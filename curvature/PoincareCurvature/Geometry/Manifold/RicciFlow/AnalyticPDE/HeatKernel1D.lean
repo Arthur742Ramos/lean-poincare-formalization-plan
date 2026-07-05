@@ -6332,5 +6332,59 @@ theorem norm_heatSemigroupNDclm_le {n : ℕ} {t : ℝ} (ht : 0 < t) :
     ‖heatSemigroupNDclm (n := n) ht‖ ≤ 1 :=
   LinearMap.mkContinuous_norm_le _ zero_le_one _
 
+/-- **The Duhamel (inhomogeneous) term of the `n`-dimensional mild heat flow as a bounded continuous
+function.**  For a time-dependent reaction source `q : ℝ → (Fin n → ℝ) →ᵇ ℝ` uniformly bounded in
+sup-norm (`‖q s y‖ ≤ C`) whose Duhamel integrand `s ↦ H_{t−s}(q s)(x)` is interval-integrable on
+`[t₀, t]` for every `x`, the Duhamel time integral `x ↦ ∫_{t₀}^{t} H_{t−s}(q s)(x) ds` is a bounded
+continuous function of `x`.  The uniform bound `‖·‖ ≤ C·(t − t₀)` is the Duhamel sup-norm estimate
+`heatSemigroupND_duhamel_sup_bound`; continuity is *Lipschitz* continuity from the spatial `C¹`
+Schauder gain `heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound`
+(`|D(x) − D(x')| ≤ 2nC√(t−t₀)/√π · ‖x − x'‖`), using `intervalIntegral.integral_sub` (the per-`x`
+integrability hypothesis) to split the Duhamel integral of the difference into `D(x) − D(x')`.  This
+is the inhomogeneous half of the mild-solution map `Φ(u)(t) = H_{t−t₀}u₀ + ∫_{t₀}^{t} H_{t−s}Q(u(s)) ds`
+bundled on the Banach state space `(Fin n → ℝ) →ᵇ ℝ`, pairing with the homogeneous propagator
+`heatSemigroupNDbcf`. -/
+noncomputable def heatDuhamelNDbcf {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    (q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ) {C : ℝ}
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hint : ∀ x : Fin n → ℝ,
+      IntervalIntegrable (fun s => heatSemigroupND (t - s) (⇑(q s)) x) volume t₀ t) :
+    BoundedContinuousFunction (Fin n → ℝ) ℝ :=
+  BoundedContinuousFunction.ofNormedAddCommGroup
+    (fun x => ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x)
+    (by
+      have hC : 0 ≤ C := le_trans (norm_nonneg _) (hqb 0 0)
+      have hqm : ∀ s, AEStronglyMeasurable (⇑(q s)) :=
+        fun s => (q s).continuous.aestronglyMeasurable
+      have hlip : LipschitzWith
+          (Real.toNNReal (2 * (n : ℝ) * C * Real.sqrt (t - t₀) / Real.sqrt π))
+          (fun x : Fin n → ℝ => ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x) := by
+        refine LipschitzWith.of_dist_le_mul (fun x x' => ?_)
+        have hLnn : (0 : ℝ) ≤ 2 * (n : ℝ) * C * Real.sqrt (t - t₀) / Real.sqrt π :=
+          div_nonneg
+            (mul_nonneg (mul_nonneg (by positivity) hC) (Real.sqrt_nonneg _))
+            (Real.sqrt_nonneg _)
+        rw [Real.dist_eq, Real.coe_toNNReal _ hLnn, dist_eq_norm,
+          ← intervalIntegral.integral_sub (hint x) (hint x')]
+        calc |∫ s in t₀..t,
+                (heatSemigroupND (t - s) (⇑(q s)) x - heatSemigroupND (t - s) (⇑(q s)) x')|
+            ≤ 2 * (n : ℝ) * C * ‖x - x'‖ * Real.sqrt (t - t₀) / Real.sqrt π :=
+              heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound hT hqm hqb x x'
+          _ = 2 * (n : ℝ) * C * Real.sqrt (t - t₀) / Real.sqrt π * ‖x - x'‖ := by ring
+      exact hlip.continuous)
+    (C * (t - t₀))
+    (fun x => by
+      rw [Real.norm_eq_abs]
+      exact heatSemigroupND_duhamel_sup_bound hT x
+        (fun s y => by rw [← Real.norm_eq_abs]; exact hqb s y))
+
+@[simp] theorem heatDuhamelNDbcf_apply {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    (q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ) {C : ℝ}
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hint : ∀ x : Fin n → ℝ,
+      IntervalIntegrable (fun s => heatSemigroupND (t - s) (⇑(q s)) x) volume t₀ t)
+    (x : Fin n → ℝ) :
+    heatDuhamelNDbcf hT q hqb hint x = ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q s)) x := rfl
+
 end AnalyticPDE
 end RicciFlow
