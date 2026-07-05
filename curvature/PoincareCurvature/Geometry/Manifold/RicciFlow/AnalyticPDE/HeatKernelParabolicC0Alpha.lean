@@ -392,5 +392,232 @@ theorem heatMildFixedPoint_parabolicSupNorm_le {n : ℕ} {t₀ T : ℝ} (hT : t�
   exact parabolicSupNorm_le hB_nonneg
     (heatMildFixedPoint_parabolicBoundedWith hT u₀ hLnn hlip Q hQcont hQb z hz s)
 
+/-- **Explicit parabolic Hölder-`1` (parabolic-Lipschitz) modulus of the model mild solution.**
+The parabolic Hölder part of the `C^{0,1}` package with the *explicit* interior constant
+`Ksp_max + Ktm_coef` (the same coefficients as in `heatMildFixedPoint_parabolicC0AlphaOn`, but now
+exposed rather than hidden behind the existential `ParabolicC0AlphaOn`).  On the interior slab
+`Icc t_lo T ×ˢ univ` (`t₀ < t_lo ≤ T`) the (time-clamped) model mild solution satisfies the parabolic
+Hölder estimate with exponent `1` and this concrete constant.  This is the quantitative Hölder-seminorm
+datum the parabolic Schauder fixed-point contraction consumes (explicit constants are needed for the
+a-priori norm bounds, which the existential class membership does not supply). -/
+theorem heatMildFixedPoint_parabolicHolderWith {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    {t_lo : ℝ} (ht_lo : t₀ < t_lo) (ht_loT : t_lo ≤ T) :
+    ParabolicHolderWith
+      ((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀)))
+          + 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π
+        + ((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ) * (2 / Real.sqrt π)
+          + CQ * Real.sqrt (T - t_lo)
+          + 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀))) 1
+      (fun p : ℝ × (Fin n → ℝ) => Set.IccExtend hT (⇑z) p.1 p.2)
+      (Set.Icc t_lo T ×ˢ (Set.univ : Set (Fin n → ℝ))) := by
+  have hCQ : 0 ≤ CQ := le_trans (norm_nonneg _) (hQb 0)
+  have hlo_pos : 0 < t_lo - t₀ := by linarith
+  have hsqrt_lo_pos : 0 < Real.sqrt (π * (t_lo - t₀)) :=
+    Real.sqrt_pos.mpr (mul_pos Real.pi_pos hlo_pos)
+  set Ksp_max : ℝ :=
+    (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀)))
+      + 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π with hKsp_def
+  set Ktm_coef : ℝ :=
+    (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ) * (2 / Real.sqrt π)
+      + CQ * Real.sqrt (T - t_lo)
+      + 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀) with hKtm_def
+  set H : ℝ := Ksp_max + Ktm_coef with hH_def
+  have hKsp_max_nonneg : 0 ≤ Ksp_max := by
+    rw [hKsp_def]
+    have h1 : 0 ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) := by positivity
+    have h2 : 0 ≤ 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π := by
+      rw [show 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π
+          = (2 * (n : ℝ) * Real.sqrt (T - t₀) / Real.sqrt π) * CQ by ring]
+      exact mul_nonneg (by positivity) hCQ
+    linarith
+  have hKtm_coef_nonneg : 0 ≤ Ktm_coef := by
+    rw [hKtm_def]
+    have h1 : 0 ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ) * (2 / Real.sqrt π) := by
+      positivity
+    have h2 : 0 ≤ CQ * Real.sqrt (T - t_lo) := mul_nonneg hCQ (Real.sqrt_nonneg _)
+    have h3 : 0 ≤ 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀) := by
+      rw [show 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀)
+          = (4 * (n : ℝ) ^ 2 / π * Real.sqrt (T - t₀)) * CQ by ring]
+      exact mul_nonneg (by positivity) hCQ
+    linarith
+  -- Spatial Lipschitz modulus with a uniform interior constant.
+  have hspace_le : ∀ (a : ℝ) (ha_mem : a ∈ Set.Icc t₀ T), t_lo ≤ a → a ≤ T →
+      ∀ y y' : Fin n → ℝ, |z ⟨a, ha_mem⟩ y - z ⟨a, ha_mem⟩ y'| ≤ Ksp_max * dist y y' := by
+    intro a ha_mem hla haT y y'
+    have ht₀a : t₀ < a := lt_of_lt_of_le ht_lo hla
+    have hlip_a : LipschitzWith
+        (((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (a - t₀)))).toNNReal
+          + (2 * (n : ℝ) * CQ * Real.sqrt (a - t₀) / Real.sqrt π).toNNReal)
+        (⇑(z ⟨a, ha_mem⟩)) :=
+      lipschitzWith_heatMildFixedPoint_apply hT u₀ hLnn hlip Q hQcont hQb z hz
+        (t := ⟨a, ha_mem⟩) ht₀a
+    have hd := hlip_a.dist_le_mul y y'
+    rw [Real.dist_eq] at hd
+    refine le_trans hd (mul_le_mul_of_nonneg_right ?_ dist_nonneg)
+    have hA_nonneg : 0 ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (a - t₀))) := by positivity
+    have hBc_nonneg : 0 ≤ 2 * (n : ℝ) * CQ * Real.sqrt (a - t₀) / Real.sqrt π := by
+      rw [show 2 * (n : ℝ) * CQ * Real.sqrt (a - t₀) / Real.sqrt π
+          = (2 * (n : ℝ) * Real.sqrt (a - t₀) / Real.sqrt π) * CQ by ring]
+      exact mul_nonneg (by positivity) hCQ
+    rw [NNReal.coe_add, Real.coe_toNNReal _ hA_nonneg, Real.coe_toNNReal _ hBc_nonneg, hKsp_def]
+    have hA_le : (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (a - t₀)))
+        ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) := by
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      exact div_le_div_of_nonneg_left (norm_nonneg _) hsqrt_lo_pos
+        (Real.sqrt_le_sqrt (by nlinarith [Real.pi_pos]))
+    have hB_le : 2 * (n : ℝ) * CQ * Real.sqrt (a - t₀) / Real.sqrt π
+        ≤ 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π := by
+      rw [div_eq_mul_inv, div_eq_mul_inv]
+      apply mul_le_mul_of_nonneg_right _ (inv_nonneg.mpr (Real.sqrt_nonneg _))
+      have h2nCQ : 0 ≤ 2 * (n : ℝ) * CQ := by
+        rw [show 2 * (n : ℝ) * CQ = (2 * (n : ℝ)) * CQ by ring]
+        exact mul_nonneg (by positivity) hCQ
+      exact mul_le_mul_of_nonneg_left (Real.sqrt_le_sqrt (by linarith)) h2nCQ
+    linarith
+  -- Time `Hölder-1/2` modulus with a uniform interior coefficient.
+  have htime_le : ∀ (a b : ℝ) (ha_mem : a ∈ Set.Icc t₀ T) (hb_mem : b ∈ Set.Icc t₀ T),
+      t_lo ≤ a → b ≤ T → a < b → ∀ y : Fin n → ℝ,
+      |z ⟨b, hb_mem⟩ y - z ⟨a, ha_mem⟩ y| ≤ Ktm_coef * Real.sqrt (b - a) := by
+    intro a b ha_mem hb_mem hla hbT hab y
+    have ht₀a : t₀ < a := lt_of_lt_of_le ht_lo hla
+    have hba_nonneg : 0 ≤ b - a := by linarith
+    have hmod : |z ⟨b, hb_mem⟩ y - z ⟨a, ha_mem⟩ y| ≤
+        (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (a - t₀))) * (n : ℝ)
+            * (2 / Real.sqrt π * Real.sqrt (b - a))
+          + (CQ * (b - a)
+              + 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (a - t₀) * Real.sqrt (b - a)) :=
+      heatMildFixedPoint_apply_time_holder_bound hT u₀ hLnn hlip Q hQcont hQb z hz
+        (t₁ := ⟨a, ha_mem⟩) (t₂ := ⟨b, hb_mem⟩) ht₀a hab y
+    refine le_trans hmod ?_
+    have hsqrt_ba_le : Real.sqrt (b - a) ≤ Real.sqrt (T - t_lo) :=
+      Real.sqrt_le_sqrt (by linarith)
+    have hsqrt_a_le : Real.sqrt (a - t₀) ≤ Real.sqrt (T - t₀) :=
+      Real.sqrt_le_sqrt (by linarith)
+    have hB1 : (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (a - t₀))) * (n : ℝ)
+          * (2 / Real.sqrt π * Real.sqrt (b - a))
+        ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ)
+          * (2 / Real.sqrt π * Real.sqrt (b - a)) := by
+      have hdiv : ‖u₀‖ / Real.sqrt (π * (a - t₀)) ≤ ‖u₀‖ / Real.sqrt (π * (t_lo - t₀)) :=
+        div_le_div_of_nonneg_left (norm_nonneg _) hsqrt_lo_pos
+          (Real.sqrt_le_sqrt (by nlinarith [Real.pi_pos]))
+      have hcoef : 0 ≤ (n : ℝ) * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt (b - a)) := by positivity
+      nlinarith [mul_le_mul_of_nonneg_left hdiv hcoef]
+    have hB2a : CQ * (b - a) ≤ CQ * Real.sqrt (T - t_lo) * Real.sqrt (b - a) := by
+      have h1 : CQ * Real.sqrt (b - a) ≤ CQ * Real.sqrt (T - t_lo) :=
+        mul_le_mul_of_nonneg_left hsqrt_ba_le hCQ
+      have h2 := mul_le_mul_of_nonneg_right h1 (Real.sqrt_nonneg (b - a))
+      rwa [mul_assoc CQ (Real.sqrt (b - a)) (Real.sqrt (b - a)), Real.mul_self_sqrt hba_nonneg] at h2
+    have hB2b : 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (a - t₀) * Real.sqrt (b - a)
+        ≤ 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀) * Real.sqrt (b - a) := by
+      have hc : 0 ≤ 4 * (n : ℝ) ^ 2 * CQ / π := by
+        rw [show 4 * (n : ℝ) ^ 2 * CQ / π = (4 * (n : ℝ) ^ 2 / π) * CQ by ring]
+        exact mul_nonneg (by positivity) hCQ
+      have h1 := mul_le_mul_of_nonneg_left hsqrt_a_le hc
+      exact mul_le_mul_of_nonneg_right h1 (Real.sqrt_nonneg (b - a))
+    have hEq : Ktm_coef * Real.sqrt (b - a)
+        = (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ)
+            * (2 / Real.sqrt π * Real.sqrt (b - a))
+          + CQ * Real.sqrt (T - t_lo) * Real.sqrt (b - a)
+          + 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀) * Real.sqrt (b - a) := by
+      rw [hKtm_def]; ring
+    rw [hEq]
+    linarith [hB1, hB2a, hB2b]
+  -- Parabolic Hölder (exponent `1`) estimate.
+  intro p hp q hq
+  obtain ⟨t, x⟩ := p
+  obtain ⟨t', x'⟩ := q
+  rw [Set.mem_prod, Set.mem_Icc] at hp hq
+  obtain ⟨⟨hlo_t, hhi_t⟩, -⟩ := hp
+  obtain ⟨⟨hlo_t', hhi_t'⟩, -⟩ := hq
+  have ht_mem : t ∈ Set.Icc t₀ T := ⟨le_of_lt (lt_of_lt_of_le ht_lo hlo_t), hhi_t⟩
+  have ht'_mem : t' ∈ Set.Icc t₀ T := ⟨le_of_lt (lt_of_lt_of_le ht_lo hlo_t'), hhi_t'⟩
+  show ‖Set.IccExtend hT (⇑z) t x - Set.IccExtend hT (⇑z) t' x'‖
+    ≤ H * (parabolicDistance (t, x) (t', x')) ^ (1 : ℝ)
+  rw [Set.IccExtend_of_mem hT (⇑z) ht_mem, Set.IccExtend_of_mem hT (⇑z) ht'_mem,
+    Real.norm_eq_abs, Real.rpow_one]
+  have hspace : |z ⟨t, ht_mem⟩ x - z ⟨t, ht_mem⟩ x'| ≤ Ksp_max * dist x x' :=
+    hspace_le t ht_mem hlo_t hhi_t x x'
+  have htime : |z ⟨t, ht_mem⟩ x' - z ⟨t', ht'_mem⟩ x'|
+      ≤ Ktm_coef * Real.sqrt |t - t'| := by
+    rcases lt_trichotomy t t' with h | h | h
+    · have hle := htime_le t t' ht_mem ht'_mem hlo_t hhi_t' h x'
+      rw [abs_sub_comm, show |t - t'| = t' - t by rw [abs_of_neg (by linarith)]; ring]
+      exact hle
+    · subst h
+      simp
+    · have hle := htime_le t' t ht'_mem ht_mem hlo_t' hhi_t h x'
+      rw [show |t - t'| = t - t' by rw [abs_of_pos (by linarith)]]
+      exact hle
+  calc |z ⟨t, ht_mem⟩ x - z ⟨t', ht'_mem⟩ x'|
+      ≤ |z ⟨t, ht_mem⟩ x - z ⟨t, ht_mem⟩ x'| + |z ⟨t, ht_mem⟩ x' - z ⟨t', ht'_mem⟩ x'| :=
+        abs_sub_le _ _ _
+    _ ≤ Ksp_max * dist x x' + Ktm_coef * Real.sqrt |t - t'| := add_le_add hspace htime
+    _ ≤ Ksp_max * parabolicDistance (t, x) (t', x')
+          + Ktm_coef * parabolicDistance (t, x) (t', x') := by
+        apply add_le_add
+        · exact mul_le_mul_of_nonneg_left
+            (parabolicDistance.space_dist_le (t, x) (t', x')) hKsp_max_nonneg
+        · exact mul_le_mul_of_nonneg_left
+            (parabolicDistance.sqrt_time_le (t, x) (t', x')) hKtm_coef_nonneg
+    _ = H * parabolicDistance (t, x) (t', x') := by rw [hH_def]; ring
+
+/-- **Explicit parabolic `C^{0,1}` norm bound of the model mild solution.**  Assembles the explicit
+sup bound `heatMildFixedPoint_parabolicSupNorm_le` and the explicit parabolic Hölder-`1` modulus
+`heatMildFixedPoint_parabolicHolderWith` into a concrete upper bound on the honest parabolic
+`C^{0,1}` norm functional `parabolicC0AlphaNorm 1` of the (time-clamped) model mild solution on the
+interior slab `Icc t_lo T ×ˢ univ`.  The bound is `B + (Ksp_max + Ktm_coef)` with `B = ‖u₀‖ + CQ·(T−t₀)`
+the a-priori sup constant and `Ksp_max + Ktm_coef` the interior parabolic-Lipschitz constant.  This is
+the quantitative Hölder-space norm control (rather than mere existential class membership) that the
+parabolic Schauder fixed-point iteration and its contraction estimates consume. -/
+theorem heatMildFixedPoint_parabolicC0AlphaNorm_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    {t_lo : ℝ} (ht_lo : t₀ < t_lo) (ht_loT : t_lo ≤ T) :
+    parabolicC0AlphaNorm 1
+        (fun p : ℝ × (Fin n → ℝ) => Set.IccExtend hT (⇑z) p.1 p.2)
+        (Set.Icc t_lo T ×ˢ (Set.univ : Set (Fin n → ℝ)))
+      ≤ (‖u₀‖ + CQ * (T - t₀))
+        + ((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀)))
+            + 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π
+          + ((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ) * (2 / Real.sqrt π)
+            + CQ * Real.sqrt (T - t_lo)
+            + 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀))) := by
+  have hCQ : 0 ≤ CQ := le_trans (norm_nonneg _) (hQb 0)
+  have hKsp_nonneg : 0 ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀)))
+      + 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π := by
+    have h1 : 0 ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) := by positivity
+    have h2 : 0 ≤ 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π := by
+      rw [show 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π
+          = (2 * (n : ℝ) * Real.sqrt (T - t₀) / Real.sqrt π) * CQ by ring]
+      exact mul_nonneg (by positivity) hCQ
+    linarith
+  have hKtm_nonneg : 0 ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ)
+        * (2 / Real.sqrt π)
+      + CQ * Real.sqrt (T - t_lo)
+      + 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀) := by
+    have h1 : 0 ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ) * (2 / Real.sqrt π) := by
+      positivity
+    have h2 : 0 ≤ CQ * Real.sqrt (T - t_lo) := mul_nonneg hCQ (Real.sqrt_nonneg _)
+    have h3 : 0 ≤ 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀) := by
+      rw [show 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀)
+          = (4 * (n : ℝ) ^ 2 / π * Real.sqrt (T - t₀)) * CQ by ring]
+      exact mul_nonneg (by positivity) hCQ
+    linarith
+  unfold parabolicC0AlphaNorm
+  exact add_le_add
+    (heatMildFixedPoint_parabolicSupNorm_le hT u₀ hLnn hlip Q hQcont hQb z hz _)
+    (parabolicHolderSeminorm_le (add_nonneg hKsp_nonneg hKtm_nonneg)
+      (heatMildFixedPoint_parabolicHolderWith hT u₀ hLnn hlip Q hQcont hQb z hz ht_lo ht_loT))
+
 end AnalyticPDE
 end RicciFlow
