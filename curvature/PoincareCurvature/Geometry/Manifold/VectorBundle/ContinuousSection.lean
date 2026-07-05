@@ -2609,6 +2609,50 @@ theorem lipschitzOnWith_of_forall_fiber_dist_le
     _ = ((L * C : NNReal) : ℝ) * dist s t := by
       rw [NNReal.coe_mul]; ring
 
+/-- **Coordinatewise joint (time–base) continuity of a section-valued family upgrades to continuity
+in the transported finite-cover Banach norm.**  If, for every trivialization index `i`, the
+coordinate readout `(t, x) ↦ (et i).continuousLinearMapAt 𝕜 x ((f t) x)` of the section `f t` in the
+`i`-th trivialization is jointly continuous on `timeSet ×ˢ Kc i`, then `t ↦ f t` is continuous on
+`timeSet` in the finite-cover Banach norm.  The compact base pieces `Kc i` supply the uniform-in-`x`
+control (via `ContinuousMap.continuousOn_of_continuousOn_uncurry`) that passes from pointwise joint
+continuity to `C(Kc i, F)`-valued continuity, which `continuousOn_of_forall_coord_continuousOn` then
+assembles.  This is the fiber-level route to the `hcont` hypothesis
+`∀ s, ContinuousOn (fun t => A t s) (Icc t₀ T)` of the section-space Picard–Lindelöf capstone. -/
+theorem continuousOn_of_forall_coord_uncurry_continuousOn
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {X : Type*} [TopologicalSpace X]
+    {f : X → ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {timeSet : Set X}
+    (hcoord : ∀ i, ContinuousOn
+      (fun p : X × M => (et i).continuousLinearMapAt 𝕜 p.2 ((f p.1) p.2))
+      (timeSet ×ˢ (Kc i : Set M))) :
+    ContinuousOn f timeSet := by
+  refine continuousOn_of_forall_coord_continuousOn
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover) ?_
+  intro i
+  refine ContinuousMap.continuousOn_of_continuousOn_uncurry _ ?_
+  have hnice : ContinuousOn
+      (fun p : X × (Kc i) =>
+        (et i).continuousLinearMapAt 𝕜 p.2.1 ((f p.1) p.2.1))
+      (timeSet ×ˢ Set.univ) := by
+    refine (hcoord i).comp
+      (continuous_fst.prodMk (continuous_subtype_val.comp continuous_snd)).continuousOn ?_
+    intro p hp
+    exact ⟨hp.1, p.2.2⟩
+  refine hnice.congr ?_
+  intro p _
+  exact coord_apply (f p.1) i p.2
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace
