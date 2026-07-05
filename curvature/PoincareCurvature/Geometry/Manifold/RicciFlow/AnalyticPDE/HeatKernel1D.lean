@@ -6276,5 +6276,16 @@ theorem norm_heatSemigroupNDbcf_sub_le {n : ℕ} {t : ℝ} (ht : 0 < t)
   rw [← Real.norm_eq_abs, show (⇑f) y - (⇑g) y = (f - g) y from rfl]
   exact (f - g).norm_coe_le_norm y
 
+/-- **The heat semigroup is a `1`-Lipschitz (non-expansive) self-map of the Banach space of
+bounded continuous functions.**  The Lipschitz-vocabulary form of `norm_heatSemigroupNDbcf_sub_le`,
+directly consumable by Mathlib's contraction / Banach-fixed-point API: `heatSemigroupNDbcf ht` is
+the non-expansive homogeneous propagator whose composition with a short-time-contracting Duhamel
+reaction term yields the mild-solution map's fixed point. -/
+theorem lipschitzWith_heatSemigroupNDbcf {n : ℕ} {t : ℝ} (ht : 0 < t) :
+    LipschitzWith 1 (heatSemigroupNDbcf (n := n) ht) :=
+  LipschitzWith.of_dist_le_mul (fun f g => by
+    rw [dist_eq_norm, dist_eq_norm, NNReal.coe_one, one_mul]
+    exact norm_heatSemigroupNDbcf_sub_le ht f g)
+
 end AnalyticPDE
 end RicciFlow
