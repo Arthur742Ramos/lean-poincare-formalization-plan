@@ -451,4 +451,62 @@ theorem _root_.IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedB
     equation := by intro t ht; exact hderiv t ht
     mem_state := by intro t ht; exact hsub (hmem t ht) }⟩
 
+/-- **Section-space state-constrained local solution from centre-bound ball-local data.**  The
+capstone of the honest route (ii): from the same centre-bound coordinatewise analytic control that
+supplies the chart's `picard` field (`K`-Lipschitz-in-section on `closedBall x0 a`, time-continuity
+there, centre readout bound `‖(A t x0)ᵢ x‖ ≤ Mc`, and the time-radius compatibility
+`(Mc + K·a)·(T − t₀) ≤ a`), together with the a-priori containment `closedBall x0 a ⊆ locus` of the
+Picard ball in the prescribed state locus (e.g. the positive-definite / Riemannian metric cone), the
+time-dependent operator `A` on the complete section space admits a genuine
+`BanachEvolutionLocalSolutionIn A locus t₀ x0` on the full window `[t₀, T]`.  Combines the centre-bound
+section-space Picard constructor `isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound`
+with the closed-ball a-posteriori bridge
+`IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset`.  This is precisely the
+state-constrained Banach solution a downstream `realization` decode into a genuine intrinsic De Turck
+local solution consumes, now available from the honest (not globally bounded) analytic input. -/
+theorem sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (locus : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover))
+    (t₀ T : ℝ) (hT : t₀ < T) (a K Mc : ℝ≥0)
+    (hlip : ∀ t ∈ Set.Icc t₀ T, ∀ ⦃s⦄, s ∈ Metric.closedBall x0 (a : ℝ) →
+        ∀ ⦃s'⦄, s' ∈ Metric.closedBall x0 (a : ℝ) → ∀ (i : κ) (x : Kc i),
+        dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s')).1 i x)
+          ≤ (K : ℝ) * dist s s')
+    (hcont : ∀ s ∈ Metric.closedBall x0 (a : ℝ), ∀ (i : κ),
+        ContinuousOn
+          (fun t => (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i)
+          (Set.Icc t₀ T))
+    (hcenter : ∀ t ∈ Set.Icc t₀ T, ∀ (i : κ) (x : Kc i),
+        ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t x0)).1 i x‖ ≤ (Mc : ℝ))
+    (hLa : ((Mc : ℝ) + (K : ℝ) * (a : ℝ)) * (T - t₀) ≤ (a : ℝ))
+    (hsub : Metric.closedBall x0 (a : ℝ) ⊆ locus) :
+    Nonempty (BanachEvolutionLocalSolutionIn A locus t₀ x0) :=
+  IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset hT
+    (isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound
+      A x0 t₀ T hT a K Mc hlip hcont hcenter hLa) hsub
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
