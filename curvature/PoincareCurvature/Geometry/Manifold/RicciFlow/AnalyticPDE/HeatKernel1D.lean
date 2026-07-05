@@ -5810,5 +5810,66 @@ theorem heatSemigroupND_sub_spatial_holder_seminorm_bound_norm {n : ℕ} {t : �
       ← heatSemigroupND_sub ht x' hfm hfb hgm hgb]
   exact heatSemigroupND_spatial_holder_seminorm_bound_norm ht (hfm.sub hgm) hD hα0 hα1 x x'
 
+/-- **Duhamel short-time sup-norm bound for the `n`-dimensional heat semigroup.**  For data
+`h : ℝ → (Fin n → ℝ) → ℝ` bounded by `C` at every time (`|h s y| ≤ C`), the Duhamel time integral
+`∫_{t₀}^{T} H_{T−s}(h s)(x) ds` of the heat-smoothed reaction term obeys
+`|∫_{t₀}^{T} H_{T−s}(h s)(x) ds| ≤ C·(T − t₀)`.  The heat semigroup is an `L^∞` contraction
+(`abs_heatSemigroupND_le`: `|H_τ(h s)(x)| ≤ C` for `τ > 0`), so the integrand is bounded by `C`
+a.e. on `(t₀, T]` — the endpoint `s = T`, where `T − s = 0` and the smoothing is undefined, is a
+null set — and `intervalIntegral.norm_integral_le_of_norm_le_const_ae` integrates the constant
+bound over the window of length `T − t₀`.  This is the time-direction estimate turning the committed
+spatial Schauder bounds into the short-time a-priori control of a mild Ricci–DeTurck representative
+(the Duhamel/reaction term of `u(t) = H_{t−t₀}u₀ + ∫_{t₀}^{t} H_{t−s}Q(u(s)) ds`). -/
+theorem heatSemigroupND_duhamel_sup_bound {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    {h : ℝ → (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ)
+    (hb : ∀ s, ∀ y, |h s y| ≤ C) :
+    |∫ s in t₀..T, heatSemigroupND (T - s) (h s) x| ≤ C * (T - t₀) := by
+  have hset : {a : ℝ | ¬ a ≠ T} = {T} := by
+    ext s; simp only [Set.mem_setOf_eq, not_not, Set.mem_singleton_iff]
+  have hTne : ∀ᵐ (s : ℝ), s ≠ T := by
+    rw [MeasureTheory.ae_iff, hset]; exact MeasureTheory.measure_singleton T
+  have key : ‖∫ s in t₀..T, heatSemigroupND (T - s) (h s) x‖ ≤ C * |T - t₀| := by
+    refine intervalIntegral.norm_integral_le_of_norm_le_const_ae ?_
+    filter_upwards [hTne] with s hs hmem
+    rw [Real.norm_eq_abs]
+    have hmem' : s ∈ Set.Ioc t₀ T := by rwa [Set.uIoc_of_le hT] at hmem
+    have hlt : s < T := lt_of_le_of_ne hmem'.2 hs
+    exact abs_heatSemigroupND_le (by linarith : (0 : ℝ) < T - s) x (hb s)
+  rwa [Real.norm_eq_abs, abs_of_nonneg (by linarith : (0 : ℝ) ≤ T - t₀)] at key
+
+/-- **Duhamel short-time contraction bound for the `n`-dimensional heat semigroup.**  The
+difference/contraction companion of `heatSemigroupND_duhamel_sup_bound`.  For two time-dependent
+data families `h₁, h₂ : ℝ → (Fin n → ℝ) → ℝ` each bounded in sup-norm by `C` and whose pointwise
+difference is bounded by `D` (`|h₁ s y − h₂ s y| ≤ D`), the Duhamel time integral of the difference
+of heat-smoothed terms obeys
+`|∫_{t₀}^{T} (H_{T−s}(h₁ s)(x) − H_{T−s}(h₂ s)(x)) ds| ≤ D·(T − t₀)`.
+The heat semigroup contracts differences in sup-norm (`abs_heatSemigroupND_sub_le`), so the
+integrand is bounded by `D` a.e. on `(t₀, T]`, and the constant bound is integrated by
+`intervalIntegral.norm_integral_le_of_norm_le_const_ae`.  Composed with a `D = Kstate·‖u₁ − u₂‖`
+Lipschitz bound on the reaction term `Q`, this is precisely the estimate
+`‖ΦDuhamel(u₁) − ΦDuhamel(u₂)‖ ≤ Kstate·(T − t₀)·‖u₁ − u₂‖` making the mild-solution map a short-time
+contraction — the Banach fixed-point input for the `picard` field of the mild Ricci–DeTurck chart. -/
+theorem heatSemigroupND_duhamel_sub_sup_bound {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    {h₁ h₂ : ℝ → (Fin n → ℝ) → ℝ} {C D : ℝ} (x : Fin n → ℝ)
+    (h1m : ∀ s, AEStronglyMeasurable (h₁ s)) (h1b : ∀ s y, ‖h₁ s y‖ ≤ C)
+    (h2m : ∀ s, AEStronglyMeasurable (h₂ s)) (h2b : ∀ s y, ‖h₂ s y‖ ≤ C)
+    (hD : ∀ s y, |h₁ s y - h₂ s y| ≤ D) :
+    |∫ s in t₀..T, (heatSemigroupND (T - s) (h₁ s) x - heatSemigroupND (T - s) (h₂ s) x)|
+      ≤ D * (T - t₀) := by
+  have hset : {a : ℝ | ¬ a ≠ T} = {T} := by
+    ext s; simp only [Set.mem_setOf_eq, not_not, Set.mem_singleton_iff]
+  have hTne : ∀ᵐ (s : ℝ), s ≠ T := by
+    rw [MeasureTheory.ae_iff, hset]; exact MeasureTheory.measure_singleton T
+  have key : ‖∫ s in t₀..T,
+      (heatSemigroupND (T - s) (h₁ s) x - heatSemigroupND (T - s) (h₂ s) x)‖ ≤ D * |T - t₀| := by
+    refine intervalIntegral.norm_integral_le_of_norm_le_const_ae ?_
+    filter_upwards [hTne] with s hs hmem
+    rw [Real.norm_eq_abs]
+    have hmem' : s ∈ Set.Ioc t₀ T := by rwa [Set.uIoc_of_le hT] at hmem
+    have hlt : s < T := lt_of_le_of_ne hmem'.2 hs
+    exact abs_heatSemigroupND_sub_le n (T - s) (by linarith : (0 : ℝ) < T - s)
+      (h₁ s) (h₂ s) D C x (h1m s) (h1b s) (h2m s) (h2b s) (hD s)
+  rwa [Real.norm_eq_abs, abs_of_nonneg (by linarith : (0 : ℝ) ≤ T - t₀)] at key
+
 end AnalyticPDE
 end RicciFlow
