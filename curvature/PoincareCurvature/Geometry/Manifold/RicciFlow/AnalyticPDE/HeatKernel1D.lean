@@ -5468,5 +5468,108 @@ theorem heatSemigroupND_spatial_holder_seminorm_bound_norm {n : ℕ} {t : ℝ} (
         mul_le_mul_of_nonneg_left hrpow hcoef_nn
     _ = (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * (n : ℝ) ^ α * ‖x - y‖ ^ α := by ring
 
+/-- The `n`-dimensional heat-kernel second coordinate-derivative integrand
+`∂²_{x_k}Kₙ = Kₙ·((x_k)²/4t² − 1/2t)` is integrable (linear combination of
+`integrable_sq_coord_mul_heatKernelND` and `integrable_heatKernelND`). -/
+lemma integrable_secondDeriv_coord_heatKernelND {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n) :
+    Integrable (fun x : Fin n → ℝ =>
+      heatKernelND t x * ((x k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) := by
+  have h := ((integrable_sq_coord_mul_heatKernelND ht k).const_mul (1 / (4 * t ^ 2))).sub
+      ((integrable_heatKernelND ht).const_mul (1 / (2 * t)))
+  refine h.congr ?_
+  filter_upwards with x
+  simp only [Pi.sub_apply]
+  ring
+
+/-- The dominating integrand `Kₙ·((x_k)²/4t² + 1/2t)` (absolute-value majorant of the second
+coordinate derivative) is integrable, with total mass `1/t` (`heatKernelND_mul_sq_coord_add_inv_integral_eq`). -/
+lemma integrable_heatKernelND_mul_sq_coord_add_inv {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n) :
+    Integrable (fun x : Fin n → ℝ =>
+      heatKernelND t x * ((x k) ^ 2 / (4 * t ^ 2) + 1 / (2 * t))) := by
+  have h := ((integrable_sq_coord_mul_heatKernelND ht k).const_mul (1 / (4 * t ^ 2))).add
+      ((integrable_heatKernelND ht).const_mul (1 / (2 * t)))
+  refine h.congr ?_
+  filter_upwards with x
+  simp only [Pi.add_apply]
+  ring
+
+/-- **The `n`-dimensional heat-kernel second coordinate-derivative total-variation bound**
+`∫ |∂²_{x_k}Kₙ(t,·)| ≤ 1/t`.  Since `|(x_k)²/4t² − 1/2t| ≤ (x_k)²/4t² + 1/2t` (both summands
+nonnegative) and `Kₙ ≥ 0`, the `L¹` norm is majorised by `∫ Kₙ·((x_k)²/4t² + 1/2t) = 1/t`.  This is
+the exact gain-of-two-derivatives-costs-`t⁻¹` Schauder constant. -/
+lemma integral_abs_secondDeriv_coord_heatKernelND_le {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n) :
+    (∫ x : Fin n → ℝ, |heatKernelND t x * ((x k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))|) ≤ 1 / t := by
+  calc (∫ x : Fin n → ℝ, |heatKernelND t x * ((x k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))|)
+      ≤ ∫ x : Fin n → ℝ, heatKernelND t x * ((x k) ^ 2 / (4 * t ^ 2) + 1 / (2 * t)) := by
+        refine integral_mono (integrable_secondDeriv_coord_heatKernelND ht k).abs
+          (integrable_heatKernelND_mul_sq_coord_add_inv ht k) (fun x => ?_)
+        rw [abs_mul, abs_of_nonneg (heatKernelND_nonneg ht x)]
+        refine mul_le_mul_of_nonneg_left ?_ (heatKernelND_nonneg ht x)
+        have ha : (0 : ℝ) ≤ (x k) ^ 2 / (4 * t ^ 2) := by positivity
+        have hb : (0 : ℝ) ≤ 1 / (2 * t) := by positivity
+        calc |(x k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)|
+            ≤ |(x k) ^ 2 / (4 * t ^ 2)| + |1 / (2 * t)| := abs_sub _ _
+          _ = (x k) ^ 2 / (4 * t ^ 2) + 1 / (2 * t) := by rw [abs_of_nonneg ha, abs_of_nonneg hb]
+    _ = 1 / t := heatKernelND_mul_sq_coord_add_inv_integral_eq ht k
+
+/-- Translation invariance of the second coordinate-derivative total-variation bound: the shifted
+kernel `y ↦ ∂²_{x_k}Kₙ(t, x − y)` has the same `L¹` norm `≤ 1/t`. -/
+lemma integral_abs_secondDeriv_coord_heatKernelND_sub_le {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n)
+    (x : Fin n → ℝ) :
+    (∫ y : Fin n → ℝ,
+      |heatKernelND t (x - y) * (((x - y) k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))|) ≤ 1 / t := by
+  rw [integral_sub_left_eq_self
+    (fun w : Fin n → ℝ => |heatKernelND t w * ((w k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))|) volume x]
+  exact integral_abs_secondDeriv_coord_heatKernelND_le ht k
+
+/-- The shifted second coordinate-derivative kernel times bounded measurable data is integrable,
+the convolution integrand behind the `C²` parabolic smoothing bound. -/
+lemma integrable_secondDeriv_coord_heatKernelND_sub_mul {n : ℕ} {t : ℝ} (ht : 0 < t) (k : Fin n)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    Integrable (fun y : Fin n → ℝ =>
+      heatKernelND t (x - y) * (((x - y) k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t)) * f y) := by
+  have hg : Integrable (fun y : Fin n → ℝ =>
+      heatKernelND t (x - y) * (((x - y) k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) :=
+    (integrable_secondDeriv_coord_heatKernelND ht k).comp_sub_left x
+  exact hg.mul_bdd hfm (Filter.Eventually.of_forall hfb)
+
+/-- **`n`-dimensional `C²` parabolic Schauder smoothing bound (integral form).**  The second
+coordinate spatial derivative of the `n`-dimensional heat semigroup obeys the
+gain-of-two-derivatives estimate `|∫ ∂²_{x_k}Kₙ(t, x − y)·f(y) dy| ≤ ‖f‖∞/t`.  The `n`-dimensional
+second-order analogue of `heatSemigroupND_coord_deriv_integral_bound`: bound the integrand by
+`|∂²_{x_k}Kₙ(t, x − y)|·‖f‖∞` and integrate using the coordinate second-derivative total-variation
+bound `integral_abs_secondDeriv_coord_heatKernelND_sub_le` (`≤ 1/t`). -/
+theorem heatSemigroupND_coord_second_deriv_integral_bound {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (x : Fin n → ℝ) (k : Fin n)
+    (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C) :
+    |∫ y, (heatKernelND t (x - y) * (((x - y) k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * f y|
+      ≤ C / t := by
+  have hCnn : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+  have hnormint : Integrable
+      (fun y : Fin n → ℝ =>
+        ‖(heatKernelND t (x - y) * (((x - y) k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * f y‖)
+      volume := (integrable_secondDeriv_coord_heatKernelND_sub_mul ht k x hfm hfb).norm
+  have habsint : Integrable
+      (fun y : Fin n → ℝ =>
+        |heatKernelND t (x - y) * (((x - y) k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))| * C) volume :=
+    (((integrable_secondDeriv_coord_heatKernelND ht k).comp_sub_left x).abs).mul_const C
+  calc |∫ y, (heatKernelND t (x - y) * (((x - y) k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * f y|
+      ≤ ∫ y, ‖(heatKernelND t (x - y)
+          * (((x - y) k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) * f y‖ := by
+        rw [← Real.norm_eq_abs]; exact norm_integral_le_integral_norm _
+    _ ≤ ∫ y, |heatKernelND t (x - y)
+          * (((x - y) k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))| * C := by
+        refine integral_mono hnormint habsint (fun y => ?_)
+        rw [Real.norm_eq_abs, abs_mul]
+        exact mul_le_mul_of_nonneg_left ((Real.norm_eq_abs (f y)) ▸ hfb y) (abs_nonneg _)
+    _ = (∫ y, |heatKernelND t (x - y)
+          * (((x - y) k) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))|) * C := by
+        rw [integral_mul_const]
+    _ ≤ (1 / t) * C := by
+        refine mul_le_mul_of_nonneg_right ?_ hCnn
+        exact integral_abs_secondDeriv_coord_heatKernelND_sub_le ht k x
+    _ = C / t := by ring
+
 end AnalyticPDE
 end RicciFlow
