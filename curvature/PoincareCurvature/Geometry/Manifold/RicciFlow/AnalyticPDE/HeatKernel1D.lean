@@ -8182,5 +8182,37 @@ theorem norm_heatMildFixedPoint_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
           (hQcont.comp (continuous_IccExtend_iff.mpr z.continuous))
           (fun s y => le_trans ((Q (Set.IccExtend hT (⇑z) s)).norm_coe_le_norm y) (hQb _)) hT
 
+/-- **A-priori deviation of the model mild-solution value from its initial datum (parabolic modulus
+of continuity in time).**  For an `L`-Lipschitz initial datum `u₀` and a continuous source `q`
+uniformly bounded by `C`, the mild-solution value at time `t > t₀` deviates from `u₀` by at most
+`L·n·(2/√π·√(t − t₀)) + C·(t − t₀)`.  Decompose `Φ(t) − u₀ = (H_{t−t₀}u₀ − u₀) + ∫ H_{t−s}q(s) ds`:
+the homogeneous term is the heat-semigroup modulus on Lipschitz data
+(`norm_heatSemigroupNDbcf_sub_self_le_of_lipschitz`, the `√(t − t₀)` part) and the Duhamel term is the
+source integral (`norm_heatDuhamelNDbcf_of_continuous_le`, the `C·(t − t₀)` part).  As `t → t₀⁺` both
+terms vanish, so the mild trajectory stays in an arbitrarily small ball of `u₀` over a short window —
+the a-priori containment estimate the closed-ball Picard route consumes to keep the solution inside
+the positive-definite locus. -/
+theorem norm_heatMildValueNDbcf_sub_initial_le_of_lipschitz {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) :
+    ‖heatMildValueNDbcf ht u₀ hq hqb - u₀‖
+      ≤ L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt (t - t₀)) + C * (t - t₀) := by
+  have hpos : (0 : ℝ) < t - t₀ := by linarith
+  have hdecomp : heatMildValueNDbcf ht u₀ hq hqb - u₀
+      = (heatSemigroupNDbcf hpos u₀ - u₀) + heatDuhamelNDbcf_of_continuous ht.le hq hqb := by
+    show heatSemigroupNDbcf hpos u₀ + heatDuhamelNDbcf_of_continuous ht.le hq hqb - u₀
+        = (heatSemigroupNDbcf hpos u₀ - u₀) + heatDuhamelNDbcf_of_continuous ht.le hq hqb
+    abel
+  rw [hdecomp]
+  calc ‖(heatSemigroupNDbcf hpos u₀ - u₀) + heatDuhamelNDbcf_of_continuous ht.le hq hqb‖
+      ≤ ‖heatSemigroupNDbcf hpos u₀ - u₀‖
+        + ‖heatDuhamelNDbcf_of_continuous ht.le hq hqb‖ := norm_add_le _ _
+    _ ≤ L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt (t - t₀)) + C * (t - t₀) :=
+        add_le_add
+          (norm_heatSemigroupNDbcf_sub_self_le_of_lipschitz hpos u₀ hLnn hlip)
+          (norm_heatDuhamelNDbcf_of_continuous_le ht.le hq hqb)
+
 end AnalyticPDE
 end RicciFlow
