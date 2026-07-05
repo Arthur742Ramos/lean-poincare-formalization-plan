@@ -7200,5 +7200,97 @@ theorem norm_heatSemigroupNDbcf_add_sub_le_sqrt {n : ℕ} {t' s : ℝ} (ht' : 0 
   rw [← heatSemigroupND_timeModulus_eq_sqrt hs.le]
   exact norm_heatSemigroupNDbcf_add_sub_le ht' hs f
 
+/-- The heat-semigroup propagator path as a *total* `BCF`-valued map `ℝ → (Fin n → ℝ) →ᵇ ℝ`:
+`H_τ f` for `τ > 0`, and `f` for `τ ≤ 0`.  Bundling the proof-dependent `heatSemigroupNDbcf` into a
+`dite` makes `t ↦ H_t f` a genuine map between metric spaces, so its `BCF`-norm continuity can be
+stated as `ContinuousAt`. -/
+noncomputable def heatFlowPathBcf {n : ℕ} (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ :=
+  fun τ => if h : 0 < τ then heatSemigroupNDbcf h f else f
+
+lemma heatFlowPathBcf_of_pos {n : ℕ} (f : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {τ : ℝ} (hτ : 0 < τ) : heatFlowPathBcf f τ = heatSemigroupNDbcf hτ f := dif_pos hτ
+
+/-- The bundled propagator depends only on the (positive) time, not on the positivity proof. -/
+lemma heatSemigroupNDbcf_congr {n : ℕ} {t t' : ℝ} (ht : 0 < t) (ht' : 0 < t')
+    (h : t = t') (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    heatSemigroupNDbcf ht f = heatSemigroupNDbcf ht' f := by subst h; rfl
+
+/-- **`BCF`-norm time-continuity of the `n`-dimensional heat-semigroup propagator path.**  For every
+bounded continuous `f` and every `τ₁ > 0`, the propagator path `t ↦ H_t f` is continuous at `τ₁` in
+the Banach space `(Fin n → ℝ) →ᵇ ℝ`.  This upgrades the earlier *pointwise-in-`x`* time-continuity
+(`continuousAt_heatMildValue_time` etc.) to genuine sup-norm continuity: within `|t − τ₁| < τ₁/2` the
+`BCF`-distance is squeezed by the `Hölder-1/2` modulus
+`dist(H_t f, H_{τ₁} f) ≤ M·√|t − τ₁|` (`norm_heatSemigroupNDbcf_add_sub_le_sqrt` in each of the
+`t ≷ τ₁` directions, with the smaller-time prefactor bounded uniformly by
+`M = (n·‖f‖/√(π·τ₁/2))·n·(2/√π)`), and `√|t − τ₁| → 0`.  This is the missing sup-norm-continuity input
+for lifting the model mild-solution map into the path space `C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`. -/
+theorem continuousAt_heatFlowPathBcf {n : ℕ} (f : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {τ₁ : ℝ} (hτ₁ : 0 < τ₁) : ContinuousAt (heatFlowPathBcf f) τ₁ := by
+  set M : ℝ := ((n : ℝ) * (‖f‖ / Real.sqrt (π * (τ₁ / 2)))) * (n : ℝ) * (2 / Real.sqrt π) with hM
+  have hMnn : 0 ≤ M := by
+    rw [hM]
+    have : (0 : ℝ) < Real.sqrt (π * (τ₁ / 2)) := Real.sqrt_pos.mpr (by positivity)
+    positivity
+  -- prefactor monotonicity: larger time ⇒ smaller prefactor, bounded by the `τ₁/2` value.
+  have hP : ∀ t' : ℝ, 0 < t' → τ₁ / 2 ≤ t' →
+      ((n : ℝ) * (‖f‖ / Real.sqrt (π * t'))) * (n : ℝ) * (2 / Real.sqrt π) ≤ M := by
+    intro t' ht'0 ht'ge
+    rw [hM]
+    have hsqrt_le : Real.sqrt (π * (τ₁ / 2)) ≤ Real.sqrt (π * t') :=
+      Real.sqrt_le_sqrt (by nlinarith [Real.pi_pos])
+    have hden_pos : (0 : ℝ) < Real.sqrt (π * (τ₁ / 2)) := Real.sqrt_pos.mpr (by positivity)
+    gcongr
+  rw [Metric.continuousAt_iff]
+  intro ε hε
+  refine ⟨min (τ₁ / 2) ((ε / (M + 1)) ^ 2), lt_min (by positivity) (by positivity), ?_⟩
+  intro τ hτdist
+  have hlt2 : |τ - τ₁| < τ₁ / 2 := lt_of_lt_of_le hτdist (min_le_left _ _)
+  have hltε : |τ - τ₁| < (ε / (M + 1)) ^ 2 := lt_of_lt_of_le hτdist (min_le_right _ _)
+  have hτgt : τ₁ / 2 < τ := by have := (abs_lt.1 hlt2).1; linarith
+  have hτpos : 0 < τ := by linarith
+  -- Distance bound by the Hölder-1/2 modulus `M·√|τ − τ₁|`.
+  have hbound : dist (heatFlowPathBcf f τ) (heatFlowPathBcf f τ₁)
+      ≤ M * Real.sqrt |τ - τ₁| := by
+    rcases lt_trichotomy τ τ₁ with hlt | heq | hgt
+    · set s : ℝ := τ₁ - τ with hsdef
+      have hs0 : 0 < s := by rw [hsdef]; linarith
+      have habs : |τ - τ₁| = s := by rw [hsdef, abs_sub_comm, abs_of_pos (by linarith)]
+      have hτ₁eq : τ₁ = τ + s := by rw [hsdef]; ring
+      rw [heatFlowPathBcf_of_pos f hτpos, heatFlowPathBcf_of_pos f hτ₁,
+        heatSemigroupNDbcf_congr hτ₁ (add_pos hτpos hs0) hτ₁eq f, dist_comm, dist_eq_norm, habs]
+      calc ‖heatSemigroupNDbcf (add_pos hτpos hs0) f - heatSemigroupNDbcf hτpos f‖
+          ≤ ((n : ℝ) * (‖f‖ / Real.sqrt (π * τ))) * (n : ℝ)
+              * (2 / Real.sqrt π * Real.sqrt s) :=
+            norm_heatSemigroupNDbcf_add_sub_le_sqrt hτpos hs0 f
+        _ = (((n : ℝ) * (‖f‖ / Real.sqrt (π * τ))) * (n : ℝ) * (2 / Real.sqrt π))
+              * Real.sqrt s := by ring
+        _ ≤ M * Real.sqrt s :=
+            mul_le_mul_of_nonneg_right (hP τ hτpos (le_of_lt hτgt)) (Real.sqrt_nonneg s)
+    · rw [heq, dist_self]; positivity
+    · set s : ℝ := τ - τ₁ with hsdef
+      have hs0 : 0 < s := by rw [hsdef]; linarith
+      have habs : |τ - τ₁| = s := by rw [hsdef, abs_of_pos (by linarith)]
+      have hτeq : τ = τ₁ + s := by rw [hsdef]; ring
+      rw [heatFlowPathBcf_of_pos f hτpos, heatFlowPathBcf_of_pos f hτ₁,
+        heatSemigroupNDbcf_congr hτpos (add_pos hτ₁ hs0) hτeq f, dist_eq_norm, habs]
+      calc ‖heatSemigroupNDbcf (add_pos hτ₁ hs0) f - heatSemigroupNDbcf hτ₁ f‖
+          ≤ ((n : ℝ) * (‖f‖ / Real.sqrt (π * τ₁))) * (n : ℝ)
+              * (2 / Real.sqrt π * Real.sqrt s) :=
+            norm_heatSemigroupNDbcf_add_sub_le_sqrt hτ₁ hs0 f
+        _ = (((n : ℝ) * (‖f‖ / Real.sqrt (π * τ₁))) * (n : ℝ) * (2 / Real.sqrt π))
+              * Real.sqrt s := by ring
+        _ ≤ M * Real.sqrt s :=
+            mul_le_mul_of_nonneg_right (hP τ₁ hτ₁ (by linarith)) (Real.sqrt_nonneg s)
+  -- Squeeze `M·√|τ − τ₁| < ε`.
+  have hM1 : (0 : ℝ) < M + 1 := by positivity
+  calc dist (heatFlowPathBcf f τ) (heatFlowPathBcf f τ₁)
+      ≤ M * Real.sqrt |τ - τ₁| := hbound
+    _ ≤ (M + 1) * Real.sqrt |τ - τ₁| :=
+        mul_le_mul_of_nonneg_right (by linarith) (Real.sqrt_nonneg _)
+    _ < (M + 1) * (ε / (M + 1)) :=
+        mul_lt_mul_of_pos_left ((Real.sqrt_lt' (by positivity)).mpr hltε) hM1
+    _ = ε := by rw [mul_comm]; exact div_mul_cancel₀ ε (ne_of_gt hM1)
+
 end AnalyticPDE
 end RicciFlow
