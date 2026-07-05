@@ -8859,5 +8859,89 @@ theorem heatMildValueNDbcf_sub_spatial_lipschitz_bound {n : ℕ} {t₀ t : ℝ} 
     _ = ((n : ℝ) * (D₀ / Real.sqrt (π * (t - t₀)))
           + 2 * (n : ℝ) * D * Real.sqrt (t - t₀) / Real.sqrt π) * ‖x - x'‖ := by ring
 
+/-- **Spatial `C¹` (Lipschitz) data-difference contraction of the model mild solution.**  The
+two-solution companion of `lipschitzWith_heatMildFixedPoint_apply`: for two genuine model mild
+solutions `z, w` (fixed points of `heatMildSelfMap` for the *same* reaction `Q`, but initial data
+`u₀, v₀`), the spatial modulus of their difference at any interior time `t₀ < t ≤ T` is controlled by
+the *initial-data* difference:
+`|(z(t)(x) − w(t)(x)) − (z(t)(x') − w(t)(x'))|
+    ≤ (n·‖u₀ − v₀‖/√(π(t−t₀)) + 2n·(Kstate·‖u₀ − v₀‖/(1 − Kstate(T−t₀)))·√(t−t₀)/√π)·‖x − x'‖`.
+The homogeneous propagator turns the merely-bounded data difference `‖u₀ − v₀‖` into a spatially
+Lipschitz difference at the `t^{-1/2}` smoothing rate, and the Duhamel term contributes the
+`√(t−t₀)` rate on the source difference, whose sup size is bounded by the reaction Lipschitz constant
+times the state-space distance of the two solutions
+`dist z w ≤ ‖u₀ − v₀‖/(1 − Kstate(T−t₀))` (`dist_heatMildFixedPoint_le`).  Since `z(t) = Φ₁(t)` and
+`w(t) = Φ₂(t)` are mild-solution values for the trajectory sources `s ↦ Q(z(projIcc s))`,
+`s ↦ Q(w(projIcc s))` (`heatMildFixedPoint_apply`), this is
+`heatMildValueNDbcf_sub_spatial_lipschitz_bound` applied to the two trajectories: the spatial-`C¹`
+half of the parabolic Schauder *contraction* on differences of genuine mild solutions — the
+difference-modulus estimate a Hölder-norm fixed-point argument for a mild Ricci–DeTurck representative
+contracts, now with the data-difference-controlled constant. -/
+theorem heatMildFixedPoint_sub_spatial_lipschitz_bound {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ v₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {Lu : ℝ} (hLunn : 0 ≤ Lu) (hulip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ Lu * ‖a - b‖)
+    {Lv : ℝ} (hLvnn : 0 ≤ Lv) (hvlip : ∀ a b : Fin n → ℝ, |v₀ a - v₀ b| ≤ Lv * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    {Kstate : ℝ} (hKnn : 0 ≤ Kstate)
+    (hQlip : ∀ v w, ‖Q v - Q w‖ ≤ Kstate * ‖v - w‖)
+    (hsmall : Kstate * (T - t₀) < 1)
+    (z w : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb z = z)
+    (hw : heatMildSelfMap hT v₀ hLvnn hvlip Q hQcont hQb w = w)
+    {t : ↥(Set.Icc t₀ T)} (ht : t₀ < (t : ℝ)) (x x' : Fin n → ℝ) :
+    |(z t x - w t x) - (z t x' - w t x')|
+      ≤ ((n : ℝ) * (‖u₀ - v₀‖ / Real.sqrt (π * ((t : ℝ) - t₀)))
+          + 2 * (n : ℝ) * (Kstate * (‖u₀ - v₀‖ / (1 - Kstate * (T - t₀))))
+              * Real.sqrt ((t : ℝ) - t₀) / Real.sqrt π) * ‖x - x'‖ := by
+  have hqc1 : Continuous (fun s => Q (Set.IccExtend hT (⇑z) s)) :=
+    hQcont.comp (continuous_IccExtend_iff.mpr z.continuous)
+  have hqb1 : ∀ s y, ‖Q (Set.IccExtend hT (⇑z) s) y‖ ≤ CQ := fun s y =>
+    le_trans ((Q (Set.IccExtend hT (⇑z) s)).norm_coe_le_norm y) (hQb _)
+  have hqc2 : Continuous (fun s => Q (Set.IccExtend hT (⇑w) s)) :=
+    hQcont.comp (continuous_IccExtend_iff.mpr w.continuous)
+  have hqb2 : ∀ s y, ‖Q (Set.IccExtend hT (⇑w) s) y‖ ≤ CQ := fun s y =>
+    le_trans ((Q (Set.IccExtend hT (⇑w) s)).norm_coe_le_norm y) (hQb _)
+  have hzt : ∀ y, z t y = heatMildValueNDbcf ht u₀ hqc1 hqb1 y := fun y => by
+    rw [heatMildValueNDbcf_apply ht u₀ hqc1 hqb1 y]
+    exact heatMildFixedPoint_apply hT u₀ hLunn hulip Q hQcont hQb z hz ht y
+  have hwt : ∀ y, w t y = heatMildValueNDbcf ht v₀ hqc2 hqb2 y := fun y => by
+    rw [heatMildValueNDbcf_apply ht v₀ hqc2 hqb2 y]
+    exact heatMildFixedPoint_apply hT v₀ hLvnn hvlip Q hQcont hQb w hw ht y
+  have hD₀ : ∀ y, ‖u₀ y - v₀ y‖ ≤ ‖u₀ - v₀‖ := fun y => by
+    rw [← BoundedContinuousFunction.sub_apply]
+    exact (u₀ - v₀).norm_coe_le_norm y
+  have hpos : 0 < 1 - Kstate * (T - t₀) := by linarith
+  have hdistzw : dist z w ≤ ‖u₀ - v₀‖ / (1 - Kstate * (T - t₀)) :=
+    dist_heatMildFixedPoint_le hT u₀ v₀ hLunn hulip hLvnn hvlip Q hQcont hQb hKnn hQlip hsmall
+      z w hz hw
+  set D : ℝ := Kstate * (‖u₀ - v₀‖ / (1 - Kstate * (T - t₀))) with hDdef
+  have hDsrc : ∀ s y,
+      ‖Q (Set.IccExtend hT (⇑z) s) y - Q (Set.IccExtend hT (⇑w) s) y‖ ≤ D := by
+    intro s y
+    have h1 : ‖Q (Set.IccExtend hT (⇑z) s) y - Q (Set.IccExtend hT (⇑w) s) y‖
+        ≤ ‖Q (Set.IccExtend hT (⇑z) s) - Q (Set.IccExtend hT (⇑w) s)‖ := by
+      rw [← BoundedContinuousFunction.sub_apply]
+      exact (Q (Set.IccExtend hT (⇑z) s) - Q (Set.IccExtend hT (⇑w) s)).norm_coe_le_norm y
+    have h3 : ‖Set.IccExtend hT (⇑z) s - Set.IccExtend hT (⇑w) s‖ ≤ ‖z - w‖ := by
+      have hEq : Set.IccExtend hT (⇑z) s - Set.IccExtend hT (⇑w) s
+          = (z - w) (Set.projIcc t₀ T hT s) := by
+        show (⇑z) (Set.projIcc t₀ T hT s) - (⇑w) (Set.projIcc t₀ T hT s)
+            = (z - w) (Set.projIcc t₀ T hT s)
+        rw [BoundedContinuousFunction.sub_apply]
+      rw [hEq]
+      exact (z - w).norm_coe_le_norm _
+    calc ‖Q (Set.IccExtend hT (⇑z) s) y - Q (Set.IccExtend hT (⇑w) s) y‖
+        ≤ ‖Q (Set.IccExtend hT (⇑z) s) - Q (Set.IccExtend hT (⇑w) s)‖ := h1
+      _ ≤ Kstate * ‖Set.IccExtend hT (⇑z) s - Set.IccExtend hT (⇑w) s‖ := hQlip _ _
+      _ ≤ Kstate * ‖z - w‖ := mul_le_mul_of_nonneg_left h3 hKnn
+      _ ≤ Kstate * (‖u₀ - v₀‖ / (1 - Kstate * (T - t₀))) := by
+          have hzwbound : ‖z - w‖ ≤ ‖u₀ - v₀‖ / (1 - Kstate * (T - t₀)) := by
+            rw [show ‖z - w‖ = dist z w from (dist_eq_norm z w).symm]; exact hdistzw
+          exact mul_le_mul_of_nonneg_left hzwbound hKnn
+      _ = D := hDdef.symm
+  rw [hzt x, hwt x, hzt x', hwt x']
+  exact heatMildValueNDbcf_sub_spatial_lipschitz_bound ht u₀ v₀ hqc1 hqc2 hqb1 hqb2 hD₀ hDsrc x x'
+
 end AnalyticPDE
 end RicciFlow
