@@ -5403,5 +5403,70 @@ theorem heatSemigroupND_spatial_holder_seminorm_bound {n : ℕ} {t : ℝ} (ht : 
     _ = (2 * C) ^ (1 - α) * ((C / Real.sqrt (π * t)) ^ α * S ^ α) := by rw [hsplit]
     _ = (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * S ^ α := by ring
 
+/-- **`n`-dimensional full spatial `C¹` parabolic Schauder rate (sup-norm modulus form).**
+Bounding each coordinate difference `|x_i − y_i| = ‖(x − y) i‖ ≤ ‖x − y‖` by the sup-norm turns the
+telescoped sum `heatSemigroupND_spatial_lipschitz_sqrt_rate` into the modulus-of-continuity form
+`|Hₜf(x) − Hₜf(y)| ≤ n·(‖f‖∞/√(πt))·‖x − y‖`, i.e. `Hₜf` is Lipschitz with the parabolic gain
+rate `n·‖f‖∞/√(πt)`. -/
+theorem heatSemigroupND_spatial_lipschitz_sqrt_rate_norm {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    (x y : Fin n → ℝ) :
+    |heatSemigroupND t f x - heatSemigroupND t f y|
+      ≤ (n : ℝ) * (C / Real.sqrt (π * t)) * ‖x - y‖ := by
+  have hcoef_nn : (0 : ℝ) ≤ C / Real.sqrt (π * t) := by
+    have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+    have hpt : (0 : ℝ) < Real.sqrt (π * t) := Real.sqrt_pos.mpr (by positivity)
+    positivity
+  have hsum : ∑ i : Fin n, |x i - y i| ≤ (n : ℝ) * ‖x - y‖ := by
+    calc ∑ i : Fin n, |x i - y i|
+        ≤ ∑ _i : Fin n, ‖x - y‖ := by
+          refine Finset.sum_le_sum (fun i _ => ?_)
+          have hi := norm_le_pi_norm (x - y) i
+          rwa [Pi.sub_apply, Real.norm_eq_abs] at hi
+      _ = (n : ℝ) * ‖x - y‖ := by
+          rw [Finset.sum_const, Finset.card_fin, nsmul_eq_mul]
+  calc |heatSemigroupND t f x - heatSemigroupND t f y|
+      ≤ (C / Real.sqrt (π * t)) * ∑ i : Fin n, |x i - y i| :=
+        heatSemigroupND_spatial_lipschitz_sqrt_rate ht hfm hfb x y
+    _ ≤ (C / Real.sqrt (π * t)) * ((n : ℝ) * ‖x - y‖) :=
+        mul_le_mul_of_nonneg_left hsum hcoef_nn
+    _ = (n : ℝ) * (C / Real.sqrt (π * t)) * ‖x - y‖ := by ring
+
+/-- **`n`-dimensional full spatial `C^{0,α}` parabolic Schauder seminorm (sup-norm modulus form).**
+Applying `‖x − y‖`-monotonicity of `t ↦ t^α` to `heatSemigroupND_spatial_holder_seminorm_bound`
+gives the Hölder modulus of continuity in the ambient sup-norm:
+`|Hₜf(x) − Hₜf(y)| ≤ (2‖f‖∞)^{1−α}·(‖f‖∞/√(πt))^α·n^α·‖x − y‖^α`.  This is the whole-space
+`C^{0,α}` seminorm control directly in the ambient norm that a parabolic Schauder estimate uses. -/
+theorem heatSemigroupND_spatial_holder_seminorm_bound_norm {n : ℕ} {t : ℝ} (ht : 0 < t)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (hfm : AEStronglyMeasurable f) (hfb : ∀ y, ‖f y‖ ≤ C)
+    {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) (x y : Fin n → ℝ) :
+    |heatSemigroupND t f x - heatSemigroupND t f y|
+      ≤ (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * (n : ℝ) ^ α * ‖x - y‖ ^ α := by
+  have hSnn : 0 ≤ ∑ i : Fin n, |x i - y i| := Finset.sum_nonneg (fun i _ => abs_nonneg _)
+  have hcoef_nn : (0 : ℝ) ≤ (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α := by
+    have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hfb 0)
+    have hpt : (0 : ℝ) < Real.sqrt (π * t) := Real.sqrt_pos.mpr (by positivity)
+    have h1 : (0 : ℝ) ≤ (2 * C) ^ (1 - α) := Real.rpow_nonneg (by positivity) _
+    have h2 : (0 : ℝ) ≤ (C / Real.sqrt (π * t)) ^ α := Real.rpow_nonneg (by positivity) _
+    positivity
+  have hsum : ∑ i : Fin n, |x i - y i| ≤ (n : ℝ) * ‖x - y‖ := by
+    calc ∑ i : Fin n, |x i - y i|
+        ≤ ∑ _i : Fin n, ‖x - y‖ := by
+          refine Finset.sum_le_sum (fun i _ => ?_)
+          have hi := norm_le_pi_norm (x - y) i
+          rwa [Pi.sub_apply, Real.norm_eq_abs] at hi
+      _ = (n : ℝ) * ‖x - y‖ := by
+          rw [Finset.sum_const, Finset.card_fin, nsmul_eq_mul]
+  have hrpow : (∑ i : Fin n, |x i - y i|) ^ α ≤ (n : ℝ) ^ α * ‖x - y‖ ^ α := by
+    calc (∑ i : Fin n, |x i - y i|) ^ α
+        ≤ ((n : ℝ) * ‖x - y‖) ^ α := Real.rpow_le_rpow hSnn hsum hα0
+      _ = (n : ℝ) ^ α * ‖x - y‖ ^ α := Real.mul_rpow (by positivity) (norm_nonneg _)
+  calc |heatSemigroupND t f x - heatSemigroupND t f y|
+      ≤ (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * (∑ i : Fin n, |x i - y i|) ^ α :=
+        heatSemigroupND_spatial_holder_seminorm_bound ht hfm hfb hα0 hα1 x y
+    _ ≤ (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * ((n : ℝ) ^ α * ‖x - y‖ ^ α) :=
+        mul_le_mul_of_nonneg_left hrpow hcoef_nn
+    _ = (2 * C) ^ (1 - α) * (C / Real.sqrt (π * t)) ^ α * (n : ℝ) ^ α * ‖x - y‖ ^ α := by ring
+
 end AnalyticPDE
 end RicciFlow
