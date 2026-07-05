@@ -8071,3 +8071,52 @@ DeTurck VF at `ContMDiff` level 2, which needs a level-2 `contMDiffOn_rieszMap_s
 hardcoded at level 1; the ambient metric is only `C²`, so level 2 is the ceiling).  Resolving B2 (the
 connection-regularity monotonicity is the higher-leverage of the two) gives `∇(DeTurck VF)`
 continuous → the DeTurck correction as a continuous section for `C²` metrics.
+
+## Milestone (2026-07-05, later) — B2 RESOLVED: covariant-derivative level downgrade `1 → 0` (Item 3 / GAP 2 geometric-operator regularity)
+
+**Blocker B2 resolved** via route (a) — the covariant-derivative level monotonicity — realized
+*concretely* through the local flat-connection (frame) decomposition, which the tangent bundle of a
+*smooth* manifold does supply (its frames are `C^∞`: `IsManifold I ∞ M ⇒ ContMDiffVectorBundle ∞
+(TangentSpace I)`), contrary to the earlier assessment that the flat-connection-difference structure
+was absent.  All additive, each `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`),
+comment-stripped `scan cheats` `TOTAL 0`, `lake build` of the affected modules green.
+
+Two commits, both in `VectorBundle/CovariantDerivative/Existence.lean` (the `RiemannianBundle`-free
+context, which sidesteps the transported-instance norm diamond on `TangentSpace →L TangentSpace` that
+blocks the analogous proof inside `LeviCivita.lean`):
+
+1. **Level-generic frame covariant-derivative regularity.**
+   * `ContMDiffAt.smulRightSection_of_level`, `ContMDiffOn.smulRightSection_of_level` — the
+     `φ ↦ φ.smulRight v` product regularity at an arbitrary level `n` (generalizing the hard-coded
+     level-1 versions).
+   * `Bundle.Trivialization.contMDiffOn_frameCovariantDerivative_of_level` (+ `_baseSet_` and the
+     `contMDiffCovariantDerivativeOn_..._of_level` class instance) — a `C^{n+1}` section has a `C^n`
+     frame covariant derivative (`frameCovariantDerivative` drops regularity by exactly one order).
+     The `n = 0` case: a `C¹` section ⇒ a `C⁰` (continuous) frame covariant derivative.
+
+2. **General-bundle level downgrade `1 → 0`.**
+   * `CovariantDerivative.contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one` — a
+     bundle-generic, `RiemannianBundle`-free port of the tangent-bundle class-to-open-set restriction
+     (smooth-bump localization), needed to probe `∇(frameᵢ)`.
+   * `CovariantDerivative.contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` — the
+     downgrade itself: `ContMDiffCovariantDerivative cov 1 ⇒ ContMDiffCovariantDerivativeOn F 0
+     cov.toFun u` on every open set, i.e. the covariant derivative of a merely-`C¹` section is a
+     *continuous* `T*M ⊗ V`-section.  Proof: on a trivialization patch,
+     `∇σ = ∇^{frame}σ + ∑ᵢ (coeffᵢ σ)·∇(frameᵢ)`; the frame term is `C⁰` by (1) at `n = 0`, and each
+     `∇(frameᵢ)` is `C¹` by applying the `C¹` class (via the restriction) to the `C²` frame section;
+     `add_section`/`sum_section`/`smul_section` recombine to `C⁰`.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  Still on the `A`/regularity side of
+GAP 2.  The downgrade is exactly the tool that makes `∇(DeTurck VF)` a continuous section for a `C¹`
+DeTurck vector field, hence `intrinsicDeTurckCorrection` a continuous section — the last regularity
+gap in seeing the intrinsic Ricci–DeTurck RHS as a `ContinuousSectionSpace` value for a `C²` metric.
+
+**Consumption caveat / NEXT.**  Instantiating the abstract downgrade at the tangent bundle *inside* the
+`RiemannianBundle` sections (`LeviCivita.lean` / `DeTurck.lean`) re-triggers the norm diamond on
+`NormedAddCommGroup (TangentSpace I x)` (Riemannian vs. flat-`E`) whenever a fresh
+`{cov : CovariantDerivative I E TM}` binder resolves the fiber norm differently from the applied lemma.
+The genuine consumer (`chosenLeviCivitaFamily`) carries one fixed instance throughout, so the diamond
+should not arise there; NEXT target is to apply
+`contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` to `chosenLeviCivitaFamily`
+with the `C¹` intrinsic DeTurck vector field to conclude `intrinsicDeTurckCorrection` is a continuous
+section, then package the intrinsic Ricci–DeTurck RHS as a `ContinuousSectionSpace` value.
