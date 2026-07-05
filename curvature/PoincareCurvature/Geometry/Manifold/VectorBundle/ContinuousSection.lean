@@ -2469,6 +2469,63 @@ theorem coord_dist_le_dist
   le_trans (ContinuousMap.dist_apply_le_dist x)
     (coordContinuousMap_dist_le_dist s t i)
 
+/-- The compact coordinate readout of the zero section vanishes pointwise:
+`(coord 0).1 i x = 0`.  The transport `equivCompatibleCoordFamilySubmodule` is additive (it is the
+underlying equivalence of the section-space module structure), so it sends `0` to `0`, and the
+coordinate/point projections of the zero coordinate family vanish.  This is the coordinate-readout
+companion of `zero_apply`, used to turn section-distance contractions into section-norm bounds. -/
+theorem coord_zero_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+      (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover)).1 i x = 0 := by
+  have he0 :
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+        (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover)) = 0 := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover]
+    exact map_zero _
+  rw [he0]
+  simp only [ZeroMemClass.coe_zero, Pi.zero_apply, ContinuousMap.zero_apply]
+
+/-- **The pointwise coordinate readout is norm-nonexpansive:** `‖(coord s).1 i x‖ ≤ ‖s‖`.  The
+norm-level companion of `coord_dist_le_dist` (take `t = 0` and use `coord_zero_apply`).  Composed
+with a section-space *boundedness* estimate `‖A t x0‖ ≤ Mc` this yields the coordinate centre-bound
+`‖(coord (A t x0)).1 i x‖ ≤ Mc` — the `hcenter` datum of
+`isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` — turning the "bounded"
+half of a bounded + Lipschitz section-space operator into the constructor's centre-size input. -/
+theorem coord_norm_le_norm
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i) :
+    ‖(equivCompatibleCoordFamilySubmodule
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖ ≤ ‖s‖ := by
+  have h := coord_dist_le_dist s
+    (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) i x
+  rw [coord_zero_apply, dist_zero_right, dist_zero_right] at h
+  exact h
+
 /-- **Section-space continuity transfers to each compact coordinate readout.**  From continuity of a
 section-valued map `f : X → ContinuousSectionSpace` (in the finite-cover Banach norm) on a set `s`,
 each compact coordinate readout `x ↦ (coord (f x)).1 i` is continuous on `s`.  Immediate from the
