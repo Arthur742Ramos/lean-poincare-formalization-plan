@@ -399,4 +399,93 @@ theorem curvatureAux_contMDiffOn_zero
   have hcomb := (hT1.sub_section hT2).sub_section hT3
   simpa only [CovariantDerivative.curvatureAux] using hcomb
 
+/-- **Germ-locality of the raw curvature commutator with only-locally-smooth replacement fields.**
+If globally-`C¹`/`C²` fields `X`, `Y`, `σ` agree *near* `y` with arbitrary fields `ea`, `eb`, `ec`
+— which carry **no** global regularity hypothesis of their own — then the raw curvature commutator
+takes the same value at `y`.  This is the `ContMDiffOn`-friendly companion of
+`curvatureAux_eq_of_eventuallyEq_apply` (which requires the "from" fields to be *globally* smooth):
+here the local frame fields of a trivialization (only `ContMDiffOn` on the base set) inherit their
+differentiability at points near `y` from the global comparison fields via the eventual equality. -/
+theorem curvatureAux_apply_eq_of_eventuallyEq_fields
+    {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
+    [CovariantDerivative.ContMDiffCovariantDerivative cov 1]
+    {ea eb ec X Y σ : Π x : M, TangentSpace I x} {y : M}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (fun z ↦ TotalSpace.mk' E z (X z)))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (fun z ↦ TotalSpace.mk' E z (Y z)))
+    (hσ : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (σ z)))
+    (hea : ea =ᶠ[nhds y] X) (heb : eb =ᶠ[nhds y] Y) (hec : ec =ᶠ[nhds y] σ) :
+    cov.curvatureAux ea eb ec y = cov.curvatureAux X Y σ y := by
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
+    ContMDiffVectorBundle.of_le (n := 2) (by norm_num)
+  have hcov_congr : ∀ {s t : Π x : M, TangentSpace I x} {z : M},
+      MDiffAt (T% s) z → MDiffAt (T% t) z → s =ᶠ[nhds z] t → cov s z = cov t z := by
+    intro s t z hs ht hst
+    exact IsCovariantDerivativeOn.congr_of_eventuallyEq
+      (hcov := cov.isCovariantDerivativeOnUniv) hs ht Filter.univ_mem hst
+  have hσ2' : ContMDiff I (I.prod 𝓘(ℝ, E)) (1 + 1)
+      (fun z ↦ TotalSpace.mk' E z (σ z)) := by simpa using hσ
+  have hAlongYσ : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (fun z ↦ TotalSpace.mk' E z (cov.along Y σ z)) := cov.contMDiff_along hY hσ2'
+  have hAlongXσ : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (fun z ↦ TotalSpace.mk' E z (cov.along X σ z)) := cov.contMDiff_along hX hσ2'
+  have hEbEc : ∀ᶠ z in nhds y, cov.along eb ec z = cov.along Y σ z := by
+    have hec_ev : ∀ᶠ z in nhds y, ec =ᶠ[nhds z] σ := eventually_eventually_nhds.2 hec
+    filter_upwards [heb, hec_ev] with z hzeb hzec_ev
+    have hσz : MDiffAt (T% σ) z := (hσ z).mdifferentiableAt (by norm_num)
+    have htec_ev : (fun w ↦ TotalSpace.mk' E w (ec w)) =ᶠ[nhds z]
+        (fun w ↦ TotalSpace.mk' E w (σ w)) := by
+      filter_upwards [hzec_ev] with w hw; simp [hw]
+    have hecz : MDiffAt (T% ec) z := hσz.congr_of_eventuallyEq htec_ev
+    have hcovz : cov ec z = cov σ z := hcov_congr hecz hσz hzec_ev
+    simp only [CovariantDerivative.along_apply, hzeb, hcovz]
+  have hEaEc : ∀ᶠ z in nhds y, cov.along ea ec z = cov.along X σ z := by
+    have hec_ev : ∀ᶠ z in nhds y, ec =ᶠ[nhds z] σ := eventually_eventually_nhds.2 hec
+    filter_upwards [hea, hec_ev] with z hzea hzec_ev
+    have hσz : MDiffAt (T% σ) z := (hσ z).mdifferentiableAt (by norm_num)
+    have htec_ev : (fun w ↦ TotalSpace.mk' E w (ec w)) =ᶠ[nhds z]
+        (fun w ↦ TotalSpace.mk' E w (σ w)) := by
+      filter_upwards [hzec_ev] with w hw; simp [hw]
+    have hecz : MDiffAt (T% ec) z := hσz.congr_of_eventuallyEq htec_ev
+    have hcovz : cov ec z = cov σ z := hcov_congr hecz hσz hzec_ev
+    simp only [CovariantDerivative.along_apply, hzea, hcovz]
+  have hAlongYσ_y : MDiffAt (T% (cov.along Y σ)) y :=
+    (hAlongYσ y).mdifferentiableAt one_ne_zero
+  have hAlongXσ_y : MDiffAt (T% (cov.along X σ)) y :=
+    (hAlongXσ y).mdifferentiableAt one_ne_zero
+  have htEbEc_ev : (fun z ↦ TotalSpace.mk' E z (cov.along eb ec z)) =ᶠ[nhds y]
+      (fun z ↦ TotalSpace.mk' E z (cov.along Y σ z)) := by
+    filter_upwards [hEbEc] with z hz; exact congrArg (TotalSpace.mk' E z) hz
+  have htEaEc_ev : (fun z ↦ TotalSpace.mk' E z (cov.along ea ec z)) =ᶠ[nhds y]
+      (fun z ↦ TotalSpace.mk' E z (cov.along X σ z)) := by
+    filter_upwards [hEaEc] with z hz; exact congrArg (TotalSpace.mk' E z) hz
+  have hAlongEbEc_y : MDiffAt (T% (cov.along eb ec)) y :=
+    hAlongYσ_y.congr_of_eventuallyEq htEbEc_ev
+  have hAlongEaEc_y : MDiffAt (T% (cov.along ea ec)) y :=
+    hAlongXσ_y.congr_of_eventuallyEq htEaEc_ev
+  have hTermA : cov.along ea (cov.along eb ec) y = cov.along X (cov.along Y σ) y := by
+    have hcov1 : cov (cov.along eb ec) y = cov (cov.along Y σ) y :=
+      hcov_congr hAlongEbEc_y hAlongYσ_y hEbEc
+    have heay : ea y = X y := hea.eq_of_nhds
+    simp only [CovariantDerivative.along_apply, heay, hcov1]
+  have hTermB : cov.along eb (cov.along ea ec) y = cov.along Y (cov.along X σ) y := by
+    have hcov1 : cov (cov.along ea ec) y = cov (cov.along X σ) y :=
+      hcov_congr hAlongEaEc_y hAlongXσ_y hEaEc
+    have heby : eb y = Y y := heb.eq_of_nhds
+    simp only [CovariantDerivative.along_apply, heby, hcov1]
+  have hbr : VectorField.mlieBracket I ea eb =ᶠ[nhds y] VectorField.mlieBracket I X Y :=
+    hea.mlieBracket_vectorField heb
+  have hTermC : cov.along (VectorField.mlieBracket I ea eb) ec y
+      = cov.along (VectorField.mlieBracket I X Y) σ y := by
+    have hσy : MDiffAt (T% σ) y := (hσ y).mdifferentiableAt (by norm_num)
+    have htec_ev : (fun w ↦ TotalSpace.mk' E w (ec w)) =ᶠ[nhds y]
+        (fun w ↦ TotalSpace.mk' E w (σ w)) := by
+      filter_upwards [hec] with w hw; simp [hw]
+    have hecy : MDiffAt (T% ec) y := hσy.congr_of_eventuallyEq htec_ev
+    have hcov1 : cov ec y = cov σ y := hcov_congr hecy hσy hec
+    have hbry : VectorField.mlieBracket I ea eb y = VectorField.mlieBracket I X Y y :=
+      hbr.eq_of_nhds
+    simp only [CovariantDerivative.along_apply, hbry, hcov1]
+  rw [CovariantDerivative.curvatureAux_apply, CovariantDerivative.curvatureAux_apply,
+    hTermA, hTermB, hTermC]
+
 end RicciFlow
