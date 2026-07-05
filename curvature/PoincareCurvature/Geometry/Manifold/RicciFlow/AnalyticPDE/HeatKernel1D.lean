@@ -6220,5 +6220,61 @@ theorem continuous_heatSemigroupND {n : ℕ} {t : ℝ} (ht : 0 < t)
   · refine Filter.Eventually.of_forall (fun z => ?_)
     exact continuous_const.mul (hf.comp (continuous_id.sub continuous_const))
 
+/-- **The `n`-dimensional heat semigroup as an endomorphism of bounded continuous functions.**
+For `t > 0`, `heatSemigroupNDbcf ht f` bundles `x ↦ (Hₜf)(x)` as a bounded continuous function
+`(Fin n → ℝ) →ᵇ ℝ`: continuity is `continuous_heatSemigroupND` and the uniform bound `‖f‖` is the
+maximum principle `abs_heatSemigroupND_le`.  This realises the heat semigroup as an operator on the
+Banach space `(Fin n → ℝ) →ᵇ ℝ` — the state space of the mild-solution Banach fixed point. -/
+noncomputable def heatSemigroupNDbcf {n : ℕ} {t : ℝ} (ht : 0 < t)
+    (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    BoundedContinuousFunction (Fin n → ℝ) ℝ :=
+  BoundedContinuousFunction.ofNormedAddCommGroup
+    (fun x => heatSemigroupND t (⇑f) x)
+    (continuous_heatSemigroupND (C := ‖f‖) ht f.continuous
+      (fun y => by rw [← Real.norm_eq_abs]; exact f.norm_coe_le_norm y))
+    ‖f‖
+    (fun x => by
+      rw [Real.norm_eq_abs]
+      exact abs_heatSemigroupND_le ht x
+        (fun y => by rw [← Real.norm_eq_abs]; exact f.norm_coe_le_norm y))
+
+@[simp] theorem heatSemigroupNDbcf_apply {n : ℕ} {t : ℝ} (ht : 0 < t)
+    (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) (x : Fin n → ℝ) :
+    heatSemigroupNDbcf ht f x = heatSemigroupND t (⇑f) x := rfl
+
+/-- **`L^∞` non-expansiveness of the heat semigroup on bounded continuous functions.**  The
+operator norm of `heatSemigroupNDbcf ht` is `≤ 1`: `‖Hₜf‖ ≤ ‖f‖`, the Banach-space form of the
+maximum principle. -/
+theorem norm_heatSemigroupNDbcf_le {n : ℕ} {t : ℝ} (ht : 0 < t)
+    (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    ‖heatSemigroupNDbcf ht f‖ ≤ ‖f‖ := by
+  rw [BoundedContinuousFunction.norm_le (norm_nonneg f)]
+  intro x
+  rw [heatSemigroupNDbcf_apply, Real.norm_eq_abs]
+  exact abs_heatSemigroupND_le ht x
+    (fun y => by rw [← Real.norm_eq_abs]; exact f.norm_coe_le_norm y)
+
+/-- **`L^∞` non-expansiveness on differences (contraction-relevant form).**  The heat semigroup
+contracts differences in sup-norm: `‖Hₜf − Hₜg‖ ≤ ‖f − g‖`.  Linearity `heatSemigroupND_sub`
+(valid for the bounded a.e.-measurable data `⇑f`, `⇑g`, with common bound `max ‖f‖ ‖g‖`) turns the
+difference into `Hₜ(f − g)`, which the maximum principle bounds by `‖f − g‖`.  This is the estimate
+that makes the homogeneous part of the mild-solution map non-expansive — pairing with the Duhamel
+short-time contraction it forces the mild representative's Banach fixed point. -/
+theorem norm_heatSemigroupNDbcf_sub_le {n : ℕ} {t : ℝ} (ht : 0 < t)
+    (f g : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    ‖heatSemigroupNDbcf ht f - heatSemigroupNDbcf ht g‖ ≤ ‖f - g‖ := by
+  have hfb : ∀ y, ‖(⇑f) y‖ ≤ max ‖f‖ ‖g‖ := fun y =>
+    le_trans (f.norm_coe_le_norm y) (le_max_left _ _)
+  have hgb : ∀ y, ‖(⇑g) y‖ ≤ max ‖f‖ ‖g‖ := fun y =>
+    le_trans (g.norm_coe_le_norm y) (le_max_right _ _)
+  rw [BoundedContinuousFunction.norm_le (norm_nonneg _)]
+  intro x
+  rw [BoundedContinuousFunction.sub_apply, heatSemigroupNDbcf_apply, heatSemigroupNDbcf_apply,
+    ← heatSemigroupND_sub ht x f.continuous.aestronglyMeasurable hfb
+      g.continuous.aestronglyMeasurable hgb, Real.norm_eq_abs]
+  refine abs_heatSemigroupND_le ht x (fun y => ?_)
+  rw [← Real.norm_eq_abs, show (⇑f) y - (⇑g) y = (f - g) y from rfl]
+  exact (f - g).norm_coe_le_norm y
+
 end AnalyticPDE
 end RicciFlow
