@@ -8552,5 +8552,107 @@ theorem exists_heatMildFixedPoint_dist_const_le {n : ℕ} {t₀ : ℝ}
   rw [heq] at hle
   exact hle.trans hcontain
 
+/-- **`Hölder-1/2` time-modulus of the Duhamel term of the `n`-dimensional heat flow.**  The
+time-regularity companion of the spatial Schauder gains
+(`heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound`,
+`heatSemigroupND_duhamel_spatial_holder_bound`): for `t₀ ≤ t₁ < t₂` and a continuous, uniformly
+sup-norm-bounded reaction source `q` (`‖q s y‖ ≤ C`), the Duhamel value
+`U(t)(x) = ∫_{t₀}^{t} H_{t−s}(q s)(x) ds` obeys the sharp parabolic time modulus
+`|U(t₂)(x) − U(t₁)(x)| ≤ C·(t₂ − t₁) + (4n²C/π)·√(t₁ − t₀)·√(t₂ − t₁)`,
+uniformly in `x`.  The difference splits (via `intervalIntegral.integral_add_adjacent_intervals` and
+`intervalIntegral.integral_sub`) into a *new-interval* term
+`∫_{t₁}^{t₂} H_{t₂−s}(q s)(x) ds`, controlled by the Duhamel `L^∞` sup bound
+`heatSemigroupND_duhamel_sup_bound` (`≤ C·(t₂ − t₁)`), and a *propagator-difference* term
+`∫_{t₀}^{t₁} (H_{t₂−s}(q s)(x) − H_{t₁−s}(q s)(x)) ds`, whose integrand is bounded by the pointwise
+heat-semigroup time modulus `abs_heatSemigroupND_add_sub_le` (in `√s` closed form via
+`heatSemigroupND_timeModulus_eq_sqrt`) times the integrable weight `(t₁ − s)^{−1/2}`, integrated by
+`integral_rpow_neg_half_sub` to the finite `√(t₁ − t₀)·√(t₂ − t₁)` cost.  As `t₂ → t₁⁺` the right-hand
+side `→ 0` at the parabolic `Hölder-1/2` rate — the missing half of the mild-solution *space-time*
+parabolic modulus, completing the model Schauder regularity picture the `geometric` chart
+identification consumes. -/
+theorem heatSemigroupND_duhamel_time_holder_bound {n : ℕ} {t₀ t₁ t₂ : ℝ}
+   (h01 : t₀ ≤ t₁) (h12 : t₁ < t₂)
+   {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+   {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (x : Fin n → ℝ) :
+   |(∫ s in t₀..t₂, heatSemigroupND (t₂ - s) (⇑(q s)) x)
+       - (∫ s in t₀..t₁, heatSemigroupND (t₁ - s) (⇑(q s)) x)|
+     ≤ C * (t₂ - t₁)
+         + 4 * (n : ℝ) ^ 2 * C / π * Real.sqrt (t₁ - t₀) * Real.sqrt (t₂ - t₁) := by
+  have hF2_02 : IntervalIntegrable (fun s => heatSemigroupND (t₂ - s) (⇑(q s)) x) volume t₀ t₂ :=
+   intervalIntegrable_heatSemigroupND_duhamel (le_trans h01 h12.le) hq hqb x
+  have hsub01 : Set.uIcc t₀ t₁ ⊆ Set.uIcc t₀ t₂ :=
+   Set.uIcc_subset_uIcc Set.left_mem_uIcc (Set.mem_uIcc.mpr (Or.inl ⟨h01, h12.le⟩))
+  have hF2_01 : IntervalIntegrable (fun s => heatSemigroupND (t₂ - s) (⇑(q s)) x) volume t₀ t₁ :=
+   hF2_02.mono_set hsub01
+  have hF2_12 : IntervalIntegrable (fun s => heatSemigroupND (t₂ - s) (⇑(q s)) x) volume t₁ t₂ :=
+   intervalIntegrable_heatSemigroupND_duhamel h12.le hq hqb x
+  have hF1_01 : IntervalIntegrable (fun s => heatSemigroupND (t₁ - s) (⇑(q s)) x) volume t₀ t₁ :=
+   intervalIntegrable_heatSemigroupND_duhamel h01 hq hqb x
+  have hsplit : (∫ s in t₀..t₂, heatSemigroupND (t₂ - s) (⇑(q s)) x)
+       - (∫ s in t₀..t₁, heatSemigroupND (t₁ - s) (⇑(q s)) x)
+     = (∫ s in t₀..t₁,
+         (heatSemigroupND (t₂ - s) (⇑(q s)) x - heatSemigroupND (t₁ - s) (⇑(q s)) x))
+       + (∫ s in t₁..t₂, heatSemigroupND (t₂ - s) (⇑(q s)) x) := by
+   rw [intervalIntegral.integral_sub hF2_01 hF1_01,
+     ← intervalIntegral.integral_add_adjacent_intervals hF2_01 hF2_12]
+   ring
+  have hB : |∫ s in t₁..t₂, heatSemigroupND (t₂ - s) (⇑(q s)) x| ≤ C * (t₂ - t₁) :=
+   heatSemigroupND_duhamel_sup_bound h12.le x
+     (fun s y => by rw [← Real.norm_eq_abs]; exact hqb s y)
+  have hA : |∫ s in t₀..t₁,
+       (heatSemigroupND (t₂ - s) (⇑(q s)) x - heatSemigroupND (t₁ - s) (⇑(q s)) x)|
+     ≤ 4 * (n : ℝ) ^ 2 * C / π * Real.sqrt (t₁ - t₀) * Real.sqrt (t₂ - t₁) := by
+   set g : ℝ → ℝ :=
+     fun s => (2 * (n : ℝ) ^ 2 * C / π * Real.sqrt (t₂ - t₁)) * (t₁ - s) ^ (-(1 / 2) : ℝ)
+     with hg
+   have hpos2 : (0 : ℝ) < t₂ - t₁ := by linarith
+   have hae : ∀ᵐ s ∂(volume : MeasureTheory.Measure ℝ), s ∈ Set.Ioc t₀ t₁ →
+       ‖heatSemigroupND (t₂ - s) (⇑(q s)) x - heatSemigroupND (t₁ - s) (⇑(q s)) x‖ ≤ g s := by
+     have hset : {a : ℝ | ¬ a ≠ t₁} = {t₁} := by
+       ext s; simp only [Set.mem_setOf_eq, not_not, Set.mem_singleton_iff]
+     have htne : ∀ᵐ (s : ℝ), s ≠ t₁ := by
+       rw [MeasureTheory.ae_iff, hset]; exact MeasureTheory.measure_singleton t₁
+     filter_upwards [htne] with s hs hmem
+     have hlt : s < t₁ := lt_of_le_of_ne hmem.2 hs
+     have hpos1 : (0 : ℝ) < t₁ - s := by linarith
+     rw [Real.norm_eq_abs]
+     have hrw : t₂ - s = (t₁ - s) + (t₂ - t₁) := by ring
+     rw [hrw]
+     refine (abs_heatSemigroupND_add_sub_le hpos1 hpos2 (q s).continuous
+       (fun y => hqb s y) x).trans ?_
+     rw [heatSemigroupND_timeModulus_eq_sqrt hpos2.le]
+     have hrp : (t₁ - s) ^ (-(1 / 2) : ℝ) = (Real.sqrt (t₁ - s))⁻¹ := by
+       rw [Real.rpow_neg hpos1.le, ← Real.sqrt_eq_rpow]
+     simp only [hg]
+     rw [Real.sqrt_mul Real.pi_pos.le, hrp]
+     refine le_of_eq ?_
+     set p := Real.sqrt π with hp_def
+     have hπ : p * p = π := Real.mul_self_sqrt Real.pi_pos.le
+     rw [← hπ]
+     have hpne : p ≠ 0 := ne_of_gt (hp_def ▸ Real.sqrt_pos.mpr Real.pi_pos)
+     have hane : Real.sqrt (t₁ - s) ≠ 0 := ne_of_gt (Real.sqrt_pos.mpr hpos1)
+     field_simp
+   have hgint : IntervalIntegrable g volume t₀ t₁ := by
+     have h4 : IntervalIntegrable (fun s : ℝ => (t₁ - s) ^ (-(1 / 2) : ℝ)) volume t₀ t₁ := by
+       have hbase : IntervalIntegrable (fun z : ℝ => z ^ (-(1 / 2) : ℝ)) volume 0 (t₁ - t₀) :=
+         intervalIntegral.intervalIntegrable_rpow' (by norm_num)
+       have h3 := hbase.comp_sub_left t₁
+       simpa using h3.symm
+     simp only [hg]
+     exact h4.const_mul _
+   have hgval : (∫ s in t₀..t₁, g s)
+       = 4 * (n : ℝ) ^ 2 * C / π * Real.sqrt (t₁ - t₀) * Real.sqrt (t₂ - t₁) := by
+     simp only [hg]
+     rw [intervalIntegral.integral_const_mul, integral_rpow_neg_half_sub, ← Real.sqrt_eq_rpow]
+     ring
+   have hmain := intervalIntegral.norm_integral_le_of_norm_le h01 hae hgint
+   rw [Real.norm_eq_abs] at hmain
+   rw [hgval] at hmain
+   exact hmain
+  rw [hsplit]
+  refine (abs_add_le _ _).trans ?_
+  rw [add_comm (C * (t₂ - t₁))]
+  exact add_le_add hA hB
+
 end AnalyticPDE
 end RicciFlow
