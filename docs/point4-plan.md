@@ -7582,3 +7582,62 @@ positivity lemma `closedBall (g₀ section) a ⊆ positiveDefiniteLocus` (a shor
 containment) that discharges the last hypothesis of the closed-ball bridge; or (iii) the
 `realization` decode `RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution` that
 consumes the `BanachEvolutionLocalSolutionIn` now constructible.
+
+Update — **the geometric a-priori positivity containment (next-target (ii)) is now closed**, as a
+FOUNDATIONAL, root-reachable lemma (in `VectorBundle/RiemannianSection.lean`, beside its open-ball
+sibling `exists_dist_lt_subset_positiveDefiniteLocus`; bare `lake build` green — 2911 jobs; axiom-
+clean `propext`/`Classical.choice`/`Quot.sound`; `scan cheats` `TOTAL 0`):
+
+* `exists_pos_closedBall_subset_positiveDefiniteLocus` — **closed-ball companion of the open-ball
+  neighbourhood lemma.**  From a section `s` lying in the *open* positive-definite locus
+  (`isOpen_setOf_forall_pos` + `Metric.isOpen_iff`), extract a positive `ℝ≥0` radius `a` (take
+  `(ε/2).toNNReal`) whose **entire** `Metric.closedBall s (a : ℝ)` stays inside
+  `positiveDefiniteLocus` (via `Metric.closedBall_subset_ball`).  This is *exactly* the
+  `hsub : Metric.closedBall x₀ (a : ℝ) ⊆ locus` hypothesis shape consumed by the closed-ball
+  Banach-solution bridge `IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset`
+  and by the route (ii) capstones `sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound`
+  / `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound`.
+* `Bundle.ContinuousRiemannianMetric.exists_pos_closedBall_toSection_subset_positiveDefiniteLocus`
+  — **metric specialization.**  For a genuine continuous Riemannian metric `g`, the section
+  `⟨g.toSection, g.continuous_toSection⟩` (in the locus via
+  `mem_positiveDefiniteLocus_of_continuousRiemannianMetric`) has such a positive Picard radius `a` —
+  discharging the last containment obligation of route (ii)'s realization-input construction for the
+  **initial metric** of a Ricci–DeTurck IVP.  Keeping this at the foundational (root-reachable) layer
+  means any future BilinearFormBundle-concrete chart/`D` constructor can consume it directly.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  The `realization` *input* is now
+CONSTRUCTIBLE end-to-end from honest analytic data with the geometric containment **discharged, not
+assumed**: `picard` from ball-local centre-bound coordinatewise control (`K`, `Mc`), forward endpoint
+`T` auto-chosen, closed-ball bridge to `BanachEvolutionLocalSolutionIn`, and now `hsub` supplied by
+the positivity margin of `g₀`.  The sole remaining `A`/`picard` gap is the *analytic* production of
+the two coordinatewise size estimates (ball-Lipschitz `K`, centre-size `Mc`) for a concrete
+mild/regularised representative `A` — the parabolic Schauder input (GAP 2).
+
+**Formulation note (per directive).**  `picard : IsPicardLindelof A` is inhabited via the honest
+ball-local Cauchy–Lipschitz route: the only analytic data required about the `C⁰`-unbounded
+Ricci–DeTurck operator is its coordinatewise `K`-Lipschitz-in-section control on `closedBall g₀ a`
+and its centre readout size `Mc = ‖(A t g₀)ᵢ x‖` — i.e. a *parabolic Schauder a-priori bound* is what
+actually supplies `picard`, NOT a globally bounded mild formulation.  The geometric/topological parts
+(positivity containment `hsub`, forward-endpoint `T`, closed-ball→solution bridge) are all now
+closed; only the Schauder `K`/`Mc` estimates remain for `A`/`picard`.
+
+**Blocker recorded for next session — BilinearFormBundle-concrete instantiation of the abstract
+route (ii) capstones triggers a `whnf` blow-up.**  Instantiating
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` +
+`exists_banachEvolutionLocalSolutionIn_of_closedBall_subset` at `V := BilinearFormBundle`,
+`F := (F →L[ℝ] F →L[ℝ] ℝ)`, centre `⟨g.toSection, _⟩` (to fold the positivity containment into a
+`∃ T, BanachEvolutionLocalSolutionIn A (positiveDefiniteLocus) t₀ g` capstone) times out at `whnf`
+even at `maxHeartbeats 1600000` — a genuine defeq blow-up in the `equivCompatibleCoordFamilySubmodule`
+readout / section-space `CompleteSpace` unification, NOT a heartbeat shortage.  The abstract capstones
+compile only because they stay generic over `V`.  Next session: pin the section-space instances with
+explicit `letI`/`haveI` (or `set … with` the centre section and `CompleteSpace` instance) before
+applying the bridges, or state the concrete capstone with the readout maps abstracted behind a local
+`let`, to avoid re-synthesising the BilinearFormBundle transported-instance diamond during
+elaboration.
+
+**Next target.**  Either (i) the parabolic Schauder ball-Lipschitz `K` + centre-size `Mc` estimates
+(`hlip`/`hcenter`) for a concrete mild/regularised section-space representative `A` — the sole
+remaining analytic input; or (ii) the instance-pinned BilinearFormBundle-concrete route (ii)
+realization-input capstone (folding in `exists_pos_closedBall_toSection_subset_positiveDefiniteLocus`)
+once the `whnf` blow-up above is tamed; or (iii) the `realization` decode
+`RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`.
