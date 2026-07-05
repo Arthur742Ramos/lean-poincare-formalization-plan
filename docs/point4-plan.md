@@ -8295,3 +8295,49 @@ essentially complete: the intrinsic Ricci–DeTurck reaction (DeTurck-correction
 value, then feed it as `chart.A` and discharge the `IsPicardLindelof` (`picard`) coordinate
 bounds (`hlip`/`hcont`/centre) for the **mild/regularised** representative via the committed
 `isPicardLindelof_of_bounded_lipschitz_timeDependent` foundation.
+
+## Milestone (2026-07-05, later still) — intrinsic Ricci–DeTurck RHS assembled as a continuous `BilinearFormBundle` section, modulo the single Ricci-tensor-section input (Item 3 / GAP 2 geometric-A regularity)
+
+The previous milestone's stated NEXT (add the Ricci part to `intrinsicDeTurckCorrectionSection` to realize
+`intrinsicRicciDeTurckRHS` as a `ContinuousSectionSpace`/`BilinearFormBundle` value) is now **done up to the
+one honest Ricci-continuity input**, sorry-free, `#print axioms`-clean
+(`propext`/`Classical.choice`/`Quot.sound`), comment-stripped `scan cheats PoincareCurvature` `TOTAL 0`, full
+`lake build PoincareCurvature` green (2916 jobs).  One additive commit; no heavy file rewritten (appended to
+the isolated `RicciFlow/DeTurckCorrectionRegularity.lean`).
+
+**`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`.**  Given *any* continuous
+`BilinearFormBundle` section `rs` representing the intrinsic Ricci tensor
+(`rs x u v = intrinsicRicciTensor g t x u v`) and a `C¹` DeTurck reference connection slice
+(`hbackground : ContMDiffCovariantDerivative (background t) 1`), the combination
+`(-2 : ℝ) • rs + intrinsicDeTurckCorrectionSection g background t` is a **continuous** `BilinearFormBundle`
+section that agrees pointwise with the geometric Ricci–DeTurck operator `intrinsicRicciDeTurckRHS`.  Proof:
+`ContMDiff.const_smul_section` on `rs` + `ContMDiff.add_section` with the already-committed correction
+continuity (`intrinsicDeTurckCorrectionSection_contMDiff_zero`); the pointwise identity is a `simp only` over
+`Pi.add_apply`/`Pi.smul_apply`/`ContinuousLinearMap.{add,smul}_apply` + `ricciFlowRHS_apply` +
+`intrinsicRicciTensor_apply` (using `intrinsicRicciFlowRHS = -2 • intrinsicRicciTensor`).  **Plumbing:** the
+Pi-level `(-2)•rs + corr` must **never** be written explicitly (it re-triggers the `BilinearFormBundle` fiber
+`AddMonoid (TangentSpace I x →L ℝ)` synthesis timeout); instead build the continuity `have` from the section
+lemmas and let the `∃`-witness be **inferred** from its type (`refine ⟨_, hcont, ?_⟩`).
+
+**Fractional progress on `{A, picard, realization, encode}`.**  This closes the *value-section assembly* half of
+the `A`-regularity side of GAP 2: the geometric operator `A`'s value at a metric is a continuous `BilinearFormBundle`
+section **as soon as** the Ricci tensor is a continuous section.  The remaining `A`-regularity obstruction is now a
+single named brick.
+
+**NEXT — Ricci-tensor-section continuity (the last `A`-value regularity input).**  Route mapped this session
+(regularity is consistent because local frames are `C^∞`, so the two nested `∇`'s in the curvature drop only to
+`C⁰` for a `C¹` connection):
+1. `curvatureAux e_a e_b e_c` is a **continuous** `TM`-section for smooth frame fields and a `C¹` connection —
+   from `CovariantDerivative.contMDiff_along` (Along.lean: `C^n` cov + `C^n` field + `C^{n+1}` section → `C^n`)
+   applied twice (inner `n=1`: cov `C¹`, `e_b` `C¹`, `e_c` `C²` → `∇_{e_b} e_c` `C¹`; outer `n=0`: cov `C⁰`,
+   `e_a` `C⁰`, `∇_{e_b} e_c` `C¹` → `C⁰`), plus the bracket term via `ContMDiff.mlieBracket_vectorField`, glued by
+   `ContMDiff.sub_section`.  Watch the `ContMDiffVectorBundle`/`ContMDiffCovariantDerivative` `n=2→1→0` instance
+   downgrade.
+2. Lift to `curvatureTensor` section continuity via the tensoriality lemmas
+   (`curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right`, Tensor.lean) — replace the
+   canonical `smoothExtend` in `curvatureTensor` by local frame sections, then read off section continuity in a
+   trivialization from the matrix entries.
+3. Contract to `ricciCurvature = trace(ricciEndomorphism)` via the frame/coframe trace formula, giving
+   `intrinsicRicciTensor` as a continuous `BilinearFormBundle` section — the exact `rs` input to the lemma above,
+   completing the geometric `A`-value regularity.  (Then the `picard` Lipschitz/centre bounds for the
+   mild/regularised representative remain — the other half of GAP 2.)
