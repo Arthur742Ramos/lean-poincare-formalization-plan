@@ -199,8 +199,7 @@ noncomputable def intrinsicDeTurckCorrectionSection
     intrinsicDeTurckCorrectionSection (I := I) (M := M) g background t x u v =
       intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v := by
   simp only [intrinsicDeTurckCorrectionSection, Pi.add_apply, ContinuousLinearMap.add_apply,
-    ContinuousLinearMap.comp_apply, ContinuousLinearMap.flip_apply,
-    intrinsicDeTurckCorrection_apply]
+    ContinuousLinearMap.comp_apply, intrinsicDeTurckCorrection_apply]
   congr 1
   exact (g t).symm x _ u
 
