@@ -8311,5 +8311,78 @@ lemma exists_forwardTime_sqrt_add_mul_sub_le (t₀ M₁ M₂ a : ℝ)
     nlinarith [ha, mul_nonneg hM₂ ha.le]
   linarith [hterm1, hterm2]
 
+/-- **A forward endpoint simultaneously meeting the containment and contraction windows.**  Given
+nonnegative modulus constants `M₁ M₂`, a positive target radius `a`, and a nonnegative contraction
+constant `K`, there is a forward time `T > t₀` with BOTH `M₁·√(T − t₀) + M₂·(T − t₀) ≤ a` (a-priori
+containment) AND `K·(T − t₀) < 1` (short-time contraction).  Take the containment endpoint from
+`exists_forwardTime_sqrt_add_mul_sub_le` and shrink it to `min (T₁ − t₀) (1/(K + 1))`: the containment
+bound is monotone increasing in the window length, so it survives shrinking, and
+`K·(1/(K + 1)) = K/(K + 1) < 1`.  This lets the mild-solution existence window (`Kstate·(T − t₀) < 1`,
+needed by `exists_unique_heatMildFixedPoint`) and the ball-containment window be chosen at once. -/
+lemma exists_forwardTime_sqrt_add_mul_sub_le_and_lt_one (t₀ M₁ M₂ a K : ℝ)
+    (hM₁ : 0 ≤ M₁) (hM₂ : 0 ≤ M₂) (ha : 0 < a) (hK : 0 ≤ K) :
+    ∃ T : ℝ, t₀ < T ∧ M₁ * Real.sqrt (T - t₀) + M₂ * (T - t₀) ≤ a ∧ K * (T - t₀) < 1 := by
+  obtain ⟨T₁, hT₁, hcont⟩ := exists_forwardTime_sqrt_add_mul_sub_le t₀ M₁ M₂ a hM₁ hM₂ ha
+  have hK1 : (0 : ℝ) < K + 1 := by linarith
+  have hinv : (0 : ℝ) < 1 / (K + 1) := by positivity
+  set d₁ : ℝ := T₁ - t₀ with hd₁
+  have hd₁p : 0 < d₁ := by rw [hd₁]; linarith
+  set d : ℝ := min d₁ (1 / (K + 1)) with hd
+  have hdp : 0 < d := lt_min hd₁p hinv
+  have hsub : t₀ + d - t₀ = d := by ring
+  refine ⟨t₀ + d, by linarith, ?_, ?_⟩
+  · rw [hsub]
+    have hdle : d ≤ d₁ := min_le_left _ _
+    have hsq : Real.sqrt d ≤ Real.sqrt d₁ := Real.sqrt_le_sqrt hdle
+    calc M₁ * Real.sqrt d + M₂ * d
+        ≤ M₁ * Real.sqrt d₁ + M₂ * d₁ :=
+          add_le_add (mul_le_mul_of_nonneg_left hsq hM₁)
+            (mul_le_mul_of_nonneg_left hdle hM₂)
+      _ ≤ a := hcont
+  · rw [hsub]
+    have hdle2 : d ≤ 1 / (K + 1) := min_le_right _ _
+    calc K * d ≤ K * (1 / (K + 1)) := mul_le_mul_of_nonneg_left hdle2 hK
+      _ = K / (K + 1) := by rw [mul_one_div]
+      _ < 1 := by rw [div_lt_one hK1]; linarith
+
+/-- **Model local existence with a-priori ball containment (mild-solution well-posedness capstone).**
+For an `L`-Lipschitz initial datum `u₀`, a bounded `Kstate`-Lipschitz reaction `Q`, and any positive
+target radius `a`, there is a forward window `T > t₀` on which the semilinear reaction–diffusion
+equation `u_t = Δu + Q(u)`, `u(t₀) = u₀` has a mild solution `z` (a fixed point of the mild-solution
+self-map) whose whole trajectory stays inside the ball `closedBall u₀ a`:
+`dist z (const u₀) ≤ a`.  The window is chosen by `exists_forwardTime_sqrt_add_mul_sub_le_and_lt_one`
+to satisfy simultaneously the containment radius `(L·n·(2/√π))·√(T − t₀) + CQ·(T − t₀) ≤ a` and the
+contraction condition `Kstate·(T − t₀) < 1`; existence is `exists_unique_heatMildFixedPoint` and the
+containment is `dist_heatMildFixedPoint_const_le`.  This packages the four a-priori estimates into the
+exact shape the chart Picard route consumes: a per-datum window carrying a solution that never leaves
+the prescribed positive-definite ball. -/
+theorem exists_heatMildFixedPoint_dist_const_le {n : ℕ} {t₀ : ℝ}
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    {Kstate : ℝ} (hKnn : 0 ≤ Kstate) (hQlip : ∀ v w, ‖Q v - Q w‖ ≤ Kstate * ‖v - w‖)
+    {a : ℝ} (ha : 0 < a) :
+    ∃ (T : ℝ) (hT : t₀ < T)
+      (z : BoundedContinuousFunction (↥(Set.Icc t₀ T))
+        (BoundedContinuousFunction (Fin n → ℝ) ℝ)),
+      heatMildSelfMap hT.le u₀ hLnn hlip Q hQcont hQb z = z ∧
+      dist z (BoundedContinuousFunction.const (↥(Set.Icc t₀ T)) u₀) ≤ a := by
+  have hM₁ : 0 ≤ L * (n : ℝ) * (2 / Real.sqrt π) :=
+    mul_nonneg (mul_nonneg hLnn (Nat.cast_nonneg n))
+      (div_nonneg (by norm_num) (Real.sqrt_nonneg _))
+  have hM₂ : 0 ≤ CQ := le_trans (norm_nonneg _) (hQb 0)
+  obtain ⟨T, hT, hcontain, hsmall⟩ :=
+    exists_forwardTime_sqrt_add_mul_sub_le_and_lt_one t₀
+      (L * (n : ℝ) * (2 / Real.sqrt π)) CQ a Kstate hM₁ hM₂ ha hKnn
+  obtain ⟨z, hz⟩ :=
+    (exists_unique_heatMildFixedPoint hT.le u₀ hLnn hlip Q hQcont hQb hKnn hQlip hsmall).exists
+  refine ⟨T, hT, z, hz, ?_⟩
+  have hle := dist_heatMildFixedPoint_const_le hT.le u₀ hLnn hlip Q hQcont hQb z hz
+  have heq : L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt (T - t₀)) + CQ * (T - t₀)
+      = L * (n : ℝ) * (2 / Real.sqrt π) * Real.sqrt (T - t₀) + CQ * (T - t₀) := by ring
+  rw [heq] at hle
+  exact hle.trans hcontain
+
 end AnalyticPDE
 end RicciFlow
