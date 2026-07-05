@@ -7409,3 +7409,39 @@ via `ContractingWith` — by assembling the complete state-space datum and the s
       the genuine Ricci–DeTurck reaction is bounded-Lipschitz only relative to a higher-regularity
       norm, not `C⁰`). The model template now makes precise exactly what must be supplied to inhabit
       `A`/`picard` through the mild route.
+
+Update — **the model mild solution is now fully *well-posed* (existence + uniqueness + continuous
+dependence) with an explicit Duhamel form** (extending `AnalyticPDE/HeatKernel1D.lean`, all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`, `scan cheats` `TOTAL 0`, module green).  This session adds
+the two remaining pillars of well-posedness beyond `exists_unique_heatMildFixedPoint`:
+
+* `dist_heatMildFixedPoint_le` — **continuous (Lipschitz) dependence on the initial datum**: two
+  mild-solution fixed points `z, w` for initial data `u₀, v₀` (common bounded `Kstate`-Lipschitz
+  reaction `Q`, short window `Kstate·(T − t₀) < 1`) satisfy
+  `dist z w ≤ ‖u₀ − v₀‖ / (1 − Kstate·(T − t₀))` in `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`.  The
+  triangle estimate `dist z w = dist (Φ_{u₀} z) (Φ_{v₀} w) ≤ dist (Φ_{u₀} z) (Φ_{u₀} w) +
+  dist (Φ_{u₀} w) (Φ_{v₀} w)` combines the short-time contraction `dist_heatMildSelfMap_le`
+  (`≤ Kstate·(T − t₀)·dist z w`) with the new **initial-datum `1`-Lipschitz** self-map bound
+  `dist_heatMildSelfMap_initial_le` (`≤ ‖u₀ − v₀‖`), which lifts the fixed-time homogeneous-propagator
+  non-expansiveness `norm_heatMildValueNDbcf_sub_initial_le` (Duhamel cancels; `H_{t−t₀}u₀ − H_{t−t₀}v₀`
+  bounded by `norm_heatSemigroupNDbcf_sub_le`) through `dist_heatMildValuePathBcfIcc_initial_le` to the
+  closed-interval path space.  The third pillar of well-posedness — stability under perturbation of the
+  data — the analytic template for the corresponding stability of the mild Ricci–DeTurck representative.
+* `heatMildFixedPoint_apply` — **the fixed point genuinely solves the Duhamel integral equation**:
+  every interior value of a fixed point `z` is the pointwise mild-solution formula
+  `z(t)(x) = H_{t−t₀}(u₀)(x) + ∫_{t₀}^{t} H_{t−s}(Q(z(projIcc s)))(x) ds`, obtained by unfolding the
+  fixed-point identity through `heatMildValuePathBcfIcc_apply` / `heatMildValuePathBcf_of_lt` /
+  `heatMildValueNDbcf_apply`.  This upgrades the abstract Banach fixed point to a genuine mild solution
+  of `u_t = Δu + Q(u)`, `u(t₀) = u₀` in concrete integral-equation form — exactly what a downstream
+  decode of the mild representative into a genuine local solution (`realization`) consumes.
+
+**Next target.**  The model semilinear mild solution is now a fully-specified well-posed template
+(existence, uniqueness, Lipschitz dependence, explicit Duhamel form).  The transport step (a) —
+generalising the model value space `(Fin n → ℝ) →ᵇ ℝ` to the manifold-bundle state space
+`ContinuousSectionSpace … et Kc …` — remains blocked on an **intrinsic parabolic (heat) semigroup on
+the compact manifold** `M`; the `ℝⁿ` heat propagator `heatSemigroupND` is coordinate-specific and does
+not transport directly.  Two honest sub-routes: (i) build the intrinsic bundle heat semigroup (large);
+or (ii) route the section-space picard through the ODE foundation
+`isPicardLindelof_of_bounded_lipschitz_timeDependent_Icc` with a genuinely bounded-Lipschitz
+*regularised* representative `A` (the mild/Yosida route), where the well-posedness template above pins
+down exactly the boundedness + Lipschitz + time-continuity estimates that must be supplied.
