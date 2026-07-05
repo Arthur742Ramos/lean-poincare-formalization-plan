@@ -5890,5 +5890,80 @@ theorem heatSemigroupND_mild_sup_bound {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
     (add_le_add (abs_heatSemigroupND_le (by linarith : (0 : ℝ) < t - t₀) x hu0)
       (heatSemigroupND_duhamel_sup_bound ht.le x hq))
 
+/-- **The fundamental parabolic-Duhamel singular integral** `∫_{t₀}^{t} (t − s)^{−1/2} ds =
+2·(t − t₀)^{1/2}`.  The `1/2`-power singularity of the heat semigroup's spatial-derivative factor
+`(t − s)^{−1/2}` at the diagonal `s = t` is integrable in time, and its integral over `[t₀, t]`
+equals `2√(t − t₀)`.  Proved by the reflection substitution `s ↦ t − s`
+(`intervalIntegral.integral_comp_sub_left`) reducing to `∫_{0}^{t−t₀} u^{−1/2} du`, then Mathlib's
+`integral_rpow` (valid since `−1 < −1/2`).  This is the exact time-weight controlling every
+first-order parabolic Schauder gain of the Duhamel term: the `t^{−1/2}` smoothing rate of the heat
+semigroup, integrated in time, produces the finite `√(t − t₀)` modulus. -/
+theorem integral_rpow_neg_half_sub (t₀ t : ℝ) :
+    (∫ s in t₀..t, (t - s) ^ (-(1 / 2) : ℝ)) = 2 * (t - t₀) ^ ((1 / 2) : ℝ) := by
+  rw [intervalIntegral.integral_comp_sub_left (fun z => z ^ (-(1 / 2) : ℝ)) t]
+  simp only [sub_self]
+  rw [integral_rpow (Or.inl (by norm_num : (-1 : ℝ) < -(1 / 2)))]
+  rw [Real.zero_rpow (by norm_num : (-(1 / 2) : ℝ) + 1 ≠ 0)]
+  have h12 : (-(1 / 2) : ℝ) + 1 = 1 / 2 := by norm_num
+  rw [h12]; ring
+
+/-- **Spatial `C^1` (Lipschitz) parabolic Schauder gain of the Duhamel term.**  The Duhamel integral
+`U(t)(x) = ∫_{t₀}^{t} H_{t−s}(q s)(x) ds` of a sup-norm-bounded reaction term `q` (`‖q s y‖ ≤ C`)
+gains a full spatial derivative at the finite `√(t − t₀)` cost:
+`|∫_{t₀}^{t} (H_{t−s}(q s)(x) − H_{t−s}(q s)(x')) ds| ≤ 2·n·C·‖x − x'‖·√(t − t₀) / √π`.
+Inside the integral the heat semigroup's spatial Lipschitz rate
+`heatSemigroupND_spatial_lipschitz_sqrt_rate_norm` bounds the integrand by
+`n·C·‖x − x'‖·(π(t−s))^{−1/2}`; this singular time-weight is integrable, and its integral is
+evaluated by `integral_rpow_neg_half_sub` (`∫ (t−s)^{−1/2} = 2√(t−t₀)`) via
+`intervalIntegral.norm_integral_le_of_norm_le` (the diagonal `s = t` being a null set).  This is the
+central parabolic *gain-of-regularity* estimate: whereas the heat semigroup itself smooths at cost
+`(t−s)^{−1/2}` (blowing up as `s → t`), the Duhamel time integral converts that into a *finite*
+first-order spatial modulus — the mechanism by which a mild Ricci–DeTurck solution acquires the
+spatial regularity a Schauder fixed point requires. -/
+theorem heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound {n : ℕ} {t₀ t : ℝ} (hT : t₀ ≤ t)
+    {q : ℝ → (Fin n → ℝ) → ℝ} {C : ℝ}
+    (hqm : ∀ s, AEStronglyMeasurable (q s)) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (x x' : Fin n → ℝ) :
+    |∫ s in t₀..t, (heatSemigroupND (t - s) (q s) x - heatSemigroupND (t - s) (q s) x')|
+      ≤ 2 * (n : ℝ) * C * ‖x - x'‖ * Real.sqrt (t - t₀) / Real.sqrt π := by
+  set g : ℝ → ℝ := fun s => ((n : ℝ) * C * ‖x - x'‖ / Real.sqrt π) * (t - s) ^ (-(1 / 2) : ℝ)
+    with hg
+  have hae : ∀ᵐ s ∂(volume : MeasureTheory.Measure ℝ), s ∈ Set.Ioc t₀ t →
+      ‖heatSemigroupND (t - s) (q s) x - heatSemigroupND (t - s) (q s) x'‖ ≤ g s := by
+    have hset : {a : ℝ | ¬ a ≠ t} = {t} := by
+      ext s; simp only [Set.mem_setOf_eq, not_not, Set.mem_singleton_iff]
+    have htne : ∀ᵐ (s : ℝ), s ≠ t := by
+      rw [MeasureTheory.ae_iff, hset]; exact MeasureTheory.measure_singleton t
+    filter_upwards [htne] with s hs hmem
+    have hlt : s < t := lt_of_le_of_ne hmem.2 hs
+    have hpos : 0 < t - s := by linarith
+    have hsp : (0 : ℝ) < Real.sqrt π := Real.sqrt_pos.mpr Real.pi_pos
+    have hst : (0 : ℝ) < Real.sqrt (t - s) := Real.sqrt_pos.mpr hpos
+    rw [Real.norm_eq_abs]
+    refine (heatSemigroupND_spatial_lipschitz_sqrt_rate_norm hpos (hqm s) (hqb s) x x').trans ?_
+    simp only [hg]
+    have hrp : (t - s) ^ (-(1 / 2) : ℝ) = (Real.sqrt (t - s))⁻¹ := by
+      rw [Real.rpow_neg hpos.le, ← Real.sqrt_eq_rpow]
+    rw [Real.sqrt_mul Real.pi_pos.le, hrp]
+    refine le_of_eq ?_
+    field_simp
+  have hgint : IntervalIntegrable g volume t₀ t := by
+    have h4 : IntervalIntegrable (fun s : ℝ => (t - s) ^ (-(1 / 2) : ℝ)) volume t₀ t := by
+      have hbase : IntervalIntegrable (fun z : ℝ => z ^ (-(1 / 2) : ℝ)) volume 0 (t - t₀) :=
+        intervalIntegral.intervalIntegrable_rpow' (by norm_num)
+      have h3 := hbase.comp_sub_left t
+      simpa using h3.symm
+    simp only [hg]
+    exact h4.const_mul _
+  have hmain := intervalIntegral.norm_integral_le_of_norm_le hT hae hgint
+  have hgval : (∫ s in t₀..t, g s)
+      = 2 * (n : ℝ) * C * ‖x - x'‖ * Real.sqrt (t - t₀) / Real.sqrt π := by
+    simp only [hg]
+    rw [intervalIntegral.integral_const_mul, integral_rpow_neg_half_sub, ← Real.sqrt_eq_rpow]
+    ring
+  rw [Real.norm_eq_abs] at hmain
+  rw [hgval] at hmain
+  exact hmain
+
 end AnalyticPDE
 end RicciFlow
