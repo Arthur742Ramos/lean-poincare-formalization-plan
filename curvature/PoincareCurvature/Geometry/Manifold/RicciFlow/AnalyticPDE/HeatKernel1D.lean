@@ -6716,5 +6716,26 @@ theorem continuousOn_heatSemigroupND_time {n : ℕ}
     ContinuousOn (fun t => heatSemigroupND t f x) (Set.Ioi 0) :=
   fun _t ht => (continuousAt_heatSemigroupND_time (Set.mem_Ioi.1 ht) hf hb x).continuousWithinAt
 
+/-- **Time-continuity of the time-shifted `n`-D heat semigroup path.**  For bounded continuous data
+`f`, the shifted propagator path `t ↦ (H_{t−t₀}f)(x)` is continuous at every `t₁ > t₀`: the
+composition of the propagator time-continuity `continuousAt_heatSemigroupND_time` (valid since
+`t₁ − t₀ > 0`) with the continuous shift `t ↦ t − t₀`.  This is precisely the time-continuity of the
+homogeneous term `H_{t−t₀}u₀` of the mild-solution map `heatMildValueNDbcf`. -/
+theorem continuousAt_heatSemigroupND_shift_time {n : ℕ} {t₀ t₁ : ℝ} (ht : t₀ < t₁)
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (hf : Continuous f) (hb : ∀ y, |f y| ≤ C) (x : Fin n → ℝ) :
+    ContinuousAt (fun t => heatSemigroupND (t - t₀) f x) t₁ := by
+  have h0 : 0 < t₁ - t₀ := by linarith
+  have hshift : ContinuousAt (fun t : ℝ => t - t₀) t₁ := by fun_prop
+  exact ContinuousAt.comp_of_eq (g := fun u => heatSemigroupND u f x) (f := fun t => t - t₀)
+    (continuousAt_heatSemigroupND_time h0 hf hb x) hshift rfl
+
+/-- **Time-continuity of the time-shifted `n`-D heat semigroup path on `(t₀, ∞)`.**  The
+`ContinuousOn` form of `continuousAt_heatSemigroupND_shift_time`. -/
+theorem continuousOn_heatSemigroupND_shift_time {n : ℕ} {t₀ : ℝ}
+    {f : (Fin n → ℝ) → ℝ} {C : ℝ} (hf : Continuous f) (hb : ∀ y, |f y| ≤ C) (x : Fin n → ℝ) :
+    ContinuousOn (fun t => heatSemigroupND (t - t₀) f x) (Set.Ioi t₀) :=
+  fun _t ht =>
+    (continuousAt_heatSemigroupND_shift_time (Set.mem_Ioi.1 ht) hf hb x).continuousWithinAt
+
 end AnalyticPDE
 end RicciFlow
