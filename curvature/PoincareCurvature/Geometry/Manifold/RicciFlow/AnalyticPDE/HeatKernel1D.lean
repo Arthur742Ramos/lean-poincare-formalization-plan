@@ -8214,5 +8214,62 @@ theorem norm_heatMildValueNDbcf_sub_initial_le_of_lipschitz {n : ℕ} {t₀ t : 
           (norm_heatSemigroupNDbcf_sub_self_le_of_lipschitz hpos u₀ hLnn hlip)
           (norm_heatDuhamelNDbcf_of_continuous_le ht.le hq hqb)
 
+/-- **A-priori containment of the whole model mild trajectory near its initial datum.**  For the
+fixed point `z` of the mild-solution self-map (`L`-Lipschitz initial datum `u₀`, reaction `Q` bounded
+by `CQ`), the entire trajectory stays uniformly close to the constant path `u₀`:
+`dist z (const u₀) ≤ L·n·(2/√π·√(T − t₀)) + CQ·(T − t₀)` in the state space
+`↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`.  Pointwise: at `t₀` the trajectory equals `u₀`
+(`heatMildValuePathBcf_initial`), and for `t > t₀` the fixed-point value is `heatMildValueNDbcf`, whose
+deviation from `u₀` is bounded by `norm_heatMildValueNDbcf_sub_initial_le_of_lipschitz` and then by the
+window endpoint via `√(t − t₀) ≤ √(T − t₀)` and `t − t₀ ≤ T − t₀`.  Since the bound `→ 0` as
+`T → t₀⁺`, choosing a short enough window keeps the mild trajectory inside any prescribed ball of the
+initial metric — the closed-ball containment (`closedBall g₀ a ⊆ positiveDefiniteLocus`) that the
+Picard route consumes. -/
+theorem dist_heatMildFixedPoint_const_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z) :
+    dist z (BoundedContinuousFunction.const (↥(Set.Icc t₀ T)) u₀)
+      ≤ L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt (T - t₀)) + CQ * (T - t₀) := by
+  have hCQ : (0 : ℝ) ≤ CQ := le_trans (norm_nonneg _) (hQb 0)
+  have hTt : (0 : ℝ) ≤ T - t₀ := by linarith
+  have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+  have hpi : (0 : ℝ) ≤ 2 / Real.sqrt π := div_nonneg (by norm_num) (Real.sqrt_nonneg _)
+  have hcoef : (0 : ℝ) ≤ L * (n : ℝ) := mul_nonneg hLnn hn
+  have hB0 : (0 : ℝ) ≤ L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt (T - t₀)) + CQ * (T - t₀) := by
+    have h1 : (0 : ℝ) ≤ L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt (T - t₀)) :=
+      mul_nonneg hcoef (mul_nonneg hpi (Real.sqrt_nonneg _))
+    have h2 : (0 : ℝ) ≤ CQ * (T - t₀) := mul_nonneg hCQ hTt
+    linarith
+  refine (BoundedContinuousFunction.dist_le hB0).2 (fun t => ?_)
+  have hzt : z t = heatMildValuePathBcf t₀ u₀
+      (hQcont.comp (continuous_IccExtend_iff.mpr z.continuous))
+      (fun s y => le_trans ((Q (Set.IccExtend hT (⇑z) s)).norm_coe_le_norm y) (hQb _)) (t : ℝ) := by
+    nth_rewrite 1 [← hz]
+    rfl
+  rw [BoundedContinuousFunction.const_apply', dist_eq_norm, hzt]
+  rcases eq_or_lt_of_le t.2.1 with h | hlt
+  · rw [← h, heatMildValuePathBcf_initial, sub_self, norm_zero]
+    exact hB0
+  · rw [heatMildValuePathBcf_of_lt hlt]
+    have hle : (t : ℝ) ≤ T := t.2.2
+    have hsqrt : Real.sqrt ((t : ℝ) - t₀) ≤ Real.sqrt (T - t₀) :=
+      Real.sqrt_le_sqrt (by linarith)
+    have hterm1 : L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt ((t : ℝ) - t₀))
+        ≤ L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt (T - t₀)) :=
+      mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hsqrt hpi) hcoef
+    have hterm2 : CQ * ((t : ℝ) - t₀) ≤ CQ * (T - t₀) :=
+      mul_le_mul_of_nonneg_left (by linarith) hCQ
+    calc ‖heatMildValueNDbcf hlt u₀
+            (hQcont.comp (continuous_IccExtend_iff.mpr z.continuous))
+            (fun s y => le_trans ((Q (Set.IccExtend hT (⇑z) s)).norm_coe_le_norm y) (hQb _)) - u₀‖
+        ≤ L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt ((t : ℝ) - t₀)) + CQ * ((t : ℝ) - t₀) :=
+          norm_heatMildValueNDbcf_sub_initial_le_of_lipschitz hlt u₀ hLnn hlip _ _
+      _ ≤ L * (n : ℝ) * (2 / Real.sqrt π * Real.sqrt (T - t₀)) + CQ * (T - t₀) :=
+          add_le_add hterm1 hterm2
+
 end AnalyticPDE
 end RicciFlow
