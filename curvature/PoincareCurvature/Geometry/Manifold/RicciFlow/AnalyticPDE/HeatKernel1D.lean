@@ -7310,5 +7310,28 @@ theorem continuousAt_heatFlowPathBcf_shift {n : ℕ} (f : BoundedContinuousFunct
   have h2 : ContinuousAt (fun t : ℝ => t - t₀) t₁ := by fun_prop
   exact ContinuousAt.comp (x := t₁) h1 h2
 
+/-- **Interval-integrability of the substituted Duhamel integrand.**  For a continuous, uniformly
+sup-norm-bounded `BCF`-valued source `q`, the substituted integrand `u ↦ H_u(q(t−u))(x)` is
+interval-integrable on `[0, b]` (`b ≥ 0`).  Unlike the original-variable integrand (singular at the
+diagonal `s = t`), after the substitution `u = t − s` the singularity sits at the *fixed* lower
+endpoint `u = 0`, which is a null set, so the bound `|H_u(q(t−u))(x)| ≤ C` (`abs_heatSemigroupND_le`,
+valid for every `u > 0`) holds on all of `Ioc 0 b`; combined with a.e.-measurability
+(`aestronglyMeasurable_heatSemigroupND_comp_sub`) and the finite measure of the interval this gives
+integrability.  This discharges the integrability side-conditions for splitting the substituted
+Duhamel integral in the `BCF`-norm time-continuity proof. -/
+lemma intervalIntegrable_heatSemigroupND_comp_sub {n : ℕ} (t : ℝ) {b : ℝ} (hb : 0 ≤ b)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C : ℝ} (hqb : ∀ s y, ‖q s y‖ ≤ C) (x : Fin n → ℝ) :
+    IntervalIntegrable (fun u => heatSemigroupND u (⇑(q (t - u))) x) volume 0 b := by
+  refine (intervalIntegrable_iff_integrableOn_Ioc_of_le hb).mpr ?_
+  refine (integrable_const C).mono'
+    (aestronglyMeasurable_heatSemigroupND_comp_sub t hq x).restrict ?_
+  rw [ae_restrict_iff' measurableSet_Ioc]
+  filter_upwards with u hmem
+  have hupos : (0 : ℝ) < u := hmem.1
+  rw [Real.norm_eq_abs]
+  exact abs_heatSemigroupND_le hupos x
+    (fun y => by rw [← Real.norm_eq_abs]; exact hqb (t - u) y)
+
 end AnalyticPDE
 end RicciFlow
