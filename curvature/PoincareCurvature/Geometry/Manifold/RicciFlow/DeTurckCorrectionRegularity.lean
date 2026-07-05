@@ -222,4 +222,41 @@ theorem intrinsicDeTurckCorrectionSection_contMDiff_zero
   have hflip := contMDiff_flipBilinearFormSection_tangent_zero hC1
   exact hC1.add_section hflip
 
+/-- The intrinsic Ricci–DeTurck right-hand side, packaged as a `BilinearFormBundle` section, is
+`(-2) • (Ricci section) + (DeTurck correction section)`.  Given *any* continuous `BilinearFormBundle`
+section `rs` representing the intrinsic Ricci tensor (`rs x u v = intrinsicRicciTensor g t x u v`), the
+combination `(-2 : ℝ) • rs + intrinsicDeTurckCorrectionSection g background t` is a **continuous**
+`BilinearFormBundle` section that agrees pointwise with the geometric Ricci–DeTurck operator
+`intrinsicRicciDeTurckRHS`.  This assembles the geometric operator `A`'s value section out of its two
+halves — the second-order Ricci part (supplied as the honest continuous-section input `rs`) and the
+already-continuous lower-order DeTurck reaction term
+(`intrinsicDeTurckCorrectionSection_contMDiff_zero`) — via the vector-bundle section algebra
+(`ContMDiff.const_smul_section`, `ContMDiff.add_section`).  It reduces the remaining `A`-regularity
+obstruction for the Ricci–DeTurck chart to the single input that the Ricci tensor is a continuous
+`BilinearFormBundle` section. -/
+theorem exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (rs : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x)
+    (hrsCont : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x (rs x)))
+    (hrsApply : ∀ (x : M) (u v : TM x),
+      rs x u v = intrinsicRicciTensor (I := I) (M := M) g t x u v) :
+    ∃ rhs : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x,
+      ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+        (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := _root_.Bundle.BilinearFormBundle (V := TM)) x (rhs x)) ∧
+      ∀ (x : M) (u v : TM x),
+        rhs x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v := by
+  have hsmul := hrsCont.const_smul_section (a := (-2 : ℝ))
+  have hcont := hsmul.add_section
+    (intrinsicDeTurckCorrectionSection_contMDiff_zero (I := I) (M := M) g background t hbackground)
+  refine ⟨_, hcont, ?_⟩
+  intro x u v
+  simp only [Pi.add_apply, Pi.smul_apply, ContinuousLinearMap.add_apply,
+    ContinuousLinearMap.smul_apply, smul_eq_mul, intrinsicDeTurckCorrectionSection_apply,
+    hrsApply, intrinsicRicciDeTurckRHS_apply, intrinsicRicciFlowRHS_apply, ricciFlowRHS_apply,
+    intrinsicRicciTensor_apply]
+
 end RicciFlow
