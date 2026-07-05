@@ -619,5 +619,124 @@ theorem heatMildFixedPoint_parabolicC0AlphaNorm_le {n : ℕ} {t₀ T : ℝ} (hT 
     (parabolicHolderSeminorm_le (add_nonneg hKsp_nonneg hKtm_nonneg)
       (heatMildFixedPoint_parabolicHolderWith hT u₀ hLnn hlip Q hQcont hQb z hz ht_lo ht_loT))
 
+/-- **Explicit parabolic `C^{0,1}` class membership of the model mild solution.**  The
+explicit-constant companion of the existential `heatMildFixedPoint_parabolicC0AlphaOn`: on the interior
+slab the (time-clamped) model mild solution satisfies the parabolic `C^{0,1}` control with the concrete
+sup constant `‖u₀‖ + CQ·(T−t₀)` and the concrete parabolic-Lipschitz constant `Ksp_max + Ktm_coef`,
+packaged as `ParabolicC0AlphaWith`.  Immediate from `heatMildFixedPoint_parabolicBoundedWith` and
+`heatMildFixedPoint_parabolicHolderWith`; this is the form whose constants the parabolic Schauder
+iteration reads off directly. -/
+theorem heatMildFixedPoint_parabolicC0AlphaWith {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    {t_lo : ℝ} (ht_lo : t₀ < t_lo) (ht_loT : t_lo ≤ T) :
+    ParabolicC0AlphaWith (‖u₀‖ + CQ * (T - t₀))
+      ((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀)))
+          + 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π
+        + ((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ) * (2 / Real.sqrt π)
+          + CQ * Real.sqrt (T - t_lo)
+          + 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀))) 1
+      (fun p : ℝ × (Fin n → ℝ) => Set.IccExtend hT (⇑z) p.1 p.2)
+      (Set.Icc t_lo T ×ˢ (Set.univ : Set (Fin n → ℝ))) :=
+  ⟨heatMildFixedPoint_parabolicBoundedWith hT u₀ hLnn hlip Q hQcont hQb z hz _,
+    heatMildFixedPoint_parabolicHolderWith hT u₀ hLnn hlip Q hQcont hQb z hz ht_lo ht_loT⟩
+
+/-- **Explicit parabolic `C^{0,α}` norm bound of the model mild solution on an interior parabolic
+closed ball.**  The Schauder-local (general-exponent) quantitative form: on a `parabolicClosedBall c R`
+whose full time-extent `[c.1 − R², c.1 + R²]` lies in the interior `[t_lo, T]` (`t₀ < t_lo`), the honest
+parabolic `C^{0,α}` norm functional of the model mild solution is bounded, for every `0 ≤ α ≤ 1`, by
+`B + (Ksp_max + Ktm_coef)·(2R)^{1−α}`, with `B = ‖u₀‖ + CQ·(T−t₀)` the a-priori sup constant.  The
+sup part is `heatMildFixedPoint_parabolicSupNorm_le`; the Hölder-`α` part restricts the interior-slab
+Hölder-`1` modulus `heatMildFixedPoint_parabolicHolderWith` to the ball (which is inside the slab, its
+time coordinate pinned by `time_abs_le_sq_of_mem`) and downgrades the exponent by
+`ParabolicHolderWith.exponent_le_of_bounded` on the ball of parabolic diameter `≤ 2R`.  This is the
+explicit-constant, ball-localised, general-`α` Hölder-space norm control the parabolic Schauder
+local-to-global gluing and interior fixed-point iteration consume. -/
+theorem heatMildFixedPoint_parabolicC0AlphaNorm_closedBall_le {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    {t_lo : ℝ} (ht_lo : t₀ < t_lo) (ht_loT : t_lo ≤ T)
+    (c : ℝ × (Fin n → ℝ)) {R : ℝ} (hR : 0 ≤ R)
+    (hlo : t_lo ≤ c.1 - R ^ 2) (hhi : c.1 + R ^ 2 ≤ T)
+    {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) :
+    parabolicC0AlphaNorm α
+        (fun p : ℝ × (Fin n → ℝ) => Set.IccExtend hT (⇑z) p.1 p.2)
+        (parabolicClosedBall c R)
+      ≤ (‖u₀‖ + CQ * (T - t₀))
+        + ((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀)))
+            + 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π
+          + ((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ) * (2 / Real.sqrt π)
+            + CQ * Real.sqrt (T - t_lo)
+            + 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀))) * (2 * R) ^ (1 - α) := by
+  have hCQ : 0 ≤ CQ := le_trans (norm_nonneg _) (hQb 0)
+  set Hslab : ℝ :=
+    (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀)))
+        + 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π
+      + ((n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ) * (2 / Real.sqrt π)
+        + CQ * Real.sqrt (T - t_lo)
+        + 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀)) with hHslab_def
+  have hHslab_nonneg : 0 ≤ Hslab := by
+    rw [hHslab_def]
+    have hKsp_nonneg : 0 ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀)))
+        + 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π := by
+      have h1 : 0 ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) := by positivity
+      have h2 : 0 ≤ 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π := by
+        rw [show 2 * (n : ℝ) * CQ * Real.sqrt (T - t₀) / Real.sqrt π
+            = (2 * (n : ℝ) * Real.sqrt (T - t₀) / Real.sqrt π) * CQ by ring]
+        exact mul_nonneg (by positivity) hCQ
+      linarith
+    have hKtm_nonneg : 0 ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ)
+          * (2 / Real.sqrt π)
+        + CQ * Real.sqrt (T - t_lo)
+        + 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀) := by
+      have h1 : 0 ≤ (n : ℝ) * (‖u₀‖ / Real.sqrt (π * (t_lo - t₀))) * (n : ℝ) * (2 / Real.sqrt π) := by
+        positivity
+      have h2 : 0 ≤ CQ * Real.sqrt (T - t_lo) := mul_nonneg hCQ (Real.sqrt_nonneg _)
+      have h3 : 0 ≤ 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀) := by
+        rw [show 4 * (n : ℝ) ^ 2 * CQ / π * Real.sqrt (T - t₀)
+            = (4 * (n : ℝ) ^ 2 / π * Real.sqrt (T - t₀)) * CQ by ring]
+        exact mul_nonneg (by positivity) hCQ
+      linarith
+    linarith
+  have h2R_nonneg : (0 : ℝ) ≤ 2 * R := mul_nonneg (by norm_num) hR
+  have hsub : parabolicClosedBall c R
+      ⊆ Set.Icc t_lo T ×ˢ (Set.univ : Set (Fin n → ℝ)) := by
+    intro p hp
+    refine ⟨?_, Set.mem_univ _⟩
+    rw [Set.mem_Icc]
+    have htime := parabolicClosedBall.time_abs_le_sq_of_mem hR hp
+    have h2 := abs_le.mp htime
+    constructor <;> linarith [h2.1, h2.2]
+  have hdiam : ∀ p ∈ parabolicClosedBall c R, ∀ q ∈ parabolicClosedBall c R,
+      parabolicDistance p q ≤ 2 * R := by
+    intro p hp q hq
+    have hpc : parabolicDistance p c ≤ R := by
+      rw [parabolicDistance.comm]; exact hp
+    calc parabolicDistance p q
+        ≤ parabolicDistance p c + parabolicDistance c q := parabolicDistance.triangle p c q
+      _ ≤ R + R := add_le_add hpc hq
+      _ = 2 * R := by ring
+  have hHball : ParabolicHolderWith Hslab 1
+      (fun p : ℝ × (Fin n → ℝ) => Set.IccExtend hT (⇑z) p.1 p.2)
+      (parabolicClosedBall c R) := by
+    rw [hHslab_def]
+    intro p hp q hq
+    exact heatMildFixedPoint_parabolicHolderWith hT u₀ hLnn hlip Q hQcont hQb z hz
+      ht_lo ht_loT (hsub hp) (hsub hq)
+  have hHball_alpha := hHball.exponent_le_of_bounded hdiam hHslab_nonneg hα0 hα1
+  unfold parabolicC0AlphaNorm
+  exact add_le_add
+    (heatMildFixedPoint_parabolicSupNorm_le hT u₀ hLnn hlip Q hQcont hQb z hz _)
+    (parabolicHolderSeminorm_le (mul_nonneg hHslab_nonneg (Real.rpow_nonneg h2R_nonneg _))
+      hHball_alpha)
+
 end AnalyticPDE
 end RicciFlow
