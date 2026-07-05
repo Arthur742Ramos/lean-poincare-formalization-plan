@@ -6737,5 +6737,67 @@ theorem continuousOn_heatSemigroupND_shift_time {n : ℕ} {t₀ : ℝ}
   fun _t ht =>
     (continuousAt_heatSemigroupND_shift_time (Set.mem_Ioi.1 ht) hf hb x).continuousWithinAt
 
+/-- **Change of variables for the Duhamel time integral.**  The substitution `u = t − s` turns the
+Duhamel integral `∫_{t₀}^{t} H_{t−s}(q s)(x) ds` (whose integrand is singular at the upper endpoint
+`s = t`) into the form `∫_{0}^{t−t₀} H_u(q(t−u))(x) du`, whose heat-semigroup time `u` runs *away*
+from the singular value `0`.  Pure interval-integral change of variables
+(`intervalIntegral.integral_comp_sub_left`); no analytic content.  This is the reflection that lets
+the Duhamel path time-continuity be proved by a dominated-convergence argument on the substituted
+(fixed-singularity) form. -/
+theorem heatSemigroupND_duhamel_eq_comp_sub {n : ℕ} (t₀ t : ℝ)
+    (q : ℝ → (Fin n → ℝ) → ℝ) (x : Fin n → ℝ) :
+    (∫ s in t₀..t, heatSemigroupND (t - s) (q s) x)
+      = ∫ u in (0 : ℝ)..(t - t₀), heatSemigroupND u (q (t - u)) x := by
+  have h := intervalIntegral.integral_comp_sub_left
+    (a := t₀) (b := t) (fun u => heatSemigroupND u (q (t - u)) x) t
+  simpa only [sub_sub_cancel, sub_self] using h
+
+/-- **Time-continuity of the substituted Duhamel integrand at fixed heat time.**  For a *fixed* heat
+time `u > 0` and a continuous `BCF`-valued source `q`, the map `t ↦ H_u(q(t−u))(x)` is continuous: the
+composition of the continuous shifted source `t ↦ q(t−u)`, the bounded linear heat propagator
+`heatSemigroupNDclm` (continuous), and evaluation at `x` (continuous).  This is the a.e.-`u`
+time-continuity ingredient of the substituted Duhamel path. -/
+theorem continuous_heatSemigroupND_comp_sub_time {n : ℕ} {u : ℝ} (hu : 0 < u)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q) (x : Fin n → ℝ) :
+    Continuous (fun t => heatSemigroupND u (⇑(q (t - u))) x) := by
+  have hshift : Continuous (fun t : ℝ => q (t - u)) :=
+    hq.comp (continuous_id.sub continuous_const)
+  have hclm : Continuous (fun t : ℝ => heatSemigroupNDclm hu (q (t - u))) :=
+    (heatSemigroupNDclm hu).continuous.comp hshift
+  have heval : Continuous (fun t : ℝ => (heatSemigroupNDclm hu (q (t - u))) x) :=
+    (continuous_eval_const x).comp hclm
+  simpa only [heatSemigroupNDclm_apply, heatSemigroupNDbcf_apply] using heval
+
+/-- **Measurability of the substituted Duhamel integrand.**  For a continuous `BCF`-valued source
+`q`, the map `u ↦ H_u(q(t−u))(x) = ∫_y Kₙ(u, x−y)·(q(t−u))(y) dy` is a.e.-strongly measurable: the
+`y`-integrand `(u,y) ↦ Kₙ(u, x−y)·(q(t−u))(y)` is jointly measurable (kernel factor from
+`measurable_uncurry_heatKernelND` precomposed with `(u,y) ↦ (u, x−y)`; source factor from joint
+continuity of evaluation `(u,y) ↦ (q(t−u))(y)`), and the parametric integral of a jointly measurable
+function is measurable (`AEStronglyMeasurable.integral_prod_right'`). -/
+theorem aestronglyMeasurable_heatSemigroupND_comp_sub {n : ℕ} (t : ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q) (x : Fin n → ℝ) :
+    AEStronglyMeasurable (fun u => heatSemigroupND u (⇑(q (t - u))) x) volume := by
+  have hK : Measurable (fun p : ℝ × (Fin n → ℝ) => heatKernelND p.1 (x - p.2)) := by
+    have hcomp : (fun p : ℝ × (Fin n → ℝ) => heatKernelND p.1 (x - p.2))
+        = (fun p : ℝ × (Fin n → ℝ) => heatKernelND p.1 p.2)
+          ∘ (fun p : ℝ × (Fin n → ℝ) => ((p.1, x - p.2) : ℝ × (Fin n → ℝ))) := rfl
+    rw [hcomp]
+    exact measurable_uncurry_heatKernelND.comp
+      (measurable_fst.prodMk (measurable_const.sub measurable_snd))
+  have hQ : Measurable (fun p : ℝ × (Fin n → ℝ) => (q (t - p.1)) p.2) := by
+    have hcomp : (fun p : ℝ × (Fin n → ℝ) => (q (t - p.1)) p.2)
+        = (fun z : (BoundedContinuousFunction (Fin n → ℝ) ℝ) × (Fin n → ℝ) => z.1 z.2)
+          ∘ (fun p : ℝ × (Fin n → ℝ) => (q (t - p.1), p.2)) := rfl
+    rw [hcomp]
+    exact (ContinuousEval.continuous_eval.comp
+      ((hq.comp (continuous_const.sub continuous_fst)).prodMk continuous_snd)).measurable
+  have hGmeas : Measurable (fun p : ℝ × (Fin n → ℝ) =>
+      heatKernelND p.1 (x - p.2) * (q (t - p.1)) p.2) := hK.mul hQ
+  have heq : (fun u => heatSemigroupND u (⇑(q (t - u))) x)
+      = fun u => ∫ y, heatKernelND u (x - y) * (q (t - u)) y := rfl
+  rw [heq]
+  exact (hGmeas.aestronglyMeasurable
+    (μ := (volume : Measure ℝ).prod (volume : Measure (Fin n → ℝ)))).integral_prod_right'
+
 end AnalyticPDE
 end RicciFlow
