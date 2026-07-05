@@ -8025,3 +8025,49 @@ section-space boundedness + Lipschitz are exactly what the new capstone now cons
 the new capstone directly) — starting from the completed model heat-kernel mild toolkit.  Or route
 (a): the connection-regularity strengthening (C² intrinsic connection from a C³ metric/bundle), which
 would unblock the direct curvature-continuity path.
+
+## Milestone (2026-07-05) — undowngraded ContMDiff regularity of the intrinsic DeTurck vector field (Item 3 / GAP 2 geometric-operator regularity brick)
+
+Ground-truth pivot to the GEOMETRIC operator regularity (per the ANALYTIC-CORE-DONE steer).
+Established this session that the *direct* geometric `A` on the continuous initial metric `g₀` is
+impossible at any regularity (g₀ is a mere `ContinuousRiemannianMetric`, the Ricci–DeTurck RHS is a
+2nd-order operator, so nothing built directly on g₀ is a smooth/continuous section); only the
+smooth-approximant / mild route can supply `A`.  That route needs `ContMDiff` (not merely
+`MDifferentiable`) regularity of the Ricci–DeTurck RHS building blocks for smooth metrics.
+
+**Blocker B1 resolved.**  The intrinsic DeTurck vector field previously had only `MDifferentiable`
+(`MDiff`) API even though the existing proofs *build* `ContMDiffOn … 1` internally (via
+`CovariantDerivative.contMDiffOn_rieszMap_section`) before discarding it with `.mdifferentiableAt`.
+Added the full undowngraded `ContMDiff` chain in `RicciFlow/DeTurck.lean`, all additive, full `lake
+build` green (2911 jobs), each `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`),
+comment-stripped `scan cheats` `TOTAL 0`:
+
+* `intrinsicDeTurckVectorField_contMDiffOn_of_contMDiffOn_intrinsicDeTurckOneForm` and
+  `…_contMDiffAt_of_contMDiff_intrinsicDeTurckOneForm` — the `ContMDiffOn`(patch)/`ContMDiffAt`(point)
+  strengthenings of the `…_mdiffAt_of_…OneForm` lemmas: raise a `C¹` DeTurck one-form with the
+  time-slice metric to a `C¹` DeTurck vector-field section.  (The rieszMap-section brick.)
+* `intrinsicDeTurckVectorField_contMDiffOn_of_connectionDifference_coeff`,
+  `…_contMDiffOn_of_contMDiffCovariantDerivativeOn`,
+  `…_contMDiffAt_of_contMDiffCovariantDerivative_background`,
+  `…_contMDiff_of_contMDiffCovariantDerivative_background` — the `ContMDiff` versions of the whole
+  `_mdiff_` chain: end-to-end, a globally `C¹` background connection slice (the chosen Levi-Civita
+  slice being `C¹` from the ambient `C²` bundle) yields a globally `C¹` intrinsic DeTurck vector
+  field.  The `_mdiffAt_of_contMDiffCovariantDerivative_background` capstone these mirror is already
+  consumed across `SmoothRealizationGaugeRoutes.lean` / `Diffeomorph3FlowTimeDerivative.lean`, so the
+  `ContMDiff` versions sit on a real consumer path.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  Still on the `A`/regularity side of
+GAP 2.  `A` for a smooth-approximant metric requires `ContMDiff` regularity of the Ricci–DeTurck RHS
+(= `intrinsicRicciFlowRHS` + `intrinsicDeTurckCorrection`).  The DeTurck-correction summand needs the
+covariant derivative `∇(DeTurck VF)` as a continuous CLM section; that consumes exactly this new
+`ContMDiff` DeTurck-VF chain.
+
+**BLOCKER B2 (next target).**  `∇(DeTurck VF)` continuity via
+`ContMDiffCovariantDerivativeOn.contMDiff` needs either (a) the covariant-derivative *level*
+monotonicity `ContMDiffCovariantDerivativeOn (k+1) → k` — an EXPLICIT Mathlib "later file" TODO
+(docstring in `Mathlib/.../CovariantDerivative/Basic.lean`), requiring the local connection-form
+(flat-connection difference) structure, absent in the repo and in Mathlib v4.29.1 — or (b) the
+DeTurck VF at `ContMDiff` level 2, which needs a level-2 `contMDiffOn_rieszMap_section` (currently
+hardcoded at level 1; the ambient metric is only `C²`, so level 2 is the ceiling).  Resolving B2 (the
+connection-regularity monotonicity is the higher-leverage of the two) gives `∇(DeTurck VF)`
+continuous → the DeTurck correction as a continuous section for `C²` metrics.
