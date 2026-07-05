@@ -488,4 +488,110 @@ theorem curvatureAux_apply_eq_of_eventuallyEq_fields
   rw [CovariantDerivative.curvatureAux_apply, CovariantDerivative.curvatureAux_apply,
     hTermA, hTermB, hTermC]
 
+/-- **Pointwise tensoriality of the raw curvature commutator for only-`ContMDiffOn` frame fields.**
+For a `C¹` tangent connection and vector fields `ea`, `eb`, `ec` that are `C²` *only on* an open set
+`u`, the raw curvature commutator at any `y ∈ u` equals the bundled curvature tensor evaluated on the
+frame values.  This is the `On`-version of
+`curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right`: the fields are
+globalised by a bump supported in `u ∩ trivializationAt.baseSet` (so the global comparison field's
+trivialization coefficients are `C²` on that patch and vanish off the bump), the value tensoriality is
+applied to the globalisation, and the germ-move `curvatureAux_apply_eq_of_eventuallyEq_fields` transfers
+the result back to the local fields. -/
+theorem curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame
+    {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
+    [CovariantDerivative.ContMDiffCovariantDerivative cov 1]
+    {ea eb ec : Π x : M, TangentSpace I x} {u : Set M} (hu : IsOpen u) {y : M} (hy : y ∈ u)
+    (hea : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (ea z)) u)
+    (heb : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (eb z)) u)
+    (hec : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (ec z)) u) :
+    cov.curvatureAux ea eb ec y =
+      CovariantDerivative.curvatureTensor (cov := cov) y (ea y) (eb y) (ec y) := by
+  classical
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
+    ContMDiffVectorBundle.of_le (n := 2) (by norm_num)
+  set e := trivializationAt E (TangentSpace I : M → Type _) y with he
+  set u' : Set M := u ∩ e.baseSet with hu'def
+  have hu'open : IsOpen u' := hu.inter e.open_baseSet
+  have hyu' : y ∈ u' := ⟨hy, mem_baseSet_trivializationAt E _ y⟩
+  have hu'subu : u' ⊆ u := Set.inter_subset_left
+  have hu'sube : u' ⊆ e.baseSet := Set.inter_subset_right
+  have hu'nhds : u' ∈ nhds y := hu'open.mem_nhds hyu'
+  obtain ⟨ψ, hψtsupp, hψsupp⟩ :=
+    (SmoothBumpFunction.nhds_basis_support (I := I) (c := y) hu'nhds).mem_iff.mp hu'nhds
+  have hψ : ContMDiff I 𝓘(ℝ) 2 (ψ : M → ℝ) :=
+    ψ.contMDiff.of_le (show (2 : WithTop ℕ∞) ≤ ∞ by decide)
+  set X : Π z : M, TangentSpace I z := fun z ↦ ψ z • ea z with hXdef
+  set Y : Π z : M, TangentSpace I z := fun z ↦ ψ z • eb z with hYdef
+  set σ : Π z : M, TangentSpace I z := fun z ↦ ψ z • ec z with hσdef
+  have hXglob : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (X z)) := by
+    simpa [hXdef] using
+      (ContMDiffOn.smul_section_of_tsupport (I := I) (F := E)
+        (V := (TangentSpace I : M → Type _)) (u := u') (n := (2 : WithTop ℕ∞)) (ψ := ψ)
+        hψ.contMDiffOn hu'open hψtsupp (hea.mono hu'subu))
+  have hYglob : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (Y z)) := by
+    simpa [hYdef] using
+      (ContMDiffOn.smul_section_of_tsupport (I := I) (F := E)
+        (V := (TangentSpace I : M → Type _)) (u := u') (n := (2 : WithTop ℕ∞)) (ψ := ψ)
+        hψ.contMDiffOn hu'open hψtsupp (heb.mono hu'subu))
+  have hσglob : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (σ z)) := by
+    simpa [hσdef] using
+      (ContMDiffOn.smul_section_of_tsupport (I := I) (F := E)
+        (V := (TangentSpace I : M → Type _)) (u := u') (n := (2 : WithTop ℕ∞)) (ψ := ψ)
+        hψ.contMDiffOn hu'open hψtsupp (hec.mono hu'subu))
+  have hψ1 : {z : M | ψ z = 1} ∈ nhds y := by
+    filter_upwards [ψ.eventuallyEq_one] with z hz; simpa using hz
+  have hψy1 : (ψ : M → ℝ) y = 1 := by simpa using ψ.eventuallyEq_one.eq_of_nhds
+  have hXea : X =ᶠ[nhds y] ea := by
+    filter_upwards [hψ1] with z hz
+    have : ψ z = 1 := hz
+    simp [hXdef, this]
+  have hYeb : Y =ᶠ[nhds y] eb := by
+    filter_upwards [hψ1] with z hz
+    have : ψ z = 1 := hz
+    simp [hYdef, this]
+  have hσec : σ =ᶠ[nhds y] ec := by
+    filter_upwards [hψ1] with z hz
+    have : ψ z = 1 := hz
+    simp [hσdef, this]
+  have hgerm : cov.curvatureAux ea eb ec y = cov.curvatureAux X Y σ y :=
+    curvatureAux_apply_eq_of_eventuallyEq_fields
+      (hXglob.of_le (by norm_num)) (hYglob.of_le (by norm_num)) hσglob
+      hXea.symm hYeb.symm hσec.symm
+  let b := Module.finBasis ℝ E
+  have hσcoeff : ∀ i, ContMDiff I 𝓘(ℝ) 2
+      (fun z ↦ e.localFrame_coeff I b i z (σ z)) := by
+    intro i
+    have hbase : ContMDiffOn I 𝓘(ℝ) 2
+        (fun z ↦ e.localFrame_coeff I b i z (σ z)) u' :=
+      contMDiffOn_localFrame_coeff (I := I) (e := e) (b := b) (t := u')
+        (k := (2 : WithTop ℕ∞)) hu'open hu'sube hσglob.contMDiffOn i
+    have hcompl : ContMDiffOn I 𝓘(ℝ) 2
+        (fun z ↦ e.localFrame_coeff I b i z (σ z)) (tsupport ψ)ᶜ := by
+      have hzero : ContMDiffOn I 𝓘(ℝ) 2 (fun _ : M ↦ (0 : ℝ)) (tsupport ψ)ᶜ :=
+        contMDiff_const.contMDiffOn
+      refine hzero.congr ?_
+      intro z hz
+      have hψz : ψ z = 0 := image_eq_zero_of_notMem_tsupport hz
+      simp [hσdef, hψz]
+    have hcover : u' ∪ (tsupport ψ)ᶜ = Set.univ := by
+      refine Set.eq_univ_iff_forall.mpr fun z ↦ ?_
+      by_cases hz : z ∈ tsupport ψ
+      · exact Or.inl (hψtsupp hz)
+      · exact Or.inr hz
+    exact contMDiff_of_contMDiffOn_union_of_isOpen hbase hcompl hcover hu'open
+      (isOpen_compl_iff.mpr (isClosed_tsupport ψ))
+  have hXy : X y = ea y := by simp [hXdef, hψy1]
+  have hYy : Y y = eb y := by simp [hYdef, hψy1]
+  have hσy : σ y = ec y := by simp [hσdef, hψy1]
+  have hcoeff_eq : ∀ i,
+      e.localFrame_coeff I b i y (σ y) = e.localFrame_coeff I b i y (ec y) := by
+    intro i; rw [hσy]
+  have htens : cov.curvatureAux X Y σ y =
+      CovariantDerivative.curvatureTensor (cov := cov) y (ea y) (eb y) (ec y) :=
+    cov.curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right
+      (b := b) (X := X) (Y := Y) (σ := σ) (x := y)
+      (hXglob.of_le (by norm_num)) (hYglob.of_le (by norm_num)) hσglob
+      hXy hYy hσcoeff hcoeff_eq
+  rw [hgerm, htens]
+
 end RicciFlow
