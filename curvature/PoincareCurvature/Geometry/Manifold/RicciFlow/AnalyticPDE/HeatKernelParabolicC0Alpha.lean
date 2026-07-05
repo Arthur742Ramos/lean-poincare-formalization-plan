@@ -34,6 +34,61 @@ open scoped Real NNReal Topology
 namespace RicciFlow
 namespace AnalyticPDE
 
+/-- **Parabolic Hölder exponent lowering on a parabolic-bounded set.**  A parabolic-Lipschitz
+(`ParabolicHolderWith C 1`) function on a set whose points are pairwise within parabolic distance
+`D` is `ParabolicHolderWith (C · D^{1−α}) α` for every exponent `0 ≤ α ≤ 1`.  This is the standard
+"Lipschitz ⟹ Hölder on a bounded set" downgrade in the parabolic metric: from
+`‖u p − u q‖ ≤ C·parabolicDistance p q` and `parabolicDistance p q ≤ D`, split
+`parabolicDistance p q = (parabolicDistance p q)^α · (parabolicDistance p q)^{1−α}` and bound the
+second factor by `D^{1−α}`. -/
+theorem ParabolicHolderWith.exponent_le_of_bounded
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {C D α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (h : ParabolicHolderWith C 1 u s)
+    (hbdd : ∀ p ∈ s, ∀ q ∈ s, parabolicDistance p q ≤ D)
+    (hC : 0 ≤ C) (hα0 : 0 ≤ α) (hα1 : α ≤ 1) :
+    ParabolicHolderWith (C * D ^ (1 - α)) α u s := by
+  intro p hp q hq
+  have hpd_nonneg : 0 ≤ parabolicDistance p q := parabolicDistance.nonneg p q
+  have hpd_le_D : parabolicDistance p q ≤ D := hbdd p hp q hq
+  have hD_nonneg : 0 ≤ D := le_trans hpd_nonneg hpd_le_D
+  have hkey : parabolicDistance p q ≤ D ^ (1 - α) * (parabolicDistance p q) ^ α := by
+    rcases eq_or_lt_of_le hpd_nonneg with hpd0 | hpd_pos
+    · calc parabolicDistance p q = 0 := hpd0.symm
+        _ ≤ D ^ (1 - α) * (parabolicDistance p q) ^ α :=
+            mul_nonneg (Real.rpow_nonneg hD_nonneg _) (Real.rpow_nonneg hpd_nonneg _)
+    · have hsplit : parabolicDistance p q
+          = (parabolicDistance p q) ^ α * (parabolicDistance p q) ^ (1 - α) := by
+        rw [← Real.rpow_add hpd_pos, show α + (1 - α) = 1 by ring, Real.rpow_one]
+      have hbound : (parabolicDistance p q) ^ (1 - α) ≤ D ^ (1 - α) :=
+        Real.rpow_le_rpow hpd_nonneg hpd_le_D (by linarith)
+      calc parabolicDistance p q
+          = (parabolicDistance p q) ^ α * (parabolicDistance p q) ^ (1 - α) := hsplit
+        _ ≤ (parabolicDistance p q) ^ α * D ^ (1 - α) :=
+            mul_le_mul_of_nonneg_left hbound (Real.rpow_nonneg hpd_nonneg _)
+        _ = D ^ (1 - α) * (parabolicDistance p q) ^ α := by ring
+  have h1 : ‖u p - u q‖ ≤ C * parabolicDistance p q := by
+    have hh := h hp hq
+    rwa [Real.rpow_one] at hh
+  calc ‖u p - u q‖ ≤ C * parabolicDistance p q := h1
+    _ ≤ C * (D ^ (1 - α) * (parabolicDistance p q) ^ α) := mul_le_mul_of_nonneg_left hkey hC
+    _ = C * D ^ (1 - α) * (parabolicDistance p q) ^ α := by ring
+
+/-- **Parabolic `C^{0,α}` from `C^{0,1}` on a parabolic-bounded set.**  On a set of parabolic
+diameter `≤ D`, membership in the parabolic-Lipschitz class `ParabolicC0AlphaOn 1` implies membership
+in `ParabolicC0AlphaOn α` for every `0 ≤ α ≤ 1` (the sup part is unchanged; the Hölder constant picks
+up a `D^{1−α}` factor from `ParabolicHolderWith.exponent_le_of_bounded`). -/
+theorem ParabolicC0AlphaOn.exponent_le_of_bounded
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {D α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)} (hD : 0 ≤ D)
+    (h : ParabolicC0AlphaOn 1 u s)
+    (hbdd : ∀ p ∈ s, ∀ q ∈ s, parabolicDistance p q ≤ D)
+    (hα0 : 0 ≤ α) (hα1 : α ≤ 1) :
+    ParabolicC0AlphaOn α u s := by
+  obtain ⟨B, hB, H, hH, hbounded, hholder⟩ := h
+  exact ⟨B, hB, H * D ^ (1 - α), mul_nonneg hH (Real.rpow_nonneg hD _),
+    hbounded, hholder.exponent_le_of_bounded hbdd hH hα0 hα1⟩
+
 /-- **Parabolic `C^{0,1}` (parabolic-Lipschitz) membership of the model mild solution.**  For the
 genuine model mild solution `z` (any fixed point of `heatMildSelfMap` for an `L`-Lipschitz initial
 datum `u₀` and a `CQ`-bounded continuous reaction nonlinearity `Q`), on any interior parabolic slab
@@ -230,6 +285,30 @@ theorem heatMildFixedPoint_parabolicC0AlphaOn {n : ℕ} {t₀ T : ℝ} (hT : t�
           · exact mul_le_mul_of_nonneg_left
               (parabolicDistance.sqrt_time_le (t, x) (t', x')) hKtm_coef_nonneg
       _ = H * parabolicDistance (t, x) (t', x') := by rw [hH_def]; ring
+
+/-- **Parabolic `C^{0,α}` membership of the model mild solution on a parabolic-bounded interior
+subset.**  Combining the parabolic-Lipschitz slab membership `heatMildFixedPoint_parabolicC0AlphaOn`
+with the exponent-lowering `ParabolicC0AlphaOn.exponent_le_of_bounded`: on any subset `s` of the
+interior slab `Icc t_lo T ×ˢ univ` (`t₀ < t_lo ≤ T`) of parabolic diameter `≤ D`, the model mild
+solution belongs to the parabolic `C^{0,α}` class for every `0 ≤ α ≤ 1`.  This is the Hölder-exponent
+form (`α ∈ (0,1)`) of the mild-solution regularity that the parabolic Schauder / smooth-realization
+side consumes on local parabolic cylinders. -/
+theorem heatMildFixedPoint_parabolicC0AlphaOn_of_bounded {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ) {L : ℝ} (hLnn : 0 ≤ L)
+    (hlip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ L * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    (z : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLnn hlip Q hQcont hQb z = z)
+    {t_lo : ℝ} (ht_lo : t₀ < t_lo) (ht_loT : t_lo ≤ T)
+    {s : Set (ℝ × (Fin n → ℝ))} {D : ℝ} (hD : 0 ≤ D)
+    (hsub : s ⊆ Set.Icc t_lo T ×ˢ (Set.univ : Set (Fin n → ℝ)))
+    (hbdd : ∀ p ∈ s, ∀ q ∈ s, parabolicDistance p q ≤ D)
+    {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) :
+    ParabolicC0AlphaOn α
+      (fun p : ℝ × (Fin n → ℝ) => Set.IccExtend hT (⇑z) p.1 p.2) s :=
+  ((heatMildFixedPoint_parabolicC0AlphaOn hT u₀ hLnn hlip Q hQcont hQb z hz ht_lo ht_loT).mono_set
+    hsub).exponent_le_of_bounded hD hbdd hα0 hα1
 
 end AnalyticPDE
 end RicciFlow
