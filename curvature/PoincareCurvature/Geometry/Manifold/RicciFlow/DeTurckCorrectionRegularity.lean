@@ -259,4 +259,68 @@ theorem exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection
     hrsApply, intrinsicRicciDeTurckRHS_apply, intrinsicRicciFlowRHS_apply, ricciFlowRHS_apply,
     intrinsicRicciTensor_apply]
 
+/-- **Continuity of the raw curvature commutator for a `C¹` connection on the tangent bundle.**
+For a `C¹` covariant derivative `cov` on `TM` and `C²` vector fields `X`, `Y`, `Z`, the raw curvature
+section `curvatureAux X Y Z = ∇_X∇_Y Z − ∇_Y∇_X Z − ∇_{[X,Y]}Z` is a **continuous** `TM`-section.  The
+regularity is consistent because the two nested covariant derivatives each drop one class: with a `C¹`
+connection the inner `∇_Y Z` is `C¹` (`contMDiff_along` at `n = 1`) and the outer `∇_X(∇_Y Z)` is `C⁰`
+(`contMDiff_along` at `n = 0`), using the fiber-norm-free tangent-bundle level downgrade
+`contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` to supply the `C⁰` connection
+instance without hitting the `TangentSpace` fiber-norm diamond; the bracket term `∇_{[X,Y]}Z` is `C⁰`
+from `ContDiff.mlieBracket_vectorField` (`C²` fields give a `C⁰` bracket) fed to `contMDiff_along`.  This
+is the base regularity input of the `curvatureAux → curvatureTensor → Ricci` route toward reading the
+intrinsic Ricci tensor as a continuous `BilinearFormBundle` section (the last geometric-`A` value
+regularity input). -/
+theorem curvatureAux_contMDiff_zero
+    {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
+    [CovariantDerivative.ContMDiffCovariantDerivative cov 1]
+    {X Y Z : Π x : M, TangentSpace I x}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (fun x ↦ TotalSpace.mk' E x (X x)))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (fun x ↦ TotalSpace.mk' E x (Y x)))
+    (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (fun x ↦ TotalSpace.mk' E x (Z x))) :
+    ContMDiff I (I.prod 𝓘(ℝ, E)) 0
+      (fun x ↦ TotalSpace.mk' E x (cov.curvatureAux X Y Z x)) := by
+  haveI : ContMDiffVectorBundle 0 E (TangentSpace I : M → Type _) I :=
+    ContMDiffVectorBundle.of_le (n := 2) (by norm_num)
+  haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
+    ContMDiffVectorBundle.of_le (n := 2) (by norm_num)
+  have hcov0on : ContMDiffCovariantDerivativeOn E 0 cov.toFun Set.univ :=
+    CovariantDerivative.TangentFrame.contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one
+      isOpen_univ
+  haveI : CovariantDerivative.ContMDiffCovariantDerivative cov 0 := ⟨hcov0on⟩
+  haveI : IsManifold I (minSmoothness ℝ 2) M := by
+    rw [minSmoothness_of_isRCLikeNormedField]; infer_instance
+  haveI : IsManifold I ((2 : ℕ∞) + 1) M :=
+    IsManifold.of_le (n := (∞ : WithTop ℕ∞)) (by exact_mod_cast le_top)
+  have hZ2 : ContMDiff I (I.prod 𝓘(ℝ, E)) (1 + 1)
+      (fun x ↦ TotalSpace.mk' E x (Z x)) := by simpa using hZ
+  have hYZ1 : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (fun x ↦ TotalSpace.mk' E x (cov.along Y Z x)) :=
+    cov.contMDiff_along (hY.of_le (by norm_num)) hZ2
+  have hXZ1 : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (fun x ↦ TotalSpace.mk' E x (cov.along X Z x)) :=
+    cov.contMDiff_along (hX.of_le (by norm_num)) hZ2
+  have hYZ1' : ContMDiff I (I.prod 𝓘(ℝ, E)) (0 + 1)
+      (fun x ↦ TotalSpace.mk' E x (cov.along Y Z x)) := by simpa using hYZ1
+  have hXZ1' : ContMDiff I (I.prod 𝓘(ℝ, E)) (0 + 1)
+      (fun x ↦ TotalSpace.mk' E x (cov.along X Z x)) := by simpa using hXZ1
+  have hT1 : ContMDiff I (I.prod 𝓘(ℝ, E)) 0
+      (fun x ↦ TotalSpace.mk' E x (cov.along X (cov.along Y Z) x)) :=
+    cov.contMDiff_along (hX.of_le (by norm_num)) hYZ1'
+  have hT2 : ContMDiff I (I.prod 𝓘(ℝ, E)) 0
+      (fun x ↦ TotalSpace.mk' E x (cov.along Y (cov.along X Z) x)) :=
+    cov.contMDiff_along (hY.of_le (by norm_num)) hXZ1'
+  have hbr0 : ContMDiff I (I.prod 𝓘(ℝ, E)) 0
+      (fun x ↦ TotalSpace.mk' E x (VectorField.mlieBracket I X Y x)) :=
+    ContDiff.mlieBracket_vectorField (m := 0) (n := 2) hX hY
+      (by rw [minSmoothness_of_isRCLikeNormedField]; norm_num)
+  have hZ1 : ContMDiff I (I.prod 𝓘(ℝ, E)) (0 + 1)
+      (fun x ↦ TotalSpace.mk' E x (Z x)) := by
+    simpa using (hZ.of_le (by norm_num) : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 _)
+  have hT3 : ContMDiff I (I.prod 𝓘(ℝ, E)) 0
+      (fun x ↦ TotalSpace.mk' E x (cov.along (VectorField.mlieBracket I X Y) Z x)) :=
+    cov.contMDiff_along hbr0 hZ1
+  have hcomb := (hT1.sub_section hT2).sub_section hT3
+  simpa only [CovariantDerivative.curvatureAux] using hcomb
+
 end RicciFlow
