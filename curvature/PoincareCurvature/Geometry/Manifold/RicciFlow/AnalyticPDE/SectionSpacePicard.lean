@@ -817,4 +817,121 @@ theorem exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_boundedL
       L b x0 t₀ T₀ hT₀ a K ha hK hLc hb
   exact IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset hT hPL hsub
 
+/-- **Fixed-window section-space Picard–Lindelöf from section-norm Lipschitz + time-continuity +
+centre bound.**  The prescribed-endpoint analogue of
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn`: the
+window `[t₀, T]` is *supplied by the caller* (not chosen internally), which is exactly what the
+`TimeDependentGeometricRicciDeTurckBanachChart.picard` field needs — the chart fixes `t₀` and `T`.
+From
+
+* `hlip` — for each `t ∈ [t₀, T]`, the time-slice operator `A t` is `K`-`LipschitzOnWith` on the
+  section-space ball `closedBall x0 a`,
+* `hcont` — for each section `s ∈ closedBall x0 a`, the time-curve `t ↦ A t s` is
+  `ContinuousOn [t₀, T]` in the section-space norm,
+* `hcenter` — the centre readout is bounded, `‖(A t x0)ᵢ x‖ ≤ Mc` on the window, and
+* `hLa` — the time-radius compatibility `(Mc + K·a)·(T − t₀) ≤ a`,
+
+`A` is `IsPicardLindelof A ⟨t₀,_⟩ x0 a 0 (Mc + K·a) K` on `[t₀, T]` — the chart's exact `picard`
+shape.  The section-norm `hlip`/`hcont` are pushed to the coordinatewise hypotheses of
+`isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` by the `1`-Lipschitz coordinate
+readout (`coord_dist_le_dist`) and `continuousOn_coord_of_continuousOn`; only the coordinate centre
+bound `hcenter` and the compatibility `hLa` remain, both stated at the level the chart provides. -/
+theorem isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn_centerBound
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T : ℝ) (hT : t₀ < T) (a K Mc : ℝ≥0)
+    (hlip : ∀ t ∈ Set.Icc t₀ T, LipschitzOnWith K (A t) (Metric.closedBall x0 (a : ℝ)))
+    (hcont : ∀ ⦃s⦄, s ∈ Metric.closedBall x0 (a : ℝ) →
+        ContinuousOn (fun t => A t s) (Set.Icc t₀ T))
+    (hcenter : ∀ t ∈ Set.Icc t₀ T, ∀ (i : κ) (x : Kc i),
+        ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t x0)).1 i x‖ ≤ (Mc : ℝ))
+    (hLa : ((Mc : ℝ) + (K : ℝ) * (a : ℝ)) * (T - t₀) ≤ (a : ℝ)) :
+    IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 (Mc + K * a) K := by
+  refine isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound
+    A x0 t₀ T hT a K Mc ?_ ?_ hcenter hLa
+  · intro t ht s hs s' hs' i x
+    exact le_trans (coord_dist_le_dist (A t s) (A t s') i x)
+      ((hlip t ht).dist_le_mul s hs s' hs')
+  · intro s hs i
+    exact continuousOn_coord_of_continuousOn (hcont hs) i
+
+/-- **Fixed-window chart `picard` field from the mild bounded-linear generator + source interface.**
+The prescribed-endpoint form of
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source`,
+producing `IsPicardLindelof (fun t s => L t s + b t) ⟨t₀,_⟩ x0 a 0 (Mc + K·a) K` on a caller-supplied
+window `[t₀, T]` — i.e. the `TimeDependentGeometricRicciDeTurckBanachChart.picard` field verbatim, with
+`L := Mc + K·a` (the bound) and `Kpic := K` (the Lipschitz constant).
+
+The mild (regularised) generator data are: `L t : CSS →L[ℝ] CSS` a bounded linear operator with
+uniform operator-norm bound `‖L t‖ ≤ K` on `[t₀, T]`, strong time continuity of `L`, a continuous
+source `b`, a coordinate centre bound `‖(L t x0 + b t)ᵢ x‖ ≤ Mc` on the window, and the time-radius
+compatibility `(Mc + K·a)·(T − t₀) ≤ a`.  The affine identity discharges the section-norm
+`LipschitzOnWith K` hypothesis (`dist (L t s + b t) (L t s' + b t) = ‖L t (s − s')‖ ≤ ‖L t‖·‖s − s'‖ ≤
+K·dist s s'`); strong continuity of `L` plus continuity of `b` discharge the time-continuity; the
+remaining centre bound and compatibility are supplied at the level the chart provides. -/
+theorem isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source_fixedWindow
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (L : ℝ →
+      (ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →L[ℝ]
+        ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover))
+    (b : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T : ℝ) (hT : t₀ < T) (a K Mc : ℝ≥0)
+    (hK : ∀ t ∈ Set.Icc t₀ T, ‖L t‖ ≤ (K : ℝ))
+    (hLc : ∀ s, ContinuousOn (fun t => (L t) s) (Set.Icc t₀ T))
+    (hb : ContinuousOn b (Set.Icc t₀ T))
+    (hcenter : ∀ t ∈ Set.Icc t₀ T, ∀ (i : κ) (x : Kc i),
+        ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+            ((L t) x0 + b t)).1 i x‖ ≤ (Mc : ℝ))
+    (hLa : ((Mc : ℝ) + (K : ℝ) * (a : ℝ)) * (T - t₀) ≤ (a : ℝ)) :
+    IsPicardLindelof (fun t s => (L t) s + b t) (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 (Mc + K * a) K := by
+  refine isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn_centerBound
+    (fun t s => (L t) s + b t) x0 t₀ T hT a K Mc ?_ ?_ hcenter hLa
+  · intro t ht
+    rw [lipschitzOnWith_iff_dist_le_mul]
+    intro s _ s' _
+    calc
+      dist ((L t) s + b t) ((L t) s' + b t)
+          = dist ((L t) s) ((L t) s') := dist_add_right _ _ _
+      _ = ‖(L t) s - (L t) s'‖ := dist_eq_norm _ _
+      _ = ‖(L t) (s - s')‖ := by rw [← map_sub]
+      _ ≤ ‖L t‖ * ‖s - s'‖ := (L t).le_opNorm _
+      _ ≤ (K : ℝ) * ‖s - s'‖ := mul_le_mul_of_nonneg_right (hK t ht) (norm_nonneg _)
+      _ = (K : ℝ) * dist s s' := by rw [dist_eq_norm]
+  · intro s _
+    exact (hLc s).add hb
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
