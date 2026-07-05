@@ -8943,5 +8943,170 @@ theorem heatMildFixedPoint_sub_spatial_lipschitz_bound {n : ℕ} {t₀ T : ℝ} 
   rw [hzt x, hwt x, hzt x', hwt x']
   exact heatMildValueNDbcf_sub_spatial_lipschitz_bound ht u₀ v₀ hqc1 hqc2 hqb1 hqb2 hD₀ hDsrc x x'
 
+/-- **Spatial `C^{0,α}` (Hölder) data-difference modulus of the mild-solution value.**  The
+fractional-exponent companion of `heatMildValueNDbcf_sub_spatial_lipschitz_bound`: for every
+Hölder exponent `0 ≤ α ≤ 1`, initial data `u₀, v₀` with sup difference `≤ D₀` and reaction sources
+`q₁, q₂` with pointwise sup difference `≤ D`, the spatial Hölder modulus of the *difference* of the two
+mild-solution values obeys
+`|(Φ₁(t)(x) − Φ₂(t)(x)) − (Φ₁(t)(x') − Φ₂(t)(x'))|
+    ≤ ((2D₀)^{1−α}·(D₀/√(π(t−t₀)))^α·n^α
+        + (2D)^{1−α}·(D/√π)^α·n^α·((t−t₀)^{1−α/2}/(1−α/2)))·‖x − x'‖^α`.
+The homogeneous propagator turns the bounded data difference into a spatially `C^{0,α}` difference at
+the fractional `t^{-α/2}` smoothing rate (`heatSemigroupND_sub_spatial_holder_seminorm_bound_norm`)
+and the Duhamel term contributes the fractional `(t−t₀)^{1−α/2}` rate on the source difference
+(`heatSemigroupND_duhamel_sub_spatial_holder_bound`), combined by the triangle inequality after
+fusing the four Duhamel integrals into one.  This is the full fractional gain-of-regularity a
+Hölder-norm parabolic Schauder *contraction* consumes on differences of mild solutions. -/
+theorem heatMildValueNDbcf_sub_spatial_holder_bound {n : ℕ} {t₀ t : ℝ} (ht : t₀ < t)
+    (u₀ v₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q₁ q₂ : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    (hq₁ : Continuous q₁) (hq₂ : Continuous q₂) {C₁ C₂ : ℝ}
+    (hqb₁ : ∀ s y, ‖q₁ s y‖ ≤ C₁) (hqb₂ : ∀ s y, ‖q₂ s y‖ ≤ C₂)
+    {D₀ D : ℝ} (hD₀ : ∀ y, ‖u₀ y - v₀ y‖ ≤ D₀) (hD : ∀ s y, ‖q₁ s y - q₂ s y‖ ≤ D)
+    {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) (x x' : Fin n → ℝ) :
+    |(heatMildValueNDbcf ht u₀ hq₁ hqb₁ x - heatMildValueNDbcf ht v₀ hq₂ hqb₂ x)
+        - (heatMildValueNDbcf ht u₀ hq₁ hqb₁ x' - heatMildValueNDbcf ht v₀ hq₂ hqb₂ x')|
+      ≤ ((2 * D₀) ^ (1 - α) * (D₀ / Real.sqrt (π * (t - t₀))) ^ α * (n : ℝ) ^ α
+          + (2 * D) ^ (1 - α) * (D / Real.sqrt π) ^ α * (n : ℝ) ^ α
+              * ((t - t₀) ^ (1 - α / 2) / (1 - α / 2))) * ‖x - x'‖ ^ α := by
+  have hpos : (0 : ℝ) < t - t₀ := by linarith
+  have hsg : |(heatSemigroupND (t - t₀) (⇑u₀) x - heatSemigroupND (t - t₀) (⇑v₀) x)
+        - (heatSemigroupND (t - t₀) (⇑u₀) x' - heatSemigroupND (t - t₀) (⇑v₀) x')|
+      ≤ (2 * D₀) ^ (1 - α) * (D₀ / Real.sqrt (π * (t - t₀))) ^ α * (n : ℝ) ^ α * ‖x - x'‖ ^ α :=
+    heatSemigroupND_sub_spatial_holder_seminorm_bound_norm hpos
+      u₀.continuous.aestronglyMeasurable
+      (fun y => (u₀.norm_coe_le_norm y).trans (le_max_left ‖u₀‖ ‖v₀‖))
+      v₀.continuous.aestronglyMeasurable
+      (fun y => (v₀.norm_coe_le_norm y).trans (le_max_right ‖u₀‖ ‖v₀‖))
+      hD₀ hα0 hα1 x x'
+  have hdu : |∫ s in t₀..t,
+        ((heatSemigroupND (t - s) (⇑(q₁ s)) x - heatSemigroupND (t - s) (⇑(q₂ s)) x)
+          - (heatSemigroupND (t - s) (⇑(q₁ s)) x' - heatSemigroupND (t - s) (⇑(q₂ s)) x'))|
+      ≤ (2 * D) ^ (1 - α) * (D / Real.sqrt π) ^ α * (n : ℝ) ^ α * ‖x - x'‖ ^ α
+          * ((t - t₀) ^ (1 - α / 2) / (1 - α / 2)) :=
+    heatSemigroupND_duhamel_sub_spatial_holder_bound ht.le
+      (fun s => (q₁ s).continuous.aestronglyMeasurable)
+      (fun s y => (hqb₁ s y).trans (le_max_left C₁ C₂))
+      (fun s => (q₂ s).continuous.aestronglyMeasurable)
+      (fun s y => (hqb₂ s y).trans (le_max_right C₁ C₂))
+      hD hα0 hα1 x x'
+  have hI1x := intervalIntegrable_heatSemigroupND_duhamel ht.le hq₁ hqb₁ x
+  have hI1x' := intervalIntegrable_heatSemigroupND_duhamel ht.le hq₁ hqb₁ x'
+  have hI2x := intervalIntegrable_heatSemigroupND_duhamel ht.le hq₂ hqb₂ x
+  have hI2x' := intervalIntegrable_heatSemigroupND_duhamel ht.le hq₂ hqb₂ x'
+  have hBcomb :
+      ((∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₁ s)) x)
+          - ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₂ s)) x)
+        - ((∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₁ s)) x')
+          - ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₂ s)) x')
+      = ∫ s in t₀..t,
+          ((heatSemigroupND (t - s) (⇑(q₁ s)) x - heatSemigroupND (t - s) (⇑(q₂ s)) x)
+            - (heatSemigroupND (t - s) (⇑(q₁ s)) x' - heatSemigroupND (t - s) (⇑(q₂ s)) x')) := by
+    rw [intervalIntegral.integral_sub (hI1x.sub hI2x) (hI1x'.sub hI2x'),
+        intervalIntegral.integral_sub hI1x hI2x, intervalIntegral.integral_sub hI1x' hI2x']
+  rw [heatMildValueNDbcf_apply ht u₀ hq₁ hqb₁ x, heatMildValueNDbcf_apply ht v₀ hq₂ hqb₂ x,
+      heatMildValueNDbcf_apply ht u₀ hq₁ hqb₁ x', heatMildValueNDbcf_apply ht v₀ hq₂ hqb₂ x']
+  set a : ℝ := heatSemigroupND (t - t₀) (⇑u₀) x with ha
+  set b : ℝ := heatSemigroupND (t - t₀) (⇑v₀) x with hb
+  set a' : ℝ := heatSemigroupND (t - t₀) (⇑u₀) x' with ha'
+  set b' : ℝ := heatSemigroupND (t - t₀) (⇑v₀) x' with hb'
+  set p : ℝ := ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₁ s)) x with hp
+  set qI : ℝ := ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₂ s)) x with hqI
+  set p' : ℝ := ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₁ s)) x' with hp'
+  set qI' : ℝ := ∫ s in t₀..t, heatSemigroupND (t - s) (⇑(q₂ s)) x' with hqI'
+  calc |a + p - (b + qI) - (a' + p' - (b' + qI'))|
+      = |(a - b - (a' - b')) + (p - qI - (p' - qI'))| := by
+        rw [show a + p - (b + qI) - (a' + p' - (b' + qI'))
+          = (a - b - (a' - b')) + (p - qI - (p' - qI')) by ring]
+    _ ≤ |a - b - (a' - b')| + |p - qI - (p' - qI')| := abs_add_le _ _
+    _ ≤ (2 * D₀) ^ (1 - α) * (D₀ / Real.sqrt (π * (t - t₀))) ^ α * (n : ℝ) ^ α * ‖x - x'‖ ^ α
+          + (2 * D) ^ (1 - α) * (D / Real.sqrt π) ^ α * (n : ℝ) ^ α * ‖x - x'‖ ^ α
+              * ((t - t₀) ^ (1 - α / 2) / (1 - α / 2)) := by
+        refine add_le_add hsg ?_
+        rw [hBcomb]; exact hdu
+    _ = ((2 * D₀) ^ (1 - α) * (D₀ / Real.sqrt (π * (t - t₀))) ^ α * (n : ℝ) ^ α
+          + (2 * D) ^ (1 - α) * (D / Real.sqrt π) ^ α * (n : ℝ) ^ α
+              * ((t - t₀) ^ (1 - α / 2) / (1 - α / 2))) * ‖x - x'‖ ^ α := by ring
+
+/-- **Spatial `C^{0,α}` (Hölder) data-difference contraction of the model mild solution.**  The
+fractional-exponent, two-solution companion of `heatMildFixedPoint_sub_spatial_lipschitz_bound`: for
+every Hölder exponent `0 ≤ α ≤ 1` and two genuine model mild solutions `z, w` (fixed points of
+`heatMildSelfMap` for the *same* reaction `Q`, initial data `u₀, v₀`), the spatial Hölder modulus of
+their difference at any interior time `t₀ < t ≤ T` is controlled by the *initial-data* difference
+`‖u₀ − v₀‖` (with the Duhamel source difference sized by `Kstate·‖u₀ − v₀‖/(1 − Kstate(T−t₀))` through
+`dist_heatMildFixedPoint_le`).  This is `heatMildValueNDbcf_sub_spatial_holder_bound` applied to the
+two trajectory sources `s ↦ Q(z(projIcc s))`, `s ↦ Q(w(projIcc s))` (`heatMildFixedPoint_apply`): the
+full fractional gain-of-regularity a Hölder-norm parabolic Schauder *contraction* consumes on
+differences of genuine mild solutions, with the data-difference-controlled constant. -/
+theorem heatMildFixedPoint_sub_spatial_holder_bound {n : ℕ} {t₀ T : ℝ} (hT : t₀ ≤ T)
+    (u₀ v₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {Lu : ℝ} (hLunn : 0 ≤ Lu) (hulip : ∀ a b : Fin n → ℝ, |u₀ a - u₀ b| ≤ Lu * ‖a - b‖)
+    {Lv : ℝ} (hLvnn : 0 ≤ Lv) (hvlip : ∀ a b : Fin n → ℝ, |v₀ a - v₀ b| ≤ Lv * ‖a - b‖)
+    (Q : BoundedContinuousFunction (Fin n → ℝ) ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (hQcont : Continuous Q) {CQ : ℝ} (hQb : ∀ v, ‖Q v‖ ≤ CQ)
+    {Kstate : ℝ} (hKnn : 0 ≤ Kstate)
+    (hQlip : ∀ v w, ‖Q v - Q w‖ ≤ Kstate * ‖v - w‖)
+    (hsmall : Kstate * (T - t₀) < 1)
+    (z w : BoundedContinuousFunction (↥(Set.Icc t₀ T)) (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    (hz : heatMildSelfMap hT u₀ hLunn hulip Q hQcont hQb z = z)
+    (hw : heatMildSelfMap hT v₀ hLvnn hvlip Q hQcont hQb w = w)
+    {t : ↥(Set.Icc t₀ T)} (ht : t₀ < (t : ℝ)) {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1)
+    (x x' : Fin n → ℝ) :
+    |(z t x - w t x) - (z t x' - w t x')|
+      ≤ ((2 * ‖u₀ - v₀‖) ^ (1 - α)
+            * (‖u₀ - v₀‖ / Real.sqrt (π * ((t : ℝ) - t₀))) ^ α * (n : ℝ) ^ α
+          + (2 * (Kstate * (‖u₀ - v₀‖ / (1 - Kstate * (T - t₀))))) ^ (1 - α)
+            * ((Kstate * (‖u₀ - v₀‖ / (1 - Kstate * (T - t₀)))) / Real.sqrt π) ^ α * (n : ℝ) ^ α
+            * (((t : ℝ) - t₀) ^ (1 - α / 2) / (1 - α / 2))) * ‖x - x'‖ ^ α := by
+  have hqc1 : Continuous (fun s => Q (Set.IccExtend hT (⇑z) s)) :=
+    hQcont.comp (continuous_IccExtend_iff.mpr z.continuous)
+  have hqb1 : ∀ s y, ‖Q (Set.IccExtend hT (⇑z) s) y‖ ≤ CQ := fun s y =>
+    le_trans ((Q (Set.IccExtend hT (⇑z) s)).norm_coe_le_norm y) (hQb _)
+  have hqc2 : Continuous (fun s => Q (Set.IccExtend hT (⇑w) s)) :=
+    hQcont.comp (continuous_IccExtend_iff.mpr w.continuous)
+  have hqb2 : ∀ s y, ‖Q (Set.IccExtend hT (⇑w) s) y‖ ≤ CQ := fun s y =>
+    le_trans ((Q (Set.IccExtend hT (⇑w) s)).norm_coe_le_norm y) (hQb _)
+  have hzt : ∀ y, z t y = heatMildValueNDbcf ht u₀ hqc1 hqb1 y := fun y => by
+    rw [heatMildValueNDbcf_apply ht u₀ hqc1 hqb1 y]
+    exact heatMildFixedPoint_apply hT u₀ hLunn hulip Q hQcont hQb z hz ht y
+  have hwt : ∀ y, w t y = heatMildValueNDbcf ht v₀ hqc2 hqb2 y := fun y => by
+    rw [heatMildValueNDbcf_apply ht v₀ hqc2 hqb2 y]
+    exact heatMildFixedPoint_apply hT v₀ hLvnn hvlip Q hQcont hQb w hw ht y
+  have hD₀ : ∀ y, ‖u₀ y - v₀ y‖ ≤ ‖u₀ - v₀‖ := fun y => by
+    rw [← BoundedContinuousFunction.sub_apply]
+    exact (u₀ - v₀).norm_coe_le_norm y
+  have hpos : 0 < 1 - Kstate * (T - t₀) := by linarith
+  have hdistzw : dist z w ≤ ‖u₀ - v₀‖ / (1 - Kstate * (T - t₀)) :=
+    dist_heatMildFixedPoint_le hT u₀ v₀ hLunn hulip hLvnn hvlip Q hQcont hQb hKnn hQlip hsmall
+      z w hz hw
+  set D : ℝ := Kstate * (‖u₀ - v₀‖ / (1 - Kstate * (T - t₀))) with hDdef
+  have hDsrc : ∀ s y,
+      ‖Q (Set.IccExtend hT (⇑z) s) y - Q (Set.IccExtend hT (⇑w) s) y‖ ≤ D := by
+    intro s y
+    have h1 : ‖Q (Set.IccExtend hT (⇑z) s) y - Q (Set.IccExtend hT (⇑w) s) y‖
+        ≤ ‖Q (Set.IccExtend hT (⇑z) s) - Q (Set.IccExtend hT (⇑w) s)‖ := by
+      rw [← BoundedContinuousFunction.sub_apply]
+      exact (Q (Set.IccExtend hT (⇑z) s) - Q (Set.IccExtend hT (⇑w) s)).norm_coe_le_norm y
+    have h3 : ‖Set.IccExtend hT (⇑z) s - Set.IccExtend hT (⇑w) s‖ ≤ ‖z - w‖ := by
+      have hEq : Set.IccExtend hT (⇑z) s - Set.IccExtend hT (⇑w) s
+          = (z - w) (Set.projIcc t₀ T hT s) := by
+        show (⇑z) (Set.projIcc t₀ T hT s) - (⇑w) (Set.projIcc t₀ T hT s)
+            = (z - w) (Set.projIcc t₀ T hT s)
+        rw [BoundedContinuousFunction.sub_apply]
+      rw [hEq]
+      exact (z - w).norm_coe_le_norm _
+    calc ‖Q (Set.IccExtend hT (⇑z) s) y - Q (Set.IccExtend hT (⇑w) s) y‖
+        ≤ ‖Q (Set.IccExtend hT (⇑z) s) - Q (Set.IccExtend hT (⇑w) s)‖ := h1
+      _ ≤ Kstate * ‖Set.IccExtend hT (⇑z) s - Set.IccExtend hT (⇑w) s‖ := hQlip _ _
+      _ ≤ Kstate * ‖z - w‖ := mul_le_mul_of_nonneg_left h3 hKnn
+      _ ≤ Kstate * (‖u₀ - v₀‖ / (1 - Kstate * (T - t₀))) := by
+          have hzwbound : ‖z - w‖ ≤ ‖u₀ - v₀‖ / (1 - Kstate * (T - t₀)) := by
+            rw [show ‖z - w‖ = dist z w from (dist_eq_norm z w).symm]; exact hdistzw
+          exact mul_le_mul_of_nonneg_left hzwbound hKnn
+      _ = D := hDdef.symm
+  rw [hzt x, hwt x, hzt x', hwt x']
+  exact heatMildValueNDbcf_sub_spatial_holder_bound ht u₀ v₀ hqc1 hqc2 hqb1 hqb2 hD₀ hDsrc
+    hα0 hα1 x x'
+
 end AnalyticPDE
 end RicciFlow
