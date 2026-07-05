@@ -8120,3 +8120,78 @@ should not arise there; NEXT target is to apply
 `contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` to `chosenLeviCivitaFamily`
 with the `C¹` intrinsic DeTurck vector field to conclude `intrinsicDeTurckCorrection` is a continuous
 section, then package the intrinsic Ricci–DeTurck RHS as a `ContinuousSectionSpace` value.
+
+## Milestone (2026-07-05, later) — Π-fiber-norm diamond DIAGNOSED + norm-free tangent-bundle frame covariant-derivative regularity committed (Item 3 / GAP 2 geometric-operator regularity)
+
+**Root-cause of the recurring `BilinearFormBundle`/`TangentSpace →L TangentSpace` diamond, pinned
+precisely.**  Attempting to consume the just-proved level downgrade
+`CovariantDerivative.contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` at the
+tangent bundle (`V = TangentSpace I`, to conclude `∇(DeTurck VF)` is a continuous `Hom(TM, TM)`
+section) fails with the "synthesized instance is not definitionally equal to expression inferred by
+typing rules" error.  Ground-truth diagnosis:
+
+* The `Existence.lean` downgrade chain — and, crucially, its building-block **definition**
+  `Bundle.Trivialization.frameCovariantDerivative` — carries the auto-included hypotheses
+  `[∀ x, NormedAddCommGroup (V x)]` / `[∀ x, NormedSpace ℝ (V x)]` (the compiler reports them
+  *unused*, but they sit in the signatures).
+* Applying any of them at `V = TangentSpace I` forces synthesis of the **Π-instance**
+  `∀ x, NormedAddCommGroup (TangentSpace I x)`.  Typeclass inference *cannot* obtain this from the
+  type synonym `TangentSpace I x = E` (an `example : ∀ x, NormedAddCommGroup (TangentSpace I x) :=
+  fun _ => inferInstance` fails without a `RiemannianBundle`), even though the *pointwise*
+  `NormedAddCommGroup (TangentSpace I x)` **is** resolvable by the bundle machinery (via unfolding the
+  synonym to `E`) — so `FiberBundle (E →L E) (fun x ↦ TM x →L TM x)` and
+  `VectorBundle ℝ (E →L E) (fun x ↦ TM x →L TM x)` and `FiberBundle (E →L E →L ℝ) (BilinearFormBundle
+  (V := TM))` all synthesize with no fiber-norm hypothesis.
+* Supplying the Π-instance by hand is the diamond: the goal's hom/bilinear bundle uses the synonym
+  `E`-norm `fun b ↦ inst✝ : NormedAddCommGroup E` (pointwise, via the bundle machinery), whereas a
+  `[RiemannianBundle TM]` `letI` gives `fun x ↦ instNormedAddCommGroupOfRiemannianBundle… x` (a
+  *different* norm — genuine non-defeq), and a flat-`E` `letI`/`haveI`
+  `fun _ ↦ inferInstanceAs (NormedAddCommGroup E)` is defeq but *syntactically* distinct (`exact`/
+  `.contMDiff` reject it; the paired `NormedSpace` `letI` even trips a kernel aux-def type mismatch).
+  Passing the flat-`E` norm through `@`-application collapses to a dependent `NormedSpace` type
+  mismatch.  **Verdict: this is a definition-site issue — the covariant-derivative theory must not
+  demand the Π fiber-norm — and cannot be closed by instance-pinning at the use site.**
+
+Importantly, the `AnalyticPDE` chart context (`variable {W : M → Type*} … [FiberBundle F W]
+[VectorBundle ℝ F W]`, **no** fiber norm; `BilW := BilinearFormBundle (V := W)`) confirms the whole
+Ricci–DeTurck chart is designed *fiber-norm-free*; the only obstruction is `Existence.lean`'s
+frame-decomposition chain hard-coding the Π fiber-norm.
+
+**Committed fix (first half): fiber-norm-free tangent-bundle frame covariant-derivative regularity.**
+New additive module `VectorBundle/CovariantDerivative/DowngradeNormFree.lean`
+(namespace `CovariantDerivative.TangentFrame`), all `#print axioms`-clean
+(`propext`/`Classical.choice`/`Quot.sound`), comment-stripped `scan cheats` `TOTAL 0`, `lake build
+PoincareCurvature` green (2912 jobs):
+
+* `inCoordinates_smulRight_eq`, `contMDiffAt_smulRightSection_of_level`,
+  `contMDiffOn_smulRightSection_of_level` — tangent-bundle (`F = E`, `V = TangentSpace I`) copies of
+  the `Existence` `smulRight`-product regularity, with **no** Π fiber-norm hypothesis (the pointwise
+  synonym norm resolves uniformly).
+* `frameCovariantDerivativeTangent` — a fiber-norm-free tangent-bundle copy of
+  `Bundle.Trivialization.frameCovariantDerivative` (`∑ᵢ d(coeffᵢ σ) ⊗ frameᵢ`), the key def whose
+  original signature carried the Π fiber-norm.
+* `contMDiffOn_frameCovariantDerivativeTangent_of_level` — a `C^{n+1}` vector field has a `C^n` frame
+  covariant derivative, stated for the tangent bundle (drops regularity by one order), consuming the
+  above.
+* `contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one` — the tangent-bundle
+  `C¹`-class-to-open-set restriction (smooth-bump localization), no Π fiber-norm.
+
+**Remaining (second half) — the decomposition cascade for the actual downgrade.**  Closing the
+tangent-bundle `_zero_` downgrade needs fiber-norm-free tangent-bundle copies of the
+frame-decomposition identity chain in `Existence.lean` (each currently carries the Π fiber-norm via
+`frameCovariantDerivative` in its proof): `isCovariantDerivativeOn_frameCovariantDerivative` (~90 lines,
+additive/Leibniz algebra), `covariantDerivative_{eq,apply_eq}_frameCovariantDerivative_add_difference`,
+`covariantDerivative_apply_eq_sum_localFrame_add_difference`,
+`difference_localFrame_eq_covariantDerivative`, and
+`covariantDerivative_apply_eq_sum_localFrame_add_sum_covariantDerivative_localFrame` (~250–350 lines
+total, mechanical: transcribe against `frameCovariantDerivativeTangent`).  Then the tangent-bundle
+`contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` follows by the exact
+`Existence` proof, and — because its conclusion mentions no fiber-norm-bearing subterm the goal cannot
+match (the hom bundle uses the synonym `E`-norm on both sides) — it applies to `chosenLeviCivitaFamily`
+in `DeTurck.lean` with **no** diamond, giving `∇(DeTurck VF)` continuous → `intrinsicDeTurckCorrection`
+a continuous `BilinearFormBundle` section → the intrinsic Ricci–DeTurck RHS as a
+`ContinuousSectionSpace` value (the geometric `A`).
+
+**NEXT.**  Transcribe the decomposition cascade into `DowngradeNormFree.lean` (namespace
+`TangentFrame`, using `frameCovariantDerivativeTangent`), prove the tangent-bundle `_zero_` downgrade,
+then apply it to `chosenLeviCivitaFamily` with the `C¹` intrinsic DeTurck vector field.
