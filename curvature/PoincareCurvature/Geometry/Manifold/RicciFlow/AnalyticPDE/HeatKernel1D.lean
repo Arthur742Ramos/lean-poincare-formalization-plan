@@ -5688,5 +5688,24 @@ lemma isPicardLindelof_of_lipschitzOn_centerBound_closedBall_timeDependent_Icc
   · push_cast
     linarith [hLa]
 
+/-- **The Picard time-radius condition is always satisfiable by a forward endpoint.**
+Given a positive ball radius `a` and nonnegative constants `M K`, there is a forward time
+`T > t₀` with `(M + K·a)·(T − t₀) ≤ a` — the exact `hLa` hypothesis of the center-bound Picard
+bridge.  Concretely `T = t₀ + a/(c+1)` with `c = M + K·a` works, since `c/(c+1) ≤ 1`.  This lets the
+honest Ricci–DeTurck chart *choose* its per-IVP Picard endpoint `T` (the `T : InitialValueProblem → ℝ`
+argument of the closure bridge) so the time-radius inequality holds automatically, once the analytic
+size constants `M` (centre bound) and `K` (Lipschitz constant) are known. -/
+lemma exists_forwardTime_mul_sub_le (t₀ : ℝ) (a K M : ℝ≥0) (ha : 0 < (a : ℝ)) :
+    ∃ T : ℝ, t₀ < T ∧ ((M : ℝ) + (K : ℝ) * (a : ℝ)) * (T - t₀) ≤ (a : ℝ) := by
+  set c : ℝ := (M : ℝ) + (K : ℝ) * (a : ℝ) with hc
+  have hc0 : 0 ≤ c := by rw [hc]; positivity
+  have hcp : (0 : ℝ) < c + 1 := by linarith
+  refine ⟨t₀ + (a : ℝ) / (c + 1), by have := div_pos ha hcp; linarith, ?_⟩
+  have hsub : t₀ + (a : ℝ) / (c + 1) - t₀ = (a : ℝ) / (c + 1) := by ring
+  rw [hsub]
+  have heq : c * ((a : ℝ) / (c + 1)) = (a : ℝ) * (c / (c + 1)) := by ring
+  rw [heq]
+  exact mul_le_of_le_one_right ha.le (by rw [div_le_one hcp]; linarith)
+
 end AnalyticPDE
 end RicciFlow
