@@ -113,3 +113,62 @@ abstract-`V`; this is the first concrete tangent instantiation and it exposes th
 fiber-value identity above is then composed to discharge the DeTurck part of the chart `geometric`
 field.  (The section-level full-RHS assembly `-2•rs + deTurckCorrection = intrinsicRicciDeTurckRHS`
 already exists as `exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`.)
+
+### Progress (2026-07-06, later) — the `bilinearDerivationField`-at-`TangentSpace` wall is DEEPER than `symmL`: it is the structural `SeminormedAddCommGroup(TM x)`-vs-canonical-bundle-topology diamond + a `whnf` performance wall. The prior "diamond-free `symmL` variant" target is NECESSARY BUT NOT SUFFICIENT.
+
+A ground-truth reproduction (throwaway module, reverted) of forming
+`ContinuousSectionSpace.bilinearDerivationField (F := F) (W := TangentSpace I) …` established the exact
+failure chain, in order:
+
+1. **`hbound` norms (fixable).**  `‖(et i).symmL ℝ x‖`, `‖(et i).continuousLinearMapAt ℝ x‖`, `‖P x‖`
+   fail `Norm` synthesis at `TangentSpace` because `Norm (TangentSpace I x →L[ℝ] …)` and the bilinear
+   symm/clm norms are not reached (instance search does not unfold `TangentSpace`).  These are ALL
+   dischargeable by copying the `SmoothApproxClosure.lean` **local-instance preamble** (lines 41–92) and
+   ADDING three more `change Norm (BilF →L BilF)` / `change Norm (F →L F)` local instances for the
+   bilinear `symmL`/`clmAt` fiber and for `Norm (TM x →L[ℝ] TM x)` (`‖P x‖`).  With the full preamble the
+   `hbound` type elaborates cleanly.  (Empirically confirmed: line-52 `hbound` error disappears.)
+
+2. **base `FiberBundle F TM` / `VectorBundle ℝ F TM` at the operator site (the real wall).**  The operator's
+   variable block simultaneously demands `[∀ x, SeminormedAddCommGroup (W x)]` AND `[FiberBundle F W]` /
+   `[VectorBundle ℝ F W]` on `W := TangentSpace I`.  At `TM` these two families CONFLICT on
+   `TopologicalSpace (TM x)`: the repo-global `instNormedAddCommGroupTangentSpace` (flat-`E`, priority 70)
+   supplies the fibre norm whose `toTopologicalSpace` is the flat-`E` norm topology, while
+   `TangentSpace.fiberBundle`/`.vectorBundle` (which is what `[FiberBundle F TM]` must come from — the
+   manifold's tangent bundle is genuinely non-trivial, so this instance CANNOT be flat) carries the
+   canonical `deriving`-produced `TangentSpace.instTopologicalSpace`.  These two `TopologicalSpace (TM x)`
+   terms are DEFEQ (both are `E`'s norm topology) but NOT syntactically equal, so `FiberBundle F TM`
+   synthesised at the operator site does not match `TangentSpace.fiberBundle`, and the whole application
+   fails with `failed to synthesize FiberBundle F (TangentSpace I)` even when `[FiberBundle F TM]` and
+   `[VectorBundle ℝ F TM]` are placed EXPLICITLY in the binder.  Everything downstream
+   (`MemTrivializationAtlas (trivializationAt BilF BilW (x0 i))`) cascades from this one failure.
+
+3. **`whnf` performance wall (FUNDAMENTAL — hits the bare linear map, not just the bounded operator).**
+   Once layers (1)–(2) are pinned by local instances, forming the operator does NOT fail fast — it grinds
+   `>11 min` without terminating (deterministic `whnf` timeout territory).  This is NOT specific to
+   `symmL`, to the `hbound`, or to the bounded-operator packaging: a follow-up probe forming ONLY the raw
+   `bilinearCompFieldLinearMap (F := F) (W := TM) …` LINEAR MAP (no norms, no bound, abstract `et`) with the
+   minimal `pTMNACG/pTMNS/pTMFB/pTMVB` preamble ALSO grinds `>90 s` and does not terminate at
+   `maxHeartbeats 1000000`.  The cost is intrinsic to reducing `BilinearFormBundle (V := TM)` /
+   `ContinuousLinearMap.topologicalSpaceTotalSpace` and the tangent trivialization readouts inside
+   `continuous_bilinearComp₂_section`.  So the definition-site fix must ALSO defeat this blow-up (e.g.
+   `@[irreducible]`/opaque wrappers around the TM bilinear-bundle trivialization terms, or a cheaper
+   concrete bundle representation), independently of the instance-diamond fix.
+
+**Why the plan's prior "symmL-only" target is insufficient.**  `SmoothApproxClosure.lean` proves the
+diamond is *navigable for `symmL` bounds and CSS operations* (it states `‖(trivializationAt F TM (x0 i)).symmL ℝ x‖`
+via the TANGENT trivialization and never re-synthesises base `VectorBundle ℝ F TM` in a conflicting
+context).  But that navigation does NOT extend to `bilinearDerivationField`, whose signature forces the
+`SeminormedAddCommGroup(TM x)` ⨯ `FiberBundle F TM` conflict AND triggers the `whnf` blow-up.  A diamond-free
+`symmL` variant alone therefore will not make the operator instantiable — layers (2) and (3) remain.
+
+**Revised concrete next target (definition-site fix, `RiemannianSection.lean`).**  Provide a
+`TangentSpace`-SPECIALISED reaction operator that (i) takes the base `FiberBundle`/`VectorBundle` and the
+fibre `SeminormedAddCommGroup` as EXPLICIT arguments pinned to ONE mutually-consistent instance (so the
+topology diamond cannot arise), (ii) phrases its bound through the model-fibre coordinate readout only
+(never `‖s x‖`/`‖P x‖` on `TM x`), and (iii) is `whnf`-cheap by never forcing reduction of
+`trivializationAt BilF BilW` (work through `continuousLinearMapAt`/`coord` eval lemmas, which DID elaborate
+at `TangentSpace`, not `symmL`).  Note the chart's `A : ℝ → CSS → CSS` field is a bare FUNCTION — the
+bounded operator is only needed to discharge the `picard`/`lipschitz` estimate fields, so the specialised
+operator can be scoped narrowly to those estimates.  The geometric RHS *source* is already a named CSS
+value (`intrinsicRicciDeTurckRHSSectionSpace` + `_apply`/`_symm`); only the reaction/principal
+*estimate operator* remains blocked.
