@@ -4847,6 +4847,89 @@ theorem bilinearDerivationFieldLinearMap_coord_norm_le
           (norm_nonneg _) (by positivity)
     _ = 2 * Kp * ‖σ‖ := by ring
 
+/-- **Affine-operator coordinate Lipschitz bound (`hlip`) for the frozen DeTurck reaction plus a
+fixed source.**  For the affine section-space operator `s ↦ bilinearDerivationFieldLinearMap … s + b`
+(the frozen two-sided derivation `L` plus a fixed source `b`), the section-space coordinate distance
+is controlled by `2·Kp·dist s s'` — *the same constant as the linear reaction alone*, because the
+fixed source `b` contributes the identical coordinate summand `coord b i x` to both `A s` and `A s'`,
+which cancels in the coordinate distance (`coord_add_apply` + `add_sub_add_right_eq_sub`).  This is
+exactly the `hlip` datum the section-space Picard bridge consumes for the *affine* chart operator
+`A t s = L s + b` at the metric state, with `K := 2·Kp`. -/
+theorem bilinearDerivationFieldLinearMap_add_source_coord_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (Kp : ℝ)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates F W F W (x0 i) x.1 (x0 i) x.1 (P x.1)‖ ≤ Kp)
+    (b s s' : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    dist
+      ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s + b)).1 i x)
+      ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s' + b)).1 i x)
+      ≤ 2 * Kp * dist s s' := by
+  rw [dist_eq_norm,
+    coord_add_apply (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover hP s) b i x,
+    coord_add_apply (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover hP s') b i x,
+    add_sub_add_right_eq_sub, ← dist_eq_norm]
+  exact bilinearDerivationFieldLinearMap_coord_dist_le
+    x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp s s' i x
+
+/-- **Affine-operator coordinate norm bound (`hcenter`) for the frozen DeTurck reaction plus a fixed
+source.**  For the affine section-space operator `σ ↦ bilinearDerivationFieldLinearMap … σ + b`, the
+section-space coordinate norm is controlled by `2·Kp·‖σ‖ + ‖b‖`: the reaction summand contributes
+`2·Kp·‖σ‖` (`bilinearDerivationFieldLinearMap_coord_norm_le`) and the fixed source `b` contributes at
+most `‖b‖` (`coord_norm_le_norm`), combined through `coord_add_apply` and the triangle inequality.
+Applied at the initial-metric section `σ = σ0`, this is exactly the `hcenter` datum
+`‖coord (A t σ0) i x‖ ≤ Mc` (with `Mc := 2·Kp·‖σ0‖ + ‖b‖`) that the section-space Picard bridge
+consumes for the affine chart operator `A t s = L s + b`. -/
+theorem bilinearDerivationFieldLinearMap_add_source_coord_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (Kp : ℝ)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates F W F W (x0 i) x.1 (x0 i) x.1 (P x.1)‖ ≤ Kp)
+    (b σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    ‖(equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP σ + b)).1 i x‖
+      ≤ 2 * Kp * ‖σ‖ + ‖b‖ := by
+  rw [coord_add_apply (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+    Kc hKc Ko hKo hKoEq hcover hP σ) b i x]
+  refine (norm_add_le _ _).trans ?_
+  exact add_le_add
+    (bilinearDerivationFieldLinearMap_coord_norm_le x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp σ i x)
+    (coord_norm_le_norm b i x)
+
 end PreferredBilinearNormControl
 
 end ContinuousSectionSpace
