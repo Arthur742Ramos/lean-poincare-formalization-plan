@@ -4644,6 +4644,62 @@ theorem bilinearDerivationField_norm_le
     (bilinearCompField_norm_le et Kc hKc Ko hKo hKoEq hcover hP _ C hC _)
     (bilinearCompField_norm_le et Kc hKc Ko hKo hKoEq hcover _ hP C hC _)
 
+/-- **The frozen-coefficient DeTurck-correction reaction as an unbundled `ℝ`-linear map on the
+section space.**  Unlike `bilinearDerivationField` (which packages the derivation as a bounded
+`ContinuousSectionSpace →L[ℝ] ContinuousSectionSpace` and therefore needs the raw fiber-norm bound
+`hbound` — the estimate that is *un-elaborable* at `W := TangentSpace I` because `‖P x‖ =
+‖TM x →L[ℝ] TM x‖` is not synthesizable), this variant is the plain `LinearMap` `s ↦ (x ↦ (s x)
+.bilinearComp (P x) id + (s x).bilinearComp id (P x))`, whose only analytic input is the *continuity*
+of the two summands (`bilinearCompFieldLinearMap`, discharged by `continuous_bilinearComp₂_section`).
+This is exactly the shape `A t s` the section-space Picard bridge consumes as a plain
+`ℝ → ContinuousSectionSpace → ContinuousSectionSpace` map, freezing the endomorphism coefficient
+`P` (e.g. `∇W` about the initial metric).  Its coordinate readout Lipschitz control is supplied — in
+the clean model fibre — by `norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_sub_le`,
+so the operator never needs the raw fiber-norm `hbound` at all. -/
+noncomputable def bilinearDerivationFieldLinearMap
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x))) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover →ₗ[ℝ]
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover :=
+  bilinearCompFieldLinearMap et Kc hKc Ko hKo hKoEq hcover hP
+      (continuous_id_endo_section (𝕜 := ℝ) (F := F) (V := W))
+    + bilinearCompFieldLinearMap et Kc hKc Ko hKo hKoEq hcover
+      (continuous_id_endo_section (𝕜 := ℝ) (F := F) (V := W)) hP
+
+@[simp]
+theorem bilinearDerivationFieldLinearMap_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (bilinearDerivationFieldLinearMap et Kc hKc Ko hKo hKoEq hcover hP s) x
+      = (s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+        + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x) := by
+  simp only [bilinearDerivationFieldLinearMap, LinearMap.add_apply, add_apply,
+    bilinearCompFieldLinearMap_apply]
+
 end PreferredBilinearNormControl
 
 end ContinuousSectionSpace
