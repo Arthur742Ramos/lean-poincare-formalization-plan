@@ -473,4 +473,42 @@ theorem deTurckReactionSectionMap_readout_sub_norm_le_inCoordinates
     ((trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (s x))).2)
     ((trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (s' x))).2)
 
+/-- **`dist`-form of the reaction operator's Lipschitz-in-state readout bound.**  The section-metric
+form of `deTurckReactionSectionMap_readout_sub_norm_le_inCoordinates`:
+`dist (readout (deTurck s x)) (readout (deTurck s' x)) ≤ 2 · ‖inCoord (P x)‖ · dist (readout (s x))
+(readout (s' x))`.  The model fibre `BilF` distance is `‖· − ·‖`; the two `dist_eq_norm` rewrites
+(applied with an explicit first endpoint so the `SeminormedAddGroup` instance is inferred from the
+readout type rather than left as a stuck metavariable) turn the norm bound into a distance bound.  This
+is the form the section-space Picard `hlip` coordinate obligation consumes: composing with
+`coord_dist_le_dist_topFibre` (which bounds the coordinate distance by the section distance) it yields
+`dist (coord (deTurck s) i x) (coord (deTurck s') i x) ≤ 2·Kp·dist s s'`. -/
+theorem deTurckReactionSectionMap_readout_sub_dist_le_inCoordinates
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization BilF (TotalSpace.proj : TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M) (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s s' : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 x : M) (hx : x ∈ (trivializationAt E TM x0).baseSet) :
+    dist
+        (trivializationAt BilF BilW x0
+            (TotalSpace.mk' BilF x
+              (deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover hP s x))).2
+        (trivializationAt BilF BilW x0
+            (TotalSpace.mk' BilF x
+              (deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover hP s' x))).2
+      ≤ 2 * ‖ContinuousLinearMap.inCoordinates E TM E TM x0 x x0 x (P x)‖
+          * dist (trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (s x))).2
+              (trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (s' x))).2 := by
+  rw [dist_eq_norm (trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x
+              (deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover hP s x))).2 _,
+    dist_eq_norm (trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (s x))).2 _]
+  exact deTurckReactionSectionMap_readout_sub_norm_le_inCoordinates
+    et Kc hKc Ko hKo hKoEq hcover hP s s' x0 x hx
+
 end RicciFlow

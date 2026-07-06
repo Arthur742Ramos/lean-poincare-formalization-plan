@@ -118,4 +118,64 @@ theorem deTurckReactionSectionMap_coord_eq_readout
     (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
       Kc hKc Ko hKo hKoEq hcover hP σ) i x
 
+/-- **The tangent-bundle DeTurck reaction operator's section-space Picard `hlip` coordinate bound.**
+For the concrete operator `deTurckReactionSectionMap … hP` on the tangent-bundle `BilinearFormBundle`
+continuous section space, the pointwise coordinate readout is Lipschitz-in-state:
+`dist (coord (deTurck s) i x) (coord (deTurck s') i x) ≤ 2·Kp·dist s s'` for any uniform bound
+`Kp ≥ ‖inCoordinates E TM E TM (x₀ i) x (x₀ i) x (P x)‖`.  This is EXACTLY the `hlip` hypothesis of the
+topological-fibre section-space Picard bridge
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn_topFibre`
+(with `K := 2·Kp`), assembled at `W := TangentSpace I` where the seminormed-fibre coordinate lemmas
+diverge.  Proof: rewrite both operator coordinates to their `trivializationAt` readouts
+(`deTurckReactionSectionMap_coord_eq_readout`), bound the readout distance by the reaction's
+Lipschitz-in-state fibre bound (`deTurckReactionSectionMap_readout_sub_dist_le_inCoordinates`, with the
+`BilF`↔`TM` base-set membership supplied by `simpa`), rewrite the plain-section readouts back to
+coordinates (`bilinearFormBundle_coord_eq_trivializationAt_readout_tangent`), and close with the
+hom-topology-native coordinate contraction `coord_dist_le_dist_topFibre` (`dist (coord s i x)
+(coord s' i x) ≤ dist s s'`) and `‖inCoord (P x)‖ ≤ Kp`. -/
+theorem deTurckReactionSectionMap_coord_dist_le_inCoordinates
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s s' : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) (Kp : ℝ)
+    (hKp : ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp) :
+    dist
+      ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s)).1 i x)
+      ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s')).1 i x)
+      ≤ 2 * Kp * dist s s' := by
+  have hxTM : (x : M) ∈ (trivializationAt E TM (x0 i)).baseSet := by simpa using hKc i x.2
+  rw [deTurckReactionSectionMap_coord_eq_readout x0 Kc hKc Ko hKo hKoEq hcover hP s i x,
+      deTurckReactionSectionMap_coord_eq_readout x0 Kc hKc Ko hKo hKoEq hcover hP s' i x]
+  refine (deTurckReactionSectionMap_readout_sub_dist_le_inCoordinates
+    (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover hP s s'
+    (x0 i) x hxTM).trans ?_
+  rw [← bilinearFormBundle_coord_eq_trivializationAt_readout_tangent x0 Kc hKc Ko hKo hKoEq hcover s i x,
+      ← bilinearFormBundle_coord_eq_trivializationAt_readout_tangent x0 Kc hKc Ko hKo hKoEq hcover s' i x]
+  have hcd := coord_dist_le_dist_topFibre s s' i x
+  have hIC : (0:ℝ) ≤ ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ :=
+    norm_nonneg _
+  nlinarith [hcd, hKp, hIC,
+    dist_nonneg (α := ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) (x := s) (y := s'),
+    dist_nonneg (α := BilF)
+      (x := (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover s).1 i x)
+      (y := (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover s').1 i x)]
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
