@@ -8581,3 +8581,50 @@ about `g₀` (e.g. a Yosida/heat-semigroup regularisation, or the bounded reacti
 continuous bundle endomorphism applied pointwise to a section), and prove its operator-norm bound + strong
 continuity, feeding `…_boundedLinear_generator_source_fixedWindow` to obtain the chart's `picard` field, and
 supply the `geometric` identification linking `A = fun t s => L t s + b t` to `intrinsicRicciDeTurckRHS`.
+
+## Milestone (2026-07-05, later still) — the missing `CSS →L[𝕜] CSS` constructor + first concrete bounded generator (Item 3 / GAP 2 `picard` half)
+
+Three additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0` commits; full `lake build PoincareCurvature` green (2916 jobs).
+The previous milestone reduced `picard` to *exhibiting a bounded linear generator* `L : ℝ → (CSS →L[ℝ]
+CSS)` with an op-norm bound + strong time-continuity.  There was, however, **no constructor** for the
+type `CSS →L[𝕜] CSS` on the transported finite-cover section space — the object `L t` must inhabit.
+This milestone supplies it and a first concrete inhabitant.
+
+All in `VectorBundle/ContinuousSection.lean` (`namespace …ContinuousSectionSpace`, section
+`TrivializationOpNorm`):
+
+* **`mkContinuousOfForallCoordNormLe`** (+ `_apply`, `_norm_le`) — **the missing bounded-operator
+  constructor.**  From a `𝕜`-linear map `T : CSS →ₗ[𝕜] CSS` and a coordinatewise operator bound
+  `‖(coord (T s)).1 i x‖ ≤ C · ‖s‖`, produces `T.mkContinuous`-packaged `CSS →L[𝕜] CSS` with operator
+  norm `≤ C`.  The coordinate bound is pushed to the section-norm bound `‖T s‖ ≤ C · ‖s‖` by the
+  already-committed `norm_le_of_forall_coord_norm_le`; `LinearMap.mkContinuous`/`_norm_le` finish.  This
+  is exactly the constructor that turns *any* generator's fiber/coordinate operator estimate into the
+  `CSS →L[𝕜] CSS` object the section-space Picard `picard` field consumes as `L t`.
+* **`continuous_smul_section`** — reusable bundle fact: for continuous `φ : M → 𝕜` and a continuous
+  section `s`, the pointwise scalar multiple `x ↦ φ x • s x` is a continuous section.  Proved fibrewise
+  through `FiberBundle.continuousAt_totalSpace` + `Trivialization.coe_linearMapAt_of_mem` (the readout in
+  the canonical trivialization is `φ x • (e (T% s x)).2`).  The continuity input for zeroth-order
+  multiplication generators.
+* **`smulFieldLinearMap` / `smulField`** (+ `_apply`, `_norm_le`) — **the first concrete bounded
+  generator.**  For a continuous scalar field `φ : M → 𝕜` bounded by `C` on the finite cover,
+  `s ↦ (x ↦ φ x • s x)` is a genuine `CSS →L[𝕜] CSS` with operator norm `≤ C`, built through
+  `mkContinuousOfForallCoordNormLe` (coordinate readout `φ x • (coord s) i x`, bound from `‖φ x‖ ≤ C`
+  and `coord_norm_le_norm`).  This is a real zeroth-order inhabitant of the bounded linear generator
+  type — the reaction/conformal part shape — validating that the `picard` reduction to
+  `CSS →L[𝕜] CSS` is not vacuous.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  `picard`: the `CSS →L[ℝ] CSS` generator
+type is now *constructible* — the missing constructor `mkContinuousOfForallCoordNormLe` exists and is
+exercised by a concrete generator (`smulField`).  The surviving `picard` obligation narrows to building
+the *time-dependent, regularised* Ricci–DeTurck generator `L t` (bounded reaction part + mild 2nd-order
+part) and its op-norm bound + strong time-continuity — the op-norm bound now discharges through
+`mkContinuousOfForallCoordNormLe` given a coordinate operator estimate.
+
+**NEXT.**  (1) Time-dependent generator: a strong-time-continuity lemma
+`∀ s, ContinuousOn (fun t => L t s) [t₀,T]` for a jointly-continuous time-dependent scalar/endomorphism
+field, via `continuousOn_of_forall_coord_uncurry_continuousOn` (watch the `↥(Kc i)` vs
+`↥(Kc i : Set M)` coercion).  (2) Generalise `continuous_smul_section`/`smulField` from `φ • id` to a
+continuous *bundle-endomorphism* field `Φ x : V x →L[𝕜] V x` (the true reaction-term shape).  (3) Feed a
+time-dependent generator + source `b` to `…_boundedLinear_generator_source_fixedWindow` to obtain the
+chart's `picard` field for a concrete operator; then the `geometric` realization.
