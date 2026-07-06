@@ -647,6 +647,20 @@ end Bundle
 
 namespace Bundle
 
+/-- **Fiberwise slot-flip depends continuously on the map.**  If `x ↦ h x` is continuous at `x₀` into
+the bilinear-map space `E →L[𝕜] Fₗ →L[𝕜] Gₗ`, then so is the pointwise slot-flip `x ↦ (h x).flip`.
+This is the `ContinuousAt` companion of the fact that `ContinuousLinearMap.flip` is a linear isometric
+equivalence (`ContinuousLinearMap.flipₗᵢ`), hence a continuous self-map of the bilinear-map space. -/
+theorem _root_.ContinuousAt.clm_flip {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E Fₗ Gₗ : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [NormedAddCommGroup Fₗ] [NormedSpace 𝕜 Fₗ] [NormedAddCommGroup Gₗ] [NormedSpace 𝕜 Gₗ]
+    {X : Type*} [TopologicalSpace X] {h : X → E →L[𝕜] Fₗ →L[𝕜] Gₗ} {x₀ : X}
+    (hh : ContinuousAt h x₀) :
+    ContinuousAt (fun x ↦ (h x).flip) x₀ := by
+  have hcont : Continuous (fun f : E →L[𝕜] Fₗ →L[𝕜] Gₗ ↦ f.flip) :=
+    (ContinuousLinearMap.flipₗᵢ 𝕜 E Fₗ Gₗ).continuous
+  exact hcont.continuousAt.comp hh
+
 section LocalCoordinatePositivity
 
 variable {M : Type*} [TopologicalSpace M]
@@ -820,6 +834,97 @@ lemma forall_pos_of_trivializationAt_bilinearFormBundle_forall_pos
   simpa [hdiag] using h
 
 end LocalCoordinatePositivity
+
+section BilinearConjugation
+
+/- A `BilinearFormBundle` over a vector bundle whose fibers are genuinely normed (the fiber topology
+is the norm topology, so no instance diamond arises), the setting in which the fiberwise bilinear
+conjugation `β ↦ β(P·, P·)` is available (`ContinuousLinearMap.bilinearComp` needs seminormed
+domains).  This is exactly the tangent-bundle situation the geometric Ricci–DeTurck reaction operator
+lives in. -/
+variable {M : Type*} [TopologicalSpace M]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+variable {W : M → Type*} [∀ x, NormedAddCommGroup (W x)] [∀ x, NormedSpace ℝ (W x)]
+  [TopologicalSpace (_root_.Bundle.TotalSpace F W)]
+  [FiberBundle F W] [VectorBundle ℝ F W]
+
+local notation "BilF" => (F →L[ℝ] F →L[ℝ] ℝ)
+local notation "BilW" => BilinearFormBundle (V := W)
+
+/-- **Fiberwise bilinear conjugation preserves continuity of a `BilinearFormBundle` section.**
+Given a continuous section `s` of the bilinear-form bundle `BilW` and a continuous section `P` of the
+tangent endomorphism bundle `Hom(W, W)`, the pointwise conjugate `x ↦ (s x).bilinearComp (P x) (P x)`
+— the bilinear form `(u, v) ↦ s x (P x u) (P x v)` — is again a continuous `BilinearFormBundle`
+section.
+
+This is the reaction-operator continuity input built **directly on sections via a tangent-bundle
+endomorphism** `P`, avoiding the triple-nested hom bundle `Hom(BilW, BilW)` (whose `TotalSpace`
+instances do not synthesize).  Proof: reduce to continuity of the trivialization readout via
+`FiberBundle.continuousAt_totalSpace`; on the trivializing base set the readout of the conjugate
+equals `(readout s).bilinearComp (readout P) (readout P)`, where `readout s` is the bilinear-form
+readout of `s` and `readout P = inCoordinates F W F W x₀ x x₀ x (P x)` is the endomorphism readout of
+`P` (both continuous, from the two section-continuity hypotheses), and `f ↦ b.bilinearComp f f`
+is continuous through `ContinuousAt.clm_comp` / `ContinuousAt.clm_flip`
+(`bilinearComp = ((·.comp ·).flip.comp ·).flip`).  The coordinate identity uses
+`trivializationAt_bilinearFormBundle_apply_eq` together with `ContinuousLinearMap.inCoordinates_eq`. -/
+theorem continuous_bilinearComp_section
+    {s : Π x : M, BilW x}
+    (hs : Continuous (fun x ↦ TotalSpace.mk' BilF (E := BilW) x (s x)))
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x))) :
+    Continuous (fun x ↦ TotalSpace.mk' BilF (E := BilW) x
+      (((s x).bilinearComp (P x) (P x) : BilW x))) := by
+  rw [continuous_iff_continuousAt]
+  intro x₀
+  rw [FiberBundle.continuousAt_totalSpace BilF]
+  refine ⟨continuousAt_id, ?_⟩
+  -- Continuity of the bilinear-form readout of `s`.
+  have hs_at := hs.continuousAt (x := x₀)
+  rw [FiberBundle.continuousAt_totalSpace BilF] at hs_at
+  have hbil : ContinuousAt
+      (fun x ↦ (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2) x₀ := hs_at.2
+  -- Continuity of the endomorphism readout of `P`.
+  have hP_at := hP.continuousAt (x := x₀)
+  rw [continuousAt_hom_bundle] at hP_at
+  have hp : ContinuousAt
+      (fun x ↦ ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)) x₀ := hP_at.2
+  -- The bilinear conjugation of the two readouts is continuous.
+  have hg : ContinuousAt (fun x ↦
+      ((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2).bilinearComp
+        (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x))
+        (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x))) x₀ := by
+    have h1 := hbil.clm_comp hp
+    have h2 := h1.clm_flip
+    have h3 := h2.clm_comp hp
+    exact h3.clm_flip
+  -- On the trivializing base set the conjugate readout matches the conjugation of the readouts.
+  refine hg.congr ?_
+  filter_upwards [(trivializationAt F W x₀).open_baseSet.mem_nhds
+    (FiberBundle.mem_baseSet_trivializationAt F W x₀)] with x hx
+  have hIC : ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)
+      = ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx : W x →L[ℝ] F).comp
+          ((P x).comp
+            (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm : F →L[ℝ] W x)) :=
+    ContinuousLinearMap.inCoordinates_eq hx hx
+  have key : ∀ u : F,
+      ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) u)
+        = P x (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm u) := by
+    intro u
+    rw [hIC]
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply,
+      ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.symm_apply_apply]
+  ext u v
+  rw [ContinuousLinearMap.bilinearComp_apply,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx (s x)
+      (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) u)
+      (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) v),
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx
+      ((s x).bilinearComp (P x) (P x)) u v,
+    ContinuousLinearMap.bilinearComp_apply, key u, key v]
+
+end BilinearConjugation
 
 section FiberwiseSymmetrization
 
