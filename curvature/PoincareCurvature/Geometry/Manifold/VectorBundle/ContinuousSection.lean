@@ -2654,6 +2654,48 @@ theorem continuousOn_of_forall_coord_uncurry_continuousOn
   intro p _
   exact coord_apply (f p.1) i p.2
 
+/-- **Joint total-space continuity of a parametrised section family upgrades to continuity in the
+transported finite-cover Banach norm.**  If the family `f : X → ContinuousSectionSpace`, read jointly
+in the parameter and base point as a map into the total space
+`(p, x) ↦ TotalSpace.mk' F x ((f p) x)`, is continuous, then `t ↦ f t` is continuous on any set
+`timeSet` in the finite-cover Banach norm.  This is the clean, coordinate-free route to the
+`hcont`/`hLc`/`hb` time-continuity hypotheses of the section-space Picard–Lindelöf capstones: rather
+than joint continuity of each trivialization coordinate readout, it suffices that the family be
+jointly continuous *into the total space*, the trivialization readout continuity then being supplied
+internally from `Trivialization.continuousOn` and `coe_linearMapAt_of_mem`.  Reduces to
+`continuousOn_of_forall_coord_uncurry_continuousOn`. -/
+theorem continuousOn_of_continuous_totalSpace_uncurry
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {X : Type*} [TopologicalSpace X]
+    {f : X → ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {timeSet : Set X}
+    (hjoint : Continuous (fun p : X × M => TotalSpace.mk' F p.2 ((f p.1) p.2))) :
+    ContinuousOn f timeSet := by
+  refine continuousOn_of_forall_coord_uncurry_continuousOn
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover) ?_
+  intro i
+  have hmaps : Set.MapsTo (fun p : X × M => TotalSpace.mk' F p.2 ((f p.1) p.2))
+      (timeSet ×ˢ (Kc i : Set M)) (et i).source := by
+    intro p hp
+    exact (et i).mem_source.mpr (hKc i hp.2)
+  have hsnd : ContinuousOn
+      (fun p : X × M => ((et i) (TotalSpace.mk' F p.2 ((f p.1) p.2))).2)
+      (timeSet ×ˢ (Kc i : Set M)) :=
+    continuous_snd.comp_continuousOn ((et i).continuousOn.comp hjoint.continuousOn hmaps)
+  refine hsnd.congr ?_
+  intro p hp
+  exact congrFun ((et i).coe_linearMapAt_of_mem (hKc i hp.2)) ((f p.1) p.2)
+
 /-- **Bounded linear section-space operator from a coordinatewise operator-norm bound.**  Given a
 `𝕜`-linear map `T` on the transported finite-cover section space together with a uniform bound
 `‖(coord (T s)).1 i x‖ ≤ C · ‖s‖` on every compact coordinate readout of the image, `T` is bounded and
