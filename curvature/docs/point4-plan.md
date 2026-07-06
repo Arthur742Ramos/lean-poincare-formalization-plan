@@ -318,3 +318,49 @@ s') i x)` through `coordContinuousMap_apply` (= readout) and `dist_eq_norm`, (ii
 `_deTurckDerivation_readout_le` at `x0` and the same uniform sup; `hcont` from
 `continuous_bilinearComp₂_section` in `t`.  This yields the frozen reaction's `picard` data; the
 principal `(-2)•Ric` source is already the named CSS value `intrinsicRicciFlowRHSSectionSpace`.
+
+### Progress (2026-07-06, later) — the frozen DeTurck-reaction's section-space Picard `hlip` + `hcenter` are ASSEMBLED into the exact bridge coordinate form, at `W := TangentSpace I`
+
+Five sorry-free, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`), purely-additive
+declarations landed in `VectorBundle/RiemannianSection.lean` (section `PreferredBilinearNormControl`),
+turning the fibre readout toolkit into the actual `A`/`picard` coordinate obligations:
+
+* `bilinearDerivationFieldLinearMap` (+ `_apply`) — the **unbundled** frozen reaction as a plain
+  `CSS →ₗ[ℝ] CSS`, `s ↦ (x ↦ (s x).bilinearComp (P x) id + (s x).bilinearComp id (P x))`, built as the
+  sum of two `bilinearCompFieldLinearMap` instances.  Crucially it needs NO raw fiber-norm `hbound`
+  (unlike the bundled `bilinearDerivationField`), so it elaborates at `W := TangentSpace I`; this is
+  the exact `A t s` shape the section-space Picard bridge consumes as a plain `ℝ → CSS → CSS` map.
+* `bilinearFormBundle_coord_eq_trivializationAt_readout` — the **coord ↔ readout bridge**: for
+  `et i := trivializationAt BilF BilW (x0 i)`, the CSS coordinate `(equivCompatibleCoordFamilySubmodule
+  σ).1 i x` equals the raw fibre readout `(trivializationAt BilF BilW (x0 i) ⟨x, σ x⟩).2`.  Composes
+  `coord_apply` with the on-baseSet identity `continuousLinearMapAt = (e ⟨x,·⟩).2`
+  (`coe_linearMapAt_of_mem`).  This translates the `coord` language the Picard bridge states its
+  `hlip`/`hcenter` in into the `trivializationAt`-readout language the model-fibre
+  `_deTurckDerivation_readout_*` estimates are proved in.
+* `bilinearDerivationFieldLinearMap_coord_dist_le` — **the `hlip` field**: `dist (coord (D s) i x)
+  (coord (D s') i x) ≤ 2·Kp·dist s s'` where `Kp` is any uniform bound on `‖inCoordinates F W F W
+  (x0 i) x (x0 i) x (P x)‖` over the finite cover.  EXACTLY the `hlip` hypothesis of
+  `sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound` /
+  `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn`, with
+  `K := 2·Kp`.  Proof: coord→readout bridge, then the clean-model-fibre
+  `_deTurckDerivation_readout_sub_le` (Lipschitz const `2‖inCoord P‖`), then `coord_dist_le_dist`.
+* `bilinearDerivationFieldLinearMap_coord_norm_le` — **the `hcenter` field**: `‖coord (D σ) i x‖ ≤
+  2·Kp·‖σ‖`.  At `σ := x0` (the initial metric section) this is the `hcenter` datum `‖coord (A t x0)
+  i x‖ ≤ Mc` with `Mc := 2·Kp·‖x0‖`.  Companion route via `_deTurckDerivation_readout_le` +
+  `coord_norm_le_norm`.
+
+**Fractions of `{A, picard}` now constructed (reaction summand).**  For the frozen reaction operator:
+`A` = `bilinearDerivationFieldLinearMap` (DONE, elaborates at `TM`).  `picard` inputs: `hlip` DONE,
+`hcenter` DONE (via `_coord_norm_le` at `x0`), `hcont` = `continuousOn_const` (frozen ⇒ trivial at the
+use-site).  So the reaction summand's full `picard` triple is in hand at the fibre/coordinate level.
+
+**Concrete next target.**  The PACKAGING into `IsPicardLindelof`/`BanachEvolutionLocalSolutionIn`
+must live in a file importing BOTH `RiemannianSection` (these lemmas) AND `AnalyticPDE/SectionSpacePicard`
+(the bridge) — `RiemannianSection` does not import the Picard layer.  In that assembly file: feed
+`_coord_dist_le` (as `hlip`, `K := 2·Kp`) and `continuousOn_const` (as `hcont`) into
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn` to obtain a
+real `IsPicardLindelof` for the frozen reaction; then add the `(-2)•Ric` source `b`
+(`intrinsicRicciFlowRHSSectionSpace`, constant in `s`) — `hlip` is unchanged (affine, `b` cancels in
+the difference), `hcenter` gains `‖coord b‖`; and identify `P := ∇W` (the frozen DeTurck coefficient
+about `g0`) with its `inCoordinates` size bound `Kp` supplied by compactness.  That yields the chart's
+`picard`, whose decode is `realization`.
