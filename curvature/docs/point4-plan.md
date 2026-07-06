@@ -172,3 +172,42 @@ bounded operator is only needed to discharge the `picard`/`lipschitz` estimate f
 operator can be scoped narrowly to those estimates.  The geometric RHS *source* is already a named CSS
 value (`intrinsicRicciDeTurckRHSSectionSpace` + `_apply`/`_symm`); only the reaction/principal
 *estimate operator* remains blocked.
+
+### Progress (2026-07-06, later) — the SECTION-SPACE self-DeTurck reduction landed: the named Ricci–DeTurck RHS value collapses to the pure Ricci-flow source `(-2)•Ric` in the flowing metric's own Levi-Civita gauge
+
+Three sorry-free, axiom-clean lemmas (only `propext`/`Classical.choice`/`Quot.sound`), purely additive:
+
+* `intrinsicRicciDeTurckRHS_chosenLeviCivitaFamily_eq_intrinsicRicciFlowRHS` (DeTurck.lean) — the
+  RAW family-level specialization of `intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita`
+  to `background := chosenLeviCivitaFamily g` (LC hypothesis discharged by
+  `chosenLeviCivitaFamily_isLeviCivita`): `intrinsicRicciDeTurckRHS g (chosenLeviCivitaFamily g) =
+  intrinsicRicciFlowRHS g`.  This is EXACTLY the reduction the chart-closure `chartRHS_eq_intrinsic`
+  obligation needs — that `RicciDeTurckChartClosureData.of_smoothMetricSectionCurve_…` field identifies
+  the chart operator along the solution with `intrinsicRicciDeTurckRHS (spatial sol).metric
+  (chosenLeviCivitaFamily (spatial sol).metric)`, which by this lemma equals
+  `intrinsicRicciFlowRHS (spatial sol).metric` = `(-2)•Ric` (the flowing metric's DeTurck term vanishes
+  in its own LC gauge).
+* `intrinsicRicciDeTurckRHSSectionSpace_apply_eq_intrinsicRicciFlowRHS_of_isLeviCivita`
+  (DeTurckCorrectionRegularity.lean) — the SECTION-SPACE companion (general LC background): the named
+  `intrinsicRicciDeTurckRHSSectionSpace` value reads out pointwise as `intrinsicRicciFlowRHS g` when the
+  background is Levi-Civita for `g`.
+* `intrinsicRicciDeTurckRHSSectionSpace_chosenLeviCivitaFamily_apply_eq_intrinsicRicciFlowRHS` — the
+  directly-consumable specialization to `chosenLeviCivitaFamily g` with the canonical `C¹` witness
+  `someContMDiffLeviCivitaConnection_contMDiff`.
+
+**Ground-truth reconfirmations this session (no new work needed):** the `_of_isLeviCivita` vanishing
+chain (`intrinsicDeTurckVectorField/Correction_eq_zero_of_isLeviCivita`) already exists; `CovariantDerivative.difference`
+is a Mathlib def (`.../CovariantDerivative/Basic.lean`) with `difference_apply_eq_extend`/`IsCovariantDerivativeOn.zero`;
+and the geometric reaction *operator* `bilinearDerivationField` at `W := TangentSpace I` remains blocked
+by the documented 3-layer `BilinearFormBundle`-at-`TM` wall (norm-instance / `SeminormedAddCommGroup`-vs-canonical-bundle-topology
+diamond / `whnf` blow-up on `trivializationAt BilF BilW`).  The self-DeTurck reduction does NOT sidestep
+that wall for a *strictly parabolic* chart: in the self-LC gauge the reaction genuinely vanishes but the
+principal `(-2)•Ric` is still 2nd-order/`C⁰`-unbounded, so the mild/regularised reaction operator with a
+FIXED background remains the picard blocker.
+
+**Concrete next target.**  Either (a) the definition-site `whnf`-cheap, instance-pinned
+`TangentSpace`-specialized reaction operator (unblocks `L t : CSS →L CSS` for the affine picard route),
+or (b) the `decode : positiveDefiniteLocus → MetricFamily` (positive-definite section → bundled metric
+family) needed for the chart `A`'s `geometric` field — `positiveDefiniteLocus = {s | ∀ x v, v ≠ 0 →
+0 < s x v v}` currently carries no metric-decode, and the `geometric` field is trivial once a section
+decodes to a metric whose `intrinsicRicciDeTurckRHSSectionSpace` reproduces `A`.
