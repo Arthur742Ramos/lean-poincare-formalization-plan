@@ -3317,6 +3317,131 @@ theorem endoFieldLinearMap_continuousOn
 
 end TrivializationOpNorm
 
+/-!
+### Topological-fibre coordinate control (Path-B compatible)
+
+The `TrivializationOpNorm` section above states `norm_le_of_forall_coord_norm_le` and
+`continuousOn_of_forall_coord_continuousOn` with a fibre `[∀ x, SeminormedAddCommGroup (V x)]`,
+whose induced fibre topology (Path A) is then baked into the `ContinuousSectionSpace` type of those
+lemmas.  Neither lemma actually uses the fibre norm — the seminormed structure is present only to
+*supply the fibre topology* the section space needs.  For a fibre that carries a *different-spelled*
+(yet defeq) topology — e.g. the `ContinuousLinearMap.topologicalSpace` (Path B) on a
+`BilinearFormBundle` fibre `V x = W x →L[𝕜] W x →L[𝕜] ℝ`, which is what `FiberBundle`/`VectorBundle`
+and the concrete coordinate readout lemmas use — the Path-A-baked statements do not unify at
+application time (the section-space Picard bridge then cannot consume Path-B coordinate bounds).
+
+The two lemmas below are the identical facts stated with the fibre topology taken as an *explicit*
+`[∀ x, TopologicalSpace (V x)]` instance binder (plus the bare `AddCommGroup`/`Module` structure the
+vector-bundle already provides), so the section-space topology is synthesised in the caller's context
+rather than derived from a seminormed structure.  This lets the section-space Picard bridge apply to
+the concrete `BilinearFormBundle` continuous section space (Path B) verbatim.  The proofs are copied
+from the seminormed originals unchanged — every step is Banach-`F`-norm level and never touches a
+fibre norm.
+-/
+
+section TopologicalFibreCoordControl
+
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {M : Type*} [TopologicalSpace M]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+  {V : M → Type*} [TopologicalSpace (TotalSpace F V)] [∀ x, TopologicalSpace (V x)]
+  [∀ x, AddCommGroup (V x)] [∀ x, Module 𝕜 (V x)]
+  [FiberBundle F V] [VectorBundle 𝕜 F V]
+
+/-- **Topological-fibre version of `norm_le_of_forall_coord_norm_le`.**  Identical statement and
+proof, but with the fibre topology taken as an explicit `[∀ x, TopologicalSpace (V x)]` binder
+(instead of being derived from a `SeminormedAddCommGroup (V x)`).  Every step is at the Banach
+`F`-norm / coordinate level, so the fibre norm is never needed.  This is the boundedness handoff the
+section-space Picard–Lindelöf bridge consumes for a section space whose fibre carries a
+non-seminormed-derived (e.g. `ContinuousLinearMap`) topology. -/
+theorem norm_le_of_forall_coord_norm_le_topFibre
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {C : ℝ} (hC : 0 ≤ C)
+    (hcoord : ∀ i (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖ ≤ C) :
+    ‖s‖ ≤ C := by
+  have he0 :
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+        (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover)) = 0 := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover]
+    exact map_zero _
+  have hdist : dist s
+      (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover) ≤ C := by
+    refine dist_le_of_forall_coord_dist_le (𝕜 := 𝕜) (F := F) (V := V)
+      (et := et) (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq)
+      (hcover := hcover) (s := s)
+      (t := (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover)) hC ?_
+    intro i x
+    rw [he0]
+    simp only [ZeroMemClass.coe_zero, Pi.zero_apply, ContinuousMap.zero_apply, dist_zero_right]
+    exact hcoord i x
+  rwa [dist_zero_right] at hdist
+
+/-- **Topological-fibre version of `continuousOn_of_forall_coord_continuousOn`.**  Identical
+statement and proof, but with the fibre topology taken as an explicit `[∀ x, TopologicalSpace (V x)]`
+binder.  The transport `equivCompatibleCoordFamilySubmodule` is a definitional isometry into
+`∀ i, C(Kc i, F)`, so coordinatewise time-continuity into `C(Kc i, F)` yields continuity into the
+section space — a fact at the Banach `F`-norm level that never touches a fibre norm.  This is the
+time-continuity handoff the section-space Picard–Lindelöf bridge consumes for a section space whose
+fibre carries a non-seminormed-derived topology. -/
+theorem continuousOn_of_forall_coord_continuousOn_topFibre
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {X : Type*} [TopologicalSpace X]
+    {f : X → ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {s : Set X}
+    (hcoord : ∀ i, ContinuousOn
+      (fun x => (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f x)).1 i) s) :
+    ContinuousOn f s := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  letI : NormedAddCommGroup
+      (compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo) :=
+    Submodule.normedAddCommGroup
+      (𝕜 := 𝕜) (E := CoordFamily (F := F) Kc)
+      (s := compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo)
+  let e := equivCompatibleCoordFamilySubmodule
+    (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+  have he : Isometry e := fun _ _ => rfl
+  have hval : Isometry
+      (fun a : compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo =>
+        (a : CoordFamily (F := F) Kc)) :=
+    Isometry.of_nndist_eq fun _ _ => rfl
+  have hInd : Topology.IsInducing
+      (fun z : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover =>
+        ((e z).1 : CoordFamily (F := F) Kc)) :=
+    (hval.comp he).isUniformEmbedding.toIsUniformInducing.isInducing
+  rw [hInd.continuousOn_iff, continuousOn_pi]
+  exact hcoord
+
+end TopologicalFibreCoordControl
+
 end ContinuousSectionSpace
 
 end Bundle.Trivialization
