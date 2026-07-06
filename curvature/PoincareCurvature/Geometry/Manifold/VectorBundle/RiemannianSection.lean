@@ -1031,6 +1031,65 @@ theorem continuous_bilinearComp₂_section
       ((s x).bilinearComp (P x) (Q x)) u v,
     ContinuousLinearMap.bilinearComp_apply, keyP u, keyQ v]
 
+/-- **The bilinear-form trivialization readout of a fiberwise two-sided composition is the
+model-fibre `bilinearComp` of the readouts.**  On the trivializing base set of `x₀`, the
+`BilinearFormBundle` coordinate readout of `(s x).bilinearComp (P x) (Q x)` equals the `bilinearComp`
+of the coordinate readout of `s x` with the endomorphism readouts `inCoordinates F W F W x₀ x x₀ x
+(P x)` and `… (Q x)` — an identity entirely inside the clean model fibre `BilF = F →L[ℝ] F →L[ℝ] ℝ`
+(never the raw `BilW x` fibre).
+
+This is the pointwise readout identity internal to `continuous_bilinearComp₂_section`, extracted as a
+standalone reusable lemma.  Its purpose is the section-space Ricci–DeTurck reaction operator at the
+tangent bundle `W := TangentSpace I`: there the raw fibre norms `‖BilW x‖ = ‖TM x →L[ℝ] TM x →L[ℝ] ℝ‖`
+and `‖P x‖ = ‖TM x →L[ℝ] TM x‖` are not synthesizable (the transported-instance diamond / nested-CLM
+`synthInstance` blow-up), so the reaction operator's Lipschitz/coordinate bound must be phrased through
+the trivialization readout in the clean model fibre.  This lemma is exactly that reduction: it rewrites
+the readout of the reaction's fibre value as a `bilinearComp` of clean-fibre readouts, whose operator
+norm is controlled by `ContinuousLinearMap.norm_bilinearComp_le` over `BilF`/`F →L[ℝ] F` (no `BilW`
+norm, no `RiemannianBundle`). -/
+theorem trivializationAt_bilinearFormBundle_bilinearComp_readout_eq
+    (s : Π x : M, BilW x) (P Q : Π x : M, W x →L[ℝ] W x)
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    (trivializationAt BilF BilW x₀
+        (TotalSpace.mk' BilF x ((s x).bilinearComp (P x) (Q x)))).2
+      = ((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2).bilinearComp
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x))
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x)) := by
+  have hICp : ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)
+      = ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx : W x →L[ℝ] F).comp
+          ((P x).comp
+            (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm : F →L[ℝ] W x)) :=
+    ContinuousLinearMap.inCoordinates_eq hx hx
+  have hICq : ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x)
+      = ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx : W x →L[ℝ] F).comp
+          ((Q x).comp
+            (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm : F →L[ℝ] W x)) :=
+    ContinuousLinearMap.inCoordinates_eq hx hx
+  have keyP : ∀ u : F,
+      ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) u)
+        = P x (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm u) := by
+    intro u
+    rw [hICp]
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply,
+      ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.symm_apply_apply]
+  have keyQ : ∀ v : F,
+      ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x) v)
+        = Q x (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm v) := by
+    intro v
+    rw [hICq]
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply,
+      ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.symm_apply_apply]
+  ext u v
+  rw [ContinuousLinearMap.bilinearComp_apply,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx (s x)
+      (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) u)
+      (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x) v),
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx
+      ((s x).bilinearComp (P x) (Q x)) u v,
+    ContinuousLinearMap.bilinearComp_apply, keyP u, keyQ v]
+
 end BilinearConjugation
 
 section FiberwiseSymmetrization
