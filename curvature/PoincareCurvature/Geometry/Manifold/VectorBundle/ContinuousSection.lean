@@ -3480,6 +3480,142 @@ theorem exists_forall_mem_Icc_coord_norm_le_of_continuousOn_topFibre
     _ ≤ D := hD (Set.mem_range_self i)
     _ ≤ max D 0 := le_max_left _ _
 
+/-- **Topological-fibre version of `coordContinuousMap_dist_le_dist`.**  Identical statement and
+proof, with the fibre topology taken as an explicit `[∀ x, TopologicalSpace (V x)]` binder instead of
+derived from a `SeminormedAddCommGroup (V x)`.  Every step is at the section-space
+`NormedAddCommGroup` / coordinate-family Banach `F`-norm level (`equivCompatibleCoordFamilySubmodule`
+is a definitional isometry onto the compatible-coordinate-family submodule of `∀ i, C(Kc i, F)`) and
+never touches a fibre norm, so the seminormed-fibre proof ports verbatim.  This lets the contraction
+apply to a section space whose fibre carries a non-seminormed-derived (e.g. `ContinuousLinearMap`)
+topology, such as the `BilinearFormBundle` hom fibre at `TangentSpace I`. -/
+theorem coordContinuousMap_dist_le_dist_topFibre
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) (i : κ) :
+    dist
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i)
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i)
+      ≤ dist s t := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  letI : NormedAddCommGroup
+      (compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo) :=
+    Submodule.normedAddCommGroup
+      (𝕜 := 𝕜) (E := CoordFamily (F := F) Kc)
+      (s := compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo)
+  let e := equivCompatibleCoordFamilySubmodule
+    (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+  have he : Isometry e := fun _ _ => rfl
+  have hval : Isometry
+      (fun a : compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo =>
+        (a : CoordFamily (F := F) Kc)) :=
+    Isometry.of_nndist_eq fun _ _ => rfl
+  have hcomp : Isometry
+      (fun z : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover =>
+        ((e z).1 : CoordFamily (F := F) Kc)) :=
+    hval.comp he
+  calc
+    dist ((e s).1 i) ((e t).1 i)
+        ≤ dist ((e s).1 : CoordFamily (F := F) Kc) ((e t).1 : CoordFamily (F := F) Kc) :=
+          dist_le_pi_dist _ _ i
+    _ = dist s t := hcomp.dist_eq s t
+
+/-- **Topological-fibre version of `coord_dist_le_dist`.**  The pointwise compact coordinate readout
+is `1`-Lipschitz in the section distance, stated with the fibre topology as an explicit
+`[∀ x, TopologicalSpace (V x)]` binder.  This is the pointwise `hlip` handoff the section-space
+Picard–Lindelöf bridge consumes for a section space whose fibre carries a non-seminormed-derived
+(e.g. `ContinuousLinearMap`) topology: the geometric Ricci–DeTurck reaction operator produces
+`BilinearFormBundle` sections whose hom fibre topology defeats the seminormed-fibre
+`coord_dist_le_dist`; this variant applies directly. -/
+theorem coord_dist_le_dist_topFibre
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i) :
+    dist
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x)
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i x)
+      ≤ dist s t :=
+  le_trans (ContinuousMap.dist_apply_le_dist x)
+    (coordContinuousMap_dist_le_dist_topFibre s t i)
+
+/-- **Topological-fibre version of `coord_zero_apply`.**  The compact coordinate readout of the zero
+section vanishes pointwise, stated with the fibre topology as an explicit
+`[∀ x, TopologicalSpace (V x)]` binder.  The transport
+`toCompatibleCoordFamilySubmoduleContinuousLinearMap` is a continuous *linear* map (built at the
+section-space Banach level, never touching a fibre norm), so it sends `0` to `0`. -/
+theorem coord_zero_apply_topFibre
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+      (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover)).1 i x = 0 := by
+  have he0 :
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+        (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover)) = 0 := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover]
+    exact map_zero _
+  rw [he0]
+  simp only [ZeroMemClass.coe_zero, Pi.zero_apply, ContinuousMap.zero_apply]
+
+/-- **Topological-fibre version of `coord_norm_le_norm`:** `‖(coord s).1 i x‖ ≤ ‖s‖`, stated with the
+fibre topology as an explicit `[∀ x, TopologicalSpace (V x)]` binder.  The `t = 0` specialisation of
+`coord_dist_le_dist_topFibre` combined with `coord_zero_apply_topFibre`.  This is the `hcenter`
+handoff the section-space Picard–Lindelöf bridge consumes for a section space whose fibre carries a
+non-seminormed-derived (e.g. `ContinuousLinearMap`) topology — turning a section-space centre size
+`‖A t σ₀‖ ≤ Mc` into the coordinate centre bound `‖(coord (A t σ₀)).1 i x‖ ≤ Mc`. -/
+theorem coord_norm_le_norm_topFibre
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i) :
+    ‖(equivCompatibleCoordFamilySubmodule
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖ ≤ ‖s‖ := by
+  have h := coord_dist_le_dist_topFibre s
+    (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) i x
+  rw [coord_zero_apply_topFibre, dist_zero_right, dist_zero_right] at h
+  exact h
+
 end TopologicalFibreCoordControl
 
 end ContinuousSectionSpace
