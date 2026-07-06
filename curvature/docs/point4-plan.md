@@ -551,3 +551,61 @@ not appear in the statement (supply `Kp := ‖inCoord P‖` from a generic-`W` s
 `coord_apply`/`equivCompatibleCoordFamilySubmodule` (fibre `AddCommGroup`/`Module` as explicit binders) so
 `coord = readout` holds at `TM`, then feed the operator readout bounds into the topological-fibre
 section-space Picard bridge for the chart's `picard`.
+
+### Progress (2026-07-06, later 3) — the geometric DeTurck reaction operator now has a CONCRETE `inCoordinates` readout size bound AND a fiber-norm-free `coord = readout` bridge at `TM`; the remaining `hlip`/`hcenter` are blocked by the section-NORM (metric) vs operator (hom) fibre-topology diamond
+
+Three sorry-free, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`), purely-additive declarations
+landed (new module `AnalyticPDE/GeometricReactionPicardTangent.lean` + additions to
+`AnalyticPDE/GeometricReactionCoordBounds.lean`):
+
+* `deTurckReactionSectionMap_comp_readout_norm_le_inCoordinates` /
+  `deTurckReactionSectionMap_readout_norm_le_inCoordinates` (in `GeometricReactionCoordBounds`) — the
+  **concrete `Kp` readout bound**: `‖readout(deTurckReactionSectionMap … σ x)‖ ≤
+  2·‖inCoordinates E TM E TM x0 x x0 x (P x)‖·‖readout(σ x)‖`, at `TM`.  **Key empirical finding:
+  naming `inCoordinates E TM E TM …` in a readout-bound STATEMENT elaborates fine at `TM`** (the plan's
+  earlier "diamond blocks any `inCoordinates` statement" warning was over-broad — it only bites in
+  `coord` position / when the section-norm is involved).  Supplies the `hcomp` hypothesis of the
+  already-committed `deTurckReactionSectionMap_readout_norm_le_of_comp_bound` with a concrete
+  `Kp := ‖inCoord (P x)‖`.
+* `bilinearFormBundle_coord_eq_trivializationAt_readout_tangent` (plain sections) +
+  `deTurckReactionSectionMap_coord_eq_readout` (operator corollary), in `GeometricReactionPicardTangent`
+  — the **fiber-norm-free `coord = readout` bridge at `TM`**: `(coord σ).1 i x = (trivializationAt BilF
+  BilW (x0 i) ⟨x, σ x⟩).2`.  The existing `bilinearFormBundle_coord_eq_trivializationAt_readout` demands
+  `[∀ x, SeminormedAddCommGroup (W x)]` (Π-fibre-seminorm) → fails to synthesize `FiberBundle E TM`.
+  **Resolution: prove it directly at `TM` by unfolding the `coord` definition (`coord_apply`'s simp set:
+  `equivCompatibleCoordFamilySubmodule`, `toSubtype`, …, `linearMapAt_apply`) ON THE GOAL** — so the
+  goal's own hom-bundle fibre topology (`ContinuousLinearMap.topologicalSpace`) is used consistently —
+  rather than via `coord_apply`/`rw` (which re-synthesize the metric fibre topology and mismatch).
+  Two plumbing facts discovered: (i) a bare-section binder `s`'s CoeFun `s x` leaves `et`/`hKc`
+  metavars in the RHS ("function expected") — write **`s.toFun x`** instead; (ii) `coord_apply` cannot
+  be *applied* to the operator (its `[∀ x, TopologicalSpace (V x)]` synthesizes the metric topology,
+  clashing with the operator's hom topology), so the direct-unfold is essential.
+
+**THE REMAINING BLOCKER (precise) — `hlip`/`hcenter` need the section NORM, which forces the metric
+fibre topology, which isDefEq-DIVERGES against the operator's hom fibre topology.**  Both the
+`_topFibre` Picard bridge inputs reduce to `‖coord σ i x‖ ≤ ‖σ‖` / `dist(coord s)(coord s') ≤ dist s s'`
+i.e. `coord_norm_le_norm` / `coord_dist_le_dist`.  These lemmas are *fiber-norm-free in their section
+binders*, BUT their conclusion mentions `‖s‖` (the section-space `NormedAddCommGroup`), whose instance
+pulls in `[∀ x, SeminormedAddCommGroup (BilW x)]` → the **metric** fibre topology
+`PseudoMetricSpace.toUniformSpace.toTopologicalSpace` on `BilW x`.  The concrete operator
+`deTurckReactionSectionMap` (fiber-norm-free) produces sections whose type carries the **hom-bundle**
+topology `ContinuousLinearMap.topologicalSpace`.  Applying `coord_norm_le_norm`/`coord_dist_le_dist` (or
+even `apply`, or with `(V := BilW)` pinned) to a hom-typed operator section triggers
+`(deterministic) timeout at whnf/isDefEq` (2M heartbeats) unifying the hom-vs-metric fibre topology on
+`BilW x = TangentSpace I x →L TangentSpace I x →L ℝ`.  Root cause: the `TangentSpace I x` derived-module
+(`def := E`) vs norm-module (`instNormedAddCommGroupTangentSpace`) `AddCommGroup` diamond (documented in
+`DowngradeNormFree.lean`), propagated to `BilW x`, makes the two fibre topologies defeq-but-not-cheaply
+so.  The `coord = readout` *equality* dodged this (unfold on the goal); the `≤ ‖σ‖` *inequality* cannot,
+because `‖σ‖` itself is the metric-typed object.
+
+**Concrete next target.** Provide a **hom-topology-native** `‖coord σ i x‖ ≤ ‖σ‖` /
+`dist(coord s i x)(coord s' i x) ≤ dist s s'` for the `BilinearFormBundle`-at-`TM` section space, so the
+operator's readout bounds become the `_topFibre` Picard `hlip`/`hcenter`.  Options: (a) reprove
+`coord_norm_le_norm`/`coord_dist_le_dist` with the fibre topology as an EXPLICIT binder pinned to the
+hom-bundle topology (a `_topFibre` variant of these two lemmas — none currently exists; only
+`norm_le_of_forall_coord_norm_le_topFibre` (the reverse direction) does); or (b) a definition-site
+alignment making `BilinearFormBundle`'s hom fibre topology defeq-cheap to the operator-norm metric
+topology at `TM`.  With that single lemma, feed the frozen `A s = deTurckReactionSectionMap ∇W s + b`
+(`hcont = continuousOn_const`) into
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn_topFibre`
+(which derives `Mc` internally) to obtain the chart's `picard`.
