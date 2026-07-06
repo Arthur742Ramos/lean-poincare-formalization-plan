@@ -514,3 +514,40 @@ the affine `A t s = intrinsicRicciFlowRHSSectionSpace g t + deTurckReactionSecti
 already-committed topological-fibre section-space Picard bridge to obtain a genuine `IsPicardLindelof`
 for the concrete tangent-bundle chart operator — the chart's `picard` field — with the `geometric`
 field already anchored on the metric state above.
+
+### Progress (2026-07-06, later 2) — the concrete tangent-bundle DeTurck reaction OPERATOR now has readout size bounds AT `TM`, and the TM AddCommGroup/VectorBundle diamond is mapped precisely
+
+Six sorry-free, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`), purely-additive declarations
+landed in the new `AnalyticPDE/GeometricReactionCoordBounds.lean`:
+
+* `Bundle.readout_add_nf` / `readout_sub_nf` / `comp_readout_eq_nf` — the **fiber-norm-free** readout
+  algebra: the trivialization readout is additive/subtractive in the fibre value, and carries a fibre
+  first-slot composition `B.comp Q` to the *model*-fibre `(readout B).comp (inCoordinates … Q)`, all with
+  only `AddCommGroup`/`Module`/`TopologicalSpace` fibre binders (no `SeminormedAddCommGroup`, no
+  `bilinearComp`).
+* `Bundle.flip_readout_eq_sn` / `norm_deTurckReaction_readout_le_sn` — the readout slot-flip identity and
+  the `comp+flip`-shape reaction readout size bound `≤ 2·‖readout B‖·‖inCoord Q‖` (generic seminorm `W`).
+* `RicciFlow.deTurckReactionSectionMap_readout_split` / `_readout_norm_le_two_comp` /
+  `_readout_norm_le_of_comp_bound` — the **real geometric operator at `TM`**:
+  `readout(deTurckReactionSectionMap … σ x) = readout((σ x).comp (P x)) + readout(((σ x).comp (P x)).flip)`,
+  hence `‖readout(deTurck σ x)‖ ≤ 2·‖readout((σ x).comp (P x))‖`, hence `≤ 2·Kp·‖readout(σ x)‖` given a
+  composition-readout bound `Kp`.  This is the `K = 2·Kp` section-space Picard `hlip`/`hcenter` fibre
+  content for the concrete operator, obtained by connecting through the operator's own `Pi.add`-value
+  (`readout_add_nf` + `rfl`) and discharging the flip readout fiber-norm-free via
+  `trivializationAt_bilinearFormBundle_apply_eq` + definitional `flip_apply` (`rfl`).
+
+**The diamond, mapped.**  `TangentSpace I x` is a non-reducible `def := E` deriving `AddCommGroup`/`Module`
+but no norm; `instNormedAddCommGroupTangentSpace` (priority 70, flat-`E`) adds one.  This gives two defeq
+but non-syntactic `AddCommGroup`/`Module` paths.  `bilinearComp`/`ContinuousLinearMap.flip` use the flat-`E`
+path, while the operator's `Pi.add` uses the deriving path.  Empirically: `readout_add_nf` (no
+`inCoordinates`) synthesizes at `TM`; but any lemma **statement** naming `inCoordinates E TM … (P x)`
+(comp readout bound, coord=readout bridge) forces `VectorBundle ℝ E TM` on the flat-`E` path, clashing
+with the section space's deriving path → `FiberBundle` synth failure or `isDefEq` timeout; and
+`deTurckReactionSectionMap` in `coord` position makes `isDefEq` diverge (>4M heartbeats) even to state.
+
+**Concrete next targets.** (A) the composition-readout `Kp` bound at `TM` phrased so `inCoordinates` does
+not appear in the statement (supply `Kp := ‖inCoord P‖` from a generic-`W` site, or prove inline via
+`trivializationAt_bilinearFormBundle_apply_eq`); (B) a `_topFibre`-style restatement of
+`coord_apply`/`equivCompatibleCoordFamilySubmodule` (fibre `AddCommGroup`/`Module` as explicit binders) so
+`coord = readout` holds at `TM`, then feed the operator readout bounds into the topological-fibre
+section-space Picard bridge for the chart's `picard`.
