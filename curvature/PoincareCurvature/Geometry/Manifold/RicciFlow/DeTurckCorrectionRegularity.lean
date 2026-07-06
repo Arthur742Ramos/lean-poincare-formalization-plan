@@ -3,6 +3,7 @@ module
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurck
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.DowngradeNormFree
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection
 
 /-!
 # Continuity of the covariant derivative of the intrinsic DeTurck vector field
@@ -833,5 +834,40 @@ theorem exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero
   · intro x u v
     rw [ricciBilinearFormSection_apply]
     rfl
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The intrinsic Ricci–DeTurck RHS as a genuine section-space element.**  For a metric family
+`g` and a background connection family whose time-`t` slice is a `C¹` covariant derivative, the
+intrinsic Ricci–DeTurck right-hand side `x ↦ intrinsicRicciDeTurckRHS g background t x` — already
+known to be a continuous `BilinearFormBundle` section by
+`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero` — packages into an element of the transported
+finite-cover `ContinuousSectionSpace`.  This is the *value/output side* of the geometric Ricci–DeTurck
+chart operator `A`: for the geometric chart, `A τ s` must be an element of this section space equal
+pointwise to the geometric RHS, which is exactly the identification asserted by the chart's `geometric`
+field.  The packaging is the honest bridge from the (bundle-level) value-section regularity to the
+Banach section space `CSS` in which the chart operator lives; the surviving geometric-`A` obstruction is
+the operator's *dependence on the input section* (and its `picard`/mild bounds), not the regularity of
+its values. -/
+theorem exists_intrinsicRicciDeTurckRHS_continuousSectionSpace
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1) :
+    ∃ rhsCSS : ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+        (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover,
+      ∀ (x : M) (u v : TM x),
+        rhsCSS x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v := by
+  obtain ⟨rhs, hrhs_cont, hrhs_val⟩ :=
+    exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero g background t hbackground
+  exact ⟨⟨rhs, hrhs_cont.continuous⟩, hrhs_val⟩
 
 end RicciFlow
