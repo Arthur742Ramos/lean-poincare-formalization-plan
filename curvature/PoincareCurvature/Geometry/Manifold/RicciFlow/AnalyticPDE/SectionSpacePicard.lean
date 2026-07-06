@@ -1216,4 +1216,129 @@ theorem exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_endoFiel
     (Φ := fun _ => Φ₀) (fun _ => hΦ₀) (hΦ₀.comp continuous_snd)
     b x0 locus t₀ T₀ hT₀ a K ha (fun _ i x => hbound i x) hb hsub
 
+/-! ### Topological-fibre section-space Picard bridges (Path-B compatible)
+
+The centre-bound section-space Picard bridges above carry a fibre
+`[∀ x, SeminormedAddCommGroup (V x)]`, whose *induced* fibre topology (Path A) is baked into their
+`ContinuousSectionSpace` type — while the concrete `BilinearFormBundle` continuous section space (with
+fibre `V x = W x →L[ℝ] W x →L[ℝ] ℝ`) carries the *defeq-but-differently-spelled*
+`ContinuousLinearMap.topologicalSpace` (Path B), the topology `FiberBundle`/`VectorBundle` and the
+concrete coordinate readout lemmas use.  Since none of the bridge machinery ever touches a fibre norm
+(all estimates are at the Banach `F`-norm / coordinate level), the two lemmas below restate the
+centre-bound bridge with the fibre topology taken as an *explicit* `[∀ x, TopologicalSpace (V x)]`
+binder (plus the bare `AddCommGroup`/`Module` structure the vector bundle provides), routing the
+time-continuity / centre-norm handoffs through the topological-fibre helpers
+`continuousOn_of_forall_coord_continuousOn_topFibre` / `norm_le_of_forall_coord_norm_le_topFibre`.
+This lets the section-space Picard bridge apply verbatim to the concrete `BilinearFormBundle`
+continuous section space (Path B), so the geometric Ricci–De Turck reaction operator's already-proved
+coordinate `hlip`/`hcenter` bounds are consumed directly. -/
+
+/-- **Topological-fibre version of `isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound`.**
+Identical statement and proof, with the fibre topology taken as an explicit
+`[∀ x, TopologicalSpace (V x)]` binder (instead of derived from a `SeminormedAddCommGroup (V x)`), so
+the section space is built with the caller's fibre topology.  The time-continuity and centre-norm
+handoffs go through the topological-fibre helpers. -/
+theorem isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound_topFibre
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, TopologicalSpace (V x)] [∀ x, AddCommGroup (V x)] [∀ x, Module ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T : ℝ) (hT : t₀ < T) (a K Mc : ℝ≥0)
+    (hlip : ∀ t ∈ Set.Icc t₀ T, ∀ ⦃s⦄, s ∈ Metric.closedBall x0 (a : ℝ) →
+        ∀ ⦃s'⦄, s' ∈ Metric.closedBall x0 (a : ℝ) → ∀ (i : κ) (x : Kc i),
+        dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s')).1 i x)
+          ≤ (K : ℝ) * dist s s')
+    (hcont : ∀ s ∈ Metric.closedBall x0 (a : ℝ), ∀ (i : κ),
+        ContinuousOn
+          (fun t => (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i)
+          (Set.Icc t₀ T))
+    (hcenter : ∀ t ∈ Set.Icc t₀ T, ∀ (i : κ) (x : Kc i),
+        ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t x0)).1 i x‖ ≤ (Mc : ℝ))
+    (hLa : ((Mc : ℝ) + (K : ℝ) * (a : ℝ)) * (T - t₀) ≤ (a : ℝ)) :
+    IsPicardLindelof A (tmin := t₀) (tmax := T)
+      ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 (Mc + K * a) K := by
+  refine isPicardLindelof_of_lipschitzOn_centerBound_closedBall_timeDependent_Icc
+    A x0 t₀ T hT a K Mc ?_ ?_ ?_ hLa
+  · intro t ht
+    exact lipschitzOnWith_of_forall_coord_dist_le
+      (fun s hs s' hs' i x => hlip t ht hs hs' i x)
+  · intro s hs
+    exact continuousOn_of_forall_coord_continuousOn_topFibre (fun i => hcont s hs i)
+  · intro t ht
+    exact norm_le_of_forall_coord_norm_le_topFibre (NNReal.coe_nonneg Mc)
+      (fun i x => hcenter t ht i x)
+
+/-- **Topological-fibre version of
+`sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound`.**  Identical
+statement and proof, with the fibre topology taken as an explicit `[∀ x, TopologicalSpace (V x)]`
+binder.  Combines the topological-fibre centre-bound section-space Picard constructor with the
+closed-ball a-posteriori bridge `IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset`
+(a Banach-space fact with no fibre instances).  This is the form the geometric Ricci–De Turck chart's
+`realization` decode consumes for the concrete `BilinearFormBundle` (Path-B) continuous section
+space. -/
+theorem sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound_topFibre
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, TopologicalSpace (V x)] [∀ x, AddCommGroup (V x)] [∀ x, Module ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (A : ℝ →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (locus : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover))
+    (t₀ T : ℝ) (hT : t₀ < T) (a K Mc : ℝ≥0)
+    (hlip : ∀ t ∈ Set.Icc t₀ T, ∀ ⦃s⦄, s ∈ Metric.closedBall x0 (a : ℝ) →
+        ∀ ⦃s'⦄, s' ∈ Metric.closedBall x0 (a : ℝ) → ∀ (i : κ) (x : Kc i),
+        dist
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i x)
+          ((equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s')).1 i x)
+          ≤ (K : ℝ) * dist s s')
+    (hcont : ∀ s ∈ Metric.closedBall x0 (a : ℝ), ∀ (i : κ),
+        ContinuousOn
+          (fun t => (equivCompatibleCoordFamilySubmodule
+            (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t s)).1 i)
+          (Set.Icc t₀ T))
+    (hcenter : ∀ t ∈ Set.Icc t₀ T, ∀ (i : κ) (x : Kc i),
+        ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t x0)).1 i x‖ ≤ (Mc : ℝ))
+    (hLa : ((Mc : ℝ) + (K : ℝ) * (a : ℝ)) * (T - t₀) ≤ (a : ℝ))
+    (hsub : Metric.closedBall x0 (a : ℝ) ⊆ locus) :
+    Nonempty (BanachEvolutionLocalSolutionIn A locus t₀ x0) :=
+  IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset hT
+    (isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound_topFibre
+      A x0 t₀ T hT a K Mc hlip hcont hcenter hLa) hsub
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
