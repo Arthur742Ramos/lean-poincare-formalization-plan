@@ -2985,6 +2985,36 @@ theorem continuousAt_inCoordinates_of_continuous_homSection
   rw [continuousAt_hom_bundle] at h
   exact h.2
 
+/-- **The coordinate readout of a continuous endomorphism-bundle section is continuous on the whole
+trivializing set.**  Unlike `continuousAt_inCoordinates_of_continuous_homSection` (which yields
+continuity only *at* the trivialization centre `x₀`), this gives `ContinuousOn` on the entire hom-bundle
+base set: for a continuous hom-section `Φ`, the fixed-centre readout
+`x ↦ inCoordinates F V F V x₀ x x₀ x (Φ x)` equals `(trivₓ₀ ⟨x, Φ x⟩).2` (`hom_trivializationAt_apply`),
+and the hom trivialization is continuous on its source (which the section maps the base set into).
+This is the ingredient that turns a *per-point* section-space Picard coordinate bound
+`‖inCoord (P x)‖ ≤ Kp` into a *uniform* bound over a compact cover (via
+`IsCompact.exists_bound_of_continuousOn` on each compact piece and a finite index sup), supplying the
+uniform Lipschitz constant `K = 2·Kp` the section-space Picard bridge consumes. -/
+theorem continuousOn_inCoordinates_of_continuous_homSection
+    {Φ : Π x : M, V x →L[𝕜] V x}
+    (hΦ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x)))
+    (x₀ : M) :
+    ContinuousOn (fun x => ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (Φ x))
+      (trivializationAt (F →L[𝕜] F) (fun x => V x →L[𝕜] V x) x₀).baseSet := by
+  set et := trivializationAt (F →L[𝕜] F) (fun x => V x →L[𝕜] V x) x₀ with het
+  have hEq : (fun x => ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (Φ x))
+      = fun x => (et (TotalSpace.mk' (F →L[𝕜] F) x (Φ x))).2 := by
+    funext x
+    rw [het, hom_trivializationAt_apply]
+  rw [hEq]
+  have hsrc : Set.MapsTo (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x))
+      et.baseSet et.source := by
+    intro x hx
+    rw [Trivialization.mem_source]
+    exact hx
+  exact continuous_snd.comp_continuousOn (et.continuousOn.comp hΦ.continuousOn hsrc)
+
 /-- **Continuity of an endomorphism-bundle section from continuity of its coordinate readout.**  The
 constructor dual of `continuousAt_inCoordinates_of_continuous_homSection`: if, at every base point
 `x₀`, the fiber readout `x ↦ inCoordinates F V F V x₀ x x₀ x (Φ x) = (trivₓ₀).clmAt x ∘ Φ x ∘
