@@ -475,3 +475,42 @@ real `IsPicardLindelof` for the frozen reaction; then add the `(-2)•Ric` sourc
 the difference), `hcenter` gains `‖coord b‖`; and identify `P := ∇W` (the frozen DeTurck coefficient
 about `g0`) with its `inCoordinates` size bound `Kp` supplied by compactness.  That yields the chart's
 `picard`, whose decode is `realization`.
+
+### Progress (2026-07-06, later) — the tangent-bundle DeTurck reaction OPERATOR now exists on the concrete `BilinearFormBundle` section space, and its affine `A = Ricci-source + reaction` reproduces the full geometric `intrinsicRicciDeTurckRHS` on the metric state
+
+Empirically confirmed the recurring blocker: the abstract generic-fibre operator
+`ContinuousSectionSpace.bilinearDerivationFieldLinearMap` **cannot be instantiated at
+`W := TangentSpace I`** — forming it there fails to synthesize `FiberBundle E (TangentSpace I)`
+(equivalently the un-synthesizable `Π`-fibre-norm `[∀ x, SeminormedAddCommGroup (TangentSpace I x)]`
+diamond documented in `DowngradeNormFree.lean`). Note the `Continuous`→`Continuous` composition helper
+`Bundle.continuous_bilinearComp₂_section` is blocked for the same reason (it carries the fibre-norm
+section variable).
+
+Four sorry-free, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`), purely-additive declarations
+landed, sidestepping the wall via the **fiber-norm-free bundle section algebra** (`clm_bundle_comp`,
+`contMDiff_flipBilinearFormSection_tangent_zero`, `add_section`) bridged to `Continuous` through
+`contMDiff_zero_iff`:
+
+* `bilinearFormSectionDeTurckReaction` (+`_apply`, +`_contMDiff_zero`, in `DeTurckCorrectionRegularity`)
+  — the **generic-section** frozen-`P` symmetrized DeTurck derivation
+  `x ↦ (s x).comp (P x) + ((s x).comp (P x)).flip` (fiber value `s(Pu,v)+s(Pv,u)`), generalizing
+  `intrinsicDeTurckCorrectionSection` (the *metric*-section case, `P:=∇W`) to an arbitrary continuous
+  section; `_apply` closes the `TangentSpace`-fibre `flip` instance-diamond via `congr`/defeq.
+* `deTurckReactionSectionMap` (+`_apply`) — the reaction as a genuine **`CSS(TM) → CSS(TM)` operator**
+  on the concrete `BilinearFormBundle` continuous section space the chart operator `A` acts on;
+  well-definedness discharged fiber-norm-free. This is the tangent-bundle reaction operator the generic
+  machinery could not provide.
+* `deTurckReactionSectionMap_metricSection_apply_eq_intrinsicDeTurckCorrection` (in
+  `DeTurckReactionAssembly`) — the operator with `P:=∇W` on the metric section **equals the geometric
+  `intrinsicDeTurckCorrection`** (symmetrized fiber value matched via `ContMDiffRiemannianMetric.symm`).
+* `deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS` —
+  the affine `intrinsicRicciFlowRHSSectionSpace g t + deTurckReactionSectionMap ∇W (metric)` reproduces
+  the **full geometric `intrinsicRicciDeTurckRHS`** on the metric state: the center-point verification
+  of the chart `A`'s `geometric` field, in terms of the concrete TM operator + named Ricci source.
+
+**Concrete next target.** Establish the section-space **coordinate `hlip`/`hcenter` bounds** for
+`deTurckReactionSectionMap` (Lipschitz-in-`s`, since it is linear in `s`) directly at `TM`, then feed
+the affine `A t s = intrinsicRicciFlowRHSSectionSpace g t + deTurckReactionSectionMap ∇W s` into the
+already-committed topological-fibre section-space Picard bridge to obtain a genuine `IsPicardLindelof`
+for the concrete tangent-bundle chart operator — the chart's `picard` field — with the `geometric`
+field already anchored on the metric state above.
