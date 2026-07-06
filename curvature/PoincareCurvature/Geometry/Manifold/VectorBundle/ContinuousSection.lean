@@ -2501,6 +2501,50 @@ theorem coord_zero_apply
   rw [he0]
   simp only [ZeroMemClass.coe_zero, Pi.zero_apply, ContinuousMap.zero_apply]
 
+/-- **The compact coordinate readout is additive:**
+`(coord (s + t)).1 i x = (coord s).1 i x + (coord t).1 i x`.  The transport
+`equivCompatibleCoordFamilySubmodule` is the underlying (continuous) linear equivalence of the
+section-space module structure, so it sends `s + t` to `equiv s + equiv t`, and the
+coordinate/point projections of a sum coordinate family are pointwise sums.  This is the
+coordinate-readout companion of `coord_zero_apply`, used to reduce the coordinate estimates of an
+*affine* section-space operator `A t s = L s + b` (a linear generator plus a fixed source) to those
+of its linear part: the source `b` contributes the same coordinate summand to `A t s` and `A t s'`,
+which cancels in the coordinate distance. -/
+theorem coord_add_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (s + t)).1 i x
+      = (equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x
+        + (equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i x := by
+  have he :
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (s + t))
+      = (equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s)
+        + (equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t) := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover,
+      ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover,
+      ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover]
+    exact map_add _ s t
+  rw [he]
+  simp only [AddMemClass.coe_add, Pi.add_apply, ContinuousMap.add_apply]
+
 /-- **The pointwise coordinate readout is norm-nonexpansive:** `‖(coord s).1 i x‖ ≤ ‖s‖`.  The
 norm-level companion of `coord_dist_le_dist` (take `t = 0` and use `coord_zero_apply`).  Composed
 with a section-space *boundedness* estimate `‖A t x0‖ ≤ Mc` this yields the coordinate centre-bound
