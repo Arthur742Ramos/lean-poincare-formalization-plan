@@ -987,4 +987,84 @@ theorem intrinsicRicciDeTurckRHSSectionSpace_symm
   rw [intrinsicRicciDeTurckRHSSectionSpace_apply, intrinsicRicciDeTurckRHSSectionSpace_apply,
     intrinsicRicciDeTurckRHS_symm]
 
+/-- **The intrinsic Ricci-flow principal part `(-2)•Ric` is a continuous `BilinearFormBundle`
+section**, unconditionally (no background hypothesis).  This is the second-order principal half of the
+intrinsic Ricci–DeTurck right-hand side split off from the DeTurck reaction: its continuous section is
+`(-2 : ℝ) • ricciBilinearFormSection (someContMDiffLeviCivitaConnection g t)`, continuous by
+`ricciBilinearFormSection_contMDiff_zero` and the vector-bundle scalar-multiple closure
+`ContMDiff.const_smul_section`.  Packaged as a `ContinuousSectionSpace` value
+(`intrinsicRicciFlowRHSSectionSpace`) it is the affine *source* term `b` of the frozen chart split
+`A τ s = reaction s + b` about the initial metric. -/
+theorem exists_intrinsicRicciFlowRHSSection_contMDiff_zero
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) :
+    ∃ rhs : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x,
+      ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+        (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := _root_.Bundle.BilinearFormBundle (V := TM)) x (rhs x)) ∧
+      ∀ (x : M) (u v : TM x),
+        rhs x u v = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v := by
+  letI : _root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x) :=
+    ⟨(g t).toRiemannianMetric⟩
+  haveI hcov :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g t
+  refine ⟨_, (ricciBilinearFormSection_contMDiff_zero (I := I) (M := M)
+      (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+        (I := I) (M := M) g t) (Module.finBasis ℝ E)).const_smul_section (a := (-2 : ℝ)), ?_⟩
+  intro x u v
+  have hval : ricciBilinearFormSection (I := I) (M := M)
+      (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+        (I := I) (M := M) g t) x u v = intrinsicRicciTensor (I := I) (M := M) g t x u v := by
+    rw [ricciBilinearFormSection_apply]; rfl
+  simp only [Pi.smul_apply, ContinuousLinearMap.smul_apply, smul_eq_mul, hval,
+    intrinsicRicciFlowRHS_apply, ricciFlowRHS_apply, intrinsicRicciTensor_apply]
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The intrinsic Ricci-flow principal part as a named section-space value.**  The `def`-level
+companion of `exists_intrinsicRicciFlowRHSSection_contMDiff_zero`: the second-order principal part
+`(-2)•Ric` of the intrinsic Ricci–DeTurck right-hand side realised as a genuine element of the
+transported finite-cover `ContinuousSectionSpace`.  Unlike `intrinsicRicciDeTurckRHSSectionSpace` it
+needs **no** background-connection hypothesis (the intrinsic Levi-Civita connection is automatically
+`C¹`).  This is the directly referenceable affine *source* `b` for the frozen chart split
+`A τ s = reaction s + b`; its defining pointwise identity is `intrinsicRicciFlowRHSSectionSpace_apply`. -/
+noncomputable def intrinsicRicciFlowRHSSectionSpace
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+      (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover :=
+  ⟨Classical.choose (exists_intrinsicRicciFlowRHSSection_contMDiff_zero g t),
+    (Classical.choose_spec (exists_intrinsicRicciFlowRHSSection_contMDiff_zero g t)).1.continuous⟩
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- The named section-space Ricci-flow principal value agrees pointwise with the intrinsic
+`intrinsicRicciFlowRHS`.  The defining identity tying the affine source `b` to the geometric
+second-order principal part. -/
+@[simp] theorem intrinsicRicciFlowRHSSectionSpace_apply
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ)
+    (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g t x u v
+      = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v :=
+  (Classical.choose_spec (exists_intrinsicRicciFlowRHSSection_contMDiff_zero g t)).2 x u v
+
 end RicciFlow
