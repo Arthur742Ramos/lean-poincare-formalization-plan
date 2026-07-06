@@ -8829,3 +8829,33 @@ should be the constant model-fibre flip), prove its continuity with
 `continuous_homSection_of_continuousAt_inCoordinates`, feed `endoField` +
 `exists_..._endoField_source_const`, and thereby inhabit the first genuine non-scalar zeroth-order chart
 generator.  Then the true long pole (the second-order mild/heat-semigroup principal part) remains.
+
+### Probe finding (2026-07-05) — the `endoField`/hom-section route hits a nested-bundle *instance* wall for `BilinearFormBundle`; build the reaction via a tangent-bundle conjugation instead
+
+A bounded probe of route (iii) (the flip/symmetrisation endomorphism `flipEndo x = flipₗᵢ ℝ (Wx) (Wx) ℝ`
+of `BilinearFormBundle (W)`) established the *exact* failing term: merely **stating** continuity of an
+endomorphism section of `BilinearFormBundle` — `Continuous (fun x => TotalSpace.mk' … x (flipEndo x))`
+— fails at instance synthesis with
+```
+failed to synthesize
+  TopologicalSpace (TotalSpace ((F →L F →L ℝ) →L F →L F →L ℝ)
+                    (fun x => BilinearFormBundle x →L BilinearFormBundle x))
+```
+i.e. the endomorphism bundle of `BilinearFormBundle` is a *triple*-nested hom bundle
+`Hom(Hom(W, Hom(W,ℝ)), Hom(W, Hom(W,ℝ)))`, and its `TopologicalSpace (TotalSpace …)` / `FiberBundle` /
+`VectorBundle` instances do **not** auto-derive from `W`'s (the double-nesting of `BilinearFormBundle`
+already strains synthesis; wrapping it in one more `Hom(·,·)` for `endoField` breaks it).  So the
+`endoField` route — which needs `Hom(BilinearFormBundle, BilinearFormBundle)` — is the wrong vehicle for
+the geometric reaction on the *actual chart bundle*.
+
+**Architectural consequence (the tractable bypass).**  The reaction endomorphism should be built
+**directly on the section space** from a *tangent-bundle* endomorphism `P : Π x, W x →L W x`, acting on
+bilinear forms by conjugation `β ↦ β(P·, P·)` (Mathlib `ContinuousLinearMap.bilinearComp (s x) (P x)
+(P x)`), whose section continuity uses `clm_bundle_apply` over the **tangent bundle `W`** (whose
+instances exist) — *never* the triple-hom endo bundle.  The just-committed hom-section continuity API
+still applies to `P` itself (a `Hom(W,W)` section — one level of nesting, instances present); the missing
+piece is a *bilinear-conjugation section-continuity* lemma
+`x ↦ TotalSpace.mk' … x ((s x).bilinearComp (P x) (P x))` at the `BilinearFormBundle` (double-hom) level,
+which avoids the triple-hom wall.  **This is the concrete next target for the reaction operator** — a
+`continuous_bilinearComp_section`-style lemma, plus a `smulField`-analogue direct `CSS →L CSS`
+reaction generator built from it, feeding the affine `picard` capstones without `endoField`.
