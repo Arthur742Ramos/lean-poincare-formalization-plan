@@ -870,4 +870,42 @@ theorem exists_intrinsicRicciDeTurckRHS_continuousSectionSpace
     exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero g background t hbackground
   exact ⟨⟨rhs, hrhs_cont.continuous⟩, hrhs_val⟩
 
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The section-space packaging of the intrinsic Ricci–DeTurck RHS is pointwise symmetric.**  A
+strengthening of `exists_intrinsicRicciDeTurckRHS_continuousSectionSpace` recording that the packaged
+`ContinuousSectionSpace` value is a *symmetric* bilinear-form section — i.e. it lies in the pointwise
+symmetric locus `{s | ∀ x v w, s x v w = s x w v}`.  This is the honest symmetry content the geometric
+Ricci–DeTurck chart exploits (`A τ s ∈ symmetricLocus`), obtained from the intrinsic
+`intrinsicRicciDeTurckRHS_symm` (Ricci and the symmetrized DeTurck reaction are both symmetric) through
+the value identification, with no assumption beyond the ambient higher smoothness of `M`. -/
+theorem exists_intrinsicRicciDeTurckRHS_continuousSectionSpace_symm
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1) :
+    ∃ rhsCSS : ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+        (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover,
+      (∀ (x : M) (u v : TM x),
+          rhsCSS x u v = intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v) ∧
+      (∀ (x : M) (u v : TM x), rhsCSS x u v = rhsCSS x v u) := by
+  obtain ⟨rhs, hrhs_cont, hrhs_val⟩ :=
+    exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero g background t hbackground
+  refine ⟨⟨rhs, hrhs_cont.continuous⟩, hrhs_val, fun x u v => ?_⟩
+  calc rhs x u v
+      = intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v := hrhs_val x u v
+    _ = intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x v u :=
+        intrinsicRicciDeTurckRHS_symm (I := I) (M := M) g background t x u v
+    _ = rhs x v u := (hrhs_val x v u).symm
+
 end RicciFlow
