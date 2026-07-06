@@ -987,6 +987,72 @@ theorem intrinsicRicciDeTurckRHSSectionSpace_symm
   rw [intrinsicRicciDeTurckRHSSectionSpace_apply, intrinsicRicciDeTurckRHSSectionSpace_apply,
     intrinsicRicciDeTurckRHS_symm]
 
+open PoincareCurvature.Bundle.Trivialization in
+/-- **Section-space self-DeTurck reduction (general Levi-Civita background).**  The section-space
+companion of `intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita`: when the background
+connection family is Levi-Civita for `g`, the named section-space Ricci–DeTurck RHS value reads out
+pointwise as the pure intrinsic Ricci-flow right-hand side `(-2)•Ric`.  The DeTurck reaction term
+vanishes in the metric's Levi-Civita gauge, so the affine chart split `A τ s = reaction s + b`
+degenerates to its principal source `b` on the identification. -/
+theorem intrinsicRicciDeTurckRHSSectionSpace_apply_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (hLC : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g background t hbackground x u v
+      = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v := by
+  rw [intrinsicRicciDeTurckRHSSectionSpace_apply]
+  exact congrArg (fun F => F t x u v)
+    (intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+      (I := I) (M := M) g background hLC)
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- **Section-space self-DeTurck reduction at the chosen Levi-Civita background.**  The directly
+consumable specialization of `intrinsicRicciDeTurckRHSSectionSpace_apply_eq_intrinsicRicciFlowRHS_of_isLeviCivita`
+to `background := chosenLeviCivitaFamily g` (with the canonical `C¹` witness
+`someContMDiffLeviCivitaConnection_contMDiff`, and Levi-Civita hypothesis discharged by
+`chosenLeviCivitaFamily_isLeviCivita`).  This is the exact section-space form the chart-closure
+identification consumes when the background is the flowing metric's own chosen Levi-Civita
+connection. -/
+theorem intrinsicRicciDeTurckRHSSectionSpace_chosenLeviCivitaFamily_apply_eq_intrinsicRicciFlowRHS
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g
+        (chosenLeviCivitaFamily (I := I) (M := M) g) t
+        (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+          (I := I) (M := M) g t)
+        x u v
+      = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v :=
+  intrinsicRicciDeTurckRHSSectionSpace_apply_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+    et Kc hKc Ko hKo hKoEq hcover g (chosenLeviCivitaFamily (I := I) (M := M) g) t
+    (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g t)
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M) g)
+    x u v
+
 /-- **The intrinsic Ricci-flow principal part `(-2)•Ric` is a continuous `BilinearFormBundle`
 section**, unconditionally (no background hypothesis).  This is the second-order principal half of the
 intrinsic Ricci–DeTurck right-hand side split off from the DeTurck reaction: its continuous section is

@@ -1245,6 +1245,23 @@ theorem intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita
             (I := I) (M := M) g background hbackground)
   rw [intrinsicRicciDeTurckRHS_apply, hcorr, add_zero]
 
+/-- **Self-DeTurck reduction: when the background is the evolving metric's own chosen Levi-Civita
+family, the intrinsic Ricci-DeTurck right-hand side collapses to the pure intrinsic Ricci-flow
+right-hand side `(-2)•Ric`.**  This is the `chosenLeviCivitaFamily`-specialised instance of
+`intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita` (discharging its Levi-Civita
+hypothesis with `chosenLeviCivitaFamily_isLeviCivita`).  It is exactly the reduction the chart-closure
+`chartRHS_eq_intrinsic` obligation needs: that field identifies the chart operator along the solution
+with `intrinsicRicciDeTurckRHS (spatial sol).metric (chosenLeviCivitaFamily (spatial sol).metric)`,
+which by this lemma equals `intrinsicRicciFlowRHS (spatial sol).metric` — the flowing metric's DeTurck
+term vanishes in its own Levi-Civita gauge. -/
+theorem intrinsicRicciDeTurckRHS_chosenLeviCivitaFamily_eq_intrinsicRicciFlowRHS
+    (g : MetricFamily (I := I) (M := M)) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g (chosenLeviCivitaFamily (I := I) (M := M) g) =
+      intrinsicRicciFlowRHS (I := I) (M := M) g :=
+  intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+    (I := I) (M := M) g (chosenLeviCivitaFamily (I := I) (M := M) g)
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M) g)
+
 /-- The intrinsic Ricci-DeTurck right-hand side vanishes wherever the intrinsic Ricci tensor
 vanishes and the background is the Levi-Civita connection of the evolving metric. -/
 theorem intrinsicRicciDeTurckRHS_eq_zero_of_isLeviCivita_of_intrinsicRicciTensor_eq_zero
