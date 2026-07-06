@@ -366,4 +366,111 @@ theorem deTurckReactionSectionMap_readout_norm_le_inCoordinates
     (deTurckReactionSectionMap_comp_readout_norm_le_inCoordinates
       et Kc hKc Ko hKo hKoEq hcover σ x0 x hx)
 
+/-- **Model-fibre reaction sub-norm bound.**  For a model endomorphism `Q : E →L[ℝ] E` and two model
+bilinear forms `Bs Bs' : BilF`, the difference of the frozen-coefficient symmetrized reaction values
+`Bs.comp Q + (Bs.comp Q).flip` and `Bs'.comp Q + (Bs'.comp Q).flip` has operator norm at most
+`2 · ‖Q‖ · ‖Bs − Bs'‖`.  This is the clean-model-fibre content of the reaction operator's section-space
+Picard `hlip` (Lipschitz-in-state) coordinate bound: the reaction being affine-linear in the bilinear
+form, its difference factors as `(Bs − Bs').comp Q + ((Bs − Bs').comp Q).flip` (`.comp`/`.flip` are
+linear in the bilinear slot), whose norm is bounded by the triangle inequality, `opNorm_flip`
+(`‖·.flip‖ = ‖·‖`) and `opNorm_comp_le` (`‖·.comp Q‖ ≤ ‖·‖·‖Q‖`). -/
+theorem bilinearReaction_model_sub_norm_le
+    (Q : E →L[ℝ] E) (Bs Bs' : E →L[ℝ] E →L[ℝ] ℝ) :
+    ‖(Bs.comp Q + (Bs.comp Q).flip) - (Bs'.comp Q + (Bs'.comp Q).flip)‖
+      ≤ 2 * ‖Q‖ * ‖Bs - Bs'‖ := by
+  have hid : (Bs.comp Q + (Bs.comp Q).flip) - (Bs'.comp Q + (Bs'.comp Q).flip)
+      = (Bs - Bs').comp Q + ((Bs - Bs').comp Q).flip := by
+    ext u v
+    simp only [ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply,
+      ContinuousLinearMap.comp_apply, ContinuousLinearMap.flip_apply]
+    ring
+  rw [hid]
+  refine (ContinuousLinearMap.opNorm_add_le _ _).trans ?_
+  rw [ContinuousLinearMap.opNorm_flip]
+  have h2 : ‖(Bs - Bs').comp Q‖ ≤ ‖Bs - Bs'‖ * ‖Q‖ := ContinuousLinearMap.opNorm_comp_le _ _
+  nlinarith [h2, norm_nonneg (Bs - Bs'), norm_nonneg Q]
+
+/-- **The tangent-bundle DeTurck reaction operator's trivialization readout equals the model-fibre
+frozen-coefficient reaction value.**  `readout (deTurckReactionSectionMap … σ x) = (readout (σ x)).comp
+Q + ((readout (σ x)).comp Q).flip`, where `Q := inCoordinates E TM E TM x₀ x x₀ x (P x)` is the
+endomorphism coordinate readout.  Combines `deTurckReactionSectionMap_readout_split` with the
+fiber-norm-free `comp_readout_eq_nf` (readout of a first-slot composition is the model-fibre
+composition with `inCoordinates`) for the composition summand, and — for the flip summand — the readout
+slot-flip identity proved **inline** via `trivializationAt_bilinearFormBundle_apply_eq` and definitional
+`flip_apply` (sidestepping `flip_readout_eq_sn`, whose `[FiberBundle E (TangentSpace I)]`/Π-fibre-seminorm
+binders fail to synthesize at `TM`).  This is the value formula from which both the reaction operator's
+`hcenter` size bound and its `hlip` difference bound follow by the model-fibre reaction norm estimates. -/
+theorem deTurckReactionSectionMap_readout_eq_inCoordinates
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization BilF (TotalSpace.proj : TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M) (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 x : M) (hx : x ∈ (trivializationAt E TM x0).baseSet) :
+    (trivializationAt BilF BilW x0
+        (TotalSpace.mk' BilF x
+          (deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover hP σ x))).2
+      = ((trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (σ x))).2).comp
+            (ContinuousLinearMap.inCoordinates E TM E TM x0 x x0 x (P x))
+          + (((trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (σ x))).2).comp
+            (ContinuousLinearMap.inCoordinates E TM E TM x0 x x0 x (P x))).flip := by
+  rw [deTurckReactionSectionMap_readout_split et Kc hKc Ko hKo hKoEq hcover hP σ x0 x hx,
+    Bundle.comp_readout_eq_nf (F := E) (W := TM) (σ x) (P x) x0 hx]
+  congr 1
+  have hflip : (trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (((σ x).comp (P x)).flip))).2
+      = ((trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x ((σ x).comp (P x)))).2).flip := by
+    ext u v
+    show (trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (((σ x).comp (P x)).flip))).2 u v
+        = (trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x ((σ x).comp (P x)))).2 v u
+    rw [Bundle.trivializationAt_bilinearFormBundle_apply_eq (F := E) (W := TM) x0 x hx
+        (((σ x).comp (P x)).flip) u v,
+      Bundle.trivializationAt_bilinearFormBundle_apply_eq (F := E) (W := TM) x0 x hx
+        ((σ x).comp (P x)) v u]
+    rfl
+  rw [hflip, Bundle.comp_readout_eq_nf (F := E) (W := TM) (σ x) (P x) x0 hx]
+
+/-- **The tangent-bundle DeTurck reaction operator's readout is Lipschitz-in-state at the fibre level.**
+`‖readout (deTurckReactionSectionMap … s x) − readout (deTurckReactionSectionMap … s' x)‖ ≤
+2 · ‖inCoordinates E TM E TM x₀ x x₀ x (P x)‖ · ‖readout (s x) − readout (s' x)‖`.  Rewriting each
+operator readout through the value formula `deTurckReactionSectionMap_readout_eq_inCoordinates` reduces
+the difference to the clean model fibre, where the model reaction sub-norm bound
+`bilinearReaction_model_sub_norm_le` (with `Bs := readout (s x)`, `Bs' := readout (s' x)`) closes it.
+This is the fibre content of the reaction operator's section-space Picard `hlip` coordinate bound, in
+the `K = 2·‖inCoord (P x)‖` shape, phrased on the difference of readouts (the model-fibre distance the
+coordinate contraction `coord_dist_le_dist_topFibre` supplies from the section distance). -/
+theorem deTurckReactionSectionMap_readout_sub_norm_le_inCoordinates
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization BilF (TotalSpace.proj : TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M) (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s s' : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 x : M) (hx : x ∈ (trivializationAt E TM x0).baseSet) :
+    ‖(trivializationAt BilF BilW x0
+          (TotalSpace.mk' BilF x
+            (deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover hP s x))).2
+        - (trivializationAt BilF BilW x0
+          (TotalSpace.mk' BilF x
+            (deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover hP s' x))).2‖
+      ≤ 2 * ‖ContinuousLinearMap.inCoordinates E TM E TM x0 x x0 x (P x)‖
+          * ‖(trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (s x))).2
+              - (trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (s' x))).2‖ := by
+  rw [deTurckReactionSectionMap_readout_eq_inCoordinates et Kc hKc Ko hKo hKoEq hcover hP s x0 x hx,
+    deTurckReactionSectionMap_readout_eq_inCoordinates et Kc hKc Ko hKo hKoEq hcover hP s' x0 x hx]
+  exact bilinearReaction_model_sub_norm_le
+    (ContinuousLinearMap.inCoordinates E TM E TM x0 x x0 x (P x))
+    ((trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (s x))).2)
+    ((trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (s' x))).2)
+
 end RicciFlow
