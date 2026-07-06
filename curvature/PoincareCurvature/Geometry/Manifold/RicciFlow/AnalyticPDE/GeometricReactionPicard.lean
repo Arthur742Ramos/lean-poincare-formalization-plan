@@ -117,4 +117,51 @@ theorem bilinearDerivationFieldLinearMap_add_source_banachEvolutionLocalSolution
       x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp b σ0 i x
   · exact hLa
 
+/-- **Forward-time `IsPicardLindelof` for the frozen-coefficient geometric DeTurck reaction plus a
+fixed source.**  The literal chart `picard`-field shape (an `IsPicardLindelof` datum with an
+*automatically chosen* forward endpoint `T ∈ (t₀, T₀]`) for the affine `BilinearFormBundle`
+section-space operator `A s = bilinearDerivationFieldLinearMap … s + b`.  Unlike
+`bilinearDerivationFieldLinearMap_add_source_banachEvolutionLocalSolutionIn_exists`, no time-radius
+compatibility `hLa` need be supplied: from a uniform bound `Kp` on the frozen coefficient `P`'s
+model-fibre readout over the finite compact cover, a reference window `Icc t₀ T₀` and a positive
+Picard radius `a`, the topological-fibre forward-time endpoint chooser produces the endpoint `T` and
+centre size `Mc` itself (the operator being constant in time, its `hcont` is trivial).  This is the
+frozen geometric reaction's actual `IsPicardLindelof` picard datum on the `BilinearFormBundle`
+(Path-B) section space. -/
+theorem bilinearDerivationFieldLinearMap_add_source_exists_forwardTime_isPicardLindelof
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (Kp : ℝ) (hKp0 : 0 ≤ Kp)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates F W F W (x0 i) x.1 (x0 i) x.1 (P x.1)‖ ≤ Kp)
+    (b σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a : ℝ≥0) (ha : 0 < (a : ℝ)) :
+    ∃ (T : ℝ) (hT : t₀ < T) (Mc : ℝ≥0),
+      IsPicardLindelof
+        (fun (_ : ℝ) (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) =>
+          bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover hP s + b)
+        (tmin := t₀) (tmax := T) ⟨t₀, ⟨le_rfl, hT.le⟩⟩ σ0 a 0 (Mc + ⟨2 * Kp, by linarith⟩ * a)
+        ⟨2 * Kp, by linarith⟩ := by
+  refine exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn_topFibre
+    (fun (_ : ℝ) s => bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover hP s + b)
+    σ0 t₀ T₀ hT₀ a ⟨2 * Kp, by linarith⟩ ha ?_ ?_
+  · intro t _ht s _hs s' _hs' i x
+    exact bilinearDerivationFieldLinearMap_add_source_coord_dist_le
+      x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp b s s' i x
+  · intro s _hs i
+    exact continuousOn_const
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
