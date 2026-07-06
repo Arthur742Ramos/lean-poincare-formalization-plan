@@ -44,6 +44,43 @@ local notation "BilW" => (_root_.Bundle.BilinearFormBundle (V := TM))
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 2000000
 
+/-- **Fiber-norm-free coordinate-readout bridge at the tangent bundle (plain sections).**  For any
+section `s` of the canonical `BilinearFormBundle` continuous section space at `W := TangentSpace I`,
+the compact coordinate `(coord s).1 i x` (`equivCompatibleCoordFamilySubmodule`) equals the raw fibre
+readout `(trivializationAt BilF BilW (x0 i) ⟨x, s x⟩).2`.  Same identity as
+`bilinearFormBundle_coord_eq_trivializationAt_readout`, but obtained at `W := TangentSpace I` — where
+the section-space fibre carries the hom-bundle topology `ContinuousLinearMap.topologicalSpace`, not the
+norm-metric topology `coord_apply` resolves to — by unfolding the `coord` definition **directly on the
+goal** (so the goal's own hom fibre topology is used consistently), sidestepping the
+`ContinuousLinearMap.topologicalSpace`-vs-`PseudoMetricSpace…toTopologicalSpace` fibre-topology diamond
+that blocks a direct `coord_apply` rewrite. -/
+theorem bilinearFormBundle_coord_eq_trivializationAt_readout_tangent
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover s).1 i x
+      = (trivializationAt BilF BilW (x0 i)
+          (_root_.Bundle.TotalSpace.mk' BilF x.1 (s.toFun x.1))).2 := by
+  have hx : (x : M) ∈ (trivializationAt BilF BilW (x0 i)).baseSet := hKc i x.2
+  haveI hlin : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := E) (W := TM) (x0 i)
+  simp [equivCompatibleCoordFamilySubmodule, toSubtype,
+    continuousSectionEquivCompatibleCoordFamilySubmodule,
+    continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
+    compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
+    _root_.Bundle.Trivialization.linearMapAt_apply, hx,
+    _root_.Bundle.Trivialization.continuousLinearMapAt_apply,
+    _root_.Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
+
 /-- **The tangent-bundle DeTurck reaction operator's coordinate readout equals its `trivializationAt`
 fibre readout.**  For the concrete operator `deTurckReactionSectionMap … σ` (fiber-norm-free, formable
 at `W := TangentSpace I`), the continuous-section-space coordinate
@@ -76,16 +113,9 @@ theorem deTurckReactionSectionMap_coord_eq_readout
       = (trivializationAt BilF BilW (x0 i)
           (_root_.Bundle.TotalSpace.mk' BilF x.1
             (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
-              Kc hKc Ko hKo hKoEq hcover hP σ x.1))).2 := by
-  have hx : (x : M) ∈ (trivializationAt BilF BilW (x0 i)).baseSet := hKc i x.2
-  haveI hlin : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
-    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := E) (W := TM) (x0 i)
-  simp [equivCompatibleCoordFamilySubmodule, toSubtype,
-    continuousSectionEquivCompatibleCoordFamilySubmodule,
-    continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
-    compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
-    _root_.Bundle.Trivialization.linearMapAt_apply, hx,
-    _root_.Bundle.Trivialization.continuousLinearMapAt_apply,
-    _root_.Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
+              Kc hKc Ko hKo hKoEq hcover hP σ x.1))).2 :=
+  bilinearFormBundle_coord_eq_trivializationAt_readout_tangent x0 Kc hKc Ko hKo hKoEq hcover
+    (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover hP σ) i x
 
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
