@@ -4700,6 +4700,38 @@ theorem bilinearDerivationFieldLinearMap_apply
   simp only [bilinearDerivationFieldLinearMap, LinearMap.add_apply, add_apply,
     bilinearCompFieldLinearMap_apply]
 
+/-- **The compact coordinate readout of a bilinear-form section is the `trivializationAt` readout.**
+When the trivialization family is chosen to be the canonical `trivializationAt BilF BilW (x0 i)`, the
+continuous-section-space coordinate `(coord σ).1 i x` (`equivCompatibleCoordFamilySubmodule`) equals
+the raw fibre readout `(trivializationAt BilF BilW (x0 i) ⟨x, σ x⟩).2`.  This is the bridge between
+the two languages used on either side of the section-space Picard `hlip`/`hcenter` obligations: the
+bridge states them in the `coord` language, while the model-fibre estimates
+(`norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_*`) are proved in the
+`trivializationAt`-readout language.  Combines the general `coord_apply`
+(`(coord σ).1 i x = (et i).continuousLinearMapAt ℝ x (σ x)`) with the trivialization identity
+`continuousLinearMapAt = (e ⟨x, ·⟩).2` on the base set (`coe_linearMapAt_of_mem`). -/
+theorem bilinearFormBundle_coord_eq_trivializationAt_readout
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover σ).1 i x
+      = (trivializationAt BilF BilW (x0 i)
+          (_root_.Bundle.TotalSpace.mk' BilF x.1 (σ x.1))).2 := by
+  haveI hlin : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := F) (W := W) (x0 i)
+  rw [coord_apply σ i x]
+  simp only [_root_.Bundle.Trivialization.continuousLinearMapAt_apply,
+    _root_.Bundle.Trivialization.coe_linearMapAt_of_mem _ (hKc i x.2)]
+
 end PreferredBilinearNormControl
 
 end ContinuousSectionSpace
