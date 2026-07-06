@@ -703,3 +703,58 @@ background t)` (continuity from `intrinsicDeTurckVectorField_covariantDerivative
 the chart's actual `picard`.  (iii) Decode the resulting `BanachEvolutionLocalSolutionIn` to
 `RicciDeTurckChartClosureData.realization` and supply `encode`, then feed `chart`+`D` to the bridge
 `intrinsicLocalExistenceUniquenessFamily_of_ricciDeTurckChartClosureData`.
+
+### Progress (2026-07-06, later 6) — the CONCRETE geometric frozen operator's `BanachEvolutionLocalSolutionIn` is now built end-to-end; the `geometric`-vs-`hbound` FORMULATION QUESTION resolved
+
+Four sorry-free, axiom-clean declarations landed (in `GeometricReactionPicardTangent.lean`, plus one
+reusable primitive in `ContinuousSection.lean`):
+
+* **`coord_add_apply_topFibre`** (`ContinuousSection.lean`, `TopologicalFibreCoordControl` section) — the
+  fibre-topology-native additivity of the compact coordinate readout,
+  `(coord (s+t)).1 i x = (coord s).1 i x + (coord t).1 i x`, with an explicit
+  `[∀ x, TopologicalSpace (V x)]` binder (the seminormed-fibre `coord_add_apply` does not apply at `TM`).
+  This is the affine handoff the `BilinearFormBundle` hom fibre needs (verbatim port of `coord_add_apply`).
+* **`deTurckReactionSectionMap_add_source_exists_isPicardLindelof`** (+ `_of_uniform_inCoordinates`) —
+  UNCONDITIONAL `IsPicardLindelof` for the AFFINE operator `A t s = deTurckReactionSectionMap … hP s + b`
+  (frozen reaction + a FIXED source `b`).  The fixed `b` is diagnostic-free for `hlip`: it contributes the
+  same coordinate summand to `A t s` and `A t s'`, cancelling in the coordinate distance
+  (`coord_add_apply_topFibre` then `dist_add_right`), so the reaction's `hlip` bound (Lipschitz `2·Kp`) is
+  unchanged; `hcont` stays `continuousOn_const`; `Mc` (absorbing `‖coord b‖`) is derived by the bridge;
+  uniform `Kp` discharged by `exists_uniform_inCoord_bound`.
+* **`deTurckReactionSectionMap_add_source_nonempty_banachEvolutionLocalSolutionIn`** — feeds that
+  `IsPicardLindelof` to `IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset`
+  (section space complete via `instCompleteSpace`, model fibre `BilF` complete) → a genuine
+  `BanachEvolutionLocalSolutionIn` in any locus containing the Picard ball `closedBall σ₀ a`.
+* **`deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn`** — the CONCRETE geometric
+  specialisation: `P := ∇W = (chosenLeviCivitaFamily g t)(intrinsicDeTurckVectorField g background t)`
+  (continuity from `intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`, `C¹` background),
+  `b := intrinsicRicciFlowRHSSectionSpace … g t` (the named `(-2)•Ric` CSS value).  The frozen geometric
+  operator's Banach evolution solution is now constructed end-to-end, unconditional.
+
+**FORMULATION QUESTION — RESOLVED (decisive for the next session).**  The chart's `geometric` field
+(equivalently `hgeom` of `TimeDependentGeometricRicciDeTurckBanachChart.ofLipschitzBoundedContinuous`,
+`SmoothRealization.lean:8395`) demands `chart.A τ s x u v = intrinsicRicciDeTurckRHS g background τ x u v`
+POINTWISE for EVERY `s` in the positive-definite locus.  This FORCES `chart.A` to BE the genuine
+(nonlinear, 2nd-order) Ricci–DeTurck RHS on the locus — a fixed FROZEN/mild linear operator agrees with
+it only at the single metric section `s = (g t).toSection`, never for all `s` (ground-truth: the ONLY
+non-vacuous `geometric :=` provider in the library is the empty-manifold case
+`IsEmptyChartClosure.lean:119`; every other is a pass-through).  But `ofLipschitzBoundedContinuous` ALSO
+demands `hbound : ‖A t x‖ ≤ L` on the C⁰ closed ball, which the genuine 2nd-order operator VIOLATES
+(C⁰-unbounded).  Hence **the mild/bounded shortcut CANNOT close `geometric` + `hbound` simultaneously; the
+genuine operator + a parabolic Schauder a-priori bound (GAP 2 long pole) is the only route** — the
+Schauder bound is precisely what makes the genuine operator bounded on a Hölder ball (not the C⁰ ball).
+The frozen-operator picard/Banach machinery built this session (and `coord_add_apply_topFibre`) is the
+reusable linearisation/reference infrastructure the eventual Schauder chart will consume, but it does NOT
+by itself inhabit `chart.A`.
+
+**Fractions of `{A, picard, realization, encode}`.**  `A`: the frozen geometric operator + its Banach
+solution are DONE, but the genuine `chart.A` (satisfying `geometric` on the whole locus) is NOT — it needs
+the Schauder-bounded genuine operator.  `picard`: DONE for the frozen operator; for the genuine operator
+it awaits the Schauder `hbound`.  `realization`/`encode`: still 0 (both are parametrised by a genuine
+`chart`, which is not yet inhabited for positive-dimensional `M`).
+
+**Concrete next target.**  Prove a genuine PIECE of the parabolic Schauder a-priori bound for the genuine
+Ricci–DeTurck operator that yields `hbound : ‖A t x‖ ≤ L` on a Hölder ball about `g₀` (the missing
+ingredient of `ofLipschitzBoundedContinuous`'s `hbound` in a Schauder norm), building on the completed
+model heat-kernel Schauder toolkit (`heatMild*` / `HeatKernelParabolicC0Alpha`).  Do NOT attempt to make a
+frozen linear operator serve as `chart.A` — `geometric` provably forbids it for positive-dimensional `M`.
