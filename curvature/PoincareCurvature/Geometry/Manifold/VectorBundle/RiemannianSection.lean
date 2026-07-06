@@ -661,6 +661,24 @@ theorem _root_.ContinuousAt.clm_flip {𝕜 : Type*} [NontriviallyNormedField �
     (ContinuousLinearMap.flipₗᵢ 𝕜 E Fₗ Gₗ).continuous
   exact hcont.continuousAt.comp hh
 
+/-- **Operator-norm bound for a bilinear conjugation.**  Composing a continuous bilinear map
+`f : E →L[𝕜] F →L[𝕜] G` with two continuous linear maps `gE : E' →L[𝕜] E`, `gF : F' →L[𝕜] F`
+multiplies the operator norms: `‖f.bilinearComp gE gF‖ ≤ ‖f‖ * ‖gE‖ * ‖gF‖`.  Proved from
+`bilinearComp = ((f.comp gE).flip.comp gF).flip` via `opNorm_flip` (isometric) and the submultiplicative
+`opNorm_comp_le`.  This is the fiber-level size estimate consumed when packaging the fiberwise
+bilinear-conjugation reaction operator as a bounded section-space operator. -/
+theorem _root_.ContinuousLinearMap.norm_bilinearComp_le {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E F G E' F' : Type*}
+    [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [SeminormedAddCommGroup F] [NormedSpace 𝕜 F]
+    [SeminormedAddCommGroup G] [NormedSpace 𝕜 G]
+    [SeminormedAddCommGroup E'] [NormedSpace 𝕜 E'] [SeminormedAddCommGroup F'] [NormedSpace 𝕜 F']
+    (f : E →L[𝕜] F →L[𝕜] G) (gE : E' →L[𝕜] E) (gF : F' →L[𝕜] F) :
+    ‖f.bilinearComp gE gF‖ ≤ ‖f‖ * ‖gE‖ * ‖gF‖ := by
+  rw [ContinuousLinearMap.bilinearComp, ContinuousLinearMap.opNorm_flip]
+  refine le_trans (ContinuousLinearMap.opNorm_comp_le _ _) ?_
+  rw [ContinuousLinearMap.opNorm_flip]
+  exact mul_le_mul_of_nonneg_right (ContinuousLinearMap.opNorm_comp_le _ _) (norm_nonneg _)
+
 section LocalCoordinatePositivity
 
 variable {M : Type*} [TopologicalSpace M]
