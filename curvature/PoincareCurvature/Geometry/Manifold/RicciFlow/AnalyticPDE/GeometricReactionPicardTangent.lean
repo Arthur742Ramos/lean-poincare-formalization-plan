@@ -449,4 +449,55 @@ theorem deTurckReactionSectionMap_add_source_nonempty_banachEvolutionLocalSoluti
   exact ⟨T, hT,
     IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset hT hPL hsub⟩
 
+/-- **`BanachEvolutionLocalSolutionIn` for the CONCRETE geometric frozen Ricci–DeTurck operator at
+`TM`.**  Specialising `deTurckReactionSectionMap_add_source_nonempty_banachEvolutionLocalSolutionIn` to
+the genuine geometric data: the frozen DeTurck coefficient `P := ∇W = (chosenLeviCivitaFamily g t)
+(intrinsicDeTurckVectorField g background t)` (continuous by
+`intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`, which needs only a `C¹` background
+slice `hbackground`), and the principal Ricci source `b := intrinsicRicciFlowRHSSectionSpace … g t`
+(the `(-2)•Ric` term as a named `ContinuousSectionSpace` value, pointwise identity
+`intrinsicRicciFlowRHSSectionSpace_apply`).  The frozen geometric operator
+`A τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t` admits a genuine
+`BanachEvolutionLocalSolutionIn` in any state locus containing the Picard closed ball `closedBall σ₀ a`,
+on a forward window `[t₀, T]` with `T ∈ (t₀, T₀]` auto-chosen — unconditionally (the uniform Lipschitz
+`Kp` is discharged by compactness of the finite cover + continuity of `∇W`).  At the metric section
+`s = (g t).toSection` this operator reproduces the full intrinsic Ricci–DeTurck RHS
+(`deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS`),
+so it is the concrete geometric Banach evolution solution the chart-closure `realization` decode into a
+genuine intrinsic De Turck local solution consumes. -/
+theorem deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn
+    {κ : Type*} [Finite κ]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a : ℝ≥0) (ha : 0 < (a : ℝ))
+    (locus : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover))
+    (hsub : Metric.closedBall σ0 (a : ℝ) ⊆ locus) :
+    ∃ (T : ℝ) (_ : t₀ < T),
+      Nonempty (RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn
+        (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous s
+          + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+              Kc hKc Ko hKo hKoEq hcover g t)
+        locus t₀ σ0) :=
+  deTurckReactionSectionMap_add_source_nonempty_banachEvolutionLocalSolutionIn
+    xc Kc hKc Ko hKo hKoEq hcover
+    (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+      g background t hbackground).continuous
+    (RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+      Kc hKc Ko hKo hKoEq hcover g t)
+    σ0 t₀ T₀ hT₀ a ha locus hsub
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
