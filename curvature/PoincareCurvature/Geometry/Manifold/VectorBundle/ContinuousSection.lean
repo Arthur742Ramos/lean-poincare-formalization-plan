@@ -2941,6 +2941,24 @@ theorem continuousAt_inCoordinates_of_continuous_homSection
   rw [continuousAt_hom_bundle] at h
   exact h.2
 
+/-- **Continuity of an endomorphism-bundle section from continuity of its coordinate readout.**  The
+constructor dual of `continuousAt_inCoordinates_of_continuous_homSection`: if, at every base point
+`x₀`, the fiber readout `x ↦ inCoordinates F V F V x₀ x x₀ x (Φ x) = (trivₓ₀).clmAt x ∘ Φ x ∘
+(trivₓ₀).symmL x` is continuous at `x₀`, then the section `x ↦ TotalSpace.mk' (F →L[𝕜] F) x (Φ x)` is
+continuous into the hom-bundle total space.  This is the entry point for proving continuity of any
+concretely-defined endomorphism section (e.g. a fiber-linear geometric reaction endomorphism): reduce
+to computing its trivialization readout and checking that readout is continuous, then discharge with
+this lemma.  It is `continuousAt_hom_bundle.mpr` paired with continuity of the (identity) base map. -/
+theorem continuous_homSection_of_continuousAt_inCoordinates
+    {Φ : Π x : M, V x →L[𝕜] V x}
+    (h : ∀ x₀ : M,
+      ContinuousAt (fun x => ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (Φ x)) x₀) :
+    Continuous (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x)) := by
+  rw [continuous_iff_continuousAt]
+  intro x₀
+  rw [continuousAt_hom_bundle]
+  exact ⟨continuousAt_id, h x₀⟩
+
 /-- **The identity endomorphism-bundle section is continuous.**  The natural section
 `x ↦ TotalSpace.mk' (F →L[𝕜] F) x (ContinuousLinearMap.id 𝕜 (V x))` of the hom bundle `V →L[𝕜] V` is
 continuous into the total space.  This is the first supplier of the `hΦ` hypothesis that
