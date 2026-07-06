@@ -609,3 +609,62 @@ topology at `TM`.  With that single lemma, feed the frozen `A s = deTurckReactio
 (`hcont = continuousOn_const`) into
 `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn_topFibre`
 (which derives `Mc` internally) to obtain the chart's `picard`.
+
+### Progress (2026-07-06, later 4) — the METRIC-vs-HOM fibre-topology blocker is RESOLVED, and the frozen geometric DeTurck reaction operator now has a genuine `IsPicardLindelof` at `W := TangentSpace I`
+
+The precise blocker recorded in "later 3" (the section-NORM `hlip`/`hcenter` forcing the metric fibre
+topology, isDefEq-diverging against the operator's hom fibre topology) is **CLOSED**.  Nine sorry-free,
+axiom-clean (`propext`/`Classical.choice`/`Quot.sound`), purely-additive declarations landed across
+`ContinuousSection.lean`, `GeometricReactionCoordBounds.lean`, `GeometricReactionPicardTangent.lean`:
+
+* **`coord_dist_le_dist_topFibre` / `coord_norm_le_norm_topFibre`** (+ helpers
+  `coordContinuousMap_dist_le_dist_topFibre`, `coord_zero_apply_topFibre`), in the
+  `TopologicalFibreCoordControl` section of `ContinuousSection.lean` — the pointwise `1`-Lipschitz
+  coordinate contraction `dist (coord s i x) (coord t i x) ≤ dist s t` and norm-nonexpansiveness
+  `‖coord s i x‖ ≤ ‖s‖`, restated with the fibre topology as an EXPLICIT `[∀ x, TopologicalSpace (V x)]`
+  binder instead of derived from `SeminormedAddCommGroup (V x)`.  Every step is at the section-space
+  `NormedAddCommGroup` / coordinate-family Banach-`F` level (`equivCompatibleCoordFamilySubmodule` is a
+  definitional isometry), never touching a fibre norm, so the seminormed-fibre proofs port verbatim.
+  **Empirically VALIDATED**: these apply DIRECTLY to `deTurckReactionSectionMap` operator sections at
+  `TM` — no `whnf`/isDefEq divergence.  This is the "single lemma" the "later 3" concrete-next-target
+  requested; it is the hom-topology-native `hlip`/`hcenter` handoff.
+
+* **`deTurckReactionSectionMap_readout_eq_inCoordinates`** (value formula) +
+  **`_readout_sub_norm_le_inCoordinates`** / **`_readout_sub_dist_le_inCoordinates`** +
+  **`bilinearReaction_model_sub_norm_le`**, in `GeometricReactionCoordBounds.lean` — the operator's
+  trivialization readout equals the model-fibre reaction value `(readout σx).comp Q + ((readout σx).comp
+  Q).flip` (`Q := inCoordinates … (P x)`), via `_readout_split` + fiber-norm-free `comp_readout_eq_nf` +
+  an INLINE flip identity through `trivializationAt_bilinearFormBundle_apply_eq` (dodging
+  `flip_readout_eq_sn`, whose `[FiberBundle E TM]`/Π-fibre-seminorm binders fail to synthesize at `TM`);
+  whence the readout DIFFERENCE is Lipschitz-in-state: `‖readout(deTurck s x) − readout(deTurck s' x)‖ ≤
+  2·‖inCoord Px‖·‖readout(s x) − readout(s' x)‖` (reaction affine-linear in the bilinear slot; model
+  bound via `opNorm_add_le`/`opNorm_flip`/`opNorm_comp_le`).  `dist_eq_norm` on the `BilF` fibre must be
+  applied with EXPLICIT endpoints (the bare-goal `SeminormedAddGroup` metavar is "stuck" — the `BilF`
+  diamond).
+
+* **`deTurckReactionSectionMap_coord_dist_le_inCoordinates`** (the `hlip` field) +
+  **`deTurckReactionSectionMap_exists_isPicardLindelof_of_uniform_inCoordinates`** (the `picard` datum),
+  in `GeometricReactionPicardTangent.lean` — the concrete tangent-bundle operator obeys
+  `dist (coord (deTurck s) i x) (coord (deTurck s') i x) ≤ 2·Kp·dist s s'` for any per-point
+  `‖inCoord (xc i) x (P x)‖ ≤ Kp` (coord→readout, dist-form readout bound, readout→coord,
+  `coord_dist_le_dist_topFibre`; `BilF`↔`TM` baseSet via `simpa`); and — given a UNIFORM `Kp` over the
+  finite compact cover — the frozen (time-independent) reaction operator `t ↦ deTurckReactionSectionMap
+  … hP` satisfies `IsPicardLindelof` about any initial section `σ₀`, radius `a`, Lipschitz `2·Kp`,
+  auto-chosen forward endpoint `T ∈ (t₀, T₀]` and centre `Mc`.  Assembled by feeding the `hlip` bound
+  (`K := 2·Kp`) and `continuousOn_const` (frozen ⇒ trivial `hcont`) to
+  `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn_topFibre`.
+
+**Fractions of `{A, picard}` now constructed (frozen reaction summand).**  `A` = the concrete TM
+operator `deTurckReactionSectionMap` (DONE earlier).  `picard`: `hlip` DONE (coordinate bound), `hcont`
+DONE (`continuousOn_const`), and the `IsPicardLindelof` PACKAGING DONE — modulo a single UNIFORM-`Kp`
+hypothesis.  So the frozen reaction's `IsPicardLindelof` is CONSTRUCTED at `TM`, Path B, diamond-free.
+
+**Concrete next target.**  Discharge the uniform-`Kp` hypothesis: prove
+`ContinuousOn (fun x ↦ ContinuousLinearMap.inCoordinates E TM E TM (xc i) x (xc i) x (P x)) (Kc i)`
+(the existing `continuousAt_inCoordinates_of_continuous_homSection` gives continuity ONLY at the trivialization
+centre `xc i`; a baseSet-wide `ContinuousOn` is needed — unfold `inCoordinates` and use the trivialization
+coordinate-change continuity + `hP`), then `IsCompact.exists_bound_of_continuousOn` per `i` + a `Finite κ`
+sup gives the uniform `Kp`.  Then add the `(-2)•Ric` source (affine: `hlip` unchanged since `b` cancels
+in the difference; `hcont` still trivial if `Ric` is frozen at `g₀`, else time-continuous) and identify
+`P := ∇W` (`intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`) to obtain the chart's actual
+`picard`, whose Banach evolution solution decodes to `RicciDeTurckChartClosureData.realization`.
