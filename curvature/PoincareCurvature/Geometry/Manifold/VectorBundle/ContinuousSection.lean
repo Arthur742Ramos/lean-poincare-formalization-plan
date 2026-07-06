@@ -2922,6 +2922,139 @@ theorem smulField_norm_le
     ‖smulField (V := V) et Kc hKc Ko hKo hKoEq hcover hφ C hC hφbound‖ ≤ C :=
   mkContinuousOfForallCoordNormLe_norm_le _ C hC _
 
+/-- **Coordinate readout of a continuous endomorphism-bundle section.**  Continuity of a section `Φ`
+of the endomorphism (hom) bundle `V →L[𝕜] V`, phrased as continuity of
+`x ↦ TotalSpace.mk' (F →L[𝕜] F) x (Φ x)` into the hom-bundle total space, is equivalent (via
+`continuousAt_hom_bundle`) to base-continuity together with continuity of the fiber readout
+`x ↦ inCoordinates F V F V x₀ x x₀ x (Φ x) = (trivₓ₀).clmAt x ∘ Φ x ∘ (trivₓ₀).symmL x`.  This is the
+extractor half: from hom-section continuity it produces `ContinuousAt` of the coordinate readout at
+each base point.  It is the shared engine behind the closure lemmas
+`continuous_add_endo_section`, `continuous_smul_endo_section`, `continuous_comp_endo_section` below,
+which combine coordinate readouts and transport the result back through `continuousAt_hom_bundle`. -/
+theorem continuousAt_inCoordinates_of_continuous_homSection
+    {Φ : Π x : M, V x →L[𝕜] V x}
+    (hΦ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x)))
+    (x₀ : M) :
+    ContinuousAt (fun x => ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (Φ x)) x₀ := by
+  have h := hΦ.continuousAt (x := x₀)
+  rw [continuousAt_hom_bundle] at h
+  exact h.2
+
+/-- **The identity endomorphism-bundle section is continuous.**  The natural section
+`x ↦ TotalSpace.mk' (F →L[𝕜] F) x (ContinuousLinearMap.id 𝕜 (V x))` of the hom bundle `V →L[𝕜] V` is
+continuous into the total space.  This is the first supplier of the `hΦ` hypothesis that
+`continuous_endo_section`/`endoField` consume (nothing previously *constructed* such a witness — the
+existing zeroth-order generators either assumed it or specialised to the scalar `smulField`).  Proof:
+via `continuousAt_hom_bundle`, the fiber readout `inCoordinates F V F V x₀ x x₀ x id` equals
+`(trivₓ₀).clmAt x ∘ (trivₓ₀).symmL x`, which is `id_F` for `x` in the trivializing base set
+(`continuousLinearMapAt_symmL`); so the readout is eventually constant and hence continuous. -/
+theorem continuous_id_endo_section :
+    Continuous (fun x : M => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x
+      (ContinuousLinearMap.id 𝕜 (V x))) := by
+  rw [continuous_iff_continuousAt]
+  intro x₀
+  rw [continuousAt_hom_bundle]
+  refine ⟨continuousAt_id, ?_⟩
+  have hev : (fun x => ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x
+        (ContinuousLinearMap.id 𝕜 (V x)))
+      =ᶠ[nhds x₀] (fun _ => ContinuousLinearMap.id 𝕜 F) := by
+    filter_upwards [(trivializationAt F V x₀).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt F V x₀)] with x hx
+    apply ContinuousLinearMap.ext
+    intro y
+    simp only [ContinuousLinearMap.inCoordinates, ContinuousLinearMap.coe_comp',
+      Function.comp_apply, ContinuousLinearMap.id_apply]
+    exact (trivializationAt F V x₀).continuousLinearMapAt_symmL (R := 𝕜) hx y
+  exact continuousAt_const.congr hev.symm
+
+/-- **Pointwise sum of continuous endomorphism-bundle sections is continuous.**  If `Φ` and `Ψ` are
+continuous sections of the hom bundle `V →L[𝕜] V`, so is `x ↦ Φ x + Ψ x`.  Proof: the fiber readout
+`inCoordinates` is linear in the endomorphism argument (it is a two-sided composition with the
+trivialization maps), so the readout of `Φ + Ψ` is the sum of the readouts, continuous by
+`continuousAt_inCoordinates_of_continuous_homSection`; transport back via `continuousAt_hom_bundle`. -/
+theorem continuous_add_endo_section {Φ Ψ : Π x : M, V x →L[𝕜] V x}
+    (hΦ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x)))
+    (hΨ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Ψ x))) :
+    Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x + Ψ x)) := by
+  rw [continuous_iff_continuousAt]
+  intro x₀
+  rw [continuousAt_hom_bundle]
+  refine ⟨continuousAt_id, ?_⟩
+  have hΦr := continuousAt_inCoordinates_of_continuous_homSection hΦ x₀
+  have hΨr := continuousAt_inCoordinates_of_continuous_homSection hΨ x₀
+  have heq : (fun x => ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (Φ x + Ψ x))
+      = (fun x => ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (Φ x)
+          + ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (Ψ x)) := by
+    funext x
+    simp only [ContinuousLinearMap.inCoordinates, ContinuousLinearMap.comp_add,
+      ContinuousLinearMap.add_comp]
+  rw [heq]
+  exact hΦr.add hΨr
+
+/-- **Continuous scalar-field multiple of a continuous endomorphism-bundle section is continuous.**
+If `c : M → 𝕜` is continuous and `Φ` is a continuous section of the hom bundle `V →L[𝕜] V`, then
+`x ↦ c x • Φ x` is a continuous section.  Proof: the fiber readout `inCoordinates` is homogeneous in
+the endomorphism argument, so the readout of `c • Φ` is `c` times the readout of `Φ`; combine
+continuity of `c` with `continuousAt_inCoordinates_of_continuous_homSection` and transport back. -/
+theorem continuous_smul_endo_section {c : M → 𝕜} (hc : Continuous c)
+    {Φ : Π x : M, V x →L[𝕜] V x}
+    (hΦ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x))) :
+    Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (c x • Φ x)) := by
+  rw [continuous_iff_continuousAt]
+  intro x₀
+  rw [continuousAt_hom_bundle]
+  refine ⟨continuousAt_id, ?_⟩
+  have hΦr := continuousAt_inCoordinates_of_continuous_homSection hΦ x₀
+  have heq : (fun x => ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (c x • Φ x))
+      = (fun x => c x • ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (Φ x)) := by
+    funext x
+    simp only [ContinuousLinearMap.inCoordinates, ContinuousLinearMap.comp_smul,
+      ContinuousLinearMap.smul_comp]
+  rw [heq]
+  exact hc.continuousAt.smul hΦr
+
+/-- **Pointwise composition of continuous endomorphism-bundle sections is continuous.**  If `Φ` and
+`Ψ` are continuous sections of the hom bundle `V →L[𝕜] V`, so is `x ↦ Φ x ∘L Ψ x`.  Proof: on the
+trivializing base set the readout of `Φ ∘ Ψ` equals the composition of the readouts — the identity
+`symmL x ∘ clmAt x = id` (`symmL_continuousLinearMapAt`) inserted between the two factors collapses
+the middle transport — so the readout is eventually the composition of two continuous
+`ContinuousLinearMap`-valued functions (`ContinuousAt.clm_comp`); transport back via
+`continuousAt_hom_bundle`.  Together with `continuous_id_endo_section`, `continuous_add_endo_section`
+and `continuous_smul_endo_section` this closes the class of continuous endomorphism-bundle sections
+under the pointwise algebra operations, the structural closure a fiber-linear reaction endomorphism is
+assembled from. -/
+theorem continuous_comp_endo_section {Φ Ψ : Π x : M, V x →L[𝕜] V x}
+    (hΦ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x)))
+    (hΨ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Ψ x))) :
+    Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x ∘L Ψ x)) := by
+  rw [continuous_iff_continuousAt]
+  intro x₀
+  rw [continuousAt_hom_bundle]
+  refine ⟨continuousAt_id, ?_⟩
+  have hΦr := continuousAt_inCoordinates_of_continuous_homSection hΦ x₀
+  have hΨr := continuousAt_inCoordinates_of_continuous_homSection hΨ x₀
+  have hev : (fun x => ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (Φ x ∘L Ψ x))
+      =ᶠ[nhds x₀] (fun x => (ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (Φ x)).comp
+          (ContinuousLinearMap.inCoordinates F V F V x₀ x x₀ x (Ψ x))) := by
+    filter_upwards [(trivializationAt F V x₀).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt F V x₀)] with x hx
+    apply ContinuousLinearMap.ext
+    intro y
+    simp only [ContinuousLinearMap.inCoordinates, ContinuousLinearMap.coe_comp',
+      Function.comp_apply]
+    rw [(trivializationAt F V x₀).symmL_continuousLinearMapAt (R := 𝕜) hx]
+  rw [continuousAt_congr hev]
+  exact hΦr.clm_comp hΨr
+
 /-- **Fiberwise continuous-linear-endomorphism application preserves continuity of a bundle
 section.**  If `Φ` is a continuous section of the endomorphism bundle `V →L[𝕜] V` (continuity phrased
 as continuity of `x ↦ TotalSpace.mk' (F →L[𝕜] F) x (Φ x)` into the hom-bundle total space) and the
