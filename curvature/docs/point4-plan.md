@@ -1,4 +1,55 @@
 
+### Progress (2026-07-06, later) — affine chart-`A` coordinate hlip/hcenter data assembled; ⚠️ the section-space Picard bridge hits a HARD topology-instance diamond on `BilinearFormBundle`
+
+Two additive, sorry-free, axiom-clean landings on the geometric-`A` critical path:
+
+* `…ContinuousSectionSpace.coord_add_apply` (`VectorBundle/ContinuousSection.lean`) — generic
+  coordinate additivity `(coord (s+t)).1 i x = (coord s).1 i x + (coord t).1 i x`, the companion of
+  `coord_zero_apply` (via `toCompatibleCoordFamilySubmoduleContinuousLinearMap` + `map_add`).
+* `bilinearDerivationFieldLinearMap_add_source_coord_dist_le` / `_add_source_coord_norm_le`
+  (`VectorBundle/RiemannianSection.lean`) — the **affine chart-`A`** coordinate `hlip`/`hcenter` data
+  for `A s = L s + b` (frozen DeTurck reaction `L` + fixed source `b`): `dist(coord(A s))(coord(A s'))
+  ≤ 2·Kp·dist s s'` (same Lipschitz const as `L` — the source cancels, via `coord_add_apply` +
+  `add_sub_add_right_eq_sub`) and `‖coord(A σ)‖ ≤ 2·Kp·‖σ‖ + ‖b‖`.  This is exactly the section-space
+  Picard `hlip`/`hcenter` shape for the affine chart operator at the metric state.
+
+**⚠️ CRITICAL BLOCKER FOUND — the section-space Picard bridge cannot yet be applied to the concrete
+`BilinearFormBundle` CSS (a topology-instance diamond).**  Attempting "step 2" (feeding the landed
+coordinate bounds to `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn`
+/ `sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound` in
+`AnalyticPDE/SectionSpacePicard.lean`) fails as follows:
+  * `ContinuousSectionSpace` takes the fibre topology `[∀ x, TopologicalSpace (V x)]` as a **separate
+    instance arg** (ContinuousSection.lean line ~39).
+  * On the double-CLM fibre `BilW x = W x →L W x →L ℝ`, that instance has TWO defeq-but-syntactically-
+    distinct spellings: **Path B** = `ContinuousLinearMap.topologicalSpace` (what the concrete
+    `BilinearFormBundle` world uses — the coord lemmas, and the `FiberBundle`/`VectorBundle` instances,
+    are all baked at Path B at their elaboration site) vs **Path A** =
+    `(SeminormedAddCommGroup …).toPseudoMetricSpace.toUniformSpace.toTopologicalSpace` (what the bridge
+    DERIVES, since for its abstract `V` only `SeminormedAddCommGroup (V x)` is in scope; Path A is
+    baked into the bridge's type, NOT a controllable binder).
+  * `rfl` confirms Path A ≡ Path B is **defeq even for abstract CLMs** — but Lean's ordered
+    application-time `isDefEq` (and instance synthesis, which uses keyed matching) does NOT bridge the
+    two spellings: feeding a Path-B `σ0` to the Path-A bridge type-mismatches on the topology arg;
+    forcing Path A globally (a high-priority `@[reducible]` local instance) makes `FiberBundle` and
+    `σ0` synthesise fine, but the derived-topology metavar `?SemiCLM` inside the bridge stays
+    unassigned during the `σ0` check (projection-non-injectivity `(?SemiCLM x).toPMS.toUS.toTS =?=
+    <concrete>` deadlock), AND the coord lemmas remain baked at Path B so `exact hb` still needs the
+    un-bridged defeq.
+
+**RECOMMENDED DEFINITION-SITE FIX (next session's highest-leverage target).**  Make one side's fibre
+topology match the other's *spelling*, so no cross-file defeq is needed.  Cleanest options:
+  1. Restate the SectionSpacePicard bridge family to take `[∀ x, TopologicalSpace (V x)]` as an
+     EXPLICIT binder placed *before* `[∀ x, SeminormedAddCommGroup (V x)]` (so the CSS fibre topology
+     is synthesised in the caller's context = Path B for `BilW`, consistent with `FiberBundle`), with
+     the seminormed structure only supplying the norm — requires checking the bridge's proof does not
+     rely on the fibre topology being *definitionally* the seminormed one; OR
+  2. Re-base the `BilinearFormBundle` coord-lemma chain in RiemannianSection on the seminormed-derived
+     (Path A) fibre topology (a `letI`/section-local instance forcing Path A for the whole
+     `PreferredBilinearNormControl` derivations), so the coord lemmas are baked at Path A and match the
+     bridge directly.
+Either unblocks "step 2" (BanachEvolutionLocalSolutionIn / IsPicardLindelof for the geometric `A`).
+The affine `hlip`/`hcenter` data above is then consumed verbatim.
+
 ### Progress (2026-07-05, later) — the non-scalar bilinear-conjugation reaction generator is BUILT (both halves of the prior "concrete next target" landed)
 
 The tangent-bundle-conjugation bypass proposed by the previous probe finding is now fully realised,
