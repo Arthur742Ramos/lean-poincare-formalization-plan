@@ -1,4 +1,64 @@
 
+### Progress (2026-07-06, EVENING) — ✅ the `BilinearFormBundle` topology-instance diamond is RESOLVED at the definition site; the geometric reaction operator now produces a genuine section-space Banach evolution solution AND its literal `IsPicardLindelof` picard datum
+
+The HARD Path-A/Path-B diamond documented in the previous note (below) is **CLOSED**, and the
+section-space Picard bridge now applies verbatim to the concrete `BilinearFormBundle` continuous
+section space.  Five additive, sorry-free, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`)
+landings across three files:
+
+**Root cause (confirmed) and fix.**  The whole section-space Picard bridge chain is *fibre-norm-free*:
+every estimate is at the Banach `F`-norm / coordinate-readout level, and the fibre
+`[∀ x, SeminormedAddCommGroup (V x)]` was present *only* to supply the section-space fibre topology —
+baking Path A (`SeminormedAddCommGroup → … → TopologicalSpace`) into the bridge's `ContinuousSectionSpace`
+type, which then failed to unify with the concrete double-`CLM` fibre `BilW x = W x →L[ℝ] W x →L[ℝ] ℝ`
+carrying Path B (`ContinuousLinearMap.topologicalSpace`).  Fix = restate the bridge chain with the
+fibre topology as an *explicit* `[∀ x, TopologicalSpace (V x)]` binder (+ bare `AddCommGroup`/`Module`),
+so the section-space topology is synthesised in the caller's context (= Path B for `BilW`).  Done
+**additively** (`_topFibre` copies; no existing declaration touched):
+
+* `ContinuousSection.lean` (new `TopologicalFibreCoordControl` section): `norm_le_of_forall_coord_norm_le_topFibre`,
+  `continuousOn_of_forall_coord_continuousOn_topFibre`, `exists_forall_mem_Icc_coord_norm_le_of_continuousOn_topFibre`
+  — the three fibre-norm-free coordinate helpers, copied from the seminormed-section originals with
+  the explicit-topology fibre binder (proofs port verbatim).
+* `AnalyticPDE/SectionSpacePicard.lean`: `isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound_topFibre`,
+  `sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound_topFibre`,
+  `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn_topFibre`
+  — the centre-bound `IsPicardLindelof` constructor, the fixed-window `BanachEvolutionLocalSolutionIn`
+  bridge, and the *auto-window* forward-time `IsPicardLindelof` chooser, all with the explicit-topology
+  fibre.
+
+**End-to-end validation (new file `AnalyticPDE/GeometricReactionPicard.lean`, imports RiemannianSection
++ SectionSpacePicard).**  The `_topFibre` bridges are applied to the concrete affine frozen-coefficient
+DeTurck reaction `A s = bilinearDerivationFieldLinearMap … s + b`, consuming its already-proved
+coordinate `hlip` (`2·Kp·dist`) / `hcenter` (`2·Kp·‖σ0‖+‖b‖`) bounds (with `hcont` trivial — the frozen
+operator is constant in time):
+
+* `bilinearDerivationFieldLinearMap_add_source_banachEvolutionLocalSolutionIn_exists` — a genuine
+  `Nonempty (BanachEvolutionLocalSolutionIn A locus t₀ σ0)` on `[t₀,T]` under `(Mc+K·a)·(T−t₀)≤a` and
+  `closedBall σ0 a ⊆ locus`.  **The first section-space Banach evolution solution from the GEOMETRIC
+  reaction operator (not a model heat-semigroup)** — the object a `RicciDeTurckChartClosureData.realization`
+  decode consumes.
+* `bilinearDerivationFieldLinearMap_add_source_exists_forwardTime_isPicardLindelof` — the literal chart
+  `picard`-field shape `∃ T Mc, IsPicardLindelof A … σ0 a 0 (Mc+K·a) K` with the endpoint `T` chosen
+  automatically (no `hLa` needed), from `Kp` + a reference window `T₀` + radius `a>0`.
+
+**Fractions of `{A, picard, realization, encode}` now in hand (frozen reaction representative).**  `A`
+= the affine `bilinearDerivationFieldLinearMap … + b` (DONE, elaborates + composes through the bridge
+at the concrete `BilW`).  `picard` = **DONE** for this representative: both `IsPicardLindelof` (auto-window)
+and `BanachEvolutionLocalSolutionIn` are now produced from the geometric coordinate bounds.  Remaining:
+extend `A` from the frozen affine reaction to the actual mild/regularised Ricci–DeTurck RHS (the
+`(-2)Ric` principal part is `C⁰`-unbounded — needs the mild representative), then the `realization`
+decode (`RicciDeTurckSmoothRealizationData.of_…`, SmoothRealization.lean) of the Banach solution into a
+genuine `ChosenIntrinsicDeTurckLocalSolution`, and `encode`.
+
+**Concrete next target.**  Feed
+`bilinearDerivationFieldLinearMap_add_source_banachEvolutionLocalSolutionIn_exists` (specialised to the
+tangent bundle `W := TM` with `P := ∇W` the frozen DeTurck coefficient about `g0` and `b := (-2)•Ric =
+intrinsicRicciFlowRHSSectionSpace`) into the `realization` decode.  The remaining obstruction is the
+`W := TM` specialisation (the raw tangent-fibre `‖·‖` synthesis wall), for which the `inCoordinates`
+readout `Kp`-bound is the intended clean-model-fibre input; and the mild upgrade of the `(-2)Ric`
+principal part.
+
 ### Progress (2026-07-06, later) — affine chart-`A` coordinate hlip/hcenter data assembled; ⚠️ the section-space Picard bridge hits a HARD topology-instance diamond on `BilinearFormBundle`
 
 Two additive, sorry-free, axiom-clean landings on the geometric-`A` critical path:
