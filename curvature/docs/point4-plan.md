@@ -211,3 +211,59 @@ or (b) the `decode : positiveDefiniteLocus → MetricFamily` (positive-definite 
 family) needed for the chart `A`'s `geometric` field — `positiveDefiniteLocus = {s | ∀ x v, v ≠ 0 →
 0 < s x v v}` currently carries no metric-decode, and the `geometric` field is trivial once a section
 decodes to a metric whose `intrinsicRicciDeTurckRHSSectionSpace` reproduces `A`.
+
+### Progress (2026-07-06, later still) — symmetric-locus content of the affine-split summands landed; and a SHARPENED ground-truth diagnosis of the `bilinearDerivationField`-at-`TM` wall (the `RiemannianBundle` cracks layer 1 but two new layers appear)
+
+**Committed (sorry-free, axiom-clean `propext`/`Classical.choice`/`Quot.sound`, additive):**
+
+* `intrinsicRicciFlowRHSSectionSpace_symm` (DeTurckCorrectionRegularity.lean) — the named
+  second-order source value `b = (-2)•Ric` of the chart split `A τ s = reaction s + b` is pointwise
+  symmetric, via `intrinsicRicciFlowRHS_symm` (needs only the ambient `IsManifold` smoothness
+  instances; **no** background hypothesis).
+* `intrinsicDeTurckCorrectionSectionSpace_symm` — the named zeroth-order DeTurck reaction value is
+  pointwise symmetric, unconditionally, via `intrinsicDeTurckCorrection_symm`.
+  Together they certify both named summands of the geometric Ricci–DeTurck RHS lie in the symmetric
+  locus — the directly-consumable symmetric-locus obligation on each half of the chart's `geometric`
+  field.
+
+**SHARPENED WALL DIAGNOSIS (empirical, read-only scratch probes at `W := TangentSpace I`).**  The prior
+note said the `‖P x‖` datum is "only reachable through `TangentSpace I x = E`".  Ground truth is richer:
+
+* **Layer 1 — the single tangent CLM norm `Norm (TM x →L[ℝ] TM x)` (the `‖P x‖ = ‖∇W x‖` datum).**
+  By *default* it FAILS to synthesize (even though `NormedAddCommGroup (TM x)` and `NormedSpace ℝ (TM x)`
+  both DO, via `TM x = E` reducibility) — the `hasOpNorm` instance cannot bridge the reducibility gap.
+  It IS defeq-providable as `(inferInstance : Norm (E →L[ℝ] E))`.  **Crucially, it synthesizes cleanly
+  under `letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩`** — the metric-induced
+  `instNormedAddCommGroupOfRiemannianBundle…` gives a fiber norm whose topology *is* the bundle
+  topology, and then `Norm (TM x →L TM x)`, `SeminormedAddCommGroup (TM x)`, and `FiberBundle E TM` all
+  synthesize *mutually consistently*.  So layer 1 is CRACKABLE with a `RiemannianBundle` `letI`.
+* **Layer 2 (NEW) — the nested/bilinear tangent CLM norm `Norm (TM x →L[ℝ] TM x →L[ℝ] ℝ)`
+  (`= Norm (BilW x)`).**  This BLOWS UP: by default it fails, and even *under* `letI : RiemannianBundle`
+  it hits the `synthInstance` heartbeat ceiling (deterministic timeout) — a genuine synthesis blow-up,
+  not a mere missing instance.  This is why any fiber-level reaction bound stated on the raw
+  `b : TM x →L TM x →L ℝ` (e.g. `‖b.bilinearComp P id + b.bilinearComp id P‖ ≤ 2‖b‖‖P‖`) is
+  UN-ELABORABLE at `TM`.  The bound MUST be phrased through the model-fibre readout in the clean
+  `E →L[ℝ] E →L[ℝ] ℝ` (where the CSS coordinate readout already lives), never the raw `‖BilW x‖`.
+* **Layer 3 — the `symmL` metric-topology diamond on `BilW`.**  Forming `bilinearDerivationField
+  (W := TM) … hbound` under `letI : RiemannianBundle` no longer fails on `‖P x‖`, but the `hbound`
+  STATEMENT itself now mis-elaborates: `(et i).symmL ℝ x` is sought against a trivialization whose fibre
+  carries `PseudoMetricSpace.…toTopologicalSpace` (the RiemannianBundle-induced metric topology on the
+  `BilF`/`BilW` fibre) while `et i` provides `ContinuousLinearMap.topologicalSpace` — the two are
+  propositionally equal but instance-path-distinct, so `symmL` drops fibre metavariables.  (Without the
+  `RiemannianBundle` `letI`, `symmL` elaborates fine but layer 1 blocks `‖P x‖`.)
+
+**Consequence for the definition-site fix (revised, precise).**  The `TangentSpace`-specialised reaction
+operator must (i) obtain `‖P x‖` NOT from a raw `Norm (TM x →L TM x)` but from the **model-fibre
+readout** `‖ContinuousLinearMap.inCoordinates E TM E TM x₀ x x₀ x (P x)‖ ∈ E →L[ℝ] E` (clean, no
+`RiemannianBundle`, no blow-up), and (ii) phrase its whole `hbound` through the `BilF`-readout so that
+neither `Norm (BilW x)` (layer 2) nor `symmL`-under-metric-topology (layer 3) is ever forced.  The
+`RiemannianBundle`-`letI` route is a dead end past layer 1 (it trades layer 1 for layers 2+3).  The
+readout route is the only one that stays in the clean model fibres throughout.
+
+**Concrete next target (unchanged in spirit, sharpened).**  A `bilinearCompField`/`bilinearDerivationField`
+variant whose `hbound` hypothesis is a bound on the `(et i)`-readout of the *composite* (or on
+`‖inCoordinates … (P x)‖`), proved via the readout identity already internal to
+`continuous_bilinearComp_section` (`readout((s x).bilinearComp (P x) (Q x)) =
+(readout s).bilinearComp (readout P)(readout Q)`), so the operator elaborates at `TM` with *default*
+instances and clean `E →L[ℝ] E →L[ℝ] ℝ` norms only.  Extract that readout identity as a standalone
+lemma first (it is the reusable core), then rebuild the bound on top of it.
