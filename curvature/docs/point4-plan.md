@@ -71,3 +71,45 @@ the *correct* shape.  Two honest continuations, in priority order:
       generator; the remaining GAP-2 core is the mild/heat-semigroup principal part for the geometric
       operator and the realization decode (parabolic smoothness of the Banach solution).  NOT more
       reaction primitives.
+
+### Progress (2026-07-06, later) — the DeTurck reaction ↔ geometric-correction fiber-value BRIDGE is BUILT, and the operator-instantiation wall is precisely diagnosed
+
+New module `RicciFlow/DeTurckReactionAssembly.lean` (imports both `DeTurckCorrectionRegularity` and
+`VectorBundle/RiemannianSection`), sorry-free and axiom-clean:
+
+* `metricSection_deTurckDerivation_eq_intrinsicDeTurckCorrectionSection` — **the DeTurck half of the
+  chart `A` `geometric` field, at the fiber-value level**: for any `ContinuousSectionSpace` element
+  `sMetric` agreeing pointwise with the metric `(g t).inner`, the frozen-`∇W` two-sided derivation
+  `sMetric x (∇W x u) v + sMetric x u (∇W x v)` equals `intrinsicDeTurckCorrectionSection g background
+  t x u v` pointwise (with `∇W = (chosenLeviCivitaFamily g t) (intrinsicDeTurckVectorField g background
+  t)`).  This is EXACTLY the value `ContinuousSectionSpace.bilinearDerivationField` produces
+  (`bilinearDerivationField_apply_apply`); composing the two identifies the abstract bounded reaction
+  operator with the concrete geometric Ricci–DeTurck reaction term on the metric section.  Stated at the
+  fiber-value level so it is **wall-free** and directly consumable once the operator is formed.
+
+**Diagnosed blocker (the operator-instantiation wall).**  Forming
+`ContinuousSectionSpace.bilinearDerivationField` itself at `W := TangentSpace I` (to get a genuine
+`CSS →L[ℝ] CSS` for the affine section-space Picard route) is blocked by a two-layer instance diamond,
+NOT a math gap:
+  1. the size datum `‖P x‖` needs `Norm (TangentSpace I x →L[ℝ] TangentSpace I x)`, only reachable via
+     the defeq `TangentSpace I x = E` (`inferInstanceAs (Norm (E →L[ℝ] E))`) — instance search does not
+     unfold `TangentSpace`; providing it as a `local instance` fixes THIS layer; but
+  2. the bound `‖(et i).symmL ℝ x‖` then fails with an **honest topology diamond on the bilinear fiber**
+     `E →L[ℝ] E →L[ℝ] ℝ`: `Trivialization.symmL` elaborates its fiber with the metric topology
+     `PseudoMetricSpace.toUniformSpace.toTopologicalSpace`, while `et i` carries the vector-bundle CLM
+     topology `ContinuousLinearMap.topologicalSpaceTotalSpace …` (defeq but not syntactically equal), so
+     `et i` cannot fill `symmL`'s trivialization slot.
+This is a DEFINITION-SITE fix (in `RiemannianSection.lean`): `bilinearDerivationField`'s hbound is
+phrased through `symmL`/`continuousLinearMapAt`, which triggers the fiber topology diamond at
+`W = TangentSpace`.  No existing code instantiates any of the section-space fiber operators
+(`smulField`/`endoField`/`bilinearCompField`/`bilinearDerivationField`) at `TangentSpace` — they are all
+abstract-`V`; this is the first concrete tangent instantiation and it exposes the wall.
+
+**Concrete next target.**  Provide, at the `RiemannianSection` definition site, a diamond-free
+`bilinearDerivationField` bound variant (state hbound via the coordinate readout norm rather than
+`symmL`, or pin the bilinear-fiber topology to the CLM one) so the operator becomes instantiable at
+`TangentSpace`; then feed `bilinearDerivationField (∇W) + source` to
+`exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_boundedLinear_generator_source`.  The
+fiber-value identity above is then composed to discharge the DeTurck part of the chart `geometric`
+field.  (The section-level full-RHS assembly `-2•rs + deTurckCorrection = intrinsicRicciDeTurckRHS`
+already exists as `exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`.)
