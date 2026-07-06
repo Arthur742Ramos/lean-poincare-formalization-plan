@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
+public import Mathlib.Topology.VectorBundle.Hom
 public import Mathlib.Analysis.Normed.Operator.Basic
 public import Mathlib.Analysis.Normed.Group.Submodule
 public import Mathlib.Analysis.Normed.Module.TransferInstance
@@ -2877,6 +2878,166 @@ theorem smulField_norm_le
     {φ : M → 𝕜} (hφ : Continuous φ) (C : ℝ) (hC : 0 ≤ C)
     (hφbound : ∀ (i : κ) (x : Kc i), ‖φ x.1‖ ≤ C) :
     ‖smulField (V := V) et Kc hKc Ko hKo hKoEq hcover hφ C hC hφbound‖ ≤ C :=
+  mkContinuousOfForallCoordNormLe_norm_le _ C hC _
+
+/-- **Fiberwise continuous-linear-endomorphism application preserves continuity of a bundle
+section.**  If `Φ` is a continuous section of the endomorphism bundle `V →L[𝕜] V` (continuity phrased
+as continuity of `x ↦ TotalSpace.mk' (F →L[𝕜] F) x (Φ x)` into the hom-bundle total space) and the
+section `s` is continuous, then so is the pointwise application `x ↦ Φ x (s x)`.  This is the
+continuity input for building zeroth-order fiber-linear (bundle-endomorphism) section-space
+generators, generalising `continuous_smul_section` (whose special case is `Φ x = φ x • id`).  Proof:
+Mathlib's `Continuous.clm_bundle_apply` for the endomorphism (hom) bundle over the identity base
+map. -/
+lemma continuous_endo_section
+    {Φ : Π x : M, V x →L[𝕜] V x}
+    (hΦ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x)))
+    {s : Π x : M, V x} (hs : Continuous (T% s)) :
+    Continuous (T% (fun x => Φ x (s x))) :=
+  hΦ.clm_bundle_apply (b := fun x => x) hs
+
+/-- The fiberwise continuous-linear-endomorphism operator on the section space, as a `𝕜`-linear map:
+for a continuous section `Φ` of the endomorphism bundle `V →L[𝕜] V` it sends a section `s` to
+`x ↦ Φ x (s x)` (continuous by `continuous_endo_section`).  This generalises `smulFieldLinearMap`
+(the special case `Φ x = φ x • id`) to a genuine fiber-linear coupling — the structural shape of the
+zeroth-order (curvature) term of a linearised geometric operator. -/
+def endoFieldLinearMap
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {Φ : Π x : M, V x →L[𝕜] V x}
+    (hΦ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x))) :
+    ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →ₗ[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover where
+  toFun s := ⟨fun x => Φ x (s x), continuous_endo_section hΦ s.continuous_toFun⟩
+  map_add' s t := by
+    refine ContinuousSectionSpace.ext (fun x => ?_)
+    rw [add_apply]
+    show Φ x ((s + t) x) = Φ x (s x) + Φ x (t x)
+    rw [add_apply, map_add]
+  map_smul' c s := by
+    refine ContinuousSectionSpace.ext (fun x => ?_)
+    rw [smul_apply]
+    show Φ x ((c • s) x) = c • Φ x (s x)
+    rw [smul_apply, map_smul]
+
+@[simp]
+theorem endoFieldLinearMap_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {Φ : Π x : M, V x →L[𝕜] V x}
+    (hΦ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x)))
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (endoFieldLinearMap (V := V) et Kc hKc Ko hKo hKoEq hcover hΦ s) x = Φ x (s x) :=
+  rfl
+
+/-- **The fiberwise endomorphism operator packaged as a bounded section-space operator.**  For a
+continuous section `Φ` of the endomorphism bundle `V →L[𝕜] V` whose section-space operator size is
+controlled on the finite cover by the trivialization-distorted fiber bound
+`‖(et i).continuousLinearMapAt 𝕜 x‖ · ‖Φ x‖ · ‖(et i).symmL 𝕜 x‖ ≤ C`, the operator
+`s ↦ (x ↦ Φ x (s x))` is a `ContinuousSectionSpace →L[𝕜] ContinuousSectionSpace` of operator norm at
+most `C`.  This is a genuine zeroth-order fiber-linear (bundle-endomorphism) generator on the
+transported section space — the `L t : CSS →L[𝕜] CSS` shape the section-space Picard `picard` field
+consumes — built through `mkContinuousOfForallCoordNormLe`: the coordinate readout of the image is
+`(et i).continuousLinearMapAt 𝕜 x (Φ x (s x))`, and writing `s x` back through
+`(et i).symmL 𝕜 x` gives the coordinate operator bound via the composed operator norms.  Generalises
+`smulField`, whose scalar coupling pulls through the trivialization with no distortion factor. -/
+noncomputable def endoField
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {Φ : Π x : M, V x →L[𝕜] V x}
+    (hΦ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt 𝕜 x.1‖ * ‖Φ x.1‖ * ‖(et i).symmL 𝕜 x.1‖ ≤ C) :
+    ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →L[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover :=
+  mkContinuousOfForallCoordNormLe
+    (endoFieldLinearMap (V := V) et Kc hKc Ko hKo hKoEq hcover hΦ) C hC
+    (fun s i x => by
+      rw [coord_apply]
+      show ‖(et i).continuousLinearMapAt 𝕜 x.1 (Φ x.1 (s x.1))‖ ≤ C * ‖s‖
+      have hsx : ‖s x.1‖ ≤ ‖(et i).symmL 𝕜 x.1‖ * ‖s‖ := by
+        rw [apply_eq_symmL_coord s x.2]
+        refine le_trans (((et i).symmL 𝕜 x.1).le_opNorm _) ?_
+        exact mul_le_mul_of_nonneg_left (coord_norm_le_norm s i _) (norm_nonneg _)
+      calc ‖(et i).continuousLinearMapAt 𝕜 x.1 (Φ x.1 (s x.1))‖
+          ≤ ‖(et i).continuousLinearMapAt 𝕜 x.1‖ * ‖Φ x.1 (s x.1)‖ :=
+            ((et i).continuousLinearMapAt 𝕜 x.1).le_opNorm _
+        _ ≤ ‖(et i).continuousLinearMapAt 𝕜 x.1‖ * (‖Φ x.1‖ * ‖s x.1‖) :=
+            mul_le_mul_of_nonneg_left ((Φ x.1).le_opNorm _) (norm_nonneg _)
+        _ ≤ ‖(et i).continuousLinearMapAt 𝕜 x.1‖ * (‖Φ x.1‖ * (‖(et i).symmL 𝕜 x.1‖ * ‖s‖)) :=
+            mul_le_mul_of_nonneg_left
+              (mul_le_mul_of_nonneg_left hsx (norm_nonneg _)) (norm_nonneg _)
+        _ = ‖(et i).continuousLinearMapAt 𝕜 x.1‖ * ‖Φ x.1‖ * ‖(et i).symmL 𝕜 x.1‖ * ‖s‖ := by
+            ring
+        _ ≤ C * ‖s‖ := mul_le_mul_of_nonneg_right (hbound i x) (norm_nonneg s))
+
+@[simp]
+theorem endoField_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {Φ : Π x : M, V x →L[𝕜] V x}
+    (hΦ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt 𝕜 x.1‖ * ‖Φ x.1‖ * ‖(et i).symmL 𝕜 x.1‖ ≤ C)
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (endoField (V := V) et Kc hKc Ko hKo hKoEq hcover hΦ C hC hbound s) x = Φ x (s x) :=
+  rfl
+
+/-- The fiberwise endomorphism operator has operator norm at most the trivialization-distorted fiber
+bound `C`. -/
+theorem endoField_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {Φ : Π x : M, V x →L[𝕜] V x}
+    (hΦ : Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt 𝕜 x.1‖ * ‖Φ x.1‖ * ‖(et i).symmL 𝕜 x.1‖ ≤ C) :
+    ‖endoField (V := V) et Kc hKc Ko hKo hKoEq hcover hΦ C hC hbound‖ ≤ C :=
   mkContinuousOfForallCoordNormLe_norm_le _ C hC _
 
 end TrivializationOpNorm
