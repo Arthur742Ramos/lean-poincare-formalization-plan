@@ -1113,6 +1113,118 @@ theorem norm_trivializationAt_bilinearFormBundle_bilinearComp_readout_le
   rw [trivializationAt_bilinearFormBundle_bilinearComp_readout_eq s P Q x₀ x hx]
   exact ContinuousLinearMap.norm_bilinearComp_le _ _ _
 
+/-- **Additivity of the bilinear-form trivialization readout.**  On the trivializing base set the
+`BilinearFormBundle` coordinate readout is additive in the fibre value: the readout of `b + c`
+equals the sum of the readouts of `b` and `c`.  A direct consequence of the fiberwise linearity of
+the trivialization (`trivializationAt_bilinearFormBundle_apply_eq`).
+
+This is the readout-linearity input consumed by any coordinate difference/Lipschitz bound in the
+continuous section space at the tangent bundle: it lets the readout of a sum of reaction summands
+(such as the two halves of the DeTurck-correction derivation) be split before estimating, staying in
+the clean model fibre `BilF = F →L[ℝ] F →L[ℝ] ℝ` throughout. -/
+theorem trivializationAt_bilinearFormBundle_readout_add
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) (b c : BilW x) :
+    (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (b + c))).2
+      = (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x b)).2
+        + (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x c)).2 := by
+  ext u v
+  simp only [ContinuousLinearMap.add_apply]
+  rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx (b + c) u v,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx b u v,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx c u v]
+  simp [ContinuousLinearMap.add_apply]
+
+/-- **The model-fibre readout of the identity endomorphism is the model identity.**  On the
+trivializing base set, the endomorphism coordinate readout of `ContinuousLinearMap.id ℝ (W x)` is
+`ContinuousLinearMap.id ℝ F` (the trivialization change of coordinates conjugates the identity to the
+identity).  Consequence of `ContinuousLinearMap.inCoordinates_eq` and
+`ContinuousLinearEquiv.coe_comp_coe_symm`. -/
+theorem inCoordinates_id_eq_id
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (ContinuousLinearMap.id ℝ (W x))
+      = ContinuousLinearMap.id ℝ F := by
+  rw [ContinuousLinearMap.inCoordinates_eq hx hx, ContinuousLinearMap.id_comp]
+  exact ContinuousLinearEquiv.coe_comp_coe_symm _
+
+/-- **The model-fibre readout of the identity endomorphism has norm at most `1`.**  Immediate from
+`inCoordinates_id_eq_id` and `ContinuousLinearMap.norm_id_le`.  This is the fibre-level size datum
+that lets the `‖id‖`-weighted slots of the DeTurck-correction derivation be absorbed into the
+constant `2`. -/
+theorem norm_inCoordinates_id_le
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (ContinuousLinearMap.id ℝ (W x))‖ ≤ 1 := by
+  rw [inCoordinates_id_eq_id (F := F) (W := W) x₀ x hx]
+  exact ContinuousLinearMap.norm_id_le
+
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **The model-fibre readout norm bound for the two-sided DeTurck-correction derivation.**  The
+operator norm of the `BilinearFormBundle` coordinate readout of the derivation value
+`(s x).bilinearComp (P x) id + (s x).bilinearComp id (P x)` — the fibre value of the intrinsic
+Ricci–DeTurck correction `(u, v) ↦ s x (P x u) v + s x u (P x v)` with the endomorphism coefficient
+`P` frozen — is bounded by `2 · ‖readout (s x)‖ · ‖inCoordinates … (P x)‖`.
+
+This is the exact fibre-level Lipschitz/size estimate for the *correct* DeTurck reaction shape (a
+two-sided derivation, not a conjugation), stated entirely through the clean model-fibre readouts
+`BilF = F →L[ℝ] F →L[ℝ] ℝ` and `F →L[ℝ] F`: no `‖BilW x‖` or `‖W x →L[ℝ] W x‖` appears, so it
+**elaborates at the tangent bundle** `W := TangentSpace I` (where the raw fibre norms are
+un-synthesizable).  Built from the plain composition readout bound
+`norm_trivializationAt_bilinearFormBundle_bilinearComp_readout_le` on each of the two one-sided
+summands, `norm_add_le` on the readout sum (via `trivializationAt_bilinearFormBundle_readout_add`),
+and the `‖id‖`-slot bound `norm_inCoordinates_id_le`. -/
+theorem norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le
+    (s : Π x : M, BilW x) (P : Π x : M, W x →L[ℝ] W x)
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    ‖(trivializationAt BilF BilW x₀
+        (TotalSpace.mk' BilF x
+          ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+            + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)))).2‖
+      ≤ 2 * ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by
+  have hid : ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x
+      (ContinuousLinearMap.id ℝ (W x))‖ ≤ 1 := norm_inCoordinates_id_le (F := F) (W := W) x₀ x hx
+  rw [trivializationAt_bilinearFormBundle_readout_add (F := F) (W := W) x₀ x hx
+    ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x)))
+    ((s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x))]
+  refine (norm_add_le
+    ((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+        ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))))).2)
+    ((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+        ((s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)))).2)).trans ?_
+  have h₁ : ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+        ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))))).2‖
+      ≤ ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by
+    refine (norm_trivializationAt_bilinearFormBundle_bilinearComp_readout_le
+      s P (fun y => ContinuousLinearMap.id ℝ (W y)) x₀ x hx).trans ?_
+    calc ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (ContinuousLinearMap.id ℝ (W x))‖
+          ≤ ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ * 1 := by gcongr
+      _ = ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := mul_one _
+  have h₂ : ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+        ((s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)))).2‖
+      ≤ ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by
+    refine (norm_trivializationAt_bilinearFormBundle_bilinearComp_readout_le
+      s (fun y => ContinuousLinearMap.id ℝ (W y)) P x₀ x hx).trans ?_
+    calc ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (ContinuousLinearMap.id ℝ (W x))‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+          ≤ ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖ * 1
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by gcongr
+      _ = ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by rw [mul_one]
+  have hrw : 2 * ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+        * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+      = ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+        + ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by ring
+  rw [hrw]
+  exact add_le_add h₁ h₂
+
 end BilinearConjugation
 
 section FiberwiseSymmetrization
