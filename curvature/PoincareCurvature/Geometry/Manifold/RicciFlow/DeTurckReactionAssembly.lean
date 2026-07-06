@@ -92,4 +92,43 @@ theorem metricSection_deTurckDerivation_eq_intrinsicDeTurckCorrectionSection
   rw [hsMetric, hsMetric, intrinsicDeTurckCorrectionSection_apply,
     intrinsicDeTurckCorrection_apply]
 
+/-- **The canonical metric section instance of the DeTurck reaction assembly identity.**  Specialises
+`metricSection_deTurckDerivation_eq_intrinsicDeTurckCorrectionSection` to the canonical
+`ContinuousSectionSpace` element `⟨(g t).toSection, (g t).continuous_toSection⟩` built directly from the
+time-`t` metric slice: the frozen-`∇W` two-sided derivation of the metric section reproduces the
+geometric `intrinsicDeTurckCorrectionSection` pointwise, with no auxiliary agreement hypothesis (it is
+discharged by `ContMDiffRiemannianMetric.toSection_apply`).  This is the exact section a Ricci–DeTurck
+chart's metric state is packaged as, so it is the directly-consumable form of the DeTurck-reaction
+half of the chart operator `A`'s `geometric` field. -/
+theorem metricToSection_deTurckDerivation_eq_intrinsicDeTurckCorrectionSection
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (x : M) (u v : TM x) :
+    (⟨(g t).toSection, (g t).continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+          (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover) x
+        ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+          (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x u) v
+      + (⟨(g t).toSection, (g t).continuous_toSection⟩ :
+        ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+          (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover) x u
+        ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+          (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x v)
+      = intrinsicDeTurckCorrectionSection (I := I) (M := M) g background t x u v :=
+  metricSection_deTurckDerivation_eq_intrinsicDeTurckCorrectionSection
+    et Kc hKc Ko hKo hKoEq hcover g background t
+    ⟨(g t).toSection, (g t).continuous_toSection⟩
+    (fun x u v => by
+      simp only [ContMDiffRiemannianMetric.toSection_apply]) x u v
+
 end RicciFlow
