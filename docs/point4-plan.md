@@ -8628,3 +8628,42 @@ field, via `continuousOn_of_forall_coord_uncurry_continuousOn` (watch the `↥(K
 continuous *bundle-endomorphism* field `Φ x : V x →L[𝕜] V x` (the true reaction-term shape).  (3) Feed a
 time-dependent generator + source `b` to `…_boundedLinear_generator_source_fixedWindow` to obtain the
 chart's `picard` field for a concrete operator; then the `geometric` realization.
+
+## Milestone (2026-07-05, later still) — geometric-`A` VALUE/OUTPUT side packaged into the section space `CSS` (Item 3 / GAP 2 geometric-`A`)
+
+Three additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0` commits; full `lake build` green (2916 jobs).  All live in the
+**root-imported** (hence audit-visible via `lake build`) module `RicciFlow/DeTurckCorrectionRegularity.lean`
+(which now also `public import`s `VectorBundle.ContinuousSection`).  These close the honest bridge from the
+already-DONE *value-section regularity* (`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero`: the
+intrinsic Ricci–DeTurck RHS of a fixed smooth metric family is a `ContMDiff`-`0` `BilinearFormBundle`
+section) to the *transported finite-cover `ContinuousSectionSpace`* `CSS` in which the geometric chart
+operator `A` actually lives — i.e. the geometric-`A` **value/output object**, not another model heat-kernel
+estimate.
+
+* **`exists_intrinsicRicciDeTurckRHS_continuousSectionSpace`** — for a metric family `g`, a background
+  connection family whose time-`t` slice is a `C¹` covariant derivative, the geometric RHS packages into an
+  element `rhsCSS : CSS` with the defining pointwise identity `rhsCSS x u v = intrinsicRicciDeTurckRHS g
+  background t x u v`.  Proof: `⟨rhs, (ContMDiff-0).continuous⟩` from the value-section regularity — no
+  transported-instance diamond arises because the `CSS` element is built directly from its `toFun`.
+* **`exists_intrinsicRicciDeTurckRHS_continuousSectionSpace_symm`** — the packaged value is pointwise
+  symmetric (`rhsCSS x u v = rhsCSS x v u`), i.e. lands in the pointwise symmetric locus, via
+  `intrinsicRicciDeTurckRHS_symm` (needs the ambient `[IsManifold I (minSmoothness ℝ 3) M]`,
+  `[IsManifold I ((2:ℕ∞)+1) M]`).  This is the symmetry content the chart's `A_mem_symmetricLocus` exploits.
+* **`intrinsicRicciDeTurckRHSSectionSpace` (+ `_apply`, `_symm`)** — the **named** `def`-level companion: a
+  reusable `CSS`-valued geometric-RHS object the chart operator `A` and the mild-affine source `b` can
+  reference directly (rather than a bare existential), with defining identity `_apply = intrinsicRicciDeTurckRHS`
+  and pointwise symmetry `_symm`.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  The geometric `A`'s **value side** is now a
+first-class `CSS` object: `A τ s`'s *range* is realised in the section space with the exact `geometric`-field
+pointwise identity.  The generic `hcenter` ingredient (`ContinuousSectionSpace.exists_forall_coord_norm_le`,
+compact-uniform coordinate bound) already exists and applies to this named value verbatim.  The surviving
+geometric-`A` obstruction is unchanged and is the hard core: the operator's **dependence on the input section
+`s`** (decoding a `C⁰` section to a metric to evaluate its 2nd-order RHS) and the associated mild/regularised
+`picard` Lipschitz bounds — NOT the regularity or section-space realisation of its values.
+
+**NEXT.**  Build the `s`-dependence: either (a) the mild/regularised generator `L t : CSS →L[ℝ] CSS` whose
+values realise `intrinsicRicciDeTurckRHSSectionSpace`-shaped sections (feeding `…_boundedLinear_generator_source_fixedWindow`
++ this named value as the source `b`), or (b) a time-continuity `ContinuousOn (fun t => intrinsicRicciDeTurckRHSSectionSpace … t …) [t₀,T]`
+of the named value (the `hb` source-continuity the affine picard consumes), which needs continuity-in-`t` of the RHS section.
