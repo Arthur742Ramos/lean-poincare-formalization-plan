@@ -131,4 +131,85 @@ theorem metricToSection_deTurckDerivation_eq_intrinsicDeTurckCorrectionSection
     (fun x u v => by
       simp only [ContMDiffRiemannianMetric.toSection_apply]) x u v
 
+/-- **The full geometric Ricci–DeTurck right-hand side splits as the Ricci-flow principal part plus the
+frozen-coefficient DeTurck reaction of the metric section.**  For any `ContinuousSectionSpace` element
+`sMetric` agreeing pointwise with the metric `(g t).inner`, the geometric `intrinsicRicciDeTurckRHS`
+equals, at every base point and tangent pair, the intrinsic Ricci-flow right-hand side plus the
+two-sided derivation `sMetric x (∇W x u) v + sMetric x u (∇W x v)`.
+
+This is the exact fiber-value form of the affine chart operator `A τ s = principalSource + reaction s`
+evaluated at the metric section: composing the second-order Ricci-flow principal part
+(`intrinsicRicciFlowRHS`) with the already-identified zeroth-order DeTurck reaction
+(`metricSection_deTurckDerivation_eq_intrinsicDeTurckCorrectionSection`) reproduces the full geometric
+Ricci–DeTurck operator.  It is the center-point verification of the chart's `geometric` field: an `A`
+whose reaction half is the frozen two-sided derivation and whose source half has fiber value
+`intrinsicRicciFlowRHS` agrees with `intrinsicRicciDeTurckRHS` on the metric state. -/
+theorem intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_add_metricSection_deTurckDerivation
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (sMetric : ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+      (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover)
+    (hsMetric : ∀ (x : M) (u v : TM x), sMetric x u v = (g t).inner x u v)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v
+      = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v
+        + (sMetric x
+            ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+              (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x u) v
+          + sMetric x u
+            ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+              (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x v)) := by
+  rw [intrinsicRicciDeTurckRHS_apply,
+    metricSection_deTurckDerivation_eq_intrinsicDeTurckCorrectionSection
+      et Kc hKc Ko hKo hKoEq hcover g background t sMetric hsMetric x u v,
+    intrinsicDeTurckCorrectionSection_apply]
+
+/-- **The named section-space Ricci–DeTurck RHS value splits as the Ricci-flow principal part plus the
+frozen-coefficient DeTurck reaction of the metric section.**  The section-space companion of
+`intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_add_metricSection_deTurckDerivation`: the named
+`intrinsicRicciDeTurckRHSSectionSpace` value (the geometric operator `A`'s / source `b`'s directly
+referenceable right-hand side) agrees, on any metric section, with the Ricci-flow principal part plus
+the two-sided DeTurck derivation.  This is the directly-consumable form of the chart's `geometric`
+field at the metric state: the named RHS source decomposes into the principal part and the reaction the
+affine section-space Picard route applies. -/
+theorem intrinsicRicciDeTurckRHSSectionSpace_eq_intrinsicRicciFlowRHS_add_metricSection_deTurckDerivation
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (sMetric : ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+      (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover)
+    (hsMetric : ∀ (x : M) (u v : TM x), sMetric x u v = (g t).inner x u v)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g background t hbackground x u v
+      = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v
+        + (sMetric x
+            ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+              (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x u) v
+          + sMetric x u
+            ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+              (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x v)) := by
+  rw [intrinsicRicciDeTurckRHSSectionSpace_apply]
+  exact intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_add_metricSection_deTurckDerivation
+    et Kc hKc Ko hKo hKoEq hcover g background t sMetric hsMetric x u v
+
 end RicciFlow
