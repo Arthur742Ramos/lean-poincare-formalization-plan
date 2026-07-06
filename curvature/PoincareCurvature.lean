@@ -12,3 +12,4 @@ import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Time
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.DowngradeNormFree
 import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckCorrectionRegularity
 import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckReactionAssembly
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReactionPicard
