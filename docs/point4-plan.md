@@ -8777,3 +8777,55 @@ feed `exists_..._endoField_source_const` (fixes the frozen-coefficient zeroth-or
 `intrinsicRicciDeTurckRHSSectionSpace` a jointly-continuous (non-`Classical.choose`) construction to
 unblock the source `hb`, or (c) begin the second-order mild formulation connecting the model
 heat-semigroup Schauder estimates to the section-space principal part.
+
+## Milestone (2026-07-05, later still) — the hom-bundle section continuity API: the missing `hΦ` supplier that `endoField` consumes (Item 3 / GAP 2 geometric-`A` reaction-endomorphism continuity)
+
+Three additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats` `TOTAL 0` commits; full `lake build` green (2960 jobs).  All live in the root-imported
+module `VectorBundle/ContinuousSection.lean`.  They construct, for the first time in the library, the
+continuity witness `hΦ : Continuous (fun x => TotalSpace.mk' (F →L[𝕜] F) x (Φ x))` that
+`continuous_endo_section`/`endoField` were built to *consume* but which nothing previously *supplied*
+(the prior zeroth-order generators either assumed it as a hypothesis or specialised to the scalar
+`smulField`, which pulls through the trivialization with no distortion).  This resolves the feared
+"BilinearFormBundle hom-section continuity wall" at the general-bundle level: it is tractable via
+Mathlib's `continuousAt_hom_bundle` + the `inCoordinates` readout, *not* a `whnf`/defeq concreteness
+blocker at general `V`.
+
+* **`continuousAt_inCoordinates_of_continuous_homSection`** (extractor) — from hom-section continuity,
+  `ContinuousAt (fun x => inCoordinates F V F V x₀ x x₀ x (Φ x))` at each base point.  The shared
+  engine of the closure lemmas.
+* **`continuous_homSection_of_continuousAt_inCoordinates`** (constructor, the dual) — from continuity
+  of the trivialization readout at every base point, hom-section continuity.  The entry point any
+  concretely-defined (geometric reaction) endomorphism's continuity proof will discharge with.
+* **`continuous_id_endo_section`** — the identity endomorphism section is continuous (readout is
+  eventually `id_F` via `continuousLinearMapAt_symmL`).
+* **`continuous_add_endo_section` / `continuous_smul_endo_section` / `continuous_comp_endo_section`** —
+  the class of continuous endomorphism-bundle sections is closed under pointwise sum, continuous
+  scalar-field multiple, and composition (readout is additive/homogeneous in the endomorphism argument
+  for sum/smul; for composition the middle transport collapses via `symmL_continuousLinearMapAt` so
+  the readout is the composition of the factor readouts).  This is the structural algebra a fiber-linear
+  reaction endomorphism is assembled from.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  This advances the `A`/`picard` half of
+GAP 2 one concrete step: the *continuity* obstruction for a **non-scalar** zeroth-order generator — the
+reason `endoField` sat unusable beyond the scalar case — is now closed at the general-bundle level.
+The surviving obstruction for a genuine non-scalar generator is the **geometric SEED**: a concrete
+continuous endomorphism-bundle section `Φ₀ : Π x, V x →L V x` that is *not* a scalar multiple of the
+identity.  Ground-truth finding: **no such seed exists at the general-`V` level** — an abstract fibre
+`V` carries no natural non-scalar endomorphism, so every section built from the identity + the closure
+algebra is scalar (equivalent to `smulField`).  A non-scalar seed requires *specific-bundle structure*:
+for the chart's `V = BilinearFormBundle (TM) = TM →L TM →L ℝ` the natural candidates are (i) the
+curvature/reaction endomorphism `h ↦ Rm ⊛ h` (needs the Riemann tensor packaged as a continuous
+`End(BilinearFormBundle)` section — a curvature-to-endomorphism map), or (ii) index-raising by an
+inverse metric `g₀⁻¹` (needs inverse-metric infrastructure), or (iii) precomposition / symmetrization
+`β ↦ β ∘ P`, `β ↦ ½(β + β.flip)` (needs the `Hom(BilinearFormBundle, BilinearFormBundle)` — a *nested*
+double-hom bundle — `inCoordinates` computation, the genuine remaining concreteness step).  The
+continuity of any of these now reduces, via the constructor lemma above, to checking a coordinate
+readout — the general-`V` technique is proved; only the bundle-specific readout computation remains.
+
+**NEXT.**  Supply the geometric non-scalar seed: package a continuous `End(BilinearFormBundle (TM))`
+section (route (i) curvature reaction, or the tractable warm-up (iii) symmetrization/flip whose readout
+should be the constant model-fibre flip), prove its continuity with
+`continuous_homSection_of_continuousAt_inCoordinates`, feed `endoField` +
+`exists_..._endoField_source_const`, and thereby inhabit the first genuine non-scalar zeroth-order chart
+generator.  Then the true long pole (the second-order mild/heat-semigroup principal part) remains.
