@@ -8721,3 +8721,59 @@ form bundle (needs a continuous `End(BilinearFormBundle)` section — watch the 
 or (b) supply the joint total-space continuity of `intrinsicRicciDeTurckRHSSectionSpace` in `(t, x)` and
 feed `continuousOn_of_continuous_totalSpace_uncurry` to close the source `hb`, or (c) begin connecting the
 model heat-semigroup Schauder toolkit to the section-space second-order part.
+
+## Milestone (2026-07-05, later still) — the endomorphism-generator affine `picard` route made end-to-end: picard field → state-constrained local solution → single-spatial-continuity (frozen-coefficient) interface (Item 3 / GAP 2 `picard` half)
+
+Three additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0` commits; full `lake build` green (2960 jobs).  All live in the
+root-imported module `AnalyticPDE/SectionSpacePicard.lean`, and they carry the recently-committed
+fiberwise-endomorphism generator `endoField` (`VectorBundle/ContinuousSection.lean`) all the way from a
+*bounded generator with strong time-continuity* to the actual `BanachEvolutionLocalSolutionIn` object the
+chart's `realization` field decodes.  Together they reduce the `picard` half of GAP 2 — for the
+**zeroth-order** (curvature/reaction) part of the operator — to *exhibiting a continuous
+endomorphism-bundle section plus a continuous source*, with everything downstream now proved.
+
+* **`endoFieldFamily` (+ `_apply`, `_norm_le`, `_continuousOn`)** — the time-dependent packaging of the
+  fiberwise-endomorphism generator: `endoFieldFamily et … hΦ C hC hbound t = endoField (Φ t)` for a
+  family `Φ : ℝ → Π x, V x →L[ℝ] V x`, giving `ℝ → (CSS →L[ℝ] CSS)` with the uniform operator-norm bound
+  `‖endoFieldFamily … t‖ ≤ C` (via `endoField_norm_le`) and strong time-continuity
+  `∀ s, ContinuousOn (fun t => endoFieldFamily … t s)` (via `endoFieldLinearMap_continuousOn`; the value
+  coincides with `endoFieldLinearMap (Φ t)` by `mkContinuousOfForallCoordNormLe_apply`).  This is the
+  `L t : CSS →L[ℝ] CSS` generator the affine section-space Picard capstones consume.
+* **`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_endoField_source`** — the endpoint-
+  choosing chart `picard` field for the affine operator `A t s = (x ↦ Φ t x (s x)) + b t`.  From joint
+  `(t, x)`-continuity of `Φ` into the endomorphism (hom) bundle, a uniform trivialization-distorted
+  fiber bound `‖clmAt‖·‖Φ t x‖·‖symmL‖ ≤ K`, and a continuous source `b`, it produces
+  `∃ T Mc, IsPicardLindelof (A) ⟨t₀,_⟩ x0 a 0 (Mc + K·a) K` — the chart `picard` shape, with `T`, `Mc`
+  chosen internally.  Specializes
+  `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source`.
+* **`exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_endoField_source`** — the same data
+  plus `[CompleteSpace F]` and the a-priori containment `closedBall x0 a ⊆ locus` run all the way to
+  `Nonempty (BanachEvolutionLocalSolutionIn A locus t₀ x0)` — the exact state-constrained Banach evolution
+  object a `RicciDeTurckChartClosureData.realization` decode consumes.
+* **`exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_endoField_source_const`** — the
+  autonomous (frozen-coefficient) interface: when the reaction endomorphism is *time-independent* (a
+  single continuous section `Φ₀ : Π x, V x →L[ℝ] V x`), the joint `(t, x)`-continuity is free
+  (`Φ₀ ∘ snd`), so the whole route collapses to a single spatial-continuity input.  This is the shape a
+  first geometric instantiation about a *frozen background metric `g₀`* (whose zeroth-order reaction
+  coefficient does not depend on time) supplies directly.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  The `picard` half of GAP 2 is now
+end-to-end **for the zeroth-order part**: from a continuous endomorphism-bundle section + continuous
+source, the chart's `picard` field and the `realization`-consumable `BanachEvolutionLocalSolutionIn` are
+both proved, sorry-free and axiom-clean.  The surviving obstructions are unchanged and geometric:
+  (i) the **second-order** (connection-Laplacian / heat-semigroup) principal part of the real
+      Ricci–DeTurck operator, which no bounded generator captures — needs the model heat-kernel Schauder
+      toolkit connected to the section space (mild integral formulation), the true long pole of GAP 2;
+  (ii) the **concrete geometric reaction endomorphism `Φ`** — a continuous `End(BilinearFormBundle)`
+      section realising the curvature action on symmetric 2-tensors (watch the fiber-instance diamond);
+  (iii) the **source `b`'s time-continuity**: `intrinsicRicciDeTurckRHSSectionSpace` is currently built
+      via `Classical.choose` (a *per-time* witness with no control over `t`-dependence), so its joint
+      `(t, x)`-continuity — the input `continuousOn_of_continuous_totalSpace_uncurry` needs to close
+      `hb` — is not yet available; a jointly-continuous construction of the RHS section is the unblocker.
+
+**NEXT.**  Either (a) construct the concrete continuous `End(BilinearFormBundle)` reaction section and
+feed `exists_..._endoField_source_const` (fixes the frozen-coefficient zeroth-order chart), or (b) give
+`intrinsicRicciDeTurckRHSSectionSpace` a jointly-continuous (non-`Classical.choose`) construction to
+unblock the source `hb`, or (c) begin the second-order mild formulation connecting the model
+heat-semigroup Schauder estimates to the section-space principal part.
