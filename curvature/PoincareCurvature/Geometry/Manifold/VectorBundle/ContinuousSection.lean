@@ -2729,6 +2729,156 @@ theorem mkContinuousOfForallCoordNormLe_norm_le
   refine LinearMap.mkContinuous_norm_le T hC fun s => ?_
   exact norm_le_of_forall_coord_norm_le (mul_nonneg hC (norm_nonneg s)) (hbound s)
 
+/-- **Scalar-function multiplication preserves continuity of a bundle section.**  If `φ : M → 𝕜` is
+continuous and the section `s` is continuous (as a map into the total space), then so is the pointwise
+scalar multiple `x ↦ φ x • s x`.  Checked fibrewise via `FiberBundle.continuousAt_totalSpace`: in the
+canonical trivialization at each base point the readout is `φ x • (e (T% s x)).2`, continuous by
+continuity of `φ` and of the section's trivialization readout.  This is the continuity input for
+building zeroth-order (multiplication) section-space generators. -/
+lemma continuous_smul_section
+    {φ : M → 𝕜} (hφ : Continuous φ)
+    {s : Π x : M, V x} (hs : Continuous (T% s)) :
+    Continuous (T% (fun x => φ x • s x)) := by
+  rw [continuous_iff_continuousAt]
+  intro x₀
+  have hs_at : ContinuousAt (T% s) x₀ := hs.continuousAt
+  rw [FiberBundle.continuousAt_totalSpace F] at hs_at
+  rw [FiberBundle.continuousAt_totalSpace F]
+  refine ⟨continuousAt_id, ?_⟩
+  have hfib_s : ContinuousAt
+      (fun x => (trivializationAt F V x₀ ((T% s) x)).2) x₀ := hs_at.2
+  show ContinuousAt
+    (fun x => (trivializationAt F V x₀ ((T% fun y => φ y • s y) x)).2) x₀
+  have hx₀base : x₀ ∈ (trivializationAt F V x₀).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt F V x₀
+  have hev :
+      (fun x => (trivializationAt F V x₀ ((T% fun y => φ y • s y) x)).2)
+        =ᶠ[nhds x₀] (fun x => φ x • (trivializationAt F V x₀ ((T% s) x)).2) := by
+    filter_upwards [(trivializationAt F V x₀).open_baseSet.mem_nhds hx₀base] with x hx
+    have key : ∀ v : V x,
+        (trivializationAt F V x₀ (TotalSpace.mk' F x v)).2
+          = (trivializationAt F V x₀).linearMapAt 𝕜 x v := by
+      intro v
+      rw [Bundle.Trivialization.coe_linearMapAt_of_mem (R := 𝕜)
+        (trivializationAt F V x₀) hx]
+    show (trivializationAt F V x₀ (TotalSpace.mk' F x (φ x • s x))).2
+      = φ x • (trivializationAt F V x₀ (TotalSpace.mk' F x (s x))).2
+    rw [key (φ x • s x), key (s x), map_smul]
+  exact (hφ.continuousAt.smul hfib_s).congr hev.symm
+
+/-- The scalar-field multiplication operator on the section space, as a `𝕜`-linear map: for a
+continuous scalar field `φ : M → 𝕜` it sends a section `s` to `x ↦ φ x • s x` (continuous by
+`continuous_smul_section`). -/
+def smulFieldLinearMap
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {φ : M → 𝕜} (hφ : Continuous φ) :
+    ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →ₗ[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover where
+  toFun s := ⟨fun x => φ x • s x, continuous_smul_section hφ s.continuous_toFun⟩
+  map_add' s t := by
+    refine ContinuousSectionSpace.ext (fun x => ?_)
+    rw [add_apply]
+    show φ x • (s + t) x = φ x • s x + φ x • t x
+    rw [add_apply, smul_add]
+  map_smul' c s := by
+    refine ContinuousSectionSpace.ext (fun x => ?_)
+    rw [smul_apply]
+    show φ x • (c • s) x = c • (φ x • s x)
+    rw [smul_apply, smul_comm]
+
+@[simp]
+theorem smulFieldLinearMap_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {φ : M → 𝕜} (hφ : Continuous φ)
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (smulFieldLinearMap (V := V) et Kc hKc Ko hKo hKoEq hcover hφ s) x = φ x • s x :=
+  rfl
+
+/-- **The scalar-field multiplication operator packaged as a bounded section-space operator.**  For a
+continuous scalar field `φ : M → 𝕜` bounded by `C` on the finite cover, `s ↦ (x ↦ φ x • s x)` is a
+`ContinuousSectionSpace →L[𝕜] ContinuousSectionSpace` of operator norm at most `C`.  This is a genuine
+zeroth-order (multiplication) generator on the transported section space, built through
+`mkContinuousOfForallCoordNormLe`: the coordinate readout of the image is `φ x • (coord s) i x`, so the
+coordinate operator bound `‖(coord (φ • s)) i x‖ ≤ C · ‖s‖` follows from `‖φ x‖ ≤ C` and the
+norm-nonexpansiveness `coord_norm_le_norm`. -/
+noncomputable def smulField
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {φ : M → 𝕜} (hφ : Continuous φ) (C : ℝ) (hC : 0 ≤ C)
+    (hφbound : ∀ (i : κ) (x : Kc i), ‖φ x.1‖ ≤ C) :
+    ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →L[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover :=
+  mkContinuousOfForallCoordNormLe
+    (smulFieldLinearMap (V := V) et Kc hKc Ko hKo hKoEq hcover hφ) C hC
+    (fun s i x => by
+      rw [coord_apply]
+      show ‖(et i).continuousLinearMapAt 𝕜 x.1 (φ x.1 • s x.1)‖ ≤ C * ‖s‖
+      rw [map_smul, norm_smul, ← coord_apply s i x]
+      calc ‖φ x.1‖ * ‖(equivCompatibleCoordFamilySubmodule
+              (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖
+          ≤ C * ‖(equivCompatibleCoordFamilySubmodule
+              (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖ :=
+            mul_le_mul_of_nonneg_right (hφbound i x) (norm_nonneg _)
+        _ ≤ C * ‖s‖ := mul_le_mul_of_nonneg_left (coord_norm_le_norm s i x) hC)
+
+@[simp]
+theorem smulField_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {φ : M → 𝕜} (hφ : Continuous φ) (C : ℝ) (hC : 0 ≤ C)
+    (hφbound : ∀ (i : κ) (x : Kc i), ‖φ x.1‖ ≤ C)
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (smulField (V := V) et Kc hKc Ko hKo hKoEq hcover hφ C hC hφbound s) x = φ x • s x :=
+  rfl
+
+/-- The scalar-field multiplication operator has operator norm at most the field bound `C`. -/
+theorem smulField_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {φ : M → 𝕜} (hφ : Continuous φ) (C : ℝ) (hC : 0 ≤ C)
+    (hφbound : ∀ (i : κ) (x : Kc i), ‖φ x.1‖ ≤ C) :
+    ‖smulField (V := V) et Kc hKc Ko hKo hKoEq hcover hφ C hC hφbound‖ ≤ C :=
+  mkContinuousOfForallCoordNormLe_norm_le _ C hC _
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace
