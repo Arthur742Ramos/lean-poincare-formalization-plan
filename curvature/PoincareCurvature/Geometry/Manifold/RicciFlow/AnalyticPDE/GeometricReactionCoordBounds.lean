@@ -309,4 +309,61 @@ theorem deTurckReactionSectionMap_readout_norm_le_of_comp_bound
         exact mul_le_mul_of_nonneg_left hcomp (by norm_num)
     _ = 2 * Kp * ‖(trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (σ x))).2‖ := by ring
 
+/-- **Composition-readout size bound at `TM`.**  The model-fibre readout of the fibre-slot
+composition `(σ x).comp (P x)` is bounded by `‖inCoordinates E TM E TM x₀ x x₀ x (P x)‖ · ‖readout
+(σ x)‖`, via the fiber-norm-free `comp_readout_eq_nf` (readout of the composition is the model-fibre
+composition of `readout (σ x)` with `inCoord (P x)`) and the clean-model-fibre `opNorm_comp_le`.  This
+supplies the `hcomp` hypothesis of `deTurckReactionSectionMap_readout_norm_le_of_comp_bound` with
+`Kp := ‖inCoordinates E TM E TM x₀ x x₀ x (P x)‖`. -/
+theorem deTurckReactionSectionMap_comp_readout_norm_le_inCoordinates
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization BilF (TotalSpace.proj : TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M) (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 x : M) (hx : x ∈ (trivializationAt E TM x0).baseSet) :
+    ‖(trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x ((σ x).comp (P x)))).2‖
+      ≤ ‖ContinuousLinearMap.inCoordinates E TM E TM x0 x x0 x (P x)‖
+          * ‖(trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (σ x))).2‖ := by
+  rw [Bundle.comp_readout_eq_nf (F := E) (W := TM) (σ x) (P x) x0 hx]
+  exact (ContinuousLinearMap.opNorm_comp_le _ _).trans_eq (mul_comm _ _)
+
+/-- **The concrete tangent-bundle DeTurck reaction operator readout obeys the section-space Picard
+coordinate size bound with `Kp := ‖inCoordinates E TM E TM x₀ x x₀ x (P x)‖`.**  Combining the
+composition-readout bound `deTurckReactionSectionMap_comp_readout_norm_le_inCoordinates`
+(`‖readout ((σ x).comp (P x))‖ ≤ ‖readout (σ x)‖ · ‖inCoord (P x)‖`) with the reaction readout size
+bound `deTurckReactionSectionMap_readout_norm_le_of_comp_bound` yields the fully-assembled fibre bound
+`‖readout (deTurckReactionSectionMap … σ x)‖ ≤ 2 · ‖inCoord (P x)‖ · ‖readout (σ x)‖` at every base
+point of a trivializing set — the `K = 2·‖inCoord (P x)‖` section-space Picard `hlip`/`hcenter` fibre
+content for the concrete reaction operator, with a CONCRETE `Kp` (no abstract composition-bound
+hypothesis). -/
+theorem deTurckReactionSectionMap_readout_norm_le_inCoordinates
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization BilF (TotalSpace.proj : TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M) (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 x : M) (hx : x ∈ (trivializationAt E TM x0).baseSet) :
+    ‖(trivializationAt BilF BilW x0
+        (TotalSpace.mk' BilF x
+          (deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover hP σ x))).2‖
+      ≤ 2 * ‖ContinuousLinearMap.inCoordinates E TM E TM x0 x x0 x (P x)‖
+          * ‖(trivializationAt BilF BilW x0 (TotalSpace.mk' BilF x (σ x))).2‖ :=
+  deTurckReactionSectionMap_readout_norm_le_of_comp_bound
+    et Kc hKc Ko hKo hKoEq hcover hP σ x0 x hx
+    (‖ContinuousLinearMap.inCoordinates E TM E TM x0 x x0 x (P x)‖) (norm_nonneg _)
+    (deTurckReactionSectionMap_comp_readout_norm_le_inCoordinates
+      et Kc hKc Ko hKo hKoEq hcover σ x0 x hx)
+
 end RicciFlow
