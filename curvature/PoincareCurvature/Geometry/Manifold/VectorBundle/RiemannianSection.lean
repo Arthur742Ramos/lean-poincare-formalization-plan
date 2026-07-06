@@ -4247,6 +4247,134 @@ theorem bilinearCompField_norm_le
     ‖bilinearCompField et Kc hKc Ko hKo hKoEq hcover hP hQ C hC hbound‖ ≤ C :=
   mkContinuousOfForallCoordNormLe_norm_le _ C hC _
 
+/-- **The frozen-coefficient intrinsic Ricci–DeTurck reaction (DeTurck-correction) operator, packaged
+as a bounded section-space operator.**  For a continuous tangent-endomorphism section `P` of
+`Hom(W, W)` whose section-space operator size is controlled on the finite cover by the
+trivialization-distorted bound `‖(et i).continuousLinearMapAt ℝ x‖ · ‖(et i).symmL ℝ x‖ · ‖P x‖ ≤ C`,
+the *derivation* `s ↦ (x ↦ (s x).bilinearComp (P x) id + (s x).bilinearComp id (P x))` —
+pointwise `(u, v) ↦ s x (P x u) v + s x u (P x v)` — is a
+`ContinuousSectionSpace →L[ℝ] ContinuousSectionSpace` of operator norm at most `2 · C`.
+
+This is exactly the shape of the intrinsic DeTurck correction
+`intrinsicDeTurckCorrection g background t x u v = (g t).inner x (∇W u) v + (g t).inner x u (∇W v)`
+(with `P = ∇W` the covariant derivative of the DeTurck vector field, a continuous `Hom(TM, TM)`
+section), read as a bounded operator on the transported bilinear-form section space by *freezing* the
+endomorphism coefficient `P`.  It is the sum of the two one-sided `bilinearCompField` instances
+`(P, id)` and `(id, P)`; the `‖id‖ ≤ 1` folding turns the single `‖P‖`-weighted bound into the two
+`bilinearCompField` bounds.  This is the `L t : CSS →L[ℝ] CSS` zeroth-order geometric reaction the
+frozen-coefficient section-space Picard route consumes. -/
+noncomputable def bilinearDerivationField
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ ≤ C) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover →L[ℝ]
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover :=
+  bilinearCompField et Kc hKc Ko hKo hKoEq hcover hP
+      (continuous_id_endo_section (𝕜 := ℝ) (F := F) (V := W)) C hC
+      (fun i x => (mul_le_of_le_one_right
+        (mul_nonneg (mul_nonneg (norm_nonneg _) (norm_nonneg _)) (norm_nonneg _))
+        ContinuousLinearMap.norm_id_le).trans (hbound i x))
+    + bilinearCompField et Kc hKc Ko hKo hKoEq hcover
+      (continuous_id_endo_section (𝕜 := ℝ) (F := F) (V := W)) hP C hC
+      (fun i x => (mul_le_mul_of_nonneg_right
+        (mul_le_of_le_one_right (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+          ContinuousLinearMap.norm_id_le)
+        (norm_nonneg _)).trans (hbound i x))
+
+@[simp]
+theorem bilinearDerivationField_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ ≤ C)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (bilinearDerivationField et Kc hKc Ko hKo hKoEq hcover hP C hC hbound s) x
+      = (s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+        + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x) := by
+  simp only [bilinearDerivationField, ContinuousLinearMap.add_apply, add_apply,
+    bilinearCompField_apply]
+
+/-- The frozen-coefficient DeTurck reaction operator, evaluated fiberwise on a tangent pair, is the
+symmetrized composition `s x (P x u) v + s x u (P x v)` — the exact pointwise form of the intrinsic
+DeTurck correction term. -/
+theorem bilinearDerivationField_apply_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ ≤ C)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) (u v : W x) :
+    (bilinearDerivationField et Kc hKc Ko hKo hKoEq hcover hP C hC hbound s) x u v
+      = s x (P x u) v + s x u (P x v) := by
+  rw [bilinearDerivationField_apply]
+  simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.bilinearComp_apply,
+    ContinuousLinearMap.id_apply]
+
+/-- The frozen-coefficient DeTurck reaction operator has operator norm at most `2 · C`, twice the
+`‖P‖`-weighted trivialization-distorted fiber bound (one `C` for each one-sided slot). -/
+theorem bilinearDerivationField_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ ≤ C) :
+    ‖bilinearDerivationField et Kc hKc Ko hKo hKoEq hcover hP C hC hbound‖ ≤ 2 * C := by
+  unfold bilinearDerivationField
+  refine (norm_add_le _ _).trans ?_
+  rw [two_mul]
+  exact add_le_add
+    (bilinearCompField_norm_le et Kc hKc Ko hKo hKoEq hcover hP _ C hC _)
+    (bilinearCompField_norm_le et Kc hKc Ko hKo hKoEq hcover _ hP C hC _)
+
 end PreferredBilinearNormControl
 
 end ContinuousSectionSpace
