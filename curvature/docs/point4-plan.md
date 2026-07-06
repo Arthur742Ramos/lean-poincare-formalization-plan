@@ -668,3 +668,38 @@ sup gives the uniform `Kp`.  Then add the `(-2)•Ric` source (affine: `hlip` un
 in the difference; `hcont` still trivial if `Ric` is frozen at `g₀`, else time-continuous) and identify
 `P := ∇W` (`intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`) to obtain the chart's actual
 `picard`, whose Banach evolution solution decodes to `RicciDeTurckChartClosureData.realization`.
+
+### Progress (2026-07-06, later 5) — the frozen geometric DeTurck reaction operator's `IsPicardLindelof` is now UNCONDITIONAL at `TM` (uniform-`Kp` discharged by compactness)
+
+Three further sorry-free, axiom-clean declarations landed in `GeometricReactionPicardTangent.lean`
+(plus the reusable `continuousOn_inCoordinates_of_continuous_homSection` in `ContinuousSection.lean`):
+
+* **`continuousOn_inCoordinates_of_continuous_homSection`** (`ContinuousSection.lean`, seminormed-fibre
+  section) — strengthens `continuousAt_inCoordinates_of_continuous_homSection` (continuity only AT the
+  centre) to `ContinuousOn` on the whole hom-bundle base set, via `hom_trivializationAt_apply` + the hom
+  trivialization's continuity on its source.
+* **`contOn_inCoord_tangent`** — the same `ContinuousOn` proved DIRECTLY at `TM` (the seminormed-fibre
+  lemma above cannot be applied at `TM`: it re-requests `[FiberBundle E TM]` under the seminormed-fibre
+  binder and hits the documented `FiberBundle E (TangentSpace I)` synth wall).  The inline proof at `TM`
+  succeeds (the `THom` hom trivialization and its continuity synthesize fine in the `RicciFlow` context).
+* **`exists_uniform_inCoord_bound`** — a UNIFORM `Kp` over the finite compact cover:
+  `contOn_inCoord_tangent` per `i` + `IsCompact.exists_bound_of_continuousOn` on each `Kc i` +
+  `Finite κ` sup.  This DISCHARGES the uniform-`Kp` hypothesis by compactness + continuity of `P`.
+* **`deTurckReactionSectionMap_exists_isPicardLindelof`** — the UNCONDITIONAL frozen-reaction picard:
+  combining `exists_uniform_inCoord_bound` with the conditional
+  `_exists_isPicardLindelof_of_uniform_inCoordinates`, the frozen reaction operator satisfies
+  `IsPicardLindelof` about any `σ₀` with NO uniform-`Kp` hypothesis — only continuity of `P` and the
+  compact cover.  `BilinearFormBundle`↔`THom` trivializing sets coincide (both reduce to the `TangentSpace`
+  trivializing set) via `simpa`.
+
+**GAP 2 geometric-A `picard` status.**  For the FROZEN reaction operator `t ↦ deTurckReactionSectionMap
+… ∇W`, the `IsPicardLindelof` datum is now FULLY CONSTRUCTED at `TM`, Path B, diamond-free, unconditional.
+
+**Concrete next target.**  (i) Add the `(-2)•Ric` affine source `b := intrinsicRicciFlowRHSSectionSpace
+g₀`: `hlip` is UNCHANGED (the fixed `b` cancels in the coordinate difference — `coord_add_apply`);
+`hcont` stays `continuousOn_const` if `b` is frozen at `g₀` (else time-continuous); `hcenter`/`Mc` gains
+`‖coord b‖`.  (ii) Identify `P := ∇W = (chosenLeviCivitaFamily g₀ t)(intrinsicDeTurckVectorField g₀
+background t)` (continuity from `intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`), giving
+the chart's actual `picard`.  (iii) Decode the resulting `BanachEvolutionLocalSolutionIn` to
+`RicciDeTurckChartClosureData.realization` and supply `encode`, then feed `chart`+`D` to the bridge
+`intrinsicLocalExistenceUniquenessFamily_of_ricciDeTurckChartClosureData`.
