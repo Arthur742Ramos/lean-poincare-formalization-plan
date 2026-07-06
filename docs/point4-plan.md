@@ -8667,3 +8667,57 @@ geometric-`A` obstruction is unchanged and is the hard core: the operator's **de
 values realise `intrinsicRicciDeTurckRHSSectionSpace`-shaped sections (feeding `…_boundedLinear_generator_source_fixedWindow`
 + this named value as the source `b`), or (b) a time-continuity `ContinuousOn (fun t => intrinsicRicciDeTurckRHSSectionSpace … t …) [t₀,T]`
 of the named value (the `hb` source-continuity the affine picard consumes), which needs continuity-in-`t` of the RHS section.
+
+## Milestone (2026-07-05, later still) — fiber-linear (bundle-endomorphism) zeroth-order generator + the coordinate-free time-continuity supplier for the section-space picard (Item 3 / GAP 2 geometric-`A` `L t` + `hLc`/`hb`)
+
+Three additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0` commits; full `lake build` green.  All live in the
+**root-imported** module `VectorBundle/ContinuousSection.lean` (which now also `public import`s
+`Mathlib.Topology.VectorBundle.Hom` for the endomorphism/hom bundle).  These pick up the plan's `NEXT`
+option (a) — a genuine bounded generator `L t : CSS →L[ℝ] CSS` — plus the coordinate-free supplier for
+the picard time-continuity hypotheses (`hLc`/`hb`/`hcont`), extending the generator toolkit from the
+scalar `smulField` to the true fiber-linear coupling shape of a linearised operator's zeroth-order
+(curvature) term.
+
+* **`continuous_endo_section` / `endoFieldLinearMap` (+ `_apply`) / `endoField` (+ `_apply`,
+  `endoField_norm_le`)** — the **fiberwise continuous-linear-endomorphism generator**: for a continuous
+  section `Φ` of the endomorphism bundle `V →L[𝕜] V` (continuity phrased via the hom-bundle total space),
+  `s ↦ (x ↦ Φ x (s x))` is a `ContinuousSectionSpace →L[𝕜] ContinuousSectionSpace` of operator norm at
+  most the trivialization-distorted fiber bound `‖(et i).continuousLinearMapAt 𝕜 x‖ · ‖Φ x‖ ·
+  ‖(et i).symmL 𝕜 x‖`.  Continuity via Mathlib's `Continuous.clm_bundle_apply`; boundedness via
+  `mkContinuousOfForallCoordNormLe` after writing `s x` back through `symmL`.  Generalises `smulField`
+  (the special case `Φ x = φ x • id`, whose scalar coupling pulls through the trivialization with no
+  distortion factor).  This is a genuine zeroth-order `L t` the picard field consumes.
+* **`continuousOn_of_continuous_totalSpace_uncurry`** — the **clean, coordinate-free** route to the
+  section-space time-continuity hypotheses: from `Continuous ((p, x) ↦ TotalSpace.mk' F x ((f p) x))`
+  (joint continuity of a parametrised family *into the total space*), get `ContinuousOn f timeSet` in
+  the finite-cover Banach norm.  Reduces to the earlier coordinate-readout bridge
+  `continuousOn_of_forall_coord_uncurry_continuousOn` by supplying the trivialization readout continuity
+  internally (`Trivialization.continuousOn` + `coe_linearMapAt_of_mem`).  This is the general supplier
+  for the picard `hLc`/`hb`/`hcont` (plan `NEXT` option (b)'s shape), now needing only total-space joint
+  continuity rather than in-coordinates readout continuity.
+* **`endoFieldLinearMap_continuousOn`** — the end-to-end `hLc` for a time-dependent endomorphism
+  generator: from joint hom-bundle continuity of `Φ : X → End(V)`, the section
+  `p ↦ (x ↦ Φ p x (s x))` is `ContinuousOn timeSet`.  This IS the affine picard's
+  `hLc : ∀ s, ContinuousOn (fun t => (L t) s) [t₀,T]` for `L t = endoField (Φ t)` (values coincide with
+  `endoFieldLinearMap (Φ t)`), obtained by composing `Continuous.clm_bundle_apply` (over the base
+  projection `Prod.snd`) with `continuousOn_of_continuous_totalSpace_uncurry`.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  Still the geometric-`A`/`picard` side of
+GAP 2.  The zeroth-order fiber-linear part of the mild operator is now a first-class bounded generator
+`L t : CSS →L[ℝ] CSS` with its uniform op-norm bound and strong time-continuity in hand — i.e. the
+`L`, `‖L t‖ ≤ K`, and `hLc` inputs of the affine section-space Picard capstone
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source` are all
+available for the endomorphism-generator route.  The surviving obstruction is unchanged: (i) the
+**second-order** (heat-semigroup / connection-Laplacian) part of the real Ricci–DeTurck operator, which
+no bounded generator can capture and which needs the model heat-kernel Schauder toolkit connected to the
+geometric section space, and (ii) the concrete geometric endomorphism `Φ` (the curvature term) and the
+source `b`'s time-continuity, both requiring joint continuity in `(t, x)` of the underlying geometric
+tensors — for which `continuousOn_of_continuous_totalSpace_uncurry` is now the ready supplier once the
+joint total-space continuity is established.
+
+**NEXT.**  Either (a) instantiate `endoField` with the concrete curvature endomorphism on the bilinear
+form bundle (needs a continuous `End(BilinearFormBundle)` section — watch the fiber instance diamond),
+or (b) supply the joint total-space continuity of `intrinsicRicciDeTurckRHSSectionSpace` in `(t, x)` and
+feed `continuousOn_of_continuous_totalSpace_uncurry` to close the source `hb`, or (c) begin connecting the
+model heat-semigroup Schauder toolkit to the section-space second-order part.
