@@ -934,4 +934,182 @@ theorem isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_sourc
   · intro s _
     exact (hLc s).add hb
 
+/-- **Time-dependent fiberwise bundle-endomorphism generator.**  The time-slice
+`endoFieldFamily et … hΦ C hC hbound t = endoField (Φ t)` packages a family of endomorphism-bundle
+sections `Φ : ℝ → Π x, V x →L[ℝ] V x`, each continuous into the endomorphism (hom) bundle and each
+with the uniform trivialization-distorted fiber bound `C`, as a time-dependent bounded section-space
+generator `ℝ → (CSS →L[ℝ] CSS)` — the honest zeroth-order `L t` shape the affine section-space
+Picard–Lindelöf capstone consumes. -/
+noncomputable def endoFieldFamily
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {Φ : ℝ → ∀ x : M, V x →L[ℝ] V x}
+    (hΦ : ∀ t, Continuous
+      (fun x => Bundle.TotalSpace.mk' (F →L[ℝ] F) (E := fun x => V x →L[ℝ] V x) x (Φ t x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (t : ℝ) (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖Φ t x.1‖ * ‖(et i).symmL ℝ x.1‖ ≤ C) :
+    ℝ →
+      (ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →L[ℝ]
+        ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) :=
+  fun t => endoField (V := V) et Kc hKc Ko hKo hKoEq hcover (hΦ t) C hC (fun i x => hbound t i x)
+
+@[simp]
+theorem endoFieldFamily_apply
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {Φ : ℝ → ∀ x : M, V x →L[ℝ] V x}
+    (hΦ : ∀ t, Continuous
+      (fun x => Bundle.TotalSpace.mk' (F →L[ℝ] F) (E := fun x => V x →L[ℝ] V x) x (Φ t x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (t : ℝ) (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖Φ t x.1‖ * ‖(et i).symmL ℝ x.1‖ ≤ C)
+    (t : ℝ)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (endoFieldFamily et Kc hKc Ko hKo hKoEq hcover hΦ C hC hbound t s) x = Φ t x (s x) :=
+  rfl
+
+/-- The time-slice of `endoFieldFamily` has operator norm at most the uniform fiber bound `C`. -/
+theorem endoFieldFamily_norm_le
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {Φ : ℝ → ∀ x : M, V x →L[ℝ] V x}
+    (hΦ : ∀ t, Continuous
+      (fun x => Bundle.TotalSpace.mk' (F →L[ℝ] F) (E := fun x => V x →L[ℝ] V x) x (Φ t x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (t : ℝ) (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖Φ t x.1‖ * ‖(et i).symmL ℝ x.1‖ ≤ C)
+    (t : ℝ) :
+    ‖endoFieldFamily et Kc hKc Ko hKo hKoEq hcover hΦ C hC hbound t‖ ≤ C :=
+  endoField_norm_le (V := V) et Kc hKc Ko hKo hKoEq hcover (hΦ t) C hC (fun i x => hbound t i x)
+
+/-- **Strong time-continuity of the time-dependent endomorphism generator.**  From joint continuity
+of `Φ : ℝ → Π x, V x →L[ℝ] V x` into the endomorphism (hom) bundle, each section curve
+`t ↦ endoFieldFamily … t s` is `ContinuousOn timeSet` in the finite-cover Banach norm — the affine
+Picard `hLc` hypothesis for the generator `L t = endoFieldFamily … t`. -/
+theorem endoFieldFamily_continuousOn
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {Φ : ℝ → ∀ x : M, V x →L[ℝ] V x}
+    (hΦ : ∀ t, Continuous
+      (fun x => Bundle.TotalSpace.mk' (F →L[ℝ] F) (E := fun x => V x →L[ℝ] V x) x (Φ t x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (t : ℝ) (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖Φ t x.1‖ * ‖(et i).symmL ℝ x.1‖ ≤ C)
+    (hΦjoint : Continuous
+      (fun p : ℝ × M =>
+        Bundle.TotalSpace.mk' (F →L[ℝ] F) (E := fun x => V x →L[ℝ] V x) p.2 (Φ p.1 p.2)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (timeSet : Set ℝ) :
+    ContinuousOn
+      (fun t => endoFieldFamily et Kc hKc Ko hKo hKoEq hcover hΦ C hC hbound t s) timeSet :=
+  endoFieldLinearMap_continuousOn (V := V) et Kc hKc Ko hKo hKoEq hcover hΦ hΦjoint s timeSet
+
+/-- **Endpoint-choosing chart `picard` field from a time-dependent bundle-endomorphism generator +
+source.**  The fiberwise-endomorphism specialization of
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source`: the
+bounded linear generator is `L t = endoFieldFamily … t` (`s ↦ (x ↦ Φ t x (s x))`) for a family of
+endomorphism-bundle sections `Φ : ℝ → Π x, V x →L[ℝ] V x` that is jointly continuous into the
+endomorphism (hom) bundle, and the affine operator is `A t s = (x ↦ Φ t x (s x)) + b t`.
+
+The analytic inputs collapse to *exhibiting a jointly continuous endomorphism family with a uniform
+trivialization-distorted fiber bound `‖clmAt‖·‖Φ t x‖·‖symmL‖ ≤ K` together with a continuous source
+`b`*: the fiber bound both constructs the generator and supplies the uniform operator-norm bound
+`‖L t‖ ≤ K` (`endoFieldFamily_norm_le`); joint continuity supplies the strong time-continuity
+(`endoFieldFamily_continuousOn`); and the centre readout size `Mc` and a forward window `T ∈ (t₀, T₀]`
+are chosen internally.  The result is the chart's exact `IsPicardLindelof … x0 a 0 (Mc + K·a) K`
+shape, reducing the `picard` field for a zeroth-order (curvature/reaction) operator to a single joint
+continuity plus fiber-norm estimate. -/
+theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_endoField_source
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {Φ : ℝ → ∀ x : M, V x →L[ℝ] V x}
+    (hΦ : ∀ t, Continuous
+      (fun x => Bundle.TotalSpace.mk' (F →L[ℝ] F) (E := fun x => V x →L[ℝ] V x) x (Φ t x)))
+    (hΦjoint : Continuous
+      (fun p : ℝ × M =>
+        Bundle.TotalSpace.mk' (F →L[ℝ] F) (E := fun x => V x →L[ℝ] V x) p.2 (Φ p.1 p.2)))
+    (b : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a K : ℝ≥0) (ha : 0 < (a : ℝ))
+    (hbound : ∀ (t : ℝ) (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖Φ t x.1‖ * ‖(et i).symmL ℝ x.1‖ ≤ (K : ℝ))
+    (hb : ContinuousOn b (Set.Icc t₀ T₀)) :
+    ∃ (T : ℝ) (hT : t₀ < T) (Mc : ℝ≥0),
+      IsPicardLindelof
+        (fun t s =>
+          (endoFieldFamily et Kc hKc Ko hKo hKoEq hcover hΦ (K : ℝ) K.coe_nonneg hbound t) s + b t)
+        (tmin := t₀) (tmax := T)
+        ⟨t₀, ⟨le_rfl, hT.le⟩⟩ x0 a 0 (Mc + K * a) K :=
+  exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source
+    (endoFieldFamily et Kc hKc Ko hKo hKoEq hcover hΦ (K : ℝ) K.coe_nonneg hbound)
+    b x0 t₀ T₀ hT₀ a K ha
+    (fun t _ =>
+      endoFieldFamily_norm_le et Kc hKc Ko hKo hKoEq hcover hΦ (K : ℝ) K.coe_nonneg hbound t)
+    (fun s =>
+      endoFieldFamily_continuousOn et Kc hKc Ko hKo hKoEq hcover hΦ (K : ℝ) K.coe_nonneg hbound
+        hΦjoint s (Set.Icc t₀ T₀))
+    hb
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
