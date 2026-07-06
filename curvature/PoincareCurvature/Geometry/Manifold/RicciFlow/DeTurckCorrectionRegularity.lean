@@ -1271,4 +1271,119 @@ theorem intrinsicDeTurckCorrectionSectionSpace_symm
   rw [intrinsicDeTurckCorrectionSectionSpace_apply, intrinsicDeTurckCorrectionSectionSpace_apply]
   exact intrinsicDeTurckCorrection_symm (I := I) (M := M) g background t x u v
 
+
+/-- The **frozen-coefficient symmetrized DeTurck reaction** of a generic `BilinearFormBundle`
+section `s` with a tangent-endomorphism coefficient `P`:
+`x ↦ (s x).comp (P x) + ((s x).comp (P x)).flip`, whose fiber value is
+`(u, v) ↦ s x (P x u) v + s x (P x v) u`.  This is the generic-section analogue of
+`intrinsicDeTurckCorrectionSection` (which is exactly this reaction of the *metric* section with
+`P := ∇W`), written directly at the tangent bundle.  Unlike the abstract reaction operator
+`ContinuousSectionSpace.bilinearDerivationFieldLinearMap`, this construction never requires the
+`Π`-fiber-norm instance `[∀ x, SeminormedAddCommGroup (TangentSpace I x)]` (equivalently the
+`FiberBundle E (TangentSpace I)` diamond), so it elaborates and is regular at `W := TangentSpace I`
+via the fiber-norm-free bundle section algebra. -/
+noncomputable def bilinearFormSectionDeTurckReaction
+    (s : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x)
+    (P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) :
+    Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x :=
+  @HAdd.hAdd
+    (Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x)
+    (Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x)
+    (Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x) instHAdd
+    (fun x ↦ (s x).comp (P x))
+    (fun x ↦ ((s x).comp (P x)).flip)
+
+@[simp] lemma bilinearFormSectionDeTurckReaction_apply
+    (s : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x)
+    (P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x)
+    (x : M) (u v : TM x) :
+    bilinearFormSectionDeTurckReaction (I := I) (M := M) s P x u v
+      = s x (P x u) v + s x (P x v) u := by
+  simp only [bilinearFormSectionDeTurckReaction, Pi.add_apply, ContinuousLinearMap.add_apply,
+    ContinuousLinearMap.comp_apply]
+  congr 1
+
+/-- The frozen-coefficient symmetrized DeTurck reaction of a **continuous** `BilinearFormBundle`
+section with a **continuous** tangent-endomorphism coefficient is again a continuous
+`BilinearFormBundle` section, fiber-norm-free at the tangent bundle.  This is the generic-section
+generalisation of `intrinsicDeTurckCorrectionSection_contMDiff_zero`, assembled from
+`ContMDiff.clm_bundle_comp` (the composition `s ∘ P`), `contMDiff_flipBilinearFormSection_tangent_zero`
+(the slot-flip), and `ContMDiff.add_section`.  It is the output-regularity that makes the frozen-`P`
+reaction a well-defined operator on the tangent-bundle `ContinuousSectionSpace`. -/
+theorem bilinearFormSectionDeTurckReaction_contMDiff_zero
+    {s : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x}
+    (hs : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x (s x)))
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x))) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x
+        (bilinearFormSectionDeTurckReaction (I := I) (M := M) s P x)) := by
+  have h1 := hs.clm_bundle_comp hP
+  have h2 := contMDiff_flipBilinearFormSection_tangent_zero h1
+  exact h1.add_section h2
+
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- The **frozen-coefficient DeTurck reaction operator on the tangent-bundle continuous section
+space**.  For a continuous tangent-endomorphism coefficient `P` (typically the frozen DeTurck
+coefficient `∇W`), this sends a continuous `BilinearFormBundle` section `s` to the continuous section
+`x ↦ (s x).comp (P x) + ((s x).comp (P x)).flip`, whose fiber value is `(u, v) ↦ s(Pu, v) + s(Pv, u)`
+(the symmetrized frozen-coefficient DeTurck derivation).  Its well-definedness (the output is a genuine
+`ContinuousSectionSpace` element) is discharged by `bilinearFormSectionDeTurckReaction_contMDiff_zero`
+through the `ContMDiff 0 ↔ Continuous` bridge, entirely fiber-norm-free.
+
+This is the tangent-bundle (`W := TangentSpace I`) reaction operator that the abstract generic-fibre
+operator `ContinuousSectionSpace.bilinearDerivationFieldLinearMap` cannot supply at `TM`, because the
+latter demands the `Π`-fibre-norm instance `[∀ x, SeminormedAddCommGroup (TangentSpace I x)]`
+(equivalently the un-synthesizable `FiberBundle E (TangentSpace I)` normed diamond).  Here the operator
+is assembled directly from the fiber-norm-free bundle section algebra, so it lives on the concrete
+`BilinearFormBundle` section space the Ricci–DeTurck chart operator `A` acts on. -/
+noncomputable def deTurckReactionSectionMap
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x))) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+        (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+        (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover :=
+  fun s ↦ ⟨bilinearFormSectionDeTurckReaction (I := I) (M := M) s.toFun P,
+    (bilinearFormSectionDeTurckReaction_contMDiff_zero (I := I) (M := M)
+      (contMDiff_zero_iff.mpr s.continuous_toFun) (contMDiff_zero_iff.mpr hP)).continuous⟩
+
+open PoincareCurvature.Bundle.Trivialization in
+@[simp] lemma deTurckReactionSectionMap_apply
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+      (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) (u v : TM x) :
+    deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover hP s x u v
+      = s x (P x u) v + s x (P x v) u :=
+  bilinearFormSectionDeTurckReaction_apply (I := I) (M := M) s.toFun P x u v
+
 end RicciFlow
