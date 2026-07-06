@@ -267,3 +267,54 @@ variant whose `hbound` hypothesis is a bound on the `(et i)`-readout of the *com
 (readout s).bilinearComp (readout P)(readout Q)`), so the operator elaborates at `TM` with *default*
 instances and clean `E →L[ℝ] E →L[ℝ] ℝ` norms only.  Extract that readout identity as a standalone
 lemma first (it is the reusable core), then rebuild the bound on top of it.
+
+### Progress (2026-07-06, still later) — the readout-route fibre toolkit for the geometric DeTurck reaction's `hlip` bound is COMPLETE: the coordinate Lipschitz constant `2‖readout P‖` is now proved at `W := TangentSpace I` in the clean model fibre
+
+Building directly on the just-extracted readout identity + norm bound
+(`trivializationAt_bilinearFormBundle_bilinearComp_readout_eq` / `_le`), five sorry-free,
+axiom-clean (`propext`/`Classical.choice`/`Quot.sound`), purely-additive lemmas landed in
+`VectorBundle/RiemannianSection.lean` (section `BilinearConjugation`):
+
+* `trivializationAt_bilinearFormBundle_readout_add` / `_readout_sub` — the `BilinearFormBundle`
+  trivialization readout is additive / subtractive in the fibre value (`readout(b ± c) = readout b ±
+  readout c` on the base set), via the fiberwise-linear `trivializationAt_bilinearFormBundle_apply_eq`.
+  The readout-linearity inputs any coordinate difference/Lipschitz bound in the CSS consumes.
+* `inCoordinates_id_eq_id` (`inCoordinates F W F W x₀ x x₀ x (id (W x)) = id F` on the base set, via
+  `inCoordinates_eq` + `ContinuousLinearEquiv.coe_comp_coe_symm`) and `norm_inCoordinates_id_le`
+  (`‖·‖ ≤ 1` via `ContinuousLinearMap.norm_id_le`) — the `‖id‖`-slot facts.
+* `norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le` — the model-fibre readout
+  **norm bound for the CORRECT DeTurck reaction shape** (a two-sided *derivation*, not a conjugation):
+  `‖readout((s x).bilinearComp (P x) id + (s x).bilinearComp id (P x))‖ ≤ 2·‖readout(s x)‖·‖inCoord
+  P‖`.  Built from the plain composition readout bound on each one-sided summand + `readout_add` +
+  `norm_inCoordinates_id_le`.
+* `norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_sub_le` — **the coordinate
+  Lipschitz bound = the fibre content of the section-space Picard `hlip` field**: for a common frozen
+  `P`, `‖readout(deriv(s x)) − readout(deriv(s' x))‖ ≤ 2·‖inCoord P‖·‖readout(s x) − readout(s' x)‖`.
+  Proof: combine the two state readouts into the readout of their fibrewise difference
+  (`readout_sub`), use derivation-value linearity (`bilinearComp` linear in slot 1), and apply the
+  derivation size bound to the difference section.
+
+**Why this is on the critical path (verified, not speculative).**  `ContinuousSection.lean:103`
+proves `coordContinuousMap (e := et i) (Kc i) … s x = (et i (T% s x.1)).2` **by `rfl`** — the CSS
+coordinate `(equivCompatibleCoordFamilySubmodule … σ).1 i x` IS the trivialization readout
+`(trivializationAt BilF BilW (x0 i) (mk x (σ x))).2`.  The bridge
+`sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound`
+(`SectionSpacePicard.lean:467`) consumes `hlip : dist (coord (A t s) i x) (coord (A t s') i x) ≤ K ·
+dist s s'`, and `dist` in the model fibre `BilF` is `‖· − ·‖`.  So the `_readout_sub_le` lemma above
+supplies the pointwise Lipschitz constant `K = 2·sup‖inCoord P‖` for the frozen-coefficient DeTurck
+reaction `A t s = (u,v) ↦ s x (P x u) v + s x u (P x v)` — entirely in the clean model fibre, hence
+elaborating at `W := TangentSpace I` where the raw `‖BilW x‖`/`‖TM x →L TM x‖` fibre norms are
+un-synthesizable.  This closes the reaction-operator's `hlip` obstruction at the *fibre* level via the
+readout route (never forming the bundled `CSS →L CSS` operator, so the `whnf` blow-up wall is
+sidestepped).
+
+**Concrete next target.**  Assemble the fibre `_readout_sub_le` bound into the actual bridge `hlip`
+field: (i) define the frozen-coefficient reaction as a map `A : ℝ → CSS → CSS` on the underlying
+sections (`s ↦ x ↦ (s x).bilinearComp (P x) id + (s x).bilinearComp id (P x)`; continuity is
+`continuous_bilinearComp₂_section`), (ii) rewrite the bridge's `dist (coord (A t s) i x) (coord (A t
+s') i x)` through `coordContinuousMap_apply` (= readout) and `dist_eq_norm`, (iii) apply
+`_readout_sub_le` with `‖inCoord P‖ ≤ K/2` uniform over the finite cover (a `Finite κ` sup, since each
+`Kc i` is compact and `inCoord P` is continuous).  Then the centre bound `hcenter` follows from
+`_deTurckDerivation_readout_le` at `x0` and the same uniform sup; `hcont` from
+`continuous_bilinearComp₂_section` in `t`.  This yields the frozen reaction's `picard` data; the
+principal `(-2)•Ric` source is already the named CSS value `intrinsicRicciFlowRHSSectionSpace`.
