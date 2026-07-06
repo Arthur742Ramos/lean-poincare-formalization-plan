@@ -107,4 +107,73 @@ theorem comp_readout_eq_nf
 
 end NormFreeReadout
 
+section SeminormReadout
+
+variable {M : Type*} [TopologicalSpace M]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+variable {W : M → Type*} [TopologicalSpace (_root_.Bundle.TotalSpace F W)]
+  [∀ x, SeminormedAddCommGroup (W x)] [∀ x, NormedSpace ℝ (W x)]
+  [FiberBundle F W] [VectorBundle ℝ F W]
+
+local notation "BilF" => (F →L[ℝ] F →L[ℝ] ℝ)
+local notation "BilW" => BilinearFormBundle (V := W)
+
+local instance bilFNormedAddCommGroupSn : NormedAddCommGroup (F →L[ℝ] F →L[ℝ] ℝ) := inferInstance
+local instance bilFNormedSpaceSn : NormedSpace ℝ (F →L[ℝ] F →L[ℝ] ℝ) := inferInstance
+
+set_option synthInstance.maxHeartbeats 400000
+set_option maxHeartbeats 1000000
+
+/-- **The trivialization readout carries a fibre slot-flip to a model-fibre slot-flip.**  The
+coordinate readout of `B.flip` (fibre value `(u, v) ↦ B v u`) is `(readout B).flip` on the model
+fibre.  Uses only `trivializationAt_bilinearFormBundle_apply_eq`.  (Requires
+`SeminormedAddCommGroup (W x)`, since `ContinuousLinearMap.flip` on the raw fibre is defined via its
+operator norm; at `W := TangentSpace I` this is supplied by `instNormedAddCommGroupTangentSpace`.) -/
+theorem flip_readout_eq_sn
+    {x : M} (B : BilW x) (x₀ : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x B.flip)).2
+      = ((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x B)).2).flip := by
+  ext u v
+  rw [ContinuousLinearMap.flip_apply,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx B v u,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx B.flip u v,
+    ContinuousLinearMap.flip_apply]
+
+/-- **Readout size bound for the frozen-coefficient DeTurck reaction fibre value.**  The operator
+norm of the model-fibre readout of `B.comp Q + (B.comp Q).flip` — the fibre value of the symmetrized
+frozen-coefficient DeTurck derivation `(u, v) ↦ B (Q u) v + B (Q v) u` — is bounded by
+`2 · ‖readout B‖ · ‖inCoordinates F W F W x₀ x x₀ x Q‖`.  Everything lands in the clean model fibre
+(`.comp` size via `opNorm_comp_le`, `.flip` size via `norm_flip`), through the fiber-norm-free readout
+identities `readout_add_nf`/`comp_readout_eq_nf` and the readout slot-flip `flip_readout_eq_sn`.  This
+is the fibre content of the section-space Picard coordinate bound for `deTurckReactionSectionMap`. -/
+theorem norm_deTurckReaction_readout_le_sn
+    {x : M} (B : BilW x) (Q : W x →L[ℝ] W x)
+    (x₀ : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    ‖(trivializationAt BilF BilW x₀
+        (TotalSpace.mk' BilF x (B.comp Q + (B.comp Q).flip))).2‖
+      ≤ 2 * ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x B)).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x Q‖ := by
+  rw [readout_add_nf (F := F) (W := W) x₀ x hx (B.comp Q) (B.comp Q).flip]
+  refine (norm_add_le _ _).trans ?_
+  rw [comp_readout_eq_nf (F := F) (W := W) B Q x₀ hx,
+    flip_readout_eq_sn (F := F) (W := W) (B.comp Q) x₀ hx,
+    comp_readout_eq_nf (F := F) (W := W) B Q x₀ hx, ContinuousLinearMap.opNorm_flip]
+  have hb : ‖((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x B)).2).comp
+        (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x Q)‖
+      ≤ ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x B)).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x Q‖ :=
+    ContinuousLinearMap.opNorm_comp_le _ _
+  calc ‖((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x B)).2).comp
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x Q)‖
+        + ‖((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x B)).2).comp
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x Q)‖
+      ≤ (‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x B)).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x Q‖)
+        + (‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x B)).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x Q‖) := add_le_add hb hb
+    _ = 2 * ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x B)).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x Q‖ := by ring
+
+end SeminormReadout
+
 end Bundle
