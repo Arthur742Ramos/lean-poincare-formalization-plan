@@ -224,4 +224,94 @@ theorem deTurckReactionSectionMap_exists_isPicardLindelof_of_uniform_inCoordinat
   · intro s _hs i
     exact continuousOn_const
 
+/-- **`ContinuousOn` of the frozen coefficient's coordinate readout on a compact piece, at `TM`.**
+For a continuous tangent-endomorphism section `P` (into the endomorphism bundle `THom = TM →L[ℝ] TM`),
+`x ↦ inCoordinates E TM E TM x₀ x x₀ x (P x)` is continuous on the trivializing set
+`(trivializationAt (E →L[ℝ] E) THom x₀).baseSet`.  Proved DIRECTLY at `TM` (the seminormed-fibre
+`continuousOn_inCoordinates_of_continuous_homSection` fails to synthesize `FiberBundle E TM` when
+applied here): the fixed-centre readout equals `(trivₓ₀ ⟨x, P x⟩).2` (`hom_trivializationAt_apply`),
+and the hom trivialization is continuous on its source, which the section maps the base set into.  This
+is the per-piece ingredient of the uniform inCoordinates bound. -/
+theorem contOn_inCoord_tangent
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (x₀ : M) :
+    ContinuousOn (fun x => ContinuousLinearMap.inCoordinates E TM E TM x₀ x x₀ x (P x))
+      (trivializationAt (E →L[ℝ] E) THom x₀).baseSet := by
+  set et := trivializationAt (E →L[ℝ] E) THom x₀ with het
+  have hEq : (fun x => ContinuousLinearMap.inCoordinates E TM E TM x₀ x x₀ x (P x))
+      = fun x => (et (TotalSpace.mk' (E →L[ℝ] E) x (P x))).2 := by
+    funext x; rw [het, hom_trivializationAt_apply]
+  rw [hEq]
+  have hsrc : Set.MapsTo (fun x => TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x))
+      et.baseSet et.source := fun x hx => by rw [Trivialization.mem_source]; exact hx
+  exact continuous_snd.comp_continuousOn (et.continuousOn.comp hP.continuousOn hsrc)
+
+/-- **Uniform bound on the frozen coefficient's coordinate readout over a finite compact cover.**  For
+a continuous tangent-endomorphism section `P` and a finite family of compact pieces `Kc i`, each inside
+the `THom` trivializing set of its centre `xc i`, there is a single `Kp ≥ 0` with
+`‖inCoordinates E TM E TM (xc i) x (xc i) x (P x)‖ ≤ Kp` for all `i` and `x ∈ Kc i`.  Each per-piece
+readout is continuous (`contOn_inCoord_tangent`) hence bounded on the compact `Kc i`
+(`IsCompact.exists_bound_of_continuousOn`), and a `Finite κ` supremum of the finitely many bounds gives
+the uniform `Kp`.  This discharges the uniform-`Kp` hypothesis of
+`deTurckReactionSectionMap_exists_isPicardLindelof_of_uniform_inCoordinates`. -/
+theorem exists_uniform_inCoord_bound
+    {κ : Type*} [Finite κ] (xc : κ → M) (Kc : κ → TopologicalSpace.Compacts M)
+    (hKcTM : ∀ i, (Kc i : Set M) ⊆ (trivializationAt (E →L[ℝ] E) THom (xc i)).baseSet)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x))) :
+    ∃ Kp : ℝ, 0 ≤ Kp ∧ ∀ i (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (xc i) x (xc i) x (P x)‖ ≤ Kp := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  have hcont : ∀ i, ContinuousOn
+      (fun x => ContinuousLinearMap.inCoordinates E TM E TM (xc i) x (xc i) x (P x))
+      (Kc i) :=
+    fun i => (contOn_inCoord_tangent hP (xc i)).mono (hKcTM i)
+  choose C hC using fun i => (Kc i).isCompact.exists_bound_of_continuousOn (hcont i)
+  obtain ⟨D, hD⟩ := (Set.finite_range C).bddAbove
+  refine ⟨max D 0, le_max_right _ _, fun i x => ?_⟩
+  exact le_trans (hC i (x : M) x.2) (le_trans (hD (Set.mem_range_self i)) (le_max_left _ _))
+
+/-- **Unconditional `IsPicardLindelof` for the frozen-coefficient geometric DeTurck reaction operator
+at `TM`.**  Combining the uniform inCoordinates bound `exists_uniform_inCoord_bound` (which supplies the
+uniform Lipschitz constant `Kp` by compactness of the finite cover + continuity of the frozen
+coefficient `P`) with the conditional construction
+`deTurckReactionSectionMap_exists_isPicardLindelof_of_uniform_inCoordinates`, the frozen (time-independent)
+reaction operator `t ↦ deTurckReactionSectionMap … hP` satisfies `IsPicardLindelof` about any initial
+section `σ₀` — with NO uniform-`Kp` hypothesis, only continuity of `P` and the compact cover.  The
+cover's `BilinearFormBundle` trivializing sets coincide with the `THom` trivializing sets (both reduce to
+the underlying `TangentSpace` trivializing set), supplied by `simpa`.  This is the frozen reaction's
+`picard` datum on the Path-B tangent-bundle section space, fully constructed for a general continuous
+frozen coefficient. -/
+theorem deTurckReactionSectionMap_exists_isPicardLindelof
+    {κ : Type*} [Finite κ]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a : ℝ≥0) (ha : 0 < (a : ℝ)) :
+    ∃ (Kp : ℝ≥0) (T : ℝ) (hT : t₀ < T) (Mc : ℝ≥0),
+      IsPicardLindelof
+        (fun _ : ℝ => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover hP)
+        (tmin := t₀) (tmax := T) ⟨t₀, ⟨le_rfl, hT.le⟩⟩ σ0 a 0 (Mc + (2 * Kp) * a) (2 * Kp) := by
+  have hKcTM : ∀ i, (Kc i : Set M) ⊆ (trivializationAt (E →L[ℝ] E) THom (xc i)).baseSet := by
+    intro i x hx
+    have hxi := hKc i hx
+    simpa using hxi
+  obtain ⟨Kp, hKp0, hKpb⟩ := exists_uniform_inCoord_bound xc Kc hKcTM hP
+  have hcast : ((Kp.toNNReal : ℝ≥0) : ℝ) = Kp := Real.coe_toNNReal Kp hKp0
+  obtain ⟨T, hT, Mc, hPL⟩ := deTurckReactionSectionMap_exists_isPicardLindelof_of_uniform_inCoordinates
+    xc Kc hKc Ko hKo hKoEq hcover hP σ0 t₀ T₀ hT₀ a Kp.toNNReal ha
+    (fun i x => by rw [hcast]; exact hKpb i x)
+  exact ⟨Kp.toNNReal, T, hT, Mc, hPL⟩
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
