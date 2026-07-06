@@ -1090,6 +1090,29 @@ theorem trivializationAt_bilinearFormBundle_bilinearComp_readout_eq
       ((s x).bilinearComp (P x) (Q x)) u v,
     ContinuousLinearMap.bilinearComp_apply, keyP u, keyQ v]
 
+/-- **The model-fibre readout norm bound for a fiberwise two-sided bilinear composition.**  The
+operator norm of the `BilinearFormBundle` coordinate readout of `(s x).bilinearComp (P x) (Q x)` is
+bounded by the product of the readout norm of `s x` and the model-fibre endomorphism readout norms
+`‖inCoordinates F W F W x₀ x x₀ x (P x)‖`, `‖… (Q x)‖`.  A direct consequence of the readout identity
+`trivializationAt_bilinearFormBundle_bilinearComp_readout_eq` and
+`ContinuousLinearMap.norm_bilinearComp_le`.
+
+Every norm on the right lives in the **clean model fibre** (`BilF = F →L[ℝ] F →L[ℝ] ℝ` and
+`F →L[ℝ] F`); no `‖BilW x‖` or `‖W x →L[ℝ] W x‖` appears.  This is the exact fiber-level Lipschitz/size
+estimate the section-space Ricci–DeTurck reaction operator needs, in a form that **elaborates at the
+tangent bundle** `W := TangentSpace I` (where the raw fibre norms are un-synthesizable): the
+endomorphism size datum enters only through its `E`-valued coordinate readout. -/
+theorem norm_trivializationAt_bilinearFormBundle_bilinearComp_readout_le
+    (s : Π x : M, BilW x) (P Q : Π x : M, W x →L[ℝ] W x)
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    ‖(trivializationAt BilF BilW x₀
+        (TotalSpace.mk' BilF x ((s x).bilinearComp (P x) (Q x)))).2‖
+      ≤ ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x)‖ := by
+  rw [trivializationAt_bilinearFormBundle_bilinearComp_readout_eq s P Q x₀ x hx]
+  exact ContinuousLinearMap.norm_bilinearComp_le _ _ _
+
 end BilinearConjugation
 
 section FiberwiseSymmetrization
