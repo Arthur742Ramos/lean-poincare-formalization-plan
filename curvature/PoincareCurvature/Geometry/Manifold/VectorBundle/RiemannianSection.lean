@@ -1134,6 +1134,28 @@ theorem trivializationAt_bilinearFormBundle_readout_add
     trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx c u v]
   simp [ContinuousLinearMap.add_apply]
 
+/-- **Subtractivity of the bilinear-form trivialization readout.**  On the trivializing base set the
+`BilinearFormBundle` coordinate readout is subtractive in the fibre value: the readout of `b - c`
+equals the difference of the readouts of `b` and `c`.  A direct consequence of the fiberwise
+linearity of the trivialization (`trivializationAt_bilinearFormBundle_apply_eq`).
+
+This is the readout-linearity input consumed by the coordinate *Lipschitz* bound in the continuous
+section space: the bridge's `hlip` obligation is stated as `dist (coord (A t s) i x)
+(coord (A t s') i x) ≤ K · dist s s'`, and `dist` in the model fibre `BilF` is `‖· - ·‖`, so the two
+readouts of the two states must be combined into the readout of their fibrewise difference before the
+reaction size estimate is applied — all inside the clean model fibre. -/
+theorem trivializationAt_bilinearFormBundle_readout_sub
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) (b c : BilW x) :
+    (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (b - c))).2
+      = (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x b)).2
+        - (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x c)).2 := by
+  ext u v
+  simp only [ContinuousLinearMap.sub_apply]
+  rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx (b - c) u v,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx b u v,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx c u v]
+  simp [ContinuousLinearMap.sub_apply]
+
 /-- **The model-fibre readout of the identity endomorphism is the model identity.**  On the
 trivializing base set, the endomorphism coordinate readout of `ContinuousLinearMap.id ℝ (W x)` is
 `ContinuousLinearMap.id ℝ F` (the trivialization change of coordinates conjugates the identity to the
