@@ -1112,4 +1112,64 @@ theorem exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_endoField_
         hΦjoint s (Set.Icc t₀ T₀))
     hb
 
+/-- **State-constrained section-space local solution from a time-dependent bundle-endomorphism
+generator + source.**  Runs the endomorphism-generator affine `picard` field all the way through the
+a-posteriori closed-ball bridge to a genuine
+`BanachEvolutionLocalSolutionIn (fun t s => (x ↦ Φ t x (s x)) + b t) locus t₀ x0` — precisely the
+state-constrained Banach evolution object a downstream `realization` decode into an intrinsic De Turck
+local solution consumes.
+
+Compared with
+`exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_boundedLinear_generator_source`, the
+bounded linear generator is exhibited concretely as `endoFieldFamily … t = endoField (Φ t)` for a
+jointly continuous endomorphism-bundle family `Φ : ℝ → Π x, V x →L[ℝ] V x` with the uniform
+trivialization-distorted fiber bound `K`.  With `F` complete the section space is Banach, so the
+Picard–Lindelöf solution — staying in `closedBall x0 a` on the whole window — is a `locus`-valued local
+solution with no interval shrinking, provided the a-priori containment `closedBall x0 a ⊆ locus`.  This
+is the picard→solution half of the chart for the zeroth-order (curvature/reaction) part, reduced to
+*exhibiting a jointly continuous endomorphism family, a continuous source, and the ball containment*. -/
+theorem exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_endoField_source
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {Φ : ℝ → ∀ x : M, V x →L[ℝ] V x}
+    (hΦ : ∀ t, Continuous
+      (fun x => Bundle.TotalSpace.mk' (F →L[ℝ] F) (E := fun x => V x →L[ℝ] V x) x (Φ t x)))
+    (hΦjoint : Continuous
+      (fun p : ℝ × M =>
+        Bundle.TotalSpace.mk' (F →L[ℝ] F) (E := fun x => V x →L[ℝ] V x) p.2 (Φ p.1 p.2)))
+    (b : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (locus : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover))
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a K : ℝ≥0) (ha : 0 < (a : ℝ))
+    (hbound : ∀ (t : ℝ) (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖Φ t x.1‖ * ‖(et i).symmL ℝ x.1‖ ≤ (K : ℝ))
+    (hb : ContinuousOn b (Set.Icc t₀ T₀))
+    (hsub : Metric.closedBall x0 (a : ℝ) ⊆ locus) :
+    Nonempty (BanachEvolutionLocalSolutionIn
+      (fun t s =>
+        (endoFieldFamily et Kc hKc Ko hKo hKoEq hcover hΦ (K : ℝ) K.coe_nonneg hbound t) s + b t)
+      locus t₀ x0) :=
+  exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_boundedLinear_generator_source
+    (endoFieldFamily et Kc hKc Ko hKo hKoEq hcover hΦ (K : ℝ) K.coe_nonneg hbound)
+    b x0 locus t₀ T₀ hT₀ a K ha
+    (fun t _ =>
+      endoFieldFamily_norm_le et Kc hKc Ko hKo hKoEq hcover hΦ (K : ℝ) K.coe_nonneg hbound t)
+    (fun s =>
+      endoFieldFamily_continuousOn et Kc hKc Ko hKo hKoEq hcover hΦ (K : ℝ) K.coe_nonneg hbound
+        hΦjoint s (Set.Icc t₀ T₀))
+    hb hsub
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
