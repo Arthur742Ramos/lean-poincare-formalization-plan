@@ -1964,6 +1964,921 @@ theorem coord_dist_le_of_trivialization_opNorm_le
     _ ≤ L * dist (s x.1) (t x.1) := by
       exact mul_le_mul_of_nonneg_right (hL i x) dist_nonneg
 
+/-- The compact coordinate readout of a section at a point of its trivializing piece is the
+trivialization's fiberwise linear map applied to the pointwise value.  This is the named form of the
+`hscoord`/`htcoord` computation used throughout the finite-cover norm bridge. -/
+theorem coord_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x =
+      (et i).continuousLinearMapAt 𝕜 x.1 (s x.1) := by
+  have hx : x.1 ∈ (et i).baseSet := hKc i x.2
+  simp [equivCompatibleCoordFamilySubmodule, toSubtype,
+    continuousSectionEquivCompatibleCoordFamilySubmodule,
+    continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
+    compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
+    Bundle.Trivialization.linearMapAt_apply, hx]
+
+/-- Inversion of `coord_apply`: on a trivializing piece the pointwise value of a section is
+recovered from its compact coordinate readout by the trivialization's backwards fiber map. -/
+theorem apply_eq_symmL_coord
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)
+    {i : κ} {x : M} (hi : x ∈ (Kc i : Set M)) :
+    s x =
+      (et i).symmL 𝕜 x
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i ⟨x, hi⟩) := by
+  have hx : x ∈ (et i).baseSet := hKc i hi
+  rw [coord_apply s i ⟨x, hi⟩]
+  exact ((et i).symmL_continuousLinearMapAt hx (s x)).symm
+
+/-- The algebraic zero section evaluates pointwise to zero. -/
+theorem zero_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (x : M) :
+    (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) x = 0 := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  rw [apply_eq_symmL_coord
+    (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) hi]
+  have he0 :
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+        (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover)) = 0 := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover]
+    exact map_zero _
+  rw [he0]
+  simp only [ZeroMemClass.coe_zero, Pi.zero_apply, ContinuousMap.zero_apply, map_zero]
+
+/-- The pointwise value of a sum of sections is the sum of the pointwise values. -/
+theorem add_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (s + t) x = s x + t x := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  rw [apply_eq_symmL_coord s hi, apply_eq_symmL_coord t hi,
+    apply_eq_symmL_coord (s + t) hi, ← map_add]
+  congr 1
+  have he : (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) (s + t)
+      = equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s
+        + equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover,
+        ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (s := s),
+        ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (s := t),
+        map_add]
+  rw [he]
+  rfl
+
+/-- The pointwise value of a difference of sections is the difference of the pointwise values. -/
+theorem sub_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (s - t) x = s x - t x := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  rw [apply_eq_symmL_coord s hi, apply_eq_symmL_coord t hi,
+    apply_eq_symmL_coord (s - t) hi, ← map_sub]
+  congr 1
+  have he : (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) (s - t)
+      = equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s
+        - equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover,
+        ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (s := s),
+        ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (s := t),
+        map_sub]
+  rw [he]
+  rfl
+
+/-- The pointwise value of a negated section is the negation of the pointwise value. -/
+theorem neg_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (-s) x = -(s x) := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  rw [apply_eq_symmL_coord s hi, apply_eq_symmL_coord (-s) hi, ← map_neg]
+  congr 1
+  have he : (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) (-s)
+      = -(equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s) := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover,
+        ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (s := s),
+        map_neg]
+  rw [he]
+  rfl
+
+/-- The pointwise value of a scalar multiple of a section is the scalar multiple of the pointwise
+value. -/
+theorem smul_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (c : 𝕜)
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (c • s) x = c • s x := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  rw [apply_eq_symmL_coord s hi, apply_eq_symmL_coord (c • s) hi, ← map_smul]
+  congr 1
+  have he : (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) (c • s)
+      = c • equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover,
+        ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (s := s),
+        map_smul]
+  rw [he]
+  rfl
+
+/-- Uniform control of every compact coordinate readout by a constant `C` controls the
+transported finite-cover section norm.  This is the boundedness companion of
+`dist_le_of_forall_coord_dist_le` (the case `t = 0`): the norm-level handoff turning local
+trivialization/coordinate sup-bounds into the global boundedness hypothesis
+`∀ s, ‖A s‖ ≤ C` demanded by the Banach-space Picard–Lindelöf foundation for a section-space
+vector field. -/
+theorem norm_le_of_forall_coord_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {C : ℝ} (hC : 0 ≤ C)
+    (hcoord : ∀ i (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖ ≤ C) :
+    ‖s‖ ≤ C := by
+  have he0 :
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+        (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover)) = 0 := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover]
+    exact map_zero _
+  have hdist : dist s
+      (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover) ≤ C := by
+    refine dist_le_of_forall_coord_dist_le (𝕜 := 𝕜) (F := F) (V := V)
+      (et := et) (Kc := Kc) (hKc := hKc) (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq)
+      (hcover := hcover) (s := s)
+      (t := (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover)) hC ?_
+    intro i x
+    rw [he0]
+    simp only [ZeroMemClass.coe_zero, Pi.zero_apply, ContinuousMap.zero_apply, dist_zero_right]
+    exact hcoord i x
+  rwa [dist_zero_right] at hdist
+
+/-- Global (`LipschitzWith`) version of `lipschitzOnWith_of_forall_coord_dist_le`: coordinatewise
+finite-cover Lipschitz estimates on *all* sections imply a global Lipschitz estimate for a
+section-space map.  This is the form consumed as the `hlip` hypothesis of the Banach-space
+Picard–Lindelöf foundation `isPicardLindelof_of_bounded_lipschitz_timeDependent_Icc`. -/
+theorem lipschitzWith_of_forall_coord_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {A : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {L : NNReal}
+    (hcoord : ∀ s t, ∀ i (x : Kc i),
+      dist
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A s)).1 i x)
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t)).1 i x)
+        ≤ (L : ℝ) * dist s t) :
+    LipschitzWith L A := by
+  rw [← lipschitzOnWith_univ]
+  exact lipschitzOnWith_of_forall_coord_dist_le
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover) (A := A) (L := L)
+    (stateSet := Set.univ)
+    (fun s _ t _ i x => hcoord s t i x)
+
+/-- Coordinatewise time-continuity of every compact readout transports to continuity of a
+section-valued map in the finite-cover Banach norm.  With finitely many trivializing pieces the
+transported section norm is the sup of the compact coordinate `C(Kc i, F)` norms (the transport
+`equivCompatibleCoordFamilySubmodule` is a definitional isometry into `∀ i, C(Kc i, F)`), so
+continuity of each readout `x ↦ (f x)ᵢ` into `C(Kc i, F)` yields continuity of `x ↦ f x` into
+`ContinuousSectionSpace`.  This is the time-continuity handoff
+`∀ s, ContinuousOn (fun t => A t s) (Icc t₀ T)` demanded by the Banach-space Picard–Lindelöf
+foundation `isPicardLindelof_of_bounded_lipschitz_timeDependent_Icc`. -/
+theorem continuousOn_of_forall_coord_continuousOn
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {X : Type*} [TopologicalSpace X]
+    {f : X → ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {s : Set X}
+    (hcoord : ∀ i, ContinuousOn
+      (fun x => (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f x)).1 i) s) :
+    ContinuousOn f s := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  letI : NormedAddCommGroup
+      (compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo) :=
+    Submodule.normedAddCommGroup
+      (𝕜 := 𝕜) (E := CoordFamily (F := F) Kc)
+      (s := compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo)
+  let e := equivCompatibleCoordFamilySubmodule
+    (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+  have he : Isometry e := fun _ _ => rfl
+  have hval : Isometry
+      (fun a : compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo =>
+        (a : CoordFamily (F := F) Kc)) :=
+    Isometry.of_nndist_eq fun _ _ => rfl
+  have hInd : Topology.IsInducing
+      (fun z : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover =>
+        ((e z).1 : CoordFamily (F := F) Kc)) :=
+    (hval.comp he).isUniformEmbedding.toIsUniformInducing.isInducing
+  rw [hInd.continuousOn_iff, continuousOn_pi]
+  exact hcoord
+
+/-- **A continuous section has a uniformly bounded compact coordinate readout.**  For a section `s`
+along a finite trivializing cover, the finite family of compact coordinate maps
+`(equivCompatibleCoordFamilySubmodule … s).1 i : C(Kc i, F)` — each a continuous function on the
+compact base piece `Kc i` — is uniformly bounded: there is a single constant `C ≥ 0` with
+`‖(coord s).1 i x‖ ≤ C` for every trivialization index `i` and base point `x ∈ Kc i`.  Each
+coordinate map is bounded by its sup-norm `‖(coord s).1 i‖` (finite because `Kc i` is compact) and
+the finite index family of these sup-norms is bounded above.  This is the existence form supplying
+the constant that `norm_le_of_forall_coord_norm_le` consumes as input, and is exactly the
+centre-readout size datum feeding the section-space Picard–Lindelöf `hcenter` hypothesis for a
+genuine (continuous) section such as the initial metric. -/
+theorem exists_forall_coord_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ i (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖ ≤ C := by
+  classical
+  obtain ⟨C, hC⟩ :=
+    (Set.finite_range (fun i => ‖(equivCompatibleCoordFamilySubmodule
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i‖)).bddAbove
+  refine ⟨max C 0, le_max_right _ _, fun i x => ?_⟩
+  calc
+    ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖
+        ≤ ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i‖ :=
+      ContinuousMap.norm_coe_le_norm _ x
+    _ ≤ C := hC (Set.mem_range_self i)
+    _ ≤ max C 0 := le_max_left _ _
+
+/-- **Uniform centre-readout bound from time-continuity of the coordinate readout.**  If a
+time-parametrised section `f : ℝ → ContinuousSectionSpace` has, on each trivializing piece `i`, a
+compact coordinate readout `t ↦ (equivCompatibleCoordFamilySubmodule … (f t)).1 i` that is
+`ContinuousOn (Icc t₀ T)` (the `hcont` datum of the section-space Picard–Lindelöf constructor,
+specialised at the centre section `f t = A t x0`), then the pointwise coordinate values are
+uniformly bounded over the whole compact time window and finite trivializing cover: there is a
+constant `C ≥ 0` with `‖(coord (f t)).1 i x‖ ≤ C` for all `t ∈ Icc t₀ T`, indices `i`, and base
+points `x ∈ Kc i`.  Each `t ↦ ‖(coord (f t)).1 i‖` (sup-norm of the coordinate map) is continuous on
+the compact `Icc t₀ T`, hence bounded, and the finite family of these interval bounds is bounded
+above.  This produces precisely the `hcenter` hypothesis
+`∀ t ∈ Icc t₀ T, ∀ i x, ‖(coord (A t x0)).1 i x‖ ≤ Mc` (take `Mc := C.toNNReal`) of
+`isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` from the (provable)
+time-continuity of the operator's coordinate readout at the initial metric. -/
+theorem exists_forall_mem_Icc_coord_norm_le_of_continuousOn
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {f : ℝ → ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ}
+    (hcont : ∀ i, ContinuousOn
+      (fun t => (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i)
+      (Set.Icc t₀ T)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc t₀ T, ∀ i (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i x‖ ≤ C := by
+  classical
+  choose C hC using fun i => isCompact_Icc.exists_bound_of_continuousOn (hcont i)
+  obtain ⟨D, hD⟩ := (Set.finite_range C).bddAbove
+  refine ⟨max D 0, le_max_right _ _, fun t ht i x => ?_⟩
+  calc
+    ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i x‖
+        ≤ ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i‖ :=
+      ContinuousMap.norm_coe_le_norm _ x
+    _ ≤ C i := hC i t ht
+    _ ≤ D := hD (Set.mem_range_self i)
+    _ ≤ max D 0 := le_max_left _ _
+
+/-- **The compact coordinate readout is `1`-Lipschitz in the section distance (`C(Kc i, F)`
+level).**  The transport `equivCompatibleCoordFamilySubmodule` is a definitional isometry from
+`ContinuousSectionSpace` onto the compatible-coordinate-family submodule of `∀ i, C(Kc i, F)`,
+carrying the finite-cover Banach norm to the `sup`-over-`i` (Pi) norm of the compact coordinate
+maps.  Hence each single coordinate map `s ↦ (coord s).1 i : C(Kc i, F)` contracts distances:
+`dist ((coord s).1 i) ((coord t).1 i) ≤ dist s t`.  This is the elementary contraction that turns
+section-space (Banach-norm) control of an operator into control of each of its compact coordinate
+readouts — the converse direction to `continuousOn_of_forall_coord_continuousOn`. -/
+theorem coordContinuousMap_dist_le_dist
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) (i : κ) :
+    dist
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i)
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i)
+      ≤ dist s t := by
+  classical
+  letI : Fintype κ := Fintype.ofFinite κ
+  letI : NormedAddCommGroup
+      (compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo) :=
+    Submodule.normedAddCommGroup
+      (𝕜 := 𝕜) (E := CoordFamily (F := F) Kc)
+      (s := compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo)
+  let e := equivCompatibleCoordFamilySubmodule
+    (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+  have he : Isometry e := fun _ _ => rfl
+  have hval : Isometry
+      (fun a : compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo =>
+        (a : CoordFamily (F := F) Kc)) :=
+    Isometry.of_nndist_eq fun _ _ => rfl
+  have hcomp : Isometry
+      (fun z : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover =>
+        ((e z).1 : CoordFamily (F := F) Kc)) :=
+    hval.comp he
+  calc
+    dist ((e s).1 i) ((e t).1 i)
+        ≤ dist ((e s).1 : CoordFamily (F := F) Kc) ((e t).1 : CoordFamily (F := F) Kc) :=
+          dist_le_pi_dist _ _ i
+    _ = dist s t := hcomp.dist_eq s t
+
+/-- **The pointwise coordinate readout is `1`-Lipschitz in the section distance (fibre `F` level).**
+Evaluating the `1`-Lipschitz `C(Kc i, F)`-level readout at a base point `x ∈ Kc i` (evaluation of a
+continuous map on a compact space is itself `1`-Lipschitz for the sup metric) gives
+`dist ((coord s).1 i x) ((coord t).1 i x) ≤ dist s t`.  This is the pointwise contraction consumed
+by the coordinatewise `hlip` hypothesis of the section-space Picard–Lindelöf constructor. -/
+theorem coord_dist_le_dist
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i) :
+    dist
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x)
+      ((equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i x)
+      ≤ dist s t :=
+  le_trans (ContinuousMap.dist_apply_le_dist x)
+    (coordContinuousMap_dist_le_dist s t i)
+
+/-- The compact coordinate readout of the zero section vanishes pointwise:
+`(coord 0).1 i x = 0`.  The transport `equivCompatibleCoordFamilySubmodule` is additive (it is the
+underlying equivalence of the section-space module structure), so it sends `0` to `0`, and the
+coordinate/point projections of the zero coordinate family vanish.  This is the coordinate-readout
+companion of `zero_apply`, used to turn section-distance contractions into section-norm bounds. -/
+theorem coord_zero_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+      (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover)).1 i x = 0 := by
+  have he0 :
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover
+        (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover)) = 0 := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover]
+    exact map_zero _
+  rw [he0]
+  simp only [ZeroMemClass.coe_zero, Pi.zero_apply, ContinuousMap.zero_apply]
+
+/-- **The pointwise coordinate readout is norm-nonexpansive:** `‖(coord s).1 i x‖ ≤ ‖s‖`.  The
+norm-level companion of `coord_dist_le_dist` (take `t = 0` and use `coord_zero_apply`).  Composed
+with a section-space *boundedness* estimate `‖A t x0‖ ≤ Mc` this yields the coordinate centre-bound
+`‖(coord (A t x0)).1 i x‖ ≤ Mc` — the `hcenter` datum of
+`isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` — turning the "bounded"
+half of a bounded + Lipschitz section-space operator into the constructor's centre-size input. -/
+theorem coord_norm_le_norm
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i) :
+    ‖(equivCompatibleCoordFamilySubmodule
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖ ≤ ‖s‖ := by
+  have h := coord_dist_le_dist s
+    (0 : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) i x
+  rw [coord_zero_apply, dist_zero_right, dist_zero_right] at h
+  exact h
+
+/-- **Section-space continuity transfers to each compact coordinate readout.**  From continuity of a
+section-valued map `f : X → ContinuousSectionSpace` (in the finite-cover Banach norm) on a set `s`,
+each compact coordinate readout `x ↦ (coord (f x)).1 i` is continuous on `s`.  Immediate from the
+`1`-Lipschitz (hence continuous) single readout `z ↦ (coord z).1 i` composed with `f`.  This is the
+converse of `continuousOn_of_forall_coord_continuousOn`, reducing the coordinatewise time-continuity
+hypothesis `hcont` of the section-space Picard–Lindelöf constructor to *section-space* continuity of
+the operator. -/
+theorem continuousOn_coord_of_continuousOn
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {X : Type*} [TopologicalSpace X]
+    {f : X → ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {s : Set X}
+    (hf : ContinuousOn f s) (i : κ) :
+    ContinuousOn
+      (fun x => (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f x)).1 i) s := by
+  have hLip : LipschitzWith 1
+      (fun z : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+          et Kc hKc Ko hKo hKoEq hcover =>
+        (equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover z).1 i) :=
+    LipschitzWith.of_dist_le_mul fun z w => by
+      simpa only [NNReal.coe_one, one_mul] using
+        coordContinuousMap_dist_le_dist z w i
+  exact hLip.continuous.comp_continuousOn hf
+
+/-- **Fiberwise Lipschitz control of a section-space operator upgrades to a `LipschitzOnWith`
+estimate in the transported finite-cover Banach norm.**  If every fiber trivialization map of the
+finite cover is bounded in operator norm by `L`, and the operator `A` is fiber-pointwise
+`C`-Lipschitz in the state — i.e. `dist ((A s) x) ((A t) x) ≤ C * dist s t` at every base point `x`,
+uniformly over the state set — then `A` is `L * C`-Lipschitz on the state set.  This is the
+interface a (regularised) geometric section-space operator naturally verifies: its value's fiber at
+each base point is Lipschitz in the state, and the finite cover's trivialization maps are uniformly
+bounded; the conclusion is precisely the `hlip` hypothesis of the section-space Picard–Lindelöf
+capstone `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn`. -/
+theorem lipschitzOnWith_of_forall_fiber_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover)}
+    {A : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover}
+    {L C : NNReal}
+    (hL : ∀ i (x : Kc i), ‖(et i).continuousLinearMapAt 𝕜 x.1‖ ≤ (L : ℝ))
+    (hfiber : ∀ ⦃s⦄, s ∈ stateSet → ∀ ⦃t⦄, t ∈ stateSet →
+      ∀ x : M, dist ((A s) x) ((A t) x) ≤ (C : ℝ) * dist s t) :
+    LipschitzOnWith (L * C) A stateSet := by
+  refine lipschitzOnWith_of_forall_coord_dist_le
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover)
+    (A := A) (L := L * C) (stateSet := stateSet) ?_
+  intro s hs t ht i x
+  calc
+    dist
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A s)).1 i x)
+        ((equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (A t)).1 i x)
+        ≤ (L : ℝ) * dist ((A s) x.1) ((A t) x.1) :=
+      coord_dist_le_of_trivialization_opNorm_le (L := (L : ℝ)) hL (A s) (A t) i x
+    _ ≤ (L : ℝ) * ((C : ℝ) * dist s t) :=
+      mul_le_mul_of_nonneg_left (hfiber hs ht x.1) (NNReal.coe_nonneg L)
+    _ = ((L * C : NNReal) : ℝ) * dist s t := by
+      rw [NNReal.coe_mul]; ring
+
+/-- **Coordinatewise joint (time–base) continuity of a section-valued family upgrades to continuity
+in the transported finite-cover Banach norm.**  If, for every trivialization index `i`, the
+coordinate readout `(t, x) ↦ (et i).continuousLinearMapAt 𝕜 x ((f t) x)` of the section `f t` in the
+`i`-th trivialization is jointly continuous on `timeSet ×ˢ Kc i`, then `t ↦ f t` is continuous on
+`timeSet` in the finite-cover Banach norm.  The compact base pieces `Kc i` supply the uniform-in-`x`
+control (via `ContinuousMap.continuousOn_of_continuousOn_uncurry`) that passes from pointwise joint
+continuity to `C(Kc i, F)`-valued continuity, which `continuousOn_of_forall_coord_continuousOn` then
+assembles.  This is the fiber-level route to the `hcont` hypothesis
+`∀ s, ContinuousOn (fun t => A t s) (Icc t₀ T)` of the section-space Picard–Lindelöf capstone. -/
+theorem continuousOn_of_forall_coord_uncurry_continuousOn
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {X : Type*} [TopologicalSpace X]
+    {f : X → ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {timeSet : Set X}
+    (hcoord : ∀ i, ContinuousOn
+      (fun p : X × M => (et i).continuousLinearMapAt 𝕜 p.2 ((f p.1) p.2))
+      (timeSet ×ˢ (Kc i : Set M))) :
+    ContinuousOn f timeSet := by
+  refine continuousOn_of_forall_coord_continuousOn
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover) ?_
+  intro i
+  refine ContinuousMap.continuousOn_of_continuousOn_uncurry _ ?_
+  have hnice : ContinuousOn
+      (fun p : X × (Kc i) =>
+        (et i).continuousLinearMapAt 𝕜 p.2.1 ((f p.1) p.2.1))
+      (timeSet ×ˢ Set.univ) := by
+    refine (hcoord i).comp
+      (continuous_fst.prodMk (continuous_subtype_val.comp continuous_snd)).continuousOn ?_
+    intro p hp
+    exact ⟨hp.1, p.2.2⟩
+  refine hnice.congr ?_
+  intro p _
+  exact coord_apply (f p.1) i p.2
+
+/-- **Bounded linear section-space operator from a coordinatewise operator-norm bound.**  Given a
+`𝕜`-linear map `T` on the transported finite-cover section space together with a uniform bound
+`‖(coord (T s)).1 i x‖ ≤ C · ‖s‖` on every compact coordinate readout of the image, `T` is bounded and
+packages into a `ContinuousSectionSpace →L[𝕜] ContinuousSectionSpace`.  The coordinate bound is pushed
+to the section-norm bound `‖T s‖ ≤ C · ‖s‖` by `norm_le_of_forall_coord_norm_le`, then
+`LinearMap.mkContinuous` supplies the packaged operator (whose operator-norm control is
+`mkContinuousOfForallCoordNormLe_norm_le`).  This is the missing constructor that turns a generator's
+fiber/coordinate operator estimate into the `CSS →L[𝕜] CSS` object consumed as the bounded linear
+generator `L t` of the section-space Picard–Lindelöf `picard` field. -/
+noncomputable def mkContinuousOfForallCoordNormLe
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (T : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →ₗ[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (T s)).1 i x‖ ≤ C * ‖s‖) :
+    ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →L[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover :=
+  T.mkContinuous C fun s =>
+    norm_le_of_forall_coord_norm_le (mul_nonneg hC (norm_nonneg s)) (hbound s)
+
+@[simp]
+theorem mkContinuousOfForallCoordNormLe_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (T : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →ₗ[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (T s)).1 i x‖ ≤ C * ‖s‖)
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) :
+    mkContinuousOfForallCoordNormLe T C hC hbound s = T s :=
+  rfl
+
+/-- Operator-norm control for `mkContinuousOfForallCoordNormLe`: the packaged section-space operator
+has operator norm at most the coordinatewise bound `C`. -/
+theorem mkContinuousOfForallCoordNormLe_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (T : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →ₗ[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+        et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (T s)).1 i x‖ ≤ C * ‖s‖) :
+    ‖mkContinuousOfForallCoordNormLe T C hC hbound‖ ≤ C := by
+  refine LinearMap.mkContinuous_norm_le T hC fun s => ?_
+  exact norm_le_of_forall_coord_norm_le (mul_nonneg hC (norm_nonneg s)) (hbound s)
+
+/-- **Scalar-function multiplication preserves continuity of a bundle section.**  If `φ : M → 𝕜` is
+continuous and the section `s` is continuous (as a map into the total space), then so is the pointwise
+scalar multiple `x ↦ φ x • s x`.  Checked fibrewise via `FiberBundle.continuousAt_totalSpace`: in the
+canonical trivialization at each base point the readout is `φ x • (e (T% s x)).2`, continuous by
+continuity of `φ` and of the section's trivialization readout.  This is the continuity input for
+building zeroth-order (multiplication) section-space generators. -/
+lemma continuous_smul_section
+    {φ : M → 𝕜} (hφ : Continuous φ)
+    {s : Π x : M, V x} (hs : Continuous (T% s)) :
+    Continuous (T% (fun x => φ x • s x)) := by
+  rw [continuous_iff_continuousAt]
+  intro x₀
+  have hs_at : ContinuousAt (T% s) x₀ := hs.continuousAt
+  rw [FiberBundle.continuousAt_totalSpace F] at hs_at
+  rw [FiberBundle.continuousAt_totalSpace F]
+  refine ⟨continuousAt_id, ?_⟩
+  have hfib_s : ContinuousAt
+      (fun x => (trivializationAt F V x₀ ((T% s) x)).2) x₀ := hs_at.2
+  show ContinuousAt
+    (fun x => (trivializationAt F V x₀ ((T% fun y => φ y • s y) x)).2) x₀
+  have hx₀base : x₀ ∈ (trivializationAt F V x₀).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt F V x₀
+  have hev :
+      (fun x => (trivializationAt F V x₀ ((T% fun y => φ y • s y) x)).2)
+        =ᶠ[nhds x₀] (fun x => φ x • (trivializationAt F V x₀ ((T% s) x)).2) := by
+    filter_upwards [(trivializationAt F V x₀).open_baseSet.mem_nhds hx₀base] with x hx
+    have key : ∀ v : V x,
+        (trivializationAt F V x₀ (TotalSpace.mk' F x v)).2
+          = (trivializationAt F V x₀).linearMapAt 𝕜 x v := by
+      intro v
+      rw [Bundle.Trivialization.coe_linearMapAt_of_mem (R := 𝕜)
+        (trivializationAt F V x₀) hx]
+    show (trivializationAt F V x₀ (TotalSpace.mk' F x (φ x • s x))).2
+      = φ x • (trivializationAt F V x₀ (TotalSpace.mk' F x (s x))).2
+    rw [key (φ x • s x), key (s x), map_smul]
+  exact (hφ.continuousAt.smul hfib_s).congr hev.symm
+
+/-- The scalar-field multiplication operator on the section space, as a `𝕜`-linear map: for a
+continuous scalar field `φ : M → 𝕜` it sends a section `s` to `x ↦ φ x • s x` (continuous by
+`continuous_smul_section`). -/
+def smulFieldLinearMap
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {φ : M → 𝕜} (hφ : Continuous φ) :
+    ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →ₗ[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover where
+  toFun s := ⟨fun x => φ x • s x, continuous_smul_section hφ s.continuous_toFun⟩
+  map_add' s t := by
+    refine ContinuousSectionSpace.ext (fun x => ?_)
+    rw [add_apply]
+    show φ x • (s + t) x = φ x • s x + φ x • t x
+    rw [add_apply, smul_add]
+  map_smul' c s := by
+    refine ContinuousSectionSpace.ext (fun x => ?_)
+    rw [smul_apply]
+    show φ x • (c • s) x = c • (φ x • s x)
+    rw [smul_apply, smul_comm]
+
+@[simp]
+theorem smulFieldLinearMap_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {φ : M → 𝕜} (hφ : Continuous φ)
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (smulFieldLinearMap (V := V) et Kc hKc Ko hKo hKoEq hcover hφ s) x = φ x • s x :=
+  rfl
+
+/-- **The scalar-field multiplication operator packaged as a bounded section-space operator.**  For a
+continuous scalar field `φ : M → 𝕜` bounded by `C` on the finite cover, `s ↦ (x ↦ φ x • s x)` is a
+`ContinuousSectionSpace →L[𝕜] ContinuousSectionSpace` of operator norm at most `C`.  This is a genuine
+zeroth-order (multiplication) generator on the transported section space, built through
+`mkContinuousOfForallCoordNormLe`: the coordinate readout of the image is `φ x • (coord s) i x`, so the
+coordinate operator bound `‖(coord (φ • s)) i x‖ ≤ C · ‖s‖` follows from `‖φ x‖ ≤ C` and the
+norm-nonexpansiveness `coord_norm_le_norm`. -/
+noncomputable def smulField
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {φ : M → 𝕜} (hφ : Continuous φ) (C : ℝ) (hC : 0 ≤ C)
+    (hφbound : ∀ (i : κ) (x : Kc i), ‖φ x.1‖ ≤ C) :
+    ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover →L[𝕜]
+      ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover :=
+  mkContinuousOfForallCoordNormLe
+    (smulFieldLinearMap (V := V) et Kc hKc Ko hKo hKoEq hcover hφ) C hC
+    (fun s i x => by
+      rw [coord_apply]
+      show ‖(et i).continuousLinearMapAt 𝕜 x.1 (φ x.1 • s x.1)‖ ≤ C * ‖s‖
+      rw [map_smul, norm_smul, ← coord_apply s i x]
+      calc ‖φ x.1‖ * ‖(equivCompatibleCoordFamilySubmodule
+              (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖
+          ≤ C * ‖(equivCompatibleCoordFamilySubmodule
+              (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x‖ :=
+            mul_le_mul_of_nonneg_right (hφbound i x) (norm_nonneg _)
+        _ ≤ C * ‖s‖ := mul_le_mul_of_nonneg_left (coord_norm_le_norm s i x) hC)
+
+@[simp]
+theorem smulField_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {φ : M → 𝕜} (hφ : Continuous φ) (C : ℝ) (hC : 0 ≤ C)
+    (hφbound : ∀ (i : κ) (x : Kc i), ‖φ x.1‖ ≤ C)
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (smulField (V := V) et Kc hKc Ko hKo hKoEq hcover hφ C hC hφbound s) x = φ x • s x :=
+  rfl
+
+/-- The scalar-field multiplication operator has operator norm at most the field bound `C`. -/
+theorem smulField_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {φ : M → 𝕜} (hφ : Continuous φ) (C : ℝ) (hC : 0 ≤ C)
+    (hφbound : ∀ (i : κ) (x : Kc i), ‖φ x.1‖ ≤ C) :
+    ‖smulField (V := V) et Kc hKc Ko hKo hKoEq hcover hφ C hC hφbound‖ ≤ C :=
+  mkContinuousOfForallCoordNormLe_norm_le _ C hC _
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace

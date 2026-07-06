@@ -333,6 +333,53 @@ theorem autonomous_fst_eq_id {E H M : Type*} [NormedAddCommGroup E] [NormedSpace
   intro t ht
   simpa [hφ] using heq ht
 
+/-- **The time component tracks the parameter, anchored at an arbitrary start time.**
+Generalises `autonomous_fst_eq_id` (anchor `t₀ = 0`): an integral curve `Γ` of the
+autonomous field `(1, X · ·)` on a preconnected open set `s ∋ 0`, with
+`(Γ 0).1 = t₀`, has `(Γ t).1 = t₀ + t` throughout `s` — the first coordinate has
+constant derivative `1`, so it is the affine map `t ↦ t₀ + t`. This lets an
+autonomous curve *anchored at time `t₀`* (not `0`) be recognised, after the time
+shift `σ ↦ σ - t₀`, as a genuine time-dependent integral curve. -/
+theorem autonomous_fst_eq_add {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M]
+    {X : ℝ → (x : M) → TangentSpace I x} {Γ : ℝ → ℝ × M} {s : Set ℝ} {t₀ : ℝ}
+    (hs : IsOpen s) (h0 : (0 : ℝ) ∈ s) (hconn : IsPreconnected s)
+    (hΓ0 : (Γ 0).1 = t₀)
+    (hΓ : ∀ t ∈ s, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) ((𝓘(ℝ, ℝ)).prod I) Γ s t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (((1 : ℝ), X (Γ t).1 (Γ t).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ t)))) :
+    ∀ t ∈ s, (Γ t).1 = t₀ + t := by
+  set φ : ℝ → ℝ := fun τ => (Γ τ).1 with hφ
+  have hd : ∀ τ ∈ s, HasDerivWithinAt φ 1 s τ := by
+    intro τ hτ
+    have hcomp :=
+      ((hasMFDerivAt_fst (Γ τ)).hasMFDerivWithinAt (s := univ)).comp τ (hΓ τ hτ)
+        (by rw [preimage_univ]; exact subset_univ s)
+    rw [hasMFDerivWithinAt_iff_hasFDerivWithinAt] at hcomp
+    have hdw := hcomp.hasDerivWithinAt
+    have hfun : (Prod.fst ∘ Γ) = φ := rfl
+    rw [hfun] at hdw
+    refine hdw.congr_deriv ?_
+    show ((ContinuousLinearMap.fst ℝ (TangentSpace 𝓘(ℝ, ℝ) (Γ τ).1) (TangentSpace I (Γ τ).2)).comp
+        (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ)
+          (((1 : ℝ), X (Γ τ).1 (Γ τ).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ τ))))
+        (1 : ℝ) = (1 : ℝ)
+    simp
+  have hderiv : ∀ τ ∈ s, deriv φ τ = 1 := fun τ hτ =>
+    ((hd τ hτ).hasDerivAt (hs.mem_nhds hτ)).deriv
+  have hdiff : DifferentiableOn ℝ φ s := fun τ hτ => (hd τ hτ).differentiableWithinAt
+  have hg : ∀ τ ∈ s, deriv (fun y : ℝ => t₀ + y) τ = 1 := fun τ _ =>
+    ((hasDerivAt_id τ).const_add t₀).deriv
+  have heq : EqOn φ (fun y : ℝ => t₀ + y) s := by
+    refine hs.eqOn_of_deriv_eq hconn hdiff (by fun_prop) ?_ h0 ?_
+    · intro τ hτ
+      rw [hderiv τ hτ, hg τ hτ]
+    · show φ 0 = t₀ + 0
+      rw [add_zero]; exact hΓ0
+  intro t ht
+  simpa [hφ] using heq ht
+
 /-- **Time-dependent integral curve from an autonomous one** (combined form): if
 `Γ` is an autonomous integral curve of `(1, X)` on a preconnected open `s ∋ 0` with
 `(Γ 0).1 = 0`, then `(Γ ·).2` is a time-dependent integral curve of `X` on `s`. -/
@@ -509,5 +556,409 @@ theorem flow_inverse_package {E H M : Type*} [NormedAddCommGroup E] [NormedSpace
     fun s t x => flow_group_law hv hanchor hcurve s t x
   exact ⟨fun t => flow_leftInverse hanchor hgroup t,
          fun t => flow_rightInverse hanchor hgroup t⟩
+
+/-! ### Uniform time-dependent local flow on a compact manifold
+
+The DeTurck gauge field is *time-dependent*. Integrating it uniformly over all
+start points requires autonomizing to the product `ℝ × M`, which is *never*
+compact, so `exists_uniform_integralCurve_time` (whole space compact) does not
+apply. What *is* compact is the **initial-time slice** `{0} × M`; a uniform lifespan
+over that slice suffices, because every start point `x` enters the autonomization
+as `(0, x)`. This subsection supplies the compact-*slice* uniform-time reduction and
+assembles the compact-manifold time-dependent local flow existence the gauge-flow
+construction consumes. -/
+
+/-- **Uniform existence time over a compact subset from the flow box.** The
+neighborhood-uniform flow box yields, over any *compact subset* `S` of a (possibly
+noncompact) manifold, a single `ε > 0` working for every start point in `S`, by
+extracting a finite subcover of `S` and taking the minimum lifespan. This is the
+compact-*slice* refinement of `exists_uniform_time_of_nhds_uniform` (which needs the
+whole space compact); applied to the compact initial-time slice `{0} × M` of the
+noncompact autonomization space `ℝ × M`, it integrates a *time-dependent* field with
+a single uniform lifespan. -/
+theorem exists_uniform_time_of_nhds_uniform_on_compact {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] {v : (x : M) → TangentSpace I x}
+    (hbox : ∀ x₀ : M, ∃ U ∈ nhds x₀, ∃ ε > 0, ∀ y ∈ U, ∃ γ : ℝ → M, γ 0 = y ∧
+      IsMIntegralCurveOn γ v (Set.Ioo (-ε) ε))
+    {S : Set M} (hS : IsCompact S) :
+    ∃ ε > 0, ∀ x ∈ S, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurveOn γ v (Set.Ioo (-ε) ε) := by
+  choose U hUmem ε hεpos hprop using hbox
+  have hopen : ∀ x : M, ∃ t, t ⊆ U x ∧ IsOpen t ∧ x ∈ t := fun x => mem_nhds_iff.mp (hUmem x)
+  choose V hVsub hVopen hVmem using hopen
+  obtain ⟨t, ht⟩ := hS.elim_finite_subcover V hVopen
+    (fun x _ => mem_iUnion.mpr ⟨x, hVmem x⟩)
+  rcases t.eq_empty_or_nonempty with hte | htne
+  · subst hte
+    refine ⟨1, one_pos, fun x hx => ?_⟩
+    have h := ht hx; simp at h
+  · refine ⟨t.inf' htne ε, (Finset.lt_inf'_iff htne).mpr (fun i _ => hεpos i), fun x hx => ?_⟩
+    obtain ⟨i, hi, hxi⟩ := mem_iUnion₂.mp (ht hx)
+    obtain ⟨γ, hγ0, hγon⟩ := hprop i x (hVsub i hxi)
+    refine ⟨γ, hγ0, hγon.mono ?_⟩
+    have hle : t.inf' htne ε ≤ ε i := Finset.inf'_le ε hi
+    exact Ioo_subset_Ioo (by linarith) hle
+
+/-- **Uniform time-dependent local flow existence on a compact manifold.** For a
+jointly-`C¹` time-dependent field `X` on a compact boundaryless complete manifold,
+there is a *single* `ε > 0` such that every start point `x` (at time `0`) admits a
+time-dependent integral curve of `X` on the common interval `Ioo (-ε) ε`. Because the
+DeTurck gauge field is time-dependent, this — not the autonomous
+`exists_uniform_integralCurve_time` — is the existence core the gauge flow consumes.
+Proved by autonomizing to the noncompact `ℝ × M` and taking the uniform lifespan over
+the *compact initial-time slice* `{0} × M` via
+`exists_uniform_time_of_nhds_uniform_on_compact`, then projecting through
+`isTimeDependentIntegralCurve_of_autonomous_of_fst`. -/
+theorem exists_uniform_timeDependent_integralCurve_time {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)))) :
+    ∃ ε > 0, ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧
+      ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ (Set.Ioo (-ε) ε) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))) := by
+  have hScompact : IsCompact (({(0 : ℝ)} ×ˢ (Set.univ : Set M)) : Set (ℝ × M)) :=
+    isCompact_singleton.prod isCompact_univ
+  obtain ⟨ε, hε, huniform⟩ := exists_uniform_time_of_nhds_uniform_on_compact
+    (fun p => exists_nhds_uniform_integralCurve (I := (𝓘(ℝ, ℝ)).prod I) hX p) hScompact
+  refine ⟨ε, hε, fun x => ?_⟩
+  obtain ⟨Γ, hΓ0, hΓon⟩ := huniform (0, x) (by simp)
+  refine ⟨fun τ => (Γ τ).2, by simp [hΓ0], ?_⟩
+  have h0 : (0 : ℝ) ∈ Set.Ioo (-ε) ε := ⟨neg_neg_of_pos hε, hε⟩
+  have hΓ0fst : (Γ 0).1 = 0 := by rw [hΓ0]
+  exact isTimeDependentIntegralCurve_of_autonomous_of_fst
+    isOpen_Ioo h0 isPreconnected_Ioo hΓ0fst (fun t ht => hΓon t ht)
+
+/-- **Bundled uniform time-dependent flow on a compact manifold.** Packages
+`exists_uniform_timeDependent_integralCurve_time` into a flow map `Φ : ℝ → M → M`
+with `Φ 0 = id` such that, for every `x`, the orbit `τ ↦ Φ τ x` is a time-dependent
+integral curve of `X` on the common interval `Ioo (-ε) ε`. This is the anchored
+integral-curve family the compact-manifold gauge-flow construction is built on. -/
+theorem exists_timeDependent_flow_compact {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)))) :
+    ∃ ε > 0, ∃ Φ : ℝ → M → M, (∀ x, Φ 0 x = x) ∧
+      ∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+        (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))) := by
+  obtain ⟨ε, hε, huniform⟩ := exists_uniform_timeDependent_integralCurve_time hX
+  choose γ hγ0 hγon using huniform
+  exact ⟨ε, hε, fun t x => γ x t, hγ0, fun x t ht => hγon x t ht⟩
+
+/-- **Uniqueness of time-dependent integral curves anchored at any interior time.**
+For a jointly-`C¹` time-dependent field `X` on a boundaryless T2 manifold, two
+time-dependent integral curves on `Ioo a b` that agree at a *single interior time*
+`t₀ ∈ Ioo a b` agree on all of `Ioo a b`. Generalises
+`timeDependent_integralCurve_unique` (anchor `t₀ = 0`) by anchoring at an arbitrary
+interior time; proved by lifting to autonomous curves on `ℝ × M` and applying
+mathlib's autonomous uniqueness at `t₀`. Anchoring at an arbitrary time is what
+yields injectivity of each time-`t` flow map. -/
+theorem timeDependent_integralCurve_eqOn_of_eq {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {γ γ' : ℝ → M} {a b t₀ : ℝ} (ht₀ : t₀ ∈ Set.Ioo a b)
+    (hγ : ∀ t ∈ Set.Ioo a b, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ (Set.Ioo a b) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))))
+    (hγ' : ∀ t ∈ Set.Ioo a b, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ' (Set.Ioo a b) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ' t))))
+    (h0 : γ t₀ = γ' t₀) :
+    Set.EqOn γ γ' (Set.Ioo a b) := by
+  set w : (x : ℝ × M) → TangentSpace ((𝓘(ℝ, ℝ)).prod I) x :=
+    fun p => ((1 : ℝ), X p.1 p.2) with hw
+  set Γ : ℝ → ℝ × M := fun t => (t, γ t) with hΓdef
+  set Γ' : ℝ → ℝ × M := fun t => (t, γ' t) with hΓ'def
+  have hΓint : IsMIntegralCurveOn Γ w (Set.Ioo a b) := fun t ht =>
+    autonomousLift_hasMFDerivWithinAt ht (hγ t ht)
+  have hΓ'int : IsMIntegralCurveOn Γ' w (Set.Ioo a b) := fun t ht =>
+    autonomousLift_hasMFDerivWithinAt ht (hγ' t ht)
+  have hstart : Γ t₀ = Γ' t₀ := by simp [hΓdef, hΓ'def, h0]
+  have heq : Set.EqOn Γ Γ' (Set.Ioo a b) :=
+    isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless ht₀ hX hΓint hΓ'int hstart
+  intro t ht
+  have h2 : (Γ t).2 = (Γ' t).2 := by rw [heq ht]
+  simpa [hΓdef, hΓ'def] using h2
+
+/-- **Injectivity of each time-`t` flow map.** For a jointly-`C¹` time-dependent
+field `X` on a compact boundaryless T2 manifold, if a flow `Φ` is anchored
+(`Φ 0 = id`) with every orbit `τ ↦ Φ τ x` a time-dependent integral curve of `X` on
+`Ioo (-ε) ε`, then for each `t ∈ Ioo (-ε) ε` the time-`t` map `x ↦ Φ t x` is
+injective: two orbits agreeing at time `t` agree everywhere on `Ioo (-ε) ε`, in
+particular at time `0`, where the anchor reads off the two start points. This is the
+diffeomorphism-onto-image (injectivity) half the compact-manifold gauge flow of
+Item 2 consumes. -/
+theorem timeDependent_flow_injective {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {ε : ℝ} (hε : 0 < ε) {Φ : ℝ → M → M} (hanchor : ∀ x, Φ 0 x = x)
+    (hflow : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+      (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    {t : ℝ} (ht : t ∈ Set.Ioo (-ε) ε) :
+    Function.Injective (Φ t) := by
+  intro x y hxy
+  have h0mem : (0 : ℝ) ∈ Set.Ioo (-ε) ε := ⟨neg_neg_of_pos hε, hε⟩
+  have heq : Set.EqOn (fun τ => Φ τ x) (fun τ => Φ τ y) (Set.Ioo (-ε) ε) :=
+    timeDependent_integralCurve_eqOn_of_eq hX ht (hflow x) (hflow y) hxy
+  have h0 := heq h0mem
+  simpa [hanchor] using h0
+
+/-- **Bundled injective time-dependent flow on a compact manifold.** Combines
+`exists_timeDependent_flow_compact` with `timeDependent_flow_injective`: for a
+jointly-`C¹` time-dependent field `X` on a compact boundaryless T2 manifold there is a
+uniform `ε > 0` and an anchored flow `Φ` (`Φ 0 = id`) whose orbits `τ ↦ Φ τ x` solve
+the field's ODE on `Ioo (-ε) ε` and whose every time-`t` slice `x ↦ Φ t x` is
+injective. This is the compact-manifold time-dependent local flow with injective
+time-slices — the existence-plus-injectivity (diffeomorphism-onto-image) datum the
+compact-manifold gauge flow of Item 2 consumes for its forward family `F`. -/
+theorem exists_timeDependent_flow_compact_injective {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)))) :
+    ∃ ε > 0, ∃ Φ : ℝ → M → M, (∀ x, Φ 0 x = x) ∧
+      (∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+        (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) ∧
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.Injective (Φ t)) := by
+  obtain ⟨ε, hε, Φ, hanchor, hflow⟩ := exists_timeDependent_flow_compact hX
+  exact ⟨ε, hε, Φ, hanchor, hflow,
+    fun t ht => timeDependent_flow_injective hX hε hanchor hflow ht⟩
+
+/-- **Uniqueness (canonicity) of the anchored time-dependent flow.** For a jointly-`C¹`
+time-dependent field `X` on a boundaryless T2 manifold, any two flows `Φ`, `Φ'` that are
+anchored (`Φ 0 = Φ' 0 = id`) with orbits solving the field's ODE on `Ioo (-ε) ε` agree
+on `Ioo (-ε) ε`: for every `x` the two orbits agree at `0`, hence everywhere by
+`timeDependent_integralCurve_eqOn_of_eq`. Together with existence and injectivity this
+makes the compact-manifold local flow a *canonically determined* family of injections. -/
+theorem timeDependent_flow_unique {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {ε : ℝ} (hε : 0 < ε) {Φ Φ' : ℝ → M → M}
+    (hanchor : ∀ x, Φ 0 x = x) (hanchor' : ∀ x, Φ' 0 x = x)
+    (hflow : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+      (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    (hflow' : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ' τ x)
+      (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ' t x))))
+    {t : ℝ} (ht : t ∈ Set.Ioo (-ε) ε) (x : M) :
+    Φ t x = Φ' t x := by
+  have h0mem : (0 : ℝ) ∈ Set.Ioo (-ε) ε := ⟨neg_neg_of_pos hε, hε⟩
+  have h0 : (fun τ => Φ τ x) 0 = (fun τ => Φ' τ x) 0 := by simp [hanchor, hanchor']
+  have heq : Set.EqOn (fun τ => Φ τ x) (fun τ => Φ' τ x) (Set.Ioo (-ε) ε) :=
+    timeDependent_integralCurve_eqOn_of_eq hX h0mem (hflow x) (hflow' x) h0
+  exact heq ht
+
+/-! ### Backward reachability and bijectivity of the compact-manifold flow
+
+The forward flow `Φ` has injective time-slices (`timeDependent_flow_injective`), but
+surjectivity of `x ↦ Φ t x` on a compact manifold is *not* automatic from injectivity
+and continuity (invariance of domain would be needed); it requires a genuine backward
+flow — an integral curve of `X` run from time `t` *back* to time `0`. Such curves need
+the time-dependent existence *anchored at an arbitrary time* `t₀`, which the uniform
+lifespan over the compact **time-slab** `Icc (-r) r ×ˢ univ` supplies (a single `δ`
+covering every start time in `[-r, r]`). Reconciling that slab lifespan with the forward
+lifespan closes surjectivity, hence bijectivity, of every time-slice — the
+diffeomorphism-onto-image datum (its `G t` inverse half) Item 2's gauge flow consumes. -/
+
+/-- **Uniform time-dependent integral-curve existence anchored at any time in a slab.**
+For a jointly-`C¹` time-dependent field `X` on a compact boundaryless complete manifold
+and any `r > 0`, there is a single `δ > 0` such that *every* start time `t₀ ∈ [-r, r]`
+and *every* point `y` admit a time-dependent integral curve `γ` of `X` on the common
+window `Ioo (t₀ - δ) (t₀ + δ)` with `γ t₀ = y`. Proved by taking the uniform lifespan of
+the autonomization `(1, X)` over the compact time-slab `Icc (-r) r ×ˢ univ ⊆ ℝ × M`
+(via `exists_uniform_time_of_nhds_uniform_on_compact`) and time-shifting the autonomous
+curve anchored at `(t₀, y)` by `σ ↦ σ - t₀` (its first coordinate then tracks the
+parameter by `autonomous_fst_eq_add`, so it descends to a time-dependent curve). This is
+the anchored-anywhere existence the backward flow — and hence surjectivity — consumes. -/
+theorem exists_uniform_timeDependent_integralCurve_anchored {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {r : ℝ} (hr : 0 < r) :
+    ∃ δ > 0, ∀ t₀ ∈ Set.Icc (-r) r, ∀ y : M, ∃ γ : ℝ → M, γ t₀ = y ∧
+      ∀ t ∈ Set.Ioo (t₀ - δ) (t₀ + δ), HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ
+        (Set.Ioo (t₀ - δ) (t₀ + δ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))) := by
+  have hScompact : IsCompact ((Set.Icc (-r) r ×ˢ (Set.univ : Set M)) : Set (ℝ × M)) :=
+    isCompact_Icc.prod isCompact_univ
+  obtain ⟨δ, hδ, huniform⟩ := exists_uniform_time_of_nhds_uniform_on_compact
+    (fun p => exists_nhds_uniform_integralCurve (I := (𝓘(ℝ, ℝ)).prod I) hX p) hScompact
+  refine ⟨δ, hδ, fun t₀ ht₀ y => ?_⟩
+  obtain ⟨Γ, hΓ0, hΓon⟩ := huniform (t₀, y) ⟨ht₀, Set.mem_univ _⟩
+  have h0mem : (0 : ℝ) ∈ Set.Ioo (-δ) δ := ⟨neg_neg_of_pos hδ, hδ⟩
+  have hΓ0fst : (Γ 0).1 = t₀ := by rw [hΓ0]
+  -- the first coordinate of Γ is the affine map `ρ ↦ t₀ + ρ`
+  have hfst_orig : ∀ ρ ∈ Set.Ioo (-δ) δ, (Γ ρ).1 = t₀ + ρ :=
+    autonomous_fst_eq_add isOpen_Ioo h0mem isPreconnected_Ioo hΓ0fst (fun ρ hρ => hΓon ρ hρ)
+  -- the shifted curve is an autonomous integral curve on `Ioo (t₀-δ) (t₀+δ)`
+  have hΓs_curve : ∀ t ∈ Set.Ioo (t₀ - δ) (t₀ + δ),
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) ((𝓘(ℝ, ℝ)).prod I) (fun σ => Γ (σ - t₀))
+        (Set.Ioo (t₀ - δ) (t₀ + δ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight
+          (((1 : ℝ), X (Γ (t - t₀)).1 (Γ (t - t₀)).2) :
+            TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ (t - t₀)))) := by
+    have h := hΓon.comp_add (-t₀)
+    have he1 : (Γ ∘ (· + (-t₀))) = (fun σ => Γ (σ - t₀)) := by
+      funext σ; simp only [Function.comp_apply, sub_eq_add_neg]
+    have he2 : {σ : ℝ | σ + (-t₀) ∈ Set.Ioo (-δ) δ} = Set.Ioo (t₀ - δ) (t₀ + δ) := by
+      ext σ; simp only [Set.mem_setOf_eq, Set.mem_Ioo]
+      constructor
+      · rintro ⟨h1, h2⟩; exact ⟨by linarith, by linarith⟩
+      · rintro ⟨h1, h2⟩; exact ⟨by linarith, by linarith⟩
+    rw [he1, he2] at h
+    exact fun t ht => h t ht
+  -- the shifted first coordinate tracks the parameter
+  have hfst : ∀ t ∈ Set.Ioo (t₀ - δ) (t₀ + δ), (Γ (t - t₀)).1 = t := by
+    intro t ht
+    rcases ht with ⟨h1, h2⟩
+    have hρ : t - t₀ ∈ Set.Ioo (-δ) δ := ⟨by linarith, by linarith⟩
+    rw [hfst_orig (t - t₀) hρ]; ring
+  refine ⟨fun σ => (Γ (σ - t₀)).2, ?_, ?_⟩
+  · show (Γ (t₀ - t₀)).2 = y
+    rw [sub_self, hΓ0]
+  · exact isTimeDependentIntegralCurve_of_autonomous (Γ := fun σ => Γ (σ - t₀)) hfst hΓs_curve
+
+/-- **Surjectivity of every time-slice of the compact-manifold flow.** For a jointly-`C¹`
+time-dependent field `X` on a compact boundaryless T2 manifold, given the forward flow `Φ`
+(anchored, orbits solving the ODE on `Ioo (-ε₁) ε₁`) and the slab-uniform anchored
+existence (lifespan `δ` over `Icc (-ε₁) ε₁`), every time-`t` slice `x ↦ Φ t x` with
+`|t| < min ε₁ δ` is surjective: run the backward integral curve from `(t, y)` to time `0`,
+landing at `x`; then `Φ · x` and that backward curve are two time-dependent integral curves
+agreeing at time `0`, so by uniqueness they agree at `t`, giving `Φ t x = y`. This is the
+surjectivity (`G t`-inverse) half of the diffeomorphism-onto-image that injectivity
+(`timeDependent_flow_injective`) alone does not supply on a compact manifold. -/
+theorem timeDependent_flow_surjective {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {ε₁ δ : ℝ} (hε₁ : 0 < ε₁) (hδ : 0 < δ) {Φ : ℝ → M → M} (hanchor : ∀ x, Φ 0 x = x)
+    (hflow : ∀ x, ∀ t ∈ Set.Ioo (-ε₁) ε₁, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+      (Set.Ioo (-ε₁) ε₁) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    (hanch : ∀ t₀ ∈ Set.Icc (-ε₁) ε₁, ∀ y : M, ∃ γ : ℝ → M, γ t₀ = y ∧
+      ∀ t ∈ Set.Ioo (t₀ - δ) (t₀ + δ), HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ
+        (Set.Ioo (t₀ - δ) (t₀ + δ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))))
+    {t : ℝ} (ht : t ∈ Set.Ioo (-min ε₁ δ) (min ε₁ δ)) :
+    Function.Surjective (Φ t) := by
+  have hεleδ : min ε₁ δ ≤ δ := min_le_right _ _
+  have hεle₁ : min ε₁ δ ≤ ε₁ := min_le_left _ _
+  rcases ht with ⟨htl, htr⟩
+  intro y
+  have htIcc : t ∈ Set.Icc (-ε₁) ε₁ := ⟨by linarith, by linarith⟩
+  obtain ⟨γ, hγt, hγcurve⟩ := hanch t htIcc y
+  refine ⟨γ 0, ?_⟩
+  set a := max (-min ε₁ δ) (t - δ) with ha_def
+  set b := min (min ε₁ δ) (t + δ) with hb_def
+  have ha0 : a < 0 := by rw [ha_def]; exact max_lt (by linarith) (by linarith)
+  have hb0 : 0 < b := by rw [hb_def]; exact lt_min (by linarith) (by linarith)
+  have hta : a < t := by rw [ha_def]; exact max_lt (by linarith) (by linarith)
+  have htb : t < b := by rw [hb_def]; exact lt_min (by linarith) (by linarith)
+  have h0mem : (0 : ℝ) ∈ Set.Ioo a b := ⟨ha0, hb0⟩
+  have htmem : t ∈ Set.Ioo a b := ⟨hta, htb⟩
+  have hsub_ε : Set.Ioo a b ⊆ Set.Ioo (-ε₁) ε₁ := by
+    apply Set.Ioo_subset_Ioo
+    · rw [ha_def]; exact le_max_of_le_left (by linarith)
+    · rw [hb_def]; exact le_trans (min_le_left _ _) (by linarith)
+  have hsub_tδ : Set.Ioo a b ⊆ Set.Ioo (t - δ) (t + δ) := by
+    apply Set.Ioo_subset_Ioo
+    · rw [ha_def]; exact le_max_right _ _
+    · rw [hb_def]; exact min_le_right _ _
+  have hΦcurve : ∀ σ ∈ Set.Ioo a b, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ (γ 0))
+      (Set.Ioo a b) σ ((1 : ℝ →L[ℝ] ℝ).smulRight (X σ (Φ σ (γ 0)))) :=
+    fun σ hσ => (hflow (γ 0) σ (hsub_ε hσ)).mono hsub_ε
+  have hγcurve' : ∀ σ ∈ Set.Ioo a b, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ
+      (Set.Ioo a b) σ ((1 : ℝ →L[ℝ] ℝ).smulRight (X σ (γ σ))) :=
+    fun σ hσ => (hγcurve σ (hsub_tδ hσ)).mono hsub_tδ
+  have hagree0 : (fun τ => Φ τ (γ 0)) 0 = γ 0 := hanchor (γ 0)
+  have heqon : Set.EqOn (fun τ => Φ τ (γ 0)) γ (Set.Ioo a b) :=
+    timeDependent_integralCurve_eqOn_of_eq hX h0mem hΦcurve hγcurve' hagree0
+  have hfin := heqon htmem
+  rw [hγt] at hfin
+  exact hfin
+
+/-- **The compact-manifold time-dependent local flow is a family of bijections.** For a
+jointly-`C¹` time-dependent field `X` on a compact boundaryless T2 manifold there is a
+uniform `ε > 0` and an anchored flow `Φ` (`Φ 0 = id`) whose orbits `τ ↦ Φ τ x` solve the
+field's ODE on `Ioo (-ε) ε` and whose *every* time-`t` slice `x ↦ Φ t x` is **bijective**.
+Bundles `exists_timeDependent_flow_compact` (existence + ODE), `timeDependent_flow_injective`
+(injectivity) and `timeDependent_flow_surjective` (surjectivity via backward reachability):
+the forward lifespan `ε₁` and the slab lifespan `δ` (`exists_uniform_timeDependent_integralCurve_anchored`)
+are reconciled by `ε := min ε₁ δ`. With `timeDependent_flow_unique` (canonicity) this is the
+canonically-determined family of **bijections** whose per-time inverse `G t := (Φ t).invFun`
+is exactly the `G`-datum `GaugeFlowAssembly.gaugeFlow_of_inverse_flow` consumes. -/
+theorem exists_timeDependent_flow_compact_bijective {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)))) :
+    ∃ ε > 0, ∃ Φ : ℝ → M → M, (∀ x, Φ 0 x = x) ∧
+      (∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+        (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) ∧
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.Bijective (Φ t)) := by
+  obtain ⟨ε₁, hε₁, Φ, hanchor, hflow⟩ := exists_timeDependent_flow_compact hX
+  obtain ⟨δ, hδ, hanch⟩ := exists_uniform_timeDependent_integralCurve_anchored hX hε₁
+  refine ⟨min ε₁ δ, lt_min hε₁ hδ, Φ, hanchor, ?_, ?_⟩
+  · intro x t ht
+    have hsub : Set.Ioo (-min ε₁ δ) (min ε₁ δ) ⊆ Set.Ioo (-ε₁) ε₁ :=
+      Set.Ioo_subset_Ioo (by simp [min_le_left]) (min_le_left _ _)
+    exact (hflow x t (hsub ht)).mono hsub
+  · intro t ht
+    have hsub : Set.Ioo (-min ε₁ δ) (min ε₁ δ) ⊆ Set.Ioo (-ε₁) ε₁ :=
+      Set.Ioo_subset_Ioo (by simp [min_le_left]) (min_le_left _ _)
+    have hε : (0 : ℝ) < min ε₁ δ := lt_min hε₁ hδ
+    have hflow' : ∀ x, ∀ s ∈ Set.Ioo (-min ε₁ δ) (min ε₁ δ),
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x) (Set.Ioo (-min ε₁ δ) (min ε₁ δ)) s
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X s (Φ s x))) :=
+      fun x s hs => (hflow x s (hsub hs)).mono hsub
+    refine ⟨timeDependent_flow_injective hX hε hanchor hflow' ht,
+      timeDependent_flow_surjective hX hε₁ hδ hanchor hflow hanch ht⟩
+
+/-- **Concrete mutually-inverse time-slice maps for the compact-manifold flow.** On a
+compact boundaryless (nonempty) T2 manifold, the forward flow `Φ` and the explicit
+inverse family `G t := Function.invFun (Φ t)` are mutually inverse on every window time,
+with both anchored at the identity: `G t` is a genuine two-sided inverse of the bijection
+`Φ t` (`Function.leftInverse_invFun` / `rightInverse_invFun` on the bijectivity of every
+slice). This is the concrete `F := Φ`, `G` mutually-inverse time-slice datum
+`GaugeFlowAssembly.gaugeFlow_of_inverse_flow` consumes (on the window; the sole remaining
+analytic obligation being the spatial `C³` regularity of `F t`/`G t`). -/
+theorem exists_timeDependent_flow_compact_inverse {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M] [T2Space M] [Nonempty M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)))) :
+    ∃ ε > 0, ∃ Φ G : ℝ → M → M, (∀ x, Φ 0 x = x) ∧ (∀ x, G 0 x = x) ∧
+      (∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+        (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) ∧
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.LeftInverse (G t) (Φ t)) ∧
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.RightInverse (G t) (Φ t)) := by
+  obtain ⟨ε, hε, Φ, hanchor, hflow, hbij⟩ := exists_timeDependent_flow_compact_bijective hX
+  refine ⟨ε, hε, Φ, fun t => Function.invFun (Φ t), hanchor, ?_, hflow, ?_, ?_⟩
+  · intro x
+    show Function.invFun (Φ 0) x = x
+    have h0mem : (0 : ℝ) ∈ Set.Ioo (-ε) ε := ⟨neg_neg_of_pos hε, hε⟩
+    have h := Function.leftInverse_invFun (hbij 0 h0mem).injective x
+    rwa [hanchor x] at h
+  · intro t ht; exact Function.leftInverse_invFun (hbij t ht).injective
+  · intro t ht; exact Function.rightInverse_invFun (hbij t ht).surjective
 
 end PoincareCurvature.ManifoldFlow

@@ -559,6 +559,87 @@ theorem intrinsicDeTurckVectorField_mdiffAt_of_contMDiffOn_intrinsicDeTurckOneFo
     (hW x hx).contMDiffAt (hu.mem_nhds hx)
   simpa [intrinsicDeTurckVectorField] using hWat.mdifferentiableAt one_ne_zero
 
+/-- **`C¹` regularity (undowngraded) of the raised intrinsic DeTurck vector field on a patch.**
+The `ContMDiffOn` strengthening of
+`intrinsicDeTurckVectorField_mdiffAt_of_contMDiffOn_intrinsicDeTurckOneForm`: exactly the rieszMap
+section regularity that lemma establishes internally (via
+`CovariantDerivative.contMDiffOn_rieszMap_section`) before discarding it to mere pointwise
+differentiability.  If the traced intrinsic DeTurck one-form is `C¹` on an open patch `u` of a
+trivialization `e`, then raising it with the time-slice metric gives a `C¹` intrinsic DeTurck
+vector-field section on `u`.  This is the regularity input a covariant-derivative-regularity step
+(`ContMDiffCovariantDerivativeOn.contMDiff`) consumes for the DeTurck correction. -/
+theorem intrinsicDeTurckVectorField_contMDiffOn_of_contMDiffOn_intrinsicDeTurckOneForm
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {u : Set M} (hu : IsOpen u) (hu' : u ⊆ e.baseSet)
+    (hω : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+        (E := fun y : M ↦ TM y →L[ℝ] ℝ) x
+        (intrinsicDeTurckOneForm (I := I) (M := M) g background t x)) u) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) u := by
+  classical
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  have hW :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+        (fun y ↦ TotalSpace.mk' E y
+          (CovariantDerivative.rieszMap (I := I) y
+            (intrinsicDeTurckOneForm (I := I) (M := M) g background t y))) u :=
+    CovariantDerivative.contMDiffOn_rieszMap_section
+      (I := I) (E := E) (M := M) (e := e) (b := b)
+      hu hu' hω
+  simpa [intrinsicDeTurckVectorField] using hW
+
+/-- **`C¹` regularity (undowngraded) of the raised intrinsic DeTurck vector field at a point.**
+The `ContMDiffAt` strengthening of
+`intrinsicDeTurckVectorField_mdiffAt_of_contMDiff_intrinsicDeTurckOneForm`: from a globally `C¹`
+traced intrinsic DeTurck one-form, raising it with the time-slice metric gives a `C¹` intrinsic
+DeTurck vector-field section at each point (proved in the trivialization at `x`). -/
+theorem intrinsicDeTurckVectorField_contMDiffAt_of_contMDiff_intrinsicDeTurckOneForm
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (hω : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+        (E := fun y : M ↦ TM y →L[ℝ] ℝ) x
+        (intrinsicDeTurckOneForm (I := I) (M := M) g background t x)))
+    (x : M) :
+    ContMDiffAt I (I.prod 𝓘(ℝ, E)) 1
+      (T% (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) x := by
+  classical
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  let e := trivializationAt E TM x
+  letI : MemTrivializationAtlas e := by infer_instance
+  let b := Module.finBasis ℝ E
+  have hxbase : x ∈ e.baseSet := mem_baseSet_trivializationAt E TM x
+  have hωon :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+        (fun y ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+          (E := fun z : M ↦ TM z →L[ℝ] ℝ) y
+          (intrinsicDeTurckOneForm (I := I) (M := M) g background t y)) e.baseSet :=
+    hω.contMDiffOn
+  have hW :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+        (fun y ↦ TotalSpace.mk' E y
+          (CovariantDerivative.rieszMap (I := I) y
+            (intrinsicDeTurckOneForm (I := I) (M := M) g background t y))) e.baseSet :=
+    CovariantDerivative.contMDiffOn_rieszMap_section
+      (I := I) (E := E) (M := M) (e := e) (b := b)
+      e.open_baseSet (fun _ hy ↦ hy) hωon
+  have hWat :
+      ContMDiffAt I (I.prod 𝓘(ℝ, E)) 1
+        (fun y ↦ TotalSpace.mk' E y
+          (CovariantDerivative.rieszMap (I := I) y
+            (intrinsicDeTurckOneForm (I := I) (M := M) g background t y))) x :=
+    (hW x hxbase).contMDiffAt (e.open_baseSet.mem_nhds hxbase)
+  simpa [intrinsicDeTurckVectorField] using hWat
+
 /-- Local diagonal connection-difference coefficient regularity implies differentiability of the
 raised intrinsic DeTurck vector field at points of the coordinate patch. -/
 theorem intrinsicDeTurckVectorField_mdiffAt_of_connectionDifference_coeff
@@ -664,6 +745,123 @@ theorem intrinsicDeTurckVectorField_mdiff_of_contMDiffCovariantDerivative_backgr
     MDiff (T% (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) := by
   intro x
   exact intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivative_background
+    (I := I) (M := M) g background t hbackground x
+
+/-- **`ContMDiffOn` (undowngraded) DeTurck vector field from local connection-difference coefficient
+regularity.**  The `ContMDiffOn` strengthening of
+`intrinsicDeTurckVectorField_mdiffAt_of_connectionDifference_coeff`, obtained by feeding the
+`ContMDiffOn` DeTurck one-form (from `intrinsicDeTurckOneForm_contMDiffOn_of_connectionDifference_coeff`)
+into `intrinsicDeTurckVectorField_contMDiffOn_of_contMDiffOn_intrinsicDeTurckOneForm`. -/
+theorem intrinsicDeTurckVectorField_contMDiffOn_of_connectionDifference_coeff
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {u : Set M} (hu : IsOpen u) (hu' : u ⊆ e.baseSet)
+    (hcoeff : ∀ i j,
+      ContMDiffOn I 𝓘(ℝ) 1
+        (fun x ↦ e.localFrame_coeff I b j x
+          ((CovariantDerivative.difference
+            ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
+            (e.localFrame b j x)) (e.localFrame b i x))) u) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) u := by
+  have hω :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+        (fun y ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+          (E := fun z : M ↦ TM z →L[ℝ] ℝ) y
+          (intrinsicDeTurckOneForm (I := I) (M := M) g background t y)) u :=
+    intrinsicDeTurckOneForm_contMDiffOn_of_connectionDifference_coeff
+      (I := I) (M := M) g background t e b hu hu' hcoeff
+  exact intrinsicDeTurckVectorField_contMDiffOn_of_contMDiffOn_intrinsicDeTurckOneForm
+    (I := I) (M := M) g background t e b hu hu' hω
+
+/-- **`ContMDiffOn` (undowngraded) DeTurck vector field from `C¹` chosen Levi-Civita and background
+connection slices on a patch.**  The `ContMDiffOn` strengthening of
+`intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivativeOn`. -/
+theorem intrinsicDeTurckVectorField_contMDiffOn_of_contMDiffCovariantDerivativeOn
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
+    {u : Set M} (hu : IsOpen u) (hu' : u ⊆ e.baseSet)
+    (hchosen : ContMDiffCovariantDerivativeOn E 1
+      ((chosenLeviCivitaFamily (I := I) (M := M) g) t).toFun u)
+    (hbackground : ContMDiffCovariantDerivativeOn E 1 (background t).toFun u) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) u := by
+  have hcoeff : ∀ i j,
+      ContMDiffOn I 𝓘(ℝ) 1
+        (fun x ↦ e.localFrame_coeff I b j x
+          ((CovariantDerivative.difference
+            ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
+            (e.localFrame b j x)) (e.localFrame b i x))) u := by
+    intro i j
+    exact connectionDifference_localFrame_coeff_contMDiffOn
+      (I := I) (M := M)
+      ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t)
+      e b hu hu' hchosen hbackground j i j
+  exact intrinsicDeTurckVectorField_contMDiffOn_of_connectionDifference_coeff
+    (I := I) (M := M) g background t e b hu hu' hcoeff
+
+/-- **`ContMDiffAt` (undowngraded) DeTurck vector field from a globally `C¹` background connection
+slice.**  The `ContMDiffAt` strengthening of
+`intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivative_background`: the chosen
+Levi-Civita slice is `C¹` from the ambient bundle structure, so a `C¹` background connection slice
+yields a `C¹` intrinsic DeTurck vector-field section at every point. -/
+theorem intrinsicDeTurckVectorField_contMDiffAt_of_contMDiffCovariantDerivative_background
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) :
+    ContMDiffAt I (I.prod 𝓘(ℝ, E)) 1
+      (T% (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) x := by
+  classical
+  letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  let e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M) :=
+    trivializationAt E TM x
+  letI : MemTrivializationAtlas e := by infer_instance
+  let b := Module.finBasis ℝ E
+  have hxbase : x ∈ e.baseSet := mem_baseSet_trivializationAt E TM x
+  have hchosenOn :
+      ContMDiffCovariantDerivativeOn E 1
+        ((chosenLeviCivitaFamily (I := I) (M := M) g) t).toFun e.baseSet := by
+    letI : CovariantDerivative.ContMDiffCovariantDerivative
+        ((chosenLeviCivitaFamily (I := I) (M := M) g) t) 1 :=
+      CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+        (I := I) (M := M) g t
+    exact CovariantDerivative.contMDiffCovariantDerivativeOn_of_contMDiffCovariantDerivative
+      (I := I) (E := E) (u := e.baseSet) e.open_baseSet
+  have hbackgroundOn :
+      ContMDiffCovariantDerivativeOn E 1 (background t).toFun e.baseSet := by
+    letI : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1 := hbackground
+    exact CovariantDerivative.contMDiffCovariantDerivativeOn_of_contMDiffCovariantDerivative
+      (I := I) (E := E) (u := e.baseSet) e.open_baseSet
+  have hOn := intrinsicDeTurckVectorField_contMDiffOn_of_contMDiffCovariantDerivativeOn
+    (I := I) (M := M) g background t e b e.open_baseSet (subset_refl _)
+    hchosenOn hbackgroundOn
+  exact (hOn x hxbase).contMDiffAt (e.open_baseSet.mem_nhds hxbase)
+
+/-- **Fixed-time global `ContMDiff` (undowngraded) DeTurck vector field from a globally `C¹`
+background connection slice.**  The `ContMDiff` strengthening of
+`intrinsicDeTurckVectorField_mdiff_of_contMDiffCovariantDerivative_background`.  This is the
+end-to-end `C¹` regularity of the intrinsic DeTurck vector field consumed by the covariant-derivative
+regularity step for the DeTurck correction. -/
+theorem intrinsicDeTurckVectorField_contMDiff_of_contMDiffCovariantDerivative_background
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1) :
+    ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (T% (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) := by
+  intro x
+  exact intrinsicDeTurckVectorField_contMDiffAt_of_contMDiffCovariantDerivative_background
     (I := I) (M := M) g background t hbackground x
 
 /-- Global version of

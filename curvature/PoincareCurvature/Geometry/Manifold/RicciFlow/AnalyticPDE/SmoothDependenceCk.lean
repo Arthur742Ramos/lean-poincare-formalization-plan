@@ -11321,6 +11321,627 @@ theorem lipschitzWith_thirdFundamentalSolution_apply [CompleteSpace E]
     (hVfamfam0 x₀) (hVfamfamd x₀) (hVfamfamc x₀) (hD₃famchar x₀) ht k).trans_eq ?_
   ring
 
+/-- **Multilinear packaging of a double continuous-linear map.**  Sends `T : E →L (E →L E)` to the
+`Fin 2` continuous multilinear map `w ↦ T (w 0) (w 1)`.  This is a genuine *bounded* operation
+(a continuous linear map) because the inner space `E →L E` carries an operator norm; it is the
+inverse of `curry2` at the operator level.  The point of routing through this map is that it lets us
+climb one currying level without ever asking for a norm on a nested continuous-linear-map space that
+Mathlib v4.29.1 cannot provide. -/
+noncomputable def uncurry2CLM :
+    (E →L[ℝ] E →L[ℝ] E) →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E :=
+  ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => E) E).symm.toContinuousLinearEquiv.toContinuousLinearMap).comp
+    (ContinuousLinearMap.compL ℝ E (E →L[ℝ] E) (ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) E)
+      (continuousMultilinearCurryFin1 ℝ E E).symm.toContinuousLinearEquiv.toContinuousLinearMap)
+
+/-- Pointwise evaluation of `uncurry2CLM`: `uncurry2CLM T w = T (w 0) (w 1)`. -/
+theorem uncurry2CLM_apply (T : E →L[ℝ] E →L[ℝ] E) (w : Fin 2 → E) :
+    uncurry2CLM T w = T (w 0) (w 1) := by
+  simp only [uncurry2CLM, ContinuousLinearMap.comp_apply, ContinuousLinearMap.compL_apply,
+    ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv,
+    continuousMultilinearCurryLeftEquiv_symm_apply, continuousMultilinearCurryFin1_symm_apply]
+  rfl
+
+/-- **`uncurry2CLM` is a left inverse of `curry2`.**  `uncurry2CLM (curry2 M) = M`.  Together with
+`curry2_uncurry2CLM` this exhibits the multilinear packaging `uncurry2CLM` and the composition-form
+representation `curry2` as mutually inverse isometries between the `Fin 2` multilinear space and the
+double continuous-linear-map space `E →L E →L E`.  This is what converts the existing
+`curry2 (iteratedFDeriv ℝ 2 f) = D₂` identifications into the multilinear form
+`iteratedFDeriv ℝ 2 f = uncurry2CLM (D₂)` needed to feed the `iteratedFDeriv ℝ 3` chain. -/
+theorem uncurry2CLM_curry2 (M : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E) :
+    uncurry2CLM (curry2 M) = M := by
+  ext w
+  rw [uncurry2CLM_apply, curry2_apply]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+/-- **`uncurry2CLM` is a right inverse of `curry2`.**  `curry2 (uncurry2CLM T) = T`. -/
+theorem curry2_uncurry2CLM (T : E →L[ℝ] E →L[ℝ] E) :
+    curry2 (uncurry2CLM T) = T := by
+  ext a b
+  rw [curry2_apply, uncurry2CLM_apply]
+  simp
+
+/-- **Second iterated derivative as a multilinear packaging.**  If `f` is everywhere differentiable
+with derivative `Df`, and the first derivative `Df` is Fréchet differentiable at `x` with derivative
+`D2 : E →L E →L E`, then the (multilinear) second iterated derivative equals the multilinear
+packaging of `D2`: `iteratedFDeriv ℝ 2 f x = uncurry2CLM D2`.  The `C²`-side companion of
+`iteratedFDeriv_three_eq_uncurry3_of_hasFDerivAt`, obtained from the composition-form identification
+`curry2_iteratedFDeriv_two_eq_of_hasFDerivAt` by the inverse relation `uncurry2CLM_curry2`.  This is
+the pointwise datum that (differentiated once more, through the continuous linear `uncurry2CLM`)
+supplies the `HasFDerivAt (iteratedFDeriv ℝ 2 f) (uncurry2CLM.comp (D₃fam x)) x` hypothesis of
+`iteratedFDeriv_three_eq_uncurry3_of_hasFDerivAt`. -/
+theorem iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt
+    {f : E → E} {Df : E → (E →L[ℝ] E)} {D2 : E →L[ℝ] (E →L[ℝ] E)} {x : E}
+    (hDf : ∀ y, HasFDerivAt f (Df y) y) (hD2 : HasFDerivAt Df D2 x) :
+    iteratedFDeriv ℝ 2 f x = uncurry2CLM D2 := by
+  rw [← uncurry2CLM_curry2 (iteratedFDeriv ℝ 2 f x),
+    curry2_iteratedFDeriv_two_eq_of_hasFDerivAt hDf hD2]
+
+/-- **Multilinear packaging of a triple continuous-linear map.**  Sends the nested triple operator
+`T : E →L E →L E →L E` to the *properly normed* `Fin 3` continuous multilinear map
+`v ↦ T (v 0) (v 1) (v 2)` in `ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E`.
+
+This is the key object that sidesteps the Mathlib v4.29.1 obstruction on the third fundamental
+solution.  The triple continuous-linear-map space `E →L E →L E →L E` carries **no** operator norm
+(`Norm`/`SeminormedAddCommGroup (E →L E →L E →L E)` fail to synthesize — the endomorphism-ring/module
+diamond), so a difference `‖D₃fam z − D₃fam x₀‖` cannot even be *stated* through the nested tower.
+The multilinear target `ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E` **does** carry a genuine
+operator norm at every order, and `uncurry3` is built entirely through normed intermediaries (the
+inner double space `E →L E →L E` is normed, so `uncurry2CLM` is a bounded operation, and one further
+left-uncurrying lands in the normed multilinear space) — never touching the un-normed triple space as
+a normed space.  So `‖uncurry3 (D₃fam z) − uncurry3 (D₃fam x₀)‖` *is* well-formed, and continuity of
+the third fundamental solution can be phrased and proved there. -/
+noncomputable def uncurry3 (T : E →L[ℝ] E →L[ℝ] E →L[ℝ] E) :
+    ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E :=
+  (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).symm (uncurry2CLM.comp T)
+
+/-- Pointwise evaluation of `uncurry3`: `uncurry3 T v = T (v 0) (v 1) (v 2)`.  This is the defining
+property that lets the trilinear operator gaps of `D₃fam` be read off slot by slot. -/
+theorem uncurry3_apply (T : E →L[ℝ] E →L[ℝ] E →L[ℝ] E) (v : Fin 3 → E) :
+    uncurry3 T v = T (v 0) (v 1) (v 2) := by
+  rw [uncurry3, continuousMultilinearCurryLeftEquiv_symm_apply,
+    ContinuousLinearMap.comp_apply, uncurry2CLM_apply]
+  rfl
+
+/-- **Left-curry of the multilinear packaging.**  `(uncurry3 T).curryLeft = uncurry2CLM.comp T`.  The
+multilinear-side companion of `curryLeft_iteratedFDeriv_three`: it exhibits the composition-form
+operator `uncurry2CLM ∘ T` as the left-curry of the multilinear packaging `uncurry3 T`, which is the
+shape the `iteratedFDeriv ℝ 3` chain consumes.  Immediate from `uncurry3` being the equiv-inverse
+image of `uncurry2CLM.comp T` under `continuousMultilinearCurryLeftEquiv`. -/
+theorem uncurry3_curryLeft (T : E →L[ℝ] E →L[ℝ] E →L[ℝ] E) :
+    (uncurry3 T).curryLeft = uncurry2CLM.comp T := by
+  rw [uncurry3]
+  exact (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).apply_symm_apply _
+
+/-- **Third iterated derivative as a multilinear packaging.**  If the (multilinear) second iterated
+derivative `iteratedFDeriv ℝ 2 f` is Fréchet differentiable at `x` with derivative the composition-form
+operator `uncurry2CLM ∘ T` (for some triple operator `T : E →L E →L E →L E`), then the third iterated
+derivative equals the multilinear packaging of `T`: `iteratedFDeriv ℝ 3 f x = uncurry3 T`.
+
+This is the bridge that transports abstract third-fundamental-solution data `T` (e.g. `D₃fam x`) onto
+the canonical `iteratedFDeriv ℝ 3` object *in the properly normed multilinear space*, where the
+multilinear Lipschitz continuity `lipschitzWith_thirdFundamentalSolution_multilinear` lives.  Proof:
+`curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt` identifies `uncurry2CLM ∘ T` with
+`(iteratedFDeriv ℝ 3 f x).curryLeft`, `uncurry3_curryLeft` identifies it with `(uncurry3 T).curryLeft`,
+and `curryLeft` (the coercion of `continuousMultilinearCurryLeftEquiv`) is injective. -/
+theorem iteratedFDeriv_three_eq_uncurry3_of_hasFDerivAt
+    {f : E → E} {T : E →L[ℝ] E →L[ℝ] E →L[ℝ] E} {x : E}
+    (hD3 : HasFDerivAt (iteratedFDeriv ℝ 2 f) (uncurry2CLM.comp T) x) :
+    iteratedFDeriv ℝ 3 f x = uncurry3 T := by
+  have h1 : uncurry2CLM.comp T = (iteratedFDeriv ℝ 3 f x).curryLeft :=
+    curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt hD3
+  have h2 : (uncurry3 T).curryLeft = (iteratedFDeriv ℝ 3 f x).curryLeft := by
+    rw [uncurry3_curryLeft, h1]
+  exact ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).injective h2).symm
+
+/-- **Abstract multilinear Lipschitz criterion.**  A per-outer-direction operator-gap bound
+`‖F x k − F y k‖ ≤ C · dist x y · ‖k‖` (valued in the well-normed *double* space `E →L E →L E`)
+promotes to genuine `LipschitzWith C.toNNReal` continuity of the `Fin 3` multilinear packaging
+`x ↦ uncurry3 (F x)`, valued in the *properly normed* multilinear space.  Proof:
+`ContinuousMultilinearMap.opNorm_le_bound` reduces the multilinear operator norm of the difference to
+the per-slot bound, which follows by two `le_opNorm` steps (in the normed double space) and the
+hypothesis at the outer slot.  This is the abstract engine that converts the per-direction third
+fundamental solution gap into `Continuous`/`LipschitzWith` continuity of the third derivative, in a
+space that the `contDiff_succ`/`iteratedFDeriv` chain can consume. -/
+theorem lipschitzWith_uncurry3_of_apply_sub_le {X : Type*} [PseudoMetricSpace X]
+    {F : X → (E →L[ℝ] E →L[ℝ] E →L[ℝ] E)} {C : ℝ} (hC : 0 ≤ C)
+    (h : ∀ x y : X, ∀ k : E, ‖F x k - F y k‖ ≤ C * dist x y * ‖k‖) :
+    LipschitzWith C.toNNReal (fun x => uncurry3 (F x)) := by
+  refine LipschitzWith.of_dist_le_mul (fun x y => ?_)
+  rw [Real.coe_toNNReal C hC, dist_eq_norm]
+  refine ContinuousMultilinearMap.opNorm_le_bound (mul_nonneg hC dist_nonneg) (fun m => ?_)
+  rw [ContinuousMultilinearMap.sub_apply, uncurry3_apply, uncurry3_apply,
+    show F x (m 0) (m 1) (m 2) - F y (m 0) (m 1) (m 2)
+        = (F x (m 0) - F y (m 0)) (m 1) (m 2) from by
+      rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply]]
+  calc ‖(F x (m 0) - F y (m 0)) (m 1) (m 2)‖
+      ≤ ‖(F x (m 0) - F y (m 0)) (m 1)‖ * ‖m 2‖ := ContinuousLinearMap.le_opNorm _ _
+    _ ≤ ‖F x (m 0) - F y (m 0)‖ * ‖m 1‖ * ‖m 2‖ :=
+        mul_le_mul_of_nonneg_right (ContinuousLinearMap.le_opNorm _ _) (norm_nonneg _)
+    _ ≤ C * dist x y * ‖m 0‖ * ‖m 1‖ * ‖m 2‖ := by
+        gcongr; exact h x y (m 0)
+    _ = C * dist x y * ∏ i, ‖m i‖ := by rw [Fin.prod_univ_three]; ring
+
+/-- **Multilinear Lipschitz continuity of the packaged third fundamental solution.**  This is the
+obstruction-free form of the continuity of `D₃fam` needed to feed the resolvent's spatial
+`ContDiff ℝ 3`.  For the packaged design-corrected third-variation operator family
+`D₃fam : E → (E →L E →L E →L E)` (with its canonical linearised-first-variation family `Vfamfam` and
+bilinear characterisation `hD₃famchar`, as produced base-point-by-base-point by
+`exists_thirdVariationOperator_of_field`), its `Fin 3` multilinear packaging
+`z ↦ uncurry3 (D₃fam z)` — valued in the *properly normed* space
+`ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E` — is genuinely `LipschitzWith`, with the same
+constant `Cλ · gronwallBound 0 K 1 (t − t₀)` (now with **no** trailing `‖k‖`, absorbed into the
+multilinear norm) as the per-direction slice bound.
+
+Whereas `lipschitzWith_thirdFundamentalSolution_apply` established continuity of `D₃fam`
+direction-by-direction in the strong operator topology (the best available through the un-normed
+triple continuous-linear-map tower), this theorem upgrades it to `LipschitzWith`/`Continuous` in a
+single honest operator norm, by transporting the family through `uncurry3` into the multilinear space
+that carries a proper norm at every order.  Proof: `lipschitzWith_uncurry3_of_apply_sub_le` fed the
+per-direction base-point gap `norm_thirdFundamentalSolution_apply_baseCurve_sub_le` (which supplies
+`‖D₃fam z k − D₃fam x₀ k‖ ≤ Cλ·g·‖z − x₀‖·‖k‖`). -/
+theorem lipschitzWith_thirdFundamentalSolution_multilinear [CompleteSpace E]
+    {Φ : E → ℝ → E} {Dv : ℝ → E → (E →L[ℝ] E)} {D2v : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ : ℝ≥0} {C' C'' : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s)) (hD2vlip : ∀ s, LipschitzWith M₂ (D2v s))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K)
+    (hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)))
+    (hD2contfun : ∀ z, Continuous (fun s => D2v s (Φ z s)))
+    (hD3contfun : ∀ z, Continuous (fun s => D3v s (Φ z s)))
+    (hC'0 : 0 ≤ C') (hC'fun : ∀ z, ∀ s, ‖D2v s (Φ z s)‖ ≤ C')
+    (hC''0 : 0 ≤ C'') (hC''fun : ∀ z, ∀ s, ‖D3v s (Φ z s)‖ ≤ C'')
+    {Ψ : E → E → ℝ → E}
+    (hΨ : ∀ z, ∀ x, IsIntegralCurve (Ψ z x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0Ψ : ∀ z, ∀ x, Ψ z x t₀ = x)
+    {T : ℝ} {t : ℝ}
+    {Vfamfam : E → E → (ℝ → (E →L[ℝ] E))}
+    {D₃fam : E → (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E)))}
+    (hVfamfam0 : ∀ z, ∀ h, Vfamfam z h t₀ = 0)
+    (hVfamfamd : ∀ z, ∀ (h : E) (s : ℝ), HasDerivAt (Vfamfam z h)
+      ((Dv s (Φ z s)).comp (Vfamfam z h s)
+        + ((D2v s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) h).comp
+            (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)) s)
+    (hVfamfamc : ∀ z, ∀ h, Continuous (Vfamfam z h))
+    (hD₃famchar : ∀ z, ∀ (k h : E) (V : ℝ → (E →L[ℝ] E)), V t₀ = 0 →
+      (∀ s, HasDerivAt V
+        ((Dv s (Φ z s)).comp (V s)
+          + (((D2v s (Φ z s)).comp (Vfamfam z k s) h).comp
+                (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)
+             + ((D2v s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) h).comp
+                 (Vfamfam z k s)
+             + (((D2v s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) k).comp
+                   (Vfamfam z h s)
+                + (continuousMultilinearCurryFin1 ℝ E E
+                    (((D3v s (Φ z s)).curryLeft
+                          (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s k)).curryLeft
+                      (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s h))).comp
+                    (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)))) s) →
+      D₃fam z k h = V t)
+    (ht : t ∈ Set.Icc t₀ T) :
+    LipschitzWith
+      (((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+            * (3 * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀) + C'')
+          + 3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+              * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+          + Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+              * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ)))
+        * gronwallBound 0 (K : ℝ) 1 (t - t₀)).toNNReal
+      (fun z => uncurry3 (D₃fam z)) := by
+  have he4 : (0 : ℝ) ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 4 := by positivity
+  have hg0 : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (T - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr (le_trans ht.1 ht.2))
+  have hgt0 : (0 : ℝ) ≤ gronwallBound 0 (K : ℝ) 1 (t - t₀) :=
+    gronwallBound_zero_one_nonneg K.coe_nonneg (sub_nonneg.mpr ht.1)
+  have hL := L.coe_nonneg
+  have hM₂ := M₂.coe_nonneg
+  have hM₃ := M₃.coe_nonneg
+  have hCbig0 : (0 : ℝ) ≤
+      ((L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+            * (3 * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀) + C'')
+          + 3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4 * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+              * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀)))
+          + Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+              * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ))) := by
+    have hA : (0 : ℝ) ≤ (L : ℝ) * Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+        * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+        * (3 * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀) + C'') :=
+      mul_nonneg (mul_nonneg (mul_nonneg hL he4) hg0)
+        (add_nonneg (mul_nonneg (mul_nonneg (by norm_num) (sq_nonneg C')) hg0) hC''0)
+    have hB : (0 : ℝ) ≤ 3 * (Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+        * gronwallBound 0 (K : ℝ) 1 (T - t₀)
+        * (2 * (M₂ : ℝ) * C' + 4 * (L : ℝ) * C' ^ 2 * gronwallBound 0 (K : ℝ) 1 (T - t₀))) :=
+      mul_nonneg (by norm_num) (mul_nonneg (mul_nonneg he4 hg0)
+        (add_nonneg (mul_nonneg (mul_nonneg (by norm_num) hM₂) hC'0)
+          (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hL) (sq_nonneg C')) hg0)))
+    have hC : (0 : ℝ) ≤ Real.exp ((K : ℝ) * (T - t₀)) ^ 4
+        * (3 * C'' * (L : ℝ) * gronwallBound 0 (K : ℝ) 1 (T - t₀) + (M₃ : ℝ)) :=
+      mul_nonneg he4 (add_nonneg
+        (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hC''0) hL) hg0) hM₃)
+    linarith
+  refine lipschitzWith_uncurry3_of_apply_sub_le (mul_nonneg hCbig0 hgt0) (fun z x₀ k => ?_)
+  rw [dist_eq_norm]
+  exact norm_thirdFundamentalSolution_apply_baseCurve_sub_le hv hΦ h0 hDvlip hD2vlip hD3vlip
+    z x₀ (hAfun z) (hAfun x₀) (hAcontfun z) (hAcontfun x₀) (hD2contfun z) (hD2contfun x₀)
+    (hD3contfun z) (hD3contfun x₀) hC'0 (hC'fun z) (hC'fun x₀) hC''0 (hC''fun z) (hC''fun x₀)
+    (hΨ z) (h0Ψ z) (hΨ x₀) (h0Ψ x₀)
+    (hVfamfam0 z) (hVfamfamd z) (hVfamfamc z) (hD₃famchar z)
+    (hVfamfam0 x₀) (hVfamfamd x₀) (hVfamfamc x₀) (hD₃famchar x₀) ht k
+
+/-- **Continuity of the third iterated derivative from multilinear derivative data.**  If the second
+iterated derivative `iteratedFDeriv ℝ 2 f` is everywhere Fréchet differentiable with derivative
+`D3ml x : E →L ContinuousMultilinearMap ℝ (Fin 2) E` (the *multilinear* representation of the third
+derivative — a value in a **properly normed** space, sidestepping the un-normed triple
+continuous-linear-map tower), and `D3ml` is continuous, then the third iterated derivative
+`iteratedFDeriv ℝ 3 f` is continuous.
+
+This is the obstruction-free continuity of the third derivative in the exact form the
+`contDiff`/`iteratedFDeriv` chain consumes.  Proof: `curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt`
+identifies `D3ml x` with `(iteratedFDeriv ℝ 3 f x).curryLeft`, so
+`iteratedFDeriv ℝ 3 f x = (continuousMultilinearCurryLeftEquiv …).symm (D3ml x)`; the curry isometry's
+inverse is continuous, so the composite is continuous.  Crucially, the hypothesis carries the third
+derivative as `D3ml : E → (E →L ContinuousMultilinearMap ℝ (Fin 2) E)` — a normed codomain — rather
+than as an `E → (E →L E →L E →L E)` whose triple operator norm does not synthesize in Mathlib
+v4.29.1. -/
+theorem continuous_iteratedFDeriv_three_of_hasFDerivAt_continuous
+    {f : E → E}
+    {D3ml : E → (E →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    (hD3 : ∀ x, HasFDerivAt (iteratedFDeriv ℝ 2 f) (D3ml x) x)
+    (hcont : Continuous D3ml) :
+    Continuous (iteratedFDeriv ℝ 3 f) := by
+  have key : iteratedFDeriv ℝ 3 f
+      = fun x => (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).symm (D3ml x) := by
+    funext x
+    have h := curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt (hD3 x)
+    apply (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).injective
+    rw [LinearIsometryEquiv.apply_symm_apply]
+    exact h.symm
+  rw [key]
+  exact (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).symm.continuous.comp hcont
+
+/-- **Differentiability of the second iterated derivative from multilinear derivative data.**  If the
+second iterated derivative `iteratedFDeriv ℝ 2 f` is everywhere Fréchet differentiable with derivative
+`D3ml x` (multilinear-valued), then it is differentiable.  The trivial `HasFDerivAt.differentiableAt`
+half of the `ContDiff ℝ 3` upgrade, kept multilinear so it never touches the un-normed triple
+continuous-linear-map tower. -/
+theorem differentiable_iteratedFDeriv_two_of_hasFDerivAt
+    {f : E → E}
+    {D3ml : E → (E →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    (hD3 : ∀ x, HasFDerivAt (iteratedFDeriv ℝ 2 f) (D3ml x) x) :
+    Differentiable ℝ (iteratedFDeriv ℝ 2 f) :=
+  fun x => (hD3 x).differentiableAt
+
+/-- **`ContDiff ℝ 3` from `ContDiff ℝ 2` plus multilinear third-derivative data.**  The obstruction-free
+capstone bridge to `C³` smoothness.  Given that `f` is already `C²`, that its second iterated
+derivative `iteratedFDeriv ℝ 2 f` is everywhere Fréchet differentiable with a *continuous*,
+*multilinear-valued* derivative `D3ml`, then `f` is `C³`.
+
+This packages the `contDiff_nat_iff_continuous_differentiable` criterion at `n = 3`: the missing
+ingredients beyond `C²` are continuity of the third iterated derivative
+(`continuous_iteratedFDeriv_three_of_hasFDerivAt_continuous`) and differentiability of the second
+(`differentiable_iteratedFDeriv_two_of_hasFDerivAt`), both supplied here from the multilinear
+derivative datum `D3ml` — which lives in the well-normed
+`E →L ContinuousMultilinearMap ℝ (Fin 2) E`, never in the un-normed `E →L E →L E →L E`.  This is the
+abstract interface a flow-specific caller feeds with the fundamental-solution third-derivative data to
+reach `ContDiff ℝ 3` dependence on initial conditions. -/
+theorem contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous
+    {f : E → E}
+    {D3ml : E → (E →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    (hf2 : ContDiff ℝ 2 f)
+    (hD3 : ∀ x, HasFDerivAt (iteratedFDeriv ℝ 2 f) (D3ml x) x)
+    (hcont : Continuous D3ml) :
+    ContDiff ℝ 3 f := by
+  rw [show (3 : WithTop ℕ∞) = ((3 : ℕ) : WithTop ℕ∞) from by norm_cast,
+    contDiff_nat_iff_continuous_differentiable]
+  refine ⟨fun m hm => ?_, fun m hm => ?_⟩
+  · interval_cases m
+    · exact hf2.continuous_iteratedFDeriv (by norm_num)
+    · exact hf2.continuous_iteratedFDeriv (by norm_num)
+    · exact hf2.continuous_iteratedFDeriv (by norm_num)
+    · exact continuous_iteratedFDeriv_three_of_hasFDerivAt_continuous hD3 hcont
+  · interval_cases m
+    · exact hf2.differentiable_iteratedFDeriv (by norm_num)
+    · exact hf2.differentiable_iteratedFDeriv (by norm_num)
+    · exact differentiable_iteratedFDeriv_two_of_hasFDerivAt hD3
+
+/-- **`uncurry2CLM` is norm-nonexpansive** — `‖uncurry2CLM T‖ ≤ ‖T‖` — proved *without ever forming*
+`‖uncurry2CLM‖`.  Taking the operator norm of `uncurry2CLM` itself requires
+`Norm ((E →L E →L E) →L ML(Fin 2))`, which fails to synthesize in Mathlib v4.29.1 (the domain
+`E →L E →L E` sits behind an expensive instance diamond).  Instead the bound is read off slot-by-slot
+via `ContinuousMultilinearMap.opNorm_le_bound` and two `ContinuousLinearMap.le_opNorm` steps on the
+*double* CLM space (the module's established pattern, cf. `lipschitzWith_uncurry3_of_apply_sub_le`),
+so only norms that *do* synthesize are used.  This is the size datum that lets `uncurry2CLM`
+post-compose a little-o (`isLittleO_uncurry2CLM_comp`). -/
+theorem norm_uncurry2CLM_le (T : E →L[ℝ] (E →L[ℝ] E)) : ‖uncurry2CLM T‖ ≤ ‖T‖ := by
+  refine ContinuousMultilinearMap.opNorm_le_bound (ContinuousLinearMap.opNorm_nonneg T) (fun m => ?_)
+  rw [uncurry2CLM_apply]
+  calc ‖T (m 0) (m 1)‖
+      ≤ ‖T (m 0)‖ * ‖m 1‖ := ContinuousLinearMap.le_opNorm _ _
+    _ ≤ (‖T‖ * ‖m 0‖) * ‖m 1‖ := by gcongr; exact ContinuousLinearMap.le_opNorm _ _
+    _ = ‖T‖ * (‖m 0‖ * ‖m 1‖) := by ring
+    _ = ‖T‖ * ∏ i, ‖m i‖ := by rw [Fin.prod_univ_two]
+
+/-- **Post-composition of a little-o with the nonexpansive `uncurry2CLM`.**  If `u =o[l] w` (with `u`
+valued in the double space `E →L E →L E`) then `y ↦ uncurry2CLM (u y) =o[l] w`.  Proof: unfold both
+little-o's to the `∀ c > 0, eventually ‖·‖ ≤ c ‖w‖` form (`Asymptotics.isLittleO_iff`) and transport
+the bound pointwise through `norm_uncurry2CLM_le`.  Routing through `isLittleO_iff` +
+`filter_upwards` + `Trans.trans` (rather than `ContinuousLinearMap.isBigO_comp` /
+`IsBigO.trans_isLittleO`) is deliberate: the latter drag in `uncurry2CLM`'s domain as a *seminormed*
+space, forcing a whnf reconciliation of the double-space `Norm` diamond
+(`ContinuousLinearMap.hasOpNorm` vs `SeminormedAddCommGroup.toNorm`) that blows up; the
+`isLittleO_iff` route only ever manipulates the already-formed norms and is defeq-robust. -/
+theorem isLittleO_uncurry2CLM_comp {α : Type*} {l : Filter α}
+    {u : α → (E →L[ℝ] (E →L[ℝ] E))} {G : Type*} [SeminormedAddGroup G] {w : α → G}
+    (h : u =o[l] w) : (fun y => uncurry2CLM (u y)) =o[l] w := by
+  rw [Asymptotics.isLittleO_iff] at h ⊢
+  intro c hc
+  filter_upwards [h hc] with y hy
+  exact (norm_uncurry2CLM_le (u y)).trans hy
+
+/-- **The nested→multilinear `HasFDerivAt` bridge for the second iterated derivative.**  This is the
+single wall that blocked applying the `ContDiff ℝ 3` capstone to the flow.  Given that `f` is `C²`
+with first derivative `Df` and second (composition-form) derivative `D2`, and that `D2` is Fréchet
+differentiable at `x` with derivative the *nested triple* operator `D3 : E →L E →L E →L E`, the
+(multilinear) second iterated derivative `iteratedFDeriv ℝ 2 f` is Fréchet differentiable at `x` with
+derivative the *multilinear-valued* operator `uncurry2CLM.comp D3 : E →L ML(Fin 2)`.
+
+The naive route — rewrite `iteratedFDeriv ℝ 2 f = uncurry2CLM ∘ D2` and apply the chain rule
+`uncurry2CLM.hasFDerivAt.comp x hD3` — **whnf-diverges / fails to unify**: it forces Lean to
+reconcile the plain topological-module structure carried by `uncurry2CLM`'s domain `E →L E →L E`
+with the seminormed structure the chain rule demands, an expensive defeq on the nested space.
+
+The proof here sidesteps that entirely.  It extracts the defining little-o of `hD3` (with the
+implicit arguments supplied *explicitly* — `HasFDerivAt.isLittleO` on a double-space codomain
+otherwise fails to assign its metavariables), post-composes it through the nonexpansive `uncurry2CLM`
+(`isLittleO_uncurry2CLM_comp`), and rewrites the resulting little-o into the Fréchet-difference shape
+of the goal using the pointwise identity `iteratedFDeriv ℝ 2 f y = uncurry2CLM (D2 y)`
+(`iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt`) and the linearity of `uncurry2CLM`.  Only norms
+that synthesize are ever touched. -/
+theorem hasFDerivAt_iteratedFDeriv_two_uncurry2CLM
+    {f : E → E} {Df : E → (E →L[ℝ] E)} {D2 : E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3 : E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E))} {x : E}
+    (hDf : ∀ y, HasFDerivAt f (Df y) y) (hD2 : ∀ y, HasFDerivAt Df (D2 y) y)
+    (hD3 : HasFDerivAt D2 D3 x) :
+    HasFDerivAt (iteratedFDeriv ℝ 2 f) (uncurry2CLM.comp D3) x := by
+  have hlo := HasFDerivAt.isLittleO (𝕜 := ℝ) (f := D2) (f' := D3) (x := x) hD3
+  refine HasFDerivAt.of_isLittleO ((isLittleO_uncurry2CLM_comp hlo).congr_left (fun y => ?_))
+  rw [iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt hDf (hD2 y),
+      iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt hDf (hD2 x),
+      ContinuousLinearMap.comp_apply, map_sub, map_sub]
+
+/-- **Obstruction-free `ContDiff ℝ 3` from nested second-fundamental-solution data.**  The clean
+interface that a flow-specific caller feeds to reach `C³` dependence on initial conditions.  Given
+that `f` is already `C²` with first/second (composition-form) derivatives `Df`, `D2`, that `D2` is
+everywhere Fréchet differentiable with the *nested triple* third-fundamental operator `D3fam y`
+(`HasFDerivAt D2 (D3fam y) y` — exactly the datum `exists_hasFDerivAt_secondFundamentalSolution`
+delivers), and that the *multilinear packaging* `z ↦ uncurry3 (D3fam z)` is continuous (the
+obstruction-free continuity `lipschitzWith_thirdFundamentalSolution_multilinear` supplies), then `f`
+is `C³`.
+
+This packages the existing capstone `contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous` with
+the multilinear third-derivative datum `D3ml x = (uncurry3 (D3fam x)).curryLeft`:
+`hasFDerivAt_iteratedFDeriv_two_uncurry2CLM` (+ `uncurry3_curryLeft`) supplies the pointwise
+`HasFDerivAt (iteratedFDeriv ℝ 2 f) (D3ml x) x`, and the continuity of `D3ml` is the continuity of
+`z ↦ uncurry3 (D3fam z)` transported through the isometry `continuousMultilinearCurryLeftEquiv`
+(whose forward map *is* `curryLeft`).  Crucially the third derivative is carried throughout as a
+value in the well-normed `ML(Fin 3)` / `E →L ML(Fin 2)` spaces — never in the un-normed
+`E →L E →L E →L E`. -/
+theorem contDiff_three_of_hasFDerivAt_nested_of_continuous
+    {f : E → E} {Df : E → (E →L[ℝ] E)} {D2 : E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D3fam : E → (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E)))}
+    (hf2 : ContDiff ℝ 2 f)
+    (hDf : ∀ y, HasFDerivAt f (Df y) y)
+    (hD2 : ∀ y, HasFDerivAt Df (D2 y) y)
+    (hD3 : ∀ y, HasFDerivAt D2 (D3fam y) y)
+    (hcont : Continuous (fun z => uncurry3 (D3fam z))) :
+    ContDiff ℝ 3 f := by
+  refine contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous
+    (D3ml := fun x => (uncurry3 (D3fam x)).curryLeft) hf2 (fun x => ?_) ?_
+  · show HasFDerivAt (iteratedFDeriv ℝ 2 f) ((uncurry3 (D3fam x)).curryLeft) x
+    rw [uncurry3_curryLeft]
+    exact hasFDerivAt_iteratedFDeriv_two_uncurry2CLM hDf hD2 (hD3 x)
+  · exact (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 3 => E) E).continuous.comp hcont
+
+/-- **The nested second-fundamental-solution `HasFDerivAt` chain *bundled with* its multilinear
+continuity** — the exact triple of data `contDiff_three_of_hasFDerivAt_nested_of_continuous` consumes
+on the third-derivative side.  This packages `exists_hasFDerivAt_secondFundamentalSolution` (the
+everywhere `fderiv D₂ = D₃fam` half of the resolvent's spatial `C³`) together with the multilinear
+continuity `z ↦ uncurry3 (D₃fam z)` of the third fundamental solution
+(`lipschitzWith_thirdFundamentalSolution_multilinear`), for the **same** packaged operators — the
+identification the two halves could not share when quoted as separate theorems (the third fundamental
+solution `D₃fam` and its linearised-first-variation family `Vfamfam` are the existentially bound
+witnesses, so their characterisation is only in scope inside a single proof).
+
+Building both from *one* `exists_thirdVariationOperator_of_field` invocation (whose seventh conjunct
+is the third-variation-ODE characterisation `hD₃bilinear` fed to *both* the `HasFDerivAt` slot
+`thirdVariationOperator_hD₃_slot_of_bilinear` and the multilinear Lipschitz base gap
+`norm_thirdFundamentalSolution_apply_baseCurve_sub_le`) is exactly what lets the continuity be stated
+for the `D₃fam` that the chain differentiates to.  The lone extra hypothesis beyond
+`exists_hasFDerivAt_secondFundamentalSolution` is `hD3vlip` (spatial Lipschitzness of the `Fin 3`
+third derivative `D3v`), which drives the continuity but is inert for the pointwise chain.  This is
+the "sole remaining ingredient" the resolvent-`C³` docstring flagged: with it,
+`contDiff_three_of_hasFDerivAt_nested_of_continuous` closes `ContDiff ℝ 3` dependence on initial
+data. -/
+theorem exists_hasFDerivAt_secondFundamentalSolution_multilinearContinuous [CompleteSpace E]
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ : ℝ≥0} {C' C'' N : ℝ}
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hΦ : ∀ x, IsIntegralCurve (Φ x) v) (h0 : ∀ x, Φ x t₀ = x)
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ) (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ) (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ) (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K)
+    (hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)))
+    (hD2contfun : ∀ z, Continuous (fun s => D2vc s (Φ z s)))
+    (hD3mcont : ∀ z, Continuous (fun s => D3vm s (Φ z s)))
+    (hD3vcont : ∀ z, Continuous (fun s => D3v s (Φ z s)))
+    (hC'0 : 0 ≤ C') (hC'fun : ∀ z, ∀ s, ‖D2vc s (Φ z s)‖ ≤ C')
+    (hN0 : 0 ≤ N) (hN : ∀ z, ∀ s, ‖D3vm s (Φ z s)‖ ≤ N)
+    (hC''0 : 0 ≤ C'') (hC'' : ∀ z, ∀ s, ‖D3v s (Φ z s)‖ ≤ C'')
+    (hcurry : ∀ z, ∀ s, D3vm s (Φ z s) = (D3v s (Φ z s)).curryLeft)
+    {Ψ : E → E → ℝ → E}
+    (hΨ : ∀ z, ∀ x, IsIntegralCurve (Ψ z x) (variationalFieldVec (fun s => Dv s (Φ z s))))
+    (h0Ψ : ∀ z, ∀ x, Ψ z x t₀ = x)
+    {T : ℝ} (ht : t ∈ Set.Icc t₀ T) :
+    ∃ (D₂ : E → (E →L[ℝ] (E →L[ℝ] E)))
+        (D₃fam : E → (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E)))),
+      (∀ (z h : E) (Vlin : ℝ → (E →L[ℝ] E)), Vlin t₀ = 0 →
+        (∀ s, HasDerivAt Vlin
+          ((Dv s (Φ z s)).comp (Vlin s)
+            + ((D2vc s (Φ z s)).comp (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s) h).comp
+                (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) s)) s) →
+        D₂ z h = Vlin t) ∧
+      (∀ y, HasFDerivAt D₂ (D₃fam y) y) ∧
+      Continuous (fun z => uncurry3 (D₃fam z)) := by
+  choose D₂ hD₂char using fun z => exists_continuousLinearMap_linearisedVariation
+    z (hAfun z) (hAcontfun z) (hD2contfun z) (hΨ z) (h0Ψ z) hC'0 (hC'fun z) ht
+  choose Vfamfam D₃fam hprops using fun z => exists_thirdVariationOperator_of_field
+    z (hAfun z) (hAcontfun z) (hD2contfun z) (hD3vcont z) (hΨ z) (h0Ψ z) hC'0 hC''0
+      (hC'fun z) (hC'' z) ht
+  refine ⟨D₂, D₃fam, hD₂char, fun y => ?_, ?_⟩
+  · obtain ⟨hVfam0, hVfamd, _, _, _, _, hD₃bilinear⟩ := hprops y
+    apply hasFDerivAt_of_eventually_norm_sub_sub_le_sq (f := D₂) (f' := D₃fam y) (x₀ := y)
+    filter_upwards [Metric.ball_mem_nhds y one_pos] with z hz
+    have hk : ‖z - y‖ ≤ 1 := by
+      have hmem := Metric.mem_ball.mp hz
+      rw [dist_eq_norm] at hmem
+      exact hmem.le
+    have hW : Continuous (fun s => fundamentalSolution (hAfun y) (hΨ y) (h0Ψ y) s) :=
+      continuous_fundamentalSolution_time (hAfun y) (hΨ y) (h0Ψ y)
+    obtain ⟨W₂, hW₂0, hW₂⟩ := exists_hasDerivAt_firstVariation_linearised
+      y (hAfun y) (hAcontfun y) (hD2contfun y) (hΨ y) (h0Ψ y) z
+    obtain ⟨Wdiff, hWdiff0, hWdiff⟩ := exists_hasDerivAt_inhomogVariation_of_continuous
+      (hAfun y) (hAcontfun y) (((hAcontfun z).sub (hAcontfun y)).clm_comp hW) t₀
+    have hslot := thirdVariationOperator_hD₃_slot_of_bilinear y z (hAfun y) (hΨ y) (h0Ψ y)
+      hVfam0 hVfamd (hcurry y) hD₃bilinear hW₂ hW₂0
+    exact norm_secondFundamentalSolution_op_sub_thirdVariation_le_sq_uniformC
+      hv hΦ h0 hDv hDvlip hD2vc hD2vclip hD3vm hD3vmlip hcompat z y
+      (hAfun z) (hAfun y) (hAcontfun y) (hAcontfun z) (hD2contfun z) (hD2contfun y) (hD3mcont y)
+      hC'0 (hC'fun z) (hC'fun y) hN0 (hN y) (hΨ y) (h0Ψ y) (hΨ z) (h0Ψ z)
+      hW₂ hW₂0 hWdiff hWdiff0 (hD₂char z) (hD₂char y) hslot hk ht
+  · exact (lipschitzWith_thirdFundamentalSolution_multilinear hv hΦ h0 hDvlip hD2vclip hD3vlip
+      hAfun hAcontfun hD2contfun hD3vcont hC'0 hC'fun hC''0 hC'' hΨ h0Ψ
+      (fun z => (hprops z).1) (fun z => (hprops z).2.1) (fun z => (hprops z).2.2.1)
+      (fun z => (hprops z).2.2.2.2.2.2) ht).continuous
+
+/-- **`C³` dependence of the flow on initial data — the Item 1/2 unblock.**  For a `C^{3,1}` vector
+field `v` on a real Banach space (uniformly `K`-Lipschitz, time-continuous, with first/second/third
+spatial derivatives `Dv`, `D2vc`/`D2vm`, `D3vm`/`D3v` — jointly continuous and spatially Lipschitz,
+in the compatible composition/multilinear representations), the time-`t` flow map `z ↦ Φ z t` is
+`ContDiff ℝ 3` (three times continuously Fréchet differentiable in the initial value).
+
+This is the theorem the compact-manifold gauge flow of Item 2 and the tensor time-derivative chain
+rule of Item 1 ultimately consume: Mathlib v4.29.1 supplies smooth ODE-flow dependence only at the
+Banach/first-order level, and this closes the `C³` initial-data regularity built up through the whole
+`SmoothDependenceCk` tower.
+
+The proof assembles three now-available pieces for a **single shared** flow family `Φ`:
+(1) `exists_flow_contDiff_two_of_lipschitz_secondDeriv` supplies `Φ` together with the honest
+`ContDiff ℝ 2 (z ↦ Φ z t)`; (2) `exists_hasFDerivAt_secondFundamentalSolution_multilinearContinuous`
+supplies the nested third-fundamental chain `∀ y, HasFDerivAt D₂ (D₃fam y) y` *and* the multilinear
+continuity `Continuous (z ↦ uncurry3 (D₃fam z))`; (3) the `C¹`/`C²` bootstraps
+(`hasFDerivAt_flow_of_lipschitz_deriv`, the base-point `C²` remainder
+`norm_fundamentalSolution_sub_sub_linearVariation_le_sq`) identify the flow's first derivative with
+the resolvent and the resolvent's derivative with the packaged `D₂`.  Feeding all of these to the
+obstruction-free `contDiff_three_of_hasFDerivAt_nested_of_continuous` — which routes the third
+derivative through the well-normed `ML(Fin 3)` / `E →L ML(Fin 2)` spaces, never the un-normed
+`E →L E →L E →L E` — yields `ContDiff ℝ 3`.  The along-flow bounds are read off the derivative
+Lipschitz constants (`C' = L`, `‖D3vm‖ ≤ N = ‖D2vm‖`-Lipschitz, `‖D3v‖ = ‖D3v.curryLeft‖ = ‖D3vm‖`
+by the `curryLeft` isometry). -/
+theorem exists_flow_contDiff_three_of_lipschitz_thirdDeriv [CompleteSpace E]
+    (hv : ∀ τ, LipschitzWith K (v τ)) (hvc : ∀ x, Continuous fun s => v s x)
+    {Dv : ℝ → E → (E →L[ℝ] E)}
+    {D2vc : ℝ → E → (E →L[ℝ] (E →L[ℝ] E))}
+    {D2vm : ℝ → E → (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E)}
+    {D3vm : ℝ → E → (E →L[ℝ] (ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) E))}
+    {D3v : ℝ → E → ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) E}
+    {L M₂ M₃ N : ℝ≥0}
+    (hDv : ∀ s ξ, HasFDerivAt (v s) (Dv s ξ) ξ)
+    (hDvc : Continuous fun p : ℝ × E => Dv p.1 p.2)
+    (hDvlip : ∀ s, LipschitzWith L (Dv s))
+    (hD2vc : ∀ s ξ, HasFDerivAt (Dv s) (D2vc s ξ) ξ)
+    (hD2vcc : Continuous fun p : ℝ × E => D2vc p.1 p.2)
+    (hD2vclip : ∀ s, LipschitzWith M₂ (D2vc s))
+    (hD2vmlip : ∀ s, LipschitzWith N (D2vm s))
+    (hD3vm : ∀ s ξ, HasFDerivAt (D2vm s) (D3vm s ξ) ξ)
+    (hD3vmc : Continuous fun p : ℝ × E => D3vm p.1 p.2)
+    (hD3vmlip : ∀ s, LipschitzWith M₃ (D3vm s))
+    (hD3vc : Continuous fun p : ℝ × E => D3v p.1 p.2)
+    (hD3vlip : ∀ s, LipschitzWith M₃ (D3v s))
+    (hcompat : ∀ s ξ, D2vc s ξ = curry2 (D2vm s ξ))
+    (hcurry : ∀ s ξ, D3vm s ξ = (D3v s ξ).curryLeft)
+    (ht0 : t₀ ≤ t) :
+    ∃ Φ : E → ℝ → E, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧
+        ContDiff ℝ 3 (fun z => Φ z t) := by
+  obtain ⟨Φ, h0, hΦ, hf2⟩ := exists_flow_contDiff_two_of_lipschitz_secondDeriv
+    hv hvc hDv hDvc hDvlip hD2vc hD2vcc hD2vclip ht0
+  have hAfun : ∀ z, ∀ s, ‖Dv s (Φ z s)‖₊ ≤ K := fun z s => by
+    have h : ‖Dv s (Φ z s)‖ ≤ (K : ℝ) := (hDv s (Φ z s)).le_of_lipschitz (hv s)
+    exact_mod_cast h
+  have hAcontfun : ∀ z, Continuous (fun s => Dv s (Φ z s)) := fun z =>
+    hDvc.comp (continuous_id.prodMk (hΦ z).continuous)
+  have hD2contfun : ∀ z, Continuous (fun s => D2vc s (Φ z s)) := fun z =>
+    hD2vcc.comp (continuous_id.prodMk (hΦ z).continuous)
+  have hD3mcont : ∀ z, Continuous (fun s => D3vm s (Φ z s)) := fun z =>
+    hD3vmc.comp (continuous_id.prodMk (hΦ z).continuous)
+  have hD3vcont : ∀ z, Continuous (fun s => D3v s (Φ z s)) := fun z =>
+    hD3vc.comp (continuous_id.prodMk (hΦ z).continuous)
+  have hCz : ∀ z, ∀ s, ‖D2vc s (Φ z s)‖ ≤ (L : ℝ) := fun z s =>
+    (hD2vc s (Φ z s)).le_of_lipschitz (hDvlip s)
+  have hNfun : ∀ z, ∀ s, ‖D3vm s (Φ z s)‖ ≤ (N : ℝ) := fun z s =>
+    (hD3vm s (Φ z s)).le_of_lipschitz (hD2vmlip s)
+  have hC''fun : ∀ z, ∀ s, ‖D3v s (Φ z s)‖ ≤ (N : ℝ) := fun z s => by
+    have hcn : ‖(D3v s (Φ z s)).curryLeft‖ = ‖D3v s (Φ z s)‖ :=
+      ContinuousMultilinearMap.curryLeft_norm _
+    have hbnd := hNfun z s
+    rw [hcurry s (Φ z s), hcn] at hbnd
+    exact hbnd
+  have htmem : t ∈ Set.Icc t₀ t := ⟨ht0, le_refl t⟩
+  choose Ψ h0Ψ hΨ using fun z => exists_variationalFlowFamily (hAfun z) (hAcontfun z)
+  obtain ⟨D₂, D₃fam, hD₂char, hD3chain, hcont⟩ :=
+    exists_hasFDerivAt_secondFundamentalSolution_multilinearContinuous
+      hv hΦ h0 hDv hDvlip hD2vc hD2vclip hD3vm hD3vmlip hD3vlip hcompat hAfun hAcontfun
+      hD2contfun hD3mcont hD3vcont L.coe_nonneg hCz N.coe_nonneg hNfun N.coe_nonneg hC''fun
+      (fun z s => hcurry s (Φ z s)) hΨ h0Ψ htmem
+  have hDf : ∀ z, HasFDerivAt (fun w => Φ w t)
+      (fundamentalSolution (hAfun z) (hΨ z) (h0Ψ z) t) z := fun z =>
+    hasFDerivAt_flow_of_lipschitz_deriv hv (hAfun z) (hΨ z) (h0Ψ z) hΦ h0 z ht0
+      (Dv := Dv) (fun _ s _ ξ _ => (hDv s ξ).hasFDerivWithinAt) L.coe_nonneg
+      (fun _ s _ ξ _ => by
+        have hlip := (hDvlip s).dist_le_mul ξ (Φ z s)
+        rw [dist_eq_norm, dist_eq_norm] at hlip
+        exact hlip)
+  have hD2 : ∀ z, HasFDerivAt
+      (fun z' => fundamentalSolution (hAfun z') (hΨ z') (h0Ψ z') t) (D₂ z) z := by
+    intro z
+    refine hasFDerivAt_of_eventually_norm_sub_sub_le_sq (C :=
+        (L : ℝ) ^ 2 * Real.exp ((K : ℝ) * (t - t₀)) ^ 3
+            * gronwallBound 0 (K : ℝ) 1 (t - t₀) ^ 2
+          + ((M₂ : ℝ) * Real.exp (2 * (K : ℝ) * (t - t₀))
+              + (L : ℝ) * ((L : ℝ) * Real.exp (2 * (K : ℝ) * (t - t₀))
+                  * gronwallBound 0 (K : ℝ) 1 (t - t₀)))
+            * Real.exp ((K : ℝ) * (t - t₀)) * gronwallBound 0 (K : ℝ) 1 (t - t₀))
+      (Filter.Eventually.of_forall (fun z' => ?_))
+    obtain ⟨Vz, hVz0, hVz⟩ := exists_hasDerivAt_firstVariation_true
+      z (hAfun z) (hAcontfun z) (hΨ z) (h0Ψ z) z' (hAcontfun z')
+    obtain ⟨Vlin, hVlin0, hVlin⟩ := exists_hasDerivAt_firstVariation_linearised
+      z (hAfun z) (hAcontfun z) (hD2contfun z) (hΨ z) (h0Ψ z) z'
+    have hrem := norm_fundamentalSolution_sub_sub_linearVariation_le_sq
+      hv hΦ h0 hDv hDvlip hD2vc hD2vclip z (hAfun z) (hAcontfun z) L.coe_nonneg (hCz z)
+      (hΨ z) (h0Ψ z) z' (hAfun z') (hAcontfun z') (hΨ z') (h0Ψ z') hVz hVz0 hVlin hVlin0 htmem
+    have hval : D₂ z (z' - z) = Vlin t := hD₂char z (z' - z) Vlin hVlin0 hVlin
+    rw [hval]; exact hrem
+  exact ⟨Φ, h0, hΦ,
+    contDiff_three_of_hasFDerivAt_nested_of_continuous hf2 hDf hD2 hD3chain hcont⟩
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow

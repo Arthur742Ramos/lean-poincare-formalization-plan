@@ -8313,6 +8313,777 @@ theorem parabolicC0AlphaNorm_mul_sub_mul_le {X A : Type*} [PseudoMetricSpace X] 
   · exact parabolicC0AlphaNorm_mul_le hu hdv
   · exact parabolicC0AlphaNorm_mul_le hdu hv'
 
+/-- The parabolic Hölder **seminorm of a constant function vanishes**: a constant has no Hölder
+oscillation, witnessed by `ParabolicHolderWith 0`. -/
+theorem parabolicHolderSeminorm_const {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (c : E) (s : Set (ℝ × X)) :
+    parabolicHolderSeminorm α (fun _ => c) s = 0 := by
+  refine le_antisymm ?_ (parabolicHolderSeminorm_nonneg α (fun _ => c) s)
+  refine parabolicHolderSeminorm_le le_rfl ?_
+  intro p _ q _
+  simp
+
+/-- The parabolic **sup norm of a constant function is at most the norm of the constant**, witnessed
+by `ParabolicBoundedWith ‖c‖`.  (Equality can fail only on the empty domain, where the value is `0`.) -/
+theorem parabolicSupNorm_const_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (c : E) (s : Set (ℝ × X)) :
+    parabolicSupNorm (fun _ => c) s ≤ ‖c‖ := by
+  refine parabolicSupNorm_le (norm_nonneg c) ?_
+  intro p _
+  exact le_rfl
+
+/-- The parabolic **`C^{0,α}` norm of a constant function is at most the norm of the constant**: its
+sup part is `≤ ‖c‖` and its Hölder part vanishes.  This is the constant-term / multiplicative-unit
+bound in the parabolic Hölder normed algebra, complementing the additive/scalar/product estimates. -/
+theorem parabolicC0AlphaNorm_const_le {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    (α : ℝ) (c : E) (s : Set (ℝ × X)) :
+    parabolicC0AlphaNorm α (fun _ => c) s ≤ ‖c‖ := by
+  unfold parabolicC0AlphaNorm
+  rw [parabolicHolderSeminorm_const, add_zero]
+  exact parabolicSupNorm_const_le c s
+
+/-! ### Short-time smallness from initial vanishing
+
+The parabolic `C^{0,α}` norm of a function that vanishes at the initial time is small on a thin
+time-slab.  Because the parabolic distance from `(t, x)` to `(t₀, x)` is `√|t - t₀|`, a Hölder
+estimate against the (zero) initial value bounds `‖u (t, x)‖` by `[u]_α · (√T)^α = [u]_α · T^{α/2}`
+on the slab `|t - t₀| ≤ T`.  This is the analytic mechanism turning a seminorm (Schauder) a-priori
+bound into a genuine short-time contraction of the Ricci–DeTurck fixed point: the difference of two
+solutions vanishes at the initial time, so its full norm is controlled by its Hölder seminorm times
+a factor `→ 0` (sup part) / `→ 1` (full norm) as the slab thickness `T → 0`. -/
+
+/-- **Pointwise short-time smallness from initial vanishing.**  If `u` satisfies a parabolic
+`α`-Hölder estimate with nonnegative constant `C` on `s`, vanishes at the initial-time point
+`(t₀, x)`, and `(t, x)` sits within parabolic time-distance `√T` of it (`|t - t₀| ≤ T`), then
+`‖u (t, x)‖ ≤ C · (√T)^α`.  The mechanism by which a function that is zero at the initial time is
+uniformly small on a thin time-slab. -/
+theorem norm_le_of_parabolicHolderWith_of_initial_zero
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {C α T t₀ t : ℝ} {x : X} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hC0 : 0 ≤ C) (hα : 0 ≤ α) (hC : ParabolicHolderWith C α u s)
+    (hp : (t, x) ∈ s) (hp0 : (t₀, x) ∈ s)
+    (hu0 : u (t₀, x) = 0) (hT : |t - t₀| ≤ T) :
+    ‖u (t, x)‖ ≤ C * Real.sqrt T ^ α := by
+  have h1 : ‖u (t, x) - u (t₀, x)‖ ≤ C * parabolicDistance (t, x) (t₀, x) ^ α := hC hp hp0
+  rw [hu0, sub_zero, parabolicDistance.same_space] at h1
+  refine h1.trans (mul_le_mul_of_nonneg_left ?_ hC0)
+  exact Real.rpow_le_rpow (Real.sqrt_nonneg _) (Real.sqrt_le_sqrt hT) hα
+
+/-- **Parabolic sup-norm short-time bound from initial vanishing.**  If `u` is parabolic `α`-Hölder
+on `s`, the time-coordinate of every point of `s` lies within `T` of the initial time `t₀`, `s` is
+closed under dropping to the initial-time slice (`(t₀, p.2) ∈ s` whenever `p ∈ s`), and `u` vanishes
+on that initial slice, then the parabolic sup norm is controlled by the Hölder seminorm:
+`‖u‖_{C⁰} ≤ [u]_α · (√T)^α`.  As `T → 0` this tends to `0`: an initial-vanishing function has
+arbitrarily small `C⁰` norm on a sufficiently thin slab. -/
+theorem parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = 0) :
+    parabolicSupNorm u s ≤ parabolicHolderSeminorm α u s * Real.sqrt T ^ α := by
+  have hsemi0 := parabolicHolderSeminorm_nonneg α u s
+  have hsemi := parabolicHolderWith_parabolicHolderSeminorm hu
+  refine parabolicSupNorm_le
+    (mul_nonneg hsemi0 (Real.rpow_nonneg (Real.sqrt_nonneg T) α)) ?_
+  rintro ⟨t, x⟩ hp
+  have hp0 : (t₀, x) ∈ s := hcyl (t, x) hp
+  exact norm_le_of_parabolicHolderWith_of_initial_zero hsemi0 hα hsemi hp hp0
+    (hu0 x hp0) (hslab (t, x) hp)
+
+/-- **Parabolic `C^{0,α}` short-time bound from initial vanishing.**  Under the initial-vanishing
+hypotheses of `parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero`, the *full* parabolic
+`C^{0,α}` norm is controlled by the Hölder seminorm alone, with a factor that tends to `1` as the
+slab thickness `T → 0`: `‖u‖_{C^{0,α}} ≤ ((√T)^α + 1) · [u]_α`.  This is the estimate that turns a
+seminorm (Schauder) a-priori bound into a full-norm contraction on the initial-vanishing subspace. -/
+theorem parabolicC0AlphaNorm_le_holderSeminorm_mul_of_initial_zero
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = 0) :
+    parabolicC0AlphaNorm α u s ≤ (Real.sqrt T ^ α + 1) * parabolicHolderSeminorm α u s := by
+  have h1 := parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero hα hu hslab hcyl hu0
+  unfold parabolicC0AlphaNorm
+  calc parabolicSupNorm u s + parabolicHolderSeminorm α u s
+      ≤ parabolicHolderSeminorm α u s * Real.sqrt T ^ α + parabolicHolderSeminorm α u s := by
+        gcongr
+    _ = (Real.sqrt T ^ α + 1) * parabolicHolderSeminorm α u s := by ring
+
+/-- The short-time factor `(√T)^α` written as a genuine power of the slab thickness:
+`(√T)^α = T^(α/2)` (for `0 ≤ T`).  Makes explicit that the short-time smallness is `O(T^{α/2})` — a
+positive power of the time-interval length. -/
+theorem sqrt_rpow_eq_rpow_half {T : ℝ} (hT : 0 ≤ T) (α : ℝ) :
+    Real.sqrt T ^ α = T ^ (α / 2) := by
+  rw [Real.sqrt_eq_rpow, ← Real.rpow_mul hT]
+  congr 1
+  ring
+
+/-- **Parabolic sup-norm short-time bound, `T^{α/2}` form.**  The initial-vanishing sup-norm estimate
+`parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero` written with the explicit power of the slab
+thickness: `‖u‖_{C⁰} ≤ [u]_α · T^{α/2}` (`0 ≤ T`) — the operator norm bounded by a positive power of
+the time-interval length that the Ricci–DeTurck short-time contraction consumes. -/
+theorem parabolicSupNorm_le_holderSeminorm_mul_rpow_of_initial_zero
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hT : 0 ≤ T) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = 0) :
+    parabolicSupNorm u s ≤ parabolicHolderSeminorm α u s * T ^ (α / 2) := by
+  rw [← sqrt_rpow_eq_rpow_half hT α]
+  exact parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero hα hu hslab hcyl hu0
+
+/-! ### Affine (non-vanishing) initial data
+
+The actual Ricci–DeTurck iteration prescribes a nonzero initial condition, so the estimates above are
+needed in the form where `u` need not vanish at the initial time but merely stays bounded there
+(`‖u (t₀, x)‖ ≤ M₀`).  Splitting `u (t, x) = (u (t, x) - u (t₀, x)) + u (t₀, x)` bounds the sup norm
+by the initial-slice bound `M₀` plus the short-time-small Hölder contribution `[u]_α · (√T)^α`.  With
+`M₀ = 0` these recover the initial-vanishing estimates. -/
+
+/-- **Pointwise short-time bound from bounded initial data.**  If `u` is parabolic `α`-Hölder with
+nonnegative constant `C` on `s`, has `‖u (t₀, x)‖ ≤ M₀` at the initial-time point, and `(t, x)` sits
+within `|t - t₀| ≤ T` of it, then `‖u (t, x)‖ ≤ M₀ + C · (√T)^α`. -/
+theorem norm_le_of_parabolicHolderWith_of_initial_le
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {C α T t₀ t M₀ : ℝ} {x : X} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hC0 : 0 ≤ C) (hα : 0 ≤ α) (hC : ParabolicHolderWith C α u s)
+    (hp : (t, x) ∈ s) (hp0 : (t₀, x) ∈ s)
+    (hu0 : ‖u (t₀, x)‖ ≤ M₀) (hT : |t - t₀| ≤ T) :
+    ‖u (t, x)‖ ≤ M₀ + C * Real.sqrt T ^ α := by
+  have h1 : ‖u (t, x) - u (t₀, x)‖ ≤ C * parabolicDistance (t, x) (t₀, x) ^ α := hC hp hp0
+  rw [parabolicDistance.same_space] at h1
+  have h2 : Real.sqrt |t - t₀| ^ α ≤ Real.sqrt T ^ α :=
+    Real.rpow_le_rpow (Real.sqrt_nonneg _) (Real.sqrt_le_sqrt hT) hα
+  have hstep : ‖u (t, x) - u (t₀, x)‖ ≤ C * Real.sqrt T ^ α :=
+    h1.trans (mul_le_mul_of_nonneg_left h2 hC0)
+  calc ‖u (t, x)‖
+      ≤ ‖u (t, x) - u (t₀, x)‖ + ‖u (t₀, x)‖ := by
+        have h := norm_add_le (u (t, x) - u (t₀, x)) (u (t₀, x))
+        rwa [sub_add_cancel] at h
+    _ ≤ C * Real.sqrt T ^ α + M₀ := add_le_add hstep hu0
+    _ = M₀ + C * Real.sqrt T ^ α := by ring
+
+/-- **Parabolic sup-norm short-time bound from bounded initial data.**  Generalises
+`parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero` to initial data bounded by `M₀` (rather than
+zero): `‖u‖_{C⁰} ≤ M₀ + [u]_α · (√T)^α`.  On a thin slab the Hölder contribution is small, so the
+sup norm is controlled by the initial-slice bound plus a short-time-small remainder — the affine
+a-priori estimate the Ricci–DeTurck iteration with a prescribed initial condition consumes. -/
+theorem parabolicSupNorm_le_add_holderSeminorm_mul_of_initial_le
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ M₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hM0 : 0 ≤ M₀) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → ‖u (t₀, x)‖ ≤ M₀) :
+    parabolicSupNorm u s ≤ M₀ + parabolicHolderSeminorm α u s * Real.sqrt T ^ α := by
+  have hsemi0 := parabolicHolderSeminorm_nonneg α u s
+  have hsemi := parabolicHolderWith_parabolicHolderSeminorm hu
+  refine parabolicSupNorm_le
+    (add_nonneg hM0 (mul_nonneg hsemi0 (Real.rpow_nonneg (Real.sqrt_nonneg T) α))) ?_
+  rintro ⟨t, x⟩ hp
+  have hp0 : (t₀, x) ∈ s := hcyl (t, x) hp
+  exact norm_le_of_parabolicHolderWith_of_initial_le hsemi0 hα hsemi hp hp0
+    (hu0 x hp0) (hslab (t, x) hp)
+
+/-- **Parabolic `C^{0,α}` short-time bound from bounded initial data.**  The full-norm affine
+estimate: `‖u‖_{C^{0,α}} ≤ M₀ + ((√T)^α + 1) · [u]_α`.  With `M₀ = 0` this recovers
+`parabolicC0AlphaNorm_le_holderSeminorm_mul_of_initial_zero`. -/
+theorem parabolicC0AlphaNorm_le_add_holderSeminorm_mul_of_initial_le
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ M₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hM0 : 0 ≤ M₀) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → ‖u (t₀, x)‖ ≤ M₀) :
+    parabolicC0AlphaNorm α u s
+      ≤ M₀ + (Real.sqrt T ^ α + 1) * parabolicHolderSeminorm α u s := by
+  have h1 := parabolicSupNorm_le_add_holderSeminorm_mul_of_initial_le hα hM0 hu hslab hcyl hu0
+  unfold parabolicC0AlphaNorm
+  calc parabolicSupNorm u s + parabolicHolderSeminorm α u s
+      ≤ (M₀ + parabolicHolderSeminorm α u s * Real.sqrt T ^ α)
+          + parabolicHolderSeminorm α u s := by gcongr
+    _ = M₀ + (Real.sqrt T ^ α + 1) * parabolicHolderSeminorm α u s := by ring
+
+/-! ### Space/time decomposition of parabolic Hölder regularity
+
+The parabolic distance is `max (√|Δt|) (dist_x)`, so a parabolic `α`-Hölder estimate restricts, at a
+fixed time, to a spatial `α`-Hölder estimate and, at a fixed space point, to a temporal `α/2`-Hölder
+estimate.  Conversely, separate spatial-`α` and temporal-`α/2` control reassemble into parabolic
+`α`-Hölder control on a set closed under mixing time/space coordinates (a parabolic cylinder).  These
+projections and the reconstruction are the structural characterisation of parabolic Hölder spaces
+that the Schauder theory rests on. -/
+
+/-- **Spatial projection of parabolic Hölder control.**  At a fixed time `t`, a parabolic `α`-Hölder
+function is spatially `α`-Hölder with the same constant: `‖u (t, x) - u (t, y)‖ ≤ C · dist x y ^ α`. -/
+theorem norm_sub_le_of_parabolicHolderWith_same_time
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {C α t : ℝ} {x y : X} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hC : ParabolicHolderWith C α u s) (hx : (t, x) ∈ s) (hy : (t, y) ∈ s) :
+    ‖u (t, x) - u (t, y)‖ ≤ C * dist x y ^ α := by
+  have h := hC hx hy
+  rwa [parabolicDistance.same_time] at h
+
+/-- **Temporal projection of parabolic Hölder control.**  At a fixed space point `x`, a parabolic
+`α`-Hölder function is temporally `α/2`-Hölder with the same constant:
+`‖u (t, x) - u (τ, x)‖ ≤ C · |t - τ| ^ (α / 2)`.  The `α/2` exponent is the parabolic scaling of time. -/
+theorem norm_sub_le_of_parabolicHolderWith_same_space
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {C α t τ : ℝ} {x : X} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hC : ParabolicHolderWith C α u s) (hp : (t, x) ∈ s) (hq : (τ, x) ∈ s) :
+    ‖u (t, x) - u (τ, x)‖ ≤ C * |t - τ| ^ (α / 2) := by
+  have h := hC hp hq
+  rwa [parabolicDistance.same_space_rpow] at h
+
+/-- **Reconstruction of parabolic Hölder control from separate spatial and temporal control.**  If
+`u` is spatially `α`-Hölder with constant `Hs` (at each fixed time) and temporally `α/2`-Hölder with
+constant `Ht` (at each fixed space point), and `s` is closed under mixing the time coordinate of one
+point with the space coordinate of another (`(p.1, q.2) ∈ s`, as for a parabolic cylinder), then `u`
+is parabolic `α`-Hölder with constant `Hs + Ht`.  The estimate splits `u p - u q` through the
+intermediate point `(p.1, q.2)`, bounding the spatial jump by `Hs · dist^α ≤ Hs · d_par^α` and the
+temporal jump by `Ht · |Δt|^{α/2} ≤ Ht · d_par^α`. -/
+theorem parabolicHolderWith_of_forall_same_time_same_space
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {Hs Ht α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hHs : 0 ≤ Hs) (hHt : 0 ≤ Ht)
+    (hmid : ∀ p ∈ s, ∀ q ∈ s, (p.1, q.2) ∈ s)
+    (hspace : ∀ ⦃t : ℝ⦄ ⦃x y : X⦄, (t, x) ∈ s → (t, y) ∈ s →
+      ‖u (t, x) - u (t, y)‖ ≤ Hs * dist x y ^ α)
+    (htime : ∀ ⦃x : X⦄ ⦃t τ : ℝ⦄, (t, x) ∈ s → (τ, x) ∈ s →
+      ‖u (t, x) - u (τ, x)‖ ≤ Ht * |t - τ| ^ (α / 2)) :
+    ParabolicHolderWith (Hs + Ht) α u s := by
+  rintro ⟨tp, xp⟩ hp ⟨tq, xq⟩ hq
+  have hmidpt : (tp, xq) ∈ s := hmid (tp, xp) hp (tq, xq) hq
+  have hspace' := hspace hp hmidpt
+  have htime' := htime hmidpt hq
+  have hd : dist xp xq ^ α ≤ parabolicDistance ((tp, xp) : ℝ × X) (tq, xq) ^ α :=
+    Real.rpow_le_rpow dist_nonneg (parabolicDistance.space_dist_le (tp, xp) (tq, xq)) hα
+  have ht : |tp - tq| ^ (α / 2) ≤ parabolicDistance ((tp, xp) : ℝ × X) (tq, xq) ^ α := by
+    rw [Real.rpow_div_two_eq_sqrt α (abs_nonneg _)]
+    exact Real.rpow_le_rpow (Real.sqrt_nonneg _)
+      (parabolicDistance.sqrt_time_le (tp, xp) (tq, xq)) hα
+  calc ‖u (tp, xp) - u (tq, xq)‖
+      ≤ ‖u (tp, xp) - u (tp, xq)‖ + ‖u (tp, xq) - u (tq, xq)‖ := by
+        have h := norm_add_le (u (tp, xp) - u (tp, xq)) (u (tp, xq) - u (tq, xq))
+        rwa [sub_add_sub_cancel] at h
+    _ ≤ Hs * dist xp xq ^ α + Ht * |tp - tq| ^ (α / 2) := add_le_add hspace' htime'
+    _ ≤ Hs * parabolicDistance (tp, xp) (tq, xq) ^ α
+          + Ht * parabolicDistance (tp, xp) (tq, xq) ^ α :=
+        add_le_add (mul_le_mul_of_nonneg_left hd hHs) (mul_le_mul_of_nonneg_left ht hHt)
+    _ = (Hs + Ht) * parabolicDistance (tp, xp) (tq, xq) ^ α := by ring
+
+/-! ### Short-time smallness in the full parabolic `C^{0,α}` (Banach) norm
+
+Bounding the Hölder seminorm by the full `C^{0,α}` norm (`parabolicHolderSeminorm_le_parabolicC0AlphaNorm`)
+turns the seminorm short-time estimates into honest *operator* smallness on the parabolic Banach
+space: for a function vanishing at the initial time, the `C⁰` part is at most its full `C^{0,α}` norm
+times the short-time factor `(√T)^α`.  Applied to a difference `u - v` of two functions agreeing at
+the initial time, this is exactly the short-time contraction the Ricci–DeTurck / parabolic Schauder
+fixed point runs on: the solution map has `C⁰`-operator norm `≤ (√T)^α → 0` on the fibre of data
+sharing an initial condition. -/
+
+/-- **Parabolic `C⁰`-norm short-time bound by the full `C^{0,α}` norm.**  For an initial-vanishing
+function, `‖u‖_{C⁰} ≤ ‖u‖_{C^{0,α}} · (√T)^α`.  The honest operator-smallness statement on the
+parabolic `C^{0,α}` Banach space: on the subspace of initial-vanishing functions the `C⁰` seminorm is
+`(√T)^α`-small relative to the full norm. -/
+theorem parabolicSupNorm_le_parabolicC0AlphaNorm_mul_of_initial_zero
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (hu : ParabolicHolderOn α u s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hu0 : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = 0) :
+    parabolicSupNorm u s ≤ parabolicC0AlphaNorm α u s * Real.sqrt T ^ α := by
+  refine (parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero hα hu hslab hcyl hu0).trans ?_
+  exact mul_le_mul_of_nonneg_right
+    (parabolicHolderSeminorm_le_parabolicC0AlphaNorm α u s)
+    (Real.rpow_nonneg (Real.sqrt_nonneg T) α)
+
+/-- **Short-time contraction in the parabolic `C⁰` norm.**  If two functions agree at the initial
+time slice, the `C⁰` norm of their difference is `(√T)^α`-small relative to the `C^{0,α}` norm of
+their difference: `‖u - v‖_{C⁰} ≤ ‖u - v‖_{C^{0,α}} · (√T)^α`.  As the slab thickness `T → 0` the
+factor tends to `0`, so the solution map is a contraction on the fibre over a fixed initial
+condition — the mechanism giving uniqueness/short-time existence of the Ricci–DeTurck fixed point. -/
+theorem parabolicSupNorm_sub_le_parabolicC0AlphaNorm_mul_of_initial_agree
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α T t₀ : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hα : 0 ≤ α) (huv : ParabolicHolderOn α (fun p => u p - v p) s)
+    (hslab : ∀ p ∈ s, |p.1 - t₀| ≤ T)
+    (hcyl : ∀ p ∈ s, (t₀, p.2) ∈ s)
+    (hagree : ∀ x : X, (t₀, x) ∈ s → u (t₀, x) = v (t₀, x)) :
+    parabolicSupNorm (fun p => u p - v p) s
+      ≤ parabolicC0AlphaNorm α (fun p => u p - v p) s * Real.sqrt T ^ α :=
+  parabolicSupNorm_le_parabolicC0AlphaNorm_mul_of_initial_zero hα huv hslab hcyl
+    (fun x hx => show u (t₀, x) - v (t₀, x) = 0 from sub_eq_zero.mpr (hagree x hx))
+
+/-- **Separation for the parabolic `C^{0,α}` norm.**  On the class of parabolic `C^{0,α}` functions
+the norm of a difference vanishes *only* when the two functions already agree on `s`.  Together with
+`parabolicC0AlphaNorm_nonneg` this makes `parabolicC0AlphaNorm` a genuine norm on functions modulo
+equality on `s` — the definiteness the parabolic Banach structure and the uniqueness half of the
+fixed-point theorem rest on. -/
+theorem eqOn_of_parabolicC0AlphaNorm_sub_eq_zero {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s)
+    (h : parabolicC0AlphaNorm α (fun z => u z - v z) s = 0) :
+    Set.EqOn u v s := by
+  intro p hp
+  obtain ⟨B, hB0, H, _, hb, _⟩ := hu.sub hv
+  have hbd : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B (fun z => u z - v z) s := ⟨B, hB0, hb⟩
+  have hle : ‖u p - v p‖ ≤ parabolicC0AlphaNorm α (fun z => u z - v z) s :=
+    norm_le_parabolicC0AlphaNorm (α := α) hbd hp
+  rw [h] at hle
+  have hz : ‖u p - v p‖ = 0 := le_antisymm hle (norm_nonneg _)
+  rw [norm_eq_zero, sub_eq_zero] at hz
+  exact hz
+
+/-- **Definiteness of the parabolic `C^{0,α}` norm on the class.**  The parabolic `C^{0,α}` norm of
+`u - v` is zero iff `u` and `v` agree on `s`. -/
+theorem parabolicC0AlphaNorm_sub_eq_zero_iff_eqOn {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (hu : ParabolicC0AlphaOn α u s) (hv : ParabolicC0AlphaOn α v s) :
+    parabolicC0AlphaNorm α (fun z => u z - v z) s = 0 ↔ Set.EqOn u v s := by
+  refine ⟨eqOn_of_parabolicC0AlphaNorm_sub_eq_zero hu hv, fun h => ?_⟩
+  have hcongr : parabolicC0AlphaNorm α (fun z => u z - v z) s
+      = parabolicC0AlphaNorm α (fun _ : ℝ × X => (0 : E)) s := by
+    refine parabolicC0AlphaNorm_congr ?_
+    intro p hp
+    show u p - v p = 0
+    rw [h hp, sub_self]
+  rw [hcongr, parabolicC0AlphaNorm_zero]
+
+/-- **Parabolic Banach fixed-point theorem.**  Let `E` be complete.  Suppose an operator
+`T` on time-space functions
+
+* preserves the parabolic `C^{0,α}` class on `s` (`hTmaps`), and
+* is a `q`-contraction on that class for the parabolic `C^{0,α}` norm, `0 ≤ q < 1` (`hTcontr`),
+
+and let `u₀` be any starting function in the class.  Then `T` has a fixed point `g` in the class:
+`g` is parabolic `C^{0,α}` on `s`, `T g` and `g` agree on `s`, and `g` is the *unique* such fixed
+point up to equality on `s`.
+
+This is the Picard/Banach contraction mechanism specialised to the parabolic Hölder space: the
+iterates `u₀, T u₀, T² u₀, …` form a `C^{0,α}`-Cauchy sequence (their consecutive differences decay
+geometrically, `‖T^{n+1}u₀ − T^n u₀‖ ≤ qⁿ‖T u₀ − u₀‖`, so the tail telescopes below `qᴺ·‖T u₀ −
+u₀‖/(1−q)`), which converges by the completeness of the parabolic `C^{0,α}` space
+(`exists_parabolicC0AlphaOn_tendsto_of_cauchy`) to a limit that the contraction forces to be fixed;
+uniqueness on `s` is `eqOn_of_parabolicC0AlphaNorm_sub_eq_zero`.  This is the abstract solution
+operator the Ricci–DeTurck short-time chart existence runs once the (future) parabolic Schauder
+estimate exhibits the DeTurck right-hand side as such a contraction. -/
+theorem exists_parabolicC0AlphaOn_fixedPt_of_contraction {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [CompleteSpace E] {α q : ℝ} {s : Set (ℝ × X)}
+    {T : (ℝ × X → E) → (ℝ × X → E)} {u₀ : ℝ × X → E}
+    (hq0 : 0 ≤ q) (hq1 : q < 1)
+    (hu₀ : ParabolicC0AlphaOn α u₀ s)
+    (hTmaps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T u) s)
+    (hTcontr : ∀ u v, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α v s →
+      parabolicC0AlphaNorm α (fun z => T u z - T v z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => u z - v z) s) :
+    ∃ g, ParabolicC0AlphaOn α g s ∧ Set.EqOn (T g) g s ∧
+      ∀ w, ParabolicC0AlphaOn α w s → Set.EqOn (T w) w s → Set.EqOn w g s := by
+  have h1q : (0 : ℝ) < 1 - q := by linarith
+  -- The Picard iteration sequence `u n = Tⁿ u₀`.
+  obtain ⟨u, hu0, husucc⟩ :
+      ∃ u : ℕ → (ℝ × X → E), u 0 = u₀ ∧ ∀ n, u (n + 1) = T (u n) :=
+    ⟨fun n => Nat.rec u₀ (fun _ p => T p) n, rfl, fun _ => rfl⟩
+  -- Every iterate stays in the class.
+  have hclass : ∀ n, ParabolicC0AlphaOn α (u n) s := by
+    intro n
+    induction n with
+    | zero => rw [hu0]; exact hu₀
+    | succ n ih => rw [husucc]; exact hTmaps (u n) ih
+  -- Abbreviation for the size of the first Picard step.
+  let D : ℝ := parabolicC0AlphaNorm α (fun z => u 1 z - u 0 z) s
+  have hD0 : 0 ≤ D := parabolicC0AlphaNorm_nonneg _ _ _
+  have hDq0 : 0 ≤ D * (1 - q)⁻¹ := mul_nonneg hD0 (inv_nonneg.mpr h1q.le)
+  -- One-step contraction of consecutive differences.
+  have hδ : ∀ n, parabolicC0AlphaNorm α (fun z => u (n + 1 + 1) z - u (n + 1) z) s
+      ≤ q * parabolicC0AlphaNorm α (fun z => u (n + 1) z - u n z) s := by
+    intro n
+    have hfun : (fun z => u (n + 1 + 1) z - u (n + 1) z)
+        = (fun z => T (u (n + 1)) z - T (u n) z) := by rw [husucc (n + 1), husucc n]
+    rw [hfun]
+    exact hTcontr (u (n + 1)) (u n) (hclass (n + 1)) (hclass n)
+  -- Geometric decay of consecutive Picard differences.
+  have hstep : ∀ m, parabolicC0AlphaNorm α (fun z => u (m + 1) z - u m z) s ≤ q ^ m * D := by
+    intro m
+    induction m with
+    | zero =>
+        show parabolicC0AlphaNorm α (fun z => u (0 + 1) z - u 0 z) s ≤ q ^ 0 * D
+        rw [pow_zero, one_mul]
+    | succ m ih =>
+        calc parabolicC0AlphaNorm α (fun z => u (m + 1 + 1) z - u (m + 1) z) s
+            ≤ q * parabolicC0AlphaNorm α (fun z => u (m + 1) z - u m z) s := hδ m
+          _ ≤ q * (q ^ m * D) := mul_le_mul_of_nonneg_left ih hq0
+          _ = q ^ (m + 1) * D := by rw [pow_succ]; ring
+  -- Telescoped bound on any forward difference by a geometric partial sum.
+  have hdiff : ∀ (n d : ℕ),
+      parabolicC0AlphaNorm α (fun z => u (n + d) z - u n z) s
+        ≤ q ^ n * D * (∑ k ∈ Finset.range d, q ^ k) := by
+    intro n d
+    induction d with
+    | zero =>
+        have hz : (fun z => u (n + 0) z - u n z) = (fun _ : ℝ × X => (0 : E)) := by
+          funext z; simp
+        rw [hz, parabolicC0AlphaNorm_zero]; simp
+    | succ d ih =>
+        have hsplit : (fun z => u (n + (d + 1)) z - u n z)
+            = (fun z => (u (n + (d + 1)) z - u (n + d) z) + (u (n + d) z - u n z)) := by
+          funext z; abel
+        rw [hsplit]
+        have hcls1 : ParabolicC0AlphaOn α (fun z => u (n + (d + 1)) z - u (n + d) z) s :=
+          (hclass (n + (d + 1))).sub (hclass (n + d))
+        have hcls2 : ParabolicC0AlphaOn α (fun z => u (n + d) z - u n z) s :=
+          (hclass (n + d)).sub (hclass n)
+        refine (parabolicC0AlphaNorm_add_le hcls1 hcls2).trans ?_
+        have hfirst : parabolicC0AlphaNorm α (fun z => u (n + (d + 1)) z - u (n + d) z) s
+            ≤ q ^ (n + d) * D := hstep (n + d)
+        refine (add_le_add hfirst ih).trans (le_of_eq ?_)
+        rw [Finset.sum_range_succ, pow_add]; ring
+  -- The geometric partial sums are bounded by `(1-q)⁻¹`.
+  have hgeom : ∀ d : ℕ, (∑ k ∈ Finset.range d, q ^ k) ≤ (1 - q)⁻¹ := by
+    intro d
+    have hid : (∑ k ∈ Finset.range d, q ^ k) * (1 - q) = 1 - q ^ d := by
+      have hgm := geom_sum_mul q d
+      linear_combination (-1 : ℝ) * hgm
+    rw [inv_eq_one_div, le_div_iff₀ h1q, hid]
+    nlinarith [pow_nonneg hq0 d]
+  -- Uniform forward-difference bound.
+  have hboundpair : ∀ a b : ℕ, a ≤ b →
+      parabolicC0AlphaNorm α (fun z => u b z - u a z) s ≤ q ^ a * (D * (1 - q)⁻¹) := by
+    intro a b hab
+    have hd := hdiff a (b - a)
+    rw [Nat.add_sub_cancel' hab] at hd
+    refine hd.trans ?_
+    calc q ^ a * D * (∑ k ∈ Finset.range (b - a), q ^ k)
+        ≤ q ^ a * D * (1 - q)⁻¹ :=
+          mul_le_mul_of_nonneg_left (hgeom (b - a)) (mul_nonneg (pow_nonneg hq0 a) hD0)
+      _ = q ^ a * (D * (1 - q)⁻¹) := by ring
+  -- The Picard sequence is Cauchy in the parabolic `C^{0,α}` norm.
+  have hcauchy : ∀ ε > 0, ∃ N, ∀ m ≥ N, ∀ n ≥ N,
+      parabolicC0AlphaNorm α (fun z => u m z - u n z) s ≤ ε := by
+    intro ε hε
+    have hc1 : (0 : ℝ) < D * (1 - q)⁻¹ + 1 := by linarith [hDq0]
+    obtain ⟨N, hNlt⟩ := exists_pow_lt_of_lt_one (div_pos hε hc1) hq1
+    refine ⟨N, fun m hm n hn => ?_⟩
+    have hqmin : q ^ (min m n) ≤ q ^ N := pow_le_pow_of_le_one hq0 hq1.le (le_min hm hn)
+    have pairbound : parabolicC0AlphaNorm α (fun z => u m z - u n z) s
+        ≤ q ^ (min m n) * (D * (1 - q)⁻¹) := by
+      rcases le_total n m with hnm | hmn
+      · rw [min_eq_right hnm]; exact hboundpair n m hnm
+      · rw [min_eq_left hmn]
+        have hswap : (fun z => u m z - u n z) = (fun z => -(u n z - u m z)) := by
+          funext z; exact (neg_sub _ _).symm
+        rw [hswap, parabolicC0AlphaNorm_neg]
+        exact hboundpair m n hmn
+    refine le_of_lt ?_
+    calc parabolicC0AlphaNorm α (fun z => u m z - u n z) s
+        ≤ q ^ (min m n) * (D * (1 - q)⁻¹) := pairbound
+      _ ≤ q ^ N * (D * (1 - q)⁻¹) := mul_le_mul_of_nonneg_right hqmin hDq0
+      _ ≤ q ^ N * (D * (1 - q)⁻¹ + 1) :=
+          mul_le_mul_of_nonneg_left (by linarith) (pow_nonneg hq0 N)
+      _ < ε := (lt_div_iff₀ hc1).mp hNlt
+  -- Completeness produces the limit `g`, converged to in the parabolic norm.
+  obtain ⟨g, hg_class, hg_conv⟩ := exists_parabolicC0AlphaOn_tendsto_of_cauchy hclass hcauchy
+  -- `g` is a fixed point on `s`.
+  have hfix : Set.EqOn (T g) g s := by
+    apply eqOn_of_parabolicC0AlphaNorm_sub_eq_zero (hTmaps g hg_class) hg_class
+    refine le_antisymm (le_of_forall_pos_le_add fun ε hε => ?_) (parabolicC0AlphaNorm_nonneg _ _ _)
+    obtain ⟨N, hN⟩ := hg_conv (ε / 2) (by positivity)
+    have hgN : parabolicC0AlphaNorm α (fun z => u N z - g z) s ≤ ε / 2 := hN N le_rfl
+    have hgN1 : parabolicC0AlphaNorm α (fun z => u (N + 1) z - g z) s ≤ ε / 2 :=
+      hN (N + 1) (Nat.le_succ N)
+    have hdecomp : (fun z => T g z - g z)
+        = (fun z => (T g z - T (u N) z) + (u (N + 1) z - g z)) := by
+      funext z
+      have huz : u (N + 1) z = T (u N) z := by rw [husucc]
+      rw [huz]; abel
+    rw [hdecomp]
+    have hc1 : ParabolicC0AlphaOn α (fun z => T g z - T (u N) z) s :=
+      (hTmaps g hg_class).sub (hTmaps (u N) (hclass N))
+    have hc2 : ParabolicC0AlphaOn α (fun z => u (N + 1) z - g z) s :=
+      (hclass (N + 1)).sub hg_class
+    refine (parabolicC0AlphaNorm_add_le hc1 hc2).trans ?_
+    have hswap : parabolicC0AlphaNorm α (fun z => g z - u N z) s
+        = parabolicC0AlphaNorm α (fun z => u N z - g z) s := by
+      have hfe : (fun z => g z - u N z) = (fun z => -(u N z - g z)) := by
+        funext z; exact (neg_sub _ _).symm
+      rw [hfe, parabolicC0AlphaNorm_neg]
+    have hle1 : parabolicC0AlphaNorm α (fun z => T g z - T (u N) z) s ≤ ε / 2 := by
+      refine (hTcontr g (u N) hg_class (hclass N)).trans ?_
+      rw [hswap]
+      calc q * parabolicC0AlphaNorm α (fun z => u N z - g z) s
+          ≤ 1 * parabolicC0AlphaNorm α (fun z => u N z - g z) s :=
+            mul_le_mul_of_nonneg_right hq1.le (parabolicC0AlphaNorm_nonneg _ _ _)
+        _ = parabolicC0AlphaNorm α (fun z => u N z - g z) s := one_mul _
+        _ ≤ ε / 2 := hgN
+    have hsum := add_le_add hle1 hgN1
+    linarith
+  -- Uniqueness on `s`.
+  have huniq : ∀ w, ParabolicC0AlphaOn α w s → Set.EqOn (T w) w s → Set.EqOn w g s := by
+    intro w hw hwfix
+    apply eqOn_of_parabolicC0AlphaNorm_sub_eq_zero hw hg_class
+    have heqON : Set.EqOn (fun z => w z - g z) (fun z => T w z - T g z) s := by
+      intro p hp
+      show w p - g p = T w p - T g p
+      rw [hwfix hp, hfix hp]
+    have hYeq : parabolicC0AlphaNorm α (fun z => w z - g z) s
+        = parabolicC0AlphaNorm α (fun z => T w z - T g z) s := parabolicC0AlphaNorm_congr heqON
+    have hYle : parabolicC0AlphaNorm α (fun z => w z - g z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => w z - g z) s :=
+      hYeq.trans_le (hTcontr w g hw hg_class)
+    have hYnonneg : 0 ≤ parabolicC0AlphaNorm α (fun z => w z - g z) s :=
+      parabolicC0AlphaNorm_nonneg _ _ _
+    have hYle0 : parabolicC0AlphaNorm α (fun z => w z - g z) s ≤ 0 := by
+      nlinarith [hYnonneg, hYle, hq1]
+    exact le_antisymm hYle0 hYnonneg
+  exact ⟨g, hg_class, hfix, huniq⟩
+
+/-- **A-priori residual bound for a fixed point of a parabolic contraction.**  If `g` is any fixed
+point on `s` of a class-preserving `q`-contraction `T` (`0 ≤ q < 1`) and `u₀` is any starting
+function in the class, then `g` lies within `(1-q)⁻¹` times the first residual `‖T u₀ − u₀‖` of `u₀`:
+`‖g − u₀‖ ≤ (1−q)⁻¹ · ‖T u₀ − u₀‖`.
+
+This is the standard Banach a-priori estimate: it needs no iteration, only `g − u₀ = (T g − T u₀) +
+(T u₀ − u₀)` on `s` (using `T g =ₛ g`), the triangle inequality, and the contraction.  Combined with
+`exists_parabolicC0AlphaOn_fixedPt_of_contraction` it keeps the DeTurck solution inside a controlled
+`C^{0,α}` ball around the initial guess — the invariant-ball datum for the short-time chart. -/
+theorem parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α q : ℝ} {s : Set (ℝ × X)}
+    {T : (ℝ × X → E) → (ℝ × X → E)} {g u₀ : ℝ × X → E}
+    (hq1 : q < 1)
+    (hg : ParabolicC0AlphaOn α g s) (hu₀ : ParabolicC0AlphaOn α u₀ s)
+    (hgfix : Set.EqOn (T g) g s)
+    (hTmaps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T u) s)
+    (hTcontr : ∀ u v, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α v s →
+      parabolicC0AlphaNorm α (fun z => T u z - T v z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => u z - v z) s) :
+    parabolicC0AlphaNorm α (fun z => g z - u₀ z) s
+      ≤ (1 - q)⁻¹ * parabolicC0AlphaNorm α (fun z => T u₀ z - u₀ z) s := by
+  have h1q : (0 : ℝ) < 1 - q := by linarith
+  have hdecomp : Set.EqOn (fun z => g z - u₀ z)
+      (fun z => (T g z - T u₀ z) + (T u₀ z - u₀ z)) s := by
+    intro p hp
+    show g p - u₀ p = (T g p - T u₀ p) + (T u₀ p - u₀ p)
+    rw [hgfix hp]; abel
+  have hcls1 : ParabolicC0AlphaOn α (fun z => T g z - T u₀ z) s :=
+    (hTmaps g hg).sub (hTmaps u₀ hu₀)
+  have hcls2 : ParabolicC0AlphaOn α (fun z => T u₀ z - u₀ z) s :=
+    (hTmaps u₀ hu₀).sub hu₀
+  have htri : parabolicC0AlphaNorm α (fun z => g z - u₀ z) s
+      ≤ parabolicC0AlphaNorm α (fun z => T g z - T u₀ z) s
+        + parabolicC0AlphaNorm α (fun z => T u₀ z - u₀ z) s := by
+    rw [parabolicC0AlphaNorm_congr hdecomp]
+    exact parabolicC0AlphaNorm_add_le hcls1 hcls2
+  have hcontr : parabolicC0AlphaNorm α (fun z => T g z - T u₀ z) s
+      ≤ q * parabolicC0AlphaNorm α (fun z => g z - u₀ z) s := hTcontr g u₀ hg hu₀
+  have hkey : parabolicC0AlphaNorm α (fun z => g z - u₀ z) s
+      ≤ q * parabolicC0AlphaNorm α (fun z => g z - u₀ z) s
+        + parabolicC0AlphaNorm α (fun z => T u₀ z - u₀ z) s := by linarith
+  rw [inv_mul_eq_div, le_div_iff₀ h1q]
+  nlinarith [hkey]
+
+/-- **Short-time parabolic solution operator (invariant-ball form).**  Packaging
+`exists_parabolicC0AlphaOn_fixedPt_of_contraction` with the a-priori residual bound
+`parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction`: a class-preserving `q`-contraction `T`
+(`0 ≤ q < 1`) on the parabolic `C^{0,α}` space has a fixed point `g` on `s` that is unique on `s`
+*and* lies in the explicit ball `‖g − u₀‖ ≤ (1−q)⁻¹·‖T u₀ − u₀‖` around any chosen starting function
+`u₀`.  This is the bundled chart-closure datum the Ricci–DeTurck short-time existence consumes once
+its right-hand side is exhibited as such a contraction. -/
+theorem exists_parabolicC0AlphaOn_fixedPt_ball_of_contraction {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [CompleteSpace E] {α q : ℝ} {s : Set (ℝ × X)}
+    {T : (ℝ × X → E) → (ℝ × X → E)} {u₀ : ℝ × X → E}
+    (hq0 : 0 ≤ q) (hq1 : q < 1)
+    (hu₀ : ParabolicC0AlphaOn α u₀ s)
+    (hTmaps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T u) s)
+    (hTcontr : ∀ u v, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α v s →
+      parabolicC0AlphaNorm α (fun z => T u z - T v z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => u z - v z) s) :
+    ∃ g, ParabolicC0AlphaOn α g s ∧ Set.EqOn (T g) g s ∧
+      (∀ w, ParabolicC0AlphaOn α w s → Set.EqOn (T w) w s → Set.EqOn w g s) ∧
+      parabolicC0AlphaNorm α (fun z => g z - u₀ z) s
+        ≤ (1 - q)⁻¹ * parabolicC0AlphaNorm α (fun z => T u₀ z - u₀ z) s := by
+  obtain ⟨g, hg, hfix, huniq⟩ :=
+    exists_parabolicC0AlphaOn_fixedPt_of_contraction hq0 hq1 hu₀ hTmaps hTcontr
+  exact ⟨g, hg, hfix, huniq,
+    parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction hq1 hg hu₀ hfix hTmaps hTcontr⟩
+
+/-- **Continuous dependence / stability of the short-time parabolic fixed point.**  The two-map
+Banach perturbation bound completing the well-posedness triad (existence, uniqueness, *stability*):
+if `T₁` and `T₂` are class-preserving parabolic `C^{0,α}` maps, `T₁` is a `q`-contraction (`q < 1`),
+and `g₁`, `g₂` are their respective fixed points on `s`, then
+
+  `‖g₁ − g₂‖_{C^{0,α}} ≤ (1 − q)⁻¹ · ‖T₁ g₂ − T₂ g₂‖_{C^{0,α}}`,
+
+so the parabolic fixed point depends Lipschitz-continuously on the solution operator: two operators
+that are close at their common fixed locus have close fixed points, and they coincide when
+`T₁ g₂ = T₂ g₂` on `s` (in particular when `T₁ = T₂`, recovering uniqueness).  This is the
+quantitative continuous-dependence estimate that upgrades the qualitative uniqueness of the
+Ricci–DeTurck short-time solution to Hadamard well-posedness.  The argument is the same
+triangle-inequality/contraction computation as `parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction`,
+now run between two genuine fixed points (`g₁ − g₂ = (T₁ g₁ − T₁ g₂) + (T₁ g₂ − T₂ g₂)`) instead of a
+fixed point and an arbitrary starting function, and it uses only the contraction property of `T₁`. -/
+theorem parabolicC0AlphaNorm_fixedPt_sub_fixedPt_le_of_contraction {X E : Type*}
+    [PseudoMetricSpace X] [NormedAddCommGroup E] {α q : ℝ} {s : Set (ℝ × X)}
+    {T₁ T₂ : (ℝ × X → E) → (ℝ × X → E)} {g₁ g₂ : ℝ × X → E}
+    (hq1 : q < 1)
+    (hg₁ : ParabolicC0AlphaOn α g₁ s) (hg₂ : ParabolicC0AlphaOn α g₂ s)
+    (hg₁fix : Set.EqOn (T₁ g₁) g₁ s) (hg₂fix : Set.EqOn (T₂ g₂) g₂ s)
+    (hT₁maps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T₁ u) s)
+    (hT₂maps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T₂ u) s)
+    (hT₁contr : ∀ u v, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α v s →
+      parabolicC0AlphaNorm α (fun z => T₁ u z - T₁ v z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => u z - v z) s) :
+    parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s
+      ≤ (1 - q)⁻¹ * parabolicC0AlphaNorm α (fun z => T₁ g₂ z - T₂ g₂ z) s := by
+  have h1q : (0 : ℝ) < 1 - q := by linarith
+  have hdecomp : Set.EqOn (fun z => g₁ z - g₂ z)
+      (fun z => (T₁ g₁ z - T₁ g₂ z) + (T₁ g₂ z - T₂ g₂ z)) s := by
+    intro p hp
+    show g₁ p - g₂ p = (T₁ g₁ p - T₁ g₂ p) + (T₁ g₂ p - T₂ g₂ p)
+    rw [hg₁fix hp, hg₂fix hp]; abel
+  have hcls1 : ParabolicC0AlphaOn α (fun z => T₁ g₁ z - T₁ g₂ z) s :=
+    (hT₁maps g₁ hg₁).sub (hT₁maps g₂ hg₂)
+  have hcls2 : ParabolicC0AlphaOn α (fun z => T₁ g₂ z - T₂ g₂ z) s :=
+    (hT₁maps g₂ hg₂).sub (hT₂maps g₂ hg₂)
+  have htri : parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s
+      ≤ parabolicC0AlphaNorm α (fun z => T₁ g₁ z - T₁ g₂ z) s
+        + parabolicC0AlphaNorm α (fun z => T₁ g₂ z - T₂ g₂ z) s := by
+    rw [parabolicC0AlphaNorm_congr hdecomp]
+    exact parabolicC0AlphaNorm_add_le hcls1 hcls2
+  have hcontr : parabolicC0AlphaNorm α (fun z => T₁ g₁ z - T₁ g₂ z) s
+      ≤ q * parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s := hT₁contr g₁ g₂ hg₁ hg₂
+  have hkey : parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s
+      ≤ q * parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s
+        + parabolicC0AlphaNorm α (fun z => T₁ g₂ z - T₂ g₂ z) s := by linarith
+  rw [inv_mul_eq_div, le_div_iff₀ h1q]
+  nlinarith [hkey]
+
+/-- **Uniqueness of the parabolic `C^{0,α}` fixed point (completeness-free).**  The direct
+uniqueness corollary of the two-map stability bound
+`parabolicC0AlphaNorm_fixedPt_sub_fixedPt_le_of_contraction` specialised to `T₁ = T₂ = T`: any two
+fixed points `g₁`, `g₂` of a class-preserving parabolic `C^{0,α}` `q`-contraction `T` (`q < 1`)
+coincide on `s`.  Unlike the uniqueness bundled inside
+`exists_parabolicC0AlphaOn_fixedPt_of_contraction`, this requires no completeness of `E` and no
+reference to a Picard-constructed solution — it compares two *given* fixed points directly (their
+difference is bounded by `(1 − q)⁻¹·‖T g₂ − T g₂‖ = 0`), the exact form the Ricci–DeTurck short-time
+uniqueness (chart `encode`) consumes. -/
+theorem parabolicC0AlphaOn_fixedPt_unique_of_contraction {X E : Type*}
+    [PseudoMetricSpace X] [NormedAddCommGroup E] {α q : ℝ} {s : Set (ℝ × X)}
+    {T : (ℝ × X → E) → (ℝ × X → E)} {g₁ g₂ : ℝ × X → E}
+    (hq1 : q < 1)
+    (hg₁ : ParabolicC0AlphaOn α g₁ s) (hg₂ : ParabolicC0AlphaOn α g₂ s)
+    (hg₁fix : Set.EqOn (T g₁) g₁ s) (hg₂fix : Set.EqOn (T g₂) g₂ s)
+    (hTmaps : ∀ u, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α (T u) s)
+    (hTcontr : ∀ u v, ParabolicC0AlphaOn α u s → ParabolicC0AlphaOn α v s →
+      parabolicC0AlphaNorm α (fun z => T u z - T v z) s
+        ≤ q * parabolicC0AlphaNorm α (fun z => u z - v z) s) :
+    Set.EqOn g₁ g₂ s := by
+  have hbound := parabolicC0AlphaNorm_fixedPt_sub_fixedPt_le_of_contraction
+    hq1 hg₁ hg₂ hg₁fix hg₂fix hTmaps hTmaps hTcontr
+  have hzero : parabolicC0AlphaNorm α (fun z => T g₂ z - T g₂ z) s = 0 := by
+    have hfun : (fun z => T g₂ z - T g₂ z) = (fun _ : ℝ × X => (0 : E)) := by
+      funext z; rw [sub_self]
+    rw [hfun, parabolicC0AlphaNorm_zero]
+  rw [hzero, mul_zero] at hbound
+  have heq0 : parabolicC0AlphaNorm α (fun z => g₁ z - g₂ z) s = 0 :=
+    le_antisymm hbound (parabolicC0AlphaNorm_nonneg α _ s)
+  exact eqOn_of_parabolicC0AlphaNorm_sub_eq_zero hg₁ hg₂ heq0
+
+/-!
+### Parabolic Hölder interpolation
+
+The classical interpolation inequality between the sup norm (`C^0`) and the `α`-Hölder seminorm:
+a bounded, `α`-Hölder function is, for every weight `0 ≤ θ ≤ 1`, Hölder with the intermediate
+exponent `α·θ` and constant `(2·sup)^{1−θ}·(seminorm)^θ`.  This is the mechanism parabolic Schauder
+estimates use to *absorb lower-order terms*: an intermediate Hölder seminorm is controlled by a small
+multiple of the top seminorm plus a large multiple of the sup norm.  Pure norm/rpow algebra — no
+Schauder or heat-kernel content.
+-/
+
+/-- **Parabolic Hölder interpolation (explicit-constant form).**  A parabolically bounded (by `B`)
+and `α`-Hölder (with constant `H`) function is, for every interpolation weight `0 ≤ θ ≤ 1`, parabolic
+Hölder with the *intermediate* exponent `α · θ` and constant `(2 · B) ^ (1 − θ) · H ^ θ`:
+`‖u p − u q‖ ≤ (2B)^{1−θ} · H^θ · d(p, q)^{α θ}`.
+
+The classical interpolation between the `C^0` (sup) norm and the `α`-Hölder seminorm.  Proved
+pointwise with *no* case split on `d(p, q) = 0`, by writing
+`‖u p − u q‖ = ‖u p − u q‖^{1−θ} · ‖u p − u q‖^θ` (valid since `(1 − θ) + θ = 1`) and bounding the two
+factors by the sup bound (`≤ 2B`) and the Hölder bound (`≤ H · d^α`) respectively. -/
+theorem parabolicHolderWith_interpolation
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {B H α θ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hB0 : 0 ≤ B) (hH0 : 0 ≤ H) (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hbdd : ParabolicBoundedWith B u s)
+    (hhol : ParabolicHolderWith H α u s) :
+    ParabolicHolderWith ((2 * B) ^ (1 - θ) * H ^ θ) (α * θ) u s := by
+  intro p hp q hq
+  have hd0 : 0 ≤ parabolicDistance p q := parabolicDistance.nonneg p q
+  have hx0 : 0 ≤ ‖u p - u q‖ := norm_nonneg _
+  have hx2B : ‖u p - u q‖ ≤ 2 * B := by
+    calc ‖u p - u q‖ ≤ ‖u p‖ + ‖u q‖ := norm_sub_le _ _
+      _ ≤ B + B := add_le_add (hbdd hp) (hbdd hq)
+      _ = 2 * B := by ring
+  have hxH : ‖u p - u q‖ ≤ H * parabolicDistance p q ^ α := hhol hp hq
+  have hne : (1 - θ) + θ ≠ 0 := by
+    have h1 : (1 - θ) + θ = 1 := by ring
+    rw [h1]; norm_num
+  have hsplit : ‖u p - u q‖ ^ (1 - θ) * ‖u p - u q‖ ^ θ = ‖u p - u q‖ := by
+    rw [← Real.rpow_add' hx0 hne]
+    have h1 : (1 - θ) + θ = 1 := by ring
+    rw [h1, Real.rpow_one]
+  have hb1 : ‖u p - u q‖ ^ (1 - θ) ≤ (2 * B) ^ (1 - θ) :=
+    Real.rpow_le_rpow hx0 hx2B (by linarith)
+  have hb2 : ‖u p - u q‖ ^ θ ≤ (H * parabolicDistance p q ^ α) ^ θ :=
+    Real.rpow_le_rpow hx0 hxH hθ0
+  have hmul : ‖u p - u q‖ ^ (1 - θ) * ‖u p - u q‖ ^ θ
+      ≤ (2 * B) ^ (1 - θ) * (H * parabolicDistance p q ^ α) ^ θ :=
+    mul_le_mul hb1 hb2 (Real.rpow_nonneg hx0 θ) (Real.rpow_nonneg (by linarith) _)
+  have hrw : (H * parabolicDistance p q ^ α) ^ θ
+      = H ^ θ * parabolicDistance p q ^ (α * θ) := by
+    rw [Real.mul_rpow hH0 (Real.rpow_nonneg hd0 α), ← Real.rpow_mul hd0]
+  calc ‖u p - u q‖ = ‖u p - u q‖ ^ (1 - θ) * ‖u p - u q‖ ^ θ := hsplit.symm
+    _ ≤ (2 * B) ^ (1 - θ) * (H * parabolicDistance p q ^ α) ^ θ := hmul
+    _ = (2 * B) ^ (1 - θ) * (H ^ θ * parabolicDistance p q ^ (α * θ)) := by rw [hrw]
+    _ = (2 * B) ^ (1 - θ) * H ^ θ * parabolicDistance p q ^ (α * θ) := by ring
+
+/-- **Parabolic Hölder interpolation (seminorm form).**  For a function in the parabolic `C^{0,α}`
+class and every weight `0 ≤ θ ≤ 1`, the intermediate `α · θ`-Hölder seminorm obeys
+`[u]_{α θ} ≤ (2 · ‖u‖_{C^0})^{1 − θ} · [u]_α^θ`.  The functional form of
+`parabolicHolderWith_interpolation`, evaluated at the attained extremal constants `parabolicSupNorm`
+and `parabolicHolderSeminorm`. -/
+theorem parabolicHolderSeminorm_interpolation_le
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α θ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hu : ParabolicC0AlphaOn α u s) :
+    parabolicHolderSeminorm (α * θ) u s
+      ≤ (2 * parabolicSupNorm u s) ^ (1 - θ) * parabolicHolderSeminorm α u s ^ θ := by
+  obtain ⟨hbdd, hhol⟩ :=
+    parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm hu
+  refine parabolicHolderSeminorm_le ?_ ?_
+  · exact mul_nonneg
+      (Real.rpow_nonneg (by have := parabolicSupNorm_nonneg u s; linarith) _)
+      (Real.rpow_nonneg (parabolicHolderSeminorm_nonneg α u s) _)
+  · exact parabolicHolderWith_interpolation (parabolicSupNorm_nonneg u s)
+      (parabolicHolderSeminorm_nonneg α u s) hθ0 hθ1 hbdd hhol
+
+/-- **Parabolic `C^{0,α}` interpolation (norm form).**  Adding the sup norm to the seminorm
+interpolation bounds the full intermediate `C^{0,α·θ}` norm:
+`‖u‖_{C^{0,α θ}} ≤ ‖u‖_{C^0} + (2 · ‖u‖_{C^0})^{1 − θ} · [u]_α^θ`. -/
+theorem parabolicC0AlphaNorm_interpolation_le
+    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
+    {α θ : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hu : ParabolicC0AlphaOn α u s) :
+    parabolicC0AlphaNorm (α * θ) u s
+      ≤ parabolicSupNorm u s
+        + (2 * parabolicSupNorm u s) ^ (1 - θ) * parabolicHolderSeminorm α u s ^ θ := by
+  unfold parabolicC0AlphaNorm
+  exact add_le_add (le_refl _) (parabolicHolderSeminorm_interpolation_le hθ0 hθ1 hu)
+
 end AnalyticPDE
 end RicciFlow
 

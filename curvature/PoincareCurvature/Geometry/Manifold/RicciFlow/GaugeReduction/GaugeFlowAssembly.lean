@@ -25,6 +25,7 @@ already proves spatial `C¹` (Fréchet) differentiability, so this is a `C¹ →
 bootstrap, not a from-scratch development.
 -/
 import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence
+import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ManifoldFlowExistence
 
 open scoped Manifold Topology ContDiff
 
@@ -63,5 +64,96 @@ theorem gaugeFlow_of_inverse_flow
   Diffeomorph3GaugeFlowOn.nonempty_of_inverse_hasMFDerivWithinAt
     (I := I) (M := M) (X := X) (s := s) (t₀ := t₀)
     F G hleft hright hF hG hanchored hderiv
+
+/-- **Global-`ℝ` extension of a windowed inverse flow to the `C³` gauge-flow datum.**
+
+The compact-manifold time-dependent flow
+(`ManifoldFlow.exists_timeDependent_flow_compact_inverse`) produces mutually inverse, anchored
+slice maps `Φ`, `G` solving the gauge ODE only on a *window* `Ioo (-ε) ε`, whereas the adapter
+`gaugeFlow_of_inverse_flow` wants the mutual-inverse / spatial-`C³` data for *every* `t : ℝ`.
+Extending both families by the identity outside the window closes that `∀ t`-gap: the extended
+slices stay mutually inverse (`id` is its own inverse), spatially `C³` (`id` is smooth), anchored,
+and — since the extension agrees with `Φ` on the window — solve the *same* gauge ODE on
+`Ioo (-ε) ε` (`HasMFDerivWithinAt.congr_mono`).  This is the pure windowed → global assembly step
+in the compact-manifold gauge-flow lift; the only remaining Item-2 analytic input is the
+spatial-`C³` regularity `hΦC3`/`hGC3` of the *windowed* slices (the `C¹ → C³` bootstrap). -/
+theorem exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    {ε : ℝ} (hε : 0 < ε)
+    (Φ G : ℝ → M → M)
+    (hanchor : ∀ x : M, Φ 0 x = x)
+    (hΦC3 : ∀ t ∈ Set.Ioo (-ε) ε, ContMDiff I I 3 (Φ t))
+    (hGC3 : ∀ t ∈ Set.Ioo (-ε) ε, ContMDiff I I 3 (G t))
+    (hleft : ∀ t ∈ Set.Ioo (-ε) ε, Function.LeftInverse (G t) (Φ t))
+    (hright : ∀ t ∈ Set.Ioo (-ε) ε, Function.RightInverse (G t) (Φ t))
+    (hderiv : ∀ x : M, ∀ t ∈ Set.Ioo (-ε) ε,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo (-ε) ε) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) :
+    Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Set.Ioo (-ε) ε) 0) := by
+  classical
+  have h0mem : (0 : ℝ) ∈ Set.Ioo (-ε) ε := ⟨neg_lt_zero.mpr hε, hε⟩
+  refine gaugeFlow_of_inverse_flow (X := X) (s := Set.Ioo (-ε) ε) (t₀ := 0)
+    (fun t => if t ∈ Set.Ioo (-ε) ε then Φ t else id)
+    (fun t => if t ∈ Set.Ioo (-ε) ε then G t else id)
+    ?_ ?_ ?_ ?_ ?_ ?_
+  · intro t
+    by_cases ht : t ∈ Set.Ioo (-ε) ε
+    · simp only [if_pos ht]; exact hleft t ht
+    · simp only [if_neg ht]; exact fun _ => rfl
+  · intro t
+    by_cases ht : t ∈ Set.Ioo (-ε) ε
+    · simp only [if_pos ht]; exact hright t ht
+    · simp only [if_neg ht]; exact fun _ => rfl
+  · intro t
+    by_cases ht : t ∈ Set.Ioo (-ε) ε
+    · simp only [if_pos ht]; exact hΦC3 t ht
+    · simp only [if_neg ht]; exact contMDiff_id
+  · intro t
+    by_cases ht : t ∈ Set.Ioo (-ε) ε
+    · simp only [if_pos ht]; exact hGC3 t ht
+    · simp only [if_neg ht]; exact contMDiff_id
+  · intro x
+    simp only [if_pos h0mem]; exact hanchor x
+  · intro t ht x
+    simp only []
+    rw [if_pos ht]
+    refine (hderiv x t ht).congr_mono ?_ ?_ (subset_refl _)
+    · intro τ hτ; simp only [if_pos hτ]
+    · simp only [if_pos ht]
+
+/-- **Compact-manifold gauge-flow existence, reduced to spatial-`C³` regularity of the flow slices.**
+
+Wires the compact-manifold time-dependent flow
+(`ManifoldFlow.exists_timeDependent_flow_compact_inverse`, which only needs the `C¹` field datum
+`hX`) into the raw `C³` gauge-flow adapter through the identity-extension assembly
+`exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow`.  The flow supplies, on some window
+`Ioo (-ε) ε`, the anchored mutually-inverse slice maps `Φ`, `G` solving the gauge ODE; the *only*
+remaining analytic input is their spatial-`C³` regularity, isolated here as the hypothesis
+`hslicesC3` (the `C¹ → C³` bootstrap, characterising the — necessarily unique — compact flow of `X`).
+Given that, the raw `C³` DeTurck gauge-flow `Diffeomorph3GaugeFlowOn X (Ioo (-ε) ε) 0` is inhabited
+for some `ε > 0`.  This is the first wiring of the compact-flow existence machinery into the
+gauge-flow adapter — the honest current state of Item 2: *unconditional up to the flow-slice `C³`
+regularity*. -/
+theorem exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3
+    [BoundarylessManifold I M] [CompactSpace M] [Nonempty M]
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    (hslicesC3 : ∀ (ε : ℝ), 0 < ε → ∀ (Φ G : ℝ → M → M),
+      (∀ x, Φ 0 x = x) →
+      (∀ x, ∀ t ∈ Set.Ioo (-ε) ε,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo (-ε) ε) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) →
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.LeftInverse (G t) (Φ t)) →
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.RightInverse (G t) (Φ t)) →
+      (∀ t ∈ Set.Ioo (-ε) ε, ContMDiff I I 3 (Φ t)) ∧
+        (∀ t ∈ Set.Ioo (-ε) ε, ContMDiff I I 3 (G t))) :
+    ∃ ε > 0, Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Set.Ioo (-ε) ε) 0) := by
+  obtain ⟨ε, hε, Φ, G, hΦ0, _hG0, hderiv, hleft, hright⟩ :=
+    ManifoldFlow.exists_timeDependent_flow_compact_inverse (I := I) (M := M) (X := X) hX
+  obtain ⟨hΦC3, hGC3⟩ := hslicesC3 ε hε Φ G hΦ0 hderiv hleft hright
+  exact ⟨ε, hε, exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow
+    hε Φ G hΦ0 hΦC3 hGC3 hleft hright hderiv⟩
 
 end PoincareCurvature.GaugeFlowAssembly

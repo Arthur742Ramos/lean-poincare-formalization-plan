@@ -2794,6 +2794,75 @@ lemma exists_dist_lt_subset_positiveDefiniteLocus
   intro u hu
   exact hεsub (by simpa [Metric.mem_ball] using hu)
 
+/-- Membership in the positive-definite locus has a *closed* metric ball neighbourhood inside the
+locus, with a positive `ℝ≥0` radius.  This is the closed-ball companion of
+`exists_dist_lt_subset_positiveDefiniteLocus`, packaged in exactly the shape consumed by the
+closed-ball Banach-solution bridge (`hsub : Metric.closedBall x₀ (a : ℝ) ⊆ locus`): from a section
+lying in the open positive-definite locus one extracts a Picard radius `a > 0` whose whole closed
+ball stays positive-definite.  Combined with the monotonicity of closed balls in the radius, this
+lets a Ricci–DeTurck chart choose its Picard radius inside the positivity margin of the state. -/
+lemma exists_pos_closedBall_subset_positiveDefiniteLocus
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F]
+    {s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover}
+    (hs : s ∈ positiveDefiniteLocus (M := M) (F := F) (W := W)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    ∃ a : NNReal, 0 < a ∧
+      Metric.closedBall s (a : ℝ) ⊆
+        positiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover := by
+  obtain ⟨ε, hεpos, hεsub⟩ :=
+    (Metric.isOpen_iff.mp
+      (isOpen_setOf_forall_pos
+        (M := M) (F := F) (W := W) x0 et het Kc hKc Ko hKo hKoEq hcover)) s hs
+  refine ⟨(ε / 2).toNNReal, Real.toNNReal_pos.mpr (by positivity), ?_⟩
+  have hcoe : ((ε / 2).toNNReal : ℝ) = ε / 2 := Real.coe_toNNReal _ (by positivity)
+  rw [hcoe]
+  exact (Metric.closedBall_subset_ball (by linarith)).trans hεsub
+
+/-- The section of a genuine continuous Riemannian metric has a positive Picard radius whose whole
+closed ball stays inside the positive-definite locus — the geometric a-priori positivity
+containment that discharges the closed-ball Banach-solution bridge's `hsub` hypothesis for the
+initial metric of a Ricci–DeTurck initial value problem. -/
+lemma _root_.Bundle.ContinuousRiemannianMetric.exists_pos_closedBall_toSection_subset_positiveDefiniteLocus
+    {κ : Type*} [Finite κ] [T2Space M]
+    (g : _root_.Bundle.ContinuousRiemannianMetric F W)
+    (x0 : κ → M)
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    [FiniteDimensional ℝ F] [Nontrivial F] :
+    ∃ a : NNReal, 0 < a ∧
+      Metric.closedBall
+        (⟨g.toSection, g.continuous_toSection⟩ :
+          ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+            et Kc hKc Ko hKo hKoEq hcover) (a : ℝ) ⊆
+        positiveDefiniteLocus (M := M) (F := F) (W := W)
+          et Kc hKc Ko hKo hKoEq hcover :=
+  exists_pos_closedBall_subset_positiveDefiniteLocus
+    (M := M) (F := F) (W := W) x0 et het Kc hKc Ko hKo hKoEq hcover
+    (mem_positiveDefiniteLocus_of_continuousRiemannianMetric
+      (M := M) (F := F) (W := W) et Kc hKc Ko hKo hKoEq hcover g)
+
 /-- For a finite compact cover by preferred bilinear-form trivializations, the actual pointwise
 symmetric locus of bundled bilinear-form sections is closed in the transported
 `ContinuousSectionSpace`. -/

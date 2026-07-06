@@ -13,6 +13,65 @@ geometric content is precisely captured by a small number of named
 structures. The remaining work is to construct inhabitants of those
 structures for arbitrary compact Riemannian manifolds.
 
+## Definition of Done — Point 4 completion gate (authoritative)
+
+**Do not declare point 4 closed, in a commit message, a status pulse, a
+rollover note, or anywhere else, unless `curvature/scripts/point4_audit.sh`
+prints `VERDICT: POINT 4 CLOSED` and exits `0` when run WITHOUT `--no-build`.**
+That script is the single source of truth. Prose, `grep`, and "looks done"
+do not count. (A naive `grep sorry` is specifically banned as evidence: the
+word appears inside docstrings such as "proved sorry-free", which repeatedly
+produced false "6 sorries" / "0 sorries" flip-flops. Use the audit's
+comment-stripping scanner, `scripts/point4_scan.py cheats`, for the real
+count.)
+
+The audit enforces five hard gates, all of which must pass:
+
+1. **G1 — sorry-free.** No `sorry`, `admit`, `sorryAx`, `native_decide`,
+   `decide!`, `axiom`, or `opaque` in the `PoincareCurvature/` library source
+   (measured after comments and string literals are stripped, so docstring
+   prose cannot create false positives *or* hide a real cheat).
+2. **G2 — build green.** `lake build` succeeds.
+3. **G3 — unconditional construction.** A target theorem exists whose
+   conclusion is `IntrinsicLocalExistenceUniquenessFamily` for a **general
+   compact manifold**, carrying **no** restricting instance
+   (`IsEmpty`, `Subsingleton`, `Fact (Module.finrank ℝ E ≤ 1)`, …) and **no**
+   assumed `TimeDependentGeometricRicciDeTurckBanachChart` /
+   `RicciDeTurckChartClosureData` hypothesis. In other words: the `chart` and
+   `D` of the conditional bridge must be *constructed*, and Items 1, 2, and 3
+   (below) discharged, not assumed.
+4. **G4 — axiom-clean.** `#print axioms <target>` is a subset of
+   `{propext, Classical.choice, Quot.sound}` and never mentions `sorryAx`.
+5. **G5 — faithful type.** The *elaborated* type of the target (from
+   `#check @<target>`) really is the point-4 package and carries none of the
+   forbidden binders above — so vacuous or over-hypothesised instantiations are
+   rejected even when the assumption is injected through a `variable`.
+
+**Canonical target.** The audit looks for a declaration whose base name is in
+`curvature/scripts/point4_target.txt` (default
+`intrinsicLocalExistenceUniquenessFamily_pointFour`). When you assemble Items
+1–3 into the unconditional closure, name it exactly that (or update the file),
+and state it for a general compact manifold with only the ambient instances —
+no `IsEmpty`/`Subsingleton`/`finrank` gate, no `chart`/`D` argument. The
+existing bridge
+`intrinsicLocalExistenceUniquenessFamily_of_ricciDeTurckChartClosureData`
+passes G1/G4 but **fails G3/G5** precisely because it still takes `chart` and
+`D` as hypotheses; that is the gap to close.
+
+Partial closure is honest and welcome as *interim* progress (the empty /
+subsingleton / rank-one / Einstein families already inhabit the package on
+their sub-classes), but the audit only reports `CLOSED` for the fully general,
+hypothesis-free, axiom-clean theorem. Report remaining work as fractions of
+`{Item 1, Item 2, Item 3}` (equivalently `{chart, D}` construction), never as a
+premature "done".
+
+Run it yourself before any completion claim:
+
+```bash
+cd curvature && ./scripts/point4_audit.sh            # full check (runs lake build)
+cd curvature && ./scripts/point4_audit.sh --no-build # fast gate check, no build
+```
+
 ## Already proved (in this repository)
 
 `IntrinsicLocalExistenceUniquenessFamily` is currently constructible
@@ -4433,6 +4492,42 @@ and the Leibniz `parabolicHolderSeminorm_mul_le`) and the bilinear Lipschitz pro
 Lipschitz control of multiplication behind the nonlinear Ricci–DeTurck contraction/uniqueness
 arguments.
 
+Update — **the genuine (separated) parabolic `C^{0,α}` Banach space is now built**, closing the
+"only point separation remains for the genuine Banach instance" gap flagged above (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`).  New module
+`AnalyticPDE/Parabolic/BanachSpace.lean` (imports only `Parabolic/FunctionSpace` + Mathlib's
+`SeparationQuotient` normed machinery; does not touch the heavy files):
+
+* `ParabolicC0AlphaSpace X E α s` — a **type-synonym carrier** for `parabolicC0AlphaSubmodule` whose
+  *canonical* `SeminormedAddCommGroup`/`NormedSpace ℝ`/`CompleteSpace` instances are the parabolic
+  Hölder ones (displacing the ambient pointwise-product topology the bare submodule subtype carries).
+  This is the complete seminormed space (`parabolicC0AlphaSubmodule.seminormedAddCommGroup` /
+  `completeSpace` / `normedSpace`) exhibited as a first-class type, with `norm_def` / `dist_def`.
+* `ParabolicC0AlphaBanach X E α s := SeparationQuotient (ParabolicC0AlphaSpace X E α s)` — the honest
+  **Banach space**: Mathlib's `SeparationQuotient` upgrades the complete *seminormed* structure to a
+  genuine `NormedAddCommGroup` (point separation) + `CompleteSpace` + `NormedSpace ℝ`.  With the
+  projection `mk`, `mk_surjective`, `norm_mk` (`‖mk u‖ = parabolicC0AlphaNorm α u s` — the projection
+  is norm-preserving on representatives), `norm_mk_ofSubmodule`, and `mk_eq_mk_iff` (`mk u = mk v ↔`
+  the parabolic `C^{0,α}` norm of the difference is `0` — the point-separation characterisation).
+* **Projection/section bounded-operator API**: `mkL` (the projection as `→L[ℝ]`, `‖mkL‖ ≤ 1`), a
+  continuous linear **section** `outL` (`SeparationQuotient.outCLM`) with `mk_outL`
+  (`mk (outL x) = x`), `mkL_comp_outL`, `outL_injective`, and `norm_outL` (`‖outL x‖ = ‖x‖` — the
+  section is an **isometric** linear embedding of the Banach space into the semi-Banach carrier).
+* **Domain-restriction operator** (a core chart-closure operation — restricting to sub-cylinders):
+  the reusable norm estimate `parabolicC0AlphaNorm_mono_domain` (`t ⊆ s ⟹ parabolicC0AlphaNorm α u t
+  ≤ parabolicC0AlphaNorm α u s`, from the sup- and Hölder-seminorm domain monotonicities — a genuine
+  gap that was missing); the carrier restriction `ParabolicC0AlphaSpace.restrictL` (op-norm `≤ 1`,
+  `LinearMap.mkContinuous` fed the monotonicity); and its **descent to the Banach spaces**
+  `ParabolicC0AlphaBanach.restrictL` (well-defined on classes because norm-nonincreasing, via
+  `SeparationQuotient.liftCLM`), with `restrictL_mk` (`restrictL (mk u) = mk (restrict u)`) and
+  `norm_restrictL_le` (op-norm `≤ 1`).
+
+This realises decomposition step 1 (the parabolic Hölder function-space carrier) at the `C^{0,α}`
+level as a genuine Banach space with its basic operator API — the `C^0`-level function-space
+realisation the Ricci–DeTurck Banach chart consumes.  Remaining (future sessions): the lift to the
+higher-regularity parabolic Hölder space `C^{2+α,1+α/2}`, then decomposition steps 2 (the
+Schauder/Lipschitz estimate for the Ricci–DeTurck RHS) and 3 (the chart / chart-closure fields).
+
 **Suggested decomposition** (multi-session):
 
 1. Choose a function-space realization of the metric locus. The
@@ -4451,6 +4546,88 @@ arguments.
 parabolic norm setup, the Lipschitz/Schauder estimate, and the actual
 chart construction. Will be the largest single addition of this whole
 program.
+
+Update — **the well-posedness / local-existence layer of the quasilinear Ricci–DeTurck fixed point
+is now built** on the parabolic `C^{0,α}` Banach chart (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), extending `AnalyticPDE/Parabolic/BanachSpace.lean`.  The
+previous milestone gave the *unique solvability* of the quasilinear equation `A u + N u + f = u`
+(bounded-linear principal part `A`, `k`-Lipschitz nonlinearity `N`, frozen data `f`, contraction
+constant `‖A‖ + k < 1`, `exists_unique_affinePlusLipschitzFixedPoint`); this session supplies the
+**continuous-dependence / a-priori / localisation data** the Ricci–DeTurck chart-closure consumes,
+turning the bare solvability into a genuine well-posed solution operator:
+
+* `norm_affinePlusLipschitzFixedPoint_sub_le` — **continuous (Lipschitz) dependence on the data**:
+  two solutions for data `f₁`, `f₂` obey `‖u₁ − u₂‖ ≤ ‖f₁ − f₂‖ / (1 − (‖A‖ + k))` (via
+  `norm_fixedPoint_sub_fixedPoint_le` with `gᵢ = A · + N · + fᵢ`, gap `g₁ − g₂ = f₁ − f₂`); generalises
+  the affine `norm_affineSolveL_apply_sub_le` (`N = 0`).
+* `norm_affinePlusLipschitzFixedPoint_le` — the **a-priori Schauder bound**
+  `‖u‖ ≤ (‖N 0‖ + ‖f‖) / (1 − (‖A‖ + k))` (from `‖u‖ ≤ (‖A‖ + k)‖u‖ + (‖N 0‖ + ‖f‖)`, the nonlinearity
+  contributing `‖N u‖ ≤ k‖u‖ + ‖N 0‖`, solved by `le_div_iff₀`).
+* `norm_affinePlusLipschitzFixedPoint_sub_le_nonlinearity` — **stability under a uniform perturbation
+  of the nonlinearity** (`‖N₁ z − N₂ z‖ ≤ C`): `‖u₁ − u₂‖ ≤ C / (1 − (‖A‖ + k))`; and
+  `norm_affinePlusLipschitzFixedPoint_sub_le_of_data_nonlinearity` — the **combined** continuous
+  dependence on `(N, f)`, `‖u₁ − u₂‖ ≤ (C + ‖f₁ − f₂‖) / (1 − (‖A‖ + k))` (gap
+  `(N₁ − N₂) + (f₁ − f₂)`), of which the two above are the `N₁ = N₂` / `f₁ = f₂` faces.
+* `affinePlusLipschitzSolve` (+ `_isSolution`, `_eq`, `norm_affinePlusLipschitzSolve_le`,
+  `lipschitzWith_affinePlusLipschitzSolve`, `continuous_affinePlusLipschitzSolve`) — the **bundled
+  quasilinear solution operator** `f ↦ u(f)` as a genuinely bounded (`≤ (‖N 0‖ + ‖f‖)/(1−(‖A‖+k))`),
+  `((1 − (‖A‖ + k))⁻¹).toNNReal`-Lipschitz, continuous nonlinear solution realisation (the nonlinear
+  analogue of the bounded *linear* `affineSolveL`).
+* `fixedPoint_mem_of_mapsTo_isClosed` — **closed-set localisation** of a nonlinear fixed point: a
+  `k`-contraction `g` (`k < 1`) with `Set.MapsTo g K K`, `c ∈ K`, `K` closed has its fixed point in `K`
+  (the Picard iterates `g^[n] c` stay in `K` and converge to `u`, `IsClosed.mem_of_tendsto`); and
+  `affinePlusLipschitzFixedPoint_mem_closedBall` — its **invariant-ball** specialisation, the honest
+  short-time / small-ball chart existence (if the RHS maps `closedBall c r` into itself, the solution
+  exists *and stays in the ball*, `dist u c ≤ r`).
+
+Remaining (future sessions): the lift to the higher-regularity parabolic Hölder space
+`C^{2+α,1+α/2}`, then the Schauder/Lipschitz estimate for the Ricci–DeTurck RHS (which supplies the
+concrete `A`, `N`, `f` and the invariant ball these consume) and the chart / chart-closure fields.
+
+Update — **the quadratic Ricci–DeTurck nonlinearity and its short-time small-ball well-posedness are
+now built** on the parabolic `C^{0,α}` Banach chart (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`), extending `AnalyticPDE/Parabolic/BanachSpace.lean`.  The
+frozen-coefficient operators (`mulL`/`mulCoeffL`) take their coefficient in the *seminormed carrier*
+(the *linearised* operator); the genuine Ricci–DeTurck nonlinearity is *quadratic*, with the
+coefficient itself a chart solution (a Banach class).  This session supplies exactly that quadratic
+algebra and the honest local existence for it (the globally-Lipschitz `affinePlusLipschitz` solver
+cannot reach a merely-locally-Lipschitz nonlinearity):
+
+* `mulBilinL` — the **fully-Banach bilinear multiplication** `ParabolicC0AlphaBanach … E … →L[ℝ]
+  (ParabolicC0AlphaBanach … F … →L[ℝ] ParabolicC0AlphaBanach … G …)` of norm `≤ ‖L‖`, descending
+  `mulL L` through the separation quotient in the coefficient slot too (well defined because `mulL L` is
+  `‖L‖`-Lipschitz); `mulBilinL_mk`/`mulBilinL_mk_mk`/`norm_mulBilinL_le`/`evalCLM_mulBilinL_apply` give
+  its representative/pointwise-product/norm/point-evaluation coherence.  Both factors are Banach classes
+  — the algebra of the *quadratic* nonlinear term, whose diagonal `u ↦ mulBilinL L u u` is the quadratic
+  map.
+* `norm_mulBilinL_diag_le` (`‖L(u,u)‖ ≤ ‖L‖‖u‖²`), `mulBilinL_diag_sub` (the bilinear polarisation
+  `L(u,u) − L(v,v) = L(u, u−v) + L(u−v, v)`), `norm_mulBilinL_diag_sub_le`
+  (`‖L(u,u) − L(v,v)‖ ≤ ‖L‖(‖u‖+‖v‖)‖u−v‖`), and `lipschitzOnWith_mulBilinL_diag` (the diagonal is
+  `LipschitzWith (2‖L‖R)` on `closedBall 0 R`) — the **local Lipschitz control** of the quadratic
+  nonlinearity, the `k`-Lipschitz-nonlinearity datum a fixed-point solver consumes.
+* `exists_fixedPoint_of_lipschitzOnWith_closedBall` (+ `eq_of_fixedPoint_of_lipschitzOnWith_closedBall`)
+  — the **Banach fixed point on a closed ball**: a self-map of `closedBall c r` that is
+  `LipschitzOnWith K` (`K < 1`) has a (unique-in-ball) fixed point there, via
+  `ContractingWith.exists_fixedPoint'` on the complete closed-ball subspace
+  (`Metric.isClosed_closedBall.isComplete`).  The abstract short-time small-ball existence.
+* `lipschitzOnWith_quadraticRHS_closedBall` — the **named contraction property** of the Ricci–DeTurck
+  right-hand side `u ↦ A u + L(u,u) + f`: `LipschitzOnWith (‖A‖ + 2‖L‖(‖c‖+r))` on `closedBall c r`
+  (linear part `‖A‖` + quadratic diagonal `2‖L‖(‖c‖+r)`).
+* `mapsTo_quadraticRHS_closedBall_zero` — the **invariant-ball (self-mapping) datum** from the explicit
+  scalar smallness `‖A‖·r + ‖L‖·r² + ‖f‖ ≤ r`.
+* `exists_fixedPoint_quadraticRHS_closedBall` (general center, `MapsTo` hypothesis),
+  `exists_fixedPoint_quadraticRHS_closedBall_zero` (center `0`, from the two scalar conditions
+  `‖A‖+2‖L‖r < 1` and `‖A‖·r+‖L‖·r²+‖f‖ ≤ r` alone), `eq_of_fixedPoint_quadraticRHS_closedBall`
+  (in-ball uniqueness), and the bundled `existsUnique_fixedPoint_quadraticRHS_closedBall_zero`
+  (**`∃!`**) — the honest **short-time chart existence + uniqueness** for the quadratic Ricci–DeTurck
+  equation `A u + L(u,u) + f = u`, stated purely from the operator/data norms.  The well-posed
+  short-time chart datum the Ricci–DeTurck chart closure consumes for the genuinely quadratic (only
+  locally Lipschitz) nonlinearity.
+
+Remaining (future sessions): unchanged in scope — the lift to the higher-regularity parabolic Hölder
+space `C^{2+α,1+α/2}`, then the Schauder/Lipschitz estimate for the Ricci–DeTurck RHS (which supplies
+the concrete `A`, the bilinear `L` and data `f`, and the short-time invariant ball these consume via
+the now-available quadratic well-posedness) and the chart / chart-closure fields.
 
 ## Dependencies between items
 
@@ -5939,3 +6116,2515 @@ Remaining for `ContDiff ℝ 3` (next session) — two viable routes:
      (`ContinuousMultilinearMap ℝ (fun _ : Fin n => E) E`, which carries a proper norm at every order
      and avoids the nested-CLM diamond entirely) instead of the nested `fderiv` tower.
 The two per-direction theorems above are the robust analytic content and feed either route.
+
+Update — the **multilinear route (Route 2) is now substantially built and the `ContDiff ℝ 3`
+capstone interface is CLOSED** (all sorry-free, axioms `propext`/`Classical.choice`/`Quot.sound` only),
+in `AnalyticPDE/SmoothDependenceCk.lean`.  Ten new theorems reformulate the `C³` closing through the
+properly-normed multilinear spaces, sidestepping the un-normed nested continuous-linear-map tower:
+
+* `uncurry2CLM` / `uncurry2CLM_apply` — the multilinear packaging
+  `(E →L E →L E) →L ContinuousMultilinearMap ℝ (Fin 2) E`, a genuine bounded operation (the inner
+  double space is normed).  `uncurry3` / `uncurry3_apply` — the packaging
+  `(E →L E →L E →L E) → ContinuousMultilinearMap ℝ (Fin 3) E`, built through normed intermediaries
+  (`(curryLeftEquiv_3).symm (uncurry2CLM.comp T)`), so `‖uncurry3 (D₃fam z) − uncurry3 (D₃fam x₀)‖`
+  (the *multilinear* norm) IS well-formed even though the triple operator norm is not.
+* `lipschitzWith_uncurry3_of_apply_sub_le` — abstract engine: a per-outer-direction operator gap
+  `‖F x k − F y k‖ ≤ C·dist x y·‖k‖` promotes to `LipschitzWith C.toNNReal (x ↦ uncurry3 (F x))` via
+  `ContinuousMultilinearMap.opNorm_le_bound`.  `lipschitzWith_thirdFundamentalSolution_multilinear` —
+  the flow instance: `z ↦ uncurry3 (D₃fam z)` is `LipschitzWith` (hence `Continuous`) in the
+  properly-normed `Fin 3` multilinear space, fed by `norm_thirdFundamentalSolution_apply_baseCurve_sub_le`.
+  **This is the obstruction-free upgrade of the per-direction `lipschitzWith_thirdFundamentalSolution_apply`.**
+* `uncurry3_curryLeft` (`(uncurry3 T).curryLeft = uncurry2CLM.comp T`), `uncurry2CLM_curry2` /
+  `curry2_uncurry2CLM` (packaging isomorphism: `uncurry2CLM` and `curry2` are mutually inverse),
+  `iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt`
+  (`iteratedFDeriv ℝ 2 f x = uncurry2CLM D2` from the flow 1st/2nd derivative data) and
+  `iteratedFDeriv_three_eq_uncurry3_of_hasFDerivAt`
+  (`HasFDerivAt (iteratedFDeriv ℝ 2 f) (uncurry2CLM.comp T) x → iteratedFDeriv ℝ 3 f x = uncurry3 T`) —
+  the currying bridges between the fundamental-solution data and the canonical `iteratedFDeriv` objects.
+* **Capstone (closed):** `continuous_iteratedFDeriv_three_of_hasFDerivAt_continuous` —
+  `Continuous (iteratedFDeriv ℝ 3 f)` from a **continuous, multilinear-valued** derivative
+  `D3ml : E → (E →L ContinuousMultilinearMap ℝ (Fin 2) E)` of the second iterated derivative (via the
+  curry isometry's inverse being continuous);  `differentiable_iteratedFDeriv_two_of_hasFDerivAt`; and
+  `contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous` — **`ContDiff ℝ 2 f` + continuous
+  multilinear `D3ml` ⟹ `ContDiff ℝ 3 f`** via `contDiff_nat_iff_continuous_differentiable` at `n = 3`.
+  The derivative datum is carried as `E → (E →L ContinuousMultilinearMap ℝ (Fin 2) E)` — a **normed**
+  codomain — throughout, so the capstone never touches the un-normed `E →L E →L E →L E`.
+
+**THE REMAINING GAP (single, well-isolated).**  To *apply* the `ContDiff ℝ 3` capstone to the flow one
+must supply its hypothesis `hD3 : ∀ x, HasFDerivAt (iteratedFDeriv ℝ 2 f) (D3ml x) x` with `D3ml`
+**multilinear-valued** (`E → (E →L ContinuousMultilinearMap ℝ (Fin 2) E)`).  The existing flow
+machinery (`exists_hasFDerivAt_secondFundamentalSolution`) delivers the *nested* datum
+`HasFDerivAt D₂ (D₃fam x) x` with `D₂ : E → (E →L E →L E)`, and the naive conversion
+`iteratedFDeriv ℝ 2 f = uncurry2CLM ∘ D₂` differentiated by the chain rule
+(`uncurry2CLM.hasFDerivAt.comp x (hD2 x)`) **whnf-diverges / times out** (deterministic `whnf`
+heartbeat blowup): the chain rule forces synthesis/reduction of `NormedSpace ℝ (E →L E →L E)`, whose
+noncomputable endomorphism-ring instance is prohibitively expensive.  So the nested→multilinear
+`HasFDerivAt` conversion is the wall.  **NEXT SESSION:** produce the multilinear `hD3` datum
+*without* the nested-CLM chain rule — e.g. differentiate `iteratedFDeriv ℝ 2 f` (a well-behaved
+`ML(Fin 2)`-valued map) natively via `iteratedFDeriv_succ_eq_comp_left` / a curry-transported second
+fundamental solution stated with a multilinear-valued derivative from the outset — then feed
+`contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous` to obtain `ContDiff ℝ 3` dependence on
+initial conditions, unblocking Items 1/2.
+
+Update — **THE REMAINING GAP IS CLOSED, and `C³` dependence of the flow on initial data is now
+proved** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), in
+`AnalyticPDE/SmoothDependenceCk.lean`.  The nested→multilinear `HasFDerivAt` wall — whose naive
+resolution (`uncurry2CLM.hasFDerivAt.comp x hD2`) whnf-diverges on the `E →L E →L E` instance diamond
+— is broken *without* the nested-CLM chain rule, and the whole `ContDiff ℝ 3` chain is assembled up to
+the honest flow-level theorem.
+
+**Root-cause diagnosis (this session).**  Every `HasFDerivAt`-lemma application whose codomain is the
+*double* space `E →L E →L E` (`.isLittleO`, `.comp`, `isBigO_comp`) fails: (a) `HasFDerivAt.isLittleO`
+leaves its metavariables unassigned unless the implicits are supplied *explicitly*
+(`HasFDerivAt.isLittleO (𝕜 := ℝ) (f := D2) (f' := D3) (x := x) hD3`); (b) two clashing `Norm`
+instances on `E →L E →L E` (`ContinuousLinearMap.hasOpNorm` vs `SeminormedAddCommGroup.toNorm`) that
+the unifier will not reduce (nested-space whnf blowup) break `trans_isLittleO`/`isBigO_comp`; (c)
+`‖uncurry2CLM‖` itself fails to synthesize (`Norm ((E →L E →L E) →L ML(Fin 2))` unavailable).
+
+**The break (all sorry-free).**
+* `norm_uncurry2CLM_le` — `‖uncurry2CLM T‖ ≤ ‖T‖`, via `ContinuousMultilinearMap.opNorm_le_bound` +
+  two `le_opNorm` on the double space; never forms the unsynthesizable `‖uncurry2CLM‖`.
+* `isLittleO_uncurry2CLM_comp` — post-composes a little-o with `uncurry2CLM`, through
+  `Asymptotics.isLittleO_iff` + `filter_upwards` + `.trans` (defeq-robust; sidesteps the double-space
+  `Norm` diamond that `isBigO_comp`/`trans_isLittleO` trip on).
+* `hasFDerivAt_iteratedFDeriv_two_uncurry2CLM` — **THE BRIDGE**:
+  `HasFDerivAt (iteratedFDeriv ℝ 2 f) (uncurry2CLM.comp D3) x` from the nested
+  `HasFDerivAt D2 D3 x` (`D2 = fderiv (fderiv f)` composition-form, `D3 : E →L E →L E →L E`), via the
+  explicit-implicit `.isLittleO` extraction + the two bricks above + the pointwise
+  `iteratedFDeriv_two_eq_uncurry2CLM_of_hasFDerivAt`.
+* `contDiff_three_of_hasFDerivAt_nested_of_continuous` — the **obstruction-free assembler**:
+  `ContDiff ℝ 3 f` from `ContDiff ℝ 2 f`, the nested chain
+  `HasFDerivAt f Df`/`HasFDerivAt Df D2`/`HasFDerivAt D2 D3fam`, and
+  `Continuous (z ↦ uncurry3 (D3fam z))`.  Sets `D3ml x = (uncurry3 (D3fam x)).curryLeft`, discharges
+  the `HasFDerivAt` slot via the bridge (+ `uncurry3_curryLeft`) and the continuity via the isometry
+  `continuousMultilinearCurryLeftEquiv` (whose forward map *is* `curryLeft`), then feeds the existing
+  capstone `contDiff_three_of_contDiff_two_of_hasFDerivAt_continuous`.
+
+**The `C³`-side bundle and the flow capstone.**
+* `exists_hasFDerivAt_secondFundamentalSolution_multilinearContinuous` — fuses
+  `exists_hasFDerivAt_secondFundamentalSolution` (the nested `D₂`/`D₃fam` chain) with
+  `lipschitzWith_thirdFundamentalSolution_multilinear` (multilinear continuity) for the **same**
+  existentially-bound `D₃fam`/`Vfamfam` (one `exists_thirdVariationOperator_of_field` drives both, so
+  the third-variation-ODE characterisation is shared).  Returns
+  `∃ D₂ D₃fam, (D₂-char) ∧ (∀ y, HasFDerivAt D₂ (D₃fam y) y) ∧ Continuous (z ↦ uncurry3 (D₃fam z))` —
+  exactly the third-derivative-side triple the assembler consumes; lone extra hypothesis `hD3vlip`.
+* `exists_flow_contDiff_three_of_lipschitz_thirdDeriv` — **THE ITEM 1/2 UNBLOCK**: for a `C^{3,1}`
+  field, `∃ Φ, (∀ z, Φ z t₀ = z) ∧ (∀ z, IsIntegralCurve (Φ z) v) ∧ ContDiff ℝ 3 (z ↦ Φ z t)`.
+  Assembles, for one shared `Φ`: `exists_flow_contDiff_two_of_lipschitz_secondDeriv` (`Φ` +
+  `ContDiff ℝ 2`), the bundle above (nested chain + continuity), and the `C¹`/`C²` bootstraps
+  (`hasFDerivAt_flow_of_lipschitz_deriv` + `norm_fundamentalSolution_sub_sub_linearVariation_le_sq`,
+  identifying `fderiv (z ↦ Φ z t) =` resolvent and `fderiv (resolvent) = D₂`), fed to the assembler.
+  Along-flow bounds are read off the derivative Lipschitz constants (`C' = L`,
+  `‖D3v‖ = ‖D3v.curryLeft‖ = ‖D3vm‖ ≤ N` by the `curryLeft` isometry `ContinuousMultilinearMap.curryLeft_norm`).
+
+Remaining for Point 4 (future sessions): **connect the now-`ContDiff ℝ 3` initial-data dependence to
+the manifold gauge-flow consumers of Items 1 & 2** — the compact-manifold gauge-flow constructor
+(Item 2, extending `GaugeReduction/Diffeomorph3FlowExistence.lean` through the Banach model bridge
+`ModelGaugeFlowODE.lean`), and the tensor time-derivative chain rule (Item 1,
+`Diffeomorph3FlowTimeDerivative.lean`) which now has its `C³` initial-data-dependence input available;
+plus the general (merely-continuous, non-Lipschitz `Dv`) modulus, and the Item 3 parabolic
+Hölder/Schauder frontier (`AnalyticPDE/ParabolicHolder.lean`).
+
+Update — **the general (merely-continuous, non-Lipschitz `Dv`) modulus is now CLOSED for a
+finite-dimensional state space**, in the new self-contained module
+`AnalyticPDE/SmoothDependenceContinuousDeriv.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; it imports the cached `SmoothDependenceCk`, so it builds
+without recompiling that tower).  The Lipschitz-derivative restriction that
+`hasFDerivAt_flow_of_lipschitz_deriv` / `exists_flow_contDiff_one_of_lipschitz_deriv` impose is
+removed: a genuine `C^1` field supplies only a *jointly continuous* spatial derivative, which on a
+finite-dimensional space suffices by Heine–Cantor.
+
+* `exists_monotone_modulus_of_continuousOn_tube` — **the reusable analytic core**: for a proper
+  (e.g. finite-dimensional) space, a continuous `f : ℝ → E → ℝ` that is nonnegative and vanishes at
+  the origin over a compact `T ⊆ ℝ` (`f s 0 = 0`) admits a nonnegative, monotone, `0⁺`-vanishing
+  modulus `ω` with `f s w ≤ ω ‖w‖` on the radius-`R` tube.  Witness `ω r = sSup` of `f` over the
+  radius-`min r R` sub-tube; boundedness from compactness (`IsCompact.bddAbove_image`), monotonicity
+  from nested tubes (`csSup_le_csSup`), and the `0⁺` limit from Heine–Cantor uniform continuity
+  (`IsCompact.uniformContinuousOn_of_continuous`).  This is the "monotone `ω → 0` from joint
+  continuity of `Dv` on the compact trajectory tube" the plan flagged as the missing step.
+* `hasFDerivAt_flow_of_continuous_deriv` (+ `differentiableAt`/`fderiv` corollaries) — the pointwise
+  `C¹` dependence: from `hDv` (everywhere Fréchet derivative), `hDvc` (joint continuity of `Dv`), and
+  `A s = Dv s (Φ x₀ s)`, `z ↦ Φ z t` is Fréchet differentiable at `x₀` with derivative the resolvent.
+  Feeds the derivative-oscillation modulus `‖Dv s (Φ x₀ s + w) − Dv s (Φ x₀ s)‖` on the compact
+  trajectory tube to `hasFDerivAt_flow_of_uniform_deriv_modulus_eventually`.
+* `exists_flow_differentiable_of_continuous_deriv` — the unconditional **everywhere-`Differentiable`**
+  version (continuous-derivative analogue of `exists_flow_differentiable_of_lipschitz_deriv`): from
+  field-level data only, one flow family `Φ` with `Differentiable ℝ (z ↦ Φ z t)`.
+* `exists_flow_fderiv_continuous_of_continuous_deriv` / `exists_flow_contDiff_one_of_continuous_deriv`
+  — the **`ContDiff ℝ 1`** version (continuous-derivative analogue of
+  `exists_flow_contDiff_one_of_lipschitz_deriv`).  Resolvent continuity is the continuous
+  (non-Lipschitz) coefficient dependence of the fundamental solution
+  (`norm_fundamentalSolution_sub_le_of_forall_le_Icc`) fed the base-point derivative-oscillation
+  modulus at the flow-separation `exp(K(t−t₀))·‖z−z₀‖` (via `tendsto_modulus_comp_norm_sub`), squeezed
+  to `0`; packaged through `contDiff_one_iff_fderiv`.  This is the honest "`C¹` in initial data" in
+  the `ContDiff` vocabulary Item 2 consumes, now for an arbitrary `C^1` right-hand side.
+
+Remaining for Point 4 (future sessions): unchanged — the manifold gauge-flow consumers of Items 1 & 2
+(the compact-manifold gauge-flow constructor, the tensor time-derivative chain rule), the higher
+(`ContDiff ℝ 2`/`3`) continuous-derivative layers (needing modulus arguments on `D²v`/`D³v`, lower
+leverage since smooth Ricci-flow RHSs already have locally-Lipschitz derivatives and use the
+`_lipschitz_` C³ capstone), and the Item 3 parabolic Hölder/Schauder frontier.
+
+Update — **the time-`t` flow map is now a `C^k` diffeomorphism (`k = 1, 2, 3`) of the state
+space, for *every* `t`**, in the new self-contained module
+`AnalyticPDE/FlowDiffeomorphism.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; imports the cached `SmoothDependenceCk`, so it builds
+without recompiling that tower).  This closes the **inverse/bijectivity half** of "the flow is a
+diffeomorphism family" that Item 2's compact-manifold gauge-flow constructor consumes: the
+`SmoothDependenceCk` tower already proved the flow map injective (`injective_flow_apply`),
+Lipschitz/continuous (`lipschitzWith_flow_apply`, `continuous_flow_apply`, `continuous_flow`) and
+`ContDiff ℝ k` in the *forward* direction (`t₀ ≤ t`), but bijectivity, the inverse flow map, and
+*backward* regularity did not exist.
+
+* `surjective_flow_apply` / `bijective_flow_apply` — the flow map is a bijection: every `w` is
+  `Φ z t` for `z = γ t₀`, `γ` the integral curve through `w` at `t`
+  (`exists_isIntegralCurve_of_lipschitzWith`), identified with `Φ (γ t₀)` by uniqueness
+  (`eq_of_isIntegralCurve_of_eq_at`).
+* `exists_inverse_flow_apply` — the **reverse-time inverse flow** `ψ = (fun w ↦ Ψ w t₀)` from a
+  companion family `Ψ` anchored at `t` (`exists_flow_family`); `LeftInverse`/`RightInverse` of
+  `x ↦ Φ x t` by uniqueness, `LipschitzWith exp(K|t₀−t|)` as the time-`t₀` map of a flow family.
+* `exists_homeomorph_flow_apply` — bundled `Homeomorph E E` whose coercion is `x ↦ Φ x t` (the
+  ambient-topological skeleton of the self-diffeomorphism family).
+* **Two-sided (all-time) regularity via time reversal.**  The `SmoothDependenceCk` regularity
+  layers are all forward-only (`t₀ ≤ t`); the flow *inverse* is a backward flow, so backward
+  regularity was the true blocker.  It follows from the forward theorems applied to the
+  time-reversed field `w s x = -(v (-s) x)` (reversed derivatives `-(D^k v (-s) x)`; all
+  norm/continuity/Lipschitz hypotheses transfer through negation + time reflection, the `C³`
+  compatibility conditions via the new `curry2_neg` / `curryLeft_neg_fin3` `map_neg` lemmas),
+  anchored at `-t₀`, target `-t ≥ -t₀`, then reflected by `s ↦ -s` (`isIntegralCurve_comp_neg`):
+  `exists_flow_{differentiable,contDiff_one,contDiff_two,contDiff_three}_..._backward` and their
+  `_two_sided` (all-`t`, by `le_total`) and given-family (`{differentiable,contDiff_one,
+  contDiff_two,contDiff_three}_flow_apply_of_..`, one anchored family, every time, by uniqueness
+  transport `eq_of_isIntegralCurve_of_eq`) forms.
+* **The diffeomorphism capstones** `exists_contDiff_{one,two,three}_diffeomorph_flow_apply` — for a
+  given flow family and *every* `t`, the reverse-time inverse `ψ` is a two-sided inverse of
+  `x ↦ Φ x t` and **both** `x ↦ Φ x t` and `ψ` are `ContDiff ℝ k` (no forward/backward restriction).
+* `exists_flow_contDiff_three_diffeomorph` — the **field-data-only** entry point: from the `C^{3,1}`
+  jet of `v` alone, a flow family `Φ` (anchored at `t₀`, integral curve of `v`) whose time-`t` map
+  is a `C³` diffeomorphism for every `t`.
+
+Remaining for Point 4 (future sessions): unchanged in scope — connect this `C^k` flow-diffeomorphism
+data (now bijective + two-sided-regular, i.e. genuine diffeomorphisms, at the Banach/chart level) to
+the compact-manifold gauge-flow constructor (Item 2, `GaugeReduction/Diffeomorph3FlowExistence.lean`
+through the Banach model bridge `ModelGaugeFlowODE.lean` and Mathlib's chart/`IsMIntegralCurve`
+layer — the remaining work is the local-chart↔global-flow bridging, the diffeomorphism data itself
+is now available), the tensor time-derivative chain rule (Item 1), and the Item 3 parabolic
+Hölder/Schauder frontier (`AnalyticPDE/ParabolicHolder.lean`).
+
+Update — **the Fréchet → manifold bridge is now built: `ContMDiff`/`HasMFDerivAt` smooth dependence
+of the ODE flow on initial data for the model manifold `𝓘(ℝ, E)`**, in the new self-contained leaf
+module `AnalyticPDE/SmoothDependenceManifold.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; imports the cached `FlowDiffeomorphism` tower plus the
+Mathlib manifold `ContMDiff`/`MFDeriv`/`Diffeomorph` layer, so it builds without recompiling the
+Banach tower).  The Banach smooth-dependence towers (`SmoothDependenceCk`, `FlowDiffeomorphism`) state
+everything in the *Fréchet* (`ContDiff`/`HasFDerivAt`/`IsIntegralCurve`) vocabulary of
+`Mathlib.Analysis`, but Item 2's compact-manifold gauge-flow constructor
+(`GaugeReduction/GaugeFlowAssembly.gaugeFlow_of_inverse_flow`) consumes the *manifold*
+(`ContMDiff`/`HasMFDerivAt`) vocabulary of `Mathlib.Geometry.Manifold`.  This module transports the
+whole diffeomorphism tower across that gap for the model manifold `E`, which — because the
+general-manifold smooth-dependence theorem is proved chart-by-chart with each chart *the model space
+`E`* — is the load-bearing chart-level core.  No new PDE/analytic content; nothing touches the heavy
+gauge files.
+
+* `hasMFDerivAt_of_isIntegralCurve` — the manifold ODE derivative form of an integral curve: from
+  `IsIntegralCurve γ v`, `HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) γ t ((1 : ℝ →L[ℝ] ℝ).smulRight (v t (γ t)))`
+  for every `t` — exactly the `hderiv` shape `gaugeFlow_of_inverse_flow` consumes (via
+  `hasDerivAt_iff_hasFDerivAt`/`smulRight_one_eq_toSpanSingleton` + `hasMFDerivAt_iff_hasFDerivAt`).
+* `contMDiff_{one,two,three}_flow_apply_of_lipschitz_{deriv,secondDeriv,thirdDeriv}` — the manifold
+  spatial `C^k` regularity of the flow map `x ↦ Φ x t` (`ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) k`), via
+  `contMDiff_iff_contDiff`.
+* `exists_flow_contMDiff_three` — field-data-only manifold smooth-dependence existence.
+* `exists_flow_contMDiff_three_diffeomorph` — the manifold `C³` **self-diffeomorphism family**
+  (per-time two-sided inverse `ψ`, both `x ↦ Φ x t` and `ψ` `ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3`): the
+  model-manifold instance of the diffeomorphism data Item 2's gauge flow consumes.
+* `exists_flow_contMDiff_three_gaugeData` — the **full model-manifold gauge-flow data bundle**:
+  anchoring, the manifold ODE derivative equation at every time, and the per-time `C³`
+  self-diffeomorphism data, packaged in the exact shapes `gaugeFlow_of_inverse_flow` needs (for
+  `M = E`, `𝓘(ℝ, E)`).
+* `exists_flow_diffeomorph_{one,two,three}` — the time-`t` flow map bundled as a first-class Mathlib
+  `Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E k` (`k = 1, 2, 3`), from the `C^{k,1}` field jet alone: the
+  reverse-time inverse flow supplies the smooth inverse, and both directions are `ContMDiff k`.
+
+Remaining for Point 4 (future sessions): the last mile is the **general-manifold** lift — replacing
+`M = E` (`𝓘(ℝ, E)`) with an arbitrary compact `M` — which is the chart-by-chart patching that lives
+in the heavy `GaugeReduction/ModelGaugeFlowODE.lean` / `Diffeomorph3FlowExistence.lean` (the model
+`E`-chart smooth-dependence core those consume is now available); the tensor time-derivative chain
+rule (Item 1, `Diffeomorph3FlowTimeDerivative.lean`); and the Item 3 parabolic Hölder/Schauder
+frontier (`AnalyticPDE/ParabolicHolder.lean`).
+
+Update — **the model-manifold (`M = E`) raw `C³` gauge-flow existence is now inhabited from
+field-jet data: the ODE smooth-dependence tower is connected all the way to the project's actual
+gauge-flow structure `RicciFlow.Diffeomorph3GaugeFlowOn`**, in the new self-contained leaf module
+`AnalyticPDE/ModelManifoldGaugeFlow.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; a legacy-mode file importing the cached
+`GaugeReduction/GaugeFlowAssembly` and the `AnalyticPDE/SmoothDependenceManifold` tower, so it builds
+without recompiling either).  Item 2's reduction target
+`GaugeFlowAssembly.gaugeFlow_of_inverse_flow` consumes mutually inverse `ContMDiff I I 3` time-slice
+maps `F`, `G : ℝ → M → M`, anchoring, and the within-set manifold ODE derivative equation
+`HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun τ ↦ F τ x) s t ((1).smulRight (X t (F t x)))`.  For the model
+manifold `E` (`𝓘(ℝ, E)`), a `TimeDependentVectorField` is *definitionally* an ordinary field
+`ℝ → E → E` (`TangentSpace 𝓘(ℝ, E) x = E`), and the whole smooth-dependence tower supplies exactly
+this data — so the previously separate Fréchet tower and manifold gauge API now meet.
+
+* `exists_diffeomorph3GaugeFlowOn_of_field_jet` — from the `C^{3,1}` field jet of `v` alone (globally
+  `K`-Lipschitz, time-continuous `v` with the standard globally-Lipschitz/jointly-continuous Fréchet
+  jet `Dv`, `D²v` (`D2vc`/`D2vm`), `D³v` (`D3vm`/`D3v`) and the `curry2`/`curryLeft` compatibilities),
+  `Nonempty (RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E) (X := v) s t₀)` on an *arbitrary*
+  time set `s`.  A pure assembly: the gauge-data bundle `exists_flow_contMDiff_three_gaugeData`
+  supplies `Φ`, anchoring, the per-time smooth inverse (`choose`), and the manifold ODE derivative
+  (weakened to within-set by `HasMFDerivAt.hasMFDerivWithinAt`), fed to `gaugeFlow_of_inverse_flow`.
+  The instance side (`IsManifold 𝓘(ℝ, E) ∞ E`, `ContMDiffVectorBundle 2 E (TangentSpace 𝓘(ℝ, E)) …`,
+  `SigmaCompactSpace E`) resolves automatically for `M = E` from `[FiniteDimensional ℝ E]`,
+  `[CompleteSpace E]`.  This is the **load-bearing chart-level core** of Item 2's general
+  compact-manifold constructor: because the general-manifold smooth-dependence theorem is proved
+  chart-by-chart with each chart the model space `E`, per-chart gauge-flow existence is now available;
+  the remaining work is the local-chart↔global-flow patching in the heavy gauge files.
+* `exists_flow_diffeomorph_three_hasMFDerivAt` — the per-chart *export*: a *single* flow family `Φ`
+  that simultaneously anchors, satisfies the manifold ODE derivative equation at every time
+  (`HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun τ ↦ Φ z τ) t ((1).smulRight (v t (Φ z t)))`), and is, for every
+  `t`, the coercion of a bundled `Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 3`.  This threads one `Φ` through
+  both `exists_flow_diffeomorph_three` (which exposed the `Diffeomorph` family but dropped the flow
+  equation) and the gauge-data bundle (which exposed the ODE but only an unbundled inverse), giving
+  the exact per-chart datum — a first-class `C³` self-diffeomorphism family that *is* the flow of the
+  chart-local field — the general lift transports.
+
+Update — **`ContDiff` → field-jet bridge** added in `AnalyticPDE/FieldJetContDiff.lean` (axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`), beginning to close the usability gap that the whole
+smooth-dependence tower is stated behind *artificial field-jet objects*. From a **single** clean
+hypothesis — `v` jointly `ContDiff ℝ n (Function.uncurry v)` — the first jet layer is extracted:
+`contDiff_apply_of_contDiff_uncurry` (each slice `v s` is spatially `ContDiff n`),
+`hasFDerivAt_fderiv_of_contDiff_uncurry` (the spatial derivative object `fderiv ℝ (v s)` is a genuine
+Fréchet derivative — the tower's `hDv` input), and `continuous_fderiv_of_contDiff_uncurry` (joint
+`(t, x)`-continuity via the partial-derivative identity
+`fderiv ℝ (v t) x = fderiv ℝ (Function.uncurry v) (t, x) ∘L inr` — the `hDvc` input).  The `hDvlip`
+input follows from a second-derivative bound via
+`lipschitzWith_fderiv_of_contDiff_of_nnnorm_secondFDeriv_le`, and the spatial-Lipschitz / time-continuity
+inputs from `lipschitzWith_apply_of_contDiff_of_nnnorm_fderiv_le` /
+`continuous_apply_of_contDiff_uncurry`.  These package into `contMDiff_one_flow_apply_of_contDiff` and
+its fully self-contained form `contMDiff_one_flow_apply_of_contDiff_of_bddDerivs`: **manifold spatial
+`C¹` regularity of the flow map stated purely from joint `ContDiff` of the field plus derivative
+bounds** — the first tower flow-regularity result carrying no separately-assumed jet objects.  Next:
+the layer-2/-3 extraction (second/third partial-derivative joint continuity + the `curry2`/`curryLeft`
+compatibilities, reusing `curry2_iteratedFDeriv_two_eq_of_hasFDerivAt` /
+`curryLeft_iteratedFDeriv_three_eq_of_hasFDerivAt`) to raise this to the full `C^{3,1}` jet that the
+model-manifold `C³` gauge flow `exists_diffeomorph3GaugeFlowOn_of_field_jet` consumes.
+
+Update — **parabolic Hölder normed-algebra constant-function primitives** added to
+`AnalyticPDE/ParabolicHolder.lean` (axiom-clean), the constant-term / multiplicative-unit bounds
+complementing the existing additive / scalar / product (`_add_le`, `_smul`, `_mul_le`,
+`_mul_sub_mul_le`) estimates on the way to the Schauder fixed point: `parabolicHolderSeminorm_const`
+(a constant has zero Hölder oscillation, `= 0`, via `ParabolicHolderWith 0`), `parabolicSupNorm_const_le`
+(`≤ ‖c‖`, via `ParabolicBoundedWith ‖c‖`), and `parabolicC0AlphaNorm_const_le` (`≤ ‖c‖`).
+
+Remaining for Point 4 (future sessions): the **general-manifold** lift (replace `M = E` with an
+arbitrary compact `M`) — the local-chart↔global-flow patching in the heavy
+`GaugeReduction/ModelGaugeFlowODE.lean` / `Diffeomorph3FlowExistence.lean`, whose per-chart flow
+existence + diffeomorphism + ODE data is now available (`ModelManifoldGaugeFlow`); the Item 1 tensor
+time-derivative chain rule (`Diffeomorph3FlowTimeDerivative.lean`); and the Item 3 parabolic
+Hölder/Schauder frontier (`AnalyticPDE/ParabolicHolder.lean`).
+
+Update — **parabolic `C^{0,α}` Banach space operator API extended** in
+`AnalyticPDE/Parabolic/BanachSpace.lean` (all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`), building the functional-analytic structure the
+Ricci–DeTurck Banach chart and chart-closure data (Item 3) consume, layered on the genuine separated
+Banach space (`ParabolicC0AlphaBanach`) and the norm-nonincreasing restriction operator `restrictL`:
+
+* `restrictL_self` / `restrictL_comp` (carrier `ParabolicC0AlphaSpace` **and** Banach
+  `ParabolicC0AlphaBanach`, with the `_apply` pointwise forms) — the **restriction operators form a
+  projective system**: restricting along `s ⊆ s` is the identity, and `restrictL (r ⊆ t)` composed
+  with `restrictL (t ⊆ s)` is `restrictL (r ⊆ s)`.  This is the categorical data that gluing of
+  local Ricci–DeTurck Banach-chart solutions across overlapping charts consumes.
+* `evalCLM z hz` (carrier and Banach, with `evalCLM_apply` / `evalCLM_mk` / `evalCLM_mk_apply`,
+  `norm_evalCLM_apply_le`, `norm_evalCLM_le`) — **point evaluation at a space-time point `z ∈ s` as a
+  bounded linear functional `… →L[ℝ] E` of operator norm `≤ 1`**.  On the carrier it is the
+  composite `LinearMap.proj z ∘ subtype` bounded by `norm_le_parabolicC0AlphaNorm` (the sup part of
+  the `C^{0,α}` norm controls the pointwise value on `s`); it **descends to the Banach quotient** via
+  `SeparationQuotient.liftCLM` because functions identified on `s` share the value at `z ∈ s`.  This
+  is the functional that reads off a Banach-chart solution's value at a space-time point.
+* `evalCLM_restrictL_apply` (carrier and Banach) — **the evaluation functionals form a compatible
+  cone over the restriction projective system**: `evalCLM z hz ∘ restrictL (t ⊆ s) = evalCLM z (…)`
+  for `z ∈ t`.  This is the coherence that keeps the point-values of glued chart-solutions consistent
+  across overlaps.
+* `eq_iff_forall_evalCLM` — **the point-evaluation functionals separate points**: a parabolic
+  `C^{0,α}` Banach class is completely determined by its values at the space-time points of `s`
+  (`x = y ↔ ∀ z ∈ s, evalCLM z hz x = evalCLM z hz y`), via `mk_eq_mk_iff` and the `B = H = 0`
+  `C^{0,α}` bound (a function vanishing on `s` has zero parabolic `C^{0,α}` norm).  The faithful
+  representation showing a Ricci–DeTurck Banach-chart solution is determined by its space-time values.
+
+Remaining for Point 4 (future sessions): the genuine **Schauder a-priori estimates** and the
+Ricci–DeTurck RHS operator on the parabolic Banach space (Item 3, the analytic main theorem); the
+**general-manifold** gauge-flow lift (Item 2, heavy gauge files); and the Item 1 tensor
+time-derivative chain rule.
+
+Update — **parabolic `C^{0,α}` Banach change-of-variables + inhomogeneous operator API extended** in
+`AnalyticPDE/Parabolic/BanachSpace.lean` (all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`), continuing the Ricci–DeTurck Banach-chart operator
+algebra (`restrictL`/`evalCLM`/`compL`/`mulCoeffL`/`mulL`) toward the Schauder fixed point:
+
+* **Precomposition norm bounds** (`parabolicSupNorm_comp_mapsTo`,
+  `parabolicHolderSeminorm_comp_parabolicDistanceLe`, `parabolicC0AlphaNorm_comp_parabolicDistanceLe_le`)
+  — the norm-level core: for a space-time map `φ : ℝ × Y → ℝ × X` mapping `t` into `s` and expanding
+  parabolic distance by at most `L`, the sup norm of `u ∘ φ` on `t` is `≤` that of `u` on `s`, the
+  Hölder seminorm scales by `L ^ α`, and `‖u ∘ φ‖_{C^{0,α}(t)} ≤ max 1 (L ^ α) · ‖u‖_{C^{0,α}(s)}`
+  (built on the existing `comp_parabolicDistanceLe` change-of-variables family).
+* **The precomposition (change-of-variables) bounded operator** `ParabolicC0AlphaBanach.precompL`
+  — `u ↦ u ∘ φ` as a bounded operator `ParabolicC0AlphaBanach X E α s →L ParabolicC0AlphaBanach Y E α t`
+  of operator norm `≤ max 1 (L ^ α)` (carrier `ParabolicC0AlphaSpace.precompSubmoduleLinearMap`
+  /`precompLinearMap`/`precompL`, descended to the separation quotients because bounded), with
+  `precompL_mk`, `norm_precompL_le`, and the pullback∘evaluation cone coherence
+  `evalCLM_precompL_apply` (`evalCLM w (precompL φ x) = evalCLM (φ w) x`).  This is the operator behind
+  chart-transition gluing, the DeTurck gauge-diffeomorphism action, and parabolic Schauder scaling;
+  it **generalises `restrictL`** (the `φ = ` inclusion, `L = 1` case).
+* **Precomposition functoriality** `precompL_comp_apply` — the contravariant cocycle law
+  `precompL_ψ ∘ precompL_φ = precompL_{φ∘ψ}` (composite `r → s`, `(L·M)`-expanding), the
+  chart-transition cocycle condition that gluing across overlapping charts consumes (precomposition
+  analogue of `restrictL_comp` / `compL_comp`), proved through the point-separation representation.
+* **The constant-function embedding operator** `ParabolicC0AlphaBanach.constL` — `c : E ↦` the class
+  of the constant field `z ↦ c`, a bounded operator `E →L ParabolicC0AlphaBanach X E α s` of norm
+  `≤ 1` (the inhomogeneous / frozen-data part of the affine `u ↦ A u + f` Ricci–DeTurck RHS), with
+  `norm_constL_le`, the point-evaluation coherence `evalCLM_constL_apply` (`evalCLM z (constL c) = c`),
+  and the bundle-morphism compatibility `compL_constL` (`compL L (constL c) = constL (L c)`).
+
+Remaining for Point 4 (future sessions): unchanged in scope — the genuine **Schauder a-priori
+estimates** and the Ricci–DeTurck RHS operator (assembled from `mulCoeffL`/`compL`/`precompL`/`constL`)
+on the parabolic Banach space (Item 3, the analytic main theorem); the **general-manifold**
+gauge-flow lift (Item 2, heavy gauge files); and the Item 1 tensor time-derivative chain rule.
+
+Update — **the parabolic `C^{0,α}` Banach nonlinear Schauder fixed-point toolkit** added to
+`AnalyticPDE/Parabolic/BanachSpace.lean` (all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`), taking the Ricci–DeTurck Banach chart from *linear/affine*
+solvability to the genuine *nonlinear/quasilinear* fixed point that the actual RHS consumes, layered
+on the completed affine Neumann solvability (`affineSolveL`, `exists_unique_affineFixedPoint`):
+
+* **Continuous dependence of the linear solution operator on its coefficients** — `affineSolveL_mul_oneSub`
+  (the left-inverse companion `affineSolveL A hA * (1 - A) = 1` of the existing right inverse, so
+  `affineSolveL A hA = (1 - A)⁻¹` two-sidedly), the **resolvent identity** `affineSolveL_sub_eq`
+  (`(1 - A)⁻¹ - (1 - B)⁻¹ = (1 - A)⁻¹ (A - B) (1 - B)⁻¹`), its operator-norm bound
+  `norm_affineSolveL_sub_le` (`≤ (1 - ‖A‖)⁻¹ ‖A - B‖ (1 - ‖B‖)⁻¹`: the *Lipschitz dependence of the
+  linearised Schauder solution operator on the frozen coefficient operator* that turns the
+  coefficient-dependent iteration into a contraction), and the a-priori solution-difference estimate
+  `norm_affineSolveL_apply_sub_le` at fixed data `f`.
+* **Nonlinear Banach fixed point** — `exists_unique_lipschitzFixedPoint` (a `LipschitzWith k`, `k < 1`
+  self-map has a unique fixed point `g u = u`: the nonlinear generalisation of the affine case, i.e.
+  solvability of the genuine quasilinear Ricci–DeTurck RHS on a short-time / small-ball chart where it
+  contracts), the a-posteriori residual bound `norm_sub_fixedPoint_le_of_lipschitz`
+  (`‖x - u‖ ≤ ‖x - g x‖ / (1 - k)`), and the stability estimate `norm_fixedPoint_sub_fixedPoint_le`
+  (`‖u₁ - u₂‖ ≤ C / (1 - k)` when `‖g₁ z - g₂ z‖ ≤ C` uniformly — well-posedness under a perturbation
+  of the nonlinearity; only `g₁` need contract).
+* **Quantitative Picard/Schauder iteration convergence** — `norm_iterate_sub_fixedPoint_le` (the
+  a-priori geometric rate `‖g^[n] x - u‖ ≤ ‖x - g x‖ · kⁿ / (1 - k)`, the constructive form of the
+  nonlinear existence) and `tendsto_iterate_fixedPoint` (the iterates converge to the solution).
+* **The quasilinear RHS shape** — `exists_unique_affinePlusLipschitzFixedPoint`: the actual
+  Ricci–DeTurck right-hand side split `A u + N u + f` (bounded linear principal-plus-lower-order part
+  `A`, nonlinear `LipschitzWith k` remainder `N`, frozen data `f`) is uniquely solvable when
+  `‖A‖ + k < 1`, via `LipschitzWith.add` (contraction constant `‖A‖₊ + k`) + the nonlinear fixed point.
+  Generalises the affine `exists_unique_affineFixedPoint` (`N = 0`) and the `compL`/`mulCoeffL`
+  corollaries.
+
+Remaining for Point 4 (future sessions): the genuine **parabolic Schauder a-priori estimates** that
+make the concrete Ricci–DeTurck RHS operator a short-time contraction (bounding the operator norm by
+the time-interval length — the hard analytic content in `AnalyticPDE/ParabolicHolder.lean`), and the
+assembly of the concrete RHS from `mulCoeffL`/`compL`/`precompL`/`constL` with the geometric
+coefficients (Item 3, the analytic main theorem); the **general-manifold** gauge-flow lift (Item 2,
+heavy gauge files); and the Item 1 tensor time-derivative chain rule.
+
+Update — **the manifold-level spatial pushforward (differential) of the ODE flow map is now proved on
+the model manifold `𝓘(ℝ, E)`**, extending `AnalyticPDE/SmoothDependenceManifold.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; a pure Fréchet→manifold transport, nothing touches the heavy
+gauge files).  The Banach `SmoothDependenceCk` tower proved spatial `C^k` smoothness (`ContMDiff`) of
+the time-`t` flow map `x ↦ Φ x t` and the *time* derivative of a single trajectory
+(`hasMFDerivAt_of_isIntegralCurve`), but the **pushforward** — the manifold differential (`mfderiv`) of
+the flow map itself, and its explicit value the resolvent `D_x Φ_t` — was stated only in the *Fréchet*
+(`HasFDerivAt`/`fderiv`) vocabulary.  Item 1's tensor time-derivative chain rule and Item 2's
+compact-manifold gauge-flow constructor both consume the *manifold* (`HasMFDerivAt`/`mfderiv`) form.
+
+* `hasMFDerivAt_flow_apply_of_hasFDerivAt` / `hasMFDerivWithinAt_flow_apply_of_hasFDerivAt` /
+  `mfderiv_flow_apply_of_hasFDerivAt` — the **generic pushforward bridges**: from the Fréchet spatial
+  derivative `HasFDerivAt (fun z => Φ z t) D x₀` (which the tower supplies via
+  `hasFDerivAt_flow_of_lipschitz_deriv` etc.), the time-`t` flow map has manifold differential `D`
+  (`HasMFDerivAt`/`HasMFDerivAt[s]`/`mfderiv = D`).  The spatial companion of
+  `hasMFDerivAt_of_isIntegralCurve` (`HasFDerivAt.hasMFDerivAt` / `.mfderiv`).
+* `hasMFDerivAt_flow_apply_of_lipschitz_deriv` / `mfderiv_flow_apply_of_lipschitz_deriv` — the
+  **self-contained `C^{1,1}`-jet identification**: `mfderiv 𝓘(ℝ, E) 𝓘(ℝ, E) (fun z => Φ z t) x₀ =
+  fundamentalSolution … = D_x Φ_t` — *the manifold pushforward is the resolvent* — transporting
+  `hasFDerivAt_flow_of_lipschitz_deriv_of_hasFDerivAt`.  (An `E →L[ℝ] E` type ascription on the
+  resolvent is essential: without it, elaborating the concrete `fundamentalSolution …` term *against*
+  the expected tangent-space CLM type eagerly triggers `NormedAddCommGroup (TangentSpace 𝓘(ℝ, E) x₀)`
+  synthesis, which fails because `TangentSpace I x := E` derives only the `AddCommGroup`/`Module`/
+  `TopologicalSpace` structure, not the normed one; the ascription forces elaboration at the Fréchet
+  type first, then the tangent-space identification is a defeq unification.)
+* `hasMFDerivAt_fundamentalSolution_apply` / `hasMFDerivWithinAt_fundamentalSolution_apply` — the
+  **manifold vector variational ODE of a pushed-forward direction** (resolvent column): the path
+  `τ ↦ D_x Φ_τ · u₀` (the pushforward of a fixed tangent vector `u₀` along the flow) has manifold
+  derivative `(1).smulRight (A t (D_x Φ_t · u₀))` for every `t` (and its `HasMFDerivAt[s]` refinement),
+  via `hasMFDerivAt_of_isIntegralCurve` ∘ `isIntegralCurve_fundamentalSolution_apply` — exactly the
+  "time-derivative of the pushforward `Φ_t · u`" datum Item 1's scalar chain rule differentiates.
+* `contMDiff_fundamentalSolution_apply_time` / `contMDiff_infty_fundamentalSolution_apply_time` — the
+  **`C^{n+1}`/`C^∞` time-regularity of the pushed-forward direction** `τ ↦ D_x Φ_τ · u₀` (manifold form
+  of `contDiff_fundamentalSolution_apply_time`, via `contMDiff_iff_contDiff`), the pushforward-leg time
+  regularity the tensor time-derivative chain rule consumes.
+
+Remaining for Point 4 (future sessions): unchanged in scope — the **general-manifold** gauge-flow lift
+(Item 2, the chart↔global patching in the heavy gauge files; the model-`E`-chart pushforward/resolvent
+data those consume is now available in the manifold vocabulary), the Item 1 tensor time-derivative
+chain rule (which now has both the pushforward `mfderiv` and its time derivative available as manifold
+data), and the Item 1 tensor time-derivative
+chain rule (which now has both the pushforward `mfderiv` and its time derivative available as manifold
+data), and the Item 3 parabolic Schauder a-priori estimates.
+
+Update — **the time-derivative of the *actual flow's* pushforward is now proved on the model manifold
+`𝓘(ℝ, E)`**, extending `AnalyticPDE/SmoothDependenceManifold.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`).  The previous milestone gave, separately, the spatial
+pushforward `mfderiv Φ_τ = D_x Φ_τ = fundamentalSolution` (`mfderiv_flow_apply_of_lipschitz_deriv`)
+and the resolvent's *own* vector variational ODE (`hasMFDerivAt_fundamentalSolution_apply`, about an
+abstract coefficient path).  This session **fuses** them into the classical variational law stated
+through the actual flow's differential, `d/dt (D_x Φ_t · u₀) = D_x v_t|_{Φ_t x₀} · (D_x Φ_t · u₀)` —
+exactly Item 1's "derivative of the pushforward `Φ_t · u`" leg, now for the honest gauge flow rather
+than an abstract resolvent:
+
+* `hasMFDerivWithinAt_flow_pushforward_of_lipschitz_deriv` / `hasMFDerivAt_flow_pushforward_of_lipschitz_deriv`
+  / `mfderiv_flow_pushforward_of_lipschitz_deriv` — the **abstract** (`C^{1,1}`-jet with a supplied
+  reference coefficient/variational family) within-`Ici t₀`, interior (`t₀ < t`), and `mfderiv`-readout
+  forms of `HasMFDerivWithinAt/HasMFDerivAt/mfderiv 𝓘(ℝ,ℝ) 𝓘(ℝ,E) (fun τ ↦ (mfderiv (fun z ↦ Φ z τ) x₀) u₀)`,
+  transferred from `hasMFDerivAt_fundamentalSolution_apply` along the pointwise pushforward=resolvent
+  equality on `Ici t₀` via `HasMFDerivWithinAt.congr_mono` / `HasMFDerivAt.congr_of_eventuallyEq`
+  (the resolvent identity holds only for `τ ≥ t₀`, hence the within-`Ici t₀` / interior split).
+* `hasMFDerivWithinAt_flow_pushforward_of_field_jet` / `hasMFDerivAt_flow_pushforward_of_field_jet`
+  / `mfderiv_flow_pushforward_of_field_jet` — the **genuinely usable field-data-only** forms: the caller
+  supplies only the `C^{1,1}` field jet of `v` (globally `K`-Lipschitz, everywhere Fréchet derivative
+  `Dv` jointly continuous and `L`-Lipschitz in space) plus the actual flow `Φ`; the canonical reference
+  coefficient `A t := D_x v_t|_{Φ_t x₀}`, the `‖Dv‖ ≤ K` bound (`HasFDerivAt.le_of_lipschitz`), the
+  variational family (`exists_variationalFlowFamily`), and the segment deviation bound (spatial Lipschitz
+  constant) are all built internally, so the conclusion is the explicit
+  `(1).smulRight (D_x v_t|_{Φ_t x₀} · (D_x Φ_t · u₀))`.
+
+With the base-point leg (`hasMFDerivAt_of_isIntegralCurve`, giving `d/dt (Φ_τ x) = v_τ(Φ_τ x)`) and
+these pushforward legs, **all three model-`E`-chart ODE-derivative inputs to Item 1's scalar tensor
+chain rule `B(τ)(y(τ))(a(τ))(b(τ))` — the base point `y(τ)`, and the two pushed-forward directions
+`a(τ), b(τ)` — are now available in the manifold vocabulary**; the remaining Item 1 work is the metric
+leg (`∂_t g`, spatial `∂` of `g.inner`) and the scalar assembly in the heavy tensor file.  Remaining
+for Point 4 (future sessions): unchanged in scope — the general-manifold gauge-flow lift (Item 2), the
+Item 1 metric-leg + scalar-assembly, and the Item 3 parabolic Schauder a-priori estimates.
+
+Update — **the parabolic short-time-smallness a-priori layer is now proved** in
+`AnalyticPDE/ParabolicHolder.lean` (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), the
+"operator norm bounded by the time-interval length" content the Ricci–DeTurck / parabolic Schauder
+fixed point contracts on.  The parabolic distance from `(t, x)` to the initial-time point `(t₀, x)` is
+`√|t − t₀|`, so a function that vanishes at the initial time is uniformly small on a thin time-slab —
+this is the mechanism that makes the DeTurck solution map a short-time contraction.  Thirteen new
+theorems, in four coherent groups:
+
+* **Short-time smallness from initial vanishing.**  `norm_le_of_parabolicHolderWith_of_initial_zero`
+  (pointwise `‖u (t, x)‖ ≤ C · (√T)^α` from a Hölder constant `C`, initial vanishing `u (t₀, x) = 0`,
+  and `|t − t₀| ≤ T`); `parabolicSupNorm_le_holderSeminorm_mul_of_initial_zero`
+  (`‖u‖_{C⁰} ≤ [u]_α · (√T)^α` on a slab-`+`-initial-cylinder set, `→ 0` as `T → 0`);
+  `parabolicC0AlphaNorm_le_holderSeminorm_mul_of_initial_zero`
+  (`‖u‖_{C^{0,α}} ≤ ((√T)^α + 1) · [u]_α`, full-norm control by the seminorm alone);
+  `sqrt_rpow_eq_rpow_half` (`(√T)^α = T^{α/2}`) and
+  `parabolicSupNorm_le_holderSeminorm_mul_rpow_of_initial_zero` (the explicit `T^{α/2}` power-of-slab
+  form).
+* **Affine (non-vanishing) initial data.**  `norm_le_of_parabolicHolderWith_of_initial_le`,
+  `parabolicSupNorm_le_add_holderSeminorm_mul_of_initial_le`
+  (`‖u‖_{C⁰} ≤ M₀ + [u]_α · (√T)^α`) and
+  `parabolicC0AlphaNorm_le_add_holderSeminorm_mul_of_initial_le`
+  (`‖u‖_{C^{0,α}} ≤ M₀ + ((√T)^α + 1) · [u]_α`): the estimates in the honest form the iteration with a
+  *prescribed* (bounded-by-`M₀`, not zero) initial condition consumes; splitting
+  `u (t, x) = (u (t, x) − u (t₀, x)) + u (t₀, x)`.  `M₀ = 0` recovers the vanishing case.
+* **Space/time decomposition of parabolic Hölder regularity.**
+  `norm_sub_le_of_parabolicHolderWith_same_time` (spatial `α`-Hölder projection at fixed time,
+  `‖u (t, x) − u (t, y)‖ ≤ C · dist x y ^ α`), `norm_sub_le_of_parabolicHolderWith_same_space`
+  (temporal `α/2`-Hölder projection at fixed space, `‖u (t, x) − u (τ, x)‖ ≤ C · |t − τ|^{α/2}`), and
+  `parabolicHolderWith_of_forall_same_time_same_space` (the reconstruction: separate spatial-`α` +
+  temporal-`α/2` control on a set closed under mixing coordinates — a parabolic cylinder — reassemble
+  into parabolic `α`-Hölder control with constant `Hs + Ht`, via the intermediate point `(p.1, q.2)`).
+  The structural characterisation of parabolic Hölder spaces the Schauder theory rests on.
+* **Short-time smallness in the full `C^{0,α}` (Banach) norm.**
+  `parabolicSupNorm_le_parabolicC0AlphaNorm_mul_of_initial_zero`
+  (`‖u‖_{C⁰} ≤ ‖u‖_{C^{0,α}} · (√T)^α` for initial-vanishing `u` — honest operator smallness on the
+  parabolic Banach space) and its contraction form
+  `parabolicSupNorm_sub_le_parabolicC0AlphaNorm_mul_of_initial_agree`
+  (`‖u − v‖_{C⁰} ≤ ‖u − v‖_{C^{0,α}} · (√T)^α` when `u`, `v` agree at the initial time): the solution
+  map has `C⁰`-operator norm `≤ (√T)^α → 0` on the fibre over a fixed initial condition — the
+  short-time contraction giving uniqueness / short-time existence of the DeTurck fixed point.
+
+Remaining for Point 4 (future sessions): the remaining genuine parabolic **Schauder interior/global
+a-priori estimate** (bounding the full `C^{0,α}` norm of the solution by the data — the heat-kernel
+Schauder content) and the assembly of the concrete Ricci–DeTurck RHS operator on the parabolic Banach
+chart from `mulCoeffL`/`compL`/`precompL`/`constL` with these short-time-smallness factors (Item 3);
+the **general-manifold** gauge-flow lift (Item 2, heavy gauge files — the `C³` initial-data-dependence
+input `exists_flow_contDiff_three_diffeomorph` and the model-manifold gauge-flow core
+`exists_diffeomorph3GaugeFlowOn_of_field_jet` are now available); and the Item 1 tensor
+time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file).
+
+Update — **the parabolic Banach fixed-point mechanism is now proved** in
+`AnalyticPDE/ParabolicHolder.lean` (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`), the
+Picard/contraction engine that turns the completeness of the parabolic `C^{0,α}` space into the
+short-time Ricci–DeTurck solution operator.  Four new theorems:
+
+* **Definiteness/separation.**  `eqOn_of_parabolicC0AlphaNorm_sub_eq_zero` and its `iff` form
+  `parabolicC0AlphaNorm_sub_eq_zero_iff_eqOn`: on the class, `‖u − v‖_{C^{0,α}} = 0 ↔ u =ₛ v`, so
+  `parabolicC0AlphaNorm` is a genuine norm modulo equality on `s` (the definiteness underlying the
+  fixed point's uniqueness).
+* **Fixed-point existence + uniqueness.**  `exists_parabolicC0AlphaOn_fixedPt_of_contraction`: a
+  class-preserving `q`-contraction `T` (`0 ≤ q < 1`) for the parabolic `C^{0,α}` norm has a class
+  fixed point `g` (`T g =ₛ g`), unique on `s`.  Proof: the Picard iterates `Tⁿ u₀` have geometrically
+  decaying consecutive differences (`‖T^{n+1}u₀ − Tⁿu₀‖ ≤ qⁿ‖T u₀ − u₀‖`), telescope to a
+  `C^{0,α}`-Cauchy sequence (tail `≤ qᴺ‖T u₀ − u₀‖/(1−q)`), and converge by
+  `exists_parabolicC0AlphaOn_tendsto_of_cauchy`; the contraction forces the limit fixed and unique.
+* **A-priori residual bound.**  `parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction`: any fixed point
+  obeys `‖g − u₀‖ ≤ (1−q)⁻¹·‖T u₀ − u₀‖` (no iteration — just `g − u₀ = (T g − T u₀) + (T u₀ − u₀)` on
+  `s`, triangle, contraction), the invariant-ball datum.
+* **Bundled solution operator.**  `exists_parabolicC0AlphaOn_fixedPt_ball_of_contraction`:
+  existence + uniqueness-on-`s` + the explicit `C^{0,α}`-ball bound in one package — the chart-closure
+  datum the Ricci–DeTurck short-time existence consumes once its RHS is exhibited as a contraction.
+
+Remaining for Point 4 (future sessions): the genuine parabolic **Schauder interior/global a-priori
+estimate** exhibiting the DeTurck RHS as such a `C^{0,α}` contraction (the heat-kernel content), and
+its assembly from `mulCoeffL`/`compL`/`precompL`/`constL` with the short-time-smallness factors
+(Item 3); the **general-manifold** gauge-flow lift (Item 2, heavy gauge files); and the Item 1 tensor
+time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file).
+
+Update — **the compact-manifold time-dependent local flow existence + injectivity + uniqueness is now
+proved** in `GaugeReduction/ManifoldFlowExistence.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; a pure manifold-topology + integral-curve development, no PDE
+content, nothing touching the heavy gauge files).  The module previously supplied compact-manifold
+*uniform-time* existence only for **autonomous** fields (`exists_uniform_integralCurve_time`, needing the
+whole manifold compact) and only **per-point** local existence for time-dependent fields
+(`exists_timeDependent_integralCurve`).  The DeTurck gauge field is *time-dependent*, and its
+autonomization space `ℝ × M` is never compact — but the **initial-time slice** `{0} × M` is.  This
+session closes exactly that gap, delivering the time-dependent existence core the gauge flow consumes
+(Item 2), plus the injectivity (diffeomorphism-onto-image) and uniqueness (canonicity) halves:
+
+* `exists_uniform_time_of_nhds_uniform_on_compact` — the **compact-slice** flow-box reduction: the
+  neighborhood-uniform flow box (`exists_nhds_uniform_integralCurve`) yields a *single* uniform lifespan
+  `ε > 0` over any **compact subset** `S` of a (possibly noncompact) manifold, by a finite subcover of `S`
+  and the minimum lifespan.  The refinement of `exists_uniform_time_of_nhds_uniform` (whole space compact)
+  needed to integrate over the compact slice `{0} × M ⊆ ℝ × M`.
+* `exists_uniform_timeDependent_integralCurve_time` — the **compact-manifold time-dependent uniform-time
+  local existence**: for a jointly-`C¹` time-dependent field `X` on a compact boundaryless complete
+  manifold there is one `ε > 0` such that *every* start point `x` admits a time-dependent integral curve
+  of `X` on the common `Ioo (-ε) ε`.  Autonomize to `ℝ × M`, take the uniform lifespan over the compact
+  slice `{0} × M` via the compact-slice reduction, and project through
+  `isTimeDependentIntegralCurve_of_autonomous_of_fst`.
+* `exists_timeDependent_flow_compact` — the bundled flow `Φ : ℝ → M → M` with `Φ 0 = id` and every orbit
+  `τ ↦ Φ τ x` a time-dependent integral curve on `Ioo (-ε) ε` (via `choose`): the anchored
+  integral-curve family the gauge construction is built on.
+* `timeDependent_integralCurve_eqOn_of_eq` — **uniqueness anchored at any interior time** (generalising
+  `timeDependent_integralCurve_unique`, anchor `0`): two time-dependent integral curves on `Ioo a b`
+  agreeing at a single interior `t₀` agree throughout, via the autonomous lift + mathlib's
+  `isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless` at `t₀`.
+* `timeDependent_flow_injective` — **injectivity of every time-`t` slice** `x ↦ Φ t x`: two orbits
+  agreeing at time `t` agree at time `0`, where the anchor reads off the two start points.  The
+  diffeomorphism-onto-image (injectivity) half Item 2 consumes.
+* `timeDependent_flow_unique` — **canonicity of the flow**: two anchored flows with orbits solving the
+  same field ODE on `Ioo (-ε) ε` coincide there (orbit uniqueness anchored at `0`).
+* `exists_timeDependent_flow_compact_injective` — the bundled **existence + orbit-ODE + injective
+  time-slices** datum in one package; with `timeDependent_flow_unique` this exhibits the compact-manifold
+  local flow as a *canonically determined family of injections* — the forward-family `F` datum
+  `GaugeReduction/GaugeFlowAssembly.lean`'s `gaugeFlow_of_inverse_flow` consumes (`hanchored` + `hderiv`).
+
+Remaining for Point 4 (future sessions): unchanged in scope — for Item 2 the **spatial `C³` regularity**
+of the flow map `x ↦ F t x` (the `C¹→C³` bootstrap from `SmoothDependenceCk`/`SmoothDependenceManifold`
+into this compact-manifold flow) and the **mutual spatial inverse** `G t` (the two-parameter / reverse
+time-dependent flow giving surjectivity, whose forward existence pieces — uniform time-dependent
+existence and anchored uniqueness — are now in place), then `gaugeFlow_of_inverse_flow` closes Item 2;
+plus the Item 1 tensor time-derivative chain rule and the Item 3 parabolic Schauder a-priori estimates.
+
+Update — **the compact-manifold time-dependent flow's slices are now proved bijective, with
+a concrete mutually-inverse family — the diffeomorphism-onto-image / `G t`-inverse content
+`gaugeFlow_of_inverse_flow` consumes on the window is closed**, extending
+`GaugeReduction/ManifoldFlowExistence.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; a pure manifold-topology + integral-curve
+development, no PDE content, nothing touching the heavy gauge files).  The previous milestone
+supplied forward existence, **injectivity** (`timeDependent_flow_injective`), and canonicity
+(`timeDependent_flow_unique`) of the time-slice maps `x ↦ Φ t x`, but **surjectivity** — the
+other half of "diffeomorphism onto image" — is *not* automatic on a compact manifold from
+injectivity + continuity (that would need invariance of domain); it requires a genuine backward
+flow (an integral curve of `X` run from time `t` *back* to time `0`), whose lifespan must be
+reconciled with the forward lifespan.  This session closes exactly that gap:
+
+* `autonomous_fst_eq_add` — the **affine first-coordinate law** generalising `autonomous_fst_eq_id`
+  to any anchor time: an autonomous integral curve `Γ` of `(1, X)` on a preconnected open `s ∋ 0`
+  with `(Γ 0).1 = t₀` has `(Γ t).1 = t₀ + t` throughout (the first coordinate has constant
+  derivative `1`, so it is `t ↦ t₀ + t`).  This lets a curve *anchored at time `t₀`* be recognised,
+  after the shift `σ ↦ σ - t₀`, as a genuine time-dependent integral curve.
+* `exists_uniform_timeDependent_integralCurve_anchored` — **anchored-anywhere existence over a
+  compact time-slab**: for any `r > 0`, a single uniform lifespan `δ > 0` such that *every* start
+  time `t₀ ∈ [-r, r]` and *every* point `y` admit a time-dependent integral curve of `X` on
+  `Ioo (t₀ - δ) (t₀ + δ)` with `γ t₀ = y`.  Proved by taking the uniform lifespan of the
+  autonomization `(1, X)` over the compact **slab** `Icc (-r) r ×ˢ univ ⊆ ℝ × M`
+  (`exists_uniform_time_of_nhds_uniform_on_compact`, previously used only over the `{0} × M` slice)
+  and time-shifting the autonomous curve anchored at `(t₀, y)` by `σ ↦ σ - t₀`
+  (`IsMIntegralCurveOn.comp_add`), whose first coordinate then tracks the parameter by
+  `autonomous_fst_eq_add`, so it descends via `isTimeDependentIntegralCurve_of_autonomous`.  The
+  slab (not a single slice) is what supplies a lifespan `δ` uniform over the *start times*, the
+  crux of the backward-lifespan reconciliation.
+* `timeDependent_flow_surjective` — **surjectivity of every time-slice** `x ↦ Φ t x` (`|t| < min ε₁ δ`):
+  run the backward curve from `(t, y)` to time `0`, landing at `x`; then `Φ · x` and that backward
+  curve are two time-dependent integral curves agreeing at time `0`, so by uniqueness
+  (`timeDependent_integralCurve_eqOn_of_eq`, restricted to a common sub-interval `Ioo a b ∋ 0, t`
+  via `HasMFDerivWithinAt.mono`) they agree at `t`, giving `Φ t x = y`.
+* `exists_timeDependent_flow_compact_bijective` — the bundled **uniform `ε > 0` anchored flow with
+  every slice bijective**: reconciles the forward lifespan `ε₁` (`exists_timeDependent_flow_compact`)
+  and the slab lifespan `δ` (the anchored existence, with `r := ε₁`) by `ε := min ε₁ δ`; combines the
+  existing injectivity with the new surjectivity.  With `timeDependent_flow_unique` this exhibits the
+  compact-manifold local flow as a *canonically determined family of bijections*.
+* `exists_timeDependent_flow_compact_inverse` — the **concrete mutually-inverse `F := Φ`, `G` datum**:
+  the explicit inverse family `G t := Function.invFun (Φ t)`, both anchored at the identity
+  (`Φ 0 = G 0 = id`), the forward orbits solving the gauge ODE on `Ioo (-ε) ε`, and `G t` a genuine
+  two-sided inverse of the bijection `Φ t` on every window time (`Function.leftInverse_invFun` /
+  `rightInverse_invFun`).  This is exactly the `hleft`/`hright` mutually-inverse time-slice datum
+  `GaugeFlowAssembly.gaugeFlow_of_inverse_flow` consumes (on the window; needs `[Nonempty M]`).
+
+Reading the adapter `GaugeFlowAssembly.gaugeFlow_of_inverse_flow` confirms its `F`, `G` are the
+*spatial* inverse per slice (**not** a backward time-flow), consumed as `LeftInverse`/`RightInverse`
++ `ContMDiff I I 3` + anchoring + the within-set manifold ODE.  With this milestone the
+mutual-inverse, anchoring, and ODE-derivative data are all in hand on the window; the **single
+remaining Item-2 analytic obligation is the spatial `C³` regularity** `hF`/`hG` of the slice maps
+(the `C¹ → C³` bootstrap transported chart-by-chart from `SmoothDependenceCk`/`SmoothDependenceManifold`,
+whose model-`E`-chart `C³` smooth dependence is already proved), plus the global-`ℝ` extension of the
+windowed `F`/`G` the adapter's `∀ t` hypotheses want.  Remaining for Point 4 (future sessions):
+unchanged in scope — that spatial-`C³` regularity + global extension for Item 2, the Item 1 tensor
+time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file), and the Item 3
+parabolic Schauder a-priori estimates.
+
+Update — **the parabolic Hölder interpolation → short-time-contraction toolkit is now proved**,
+in `AnalyticPDE/ParabolicHolder.lean` and the new leaf module
+`AnalyticPDE/ParabolicInterpolation.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`).  The classical interpolation between the `C^0` (sup)
+norm and the `α`-Hölder seminorm — the mechanism parabolic Schauder estimates use to *absorb
+lower-order terms* and, combined with the initial-vanishing short-time smallness, to make the
+Ricci–DeTurck solution map a contraction in the *intermediate* Hölder norms (not merely the sup
+norm).  Pure norm/rpow/AM–GM algebra, no heat-kernel content:
+
+* `parabolicHolderWith_interpolation` / `parabolicHolderSeminorm_interpolation_le` /
+  `parabolicC0AlphaNorm_interpolation_le` (in `ParabolicHolder.lean`) — the **multiplicative
+  interpolation** `[u]_{α θ} ≤ (2·sup)^{1−θ}·[u]_α^θ` (a bounded, `α`-Hölder function is Hölder with
+  the intermediate exponent `α θ` and constant `(2B)^{1−θ} H^θ`), proved pointwise with no
+  `d = 0` case split by writing `‖u p − u q‖ = ‖u p − u q‖^{1−θ}·‖u p − u q‖^θ` and bounding the two
+  factors by the sup bound and the Hölder bound; plus its seminorm-functional and full-`C^{0,α θ}`-norm
+  forms.
+* `rpow_mul_rpow_le_absorb`, `parabolicHolderWith_interpolation_add` / `_le` / `_absorb`,
+  `parabolicHolderSeminorm_interpolation_add_le` / `_absorb_le` (in the new leaf
+  `ParabolicInterpolation.lean`, which localises the sole heavy dependency
+  `Mathlib.Analysis.MeanInequalities` off the widely-imported `ParabolicHolder`) — the **additive /
+  Young / absorbing** refinements: the weighted-AM–GM scalar inequality
+  `a^{1−θ} b^θ ≤ (1−θ)κ^{−θ/(1−θ)} a + θκ b`, the additive convex-combination constant
+  `(1−θ)(2B)+θH` (and the uniform `2B+H`), and the `κ`-scaled absorbing constant whose `θκ`
+  coefficient on the leading seminorm is tunable to any target — the honest lower-order-term
+  absorption form.
+* `parabolicHolderSeminorm_interpolation_short_time_le`,
+  `parabolicC0AlphaNorm_interpolation_short_time_le`,
+  `parabolicC0AlphaNorm_sub_interpolation_short_time_le` (in `ParabolicInterpolation.lean`) — the
+  **short-time contraction** capstone: feeding the initial-vanishing sup bound
+  `parabolicSupNorm ≤ [u]_α·(√T)^α` into the multiplicative interpolation gives
+  `[u]_{α θ} ≤ 2^{1−θ}·(√T)^{α (1−θ)}·[u]_α` and
+  `‖u‖_{C^{0,α θ}} ≤ ((√T)^α + 2^{1−θ}(√T)^{α (1−θ)})·[u]_α` for an initial-vanishing `u` on a thin
+  slab (every factor a positive power of the slab thickness `T`, so `→ 0` as `T → 0`), and — the
+  form the fixed point consumes — `‖u − v‖_{C^{0,α θ}} ≤ (…)·[u − v]_α` for `u`, `v` agreeing on the
+  initial slice: the Ricci–DeTurck solution map contracts in the intermediate parabolic norm on a
+  sufficiently thin time-slab.
+
+Remaining for Point 4 (future sessions): unchanged in scope — the genuine parabolic **Schauder
+interior/global a-priori estimate** exhibiting the concrete Ricci–DeTurck RHS as such a
+`C^{0,α}` contraction (the heat-kernel content) and its assembly from
+`mulCoeffL`/`compL`/`precompL`/`constL` with these interpolation / short-time-smallness factors
+(Item 3); the **general-manifold** gauge-flow lift (Item 2, heavy gauge files — the spatial-`C³`
+regularity + global-`ℝ` extension of the compact-manifold flow slices); and the Item 1 tensor
+time-derivative chain rule (metric leg + scalar assembly in the heavy tensor file).
+
+Update — **the abstract Ricci–DeTurck short-time existence & uniqueness is now proved, reduced to the
+single parabolic Schauder gain estimate**, extending the leaf module
+`AnalyticPDE/ParabolicInterpolation.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; pure norm/rpow analysis + the parabolic Banach fixed point,
+no heat-kernel content, nothing touching the heavy files).  The previous milestone supplied the
+*qualitative* short-time smallness `parabolicC0AlphaNorm_sub_interpolation_short_time_le` — for an
+initial-vanishing `α`-Hölder difference on a slab of thickness `T`,
+`‖u − v‖_{C^{0,α θ}} ≤ factor(T)·[u − v]_α` with
+`factor(T) = (√T)^α + 2^{1−θ}(√T)^{α(1−θ)} → 0` as `T → 0`.  That "`→ 0`" is not directly usable by a
+fixed point, which needs a *quantitative* contraction ratio `< 1`.  This session closes exactly that
+gap and threads it through to short-time well-posedness:
+
+* `exists_thickness_shortTimeInterpFactor_le` — the **quantitative factor smallness**: for `0 < α`,
+  `θ < 1` and any target ratio `q > 0` there is a slab thickness `T₀ > 0` with `factor(T) ≤ q` for all
+  `0 ≤ T ≤ T₀`.  The factor is continuous in `T` at `0` (both exponents `α`, `α(1−θ)` strictly
+  positive) with value `0 < q`, so it stays below `q` on a neighbourhood of `0`
+  (`Filter.Tendsto.eventually_lt_const` + `Metric.eventually_nhds_iff`).  The honest quantitative form
+  of "`factor → 0`".
+* `exists_thickness_parabolicC0AlphaNorm_sub_interpolation_contraction` — the **quantitative
+  intermediate-norm contraction of a difference**: for any `q > 0`, a thin enough slab gives
+  `‖u − v‖_{C^{0,α θ}} ≤ q·[u − v]_α` for initial-agreeing `α`-Hölder differences.
+* `exists_thickness_solutionMap_contraction_of_schauder_gain` — the **reduction to the Schauder gain**:
+  composing the interpolation smallness with a hypothesised parabolic Schauder gain
+  `[S w₁ − S w₂]_α ≤ C·‖w₁ − w₂‖_{C^{0,α θ}}` (gain from the intermediate input norm to the top output
+  seminorm — the heat-kernel content, taken as a hypothesis) turns the solution map into a *genuine
+  same-exponent `q`-contraction* `‖S w₁ − S w₂‖_{C^{0,α θ}} ≤ q·‖w₁ − w₂‖_{C^{0,α θ}}` on a thin enough
+  slab (choosing `T₀` so `factor(T)·C ≤ q`, via target `q/(C+1)`).  The exact input shape the parabolic
+  Banach fixed point `exists_parabolicC0AlphaOn_fixedPt_of_contraction` consumes.
+* `exists_shortTime_fixedPoint_of_schauder_gain` — the **short-time existence & uniqueness capstone**:
+  a solution map `S` on the parabolic `C^{0,α θ}` class that self-maps, preserves the initial datum,
+  has `α`-Hölder output differences, and satisfies the Schauder gain has, on a sufficiently thin
+  time-slab, a *unique* fixed point `g = S g` in the class (`½`-contraction fed into the parabolic
+  Banach fixed point).  Every hypothesis except the Schauder gain is a structural property of the
+  DeTurck solution operator.
+* `exists_shortTime_fixedPoint_ball_of_schauder_gain` — the **quantitative form with a-priori bound**:
+  the same unique fixed point additionally obeys `‖g − u₀‖_{C^{0,α θ}} ≤ 2·‖S u₀ − u₀‖_{C^{0,α θ}}`
+  (the `(1 − ½)⁻¹` ball-form Banach bound), controlling the solution by twice the initial residual of
+  any starting guess — the estimate that keeps the DeTurck solution inside the ball on which the
+  coefficient data / Schauder gain remain valid.
+
+With this the **entire abstract side of Item 3 is now in place**: given the one parabolic Schauder gain
+estimate, short-time DeTurck existence, uniqueness, and the solution bound all follow.  Remaining for
+Point 4 (future sessions): the genuine parabolic **Schauder interior/global a-priori estimate**
+exhibiting the concrete Ricci–DeTurck RHS as such a `C^{0,α}`-gaining operator (the heat-kernel content,
+`HeatKernel1D.lean` + assembly from `mulCoeffL`/`compL`/`precompL`/`constL`) — now the *sole* missing
+mathematical input on the Item 3 fixed-point route; the **general-manifold** gauge-flow lift (Item 2,
+heavy gauge files — spatial-`C³` regularity + global-`ℝ` extension of the compact-manifold flow
+slices); and the Item 1 tensor time-derivative chain rule (metric leg + scalar assembly).
+
+Update — **the abstract Item-3 well-posedness family is now complete with the stability /
+continuous-dependence leg** (all axiom-clean: `propext`/`Classical.choice`/`Quot.sound`; pure
+parabolic-`C^{0,α}`-norm algebra + the already-proved fixed-point machinery, no heat-kernel content,
+nothing touching the heavy files).  The previous milestone had existence, uniqueness and the a-priori
+ball bound (reduced to the single parabolic Schauder gain).  Stability — the third Hadamard leg (the
+solution depends Lipschitz-continuously on the operator) — was the remaining abstract gap, and closes
+it:
+
+* `parabolicC0AlphaNorm_fixedPt_sub_fixedPt_le_of_contraction` (in
+  `AnalyticPDE/ParabolicHolder.lean`) — the **two-map Banach perturbation bound**: for two
+  class-preserving parabolic `C^{0,α}` maps `T₁`, `T₂` with `T₁` a `q`-contraction (`q < 1`) and
+  respective fixed points `g₁ = T₁ g₁`, `g₂ = T₂ g₂`,
+  `‖g₁ − g₂‖_{C^{0,α}} ≤ (1 − q)⁻¹·‖T₁ g₂ − T₂ g₂‖_{C^{0,α}}`.  Same triangle-inequality/contraction
+  computation as the one-map a-priori bound `parabolicC0AlphaNorm_fixedPt_sub_le_of_contraction`
+  (`g₁ − g₂ = (T₁ g₁ − T₁ g₂) + (T₁ g₂ − T₂ g₂)`), now between two genuine fixed points, using only
+  `T₁`'s contraction.
+* `parabolicC0AlphaOn_fixedPt_unique_of_contraction` (same module) — **completeness-free uniqueness**:
+  the `T₁ = T₂ = T` corollary (`‖g₁ − g₂‖ ≤ (1 − q)⁻¹·‖T g₂ − T g₂‖ = 0`), so any two *given* fixed
+  points of a parabolic `C^{0,α}` `q`-contraction coincide on `s` — no `CompleteSpace E`, no
+  Picard-constructed reference solution (the form the Ricci–DeTurck short-time uniqueness / chart
+  `encode` consumes directly).
+* `exists_shortTime_fixedPoint_stability_of_schauder_gain` (in
+  `AnalyticPDE/ParabolicInterpolation.lean`) — the **short-time continuous dependence reduced to the
+  Schauder gain**: two solution maps `S₁`, `S₂` on the parabolic `C^{0,α θ}` class with `S₁`
+  self-mapping / initial-preserving / `α`-Hölder-output / Schauder-gain (⇒ `½`-contraction on a thin
+  slab, via `exists_thickness_solutionMap_contraction_of_schauder_gain`) and `S₂` self-mapping have
+  fixed points obeying `‖g₁ − g₂‖_{C^{0,α θ}} ≤ 2·‖S₁ g₂ − S₂ g₂‖_{C^{0,α θ}}` on every slab
+  `T ≤ T₀` — the stability companion of the existence / a-priori-bound capstones, completing the
+  reduced-to-Schauder-gain quartet (existence, uniqueness, a-priori bound, stability).
+
+With this the **entire abstract side of Item 3** — existence, uniqueness, a-priori control *and*
+Hadamard continuous dependence — is in place, all conditional only on the one parabolic Schauder gain
+estimate.  Formulation note resolved this session: `chart.picard : IsPicardLindelof A` is a Banach
+Cauchy-Lipschitz requirement (bounded / Lipschitz / time-continuous on a `C⁰` ball); the genuine
+second-order Ricci–DeTurck RHS (real Levi-Civita curvature + DeTurck correction) is *unbounded* on the
+`C⁰` section space, so it cannot inhabit `IsPicardLindelof` directly — `ofLipschitzBoundedContinuous`
+is honestly usable only by a mild / regularised representative (or on a sub-class where the RHS is
+uniformly `C⁰`-bounded/Lipschitz), and the general operator's `picard` is supplied by the parabolic
+Schauder a-priori bound (Hölder-space contraction), not a `C⁰` ball.  Remaining for Point 4: the
+concrete parabolic **Schauder gain / a-priori estimate** exhibiting the Ricci–DeTurck RHS as a
+`C^{0,α}`-gaining operator (heat-kernel content, `HeatKernel1D.lean`) — the sole missing mathematical
+input on the fixed-point route; the general-manifold gauge-flow lift (Item 2); and the Item 1 tensor
+time-derivative chain rule.
+
+Update — **Item 2 windowed → global assembly and compact-flow wiring done** (in
+`GaugeReduction/GaugeFlowAssembly.lean`; both axiom-clean: `propext`/`Classical.choice`/`Quot.sound`).
+The two remaining Item-2 obligations recorded above were the spatial-`C³` regularity of the flow
+slices **and** the global-`ℝ` extension of the windowed `F`/`G` the adapter `gaugeFlow_of_inverse_flow`
+wants (`∀ t`, whereas the compact flow lives on a window `Ioo (-ε) ε`).  The latter — plus the first
+wiring of the compact-flow existence machinery into the adapter — is now proved:
+
+* `exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow` — the **global-`ℝ` extension**: given
+  mutually-inverse, anchored slice maps `Φ`, `G` that are spatially `C³` on the window and solve the
+  gauge ODE there, extend both by the identity outside `Ioo (-ε) ε` (identity is its own inverse /
+  smooth / anchored) and thread the windowed ODE through `HasMFDerivWithinAt.congr_mono` to hit the
+  adapter, giving `Nonempty (Diffeomorph3GaugeFlowOn X (Ioo (-ε) ε) 0)`.  Pure assembly, no analysis.
+* `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` — the **compact-flow wiring**:
+  feeds `ManifoldFlow.exists_timeDependent_flow_compact_inverse` (which needs only the `C¹` field datum
+  `hX`) into the extension lemma, so that from the `C¹` gauge field alone the raw `C³` DeTurck
+  gauge-flow `Diffeomorph3GaugeFlowOn X (Ioo (-ε) ε) 0` is inhabited for some `ε > 0`, **conditional
+  only** on the flow slices' spatial-`C³` regularity `hslicesC3` (the `C¹ → C³` bootstrap,
+  characterising the unique compact flow of `X`).  `ManifoldFlowExistence.lean` was previously imported
+  by nothing; this is its first consumer.
+
+Net effect: Item 2 is now **unconditional up to a single named analytic input** — the spatial-`C³`
+regularity of the compact flow slices (the chart-by-chart `C¹ → C³` transport from the model-`E`
+`SmoothDependenceManifold` core).  Remaining for Point 4 (unchanged otherwise): that spatial-`C³`
+regularity (Item 2); the Item 1 tensor time-derivative chain rule; and the Item 3 parabolic Schauder
+gain (heat-kernel content).
+
+Update — **time-dependent Banach Cauchy–Lipschitz well-posedness for the chart `A`/`picard` route
+is now proved** (in `AnalyticPDE/HeatKernel1D.lean`; all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; full library green).  The pre-existing Banach-ODE bridge
+`isPicardLindelof_of_bounded_lipschitz` / `bounded_lipschitz_evolution_exists_unique` covered only
+**time-independent** fields, but the Ricci–DeTurck chart's `A : ℝ → …` (hence its `picard` field and
+the solution operator it generates) is genuinely **time-dependent**; this session supplies the missing
+time-dependent generalization on both the `0`-anchored and the general interval `[t₀, T]` (the exact
+`IsPicardLindelof A (tmin := t₀) (tmax := T) ⟨t₀,…⟩ x₀ a 0 L Kpic` interval/anchor shape of the chart
+`picard` field):
+
+* `isPicardLindelof_of_bounded_lipschitz_timeDependent` / `…_timeDependent_Icc` — a globally bounded
+  (`‖g t x‖ ≤ L`) + uniformly Lipschitz (`∀ t, LipschitzWith K (g t)`), time-continuous
+  (`ContinuousOn (g · x) [t₀,T]`) time-dependent field `g : ℝ → E → E` is `IsPicardLindelof` with
+  `a = L·(T−t₀) + 1`, `r = 0`, anchored at the left endpoint `t₀`; the last (`mul_max_le`) field is the
+  one-sided interval-length computation `L·(T−t₀) ≤ a`.
+* `bounded_lipschitz_evolution_exists_timeDependent` / `…_Icc` — existence of a solution `α` with
+  `α t₀ = x₀` on `[t₀,T]` (via `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀`, `E`
+  complete).
+* `ode_solution_unique_timeDependent` / `…_Icc` — Gronwall uniqueness (`ODE_solution_unique` with
+  `v := g` time-dependent), and `bounded_lipschitz_evolution_exists_unique_timeDependent` / `…_Icc`
+  package existence + uniqueness in the shape the mild/regularised chart operator consumes.
+* `ode_solution_dist_le_timeDependent_Icc` — continuous dependence (`dist (α t) (β t) ≤
+  dist (α t₀) (β t₀)·exp(K·(t−t₀))`, via `dist_le_of_trajectories_ODE`): the third Hadamard leg, so the
+  time-dependent Banach ODE route now has the full existence / uniqueness / stability triple (uniqueness
+  is its `dist₀ = 0` case).
+
+**Formulation note (re-confirmed with committed lemmas).** These discharge the honest **mild / bounded /
+regularised** route to `picard`: the chart builder `TimeDependentGeometricRicciDeTurckBanachChart.ofLipschitzBoundedContinuous`
+already discharges `picard` inline from ball-restricted bounded/Lipschitz/time-continuous data, and the
+above give the standalone time-dependent PL + evolution existence/uniqueness/stability for such a
+representative on any `[NormedAddCommGroup E] [NormedSpace ℝ E]` (`+ CompleteSpace` for existence),
+instantiated at `E = ContinuousSectionSpace`.  Unchanged: for a **general** initial metric the true
+second-order Ricci–DeTurck RHS is unbounded on `C⁰`, so `hgeom` (`A = intrinsicRicciDeTurckRHS` on the
+positive-definite locus) cannot simultaneously hold for a `C⁰`-bounded `A`; the general operator's
+`picard` still requires the parabolic Schauder a-priori bound.  Remaining for Point 4 (unchanged): the
+Item 3 parabolic Schauder gain (heat-kernel content); the Item 2 spatial-`C³` flow-slice regularity;
+and the Item 1 tensor time-derivative chain rule.
+
+Update — **layer-2 `ContDiff → field-jet` bridge is now proved (`C²` manifold flow regularity from a
+single joint-`ContDiff` hypothesis)** in `AnalyticPDE/FieldJetContDiff.lean` (all axiom-clean:
+`propext`/`Classical.choice`/`Quot.sound`; full library green).  Extending the layer-1 `C¹` bridge
+(`contMDiff_one_flow_apply_of_contDiff`), this session adds:
+
+* `continuous_fderiv_of_contDiff_uncurry'` and `contDiff_uncurry_fderiv_of_contDiff_uncurry'` — the
+  **codomain-general** (`w : ℝ → E → F`) forms of the layer-1 continuity lemma and of the "derivative
+  field is itself jointly `ContDiff` one order lower" step (`uncurry (fderiv ℝ (w ·)) = fderiv ℝ
+  (uncurry w) ∘L inr`, a bounded-linear post-composition).  These are exactly what lets the field-jet
+  extraction **recurse**: the layer-1 derivative field `fun s ↦ fderiv ℝ (v s)` is `(E →L[ℝ] E)`-valued,
+  not `E`-valued, so the original (codomain-`E`) layer-1 lemmas do not re-apply to it.
+* `hasFDerivAt_fderiv_fderiv_of_contDiff_uncurry` (`hD2v`) and
+  `continuous_fderiv_fderiv_of_contDiff_uncurry` (`hD2vc`) — the second-jet inputs of the tower's `C²`
+  flow theorem `contMDiff_two_flow_apply_of_lipschitz_secondDeriv`, obtained by applying the primed
+  layer-1 lemmas to the derivative field.
+* `contMDiff_two_flow_apply_of_contDiff` and `contMDiff_two_flow_apply_of_contDiff_of_bddDerivs` — the
+  `C²` bridges (the second discharges `hv`/`hvc` from a first-derivative bound, matching the layer-1
+  `_of_bddDerivs` API).
+
+**Key finding (blocks the naive layer-3/fully-bounded route).** The nested-`fderiv` representation of
+the jet **caps out at `C²`**: the triple-nested continuous-linear space `E →L[ℝ] E →L[ℝ] E →L[ℝ] E` has
+**no directly-synthesizable `SeminormedAddCommGroup`/`Norm`/`NNNorm` instance** in this context (verified
+by probe — `fderiv ℝ (fderiv ℝ (fderiv ℝ f))` type-checks, but `‖·‖₊` on its value does not synthesize),
+so a third-derivative bound `‖fderiv ℝ (fderiv ℝ (fderiv ℝ (v s))) ξ‖₊ ≤ M` cannot even be *stated*.
+Consequently `hD2vlip` (Lipschitz of the second-derivative field) is taken as a hypothesis in the `C²`
+bridges rather than derived from a bound.  **Layer-3 / `C³` therefore MUST use the multilinear /
+`iteratedFDeriv` representation** — which is precisely why the tower's `C³` theorem
+`contMDiff_three_flow_apply_of_lipschitz_thirdDeriv` consumes `D2vm : E → (E[×2]→L E)`,
+`D3vm : E → (E →L (E[×2]→L E))`, `D3v : E → (E[×3]→L E)` with the `curry2`/`curryLeft` compatibility
+fields `hcompat`/`hcurry` (`curry2` in `SmoothDependenceCk.lean`).
+
+**Next target (layer-3 `C³` `ContDiff` bridge).** Produce, from a single `ContDiff ℝ n (uncurry v)`
+(`n ≥ 4`), the multilinear jet objects `D2vm := iteratedFDeriv ℝ 2 (v ·)`, `D3v := iteratedFDeriv ℝ 3
+(v ·)`, `D3vm := fderiv ℝ (iteratedFDeriv ℝ 2 (v ·))`, with their `HasFDerivAt`/joint-continuity/
+`LipschitzWith` inputs (the multilinear norms are clean at every arity, so the third-order bound is now
+statable) and the compatibility identities `hcompat : fderiv ℝ (fderiv ℝ (v s)) ξ = curry2
+(iteratedFDeriv ℝ 2 (v s) ξ)` and `hcurry`, to assemble `contMDiff_three_flow_apply_of_contDiff` — the
+`C^{3,1}` jet the model-manifold `C³` gauge flow consumes.
+
+Update — **layer-3 `C³` `ContDiff → field-jet` bridge is now proved (`contMDiff_three_flow_apply_of_contDiff`)**
+in `AnalyticPDE/FieldJetContDiff.lean` (all axiom-clean `propext`/`Classical.choice`/`Quot.sound`; full
+library green, `scripts/point4_scan.py cheats` = `TOTAL 0`).  This completes the previously-stated "next
+target": the `C^{3,1}` field jet the model-manifold `C³` gauge flow consumes is now extracted from a
+*single* joint-`ContDiff ℝ n (uncurry v)` hypothesis (`3 ≤ n`).  This session adds, on the unconditional
+Item-2 critical path:
+
+* `fderiv_fderiv_eq_curry2_iteratedFDeriv_two` (`hcompat`) and `fderiv_iteratedFDeriv_two_eq_curryLeft`
+  (`hcurry`) — the two multilinear compatibility identities, both **unconditional** (no smoothness
+  hypothesis): the first bridges the nested-`fderiv` second derivative to `curry2 (iteratedFDeriv ℝ 2 …)`
+  via `curry2_apply` + `iteratedFDeriv_two_apply`; the second is the definitional `fderiv_iteratedFDeriv`
+  (the currying equiv is `ContinuousMultilinearMap.curryLeft`).
+* `contDiff_uncurry_iteratedFDeriv_of_contDiff_uncurry` — the **multilinear field-jet joint-`ContDiff`
+  recursion**: `(t, x) ↦ iteratedFDeriv ℝ k (v t) x` is jointly `ContDiff ℝ m` for `m + k ≤ n`, by
+  induction on `k` rewriting `iteratedFDeriv ℝ (k+1)` as the left-currying isometry of
+  `fderiv ℝ (iteratedFDeriv ℝ k)` (`iteratedFDeriv_succ_eq_comp_left`) and applying the codomain-general
+  layer-1 derivative-field recursion `contDiff_uncurry_fderiv_of_contDiff_uncurry'` to the `k`-th jet.
+  (Plumbing note: `ContDiff.comp` with `LinearIsometryEquiv.contDiff`/`ContinuousLinearEquiv.contDiff`
+  of the multilinear curry equiv `whnf`-times-out or hits a Seminormed/Normed instance diamond; `fun_prop`
+  discharges the post-composition robustly — the reliable incantation for composing `ContDiff` with a
+  curry isometry.)
+* `hasFDerivAt_fderiv_iteratedFDeriv_two_of_contDiff_uncurry` (`hD3vm`),
+  `continuous_fderiv_iteratedFDeriv_two_of_contDiff_uncurry` (`hD3vmc`), and
+  `continuous_iteratedFDeriv_three_of_contDiff_uncurry` (`hD3vc`) — the multilinear second/third jet
+  `HasFDerivAt`/joint-continuity inputs, from `ContDiff.iteratedFDeriv_right` (single slice) and the
+  recursion + the codomain-general layer-1 continuity lemma.
+* `contMDiff_three_flow_apply_of_contDiff` and `contMDiff_three_flow_apply_of_contDiff_of_bddDerivs` — the
+  `C³` bridges themselves, feeding all the above plus the assumed top-order Lipschitz controls
+  (`hDvlip`/`hD2vclip`/`hD2vmlip`/`hD3vmlip`/`hD3vlip`, supplied directly, as expressing them as
+  fourth-derivative bounds would need a further multilinear jet) into the tower's
+  `contMDiff_three_flow_apply_of_lipschitz_thirdDeriv`.  The `_of_bddDerivs` form additionally discharges
+  `hv`/`hvc` from a first-derivative bound.
+
+**Formulation note (unchanged, re-confirmed).** The Item-3 chart route stays parabolic-Schauder-blocked
+for a general initial metric: `hgeom` (`A = intrinsicRicciDeTurckRHS` on the positive-definite locus)
+cannot hold for a `C⁰`-bounded `A`, and the empty / rank-`≤1` closures already exist directly
+(`intrinsicLocalExistenceUniquenessFamily_of_isEmpty`,
+`intrinsicLocalExistenceUniquenessFamily_of_finrank_model_le_one`).  So this session advanced the
+**unconditional Item-2** leg instead.  **Next target.** Wire `contMDiff_three_flow_apply_of_contDiff`
+(equivalently `exists_flow_contMDiff_three_gaugeData`) into the compact-manifold gauge-flow existence
+(`GaugeReduction/Diffeomorph3FlowExistence.lean` via the model bridge in `ModelGaugeFlowODE.lean` and
+`GaugeFlowAssembly.gaugeFlow_of_inverse_flow`), discharging Item-2's spatial-`C³` flow-slice regularity
+input from a `ContDiff` field of the DeTurck gauge vector field.
+
+Update — **model-manifold `C³` gauge-flow existence is now available behind a single `ContDiff`
+hypothesis** (`AnalyticPDE/ModelManifoldGaugeFlow.lean`; both new theorems axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`, cheat-scan `TOTAL 0`).  This session completed the model
+(chart-level) leg of the previously-stated "next target" — driving the raw `C³` DeTurck gauge flow
+from a `ContDiff` field — by adding the two `_of_contDiff` entry points to the model-manifold gauge-flow
+exports, mirroring the `FieldJetContDiff` jet-extraction API:
+
+* `exists_diffeomorph3GaugeFlowOn_of_contDiff` — the model-manifold (`M = E`, `𝓘(ℝ, E)`) raw `C³`
+  gauge-flow existence target `Diffeomorph3GaugeFlowOn (X := v) s t₀`, with the *entire* `C^{3,1}`
+  Fréchet jet (`Dv`, `D²v` in curry/multilinear guises, `D³v`) and all its `HasFDerivAt`/joint-continuity/
+  compatibility obligations discharged from a single `ContDiff ℝ n (Function.uncurry v)` hypothesis
+  (`3 ≤ n`) — only the honest top-order Lipschitz controls remain, matching the tower's `C³` interface.
+  A pure assembly: the `FieldJetContDiff` extraction fed into `exists_diffeomorph3GaugeFlowOn_of_field_jet`.
+* `exists_flow_diffeomorph_three_hasMFDerivAt_of_contDiff` — the `ContDiff`-packaged form of the second
+  documented per-chart export `exists_flow_diffeomorph_three_hasMFDerivAt` (a single flow family `Φ`
+  that anchors, solves the manifold integral-curve ODE at every time, and is for every `t` a first-class
+  bundled `Diffeomorph 𝓘(ℝ, E) 𝓘(ℝ, E) E E 3`).
+
+(Plumbing note: `ModelManifoldGaugeFlow.lean` is a *classic* (non-`module`) file; it already imports the
+`module` file `SmoothDependenceManifold`, so adding `import …AnalyticPDE.FieldJetContDiff` — also a
+`module` file — is legal (classic files may import module files) and cycle-free (nothing imports
+`ModelManifoldGaugeFlow`).)
+
+**Honest remaining Item-2 gap (compact manifold).**  The compact-manifold gauge-flow existence
+`GaugeReduction/GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` is
+unconditional *up to* its `hslicesC3` hypothesis — the spatial-`C³` regularity (the `C¹ → C³` bootstrap)
+of the *compact-manifold* flow slices produced by
+`ManifoldFlowExistence.exists_timeDependent_flow_compact_inverse` (which itself needs only the `C¹`
+field datum).  The model-manifold `C³` dependence is now fully available (incl. the `_of_contDiff`
+entry points above), but transporting it to a general compact manifold `M` — expressing `Φ t` in
+charts, applying the model-space `C³` dependence to the chart-local field, and patching back to
+`ContMDiff I I 3 (Φ t)` — is the substantial chart-transfer work that lives in the heavy
+`GaugeReduction/ModelGaugeFlowODE.lean` (~24k lines) / `GaugeReduction/Diffeomorph3FlowExistence.lean`.
+**Next target.** Discharge `hslicesC3` from a `ContDiff` datum on the chart-local DeTurck gauge field
+by the chart-transfer of model-manifold `C³` smooth dependence, yielding an *unconditional* compact
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact` (no `hslicesC3` hypothesis).
+
+**Formulation note (unchanged, re-confirmed).** Item-3's chart route stays parabolic-Schauder-blocked
+for a general initial metric: the chart field `A`'s `geometric` obligation (`A τ s =
+intrinsicRicciDeTurckRHS …` on the positive-definite locus) forces `A` to be the genuine 2nd-order
+Ricci-DeTurck operator, which cannot simultaneously satisfy `picard`'s `IsPicardLindelof` (a `C⁰`-Banach
+Lipschitz/bounded requirement); the empty / rank-`≤1` closures already exist directly.  So this session
+advanced the **unconditional Item-2** leg.
+
+Update — **the ND heat semigroup is now a first-class bounded LINEAR operator (norm ≤ 1) on the
+Banach space of bounded continuous functions `(Fin n → ℝ) →ᵇ ℝ`**, extending
+`AnalyticPDE/HeatKernel1D.lean` (all axiom-clean `propext`/`Classical.choice`/`Quot.sound`,
+cheat-scan `TOTAL 0`).  The committed Duhamel Schauder estimates were all stated pointwise on the
+bare curried type `ℝ → (Fin n → ℝ) → ℝ`, which carries no complete-metric-space structure, so the
+Banach fixed point that yields a mild Ricci–DeTurck representative had no state space to live on.
+This session builds that state space's homogeneous propagator:
+
+* `continuous_heatSemigroupND` — spatial continuity of `x ↦ (Hₜf)(x) = ∫ Kₙ(t, x−y)·f y dy` for
+  `t > 0` and bounded continuous `f`.  The reflection change of variables `y ↦ x − y`
+  (`integral_sub_left_eq_self`; `volume` on `Fin n → ℝ` is negation- and translation-invariant)
+  rewrites `Hₜf x = ∫ z, Kₙ(t, z)·f(x − z) dz`, whose integrand is continuous in `x` per fixed `z`
+  and dominated by the `x`-independent integrable envelope `z ↦ Kₙ(t, z)·C`, so
+  `continuous_of_dominated` closes it.  (A constant envelope on the direct `∫ Kₙ(t, x−y)·f y` form is
+  *not* integrable on `ℝⁿ` — the change of variables is what makes the domination work.)
+* `heatSemigroupNDbcf` / `heatSemigroupNDbcf_apply` — `Hₜf` bundled as a `BoundedContinuousFunction`
+  via `ofNormedAddCommGroup` (continuity above + the maximum-principle uniform bound `‖f‖`).
+* `norm_heatSemigroupNDbcf_le` (`‖Hₜf‖ ≤ ‖f‖`), `norm_heatSemigroupNDbcf_sub_le`
+  (`‖Hₜf − Hₜg‖ ≤ ‖f − g‖`, via `heatSemigroupND_sub` linearity + maximum principle), and
+  `lipschitzWith_heatSemigroupNDbcf` (`LipschitzWith 1`) — the `L^∞` non-expansiveness in norm,
+  difference, and Lipschitz vocabularies, the last directly consumable by the `ContractingWith` /
+  Banach-fixed-point API this module already imports.
+* `heatSemigroupNDbcf_add` / `heatSemigroupNDbcf_smul` / `heatSemigroupNDclm` /
+  `norm_heatSemigroupNDclm_le` — additivity + real homogeneity upgrade the map to a bounded
+  `ℝ`-linear operator `((Fin n → ℝ) →ᵇ ℝ) →L[ℝ] ((Fin n → ℝ) →ᵇ ℝ)` of operator norm `≤ 1`
+  (`LinearMap.mkContinuous`), the operator-theoretic object the abstract parabolic Banach fixed-point
+  machinery (`AnalyticPDE/Parabolic/BanachSpace.lean`) consumes.
+
+(Plumbing note: the `→ᵇ` superscript notation does not elaborate in this `module` file
+[`superscriptTerm` elaborator unavailable]; the explicit `BoundedContinuousFunction (Fin n → ℝ) ℝ`
+must be written instead.)
+
+**Formulation finding (re-confirmed, stated per directive).** The general-`M` Item-3 chart route
+stays blocked: `TimeDependentGeometricRicciDeTurckBanachChart` requires `A` to be `IsPicardLindelof`
+(bounded + Lipschitz on the `C⁰` section space, via `isPicardLindelof_of_bounded_lipschitz…`) *and*
+(via `geometric`) to equal the genuine 2nd-order `intrinsicRicciDeTurckRHS` of some smooth metric
+family.  `geometric`'s existential `∃ g` gives freedom (a "realise `s` to a smooth `g[s]`, then apply
+RHS" operator can be bounded-Lipschitz for a *fixed* regularisation, so the **chart** is inhabitable),
+but the genuine obstruction moves into `D`'s `realization`/`encode`: a *regularised* Banach solution
+does not decode to a genuine `ChosenIntrinsicDeTurckLocalSolution`.  Closing it needs the parabolic
+Schauder a-priori estimate controlling the *true* operator — i.e. the mild fixed point on the Banach
+space this session's operator now lives on — not a direct Mathlib Banach ODE.  Next target: the
+**Duhamel term as a `BoundedContinuousFunction`** (`x ↦ ∫_{t₀}^{t} H_{t−s}(q s) x ds` continuous +
+bounded; needs the Duhamel integrand's `s`-continuity/measurability), then the short-time-contraction
+Banach fixed point `Hₜu₀ + Duhamel(Q u)` giving a genuine mild solution of the ND reaction–diffusion
+model.
+
+Update — **the model (`ℝⁿ`) mild-solution map is now built as a genuine Banach-space object with its
+complete short-time fixed-point datum**, extending `AnalyticPDE/HeatKernel1D.lean` (all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`, cheat-scan `TOTAL 0`, full aggregate green).  The previous
+milestone realised the *homogeneous* propagator `Hₜ` as a bounded linear operator on the Banach space
+`(Fin n → ℝ) →ᵇ ℝ`; the committed pointwise Duhamel Schauder bounds still lived on the bare curried
+type carrying no complete-metric structure.  This session bundles the *inhomogeneous* half and the full
+map value on that Banach state space, completing the model mild map's self-map + contraction data:
+
+* `heatDuhamelNDbcf` / `heatDuhamelNDbcf_apply` — the Duhamel term `x ↦ ∫_{t₀}^{t} H_{t−s}(q s)(x) ds`
+  as a `BoundedContinuousFunction`, for a sup-norm-`C`-bounded source `q : ℝ → (Fin n → ℝ) →ᵇ ℝ` whose
+  Duhamel integrand is per-`x` interval-integrable.  Continuity is **Lipschitz** continuity from the
+  committed spatial `C¹` Schauder gain `heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound`
+  (`|D(x)−D(x')| ≤ 2nC√(t−t₀)/√π·‖x−x'‖`, splitting the Duhamel integral of the difference via
+  `intervalIntegral.integral_sub`); boundedness (`‖·‖ ≤ C·(t−t₀)`) is `heatSemigroupND_duhamel_sup_bound`.
+* `norm_heatDuhamelNDbcf_le` / `norm_heatDuhamelNDbcf_sub_le` — the Banach-space (`norm_le`) forms of the
+  Duhamel sup / sub-sup bounds: `‖heatDuhamelNDbcf q‖ ≤ C·(t−t₀)` (self-map) and
+  `‖heatDuhamelNDbcf q₁ − heatDuhamelNDbcf q₂‖ ≤ D·(t−t₀)` (short-time contraction, from
+  `‖q₁ s y − q₂ s y‖ ≤ D`).
+* `measurable_uncurry_heatKernel1D` / `measurable_uncurry_heatKernelND` — the heat kernel is **jointly
+  measurable** in `(t, x)` (Gaussian formula via `fun_prop`; finite product for the `n`-D kernel).
+* `intervalIntegrable_heatSemigroupND_duhamel` — **discharges the integrability side-condition** from
+  mere *continuity* of the source: measurability of the parametric Duhamel integral
+  `s ↦ ∫_y Kₙ(t−s, x−y)·(q s)(y) dy` via `AEStronglyMeasurable.integral_prod_right'` (kernel factor
+  jointly measurable, source factor from joint eval-continuity of `q : ℝ → BCF`), bounded a.e. by `C` on
+  `(t₀, t]` (`abs_heatSemigroupND_le`, `s = t` null), hence interval-integrable.
+* `heatDuhamelNDbcf_of_continuous` (+ `_apply`, `norm_…_le`, `norm_…_sub_le`) — the Duhamel BCF with
+  **no free integrability hypothesis**, the form the mild fixed point (`q s = Q(u s)` continuous)
+  consumes.
+* `heatMildValueNDbcf` (+ `_apply`) — the **full mild-map value** `Φ(t) = H_{t−t₀}u₀ +
+  ∫_{t₀}^{t} H_{t−s}(q s) ds` as a `BCF`, and its two fixed-point bounds:
+  `norm_heatMildValueNDbcf_le` (self-map, `‖Φ(t)‖ ≤ ‖u₀‖ + C·(t−t₀)`, triangle + `L∞`-nonexpansive `H`)
+  and `norm_heatMildValueNDbcf_sub_le` (contraction, `‖Φ(q₁)(t) − Φ(q₂)(t)‖ ≤ D·(t−t₀)` — the
+  source-independent homogeneous part cancels, leaving the Duhamel contraction).  The complete Banach
+  fixed-point datum (self-map ∧ short-time contraction) for the model mild ND heat flow.
+
+**Formulation finding (re-confirmed, per directive).**  Unchanged: for a *general* initial metric the
+true 2nd-order Ricci–DeTurck RHS is `C⁰`-unbounded, so the chart field `A`'s `geometric` obligation
+(`A = intrinsicRicciDeTurckRHS` on the positive-definite locus) cannot coexist with a `C⁰`-bounded `A`
+satisfying `picard : IsPicardLindelof A` directly; the honest route is the **mild / regularised**
+representative — the Banach fixed point `Hₜu₀ + Duhamel(Q u)` on the complete state space this session's
+`heatMildValueNDbcf` now inhabits — with the obstruction moving into `D`'s `realization`/`encode` (a
+regularised Banach solution decoding to a genuine geometric solution needs the parabolic Schauder gain,
+now available in the Duhamel `_spatial_holder`/`_spatial_lipschitz` bounds).  The trivial (empty /
+rank-`≤1`) closures already exist directly and are **not** on the general-`M` critical path.
+
+**Next target.**  Lift the fixed-time mild-map value to the **time-path space** `C([t₀, T], (Fin n → ℝ)
+→ᵇ ℝ)`: the missing analytic input is **time-continuity** of the propagator/Duhamel/mild-value paths
+`t ↦ heatMildValueNDbcf …` (ND heat-semigroup time-continuity), after which the committed per-time
+`norm_heatMildValueNDbcf_sub_le` gives the path-space short-time contraction and the Banach fixed point
+yields a genuine mild solution of the ND reaction–diffusion model — the model template for the mild
+Ricci–DeTurck representative feeding `A`/`picard`.
+
+Update — **the propagator half of that time-continuity input is now proved** (extending
+`AnalyticPDE/HeatKernel1D.lean`; all axiom-clean `propext`/`Classical.choice`/`Quot.sound`, cheat-scan
+`TOTAL 0`, module green).  The recorded next target asked for time-continuity of the
+propagator/Duhamel/mild-value paths; this session closes the **propagator** path (the homogeneous
+`H_{t−t₀}u₀` term of `heatMildValueNDbcf`):
+
+* `continuousAt_heatSemigroupND_time` / `continuousOn_heatSemigroupND_time` — for bounded continuous
+  data `f` (`|f y| ≤ C`), the propagator path `t ↦ (Hₜf)(x) = ∫ Kₙ(t, x−y)·f(y) dy` is continuous at
+  every `t₁ > 0` (and `ContinuousOn (0, ∞)`).  Dominated convergence: near `t₁` (on `Ioo (t₁/2) (2t₁)`)
+  the integrand is dominated by the `t`-independent integrable envelope `c^n·Kₙ(2t₁, x−y)·C`, is
+  `t`-continuous for a.e. `y`, and measurable in `y`.
+* `heatKernelND_le_const_mul_heatKernelND_of_mem_Icc` — the supporting **time-monotone Gaussian
+  domination** on a compact time interval: for `0 < a ≤ t ≤ b`,
+  `Kₙ(t, w) ≤ ((4πa)^(-1/2)·(4πb)^(1/2))^n·Kₙ(b, w)` (antitone prefactor `(4πt)^(-1/2)` × monotone
+  Gaussian `exp(-|w|²/(4t))`, product over coordinates) — the `t`-independent dominating function.
+* `continuousAt_heatKernelND_time` — time-continuity of the `n`-D heat kernel `t ↦ Kₙ(t, z)` on
+  `(0, ∞)` (finite product of the existing `continuousOn_heatKernel1D_time`), the a.e.-`t`-continuity
+  input to the dominated-convergence argument.
+* `continuousAt_heatSemigroupND_shift_time` / `continuousOn_heatSemigroupND_shift_time` — the shifted
+  form `t ↦ (H_{t−t₀}f)(x)` continuous at every `t₁ > t₀` (composition with `t ↦ t − t₀`), i.e. the
+  time-continuity of the homogeneous term of the mild-solution map value.
+
+**Next target.**  The remaining **Duhamel** path time-continuity `t ↦ ∫_{t₀}^{t} H_{t−s}(q s)(x) ds`
+(then the mild-value path `t ↦ heatMildValueNDbcf(t)(x)` as their sum).  Subtlety to handle: the
+Duhamel integrand is *singular at the upper endpoint* `s = t` (`H_{t−s}` as `t−s → 0⁺`), so plain
+`continuousAt_of_dominated` does not apply directly; the honest route is the substitution `u = t − s`
+turning it into `∫_0^{t−t₀} H_u(q(t−u))(x) du = ∫_ℝ 1_{[0,t−t₀]}(u)·H_u(q(t−u))(x) du`, where the
+integrand is bounded by `C`, `t`-continuous for a.e. `u` (exceptional set `{0, t−t₀}` is null), and
+dominated on a `t₁`-neighbourhood by `C·1_{[0, t₁+δ−t₀]}` — a dominated-convergence argument for the
+substituted (non-singular-in-`u`) form.  With propagator + Duhamel time-continuity in hand, the
+per-time `norm_heatMildValueNDbcf_sub_le` gives the path-space short-time contraction and the Banach
+fixed point yields a genuine mild solution of the ND reaction–diffusion model.
+
+Update — **the Duhamel + mild-value path time-continuities are now proved** (extending
+`AnalyticPDE/HeatKernel1D.lean`; all axiom-clean `propext`/`Classical.choice`/`Quot.sound`, cheat-scan
+`TOTAL 0`, module green).  This session closes the recorded next target — the singular Duhamel-path
+time-continuity and the mild-value path as the sum — via the substitution route:
+
+* `heatSemigroupND_duhamel_eq_comp_sub` — the `u = t − s` change of variables
+  `∫_{t₀}^{t} H_{t−s}(q s)(x) ds = ∫_{0}^{t−t₀} H_u(q(t−u))(x) du`
+  (`intervalIntegral.integral_comp_sub_left`), moving the diagonal singularity `s = t` to the *fixed*
+  heat time `u = 0`.
+* `continuous_heatSemigroupND_comp_sub_time` — for fixed `u > 0`, `t ↦ H_u(q(t−u))(x)` is continuous
+  (composition of the continuous shifted source `t ↦ q(t−u)`, the bounded linear propagator
+  `heatSemigroupNDclm`, and evaluation at `x`).  The a.e.-`u` time-continuity ingredient.
+* `aestronglyMeasurable_heatSemigroupND_comp_sub` — `u ↦ H_u(q(t−u))(x)` is a.e.-measurable (joint
+  kernel×eval measurability + `AEStronglyMeasurable.integral_prod_right'`), adapting the measurability
+  pattern of `intervalIntegrable_heatSemigroupND_duhamel`.
+* `continuousAt_heatSemigroupND_duhamel_time` — the **Duhamel path** `t ↦ ∫_{t₀}^{t} H_{t−s}(q s)(x) ds`
+  is continuous at every `t₁ > t₀`.  After the substitution, the integral over the `t`-dependent domain
+  `(0, t−t₀]` is written as a full-space integral of the indicator
+  `u ↦ 1_{(0, t−t₀]}(u)·H_u(q(t−u))(x)`, and `continuousAt_of_dominated` applies: a.e.-measurable in
+  `u`, dominated on a `t₁`-neighbourhood by the `t`-independent envelope `1_{(0, t₁−t₀+1]}·C`
+  (`abs_heatSemigroupND_le`), continuous in `t` for a.e. `u` (indicator boundary set `{0, t₁−t₀}` null).
+* `continuousAt_heatMildValue_time` (+ `continuousOn_…` on `Ioi t₀`) — the **pointwise mild-solution
+  path** `t ↦ Φ(t)(x) = H_{t−t₀}(u₀)(x) + ∫_{t₀}^{t} H_{t−s}(q s)(x) ds` continuous at every `t₁ > t₀`,
+  the sum of the propagator-shift and Duhamel time-continuities (`heatMildValueNDbcf_apply`).
+* `continuousOn_heatSemigroupND_duhamel_time` — the `ContinuousOn (Ioi t₀)` form of the Duhamel path.
+
+**Next target.**  Upgrade the *pointwise*-in-`x` mild-value path time-continuity to **`BCF`-norm**
+(sup-over-`x`) continuity, so `t ↦ Φ(t)` is a genuine element of the path space
+`C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`.  Blocker identified: sup-norm continuity of the homogeneous part
+`t ↦ H_{t−t₀}u₀` needs the heat-semigroup **composition (Chapman–Kolmogorov) property**
+`H_s(H_t f) = H_{s+t} f` (not yet in `HeatKernel1D.lean`; requires a Gaussian-convolution identity
+`Kₙ(s,·) ⋆ Kₙ(t,·) = Kₙ(s+t,·)`) to run the `ε`-regularisation `H_t = H_{t−ε}(H_ε ·)` reducing to
+strong continuity on the *bounded-uniformly-continuous* range `H_ε u₀`.  The tractable next PIECE is
+therefore that convolution/semigroup identity (or, if the eventual mild fixed point can be set up with
+pointwise continuity + uniform bounds instead of `BCF`-norm continuity, the abstract path-space
+`ContractingWith` self-map on the sup-bounded continuous trajectories directly from the committed
+per-time `norm_heatMildValueNDbcf_sub_le`).
+
+Update — **the `BCF`-norm propagator-path time-continuity blocker is now fully resolved** (extending
+`AnalyticPDE/HeatKernel1D.lean`; all axiom-clean `propext`/`Classical.choice`/`Quot.sound`, cheat-scan
+`TOTAL 0`, module green).  This session closes the recorded next target — the sup-over-`x` (`BCF`-norm)
+time-continuity of the homogeneous propagator path `t ↦ H_t f` — via the semigroup route flagged above,
+building the missing Chapman–Kolmogorov ⇒ approximate-identity ⇒ Hölder-1/2 modulus ⇒ continuity tower:
+
+* `heatSemigroupND_comp` — the **`n`-dimensional heat-semigroup composition law** `Hₜ(Hₛf) = H_{t+s}f`
+  for bounded a.e.-measurable `f`, by Fubini (`integral_integral_swap`) from the already-committed nD
+  Chapman–Kolmogorov identity `heatKernelND_chapman_kolmogorov` (the `ND` analog of the committed
+  `heatSemigroup1D_comp`).  This is the previously-missing semigroup identity the `ε`-regularisation
+  `Hₜ = H_{t−ε}(H_ε ·)` needs.
+* `abs_heatSemigroupND_sub_self_le_of_lipschitz` — **strong continuity at time `0` on Lipschitz data**:
+  for bounded `L`-Lipschitz `w`, `|Hₛw x − w x| ≤ L·n·((4πs)^{−1/2}·4s) → 0`.  Mean-zero rewrite
+  `Hₛw x − w x = ∫ Kₙ(s,x−y)(w y − w x)` (using `∫Kₙ = 1`), pointwise `|w y − w x| ≤ L‖x−y‖ ≤
+  L·∑ₖ|xₖ−yₖ|` (`pi_norm_le_iff_of_nonneg` + `Finset.single_le_sum`), each coordinate integral
+  collapsed by the closed-form first moment `integral_abs_coord_mul_heatKernelND_eq` (via
+  `integral_sub_left_eq_self`).
+* `abs_heatSemigroupND_add_sub_le` / `norm_heatSemigroupNDbcf_add_sub_le` — the **pointwise and
+  `BCF`-norm consecutive-time modulus** `|H_{t'+s}w x − H_{t'}w x| ≤ (n·C/√(πt'))·n·((4πs)^{−1/2}·4s)`.
+  Via `heatSemigroupND_comp` (`H_{t'+s} = H_s(H_{t'} ·)`) this is the strong-continuity estimate applied
+  to `v := H_{t'}w`, which is *already* Lipschitz with the committed `√t'`-parabolic-smoothing constant
+  `n·C/√(πt')` (`heatSemigroupND_spatial_lipschitz_sqrt_rate_norm`) — so no Lipschitz hypothesis on `w`.
+* `heatSemigroupND_timeModulus_sq` / `_eq_sqrt` / `norm_heatSemigroupNDbcf_add_sub_le_sqrt` — the
+  **sharp `Hölder-1/2` `√s` form**: `(4πs)^{−1/2}·4s` squares to `4s/π` (rpow arithmetic), hence equals
+  `(2/√π)·√s`, giving `‖H_{t'+s}f − H_{t'}f‖ ≤ (n·‖f‖/√(πt'))·n·(2/√π)·√s`.
+* `continuousAt_heatFlowPathBcf` (+ total path `heatFlowPathBcf`, `heatFlowPathBcf_of_pos`,
+  `heatSemigroupNDbcf_congr`) — the **capstone `BCF`-norm time-continuity**: for bounded continuous `f`
+  and every `τ₁ > 0`, `t ↦ H_t f` is `ContinuousAt τ₁` in `(Fin n → ℝ) →ᵇ ℝ`.  Within `|t − τ₁| < τ₁/2`
+  the `BCF`-distance is squeezed by `M·√|t − τ₁|` (the `√s` modulus in both `t ≷ τ₁` directions, the
+  smaller-time prefactor bounded uniformly by `M = (n·‖f‖/√(π·τ₁/2))·n·(2/√π)`), and `√|t − τ₁| → 0`
+  (`Real.sqrt_lt'`).  This upgrades the earlier *pointwise-in-`x`* `continuousAt_heatMildValue_time` to
+  genuine sup-norm continuity.
+
+**Next target.**  The remaining half of the mild-value path lift: **`BCF`-norm time-continuity of the
+inhomogeneous Duhamel path** `t ↦ heatDuhamelNDbcf(t)` (the singular-endpoint term), after which the
+mild-value path `t ↦ heatMildValueNDbcf(t) = H_{t−t₀}u₀ + Duhamel(q)` is `BCF`-norm continuous as the
+sum of `continuousAt_heatFlowPathBcf` (homogeneous) and the Duhamel continuity — a genuine element of
+the path space `C([t₀, T], (Fin n → ℝ) →ᵇ ℝ)`.  Then the committed per-time `norm_heatMildValueNDbcf_sub_le`
+gives the path-space short-time contraction and the Banach fixed point (`ContractingWith`) yields a
+genuine mild solution of the ND reaction–diffusion model — the model template for the mild Ricci–DeTurck
+representative feeding the chart `A`/`picard`.
+
+Update — **the `BCF`-norm mild-value path lift is now complete** (extending
+`AnalyticPDE/HeatKernel1D.lean`; all axiom-clean `propext`/`Classical.choice`/`Quot.sound`, cheat-scan
+`TOTAL 0`, module green).  This session closes the recorded next target — the singular Duhamel-path
+`BCF`-norm time-continuity and the mild-value path as the sum — via the `u = t − s` substitution route
+(which decouples the heat time from `t`, so the propagator `H_u` acts *nonexpansively* and the
+`(t−s)^{−1/2}` diagonal singularity never appears):
+
+* `intervalIntegrable_heatSemigroupND_comp_sub` — **interval-integrability of the substituted Duhamel
+  integrand** `u ↦ H_u(q(t−u))(x)` on `[0, b]`.  After the substitution the only singular time `u = 0`
+  is a null endpoint, so the bound `|H_u(q(t−u))(x)| ≤ C` (`abs_heatSemigroupND_le`) holds on all of
+  `Ioc 0 b`; with a.e.-measurability (`aestronglyMeasurable_heatSemigroupND_comp_sub`) and finite
+  interval measure this gives integrability, discharging the interval-split side-conditions.
+* `continuousAt_intervalIntegral_normSub_shift` — **continuity of the source time-modulus integral**
+  `t ↦ ∫_0^b ‖q(t−u) − q(t₁−u)‖ du` at `t₁` (where it vanishes), by interval dominated convergence
+  (`continuousAt_of_dominated_interval`): the integrand is continuous, dominated by the constant `2C`
+  on the finite interval, and continuous in `t` for every `u`.  This is the *non-singular* modulus
+  governing the main term.
+* `continuousAt_heatDuhamelPathBcf` (+ total path `heatDuhamelPathBcf`, `heatDuhamelPathBcf_of_le`) —
+  the **singular-endpoint capstone**: for continuous sup-`C`-bounded `q`, the Duhamel path
+  `t ↦ ∫_{t₀}^{t} H_{t−s}(q s) ds` is `ContinuousAt t₁` in `(Fin n → ℝ) →ᵇ ℝ` for every `t₁ > t₀`.
+  Substituting `u = t − s` and splitting at `b = t₁ − t₀` gives (with `a = t − t₀`)
+  `Duhamel(t)(x) − Duhamel(t₁)(x) = ∫_b^a H_u(q(t−u))(x) du + ∫_0^b H_u(q(t−u) − q(t₁−u))(x) du`; the
+  tail is `≤ C·|t − t₁|` (nonexpansiveness, uniform in `x`) and the main term `≤ ∫_0^b ‖q(t−u) −
+  q(t₁−u)‖ du = G(t)` (linearity + nonexpansiveness of `H_u`, uniform in `x`).  Taking the sup over `x`
+  (`BoundedContinuousFunction.norm_le`) gives `‖Duhamel(t) − Duhamel(t₁)‖ ≤ C·|t − t₁| + G(t) → 0`, so
+  the distance is squeezed to `0` (`squeeze_zero'`).
+* `continuousAt_heatMildValuePathBcf` (+ total path `heatMildValuePathBcf`, `heatMildValuePathBcf_of_lt`)
+  — the **mild-value path lift**: `t ↦ Φ(t) = H_{t−t₀}u₀ + Duhamel(q)` is `ContinuousAt t₁` for every
+  `t₁ > t₀`, the sum of `continuousAt_heatFlowPathBcf_shift` (homogeneous) and
+  `continuousAt_heatDuhamelPathBcf` (Duhamel).  `heatMildValuePathBcf_of_lt` identifies the bundled
+  path with the fixed-time `heatMildValueNDbcf` for `t > t₀`.
+* `continuousOn_heatDuhamelPathBcf` / `continuousOn_heatMildValuePathBcf` — the `ContinuousOn (Ioi t₀)`
+  forms: the Duhamel and mild-value paths are `BCF`-norm-continuous on the open forward time ray, i.e.
+  genuine elements of `C((t₀, T], (Fin n → ℝ) →ᵇ ℝ)`, the domain on which a mild trajectory lives.
+
+**Next target.**  With the mild-value path now a `BCF`-norm-continuous element of `C((t₀, T],
+(Fin n → ℝ) →ᵇ ℝ)`, build the **path-space Banach fixed point**: pick the complete metric space (e.g.
+`BoundedContinuousFunction ↥(Set.Ioc t₀ T) ((Fin n → ℝ) →ᵇ ℝ)`, noting the heat semigroup on `C_b` is
+*not* `C₀`, so the closed-interval left endpoint `t₀` needs care — the trajectory matches `u₀` at `t₀`
+only in the mild sense), define the mild-solution self-map `Φ(u)(t) = H_{t−t₀}u₀ + ∫_{t₀}^{t}
+H_{t−s}(Q(u s)) ds`, and use the committed per-time contraction `norm_heatMildValueNDbcf_sub_le`
+(`‖Φ(u₁)(t) − Φ(u₂)(t)‖ ≤ Kstate·(t − t₀)·‖u₁ − u₂‖`, uniform over `t ∈ (t₀, T]`) to get a
+`ContractingWith` on a short time window, whose fixed point is the model mild solution — the analytic
+template for the mild Ricci–DeTurck representative feeding the chart `A`/`picard`.
+
+Update — **the path-space Banach fixed point is now CLOSED for the model (`ℝⁿ`) mild solution**
+(extending `AnalyticPDE/HeatKernel1D.lean`, all axiom-clean, `scan cheats` `TOTAL 0`, module green).
+This session closes the recorded next target — the model semilinear mild-solution existence+uniqueness
+via `ContractingWith` — by assembling the complete state-space datum and the self-map fixed point:
+
+* `heatMildValuePathBcfIoc` / `heatMildValuePathBcfIcc` (+ `_apply`, `_apply_eq`, self-map norm bounds
+  `norm_heatMildValuePathBcfIoc_le` / `norm_heatMildValuePathBcfIcc_le`) — the mild-value path realized
+  as a genuine element of the complete Banach state spaces `↥(Set.Ioc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`
+  (half-open, no endpoint hypotheses) and `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)` (closed, Lipschitz
+  data), via `ofNormedAddCommGroup` from the `Ioi`/`Icc` continuity and the `‖u₀‖+C·(T−t₀)` bound.
+* `dist_heatMildValuePathBcfIoc_le` / `dist_heatMildValuePathBcfIcc_le` — the short-time contraction
+  datum `dist(Φ(q₁))(Φ(q₂)) ≤ D·(T−t₀)` in each state-space norm (fixed-time `norm_heatMildValueNDbcf_sub_le`,
+  homogeneous term cancels; at the closed endpoint both values are `u₀`).
+* `norm_heatSemigroupNDbcf_sub_self_le_of_lipschitz` (`‖H_s u₀−u₀‖ ≤ L·n·(2/√π)·√s`) +
+  `continuousWithinAt_heatFlowPathBcf_zero` — **strong continuity of the `C_b` heat semigroup at the
+  initial time on Lipschitz data**, the endpoint datum closing the `Icc` route.
+* `continuousWithinAt_heatDuhamelPathBcf_initial`, `continuousWithinAt_heatMildValuePathBcf_initial`,
+  `continuousOn_heatMildValuePathBcf_Icc`, `heatMildValuePathBcf_initial` (`Φ(t₀)=u₀`) — the mild-value
+  path is `ContinuousOn` the **closed** interval on Lipschitz data.
+* `heatMildSelfMap` (source via `Set.IccExtend`), `dist_heatMildSelfMap_le`
+  (`dist(Φu)(Φv) ≤ Kstate·(T−t₀)·dist(u,v)`), and **`exists_unique_heatMildFixedPoint`**: for
+  `L`-Lipschitz `u₀`, bounded `Kstate`-Lipschitz reaction `Q`, and `Kstate·(T−t₀) < 1`, the mild
+  self-map has a **unique fixed point** in `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)` — the genuine model
+  mild solution of `u_t = Δu + Q(u)`, `u(t₀)=u₀`, via `banach_fixedPoint_exists_unique`.
+
+**Next target.**  Transport the model mild fixed point to the chart. Two honest sub-steps:
+  (a) generalise the model state space `(Fin n → ℝ) →ᵇ ℝ` to the manifold bundle state space
+      `ContinuousSectionSpace … et Kc …` (the chart's `A` domain), lifting `heatMildSelfMap` /
+      `exists_unique_heatMildFixedPoint` to sections; and
+  (b) identify the mild representative with the geometric Ricci–DeTurck RHS (`chart.geometric`), where
+      the reaction `Q` is the lower-order (non-Laplacian) part — the point at which the *bounded
+      Lipschitz `Q`* hypothesis meets the real operator (the remaining Schauder/higher-regularity gap:
+      the genuine Ricci–DeTurck reaction is bounded-Lipschitz only relative to a higher-regularity
+      norm, not `C⁰`). The model template now makes precise exactly what must be supplied to inhabit
+      `A`/`picard` through the mild route.
+
+Update — **the model mild solution is now fully *well-posed* (existence + uniqueness + continuous
+dependence) with an explicit Duhamel form** (extending `AnalyticPDE/HeatKernel1D.lean`, all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`, `scan cheats` `TOTAL 0`, module green).  This session adds
+the two remaining pillars of well-posedness beyond `exists_unique_heatMildFixedPoint`:
+
+* `dist_heatMildFixedPoint_le` — **continuous (Lipschitz) dependence on the initial datum**: two
+  mild-solution fixed points `z, w` for initial data `u₀, v₀` (common bounded `Kstate`-Lipschitz
+  reaction `Q`, short window `Kstate·(T − t₀) < 1`) satisfy
+  `dist z w ≤ ‖u₀ − v₀‖ / (1 − Kstate·(T − t₀))` in `↥(Set.Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`.  The
+  triangle estimate `dist z w = dist (Φ_{u₀} z) (Φ_{v₀} w) ≤ dist (Φ_{u₀} z) (Φ_{u₀} w) +
+  dist (Φ_{u₀} w) (Φ_{v₀} w)` combines the short-time contraction `dist_heatMildSelfMap_le`
+  (`≤ Kstate·(T − t₀)·dist z w`) with the new **initial-datum `1`-Lipschitz** self-map bound
+  `dist_heatMildSelfMap_initial_le` (`≤ ‖u₀ − v₀‖`), which lifts the fixed-time homogeneous-propagator
+  non-expansiveness `norm_heatMildValueNDbcf_sub_initial_le` (Duhamel cancels; `H_{t−t₀}u₀ − H_{t−t₀}v₀`
+  bounded by `norm_heatSemigroupNDbcf_sub_le`) through `dist_heatMildValuePathBcfIcc_initial_le` to the
+  closed-interval path space.  The third pillar of well-posedness — stability under perturbation of the
+  data — the analytic template for the corresponding stability of the mild Ricci–DeTurck representative.
+* `heatMildFixedPoint_apply` — **the fixed point genuinely solves the Duhamel integral equation**:
+  every interior value of a fixed point `z` is the pointwise mild-solution formula
+  `z(t)(x) = H_{t−t₀}(u₀)(x) + ∫_{t₀}^{t} H_{t−s}(Q(z(projIcc s)))(x) ds`, obtained by unfolding the
+  fixed-point identity through `heatMildValuePathBcfIcc_apply` / `heatMildValuePathBcf_of_lt` /
+  `heatMildValueNDbcf_apply`.  This upgrades the abstract Banach fixed point to a genuine mild solution
+  of `u_t = Δu + Q(u)`, `u(t₀) = u₀` in concrete integral-equation form — exactly what a downstream
+  decode of the mild representative into a genuine local solution (`realization`) consumes.
+
+**Next target.**  The model semilinear mild solution is now a fully-specified well-posed template
+(existence, uniqueness, Lipschitz dependence, explicit Duhamel form).  The transport step (a) —
+generalising the model value space `(Fin n → ℝ) →ᵇ ℝ` to the manifold-bundle state space
+`ContinuousSectionSpace … et Kc …` — remains blocked on an **intrinsic parabolic (heat) semigroup on
+the compact manifold** `M`; the `ℝⁿ` heat propagator `heatSemigroupND` is coordinate-specific and does
+not transport directly.  Two honest sub-routes: (i) build the intrinsic bundle heat semigroup (large);
+or (ii) route the section-space picard through the ODE foundation
+`isPicardLindelof_of_bounded_lipschitz_timeDependent_Icc` with a genuinely bounded-Lipschitz
+*regularised* representative `A` (the mild/Yosida route), where the well-posedness template above pins
+down exactly the boundedness + Lipschitz + time-continuity estimates that must be supplied.
+
+Update — **the section-space route (ii) `picard`/evolution transport is now assembled from a
+complete coordinate→section handoff suite** (extending `VectorBundle/ContinuousSection.lean` and a
+new dedicated module `AnalyticPDE/SectionSpacePicard.lean`; all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`, `scan cheats` `TOTAL 0`, full `lake build` green). The
+model `ℝⁿ` mild solution is fully well-posed but its `ℝⁿ` heat propagator is coordinate-specific;
+this session builds the missing bridges that let the *section-space* `A`/`picard` be supplied
+directly through the already-proved Banach ODE foundation
+`isPicardLindelof_of_bounded_lipschitz_timeDependent_Icc` (route (ii)), for a general
+finite-rank bundle:
+
+* `norm_le_of_forall_coord_norm_le` — **boundedness handoff**: a uniform sup-bound `C` on every
+  compact trivialization readout of a section gives `‖s‖ ≤ C` in the transported finite-cover norm
+  (the `t = 0` companion of `dist_le_of_forall_coord_dist_le`). Supplies the foundation's `hbound`.
+* `lipschitzWith_of_forall_coord_dist_le` — **global-Lipschitz handoff**: coordinatewise
+  `LipschitzWith`-style readout estimates over *all* sections give `LipschitzWith K A`
+  (`stateSet = univ` companion of `lipschitzOnWith_of_forall_coord_dist_le`). Supplies `hlip`.
+* `continuousOn_of_forall_coord_continuousOn` — **time-continuity handoff**: continuity of each
+  readout `x ↦ (f x)ᵢ` into `C(Kc i, F)` gives continuity of `x ↦ f x` in the section norm (the
+  transport `equivCompatibleCoordFamilySubmodule` is a definitional isometry into `∀ i, C(Kc i, F)`,
+  composed with the submodule-coercion isometry; `IsInducing.continuousOn_iff` + `continuousOn_pi`
+  over the finite trivialization index). Supplies `hcont`.
+* `isPicardLindelof_continuousSectionSpace_of_forall_coord` (new module) — **route (ii) `picard`-field
+  constructor**: assembles the three handoffs with the Banach ODE foundation to produce
+  `IsPicardLindelof A` in exactly the interval/anchor/constant shape
+  (`⟨t₀,_⟩ x0 (L·(T−t₀)₊+1) 0 L K`) of `TimeDependentGeometricRicciDeTurckBanachChart.picard`, from
+  purely coordinatewise boundedness / Lipschitz / continuity data.
+* `sectionSpace_evolution_exists_unique_of_forall_coord` (new module) — **transport step (a)**: the
+  same coordinate data yields a *unique* `[t₀, T]`-evolution `α` in the complete section space with
+  `α t₀ = x0`, `α'(t) = A t (α t)` (via `bounded_lipschitz_evolution_exists_unique_timeDependent_Icc`).
+  Lifts the model `ℝⁿ` mild-solution existence–uniqueness to the manifold-bundle section space.
+
+**Fractional progress on `{A, picard, realization, encode}`.** `picard` is now *constructible* from
+coordinatewise analytic control of `A` (route (ii)), and the section-space evolution it produces is
+in hand. The remaining gap for `A`/`picard` is the *genuine* mild/regularised operator: exhibiting a
+concrete time-dependent `A` on the section space whose trivialization readouts are actually bounded +
+Lipschitz + time-continuous (the boundedness being where the C⁰-unbounded second-order Ricci–DeTurck
+operator meets the mild/Yosida regularisation) — at which point these constructors close `picard`.
+
+**Next target.** Construct a concrete bounded-Lipschitz section-space representative `A` (mild/Yosida
+form) and prove the three coordinatewise estimates (`hbound`/`hlip`/`hcont`) it must satisfy to feed
+`isPicardLindelof_continuousSectionSpace_of_forall_coord`; alternatively begin the `realization`
+decode (`BanachEvolutionLocalSolutionIn A → ChosenIntrinsicDeTurckLocalSolution`) that the
+section-space evolution now makes available.
+
+Update — **the honest *ball-local* `picard` route for the section space is now complete** (extending
+`AnalyticPDE/SectionSpacePicard.lean`; all axiom-clean `propext`/`Classical.choice`/`Quot.sound`,
+`scan cheats` `TOTAL 0`, bare `lake build` green — 2911 jobs). The prior section-space picard
+constructor `isPicardLindelof_continuousSectionSpace_of_forall_coord` demanded the *global*
+boundedness the `C⁰`-unbounded second-order Ricci–DeTurck operator cannot supply; this session builds
+the honest ball-local route producing the chart's **exact** `a` radius (matching its `lipschitz`-on-
+locus field), via the already-committed ball-local Banach ODE foundations
+(`isPicardLindelof_of_boundedOn_lipschitzOn_superset_timeDependent_Icc`,
+`isPicardLindelof_of_lipschitzOn_centerBound_closedBall_timeDependent_Icc`,
+`exists_forwardTime_mul_sub_le`):
+
+* `isPicardLindelof_continuousSectionSpace_of_forall_coord_superset` — coordinatewise readout
+  boundedness ≤ `L` + `K`-Lipschitz-in-section on a set `S ⊇ closedBall x0 a` (e.g. the positive-
+  definite locus) + time-continuity + `L·(T−t₀) ≤ a` ⟹ `IsPicardLindelof A ⟨t₀,_⟩ x0 a 0 L K` — the
+  chart `picard` shape with radius `a` (not the global `L·(T−t₀)₊+1`).
+* `isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` — sharpest honest form: the
+  only norm datum is the coordinatewise readout size of `A t` at the **fixed centre** `x0` (= `g₀`);
+  the ball bound `Mc + K·a` is *derived* from ball-Lipschitz. Output `… x0 a 0 (Mc + K·a) K`.
+* `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` — capstone:
+  from *forward*-time-uniform (on `Ici t₀`) centre-bound data there **exists** a forward endpoint
+  `T > t₀` carrying the full `picard` (endpoint from `exists_forwardTime_mul_sub_le`, auto-satisfying
+  `(Mc + K·a)·(T−t₀) ≤ a`) — supplying *both* `T`-dependent chart fields (`hT`, `picard`) at once,
+  the chart's `lipschitz`/`geometric` fields being `T`-independent.
+* `sectionSpace_evolution_exists_of_forall_coord_centerBound` — honest ball-local companion of
+  `sectionSpace_evolution_exists_unique_of_forall_coord`: the centre-bound data yields the actual
+  `[t₀,T]`-evolution curve `α` (`α t₀ = x0`, `α'(t) = A t (α t)`) via
+  `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀` — the raw material a `realization`
+  decode consumes, now from honest (not globally bounded) input.
+
+**Fractional progress on `{A, picard, realization, encode}`.** `picard` is now constructible from the
+*honest* ball-local / centre-bound coordinatewise analytic control — radius `a`, ball-Lipschitz `K`,
+centre size `Mc = ‖(A t g₀)ᵢ x‖` — the exact shape the real `C⁰`-unbounded operator can supply once a
+parabolic Schauder estimate provides `K` and `Mc`. The remaining `A`/`picard` gap is purely the
+*analytic* production of those two coordinatewise estimates for a concrete mild/regularised
+representative; the picard plumbing above then closes `picard` and hands over the evolution curve.
+
+**Next target.** Either (i) the parabolic Schauder ball-Lipschitz `K` + centre-size `Mc` estimates
+(`hlip`/`hcenter`) for a concrete mild/regularised section-space representative `A` — the sole
+remaining analytic input the picard route now needs; or (ii) the a-posteriori ball-membership
+`curve t ∈ closedBall x0 a` on `[t₀,T]`, upgrading `sectionSpace_evolution_exists_of_forall_coord_centerBound`
+to a full `BanachEvolutionLocalSolutionIn A locus t₀ x0` (the direct `realization` input) given
+`closedBall x0 a ⊆ locus`.
+
+Update — **the a-posteriori ball-membership route (ii) is now closed**: the honest ball-local
+centre-bound Picard data now yields a genuine state-constrained `BanachEvolutionLocalSolutionIn` on
+the *full* window (extending `AnalyticPDE/SectionSpacePicard.lean`, which now `public import`s
+`AnalyticPDE` so it can produce the `BanachEvolutionLocalSolutionIn` carrier; all axiom-clean
+`propext`/`Classical.choice`/`Quot.sound`, `scan cheats` `TOTAL 0`, bare `lake build` green — 2911
+jobs, and the module itself green — 2960 jobs):
+
+* `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt_mem_closedBall` — **the missing
+  single-solution Picard–Lindelöf state-membership readout.**  Mathlib's differential
+  `exists_eq_forall_mem_Icc_hasDerivWithinAt` produces the local integral curve `α` but *discards*
+  the a-priori bound `α t ∈ closedBall x₀ a` (for all `t ∈ [tmin,tmax]`) that its own proof
+  establishes via `ODE.FunSpace.compProj_mem_closedBall`.  This variant mirrors that proof and
+  *retains* the ball-membership conjunct — the exact datum that upgrades a raw evolution curve to a
+  state-constrained solution.
+* `IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset` — **the closed-ball
+  a-posteriori bridge.**  From `IsPicardLindelof F ⟨t₀,_⟩ u₀ a 0 L K` and the containment
+  `closedBall u₀ a ⊆ stateSet`, the forward Picard solution — which stays in `closedBall u₀ a` on the
+  *whole* `[t₀,T]` — is a genuine `BanachEvolutionLocalSolutionIn F stateSet t₀ u₀` on the full
+  window, with **no** interval shrinking and **no** openness hypothesis (contrast
+  `exists_banachEvolutionLocalSolutionIn_of_mem_isOpen`, which shrinks the terminal time to keep the
+  curve inside an *open* set).  Since a `TimeDependentGeometricRicciDeTurckBanachChart` already
+  supplies `hT` and `picard`, this bridge takes `chart.hT`/`chart.picard` plus the ball containment
+  straight to the `realization` input shape.
+* `sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound` — **route (ii)
+  capstone.**  From the honest centre-bound ball-local coordinatewise control (`K`-Lipschitz-in-
+  section on `closedBall x0 a`, time-continuity there, centre readout bound `‖(A t x0)ᵢ x‖ ≤ Mc`,
+  `(Mc + K·a)·(T − t₀) ≤ a`) *plus* the a-priori containment `closedBall x0 a ⊆ locus`, the
+  section-space operator `A` admits a genuine `BanachEvolutionLocalSolutionIn A locus t₀ x0` on
+  `[t₀,T]` — assembling `isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` with the
+  closed-ball bridge.  This is precisely the state-constrained Banach solution a downstream
+  `realization` decode consumes, now from honest (not globally bounded) analytic input.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  The `realization` *input* — a genuine
+`BanachEvolutionLocalSolutionIn chart.A (positiveDefiniteLocus …) …` on the full window — is now
+CONSTRUCTIBLE from `chart.picard` (equivalently, from the honest ball-local centre-bound analytic
+data) plus the single a-priori containment `closedBall (initial section) a ⊆ positiveDefiniteLocus`.
+The `picard` plumbing (both global-window and forward-endpoint forms) and this closed-ball
+solution-existence bridge are complete; the residual `A`/`picard` gap is purely the *analytic*
+production of the two coordinatewise size estimates (ball-Lipschitz `K`, centre-size `Mc`) for a
+concrete mild/regularised representative — the parabolic Schauder input — together with the geometric
+positivity fact `closedBall (g₀ section) a ⊆ positiveDefiniteLocus`.
+
+**Next target.** Either (i) the parabolic Schauder ball-Lipschitz `K` + centre-size `Mc` estimates
+(`hlip`/`hcenter`) for a concrete mild/regularised section-space representative `A` — the sole
+remaining analytic input the picard/solution route now needs; or (ii) the geometric a-priori
+positivity lemma `closedBall (g₀ section) a ⊆ positiveDefiniteLocus` (a short-time metric-cone
+containment) that discharges the last hypothesis of the closed-ball bridge; or (iii) the
+`realization` decode `RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution` that
+consumes the `BanachEvolutionLocalSolutionIn` now constructible.
+
+Update — **the geometric a-priori positivity containment (next-target (ii)) is now closed**, as a
+FOUNDATIONAL, root-reachable lemma (in `VectorBundle/RiemannianSection.lean`, beside its open-ball
+sibling `exists_dist_lt_subset_positiveDefiniteLocus`; bare `lake build` green — 2911 jobs; axiom-
+clean `propext`/`Classical.choice`/`Quot.sound`; `scan cheats` `TOTAL 0`):
+
+* `exists_pos_closedBall_subset_positiveDefiniteLocus` — **closed-ball companion of the open-ball
+  neighbourhood lemma.**  From a section `s` lying in the *open* positive-definite locus
+  (`isOpen_setOf_forall_pos` + `Metric.isOpen_iff`), extract a positive `ℝ≥0` radius `a` (take
+  `(ε/2).toNNReal`) whose **entire** `Metric.closedBall s (a : ℝ)` stays inside
+  `positiveDefiniteLocus` (via `Metric.closedBall_subset_ball`).  This is *exactly* the
+  `hsub : Metric.closedBall x₀ (a : ℝ) ⊆ locus` hypothesis shape consumed by the closed-ball
+  Banach-solution bridge `IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset`
+  and by the route (ii) capstones `sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound`
+  / `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound`.
+* `Bundle.ContinuousRiemannianMetric.exists_pos_closedBall_toSection_subset_positiveDefiniteLocus`
+  — **metric specialization.**  For a genuine continuous Riemannian metric `g`, the section
+  `⟨g.toSection, g.continuous_toSection⟩` (in the locus via
+  `mem_positiveDefiniteLocus_of_continuousRiemannianMetric`) has such a positive Picard radius `a` —
+  discharging the last containment obligation of route (ii)'s realization-input construction for the
+  **initial metric** of a Ricci–DeTurck IVP.  Keeping this at the foundational (root-reachable) layer
+  means any future BilinearFormBundle-concrete chart/`D` constructor can consume it directly.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  The `realization` *input* is now
+CONSTRUCTIBLE end-to-end from honest analytic data with the geometric containment **discharged, not
+assumed**: `picard` from ball-local centre-bound coordinatewise control (`K`, `Mc`), forward endpoint
+`T` auto-chosen, closed-ball bridge to `BanachEvolutionLocalSolutionIn`, and now `hsub` supplied by
+the positivity margin of `g₀`.  The sole remaining `A`/`picard` gap is the *analytic* production of
+the two coordinatewise size estimates (ball-Lipschitz `K`, centre-size `Mc`) for a concrete
+mild/regularised representative `A` — the parabolic Schauder input (GAP 2).
+
+**Formulation note (per directive).**  `picard : IsPicardLindelof A` is inhabited via the honest
+ball-local Cauchy–Lipschitz route: the only analytic data required about the `C⁰`-unbounded
+Ricci–DeTurck operator is its coordinatewise `K`-Lipschitz-in-section control on `closedBall g₀ a`
+and its centre readout size `Mc = ‖(A t g₀)ᵢ x‖` — i.e. a *parabolic Schauder a-priori bound* is what
+actually supplies `picard`, NOT a globally bounded mild formulation.  The geometric/topological parts
+(positivity containment `hsub`, forward-endpoint `T`, closed-ball→solution bridge) are all now
+closed; only the Schauder `K`/`Mc` estimates remain for `A`/`picard`.
+
+**Blocker recorded for next session — BilinearFormBundle-concrete instantiation of the abstract
+route (ii) capstones triggers a `whnf` blow-up.**  Instantiating
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` +
+`exists_banachEvolutionLocalSolutionIn_of_closedBall_subset` at `V := BilinearFormBundle`,
+`F := (F →L[ℝ] F →L[ℝ] ℝ)`, centre `⟨g.toSection, _⟩` (to fold the positivity containment into a
+`∃ T, BanachEvolutionLocalSolutionIn A (positiveDefiniteLocus) t₀ g` capstone) times out at `whnf`
+even at `maxHeartbeats 1600000` — a genuine defeq blow-up in the `equivCompatibleCoordFamilySubmodule`
+readout / section-space `CompleteSpace` unification, NOT a heartbeat shortage.  The abstract capstones
+compile only because they stay generic over `V`.  Next session: pin the section-space instances with
+explicit `letI`/`haveI` (or `set … with` the centre section and `CompleteSpace` instance) before
+applying the bridges, or state the concrete capstone with the readout maps abstracted behind a local
+`let`, to avoid re-synthesising the BilinearFormBundle transported-instance diamond during
+elaboration.
+
+**Next target.**  Either (i) the parabolic Schauder ball-Lipschitz `K` + centre-size `Mc` estimates
+(`hlip`/`hcenter`) for a concrete mild/regularised section-space representative `A` — the sole
+remaining analytic input; or (ii) the instance-pinned BilinearFormBundle-concrete route (ii)
+realization-input capstone (folding in `exists_pos_closedBall_toSection_subset_positiveDefiniteLocus`)
+once the `whnf` blow-up above is tamed; or (iii) the `realization` decode
+`RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`.
+
+---
+
+## Milestone (2026-07-05) — model mild-solution a-priori estimate suite + local-existence-with-containment capstone (GAP 2 analytic core)
+
+Six additive, fully-proved, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`) theorems appended
+to `AnalyticPDE/HeatKernel1D.lean`, completing the model semilinear reaction–diffusion
+(`u_t = Δu + Q(u)`) well-posedness theory with the a-priori control the chart `picard`/closed-ball
+route consumes. Bare `lake build` green (2911 jobs); `scan cheats` `TOTAL 0`.
+
+* `norm_heatMildFixedPoint_le` — **a-priori sup bound** (fourth well-posedness pillar): any fixed point
+  `z` of the mild-solution self-map obeys `‖z‖ ≤ ‖u₀‖ + CQ·(T − t₀)`. The `C⁰` centre-size estimate.
+* `norm_heatMildValueNDbcf_sub_initial_le_of_lipschitz` — **fixed-time deviation from the initial
+  datum** (parabolic modulus of continuity): `‖Φ(t) − u₀‖ ≤ L·n·(2/√π·√(t − t₀)) + C·(t − t₀)`, via
+  the decomposition `Φ(t) − u₀ = (H_{t−t₀}u₀ − u₀) + Duhamel` (heat-semigroup Lipschitz modulus +
+  Duhamel bound).
+* `dist_heatMildFixedPoint_const_le` — **path-space containment near the initial datum**: the whole
+  fixed-point trajectory satisfies `dist z (const u₀) ≤ L·n·(2/√π·√(T − t₀)) + CQ·(T − t₀)`. Pointwise
+  from the previous lemma + the `t₀`-endpoint value `u₀`; `→ 0` as `T → t₀⁺`.
+* `exists_forwardTime_sqrt_add_mul_sub_le` — **√-shape window chooser** (analog of
+  `exists_forwardTime_mul_sub_le`): for `M₁,M₂ ≥ 0`, `a > 0` there is `T > t₀` with
+  `M₁·√(T − t₀) + M₂·(T − t₀) ≤ a`.
+* `exists_forwardTime_sqrt_add_mul_sub_le_and_lt_one` — **combined containment + contraction window**:
+  a `T > t₀` meeting both `M₁·√(T − t₀) + M₂·(T − t₀) ≤ a` and `K·(T − t₀) < 1`, by shrinking to
+  `min (T₁ − t₀) (1/(K + 1))` (containment monotone in window length).
+* `exists_heatMildFixedPoint_dist_const_le` — **CAPSTONE: model local existence with a-priori ball
+  containment.** For any target radius `a > 0` there is a forward window `T > t₀` carrying a mild
+  solution `z` (fixed point) with `dist z (const u₀) ≤ a` — a solution that never leaves the prescribed
+  ball. Assembles the combined chooser (with `M₁ = L·n·(2/√π)`, `M₂ = CQ`),
+  `exists_unique_heatMildFixedPoint`, and `dist_heatMildFixedPoint_const_le`.
+
+**Fractional progress on `{A, picard, realization, encode}`.** This is the genuine model template for
+the mild Ricci–DeTurck representative feeding `A`/`picard`: the honest analytic well-posedness data
+(existence, uniqueness, continuous dependence, a-priori sup/deviation/containment) is now complete on
+the model space `↥(Icc t₀ T) →ᵇ ((Fin n → ℝ) →ᵇ ℝ)`, with the per-datum window chosen so the solution
+stays in the target ball. The remaining `A`/`picard` gap is the transfer of this model template to the
+section space of `BilinearFormBundle` (the genuine chart state space) and the identification of the
+mild representative with `intrinsicRicciDeTurckRHS` on the positive-definite locus (the `geometric`
+field).
+
+**Next target.** Either (i) lift the model containment capstone to the section-space representative
+(matching `dist_heatMildFixedPoint_const_le`'s output to the closed-ball `hsub` already discharged by
+`exists_pos_closedBall_toSection_subset_positiveDefiniteLocus`); or (ii) the `realization` decode
+`RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`; or (iii) further parabolic
+Schauder gain (spatial second-derivative Hölder control) toward the `geometric` identification.
+
+---
+
+## Milestone (2026-07-05) — spatial `C¹`/`C^{0,α}` Schauder regularity of the model mild solution (GAP 2 analytic core)
+
+Four additive, fully-proved, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`) theorems appended
+to `AnalyticPDE/HeatKernel1D.lean`, promoting the model semilinear mild-solution theory from mere
+sup/deviation control to genuine spatial *gain of regularity* — the parabolic Schauder half that shows
+the (`C⁰`-bounded) mild Ricci–DeTurck representative is spatially `C¹`/`C^{0,α}` after any positive
+time. Full `lake build` green (2911 jobs); `scan cheats` `TOTAL 0`.
+
+* `lipschitzWith_heatMildValueNDbcf` — **spatial `C¹` (Lipschitz) regularity of the mild-value map.**
+  `Φ(t) = H_{t−t₀}u₀ + ∫ H_{t−s}(q s) ds` at any `t > t₀` is `LipschitzWith
+  (n·‖u₀‖/√(π(t−t₀)) + 2nC√(t−t₀)/√π)`, packaged as a mathlib `LipschitzWith` instance: the
+  `t^{-1/2}` propagator smoothing (`heatSemigroupND_spatial_lipschitz_sqrt_rate_norm`) plus the
+  `√(t−t₀)` Duhamel gain (`heatSemigroupND_duhamel_spatial_lipschitz_sqrt_bound`), combined by the
+  triangle inequality after `intervalIntegral.integral_sub`.
+* `heatMildValueNDbcf_spatial_holder_bound` — **spatial `C^{0,α}` (Hölder) regularity of the
+  mild-value map.** Fractional companion: `|Φ(t)(x) − Φ(t)(x')| ≤ (Psg + Pdu)·‖x−x'‖^α` for every
+  `0 ≤ α ≤ 1`, with `Psg = (2‖u₀‖)^{1−α}(‖u₀‖/√(π(t−t₀)))^α n^α`,
+  `Pdu = (2C)^{1−α}(C/√π)^α n^α ((t−t₀)^{1−α/2}/(1−α/2))`
+  (`heatSemigroupND_spatial_holder_seminorm_bound_norm` + `heatSemigroupND_duhamel_spatial_holder_bound`).
+* `lipschitzWith_heatMildFixedPoint_apply` — **spatial `C¹` regularity of the genuine mild solution.**
+  Transfers the map-level `C¹` gain to the actual fixed point `z`: `z(t)` equals `heatMildValueNDbcf`
+  for the trajectory source `s ↦ Q(z(projIcc s))` (`heatMildFixedPoint_apply`), so `⇑(z t)` is
+  `LipschitzWith` the same rate.
+* `heatMildFixedPoint_apply_spatial_holder_bound` — **spatial `C^{0,α}` regularity of the genuine
+  mild solution.** Fractional companion at the solution level.
+
+**Fractional progress on `{A, picard, realization, encode}`.** This is a concrete step of GAP 2's
+heat-kernel Schauder estimate (the directive's explicitly-endorsed "concrete step of the heat-kernel
+Schauder estimate" / "Lipschitz estimate for the mild representative"): the model mild representative
+now carries the spatial first-derivative regularity — bounded data becomes spatially Lipschitz/Hölder
+after any positive time — that the `geometric` identification of the chart operator `A` with
+`intrinsicRicciDeTurckRHS` ultimately consumes. The complete 2×2 spatial-regularity picture (`C¹`/`C^{0,α}`
+× map/solution) is now available on the model space `(Fin n → ℝ) →ᵇ ℝ`.
+
+**Next target.** Either (i) the *time*-regularity companion (time-Hölder `|t−t'|^{α/2}` modulus of the
+mild value) completing the full parabolic space-time `C^{0,α}` modulus toward `ParabolicC0AlphaOn`
+membership; or (ii) transfer of the spatial-regularity suite to the section-space representative (the
+coordinatewise readout `K`-Lipschitz-in-section datum feeding `chart.lipschitz`); or (iii) the
+`realization` decode `RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`.
+
+---
+
+## Milestone (2026-07-05) — `Hölder-1/2` *time*-modulus of the model mild solution (GAP 2 analytic core; time half of the parabolic space-time modulus)
+
+Four additive, fully-proved, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`) theorems appended
+to `AnalyticPDE/HeatKernel1D.lean`, supplying the **time-regularity companion** the previous milestone
+flagged as "Next target (i)".  Together with the earlier spatial `C¹`/`C^{0,α}` suite this completes
+the model mild-solution **parabolic space-time modulus** (`Hölder-1/2`-in-time × `C^{0,α}`-in-space).
+Full `lake build` green (2911 jobs); `scan cheats` `TOTAL 0`.
+
+* `heatSemigroupND_duhamel_time_holder_bound` — **`Hölder-1/2` time modulus of the Duhamel term.**
+  For `t₀ ≤ t₁ < t₂` and a sup-norm-`C`-bounded source `q`,
+  `|U(t₂)(x) − U(t₁)(x)| ≤ C·(t₂−t₁) + (4n²C/π)·√(t₁−t₀)·√(t₂−t₁)` (uniform in `x`).  The difference
+  splits (`integral_add_adjacent_intervals` + `integral_sub`) into a *new-interval* term controlled by
+  the Duhamel sup bound `heatSemigroupND_duhamel_sup_bound` (`≤ C·(t₂−t₁)`) and a *propagator-
+  difference* term whose integrand is bounded by the pointwise semigroup time modulus
+  `abs_heatSemigroupND_add_sub_le` (in `√s` form via `heatSemigroupND_timeModulus_eq_sqrt`) times the
+  integrable weight `(t₁−s)^{−1/2}`, integrated by `integral_rpow_neg_half_sub`.  This is the genuinely
+  new content — the existing Duhamel time-*continuity* (`continuousAt_heatSemigroupND_duhamel_time`)
+  was proved *softly* by dominated convergence, with no quantitative rate.
+* `norm_heatMildValueNDbcf_time_holder_bound` — **`Hölder-1/2` time modulus of the mild-value map**
+  (pointwise in `x`): combines the homogeneous heat-semigroup time modulus with the Duhamel one via
+  `abs_add_le` after `heatMildValueNDbcf_apply`.
+* `heatMildFixedPoint_apply_time_holder_bound` — **`Hölder-1/2` time modulus of the genuine mild
+  solution** `z` (any fixed point): both slices equal `heatMildValueNDbcf` for the common
+  trajectory-reaction source `s ↦ Q(z(projIcc s))` (`heatMildFixedPoint_apply`), transferring the
+  map-level modulus to the solution.  Solution-level companion of
+  `lipschitzWith_heatMildFixedPoint_apply` / `heatMildFixedPoint_apply_spatial_holder_bound`.
+* `norm_heatMildValueNDbcf_sub_time_holder` — **`BCF`-norm (Banach-space) time modulus**: the
+  sup-over-`x` packaging, giving the quantitative `Hölder-1/2` modulus of continuity of the mild-value
+  path `t ↦ heatMildValueNDbcf …` in the state space `(Fin n → ℝ) →ᵇ ℝ` (upgrading the qualitative
+  `continuousAt_heatMildValue_time`).
+
+**Fractional progress on `{A, picard, realization, encode}`.** GAP 2's heat-kernel Schauder estimate
+now carries the FULL parabolic space-time modulus of the model mild representative: away from the
+initial slice `t = t₀`, the solution is jointly `Hölder-1/2`-in-time and `C^{0,α}`-in-space, with
+sharp explicit constants.  This is the complete analytic regularity the eventual `geometric`
+identification of the chart operator `A` with `intrinsicRicciDeTurckRHS` (and the `realization` decode)
+consumes; the model template is now regularity-complete (existence, uniqueness, continuous dependence,
+a-priori sup/deviation/containment, spatial `C¹`/`C^{0,α}`, and time `C^{0,1/2}`).
+
+**Next target.** With the model Schauder toolkit regularity-complete, the frontier is now the
+*transfer/assembly* side (not more model estimates): either (i) lift the space-time modulus suite to
+the section-space representative feeding `chart.lipschitz`/`picard` (the coordinatewise
+`K`-Lipschitz-in-section datum), routing pointwise identifications through the diamond-free
+`ContinuousSection` eval API; or (ii) the `realization` decode
+`RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`; or (iii) the `geometric`
+identification `A τ s x u v = intrinsicRicciDeTurckRHS …` on the positive-definite locus.
+
+---
+
+## Milestone (2026-07-05) — parabolic `C^{0,α}`-class membership of the model mild solution (GAP 2 analytic core; assembled space-time modulus in Schauder-consumable class form)
+
+New additive module `AnalyticPDE/HeatKernelParabolicC0Alpha.lean` (imports `HeatKernel1D` and
+`ParabolicHolder`, which were previously siblings importing neither the other), bridging the model
+heat-kernel regularity suite into the parabolic Hölder framework.  Four fully-proved, axiom-clean
+(`propext`/`Classical.choice`/`Quot.sound`) declarations; full `lake build` green (2911 jobs);
+`scan cheats` `TOTAL 0`.
+
+This converts the raw space-time moduli of the previous three milestones (spatial `C¹`/`C^{0,α}`,
+time `Hölder-1/2`) into `ParabolicC0AlphaOn` **class membership** — the exact interface the parabolic
+Schauder / smooth-realization side consumes — rather than leaving them as free-floating pointwise
+estimates.  The parabolic distance `parabolicDistance p q = max (√|Δt|) (dist x x')` makes a
+spatial-Lipschitz bound plus a time-`Hölder-1/2` bound combine precisely into the exponent-`1`
+parabolic Hölder estimate.
+
+* `heatMildFixedPoint_parabolicC0AlphaOn` — **parabolic `C^{0,1}` (parabolic-Lipschitz) membership of
+  the genuine mild solution on the interior slab `Icc t_lo T ×ˢ univ`** (`t₀ < t_lo ≤ T`).  Assembles,
+  via the triangle inequality (spatial step at fixed time + time step at fixed space), the spatial
+  Lipschitz modulus `lipschitzWith_heatMildFixedPoint_apply` (coefficient uniformly bounded over
+  `[t_lo, T]` by `Ksp_max`) and the `Hölder-1/2` time modulus `heatMildFixedPoint_apply_time_holder_bound`
+  (coefficient uniformly bounded by `Ktm_coef`, absorbing the linear `|Δt|` Duhamel term into `√|Δt|`
+  via `|Δt| ≤ √(T−t_lo)·√|Δt|`).  Sup part from `norm_heatMildFixedPoint_le`.
+* `ParabolicHolderWith.exponent_le_of_bounded` / `ParabolicC0AlphaOn.exponent_le_of_bounded` — **generic
+  parabolic Hölder exponent lowering on a parabolic-bounded set.**  Reusable ParabolicHolder
+  infrastructure: on a set of parabolic diameter `≤ D`, `ParabolicHolderWith C 1 ⟹ ParabolicHolderWith
+  (C·D^{1−α}) α` (split `pd = pd^α · pd^{1−α}`, bound the second factor by `D^{1−α}`), and likewise for
+  the full `ParabolicC0AlphaOn` class.  This is the standard Lipschitz⟹Hölder downgrade in the
+  parabolic metric.
+* `heatMildFixedPoint_parabolicC0AlphaOn_of_bounded` — **`C^{0,α}` (any `0 ≤ α ≤ 1`) mild-solution
+  membership on a parabolic-bounded interior subset**, combining the slab `C^{0,1}` membership
+  (`mono_set` to the subset) with the exponent-lowering.  The Schauder-relevant Hölder-exponent form.
+* `heatMildFixedPoint_parabolicC0AlphaOn_closedBall` — **`C^{0,α}` mild-solution membership on an
+  interior parabolic closed ball** whose time-extent `[c.1 − R², c.1 + R²]` lies in `[t_lo, T]`.  The
+  ball is inside the slab (time coordinate pinned by `time_abs_le_sq_of_mem`) and has parabolic
+  diameter `≤ 2R` (triangle through the centre).  This is the ball-localised regularity datum the
+  parabolic Schauder local-to-global gluing (`ParabolicC0AlphaOn.of_parabolicBall_cover_closedBall`
+  and companions) directly consumes.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  The model mild representative's
+regularity is now available not merely as raw moduli but as `ParabolicC0AlphaOn α` membership on
+interior parabolic balls/cylinders — the class-level interface bridging the (previously isolated)
+508-declaration heat-kernel theory to the parabolic Schauder framework.  This is the connective tissue
+the `realization` decode (`RicciDeTurckSmoothRealizationData → ChosenIntrinsicDeTurckLocalSolution`)
+needs to certify that a Banach mild solution is regular enough to be a genuine geometric solution: the
+Schauder bootstrap operates on `ParabolicC0AlphaOn`-class data on local cylinders, which is exactly
+what `heatMildFixedPoint_parabolicC0AlphaOn_closedBall` now supplies.
+
+**Next target.** With the model regularity in Schauder-consumable class form, the frontier remains the
+transfer/assembly side: (i) lift the `ParabolicC0AlphaOn` membership through the coordinate readout to
+the section-space representative feeding `chart.lipschitz`/`picard` (routing pointwise identifications
+through the diamond-free `ContinuousSection` eval API); (ii) the `realization` decode consuming the
+ball-localised `C^{0,α}` regularity via a parabolic Schauder interior estimate; or (iii) the `geometric`
+identification `A τ s x u v = intrinsicRicciDeTurckRHS …` on the positive-definite locus.
+
+---
+
+## Milestone (2026-07-05) — explicit-constant quantitative parabolic `C^{0,α}` norm bounds of the model mild solution (GAP 2 analytic core; Schauder-consumable norm form)
+
+Six additive, fully-proved, axiom-clean (`propext`/`Classical.choice`/`Quot.sound`) declarations
+appended to `AnalyticPDE/HeatKernelParabolicC0Alpha.lean` (a leaf module, so the additions are fully
+isolated); full `lake build` green (2704 jobs); `scan cheats` `TOTAL 0`.
+
+**Motivation.** The previous milestone established `ParabolicC0AlphaOn` *class membership*
+(`heatMildFixedPoint_parabolicC0AlphaOn` and companions) — but `ParabolicC0AlphaOn` is
+`∃ B ≥ 0, ∃ H ≥ 0, ParabolicC0AlphaWith B H α`, so the concrete sup/Hölder constants are **erased
+behind the existential**.  The parabolic Schauder fixed-point iteration and its contraction estimates
+operate on the **honest `ℝ`-valued norm functional** `parabolicC0AlphaNorm` and need *explicit* a-priori
+norm bounds, not mere membership.  This milestone exposes those constants.
+
+* `heatMildFixedPoint_parabolicBoundedWith` / `heatMildFixedPoint_parabolicSupNorm_le` — the `C^0`
+  part with the **explicit** sup constant `‖u₀‖ + CQ·(T−t₀)`, on *every* time-space set (the a-priori
+  bound `norm_heatMildFixedPoint_le` holds globally and `Set.IccExtend` only clamps the time argument).
+* `heatMildFixedPoint_parabolicHolderWith` — the parabolic Hölder-`1` (parabolic-Lipschitz) modulus on
+  the interior slab `Icc t_lo T ×ˢ univ` with the **explicit** interior constant `Ksp_max + Ktm_coef`
+  (the same coefficients the existential membership lemma computes internally, now surfaced), assembled
+  from the uniform spatial-Lipschitz and time-`Hölder-1/2` moduli.
+* `heatMildFixedPoint_parabolicC0AlphaWith` — the explicit-constant `ParabolicC0AlphaWith` class
+  membership (the direct explicit companion of the existential `heatMildFixedPoint_parabolicC0AlphaOn`).
+* `heatMildFixedPoint_parabolicC0AlphaNorm_le` — the explicit **`parabolicC0AlphaNorm 1` bound**
+  `B + (Ksp_max + Ktm_coef)` on the interior slab (sup part + Hölder-seminorm part via
+  `parabolicSupNorm_le` / `parabolicHolderSeminorm_le`).
+* `heatMildFixedPoint_parabolicC0AlphaNorm_closedBall_le` — the **Schauder-local, general-exponent**
+  form: on an interior `parabolicClosedBall c R` (time-extent `[c.1−R², c.1+R²] ⊆ [t_lo, T]`), the
+  `parabolicC0AlphaNorm α` (`0 ≤ α ≤ 1`) is bounded by `B + (Ksp_max + Ktm_coef)·(2R)^{1−α}` — the
+  interior slab Hölder-`1` modulus restricted to the ball (inside the slab) and exponent-downgraded on
+  the ball of parabolic diameter `≤ 2R` via `ParabolicHolderWith.exponent_le_of_bounded`.  This is the
+  ball-localised explicit Hölder-space norm control the parabolic Schauder local fixed-point iteration
+  and local-to-global gluing consume.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  Still on the `realization`/Schauder
+side of GAP 2: the model mild representative's regularity is now available as *explicit quantitative
+norm bounds* in the parabolic `C^{0,α}` Banach norm (interior slab and interior closed balls), not just
+existential class membership.  This is the exact interface the parabolic Schauder interior fixed-point
+iteration reads its a-priori constants from — the connective step from "the mild solution is regular"
+to "the mild solution's Hölder-space norm is explicitly controlled by the data".
+
+**Next target.** The frontier remains the transfer/assembly side: (i) the contraction/difference norm
+bound (two mild solutions differ in `parabolicC0AlphaNorm` by the data difference — the Schauder
+fixed-point contraction ingredient); (ii) lift the explicit norm bounds through the coordinate readout
+to the section-space representative feeding `chart.lipschitz`/`picard`; or (iii) the `realization`
+decode consuming the ball-localised explicit `C^{0,α}` norm control via a parabolic Schauder interior
+estimate.
+
+## Milestone (2026-07-05) — spatial data-difference contraction of the model mild solution (GAP 2 Schauder contraction ingredient; plan Next-target (i))
+
+Progress on **Next target (i)** — the contraction/difference norm bound (two mild solutions differ by
+the data difference), the Schauder fixed-point contraction ingredient.  The prior milestones controlled
+the parabolic `C^{0,α}` norm of a *single* mild solution; this milestone controls the *difference* of
+two mild solutions (same reaction `Q`, initial data `u₀, v₀`) by the initial-data difference, in the
+spatial (`C^{0,α}`) directions and in the parabolic sup norm.  All in `HeatKernel1D.lean` /
+`HeatKernelParabolicC0Alpha.lean`, appended, `#print axioms`-clean.
+
+* `heatMildValueNDbcf_sub_spatial_lipschitz_bound` — **spatial `C¹` data-difference modulus of the
+  mild-solution value**: for data `u₀, v₀` (sup diff `≤ D₀`) and sources `q₁, q₂` (pointwise sup diff
+  `≤ D`), `|(Φ₁(t)(x) − Φ₂(t)(x)) − (Φ₁(t)(x') − Φ₂(t)(x'))| ≤ (n·D₀/√(π(t−t₀)) + 2nD·√(t−t₀)/√π)·‖x−x'‖`.
+  Assembles the homogeneous (`heatSemigroupND_sub_spatial_lipschitz_sqrt_rate_norm`) and Duhamel
+  (`heatSemigroupND_duhamel_sub_spatial_lipschitz_sqrt_bound`) difference building blocks, fusing the
+  four Duhamel integrals via `intervalIntegral.integral_sub`.
+* `heatMildFixedPoint_sub_spatial_lipschitz_bound` — **spatial `C¹` contraction of the model mild
+  solution**: for two genuine mild solutions `z, w`, the spatial modulus of `z − w` is controlled by
+  the *initial-data* difference, the Duhamel source difference sized by `Kstate·‖u₀−v₀‖/(1−Kstate(T−t₀))`
+  via `dist_heatMildFixedPoint_le`.
+* `heatMildValueNDbcf_sub_spatial_holder_bound` / `heatMildFixedPoint_sub_spatial_holder_bound` — the
+  **fractional-exponent** (`0 ≤ α ≤ 1`) companions, using the Hölder-scale homogeneous / Duhamel
+  difference building blocks; the full spatial `C^{0,α}` gain a Hölder-norm Schauder contraction reads.
+* `heatMildFixedPoint_parabolicSupNorm_sub_le` — the **`C^0` (sup) half in the parabolic framework**:
+  `parabolicSupNorm (z − w) s ≤ ‖u₀ − v₀‖/(1 − Kstate(T−t₀))`, packaging `dist_heatMildFixedPoint_le`
+  into `ParabolicBoundedWith` / `parabolicSupNorm_le`.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  Still on the `realization`/Schauder
+side of GAP 2.  The contraction estimate now has both halves in place at the spatial+sup level: the
+`C^0` part (`parabolicSupNorm` difference `≤` data difference) and the spatial `C^{0,α}` seminorm part
+(difference modulus `≤` data-difference constant).  This is exactly the interface a parabolic Schauder
+interior fixed-point iteration contracts in.
+
+**Next target.**  The one remaining piece for a full `parabolicC0AlphaNorm`-difference (direction (i)
+headline) is the **time**-difference modulus of two mild solutions (`‖(z−w)(t₂) − (z−w)(t₁)‖`
+`Hölder-1/2` in `√|Δt|`), which combines with the spatial difference modulus into a full parabolic
+`ParabolicHolderWith` bound on `z − w`.  Then (ii)/(iii): lift through the coordinate readout to the
+section-space representative feeding `chart.lipschitz`/`picard`, or the `realization` decode.
+
+## Milestone (2026-07-05) — section-space coordinate-readout size lemmas + Picard field from continuity alone (GAP 2 route (ii): lift through the coordinate readout to the picard field)
+
+Pivot away from model-side heat-kernel estimates (now saturated) to **route (ii)** — lifting bounds
+through the section-space coordinate readout to feed the chart's `picard` field.  Ground-truth audit
+found the *geometric* operator `A` itself is blocked on **missing curvature-continuity
+infrastructure**: there is *zero* existing `Continuous`/`ContMDiff` API for `curvatureTensor` /
+`ricciTensor` / `intrinsicRicciDeTurckRHS` (grep-confirmed), so a direct (non-regularised) geometric
+`A` cannot yet be shown to land in `ContinuousSectionSpace`.  This session instead completed the
+*section-space transport* half of route (ii), reducing the `picard`-field inputs from a hand-supplied
+centre size constant to just Lipschitz + continuity.  All additive, `#print axioms`-clean
+(`propext`/`Classical.choice`/`Quot.sound`), comment-stripped `scan cheats` `TOTAL 0`.
+
+* `exists_forall_coord_norm_le` (ContinuousSection.lean) — **a continuous section has a uniformly
+  bounded compact coordinate readout**: `∃ C ≥ 0, ∀ i (x : Kc i), ‖(coord s).1 i x‖ ≤ C`.  Each
+  coordinate map `(coord s).1 i : C(Kc i, F)` is bounded by its sup-norm (finite since `Kc i` is
+  compact) and the finite index family of sup-norms is bounded above.  The existence form supplying
+  the constant that `norm_le_of_forall_coord_norm_le` consumes.
+* `exists_forall_mem_Icc_coord_norm_le_of_continuousOn` (ContinuousSection.lean) — **uniform centre
+  bound from time-continuity of the coordinate readout**: if `t ↦ (coord (f t)).1 i` is
+  `ContinuousOn (Icc t₀ T)`, then `∃ C ≥ 0, ∀ t ∈ Icc t₀ T, ∀ i x, ‖(coord (f t)).1 i x‖ ≤ C` (via
+  `IsCompact.exists_bound_of_continuousOn` on the compact time window + finite index max).  Produces
+  precisely the `hcenter` datum of `isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound`.
+* `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn`
+  (SectionSpacePicard.lean) — **section-space Picard endpoint chooser from Lipschitz + time-continuity
+  alone**: on a reference window `Icc t₀ T₀`, from ball-local `K`-Lipschitz-in-section control and
+  mere time-continuity of the coordinate readouts (no hand-supplied `Mc`), derives the centre bound
+  (previous lemma), chooses a forward endpoint `T ∈ (t₀, T₀]` (`exists_forwardTime_mul_sub_le`
+  intersected with the window via `min T' T₀`), and produces `IsPicardLindelof A ⟨t₀,_⟩ x0 a 0
+  (Mc + K·a) K` — the chart's exact `picard` shape.  **Consumes** the previous centre-bound lemma,
+  demonstrating its purpose.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  `picard`: the honest section-space
+Picard field can now be produced from just the operator's ball-local Lipschitz constant and the
+time-continuity of its coordinate readout — the size constant `Mc` is no longer a separately
+quantified input.  The residual analytic obligations for a *geometric* chart are therefore exactly
+(a) ball-local coordinate `K`-Lipschitz-in-state of the real Ricci–DeTurck operator, and
+(b) time-continuity of its coordinate readout — both of which still require the missing
+curvature-continuity / mild-regularisation infrastructure.
+
+**BLOCKER (for the geometric `A`).**  `intrinsicRicciDeTurckRHS g background τ` is a genuine
+2nd-order operator (`= intrinsicRicciFlowRHS + intrinsicDeTurckCorrection`, Ricci tensor via the
+chosen Levi-Civita family).  Showing `x ↦ intrinsicRicciDeTurckRHS g background τ x` is a *continuous
+section* (needed for `A` to land in `ContinuousSectionSpace`, and for `hcont`/`hcenter`) has **no
+existing infrastructure**: `curvatureTensor`/`ricciTensor` carry no `Continuous`/`ContMDiff` lemmas.
+The direct route needs a curvature-continuity sub-project (connection-coefficient → curvature → Ricci
+contraction continuity); the regularised route needs the mild-operator construction.
+
+**Next target.**  (i) Begin the curvature-continuity infrastructure with the smallest provable step —
+e.g. continuity in `x` of `intrinsicDeTurckCorrection` (first-order in the metric, most tractable) or
+of a single curvature contraction, from the `ContMDiff` structure of `someContMDiffLeviCivitaConnection`;
+or (ii) the ball-local coordinate `K`-Lipschitz-in-state estimate for a mild/regularised
+representative feeding the `hlip` input of the new endpoint chooser.
+
+## Milestone (2026-07-05) — section-space Picard field from Banach-norm hypotheses alone; C¹-connection block on the *direct* geometric `A` (GAP 2 route (ii))
+
+Two additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats` `TOTAL 0` commits; full `lake build` green (2911 jobs).  Continues route (ii) — lifting
+control through the section-space coordinate readout to the chart `picard` field — by removing the
+last coordinate-level bookkeeping from its inputs.
+
+**Committed.**
+* `coordContinuousMap_dist_le_dist` / `coord_dist_le_dist` / `continuousOn_coord_of_continuousOn`
+  (ContinuousSection.lean) — the coordinate readout `s ↦ (coord s).1 i` is **`1`-Lipschitz** in the
+  section (finite-cover Banach) distance, at the `C(Kc i, F)` level and the pointwise `F` level, and
+  section-space continuity of `f : X → ContinuousSectionSpace` transfers to each compact readout.
+  These are the exact **converse** of `continuousOn_of_forall_coord_continuousOn`, proved from the
+  definitional isometry `equivCompatibleCoordFamilySubmodule` onto `∀ i, C(Kc i, F)` (Pi sup metric)
+  via `dist_le_pi_dist` + `ContinuousMap.dist_apply_le_dist`.
+* `coord_norm_le_norm` (+ `coord_zero_apply`) — norm-side twin: `‖(coord s).1 i x‖ ≤ ‖s‖`, converting
+  a section-space *boundedness* estimate `‖A t x0‖ ≤ Mc` into the coordinate `hcenter` datum.
+* `exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn`
+  (SectionSpacePicard.lean) — **the honest `picard` field from purely section-space hypotheses**: from
+  ball-local `LipschitzOnWith K (A t)` on `closedBall x0 a` and section-space `ContinuousOn (t ↦ A t s)`
+  on `Icc t₀ T₀`, chooses a forward endpoint and produces `IsPicardLindelof A ⟨t₀,_⟩ x0 a 0 (Mc+K·a) K`
+  (the chart's exact `picard` shape).  All trivialization/coordinate bookkeeping is discharged
+  internally via the readout lemmas above.  This is the interface a mild/regularised Ricci–DeTurck
+  section-space operator must verify: a Banach-norm Lipschitz-in-state bound + Banach-norm
+  time-continuity — nothing coordinate-level.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  `picard`: now reducible to two
+Banach-norm facts about the operator (ball-local `LipschitzOnWith` + `ContinuousOn` in time), the
+cleanest possible target for the eventual operator; no residual coordinate obligations.
+
+**STRUCTURAL FINDING — the *direct* (non-regularised) geometric `A` is blocked at the current
+regularity, not merely by missing lemmas.**  Ground-truth: the intrinsic Levi-Civita connection is
+only **C¹** (`someContMDiffLeviCivitaConnection_contMDiff … 1`), because the ambient tangent bundle is
+only **C²** (`ContMDiffVectorBundle 2 F (TangentSpace I) I`) and the initial metric `g₀` is a mere
+`ContinuousRiemannianMetric`.  Curvature (`curvatureAux X Y σ = ∇_X∇_Y σ − ∇_Y∇_X σ − ∇_{[X,Y]}σ`) and
+the DeTurck correction (which contracts `∇` of the DeTurck vector field, itself first-order in the
+metric) each need a **C² connection** to be a *continuous* section of the bilinear-form bundle: the
+double covariant derivative `∇_X(∇_Y σ)` requires `∇_Y σ ∈ C²` via `contMDiff_along`, i.e. connection
+level `≥ 2`.  Mathlib's covariant-derivative smoothness monotonicity (`C^{k+1} conn ⟹ C^k conn`) is an
+explicit TODO ("later file") and in any case runs the *wrong* direction (roughening, not smoothing) to
+recover C² from C¹.  Consequence: `x ↦ intrinsicRicciDeTurckRHS g background τ x` cannot be shown to
+land in `ContinuousSectionSpace` at the current regularity; the direct chart `A` is genuinely
+unavailable.  The two honest resolutions are (a) **strengthen the ambient regularity** (C³⁺ bundle /
+C³ metric so the connection is C²), a broad refactor, or (b) the **mild/regularised operator** whose
+section-space boundedness + Lipschitz are exactly what the new capstone now consumes.
+
+**Next target.**  Route (b): construct the mild/regularised Ricci–DeTurck section-space operator about
+`g₀` and prove its section-space `LipschitzOnWith` on `closedBall` + `ContinuousOn` in time (feeding
+the new capstone directly) — starting from the completed model heat-kernel mild toolkit.  Or route
+(a): the connection-regularity strengthening (C² intrinsic connection from a C³ metric/bundle), which
+would unblock the direct curvature-continuity path.
+
+## Milestone (2026-07-05) — undowngraded ContMDiff regularity of the intrinsic DeTurck vector field (Item 3 / GAP 2 geometric-operator regularity brick)
+
+Ground-truth pivot to the GEOMETRIC operator regularity (per the ANALYTIC-CORE-DONE steer).
+Established this session that the *direct* geometric `A` on the continuous initial metric `g₀` is
+impossible at any regularity (g₀ is a mere `ContinuousRiemannianMetric`, the Ricci–DeTurck RHS is a
+2nd-order operator, so nothing built directly on g₀ is a smooth/continuous section); only the
+smooth-approximant / mild route can supply `A`.  That route needs `ContMDiff` (not merely
+`MDifferentiable`) regularity of the Ricci–DeTurck RHS building blocks for smooth metrics.
+
+**Blocker B1 resolved.**  The intrinsic DeTurck vector field previously had only `MDifferentiable`
+(`MDiff`) API even though the existing proofs *build* `ContMDiffOn … 1` internally (via
+`CovariantDerivative.contMDiffOn_rieszMap_section`) before discarding it with `.mdifferentiableAt`.
+Added the full undowngraded `ContMDiff` chain in `RicciFlow/DeTurck.lean`, all additive, full `lake
+build` green (2911 jobs), each `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`),
+comment-stripped `scan cheats` `TOTAL 0`:
+
+* `intrinsicDeTurckVectorField_contMDiffOn_of_contMDiffOn_intrinsicDeTurckOneForm` and
+  `…_contMDiffAt_of_contMDiff_intrinsicDeTurckOneForm` — the `ContMDiffOn`(patch)/`ContMDiffAt`(point)
+  strengthenings of the `…_mdiffAt_of_…OneForm` lemmas: raise a `C¹` DeTurck one-form with the
+  time-slice metric to a `C¹` DeTurck vector-field section.  (The rieszMap-section brick.)
+* `intrinsicDeTurckVectorField_contMDiffOn_of_connectionDifference_coeff`,
+  `…_contMDiffOn_of_contMDiffCovariantDerivativeOn`,
+  `…_contMDiffAt_of_contMDiffCovariantDerivative_background`,
+  `…_contMDiff_of_contMDiffCovariantDerivative_background` — the `ContMDiff` versions of the whole
+  `_mdiff_` chain: end-to-end, a globally `C¹` background connection slice (the chosen Levi-Civita
+  slice being `C¹` from the ambient `C²` bundle) yields a globally `C¹` intrinsic DeTurck vector
+  field.  The `_mdiffAt_of_contMDiffCovariantDerivative_background` capstone these mirror is already
+  consumed across `SmoothRealizationGaugeRoutes.lean` / `Diffeomorph3FlowTimeDerivative.lean`, so the
+  `ContMDiff` versions sit on a real consumer path.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  Still on the `A`/regularity side of
+GAP 2.  `A` for a smooth-approximant metric requires `ContMDiff` regularity of the Ricci–DeTurck RHS
+(= `intrinsicRicciFlowRHS` + `intrinsicDeTurckCorrection`).  The DeTurck-correction summand needs the
+covariant derivative `∇(DeTurck VF)` as a continuous CLM section; that consumes exactly this new
+`ContMDiff` DeTurck-VF chain.
+
+**BLOCKER B2 (next target).**  `∇(DeTurck VF)` continuity via
+`ContMDiffCovariantDerivativeOn.contMDiff` needs either (a) the covariant-derivative *level*
+monotonicity `ContMDiffCovariantDerivativeOn (k+1) → k` — an EXPLICIT Mathlib "later file" TODO
+(docstring in `Mathlib/.../CovariantDerivative/Basic.lean`), requiring the local connection-form
+(flat-connection difference) structure, absent in the repo and in Mathlib v4.29.1 — or (b) the
+DeTurck VF at `ContMDiff` level 2, which needs a level-2 `contMDiffOn_rieszMap_section` (currently
+hardcoded at level 1; the ambient metric is only `C²`, so level 2 is the ceiling).  Resolving B2 (the
+connection-regularity monotonicity is the higher-leverage of the two) gives `∇(DeTurck VF)`
+continuous → the DeTurck correction as a continuous section for `C²` metrics.
+
+## Milestone (2026-07-05, later) — B2 RESOLVED: covariant-derivative level downgrade `1 → 0` (Item 3 / GAP 2 geometric-operator regularity)
+
+**Blocker B2 resolved** via route (a) — the covariant-derivative level monotonicity — realized
+*concretely* through the local flat-connection (frame) decomposition, which the tangent bundle of a
+*smooth* manifold does supply (its frames are `C^∞`: `IsManifold I ∞ M ⇒ ContMDiffVectorBundle ∞
+(TangentSpace I)`), contrary to the earlier assessment that the flat-connection-difference structure
+was absent.  All additive, each `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`),
+comment-stripped `scan cheats` `TOTAL 0`, `lake build` of the affected modules green.
+
+Two commits, both in `VectorBundle/CovariantDerivative/Existence.lean` (the `RiemannianBundle`-free
+context, which sidesteps the transported-instance norm diamond on `TangentSpace →L TangentSpace` that
+blocks the analogous proof inside `LeviCivita.lean`):
+
+1. **Level-generic frame covariant-derivative regularity.**
+   * `ContMDiffAt.smulRightSection_of_level`, `ContMDiffOn.smulRightSection_of_level` — the
+     `φ ↦ φ.smulRight v` product regularity at an arbitrary level `n` (generalizing the hard-coded
+     level-1 versions).
+   * `Bundle.Trivialization.contMDiffOn_frameCovariantDerivative_of_level` (+ `_baseSet_` and the
+     `contMDiffCovariantDerivativeOn_..._of_level` class instance) — a `C^{n+1}` section has a `C^n`
+     frame covariant derivative (`frameCovariantDerivative` drops regularity by exactly one order).
+     The `n = 0` case: a `C¹` section ⇒ a `C⁰` (continuous) frame covariant derivative.
+
+2. **General-bundle level downgrade `1 → 0`.**
+   * `CovariantDerivative.contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one` — a
+     bundle-generic, `RiemannianBundle`-free port of the tangent-bundle class-to-open-set restriction
+     (smooth-bump localization), needed to probe `∇(frameᵢ)`.
+   * `CovariantDerivative.contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` — the
+     downgrade itself: `ContMDiffCovariantDerivative cov 1 ⇒ ContMDiffCovariantDerivativeOn F 0
+     cov.toFun u` on every open set, i.e. the covariant derivative of a merely-`C¹` section is a
+     *continuous* `T*M ⊗ V`-section.  Proof: on a trivialization patch,
+     `∇σ = ∇^{frame}σ + ∑ᵢ (coeffᵢ σ)·∇(frameᵢ)`; the frame term is `C⁰` by (1) at `n = 0`, and each
+     `∇(frameᵢ)` is `C¹` by applying the `C¹` class (via the restriction) to the `C²` frame section;
+     `add_section`/`sum_section`/`smul_section` recombine to `C⁰`.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  Still on the `A`/regularity side of
+GAP 2.  The downgrade is exactly the tool that makes `∇(DeTurck VF)` a continuous section for a `C¹`
+DeTurck vector field, hence `intrinsicDeTurckCorrection` a continuous section — the last regularity
+gap in seeing the intrinsic Ricci–DeTurck RHS as a `ContinuousSectionSpace` value for a `C²` metric.
+
+**Consumption caveat / NEXT.**  Instantiating the abstract downgrade at the tangent bundle *inside* the
+`RiemannianBundle` sections (`LeviCivita.lean` / `DeTurck.lean`) re-triggers the norm diamond on
+`NormedAddCommGroup (TangentSpace I x)` (Riemannian vs. flat-`E`) whenever a fresh
+`{cov : CovariantDerivative I E TM}` binder resolves the fiber norm differently from the applied lemma.
+The genuine consumer (`chosenLeviCivitaFamily`) carries one fixed instance throughout, so the diamond
+should not arise there; NEXT target is to apply
+`contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` to `chosenLeviCivitaFamily`
+with the `C¹` intrinsic DeTurck vector field to conclude `intrinsicDeTurckCorrection` is a continuous
+section, then package the intrinsic Ricci–DeTurck RHS as a `ContinuousSectionSpace` value.
+
+## Milestone (2026-07-05, later) — Π-fiber-norm diamond DIAGNOSED + norm-free tangent-bundle frame covariant-derivative regularity committed (Item 3 / GAP 2 geometric-operator regularity)
+
+**Root-cause of the recurring `BilinearFormBundle`/`TangentSpace →L TangentSpace` diamond, pinned
+precisely.**  Attempting to consume the just-proved level downgrade
+`CovariantDerivative.contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` at the
+tangent bundle (`V = TangentSpace I`, to conclude `∇(DeTurck VF)` is a continuous `Hom(TM, TM)`
+section) fails with the "synthesized instance is not definitionally equal to expression inferred by
+typing rules" error.  Ground-truth diagnosis:
+
+* The `Existence.lean` downgrade chain — and, crucially, its building-block **definition**
+  `Bundle.Trivialization.frameCovariantDerivative` — carries the auto-included hypotheses
+  `[∀ x, NormedAddCommGroup (V x)]` / `[∀ x, NormedSpace ℝ (V x)]` (the compiler reports them
+  *unused*, but they sit in the signatures).
+* Applying any of them at `V = TangentSpace I` forces synthesis of the **Π-instance**
+  `∀ x, NormedAddCommGroup (TangentSpace I x)`.  Typeclass inference *cannot* obtain this from the
+  type synonym `TangentSpace I x = E` (an `example : ∀ x, NormedAddCommGroup (TangentSpace I x) :=
+  fun _ => inferInstance` fails without a `RiemannianBundle`), even though the *pointwise*
+  `NormedAddCommGroup (TangentSpace I x)` **is** resolvable by the bundle machinery (via unfolding the
+  synonym to `E`) — so `FiberBundle (E →L E) (fun x ↦ TM x →L TM x)` and
+  `VectorBundle ℝ (E →L E) (fun x ↦ TM x →L TM x)` and `FiberBundle (E →L E →L ℝ) (BilinearFormBundle
+  (V := TM))` all synthesize with no fiber-norm hypothesis.
+* Supplying the Π-instance by hand is the diamond: the goal's hom/bilinear bundle uses the synonym
+  `E`-norm `fun b ↦ inst✝ : NormedAddCommGroup E` (pointwise, via the bundle machinery), whereas a
+  `[RiemannianBundle TM]` `letI` gives `fun x ↦ instNormedAddCommGroupOfRiemannianBundle… x` (a
+  *different* norm — genuine non-defeq), and a flat-`E` `letI`/`haveI`
+  `fun _ ↦ inferInstanceAs (NormedAddCommGroup E)` is defeq but *syntactically* distinct (`exact`/
+  `.contMDiff` reject it; the paired `NormedSpace` `letI` even trips a kernel aux-def type mismatch).
+  Passing the flat-`E` norm through `@`-application collapses to a dependent `NormedSpace` type
+  mismatch.  **Verdict: this is a definition-site issue — the covariant-derivative theory must not
+  demand the Π fiber-norm — and cannot be closed by instance-pinning at the use site.**
+
+Importantly, the `AnalyticPDE` chart context (`variable {W : M → Type*} … [FiberBundle F W]
+[VectorBundle ℝ F W]`, **no** fiber norm; `BilW := BilinearFormBundle (V := W)`) confirms the whole
+Ricci–DeTurck chart is designed *fiber-norm-free*; the only obstruction is `Existence.lean`'s
+frame-decomposition chain hard-coding the Π fiber-norm.
+
+**Committed fix (first half): fiber-norm-free tangent-bundle frame covariant-derivative regularity.**
+New additive module `VectorBundle/CovariantDerivative/DowngradeNormFree.lean`
+(namespace `CovariantDerivative.TangentFrame`), all `#print axioms`-clean
+(`propext`/`Classical.choice`/`Quot.sound`), comment-stripped `scan cheats` `TOTAL 0`, `lake build
+PoincareCurvature` green (2912 jobs):
+
+* `inCoordinates_smulRight_eq`, `contMDiffAt_smulRightSection_of_level`,
+  `contMDiffOn_smulRightSection_of_level` — tangent-bundle (`F = E`, `V = TangentSpace I`) copies of
+  the `Existence` `smulRight`-product regularity, with **no** Π fiber-norm hypothesis (the pointwise
+  synonym norm resolves uniformly).
+* `frameCovariantDerivativeTangent` — a fiber-norm-free tangent-bundle copy of
+  `Bundle.Trivialization.frameCovariantDerivative` (`∑ᵢ d(coeffᵢ σ) ⊗ frameᵢ`), the key def whose
+  original signature carried the Π fiber-norm.
+* `contMDiffOn_frameCovariantDerivativeTangent_of_level` — a `C^{n+1}` vector field has a `C^n` frame
+  covariant derivative, stated for the tangent bundle (drops regularity by one order), consuming the
+  above.
+* `contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one` — the tangent-bundle
+  `C¹`-class-to-open-set restriction (smooth-bump localization), no Π fiber-norm.
+
+**Remaining (second half) — the decomposition cascade for the actual downgrade.**  Closing the
+tangent-bundle `_zero_` downgrade needs fiber-norm-free tangent-bundle copies of the
+frame-decomposition identity chain in `Existence.lean` (each currently carries the Π fiber-norm via
+`frameCovariantDerivative` in its proof): `isCovariantDerivativeOn_frameCovariantDerivative` (~90 lines,
+additive/Leibniz algebra), `covariantDerivative_{eq,apply_eq}_frameCovariantDerivative_add_difference`,
+`covariantDerivative_apply_eq_sum_localFrame_add_difference`,
+`difference_localFrame_eq_covariantDerivative`, and
+`covariantDerivative_apply_eq_sum_localFrame_add_sum_covariantDerivative_localFrame` (~250–350 lines
+total, mechanical: transcribe against `frameCovariantDerivativeTangent`).  Then the tangent-bundle
+`contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` follows by the exact
+`Existence` proof, and — because its conclusion mentions no fiber-norm-bearing subterm the goal cannot
+match (the hom bundle uses the synonym `E`-norm on both sides) — it applies to `chosenLeviCivitaFamily`
+in `DeTurck.lean` with **no** diamond, giving `∇(DeTurck VF)` continuous → `intrinsicDeTurckCorrection`
+a continuous `BilinearFormBundle` section → the intrinsic Ricci–DeTurck RHS as a
+`ContinuousSectionSpace` value (the geometric `A`).
+
+**NEXT.**  Transcribe the decomposition cascade into `DowngradeNormFree.lean` (namespace
+`TangentFrame`, using `frameCovariantDerivativeTangent`), prove the tangent-bundle `_zero_` downgrade,
+then apply it to `chosenLeviCivitaFamily` with the `C¹` intrinsic DeTurck vector field.
+
+## Milestone (2026-07-05, later still) — tangent-bundle `_zero_` downgrade PROVED + applied to `chosenLeviCivitaFamily`: ∇(DeTurck VF) is continuous (Item 3 / GAP 2 geometric-A regularity)
+
+The previous milestone's stated NEXT target is now **done, sorry-free, `#print axioms`-clean**
+(`propext`/`Classical.choice`/`Quot.sound`), comment-stripped `scan cheats` `TOTAL 0`, full `lake build`
+green (2915 jobs).  Two additive commits, no heavy file rewritten.
+
+**(1) Fiber-norm-free tangent-bundle level downgrade `1 → 0`** — appended to
+`VectorBundle/CovariantDerivative/DowngradeNormFree.lean` (namespace `CovariantDerivative.TangentFrame`).
+The whole frame-decomposition cascade of `Existence.lean` was transcribed against the fiber-norm-free
+`frameCovariantDerivativeTangent` (the Mathlib `IsCovariantDerivativeOn`/`difference`/`CovariantDerivative`
+machinery is *already* fiber-norm-free — only `Existence.frameCovariantDerivative`'s definition carried
+the `Π` fiber-norm, which the `Tangent` copy drops):
+`isCovariantDerivativeOn_frameCovariantDerivativeTangent`,
+`covariantDerivative_eq_frameCovariantDerivativeTangent_add_difference`,
+`covariantDerivative_apply_eq_frameCovariantDerivativeTangent_apply_add_difference`,
+`covariantDerivative_apply_eq_sum_localFrame_add_difference`,
+`frameCovariantDerivativeTangent_localFrame_eq_zero`,
+`difference_localFrame_eq_covariantDerivative`,
+`covariantDerivative_apply_eq_sum_localFrame_add_sum_covariantDerivative_localFrame`, and finally
+`contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one` — a globally `C¹` covariant
+derivative on the tangent bundle sends a `C¹` vector field to a **continuous** `Hom(TM, TM)`-section, with
+**no** `Π` fiber-norm hypothesis anywhere.
+
+**(2) Consumption — ∇(DeTurck VF) continuous** — new isolated module
+`RicciFlow/DeTurckCorrectionRegularity.lean` (imports `DeTurck` + `DowngradeNormFree`, added to the root):
+* `chosenLeviCivitaFamily_contMDiffCovariantDerivativeOn_zero` — the canonical smooth Levi-Civita slice
+  is a `C⁰` covariant derivative on every open set (feeds `someContMDiffLeviCivitaConnection_contMDiff`
+  to the downgrade).
+* `intrinsicDeTurckVectorField_covariantDerivative_contMDiffOn_zero` /
+  `..._contMDiff_zero` — for a `C¹` background connection slice,
+  `∇W = (chosenLeviCivitaFamily g t) (intrinsicDeTurckVectorField g background t)` is a **continuous**
+  `Hom(TM, TM)`-section (locally / globally).
+**Confirmed the plan's key prediction:** applying the fiber-norm-free downgrade to `chosenLeviCivitaFamily`
+inside the `RiemannianBundle` context triggers **no** transported-instance norm diamond — the conclusion's
+hom bundle uses the synonym `E`-norm on both sides, so `.contMDiff` accepts the `C¹` DeTurck vector field
+directly.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  Still the `A`-regularity side of GAP 2,
+but the last regularity obstruction to reading `∇W` as a continuous section is now removed.
+
+**NEXT.**  Metric composition: promote `∇W` continuity to continuity of the symmetrized correction
+`intrinsicDeTurckCorrection g background t x u v = (g t).inner x (∇W u) v + (g t).inner x u (∇W v)` as a
+continuous `BilinearFormBundle` section, then package the intrinsic Ricci–DeTurck RHS as a
+`ContinuousSectionSpace` value (the geometric `A`).  This needs a *metric-section continuity* lemma
+(continuity of `x ↦ (g t).inner x` as a `BilinearFormBundle` section, from the `C²` metric family) plus a
+diamond-safe composition `(BilinearForm) ∘ (Hom(TM,TM))`; build that metric-section continuity brick
+first (watch the `letI : RiemannianBundle` in `intrinsicDeTurckCorrection`).
+
+## Milestone (2026-07-05, later) — intrinsic DeTurck correction PROVED a continuous `BilinearFormBundle` section (Item 3 / GAP 2 geometric-A regularity)
+
+The previous milestone's stated NEXT (metric-section composition to `intrinsicDeTurckCorrection`
+continuity) is now **done, sorry-free, `#print axioms`-clean** (`propext`/`Classical.choice`/`Quot.sound`),
+comment-stripped `scan cheats PoincareCurvature` `TOTAL 0`, full `lake build PoincareCurvature` green
+(2916 jobs).  Four additive commits; no heavy file rewritten.
+
+**(1) Bundle-level `clm_comp` (new module `VectorBundle/HomBundleComp.lean`, added to root).**
+Mathlib's `VectorBundle/Hom.lean` has `clm_bundle_apply`/`clm_bundle_apply₂` (applying a hom-section to
+vector-sections) but **no** composition of two hom-sections.  `ContMDiff{WithinAt,At,On,}.clm_bundle_comp`
+supplies it: for smooth sections `ϕ : Hom(E₂,E₃)`, `ψ : Hom(E₁,E₂)`, `x ↦ (ϕ x).comp (ψ x)` is a smooth
+`Hom(E₁,E₃)`-section.  Proof reduces `contMDiff*_hom_bundle` to `inCoordinates` and uses
+`inCoordinates_comp_eq` — the coordinate readout of a composition factors through the readouts on the
+middle base set, via the `symmL ∘ continuousLinearMapAt = id` cancellation — reducing to the ordinary
+normed `ContMDiff*.clm_comp`.  Fully general, fiber-norm-free.
+
+**(2) Covariant part `C1 = (g t).inner ∘L ∇W` continuous** — `metricComp_intrinsicDeTurckVectorField_
+covariantDerivative_contMDiff_zero`: apply `clm_bundle_comp` to the `C²` metric section
+(`ContMDiffRiemannianMetric.contMDiff_toSection`, downgraded to `C⁰`) and the continuous `∇W`
+`Hom(TM,TM)`-section (the earlier `intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`).
+
+**(3) Fiber-norm-free slot-flip continuity** — `contMDiff_flipBilinearFormSection_tangent_zero`: for a
+continuous `BilinearFormBundle` section `s`, `x ↦ (s x).flip` is continuous.  Mirrors the existing
+`Bundle.contMDiff_symmetrizeBilinearSection` (model operator `ContinuousLinearMap.flipBilinear` in
+preferred coordinates) but with the **flip** operator and — crucially — **no** `Π` fiber-norm: it uses
+only the fiber-norm-free readout `trivializationAt_bilinearFormBundle_apply_eq` (the fiber-norm version
+lives later in `RiemannianSection.lean`).  Needed two plumbing fixes flagged in the steer:
+(a) the CLM-`AddCommMonoid` diamond on `E →L E →L ℝ` (`flipBilinear`'s type vs the `𝓘(ℝ,·)` model) —
+resolved by re-declaring the canonical `NormedAddCommGroup`/`NormedSpace (E →L E →L ℝ)` as *local
+instances* (as `RiemannianSection.lean` does); (b) `rw [flip_apply]` HO-pattern failure — use
+`exact ContinuousLinearMap.flip_apply (s x) _ _`.
+
+**(4) The correction section itself** — `intrinsicDeTurckCorrectionSection` (`= C1 + flip C1`, a genuine
+`Π x, BilinearFormBundle (V := TM) x`) with `_apply` (`= intrinsicDeTurckCorrection` by metric
+`symm`) and `_contMDiff_zero` (continuity via `ContMDiff.add_section` of (2)+(3)).  **Plumbing note for
+next time:** the section-level `+` on the tangent synonym only resolves when the summands are typed as the
+bundle fiber `BilinearFormBundle (V:=TM) x` *un-unfolded* — an ascription `(… : Π x, BilW x)` unfolds the
+abbrev to the raw synonym and `Add (Π x, TM x →L TM x →L ℝ)` then fails; the fix is to force the resolving
+instance with `@HAdd.hAdd (Π x, BilW x) … instHAdd …`.  `infer_instance` confirms `Add (Π x, BilW x)`
+*does* resolve; only the raw-synonym form fails.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  The `A`-regularity side of GAP 2 is now
+essentially complete: the intrinsic Ricci–DeTurck reaction (DeTurck-correction) term is a continuous
+`BilinearFormBundle`/`ContinuousSectionSpace` value.
+
+**NEXT.**  Assemble the full geometric operator `A` value: add the Ricci part `−2 Ric(g t)` (continuity of
+`ricciTensor` as a `BilinearFormBundle` section — same bundle-section algebra) to
+`intrinsicDeTurckCorrectionSection` to realize `intrinsicRicciDeTurckRHS` as a `ContinuousSectionSpace`
+value, then feed it as `chart.A` and discharge the `IsPicardLindelof` (`picard`) coordinate
+bounds (`hlip`/`hcont`/centre) for the **mild/regularised** representative via the committed
+`isPicardLindelof_of_bounded_lipschitz_timeDependent` foundation.
+
+## Milestone (2026-07-05, later still) — intrinsic Ricci–DeTurck RHS assembled as a continuous `BilinearFormBundle` section, modulo the single Ricci-tensor-section input (Item 3 / GAP 2 geometric-A regularity)
+
+The previous milestone's stated NEXT (add the Ricci part to `intrinsicDeTurckCorrectionSection` to realize
+`intrinsicRicciDeTurckRHS` as a `ContinuousSectionSpace`/`BilinearFormBundle` value) is now **done up to the
+one honest Ricci-continuity input**, sorry-free, `#print axioms`-clean
+(`propext`/`Classical.choice`/`Quot.sound`), comment-stripped `scan cheats PoincareCurvature` `TOTAL 0`, full
+`lake build PoincareCurvature` green (2916 jobs).  One additive commit; no heavy file rewritten (appended to
+the isolated `RicciFlow/DeTurckCorrectionRegularity.lean`).
+
+**`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`.**  Given *any* continuous
+`BilinearFormBundle` section `rs` representing the intrinsic Ricci tensor
+(`rs x u v = intrinsicRicciTensor g t x u v`) and a `C¹` DeTurck reference connection slice
+(`hbackground : ContMDiffCovariantDerivative (background t) 1`), the combination
+`(-2 : ℝ) • rs + intrinsicDeTurckCorrectionSection g background t` is a **continuous** `BilinearFormBundle`
+section that agrees pointwise with the geometric Ricci–DeTurck operator `intrinsicRicciDeTurckRHS`.  Proof:
+`ContMDiff.const_smul_section` on `rs` + `ContMDiff.add_section` with the already-committed correction
+continuity (`intrinsicDeTurckCorrectionSection_contMDiff_zero`); the pointwise identity is a `simp only` over
+`Pi.add_apply`/`Pi.smul_apply`/`ContinuousLinearMap.{add,smul}_apply` + `ricciFlowRHS_apply` +
+`intrinsicRicciTensor_apply` (using `intrinsicRicciFlowRHS = -2 • intrinsicRicciTensor`).  **Plumbing:** the
+Pi-level `(-2)•rs + corr` must **never** be written explicitly (it re-triggers the `BilinearFormBundle` fiber
+`AddMonoid (TangentSpace I x →L ℝ)` synthesis timeout); instead build the continuity `have` from the section
+lemmas and let the `∃`-witness be **inferred** from its type (`refine ⟨_, hcont, ?_⟩`).
+
+**Fractional progress on `{A, picard, realization, encode}`.**  This closes the *value-section assembly* half of
+the `A`-regularity side of GAP 2: the geometric operator `A`'s value at a metric is a continuous `BilinearFormBundle`
+section **as soon as** the Ricci tensor is a continuous section.  The remaining `A`-regularity obstruction is now a
+single named brick.
+
+**NEXT — Ricci-tensor-section continuity (the last `A`-value regularity input).**  Route mapped this session
+(regularity is consistent because local frames are `C^∞`, so the two nested `∇`'s in the curvature drop only to
+`C⁰` for a `C¹` connection):
+1. `curvatureAux e_a e_b e_c` is a **continuous** `TM`-section for smooth frame fields and a `C¹` connection —
+   from `CovariantDerivative.contMDiff_along` (Along.lean: `C^n` cov + `C^n` field + `C^{n+1}` section → `C^n`)
+   applied twice (inner `n=1`: cov `C¹`, `e_b` `C¹`, `e_c` `C²` → `∇_{e_b} e_c` `C¹`; outer `n=0`: cov `C⁰`,
+   `e_a` `C⁰`, `∇_{e_b} e_c` `C¹` → `C⁰`), plus the bracket term via `ContMDiff.mlieBracket_vectorField`, glued by
+   `ContMDiff.sub_section`.  Watch the `ContMDiffVectorBundle`/`ContMDiffCovariantDerivative` `n=2→1→0` instance
+   downgrade.
+2. Lift to `curvatureTensor` section continuity via the tensoriality lemmas
+   (`curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right`, Tensor.lean) — replace the
+   canonical `smoothExtend` in `curvatureTensor` by local frame sections, then read off section continuity in a
+   trivialization from the matrix entries.
+3. Contract to `ricciCurvature = trace(ricciEndomorphism)` via the frame/coframe trace formula, giving
+   `intrinsicRicciTensor` as a continuous `BilinearFormBundle` section — the exact `rs` input to the lemma above,
+   completing the geometric `A`-value regularity.  (Then the `picard` Lipschitz/centre bounds for the
+   mild/regularised representative remain — the other half of GAP 2.)
+
+## Milestone (2026-07-05, later still) — raw curvature commutator continuity: `curvatureAux` is a continuous `TM`-section for a `C¹` connection (global + local), Step 1 of the Ricci-tensor-section route DONE (Item 3 / GAP 2 geometric-A regularity)
+
+Two additive commits, sorry-free, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0`, `lake build …DeTurckCorrectionRegularity` green (2910 jobs).  Appended to the
+isolated `RicciFlow/DeTurckCorrectionRegularity.lean` (nothing imports it downstream, so no rebuild churn).
+
+**`curvatureAux_contMDiff_zero`** (global).  For a `C¹` covariant derivative `cov` on `TM`
+(`[ContMDiffCovariantDerivative cov 1]`) and *global* `C²` vector fields `X`, `Y`, `Z`, the raw curvature section
+`curvatureAux X Y Z = ∇_X∇_Y Z − ∇_Y∇_X Z − ∇_{[X,Y]}Z` is a **continuous** `TM`-section.  Proof: `contMDiff_along`
+(Along.lean) applied twice — inner `∇_Y Z` at `n=1` (cov `C¹`, `Y` `C¹`, `Z` `C²`), outer `∇_X(∇_Y Z)` at `n=0`
+(cov `C⁰`, `X` `C⁰`, `∇_Y Z` `C¹`); the `C⁰` connection instance is derived from `[cov 1]` via the fiber-norm-free
+tangent-bundle downgrade `CovariantDerivative.TangentFrame.contMDiffCovariantDerivativeOn_zero_of_contMDiffCovariantDerivative_one`
+(u := univ) + `⟨·⟩`; the bracket `∇_{[X,Y]}Z` is `C⁰` from the *global* `ContDiff.mlieBracket_vectorField` (`C²` fields → `C⁰`
+bracket) fed to `contMDiff_along`; combined with `ContMDiff.sub_section` and unfolded via `simpa only [curvatureAux]`.
+
+**`curvatureAux_contMDiffOn_zero`** (local / `On`).  Same conclusion on an open set `u` for fields that are `C²`
+*only on `u`* — the local frame fields of a trivialization (`Bundle.Trivialization.contMDiffOn_localFrame_baseSet` gives
+only `ContMDiffOn` on the base set).  The connection is restricted to `u` via
+`TangentFrame.contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one` (level 1) and the `C¹→C⁰`
+downgrade (level 0); the bracket is `ContMDiffOn.mlieBracketWithin_vectorField` (`mlieBracketWithin` on `u`) identified
+with `mlieBracket` on the open set via `VectorField.mlieBracketWithin_eq_mlieBracket` (torsion-proof pattern); the two
+nested `∇`'s use `.contMDiff … |>.clm_bundle_apply` at levels 1 then 0.  This is the **local-to-global gluing brick**
+for Step 2.
+
+**Plumbing lessons (do not re-lose).**  (i) Use the `CovariantDerivative.TangentFrame.*` downgrade lemmas
+(DowngradeNormFree.lean), **not** the bundle-generic `CovariantDerivative.*` ones (Existence.lean) — the latter hit the
+`FiberBundle E (TangentSpace I)` / `VectorBundle ℝ E (TangentSpace I)` fiber-norm diamond in the frontier context and
+fail to synthesize; the `TangentFrame` copies are diamond-free.  (ii) `ContDiff.mlieBracket_vectorField` /
+`ContMDiffOn.mlieBracketWithin_vectorField` live in `section Invariance` with `variable [IsManifold I (minSmoothness ℝ 2) M]`
+— since `minSmoothness` is `irreducible_def`, provide it explicitly `haveI : IsManifold I (minSmoothness ℝ 2) M := by
+rw [minSmoothness_of_isRCLikeNormedField]; infer_instance`; and `[IsManifold I (n+1) M]` with `n=2` needs
+`haveI : IsManifold I ((2:ℕ∞)+1) M := IsManifold.of_le (n := (∞ : WithTop ℕ∞)) (by exact_mod_cast le_top)` (the `LEInfty`
+instances cover only `↑n`/literals, not the `↑2+1` sum shape, and `le_top` targets `ω` not `∞`).  (iii) Do **not** add an
+explicit `haveI : FiberBundle E (TangentSpace I) := inferInstance` — it introduces a second instance diamonding with the
+canonical `TangentSpace.fiberBundle`.
+
+**NEXT — Step 2 hurdle (curvatureTensor section continuity).**  The plan's tensoriality lemma
+`curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right` (Tensor.lean) rewrites
+`curvatureTensor x u v w` (defined via `smoothExtend`) as `curvatureAux X Y σ x` for frame-valued `X,Y,σ`, but its
+`hσcoeff` hypothesis demands **global** `ContMDiff` of `y ↦ localFrame_coeff i y (σ y)` — sections have only **`On`**
+coeff-continuity (`contMDiffOn_localFrame_coeff`, base set).  So lifting `curvatureAux_contMDiffOn_zero` to
+`fun x ↦ curvatureTensor x (e_a x)(e_b x)(e_c x)` continuous needs EITHER (a) a **local/On tensoriality variant**
+requiring only near-`x` coeff-continuity, OR (b) extend the local frames to global smooth fields agreeing near each `x₀`
+(bump), then apply the existing global tensoriality + `curvatureAux_contMDiff_zero`, glued by
+`contMDiffOn_of_locally_contMDiffOn`.  Route (a) is a Tensor.lean addition; route (b) reuses the two committed bricks.
+Then Step 3 (Ricci trace via `ricciEndomorphism`/`ricciCurvature` in Contractions.lean) yields `intrinsicRicciTensor` as
+the continuous `rs` section consumed by `exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`.
+
+## Milestone (2026-07-05, later still) — Step 2 of the Ricci-tensor-section route DONE: `curvatureTensor` in local `ContMDiffOn` frames is a continuous `TM`-section (Item 3 / GAP 2 geometric-A regularity)
+
+Three additive commits, sorry-free, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0`, `lake build …DeTurckCorrectionRegularity` green (2910 jobs).  Appended to the
+isolated `RicciFlow/DeTurckCorrectionRegularity.lean` (nothing imports it downstream, so no rebuild churn).  This closes
+the Step 2 hurdle recorded in the previous milestone (the tensoriality lemma's **global** `hσcoeff` demand vs. sections'
+only-**`On`** coeff-continuity) **without** touching the heavy `Tensor.lean` — the localisation is done additively in the
+extension module using only *public* tensoriality/locality API.
+
+**`curvatureAux_apply_eq_of_eventuallyEq_fields`** (the germ-move brick).  If globally-`C¹`/`C²` fields `X`, `Y`, `σ`
+agree *near* `y` with arbitrary fields `ea`, `eb`, `ec` (which carry **no** global regularity of their own), then
+`curvatureAux ea eb ec y = curvatureAux X Y σ y`.  This is the `ContMDiffOn`-friendly companion of the (public but
+global-only) `curvatureAux_eq_of_eventuallyEq_apply`: the local fields inherit differentiability at points near `y` from
+the global comparison fields via the eventual equality.  Proof mirrors `curvatureAux_eq_of_eventuallyEq_right_apply`
+inline, using the *public* `IsCovariantDerivativeOn.congr_of_eventuallyEq` (+ `cov.isCovariantDerivativeOnUniv`),
+`MDifferentiableAt.congr_of_eventuallyEq` (to transfer differentiability of the local fields and of `cov.along · ·`), and
+`Filter.EventuallyEq.mlieBracket_vectorField` for the bracket slot — the private `along_eventuallyEq_right_apply` /
+`mdifferentiableAt_along_of_contMDiff` of `Tensor.lean` are **not** needed.
+
+**`curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame`** (the `On`-tensoriality).  For `C²`-on-`u` fields
+`ea`, `eb`, `ec` and `y ∈ u`, `curvatureAux ea eb ec y = curvatureTensor y (ea y)(eb y)(ec y)`.  Route (resolving Step 2):
+bump-globalise the local fields in `u ∩ (trivializationAt E TM y).baseSet` via `ContMDiffOn.smul_section_of_tsupport`
+(so the right-slot **global** field `σ = ψ • ec` has trivialization coefficients that are `C²` on that patch —
+`contMDiffOn_localFrame_coeff` on the global field, **not** on `ec` — and vanish off the bump by `map_zero` of the linear
+`localFrame_coeff`, glued to a global `C²` coeff via `contMDiff_of_contMDiffOn_union_of_isOpen`); apply the **existing
+global** value tensoriality `curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right` at `y`; then
+transfer back to the local fields by the germ-move (the bump is `=ᶠ 1` near `y`, so `ψ • ea =ᶠ ea` etc.).  Basis:
+`Module.finBasis ℝ E`.
+
+**`curvatureTensor_contMDiffOn_frame_zero`** (Step 2 conclusion).  `z ↦ curvatureTensor z (ea z)(eb z)(ec z)` is a
+**continuous** `TM`-section on `u` for `C²`-on-`u` frame fields — `curvatureAux_contMDiffOn_zero` (`ContMDiffOn 0`) `.congr`
+the pointwise `On`-tensoriality.  So the bundled curvature tensor in local smooth frames is a continuous bundle section.
+
+**NEXT — Step 3 (Ricci trace → `intrinsicRicciTensor` as the continuous `rs` section).**  `intrinsicRicciTensor g =
+ricciTensor g (someLeviCivita) = ricciCurvature = trace(ricciEndomorphism)`, and (Contractions.lean) the trace is expanded
+`LinearMap.trace_eq_sum_inner _ b` over an **orthonormal** fiber basis, giving
+`ricciCurvature x u w = ∑ᵢ ⟪curvatureTensor x (eᵢ x) u w, eᵢ x⟫`.  To realise `x ↦ ricciCurvature x` as a continuous
+`BilinearFormBundle`-section (the `rs` input to `exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`)
+still needs: (i) a **local `ContMDiffOn` orthonormal frame** `eᵢ` (none in the repo yet — Gram–Schmidt on a trivialization
+coordinate frame against the `C²` metric section, OR a non-orthonormal frame + dual coframe using `LinearMap.trace_eq_sum`
+to avoid orthonormalisation), (ii) continuity of each scalar summand `x ↦ ⟪curvatureTensor x (eᵢ x) u w, eᵢ x⟫` from the
+just-committed `curvatureTensor_contMDiffOn_frame_zero` + the `C²` metric-inner continuity, and (iii) assembling the finite
+sum of continuous bilinear-form sections into one `BilinearFormBundle`-section (reuse the `ContMDiff.{add,const_smul}_section`
+pattern of `intrinsicDeTurckCorrectionSection`, being careful with the fiber `NormedAddCommGroup (TM x →L ℝ)` instance
+diamond — build the continuity `have` from the section lemmas and let the `∃`/section be inferred, never write the Pi-level
+sum explicitly).  Then feed `rs` to the committed
+`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`, completing the geometric-`A` **value-section**
+regularity; the remaining `A`-side obstruction is then the `picard` Lipschitz/centre bounds for the mild/regularised
+representative.
+
+## Milestone (2026-07-05, later still) — Step 3 of the Ricci-tensor-section route DONE: the intrinsic Ricci–DeTurck RHS is a continuous `BilinearFormBundle` section **unconditionally** (Item 3 / GAP 2 geometric-`A` value-section regularity CLOSED)
+
+Five additive commits, all sorry-free, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0`, full `lake build PoincareCurvature` green (2916 jobs).  Appended to
+`RicciFlow/DeTurckCorrectionRegularity.lean` (imported by the root, so on the build/audit path).  This closes the
+**value-section** half of GAP 2: the geometric operator `A`'s right-hand side `−2·Ricci + DeTurck` is now a genuine
+continuous `BilinearFormBundle` section with **no** assumed Ricci-section hypothesis.
+
+**`contMDiff_zero_bilinearFormBundleSection_of_forall_localFrame`** (the frame-component criterion).  A tangent
+`BilinearFormBundle` section `s` is a continuous section iff, for every base point `x0` and every model-basis pair
+`(i,j)`, `x ↦ s x (localFrame b i x)(localFrame b j x)` is continuous on `(trivializationAt E TM x0).baseSet`.  Continuity
+is local: at each `x0` the section is read in preferred coordinates (`trivializationAt_bilinearFormBundle_apply_eq`), and
+the coordinate bilinear form `E →L E →L ℝ` is reconstructed from its finitely-many frame evaluations by the finite-dim
+helper **`continuousOn_clm_of_forall_apply_basis`** (`Module.Basis.constrL`, continuous because `ι → G` is
+finite-dimensional) applied twice, then transferred through `Bundle.contMDiffAt_section`.  This is the bridge from Step 2's
+frame continuity of `curvatureTensor` to Step 3's section continuity, avoiding the transported-instance fiber diamond.
+
+**`ricciCurvature_eq_sum_localFrame_coeff`** (the frame trace formula).  For `x ∈ baseSet`,
+`ricci x u w = ∑ₖ localFrame_coeff b k x (curvatureTensor x (localFrame b k x) u w)` — the frame trace of the curvature
+endomorphism against the induced dual coframe, via `LinearMap.trace_eq_matrix_trace` over `basisAt b hx` (trace is
+metric-independent, so any `RiemannianBundle` works) + `toMatrix` diagonal + `ricciEndomorphism_apply` and the section-free
+coframe identity `repr_basisAt_eq_localFrame_coeff` (from `localFrame_coeff_apply_of_mem_baseSet` at a pinned section).
+
+**`ricciBilinearFormSection` / `_apply` / `ricciBilinearFormSection_contMDiff_zero`.**  The linear-map-valued
+`ricciCurvature cov x : TM x →ₗ TM x →ₗ ℝ` is promoted fiberwise to `TM x →L TM x →L ℝ` by the finite-dim
+`LinearMap.toContinuousLinearMap` (no fiber-norm diamond — only `T2Space`/`FiniteDimensional` on the vector-bundle fiber),
+and proved a **continuous** section: the criterion reduces to `x ↦ ricci x (eᵢ x)(eⱼ x)`, the trace formula expands it into
+a finite sum, each summand is `curvatureTensor_contMDiffOn_frame_zero` (Step 2) fed through `contMDiffOn_localFrame_coeff`
+at `k = 0` (continuous coframe pairing).
+
+**`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero`** (the unconditional closure of the value-section half).  Feeds
+`rs := ricciBilinearFormSection (someContMDiffLeviCivitaConnection g t)` + its continuity to the previously-committed
+`exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`, with `rs x u v = ricciCurvature = intrinsicRicciTensor`
+by `rfl` under the metric's `RiemannianBundle` instance.  No assumed Ricci-section hypothesis remains.
+
+**NEXT — the `A`-side `picard` bounds (the still-open half of GAP 2).**  With the geometric `A`'s value section now
+continuous, the remaining obstruction is exhibiting the mild/regularised Ricci–DeTurck representative as a
+`ContinuousSectionSpace`-valued operator satisfying the coordinate `hlip`/`hcont`/centre bounds of
+`sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound` (bounded + Lipschitz-in-state).  A genuine
+piece: a boundedness or Lipschitz estimate for the geometric mild representative reusing the already-committed model K/Mc
+bound *shapes* but on the real operator.
+
+## Milestone (2026-07-05, later still) — the `picard` field reduced to *fiber-pointwise* operator estimates: fiber→section `hlip`/`hcont` bridges + fiber-pointwise Picard capstone (Item 3 / GAP 2 `picard` half)
+
+Three additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0` commits; full `lake build PoincareCurvature` green (2916 jobs).  This attacks the
+**still-open half of GAP 2** — the `picard` field — by collapsing its two section-space hypotheses (`hlip`/`hcont`) down to
+the *fiber-pointwise* estimates a regularised geometric Ricci–DeTurck operator naturally produces (its value's fiber at each
+base point is Lipschitz in the state / jointly continuous in `(t,x)`), so that the eventual operator only has to be checked
+one base point at a time rather than in the finite-cover Banach norm.
+
+**`lipschitzOnWith_of_forall_fiber_dist_le`** (ContinuousSection.lean, `TrivializationOpNorm` section).  From a uniform
+operator-norm bound `Lop` on the finite family of fiber trivialization maps (`hL : ∀ i x, ‖(et i).continuousLinearMapAt ℝ
+x‖ ≤ Lop`) and a **fiber-pointwise** Lipschitz-in-state estimate `dist ((A s) x) ((A t) x) ≤ C · dist s t` at every base
+point `x`, uniformly over the state set, concludes `LipschitzOnWith (Lop · C) A stateSet` in the transported finite-cover
+Banach norm.  Chains the committed `coord_dist_le_of_trivialization_opNorm_le` (coordinate readout ≤ `Lop` · fiber dist)
+with `lipschitzOnWith_of_forall_coord_dist_le`.  This is the `hlip` interface of the section-space Picard capstone.
+
+**`continuousOn_of_forall_coord_uncurry_continuousOn`** (ContinuousSection.lean).  From *coordinatewise joint (time–base)
+continuity* of each trivialization readout `(t,x) ↦ (et i).continuousLinearMapAt ℝ x ((f t) x)` on `timeSet ×ˢ Kc i`,
+concludes `ContinuousOn (fun t => f t) timeSet` in the finite-cover Banach norm.  The compact base pieces `Kc i` supply the
+uniform-in-`x` control: `ContinuousMap.continuousOn_of_continuousOn_uncurry` (no local-compactness needed) upgrades the
+pointwise joint continuity to `C(Kc i, F)`-valued continuity, then `continuousOn_of_forall_coord_continuousOn` assembles the
+finitely many readouts; the coordinate identification is the committed `coord_apply`.  This is the `hcont` interface.
+
+**`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_fiber_dist_le_continuousOn`**
+(SectionSpacePicard.lean).  The fiber-pointwise Picard capstone: from `hL` (trivialization op-norm bound), `hfiber`
+(fiber-pointwise `C`-Lipschitz-in-state over the ball, uniformly in `t ∈ [t₀,T₀]`), and `hcont` (coordinatewise joint
+`(t,x)`-continuity of `A·s` on `[t₀,T₀] ×ˢ Kc i`), chooses a forward endpoint and produces `IsPicardLindelof A ⟨t₀,_⟩ x0
+a 0 (Mc + Lop·C·a) (Lop·C)` — the chart's exact `picard` shape with Lipschitz constant `Lop·C`.  Feeds the two ContinuousSection
+bridges above into the section-level capstone
+`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn`.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  `picard`: the section-space Picard–Lindelöf field is now
+reducible to *purely fiber-pointwise* facts about the operator — an operator-norm bound on the (compactly supported) finite
+trivialization family (dischargeable for the real `BilinearFormBundle` via the committed
+`preferredBilinear_trivialization_opNorm_le_of_symmL_opNorm_le`, which reduces it to a `symmL` bound on the tangent
+trivialization), a fiber-pointwise Lipschitz-in-state estimate, and fiber-pointwise joint time–base continuity.  Combined with
+the already-CLOSED value-section regularity half of GAP 2, the only remaining `picard` obligation is the fiber-pointwise
+`hfiber`/`hcont` estimates for the actual mild/regularised operator — i.e. these must now be proved for one concrete operator,
+no longer packaged as abstract section-space hypotheses.
+
+**NEXT.**  Exhibit the mild/regularised Ricci–DeTurck section-space operator about `g₀` and prove its fiber-pointwise
+`hfiber` (Lipschitz-in-state at each base point) and `hcont` (joint `(t,x)`-continuity of each coordinate readout), feeding
+the new fiber-pointwise capstone directly to obtain the chart's `picard` field.  The trivialization op-norm `hL` is already a
+solved compactness/`symmL` quantity.
+
+## Milestone (2026-07-05, later still) — the `picard` field reduced to a *bounded-linear generator + source* (mild-operator) interface, endpoint-choosing AND fixed-window, run through to a state-constrained local solution (Item 3 / GAP 2 `picard` half)
+
+Four additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0` theorems (three commits); full `lake build PoincareCurvature`
+green (2916 jobs).  This reframes the still-open `picard` half of GAP 2 around the *honest structural
+shape* a regularised (mild) Ricci–DeTurck section-space operator has — a **bounded** linear generator
+plus a continuous inhomogeneity, `A t s = L t s + b t` with `L t : CSS →L[ℝ] CSS` — and discharges the
+entire section-space Picard/solution machinery from that shape, so the only remaining `picard` obligation
+is *exhibiting the regularised generator family `L`* (its op-norm bound + strong continuity) and the source
+`b`.  The affine structure makes every estimate exact with **no** bundle-distortion bookkeeping: the
+Lipschitz constant is read directly off the operator norm via `dist (L t s + b t)(L t s' + b t) =
+‖L t (s − s')‖ ≤ ‖L t‖·‖s − s'‖`.
+
+All four live in `AnalyticPDE/SectionSpacePicard.lean`
+(`namespace …ContinuousSectionSpace`):
+
+* **`exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source`** —
+  endpoint-choosing `picard`: from `‖L t‖ ≤ K` on `[t₀,T₀]`, strong time-continuity `t ↦ L t s`, and
+  continuous source `b`, chooses a forward `T > t₀` and yields `IsPicardLindelof (fun t s => L t s + b t)
+  ⟨t₀,_⟩ x0 a 0 (Mc + K·a) K` (the chart's exact `picard` shape).  Feeds the section-level LipschitzOnWith
+  capstone with the affine Lipschitz discharge + `ContinuousOn.add`.
+* **`exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_boundedLinear_generator_source`** —
+  runs the above through `IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset`
+  (needs `[CompleteSpace F]`, so `CSS` is Banach) with `closedBall x0 a ⊆ locus`, giving
+  `Nonempty (BanachEvolutionLocalSolutionIn (fun t s => L t s + b t) locus t₀ x0)` — the state-constrained
+  Banach evolution object a downstream `realization` decode consumes.
+* **`isPicardLindelof_continuousSectionSpace_of_lipschitzOnWith_continuousOn_centerBound`** — the
+  *fixed-window* (caller-supplied `[t₀,T]`) section-level capstone, the prescribed-endpoint complement of
+  the endpoint-choosing `…_of_lipschitzOnWith_continuousOn`: from section-norm `LipschitzOnWith K (A t)` on
+  the ball, section-norm time-continuity, a coordinate centre bound `Mc`, and the compatibility
+  `(Mc + K·a)·(T − t₀) ≤ a`, gives `IsPicardLindelof A ⟨t₀,_⟩ x0 a 0 (Mc + K·a) K`.  Reusable for the
+  *actual* geometric `A` (not just affine); discharges to
+  `isPicardLindelof_continuousSectionSpace_of_forall_coord_centerBound` via `coord_dist_le_dist` +
+  `continuousOn_coord_of_continuousOn`.  This is the shape the chart fixes (`t₀`, `T` are chart parameters).
+* **`isPicardLindelof_continuousSectionSpace_of_boundedLinear_generator_source_fixedWindow`** — the mild
+  affine specialization of the previous, `IsPicardLindelof (fun t s => L t s + b t) ⟨t₀,_⟩ x0 a 0 (Mc+K·a)
+  K` on a caller-supplied `[t₀,T]` — the `TimeDependentGeometricRicciDeTurckBanachChart.picard` field
+  *verbatim* (`L := Mc + K·a`, `Kpic := K`).
+
+**Fractional progress on `{A, picard, realization, encode}`.**  `picard`: the section-space Picard–Lindelöf
+field is now reducible, in **both** the endpoint-choosing and the chart-window-fixed forms, to *exhibiting a
+bounded linear generator family* `L : ℝ → (CSS →L[ℝ] CSS)` with a uniform operator-norm bound and strong
+time-continuity, plus a continuous source `b` and the (compactness-derivable) coordinate centre bound.  The
+whole Picard/solution stack downstream of the generator is now assembled and axiom-clean; the surviving
+`picard` obligation is purely *analytic*: build the regularised generator `L` (the bounded/mild form of the
+C⁰-unbounded 2nd-order Ricci–DeTurck operator) and its op-norm bound.  The **`geometric` field** of the chart
+(`A τ s x u v = intrinsicRicciDeTurckRHS …`) remains the faithfulness constraint tying this `A` to the actual
+RHS — the value-section regularity work (already CLOSED) is its content.
+
+**NEXT.**  Construct the regularised bounded generator `L t : CSS →L[ℝ] CSS` for the Ricci–DeTurck operator
+about `g₀` (e.g. a Yosida/heat-semigroup regularisation, or the bounded reaction/zeroth-order part from a
+continuous bundle endomorphism applied pointwise to a section), and prove its operator-norm bound + strong
+continuity, feeding `…_boundedLinear_generator_source_fixedWindow` to obtain the chart's `picard` field, and
+supply the `geometric` identification linking `A = fun t s => L t s + b t` to `intrinsicRicciDeTurckRHS`.
+
+## Milestone (2026-07-05, later still) — the missing `CSS →L[𝕜] CSS` constructor + first concrete bounded generator (Item 3 / GAP 2 `picard` half)
+
+Three additive, `#print axioms`-clean (`propext`/`Classical.choice`/`Quot.sound`), comment-stripped
+`scan cheats PoincareCurvature` `TOTAL 0` commits; full `lake build PoincareCurvature` green (2916 jobs).
+The previous milestone reduced `picard` to *exhibiting a bounded linear generator* `L : ℝ → (CSS →L[ℝ]
+CSS)` with an op-norm bound + strong time-continuity.  There was, however, **no constructor** for the
+type `CSS →L[𝕜] CSS` on the transported finite-cover section space — the object `L t` must inhabit.
+This milestone supplies it and a first concrete inhabitant.
+
+All in `VectorBundle/ContinuousSection.lean` (`namespace …ContinuousSectionSpace`, section
+`TrivializationOpNorm`):
+
+* **`mkContinuousOfForallCoordNormLe`** (+ `_apply`, `_norm_le`) — **the missing bounded-operator
+  constructor.**  From a `𝕜`-linear map `T : CSS →ₗ[𝕜] CSS` and a coordinatewise operator bound
+  `‖(coord (T s)).1 i x‖ ≤ C · ‖s‖`, produces `T.mkContinuous`-packaged `CSS →L[𝕜] CSS` with operator
+  norm `≤ C`.  The coordinate bound is pushed to the section-norm bound `‖T s‖ ≤ C · ‖s‖` by the
+  already-committed `norm_le_of_forall_coord_norm_le`; `LinearMap.mkContinuous`/`_norm_le` finish.  This
+  is exactly the constructor that turns *any* generator's fiber/coordinate operator estimate into the
+  `CSS →L[𝕜] CSS` object the section-space Picard `picard` field consumes as `L t`.
+* **`continuous_smul_section`** — reusable bundle fact: for continuous `φ : M → 𝕜` and a continuous
+  section `s`, the pointwise scalar multiple `x ↦ φ x • s x` is a continuous section.  Proved fibrewise
+  through `FiberBundle.continuousAt_totalSpace` + `Trivialization.coe_linearMapAt_of_mem` (the readout in
+  the canonical trivialization is `φ x • (e (T% s x)).2`).  The continuity input for zeroth-order
+  multiplication generators.
+* **`smulFieldLinearMap` / `smulField`** (+ `_apply`, `_norm_le`) — **the first concrete bounded
+  generator.**  For a continuous scalar field `φ : M → 𝕜` bounded by `C` on the finite cover,
+  `s ↦ (x ↦ φ x • s x)` is a genuine `CSS →L[𝕜] CSS` with operator norm `≤ C`, built through
+  `mkContinuousOfForallCoordNormLe` (coordinate readout `φ x • (coord s) i x`, bound from `‖φ x‖ ≤ C`
+  and `coord_norm_le_norm`).  This is a real zeroth-order inhabitant of the bounded linear generator
+  type — the reaction/conformal part shape — validating that the `picard` reduction to
+  `CSS →L[𝕜] CSS` is not vacuous.
+
+**Fractional progress on `{A, picard, realization, encode}`.**  `picard`: the `CSS →L[ℝ] CSS` generator
+type is now *constructible* — the missing constructor `mkContinuousOfForallCoordNormLe` exists and is
+exercised by a concrete generator (`smulField`).  The surviving `picard` obligation narrows to building
+the *time-dependent, regularised* Ricci–DeTurck generator `L t` (bounded reaction part + mild 2nd-order
+part) and its op-norm bound + strong time-continuity — the op-norm bound now discharges through
+`mkContinuousOfForallCoordNormLe` given a coordinate operator estimate.
+
+**NEXT.**  (1) Time-dependent generator: a strong-time-continuity lemma
+`∀ s, ContinuousOn (fun t => L t s) [t₀,T]` for a jointly-continuous time-dependent scalar/endomorphism
+field, via `continuousOn_of_forall_coord_uncurry_continuousOn` (watch the `↥(Kc i)` vs
+`↥(Kc i : Set M)` coercion).  (2) Generalise `continuous_smul_section`/`smulField` from `φ • id` to a
+continuous *bundle-endomorphism* field `Φ x : V x →L[𝕜] V x` (the true reaction-term shape).  (3) Feed a
+time-dependent generator + source `b` to `…_boundedLinear_generator_source_fixedWindow` to obtain the
+chart's `picard` field for a concrete operator; then the `geometric` realization.
