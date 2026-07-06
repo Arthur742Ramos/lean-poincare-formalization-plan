@@ -1247,6 +1247,59 @@ theorem norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le
   rw [hrw]
   exact add_le_add h₁ h₂
 
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **The coordinate Lipschitz bound for the frozen-coefficient DeTurck-correction reaction.**  The
+model-fibre readout of the two-sided DeTurck-correction derivation is Lipschitz in the fibre value
+with constant `2 · ‖inCoordinates … (P x)‖`: the difference of the readouts of the derivation at two
+states `s x`, `s' x` (with a *common* frozen endomorphism `P`) is bounded by `2 · ‖inCoordinates …
+(P x)‖` times the difference of the readouts of the two states.
+
+This is **exactly the fibre content of the section-space Picard `hlip` obligation** for the
+frozen-coefficient reaction operator: the bridge's Lipschitz hypothesis reads
+`dist (coord (A t s) i x) (coord (A t s') i x) ≤ K · dist s s'`, and since the continuous-section
+coordinate `coord σ i x` is definitionally the trivialization readout
+`(trivializationAt BilF BilW (x0 i) (TotalSpace.mk' BilF x (σ x))).2` (`coordContinuousMap_apply`)
+and `dist` in the model fibre is `‖· - ·‖`, this lemma supplies the pointwise constant `2 · ‖readout
+P‖` for the DeTurck reaction `A t s = (u, v) ↦ s x (P x u) v + s x u (P x v)`.  Everything stays in
+the clean model fibre `BilF = F →L[ℝ] F →L[ℝ] ℝ` / `F →L[ℝ] F`, so it **elaborates at the tangent
+bundle** `W := TangentSpace I`.  Proof: combine the two state readouts into the readout of their
+fibrewise difference (`trivializationAt_bilinearFormBundle_readout_sub`), use the additivity of the
+derivation in the fibre value (`bilinearComp` is linear in its first slot), and apply the derivation
+size bound `norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le` to the difference
+section. -/
+theorem norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_sub_le
+    (s s' : Π x : M, BilW x) (P : Π x : M, W x →L[ℝ] W x)
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+          ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+            + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)))).2
+        - (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+          ((s' x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+            + (s' x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)))).2‖
+      ≤ 2 * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+          * ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2
+              - (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s' x))).2‖ := by
+  have hlin : (s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+          + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)
+        - ((s' x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+          + (s' x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x))
+      = (s x - s' x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+          + (s x - s' x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x) := by
+    ext u v
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.sub_apply,
+      ContinuousLinearMap.bilinearComp_apply, ContinuousLinearMap.id_apply]
+    ring
+  rw [← trivializationAt_bilinearFormBundle_readout_sub (F := F) (W := W) x₀ x hx
+      ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+        + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x))
+      ((s' x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+        + (s' x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)),
+    hlin,
+    ← trivializationAt_bilinearFormBundle_readout_sub (F := F) (W := W) x₀ x hx (s x) (s' x)]
+  refine (norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le
+    (fun y => s y - s' y) P x₀ x hx).trans (le_of_eq ?_)
+  ring
+
 end BilinearConjugation
 
 section FiberwiseSymmetrization
