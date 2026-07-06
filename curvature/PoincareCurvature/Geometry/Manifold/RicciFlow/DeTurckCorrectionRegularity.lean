@@ -908,4 +908,83 @@ theorem exists_intrinsicRicciDeTurckRHS_continuousSectionSpace_symm
         intrinsicRicciDeTurckRHS_symm (I := I) (M := M) g background t x u v
     _ = rhs x v u := (hrhs_val x v u).symm
 
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The intrinsic Ricci–DeTurck RHS as a named section-space value.**  The `def`-level companion of
+`exists_intrinsicRicciDeTurckRHS_continuousSectionSpace`: for a metric family `g`, a background
+connection family whose time-`t` slice is a `C¹` covariant derivative, this is the geometric
+Ricci–DeTurck right-hand side realised as a genuine element of the transported finite-cover
+`ContinuousSectionSpace`.  Having a *named* section-space value (rather than a bare existential) is what
+the geometric chart operator `A` and the mild-affine source term `b` can reference directly; its
+defining pointwise identity is `intrinsicRicciDeTurckRHSSectionSpace_apply`. -/
+noncomputable def intrinsicRicciDeTurckRHSSectionSpace
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+      (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover :=
+  ⟨Classical.choose
+      (exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero g background t hbackground),
+    (Classical.choose_spec
+      (exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero g background t hbackground)).1.continuous⟩
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- The named section-space Ricci–DeTurck RHS value agrees pointwise with the intrinsic
+`intrinsicRicciDeTurckRHS`.  This is the defining identity that ties the section-space value to the
+geometric right-hand side (the chart's `geometric` field content). -/
+@[simp] theorem intrinsicRicciDeTurckRHSSectionSpace_apply
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g background t hbackground x u v
+      = intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v :=
+  (Classical.choose_spec
+    (exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero g background t hbackground)).2 x u v
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- The named section-space Ricci–DeTurck RHS value is pointwise symmetric (it lies in the pointwise
+symmetric locus), a direct consequence of `intrinsicRicciDeTurckRHS_symm`. -/
+theorem intrinsicRicciDeTurckRHSSectionSpace_symm
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g background t hbackground x u v
+      = intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover
+          g background t hbackground x v u := by
+  rw [intrinsicRicciDeTurckRHSSectionSpace_apply, intrinsicRicciDeTurckRHSSectionSpace_apply,
+    intrinsicRicciDeTurckRHS_symm]
+
 end RicciFlow
