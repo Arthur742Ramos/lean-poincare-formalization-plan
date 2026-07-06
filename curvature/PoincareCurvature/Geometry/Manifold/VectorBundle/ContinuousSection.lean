@@ -3082,6 +3082,44 @@ theorem endoField_norm_le
     ‖endoField (V := V) et Kc hKc Ko hKo hKoEq hcover hΦ C hC hbound‖ ≤ C :=
   mkContinuousOfForallCoordNormLe_norm_le _ C hC _
 
+/-- **Strong time-continuity of the fiberwise endomorphism generator.**  For a parametrised
+endomorphism family `Φ : X → Π x, V x →L[𝕜] V x` that is jointly continuous into the endomorphism
+(hom) bundle `(p, x) ↦ TotalSpace.mk' (F →L[𝕜] F) x (Φ p x)`, and any fixed section `s`, the section
+`p ↦ (x ↦ Φ p x (s x))` is continuous on any set `timeSet` in the finite-cover Banach norm.  This is
+exactly the strong time-continuity `hLc : ∀ s, ContinuousOn (fun t => (L t) s) [t₀, T]` that the
+affine section-space Picard–Lindelöf capstone consumes for a time-dependent endomorphism generator
+`L t = endoField (Φ t)` (whose value `(endoField (Φ t) …) s = (endoFieldLinearMap (Φ t) …) s`
+coincides with the map below).  Proof: `Continuous.clm_bundle_apply` (over the base projection
+`Prod.snd`) makes `(p, x) ↦ Φ p x (s x)` jointly continuous into the total space, which
+`continuousOn_of_continuous_totalSpace_uncurry` lifts to Banach-norm time-continuity. -/
+theorem endoFieldLinearMap_continuousOn
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {X : Type*} [TopologicalSpace X]
+    {Φ : X → Π x : M, V x →L[𝕜] V x}
+    (hΦ : ∀ p, Continuous
+      (fun x => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) x (Φ p x)))
+    (hΦjoint : Continuous
+      (fun p : X × M => TotalSpace.mk' (F →L[𝕜] F) (E := fun x => V x →L[𝕜] V x) p.2 (Φ p.1 p.2)))
+    (s : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (timeSet : Set X) :
+    ContinuousOn
+      (fun p => endoFieldLinearMap (V := V) et Kc hKc Ko hKo hKoEq hcover (hΦ p) s)
+      timeSet := by
+  refine continuousOn_of_continuous_totalSpace_uncurry
+    (𝕜 := 𝕜) (F := F) (V := V) (et := et) (Kc := Kc) (hKc := hKc)
+    (Ko := Ko) (hKo := hKo) (hKoEq := hKoEq) (hcover := hcover) ?_
+  have hv : Continuous (fun p : X × M => TotalSpace.mk' F p.2 (s p.2)) :=
+    (ContinuousSectionSpace.continuous s).comp continuous_snd
+  exact hΦjoint.clm_bundle_apply (b := Prod.snd) hv
+
 end TrivializationOpNorm
 
 end ContinuousSectionSpace
