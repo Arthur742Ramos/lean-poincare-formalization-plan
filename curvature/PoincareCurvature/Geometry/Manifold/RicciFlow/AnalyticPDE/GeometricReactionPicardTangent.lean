@@ -178,4 +178,50 @@ theorem deTurckReactionSectionMap_coord_dist_le_inCoordinates
       (y := (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
         (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover s').1 i x)]
 
+/-- **`IsPicardLindelof` for the frozen-coefficient geometric DeTurck reaction operator on the
+tangent-bundle continuous section space.**  Given a uniform bound `Kp` on the endomorphism coordinate
+readout `‖inCoordinates E TM E TM (xc i) x (xc i) x (P x)‖` over the finite compact cover, the
+time-independent (frozen) reaction operator `t ↦ deTurckReactionSectionMap … hP` satisfies
+`IsPicardLindelof` about any initial section `σ₀`, with radius `a`, Lipschitz constant `2·Kp`, and an
+auto-chosen forward endpoint `T ∈ (t₀, T₀]` and centre size `Mc`.  This is the concrete tangent-bundle
+chart operator's `picard` datum (Path B, no seminormed-fibre diamond): its `hlip` field is the just-proved
+`deTurckReactionSectionMap_coord_dist_le_inCoordinates` (with `K := 2·Kp`, the uniform bound feeding each
+per-point `‖inCoord (P x)‖ ≤ Kp`), and its `hcont` field is `continuousOn_const` (the operator is
+constant in time, so its coordinate readouts are trivially time-continuous).  Feeding the affine
+`A t s = deTurckReactionSectionMap ∇W s + (-2)•Ric` source and identifying `P := ∇W` yields the chart's
+`picard`; the uniform `Kp` is supplied by compactness of the cover and continuity of the frozen
+coefficient's coordinate readout. -/
+theorem deTurckReactionSectionMap_exists_isPicardLindelof_of_uniform_inCoordinates
+    {κ : Type*} [Finite κ]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a Kp : ℝ≥0) (ha : 0 < (a : ℝ))
+    (hKpU : ∀ i (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (xc i) x (xc i) x (P x)‖ ≤ (Kp : ℝ)) :
+    ∃ (T : ℝ) (hT : t₀ < T) (Mc : ℝ≥0),
+      IsPicardLindelof
+        (fun _ : ℝ => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover hP)
+        (tmin := t₀) (tmax := T) ⟨t₀, ⟨le_rfl, hT.le⟩⟩ σ0 a 0 (Mc + (2 * Kp) * a) (2 * Kp) := by
+  refine exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn_topFibre
+    (fun _ : ℝ => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+      Kc hKc Ko hKo hKoEq hcover hP)
+    σ0 t₀ T₀ hT₀ a (2 * Kp) ha ?_ ?_
+  · intro t _ht s _hs s' _hs' i x
+    have h := deTurckReactionSectionMap_coord_dist_le_inCoordinates xc Kc hKc Ko hKo hKoEq hcover hP
+      s s' i x (Kp : ℝ) (hKpU i x)
+    calc dist _ _ ≤ 2 * (Kp : ℝ) * dist s s' := h
+      _ = ((2 * Kp : ℝ≥0) : ℝ) * dist s s' := by push_cast; ring
+  · intro s _hs i
+    exact continuousOn_const
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
