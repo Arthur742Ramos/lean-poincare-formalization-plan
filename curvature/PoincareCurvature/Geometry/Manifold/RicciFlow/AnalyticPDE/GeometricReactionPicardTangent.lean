@@ -408,4 +408,45 @@ theorem deTurckReactionSectionMap_add_source_exists_isPicardLindelof
       (fun i x => by rw [hcast]; exact hKpb i x)
   exact ⟨Kp.toNNReal, T, hT, Mc, hPL⟩
 
+/-- **`BanachEvolutionLocalSolutionIn` for the affine geometric DeTurck operator (frozen reaction +
+fixed source) at `TM`.**  Feeding the unconditional affine `IsPicardLindelof`
+`deTurckReactionSectionMap_add_source_exists_isPicardLindelof` to the closed-ball a-posteriori bridge
+`IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset`, the affine operator
+`A t s = deTurckReactionSectionMap … hP s + b` — the frozen DeTurck reaction plus a fixed source `b` —
+admits a genuine `BanachEvolutionLocalSolutionIn` in any state locus containing the Picard closed ball
+`closedBall σ₀ a`, on a forward window `[t₀, T]` with `T ∈ (t₀, T₀]` auto-chosen.  The tangent-bundle
+section space is complete (`instCompleteSpace`, since the model fibre `BilF = E →L[ℝ] E →L[ℝ] ℝ` is
+complete), so the closed-ball bridge applies.  This is precisely the state-constrained Banach evolution
+solution the downstream `realization` decode into a genuine intrinsic De Turck local solution consumes:
+taking `b := intrinsicRicciFlowRHSSectionSpace g₀` (the `(-2)•Ric` principal Ricci source), `P := ∇W`
+(the frozen DeTurck coefficient), and `locus :=` the positive-definite / Riemannian-metric cone
+(containing the ball for suitably small `a`) yields the chart's `realization` input. -/
+theorem deTurckReactionSectionMap_add_source_nonempty_banachEvolutionLocalSolutionIn
+    {κ : Type*} [Finite κ]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a : ℝ≥0) (ha : 0 < (a : ℝ))
+    (locus : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover))
+    (hsub : Metric.closedBall σ0 (a : ℝ) ⊆ locus) :
+    ∃ (T : ℝ) (_ : t₀ < T),
+      Nonempty (RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn
+        (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover hP s + b) locus t₀ σ0) := by
+  obtain ⟨Kp, T, hT, Mc, hPL⟩ := deTurckReactionSectionMap_add_source_exists_isPicardLindelof
+    xc Kc hKc Ko hKo hKoEq hcover hP b σ0 t₀ T₀ hT₀ a ha
+  exact ⟨T, hT,
+    IsPicardLindelof.exists_banachEvolutionLocalSolutionIn_of_closedBall_subset hT hPL hsub⟩
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
