@@ -1214,4 +1214,61 @@ theorem intrinsicRicciDeTurckRHSSectionSpace_eq_intrinsicRicciFlowRHSSectionSpac
   rw [intrinsicRicciDeTurckRHSSectionSpace_apply, intrinsicRicciFlowRHSSectionSpace_apply,
     intrinsicDeTurckCorrectionSectionSpace_apply, intrinsicRicciDeTurckRHS_apply]
 
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The intrinsic Ricci-flow principal source value is pointwise symmetric.**  The named
+second-order source value `b = (-2)•Ric` of the affine chart split `A τ s = reaction s + b` lies in
+the pointwise symmetric locus (the intrinsic Ricci tensor is symmetric, so its `(-2)`-multiple is too),
+a direct consequence of `intrinsicRicciFlowRHS_symm`.  Unlike the full-RHS symmetry
+`intrinsicRicciDeTurckRHSSectionSpace_symm` it needs **no** background-connection hypothesis (the
+source carries none).  This is the symmetric-locus content of the chart split's principal source. -/
+theorem intrinsicRicciFlowRHSSectionSpace_symm
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ)
+    (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g t x u v
+      = intrinsicRicciFlowRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g t x v u := by
+  rw [intrinsicRicciFlowRHSSectionSpace_apply, intrinsicRicciFlowRHSSectionSpace_apply]
+  exact intrinsicRicciFlowRHS_symm (I := I) (M := M) g t x u v
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The intrinsic DeTurck correction (reaction) value is pointwise symmetric.**  The named
+zeroth-order reaction value of the affine chart split lies in the pointwise symmetric locus,
+unconditionally (both derivation slots read out the metric-symmetric inner product), via
+`intrinsicDeTurckCorrection_symm`.  This is the symmetric-locus content of the chart split's reaction
+value; together with `intrinsicRicciFlowRHSSectionSpace_symm` it certifies that both named summands of
+the geometric Ricci–DeTurck RHS lie in the symmetric locus. -/
+theorem intrinsicDeTurckCorrectionSectionSpace_symm
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) (u v : TM x) :
+    intrinsicDeTurckCorrectionSectionSpace et Kc hKc Ko hKo hKoEq hcover
+        g background t hbackground x u v
+      = intrinsicDeTurckCorrectionSectionSpace et Kc hKc Ko hKo hKoEq hcover
+          g background t hbackground x v u := by
+  rw [intrinsicDeTurckCorrectionSectionSpace_apply, intrinsicDeTurckCorrectionSectionSpace_apply]
+  exact intrinsicDeTurckCorrection_symm (I := I) (M := M) g background t x u v
+
 end RicciFlow
