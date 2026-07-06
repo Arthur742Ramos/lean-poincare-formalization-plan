@@ -4794,6 +4794,59 @@ theorem bilinearDerivationFieldLinearMap_coord_dist_le
   refine mul_le_mul (mul_le_mul_of_nonneg_left (hKp i x) (by norm_num)) hcoord
     (norm_nonneg _) (mul_nonneg (by norm_num) hKp0)
 
+/-- **The section-space Picard `hcenter` coordinate-norm bound for the frozen-coefficient
+DeTurck-correction reaction, at the canonical bilinear-form trivialization family.**  For the plain
+operator `bilinearDerivationFieldLinearMap`, the section-space coordinate norm of the reaction applied
+to a section `σ` is controlled by `2·Kp·‖σ‖`, where `Kp` uniformly bounds the model-fibre endomorphism
+readout `‖inCoordinates F W F W (x0 i) x (x0 i) x (P x)‖` over the finite cover.  Applied at the
+initial-metric section `σ = x0`, this is exactly the `hcenter` datum `‖(coord (A t x0)) i x‖ ≤ Mc`
+(with `Mc := 2·Kp·‖x0‖`) that the section-space Picard bridge
+`sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound` consumes for the
+reaction summand.  Companion of `bilinearDerivationFieldLinearMap_coord_dist_le`: same route through
+`bilinearFormBundle_coord_eq_trivializationAt_readout` and the clean-model-fibre size bound
+`norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le`, closing with
+`coord_norm_le_norm`. -/
+theorem bilinearDerivationFieldLinearMap_coord_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (Kp : ℝ)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates F W F W (x0 i) x.1 (x0 i) x.1 (P x.1)‖ ≤ Kp)
+    (σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    ‖(equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP σ)).1 i x‖
+      ≤ 2 * Kp * ‖σ‖ := by
+  have hxW : x.1 ∈ (trivializationAt F W (x0 i)).baseSet := by simpa using hKc i x.2
+  have hKp0 : (0 : ℝ) ≤ Kp := le_trans (norm_nonneg _) (hKp i x)
+  rw [bilinearFormBundle_coord_eq_trivializationAt_readout x0 Kc hKc Ko hKo hKoEq hcover _ i x,
+    bilinearDerivationFieldLinearMap_apply]
+  refine (_root_.Bundle.norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le
+      (fun y => σ y) P (x0 i) x.1 hxW).trans ?_
+  have hσ : ‖(trivializationAt BilF BilW (x0 i)
+        (_root_.Bundle.TotalSpace.mk' BilF x.1 (σ x.1))).2‖ ≤ ‖σ‖ := by
+    rw [← bilinearFormBundle_coord_eq_trivializationAt_readout x0 Kc hKc Ko hKo hKoEq hcover σ i x]
+    exact coord_norm_le_norm σ i x
+  calc 2 * ‖(trivializationAt BilF BilW (x0 i)
+          (_root_.Bundle.TotalSpace.mk' BilF x.1 (σ x.1))).2‖
+        * ‖ContinuousLinearMap.inCoordinates F W F W (x0 i) x.1 (x0 i) x.1 (P x.1)‖
+      ≤ 2 * ‖σ‖ * Kp := by
+        refine mul_le_mul (mul_le_mul_of_nonneg_left hσ (by norm_num)) (hKp i x)
+          (norm_nonneg _) (by positivity)
+    _ = 2 * Kp * ‖σ‖ := by ring
+
 end PreferredBilinearNormControl
 
 end ContinuousSectionSpace
