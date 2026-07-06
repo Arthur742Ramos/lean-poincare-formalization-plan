@@ -1172,4 +1172,48 @@ theorem exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_endoFiel
         hΦjoint s (Set.Icc t₀ T₀))
     hb hsub
 
+/-- **Autonomous (frozen-coefficient) specialization.**  When the reaction endomorphism is
+*time-independent* — a single continuous endomorphism-bundle section `Φ₀ : Π x, V x →L[ℝ] V x` — the
+joint `(t, x)`-continuity hypothesis is free (`Φ₀ ∘ snd`), so the whole endomorphism-generator route
+collapses to a single spatial continuity input.  From `Φ₀` continuous into the endomorphism (hom)
+bundle with uniform trivialization-distorted fiber bound `K`, a continuous source `b`, and the
+containment `closedBall x0 a ⊆ locus`, this produces the state-constrained Banach local solution of the
+autonomous affine operator `A t s = (x ↦ Φ₀ x (s x)) + b t` — precisely the shape the first geometric
+instantiation (a frozen background metric `g₀`, whose zeroth-order reaction coefficient does not depend
+on time) supplies. -/
+theorem exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_endoField_source_const
+    {M : Type*} [TopologicalSpace M]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+    {V : M → Type*} [TopologicalSpace (Bundle.TotalSpace F V)]
+    [∀ x, SeminormedAddCommGroup (V x)] [∀ x, NormedSpace ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V]
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Bundle.Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {Φ₀ : ∀ x : M, V x →L[ℝ] V x}
+    (hΦ₀ : Continuous
+      (fun x => Bundle.TotalSpace.mk' (F →L[ℝ] F) (E := fun x => V x →L[ℝ] V x) x (Φ₀ x)))
+    (b : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (x0 : ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover)
+    (locus : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover))
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a K : ℝ≥0) (ha : 0 < (a : ℝ))
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖Φ₀ x.1‖ * ‖(et i).symmL ℝ x.1‖ ≤ (K : ℝ))
+    (hb : ContinuousOn b (Set.Icc t₀ T₀))
+    (hsub : Metric.closedBall x0 (a : ℝ) ⊆ locus) :
+    Nonempty (BanachEvolutionLocalSolutionIn
+      (fun t s =>
+        (endoField (V := V) et Kc hKc Ko hKo hKoEq hcover hΦ₀ (K : ℝ) K.coe_nonneg hbound) s + b t)
+      locus t₀ x0) :=
+  exists_banachEvolutionLocalSolutionIn_continuousSectionSpace_of_endoField_source
+    (Φ := fun _ => Φ₀) (fun _ => hΦ₀) (hΦ₀.comp continuous_snd)
+    b x0 locus t₀ T₀ hT₀ a K ha (fun _ i x => hbound i x) hb hsub
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
