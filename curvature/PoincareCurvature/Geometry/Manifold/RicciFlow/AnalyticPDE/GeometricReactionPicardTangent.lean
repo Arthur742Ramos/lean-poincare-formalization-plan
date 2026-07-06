@@ -314,4 +314,98 @@ theorem deTurckReactionSectionMap_exists_isPicardLindelof
     (fun i x => by rw [hcast]; exact hKpb i x)
   exact ⟨Kp.toNNReal, T, hT, Mc, hPL⟩
 
+/-- **`IsPicardLindelof` for the affine geometric DeTurck operator (frozen reaction + fixed source) on
+the tangent-bundle section space, conditional on a uniform inCoordinates bound.**  Given a uniform bound
+`Kp` on the endomorphism coordinate readout `‖inCoordinates E TM E TM (xc i) x (xc i) x (P x)‖` over the
+finite compact cover, the affine operator `A t s = deTurckReactionSectionMap … hP s + b` — the frozen
+DeTurck reaction plus a FIXED source section `b` (typically the `(-2)•Ric` principal Ricci source frozen
+at `g₀`, `b := intrinsicRicciFlowRHSSectionSpace g₀`) — satisfies `IsPicardLindelof` about any initial
+section `σ₀`, with radius `a`, Lipschitz constant `2·Kp`, and an auto-chosen forward endpoint
+`T ∈ (t₀, T₀]` and centre size `Mc`.  The affine part is DIAGNOSTIC-FREE for the Lipschitz bound: the
+fixed source `b` contributes the SAME coordinate summand to `A t s` and `A t s'`, so it cancels in the
+coordinate distance (`coord_add_apply_topFibre` then `dist_add_right`), leaving the frozen reaction's
+`hlip` bound `deTurckReactionSectionMap_coord_dist_le_inCoordinates` unchanged (constant `2·Kp`).  The
+`hcont` field is again `continuousOn_const` (both summands are frozen in time), and the centre size `Mc`
+is derived internally by the bridge (absorbing `‖coord b‖`).  This is the affine chart operator's
+`picard` datum on the Path-B tangent-bundle section space (no seminormed-fibre diamond). -/
+theorem deTurckReactionSectionMap_add_source_exists_isPicardLindelof_of_uniform_inCoordinates
+    {κ : Type*} [Finite κ]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a Kp : ℝ≥0) (ha : 0 < (a : ℝ))
+    (hKpU : ∀ i (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (xc i) x (xc i) x (P x)‖ ≤ (Kp : ℝ)) :
+    ∃ (T : ℝ) (hT : t₀ < T) (Mc : ℝ≥0),
+      IsPicardLindelof
+        (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover hP s + b)
+        (tmin := t₀) (tmax := T) ⟨t₀, ⟨le_rfl, hT.le⟩⟩ σ0 a 0 (Mc + (2 * Kp) * a) (2 * Kp) := by
+  refine exists_forwardTime_isPicardLindelof_continuousSectionSpace_of_forall_coord_continuousOn_topFibre
+    (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+      Kc hKc Ko hKo hKoEq hcover hP s + b)
+    σ0 t₀ T₀ hT₀ a (2 * Kp) ha ?_ ?_
+  · intro t _ht s _hs s' _hs' i x
+    simp only [coord_add_apply_topFibre, dist_add_right]
+    have h := deTurckReactionSectionMap_coord_dist_le_inCoordinates xc Kc hKc Ko hKo hKoEq hcover hP
+      s s' i x (Kp : ℝ) (hKpU i x)
+    calc dist _ _ ≤ 2 * (Kp : ℝ) * dist s s' := h
+      _ = ((2 * Kp : ℝ≥0) : ℝ) * dist s s' := by push_cast; ring
+  · intro s _hs i
+    exact continuousOn_const
+
+/-- **Unconditional `IsPicardLindelof` for the affine geometric DeTurck operator (frozen reaction +
+fixed source) at `TM`.**  Combining the uniform inCoordinates bound `exists_uniform_inCoord_bound`
+(which supplies the uniform Lipschitz constant `Kp` by compactness of the finite cover + continuity of
+the frozen coefficient `P`) with the conditional affine construction
+`deTurckReactionSectionMap_add_source_exists_isPicardLindelof_of_uniform_inCoordinates`, the affine
+operator `A t s = deTurckReactionSectionMap … hP s + b` — frozen reaction plus a FIXED source `b` —
+satisfies `IsPicardLindelof` about any initial section `σ₀` with NO uniform-`Kp` hypothesis, only
+continuity of `P` and the compact cover.  This is the full frozen chart operator's `picard` datum:
+feeding `b := intrinsicRicciFlowRHSSectionSpace g₀` (the `(-2)•Ric` principal Ricci source) and
+`P := ∇W` (the frozen DeTurck coefficient) yields the concrete Ricci–DeTurck chart's `picard`, whose
+Banach evolution solution decodes to `RicciDeTurckChartClosureData.realization`. -/
+theorem deTurckReactionSectionMap_add_source_exists_isPicardLindelof
+    {κ : Type*} [Finite κ]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a : ℝ≥0) (ha : 0 < (a : ℝ)) :
+    ∃ (Kp : ℝ≥0) (T : ℝ) (hT : t₀ < T) (Mc : ℝ≥0),
+      IsPicardLindelof
+        (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover hP s + b)
+        (tmin := t₀) (tmax := T) ⟨t₀, ⟨le_rfl, hT.le⟩⟩ σ0 a 0 (Mc + (2 * Kp) * a) (2 * Kp) := by
+  have hKcTM : ∀ i, (Kc i : Set M) ⊆ (trivializationAt (E →L[ℝ] E) THom (xc i)).baseSet := by
+    intro i x hx
+    have hxi := hKc i hx
+    simpa using hxi
+  obtain ⟨Kp, hKp0, hKpb⟩ := exists_uniform_inCoord_bound xc Kc hKcTM hP
+  have hcast : ((Kp.toNNReal : ℝ≥0) : ℝ) = Kp := Real.coe_toNNReal Kp hKp0
+  obtain ⟨T, hT, Mc, hPL⟩ :=
+    deTurckReactionSectionMap_add_source_exists_isPicardLindelof_of_uniform_inCoordinates
+      xc Kc hKc Ko hKo hKoEq hcover hP b σ0 t₀ T₀ hT₀ a Kp.toNNReal ha
+      (fun i x => by rw [hcast]; exact hKpb i x)
+  exact ⟨Kp.toNNReal, T, hT, Mc, hPL⟩
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace

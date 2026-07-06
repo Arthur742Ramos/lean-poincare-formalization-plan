@@ -3646,6 +3646,53 @@ theorem coord_norm_le_norm_topFibre
   rw [coord_zero_apply_topFibre, dist_zero_right, dist_zero_right] at h
   exact h
 
+/-- **Topological-fibre version of `coord_add_apply`.**  The compact coordinate readout is additive:
+`(coord (s + t)).1 i x = (coord s).1 i x + (coord t).1 i x`, stated with the fibre topology as an
+explicit `[∀ x, TopologicalSpace (V x)]` binder (instead of derived from a
+`SeminormedAddCommGroup (V x)`).  The transport `toCompatibleCoordFamilySubmoduleContinuousLinearMap`
+is a continuous *linear* map (built at the section-space Banach level, never touching a fibre norm),
+so it sends `s + t` to `equiv s + equiv t`, and the coordinate/point projections of a sum coordinate
+family are pointwise sums.  This is the additivity handoff used to reduce the coordinate estimates of
+an *affine* section-space operator `A t s = L s + b` (a linear/reaction generator plus a fixed source)
+to those of its non-affine part: the fixed source `b` contributes the same coordinate summand to
+`A t s` and `A t s'`, which cancels in the coordinate distance (`dist_add_right`).  This is the
+fibre-topology-native companion the geometric Ricci–DeTurck chart operator consumes, since its
+`BilinearFormBundle` hom fibre topology defeats the seminormed-fibre `coord_add_apply`. -/
+theorem coord_add_apply_topFibre
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    (s t : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover) (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule
+      (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (s + t)).1 i x
+      = (equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x
+        + (equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t).1 i x := by
+  have he :
+      (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (s + t))
+      = (equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s)
+        + (equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover t) := by
+    rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover,
+      ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover,
+      ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover]
+    exact map_add _ s t
+  rw [he]
+  simp only [AddMemClass.coe_add, Pi.add_apply, ContinuousMap.add_apply]
+
 end TopologicalFibreCoordControl
 
 end ContinuousSectionSpace
