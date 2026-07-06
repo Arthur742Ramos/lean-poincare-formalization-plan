@@ -212,4 +212,45 @@ theorem intrinsicRicciDeTurckRHSSectionSpace_eq_intrinsicRicciFlowRHS_add_metric
   exact intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_add_metricSection_deTurckDerivation
     et Kc hKc Ko hKo hKoEq hcover g background t sMetric hsMetric x u v
 
+
+/-- **The tangent-bundle DeTurck reaction operator, evaluated at the metric section with the frozen
+DeTurck coefficient `∇W`, is the geometric DeTurck correction.**  Feeding the frozen coefficient
+`P := ∇W = (chosenLeviCivitaFamily g t) (intrinsicDeTurckVectorField g background t)` (continuous by
+`intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`) and the metric section
+`⟨(g t).toSection, (g t).continuous_toSection⟩` to the fiber-norm-free tangent-bundle reaction operator
+`deTurckReactionSectionMap` reproduces, at every base point and tangent pair, the geometric intrinsic
+`intrinsicDeTurckCorrection`.  The operator's symmetrized fiber value `s(∇W u, v) + s(∇W v, u)` matches
+the DeTurck correction `s(∇W u, v) + s(u, ∇W v)` on the *symmetric* metric section via metric symmetry
+(`ContMDiffRiemannianMetric.symm`).  This identifies the concrete tangent-bundle chart reaction operator
+with the DeTurck half of the Ricci–DeTurck chart operator `A`'s `geometric` field on the metric
+state. -/
+theorem deTurckReactionSectionMap_metricSection_apply_eq_intrinsicDeTurckCorrection
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) (u v : TM x) :
+    deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover
+        (intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+          (I := I) (M := M) g background t hbackground).continuous
+        ⟨(g t).toSection, (g t).continuous_toSection⟩ x u v
+      = intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v := by
+  rw [deTurckReactionSectionMap_apply]
+  have h := metricToSection_deTurckDerivation_eq_intrinsicDeTurckCorrectionSection
+    et Kc hKc Ko hKo hKoEq hcover g background t x u v
+  rw [intrinsicDeTurckCorrectionSection_apply] at h
+  rw [← h]
+  congr 1
+  simp only [ContMDiffRiemannianMetric.toSection_apply]
+  exact (g t).symm x _ u
+
 end RicciFlow
