@@ -3440,6 +3440,46 @@ theorem continuousOn_of_forall_coord_continuousOn_topFibre
   rw [hInd.continuousOn_iff, continuousOn_pi]
   exact hcoord
 
+/-- **Topological-fibre version of `exists_forall_mem_Icc_coord_norm_le_of_continuousOn`.**
+Identical statement and proof, with the fibre topology taken as an explicit
+`[∀ x, TopologicalSpace (V x)]` binder.  Each compact coordinate readout is bounded on the compact
+time interval by its sup-norm and the finite index family of these bounds is bounded above — a fact
+at the Banach `F`-norm level that never touches a fibre norm.  This supplies the centre-readout size
+constant the forward-time section-space Picard endpoint chooser consumes. -/
+theorem exists_forall_mem_Icc_coord_norm_le_of_continuousOn_topFibre
+    {κ : Type*} [Finite κ] [T2Space M]
+    {et : κ → Trivialization F (TotalSpace.proj : TotalSpace F V → M)}
+    [∀ i, MemTrivializationAtlas (et i)]
+    {Kc : κ → TopologicalSpace.Compacts M}
+    {hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet}
+    {Ko : κ → κ → TopologicalSpace.Compacts M}
+    {hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M)}
+    {hcover : (⋃ i, (Kc i : Set M)) = Set.univ}
+    {f : ℝ → ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover}
+    {t₀ T : ℝ}
+    (hcont : ∀ i, ContinuousOn
+      (fun t => (equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i)
+      (Set.Icc t₀ T)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc t₀ T, ∀ i (x : Kc i),
+      ‖(equivCompatibleCoordFamilySubmodule
+        (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i x‖ ≤ C := by
+  classical
+  choose C hC using fun i => isCompact_Icc.exists_bound_of_continuousOn (hcont i)
+  obtain ⟨D, hD⟩ := (Set.finite_range C).bddAbove
+  refine ⟨max D 0, le_max_right _ _, fun t ht i x => ?_⟩
+  calc
+    ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i x‖
+        ≤ ‖(equivCompatibleCoordFamilySubmodule
+          (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover (f t)).1 i‖ :=
+      ContinuousMap.norm_coe_le_norm _ x
+    _ ≤ C i := hC i t ht
+    _ ≤ D := hD (Set.mem_range_self i)
+    _ ≤ max D 0 := le_max_left _ _
+
 end TopologicalFibreCoordControl
 
 end ContinuousSectionSpace
