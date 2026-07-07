@@ -78,6 +78,30 @@ theorem fundamentalSolution_const_eq_exp {A₀ : E →L[ℝ] E} {K : ℝ≥0}
   rw [h0]
   simp [NormedSpace.exp_zero]
 
+/-- **The operator-exponential map is smooth.**  For a fixed scalar `s`, the map
+`A₀ ↦ exp (s • A₀)` on `E →L[ℝ] E` is `ContDiff ℝ n` for every `n`.  Immediate from the analyticity of
+`NormedSpace.exp` on the (complete) operator Banach algebra (`NormedSpace.exp_analytic`, whose power
+series has infinite radius) composed with the smooth scalar rescaling `A₀ ↦ s • A₀`. -/
+theorem contDiff_exp_smul_const (s : ℝ) {n : WithTop ℕ∞} :
+    ContDiff ℝ n (fun A₀ : E →L[ℝ] E => NormedSpace.exp (s • A₀)) := by
+  have hana : AnalyticOnNhd ℝ (NormedSpace.exp : (E →L[ℝ] E) → (E →L[ℝ] E)) Set.univ :=
+    fun x _ => NormedSpace.exp_analytic x
+  exact ContDiff.comp hana.contDiff (contDiff_const_smul s)
+
+/-- **Smooth dependence of the autonomous resolvent on a parameter.**  If a family of autonomous
+generators `A : X → (E →L[ℝ] E)` over a normed parameter space `X` is `C^n`, then the autonomous
+resolvent `x ↦ exp (s • A x)` is `C^n`.  This transports smooth dependence of the generator to smooth
+dependence of the resolvent — the parameter-smoothness form that, via `fundamentalSolution_const_eq_exp`,
+turns spatial (`x`-dependent) smoothness of a frozen bounded-linear generator into spatial smoothness of
+its Banach evolution, with no `IsIntegralCurve` bookkeeping. -/
+theorem contDiff_exp_smul_of_contDiff
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    {A : X → (E →L[ℝ] E)} {n : WithTop ℕ∞} (hA : ContDiff ℝ n A) (s : ℝ) :
+    ContDiff ℝ n (fun x => NormedSpace.exp (s • A x)) := by
+  have hana : AnalyticOnNhd ℝ (NormedSpace.exp : (E →L[ℝ] E) → (E →L[ℝ] E)) Set.univ :=
+    fun x _ => NormedSpace.exp_analytic x
+  exact ContDiff.comp hana.contDiff (ContDiff.const_smul s hA)
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
