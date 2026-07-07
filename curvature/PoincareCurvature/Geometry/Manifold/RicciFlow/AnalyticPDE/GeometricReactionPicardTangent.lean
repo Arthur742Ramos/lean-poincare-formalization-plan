@@ -797,4 +797,108 @@ theorem deTurckFrozenGeometric_exists_isPicardLindelof
       Kc hKc Ko hKo hKoEq hcover g t)
     σ0 t₀ T₀ hT₀ a ha
 
+/-- **The tangent-bundle DeTurck reaction operator lands in the pointwise symmetric locus.**  By
+`deTurckReactionSectionMap_apply`, `deTurckReactionSectionMap … hP s x u v = s x (P x u) v +
+s x (P x v) u` is manifestly symmetric in `(u, v)` (the two summands merely swap), so the reaction
+operator maps *every* section `s` — symmetric or not — into the symmetric locus.  This is the
+operator-level (set-membership) companion of the pointwise `intrinsicDeTurckCorrectionSectionSpace_symm`
+value symmetry: it is exactly the datum certifying that the reaction summand of the affine chart split
+`A τ s = reaction s + b` keeps the Banach velocity in `symmetricLocus`. -/
+theorem deTurckReactionSectionMap_mem_symmetricLocus
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization BilF
+      (TotalSpace.proj : TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    deTurckReactionSectionMap et Kc hKc Ko hKo hKoEq hcover hP s
+      ∈ symmetricLocus (M := M) (F := E) (W := TM) et Kc hKc Ko hKo hKoEq hcover := by
+  intro x u v
+  simp only [deTurckReactionSectionMap_apply]
+  ring
+
+/-- **The affine DeTurck reaction operator preserves the symmetric locus.**  Adding a symmetric
+source `b` to the reaction value keeps the result symmetric: `deTurckReactionSectionMap … hP s + b`
+lies in the pointwise symmetric locus whenever `b` does.  This is the operator-level statement for the
+whole affine chart split `A τ s = reaction s + b`; combined with symmetry of the concrete `(-2)•Ric`
+source it certifies the geometric Ricci–DeTurck chart velocity is symmetric. -/
+theorem deTurckReactionSectionMap_add_mem_symmetricLocus
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (et : κ → Trivialization BilF
+      (TotalSpace.proj : TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hb : b ∈ symmetricLocus (M := M) (F := E) (W := TM) et Kc hKc Ko hKo hKoEq hcover)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    (deTurckReactionSectionMap et Kc hKc Ko hKo hKoEq hcover hP s + b)
+      ∈ symmetricLocus (M := M) (F := E) (W := TM) et Kc hKc Ko hKo hKoEq hcover := by
+  have hr := deTurckReactionSectionMap_mem_symmetricLocus
+    et Kc hKc Ko hKo hKoEq hcover hP s
+  rw [← mem_symmetricSectionSubmodule_iff x0 et het Kc hKc Ko hKo hKoEq hcover] at hr hb ⊢
+  exact add_mem hr hb
+
+/-- **The concrete geometric frozen Ricci–DeTurck chart operator lands in the symmetric locus.**
+For every section `s`, the frozen geometric operator value
+`A s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t` — the operator whose
+`IsPicardLindelof` is `deTurckFrozenGeometric_exists_isPicardLindelof` — lies in the pointwise
+symmetric locus.  The `∇W` reaction summand is symmetric unconditionally
+(`deTurckReactionSectionMap_mem_symmetricLocus`) and the principal `(-2)•Ric` source is symmetric by
+`intrinsicRicciFlowRHSSectionSpace_symm`.  This is the direct (frozen-operator) analogue of
+`TimeDependentGeometricRicciDeTurckBanachChart.A_mem_symmetricLocus`, established here without routing
+through the chart's `geometric` identification field: it certifies that the Banach evolution velocity
+of the geometric chart operator is symmetric, so its solution curve stays a symmetric metric family. -/
+theorem deTurckFrozenGeometric_A_mem_symmetricLocus
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover) :
+    (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+        Kc hKc Ko hKo hKoEq hcover
+        (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+          g background t hbackground).continuous s
+      + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover g t)
+      ∈ symmetricLocus (M := M) (F := E) (W := TM)
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover :=
+  deTurckReactionSectionMap_add_mem_symmetricLocus
+    xc (fun i => trivializationAt BilF BilW (xc i)) (fun _ => rfl) Kc hKc Ko hKo hKoEq hcover
+    (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+      g background t hbackground).continuous
+    (RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+      Kc hKc Ko hKo hKoEq hcover g t)
+    (fun x u v => RicciFlow.intrinsicRicciFlowRHSSectionSpace_symm
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover g t x u v)
+    s
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
