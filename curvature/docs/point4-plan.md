@@ -1619,3 +1619,42 @@ Riemannian-bundle raising framework (the `rieszMap`/`contMDiffOn_rieszMap_sectio
 via `[IsContMDiffRiemannianBundle I 2 E TM]`), which does not yet exist — a genuine missing sub-project.
 Also still open: packaging the forward `C³` flow into the `Diffeomorph3GaugeFlowOn` deliverable needs the
 inverse-slice `C³` + flow uniqueness (feeds `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`).
+
+### Item 2 (GAP 1 upstream) later-24 — the field-independent linear-algebra core of joint space-time Riemannian raising: base-polymorphic, arbitrary-order matrix det/adjugate/inverse + Cramer-solve smoothness (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The later-23 NEXT identified the sole remaining GAP-1 obstruction as the joint `(t,x)` smoothness of the
+real Ricci–DeTurck gauge field, which reduces to *time-dependent* Riemannian raising: the spatial raising
+`CovariantDerivative.contMDiffOn_rieszMap_section` reduces raising a co-vector to inverting the local-frame
+Gram matrix (coefficient formula `localFrame_coeff_rieszMap`: `cᵢ = ∑ⱼ (Gram⁻¹)ᵢⱼ · ω(frameⱼ)`), but its
+smoothness support (`contMDiffOn_localFrameGramMatrix_inv`) is proved only for a *fixed base manifold* `M`
+and at the *single order* `2`.  Running that argument jointly over the space-time base `ℝ × M` needs those
+facts for an *arbitrary base* and *arbitrary order*.  This session isolated exactly that field-independent
+core into a new, Mathlib-only module, wired into the root import graph:
+
+* **`PoincareCurvature/Analysis/MatrixSmoothness.lean`** (namespace `PoincareCurvature.MatrixSmoothness`):
+  - `contDiff_det`, `contDiff_updateRow`, `contDiff_adjugate` — det and adjugate are polynomial in the
+    entries, hence `ContDiff ℝ n` for *every* order `n` (generalising the `private`, order-`2`
+    `contDiff_matrix_det`/`_adjugate` buried in `LeviCivita.lean`).
+  - `contMDiffOn_matrixDet`/`_matrixAdjugate`/`_matrixDetInv` — the manifold-level compositions over an
+    *arbitrary* base `(J : ModelWithCorners ℝ E' H')`, `N` a charted space.
+  - **`contMDiffOn_matrixInv`** — for any `ContMDiffOn` family of matrices over any base with nonzero
+    determinant, the entrywise inverse is `ContMDiffOn` at the same order (via
+    `A⁻¹ = (det A)⁻¹ • adjugate A`, `Matrix.inv_def` + `Ring.inverse_eq_inv`).  The base-polymorphic,
+    arbitrary-order generalisation of `contMDiffOn_localFrameGramMatrix_inv`.
+  - `contMDiffOn_matrixEntry`/`_vecEntry`, **`contMDiffOn_mulVec`** (matrix–vector product, componentwise
+    finite-sum induction; scalar products via `.smul` + `smul_eq_mul` to stay order-polymorphic — the Lie
+    `ContMDiffMul` instance is unavailable at a *variable* order), and **`contMDiffOn_matrixInv_mulVec`**
+    — on the nonsingular locus the linear solve `x ↦ (A x)⁻¹ *ᵥ (b x)` is `ContMDiffOn`.  This last one is
+    *exactly* the shape of the raised-covector coefficient formula, packaging `contMDiffOn_matrixInv` for
+    the raising assembly.
+
+**Net.**  With `contMDiffOn_matrixInv_mulVec` instantiated at `N := ℝ × M`, `J := 𝓘(ℝ,ℝ).prod I`, the
+raised-covector coefficients `cᵢ(t,x)` are jointly `(t,x)`-smooth as soon as the two *inputs* are: the
+joint-`(t,x)` Gram matrix `A(t,x) = Gram_{g_t}(x)` and the joint-`(t,x)` pairing `b(t,x)ⱼ = ω_t(x)(frameⱼ)`.
+**NEXT:** supply those two inputs.  `b` is the joint-`(t,x)` traced DeTurck one-form (already spatial;
+needs the time slot).  `A` is the joint-`(t,x)` local-frame Gram matrix of a *time-dependent* metric — i.e.
+the joint version of `contMDiffOn_localFrameGramMatrix`, whose only genuinely-new input is joint-`(t,x)`
+smoothness of the inner product `⟪frameᵢ, frameⱼ⟫_{g_t}` (a `MetricFamily`/`TimeDependentRiemannianMetric`
+joint-smoothness hypothesis, not yet exposed).  Then assemble the raised section over `ℝ × M` (via
+`contMDiffOn_iff_localFrame_coeff`) to obtain the joint field jet `hXfield`, and feed it to the CLOSED
+field-independent assembly `exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact`.
