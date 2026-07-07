@@ -949,4 +949,92 @@ theorem deTurckFrozenGeometric_A_coordwiseSymmetryDefect_eq_zero
     (deTurckFrozenGeometric_A_mem_symmetricLocus
       xc Kc hKc Ko hKo hKoEq hcover g background t hbackground s)
 
+/-- **The frozen geometric Ricci–DeTurck operator's Banach evolution solution stays in the symmetric
+positive-definite locus.**  Strengthening
+`deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_positiveDefiniteLocus` with a *symmetric*
+conclusion: the concrete frozen geometric operator
+`A τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t`, whose
+`IsPicardLindelof` datum is `deTurckFrozenGeometric_exists_isPicardLindelof` and whose uniform Lipschitz
+control is `deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordinates`, admits a
+Banach evolution local solution — anchored at the metric section `g₀.toSection` of a genuine continuous
+Riemannian metric `g₀`, constrained to the positive-definite locus, forward-unique on the overlap of
+Picard intervals — whose curve additionally stays in the *symmetric* positive-definite locus at every
+time of its interval.  The symmetric containment is obtained WITHOUT the chart's `geometric`
+identification field: it is fed purely by the frozen operator's velocity symmetry
+`deTurckFrozenGeometric_A_mem_symmetricLocus` (`A τ s ∈ symmetricLocus` for every section `s`) through
+the ODE symmetric-carrier invariance
+`exists_unique_in_symmetricPositiveDefiniteLocus_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn`
+(the coordinatewise antisymmetric defect satisfies the same linear ODE, starts at `0` since `g₀` is
+symmetric, hence stays `0`).  This certifies the frozen geometric Banach solution curve is a genuine
+symmetric-positive-definite metric family — the realization-side consistency datum a `RicciDeTurckChart`
+closure needs for its `sol` to decode into an intrinsic metric evolution — available independently of
+the `geometric`/`realization` parabolic reconciliation. -/
+theorem deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_symmetricPositiveDefiniteLocus
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ] [Nontrivial E]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric E TM)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) :
+    ∃ sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn
+        (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous s
+          + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+              Kc hKc Ko hKo hKoEq hcover g t)
+        (positiveDefiniteLocus (M := M) (F := E) (W := TM)
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+        t₀ ⟨g₀.toSection, g₀.continuous_toSection⟩,
+      (∀ sol' : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn
+          (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+            Kc hKc Ko hKo hKoEq hcover
+            (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+              g background t hbackground).continuous s
+            + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+                Kc hKc Ko hKo hKoEq hcover g t)
+          (positiveDefiniteLocus (M := M) (F := E) (W := TM)
+            (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+          t₀ ⟨g₀.toSection, g₀.continuous_toSection⟩,
+        Set.EqOn sol.curve sol'.curve
+          (Set.Icc t₀ (min sol.terminalTime sol'.terminalTime))) ∧
+      ∀ ⦃τ : ℝ⦄, τ ∈ Set.Icc t₀ sol.terminalTime →
+        sol.curve τ ∈ symmetricPositiveDefiniteLocus (M := M) (F := E) (W := TM)
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover := by
+  have hKcTM : ∀ i, (Kc i : Set M) ⊆ (trivializationAt (E →L[ℝ] E) THom (xc i)).baseSet := by
+    intro i x hx
+    have hxi := hKc i hx
+    simpa using hxi
+  obtain ⟨Kp', hKp'0, hKp'b⟩ := exists_uniform_inCoord_bound xc Kc hKcTM
+    (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+      g background t hbackground).continuous
+  obtain ⟨Kp, T, hT, Mc, hPL⟩ := deTurckFrozenGeometric_exists_isPicardLindelof
+    xc Kc hKc Ko hKo hKoEq hcover g background t hbackground
+    ⟨g₀.toSection, g₀.continuous_toSection⟩ t₀ T₀ hT₀ 1 (by norm_num)
+  exact RicciFlow.AnalyticPDE.MetricLocusEvolution.exists_unique_in_symmetricPositiveDefiniteLocus_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn
+    (M := M) (F := E) (W := TM)
+    xc (fun i => trivializationAt BilF BilW (xc i)) (fun _ => rfl)
+    Kc hKc Ko hKo hKoEq hcover inferInstance hT hPL
+    (mem_symmetricPositiveDefiniteLocus_of_continuousRiemannianMetric
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover g₀)
+    (fun _ => deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordinates
+      xc Kc hKc Ko hKo hKoEq hcover
+      (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+        g background t hbackground).continuous Kp' hKp'0 hKp'b
+      (RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+        Kc hKc Ko hKo hKoEq hcover g t)
+      (positiveDefiniteLocus (M := M) (F := E) (W := TM)
+        (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover))
+    (fun _ s _ => deTurckFrozenGeometric_A_mem_symmetricLocus
+      xc Kc hKc Ko hKo hKoEq hcover g background t hbackground s)
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
