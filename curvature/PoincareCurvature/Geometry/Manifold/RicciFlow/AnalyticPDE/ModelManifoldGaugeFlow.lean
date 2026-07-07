@@ -311,6 +311,37 @@ theorem exists_bound_iteratedFDeriv_prodMk_left
     (hF.continuous_iteratedFDeriv hn)
   exact ⟨C, fun s x => (norm_iteratedFDeriv_prodMk_left_le hF hn s x).trans (hC (s, x))⟩
 
+/-- **Uniform-in-time Lipschitz bound on the slice iterated derivatives of a compactly-supported
+field.**  If `F : ℝ × E → G` is jointly `C^N` with compact support and `n + 1 ≤ N`, then there is a
+single Lipschitz constant `C` such that the `n`-th iterated derivative of *every* time slice
+`y ↦ F (s, y)` is `C`-Lipschitz.
+
+This is the exact shape of the uniform derivative-field Lipschitz hypotheses
+(`hD2vmlip`/`hD3vlip`) consumed by `exists_diffeomorph3GaugeFlowOn_of_contDiff`: the constant is
+obtained from the uniform order-`(n+1)` bound `exists_bound_iteratedFDeriv_prodMk_left`, converted to
+a Lipschitz estimate via `norm_fderiv_iteratedFDeriv` (`‖fderiv (Dⁿf)‖ = ‖Dⁿ⁺¹f‖`) and
+`lipschitzWith_of_nnnorm_fderiv_le`. -/
+theorem exists_lipschitzWith_iteratedFDeriv_prodMk_left
+    {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+    {F : ℝ × E → G} {N : WithTop ℕ∞} (hF : ContDiff ℝ N F) (hcs : HasCompactSupport F)
+    {n : ℕ} (hn : ((n + 1 : ℕ) : WithTop ℕ∞) ≤ N) :
+    ∃ C : ℝ≥0, ∀ s : ℝ, LipschitzWith C (iteratedFDeriv ℝ n (fun y => F (s, y))) := by
+  obtain ⟨C₀, hC₀⟩ := exists_bound_iteratedFDeriv_prodMk_left (n := n + 1) hF hcs hn
+  refine ⟨⟨max C₀ 0, le_max_right _ _⟩, fun s => ?_⟩
+  have hslice : ContDiff ℝ N (fun y => F (s, y)) :=
+    hF.comp (contDiff_const.prodMk contDiff_id)
+  have hle : (1 : WithTop ℕ∞) + (n : WithTop ℕ∞) ≤ N := by
+    have h1 : (1 : WithTop ℕ∞) + (n : WithTop ℕ∞) = ((n + 1 : ℕ) : WithTop ℕ∞) := by
+      push_cast; exact add_comm _ _
+    rw [h1]; exact hn
+  refine lipschitzWith_of_nnnorm_fderiv_le
+    ((hslice.iteratedFDeriv_right (m := 1) hle).differentiable one_ne_zero) (fun x => ?_)
+  have hb : ‖fderiv ℝ (iteratedFDeriv ℝ n (fun y => F (s, y))) x‖ ≤ max C₀ 0 := by
+    rw [norm_fderiv_iteratedFDeriv]
+    exact (hC₀ s x).trans (le_max_left _ _)
+  rw [← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_mk]
+  exact hb
+
 end
 
 end SmoothDependenceCk
