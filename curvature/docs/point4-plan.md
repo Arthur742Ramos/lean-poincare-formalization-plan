@@ -1491,3 +1491,37 @@ interior is a convex Lipschitz tube ⊆ target), then wire the finite cover + wi
 into `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover`.  (Note the smooth-bump cutoff forces
 `N ≤ ∞`, i.e. the field regularity exponent is not analytic `ω` — an honest constraint compatible with
 `4 ≤ N`.)
+
+### Item 3 (GAP 2) later-21 — geometric-A `picard` field + `realization` INPUT assembled at the chart centre (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Ground-truth state of the frozen geometric operator `A τ s = deTurckReactionSectionMap ∇W s +
+intrinsicRicciFlowRHSSectionSpace g t` on the tangent-bundle `BilinearFormBundle` section space
+(`AnalyticPDE/GeometricReactionPicardTangent.lean`): its `A`/`lipschitz`/`hlip`/`hcenter` coordinate
+bounds, the unconditional `IsPicardLindelof`, the `BanachEvolutionLocalSolutionIn`, and the centre-point
+`geometric` identity (`deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS`,
+in `DeTurckReactionAssembly.lean`) were ALL already present.  This session connected the two previously
+independent halves needed to feed the chart-closure `realization` field:
+
+* **`deTurckFrozenGeometric_exists_isPicardLindelof`** — the literal `picard`-field datum for the
+  concrete geometric operator: `IsPicardLindelof A ⟨t₀,…⟩ σ₀ a 0 (Mc+2Kp·a) (2Kp)` on an auto-chosen
+  forward window, with the geometric coefficient `P := ∇W` and source `b := intrinsicRicciFlowRHSSectionSpace g t`
+  (thin specialisation of `deTurckReactionSectionMap_add_source_exists_isPicardLindelof`).
+* **`deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_positiveDefiniteLocus`** — the
+  geometric Banach evolution solution CONSTRAINED to `positiveDefiniteLocus`, obtained by discharging the
+  closed-ball bridge's `hsub` via the a-priori positivity containment
+  `ContinuousRiemannianMetric.exists_pos_closedBall_toSection_subset_positiveDefiniteLocus` (openness of
+  the positive-definite locus).  σ₀ := `g₀.toSection`.
+* **`…_positiveDefiniteLocus_ivp`** — the IVP-vocabulary form: σ₀ := `InitialValueProblem.toContinuousSectionSpace … ivp`
+  (definitionally the initial-metric section), `t₀ := ivp.initialTime`.  This is EXACTLY the `sol` shape the
+  `RicciDeTurckChartClosureData.realization` field consumes, `BanachEvolutionLocalSolutionIn chart.A
+  (positiveDefiniteLocus …) ivp.initialTime (toContinuousSectionSpace … ivp)`, modulo identifying the
+  frozen geometric operator with `chart.A`.
+
+**Reduction achieved.**  For the concrete tangent-bundle geometric operator, the chart fields
+`A`/`hT`/`picard`/`lipschitz` and the realization `sol` INPUT are now all constructed; the centre-point
+`geometric` holds.  **NEXT (still the long pole):** the chart `geometric` field for ALL `s ∈
+positiveDefiniteLocus` (the frozen operator satisfies it only at the metric section — a general `s`
+requires realising the symmetric value `reaction s + b` as a DeTurck correction of some background, an
+honest first-order background solve), and the `realization` DECODE producing a smooth `metric` family
+from the Banach curve (`chartRHS_eq_intrinsic` along the whole interval needs the state-dependent /
+mild operator, not the frozen linearisation).
