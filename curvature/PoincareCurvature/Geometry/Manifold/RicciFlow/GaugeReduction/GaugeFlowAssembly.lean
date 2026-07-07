@@ -583,4 +583,64 @@ theorem exists_lipschitzOnWith_chartPushforwardField {n : WithTop ℕ∞}
     ∃ K, LipschitzOnWith K (chartPushforwardField I X p τ) s :=
   ((contDiffOn_chartPushforwardField hX).mono hs_sub).exists_lipschitzOnWith hn hs_conv hs_comp
 
+/-- **Joint `(τ, q)` `ContDiffOn` of the chart pushforward field from a jointly-`C^n`
+time-dependent tangent-bundle section.**  The time-uniform (product-domain) strengthening of
+`contDiffOn_chartPushforwardField`: from joint `C^n` regularity of the time-dependent section
+`(τ, y) ↦ ⟨y, X τ y⟩` on `ℝ ×ˢ (extChartAt I p).source` (as a map into the tangent bundle with the
+product model `𝓘(ℝ, ℝ).prod I`), the uncurried chart pushforward field
+`(τ, q) ↦ chartPushforwardField I X p τ q` is `ContDiffOn ℝ n` on `ℝ ×ˢ (extChartAt I p).target`.
+
+The proof runs the fixed-time argument of `contDiffOn_chartPushforwardField` with the product source
+manifold `ℝ × M`: the fixed-trivialization section characterisation
+(`Bundle.Trivialization.contMDiffOn_iff`, centred at `p`) turns the joint section smoothness into joint
+`C^n`-ness of `(τ, y) ↦ (trivializationAt E (TangentSpace I) p ⟨y, X τ y⟩).2`, which is composed with the
+time-passenger chart inverse `(τ, q) ↦ (τ, (extChartAt I p).symm q)` and read off through
+`modelWithCornersSelf_prod`/`chartedSpaceSelf_prod` + `contMDiffOn_iff_contDiffOn` on the model product
+`ℝ × E`.  This is the joint-in-time field regularity feeding the bump-function globalisation of the model
+gauge flow: a compactly-supported `C^N` representative of the pushforward field is what
+`exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport` consumes. -/
+theorem contDiffOn_prod_chartPushforwardField {n : WithTop ℕ∞}
+    [IsManifold I n M] [ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M}
+    (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) n
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source)) :
+    ContDiffOn ℝ n (fun r : ℝ × E => chartPushforwardField I X p r.1 r.2)
+      (Set.univ ×ˢ (extChartAt I p).target) := by
+  have hmaps : Set.MapsTo (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source)
+      (trivializationAt E (TangentSpace I) p).source := by
+    intro r hr
+    rw [TangentBundle.trivializationAt_source]
+    have hr2 := hr.2
+    rw [extChartAt_source] at hr2
+    exact hr2
+  have hsnd : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) n
+      (fun r : ℝ × M => (trivializationAt E (TangentSpace I) p
+        (⟨r.2, X r.1 r.2⟩ : TangentBundle I M)).2)
+      (Set.univ ×ˢ (extChartAt I p).source) :=
+    (((trivializationAt E (TangentSpace I) p).contMDiffOn_iff hmaps).mp hX).2
+  have hΦ : ContMDiffOn 𝓘(ℝ, ℝ × E) (𝓘(ℝ, ℝ).prod I) n
+      (fun r : ℝ × E => ((r.1 : ℝ), (extChartAt I p).symm r.2))
+      (Set.univ ×ˢ (extChartAt I p).target) :=
+    ((ContinuousLinearMap.fst ℝ ℝ E).contMDiff.contMDiffOn).prodMk
+      ((contMDiffOn_extChartAt_symm p).comp
+        ((ContinuousLinearMap.snd ℝ ℝ E).contMDiff.contMDiffOn)
+        (fun r hr => hr.2))
+  have hcomp :=
+    hsnd.comp hΦ (fun r hr => ⟨Set.mem_univ _, (extChartAt I p).map_target hr.2⟩)
+  rw [← contMDiffOn_iff_contDiffOn]
+  refine hcomp.congr (fun r hr => ?_)
+  simp only [Function.comp_apply]
+  have hq : r.2 ∈ (extChartAt I p).target := hr.2
+  have hy : (extChartAt I p).symm r.2 ∈ (extChartAt I p).source := (extChartAt I p).map_target hq
+  have hqe : extChartAt I p ((extChartAt I p).symm r.2) = r.2 := (extChartAt I p).right_inv hq
+  have hL : chartPushforwardField I X p r.1 r.2
+      = tangentCoordChange I ((extChartAt I p).symm r.2) p ((extChartAt I p).symm r.2)
+          (X r.1 ((extChartAt I p).symm r.2)) := by
+    conv_lhs => rw [← hqe]
+    exact chartPushforwardField_extChartAt X r.1 hy
+  rw [hL, TangentBundle.trivializationAt_apply, tangentCoordChange_def]
+  rfl
+
 end PoincareCurvature.GaugeFlowAssembly
