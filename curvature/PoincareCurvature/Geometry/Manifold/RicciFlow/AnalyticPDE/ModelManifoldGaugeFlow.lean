@@ -342,6 +342,44 @@ theorem exists_lipschitzWith_iteratedFDeriv_prodMk_left
   rw [← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_mk]
   exact hb
 
+/-- **Uniform-in-time Lipschitz bound on the time slices themselves.**  If `F : ℝ × E → G` is jointly
+`C^N` with compact support and `1 ≤ N`, there is a single Lipschitz constant `C` with every time slice
+`y ↦ F (s, y)` being `C`-Lipschitz.  This is the `hv` datum of `exists_diffeomorph3GaugeFlowOn_of_contDiff`
+(the field itself uniformly Lipschitz).  Proof: the uniform order-`1` slice bound
+`exists_bound_iteratedFDeriv_prodMk_left` combined with `norm_iteratedFDeriv_one`
+(`‖D¹f‖ = ‖fderiv f‖`) and `lipschitzWith_of_nnnorm_fderiv_le`. -/
+theorem exists_lipschitzWith_prodMk_left
+    {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+    {F : ℝ × E → G} {N : WithTop ℕ∞} (hF : ContDiff ℝ N F) (hcs : HasCompactSupport F)
+    (hN : 1 ≤ N) :
+    ∃ C : ℝ≥0, ∀ s : ℝ, LipschitzWith C (fun y => F (s, y)) := by
+  obtain ⟨C₀, hC₀⟩ := exists_bound_iteratedFDeriv_prodMk_left (n := 1) hF hcs (by exact_mod_cast hN)
+  have hN0 : N ≠ 0 := by rintro rfl; exact absurd hN (by norm_num)
+  refine ⟨⟨max C₀ 0, le_max_right _ _⟩, fun s => ?_⟩
+  have hslice : ContDiff ℝ N (fun y => F (s, y)) :=
+    hF.comp (contDiff_const.prodMk contDiff_id)
+  refine lipschitzWith_of_nnnorm_fderiv_le (hslice.differentiable hN0) (fun x => ?_)
+  have hb : ‖fderiv ℝ (fun y => F (s, y)) x‖ ≤ max C₀ 0 := by
+    rw [← norm_iteratedFDeriv_one]
+    exact (hC₀ s x).trans (le_max_left _ _)
+  rw [← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_mk]
+  exact hb
+
+/-- **Lipschitz transport across the `fderiv`↔iterated-derivative currying isometry.**  Since
+`fderiv ℝ (iteratedFDeriv ℝ n f) = e ∘ iteratedFDeriv ℝ (n+1) f` with `e` the currying
+`LinearIsometryEquiv` (`fderiv_iteratedFDeriv`), a Lipschitz bound on the `(n+1)`-st iterated
+derivative transports to the same bound on `fderiv` of the `n`-th iterated derivative.  This turns the
+`iteratedFDeriv`-shaped bounds of `exists_lipschitzWith_iteratedFDeriv_prodMk_left` into the
+`fderiv (iteratedFDeriv …)`-shaped hypothesis `hD3vmlip` of `exists_diffeomorph3GaugeFlowOn_of_contDiff`. -/
+theorem lipschitzWith_fderiv_iteratedFDeriv_of_lipschitzWith_iteratedFDeriv_succ
+    {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+    {f : E → G} {C : ℝ≥0} {n : ℕ}
+    (h : LipschitzWith C (iteratedFDeriv ℝ (n + 1) f)) :
+    LipschitzWith C (fderiv ℝ (iteratedFDeriv ℝ n f)) := by
+  rw [fderiv_iteratedFDeriv]
+  exact (Isometry.lipschitzWith_iff C
+    (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (n + 1) => E) G).isometry).mpr h
+
 end
 
 end SmoothDependenceCk
