@@ -1262,3 +1262,46 @@ by the frozen affine operator.  **NEXT:** the `RicciDeTurckChartClosureData.real
 (`RicciDeTurckSmoothRealizationData.of_chosenBackground_endpointTimeDerivative_chartRHS`) that turns the
 already-built `BanachEvolutionLocalSolutionIn` of the geometric `A` into a genuine
 `ChosenIntrinsicDeTurckLocalSolution`, and the `geometric`↔Schauder connection.
+
+### Progress (2026-07-07, later 16) — Item 2 GAP 1: the manifold-target orbit confinement API (the named NEXT) is now PROVED — the raw-manifold `hγ_src`/`hγ_mem` mechanism no longer depends on the model-space-only tube lemma
+
+**Key finding.**  The abstract short-time orbit-graph confinement the raw-manifold side of step (v)
+needs is *not* a missing ODE-regularity primitive: the model-space tube lemma
+`exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt` uses the model normed space `E` only
+through its topology (the elaborator flags `[NormedSpace ℝ E]` as unused there), so it generalises
+verbatim to an arbitrary topological-space target `Y` — exactly the setting of the raw manifold gauge
+flow `Φ : ℝ → M → M`, where `M` carries no normed-space structure and the `E`-target lemma cannot be
+applied directly.
+
+**What landed (sorry-free, axiom-clean `{propext, Classical.choice, Quot.sound}`; three additive
+theorems in `AnalyticPDE/ModelManifoldGaugeFlow.lean`, two commits).**
+
+* **`exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_manifoldTarget`** — the
+  manifold-target generalisation: for a flow `Ψ : ℝ → Y → Y` (`Y` an arbitrary topological space) whose
+  space-time graph map is jointly continuous at each anchored `(t₀, q)` (`q ∈ Q` compact) and an open
+  space-time target `W ⊇` the anchored graph, an honest window `Ioo a b ∋ t₀` on which every orbit graph
+  stays in `W`.  Proof identical to the `E`-version (`IsCompact.eventually_forall_of_forall_eventually`
+  + `ContinuousAt.preimage_mem_nhds` + `mem_nhds_iff_exists_Ioo_subset`).
+* **`exists_Ioo_forall_mem_of_continuousAt_source`** — the `Q = {x}` single-orbit source-confinement
+  packaged directly for `hγ_src`: joint continuity of `Ψ` at `(t₀, x)` + open `U ∋ Ψ t₀ x` ⟹ a window
+  on which `τ ↦ Ψ τ x` stays in `U`.  With `Ψ = Φ`, `x` a chart-patch point, `U = (extChartAt I p).source`
+  this is precisely the "orbit stays in the chart source" window the step-(v) chart-conjugation transfer
+  (`extChartAt_comp_eqOn_maps3_of_cutoff_eqOne`) requires.  Derived from the general lemma with
+  `W = univ ×ˢ U`.
+* **`exists_Ioo_forall_forall_graph_mem_compact_of_isCompact_of_continuousAt_manifoldTarget`** — the glue
+  from *open-target* confinement to the *compact-window* `graph ⊆ K` datum consumed by
+  `cutoff_eqOne_along_curve_of_graph_subset`: apply the open confinement to `interior K`
+  (`isOpen_interior`), then `interior_subset`.  This closes the "open target ⟹ compact-window graph
+  containment" bridge for the raw-manifold side, uniformly over a compact chart patch.
+
+**Fraction of GAP 1.**  The raw-manifold orbit-containment *mechanism* (`hγ_src`, `hγ_mem`) of the
+step-(v) capstone `contMDiffOn_flowSlice_of_cutoff_orbit_control` is now available in reusable abstract
+form, symmetric to the model side (`exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith`).  Both
+confinement APIs take the flow's joint continuity as a hypothesis.  The one remaining input on the
+raw-manifold side is the concrete **joint continuity of `Φ` on the general compact `M`** (manifold
+continuous-dependence à la `GaugeReduction/ManifoldFlowExistence.exists_nhds_uniform_integralCurve`),
+which lives in the heavy gauge files; plus residual (b) `hX` (the DeTurck gauge field's joint
+section-smoothness) and the finite-cover globalisation.  **NEXT:** obtain `Φ`'s joint continuity from the
+manifold flow existence and feed it to `exists_Ioo_forall_mem_of_continuousAt_source` /
+`…_graph_mem_compact_…_manifoldTarget` to discharge `hγ_src`/`hγ_mem` in the step-(v) capstone, then the
+finite-cover globalisation of `contMDiffOn_flowSlice_of_cutoff_orbit_control`.
