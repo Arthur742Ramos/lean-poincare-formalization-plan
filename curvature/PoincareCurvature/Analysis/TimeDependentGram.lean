@@ -644,6 +644,21 @@ theorem raisedGaugeField_neg
     simp only [map_neg, ContinuousLinearMap.neg_apply, Pi.neg_apply,
       raisedGaugeField_inner_eq])).symm
 
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **The metric dual subtracts with the one-form.**  `raisedGaugeField g (ω₁ - ω₂) bas y =
+raisedGaugeField g ω₁ bas y - raisedGaugeField g ω₂ bas y`.  Relevant to the intrinsic DeTurck
+one-form, which is a *difference* of connection (Christoffel) one-forms. -/
+theorem raisedGaugeField_sub
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω₁ ω₂ : ∀ z : B, V z →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    (y : B) :
+    raisedGaugeField g (ω₁ - ω₂) bas y
+      = raisedGaugeField g ω₁ bas y - raisedGaugeField g ω₂ bas y :=
+  (raisedGaugeField_eq_of_forall_inner_eq g (ω₁ - ω₂) bas (fun w => by
+    simp only [map_sub, ContinuousLinearMap.sub_apply, Pi.sub_apply,
+      raisedGaugeField_inner_eq])).symm
+
 /-- **Per-patch joint `(t, x)` smoothness of the global raised gauge field, as a tangent-style
 section.**  Over the canonical trivialization patch around any base point `x`, the globally-defined
 raised gauge field `raisedGaugeField (g ·) (ω ·) bas`, read as the section
