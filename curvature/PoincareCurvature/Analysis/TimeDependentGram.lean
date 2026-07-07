@@ -283,6 +283,35 @@ theorem contMDiffOn_raisedSection_of_coeff
   refine congrArg (TotalSpace.mk' F p.2) ?_
   exact (Finset.sum_congr rfl fun i _ => by rw [hframe i]).symm
 
+/-- **Joint `(t, x)` smoothness of the raised gauge field section on a chart patch.**  Chaining the
+raised-covector coefficients with the section assembly: given a time-dependent metric `g` and a
+time-dependent one-form `ω`, both jointly `(t, x)`-smooth (as fibrewise sections over `ℝ ×ˢ u`), the
+raised section `(t, x) ↦ ∑ᵢ (G(t, x)⁻¹ *ᵥ b(t, x))ᵢ • frameᵢ(x)` — the metric-raised vector field of
+`ω_t` — is `ContMDiffOn` over `Set.univ ×ˢ u`.  This is the per-chart-patch joint field jet produced by
+the entire field-independent joint space-time raising chain; for the tangent bundle it is exactly the
+tangent-section input to `contMDiff_spaceTimeField_of_contMDiff_tangentSection`. -/
+theorem contMDiffOn_timeDependentRaisedSection
+    (g : ℝ → Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ℝ → ∀ y : B, V y →L[ℝ] ℝ)
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    {u : Set B} (hu' : u ⊆ e.baseSet)
+    (hg : ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] V y →L[ℝ] ℝ)) p.2 ((g p.1).inner p.2)) (Set.univ ×ˢ u))
+    (hω : ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] ℝ)) p.2 (ω p.1 p.2)) (Set.univ ×ˢ u)) :
+    ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' F p.2
+        (∑ i, (show ι → ℝ from
+            ((show Matrix ι ι ℝ from
+                (fun a b ↦ (g p.1).inner p.2 (e.localFrame bas a p.2) (e.localFrame bas b p.2)))⁻¹
+              : Matrix ι ι ℝ).mulVec (fun j ↦ ω p.1 p.2 (e.localFrame bas j p.2))) i
+          • e.localFrame bas i p.2)) (Set.univ ×ˢ u) :=
+  contMDiffOn_raisedSection_of_coeff e bas hu'
+    (contMDiffOn_timeDependentRaisedCoeff g ω e bas hu' hg hω)
+
 end Gram
 
 end PoincareCurvature.ParametrizedInner
