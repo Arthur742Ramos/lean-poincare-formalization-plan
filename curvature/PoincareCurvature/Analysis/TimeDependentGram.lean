@@ -41,6 +41,21 @@ variable
   [∀ x, NormedSpace ℝ (V x)]
   [FiberBundle F V] [VectorBundle ℝ F V] [ContMDiffVectorBundle n F V IB]
 
+/-- **Joint `(t, x)` smoothness of a time-independent local frame section, over the space-time base.**
+Composing the spatial `contMDiffOn_localFrame_baseSet` with `Prod.snd : ℝ × B → B`.  This is the
+common `v`/`w` input to both the Gram readout and the one-form pairing readout. -/
+theorem contMDiffOn_frameSection_prodSnd
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    {ι : Type*} (bas : Module.Basis ι ℝ F)
+    {u : Set B} (hu' : u ⊆ e.baseSet) (k : ι) :
+    ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F)) n
+      (fun p : ℝ × B ↦ (TotalSpace.mk' F p.2 (e.localFrame bas k p.2))) (Set.univ ×ˢ u) := by
+  have hspatial : ContMDiffOn IB (IB.prod 𝓘(ℝ, F)) n
+      (fun x : B ↦ TotalSpace.mk' F x (e.localFrame bas k x)) u :=
+    (Bundle.Trivialization.contMDiffOn_localFrame_baseSet (I := IB) (e := e)
+      (n := n) (b := bas) k).mono hu'
+  exact hspatial.comp (contMDiff_snd.contMDiffOn) (fun p hp ↦ hp.2)
+
 /-- **Joint `(t, x)` smoothness of a fixed pair of frame vectors paired by a time-dependent metric.**
 If the fibrewise bilinear form `(g t).inner` of a time-dependent metric is jointly `(t, x)`-smooth
 over `ℝ ×ˢ u`, and `i j` index a local frame of a trivialization `e` with `u ⊆ e.baseSet`, then the
@@ -90,6 +105,27 @@ theorem contMDiffOn_timeDependentGramReadout
   rw [contMDiffOn_pi_space]
   intro j
   exact contMDiffOn_timeDependentInner_localFrame g e bas hu' hg i j
+
+/-- **Joint `(t, x)` smoothness of a time-dependent one-form pairing readout.**  Given a
+time-dependent field of covectors `ω t : Π y, V y →L[ℝ] ℝ` whose section `(t, x) ↦ ω t x` is jointly
+`(t, x)`-smooth over `ℝ ×ˢ u`, the pairing readout `(t, x) ↦ fun j ↦ ω t x (frameⱼ x)` is
+`ContMDiffOn` over `Set.univ ×ˢ u`, valued in `ι → ℝ`.  This is the vector family `b(t, x)ⱼ` fed
+(alongside the inverse Gram matrix) to `PoincareCurvature.MatrixSmoothness.contMDiffOn_matrixInv_mulVec`
+to obtain the joint `(t, x)` raised-covector coefficients. -/
+theorem contMDiffOn_timeDependentOneFormPairing
+    (ω : ℝ → ∀ y : B, V y →L[ℝ] ℝ)
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] (bas : Module.Basis ι ℝ F)
+    {u : Set B} (hu' : u ⊆ e.baseSet)
+    (hω : ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] ℝ)) p.2 (ω p.1 p.2)) (Set.univ ×ˢ u)) :
+    ContMDiffOn (𝓘(ℝ).prod IB) 𝓘(ℝ, ι → ℝ) n
+      (fun p : ℝ × B ↦ (fun j ↦ ω p.1 p.2 (e.localFrame bas j p.2) : ι → ℝ)) (Set.univ ×ˢ u) := by
+  rw [contMDiffOn_pi_space]
+  intro j
+  exact contMDiffOn_paramLinear_apply (b := Prod.snd) (v := fun p ↦ e.localFrame bas j p.2)
+    (φ := fun p ↦ ω p.1 p.2) hω (contMDiffOn_frameSection_prodSnd e bas hu' j)
 
 end Gram
 

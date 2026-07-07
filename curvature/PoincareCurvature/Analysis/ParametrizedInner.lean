@@ -175,4 +175,74 @@ lemma contMDiff_paramBilin_apply₂
 
 end ParamBilin
 
+section ParamLinear
+
+/-!
+### A parameter-dependent linear form
+
+For the DeTurck one-form pairing `b(t, x)ⱼ = ω_t(x)(frameⱼ)` we need the *linear* analogue: a section
+`φ : ∀ m, E (b m) →L[ℝ] ℝ` of the dual bundle, depending on the full parameter `m`, applied to a
+jointly-smooth section.  This is `clm_bundle_apply` into the trivial `ℝ`-bundle followed by reading
+off the fibre component.
+-/
+
+variable
+  {EB : Type*} [NormedAddCommGroup EB] [NormedSpace ℝ EB]
+  {HB : Type*} [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  {E : B → Type*} [TopologicalSpace (TotalSpace F E)] [∀ x, NormedAddCommGroup (E x)]
+  [∀ x, NormedSpace ℝ (E x)]
+  [FiberBundle F E] [VectorBundle ℝ F E]
+  {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
+  {HM : Type*} [TopologicalSpace HM] {IM : ModelWithCorners ℝ EM HM}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace HM M]
+  {b : M → B} {v : ∀ x, E (b x)} {s : Set M} {x : M}
+  {φ : ∀ m : M, E (b m) →L[ℝ] ℝ}
+
+/-- **Parameter-dependent linear form, within a set at a point.**  A jointly-smooth dual-bundle
+section `φ m : E (b m) →L[ℝ] ℝ` applied to a jointly-smooth section `v m` gives a jointly-smooth
+scalar `m ↦ φ m (v m)`. -/
+lemma contMDiffWithinAt_paramLinear_apply
+    (hφ : ContMDiffWithinAt IM (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun m ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (E y →L[ℝ] ℝ)) (b m) (φ m)) s x)
+    (hv : ContMDiffWithinAt IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (v m : TotalSpace F E)) s x) :
+    ContMDiffWithinAt IM 𝓘(ℝ) n (fun m ↦ φ m (v m)) s x := by
+  have hres : ContMDiffWithinAt IM (IB.prod 𝓘(ℝ)) n
+      (fun m ↦ TotalSpace.mk' ℝ (E := Bundle.Trivial B ℝ) (b m) (φ m (v m))) s x :=
+    hφ.clm_bundle_apply (F₁ := F) hv
+  simp only [contMDiffWithinAt_totalSpace] at hres
+  exact hres.2
+
+/-- **Parameter-dependent linear form, at a point.** -/
+lemma contMDiffAt_paramLinear_apply
+    (hφ : ContMDiffAt IM (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun m ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (E y →L[ℝ] ℝ)) (b m) (φ m)) x)
+    (hv : ContMDiffAt IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (v m : TotalSpace F E)) x) :
+    ContMDiffAt IM 𝓘(ℝ) n (fun m ↦ φ m (v m)) x := by
+  rw [← contMDiffWithinAt_univ] at hφ hv ⊢
+  exact contMDiffWithinAt_paramLinear_apply hφ hv
+
+/-- **Parameter-dependent linear form, on a set.** -/
+lemma contMDiffOn_paramLinear_apply
+    (hφ : ContMDiffOn IM (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun m ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (E y →L[ℝ] ℝ)) (b m) (φ m)) s)
+    (hv : ContMDiffOn IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (v m : TotalSpace F E)) s) :
+    ContMDiffOn IM 𝓘(ℝ) n (fun m ↦ φ m (v m)) s :=
+  fun m hm ↦ contMDiffWithinAt_paramLinear_apply (hφ m hm) (hv m hm)
+
+/-- **Parameter-dependent linear form, everywhere.** -/
+lemma contMDiff_paramLinear_apply
+    (hφ : ContMDiff IM (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun m ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (E y →L[ℝ] ℝ)) (b m) (φ m)))
+    (hv : ContMDiff IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (v m : TotalSpace F E))) :
+    ContMDiff IM 𝓘(ℝ) n (fun m ↦ φ m (v m)) :=
+  fun m ↦ contMDiffAt_paramLinear_apply (hφ m) (hv m)
+
+end ParamLinear
+
 end PoincareCurvature.ParametrizedInner
