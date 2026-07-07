@@ -1952,3 +1952,52 @@ reconciliation and the `realization`/`encode` parabolic smoothing (`SmoothIntrin
 A concrete next inch: the frozen operator's Banach solution curve stays in `positiveDefiniteLocus`
 (already the solution's constraint) AND `symmetricLocus` (now that its velocity is certified
 symmetric) — package the curve's symmetric-positive-definite membership toward the realized metric.
+
+### Item 3 (GAP 2) later-32 — the frozen geometric Ricci–DeTurck Banach solution curve is certified symmetric-positive-definite, in the IVP `realization` shape (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The later-31 NEXT inch — "package the curve's symmetric-positive-definite membership toward the
+realized metric" — is now discharged.  Key observation defeating the apparent need for the `geometric`
+field: the ODE symmetric-carrier invariance
+`exists_unique_in_symmetricPositiveDefiniteLocus_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn`
+routes the symmetric-positive-definite conclusion PURELY through *velocity symmetry*
+(`A τ s ∈ symmetricLocus`) — NOT through the chart's `geometric` identification.  We already have the
+velocity symmetry for the frozen operator (`deTurckFrozenGeometric_A_mem_symmetricLocus`, later-31), and
+its `picard` (`deTurckFrozenGeometric_exists_isPicardLindelof`) and uniform Lipschitz
+(`deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordinates`).  Feeding these three
+to the invariance lemma yields, in `AnalyticPDE/GeometricReactionPicardTangent.lean` (additive,
+axiom-clean):
+* `deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_symmetricPositiveDefiniteLocus` — the
+  frozen geometric operator, anchored at the metric section of a genuine continuous Riemannian metric
+  `g₀`, admits a positive-definite-locus Banach evolution local solution, forward-unique on the overlap,
+  **whose curve stays in `symmetricPositiveDefiniteLocus` at every time of its interval** (the
+  coordinatewise antisymmetric defect solves the same linear ODE, starts at `0` since `g₀` is symmetric,
+  hence stays `0`).
+* `deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_symmetricPositiveDefiniteLocus_ivp` —
+  the IVP-vocabulary specialisation (`g₀ := ivp.initialMetric.toContinuousRiemannianMetric`,
+  `t₀ := ivp.initialTime`), so the produced `sol` is anchored at
+  `InitialValueProblem.toContinuousSectionSpace … ivp` — *exactly* the shape the chart-closure
+  `RicciDeTurckChartClosureData.realization` / `SmoothMetricSectionCurveData` consume — now additionally
+  certified to trace a symmetric-positive-definite metric family (the `mem_spd` ingredient).
+
+**Formulation resolution (as requested by the primary directive).**  `picard : IsPicardLindelof A` is a
+Banach-space (bounded / Cauchy–Lipschitz) requirement.  Ground-truth: the frozen (coefficient-frozen-at-
+`g₀,t`) geometric operator `A τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t`
+is a BOUNDED 0th-order operator that inhabits `picard` and `lipschitz` DIRECTLY (Mathlib Banach ODE
+closes it) — but satisfies the geometric identification `A τ s = intrinsicRicciDeTurckRHS g bg τ` ONLY at
+the single metric section `s = (g t).toSection`
+(`deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS`),
+never for all `s ∈ positiveDefiniteLocus`.  The operator that satisfies `geometric` for all `s` is the
+true state-dependent 2nd-order Ricci–DeTurck RHS, which is C⁰-UNBOUNDED, so `picard` fails on it.  Hence
+`picard` and `geometric` are in direct tension and NO single bounded `A` inhabits both; closing the chart
+genuinely requires the parabolic mild/Schauder reconciliation (a mild/regularised representative that is
+bounded+Lipschitz AND faithfully represents the RHS via the heat-semigroup smoothing gain).  This is the
+unchanged point-4 long pole.  The later-32 results are the honest realization-side consistency
+ingredients (`sol` in realization shape + symmetric-PD certification of its curve) that the reconciliation
+will consume; they are available independently of it.
+
+**NEXT (unchanged long pole).**  The `SmoothMetricSectionCurveData` for the frozen solution needs its
+`contMDiff` field (spatial `C²` of every time slice) — which, even for the *bounded* frozen operator, is
+a genuine analytic result (C⁰ Banach ODE solution with a smooth-coefficient 0th-order generator stays
+spatially `C²`, needing a uniform-`C²` bound on the Picard iterates), and for the *real* operator is the
+full parabolic Schauder gain.  Absent that, the chart's `geometric`/`realization` reconciliation remains
+the critical path.
