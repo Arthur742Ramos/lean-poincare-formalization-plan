@@ -19,3 +19,4 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReacti
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReactionCoordBounds
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReactionPicardTangent
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CompactGaugeFlowRaising
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.DeTurckRaisedGaugeField
