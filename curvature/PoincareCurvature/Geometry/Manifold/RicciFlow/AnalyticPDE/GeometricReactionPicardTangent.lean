@@ -705,4 +705,48 @@ theorem deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_positiveD
     xc Kc hKc Ko hKo hKoEq hcover g background t hbackground
     ⟨g₀.toSection, g₀.continuous_toSection⟩ t₀ T₀ hT₀ a (NNReal.coe_pos.mpr ha) _ hsub
 
+/-- **`BanachEvolutionLocalSolutionIn` for the frozen geometric Ricci–DeTurck operator, in the
+positive-definite locus, at the initial section of a Ricci–DeTurck initial value problem.**  The
+IVP-vocabulary specialisation of
+`deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_positiveDefiniteLocus` obtained with
+`g₀ := ivp.initialMetric.toContinuousRiemannianMetric` and `t₀ := ivp.initialTime`: since
+`InitialValueProblem.toContinuousSectionSpace … ivp` is by definition
+`⟨ivp.initialMetric.toContinuousRiemannianMetric.toSection, …⟩`, the produced Banach evolution local
+solution is anchored exactly at the IVP's initial section, on the IVP's initial time, constrained to the
+positive-definite locus.  This is *precisely* the shape of the `sol` argument the chart-closure
+`realization` field consumes
+(`BanachEvolutionLocalSolutionIn chart.A (positiveDefiniteLocus …) ivp.initialTime
+(InitialValueProblem.toContinuousSectionSpace … ivp)`), modulo the identification of the frozen
+geometric operator with the chart's `A`. -/
+theorem deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_positiveDefiniteLocus_ivp
+    {κ : Type*} [Finite κ] [Nontrivial E]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (ivp : RicciFlow.InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (T₀ : ℝ) (hT₀ : ivp.initialTime < T₀) :
+    ∃ (T : ℝ) (_ : ivp.initialTime < T),
+      Nonempty (RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn
+        (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous s
+          + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+              Kc hKc Ko hKo hKoEq hcover g t)
+        (positiveDefiniteLocus (M := M) (F := E) (W := TM)
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+        ivp.initialTime
+        (RicciFlow.AnalyticPDE.MetricLocusEvolution.InitialValueProblem.toContinuousSectionSpace
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover ivp)) :=
+  deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_positiveDefiniteLocus
+    xc Kc hKc Ko hKo hKoEq hcover g background t hbackground
+    ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T₀ hT₀
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
