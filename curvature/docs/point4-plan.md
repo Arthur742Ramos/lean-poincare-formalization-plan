@@ -1912,3 +1912,43 @@ capstone's `raisedGaugeField g om`.  The natural bridge is the pointwise identit
   syntactic).  With that identity in hand, `raisedGaugeField_neg` turns it into the gauge-field form and
   the later-29 flow capstone yields the DeTurck `C³` gauge flow directly.  (GAP 2's geometric chart
   `A`/Schauder realization remains the point-4 long pole.)
+
+### Item 3 (GAP 2) later-31 — the geometric frozen chart operator's symmetry is certified: `A s ∈ symmetricLocus` + defect-zero, without the `geometric` field (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Ground-truth state on entry: the geometric-A `picard`/`lipschitz`/Banach-evolution-solution for the
+frozen operator `A s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t`
+(`deTurckFrozenGeometric_exists_isPicardLindelof`, `..._nonempty_banachEvolutionLocalSolutionIn_*`)
+are DONE.  The chart's remaining `geometric` field (`∀ s ∈ locus, ∃ g bg, A τ s = intrinsicRicciDeTurckRHS
+g bg τ`) is a GENUINE math gap: the frozen (bounded, coefficient-frozen-at-`g₀,t`) operator satisfies
+the identification ONLY at `s = (g t).toSection` (`deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS`),
+never for all `s` — the true state-dependent operator that would satisfy `geometric` is 2nd-order
+unbounded, so `picard` fails on it.  Reconciling the two (bounded ⟺ geometric) IS the parabolic
+long pole (`realization`/`encode`), unchanged.
+
+This session added, in `AnalyticPDE/GeometricReactionPicardTangent.lean` (all additive, axiom-clean),
+the **symmetry certification** of the frozen geometric chart operator — the direct frozen-operator
+analogues of the chart's `A_mem_symmetricLocus` / `A_coordwiseSymmetryDefect_eq_zero`, established
+WITHOUT the (unavailable) `geometric` field:
+* `deTurckReactionSectionMap_mem_symmetricLocus` — the `∇W` reaction summand lands in `symmetricLocus`
+  for EVERY section `s` (symmetric or not): `deTurckReactionSectionMap_apply` gives `s x (P u) v +
+  s x (P v) u`, manifestly symmetric in `(u,v)`; `ring`.  Unconditional.
+* `deTurckReactionSectionMap_add_mem_symmetricLocus` — `reaction s + b ∈ symmetricLocus` whenever
+  `b` is.  Proved via the `symmetricSectionSubmodule` add-closure (`mem_symmetricSectionSubmodule_iff`
+  + `add_mem`), which DODGES the `SeminormedAddCommGroup (BilinearFormBundle x)` Π-fibre diamond that
+  blocks a direct `ContinuousSectionSpace.add_apply` evaluation at `V := TangentSpace I` (the same
+  fibre-seminorm wall this file's coord-readout bridges were built to avoid — recorded so it is not
+  re-hit).  Needs `x0`/`het`.
+* `deTurckFrozenGeometric_A_mem_symmetricLocus` — the concrete frozen operator lands in
+  `symmetricLocus` (the `(-2)•Ric` source is symmetric by `intrinsicRicciFlowRHSSectionSpace_symm`).
+* `deTurckFrozenGeometric_A_coordwiseSymmetryDefect_eq_zero` — its
+  `coordwiseSymmetryDefectContinuousLinearMap` vanishes (via `..._eq_zero_iff`), the defect-zero datum
+  the symmetric-carrier / interval-defect chart machinery consumes.
+
+**Value.**  Certifies the geometric chart operator's Banach evolution VELOCITY is symmetric, so its
+solution curve stays a symmetric metric family — a realization-side consistency ingredient available
+independently of the chart assembly.  **NEXT (unchanged long pole):** the `geometric` field
+reconciliation and the `realization`/`encode` parabolic smoothing (`SmoothIntrinsicDeTurckRealization`
+/ `SmoothMetricSectionCurveData` from the frozen Banach solution) remain the point-4 critical path.
+A concrete next inch: the frozen operator's Banach solution curve stays in `positiveDefiniteLocus`
+(already the solution's constraint) AND `symmetricLocus` (now that its velocity is certified
+symmetric) — package the curve's symmetric-positive-definite membership toward the realized metric.
