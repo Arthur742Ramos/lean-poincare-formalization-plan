@@ -2132,3 +2132,58 @@ readout with `exp ((t - t₀) • L_x)` fibrewise, then feed spatial `C²` of `P
 `contDiff_exp_sub_smul_of_contDiff` for the `SmoothMetricSectionCurveData.contMDiff` field.  (GAP 2's
 *honest* geometric chart — the state-dependent 2nd-order/mild operator satisfying `geometric` for all
 `s` — still requires the parabolic Schauder smoothing gain and remains the point-4 long pole.)
+
+### Item 3 (GAP 2) later-36 — raw-function-level linearity of the frozen DeTurck reaction operator committed; CSS-level `map_add`/`map_smul` blocked by the BilinearFormBundle concreteness wall (one commit; `{propext, Classical.choice, Quot.sound}`)
+
+The later-35 `NEXT` was to package `deTurckReactionSectionMap ∇W` as a bounded linear `CSS →L[ℝ] CSS`
+generator (for the frozen chart's autonomous resolvent).  The operator is manifestly linear
+(`deTurckReactionSectionMap_apply : s x u v = s x (P x u) v + s x (P x v) u`).  This session committed the
+**wall-free half** of that packaging, in `AnalyticPDE/GeometricReactionPicardTangent.lean` (additive,
+axiom-clean):
+
+* `bilinearFormSectionDeTurckReaction_add` / `bilinearFormSectionDeTurckReaction_smul` — the underlying
+  raw map `bilinearFormSectionDeTurckReaction · P` on the **raw Pi-function space** `Π x, BilW x` is
+  additive / ℝ-homogeneous.  Proved at the canonical `BilinearFormBundle` fibre
+  (`Pi.add_apply`/`Pi.smul_apply` + `bilinearFormSectionDeTurckReaction_apply` +
+  `ContinuousLinearMap.add_apply`/`smul_apply`, closed by `add_add_add_comm`/`smul_add`), which does
+  **not** meet the transported-section-add whnf wall because it never touches the
+  `ContinuousSectionSpace` add.
+* `deTurckReactionSectionMap_toFun` — the definitional bridge
+  `(deTurckReactionSectionMap … hP s).toFun = bilinearFormSectionDeTurckReaction s.toFun P` (`rfl`).
+
+**BLOCKER (BilinearFormBundle concreteness whnf wall).**  Assembling these into the `CSS`-level
+`deTurckReactionSectionMap_map_add : deTurckReactionSectionMap … (s + s') = deTurckReactionSectionMap … s
++ deTurckReactionSectionMap … s'` requires relating the transported `ContinuousSectionSpace` add of the
+**reaction sections** to the raw Pi add, i.e. applying `ContinuousSectionSpace.add_apply` to
+`deTurckReactionSectionMap … s` and `deTurckReactionSectionMap … s'`.  Every operation that touches these
+two reaction-section values in a defeq/whnf context blows past `maxHeartbeats 2000000`:
+  - `add_apply … (deTurckReactionSectionMap … s) (deTurckReactionSectionMap … s') y` — `whnf`/`isDefEq`
+    timeout (whereas the *identical* `add_apply … s s' y` on the **input** sections `s s'` succeeds
+    instantly — `hs : (s + s').toFun = s.toFun + s'.toFun` compiles).
+  - Tried and all hit the wall: `simp only [add_apply/ContinuousLinearMap.add_apply]` (fiber-add diamond
+    whnf), `rw [add_apply]` (clean "did not find pattern" — the goal carries the `.toFun` *projection*
+    form, `add_apply`'s LHS the `CoeFun` form), `Eq.trans ?_ (add_apply …).symm` (isDefEq timeout on the
+    fibre add `deTurck s x + deTurck s' x`), a universally-quantified `.toFun`-form `addp`, explicit-typed
+    `have`s, `set a := deTurckReactionSectionMap …` (kabstract whnf timeout), and
+    `attribute [local irreducible] deTurckReactionSectionMap` (does **not** help — the blowup is in the
+    `ContinuousSectionSpace`/`BilinearFormBundle` add machinery on the reaction-section *type*, not in
+    unfolding `deTurckReactionSectionMap`).
+  - Likely root cause: the return type of `deTurckReactionSectionMap` writes its `V` as
+    `_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))` and its transported
+    `ContinuousSectionSpace.instAddCommGroup` carries the `BilinearFormBundle` fibre
+    NormedAddCommGroup/instance reachable by two paths; unifying the reaction-section value against
+    `add_apply`'s section binder forces a whnf through `equivCompatibleCoordFamilySubmodule` at the
+    concrete `BilW` fibre that does not terminate under the heartbeat budget.  Plain input sections `s s'`
+    avoid it because their type is the *binder* `ContinuousSectionSpace … (V := BilW) …` (notation),
+    syntactically aligned with `add_apply`'s expectation.
+
+**NEXT.**  A **definition-site** fix is likely required: either (a) give
+`deTurckReactionSectionMap`'s return type using the exact `BilW` notation / a fibre instance pinned to the
+single canonical `coordL`/`symmL` path so a reaction-section value is *syntactically* an `add_apply`
+section, or (b) prove a bespoke `deTurckReactionSectionMap_toFun_add` at the section level with the fibre
+instance supplied per the diamond-free eval API in `ContinuousSection` (`coord_apply`/`apply_eq_symmL_coord`),
+avoiding the transported-add whnf.  With `deTurckReactionSectionMap_toFun_add`/`_smul` in hand the
+`map_add'`/`map_smul'` fields, the `CSS →ₗ[ℝ] CSS` `deTurckReactionSectionLinearMap`, and the bounded
+`CSS →L[ℝ] CSS` `deTurckReactionSectionCLM` (norm bound from
+`deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates` + `exists_uniform_inCoord_bound`) all
+follow immediately — feeding the frozen chart's autonomous resolvent (later-35).
