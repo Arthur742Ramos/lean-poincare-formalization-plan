@@ -302,4 +302,32 @@ theorem hasDerivWithinAt_extChartAt_comp_self_of_hasMFDerivWithinAt
   rwa [tangentCoordChange_self (I := I) (x := γ t) (z := γ t) (v := w)
     (mem_extChartAt_source (γ t))] at h
 
+/-- **Raw-flow chart-representation derivative, upgraded to `HasDerivAt`.**  When the time set `s`
+is a neighbourhood of `t` — the situation for the *open* flow window `Set.Ioo (-ε) ε` at an interior
+time, which is exactly the shape of the ODE hypothesis in
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` — the within-set derivative of
+`hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt` upgrades to a full `HasDerivAt`.  This is the
+form consumed by Mathlib's model integral-curve / ODE-uniqueness API (`IsIntegralCurve`,
+`ODE_solution_unique`), the next step in the raw-flow chart-conjugation route. -/
+theorem hasDerivAt_extChartAt_comp_of_hasMFDerivWithinAt
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {p : M} {w : TangentSpace I (γ t)}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight w))
+    (hs : s ∈ nhds t)
+    (hsrc_ext : γ t ∈ (extChartAt I p).source) :
+    HasDerivAt (fun τ : ℝ ↦ extChartAt I p (γ τ))
+      (tangentCoordChange I (γ t) p (γ t) w) t :=
+  (hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt hγ hsrc_ext).hasDerivAt hs
+
+/-- **Raw-flow chart-representation derivative in the centered chart, upgraded to `HasDerivAt`.**
+The centered (`p := γ t`) `HasDerivAt` form of `hasDerivAt_extChartAt_comp_of_hasMFDerivWithinAt`,
+whose derivative is the flow velocity `w` itself.  Together with the fixed-chart version this is the
+model-ODE datum the raw compact flow supplies to the integral-curve uniqueness comparison against the
+model-`C³` flow tower. -/
+theorem hasDerivAt_extChartAt_comp_self_of_hasMFDerivWithinAt
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {w : TangentSpace I (γ t)}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight w))
+    (hs : s ∈ nhds t) :
+    HasDerivAt (fun τ : ℝ ↦ extChartAt I (γ t) (γ τ)) w t :=
+  (hasDerivWithinAt_extChartAt_comp_self_of_hasMFDerivWithinAt hγ).hasDerivAt hs
+
 end PoincareCurvature.GaugeFlowAssembly
