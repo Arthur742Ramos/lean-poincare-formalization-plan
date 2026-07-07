@@ -901,4 +901,52 @@ theorem deTurckFrozenGeometric_A_mem_symmetricLocus
       (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover g t x u v)
     s
 
+/-- **The geometric frozen Ricci–DeTurck chart operator has vanishing coordinatewise symmetry
+defect.**  The `coordwiseSymmetryDefectContinuousLinearMap` form of
+`deTurckFrozenGeometric_A_mem_symmetricLocus`, obtained through
+`coordwiseSymmetryDefectContinuousLinearMap_eq_zero_iff`: the transported coordinatewise
+antisymmetric-defect readout of the frozen geometric operator value vanishes.  This is the direct
+(frozen-operator) analogue of
+`TimeDependentGeometricRicciDeTurckBanachChart.A_coordwiseSymmetryDefect_eq_zero` — the defect-zero
+datum the symmetric-carrier / interval-defect chart machinery consumes — obtained here without the
+chart's `geometric` identification field. -/
+theorem deTurckFrozenGeometric_A_coordwiseSymmetryDefect_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover) :
+    coordwiseSymmetryDefectContinuousLinearMap (F := E) (V := BilW)
+        (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover
+        (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+            Kc hKc Ko hKo hKoEq hcover
+            (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+              g background t hbackground).continuous s
+          + RicciFlow.intrinsicRicciFlowRHSSectionSpace
+              (fun i => trivializationAt BilF BilW (xc i))
+              Kc hKc Ko hKo hKoEq hcover g t) = 0 :=
+  (coordwiseSymmetryDefectContinuousLinearMap_eq_zero_iff
+    (M := M) (F := E) (W := TM)
+    xc (fun i => trivializationAt BilF BilW (xc i)) (fun _ => rfl)
+    Kc hKc Ko hKo hKoEq hcover
+    (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+        Kc hKc Ko hKo hKoEq hcover
+        (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+          g background t hbackground).continuous s
+      + RicciFlow.intrinsicRicciFlowRHSSectionSpace
+          (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover g t)).2
+    (deTurckFrozenGeometric_A_mem_symmetricLocus
+      xc Kc hKc Ko hKo hKoEq hcover g background t hbackground s)
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
