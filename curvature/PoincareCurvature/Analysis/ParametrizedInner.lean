@@ -99,4 +99,80 @@ lemma contMDiff_metricSection_apply₂
 
 end
 
+section ParamBilin
+
+/-!
+### The genuinely parameter-dependent bilinear form
+
+For a *time-dependent* metric the fibrewise bilinear form depends on the full parameter `m` (which
+carries the time coordinate), not merely on the base point `b m`.  We therefore also record the
+version whose bilinear-form section `ψ : ∀ m, E (b m) →L[ℝ] E (b m) →L[ℝ] ℝ` is an arbitrary function
+of the parameter (its fibre still living over `b m`).  Instantiating `M := ℝ × M`, `b := Prod.snd`,
+and `ψ (t, x) := (g t).inner x` gives the joint `(t, x)` smoothness of a time-dependent metric
+evaluated on two jointly-smooth sections — exactly the input the space-time Gram matrix needs.
+-/
+
+variable
+  {EB : Type*} [NormedAddCommGroup EB] [NormedSpace ℝ EB]
+  {HB : Type*} [TopologicalSpace HB] {IB : ModelWithCorners ℝ EB HB} {n : WithTop ℕ∞}
+  {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  {E : B → Type*} [TopologicalSpace (TotalSpace F E)] [∀ x, NormedAddCommGroup (E x)]
+  [∀ x, NormedSpace ℝ (E x)]
+  [FiberBundle F E] [VectorBundle ℝ F E]
+  {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
+  {HM : Type*} [TopologicalSpace HM] {IM : ModelWithCorners ℝ EM HM}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace HM M]
+  {b : M → B} {v w : ∀ x, E (b x)} {s : Set M} {x : M}
+  {ψ : ∀ m : M, E (b m) →L[ℝ] E (b m) →L[ℝ] ℝ}
+
+/-- **Parameter-dependent bilinear form, within a set at a point.**  Here the bilinear-form section
+`ψ m : E (b m) →L[ℝ] E (b m) →L[ℝ] ℝ` may depend on the full parameter `m` (its fibre over `b m`).
+If it and two sections `v w` are `C^n` jointly in `m`, so is the scalar `m ↦ ψ m (v m) (w m)`. -/
+lemma contMDiffWithinAt_paramBilin_apply₂
+    (hψ : ContMDiffWithinAt IM (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) n
+      (fun m ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (E y →L[ℝ] E y →L[ℝ] ℝ)) (b m) (ψ m)) s x)
+    (hv : ContMDiffWithinAt IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (v m : TotalSpace F E)) s x)
+    (hw : ContMDiffWithinAt IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (w m : TotalSpace F E)) s x) :
+    ContMDiffWithinAt IM 𝓘(ℝ) n (fun m ↦ ψ m (v m) (w m)) s x := by
+  have hres : ContMDiffWithinAt IM (IB.prod 𝓘(ℝ)) n
+      (fun m ↦ TotalSpace.mk' ℝ (E := Bundle.Trivial B ℝ) (b m) (ψ m (v m) (w m))) s x :=
+    hψ.clm_bundle_apply₂ (F₁ := F) (F₂ := F) hv hw
+  simp only [contMDiffWithinAt_totalSpace] at hres
+  exact hres.2
+
+/-- **Parameter-dependent bilinear form, at a point.** -/
+lemma contMDiffAt_paramBilin_apply₂
+    (hψ : ContMDiffAt IM (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) n
+      (fun m ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (E y →L[ℝ] E y →L[ℝ] ℝ)) (b m) (ψ m)) x)
+    (hv : ContMDiffAt IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (v m : TotalSpace F E)) x)
+    (hw : ContMDiffAt IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (w m : TotalSpace F E)) x) :
+    ContMDiffAt IM 𝓘(ℝ) n (fun m ↦ ψ m (v m) (w m)) x := by
+  rw [← contMDiffWithinAt_univ] at hψ hv hw ⊢
+  exact contMDiffWithinAt_paramBilin_apply₂ hψ hv hw
+
+/-- **Parameter-dependent bilinear form, on a set.** -/
+lemma contMDiffOn_paramBilin_apply₂
+    (hψ : ContMDiffOn IM (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) n
+      (fun m ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (E y →L[ℝ] E y →L[ℝ] ℝ)) (b m) (ψ m)) s)
+    (hv : ContMDiffOn IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (v m : TotalSpace F E)) s)
+    (hw : ContMDiffOn IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (w m : TotalSpace F E)) s) :
+    ContMDiffOn IM 𝓘(ℝ) n (fun m ↦ ψ m (v m) (w m)) s :=
+  fun m hm ↦ contMDiffWithinAt_paramBilin_apply₂ (hψ m hm) (hv m hm) (hw m hm)
+
+/-- **Parameter-dependent bilinear form, everywhere.** -/
+lemma contMDiff_paramBilin_apply₂
+    (hψ : ContMDiff IM (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) n
+      (fun m ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (E y →L[ℝ] E y →L[ℝ] ℝ)) (b m) (ψ m)))
+    (hv : ContMDiff IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (v m : TotalSpace F E)))
+    (hw : ContMDiff IM (IB.prod 𝓘(ℝ, F)) n (fun m ↦ (w m : TotalSpace F E))) :
+    ContMDiff IM 𝓘(ℝ) n (fun m ↦ ψ m (v m) (w m)) :=
+  fun m ↦ contMDiffAt_paramBilin_apply₂ (hψ m) (hv m) (hw m)
+
+end ParamBilin
+
 end PoincareCurvature.ParametrizedInner
