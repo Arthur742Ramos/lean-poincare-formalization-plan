@@ -1345,3 +1345,58 @@ into `exists_Ioo_forall_mem_of_continuousAt_source` (open target = a chart sourc
 to discharge `hγ_src`, and into `…_graph_mem_compact_…_manifoldTarget` for `hγ_mem`, in the step-(v)
 capstone `contMDiffOn_flowSlice_of_cutoff_orbit_control`; then residual (b) `hX` (the DeTurck gauge
 field's joint section-smoothness) and the finite-cover globalisation.
+
+### Progress (2026-07-07, later 18) — Item 2 GAP 1: the named NEXT is DONE — the raw-manifold `hγ_src`/`hγ_mem`/`heq` faces of step (v) are now MECHANICALLY PRODUCED from the compact flow's joint continuity, on a single common window
+
+**What landed (all in `AnalyticPDE/ModelManifoldGaugeFlow.lean`, namespace
+`RicciFlow.AnalyticPDE.SmoothDependenceCk`, additive, sorry-free, axiom-clean
+`{propext, Classical.choice, Quot.sound}`; six commits).**  The later-17 NEXT — feed
+`exists_timeDependent_flow_compact_continuousAt` into the confinement APIs to discharge `hγ_src`/`hγ_mem` —
+is now closed, and bundled onto one window together with `heq`:
+
+* **`exists_Ioo_forall_forall_mem_of_isCompact_of_continuousAt_source`** — the compact-`Q` generalisation
+  of the singleton `exists_Ioo_forall_mem_of_continuousAt_source`: every orbit `τ ↦ Ψ τ q` (for `q` in a
+  compact `Q`) confined to an open `U` on a **single** window (via the `manifoldTarget` tube lemma with
+  `W = univ ×ˢ U`).
+* **`exists_Ioo_forall_forall_mem_extChartAt_source_of_continuousAt`** — the `hγ_src` datum: specialises
+  the above to `U = (extChartAt I p).source` and an anchored flow (`Φ 0 = id`), so the anchor condition
+  reduces to `Q ⊆ (extChartAt I p).source`.  Gives `∀ τ ∈ Ioo a b, ∀ x ∈ Q, Φ τ x ∈ (extChartAt I p).source`.
+* **`exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_prod`** — the tube lemma with
+  **distinct** domain `Y` / codomain `Z` (the `manifoldTarget` proof never used `Y = Z`).  Needed because
+  the `hγ_mem` confined quantity is the **chart image** `extChartAt I p (Φ τ x) : E` of the orbit `Φ τ x : M`.
+* **`continuousAt_zero_prod_extChartAt_flow`** — joint continuity of `z ↦ extChartAt I p (Φ z.1 z.2)` at
+  `(0, x)` for `x ∈ (extChartAt I p).source` (post-compose `Φ`'s joint continuity with `continuousAt_extChartAt'`).
+* **`exists_Ioo_forall_forall_extChartAt_mem_of_continuousAt`** — the `hγ_mem` datum: the `…_prod` tube
+  lemma applied to the chart-composed flow, giving `∀ τ ∈ Ioo a b, ∀ x ∈ Q, (τ, extChartAt I p (Φ τ x)) ∈ W`
+  for an open space-time target `W` (take `W` = the state graph `{z | z.2 ∈ state z.1}` for the capstone).
+* **`exists_Ioo_forall_and`** — anchor-preserving intersection of two `Ioo`-window confinements
+  (`max`/`min` endpoints).  The generic glue for merging step (v)'s several confinement windows into one.
+* **`exists_Ioo_forall_forall_extChartAt_source_and_mem_of_continuousAt`** — `hγ_src` **and** `hγ_mem` on
+  a single common window (the two above merged by the combinator).
+* **`exists_timeDependent_flow_compact_extChartAt_source_and_mem`** — END-TO-END: from the field jet `hX`,
+  `exists_timeDependent_flow_compact_continuousAt` gives the flow `Φ` + orbit ODE on `Ioo (-ε) ε` +
+  joint continuity; intersecting with the confinement window yields a **single** window `Ioo a b ∋ 0` on
+  which `hγ` (ODE, `mono`-restricted), `hγ_src`, and `hγ_mem` all hold, over a compact patch
+  `Q ⊆ (extChartAt I p).source` — the raw-manifold input package of the step-(v) capstone, produced
+  unconditionally from the field's jet.
+* **`extChartAt_flow_eq_maps3_at_zero`** — the `heq` datum at the common anchor `0`: with both `Φ` and the
+  model gauge flow `G` anchored at `0`, `extChartAt I p (Φ 0 x) = (G.maps3 0) (extChartAt I p x)`
+  (both sides `= extChartAt I p x`).  Choosing the capstone's reference time `t₀ = 0` discharges `heq` free.
+* **`isCompact_extChartAt_image`** — compactness of `extChartAt I p '' Q`, the model-space initial set
+  `Q_E` over which the model-curve confinement `exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith`
+  (the `hg_mem`/`hχ` faces) is taken — the bridge between the two sides' initial sets.
+
+**Shape check.**  Modulo trivial `∀`-reordering (`∀ τ, ∀ x` ↔ `∀ x, ∀ τ`), `U ⊆ Q`, and `W` = the state
+graph, these producers have EXACTLY the `hγ_src`/`hγ_mem`/`heq` shapes of
+`contMDiffOn_flowSlice_of_cutoff_orbit_control`.  The raw-manifold orbit-control confinement is now
+mechanically assembled; the model-curve `hg_mem`/`hχ`-graph faces reduce (over `isCompact_extChartAt_image`)
+to the already-proved `exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith` +
+`cutoff_eqOne_along_curve_of_graph_subset`.
+
+**Fraction of GAP 1.**  All the ORBIT-CONFINEMENT content of step (v) is now producible from the compact
+flow's joint continuity + the compact chart patch.  **NEXT:** the FINAL step-(v) assembly — merge the raw
+bundle (`exists_timeDependent_flow_compact_extChartAt_source_and_mem`) with the model-curve confinements
+over `isCompact_extChartAt_image` via `exists_Ioo_forall_and`, choose `t₀ = 0` for `heq`, and feed all of
+`hγ`,`hγ_src`,`hγ_mem`,`hg_mem`,`hχ`,`heq` into `contMDiffOn_flowSlice_of_cutoff_orbit_control` — leaving
+ONLY the field-analytic faces `hlip` (`chartPushforwardField` Lipschitz on `state τ`) and `hnhds`, plus
+the residual (b) `hX` (DeTurck gauge field joint section-smoothness) and the finite-cover globalisation.
