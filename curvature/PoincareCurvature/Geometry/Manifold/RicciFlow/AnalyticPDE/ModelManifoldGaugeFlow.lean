@@ -642,6 +642,28 @@ theorem contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn
     ContDiff ℝ 3 (G.maps3 t : E → E) :=
   contMDiff_iff_contDiff.mp (G.maps3 t).contMDiff
 
+/-- **Model gauge-flow curves are integral curves of the field (ordinary within-set derivative).**  On
+the model manifold `E`, the manifold ODE readout `Diffeomorph3GaugeFlowOn.hasMFDerivWithinAt` becomes a
+genuine `HasDerivWithinAt`: for a fixed base point `q`, the flow curve `τ ↦ G.maps3 τ q` has, at every
+time `t ∈ s`, derivative `Xc t (G.maps3 t q)` (the field value at the current position).  The manifold
+Fréchet derivative `(1).smulRight (Xc t (G.maps3 t q))` transfers to the ordinary derivative via the
+model-space `HasMFDerivWithinAt.hasFDerivWithinAt` and `smulRight_one_eq_toSpanSingleton`.
+
+This is the `hg'` datum consumed by `GaugeFlowAssembly.extChartAt_comp_eqOn_of_lipschitzOnWith`: with
+`g := τ ↦ G.maps3 τ q` the model comparison curve, on the region where the cutoff `χ ≡ 1` the field
+`Xc = χ • chartPushforwardField` reduces to `chartPushforwardField`, so this readout supplies the
+integral-curve hypothesis of the step-(v) temporal uniqueness comparison. -/
+theorem hasDerivWithinAt_maps3_eval_of_model_diffeomorph3GaugeFlowOn
+    [FiniteDimensional ℝ E] [CompleteSpace E]
+    {Xc : CovariantDerivative.TimeDependentVectorField (I := 𝓘(ℝ, E)) (M := E)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E) Xc s t₀)
+    {t : ℝ} (ht : t ∈ s) (q : E) :
+    HasDerivWithinAt (fun τ : ℝ => (G.maps3 τ) q) (Xc t ((G.maps3 t) q)) s t := by
+  have hfd := (G.hasMFDerivWithinAt ht q).hasFDerivWithinAt
+  rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton] at hfd
+  exact hasDerivWithinAt_iff_hasFDerivWithinAt.mpr hfd
+
 end
 
 end SmoothDependenceCk
