@@ -1528,6 +1528,43 @@ theorem contMDiffOn_flowSlice_perPatch_of_flow
   · intro x _
     exact extChartAt_flow_eq_maps3_at_zero (p := p) G hanchor x
 
+/-- **Finite-cover globalisation of per-patch slice-`C³` to a global slice-`C³` window.**  The gluing
+step of GAP-1 step (v): given a family `U : ι → Set M` (`ι` finite) of OPEN sets covering `M`, and for
+each patch `i` an honest open time window `Set.Ioo (a i) (b i) ∋ 0` on which the flow slice `Φ t` is
+`ContMDiffOn I I 3` on `U i` (exactly the output of `contMDiffOn_flowSlice_perPatch_of_flow`), there is a
+single open window `Set.Ioo c d ∋ 0` on which `Φ t` is **globally** `ContMDiff I I 3` on all of `M`.
+
+The finite intersection `⋂ i, Set.Ioo (a i) (b i)` of the patch windows is an open neighbourhood of `0`
+(`isOpen_iInter_of_finite`), hence contains an honest `Set.Ioo c d ∋ 0` (`mem_nhds_iff_exists_Ioo_subset`);
+for `t` in it, `t` lies in every patch window, so `Φ t` is `ContMDiffOn` on every `U i`, and since the
+`U i` are open and cover `M`, `contMDiff_of_locally_contMDiffOn` upgrades this to global `ContMDiff`.
+Together with the global compact flow existence and `contMDiffOn_flowSlice_perPatch_of_flow` on each
+chart patch of a finite cover, this is the finite-cover globalisation that closes the `hslicesC3`
+(`∀ t, ContMDiff I I 3 (Φ t)`) content of GAP-1 step (v) once the per-patch field-analytic data is
+supplied. -/
+theorem exists_Ioo_forall_contMDiff_of_finite_cover
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    {ι : Type*} [Finite ι] {Φ : ℝ → M → M} {U : ι → Set M}
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hpatch : ∀ i : ι, ∃ a b : ℝ, (0 : ℝ) ∈ Set.Ioo a b ∧
+      ∀ t ∈ Set.Ioo a b, ContMDiffOn I I 3 (fun x : M => Φ t x) (U i)) :
+    ∃ c d : ℝ, (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (fun x : M => Φ t x) := by
+  choose a b hmem hslice using hpatch
+  have hWopen : IsOpen (⋂ i, Set.Ioo (a i) (b i)) :=
+    isOpen_iInter_of_finite (fun i => isOpen_Ioo)
+  have hW0 : (0 : ℝ) ∈ ⋂ i, Set.Ioo (a i) (b i) :=
+    Set.mem_iInter.mpr (fun i => hmem i)
+  obtain ⟨c, d, hcd, hsubW⟩ :=
+    mem_nhds_iff_exists_Ioo_subset.mp (hWopen.mem_nhds hW0)
+  refine ⟨c, d, hcd, fun t ht => ?_⟩
+  have htIoo : ∀ i, t ∈ Set.Ioo (a i) (b i) :=
+    fun i => Set.mem_iInter.mp (hsubW ht) i
+  refine contMDiff_of_locally_contMDiffOn (fun x => ?_)
+  obtain ⟨i, hxi⟩ := hcover x
+  exact ⟨U i, hopen i, hxi, hslice i t (htIoo i)⟩
+
 end
 
 end SmoothDependenceCk
