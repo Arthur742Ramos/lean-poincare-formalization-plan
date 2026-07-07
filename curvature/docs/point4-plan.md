@@ -1556,9 +1556,26 @@ and reduced the `hlip`/`state₀`/`hstate` residual to the chart field jet on a 
 
 **Reduction achieved.**  With `…_windowLip` + the two ball atoms, the step-(v) capstone's
 `hlip`/`state₀`/`hstate` residuals reduce to: place each patch's chart image in a ball whose closure lies
-in the target (a chart-source shrink), and supply the two gauge-field jets `hXraw`/`hXchart i`.  **NEXT:**
-the finite BALL cover of compact `M` (shrink each `Q_M i` so `extChartAt I (p i) '' Q_M i ⊆ Metric.ball
-(extChartAt I (p i) (p i)) ρᵢ` via chart symm-images), then the two field jets from the real Ricci-DeTurck
-gauge field — the genuinely field-analytic core of Item 2.  (GAP 2's chart `geometric`-for-all-`s`
-field remains the point-4 long pole: `ofLipschitzBoundedContinuous` still takes `hgeom` as a hypothesis,
-and the frozen operator supplies it only at the metric section.)
+in the target (a chart-source shrink), and supply the two gauge-field jets `hXraw`/`hXchart i`.  That
+chart-source shrink is now also DONE:
+
+* **`exists_finite_chart_ball_cover_compact`** (`ModelManifoldGaugeFlow.lean`) — the finite BALL cover of
+  compact `M`: strengthens `exists_finite_chart_cover_compact` so each compact patch `Q_M i` has
+  `extChartAt I (p i) '' Q_M i ⊆ Metric.ball (extChartAt I (p i) (p i)) (ρ i)` with
+  `Metric.closedBall … (ρ i) ⊆ (extChartAt I (p i)).target`.  The patch is the chart symm-image of a
+  half-radius closed ball (compact via `IsCompact.image_of_continuousOn`, `⊆ source` via `map_target`,
+  image the half-ball via `right_inv`); the open cover set is `source ∩ chart⁻¹'(ball)`
+  (`ContinuousOn.isOpen_inter_preimage`).
+
+**Net reduction.**  The step-(v) globalisation capstone's cover-side data (`hopen`/`hcover`/`hU`/`hUQ`/
+`hQ_M`/`hQ_M_src`) AND the convex-tube data (`state₀ := Metric.ball … (ρ i)` with `hstate`/`hlip`/
+`hplace_state`) are now ALL producible from compact `M` + the per-patch chart field jet `hXchart i`
+(feed `exists_finite_chart_ball_cover_compact`'s `ρ i`/`closedBall ⊆ target` into
+`exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField_ball`).  The window/cutoff data
+(`Kwin`/`hplace_win`/`χ`) come from `exists_compact_window_of_compact_patch` + the existing bump cutoff.
+**NEXT:** the genuinely field-analytic core — the two gauge-field jets `hXraw` (global `C¹` product-tangent
+jet) and `hXchart i` (`C^N`, `N ≥ 4`, per patch) of the REAL Ricci-DeTurck gauge field — then wire the
+whole package into `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip` for the
+general-`M` `hslicesC3` window.  (GAP 2's chart `geometric`-for-all-`s` field remains the point-4 long
+pole: `ofLipschitzBoundedContinuous` still takes `hgeom` as a hypothesis, and the frozen operator supplies
+it only at the metric section.)
