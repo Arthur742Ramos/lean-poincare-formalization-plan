@@ -565,4 +565,22 @@ theorem contDiffOn_chartPushforwardField {n : WithTop ℕ∞}
   rw [hL, TangentBundle.trivializationAt_apply, tangentCoordChange_def]
   rfl
 
+/-- **`LipschitzOnWith` of the chart pushforward field on a convex compact tube.**  The field-regularity
+datum consumed by the `hlip` hypothesis of `extChartAt_comp_eqOn_of_lipschitzOnWith`: combining the `C^n`
+regularity `contDiffOn_chartPushforwardField` (`n ≠ 0`, so `C^1` suffices) with
+`ContDiffOn.exists_lipschitzOnWith` (a `C^1` function on a convex compact set is Lipschitz), the chart
+pushforward field of a `C^n` tangent-bundle section is `LipschitzOnWith` some constant `K` on any convex
+compact subset `s` of the chart target.  This closes the field-Lipschitz step of the temporal
+integral-curve uniqueness comparison (with `s` the state tube `state t`), reducing the remaining GAP-1
+analytic content to the existence of the model-`C³` comparison flow `Ψ` itself. -/
+theorem exists_lipschitzOnWith_chartPushforwardField {n : WithTop ℕ∞}
+    [IsManifold I n M] [ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M} {τ : ℝ}
+    (hX : ContMDiffOn I (I.prod 𝓘(ℝ, E)) n
+      (fun y : M => (⟨y, X τ y⟩ : TangentBundle I M)) (extChartAt I p).source)
+    (hn : n ≠ 0) {s : Set E} (hs_sub : s ⊆ (extChartAt I p).target)
+    (hs_conv : Convex ℝ s) (hs_comp : IsCompact s) :
+    ∃ K, LipschitzOnWith K (chartPushforwardField I X p τ) s :=
+  ((contDiffOn_chartPushforwardField hX).mono hs_sub).exists_lipschitzOnWith hn hs_conv hs_comp
+
 end PoincareCurvature.GaugeFlowAssembly
