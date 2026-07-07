@@ -340,6 +340,58 @@ theorem exists_nhds_uniform_localFlow_continuousOn {E H M : Type*}
     rw [hUdef] at hp
     exact mem_of_mem_of_subset (hp.1.2.1 p.2 (Ioo_subset_Icc_self hp.2)) interior_subset
 
+/-- **Joint continuity at the anchor of an autonomous manifold flow — from the jointly-continuous
+local flow box and integral-curve uniqueness.** For a `C¹` vector field `v` on a boundaryless
+complete manifold, any flow map `Φ : ℝ → M → M` that is *anchored* (`Φ 0 y = y` for `y` near `x₀`)
+and whose orbits `τ ↦ Φ τ y` solve the field ODE on a *uniform* window `Ioo (-ε₀) ε₀` (for `y` near
+`x₀`) is jointly `(t, y)`-continuous at the anchor point `(0, x₀)`.  The chosen orbit is pinned to the
+jointly-continuous local flow `Ψ` of `exists_nhds_uniform_localFlow_continuousOn` by uniqueness of
+integral curves (`isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless`), transferring `Ψ`'s
+continuity across the coordinate swap `(t, y) ↦ (y, t)`.  This is the `ContinuousAt Φ (t₀, x)` datum
+the orbit-confinement control `exists_Ioo_forall_mem_of_continuousAt_source` consumes on the
+raw-manifold side of the step-(v) gauge-flow slice regularity. -/
+theorem continuousAt_zero_prod_flow_of_isMIntegralCurveOn {E H M : Type*}
+    [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {v : (x : M) → TangentSpace I x}
+    (hv : ContMDiff I I.tangent 1 (fun x => (⟨x, v x⟩ : TangentBundle I M)))
+    {Φ : ℝ → M → M} {x₀ : M} {ε₀ : ℝ} (hε₀ : 0 < ε₀)
+    (hanchor : ∀ᶠ y in 𝓝 x₀, Φ 0 y = y)
+    (horbit : ∀ᶠ y in 𝓝 x₀, IsMIntegralCurveOn (fun τ => Φ τ y) v (Set.Ioo (-ε₀) ε₀)) :
+    ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x₀) := by
+  obtain ⟨U₁, hU₁, ε₁, hε₁, Ψ, hΨ, hΨcont⟩ := exists_nhds_uniform_localFlow_continuousOn hv x₀
+  set ε₂ := min ε₀ ε₁ with hε₂def
+  have hε₂pos : 0 < ε₂ := lt_min hε₀ hε₁
+  have hsub₀ : Set.Ioo (-ε₂) ε₂ ⊆ Set.Ioo (-ε₀) ε₀ :=
+    Set.Ioo_subset_Ioo (by have := min_le_left ε₀ ε₁; linarith) (min_le_left ε₀ ε₁)
+  have hsub₁ : Set.Ioo (-ε₂) ε₂ ⊆ Set.Ioo (-ε₁) ε₁ :=
+    Set.Ioo_subset_Ioo (by have := min_le_right ε₀ ε₁; linarith) (min_le_right ε₀ ε₁)
+  set W : Set M := U₁ ∩ {y | Φ 0 y = y} ∩
+      {y | IsMIntegralCurveOn (fun τ => Φ τ y) v (Set.Ioo (-ε₀) ε₀)} with hWdef
+  have hWnhds : W ∈ 𝓝 x₀ :=
+    Filter.inter_mem (Filter.inter_mem hU₁ hanchor) horbit
+  have hagree : ∀ y ∈ W, ∀ τ ∈ Set.Ioo (-ε₂) ε₂, Φ τ y = Ψ y τ := by
+    intro y hyW τ hτ
+    rw [hWdef] at hyW
+    obtain ⟨hΨ0, hΨorbit⟩ := hΨ y hyW.1.1
+    have heq : Set.EqOn (fun τ => Φ τ y) (Ψ y) (Set.Ioo (-ε₂) ε₂) := by
+      refine isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless
+        (a := -ε₂) (b := ε₂) (t₀ := 0) ⟨by linarith, by linarith⟩ hv
+        (hyW.2.mono hsub₀) (hΨorbit.mono hsub₁) ?_
+      show Φ 0 y = Ψ y 0
+      rw [hyW.1.2, hΨ0]
+    exact heq hτ
+  have hΨcontAt : ContinuousAt (fun p : M × ℝ => Ψ p.1 p.2) (x₀, 0) :=
+    hΨcont.continuousAt (prod_mem_nhds hU₁ (Ioo_mem_nhds (by linarith) hε₁))
+  have hswapcont : ContinuousAt (fun z : ℝ × M => ((z.2, z.1) : M × ℝ)) (0, x₀) :=
+    (continuous_snd.prodMk continuous_fst).continuousAt
+  have hcompAt := hΨcontAt.comp_of_eq hswapcont rfl
+  refine hcompAt.congr ?_
+  have htime : Set.Ioo (-ε₂) ε₂ ∈ 𝓝 (0 : ℝ) := Ioo_mem_nhds (by linarith) hε₂pos
+  filter_upwards [prod_mem_nhds htime hWnhds] with z hz
+  exact (hagree z.2 hz.2 z.1 hz.1).symm
+
 /-- **Uniform existence time from the flow box and compactness.** On a compact
 manifold, the neighborhood-uniform flow box yields a single `ε > 0` working for
 *every* start point, by extracting a finite subcover and taking the minimum
