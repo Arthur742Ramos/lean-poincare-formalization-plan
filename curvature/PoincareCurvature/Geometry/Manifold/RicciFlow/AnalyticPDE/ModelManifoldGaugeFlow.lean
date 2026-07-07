@@ -1953,6 +1953,71 @@ theorem exists_finite_chart_ball_cover_compact
     rw [(extChartAt I i.1).right_inv (hhalf i.1 hz)]
     exact Metric.closedBall_subset_ball (by linarith [hRpos i.1]) hz
 
+/-- **Compact-manifold `C³` gauge-flow slice regularity from a single global field smoothness.**
+The end-to-end step-(v) globalisation, reduced to ONE hypothesis: the joint space-time smoothness of
+the gauge field `X : ℝ → M → E` as a `C^∞` section `(t, x) ↦ ⟨x, X t x⟩` of the tangent bundle
+`TangentBundle I M` over `ℝ × M`.  From it — for a compact boundaryless finite-dimensional manifold —
+there is a global flow `Φ` on some window `Ioo c d ∋ 0`, anchored `Φ 0 = id`, whose every time slice
+`Φ t` is `ContMDiff I I 3`.
+
+All the field-independent capstone data are produced internally: the finite chart BALL cover
+(`exists_finite_chart_ball_cover_compact`), the two field jets `hXraw` (via the space-time bridge
+`ManifoldFlow.contMDiff_spaceTimeField_of_contMDiff_tangentSection`) and `hXchart` (`ContMDiff.contMDiffOn`
+of `hXfield`), the per-patch field-Lipschitz tube on the chart ball
+(`GaugeFlowAssembly.exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField_ball`), the compact
+space-time cutoff window (`exists_compact_window_of_compact_patch`) and its smooth bump
+(`exists_contDiff_cutoff_one_nhdsSet_of_isCompact`), all fed to
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip`.  This closes the entire
+field-independent GAP-1 assembly: the ONLY remaining obligation for the general compact `M` is the
+global joint smoothness `hXfield` of the real Ricci–DeTurck gauge field.  (`C^∞` matches the natural
+regularity of the gauge field of a smooth metric family and makes the smooth-bump cutoff available.) -/
+theorem exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] [CompactSpace M] [IsManifold I 1 M]
+    [ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E}
+    (hXfield : ContMDiff ((𝓘(ℝ, ℝ)).prod I) I.tangent ∞
+      (fun p : ℝ × M => (⟨p.2, X p.1 p.2⟩ : TangentBundle I M))) :
+    ∃ (Φ : ℝ → M → M) (c d : ℝ), (∀ x, Φ 0 x = x) ∧ (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (fun x : M => Φ t x) := by
+  obtain ⟨ι, hιfin, p, U, Q_M, ρ, hopen, hcover, hU, hUQ, hQ_M, hQ_M_src,
+      hρpos, hball, hplace⟩ := exists_finite_chart_ball_cover_compact (I := I) (M := M)
+  haveI : Finite ι := hιfin
+  have hXchart : ∀ i, ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I (p i)).source) := fun i => hXfield.contMDiffOn
+  have hXraw : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun q : ℝ × M => (⟨q, ((1 : ℝ), X q.1 q.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))) :=
+    PoincareCurvature.ManifoldFlow.contMDiff_spaceTimeField_of_contMDiff_tangentSection
+      (hXfield.of_le (by exact_mod_cast le_top))
+  have hlipex : ∀ i, ∃ K : ℝ≥0, ∀ t ∈ Set.Icc (-1 : ℝ) 1, LipschitzOnWith K
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) t)
+      (Metric.ball (extChartAt I (p i) (p i)) (ρ i)) := fun i =>
+    PoincareCurvature.GaugeFlowAssembly.exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField_ball
+      (a := -1) (b := 1) (hXfield.contMDiffOn) (by simp) (hball i)
+  choose K hK using hlipex
+  have hwinex : ∀ i, ∃ Kwin : Set (ℝ × E), IsCompact Kwin ∧
+      Kwin ⊆ Set.univ ×ˢ (extChartAt I (p i)).target ∧
+      (∀ x ∈ Q_M i, ((0 : ℝ), extChartAt I (p i) x) ∈ interior Kwin) := fun i =>
+    exists_compact_window_of_compact_patch (hQ_M i) (hQ_M_src i)
+  choose Kwin hKwinCpt hKwinSub hplaceWin using hwinex
+  have hcutex : ∀ i, ∃ χ : ℝ × E → ℝ, ContDiff ℝ (⊤ : ℕ∞) χ ∧ HasCompactSupport χ ∧
+      tsupport χ ⊆ Set.univ ×ˢ (extChartAt I (p i)).target ∧
+      (∀ᶠ r in 𝓝ˢ (Kwin i), χ r = 1) ∧ ∀ r, χ r ∈ Set.Icc (0 : ℝ) 1 := fun i =>
+    exists_contDiff_cutoff_one_nhdsSet_of_isCompact (hKwinCpt i)
+      (isOpen_univ.prod (isOpen_extChartAt_target (I := I) (p i))) (hKwinSub i)
+  choose χ hχC0 hχc hsub hcut _hIcc using hcutex
+  exact exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip
+    (N := ∞) (cw := -1) (dw := 1) (p := p) (U := U) (Q_M := Q_M) (χ := χ) (Kwin := Kwin)
+    (state₀ := fun i => Metric.ball (extChartAt I (p i) (p i)) (ρ i)) (K := K)
+    hXraw ⟨by norm_num, by norm_num⟩ hopen hcover hXchart
+    (fun i => hχC0 i) hχc hsub hcut (by decide)
+    (fun i => Metric.isOpen_ball) hK hU hUQ hQ_M hQ_M_src hplace hplaceWin
+
 end
 
 end SmoothDependenceCk
