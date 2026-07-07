@@ -254,4 +254,52 @@ theorem contMDiff_of_forall_extChartAt_conjugation
   obtain ⟨x₀, U, Ψ, hUmem, hU, hΨ, hFU, hconj⟩ := h x
   exact (contMDiffOn_of_extChartAt_conjugation hU hΨ hFU hconj).contMDiffAt hUmem
 
+/-- **Raw-flow chart-representation derivative.**  The chart-conjugation `C³` transfer
+(`contMDiffOn_of_extChartAt_conjugation`) is fed by identifying a flow slice with a model `C³` map in
+charts; that identification, in turn, rests on the flow curve's *chart representation* solving a model
+ODE.  This lemma supplies exactly that at the RAW (pre-`C³`) level: for an abstract curve `γ : ℝ → M`
+that satisfies the manifold flow ODE `HasMFDerivWithinAt … γ s t ((1).smulRight w)` at time `t` — the
+hypothesis form produced by the compact-manifold flow
+(`ManifoldFlow.exists_timeDependent_flow_compact_inverse`) *before* any spatial regularity is known —
+the chart representation `τ ↦ extChartAt I p (γ τ)`, in any preferred chart whose source contains
+`γ t`, has the within-set derivative `tangentCoordChange I (γ t) p (γ t) w`.
+
+This is the abstract-curve analogue of
+`RicciFlow.Diffeomorph3GaugeFlowOn.hasDerivWithinAt_extChartAt_eval_of_mem_source`, but with the
+gauge-flow structure (which presupposes `C³`) replaced by the bare `HasMFDerivWithinAt` datum, so it
+applies to the *raw* compact flow whose `C³` regularity is exactly what the `hslicesC3` hypothesis of
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` must establish.  The proof is the
+model ODE chain rule: compose the chart map's `HasMFDerivWithinAt` (`hasMFDerivWithinAt_extChartAt`)
+with the curve's, then rewrite the composite `mfderiv` through
+`mfderiv_chartAt_eq_tangentCoordChange`. -/
+theorem hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {p : M} {w : TangentSpace I (γ t)}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight w))
+    (hsrc_ext : γ t ∈ (extChartAt I p).source) :
+    HasDerivWithinAt (fun τ : ℝ ↦ extChartAt I p (γ τ))
+      (tangentCoordChange I (γ t) p (γ t) w) s t := by
+  have hsrc : γ t ∈ (chartAt H p).source := by
+    simpa only [extChartAt_source] using hsrc_ext
+  rw [hasDerivWithinAt_iff_hasFDerivWithinAt, ← hasMFDerivWithinAt_iff_hasFDerivWithinAt]
+  apply (HasMFDerivWithinAt.comp t (hasMFDerivWithinAt_extChartAt (I := I) hsrc) hγ
+    (Set.subset_preimage_image _ _)).congr_mfderiv
+  rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton,
+    mfderiv_chartAt_eq_tangentCoordChange hsrc]
+  exact ContinuousLinearMap.comp_toSpanSingleton _ _
+
+/-- **Raw-flow chart-representation derivative in the centered chart.**  Specialization of
+`hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt` to the preferred chart centered at the
+time-`t` value `γ t`, where the tangent-coordinate change is the identity (`tangentCoordChange_self`),
+so the chart representation's within-set derivative is the flow velocity `w` itself.  This is the
+abstract-curve (raw-flow) analogue of
+`RicciFlow.Diffeomorph3GaugeFlowOn.hasDerivWithinAt_extChartAt_eval_self`. -/
+theorem hasDerivWithinAt_extChartAt_comp_self_of_hasMFDerivWithinAt
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {w : TangentSpace I (γ t)}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight w)) :
+    HasDerivWithinAt (fun τ : ℝ ↦ extChartAt I (γ t) (γ τ)) w s t := by
+  have h := hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt hγ
+    (mem_extChartAt_source (γ t))
+  rwa [tangentCoordChange_self (I := I) (x := γ t) (z := γ t) (v := w)
+    (mem_extChartAt_source (γ t))] at h
+
 end PoincareCurvature.GaugeFlowAssembly
