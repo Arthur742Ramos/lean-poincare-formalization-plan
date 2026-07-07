@@ -754,6 +754,62 @@ theorem extChartAt_comp_eqOn_maps3_of_cutoff_eqOne
   exact hasDerivAt_maps3_eval_of_cutoff_eqOne G (hnhds τ hτ)
     (mem_of_mem_nhds (hnhds τ hτ)) (extChartAt I p x) (hχ τ hτ)
 
+/-- **Step-(v) capstone: the compact-manifold gauge-flow slice is `ContMDiffOn I I 3` on a chart patch,
+modulo orbit-containment hypotheses.**  Assembles the full spatial-`C³` transfer of GAP-1 step (v) for a
+single time slice `Φ t` on a patch `U ⊆ (chartAt H p).source`.  For each `x ∈ U`, the uniqueness
+packaging `extChartAt_comp_eqOn_maps3_of_cutoff_eqOne` identifies the manifold-flow chart representation
+`τ ↦ extChartAt I p (Φ τ x)` with the model `G.maps3`-curve `τ ↦ (G.maps3 τ) (extChartAt I p x)` on the
+window; evaluated at the interior time `t` this is the spatial conjugation identity
+`extChartAt I p (Φ t x) = (G.maps3 t) (extChartAt I p x)`.  Feeding that (as `hconj`) together with the
+model slice-`C³` bound `contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn G t` (as `hΨ`) into the
+chart-conjugation transfer `GaugeFlowAssembly.contMDiffOn_of_extChartAt_conjugation'` (single chart `p`
+for source and target) yields `ContMDiffOn I I 3 (fun x ↦ Φ t x) U`.
+
+This is exactly the per-patch content of the `hslicesC3` obligation
+(`∀ t ∈ Set.Ioo a b, ContMDiff I I 3 (Φ t)`) consumed by
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`: with the compact
+manifold covered by finitely many such chart patches and the orbit-containment facts discharged, the
+per-patch `ContMDiffOn` glue to global `ContMDiff` closes GAP 1.  The remaining input is purely the
+orbit-containment control (the raw flow's chart-source stay `hγ_src`, the cutoff `hχ`, the tube
+memberships `hγ_mem`/`hg_mem`); all derivative/uniqueness/`C³`-transfer machinery is assembled here. -/
+theorem contMDiffOn_flowSlice_of_cutoff_orbit_control
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {p : M} {χ : ℝ × E → ℝ} {sTime : Set ℝ} {t₀' : ℝ}
+    (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+      (X := fun τ q => χ (τ, q) •
+        PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) sTime t₀')
+    (Φ : ℝ → M → M) {U : Set M} {a b t₀ t : ℝ} {K : NNReal} {state : ℝ → Set E}
+    (hU : U ⊆ (chartAt H p).source)
+    (ht : t ∈ Set.Ioo a b)
+    (ht₀ : t₀ ∈ Set.Ioo a b)
+    (hnhds : ∀ τ ∈ Set.Ioo a b, sTime ∈ 𝓝 τ)
+    (hlip : ∀ τ ∈ Set.Ioo a b,
+      LipschitzOnWith K
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ))
+    (hγ : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ x) (Set.Ioo a b) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x))))
+    (hγ_src : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ x ∈ (extChartAt I p).source)
+    (hχ : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, χ (τ, (G.maps3 τ) (extChartAt I p x)) = 1)
+    (hγ_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ x) ∈ state τ)
+    (hg_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) (extChartAt I p x) ∈ state τ)
+    (heq : ∀ x ∈ U, extChartAt I p (Φ t₀ x) = (G.maps3 t₀) (extChartAt I p x)) :
+    ContMDiffOn I I 3 (fun x : M => Φ t x) U := by
+  have hFU : Set.MapsTo (fun x : M => Φ t x) U (chartAt H p).source := by
+    intro x hx
+    have hsrc := hγ_src x hx t ht
+    rwa [extChartAt_source] at hsrc
+  refine PoincareCurvature.GaugeFlowAssembly.contMDiffOn_of_extChartAt_conjugation'
+    (x₀ := p) (y₀ := p) hU
+    (contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn G t) hFU ?_
+  intro x hx
+  have hEqOn := extChartAt_comp_eqOn_maps3_of_cutoff_eqOne (γ := fun σ : ℝ => Φ σ x) G hnhds
+    (hγ x hx) (hγ_src x hx) ht₀ hlip (hχ x hx) (hγ_mem x hx) (hg_mem x hx) (heq x hx)
+  exact hEqOn ht
+
 end
 
 end SmoothDependenceCk
