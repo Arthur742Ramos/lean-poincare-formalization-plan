@@ -1528,6 +1528,98 @@ theorem contMDiffOn_flowSlice_perPatch_of_flow
   · intro x _
     exact extChartAt_flow_eq_maps3_at_zero (p := p) G hanchor x
 
+/-- **Window-restricted Lipschitz variant of `contMDiffOn_flowSlice_perPatch_of_flow`.**  Identical to
+`contMDiffOn_flowSlice_perPatch_of_flow` except the field-Lipschitz control `hlip` is required only on a
+fixed bounded time window `Set.Icc c d` (with `0 ∈ Set.Ioo c d`) rather than for *all* `τ : ℝ`.  Because
+the per-patch capstone only ever uses the Lipschitz bound on the (bounded) time window it internally
+builds, this weaker hypothesis suffices — and it is exactly the shape produced by
+`GaugeFlowAssembly.exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField`, which delivers a
+Lipschitz bound for `chartPushforwardField` only on a compact time interval `Set.Icc a b`, not for all
+time.  The proof simply intersects the internally-built slice-`C³` window with `Set.Ioo c d`, so every
+`τ` fed to `hlip` lies in `Set.Icc c d`.  This removes the artificial `∀ τ : ℝ` impedance mismatch that
+blocked feeding the bounded-time field-Lipschitz lemma into the step-(v) globalisation. -/
+theorem contMDiffOn_flowSlice_perPatch_of_flow_windowLip
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {N : WithTop ℕ∞} [IsManifold I N M]
+    [ContMDiffVectorBundle N E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M} {χ : ℝ × E → ℝ} {Φ : ℝ → M → M} {ε : ℝ}
+    {U Q_M : Set M} {Kwin : Set (ℝ × E)} {state₀ : Set E} {K : ℝ≥0} {c d : ℝ}
+    (hε : 0 < ε)
+    (hcd0 : (0 : ℝ) ∈ Set.Ioo c d)
+    (hanchor : ∀ x, Φ 0 x = x)
+    (horbit : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ x) (Set.Ioo (-ε) ε) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    (hcontA : ∀ x, ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x))
+    (hXchart : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) N
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source))
+    (hχC : ContDiff ℝ N χ) (hχc : HasCompactSupport χ)
+    (hsub : tsupport χ ⊆ Set.univ ×ˢ (extChartAt I p).target)
+    (hcut : ∀ᶠ r in 𝓝ˢ Kwin, χ r = 1) (hN : 4 ≤ N)
+    (hstate : IsOpen state₀)
+    (hlip : ∀ τ ∈ Set.Icc c d, LipschitzOnWith K
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) state₀)
+    (hU : U ⊆ (chartAt H p).source) (hUQ : U ⊆ (Q_M : Set M))
+    (hQ_M : IsCompact Q_M) (hQ_M_src : Q_M ⊆ (extChartAt I p).source)
+    (hplace_state : ∀ x ∈ Q_M, extChartAt I p x ∈ state₀)
+    (hplace_win : ∀ x ∈ Q_M, ((0 : ℝ), extChartAt I p x) ∈ interior Kwin) :
+    ∃ a b : ℝ, (0 : ℝ) ∈ Set.Ioo a b ∧
+      ∀ t ∈ Set.Ioo a b, ContMDiffOn I I 3 (fun x : M => Φ t x) U := by
+  obtain ⟨a₁, b₁, hmem0₁, hconf⟩ :=
+    exists_Ioo_forall_forall_extChartAt_source_and_mem_of_continuousAt (Φ := Φ)
+      hQ_M hQ_M_src (isOpen_univ.prod hstate) (fun x _ => hanchor x)
+      (fun x hx => ⟨Set.mem_univ _, hplace_state x hx⟩) (fun x _ => hcontA x)
+  obtain ⟨G, a₂, b₂, hmem0₂, hχ_mod, hg_mem_mod⟩ :=
+    exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem (X := X) (p := p)
+      hXchart hχC hχc hsub hN (0 : ℝ)
+      (isCompact_extChartAt_image hQ_M hQ_M_src) hcut hstate
+      (fun q hq => by obtain ⟨x, hx, rfl⟩ := hq; exact hplace_win x hx)
+      (fun q hq => by obtain ⟨x, hx, rfl⟩ := hq; exact hplace_state x hx)
+  refine ⟨max (max (max a₁ a₂) (-ε)) c, min (min (min b₁ b₂) ε) d,
+    ⟨max_lt (max_lt (max_lt hmem0₁.1 hmem0₂.1) (neg_lt_zero.mpr hε)) hcd0.1,
+      lt_min (lt_min (lt_min hmem0₁.2 hmem0₂.2) hε) hcd0.2⟩, ?_⟩
+  intro t ht
+  have hsub_conf : Set.Ioo (max (max (max a₁ a₂) (-ε)) c) (min (min (min b₁ b₂) ε) d)
+      ⊆ Set.Ioo a₁ b₁ :=
+    Set.Ioo_subset_Ioo
+      ((le_max_left a₁ a₂).trans ((le_max_left _ _).trans (le_max_left _ _)))
+      ((min_le_left _ _).trans ((min_le_left _ _).trans (min_le_left _ _)))
+  have hsub_mod : Set.Ioo (max (max (max a₁ a₂) (-ε)) c) (min (min (min b₁ b₂) ε) d)
+      ⊆ Set.Ioo a₂ b₂ :=
+    Set.Ioo_subset_Ioo
+      ((le_max_right a₁ a₂).trans ((le_max_left _ _).trans (le_max_left _ _)))
+      ((min_le_left _ _).trans ((min_le_left _ _).trans (min_le_right _ _)))
+  have hsub_ode : Set.Ioo (max (max (max a₁ a₂) (-ε)) c) (min (min (min b₁ b₂) ε) d)
+      ⊆ Set.Ioo (-ε) ε :=
+    Set.Ioo_subset_Ioo
+      ((le_max_right _ _).trans (le_max_left _ _))
+      ((min_le_left _ _).trans (min_le_right _ _))
+  have hsub_cd : Set.Ioo (max (max (max a₁ a₂) (-ε)) c) (min (min (min b₁ b₂) ε) d)
+      ⊆ Set.Icc c d :=
+    (Set.Ioo_subset_Ioo (le_max_right _ _) (min_le_right _ _)).trans Set.Ioo_subset_Icc_self
+  have ht₀ : (0 : ℝ) ∈ Set.Ioo (max (max (max a₁ a₂) (-ε)) c) (min (min (min b₁ b₂) ε) d) :=
+    ⟨max_lt (max_lt (max_lt hmem0₁.1 hmem0₂.1) (neg_lt_zero.mpr hε)) hcd0.1,
+      lt_min (lt_min (lt_min hmem0₁.2 hmem0₂.2) hε) hcd0.2⟩
+  refine contMDiffOn_flowSlice_of_cutoff_orbit_control (X := X) (p := p) (χ := χ)
+    (state := fun _ : ℝ => state₀) G Φ hU ht ht₀ (fun τ _ => Filter.univ_mem)
+    (fun τ hτ => hlip τ (hsub_cd hτ)) ?_ ?_ ?_ ?_ ?_ ?_
+  · intro x _ τ hτ
+    exact (horbit x τ (hsub_ode hτ)).mono hsub_ode
+  · intro x hx τ hτ
+    exact (hconf τ (hsub_conf hτ)).1 x (hUQ hx)
+  · intro x hx τ hτ
+    exact hχ_mod (extChartAt I p x) ⟨x, hUQ hx, rfl⟩ τ (hsub_mod hτ)
+  · intro x hx τ hτ
+    exact ((hconf τ (hsub_conf hτ)).2 x (hUQ hx)).2
+  · intro x hx τ hτ
+    exact hg_mem_mod (extChartAt I p x) ⟨x, hUQ hx, rfl⟩ τ (hsub_mod hτ)
+  · intro x _
+    exact extChartAt_flow_eq_maps3_at_zero (p := p) G hanchor x
+
 /-- **Finite-cover globalisation of per-patch slice-`C³` to a global slice-`C³` window.**  The gluing
 step of GAP-1 step (v): given a family `U : ι → Set M` (`ι` finite) of OPEN sets covering `M`, and for
 each patch `i` an honest open time window `Set.Ioo (a i) (b i) ∋ 0` on which the flow slice `Φ t` is
@@ -1621,7 +1713,56 @@ theorem exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover
         (hplace_state i) (hplace_win i))
   exact ⟨Φ, c, d, hanchor, hcd, hglob⟩
 
-universe uM
+/-- **Window-restricted Lipschitz variant of the step-(v) globalisation capstone
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover`.**  Identical to the capstone except the
+per-patch field-Lipschitz control `hlip` is required only on a fixed bounded time window `Set.Icc cw dw`
+(with `0 ∈ Set.Ioo cw dw`) rather than for *all* `τ : ℝ`.  This is the exact shape delivered by
+`GaugeFlowAssembly.exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField`, so with this variant the
+whole `hlip` residual is dischargeable directly from the per-patch field jet `hXchart i` on a compact
+convex chart tube — no artificial global-in-time Lipschitz bound is needed.  Proof: identical to the
+capstone but routed through `contMDiffOn_flowSlice_perPatch_of_flow_windowLip`. -/
+theorem exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] [CompactSpace M] [IsManifold I 1 M]
+    {N : WithTop ℕ∞} [IsManifold I N M]
+    [ContMDiffVectorBundle N E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E}
+    (hXraw : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun q : ℝ × M => (⟨q, ((1 : ℝ), X q.1 q.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {ι : Type*} [Finite ι] {cw dw : ℝ}
+    {p : ι → M} {U Q_M : ι → Set M} {χ : ι → (ℝ × E → ℝ)}
+    {Kwin : ι → Set (ℝ × E)} {state₀ : ι → Set E} {K : ι → ℝ≥0}
+    (hcd0 : (0 : ℝ) ∈ Set.Ioo cw dw)
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hXchart : ∀ i, ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) N
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I (p i)).source))
+    (hχC : ∀ i, ContDiff ℝ N (χ i)) (hχc : ∀ i, HasCompactSupport (χ i))
+    (hsub : ∀ i, tsupport (χ i) ⊆ Set.univ ×ˢ (extChartAt I (p i)).target)
+    (hcut : ∀ i, ∀ᶠ r in 𝓝ˢ (Kwin i), (χ i) r = 1) (hN : 4 ≤ N)
+    (hstate : ∀ i, IsOpen (state₀ i))
+    (hlip : ∀ i, ∀ τ ∈ Set.Icc cw dw, LipschitzOnWith (K i)
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ) (state₀ i))
+    (hU : ∀ i, U i ⊆ (chartAt H (p i)).source) (hUQ : ∀ i, U i ⊆ (Q_M i : Set M))
+    (hQ_M : ∀ i, IsCompact (Q_M i)) (hQ_M_src : ∀ i, Q_M i ⊆ (extChartAt I (p i)).source)
+    (hplace_state : ∀ i, ∀ x ∈ Q_M i, extChartAt I (p i) x ∈ state₀ i)
+    (hplace_win : ∀ i, ∀ x ∈ Q_M i, ((0 : ℝ), extChartAt I (p i) x) ∈ interior (Kwin i)) :
+    ∃ (Φ : ℝ → M → M) (c d : ℝ), (∀ x, Φ 0 x = x) ∧ (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (fun x : M => Φ t x) := by
+  obtain ⟨ε, hε, Φ, hanchor, horbit, hcontA⟩ :=
+    PoincareCurvature.ManifoldFlow.exists_timeDependent_flow_compact_continuousAt hXraw
+  obtain ⟨c, d, hcd, hglob⟩ :=
+    exists_Ioo_forall_contMDiff_of_finite_cover (Φ := Φ) hopen hcover
+      (fun i => contMDiffOn_flowSlice_perPatch_of_flow_windowLip (X := X) (p := p i)
+        hε hcd0 hanchor horbit hcontA (hXchart i) (hχC i) (hχc i) (hsub i) (hcut i) hN
+        (hstate i) (hlip i) (hU i) (hUQ i) (hQ_M i) (hQ_M_src i)
+        (hplace_state i) (hplace_win i))
+  exact ⟨Φ, c, d, hanchor, hcd, hglob⟩
+
 
 /-- **Finite chart cover of a compact manifold — the cover-side data package consumed by the step-(v)
 globalisation capstone `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover`.**  For a compact
