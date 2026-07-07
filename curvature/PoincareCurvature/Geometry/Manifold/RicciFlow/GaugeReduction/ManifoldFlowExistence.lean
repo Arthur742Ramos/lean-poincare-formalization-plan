@@ -912,6 +912,31 @@ theorem exists_timeDependent_flow_compact {E H M : Type*} [NormedAddCommGroup E]
   choose γ hγ0 hγon using huniform
   exact ⟨ε, hε, fun t x => γ x t, hγ0, fun x t ht => hγon x t ht⟩
 
+/-- **Compact time-dependent gauge flow with joint continuity at the anchor.** Strengthening of
+`exists_timeDependent_flow_compact`: on a compact boundaryless `T2` manifold, the uniform-lifespan
+time-dependent flow `Φ` of a jointly-`C¹` field `X` additionally has, at *every* base point `x`, a
+jointly `(t, y)`-continuous total flow map at the anchor `(0, x)`
+(`continuousAt_zero_prod_timeDependent_flow_of_hasMFDerivWithinAt`, the anchor/orbit hypotheses being
+the flow's own `∀ x` clauses).  This is precisely the `ContinuousAt Φ (0, x)` datum
+`ManifoldFlow.exists_Ioo_forall_mem_of_continuousAt_source` consumes to confine each orbit to a chart
+patch over a short window (`hγ_src`), the raw-manifold input of the GAP-1 step-(v) slice-`C³`
+capstone. -/
+theorem exists_timeDependent_flow_compact_continuousAt {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)))) :
+    ∃ ε > 0, ∃ Φ : ℝ → M → M, (∀ x, Φ 0 x = x) ∧
+      (∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+        (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) ∧
+      (∀ x, ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x)) := by
+  obtain ⟨ε, hε, Φ, hanchor, horbit⟩ := exists_timeDependent_flow_compact hX
+  refine ⟨ε, hε, Φ, hanchor, horbit, fun x => ?_⟩
+  exact continuousAt_zero_prod_timeDependent_flow_of_hasMFDerivWithinAt hX hε
+    (Filter.Eventually.of_forall hanchor) (Filter.Eventually.of_forall horbit)
+
 /-- **Uniqueness of time-dependent integral curves anchored at any interior time.**
 For a jointly-`C¹` time-dependent field `X` on a boundaryless T2 manifold, two
 time-dependent integral curves on `Ioo a b` that agree at a *single interior time*
