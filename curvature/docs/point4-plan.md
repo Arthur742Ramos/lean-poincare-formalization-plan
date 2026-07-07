@@ -1213,3 +1213,52 @@ same mechanism but needs `Φ`'s joint continuity on the general compact `M`, i.e
 generalisation of `exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt` fed by manifold
 continuous-dependence à la `ManifoldFlowExistence.exists_nhds_uniform_integralCurve`), plus residual (b)
 `hX` and the finite-cover globalisation.  NEXT: the manifold-target confinement + `Φ` joint continuity.
+
+---
+
+## Item 3 (GAP 2) — geometric chart operator `A`: the `lipschitz` field is now DONE (2026-07-07)
+
+The mild/frozen geometric Ricci–DeTurck chart operator
+`A τ s = deTurckReactionSectionMap ∇W s + b` (tangent-bundle, fiber-norm-free) now carries the full
+**bounded + Lipschitz** analytic package the `TimeDependentGeometricRicciDeTurckBanachChart` demands of
+its `A`/`picard` — everything except the `geometric` field:
+
+* **`A`** — the affine tangent-bundle operator (`deTurckReactionSectionMap` + fixed Ricci source `b`),
+  already built (`GeometricReactionPicardTangent.lean`).
+* **`picard`** — `deTurckReactionSectionMap_add_source_exists_isPicardLindelof` (unconditional
+  `IsPicardLindelof`, forward-endpoint auto-chosen), already built.
+* **`BanachEvolutionLocalSolutionIn`** — `deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn`,
+  already built.
+* **`lipschitz`** (NEW this session) — the literal chart field
+  `∀ t, LipschitzOnWith Kstate (A t) locus` with `Kstate = 2·Kp`:
+  - `deTurckReactionSectionMap_lipschitzOnWith_of_uniform_inCoordinates` (bare reaction),
+  - `deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordinates` (affine, the field),
+  - global strengthenings `…_lipschitzWith_…` (bare + affine) = the `hlip` shape for the Banach Picard
+    foundation `isPicardLindelof_of_bounded_lipschitz_timeDependent`,
+  - `…_add_source_continuous_…` = operator continuity (`LipschitzWith.continuous`).
+  Lifted from the per-coordinate bound `deTurckReactionSectionMap_coord_dist_le_inCoordinates`
+  (`≤ 2·Kp·dist s s'`) via `lipschitzOnWith_of_forall_coord_dist_le` /
+  `lipschitzWith_of_forall_coord_dist_le`; the uniform `Kp` bounds `‖inCoordinates … (P x)‖` over the
+  finite compact cover.
+
+**Plumbing pattern discovered (avoid re-losing time).**  For the *affine* `+ b` coordinate bound at
+`W := TangentSpace I`, the fixed source `b` cancels via **`coord_add_apply_topFibre` then the fibre
+`dist_add_right`** (`simp only [coord_add_apply_topFibre, dist_add_right]`).  The seminormed-fibre
+`coord_add_apply` does NOT match the `BilinearFormBundle` hom-fibre topology (the tangent-bundle
+`coord_add_apply` matching quirk), and a *section-level* `dist_eq_norm` triggers a `whnf` timeout on the
+transported section-space metric diamond (and `dist_add_right` at the section level fails —
+`IsIsometricVAdd (CSS)ᵃᵒᵖ CSS` is unsynthesizable).  Global `LipschitzWith` cannot infer `F`/`V`/`et`
+with no `stateSet` to pin them — derive it from the `LipschitzOnWith` version at `Set.univ` via
+`lipschitzOnWith_univ` instead of re-invoking `lipschitzWith_of_forall_coord_dist_le`.
+
+**The one remaining chart field = `geometric`, and it is the fundamental 2nd-order gap.**  The frozen
+operator matches `intrinsicRicciDeTurckRHS` ONLY at the metric-section centre
+(`deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS`);
+for a *general continuous* `s ∈ positiveDefiniteLocus` there is no smooth `g` whose Ricci-DeTurck RHS at
+`τ` equals `deTurckReactionSectionMap ∇W₀ s + b₀` (the principal `intrinsicRicciFlowRHS` needs two
+derivatives of `g`, undefined for merely-continuous `s`).  Closing `geometric` for general `s` is
+exactly the parabolic-Schauder smoothing/realization connection (GAP 2 long pole) — it cannot be done
+by the frozen affine operator.  **NEXT:** the `RicciDeTurckChartClosureData.realization` decode
+(`RicciDeTurckSmoothRealizationData.of_chosenBackground_endpointTimeDerivative_chartRHS`) that turns the
+already-built `BanachEvolutionLocalSolutionIn` of the geometric `A` into a genuine
+`ChosenIntrinsicDeTurckLocalSolution`, and the `geometric`↔Schauder connection.
