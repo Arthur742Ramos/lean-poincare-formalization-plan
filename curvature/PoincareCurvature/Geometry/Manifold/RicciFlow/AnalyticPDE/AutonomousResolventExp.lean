@@ -102,6 +102,26 @@ theorem contDiff_exp_smul_of_contDiff
     fun x _ => NormedSpace.exp_analytic x
   exact ContDiff.comp hana.contDiff (ContDiff.const_smul s hA)
 
+/-- **Joint `(time, parameter)` smoothness of the parametrized autonomous resolvent.**  If a family of
+autonomous generators `A : X → (E →L[ℝ] E)` over a normed parameter space `X` is `C^n`, then the
+time-dependent resolvent `(t, x) ↦ exp ((t - t₀) • A x)` is jointly `C^n` on `ℝ × X`.  This is the exact
+joint-smoothness shape a downstream realization consumes: for the frozen (autonomous, bounded-linear)
+Ricci–DeTurck chart generator whose fibre generator `A x` depends `C^n`-smoothly on the spatial point `x`,
+`fundamentalSolution_const_eq_exp` identifies its Banach evolution with `exp ((t - t₀) • A x)`, so this
+lemma yields joint smoothness of that evolution in `(time, space)` — the parabolic-free regularity of a
+0th-order generator's flow.  Assembled from the smoothness of `NormedSpace.exp`, the bilinear scalar
+action, and the coordinate projections. -/
+theorem contDiff_exp_sub_smul_of_contDiff
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    {A : X → (E →L[ℝ] E)} {n : WithTop ℕ∞} (hA : ContDiff ℝ n A) (t₀ : ℝ) :
+    ContDiff ℝ n (fun p : ℝ × X => NormedSpace.exp ((p.1 - t₀) • A p.2)) := by
+  have hana : AnalyticOnNhd ℝ (NormedSpace.exp : (E →L[ℝ] E) → (E →L[ℝ] E)) Set.univ :=
+    fun x _ => NormedSpace.exp_analytic x
+  have h1 : ContDiff ℝ n (fun p : ℝ × X => p.1 - t₀) :=
+    ContDiff.sub contDiff_fst contDiff_const
+  have h2 : ContDiff ℝ n (fun p : ℝ × X => A p.2) := ContDiff.comp hA contDiff_snd
+  exact ContDiff.comp hana.contDiff (ContDiff.smul h1 h2)
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
