@@ -90,5 +90,36 @@ theorem intrinsicDeTurckVectorField_eq_raisedGaugeField
       (by exact TangentSpace.fiberBundle) (by exact TangentSpace.vectorBundle)
       (g t) (intrinsicDeTurckOneForm (I := I) (M := M) g background t) _ _ _ bas x _ hv
 
+set_option maxHeartbeats 1000000 in
+attribute [local irreducible] raisedGaugeField in
+/-- **The reverse (DeTurck gauge) vector field is the metric dual of the negated one-form.**  The
+reverse intrinsic DeTurck gauge field `intrinsicDeTurckGaugeField g background t x =
+-intrinsicDeTurckVectorField g background t x` (the field that drives the intrinsic DeTurck pullback
+gauge) equals the coordinate-free metric-raised gauge field of the *negated* traced DeTurck one-form,
+`raisedGaugeField (g t) (-intrinsicDeTurckOneForm g background t) bas x`.  This is
+`intrinsicDeTurckVectorField_eq_raisedGaugeField` composed with `raisedGaugeField_neg` (the metric dual
+is linear, so it negates with the one-form). -/
+theorem neg_intrinsicDeTurckVectorField_eq_raisedGaugeField_neg
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ E)
+    (x : M) :
+    -intrinsicDeTurckVectorField (I := I) (M := M) g background t x
+      = @raisedGaugeField E _ _ H _ I 2 M _ _ E _ _ (TangentSpace I : M → Type _)
+          (by exact inferInstance)
+          (fun _ => by exact inferInstance)
+          (fun _ => by exact inferInstance)
+          (by exact TangentSpace.fiberBundle) (by exact TangentSpace.vectorBundle)
+          (g t) (-intrinsicDeTurckOneForm (I := I) (M := M) g background t) _ _ _ bas x := by
+  rw [intrinsicDeTurckVectorField_eq_raisedGaugeField g background t bas x]
+  exact (@raisedGaugeField_neg E _ _ H _ I 2 M _ _ E _ _ (TangentSpace I : M → Type _)
+    (by exact inferInstance)
+    (fun _ => by exact inferInstance)
+    (fun _ => by exact inferInstance)
+    (by exact TangentSpace.fiberBundle) (by exact TangentSpace.vectorBundle)
+    (g t) (intrinsicDeTurckOneForm (I := I) (M := M) g background t) _ _ _ bas x).symm
+
 end RicciFlow
+
 
