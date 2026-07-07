@@ -232,6 +232,57 @@ theorem contMDiffOn_timeDependentRaisedCoeff
     (contMDiffOn_timeDependentOneFormPairing ω e bas hu' hω)
     (fun p hp ↦ timeDependentGram_det_ne_zero (g p.1) e bas (hu' hp.2))
 
+/-- **Joint `(t, x)` smoothness of a raised section assembled from smooth coefficients.**  Given a
+jointly `(t, x)`-smooth family of coefficients `c(t, x) : ι → ℝ`, the raised section
+`(t, x) ↦ ∑ᵢ c(t, x)ᵢ • frameᵢ(x)` — a section of the bundle `V` along `Prod.snd : ℝ × B → B` — is
+`ContMDiffOn` over `Set.univ ×ˢ u`.  Combined with `contMDiffOn_timeDependentRaisedCoeff` (whose output
+is exactly such a `c`), this produces the joint `(t, x)` smoothness of the raised gauge field on a
+single chart patch — the per-patch `hXfield`.  The proof composes the smooth inverse trivialization
+`e.symm` with the smooth coordinate map `(t, x) ↦ (x, ∑ᵢ c(t, x)ᵢ • basᵢ)`. -/
+theorem contMDiffOn_raisedSection_of_coeff
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] (bas : Module.Basis ι ℝ F)
+    {u : Set B} (hu' : u ⊆ e.baseSet)
+    {c : ℝ × B → ι → ℝ}
+    (hc : ContMDiffOn (𝓘(ℝ).prod IB) 𝓘(ℝ, ι → ℝ) n c (Set.univ ×ˢ u)) :
+    ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' F p.2 (∑ i, c p i • e.localFrame bas i p.2))
+      (Set.univ ×ˢ u) := by
+  have hcoord : ContMDiffOn (𝓘(ℝ).prod IB) 𝓘(ℝ, F) n
+      (fun p : ℝ × B ↦ ∑ i, c p i • bas i) (Set.univ ×ˢ u) := by
+    classical
+    have hs : ∀ t : Finset ι, ContMDiffOn (𝓘(ℝ).prod IB) 𝓘(ℝ, F) n
+        (fun p : ℝ × B ↦ ∑ i ∈ t, c p i • bas i) (Set.univ ×ˢ u) := by
+      intro t
+      induction t using Finset.induction_on with
+      | empty => simpa using (contMDiffOn_const (c := (0 : F)))
+      | insert i t hi ih =>
+        simp only [Finset.sum_insert hi]
+        exact (((contMDiffOn_pi_space.mp hc) i).smul contMDiffOn_const).add ih
+    exact hs Finset.univ
+  have hh : ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F)) n
+      (fun p : ℝ × B ↦ ((p.2, ∑ i, c p i • bas i) : B × F)) (Set.univ ×ˢ u) :=
+    (contMDiff_snd.contMDiffOn).prodMk hcoord
+  have hmaps : Set.MapsTo (fun p : ℝ × B ↦ ((p.2, ∑ i, c p i • bas i) : B × F))
+      (Set.univ ×ˢ u) e.target := fun p hp ↦ e.mem_target.mpr (hu' hp.2)
+  have hcomp := (Bundle.Trivialization.contMDiffOn_symm e (n := n)).comp hh hmaps
+  refine hcomp.congr fun p hp ↦ ?_
+  have hp2 : p.2 ∈ e.baseSet := hu' hp.2
+  have hframe : ∀ i : ι, e.localFrame bas i p.2 = e.symm p.2 (bas i) := by
+    intro i
+    rw [Bundle.Trivialization.localFrame_apply_of_mem_baseSet e bas hp2]
+    simp only [Bundle.Trivialization.basisAt, Module.Basis.map_apply,
+      Bundle.Trivialization.linearEquivAt_symm_apply]
+  have hlin : e.symm p.2 (∑ i, c p i • bas i) = ∑ i, c p i • e.symm p.2 (bas i) := by
+    have h := map_sum (e.symmL ℝ p.2) (fun i => c p i • bas i) Finset.univ
+    simp only [map_smul, Bundle.Trivialization.symmL_apply] at h
+    exact h
+  show TotalSpace.mk' F p.2 (∑ i, c p i • e.localFrame bas i p.2)
+      = e.toOpenPartialHomeomorph.symm ((p.2, ∑ i, c p i • bas i))
+  rw [← Bundle.Trivialization.mk_symm e hp2, hlin]
+  refine congrArg (TotalSpace.mk' F p.2) ?_
+  exact (Finset.sum_congr rfl fun i _ => by rw [hframe i]).symm
+
 end Gram
 
 end PoincareCurvature.ParametrizedInner
