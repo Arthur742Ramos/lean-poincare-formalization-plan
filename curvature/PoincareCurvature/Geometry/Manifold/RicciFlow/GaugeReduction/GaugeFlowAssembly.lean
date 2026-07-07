@@ -425,4 +425,45 @@ theorem extChartAt_comp_eqOn_of_lipschitzOnWith
     (fun t ht ↦ ⟨hg' t ht, hg_mem t ht⟩)
     heq
 
+/-- **Chart-conjugation `C³` transfer with an independent target chart centre.**  Generalisation of
+`contMDiffOn_of_extChartAt_conjugation` in which the target chart is centred at an arbitrary `y₀ : M`
+rather than the image centre `F x₀`.  This is the form the *temporal* integral-curve identification
+produces: the chart representation `τ ↦ extChartAt I p (Φ τ x)` uses a single fixed chart `p` for both
+source and target, so the spatial conjugation identity it yields at a fixed time,
+`extChartAt I p (Φ t x) = Ψ (extChartAt I p x)`, has target centre `p` — generally distinct from
+`Φ t p`.  With this variant that fixed-chart identity discharges `ContMDiffOn I I 3 (Φ t)` on the
+chart-confined patch, feeding the `hslicesC3` spatial-`C³` obligation via
+`contMDiff_of_forall_extChartAt_conjugation`.
+
+The proof is identical to `contMDiffOn_of_extChartAt_conjugation` with `y₀` in place of `F x₀`; nothing
+in that argument uses `y₀ = F x₀`. -/
+theorem contMDiffOn_of_extChartAt_conjugation'
+    {x₀ y₀ : M} {F : M → M} {U : Set M} {Ψ : E → E}
+    (hU : U ⊆ (chartAt H x₀).source)
+    (hΨ : ContDiff ℝ 3 Ψ)
+    (hFU : Set.MapsTo F U (chartAt H y₀).source)
+    (hconj : ∀ x ∈ U, extChartAt I y₀ (F x) = Ψ (extChartAt I x₀ x)) :
+    ContMDiffOn I I 3 F U := by
+  have hchart : ContMDiffOn I 𝓘(ℝ, E) 3 (extChartAt I x₀) U :=
+    (contMDiffOn_extChartAt (I := I) (n := 3) (x := x₀)).mono hU
+  have hΨm : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3 Ψ := contMDiff_iff_contDiff.mpr hΨ
+  have hmid : ContMDiffOn I 𝓘(ℝ, E) 3 (fun x => Ψ (extChartAt I x₀ x)) U :=
+    hΨm.comp_contMDiffOn hchart
+  have hmaps : Set.MapsTo (fun x => Ψ (extChartAt I x₀ x)) U (extChartAt I y₀).target := by
+    intro x hx
+    show Ψ (extChartAt I x₀ x) ∈ (extChartAt I y₀).target
+    rw [← hconj x hx]
+    exact PartialEquiv.map_source (extChartAt I y₀)
+      (by rw [extChartAt_source]; exact hFU hx)
+  have hsymm : ContMDiffOn 𝓘(ℝ, E) I 3 (extChartAt I y₀).symm
+      (extChartAt I y₀).target := contMDiffOn_extChartAt_symm y₀
+  have hcomp : ContMDiffOn I I 3
+      (fun x => (extChartAt I y₀).symm (Ψ (extChartAt I x₀ x))) U :=
+    hsymm.comp hmid hmaps
+  refine hcomp.congr (fun x hx => ?_)
+  show F x = (extChartAt I y₀).symm (Ψ (extChartAt I x₀ x))
+  rw [← hconj x hx]
+  exact (PartialEquiv.left_inv (extChartAt I y₀)
+    (by rw [extChartAt_source]; exact hFU hx)).symm
+
 end PoincareCurvature.GaugeFlowAssembly
