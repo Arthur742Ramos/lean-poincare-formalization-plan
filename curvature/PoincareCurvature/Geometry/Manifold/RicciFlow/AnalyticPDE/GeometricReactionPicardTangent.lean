@@ -500,4 +500,75 @@ theorem deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn
       Kc hKc Ko hKo hKoEq hcover g t)
     σ0 t₀ T₀ hT₀ a ha locus hsub
 
+/-- **The frozen geometric DeTurck reaction operator is `LipschitzOnWith 2·Kp` on any state locus.**
+The section-space chart `lipschitz` field for the bare reaction operator `deTurckReactionSectionMap …`:
+from a *uniform* bound `Kp` on the frozen coefficient `P`'s model-fibre readout over the finite compact
+cover, the per-coordinate Lipschitz bound `deTurckReactionSectionMap_coord_dist_le_inCoordinates` is
+lifted to a genuine `LipschitzOnWith ⟨2·Kp, _⟩` on the section space via
+`lipschitzOnWith_of_forall_coord_dist_le` (the finite-cover coordinate-to-global norm handoff).  This
+is the substantive Lipschitz content of the chart operator's `lipschitz` field. -/
+theorem deTurckReactionSectionMap_lipschitzOnWith_of_uniform_inCoordinates
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (Kp : ℝ) (hKp0 : 0 ≤ Kp)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp)
+    (stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)) :
+    LipschitzOnWith ⟨2 * Kp, mul_nonneg (by norm_num) hKp0⟩
+      (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP)
+      stateSet := by
+  refine lipschitzOnWith_of_forall_coord_dist_le ?_
+  intro s _hs s' _hs' i x
+  simpa only [NNReal.coe_mk] using
+    deTurckReactionSectionMap_coord_dist_le_inCoordinates
+      x0 Kc hKc Ko hKo hKoEq hcover hP s s' i x Kp (hKp i x)
+
+/-- **The affine frozen geometric DeTurck chart operator `A τ s = deTurckReactionSectionMap ∇W s + b`
+is `LipschitzOnWith 2·Kp` on any state locus — the literal chart `lipschitz` field.**  Adding the fixed
+source section `b` contributes the same coordinate summand to `A τ s` and `A τ s'`, which cancels in
+every compact coordinate distance (`coord_add_apply_topFibre` then the fibre translation isometry
+`dist_add_right`), so the reaction's per-coordinate Lipschitz bound
+`deTurckReactionSectionMap_coord_dist_le_inCoordinates` transfers verbatim through
+`lipschitzOnWith_of_forall_coord_dist_le`.  This is exactly the
+`lipschitz : ∀ t, LipschitzOnWith Kstate (A t) locus` field of the
+`TimeDependentGeometricRicciDeTurckBanachChart` for the concrete tangent-bundle frozen operator, with
+`Kstate = 2·Kp` (uniform over `t`, the operator being time-independent). -/
+theorem deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordinates
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (Kp : ℝ) (hKp0 : 0 ≤ Kp)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp)
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)) :
+    LipschitzOnWith ⟨2 * Kp, mul_nonneg (by norm_num) hKp0⟩
+      (fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s + b)
+      stateSet := by
+  refine lipschitzOnWith_of_forall_coord_dist_le ?_
+  intro s _hs s' _hs' i x
+  simp only [coord_add_apply_topFibre, dist_add_right, NNReal.coe_mk]
+  exact deTurckReactionSectionMap_coord_dist_le_inCoordinates
+    x0 Kc hKc Ko hKo hKoEq hcover hP s s' i x Kp (hKp i x)
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
