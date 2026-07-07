@@ -480,6 +480,39 @@ theorem contDiff_and_hasCompactSupport_cutoff_smul
     rw [Function.mem_support] at hx ⊢
     exact fun hχx => hx (by rw [hχx, zero_smul])
 
+/-- **Bump-globalised chart pushforward field: globally `C^N` with compact support.**  Combining the
+joint-in-time field regularity `contDiffOn_prod_chartPushforwardField` with the extension-by-zero cutoff
+product `contDiff_and_hasCompactSupport_cutoff_smul`: given joint `C^N` regularity of the time-dependent
+tangent-bundle section `(τ, y) ↦ ⟨y, X τ y⟩` on `ℝ ×ˢ (extChartAt I p).source`, and a globally-`C^N`,
+compactly-supported cutoff `χ : ℝ × E → ℝ` with `tsupport χ ⊆ ℝ ×ˢ (extChartAt I p).target`, the cutoff
+multiple `(τ, q) ↦ χ (τ, q) • chartPushforwardField I X p τ q` is globally `ContDiff ℝ N` on the model
+product `ℝ × E` and has compact support.  The chart target is open
+(`isOpen_extChartAt_target`, using `I.Boundaryless`), so the field is `C^N` on the open tube where the
+cutoff lives.  This is GAP-1 step (iii): the compactly-supported `C^N` field
+`v := Function.curry (χ • chartPushforwardField …)` whose `(ContDiff, HasCompactSupport)` pair is exactly
+the input consumed by `exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport` to produce the model
+gauge flow `Ψ`. -/
+theorem contDiff_hasCompactSupport_cutoff_chartPushforwardField
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {N : WithTop ℕ∞} [IsManifold I N M]
+    [ContMDiffVectorBundle N E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M}
+    (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) N
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source))
+    {χ : ℝ × E → ℝ} (hχ : ContDiff ℝ N χ) (hχc : HasCompactSupport χ)
+    (hsub : tsupport χ ⊆ Set.univ ×ˢ (extChartAt I p).target) :
+    ContDiff ℝ N (fun r : ℝ × E => χ r •
+        PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p r.1 r.2) ∧
+      HasCompactSupport (fun r : ℝ × E => χ r •
+        PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p r.1 r.2) :=
+  contDiff_and_hasCompactSupport_cutoff_smul
+    (isOpen_univ.prod (isOpen_extChartAt_target p))
+    (PoincareCurvature.GaugeFlowAssembly.contDiffOn_prod_chartPushforwardField hX) hχ hχc hsub
+
 end
 
 end SmoothDependenceCk
