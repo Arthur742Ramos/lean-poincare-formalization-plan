@@ -812,3 +812,58 @@ uniqueness (the manifold flow's chart representation solves the pushed ODE).  Fe
 transfer lemmas above discharges `hslicesC3` / the `hlocal` `LocalGluingData 3`, closing GAP 1
 unconditionally.  Do NOT route the genuine 2nd-order operator through `chart.A`'s C⁰ `picard` — the
 `IsPicardLindelof.norm_le` C⁰-ball bound provably forbids it for positive-dimensional `M`.
+
+### Progress (2026-07-06, later 8) — Item 2 GAP 1: the RAW-flow (C³-free) chart-representation derivative toolkit is BUILT; and the Item-3 picard/realization tension is RE-AUDITED (weaker than "structurally impossible")
+
+**Ground-truth re-audit of the Item-3 blocker (sharpens, and partly WALKS BACK, later-7's "structurally
+impossible" claim).**  Reading the actual field types: the chart's `geometric` field
+(`AnalyticPDE.lean:4022`) is `∀ τ s ∈ locus, ∃ g background, A τ s = intrinsicRicciDeTurckRHS g background τ`
+— the metric family `g` and connection `background` are existentially quantified **per `(τ,s)`**, so
+`geometric` does NOT force `chart.A` to BE the genuine operator (a state-independent representative
+satisfies it by choosing `g,background` freely).  Decisively, the `realization` binding constraint is the
+`RicciDeTurckSmoothRealizationData` field `chartRHS_eq_intrinsic` (`SmoothRealization.lean:2432`):
+`chart.A t (sol.curve t) x u v = intrinsicRicciDeTurckRHS metric background t x u v` **only along the
+solution curve** `sol.curve t` (a smooth metric section via `metric_eq_curve`), NOT on the whole C⁰ ball.
+So `picard` (C⁰-bounded `A` on a C⁰ ball) and `realization` are RECONCILABLE: `chart.A` may be a
+bounded/regularised operator that coincides with the genuine 2nd-order RHS only along ONE constructed
+smooth solution curve.  The catch: that smooth realization `metric` (with `metricTensor metric = sol.curve`)
+must be a genuine Ricci–DeTurck flow — i.e. it is exactly what the geometric gauge flow (Items 1 & 2)
+supplies.  **Conclusion: the Item-3 chart closure genuinely DEPENDS on Items 1 & 2; the critical path runs
+through the geometric flow (GAP 1), confirming the pivot.**
+
+**What landed (all in `GaugeReduction/GaugeFlowAssembly.lean`, sorry-free, axiom-clean).**  The last
+session built the tower→compact chart-conjugation *transfer interface*
+(`contMDiffOn_of_extChartAt_conjugation` etc.), whose `hconj` input rests on the flow curve's chart
+representation solving a model ODE.  Every repo lemma providing that
+(`Diffeomorph3GaugeFlowOn.hasDerivWithinAt_extChartAt_eval*`) is stated on `Diffeomorph3GaugeFlowOn`,
+which **presupposes `C³`** — circular for `hslicesC3` (which must ESTABLISH `C³` from the *raw* compact
+flow, known only `C¹`).  The missing brick is the **raw (C³-free) analogue**, now proved as four lemmas:
+* **`hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt`** — for an abstract curve `γ : ℝ → M`
+  satisfying the bare flow ODE `HasMFDerivWithinAt … γ s t ((1).smulRight w)` (the hypothesis shape the
+  compact flow supplies pre-regularity), the chart representation `τ ↦ extChartAt I p (γ τ)` in any
+  preferred chart containing `γ t` has within-set derivative `tangentCoordChange I (γ t) p (γ t) w`.
+  Proof = model ODE chain rule (`hasMFDerivWithinAt_extChartAt` ∘ `hγ`, then
+  `mfderiv_chartAt_eq_tangentCoordChange`).  This is the C³-free analogue of
+  `Diffeomorph3GaugeFlowOn.hasDerivWithinAt_extChartAt_eval_of_mem_source`.
+* **`hasDerivWithinAt_extChartAt_comp_self_of_hasMFDerivWithinAt`** — centered (`p := γ t`) form via
+  `tangentCoordChange_self`, derivative = the flow velocity `w`.
+* **`hasDerivAt_extChartAt_comp_of_hasMFDerivWithinAt`** (+ `_self`) — on the OPEN flow window
+  `Set.Ioo (-ε) ε` (a `𝓝 t` at interior times), the within-set derivative upgrades to a full `HasDerivAt`
+  (`HasDerivWithinAt.hasDerivAt`), the form Mathlib's `IsIntegralCurve`/`ODE_solution_unique` uniqueness
+  API consumes.
+
+**Fractions of GAP 1.**  The raw compact flow's chart representation is now known to solve a model ODE
+(as `HasDerivAt`, on the open window) with ZERO spatial-regularity assumption — the datum the model-`C³`
+smooth-dependence tower and integral-curve uniqueness need to pin `Φ t`'s chart rep to a model-`C³` flow.
+Remaining for `hslicesC3`: (i) the chart-pushforward model field `vpush` (via `(extChartAt I p).symm`) is
+globally `C^{3,1}` so `exists_flow_diffeomorph_three` yields the model flow `Ψ` (the genuine analytic
+long-pole — `tangentCoordChange`/transition-map regularity); (ii) integral-curve uniqueness identifies
+`Φ t`'s chart rep with `Ψ`, giving `hconj`; (iii) compose the source→target chart transition and cover
+the (compact) trajectory by finitely many charts for arbitrary window-`t`.
+
+**Concrete next target.**  Prove the chart-pushforward field identity feeding uniqueness: the raw flow's
+chart rep is an integral curve of the pushed field `vpush τ q := tangentCoordChange I ((extChartAt I p).symm q)
+p ((extChartAt I p).symm q) (X τ ((extChartAt I p).symm q))` on a chart-confined sub-window (immediate from
+`hasDerivAt_extChartAt_comp_of_hasMFDerivWithinAt` + `PartialEquiv.left_inv`), then the single-chart
+`hconj` from `eqOn_Icc_of_lipschitzOnWith` (ModelGaugeFlowODE) once `vpush` is shown Lipschitz — the first
+genuine consumer of the raw-flow chart-rep toolkit.  Do NOT rebuild trivial-case chart closures.
