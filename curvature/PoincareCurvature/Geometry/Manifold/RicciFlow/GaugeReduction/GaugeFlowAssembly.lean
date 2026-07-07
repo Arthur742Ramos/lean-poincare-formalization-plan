@@ -466,4 +466,56 @@ theorem contMDiffOn_of_extChartAt_conjugation'
   exact (PartialEquiv.left_inv (extChartAt I y₀)
     (by rw [extChartAt_source]; exact hFU hx)).symm
 
+/-- **`ContinuousOn` of the chart pushforward field from a continuous tangent-bundle section.**
+
+The isolated varying-source-centre coordinate change `y ↦ tangentCoordChange I y p y` is *not*
+continuous — its source chart `chartAt H y` jumps discontinuously with `y` (and, via
+`tangentCoordChange_comp`, `tangentCoordChange I y p y` is the *inverse* of `tangentCoordChange I p y y`,
+which still reads the varying chart at `y`).  `chartPushforwardField` is continuous only through its
+identification with a genuine tangent-bundle chart representation: for `y ∈ (extChartAt I p).source`, the
+value `tangentCoordChange I y p y (X τ y)` (`chartPushforwardField_extChartAt`) is exactly the second
+component of the trivialization `trivializationAt E (TangentSpace I) p` applied to the section value
+`⟨y, X τ y⟩` (`trivializationAt_apply` — both unfold to the same
+`fderivWithin ℝ (extChartAt I p ∘ (extChartAt I y).symm) (range I) (extChartAt I y y)`).
+
+Consequently, whenever the section `y ↦ ⟨y, X τ y⟩` is `ContinuousOn` the chart source — the shape a
+genuine (e.g. DeTurck) vector field supplies, being a continuous section of the tangent bundle — the
+model field `chartPushforwardField I X p τ` is `ContinuousOn` the chart target.  This is the
+correctly-hypothesised field-regularity step feeding the `LipschitzOnWith` input of
+`extChartAt_comp_eqOn_of_lipschitzOnWith` (the plan's "`chartPushforwardField` `ContinuousOn`" target,
+here supplied with the section hypothesis it genuinely requires). -/
+theorem continuousOn_chartPushforwardField
+    {X : ℝ → M → E} {p : M} {τ : ℝ}
+    (hX : ContinuousOn (fun y : M => (⟨y, X τ y⟩ : TangentBundle I M))
+      (extChartAt I p).source) :
+    ContinuousOn (chartPushforwardField I X p τ) (extChartAt I p).target := by
+  have hsymm : Set.MapsTo (fun q => (extChartAt I p).symm q)
+      (extChartAt I p).target (extChartAt I p).source :=
+    fun q hq => (extChartAt I p).map_target hq
+  have h2 : ContinuousOn (fun q => (⟨(extChartAt I p).symm q,
+      X τ ((extChartAt I p).symm q)⟩ : TangentBundle I M)) (extChartAt I p).target :=
+    hX.comp (continuousOn_extChartAt_symm p) hsymm
+  have h3 : ContinuousOn (fun q => (trivializationAt E (TangentSpace I) p)
+      (⟨(extChartAt I p).symm q, X τ ((extChartAt I p).symm q)⟩ : TangentBundle I M))
+      (extChartAt I p).target := by
+    refine (trivializationAt E (TangentSpace I) p).continuousOn.comp h2 (fun q hq => ?_)
+    rw [TangentBundle.trivializationAt_source]
+    have hmem := (extChartAt I p).map_target hq
+    rw [extChartAt_source] at hmem
+    exact hmem
+  have hg : ContinuousOn (fun q => ((trivializationAt E (TangentSpace I) p)
+      (⟨(extChartAt I p).symm q, X τ ((extChartAt I p).symm q)⟩ : TangentBundle I M)).2)
+      (extChartAt I p).target :=
+    continuous_snd.comp_continuousOn h3
+  refine hg.congr (fun q hq => ?_)
+  have hy : (extChartAt I p).symm q ∈ (extChartAt I p).source := (extChartAt I p).map_target hq
+  have hqe : extChartAt I p ((extChartAt I p).symm q) = q := (extChartAt I p).right_inv hq
+  have hL : chartPushforwardField I X p τ q
+      = tangentCoordChange I ((extChartAt I p).symm q) p ((extChartAt I p).symm q)
+          (X τ ((extChartAt I p).symm q)) := by
+    conv_lhs => rw [← hqe]
+    exact chartPushforwardField_extChartAt X τ hy
+  rw [hL, TangentBundle.trivializationAt_apply, tangentCoordChange_def]
+  rfl
+
 end PoincareCurvature.GaugeFlowAssembly
