@@ -867,3 +867,63 @@ p ((extChartAt I p).symm q) (X τ ((extChartAt I p).symm q))` on a chart-confine
 `hasDerivAt_extChartAt_comp_of_hasMFDerivWithinAt` + `PartialEquiv.left_inv`), then the single-chart
 `hconj` from `eqOn_Icc_of_lipschitzOnWith` (ModelGaugeFlowODE) once `vpush` is shown Lipschitz — the first
 genuine consumer of the raw-flow chart-rep toolkit.  Do NOT rebuild trivial-case chart closures.
+
+### Progress (2026-07-06, later 9) — Item 2 GAP 1: the chart-pushforward field `vpush` is DEFINED, the raw flow's chart rep is PROVED to be its integral curve, and the temporal integral-curve UNIQUENESS + the fixed-chart-target `C³` transfer are BUILT (the temporal→spatial bridge, modulo the model flow `Ψ` + its `C³`)
+
+**What landed (all in `GaugeReduction/GaugeFlowAssembly.lean`, sorry-free, axiom-clean:
+`{propext, Classical.choice, Quot.sound}`).**  The previous session left the raw (`C³`-free) chart-rep
+derivative toolkit and named the concrete next target: the pushed field `vpush` and the raw flow's chart
+rep as its integral curve.  That target is now DONE, plus the uniqueness consumer and the transfer variant
+it needs:
+
+* **`chartPushforwardField`** (the `vpush` of the plan) — `noncomputable def … (X : ℝ → M → E) (p : M)
+  (τ : ℝ) (q : E) : E := tangentCoordChange I ((extChartAt I p).symm q) p ((extChartAt I p).symm q)
+  (X τ ((extChartAt I p).symm q))`.  **Key formulation choice**: typing the base field as `X : ℝ → M → E`
+  (into the model space, not a point-dependent `TangentSpace I x`) removes ALL dependent-type obstruction
+  from the chart-image reduction below — `X τ y : E` unconditionally, so the `left_inv` rewrite has a
+  type-correct motive.  This is the model-space vector field `f : ℝ → E → E` feeding the model ODE
+  uniqueness API.
+* **`chartPushforwardField_extChartAt`** — at a chart image `q = extChartAt I p y` with `y ∈ source`, the
+  field reduces (via `PartialEquiv.left_inv`) to `tangentCoordChange I y p y (X τ y)`.
+* **`hasDerivWithinAt_extChartAt_comp_chartPushforwardField`** (+ **`hasDerivAt_…`**) — **the raw flow's
+  chart rep IS an integral curve of `chartPushforwardField`**: for `γ` solving the bare manifold flow ODE
+  `HasMFDerivWithinAt … ((1).smulRight (X t (γ t)))` with `γ t ∈ (extChartAt I p).source`, the chart rep
+  `τ ↦ extChartAt I p (γ τ)` has derivative `chartPushforwardField I X p t (extChartAt I p (γ t))` — i.e.
+  exactly the `ModelGaugeFlowODE.LocalFlowSolution`-shaped datum `HasDerivWithinAt (flow) (f t (flow t)) s
+  t`, with NO spatial regularity assumed.  The first genuine consumer of the raw-flow chart-rep toolkit.
+* **`extChartAt_comp_eqOn_of_lipschitzOnWith`** — the integral-curve UNIQUENESS: the raw flow's chart rep
+  equals ANY co-integral curve `g : ℝ → E` of the same `chartPushforwardField` that agrees at an interior
+  time, provided the field is `LipschitzOnWith K` on a state tube containing both curves (via Mathlib
+  `ODE_solution_unique_of_mem_Ioo`, consuming `hasDerivAt_extChartAt_comp_chartPushforwardField`).  With
+  `g := ` the model flow curve `τ ↦ Ψ τ (extChartAt I p x)` this is step (ii): it pins the chart rep to
+  the model flow `Ψ`.
+* **`contMDiffOn_of_extChartAt_conjugation'`** — the chart-conjugation `C³` transfer with an INDEPENDENT
+  target chart centre `y₀` (the original hardcodes `F x₀`).  The temporal identity uses a single fixed
+  chart `p` for source AND target, so its fixed-time spatial identity `extChartAt I p (Φ t x) =
+  Ψ t (extChartAt I p x)` has target centre `p ≠ Φ t p`; this variant lets that identity discharge
+  `ContMDiffOn I I 3 (Φ t)` on the chart patch — the spatial-`C³` (`hslicesC3`) payoff of step (iii).
+
+**How they compose (the temporal→spatial bridge, now complete modulo the model flow).**  For a flow slice
+`Φ t` on a chart-confined patch `U`: apply `extChartAt_comp_eqOn_of_lipschitzOnWith` per `x ∈ U` (with
+`γ := fun τ ↦ Φ τ x`, `g := fun τ ↦ Ψ τ (extChartAt I p x)`) → temporal `EqOn`; evaluate at `t` →
+`hconj : ∀ x ∈ U, extChartAt I p (Φ t x) = Ψ t (extChartAt I p x)`; feed to
+`contMDiffOn_of_extChartAt_conjugation'` (`x₀ = y₀ = p`) with `hΨ : ContDiff ℝ 3 (Ψ t)` →
+`ContMDiffOn I I 3 (Φ t) U`; glue over a finite chart cover via
+`contMDiff_of_forall_extChartAt_conjugation`.  **Every step now exists EXCEPT the model flow `Ψ` itself
+and its two regularity inputs**: (a) `chartPushforwardField` is `LipschitzOnWith` on a tube (`hlip`), and
+(b) `Ψ τ` is `ContDiff ℝ 3` in the initial condition — BOTH are the `tangentCoordChange`/transition-map
+regularity + `exists_flow_diffeomorph_three` smooth-dependence long-pole.
+
+**Fractions of GAP 1.**  Steps (ii) [integral-curve uniqueness] and the target-centre-flexible half of
+(iii) [spatial-`C³` transfer] are DONE.  The remaining GAP-1 core is the single analytic long-pole (i):
+construct the model flow `Ψ` of `chartPushforwardField` and prove it `C³` in the initial condition, which
+reduces to (a) `chartPushforwardField` `Lipschitz`/`C^{3,1}` in `q` — the crux being regularity of the
+VARYING-source-centre `tangentCoordChange I y p y` (both slots move with `y`), NOT the fixed-centre
+`continuousOn_tangentCoordChange` — and (b) feeding it to `exists_flow_diffeomorph_three`.
+
+**Concrete next target.**  Attack the long-pole bottom-up: prove `chartPushforwardField` is `ContinuousOn`
+(then `LipschitzOnWith`, on a chart-confined tube) in `q`, decomposing `q ↦ (extChartAt I p).symm q`
+(chart-symm continuity) ∘ `y ↦ tangentCoordChange I y p y` (the varying-centre transition-map regularity —
+the genuine crux; look for a joint-continuity/`ContMDiff` route via `tangentBundleCore` or the
+`contMDiffOn_ext_coord_change` chain, NOT the fixed-centre lemma) ∘ `y ↦ X τ y` (base-field regularity).
+Do NOT rebuild trivial-case chart closures; the fixed-chart temporal→spatial bridge above is the route.
