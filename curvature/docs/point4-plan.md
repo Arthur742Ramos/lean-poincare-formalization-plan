@@ -1731,3 +1731,46 @@ as a `ContMDiffOn` bilinear-form section) and (ii) the joint `(t,x)` one-form se
 the traced DeTurck one-form — then instantiate `contMDiffOn_timeDependentRaisedSection` at `V := TM`,
 `IB := I`, feed the per-patch jet through `contMDiff_spaceTimeField_of_contMDiff_tangentSection`, and
 globalise over the finite chart cover (already assembled) to obtain the general-compact-`M` `hXfield`.
+
+### Item 2 (GAP 1) later-27 — geometric raising inputs discharged for static data, coordinate-freeness of the raised field, and the local→global smoothness glue (five commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Two fronts advanced toward producing the general-compact-`M` `hXfield`: (a) the two geometric inputs
+`hg`/`hω` of the raising capstone were discharged in the time-INDEPENDENT case, and (b) the raised
+field was shown to be the honest, trivialization-independent metric dual of the one-form, plus the pure
+local→global smoothness glue was built.
+
+* In `PoincareCurvature/Analysis/TimeDependentGram.lean`:
+  - `contMDiff_constMetricSection_prodSnd` / `contMDiff_constOneFormSection_prodSnd` — the constant
+    (time-independent) family instances of the capstone hypotheses `hg` / `hω`: a static metric section
+    (`g₀.contMDiff ∘ Prod.snd`) resp. a spatially-smooth static covector section are jointly `(t,x)`
+    smooth over `ℝ × B`.
+  - `contMDiffOn_timeIndependentRaisedSection` — discharges BOTH capstone inputs from the two lemmas
+    above, giving the per-patch raised gauge-field jet for a static gauge (positive-dimensional,
+    general `B`).
+  - `raisedVector_inner_localFrame_eq` — Cramer/Gram identity: the raised vector
+    `v = ∑ᵢ (G⁻¹ *ᵥ b)ᵢ • frameᵢ(x)` satisfies `g.inner x v (frameₖ x) = ω x (frameₖ x)` for every
+    frame index, using Gram symmetry `Gᵢⱼ = Gⱼᵢ` and `G · G⁻¹ = 1` (`timeDependentGram_det_ne_zero`).
+  - `raisedVector_inner_eq` — extends the raising equation from frame vectors to ALL `w : V x` via the
+    local-frame basis expansion; hence `g.inner x v = ω x`, i.e. `v` is the metric dual of `ω`.
+  - `eq_of_forall_inner_eq` — left nondegeneracy of a `ContMDiffRiemannianMetric` (from
+    positive-definiteness).
+  - `raisedVector_trivialization_independent` — the raised vector is INDEPENDENT of the chosen
+    trivialization/basis (even over different index types): both realizations are the unique metric
+    dual, identified by nondegeneracy.  This is the compatibility that lets the per-chart raised
+    sections glue into ONE global gauge field.
+* In `PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ModelManifoldGaugeFlow.lean`:
+  - `contMDiff_of_locally_contMDiffOn_univ_prod` — pure-locality glue: a map on `ℝ × M` is `ContMDiff`
+    as soon as, around every `x : M`, it is `ContMDiffOn` on `univ ×ˢ (open nbhd)`.
+  - `exists_flow_Ioo_forall_contMDiff_of_locally_contMDiffOn_tangentSection_compact` — compact-`M`
+    gauge flow (anchored, `ContMDiff I I 3` slices on a window around `0`) from the gauge-field jet in
+    the *local* per-chart form the raising capstone produces, gluing to the global `hXfield` via the
+    lemma above and feeding `exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact`.
+
+**Net.**  For STATIC gauge data the whole per-patch → flow pipeline is now inhabitable, and the raised
+field is proved coordinate-free.  **NEXT:** assemble the general (time-dependent) `hXfield` by (1)
+defining the global raised gauge field coordinate-free (or patchwise, well-defined by
+`raisedVector_trivialization_independent`), (2) identifying it with the per-chart local-frame
+expression on each patch, (3) feeding the capstone's per-patch `ContMDiffOn` through
+`contMDiff_of_locally_contMDiffOn_univ_prod` to the global `hXfield`, and (4) applying
+`exists_flow_Ioo_forall_contMDiff_of_locally_contMDiffOn_tangentSection_compact`; the residual genuine
+input is the joint `(t,x)` smoothness of the real (time-dependent) DeTurck metric/one-form.
