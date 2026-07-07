@@ -1010,6 +1010,55 @@ theorem exists_Ioo_forall_forall_graph_mem_compact_of_isCompact_of_continuousAt_
       hQ isOpen_interior hgraph0 hcont
   exact ⟨a, b, hmem, fun τ hτ q hq => interior_subset (hgraph τ hτ q hq)⟩
 
+/-- **Uniform short-time source confinement over a compact set (manifold-target).**  The compact-`Q`
+generalisation of `exists_Ioo_forall_mem_of_continuousAt_source`: where that lemma confines a *single*
+orbit `τ ↦ Ψ τ x` into an open set `U`, this one confines *every* orbit `τ ↦ Ψ τ q` (for `q` in a
+compact set `Q`) into `U` on a **single** time window.  For a time-dependent flow `Ψ : ℝ → Y → Y` (`Y`
+an arbitrary topological space) jointly continuous at each anchored point `(t₀, q)` (`q ∈ Q`), with the
+anchor values `Ψ t₀ q ∈ U` for all `q ∈ Q` and `U` open, there is an open time window `Set.Ioo a b ∋ t₀`
+on which `Ψ τ q ∈ U` for every `τ` in the window and every `q ∈ Q`.  Proof: apply the manifold-target
+tube-lemma confinement `exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_manifoldTarget`
+to the open space-time target `W = univ ×ˢ U`, then read off the second component.  This is the
+`hγ_src`-producing datum of GAP-1 step (v) **uniformly over a compact chart patch** (take
+`U = (extChartAt I p).source` and `Q` a compact neighbourhood of the patch). -/
+theorem exists_Ioo_forall_forall_mem_of_isCompact_of_continuousAt_source
+    {Y : Type*} [TopologicalSpace Y]
+    {Ψ : ℝ → Y → Y} {Q U : Set Y} {t₀ : ℝ}
+    (hQ : IsCompact Q) (hU : IsOpen U)
+    (hanchor : ∀ q ∈ Q, Ψ t₀ q ∈ U)
+    (hcont : ∀ q ∈ Q, ContinuousAt (fun z : ℝ × Y => Ψ z.1 z.2) (t₀, q)) :
+    ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧ ∀ τ ∈ Set.Ioo a b, ∀ q ∈ Q, Ψ τ q ∈ U := by
+  obtain ⟨a, b, hmem, hgraph⟩ :=
+    exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_manifoldTarget
+      (Ψ := Ψ) (Q := Q) (W := Set.univ ×ˢ U) (t₀ := t₀)
+      hQ (isOpen_univ.prod hU)
+      (fun q hq => ⟨Set.mem_univ _, hanchor q hq⟩) hcont
+  exact ⟨a, b, hmem, fun τ hτ q hq => (hgraph τ hτ q hq).2⟩
+
+/-- **The `hγ_src` datum of GAP-1 step (v), produced from the raw manifold flow's joint continuity.**
+Specialises `exists_Ioo_forall_forall_mem_of_isCompact_of_continuousAt_source` to the open target
+`U = (extChartAt I p).source` and an **anchored** flow `Φ` (`Φ 0 = id` on `Q`): the anchor condition
+`Φ 0 x ∈ (extChartAt I p).source` then reduces to `Q ⊆ (extChartAt I p).source`.  For a jointly-continuous
+(at each `(0, x)`, `x ∈ Q`) anchored flow `Φ` on a compact patch `Q` contained in a chart source, there
+is an open window `Set.Ioo a b ∋ 0` on which every orbit stays in the chart source:
+`∀ τ ∈ Ioo a b, ∀ x ∈ Q, Φ τ x ∈ (extChartAt I p).source`.  Since `U ⊆ Q` for the open chart patch `U`
+of the step-(v) capstone, this delivers exactly the `hγ_src` hypothesis of
+`contMDiffOn_flowSlice_of_cutoff_orbit_control`, derived from the raw manifold gauge flow's joint
+continuity (`exists_timeDependent_flow_compact_continuousAt`) rather than assumed. -/
+theorem exists_Ioo_forall_forall_mem_extChartAt_source_of_continuousAt
+    {H M : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    [TopologicalSpace M] [ChartedSpace H M]
+    {Φ : ℝ → M → M} {Q : Set M} {p : M}
+    (hQ : IsCompact Q) (hQsub : Q ⊆ (extChartAt I p).source)
+    (hanchor : ∀ x ∈ Q, Φ 0 x = x)
+    (hcont : ∀ x ∈ Q, ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x)) :
+    ∃ a b : ℝ, (0 : ℝ) ∈ Set.Ioo a b ∧
+      ∀ τ ∈ Set.Ioo a b, ∀ x ∈ Q, Φ τ x ∈ (extChartAt I p).source := by
+  have hUopen : IsOpen (extChartAt I p).source := by
+    rw [extChartAt_source]; exact (chartAt H p).open_source
+  exact exists_Ioo_forall_forall_mem_of_isCompact_of_continuousAt_source
+    hQ hUopen (fun x hx => by rw [hanchor x hx]; exact hQsub hx) hcont
+
 end
 
 end SmoothDependenceCk
