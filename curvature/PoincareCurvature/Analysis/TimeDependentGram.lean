@@ -312,6 +312,64 @@ theorem contMDiffOn_timeDependentRaisedSection
   contMDiffOn_raisedSection_of_coeff e bas hu'
     (contMDiffOn_timeDependentRaisedCoeff g ω e bas hu' hg hω)
 
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **Joint `(t, x)` smoothness of a time-INDEPENDENT metric section, over the space-time base.**
+Composing the spatial metric smoothness `g₀.contMDiff` with `Prod.snd : ℝ × B → B` gives the
+constant-family instance of the capstone's `hg` input: a background/reference metric that does not
+evolve in time is (trivially) jointly `(t, x)`-smooth as a fibrewise bilinear-form section.  This is
+the `hg` hypothesis of `contMDiffOn_timeDependentRaisedSection` for the constant family
+`g := fun _ ↦ g₀` (via `.contMDiffOn`). -/
+theorem contMDiff_constMetricSection_prodSnd
+    (g₀ : Bundle.ContMDiffRiemannianMetric IB n F V) :
+    ContMDiff (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] V y →L[ℝ] ℝ)) p.2 (g₀.inner p.2)) :=
+  g₀.contMDiff.comp contMDiff_snd
+
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **Joint `(t, x)` smoothness of a time-INDEPENDENT one-form section, over the space-time base.**
+Composing a spatially-smooth covector section with `Prod.snd : ℝ × B → B` gives the constant-family
+instance of the capstone's `hω` input: a time-independent one-form (e.g. the traced DeTurck one-form
+of a static metric) is jointly `(t, x)`-smooth.  This is the `hω` hypothesis of
+`contMDiffOn_timeDependentRaisedSection` for the constant family `ω := fun _ ↦ ω₀` (via
+`.contMDiffOn`). -/
+theorem contMDiff_constOneFormSection_prodSnd
+    (ω₀ : ∀ y : B, V y →L[ℝ] ℝ)
+    (hω₀ : ContMDiff IB (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun y : B ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] ℝ)) y (ω₀ y))) :
+    ContMDiff (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] ℝ)) p.2 (ω₀ p.2)) :=
+  hω₀.comp contMDiff_snd
+
+/-- **Per-patch raised gauge field for time-INDEPENDENT metric + one-form.**  The autonomous-data
+instance of `contMDiffOn_timeDependentRaisedSection`: for a static metric `g₀` and static one-form
+`ω₀` (spatially smooth as a covector section), the metric-raised vector field
+`x ↦ ∑ᵢ (G₀⁻¹ *ᵥ b₀)ᵢ • frameᵢ(x)` of `ω₀` — read as a time-independent section over `ℝ ×ˢ u` — is
+`ContMDiffOn`.  This discharges both geometric inputs of the field-independent raising capstone from
+the two constant-family smoothness lemmas above, giving the per-patch gauge-field jet for a static
+gauge. -/
+theorem contMDiffOn_timeIndependentRaisedSection
+    (g₀ : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω₀ : ∀ y : B, V y →L[ℝ] ℝ)
+    (hω₀ : ContMDiff IB (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun y : B ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] ℝ)) y (ω₀ y)))
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    {u : Set B} (hu' : u ⊆ e.baseSet) :
+    ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' F p.2
+        (∑ i, (show ι → ℝ from
+            ((show Matrix ι ι ℝ from
+                (fun a b ↦ g₀.inner p.2 (e.localFrame bas a p.2) (e.localFrame bas b p.2)))⁻¹
+              : Matrix ι ι ℝ).mulVec (fun j ↦ ω₀ p.2 (e.localFrame bas j p.2))) i
+          • e.localFrame bas i p.2)) (Set.univ ×ˢ u) :=
+  contMDiffOn_timeDependentRaisedSection (fun _ ↦ g₀) (fun _ ↦ ω₀) e bas hu'
+    (contMDiff_constMetricSection_prodSnd g₀).contMDiffOn
+    (contMDiff_constOneFormSection_prodSnd ω₀ hω₀).contMDiffOn
+
 end Gram
 
 end PoincareCurvature.ParametrizedInner
