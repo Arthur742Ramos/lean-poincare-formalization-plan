@@ -2048,3 +2048,43 @@ needs the smoothness-ladder reconciliation: the capstone consumes `C^∞` joint 
 the residual is either a `C²`-regularity version of the raising capstone or a `C^∞` upgrade of the
 DeTurck one-form's joint smoothness.  (GAP 2's geometric chart `A`/Schauder realization remains the
 point-4 long pole.)
+
+### Item 2 (GAP 1) later-34 — the smoothness-ladder's `n = 2` ↔ `n = ∞` metric-regularity step is CLOSED: the reverse DeTurck gauge field is the `C^∞`-metric-raised field of the negated one-form (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The later-33 `NEXT` named the residual as "the capstone consumes `C^∞` joint `(t, x)` data
+(`g : ℝ → ContMDiffRiemannianMetric I ∞`, `hg`/`hom` at level `∞`), whereas a `MetricFamily` is `C²`".
+The **metric-regularity half** of that reconciliation is now discharged — the raised gauge field the
+capstone flows can be identified with the genuine DeTurck gauge field *across the `n = 2` ↔ `n = ∞`
+regularity gap*.  Two additive, axiom-clean landings:
+
+* **`raisedGaugeField_congr_inner`** (`Analysis/TimeDependentGram.lean`) — the metric-raised gauge field
+  depends only on the fibre inner product, not the metric's smoothness class: if `g` (class `n`) and
+  `g'` (class `m`) satisfy `g.inner y v w = g'.inner y v w` then
+  `raisedGaugeField g ω bas y = raisedGaugeField g' ω bas y`.  Both are the unique metric dual `♯ω` of a
+  common inner product, so `raisedGaugeField_eq_of_forall_inner_eq` identifies them.  Diamond-free (the
+  raised value's fibre type does not depend on the metric); no transported-instance reconciliation.
+* **`neg_intrinsicDeTurckVectorField_eq_raisedGaugeField_neg_of_inner_eq`**
+  (`AnalyticPDE/DeTurckRaisedGaugeField.lean`) — for a `MetricFamily` `g` (`C²`) and *any* `C^m` metric
+  family `g'` with `(g t).inner = (g' t).inner` (e.g. `m := ∞`, `g'` the `C^∞` metric and `g` its `C²`
+  downgrade), `-intrinsicDeTurckVectorField g background t x = raisedGaugeField (g' t) (-ω) bas x`.
+  Proof: the later-33 `C²` identity `neg_intrinsicDeTurckVectorField_eq_raisedGaugeField_neg` composed
+  (`.trans`) with `raisedGaugeField_congr_inner`.  The later-33 diamond returns at the `.trans`'s
+  `isDefEq` (a `whnf` timeout on the local-frame/Gram-inverse sum + tangent-fibre instance mismatch);
+  it is defeated the same way — full positional `@`-pin of every tangent-bundle instance to the
+  canonical `inferInstance`/`TangentSpace.fiberBundle`/`TangentSpace.vectorBundle`, plus
+  `attribute [local irreducible] raisedGaugeField in`, so the two `@`-identical `raisedGaugeField (g t)`
+  applications unify syntactically instead of unfolding.
+
+**Value.**  With `m := ∞` the reverse DeTurck gauge field is now expressible as
+`raisedGaugeField (g' t) (-intrinsicDeTurckOneForm g background t) bas`, whose metric argument
+`g' t : ContMDiffRiemannianMetric I ∞` is *exactly* the `ℝ → ContMDiffRiemannianMetric I ∞` shape the
+raising capstone `exists_gaugeFlow_Ioo_of_timeDependent_raisingData` requires — so the capstone's flowed
+field can be read as the genuine DeTurck gauge field with no residual `n = 2` ↔ `n = ∞` mismatch.
+`raisedGaugeField_congr_inner` is now a reusable metric-regularity bridge for any raised-field
+reconciliation.  **NEXT (Item 2 GAP 1 residual).**  Only the joint-smoothness *inputs* to the capstone
+remain: `hom` (joint `(t, x)` `C^∞` smoothness of `-intrinsicDeTurckOneForm g background`, which needs
+joint smoothness of the chosen Levi-Civita connection family — the existing DeTurck one-form smoothness
+lemmas are spatial-only, `contMDiffOn` at fixed `t`) and `hg` (joint `(t, x)` smoothness of the `C^∞`
+metric's inner).  Both require a jointly-smooth (in particular time-differentiable) metric family, which
+a bare `MetricFamily` does not provide; they are the genuine analytic content still open on this front.
+(GAP 2's geometric chart `A`/Schauder realization remains the point-4 long pole.)
