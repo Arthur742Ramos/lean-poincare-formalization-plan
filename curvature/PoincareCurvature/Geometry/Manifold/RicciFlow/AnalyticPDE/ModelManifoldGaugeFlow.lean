@@ -1295,6 +1295,66 @@ theorem exists_Ioo_maps3_cutoff_eqOne_and_state_mem
     fun q hq τ hτ => (hboth τ hτ).1 q hq,
     fun q hq τ hτ => (hboth τ hτ).2 q hq⟩
 
+/-- **End-to-end model-side face producer from field + cutoff data — the model analogue of
+`exists_timeDependent_flow_compact_extChartAt_source_and_mem`.**  From the joint `C^N` (`N ≥ 4`)
+regularity of the tangent-bundle section `(τ, y) ↦ ⟨y, X τ y⟩` on `ℝ ×ˢ (extChartAt I p).source` and a
+globally-`C^N`, compactly-supported cutoff `χ` with `tsupport χ ⊆ ℝ ×ˢ (extChartAt I p).target` that is
+`≡ 1` on a neighbourhood of a compact window `Kwin`, this produces the model comparison gauge flow `G`
+of the bump-globalised cut field `χ • chartPushforwardField I X p` *together with* both model-curve
+orbit-containment faces of the step-(v) capstone on a single window `Set.Ioo a b ∋ t₀`:
+
+* the gauge flow `G : Diffeomorph3GaugeFlowOn (χ • chartPushforwardField I X p) Set.univ t₀` itself,
+  built by `exists_diffeomorph3GaugeFlowOn_cutoff_chartPushforwardField`;
+* `hχ`  — `χ (τ, (G.maps3 τ) q) = 1` along every orbit (`q ∈ Q`);
+* `hg_mem` — `(G.maps3 τ) q ∈ state`.
+
+The uniform-in-time Lipschitz constant of the cut field needed by
+`exists_Ioo_maps3_cutoff_eqOne_and_state_mem` is *derived* — not assumed — from the cut field's compact
+support via `exists_lipschitzWith_prodMk_left` (through
+`contDiff_hasCompactSupport_cutoff_chartPushforwardField`).  The anchored positions `(G.maps3 t₀) q = q`
+(`AnchoredAt.apply`) reduce the containment hypotheses to `(t₀, q) ∈ interior Kwin` and `q ∈ state`.
+Instantiated with `Q := extChartAt I p '' U` (`isCompact_extChartAt_image`), this is exactly the `G` /
+`hχ` / `hg_mem` model-side input of `contMDiffOn_flowSlice_of_cutoff_orbit_control`, produced from the
+chart field jet alone. -/
+theorem exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {N : WithTop ℕ∞} [IsManifold I N M]
+    [ContMDiffVectorBundle N E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M}
+    (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) N
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source))
+    {χ : ℝ × E → ℝ} (hχ : ContDiff ℝ N χ) (hχc : HasCompactSupport χ)
+    (hsub : tsupport χ ⊆ Set.univ ×ˢ (extChartAt I p).target)
+    (hN : 4 ≤ N) (t₀ : ℝ)
+    {Q : Set E} {Kwin : Set (ℝ × E)} {state : Set E}
+    (hQ : IsCompact Q)
+    (hcut : ∀ᶠ r in 𝓝ˢ Kwin, χ r = 1)
+    (hstate : IsOpen state)
+    (hwin0 : ∀ q ∈ Q, ((t₀, q) : ℝ × E) ∈ interior Kwin)
+    (hstate0 : ∀ q ∈ Q, q ∈ state) :
+    ∃ (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+        (X := fun τ q => χ (τ, q) •
+          PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) Set.univ t₀),
+      ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧
+      (∀ q ∈ Q, ∀ τ ∈ Set.Ioo a b, χ (τ, (G.maps3 τ) q) = 1) ∧
+      (∀ q ∈ Q, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) q ∈ state) := by
+  obtain ⟨hF, hcs⟩ :=
+    contDiff_hasCompactSupport_cutoff_chartPushforwardField hX hχ hχc hsub
+  obtain ⟨C, hC⟩ := exists_lipschitzWith_prodMk_left hF hcs
+    ((by norm_num : (1 : WithTop ℕ∞) ≤ 4).trans hN)
+  obtain ⟨G⟩ :=
+    exists_diffeomorph3GaugeFlowOn_cutoff_chartPushforwardField hX hχ hχc hsub hN Set.univ t₀
+  refine ⟨G, ?_⟩
+  have hanchor : ∀ q : E, (G.maps3 t₀) q = q :=
+    fun q => SmoothSelfDiffeomorph3Family.AnchoredAt.apply (Φ := G.maps3) G.anchored q
+  exact exists_Ioo_maps3_cutoff_eqOne_and_state_mem G (fun t => hC t) hQ hcut hstate
+    (fun q hq => by rw [hanchor]; exact hwin0 q hq)
+    (fun q hq => by rw [hanchor]; exact hstate0 q hq)
+
 end
 
 end SmoothDependenceCk
