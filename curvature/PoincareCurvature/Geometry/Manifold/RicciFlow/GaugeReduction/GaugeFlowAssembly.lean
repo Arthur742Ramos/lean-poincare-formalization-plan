@@ -643,4 +643,46 @@ theorem contDiffOn_prod_chartPushforwardField {n : WithTop ℕ∞}
   rw [hL, TangentBundle.trivializationAt_apply, tangentCoordChange_def]
   rfl
 
+/-- **Time-uniform `LipschitzOnWith` of the chart pushforward field on a convex compact tube.**  The
+time-independent (`hlip`) datum consumed by `extChartAt_comp_eqOn_of_lipschitzOnWith`: a *single*
+Lipschitz constant `K` valid for **every** time slice `chartPushforwardField I X p t`
+(`t ∈ Set.Icc a b`), obtained from the joint-in-time field regularity
+`contDiffOn_prod_chartPushforwardField` on the compact convex product tube `Set.Icc a b ×ˢ s`
+(`ContDiffOn.exists_lipschitzOnWith`), then restricting the joint Lipschitz bound to each time slice:
+for a fixed time `t` the two product points `(t, q)`, `(t, q')` share their first coordinate, so their
+sup-metric distance `edist (t, q) (t, q')` collapses to `edist q q'` (`Prod.edist_eq`, `edist_self`),
+turning the joint bound into the slice bound with the *same* constant.
+
+This is exactly the uniform-`K` shape the temporal integral-curve uniqueness comparison requires for its
+`hlip : ∀ t ∈ Set.Ioo a b, LipschitzOnWith K (chartPushforwardField I X p t) (state t)` hypothesis with
+a constant state tube `state t := s` (and `Set.Ioo a b ⊆ Set.Icc a b`), strengthening the
+per-fixed-time `exists_lipschitzOnWith_chartPushforwardField` to a bound uniform over the whole compact
+time interval — the field-Lipschitz input of the step-(v) GAP-1 glue that no longer varies with `t`. -/
+theorem exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField {n : WithTop ℕ∞}
+    [IsManifold I n M] [ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M}
+    (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) n
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source))
+    (hn : n ≠ 0) {a b : ℝ} {s : Set E} (hs_sub : s ⊆ (extChartAt I p).target)
+    (hs_conv : Convex ℝ s) (hs_comp : IsCompact s) :
+    ∃ K, ∀ t ∈ Set.Icc a b, LipschitzOnWith K (chartPushforwardField I X p t) s := by
+  have hsub : Set.Icc a b ×ˢ s ⊆ Set.univ ×ˢ (extChartAt I p).target :=
+    Set.prod_mono (Set.subset_univ _) hs_sub
+  have hconv : Convex ℝ (Set.Icc a b ×ˢ s) := (convex_Icc a b).prod hs_conv
+  have hcomp : IsCompact (Set.Icc a b ×ˢ s) := isCompact_Icc.prod hs_comp
+  obtain ⟨K, hK⟩ :=
+    ((contDiffOn_prod_chartPushforwardField hX).mono hsub).exists_lipschitzOnWith hn hconv hcomp
+  refine ⟨K, fun t ht => ?_⟩
+  intro q hq q' hq'
+  have hedist : edist ((t, q) : ℝ × E) (t, q') = edist q q' := by
+    rw [Prod.edist_eq]
+    dsimp only
+    rw [edist_self]
+    exact max_eq_right (zero_le _)
+  have hlip := hK (⟨ht, hq⟩ : ((t, q) : ℝ × E) ∈ Set.Icc a b ×ˢ s)
+    (⟨ht, hq'⟩ : ((t, q') : ℝ × E) ∈ Set.Icc a b ×ˢ s)
+  rw [hedist] at hlip
+  exact hlip
+
 end PoincareCurvature.GaugeFlowAssembly
