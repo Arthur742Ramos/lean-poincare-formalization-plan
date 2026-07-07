@@ -1863,3 +1863,52 @@ gauge one-form `om` and metric `g` of the DeTurck setup to the `hg`/`hom` joint-
 geometric raising data of the actual Ricci–DeTurck gauge), then thread the resulting `C³` flow into the
 Item 1 time-derivative / DeTurck reduction.  (GAP 2's geometric chart `A`/Schauder realization remains
 the point-4 long pole.)
+
+### Item 2 (GAP 1) later-30 — metric-dual (`raisedGaugeField`) algebra toolkit committed; the DeTurck↔raisedGaugeField identity is diamond-blocked at the definition site (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The later-29 NEXT was to connect the actual DeTurck gauge (`g`, `intrinsicDeTurckOneForm`) to the flow
+capstone's `raisedGaugeField g om`.  The natural bridge is the pointwise identity
+`intrinsicDeTurckVectorField g bg t = raisedGaugeField (g t) (intrinsicDeTurckOneForm g bg t) bas`
+(both are the metric dual `♯` of the one-form; `intrinsicDeTurckGaugeField = -` of it, cf.
+`raisedGaugeField_neg`).  The *algebraic* half of that bridge is now committed, and the identity's
+*analytic* half is diagnosed as a genuine instance-diamond obstacle.
+
+* In `PoincareCurvature/Analysis/TimeDependentGram.lean` (all general, abstract-`V`, wall-free):
+  - `raisedGaugeField_eq_of_inner_eq` / `raisedGaugeField_eq_of_forall_inner_eq` — **uniqueness of the
+    metric dual**: any `v` with `g.inner y v = ω y` equals `raisedGaugeField g ω bas y`
+    (`eq_of_forall_inner_eq` ∘ `raisedGaugeField_inner_eq`).  This is exactly the tool that identifies a
+    concretely-built dual (e.g. a Riesz `♯ω`) with the coordinate-free `raisedGaugeField` — once the
+    two are put in one instance path.
+  - `raisedGaugeField_zero` / `_add` / `_smul` / `_neg` / `_sub` — the metric dual is **linear in the
+    one-form** (proved through the uniqueness bridge + bilinearity of `g.inner`).  `_neg` gives the
+    reverse gauge field `-♯ω = ♯(-ω)`; `_sub` matches the DeTurck one-form's Christoffel-difference
+    structure.
+
+* **BLOCKER (the identity itself).**  `intrinsicDeTurckVectorField g bg t x = raisedGaugeField (g t) ω
+  bas x` cannot be stated-and-proved as a plain equality without defeating a *compounded* tangent-bundle
+  instance diamond that is strictly worse than the later-29 flow-capstone wall:
+  - `raisedGaugeField … x` at `V := TangentSpace I` needs `FiberBundle E (TangentSpace I)`; as a fresh
+    lemma-application argument this synthesis enters a non-terminating `whnf` (even though
+    `example : FiberBundle E TM := inferInstance` succeeds standalone — the failure is metavar/telescope
+    order, `inst_8 : ∀x, NAG (V x)` being resolved before `inst_10 : FiberBundle` and fixing an
+    incompatible `AddCommGroup` path: `instAddCommGroupTangentSpace` vs `NormedAddCommGroup…toAddCommMonoid`).
+  - The later-29 capstone technique (full positional `@`-pin of every bundle instance with `by exact`
+    bridges + `synthInstance.maxHeartbeats 4000000`) makes `raisedGaugeField` *elaborate*, but the
+    equality then times out at `isDefEq`/`whnf` on the **LHS**: `intrinsicDeTurckVectorField` unfolds to
+    `letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩; CovariantDerivative.rieszMap x (ω x)`, so
+    reconciling the `rieszMap` `RiemannianBundle` path against `raisedGaugeField`'s pinned
+    `FiberBundle/VectorBundle` path loops.  The capstone never touched `rieszMap`, so it did not hit this
+    second path; the identity does.
+  - Verified fact used by the intended proof (holds by `rfl`): under
+    `letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩`, `⟪u, w⟫ = (g t).inner x u w`.  So once
+    the two are in one instance path, the identity closes in one line via
+    `raisedGaugeField_eq_of_forall_inner_eq` + `rieszMap_apply_inner`.
+
+* **NEXT.**  Defeat the compounded diamond at the *definition site*, not the use site: give a single
+  once-off `local instance`/lemma discharging `FiberBundle`/`VectorBundle E (TangentSpace I)` from the
+  SAME canonical `AddCommGroup`/`Module` path that `rieszMap`'s `RiemannianBundle` uses (candidate: state
+  `intrinsicDeTurckVectorField_eq_raisedGaugeField` with both sides built through one `@`-pinned
+  `raisedGaugeField`/`rieszMap` expression whose fibre instances are literally shared, so `isDefEq` is
+  syntactic).  With that identity in hand, `raisedGaugeField_neg` turns it into the gauge-field form and
+  the later-29 flow capstone yields the DeTurck `C³` gauge flow directly.  (GAP 2's geometric chart
+  `A`/Schauder realization remains the point-4 long pole.)
