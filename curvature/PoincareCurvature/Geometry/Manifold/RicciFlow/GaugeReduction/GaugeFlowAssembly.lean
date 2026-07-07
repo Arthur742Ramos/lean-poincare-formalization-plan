@@ -392,4 +392,37 @@ theorem hasDerivAt_extChartAt_comp_chartPushforwardField
       (chartPushforwardField I X p t (extChartAt I p (γ t))) t :=
   (hasDerivWithinAt_extChartAt_comp_chartPushforwardField hγ hsrc_ext).hasDerivAt hs
 
+/-- **Chart-representation uniqueness against a co-integral curve of the chart pushforward field.**
+Given the raw manifold flow ODE for `γ` in the source of the preferred chart `extChartAt I p` over an
+open time window `Ioo a b`, and a second curve `g : ℝ → E` that is an integral curve of the *same*
+chart pushforward field `chartPushforwardField I X p` on that window and agrees with the chart
+representation `extChartAt I p ∘ γ` at an interior time `t₀`, if the field is `LipschitzOnWith K` on a
+state tube `state t` containing both curves then the two coincide on the whole window.
+
+This is the integral-curve uniqueness step that identifies the raw compact flow's chart representation
+with a comparison curve `g` — in the intended application `g` is the model-`C³` flow tower `Ψ`, so the
+conclusion upgrades the chart representation to `C³` (the `hslicesC3` content of
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`).  The Lipschitz hypothesis `hlip` is the
+`tangentCoordChange`/transition-map regularity supplied separately; everything else is now available
+unconditionally from the raw flow via `hasDerivAt_extChartAt_comp_chartPushforwardField`. -/
+theorem extChartAt_comp_eqOn_of_lipschitzOnWith
+    {γ : ℝ → M} {g : ℝ → E} {p : M} {X : ℝ → M → E}
+    {a b t₀ : ℝ} {K : NNReal} {state : ℝ → Set E}
+    (hγ : ∀ t ∈ Set.Ioo a b,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ (Set.Ioo a b) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))))
+    (hγ_src : ∀ t ∈ Set.Ioo a b, γ t ∈ (extChartAt I p).source)
+    (ht₀ : t₀ ∈ Set.Ioo a b)
+    (hlip : ∀ t ∈ Set.Ioo a b, LipschitzOnWith K (chartPushforwardField I X p t) (state t))
+    (hg' : ∀ t ∈ Set.Ioo a b, HasDerivAt g (chartPushforwardField I X p t (g t)) t)
+    (hγ_mem : ∀ t ∈ Set.Ioo a b, extChartAt I p (γ t) ∈ state t)
+    (hg_mem : ∀ t ∈ Set.Ioo a b, g t ∈ state t)
+    (heq : extChartAt I p (γ t₀) = g t₀) :
+    Set.EqOn (fun τ : ℝ ↦ extChartAt I p (γ τ)) g (Set.Ioo a b) :=
+  ODE_solution_unique_of_mem_Ioo (v := chartPushforwardField I X p) (s := state)
+    hlip ht₀
+    (fun t ht ↦ ⟨hasDerivAt_extChartAt_comp_chartPushforwardField (hγ t ht)
+      (Ioo_mem_nhds ht.1 ht.2) (hγ_src t ht), hγ_mem t ht⟩)
+    (fun t ht ↦ ⟨hg' t ht, hg_mem t ht⟩)
+    heq
+
 end PoincareCurvature.GaugeFlowAssembly
