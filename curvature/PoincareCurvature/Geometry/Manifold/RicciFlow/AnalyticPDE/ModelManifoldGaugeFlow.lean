@@ -1129,6 +1129,45 @@ theorem exists_Ioo_forall_forall_extChartAt_mem_of_continuousAt
   · intro x hx
     exact continuousAt_zero_prod_extChartAt_flow (hQsub hx) (hanchor x hx) (hcont x hx)
 
+/-- **Intersecting two open-window confinements at a common anchor.**  Given two short-time confinements
+`∃ a b, t₀ ∈ Ioo a b ∧ ∀ τ ∈ Ioo a b, P τ` and the same for `R`, their windows intersect to a single
+open window `Ioo (max a₁ a₂) (min b₁ b₂) ∋ t₀` on which **both** `P τ` and `R τ` hold.  The generic glue
+for assembling the several separate short-time orbit-confinement windows of GAP-1 step (v)
+(`hγ_src`, `hγ_mem`, the model-curve `hg_mem`, the cutoff window) into the *single* window
+`contMDiffOn_flowSlice_of_cutoff_orbit_control` consumes. -/
+theorem exists_Ioo_forall_and {t₀ : ℝ} {P R : ℝ → Prop}
+    (h₁ : ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧ ∀ τ ∈ Set.Ioo a b, P τ)
+    (h₂ : ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧ ∀ τ ∈ Set.Ioo a b, R τ) :
+    ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧ ∀ τ ∈ Set.Ioo a b, P τ ∧ R τ := by
+  obtain ⟨a₁, b₁, ⟨ha₁, hb₁⟩, hP⟩ := h₁
+  obtain ⟨a₂, b₂, ⟨ha₂, hb₂⟩, hR⟩ := h₂
+  refine ⟨max a₁ a₂, min b₁ b₂, ⟨max_lt ha₁ ha₂, lt_min hb₁ hb₂⟩, fun τ hτ => ?_⟩
+  exact ⟨hP τ (Set.Ioo_subset_Ioo (le_max_left a₁ a₂) (min_le_left b₁ b₂) hτ),
+         hR τ (Set.Ioo_subset_Ioo (le_max_right a₁ a₂) (min_le_right b₁ b₂) hτ)⟩
+
+/-- **The `hγ_src` *and* `hγ_mem` data of GAP-1 step (v) on a single common window.**  Bundles
+`exists_Ioo_forall_forall_mem_extChartAt_source_of_continuousAt` (orbit stays in the chart source) and
+`exists_Ioo_forall_forall_extChartAt_mem_of_continuousAt` (chart image of orbit stays in the open
+space-time target `W`) into one open window `Set.Ioo a b ∋ 0` via `exists_Ioo_forall_and`.  For a
+jointly-continuous anchored raw manifold flow `Φ` over a compact patch `Q ⊆ (extChartAt I p).source`,
+delivers both raw-manifold orbit-confinement faces of the step-(v) capstone simultaneously — the exact
+common time window `contMDiffOn_flowSlice_of_cutoff_orbit_control` needs. -/
+theorem exists_Ioo_forall_forall_extChartAt_source_and_mem_of_continuousAt
+    {H M : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    [TopologicalSpace M] [ChartedSpace H M]
+    {Φ : ℝ → M → M} {Q : Set M} {p : M} {W : Set (ℝ × E)}
+    (hQ : IsCompact Q) (hQsub : Q ⊆ (extChartAt I p).source) (hW : IsOpen W)
+    (hanchor : ∀ x ∈ Q, Φ 0 x = x)
+    (hgraph0 : ∀ x ∈ Q, ((0 : ℝ), extChartAt I p x) ∈ W)
+    (hcont : ∀ x ∈ Q, ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x)) :
+    ∃ a b : ℝ, (0 : ℝ) ∈ Set.Ioo a b ∧
+      ∀ τ ∈ Set.Ioo a b,
+        (∀ x ∈ Q, Φ τ x ∈ (extChartAt I p).source) ∧
+        (∀ x ∈ Q, ((τ, extChartAt I p (Φ τ x)) : ℝ × E) ∈ W) :=
+  exists_Ioo_forall_and
+    (exists_Ioo_forall_forall_mem_extChartAt_source_of_continuousAt hQ hQsub hanchor hcont)
+    (exists_Ioo_forall_forall_extChartAt_mem_of_continuousAt hQ hQsub hW hanchor hgraph0 hcont)
+
 end
 
 end SmoothDependenceCk
