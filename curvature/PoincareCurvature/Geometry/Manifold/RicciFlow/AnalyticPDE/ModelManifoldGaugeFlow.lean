@@ -1243,6 +1243,58 @@ theorem isCompact_extChartAt_image
     IsCompact (extChartAt I p '' Q) :=
   hQ.image_of_continuousOn ((continuousOn_extChartAt p).mono hQsub)
 
+/-- **The `hχ` *and* `hg_mem` model-curve faces of GAP-1 step (v) on a single common window — the
+model-side analogue of `exists_timeDependent_flow_compact_extChartAt_source_and_mem`.**  For a model
+gauge flow `G : Diffeomorph3GaugeFlowOn (X := X) Set.univ t₀` of a *uniformly-in-time* `K`-Lipschitz
+field `X` (exactly the shape the bump-globalised cut field `χ • chartPushforwardField` supplies via its
+compact support), a compact model-space initial set `Q`, a cutoff `χ` that is `≡ 1` on a neighbourhood
+of a compact window `Kwin` (as produced by `exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`),
+and an open state tube `state`, this bundles the two model-curve orbit-containment faces of the step-(v)
+capstone onto ONE window `Set.Ioo a b ∋ t₀`:
+
+* `hχ`  — `χ (τ, (G.maps3 τ) q) = 1` along every orbit (`q ∈ Q`); obtained by confining the orbit graphs
+  into `interior Kwin` (`exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith`), whence
+  `interior_subset` puts the graph in `Kwin` and `hcut.self_of_nhdsSet` fires the cutoff.
+* `hg_mem` — `(G.maps3 τ) q ∈ state`; obtained by confining the orbits into `Set.univ ×ˢ state`.
+
+The two confinement windows are merged with `exists_Ioo_forall_and`.  Instantiated with
+`Q := extChartAt I p '' U` (compact by `isCompact_extChartAt_image`) and a constant `state`, this is
+exactly the `hχ` / `hg_mem` data of `contMDiffOn_flowSlice_of_cutoff_orbit_control` — the model-side
+input package of the step-(v) capstone, produced from the model gauge flow's Lipschitz field. -/
+theorem exists_Ioo_maps3_cutoff_eqOne_and_state_mem
+    [FiniteDimensional ℝ E] [CompleteSpace E]
+    {X : ℝ → E → E} {χ : ℝ × E → ℝ} {t₀ : ℝ} {K : ℝ≥0}
+    {Q : Set E} {Kwin : Set (ℝ × E)} {state : Set E}
+    (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E) (X := X) Set.univ t₀)
+    (hX : ∀ t, LipschitzWith K (X t))
+    (hQ : IsCompact Q)
+    (hcut : ∀ᶠ r in 𝓝ˢ Kwin, χ r = 1)
+    (hstate : IsOpen state)
+    (hwin0 : ∀ q ∈ Q, ((t₀, (G.maps3 t₀) q) : ℝ × E) ∈ interior Kwin)
+    (hstate0 : ∀ q ∈ Q, (G.maps3 t₀) q ∈ state) :
+    ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧
+      (∀ q ∈ Q, ∀ τ ∈ Set.Ioo a b, χ (τ, (G.maps3 τ) q) = 1) ∧
+      (∀ q ∈ Q, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) q ∈ state) := by
+  have hconf₁ : ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧
+      ∀ τ ∈ Set.Ioo a b, ∀ q ∈ Q, χ (τ, (G.maps3 τ) q) = 1 := by
+    obtain ⟨a, b, hmem, hconf⟩ :=
+      exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith G hX hQ isOpen_interior hwin0
+    exact ⟨a, b, hmem, fun τ hτ q hq =>
+      hcut.self_of_nhdsSet (τ, (G.maps3 τ) q) (interior_subset (hconf τ hτ q hq))⟩
+  have hconf₂ : ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧
+      ∀ τ ∈ Set.Ioo a b, ∀ q ∈ Q, (G.maps3 τ) q ∈ state := by
+    obtain ⟨a, b, hmem, hconf⟩ :=
+      exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith G hX hQ
+        (isOpen_univ.prod hstate)
+        (fun q hq => ⟨Set.mem_univ _, hstate0 q hq⟩)
+    exact ⟨a, b, hmem, fun τ hτ q hq => (hconf τ hτ q hq).2⟩
+  obtain ⟨a, b, hmem, hboth⟩ := exists_Ioo_forall_and
+    (P := fun τ => ∀ q ∈ Q, χ (τ, (G.maps3 τ) q) = 1)
+    (R := fun τ => ∀ q ∈ Q, (G.maps3 τ) q ∈ state) hconf₁ hconf₂
+  exact ⟨a, b, hmem,
+    fun q hq τ hτ => (hboth τ hτ).1 q hq,
+    fun q hq τ hτ => (hboth τ hτ).2 q hq⟩
+
 end
 
 end SmoothDependenceCk
