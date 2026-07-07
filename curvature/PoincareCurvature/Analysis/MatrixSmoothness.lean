@@ -194,6 +194,78 @@ theorem contMDiffOn_matrixInv_mulVec {A : N → (ι → ι → ℝ)} {b : N → 
   contMDiffOn_mulVec (J := J) (n := n)
     (contMDiffOn_matrixInv (J := J) (n := n) hA hdet) hb
 
+omit [DecidableEq ι] in
+/-- The transpose of a `ContMDiffOn` family of matrices is `ContMDiffOn` (each entry of the
+transpose is an entry of the original matrix). -/
+theorem contMDiffOn_transpose {A : N → (ι → ι → ℝ)} {u : Set N}
+    (hA : ContMDiffOn J 𝓘(ℝ, ι → ι → ℝ) n A u) :
+    ContMDiffOn J 𝓘(ℝ, ι → ι → ℝ) n
+      (fun x => (show ι → ι → ℝ from (show Matrix ι ι ℝ from A x)ᵀ)) u := by
+  rw [contMDiffOn_pi_space]
+  intro i
+  rw [contMDiffOn_pi_space]
+  intro j
+  simpa [Matrix.transpose_apply] using contMDiffOn_matrixEntry (J := J) (n := n) hA j i
+
+/-- **Smoothness of the matrix–matrix product.**  If `A B : N → (ι → ι → ℝ)` are `ContMDiffOn`
+families of matrices over an arbitrary base, then `x ↦ (A x) * (B x)` is `ContMDiffOn` at the same
+order.  Together with `contMDiffOn_matrixInv` and `contMDiffOn_mulVec` this completes the elementary
+matrix calculus (products, inverses, contractions) needed to run local Riemannian tensor formulas —
+e.g. Christoffel/curvature contractions `g⁻¹ · (∂g) · g⁻¹` — jointly over the space-time base. -/
+theorem contMDiffOn_matrix_mul {A B : N → (ι → ι → ℝ)} {u : Set N}
+    (hA : ContMDiffOn J 𝓘(ℝ, ι → ι → ℝ) n A u)
+    (hB : ContMDiffOn J 𝓘(ℝ, ι → ι → ℝ) n B u) :
+    ContMDiffOn J 𝓘(ℝ, ι → ι → ℝ) n
+      (fun x => (show ι → ι → ℝ from
+        (show Matrix ι ι ℝ from A x) * (show Matrix ι ι ℝ from B x))) u := by
+  classical
+  rw [contMDiffOn_pi_space]
+  intro i
+  rw [contMDiffOn_pi_space]
+  intro k
+  have hsum : ∀ s : Finset ι,
+      ContMDiffOn J 𝓘(ℝ) n (fun x => s.sum fun j => A x i j * B x j k) u := by
+    intro s
+    refine Finset.induction_on s ?_ ?_
+    · simpa using (contMDiffOn_const : ContMDiffOn J 𝓘(ℝ) n (fun _ : N => (0 : ℝ)) u)
+    · intro j s hj hs
+      have hfirst : ContMDiffOn J 𝓘(ℝ) n (fun x => A x i j * B x j k) u := by
+        simpa [smul_eq_mul] using
+          (contMDiffOn_matrixEntry (J := J) (n := n) hA i j).smul
+            (contMDiffOn_matrixEntry (J := J) (n := n) hB j k)
+      refine ContMDiffOn.congr (hfirst.add hs) ?_
+      intro x hx
+      simp [Finset.sum_insert, hj]
+  refine ContMDiffOn.congr (hsum Finset.univ) ?_
+  intro x hx
+  simp [Matrix.mul_apply]
+
+/-- **Smoothness of the dot product.**  If `a b : N → (ι → ℝ)` are `ContMDiffOn` families of vectors
+over an arbitrary base, then the scalar dot product `x ↦ (a x) ⬝ᵥ (b x)` is `ContMDiffOn`.  This is
+the bilinear-pairing building block for scalar tensor contractions (e.g. quadratic forms
+`x ↦ (c x) ⬝ᵥ ((A x) *ᵥ (c x))`) over the space-time base. -/
+theorem contMDiffOn_dotProduct {a b : N → (ι → ℝ)} {u : Set N}
+    (ha : ContMDiffOn J 𝓘(ℝ, ι → ℝ) n a u)
+    (hb : ContMDiffOn J 𝓘(ℝ, ι → ℝ) n b u) :
+    ContMDiffOn J 𝓘(ℝ) n (fun x => (a x) ⬝ᵥ (b x)) u := by
+  classical
+  have hsum : ∀ s : Finset ι,
+      ContMDiffOn J 𝓘(ℝ) n (fun x => s.sum fun j => a x j * b x j) u := by
+    intro s
+    refine Finset.induction_on s ?_ ?_
+    · simpa using (contMDiffOn_const : ContMDiffOn J 𝓘(ℝ) n (fun _ : N => (0 : ℝ)) u)
+    · intro j s hj hs
+      have hfirst : ContMDiffOn J 𝓘(ℝ) n (fun x => a x j * b x j) u := by
+        simpa [smul_eq_mul] using
+          (contMDiffOn_vecEntry (J := J) (n := n) ha j).smul
+            (contMDiffOn_vecEntry (J := J) (n := n) hb j)
+      refine ContMDiffOn.congr (hfirst.add hs) ?_
+      intro x hx
+      simp [Finset.sum_insert, hj]
+  refine ContMDiffOn.congr (hsum Finset.univ) ?_
+  intro x hx
+  rfl
+
 end Manifold
 
 end PoincareCurvature.MatrixSmoothness
