@@ -2,6 +2,7 @@
 Copyright (c) 2026 Poincaré formalization project. All rights reserved.
 -/
 import PoincareCurvature.Analysis.ParametrizedInner
+import PoincareCurvature.Analysis.MatrixSmoothness
 import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 
 /-!
@@ -201,6 +202,35 @@ theorem contMDiffOn_timeDependentOneFormPairing
   intro j
   exact contMDiffOn_paramLinear_apply (b := Prod.snd) (v := fun p ↦ e.localFrame bas j p.2)
     (φ := fun p ↦ ω p.1 p.2) hω (contMDiffOn_frameSection_prodSnd e bas hu' j)
+
+/-- **Joint `(t, x)` smoothness of the raised-covector coefficients.**  Combining the joint Gram
+readout, the joint one-form pairing, and Gram nonsingularity through the Cramer-solve smoothness
+`contMDiffOn_matrixInv_mulVec`, the raised-covector coefficient family
+`cᵢ(t, x) = (G(t, x)⁻¹ *ᵥ b(t, x))ᵢ` — where `Gᵢⱼ = (g t).inner x (frameᵢ) (frameⱼ)` and
+`bⱼ = ω t x (frameⱼ)` — is `ContMDiffOn` over `Set.univ ×ˢ u`, valued in `ι → ℝ`.  This is the joint
+`(t, x)` version of the raised-coefficient formula `cᵢ = ∑ⱼ (Gram⁻¹)ᵢⱼ · ω(frameⱼ)`, the coefficients
+of the space-time raised section. -/
+theorem contMDiffOn_timeDependentRaisedCoeff
+    (g : ℝ → Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ℝ → ∀ y : B, V y →L[ℝ] ℝ)
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    {u : Set B} (hu' : u ⊆ e.baseSet)
+    (hg : ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] V y →L[ℝ] ℝ)) p.2 ((g p.1).inner p.2)) (Set.univ ×ˢ u))
+    (hω : ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] ℝ)) p.2 (ω p.1 p.2)) (Set.univ ×ˢ u)) :
+    ContMDiffOn (𝓘(ℝ).prod IB) 𝓘(ℝ, ι → ℝ) n
+      (fun p : ℝ × B ↦ (show ι → ℝ from
+        ((show Matrix ι ι ℝ from
+            (fun i j ↦ (g p.1).inner p.2 (e.localFrame bas i p.2) (e.localFrame bas j p.2)))⁻¹
+          : Matrix ι ι ℝ).mulVec (fun j ↦ ω p.1 p.2 (e.localFrame bas j p.2)))) (Set.univ ×ˢ u) :=
+  PoincareCurvature.MatrixSmoothness.contMDiffOn_matrixInv_mulVec
+    (contMDiffOn_timeDependentGramReadout g e bas hu' hg)
+    (contMDiffOn_timeDependentOneFormPairing ω e bas hu' hω)
+    (fun p hp ↦ timeDependentGram_det_ne_zero (g p.1) e bas (hu' hp.2))
 
 end Gram
 
