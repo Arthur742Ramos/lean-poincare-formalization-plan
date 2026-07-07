@@ -1525,3 +1525,40 @@ requires realising the symmetric value `reaction s + b` as a DeTurck correction 
 honest first-order background solve), and the `realization` DECODE producing a smooth `metric` family
 from the Banach curve (`chartRHS_eq_intrinsic` along the whole interval needs the state-dependent /
 mild operator, not the frozen linearisation).
+
+### Item 2 (GAP 1) later-22 — step-(v) `hlip` residual reduced to the chart field jet: window-restricted Lipschitz variants + convex open-ball tube atoms (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Ground-truth read of the step-(v) globalisation chain found an impedance mismatch: the per-patch capstone
+`contMDiffOn_flowSlice_perPatch_of_flow` and the finite-cover capstone
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover` demand the field-Lipschitz control
+`hlip : ∀ τ : ℝ, LipschitzOnWith K (chartPushforwardField …) state₀`, yet internally `hlip τ` is used only
+for `τ` in the (bounded) slice-`C³` window they build (it is passed as `(fun τ _ => hlip τ)` to the inner
+lemma `contMDiffOn_flowSlice_of_cutoff_orbit_control`, whose own `hlip` is already `∀ τ ∈ Set.Ioo a b`).
+The bounded-time field-Lipschitz producer
+`GaugeFlowAssembly.exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField` only delivers Lipschitz on
+a compact `Set.Icc a b`, so the `∀ τ : ℝ` shape blocked feeding it in.  This session removed the mismatch
+and reduced the `hlip`/`state₀`/`hstate` residual to the chart field jet on a convex ball tube:
+
+* **`contMDiffOn_flowSlice_perPatch_of_flow_windowLip`** and
+  **`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip`** (`ModelManifoldGaugeFlow.lean`)
+  — additive window-restricted variants requiring `hlip` only on a fixed `Set.Icc cw dw`
+  (`0 ∈ Set.Ioo cw dw`); the internally-built slice-`C³` window is intersected with `Set.Ioo cw dw`, so
+  every `τ` fed to `hlip` lies in `Set.Icc cw dw`.  Proof mirrors the originals with the extra window
+  intersection and one `Set.Ioo_subset_Icc_self` composition.
+* **`GaugeFlowAssembly.exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField_ball`**
+  (`GaugeFlowAssembly.lean`) — from the chart field jet, a uniform-over-`Icc a b` field-Lipschitz bound on
+  an OPEN ball `state₀ := Metric.ball c ρ` whose closure lies in the chart target (`closedBall` is compact
+  by finite-dim `ProperSpace` and convex; the bound restricts along `Metric.ball_subset_closedBall`).  This
+  is exactly the open convex `state₀`/`hstate`/`hlip` tube the `windowLip` capstone consumes.
+* **`exists_pos_closedBall_subset_extChartAt_target`** (`ModelManifoldGaugeFlow.lean`) — for boundaryless
+  `I`, a positive-radius closed ball around `extChartAt I p p` sits in the open chart target, supplying the
+  `closedBall ⊆ target` hypothesis of the ball-Lipschitz lemma at any chart centre.
+
+**Reduction achieved.**  With `…_windowLip` + the two ball atoms, the step-(v) capstone's
+`hlip`/`state₀`/`hstate` residuals reduce to: place each patch's chart image in a ball whose closure lies
+in the target (a chart-source shrink), and supply the two gauge-field jets `hXraw`/`hXchart i`.  **NEXT:**
+the finite BALL cover of compact `M` (shrink each `Q_M i` so `extChartAt I (p i) '' Q_M i ⊆ Metric.ball
+(extChartAt I (p i) (p i)) ρᵢ` via chart symm-images), then the two field jets from the real Ricci-DeTurck
+gauge field — the genuinely field-analytic core of Item 2.  (GAP 2's chart `geometric`-for-all-`s`
+field remains the point-4 long pole: `ofLipschitzBoundedContinuous` still takes `hgeom` as a hypothesis,
+and the frozen operator supplies it only at the metric section.)
