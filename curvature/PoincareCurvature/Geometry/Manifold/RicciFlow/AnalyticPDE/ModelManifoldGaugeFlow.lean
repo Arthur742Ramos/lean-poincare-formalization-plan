@@ -2018,6 +2018,48 @@ theorem exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact
     (fun i => hχC0 i) hχc hsub hcut (by decide)
     (fun i => Metric.isOpen_ball) hK hU hUQ hQ_M hQ_M_src hplace hplaceWin
 
+/-- **Globalising joint `(t, x)`-smoothness from spatial neighbourhoods.**  A map on `ℝ × M` is
+`ContMDiff` as soon as, around every point `x : M`, there is an open set `s ∋ x` on which the map is
+`ContMDiffOn` over the time-full slab `Set.univ ×ˢ s`.  This is the pure-locality glue that turns the
+per-chart joint smoothness produced by the field-raising capstone
+(`ParametrizedInner.contMDiffOn_timeDependentRaisedSection`) into the *global* `hXfield` hypothesis of
+the compact-`M` gauge-flow assembly `exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact`. -/
+theorem contMDiff_of_locally_contMDiffOn_univ_prod
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {F H' N : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [TopologicalSpace H']
+    {J : ModelWithCorners ℝ F H'} [TopologicalSpace N] [ChartedSpace H' N]
+    {n : WithTop ℕ∞} {f : ℝ × M → N}
+    (h : ∀ x : M, ∃ s : Set M, IsOpen s ∧ x ∈ s ∧
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) J n f (Set.univ ×ˢ s)) :
+    ContMDiff (𝓘(ℝ, ℝ).prod I) J n f := by
+  rintro ⟨t, x⟩
+  obtain ⟨s, hs, hx, hcont⟩ := h x
+  exact hcont.contMDiffAt ((isOpen_univ.prod hs).mem_nhds (Set.mk_mem_prod (Set.mem_univ t) hx))
+
+/-- **Compact-`M` gauge flow from spatially-local joint smoothness of the gauge field.**  A
+convenience form of `exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact` that accepts
+the gauge-field jet in the *local* form produced by the per-chart raising capstone: joint `C^∞`
+smoothness of the tangent-bundle section `(τ, y) ↦ ⟨y, X τ y⟩` on `Set.univ ×ˢ s` for some open `s`
+around every point.  The spatial neighbourhoods are glued to the global `hXfield` via
+`contMDiff_of_locally_contMDiffOn_univ_prod`, then fed to the field-independent assembly, yielding the
+anchored gauge flow with `ContMDiff I I 3` time slices on an open window around `0`. -/
+theorem exists_flow_Ioo_forall_contMDiff_of_locally_contMDiffOn_tangentSection_compact
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] [CompactSpace M] [IsManifold I 1 M]
+    [ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E}
+    (hXloc : ∀ x : M, ∃ s : Set M, IsOpen s ∧ x ∈ s ∧
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) I.tangent ∞
+        (fun p : ℝ × M => (⟨p.2, X p.1 p.2⟩ : TangentBundle I M)) (Set.univ ×ˢ s)) :
+    ∃ (Φ : ℝ → M → M) (c d : ℝ), (∀ x, Φ 0 x = x) ∧ (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (fun x : M => Φ t x) :=
+  exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact
+    (contMDiff_of_locally_contMDiffOn_univ_prod hXloc)
+
 end
 
 end SmoothDependenceCk
