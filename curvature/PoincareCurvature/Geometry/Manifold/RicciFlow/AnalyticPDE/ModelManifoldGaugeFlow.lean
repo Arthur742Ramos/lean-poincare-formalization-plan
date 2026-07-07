@@ -237,6 +237,80 @@ theorem exists_flow_diffeomorph_three_hasMFDerivAt_of_contDiff
     (fun s ξ => fderiv_fderiv_eq_curry2_iteratedFDeriv_two (v s) ξ)
     (fun s ξ => fderiv_iteratedFDeriv_two_eq_curryLeft (v s) ξ)
 
+/-!
+## Compact-support jet bounds for the bump-globalised gauge field (Item 2 GAP 1)
+
+The compact-manifold lift feeds `exists_diffeomorph3GaugeFlowOn_of_contDiff` a field
+`v : ℝ → E → E` obtained by bump-cutting the chart pushforward field to a globally-`C^{3,1}`,
+compactly-supported representative.  Its hypotheses demand *uniform-in-time* Lipschitz bounds on the
+spatial-derivative fields `Dⁱ (v s)`.  These reduce to the following two purely model-space facts
+about a jointly-`ContDiff`, compactly-supported two-variable function `F = uncurry v`:
+
+* the `n`-th iterated derivative of a time slice `y ↦ F (s, y)` is dominated in norm by the full
+  `n`-th iterated derivative of `F` at `(s, y)` (`norm_iteratedFDeriv_prodMk_left_le`); and
+* consequently the slice iterated derivatives are **uniformly bounded** in `(s, y)` whenever `F` has
+  compact support (`exists_bound_iteratedFDeriv_prodMk_left`).
+
+Both are the reusable analytic core supplying the uniform jet bounds of the globalised field; no
+gauge-flow content.
+-/
+
+/-- **Norm slice bound for iterated derivatives of a two-variable function.**  The `n`-th iterated
+Fréchet derivative of the `s`-slice `y ↦ F (s, y)` of `F : ℝ × E → G` is bounded in norm by the full
+`n`-th iterated derivative of `F` at `(s, y)`.
+
+The slice factors as `(fun p ↦ F (p + (s, 0))) ∘ inr` with `inr : E →L[ℝ] ℝ × E` the norm-`≤ 1`
+inclusion `y ↦ (0, y)`; iterated differentiation of that composition
+(`ContinuousLinearMap.iteratedFDeriv_comp_right`) precomposes the full iterated derivative with `inr`
+in every slot, and the constant shift moves the base point from `inr x` to `(s, x)`
+(`iteratedFDeriv_comp_add_right`).  Taking norms with `‖inr‖ ≤ 1` gives the bound. -/
+theorem norm_iteratedFDeriv_prodMk_left_le
+    {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+    {F : ℝ × E → G} {N : WithTop ℕ∞} (hF : ContDiff ℝ N F)
+    {n : ℕ} (hn : (n : WithTop ℕ∞) ≤ N) (s : ℝ) (x : E) :
+    ‖iteratedFDeriv ℝ n (fun y => F (s, y)) x‖ ≤ ‖iteratedFDeriv ℝ n F (s, x)‖ := by
+  have hcomp : (fun y => F (s, y))
+      = (fun p : ℝ × E => F (p + (s, 0))) ∘ (ContinuousLinearMap.inr ℝ ℝ E : E → ℝ × E) := by
+    funext y
+    simp only [Function.comp_apply, ContinuousLinearMap.inr_apply, Prod.mk_add_mk,
+      zero_add, add_zero]
+  have hG : ContDiff ℝ N (fun p : ℝ × E => F (p + (s, 0))) :=
+    hF.comp (contDiff_id.add contDiff_const)
+  rw [hcomp,
+    ContinuousLinearMap.iteratedFDeriv_comp_right (ContinuousLinearMap.inr ℝ ℝ E) hG x hn]
+  have hshift : iteratedFDeriv ℝ n (fun p : ℝ × E => F (p + (s, 0)))
+        (ContinuousLinearMap.inr ℝ ℝ E x)
+      = iteratedFDeriv ℝ n F ((s, x) : ℝ × E) := by
+    rw [iteratedFDeriv_comp_add_right n (s, 0) (ContinuousLinearMap.inr ℝ ℝ E x)]
+    congr 1
+    simp only [ContinuousLinearMap.inr_apply, Prod.mk_add_mk, zero_add, add_zero]
+  rw [hshift]
+  calc ‖(iteratedFDeriv ℝ n F ((s, x) : ℝ × E)).compContinuousLinearMap
+          (fun _ : Fin n => ContinuousLinearMap.inr ℝ ℝ E)‖
+      ≤ ‖iteratedFDeriv ℝ n F ((s, x) : ℝ × E)‖
+          * ∏ _i : Fin n, ‖ContinuousLinearMap.inr ℝ ℝ E‖ :=
+        ContinuousMultilinearMap.norm_compContinuousLinearMap_le _ _
+    _ ≤ ‖iteratedFDeriv ℝ n F ((s, x) : ℝ × E)‖ * 1 := by
+        apply mul_le_mul_of_nonneg_left _ (norm_nonneg _)
+        exact Finset.prod_le_one (fun i _ => norm_nonneg _)
+          (fun i _ => ContinuousLinearMap.norm_inr_le_one ℝ ℝ E)
+    _ = ‖iteratedFDeriv ℝ n F ((s, x) : ℝ × E)‖ := mul_one _
+
+/-- **Uniform bound on the slice iterated derivatives of a compactly-supported field.**  If
+`F : ℝ × E → G` is jointly `C^N` with compact support then, for each `n ≤ N`, the `n`-th iterated
+derivative of every time slice `y ↦ F (s, y)` is uniformly bounded in `(s, y)`.  Combines the slice
+bound `norm_iteratedFDeriv_prodMk_left_le` with the global bound on `iteratedFDeriv ℝ n F` obtained
+from compact support (`HasCompactSupport.iteratedFDeriv` + `HasCompactSupport.exists_bound_of_continuous`).
+This is the uniform-in-time control the globalised gauge field's jet Lipschitz bounds are built on. -/
+theorem exists_bound_iteratedFDeriv_prodMk_left
+    {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+    {F : ℝ × E → G} {N : WithTop ℕ∞} (hF : ContDiff ℝ N F) (hcs : HasCompactSupport F)
+    {n : ℕ} (hn : (n : WithTop ℕ∞) ≤ N) :
+    ∃ C : ℝ, ∀ (s : ℝ) (x : E), ‖iteratedFDeriv ℝ n (fun y => F (s, y)) x‖ ≤ C := by
+  obtain ⟨C, hC⟩ := (hcs.iteratedFDeriv (𝕜 := ℝ) n).exists_bound_of_continuous
+    (hF.continuous_iteratedFDeriv hn)
+  exact ⟨C, fun s x => (norm_iteratedFDeriv_prodMk_left_le hF hn s x).trans (hC (s, x))⟩
+
 end
 
 end SmoothDependenceCk
