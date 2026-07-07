@@ -1658,3 +1658,27 @@ smoothness of the inner product `⟪frameᵢ, frameⱼ⟫_{g_t}` (a `MetricFamil
 joint-smoothness hypothesis, not yet exposed).  Then assemble the raised section over `ℝ × M` (via
 `contMDiffOn_iff_localFrame_coeff`) to obtain the joint field jet `hXfield`, and feed it to the CLOSED
 field-independent assembly `exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact`.
+
+### Item 2 (GAP 1 upstream) later-25 — completing the base-polymorphic matrix-calculus core: matrix product / transpose / dot product / bilinear-form smoothness (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The later-24 core supplied det/adjugate/inverse/`mulVec`/`matrixInv_mulVec`.  This session rounded out the
+field-independent, base-polymorphic (`J : ModelWithCorners ℝ E' H'`), arbitrary-order matrix calculus in
+`PoincareCurvature/Analysis/MatrixSmoothness.lean` so that *any* local Riemannian tensor formula can be run
+jointly over the space-time base `ℝ × M`:
+
+* **`contMDiffOn_transpose`** — the transpose of a `ContMDiffOn` matrix family is `ContMDiffOn` (entrywise).
+* **`contMDiffOn_matrix_mul`** — the product `x ↦ (A x) * (B x)` of two `ContMDiffOn` matrix families is
+  `ContMDiffOn` (double `contMDiffOn_pi_space` + finite-sum induction, mirroring `contMDiffOn_mulVec`).
+  This is what the Christoffel/curvature contractions `g⁻¹ · (∂g) · g⁻¹` of the joint DeTurck field need.
+* **`contMDiffOn_dotProduct`** — the scalar `x ↦ (a x) ⬝ᵥ (b x)` of two `ContMDiffOn` vector families.
+* **`contMDiffOn_bilinForm`** — the coordinate bilinear form `x ↦ (u x) ⬝ᵥ ((A x) *ᵥ (v x))` = `Uᵀ G V`,
+  i.e. the local expression for evaluating a matrix-valued tensor (e.g. the metric readout `G(t,x)`) on two
+  vector fields; the tensor-evaluation atom for the joint Gram matrix and one-form pairing.
+
+**Net.**  Products, inverses, contractions, and quadratic/bilinear tensor evaluations are now all available
+`ContMDiffOn` over an arbitrary base at arbitrary order, purely in the `ι → ι → ℝ` normed-space readout
+world (no `BilinearFormBundle` fibre-instance diamonds).  **NEXT is unchanged** and remains the genuine
+GAP-1 obstruction: expose joint-`(t,x)` smoothness of the metric family (a `MetricFamily`/
+`TimeDependentRiemannianMetric` joint-smoothness datum), feed the joint Gram readout `G(t,x)` and one-form
+pairing `b(t,x)ⱼ` into `contMDiffOn_matrixInv_mulVec` + `contMDiffOn_bilinForm`, and assemble the raised
+section over `ℝ × M` to obtain `hXfield` for the CLOSED field-independent flow assembly.
