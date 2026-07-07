@@ -1774,3 +1774,49 @@ expression on each patch, (3) feeding the capstone's per-patch `ContMDiffOn` thr
 `contMDiff_of_locally_contMDiffOn_univ_prod` to the global `hXfield`, and (4) applying
 `exists_flow_Ioo_forall_contMDiff_of_locally_contMDiffOn_tangentSection_compact`; the residual genuine
 input is the joint `(t,x)` smoothness of the real (time-dependent) DeTurck metric/one-form.
+
+### Item 2 (GAP 1) later-28 — coordinate-free global raised gauge field + per-patch smoothness assembled; final tangent-bundle flow instantiation blocked by a Mathlib instance wall (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The NEXT of later-27 was executed: the global raised gauge field is now defined coordinate-free and its
+per-patch joint `(t,x)`-smoothness is packaged in the exact shape the compact-`M` flow assembly consumes.
+
+* In `PoincareCurvature/Analysis/TimeDependentGram.lean`:
+  - `raisedGaugeField g ω bas y` — the **globally-defined** metric-raised gauge field, defined via the
+    canonical trivialization `trivializationAt F V y` and a fixed model basis; a genuine global section
+    of `V`.
+  - `raisedGaugeField_eq_localFrame` — on *every* trivialization patch it equals the concrete
+    local-frame raised expression (via `raisedVector_trivialization_independent`), so the raising
+    capstone's per-patch smoothness transfers to it.
+  - `raisedGaugeField_inner_eq` — it is the honest metric dual: `g.inner y (raisedGaugeField …) = ω y`.
+  - `contMDiffOn_raisedGaugeField_tangentSection` — the raised-field section
+    `(t,y) ↦ TotalSpace.mk' F y (raisedGaugeField (g t) (ω t) bas y)` is `ContMDiffOn` on
+    `ℝ ×ˢ (trivializationAt F V x).baseSet`, from `hg`/`hω` (capstone ∘ patch identity).
+  - `exists_isOpen_contMDiffOn_raisedGaugeField_tangentSection` — packages the above as the exact
+    `∃ s, IsOpen s ∧ x ∈ s ∧ ContMDiffOn … (univ ×ˢ s)` local-jet hypothesis consumed by
+    `exists_flow_Ioo_forall_contMDiff_of_locally_contMDiffOn_tangentSection_compact`.  All trivialization
+    handling lives inside this abstract vector-bundle statement.
+
+**BLOCKER (for the general-`M` flow capstone `exists_gaugeFlow_Ioo_of_timeDependent_raisingData`).**  The
+final step — instantiate `exists_isOpen_contMDiffOn_raisedGaugeField_tangentSection` at `V := TangentSpace I`
+inside a theorem carrying the full compact-manifold instance set (`[IsManifold I ∞ M]`,
+`[ContMDiffVectorBundle 2/∞ …]`, `[BoundarylessManifold]`, `[CompactSpace]`, …) and feed it to the flow
+assembly — is blocked by a Mathlib instance-resolution pathology: synthesizing
+`VectorBundle ℝ E (TangentSpace I)` / `FiberBundle E (TangentSpace I)` in that heavy context runs a
+non-terminating `whnf` (the `ContMDiffVectorBundle` monotonicity instances + the
+`TopologicalSpace (TotalSpace E (TangentSpace I))` total-space topology are reached by two defeq-but-not-
+syntactic paths — a diamond).  Symptoms: `failed to synthesize FiberBundle E (TangentSpace I)` at the
+lemma application, with a `(deterministic) timeout at whnf` PANIC from the error-suggestion mechanism.
+The `VectorBundle` search succeeds in a *minimal* context (`[IsManifold I 1 M] [ContMDiffVectorBundle ∞ …]`
+only) with `synthInstance.maxHeartbeats 4000000`, but blows up once the extra manifold instances are
+present; `@`-pinning `inst_7 := instTopologicalSpaceTangentBundle` and adding explicit
+`[FiberBundle …] [VectorBundle …]` binders did not defeat the diamond.  The uncommitted flow-theorem
+attempt was reverted; the tree is green at HEAD with the five abstract lemmas above committed.
+
+**NEXT.**  Defeat the tangent-bundle instance wall so the abstract lemma composes through the flow
+assembly.  Candidate routes: (a) prove a small once-off `TangentSpace.contMDiffVectorBundle`-anchored
+lemma that discharges `FiberBundle`/`VectorBundle E (TangentSpace I)` from a *single canonical path* and
+reuse it as a `local instance` to break the diamond; (b) restate the flow assembly to consume the
+raised-field jet through an explicitly-instanced interface (pass the bundle instances positionally);
+(c) isolate which manifold instance triggers the `whnf` blowup (bisecting the instance set in a scratch)
+and route around it.  The analytic/geometric content (Items 1,2 raising) is done — this is purely a
+Lean instance-plumbing gate on the final `exists_gaugeFlow_Ioo_of_timeDependent_raisingData` capstone.
