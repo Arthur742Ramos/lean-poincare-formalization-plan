@@ -930,6 +930,64 @@ theorem exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith
     (Ψ := fun τ q => (G.maps3 τ) q) hQ hW hgraph0
     (fun q _ => hcont.continuousAt)
 
+/-- **Manifold-target generalisation of the uniform short-time orbit-graph confinement.**  The
+tube-lemma confinement `exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt` holds with the
+model normed space `E` replaced by an *arbitrary topological space* `Y`: its proof only ever uses `E`
+through its topology (never the linear structure — the elaborator even flags `[NormedSpace ℝ E]` as
+unused there).  This is exactly the form the GAP-1 step-(v) **raw-manifold** orbit control needs, where
+the flow `Φ : ℝ → M → M` maps the general compact manifold `M` to itself and `M` carries no normed-space
+structure, so the model `E`-target confinement cannot be applied directly.  For a time-dependent flow
+`Ψ : ℝ → Y → Y` whose space-time graph map `z ↦ (z.1, Ψ z.1 z.2)` is jointly continuous at each
+*anchored* point `(t₀, q)` (with `q` ranging over a compact initial set `Q`) and an open space-time
+target `W` containing the whole anchored graph `{(t₀, Ψ t₀ q) | q ∈ Q}`, there is an open time window
+`Set.Ioo a b ∋ t₀` on which **every** orbit graph stays in `W`.  Proof: identical to the `E`-version —
+`IsCompact.eventually_forall_of_forall_eventually` turns the pointwise open-preimage neighbourhoods
+(`ContinuousAt.preimage_mem_nhds`) into a single *time* neighbourhood of `t₀` valid for all `q ∈ Q`,
+whence an honest `Set.Ioo` window through `mem_nhds_iff_exists_Ioo_subset`. -/
+theorem exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_manifoldTarget
+    {Y : Type*} [TopologicalSpace Y]
+    {Ψ : ℝ → Y → Y} {Q : Set Y} {W : Set (ℝ × Y)} {t₀ : ℝ}
+    (hQ : IsCompact Q) (hW : IsOpen W)
+    (hgraph0 : ∀ q ∈ Q, ((t₀, Ψ t₀ q) : ℝ × Y) ∈ W)
+    (hcont : ∀ q ∈ Q, ContinuousAt (fun z : ℝ × Y => Ψ z.1 z.2) (t₀, q)) :
+    ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧
+      ∀ τ ∈ Set.Ioo a b, ∀ q ∈ Q, ((τ, Ψ τ q) : ℝ × Y) ∈ W := by
+  have hev : ∀ᶠ τ in 𝓝 t₀, ∀ q ∈ Q, ((τ, Ψ τ q) : ℝ × Y) ∈ W := by
+    refine IsCompact.eventually_forall_of_forall_eventually hQ ?_
+    intro q hq
+    have hgraphcont :
+        ContinuousAt (fun z : ℝ × Y => ((z.1, Ψ z.1 z.2) : ℝ × Y)) (t₀, q) :=
+      continuousAt_fst.prodMk (hcont q hq)
+    exact hgraphcont.preimage_mem_nhds (hW.mem_nhds (hgraph0 q hq))
+  obtain ⟨l, u, hmem, hsub⟩ := mem_nhds_iff_exists_Ioo_subset.mp hev
+  exact ⟨l, u, hmem, fun τ hτ q hq => hsub hτ q hq⟩
+
+/-- **Single-orbit short-time source confinement (manifold-target).**  The `Q = {x}` case of
+`exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_manifoldTarget`, packaged directly for
+the `hγ_src` obligation of GAP-1 step (v): if the space-time flow `Ψ : ℝ → Y → Y` (`Y` an arbitrary
+topological space) is jointly continuous at `(t₀, x)` and `U` is an open set containing the anchor value
+`Ψ t₀ x`, there is an open time window `Set.Ioo a b ∋ t₀` on which the single orbit `τ ↦ Ψ τ x` stays
+inside `U`.  Applied with `Ψ = Φ` the raw manifold gauge flow, `x` a chart-patch point and
+`U = (extChartAt I p).source`, this is exactly the "the orbit stays in the chart source" window the
+step-(v) chart-conjugation transfer (`extChartAt_comp_eqOn_maps3_of_cutoff_eqOne`) requires. -/
+theorem exists_Ioo_forall_mem_of_continuousAt_source
+    {Y : Type*} [TopologicalSpace Y]
+    {Ψ : ℝ → Y → Y} {U : Set Y} {t₀ : ℝ} {x : Y}
+    (hU : IsOpen U) (hx : Ψ t₀ x ∈ U)
+    (hcont : ContinuousAt (fun z : ℝ × Y => Ψ z.1 z.2) (t₀, x)) :
+    ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧ ∀ τ ∈ Set.Ioo a b, Ψ τ x ∈ U := by
+  obtain ⟨a, b, hmem, hgraph⟩ :=
+    exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_manifoldTarget
+      (Ψ := Ψ) (Q := ({x} : Set Y)) (W := Set.univ ×ˢ U) (t₀ := t₀)
+      isCompact_singleton (isOpen_univ.prod hU)
+      (fun q hq => by
+        rw [Set.mem_singleton_iff] at hq; subst hq
+        exact ⟨Set.mem_univ _, hx⟩)
+      (fun q hq => by
+        rw [Set.mem_singleton_iff] at hq; subst hq
+        exact hcont)
+  exact ⟨a, b, hmem, fun τ hτ => (hgraph τ hτ x rfl).2⟩
+
 end
 
 end SmoothDependenceCk
