@@ -1451,3 +1451,43 @@ placements — plus a concrete finite chart cover.  **NEXT:** discharge the fiel
 placements by choosing `state₀`/`Kwin` as nhds of the compact chart-image of `Q_M`), and construct the
 finite chart cover of compact `M`, then feed all into
 `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover` for the general-`M` `hslicesC3` window.
+
+### Progress (2026-07-07, later 20) — Item 2 GAP 1: the FIELD-INDEPENDENT capstone obligations are discharged — the finite chart cover and the window/placement package
+
+**What landed (both in `AnalyticPDE/ModelManifoldGaugeFlow.lean`, namespace
+`RicciFlow.AnalyticPDE.SmoothDependenceCk`, additive, sorry-free, axiom-clean
+`{propext, Classical.choice, Quot.sound}`; two commits).**  Two of the three residual data families the
+step-(v) globalisation capstone `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover` still
+consumed — the ones that are purely topological / geometric and carry NO gauge-field content — are now
+produced unconditionally from compactness of `M`:
+
+* **`exists_finite_chart_cover_compact`** — the cover-side data package
+  `hopen`/`hcover`/`hU`/`hUQ`/`hQ_M`/`hQ_M_src`.  For a compact Hausdorff manifold `M`, produces a finite
+  index type `ι`, chart centres `p : ι → M`, open patches `U : ι → Set M` covering `M` inside chart
+  sources, and compact patches `Q_M : ι → Set M` with `U i ⊆ Q_M i ⊆ (extChartAt I (p i)).source`.
+  Proof: `M` compact + Hausdorff ⇒ locally compact, so `exists_compact_subset` gives a per-point compact
+  chart neighbourhood; the interiors cover `M`, and `isCompact_univ.elim_finite_subcover` extracts the
+  finite subcover (`extChartAt_source` for the chart-source containment).  KEY: index type is `Type uM`
+  (M's universe) via an explicit `universe uM`, so the existentially-quantified `ι` is directly
+  consumable by the capstone's `{ι : Type*}`.
+* **`exists_compact_window_of_compact_patch`** — the `Kwin`/`hplace_win` data package.  For a compact
+  patch `Q ⊆ (extChartAt I p).source` (boundaryless `I`, finite-dim `E`), a compact window `Kwin ⊆ ℝ × E`
+  with `Kwin ⊆ univ ×ˢ (extChartAt I p).target` and every anchored chart image
+  `((0 : ℝ), extChartAt I p x) ∈ interior Kwin` for `x ∈ Q`.  Proof: the chart image is compact
+  (`isCompact_extChartAt_image`) inside the open target (`image_source_eq_target`,
+  `isOpen_extChartAt_target`); `E` finite-dim ⇒ locally compact, so `exists_compact_between` gives a
+  compact `C` with image `⊆ interior C ⊆ C ⊆ target`, and `Kwin := Icc (-1) 1 ×ˢ C` works
+  (`interior_prod_eq`, `interior_Icc`).
+
+**Reduction achieved.**  The window's `Kwin ⊆ univ ×ˢ target` feeds the ALREADY-EXISTING cutoff producer
+`exists_contDiff_cutoff_one_nhdsSet_of_isCompact` (`K := Kwin`, `U := univ ×ˢ target`) — which supplies
+`χ`/`hχC`/`hχc`/`hsub`/`hcut` — so the cutoff residual is NOT missing infrastructure.  Of the capstone's
+inputs, only the genuinely FIELD-SPECIFIC ones remain: the two gauge-field jets `hXraw`/`hXchart i`, the
+Lipschitz state tube `state₀ i` with `hlip i` (`chartPushforwardField` Lipschitz on `state₀`), and the
+associated `hstate i`/`hplace_state i`.  **NEXT:** discharge the field-specific residuals from the actual
+Ricci-DeTurck gauge field — `hlip i` via `exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField` on
+a compact CONVEX tube (a chart-ball patch: choose `Q_M`'s chart-image a closed ball, so `state₀ :=` its
+interior is a convex Lipschitz tube ⊆ target), then wire the finite cover + window + cutoff + field data
+into `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover`.  (Note the smooth-bump cutoff forces
+`N ≤ ∞`, i.e. the field regularity exponent is not analytic `ω` — an honest constraint compatible with
+`4 ≤ N`.)
