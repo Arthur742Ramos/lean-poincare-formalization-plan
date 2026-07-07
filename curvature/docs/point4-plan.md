@@ -1682,3 +1682,52 @@ GAP-1 obstruction: expose joint-`(t,x)` smoothness of the metric family (a `Metr
 `TimeDependentRiemannianMetric` joint-smoothness datum), feed the joint Gram readout `G(t,x)` and one-form
 pairing `b(t,x)ⱼ` into `contMDiffOn_matrixInv_mulVec` + `contMDiffOn_bilinForm`, and assemble the raised
 section over `ℝ × M` to obtain `hXfield` for the CLOSED field-independent flow assembly.
+
+### Item 2 (GAP 1 upstream) later-26 — the ENTIRE field-independent joint space-time raising chain, assembled to the per-patch raised section (eight commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The later-25 NEXT — "feed the joint Gram readout and one-form pairing into `contMDiffOn_matrixInv_mulVec`
+and assemble the raised section over `ℝ × M`" — is now DONE end-to-end, in two new Mathlib-only modules
+wired into the root import graph.  The genuinely-new geometric input (joint `(t,x)` smoothness of the
+time-dependent metric on frames) is supplied by a *parametrized* version of Mathlib's `inner_bundle`.
+
+* **`PoincareCurvature/Analysis/ParametrizedInner.lean`** (namespace `PoincareCurvature.ParametrizedInner`):
+  - `contMDiffWithinAt/At/On/·_metricSection_apply₂` and `·_paramBilin_apply₂` — the parametrized
+    `inner_bundle`: for a fibrewise bilinear-form section `ψ m : E (b m) →L[ℝ] E (b m) →L[ℝ] ℝ` depending
+    on the FULL parameter `m` (not just `b m`), applied to two jointly-smooth sections, the scalar
+    `m ↦ ψ m (v m) (w m)` is `C^n`.  Proof = `clm_bundle_apply₂` into the trivial `ℝ`-bundle, then read
+    off the fibre.  With `M := ℝ × M`, `b := Prod.snd`, `ψ (t,x) := (g t).inner x` this is the joint
+    `(t,x)` smoothness of a TIME-DEPENDENT metric evaluated on fixed frames — the input Mathlib's
+    single-metric `[IsContMDiffRiemannianBundle]` cannot give.
+  - `contMDiff…_paramLinear_apply` — the linear analogue (dual-bundle section `φ m : E (b m) →L[ℝ] ℝ`),
+    via `clm_bundle_apply`, for the one-form pairing.
+* **`PoincareCurvature/Analysis/TimeDependentGram.lean`** (same namespace):
+  - `contMDiffOn_frameSection_prodSnd` — the time-independent local frame section over the space-time
+    base (`contMDiffOn_localFrame_baseSet ∘ Prod.snd`).
+  - `contMDiffOn_timeDependentGramReadout` — the joint Gram readout `G(t,x)ᵢⱼ = (g t).inner x (frameᵢ)
+    (frameⱼ)`, `ContMDiffOn` valued in `ι → ι → ℝ`.
+  - `contMDiffOn_timeDependentOneFormPairing` — the joint one-form pairing `b(t,x)ⱼ = ω t x (frameⱼ)`,
+    `ContMDiffOn` valued in `ι → ℝ`.
+  - `timeDependentGram_pos` / `timeDependentGram_det_ne_zero` — nonsingularity of the Gram matrix from
+    metric positive-definiteness (`g.pos`), via a controlled CLM bilinear expansion (first arg, then
+    second, keeping Gram indices aligned with coefficient indices); discharges the `hdet` hypothesis of
+    `contMDiffOn_matrixInv_mulVec` UNCONDITIONALLY.
+  - `contMDiffOn_timeDependentRaisedCoeff` — the raised-covector coefficients `cᵢ(t,x) =
+    (G(t,x)⁻¹ *ᵥ b(t,x))ᵢ` (feeding the above three into `MatrixSmoothness.contMDiffOn_matrixInv_mulVec`).
+  - `contMDiffOn_raisedSection_of_coeff` — the raised SECTION `(t,x) ↦ ∑ᵢ cᵢ(t,x) • frameᵢ(x)` (a section
+    along `Prod.snd`) is `ContMDiffOn`, by composing the smooth inverse trivialization `e.symm`
+    (`contMDiffOn_symm`) with the smooth coordinate map `(t,x) ↦ (x, ∑ᵢ cᵢ • basᵢ)` and identifying via
+    `mk_symm` + `symmL` linearity + `frameᵢ(x) = e.symm x (basᵢ)`.
+  - **`contMDiffOn_timeDependentRaisedSection`** — the capstone composition: given a time-dependent metric
+    `g` and one-form `ω`, both jointly `(t,x)`-smooth as fibrewise sections over `ℝ ×ˢ u`, the raised
+    section `(t,x) ↦ ∑ᵢ (G⁻¹ *ᵥ b)ᵢ • frameᵢ(x)` is `ContMDiffOn` over `univ ×ˢ u` — the per-chart-patch
+    `hXfield`, i.e. exactly the tangent-section input to
+    `contMDiff_spaceTimeField_of_contMDiff_tangentSection`.
+
+**Net.**  The entire field-independent joint space-time raising is now assembled from the coefficient
+level up to the raised section, UNCONDITIONALLY (Gram nonsingularity proved from positive-definiteness).
+**NEXT:** supply the two remaining GEOMETRIC inputs for the REAL Ricci–DeTurck gauge field — (i) the joint
+`(t,x)` metric section smoothness `hg` (a `MetricFamily` joint-smoothness datum: `(t,x) ↦ (g t).inner x`
+as a `ContMDiffOn` bilinear-form section) and (ii) the joint `(t,x)` one-form section smoothness `hω` for
+the traced DeTurck one-form — then instantiate `contMDiffOn_timeDependentRaisedSection` at `V := TM`,
+`IB := I`, feed the per-patch jet through `contMDiff_spaceTimeField_of_contMDiff_tangentSection`, and
+globalise over the finite chart cover (already assembled) to obtain the general-compact-`M` `hXfield`.
