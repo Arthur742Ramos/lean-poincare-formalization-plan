@@ -1859,6 +1859,24 @@ theorem exists_compact_window_of_compact_patch
     rw [interior_prod_eq, interior_Icc]
     exact ⟨by norm_num, hC_int (Set.mem_image_of_mem _ hx)⟩
 
+/-- **A closed metric ball around a chart centre's image sits inside the chart target.**  For a
+boundaryless `I` and a point `p : M`, the extended-chart image `extChartAt I p p` lies in the open chart
+target `(extChartAt I p).target`, so some closed ball around it is contained in the target.  Fed to
+`GaugeFlowAssembly.exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField_ball` (finite dimension
+makes that closed ball compact, and it is convex), this supplies the open, convex Lipschitz tube
+`state₀ := Metric.ball (extChartAt I p p) ρ` — with `IsOpen state₀` and the time-uniform field-Lipschitz
+bound on it — that the step-(v) globalisation capstone consumes around the chart centre `p`. -/
+theorem exists_pos_closedBall_subset_extChartAt_target
+    {H M : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    [TopologicalSpace M] [ChartedSpace H M] (p : M) :
+    ∃ ρ : ℝ, 0 < ρ ∧
+      Metric.closedBall (extChartAt I p p) ρ ⊆ (extChartAt I p).target := by
+  have hmem : extChartAt I p p ∈ (extChartAt I p).target :=
+    (extChartAt I p).map_source (mem_extChartAt_source (I := I) p)
+  have hopen : IsOpen (extChartAt I p).target := isOpen_extChartAt_target (I := I) p
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp (hopen.mem_nhds hmem)
+  exact ⟨ε / 2, by linarith, (Metric.closedBall_subset_ball (by linarith)).trans hball⟩
+
 end
 
 end SmoothDependenceCk

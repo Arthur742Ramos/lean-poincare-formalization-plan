@@ -685,4 +685,27 @@ theorem exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField {n : WithTop
   rw [hedist] at hlip
   exact hlip
 
+/-- **Field-Lipschitz bound on an open ball tube from a closed-ball chart containment.**  Specialises
+`exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField` to a metric ball `state₀ := Metric.ball c ρ`
+whose closure `Metric.closedBall c ρ` lies in the chart target.  The closed ball is compact (finite
+dimension gives `ProperSpace E`) and convex, so the base lemma yields a uniform Lipschitz constant for
+`chartPushforwardField I X p t` on it over the whole time interval `Set.Icc a b`, and that restricts to
+the open ball `Metric.ball c ρ ⊆ Metric.closedBall c ρ`.  This is exactly the open, convex Lipschitz tube
+`state₀` datum (with its `hlip`) consumed by the step-(v) globalisation capstone
+(`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip`), discharged directly from the
+per-patch chart field jet — no global-in-time Lipschitz hypothesis needed. -/
+theorem exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField_ball {n : WithTop ℕ∞}
+    [IsManifold I n M] [ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M}
+    (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) n
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source))
+    (hn : n ≠ 0) {a b : ℝ} {c : E} {ρ : ℝ}
+    (hball : Metric.closedBall c ρ ⊆ (extChartAt I p).target) :
+    ∃ K, ∀ t ∈ Set.Icc a b, LipschitzOnWith K
+      (chartPushforwardField I X p t) (Metric.ball c ρ) := by
+  obtain ⟨K, hK⟩ := exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField hX hn
+    hball (convex_closedBall c ρ) (isCompact_closedBall c ρ)
+  exact ⟨K, fun t ht => (hK t ht).mono Metric.ball_subset_closedBall⟩
+
 end PoincareCurvature.GaugeFlowAssembly
