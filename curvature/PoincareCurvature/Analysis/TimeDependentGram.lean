@@ -500,6 +500,66 @@ theorem raisedVector_trivialization_independent
   refine eq_of_forall_inner_eq g fun w => ?_
   rw [raisedVector_inner_eq g ω e bas hx w, raisedVector_inner_eq g ω e' bas' hx' w]
 
+/-- **The globally-defined metric-raised gauge field.**  For a smooth Riemannian metric `g` and a
+one-form `ω` (a covector section), the metric-raised vector at `y` is the honest metric dual of
+`ω y`, computed here concretely via the *canonical* trivialization `trivializationAt F V y` and a
+fixed model basis `bas` of `F`.  Because every point lies in the base set of its canonical
+trivialization (`FiberBundle.mem_baseSet_trivializationAt'`), this is a genuine global section of `V`;
+and by `raisedVector_trivialization_independent` its value does not depend on the trivialization used,
+so on *every* trivialization patch it agrees with the local-frame raised expression
+(`raisedGaugeField_eq_localFrame`) and it is the unique metric dual of `ω`
+(`raisedGaugeField_inner_eq`).  This is the coordinate-free gauge field whose per-patch smoothness
+(via the raising capstone) glues to the global `hXfield` of the compact-`M` gauge-flow assembly. -/
+noncomputable def raisedGaugeField
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ∀ y : B, V y →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    (y : B) : V y :=
+  ∑ i, ((show Matrix ι ι ℝ from
+        (fun a b ↦ g.inner y ((trivializationAt F V y).localFrame bas a y)
+          ((trivializationAt F V y).localFrame bas b y)))⁻¹
+      : Matrix ι ι ℝ).mulVec
+        (fun j ↦ ω y ((trivializationAt F V y).localFrame bas j y)) i
+    • (trivializationAt F V y).localFrame bas i y
+
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **On every trivialization patch the global raised field is the local-frame raised expression.**
+For any trivialization `e` (with model basis `bas`) whose base set contains `y`, the global gauge
+field `raisedGaugeField g ω bas y` equals the concrete local-frame raised vector
+`∑ᵢ (G⁻¹ *ᵥ b)ᵢ • frameᵢ(y)` of `e`.  Both are the unique metric dual of `ω y`, identified by
+`raisedVector_trivialization_independent` (comparing `e` with the canonical trivialization used in the
+definition).  This is what transfers the per-patch joint `(t, x)`-smoothness of the raising capstone
+to the globally-defined field. -/
+theorem raisedGaugeField_eq_localFrame
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ∀ y : B, V y →L[ℝ] ℝ)
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    {y : B} (hy : y ∈ e.baseSet) :
+    raisedGaugeField g ω bas y
+      = ∑ i, ((show Matrix ι ι ℝ from
+            (fun a b ↦ g.inner y (e.localFrame bas a y) (e.localFrame bas b y)))⁻¹
+          : Matrix ι ι ℝ).mulVec (fun j ↦ ω y (e.localFrame bas j y)) i
+        • e.localFrame bas i y := by
+  have hy0 : y ∈ (trivializationAt F V y).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' y
+  exact raisedVector_trivialization_independent g ω (trivializationAt F V y) e bas bas hy0 hy
+
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **The global raised gauge field is the honest metric dual of the one-form.**  `raisedGaugeField`
+satisfies `g.inner y (raisedGaugeField g ω bas y) = ω y` as continuous linear functionals: it is the
+metric-`♯` of `ω`.  Follows pointwise from `raisedVector_inner_eq` at the canonical trivialization. -/
+theorem raisedGaugeField_inner_eq
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ∀ y : B, V y →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    (y : B) :
+    g.inner y (raisedGaugeField g ω bas y) = ω y := by
+  have hy0 : y ∈ (trivializationAt F V y).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' y
+  ext w
+  exact raisedVector_inner_eq g ω (trivializationAt F V y) bas hy0 w
+
 end Gram
 
 end PoincareCurvature.ParametrizedInner
