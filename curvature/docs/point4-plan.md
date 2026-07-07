@@ -1820,3 +1820,46 @@ raised-field jet through an explicitly-instanced interface (pass the bundle inst
 (c) isolate which manifold instance triggers the `whnf` blowup (bisecting the instance set in a scratch)
 and route around it.  The analytic/geometric content (Items 1,2 raising) is done — this is purely a
 Lean instance-plumbing gate on the final `exists_gaugeFlow_Ioo_of_timeDependent_raisingData` capstone.
+
+### Item 2 (GAP 1) later-29 — the flow capstone is BUILT: the tangent-bundle instance wall is DEFEATED (one commit; `{propext, Classical.choice, Quot.sound}`)
+
+The later-28 BLOCKER is closed.  `exists_gaugeFlow_Ioo_of_timeDependent_raisingData`
+(`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/CompactGaugeFlowRaising.lean`, a new
+additive module) composes the coordinate-free raised gauge field with the compact-manifold `C³`
+flow-by-time-dependent-vector-field, on a **general** compact boundaryless manifold, with NO
+restricting instance:
+
+> from `g : ℝ → ContMDiffRiemannianMetric I ∞ E (TangentSpace I)`, `om : ℝ → Ω¹`, and the joint
+> `(t,x)`-smoothness `hg`/`hom` of the metric inner and one-form, there is `Φ : ℝ → M → M` and an open
+> `Ioo c d ∋ 0` with `Φ 0 = id` and each `Φ t` `C³` — the metric-raised gauge flow.
+
+**The wall and how it was defeated (record so the technique is not re-lost).**  Instantiating the
+abstract vector-bundle lemma `exists_isOpen_contMDiffOn_raisedGaugeField_tangentSection` at
+`V := TangentSpace I` crosses a genuine, *non-terminating* `whnf` instance diamond.  The precise
+diagnosis:
+* `open scoped ContDiff` reserves `ω` (analytic-smoothness marker) and supplies `∞`; the abstract
+  lemma's `ω` binder name is inadmissible downstream — use `om`.  `ContMDiffVectorBundle ∞ …`
+  elaborates only with the full heavy-manifold import context.
+* The fibre of `TangentSpace I` carries TWO defeq-but-not-syntactic `AddCommGroup` paths —
+  `instAddCommGroupTangentSpace` (canonical) vs the `NormedAddCommGroup`-derived one — so a *fresh*
+  `VectorBundle ℝ E (TangentSpace I)` search and `TangentSpace.vectorBundle` disagree; the section-level
+  defeq that bridges the abstract lemma's `TotalSpace E (TangentSpace I)` / model `I.prod 𝓘(ℝ,E)` to the
+  flow lemma's `TangentBundle I M` / `I.tangent` then loops in `whnf` (times out even at 20 000 000
+  heartbeats).
+* **Fix.**  (1) `@`-pin **every** bundle instance of the abstract lemma positionally, bridging each with
+  a *tactic-mode* `by exact` (`by exact TangentSpace.vectorBundle` unifies the two paths where a bare
+  term `:=` reports a spurious type mismatch).  (2) `refine flow_lemma (X := <the same @-pinned
+  raisedGaugeField expression>) (fun x => ?_)`, then discharge each `x` by `obtain`-ing the `@`-pinned
+  abstract lemma and `exact ⟨s, hs_open, hxs, hcont⟩`: because `X` and the lemma conclusion are now
+  **syntactically identical** on the section, the only residual defeq is the definitional
+  `I.tangent = I.prod 𝓘(ℝ,E)`, discharged cheaply instead of through the diamond.  `set_option
+  (synthInstance.)maxHeartbeats 4000000` covers the by-exact bridges.
+
+**Fraction of GAP 1.**  The field-independent scaffolding (later-23) and the geometric raising chain
+(later-27/28) already reduced the compact-`M` step-(v) `C³` slice regularity to the single
+joint-smoothness hypothesis; that hypothesis is exactly `hg`/`hom`, and the flow now lands from it
+unconditionally.  GAP 1's flow-existence capstone is therefore CONSTRUCTED.  **NEXT:** connect the
+gauge one-form `om` and metric `g` of the DeTurck setup to the `hg`/`hom` joint-smoothness inputs (the
+geometric raising data of the actual Ricci–DeTurck gauge), then thread the resulting `C³` flow into the
+Item 1 time-derivative / DeTurck reduction.  (GAP 2's geometric chart `A`/Schauder realization remains
+the point-4 long pole.)
