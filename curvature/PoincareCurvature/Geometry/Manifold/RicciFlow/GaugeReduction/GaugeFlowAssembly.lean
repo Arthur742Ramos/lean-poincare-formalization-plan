@@ -330,4 +330,66 @@ theorem hasDerivAt_extChartAt_comp_self_of_hasMFDerivWithinAt
     HasDerivAt (fun τ : ℝ ↦ extChartAt I (γ t) (γ τ)) w t :=
   (hasDerivWithinAt_extChartAt_comp_self_of_hasMFDerivWithinAt hγ).hasDerivAt hs
 
+variable (I) in
+/-- **Chart pushforward vector field.**  The time-dependent vector field `X : ℝ → M → E` on the base
+manifold, transported into the model space `E` of the preferred chart `extChartAt I p`: a model point
+`q : E` is pulled back to `M` via the chart inverse `(extChartAt I p).symm`, the base field `X τ` is
+evaluated there, and the resulting tangent vector is pushed forward to the `p`-chart coordinates by the
+tangent coordinate change `tangentCoordChange`.
+
+This is the model-space vector field `f : ℝ → E → E` whose integral curves are the chart representations
+of the raw manifold flow curves; it is the object fed to the model ODE uniqueness API
+(`RicciFlow.ModelGaugeFlowODE.eqOn_Icc_of_lipschitzOnWith` and friends) to identify the raw compact
+flow's chart representation with the model-`C³` flow tower.  Because `X` lands in the model space `E`
+(rather than a point-dependent `TangentSpace I x`), the definition and its chart-image reduction below
+carry no dependent-type obstruction. -/
+noncomputable def chartPushforwardField (X : ℝ → M → E) (p : M) (τ : ℝ) (q : E) : E :=
+  tangentCoordChange I ((extChartAt I p).symm q) p ((extChartAt I p).symm q)
+    (X τ ((extChartAt I p).symm q))
+
+/-- Evaluated at the `p`-chart image of a base point `y ∈ (extChartAt I p).source`, the chart pushforward
+field reduces — via the chart's left inverse `PartialEquiv.left_inv` — to the tangent coordinate change
+of `X τ y` from the chart at `y` to the chart at `p`, evaluated at `y`. -/
+theorem chartPushforwardField_extChartAt (X : ℝ → M → E) {p y : M} (τ : ℝ)
+    (hy : y ∈ (extChartAt I p).source) :
+    chartPushforwardField I X p τ (extChartAt I p y) = tangentCoordChange I y p y (X τ y) := by
+  unfold chartPushforwardField
+  rw [(extChartAt I p).left_inv hy]
+
+/-- **The raw flow's chart representation is an integral curve of the chart pushforward field.**  Combining
+the raw-flow chart-representation derivative
+(`hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt`) with the field's chart-image value
+(`chartPushforwardField_extChartAt`): for an abstract curve `γ : ℝ → M` satisfying the bare manifold flow
+ODE `HasMFDerivWithinAt … γ s t ((1).smulRight (X t (γ t)))` at time `t` with `γ t` in the source of the
+preferred chart `extChartAt I p`, the chart representation `τ ↦ extChartAt I p (γ τ)` has within-set
+derivative `chartPushforwardField I X p t` evaluated at the *current* chart point `extChartAt I p (γ t)`.
+
+This is exactly the `RicciFlow.ModelGaugeFlowODE.LocalFlowSolution`-shaped integral-curve datum
+`HasDerivWithinAt (flow) (f t (flow t)) s t` (with `f := chartPushforwardField I X p`), now supplied by
+the RAW compact flow with **no spatial regularity assumed** — the first genuine consumer of the
+raw-flow chart-representation toolkit, feeding the model ODE uniqueness comparison against the
+model-`C³` flow. -/
+theorem hasDerivWithinAt_extChartAt_comp_chartPushforwardField
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {p : M} {X : ℝ → M → E}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))))
+    (hsrc_ext : γ t ∈ (extChartAt I p).source) :
+    HasDerivWithinAt (fun τ : ℝ ↦ extChartAt I p (γ τ))
+      (chartPushforwardField I X p t (extChartAt I p (γ t))) s t := by
+  rw [chartPushforwardField_extChartAt X t hsrc_ext]
+  exact hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt hγ hsrc_ext
+
+/-- **`HasDerivAt` form of the chart-representation integral-curve property.**  When the time set `s` is
+a neighbourhood of `t` — the situation for the *open* flow window `Set.Ioo (-ε) ε` at an interior time —
+the within-set integral-curve derivative of
+`hasDerivWithinAt_extChartAt_comp_chartPushforwardField` upgrades to a full `HasDerivAt`, the form
+consumed by Mathlib's model integral-curve / ODE-uniqueness API. -/
+theorem hasDerivAt_extChartAt_comp_chartPushforwardField
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {p : M} {X : ℝ → M → E}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))))
+    (hs : s ∈ nhds t)
+    (hsrc_ext : γ t ∈ (extChartAt I p).source) :
+    HasDerivAt (fun τ : ℝ ↦ extChartAt I p (γ τ))
+      (chartPushforwardField I X p t (extChartAt I p (γ t))) t :=
+  (hasDerivWithinAt_extChartAt_comp_chartPushforwardField hγ hsrc_ext).hasDerivAt hs
+
 end PoincareCurvature.GaugeFlowAssembly
