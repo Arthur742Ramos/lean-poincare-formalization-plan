@@ -370,6 +370,55 @@ theorem contMDiffOn_timeIndependentRaisedSection
     (contMDiff_constMetricSection_prodSnd g₀).contMDiffOn
     (contMDiff_constOneFormSection_prodSnd ω₀ hω₀).contMDiffOn
 
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **The raised gauge vector solves the raising equation on frame vectors.**  Writing `G` for the
+local-frame Gram matrix `Gᵢⱼ = g.inner x (frameᵢ) (frameⱼ)` and `bⱼ = ω x (frameⱼ)`, the raised
+vector `v = ∑ᵢ (G⁻¹ *ᵥ b)ᵢ • frameᵢ(x)` produced by the raising capstone satisfies
+`g.inner x v (frameₖ x) = ω x (frameₖ x)` for every frame index `k`.  This is Cramer's identity
+`G (G⁻¹ b) = b` combined with the symmetry `Gᵢⱼ = Gⱼᵢ` of the metric: it certifies that the
+coordinate raised vector is the honest metric dual of `ω` tested against the frame, which (extended to
+all of `V x`) makes the raised section *coordinate-free* and hence globally well defined across
+overlapping trivializations. -/
+theorem raisedVector_inner_localFrame_eq
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ∀ y : B, V y →L[ℝ] ℝ)
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    {x : B} (hx : x ∈ e.baseSet) (k : ι) :
+    g.inner x
+        (∑ i, ((show Matrix ι ι ℝ from
+              (fun a b ↦ g.inner x (e.localFrame bas a x) (e.localFrame bas b x)))⁻¹
+            : Matrix ι ι ℝ).mulVec (fun j ↦ ω x (e.localFrame bas j x)) i
+          • e.localFrame bas i x)
+        (e.localFrame bas k x)
+      = ω x (e.localFrame bas k x) := by
+  classical
+  set G : Matrix ι ι ℝ := fun a b ↦ g.inner x (e.localFrame bas a x) (e.localFrame bas b x)
+    with hGdef
+  set bvec : ι → ℝ := fun j ↦ ω x (e.localFrame bas j x) with hbdef
+  have hdet : G.det ≠ 0 := timeDependentGram_det_ne_zero g e bas hx
+  have hGc : G.mulVec (G⁻¹.mulVec bvec) = bvec := by
+    rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv G (isUnit_iff_ne_zero.mpr hdet),
+      Matrix.one_mulVec]
+  have hLHS :
+      g.inner x (∑ i, G⁻¹.mulVec bvec i • e.localFrame bas i x) (e.localFrame bas k x)
+        = ∑ i, G⁻¹.mulVec bvec i * g.inner x (e.localFrame bas i x) (e.localFrame bas k x) := by
+    rw [_root_.map_sum (g.inner x), ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+  have hsym : ∀ i, g.inner x (e.localFrame bas i x) (e.localFrame bas k x) = G k i :=
+    fun i => g.symm x (e.localFrame bas i x) (e.localFrame bas k x)
+  calc
+    g.inner x
+        (∑ i, G⁻¹.mulVec bvec i • e.localFrame bas i x) (e.localFrame bas k x)
+        = ∑ i, G⁻¹.mulVec bvec i * g.inner x (e.localFrame bas i x) (e.localFrame bas k x) := hLHS
+    _ = ∑ i, G k i * G⁻¹.mulVec bvec i := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [hsym i, mul_comm]
+    _ = G.mulVec (G⁻¹.mulVec bvec) k := rfl
+    _ = bvec k := by rw [hGc]
+    _ = ω x (e.localFrame bas k x) := rfl
+
 end Gram
 
 end PoincareCurvature.ParametrizedInner
