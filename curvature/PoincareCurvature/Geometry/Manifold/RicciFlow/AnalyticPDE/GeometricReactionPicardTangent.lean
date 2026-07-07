@@ -1103,4 +1103,75 @@ theorem deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_symmetric
     xc Kc hKc Ko hKo hKoEq hcover g background t hbackground
     ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T₀ hT₀
 
+/-! ### Linearity of the frozen-coefficient DeTurck reaction operator (raw-function level)
+
+The frozen (coefficient-frozen) DeTurck reaction operator `deTurckReactionSectionMap … hP`, whose
+pointwise action `s x u v = s x (P x u) v + s x (P x v) u` is manifestly **linear** in the section `s`,
+is the bounded-linear generator whose autonomous resolvent `exp ((t - t₀) • ·)`
+(`AutonomousResolventExp`) is intended to supply the `SmoothMetricSectionCurveData.contMDiff`
+realization field of the frozen geometric chart.
+
+This section establishes the **raw-function-level linearity** of the underlying map
+`bilinearFormSectionDeTurckReaction` (`bilinearFormSectionDeTurckReaction_add`/`_smul`), proved at the
+canonical `BilinearFormBundle` fibre (fibre-diamond-free), together with the definitional bridge
+`deTurckReactionSectionMap_toFun` from the operator to that raw map.  These are the wall-free ingredients
+of the section-space `map_add'`/`map_smul'` linear packaging; the final packaging as a
+`ContinuousLinearMap` additionally requires transporting these through the `ContinuousSectionSpace`
+add/smul, which meets the `BilinearFormBundle` concreteness whnf wall on the *reaction sections* and is
+the remaining obstruction to the bundled `CSS →L[ℝ] CSS` generator. -/
+
+/-- **The raw (Pi-function-level) DeTurck reaction is additive in the section function.**  Proved at the
+canonical `BilinearFormBundle` fibre `BilW x = TM x →L[ℝ] TM x →L[ℝ] ℝ` (standard `ContinuousLinearMap`
+instances, *not* the transported section-space add), so `ContinuousLinearMap.add_apply` and `Pi.add_apply`
+reduce it to the scalar rearrangement `add_add_add_comm`.  This is the fibre-diamond-free core of the
+section-map additivity: it avoids the `ContinuousSectionSpace` transported-add whnf wall by working on the
+underlying `Π x, BilW x` function. -/
+theorem bilinearFormSectionDeTurckReaction_add
+    (f g : Π x : M, BilW x)
+    (P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) :
+    RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) (f + g) P
+      = RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) f P
+        + RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) g P := by
+  funext x
+  refine ContinuousLinearMap.ext fun u => ContinuousLinearMap.ext fun v => ?_
+  simp only [Pi.add_apply, RicciFlow.bilinearFormSectionDeTurckReaction_apply,
+    ContinuousLinearMap.add_apply]
+  exact add_add_add_comm _ _ _ _
+
+/-- **The raw (Pi-function-level) DeTurck reaction is homogeneous in the section function.**  Companion of
+`bilinearFormSectionDeTurckReaction_add`; proved at the canonical fibre so `ContinuousLinearMap.smul_apply`
+and `Pi.smul_apply` reduce it to `smul_add`, avoiding the transported section-space smul. -/
+theorem bilinearFormSectionDeTurckReaction_smul
+    (c : ℝ) (f : Π x : M, BilW x)
+    (P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) :
+    RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) (c • f) P
+      = c • RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) f P := by
+  funext x
+  refine ContinuousLinearMap.ext fun u => ContinuousLinearMap.ext fun v => ?_
+  simp only [Pi.smul_apply, RicciFlow.bilinearFormSectionDeTurckReaction_apply,
+    ContinuousLinearMap.smul_apply]
+  exact (smul_add c _ _).symm
+
+/-- The underlying section function of the frozen DeTurck reaction operator is the raw
+`bilinearFormSectionDeTurckReaction`; definitional, used to bridge the operator to the raw
+Pi-function-level additivity/homogeneity lemmas. -/
+@[simp] theorem deTurckReactionSectionMap_toFun
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization BilF
+      (TotalSpace.proj : TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    (deTurckReactionSectionMap et Kc hKc Ko hKo hKoEq hcover hP s).toFun
+      = RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) s.toFun P :=
+  rfl
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
