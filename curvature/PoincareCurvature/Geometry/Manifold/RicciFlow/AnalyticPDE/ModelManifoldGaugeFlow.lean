@@ -859,6 +859,60 @@ theorem exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt
   obtain ⟨l, u, hmem, hsub⟩ := mem_nhds_iff_exists_Ioo_subset.mp hev
   exact ⟨l, u, hmem, fun τ hτ q hq => hsub hτ q hq⟩
 
+/-- **Joint continuity of the model gauge flow `(τ, q) ↦ (G.maps3 τ) q`.**  On the model manifold `E`,
+a raw `C³` gauge-flow witness `G : Diffeomorph3GaugeFlowOn (X := X) Set.univ t₀` of a *uniformly-in-time
+globally `K`-Lipschitz* field `X : ℝ → E → E` has jointly continuous total flow map.  Each base curve
+`τ ↦ (G.maps3 τ) q` is a genuine global `IsIntegralCurve` of `X` (the within-`Set.univ` manifold ODE
+readout `hasDerivWithinAt_maps3_eval_of_model_diffeomorph3GaugeFlowOn` upgraded via `hasDerivWithinAt_univ`),
+and the flow is anchored at `t₀` (`SmoothSelfDiffeomorph3Family.AnchoredAt.apply`), so the abstract
+Grönwall joint-continuity theorem `continuous_flow` (uniform-exponential Lipschitz-in-initial-value ×
+integral-curve continuity-in-time) applies verbatim.
+
+This supplies the joint-continuity input that the tube-lemma confinement
+`exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt` consumes: it is the concrete
+`(τ, q) ↦ (G.maps3 τ) q` continuity the GAP-1 step-(v) orbit control needs for the model comparison
+flow.  Crucially the joint continuity is *not* a missing Banach→manifold-ODE-regularity primitive here —
+it is already available for globally-Lipschitz fields through `continuous_flow`, which the compactly
+supported cut field `χ • chartPushforwardField` satisfies. -/
+theorem continuous_maps3_of_lipschitzWith
+    [FiniteDimensional ℝ E] [CompleteSpace E]
+    {X : ℝ → E → E} {t₀ : ℝ} {K : ℝ≥0}
+    (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E) (X := X) Set.univ t₀)
+    (hX : ∀ t, LipschitzWith K (X t)) :
+    Continuous (fun p : ℝ × E => (G.maps3 p.1) p.2) := by
+  have hΦ : ∀ q : E, IsIntegralCurve (fun τ : ℝ => (G.maps3 τ) q) X := by
+    intro q t
+    have h := hasDerivWithinAt_maps3_eval_of_model_diffeomorph3GaugeFlowOn G (Set.mem_univ t) q
+    rwa [hasDerivWithinAt_univ] at h
+  have h0 : ∀ q : E, (fun τ : ℝ => (G.maps3 τ) q) t₀ = q :=
+    fun q => SmoothSelfDiffeomorph3Family.AnchoredAt.apply (Φ := G.maps3) G.anchored q
+  exact continuous_flow (Φ := fun q τ => (G.maps3 τ) q) hX hΦ h0
+
+/-- **Uniform short-time orbit-graph confinement for the model gauge flow.**  The direct composition of
+`continuous_maps3_of_lipschitzWith` (joint continuity of `(τ, q) ↦ (G.maps3 τ) q`) with the tube-lemma
+confinement `exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt`: for a model gauge flow `G`
+of a uniformly `K`-Lipschitz field on `E`, a compact initial set `Q`, and an open space-time target `W`
+containing the anchored graph `{(t₀, (G.maps3 t₀) q) | q ∈ Q}`, there is an honest open time window
+`Set.Ioo a b ∋ t₀` on which **every** orbit graph `τ ↦ (τ, (G.maps3 τ) q)` (for `q ∈ Q`) stays in `W`.
+
+Applied with `W` the interior of the compact cutoff window `K₀` (so `W ⊆ K₀`), this yields the
+`graph ⊆ K₀` hypothesis consumed by `cutoff_eqOne_along_curve_of_graph_subset` **uniformly over a chart
+patch** — closing the flow-trajectory-confinement obligation for the model comparison curve of GAP-1
+step (v). -/
+theorem exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith
+    [FiniteDimensional ℝ E] [CompleteSpace E]
+    {X : ℝ → E → E} {t₀ : ℝ} {K : ℝ≥0} {Q : Set E} {W : Set (ℝ × E)}
+    (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E) (X := X) Set.univ t₀)
+    (hX : ∀ t, LipschitzWith K (X t))
+    (hQ : IsCompact Q) (hW : IsOpen W)
+    (hgraph0 : ∀ q ∈ Q, ((t₀, (G.maps3 t₀) q) : ℝ × E) ∈ W) :
+    ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧
+      ∀ τ ∈ Set.Ioo a b, ∀ q ∈ Q, ((τ, (G.maps3 τ) q) : ℝ × E) ∈ W := by
+  have hcont := continuous_maps3_of_lipschitzWith G hX
+  exact exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt
+    (Ψ := fun τ q => (G.maps3 τ) q) hQ hW hgraph0
+    (fun q _ => hcont.continuousAt)
+
 end
 
 end SmoothDependenceCk
