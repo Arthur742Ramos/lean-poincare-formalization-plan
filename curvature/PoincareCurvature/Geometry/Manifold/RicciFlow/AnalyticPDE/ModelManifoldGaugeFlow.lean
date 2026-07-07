@@ -544,6 +544,46 @@ theorem exists_diffeomorph3GaugeFlowOn_cutoff_chartPushforwardField
     contDiff_hasCompactSupport_cutoff_chartPushforwardField hX hχ hχc hsub
   exact exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport s hF hcs hN
 
+/-- **Smooth cutoff equal to `1` near a compact set, supported in an open set (GAP-1 step (ii)).**
+On a finite-dimensional real normed space `F`, for a compact set `K` inside an open set `U`, there is
+a globally-`C^n` function `χ : F → ℝ` that
+  * has compact support,
+  * has `tsupport χ ⊆ U`,
+  * is identically `1` on a neighbourhood of `K` (`∀ᶠ x in 𝓝ˢ K, χ x = 1`), and
+  * takes values in `[0, 1]`.
+
+This is the cutoff datum consumed by `exists_diffeomorph3GaugeFlowOn_cutoff_chartPushforwardField`:
+applied with `F := ℝ × E`, `U := Set.univ ×ˢ (extChartAt I p).target` (open) and `K` the compact
+trajectory window, it supplies the `hχ`/`hχc`/`hsub` hypotheses of that capstone, while the extra
+`χ ≡ 1` near `K` clause is what makes the bump-cut field agree with the un-cut chart pushforward field
+on the orbit (the input to the step-(v) integral-curve comparison
+`extChartAt_comp_eqOn_of_lipschitzOnWith`).
+
+Construction: interpose (`exists_compact_between`, using local compactness) a compact `L` with
+`K ⊆ interior L ⊆ L ⊆ U`; view `F` as the model manifold `𝓘(ℝ, F)` and apply the manifold cutoff
+`exists_contMDiffMap_one_nhds_of_subset_interior` with `s := K`, `t := L` to get a smooth `f` equal to
+`1` near `K` and vanishing off `L`; `support f ⊆ L` (compact) gives `HasCompactSupport` and
+`tsupport f ⊆ L ⊆ U`; the `ContMDiff → ContDiff` transfer is `contMDiff_iff_contDiff`. -/
+theorem exists_contDiff_cutoff_one_nhdsSet_of_isCompact
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
+    {n : ℕ∞} {K U : Set F} (hK : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U) :
+    ∃ χ : F → ℝ, ContDiff ℝ n χ ∧ HasCompactSupport χ ∧ tsupport χ ⊆ U ∧
+      (∀ᶠ x in 𝓝ˢ K, χ x = 1) ∧ ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1 := by
+  obtain ⟨L, hLc, hKL, hLU⟩ := exists_compact_between hK hU hKU
+  obtain ⟨f, h1, h0, hIcc⟩ :=
+    exists_contMDiffMap_one_nhds_of_subset_interior 𝓘(ℝ, F) hK.isClosed hKL (n := n)
+  have hsupp : Function.support (f : F → ℝ) ⊆ L := by
+    intro x hx
+    by_contra hxL
+    exact hx (h0 x hxL)
+  have hcs : HasCompactSupport (f : F → ℝ) :=
+    HasCompactSupport.of_support_subset_isCompact hLc hsupp
+  refine ⟨(f : F → ℝ), contMDiff_iff_contDiff.mp f.contMDiff, hcs, ?_, h1, hIcc⟩
+  calc tsupport (f : F → ℝ) = closure (Function.support (f : F → ℝ)) := rfl
+    _ ⊆ closure L := closure_mono hsupp
+    _ = L := hLc.isClosed.closure_eq
+    _ ⊆ U := hLU
+
 end
 
 end SmoothDependenceCk
