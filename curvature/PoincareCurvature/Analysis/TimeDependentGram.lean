@@ -419,6 +419,44 @@ theorem raisedVector_inner_localFrame_eq
     _ = bvec k := by rw [hGc]
     _ = ω x (e.localFrame bas k x) := rfl
 
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **The raised gauge vector is the coordinate-free metric dual of the one-form.**  Extending
+`raisedVector_inner_localFrame_eq` from frame vectors to an arbitrary `w : V x`: the raised vector
+`v = ∑ᵢ (G⁻¹ *ᵥ b)ᵢ • frameᵢ(x)` satisfies `g.inner x v w = ω x w` for *every* tangent vector `w`.
+Since `v` is thereby characterised by the trivialization-independent equation `g.inner x v = ω x`,
+the raised section is independent of the chosen trivialization and local frame — precisely the
+coordinate-freeness needed to glue the per-chart raised sections into a single global gauge field. -/
+theorem raisedVector_inner_eq
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ∀ y : B, V y →L[ℝ] ℝ)
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    {x : B} (hx : x ∈ e.baseSet) (w : V x) :
+    g.inner x
+        (∑ i, ((show Matrix ι ι ℝ from
+              (fun a b ↦ g.inner x (e.localFrame bas a x) (e.localFrame bas b x)))⁻¹
+            : Matrix ι ι ℝ).mulVec (fun j ↦ ω x (e.localFrame bas j x)) i
+          • e.localFrame bas i x)
+        w
+      = ω x w := by
+  classical
+  set v : V x := ∑ i, ((show Matrix ι ι ℝ from
+        (fun a b ↦ g.inner x (e.localFrame bas a x) (e.localFrame bas b x)))⁻¹
+      : Matrix ι ι ℝ).mulVec (fun j ↦ ω x (e.localFrame bas j x)) i
+    • e.localFrame bas i x with hvdef
+  have hframe : ∀ k, e.localFrame bas k x = (e.basisAt bas hx) k := fun k =>
+    Bundle.Trivialization.localFrame_apply_of_mem_baseSet (e := e) (b := bas) hx
+  set d : ι → ℝ := fun i => (e.basisAt bas hx).repr w i with hd
+  have hw : w = ∑ k, d k • e.localFrame bas k x := by
+    simp_rw [hframe]
+    rw [hd]
+    exact ((e.basisAt bas hx).sum_repr w).symm
+  rw [hw, _root_.map_sum (g.inner x v), _root_.map_sum (ω x)]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.map_smul]
+  congr 1
+  exact raisedVector_inner_localFrame_eq g ω e bas hx k
+
 end Gram
 
 end PoincareCurvature.ParametrizedInner
