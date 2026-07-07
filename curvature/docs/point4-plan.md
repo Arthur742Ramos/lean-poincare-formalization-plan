@@ -2187,3 +2187,55 @@ avoiding the transported-add whnf.  With `deTurckReactionSectionMap_toFun_add`/`
 `CSS →L[ℝ] CSS` `deTurckReactionSectionCLM` (norm bound from
 `deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates` + `exists_uniform_inCoord_bound`) all
 follow immediately — feeding the frozen chart's autonomous resolvent (later-35).
+
+### Item 3 (GAP 2) later-37 — CSS-level reaction linearity is DEFINITIVELY WALLED at the definition site (`isDefEq` timeout on `add_apply` at `BilW`); pivoted to the committed Levi–Civita gauge reduction of the concrete reaction operator (one commit; `{propext, Classical.choice, Quot.sound}`)
+
+**Wall — DEFINITIVE diagnosis (supersedes later-36's "whnf wall on reaction sections").**  The later-36
+`NEXT` (package `deTurckReactionSectionMap` as a `CSS →ₗ[ℝ] CSS`) is blocked far more fundamentally than a
+reaction-section `rw`-matcher issue.  A minimal probe — a bare
+`example … (s t : ContinuousSectionSpace … (V := BilW) …) (x : M) : (s + t) x = s x + t x :=
+  ContinuousSectionSpace.add_apply et Kc hKc Ko hKo hKoEq hcover s t x`
+on **plain opaque input sections** (NOT reaction outputs) — **fails** with
+`error: … (deterministic) timeout at `isDefEq`, maximum number of heartbeats (2000000) has been reached`.
+So *any* use of the `ContinuousSectionSpace` transported add/smul at the concrete tangent
+`BilinearFormBundle` fibre blows the elaborator's `isDefEq` budget, independent of the section terms.
+Contrast: `bilinearFormSectionDeTurckReaction_add/_smul` (raw `Π x, BilW x` add via `Pi.add_apply` +
+`ContinuousLinearMap.add_apply`) and every `dist`/`coord`/`LipschitzWith`/`IsPicardLindelof` lemma at `BilW`
+compile fine — because the **norm/metric** transports `rfl`-cleanly (`instCompleteSpace`'s `Isometry e := by
+… rfl`), whereas the **add** `s + t := e.symm (e s + e t)` (`Equiv.addCommGroup` on
+`equivCompatibleCoordFamilySubmodule e`) forces an `isDefEq` that unfolds the heavy composite equiv `e` at
+the concrete `BilW` submodule and does not terminate.  Attempts that ALL hit this: `rw [add_apply]` (also
+"did not find pattern"), term-mode `Eq.trans … (add_apply …).symm`, and the `example` above.
+**This is a genuine definition-site issue in `ContinuousSectionSpace.instAddCommGroup`** — the fix is to
+give the add/smul a fibre-`isDefEq`-cheap (pointwise `⟨s.toFun + t.toFun, …⟩`) representative matching the
+`rfl`-clean metric, but that is a non-additive core-instance refactor of `VectorBundle/ContinuousSection.lean`
+(the norm/module/complete structure all transport through `e`), deferred as too risky for an additive session.
+**Crucially, the `CSS`-linear/`CLM` packaging is a SIDE-QUEST, not the critical path:** the chart field
+`TimeDependentGeometricRicciDeTurckBanachChart.A` and the Picard bridge
+`sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound` both take `A` as a **raw
+function** `ℝ → CSS → CSS` with `dist`/`coord`-level `hlip`/`hcont`/`hcenter` (all wall-free); the linear
+packaging was only for the later-35 autonomous-`exp` resolvent.  So the wall does **not** block the chart
+`A`/`picard`.
+
+**Committed (wall-free, on the `chartRHS_eq_intrinsic`/`geometric` critical path).**  In
+`DeTurckReactionAssembly.lean`, the operator-level **Levi–Civita (self-DeTurck) gauge reduction** of the
+concrete tangent-bundle reaction operator, at the fibre-value (`x u v`) level (so no `CSS` add):
+* `deTurckReactionSectionMap_metricSection_apply_eq_zero_of_isLeviCivita` — on a Levi–Civita background
+  (`IsLeviCivita g background`) the concrete `deTurckReactionSectionMap` at the frozen coefficient `∇W`,
+  on the metric section, is `0` (from the committed center-point identification
+  `deTurckReactionSectionMap_metricSection_apply_eq_intrinsicDeTurckCorrection` +
+  `intrinsicDeTurckCorrection_eq_zero_of_isLeviCivita`).
+* `deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciFlowRHS_of_isLeviCivita`
+  — the affine center-point chart operator (`intrinsicRicciFlowRHSSectionSpace g t + deTurckReactionSectionMap`)
+  on the metric state collapses to the pure `intrinsicRicciFlowRHS g` on a Levi–Civita background (from the
+  committed `…_eq_intrinsicRicciDeTurckRHS` + `intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita`).
+This is the concrete operator-level form of the `RicciDeTurckSmoothRealizationData.chartRHS_eq_intrinsic`
+reduction: in the flowing metric's own chosen Levi–Civita gauge the chart operator on the metric state is
+exactly the geometric Ricci-flow RHS.
+
+**NEXT.**  (a) DEFINITION-SITE FIX (highest leverage, unblocks all `CSS`-operator-algebra at `BilW`): give
+`ContinuousSectionSpace` a pointwise, fibre-`isDefEq`-cheap `AddCommGroup`/`Module` whose `add_apply`/`smul_apply`
+are `rfl`, proved compatible with the existing `e`-transported norm — a dedicated, carefully-staged edit to
+`VectorBundle/ContinuousSection.lean` (verify the whole downstream stays green).  (b) The GENERAL-`M`
+state-dependent 2nd-order (mild/regularised) chart `A` satisfying `geometric` for all `s` (not just the metric
+state) + its bounded/Lipschitz `hbound`/`hlipBall`/`hcontTime` — the parabolic long pole — remains open.
