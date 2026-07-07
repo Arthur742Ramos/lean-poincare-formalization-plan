@@ -664,6 +664,47 @@ theorem hasDerivWithinAt_maps3_eval_of_model_diffeomorph3GaugeFlowOn
   rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton] at hfd
   exact hasDerivWithinAt_iff_hasFDerivWithinAt.mpr hfd
 
+/-- **The `hg'` datum of the step-(v) glue: the model comparison curve is a full `HasDerivAt` integral
+curve of the *uncut* `chartPushforwardField` wherever the cutoff `χ ≡ 1`.**  For the model gauge flow
+`G` of the cut field `fun τ q ↦ χ (τ, q) • chartPushforwardField I X p τ q` produced by
+`exists_diffeomorph3GaugeFlowOn_cutoff_chartPushforwardField` /
+`exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`, on an open time window
+(`hs : s ∈ 𝓝 t`) and at a base point `q` whose current position `(G.maps3 t) q` lies in the region where
+the cutoff equals one (`hχ`), the within-set flow-ODE readout
+`hasDerivWithinAt_maps3_eval_of_model_diffeomorph3GaugeFlowOn` — which carries the *cut* field value
+`χ (t, (G.maps3 t) q) • chartPushforwardField …` — collapses to the un-cut field
+(`1 • chartPushforwardField = chartPushforwardField`, `one_smul`) and upgrades from `HasDerivWithinAt` to
+`HasDerivAt` via the window neighbourhood (`HasDerivWithinAt.hasDerivAt`).
+
+This is exactly the shape of the
+`hg' : ∀ t ∈ Set.Ioo a b, HasDerivAt g (chartPushforwardField I X p t (g t)) t` hypothesis consumed by
+`GaugeFlowAssembly.extChartAt_comp_eqOn_of_lipschitzOnWith`, with the model comparison curve
+`g := fun τ ↦ (G.maps3 τ) q`.  The `χ ≡ 1` fact `hχ` is the pointwise face of the orbit-containment
+control (supplied separately), keeping this readout free of that delicate step. -/
+theorem hasDerivAt_maps3_eval_of_cutoff_eqOne
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {p : M} {χ : ℝ × E → ℝ} {s : Set ℝ} {t₀ : ℝ}
+    (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+      (X := fun τ q => χ (τ, q) •
+        PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) s t₀)
+    {t : ℝ} (hs : s ∈ 𝓝 t) (ht : t ∈ s) (q : E)
+    (hχ : χ (t, (G.maps3 t) q) = 1) :
+    HasDerivAt (fun τ : ℝ => (G.maps3 τ) q)
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p t ((G.maps3 t) q)) t := by
+  have h := hasDerivWithinAt_maps3_eval_of_model_diffeomorph3GaugeFlowOn G ht q
+  have key : (fun τ q => χ (τ, q) •
+        PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) t ((G.maps3 t) q)
+      = PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p t ((G.maps3 t) q) := by
+    show χ (t, (G.maps3 t) q) •
+        PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p t ((G.maps3 t) q)
+        = PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p t ((G.maps3 t) q)
+    rw [hχ, one_smul]
+  rw [← key]
+  exact h.hasDerivAt hs
+
 end
 
 end SmoothDependenceCk
