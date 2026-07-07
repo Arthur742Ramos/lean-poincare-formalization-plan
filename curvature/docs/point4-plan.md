@@ -2001,3 +2001,50 @@ a genuine analytic result (C⁰ Banach ODE solution with a smooth-coefficient 0t
 spatially `C²`, needing a uniform-`C²` bound on the Picard iterates), and for the *real* operator is the
 full parabolic Schauder gain.  Absent that, the chart's `geometric`/`realization` reconciliation remains
 the critical path.
+
+### Item 2 (GAP 1) later-33 — the later-30 DeTurck↔`raisedGaugeField` instance diamond is DEFEATED: the intrinsic DeTurck vector field is the coordinate-free metric-raised gauge field (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The later-30 `NEXT` — "defeat the compounded tangent-bundle instance diamond so that
+`intrinsicDeTurckVectorField g bg t x = raisedGaugeField (g t) (intrinsicDeTurckOneForm g bg t) bas x`
+can be stated and proved" — is now discharged.  The diamond that stalled a prior session (the
+`rieszMap` `RiemannianBundle` path vs `raisedGaugeField`'s `FiberBundle`/`VectorBundle` path, looping at
+`whnf`/`isDefEq` even under a full positional `@`-pin + 4M heartbeats) is broken by a three-part
+technique, committed in the new leaf module
+`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/DeTurckRaisedGaugeField.lean`
+(non-`module`, importing both `RicciFlow.DeTurck` and `Analysis.TimeDependentGram`):
+
+* **`intrinsicDeTurckVectorField_eq_raisedGaugeField`** — the pointwise metric-dual identity.  Proof
+  shape that beats the diamond:
+  1. Prove the *scalar* pairing `hv : ∀ w, (g t).inner x (intrinsicDeTurckVectorField g bg t x) w =
+     intrinsicDeTurckOneForm g bg t x w` FIRST, entirely inside the `RiemannianBundle` world
+     (`letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩`; `change inner ℝ (rieszMap …) w = …`;
+     `rieszMap_apply_inner`).  No `raisedGaugeField` appears in this subgoal, so the two instance paths
+     are never inside one subterm.
+  2. Feed `hv` to the uniqueness lemma `raisedGaugeField_eq_of_forall_inner_eq`, which *produces* the
+     metric-dual equation rather than reconciling two pre-built sides.  Pin every tangent-bundle instance
+     positionally with `@` to the CANONICAL `inferInstance` / `TangentSpace.fiberBundle` /
+     `TangentSpace.vectorBundle` (matching the raising capstone's proven-good pins — crucially the
+     fibre `NormedAddCommGroup`/`NormedSpace` are left to `inferInstance`, i.e. the same instance
+     `rieszMap` uses, NOT `inferInstanceAs (NormedAddCommGroup E)`, which is a syntactically-different
+     defeq term that keeps the diamond alive).
+  3. `attribute [local irreducible] raisedGaugeField in` around the theorem — THIS is the decisive
+     stroke: with `raisedGaugeField` opaque, the final `exact`'s `isDefEq` compares the produced and goal
+     `raisedGaugeField` applications *syntactically* (they are the identical `@`-pinned term) instead of
+     `whnf`-unfolding the big local-frame/Gram-inverse sum and looping on the fibre instance mismatch.
+* **`neg_intrinsicDeTurckVectorField_eq_raisedGaugeField_neg`** — the reverse (DeTurck gauge) field form
+  `-intrinsicDeTurckVectorField g bg t x = raisedGaugeField (g t) (-intrinsicDeTurckOneForm g bg t) bas x`
+  (`intrinsicDeTurckGaugeField` is definitionally `-intrinsicDeTurckVectorField`).  Proof: `rw` the
+  identity, then `@`-pinned `raisedGaugeField_neg` (metric dual is linear ⇒ negates with the one-form).
+
+**Value.**  This is the pointwise bridge the later-29 flow capstone
+(`exists_gaugeFlow_Ioo_of_timeDependent_raisingData`, which flows `raisedGaugeField (g t) (om t) bas`)
+needs to be read as flowing the *genuine* DeTurck vector field: with `om := intrinsicDeTurckOneForm`, the
+capstone's field IS `intrinsicDeTurckVectorField` by this identity.  The general instance-pinning
+technique (`have`-first scalar reduction + canonical `inferInstance` fibre pins + `local irreducible`
+on the coordinate-free field) is now a reusable tool for any future `rieszMap`↔`raisedGaugeField`
+reconciliation.  **NEXT (Item 2 GAP 1 residual).**  Applying the capstone to the DeTurck case still
+needs the smoothness-ladder reconciliation: the capstone consumes `C^∞` joint `(t, x)` data
+(`g : ℝ → ContMDiffRiemannianMetric I ∞`, `hg`/`hom` at level `∞`), whereas a `MetricFamily` is `C²`; so
+the residual is either a `C²`-regularity version of the raising capstone or a `C^∞` upgrade of the
+DeTurck one-form's joint smoothness.  (GAP 2's geometric chart `A`/Schauder realization remains the
+point-4 long pole.)
