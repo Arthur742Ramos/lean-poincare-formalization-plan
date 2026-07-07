@@ -927,3 +927,53 @@ VARYING-source-centre `tangentCoordChange I y p y` (both slots move with `y`), N
 the genuine crux; look for a joint-continuity/`ContMDiff` route via `tangentBundleCore` or the
 `contMDiffOn_ext_coord_change` chain, NOT the fixed-centre lemma) ∘ `y ↦ X τ y` (base-field regularity).
 Do NOT rebuild trivial-case chart closures; the fixed-chart temporal→spatial bridge above is the route.
+
+### Progress (2026-07-06, later 10) — Item 2 GAP 1: the chart-pushforward field regularity chain is DONE (`ContinuousOn` → `ContDiffOn` → `LipschitzOnWith`), and the "varying-centre" formulation question is RESOLVED
+
+**What landed (all in `GaugeReduction/GaugeFlowAssembly.lean`, sorry-free, axiom-clean:
+`{propext, Classical.choice, Quot.sound}`).**  The previous session named the next target as proving
+`chartPushforwardField` `ContinuousOn`/`LipschitzOnWith` in `q`, decomposing through the varying-centre
+`tangentCoordChange I y p y`.  That decomposition is the WRONG route and the plan's stated target was
+UNDER-hypothesised: the isolated varying-source-centre map `y ↦ tangentCoordChange I y p y` is genuinely
+**discontinuous** — its source chart `chartAt H y` jumps with `y`, and via `tangentCoordChange_comp` the
+map is the inverse of `tangentCoordChange I p y y`, which still reads the varying chart at `y`.  So NO
+fixed-centre/`tangentBundleCore` joint-continuity route exists for an arbitrary base field `X`.  The
+**correct route** (this is the resolution): `tangentCoordChange I y p y (X τ y)` is exactly the second
+component of the tangent-bundle trivialization `trivializationAt E (TangentSpace I) p` applied to the
+section value `⟨y, X τ y⟩` (`TangentBundle.trivializationAt_apply` — both unfold to the same
+`fderivWithin ℝ (extChartAt I p ∘ (extChartAt I y).symm) (range I) (extChartAt I y y)`), so regularity
+holds **only through the section**, requiring `y ↦ ⟨y, X τ y⟩` to be a genuine continuous / `C^n` section
+of the tangent bundle.  The three regularity lemmas, each with that section hypothesis:
+
+* **`continuousOn_chartPushforwardField`** — from `ContinuousOn (fun y => ⟨y, X τ y⟩) (extChartAt I p).source`
+  (a continuous tangent-bundle section), `ContinuousOn (chartPushforwardField I X p τ) (extChartAt I p).target`.
+  Proof: identify the field on the target with `Prod.snd ∘ trivializationAt … p ∘ section ∘ (extChartAt I p).symm`,
+  each factor `ContinuousOn` (trivialization via `Trivialization.continuousOn`).
+* **`contDiffOn_chartPushforwardField`** — the `C^n` analogue (`{n} [IsManifold I n M]
+  [ContMDiffVectorBundle n E (TangentSpace I) I]`): from `ContMDiffOn I (I.prod 𝓘(ℝ,E)) n (section)
+  (extChartAt I p).source`, `ContDiffOn ℝ n (chartPushforwardField I X p τ) (extChartAt I p).target`.
+  Uses the **fixed-trivialization** section characterisation `Bundle.Trivialization.contMDiffOn_iff`
+  (centred at `p`, not the varying base point, via `MemTrivializationAtlas (trivializationAt E (TangentSpace I) p)`),
+  then `contMDiffOn_iff_contDiffOn`.  This is the `C^1`→Lipschitz-ready form.
+* **`exists_lipschitzOnWith_chartPushforwardField`** — from the same `C^n` section (`n ≠ 0`) and a convex
+  compact `s ⊆ (extChartAt I p).target`, `∃ K, LipschitzOnWith K (chartPushforwardField I X p τ) s`, via
+  `ContDiffOn.exists_lipschitzOnWith`.  This is exactly the field-Lipschitz datum consumed by the `hlip`
+  hypothesis of `extChartAt_comp_eqOn_of_lipschitzOnWith` (with `s :=` the state tube `state t`).
+
+**Fractions of GAP 1.**  The field-regularity input to the temporal integral-curve uniqueness comparison
+(`hlip`) is now supplied.  Remaining GAP-1 core: (i) the model comparison flow `Ψ` of
+`chartPushforwardField` and its `C³`-in-initial-condition regularity — the single analytic long-pole,
+which reduces to feeding a **globally**-`C^{3,1}` field on all of `E` to `exists_flow_diffeomorph_three`
+(`AnalyticPDE/SmoothDependenceManifold.lean:245`); (ii) that theorem needs a SINGLE global Lipschitz
+constant + globally-Lipschitz `Dv`/`D2v`/`D3v`, whereas `chartPushforwardField` is regular only on the
+chart target — so the next brick is the **bump-function globalisation** of `chartPushforwardField` (cut
+off to a compactly-supported globally-`C^{3,1}` field agreeing with it on a neighbourhood of the compact
+trajectory), whose flow then feeds `exists_flow_diffeomorph_three` to build `Ψ`.
+
+**Concrete next target.**  The bump-function globalisation: given the compact trajectory sits inside the
+chart patch, multiply `chartPushforwardField I X p τ` (extended by `0` off the target, or precomposed with
+a fixed chart-symm) by a smooth cutoff `χ : E → ℝ` supported in the chart target and `≡ 1` on a
+neighbourhood of the trajectory, obtaining a globally-`C^{3,1}` `v : ℝ → E → E` with a single global
+Lipschitz constant; prove its flow agrees with the raw-flow chart representation on the trajectory window
+(via `extChartAt_comp_eqOn_of_lipschitzOnWith` with `g := Ψ`), giving `hslicesC3`.  Do NOT rebuild
+trivial-case chart closures.
