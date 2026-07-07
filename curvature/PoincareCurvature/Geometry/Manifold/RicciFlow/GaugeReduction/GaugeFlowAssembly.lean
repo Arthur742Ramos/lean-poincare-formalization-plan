@@ -231,4 +231,27 @@ theorem localGluingData_ofChartConjugation
   left_invOn := by simpa only [Set.univ_inter] using hleft
   right_invOn := by simpa only [Set.univ_inter] using hright
 
+/-- **Global slice `C³` regularity from per-point chart-conjugation.**  If every point `x : M` has a
+neighbourhood `U` on which the map `F` is represented, in the extended charts at some centre `x₀`
+(source) and `F x₀` (target), by a globally-`C³` model map `Ψ : E → E`, then `F` is globally
+`ContMDiff I I 3`.
+
+This is the `ContMDiff I I 3 (Φ t)` content of the compact gauge-flow reduction's `hslicesC3`
+hypothesis (`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`): each
+flow slice `Φ t : M → M` is, near every point, the chart-representation of a model `C³` flow supplied
+by the smooth-dependence tower, and this lemma glues those local chart-conjugation witnesses into
+global spatial `C³` regularity of the slice.  `ContMDiff` unfolds to `∀ x, ContMDiffAt`, each of which
+is `contMDiffOn_of_extChartAt_conjugation` restricted to the neighbourhood via
+`ContMDiffOn.contMDiffAt`. -/
+theorem contMDiff_of_forall_extChartAt_conjugation
+    {F : M → M}
+    (h : ∀ x : M, ∃ (x₀ : M) (U : Set M) (Ψ : E → E),
+      U ∈ 𝓝 x ∧ U ⊆ (chartAt H x₀).source ∧ ContDiff ℝ 3 Ψ ∧
+      Set.MapsTo F U (chartAt H (F x₀)).source ∧
+      (∀ y ∈ U, extChartAt I (F x₀) (F y) = Ψ (extChartAt I x₀ y))) :
+    ContMDiff I I 3 F := by
+  intro x
+  obtain ⟨x₀, U, Ψ, hUmem, hU, hΨ, hFU, hconj⟩ := h x
+  exact (contMDiffOn_of_extChartAt_conjugation hU hΨ hFU hconj).contMDiffAt hUmem
+
 end PoincareCurvature.GaugeFlowAssembly
