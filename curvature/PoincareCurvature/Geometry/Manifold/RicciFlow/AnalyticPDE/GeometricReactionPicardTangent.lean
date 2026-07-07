@@ -749,4 +749,52 @@ theorem deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_positiveD
     xc Kc hKc Ko hKo hKoEq hcover g background t hbackground
     ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T₀ hT₀
 
+/-- **`IsPicardLindelof` for the concrete geometric frozen Ricci–DeTurck operator at `TM` — the chart
+`picard`-field datum.**  Specialising `deTurckReactionSectionMap_add_source_exists_isPicardLindelof` to
+the genuine geometric data: the frozen DeTurck coefficient `P := ∇W = (chosenLeviCivitaFamily g t)
+(intrinsicDeTurckVectorField g background t)` (continuous by
+`intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`, needing only a `C¹` background slice
+`hbackground`) and the principal Ricci source `b := intrinsicRicciFlowRHSSectionSpace … g t` (the
+`(-2)•Ric` term as a named `ContinuousSectionSpace` value).  The frozen geometric operator
+`A τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t` satisfies
+`IsPicardLindelof` about any initial section `σ₀`, on an auto-chosen forward window `[t₀, T]` with
+`T ∈ (t₀, T₀]`, with radius `a`, Lipschitz constant `2·Kp` and centre size `Mc + 2·Kp·a` — all produced
+internally (the uniform Lipschitz `Kp` discharged by compactness of the finite cover + continuity of
+`∇W`, the centre bound derived from continuity of the readout on the compact window).  This is the
+literal `picard` datum of the `TimeDependentGeometricRicciDeTurckBanachChart` for the concrete
+tangent-bundle geometric operator; the companion
+`deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn` feeds this very datum to the
+closed-ball a-posteriori bridge to obtain the chart's Banach evolution solution. -/
+theorem deTurckFrozenGeometric_exists_isPicardLindelof
+    {κ : Type*} [Finite κ]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) (a : ℝ≥0) (ha : 0 < (a : ℝ)) :
+    ∃ (Kp : ℝ≥0) (T : ℝ) (hT : t₀ < T) (Mc : ℝ≥0),
+      IsPicardLindelof
+        (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous s
+          + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+              Kc hKc Ko hKo hKoEq hcover g t)
+        (tmin := t₀) (tmax := T) ⟨t₀, ⟨le_rfl, hT.le⟩⟩ σ0 a 0 (Mc + (2 * Kp) * a) (2 * Kp) :=
+  deTurckReactionSectionMap_add_source_exists_isPicardLindelof
+    xc Kc hKc Ko hKo hKoEq hcover
+    (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+      g background t hbackground).continuous
+    (RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+      Kc hKc Ko hKo hKoEq hcover g t)
+    σ0 t₀ T₀ hT₀ a ha
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
