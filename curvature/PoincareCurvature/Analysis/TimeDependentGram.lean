@@ -56,6 +56,81 @@ theorem contMDiffOn_frameSection_prodSnd
       (n := n) (b := bas) k).mono hu'
   exact hspatial.comp (contMDiff_snd.contMDiffOn) (fun p hp ↦ hp.2)
 
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **Positive-definiteness of the local-frame Gram form of a Riemannian metric.**  For `c ≠ 0`,
+`∑ᵢⱼ cᵢ cⱼ · g.inner x (frameᵢ) (frameⱼ) > 0`, since it equals `g.inner x w w` for the nonzero
+combination `w = ∑ᵢ cᵢ • frameᵢ` and the metric is positive-definite. -/
+theorem timeDependentGram_pos
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] (bas : Module.Basis ι ℝ F)
+    {x : B} (hx : x ∈ e.baseSet) {c : ι → ℝ} (hc : c ≠ 0) :
+    0 < ∑ i, ∑ j, c i * c j * g.inner x (e.localFrame bas i x) (e.localFrame bas j x) := by
+  classical
+  let w : V x := ∑ i, c i • e.localFrame bas i x
+  have hw : w ≠ 0 := by
+    intro hw0
+    apply hc
+    calc
+      c = (e.basisAt bas hx).repr w := by
+        simpa [w, Bundle.Trivialization.localFrame_apply_of_mem_baseSet (e := e) (b := bas) hx]
+          using ((e.basisAt bas hx).repr_sum_self c).symm
+      _ = 0 := by simp [hw0]
+  have hsum :
+      g.inner x w w =
+        ∑ i, ∑ j, c i * c j * g.inner x (e.localFrame bas i x) (e.localFrame bas j x) := by
+    show (g.inner x) (∑ i, c i • e.localFrame bas i x) (∑ j, c j • e.localFrame bas j x) = _
+    rw [_root_.map_sum (g.inner x), ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.smul_apply,
+      _root_.map_sum (g.inner x (e.localFrame bas i x)), Finset.smul_sum]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [ContinuousLinearMap.map_smul, smul_eq_mul, smul_eq_mul]
+    ring
+  calc
+    0 < g.inner x w w := g.pos x w hw
+    _ = ∑ i, ∑ j, c i * c j * g.inner x (e.localFrame bas i x) (e.localFrame bas j x) := hsum
+
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **The local-frame Gram matrix of a Riemannian metric is nonsingular.**  Its determinant is
+nonzero at every base point of the trivialization, since positive-definiteness rules out a nontrivial
+kernel vector.  This discharges the nonsingularity hypothesis of
+`PoincareCurvature.MatrixSmoothness.contMDiffOn_matrixInv_mulVec` for the time-dependent Gram
+readout. -/
+theorem timeDependentGram_det_ne_zero
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    {x : B} (hx : x ∈ e.baseSet) :
+    (show Matrix ι ι ℝ from
+        (fun i j ↦ g.inner x (e.localFrame bas i x) (e.localFrame bas j x))).det ≠ 0 := by
+  classical
+  let A : Matrix ι ι ℝ := fun i j ↦ g.inner x (e.localFrame bas i x) (e.localFrame bas j x)
+  intro hA
+  obtain ⟨c, hc, hAc⟩ := Matrix.exists_mulVec_eq_zero_iff.mpr hA
+  have hAcA : A.mulVec c = 0 := by simpa [A] using hAc
+  have hAc' : ∀ i, ∑ j, A i j * c j = 0 := by
+    intro i
+    have hi := congrFun hAcA i
+    simpa [Matrix.mulVec, dotProduct] using hi
+  have hsum :
+      ∑ i, ∑ j, c i * c j * g.inner x (e.localFrame bas i x) (e.localFrame bas j x) = 0 := by
+    calc
+      ∑ i, ∑ j, c i * c j * g.inner x (e.localFrame bas i x) (e.localFrame bas j x)
+          = ∑ i, c i * (∑ j, A i j * c j) := by
+            refine Finset.sum_congr rfl fun i _ => ?_
+            rw [Finset.mul_sum]
+            refine Finset.sum_congr rfl fun j _ => ?_
+            simp only [A]
+            ring
+      _ = ∑ i, c i * 0 := by
+            refine Finset.sum_congr rfl fun i _ => ?_
+            rw [hAc' i]
+      _ = 0 := by simp
+  have hpos := timeDependentGram_pos g e bas hx hc
+  rw [hsum] at hpos
+  exact lt_irrefl 0 hpos
+
 /-- **Joint `(t, x)` smoothness of a fixed pair of frame vectors paired by a time-dependent metric.**
 If the fibrewise bilinear form `(g t).inner` of a time-dependent metric is jointly `(t, x)`-smooth
 over `ℝ ×ˢ u`, and `i j` index a local frame of a trivialization `e` with `u ⊆ e.baseSet`, then the
