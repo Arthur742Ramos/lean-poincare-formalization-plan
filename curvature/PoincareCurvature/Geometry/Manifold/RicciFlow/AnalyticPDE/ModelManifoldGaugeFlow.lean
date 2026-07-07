@@ -513,6 +513,37 @@ theorem contDiff_hasCompactSupport_cutoff_chartPushforwardField
     (isOpen_univ.prod (isOpen_extChartAt_target p))
     (PoincareCurvature.GaugeFlowAssembly.contDiffOn_prod_chartPushforwardField hX) hχ hχc hsub
 
+/-- **Model gauge flow `Ψ` from a jointly-`C^N` section plus a chart-target cutoff (`N ≥ 4`).**  The
+capstone of GAP-1 steps (i)–(iv): from joint `C^N` regularity of the time-dependent tangent-bundle
+section `(τ, y) ↦ ⟨y, X τ y⟩` on `ℝ ×ˢ (extChartAt I p).source` and a globally-`C^N`, compactly-supported
+cutoff `χ` with `tsupport χ ⊆ ℝ ×ˢ (extChartAt I p).target`, the bump-globalised chart pushforward field
+`v := fun τ q ↦ χ (τ, q) • chartPushforwardField I X p τ q` is a compactly-supported `C^N` field on the
+model manifold `E`, and hence (`exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport`) inhabits
+the raw `C³` DeTurck gauge-flow structure `Diffeomorph3GaugeFlowOn (X := v) s t₀`.  This is the model
+comparison flow `Ψ` used by `contMDiffOn_of_extChartAt_conjugation'` to transfer spatial `C³` regularity
+to the compact manifold `M` (step (v), `hslicesC3`); only the construction of the cutoff `χ` around the
+compact trajectory (step (ii)) remains between this and the compact-manifold gauge-flow lift. -/
+theorem exists_diffeomorph3GaugeFlowOn_cutoff_chartPushforwardField
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {N : WithTop ℕ∞} [IsManifold I N M]
+    [ContMDiffVectorBundle N E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M}
+    (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) N
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source))
+    {χ : ℝ × E → ℝ} (hχ : ContDiff ℝ N χ) (hχc : HasCompactSupport χ)
+    (hsub : tsupport χ ⊆ Set.univ ×ˢ (extChartAt I p).target)
+    (hN : 4 ≤ N) (s : Set ℝ) (t₀ : ℝ) :
+    Nonempty (RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+      (X := fun τ q => χ (τ, q) •
+        PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) s t₀) := by
+  obtain ⟨hF, hcs⟩ :=
+    contDiff_hasCompactSupport_cutoff_chartPushforwardField hX hχ hχc hsub
+  exact exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport s hF hcs hN
+
 end
 
 end SmoothDependenceCk
