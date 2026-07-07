@@ -826,6 +826,39 @@ theorem cutoff_eqOne_along_curve_of_graph_subset
     ∀ τ ∈ s, χ (τ, g τ) = 1 :=
   fun τ hτ => hχ.self_of_nhdsSet (τ, g τ) (hgraph τ hτ)
 
+/-- **Uniform short-time orbit-graph confinement — the *producing* companion of
+`cutoff_eqOne_along_curve_of_graph_subset`.**  For a time-dependent flow map `Ψ : ℝ → E → E` whose
+space-time graph map `z ↦ (z.1, Ψ z.1 z.2)` is (jointly) continuous at every *anchored* point `(t₀, q)`
+with `q` ranging over a compact initial set `Q`, and an open space-time target `W` containing the whole
+anchored graph `{(t₀, Ψ t₀ q) | q ∈ Q}`, there is an open time window `Set.Ioo a b ∋ t₀` on which **every**
+orbit graph stays in `W`:
+`∀ τ ∈ Set.Ioo a b, ∀ q ∈ Q, (τ, Ψ τ q) ∈ W`.
+
+This is precisely the flow-trajectory-confinement mechanism the GAP-1 step-(v) orbit control needs:
+applied with `W` the interior of the compact cutoff window `K` (so `W ⊆ K`), it produces the
+`graph ⊆ K` hypothesis of `cutoff_eqOne_along_curve_of_graph_subset` *uniformly over a chart patch*,
+once the joint continuity of the model gauge flow `(τ, q) ↦ (G.maps3 τ) q` is supplied.  The proof is
+the tube-lemma confinement: `IsCompact.eventually_forall_of_forall_eventually` turns the pointwise
+"the anchored orbit starts in the open target" facts (each an open-preimage neighbourhood via
+`ContinuousAt.preimage_mem_nhds`) into a single *time* neighbourhood of `t₀` valid for all `q ∈ Q`,
+whence an honest `Set.Ioo` window through `mem_nhds_iff_exists_Ioo_subset`. -/
+theorem exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt
+    {Ψ : ℝ → E → E} {Q : Set E} {W : Set (ℝ × E)} {t₀ : ℝ}
+    (hQ : IsCompact Q) (hW : IsOpen W)
+    (hgraph0 : ∀ q ∈ Q, ((t₀, Ψ t₀ q) : ℝ × E) ∈ W)
+    (hcont : ∀ q ∈ Q, ContinuousAt (fun z : ℝ × E => Ψ z.1 z.2) (t₀, q)) :
+    ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧
+      ∀ τ ∈ Set.Ioo a b, ∀ q ∈ Q, ((τ, Ψ τ q) : ℝ × E) ∈ W := by
+  have hev : ∀ᶠ τ in 𝓝 t₀, ∀ q ∈ Q, ((τ, Ψ τ q) : ℝ × E) ∈ W := by
+    refine IsCompact.eventually_forall_of_forall_eventually hQ ?_
+    intro q hq
+    have hgraphcont :
+        ContinuousAt (fun z : ℝ × E => ((z.1, Ψ z.1 z.2) : ℝ × E)) (t₀, q) :=
+      continuousAt_fst.prodMk (hcont q hq)
+    exact hgraphcont.preimage_mem_nhds (hW.mem_nhds (hgraph0 q hq))
+  obtain ⟨l, u, hmem, hsub⟩ := mem_nhds_iff_exists_Ioo_subset.mp hev
+  exact ⟨l, u, hmem, fun τ hτ q hq => hsub hτ q hq⟩
+
 end
 
 end SmoothDependenceCk
