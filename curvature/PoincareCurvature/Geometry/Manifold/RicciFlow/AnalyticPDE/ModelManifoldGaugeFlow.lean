@@ -380,6 +380,80 @@ theorem lipschitzWith_fderiv_iteratedFDeriv_of_lipschitzWith_iteratedFDeriv_succ
   exact (Isometry.lipschitzWith_iff C
     (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (n + 1) => E) G).isometry).mpr h
 
+/-- **Model-manifold raw `C³` gauge-flow existence from a compactly-supported `C^N` field (`N ≥ 4`).**
+The bump-globalised gauge field is a jointly-`ContDiff`, compactly-supported `v : ℝ → E → E`; from that
+data *alone* (no separately-supplied jet Lipschitz constants) the raw `C³` DeTurck gauge-flow structure
+`Diffeomorph3GaugeFlowOn (X := v) s t₀` is inhabited on the model manifold `E`.
+
+Every uniform-in-time jet Lipschitz hypothesis of `exists_diffeomorph3GaugeFlowOn_of_contDiff` is
+discharged from compact support:
+* `hv` from `exists_lipschitzWith_prodMk_left`;
+* `hD2vmlip` / `hD3vlip` from `exists_lipschitzWith_iteratedFDeriv_prodMk_left` (orders `2`, `3`);
+* `hD3vmlip` by transporting the order-`3` bound through the currying isometry
+  (`lipschitzWith_fderiv_iteratedFDeriv_of_lipschitzWith_iteratedFDeriv_succ`) — with the *same*
+  constant `M₃` as `hD3vlip`;
+* the nested-`fderiv` bounds `hDvlip` / `hD2vclip` through the two-fold curry `curry2`, which is
+  norm-nonexpansive (`norm_curry2_le`) and linear (`curry2_sub`), hence `1`-Lipschitz, combined with
+  the uniform order-`2` slice bound.
+
+This is the compact-support entry point the general compact-manifold gauge-flow lift consumes after
+bump-cutting the chart pushforward field to a globally-`C^{3,1}` representative. -/
+theorem exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport
+    [FiniteDimensional ℝ E] [CompleteSpace E]
+    {v : ℝ → E → E} {t₀ : ℝ} {N : WithTop ℕ∞} (s : Set ℝ)
+    (hF : ContDiff ℝ N (Function.uncurry v))
+    (hcs : HasCompactSupport (Function.uncurry v)) (hN : 4 ≤ N) :
+    Nonempty (RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E) (X := v) s t₀) := by
+  have hsl : ∀ σ : ℝ, (fun y => Function.uncurry v (σ, y)) = v σ := fun _ => rfl
+  have hslc : ∀ σ : ℝ, ContDiff ℝ N (fun y => Function.uncurry v (σ, y)) :=
+    fun _ => hF.comp (contDiff_const.prodMk contDiff_id)
+  have hN1 : (1 : WithTop ℕ∞) ≤ N := le_trans (by norm_num) hN
+  have hN2 : (2 : WithTop ℕ∞) ≤ N := le_trans (by norm_num) hN
+  have hN3 : (3 : WithTop ℕ∞) ≤ N := le_trans (by norm_num) hN
+  obtain ⟨K, hK⟩ := exists_lipschitzWith_prodMk_left hF hcs hN1
+  obtain ⟨Nc, hNc⟩ :=
+    exists_lipschitzWith_iteratedFDeriv_prodMk_left (n := 2) hF hcs (by exact_mod_cast hN3)
+  obtain ⟨M₃, hM₃⟩ :=
+    exists_lipschitzWith_iteratedFDeriv_prodMk_left (n := 3) hF hcs (by exact_mod_cast hN)
+  obtain ⟨C₂, hC₂⟩ :=
+    exists_bound_iteratedFDeriv_prodMk_left (n := 2) hF hcs (by exact_mod_cast hN2)
+  have hcurry2 : LipschitzWith 1 (curry2 (E := E)) := by
+    rw [lipschitzWith_iff_dist_le_mul]
+    intro X Y
+    rw [dist_eq_norm, dist_eq_norm, ← curry2_sub]
+    simpa using norm_curry2_le (X - Y)
+  refine exists_diffeomorph3GaugeFlowOn_of_contDiff (K := K) (L := ⟨max C₂ 0, le_max_right _ _⟩)
+    (M₂ := 1 * Nc) (N := Nc) (M₃ := M₃) s hF hN3
+    ?hv ?hvc ?hDvlip ?hD2vclip ?hD2vmlip ?hD3vmlip ?hD3vlip
+  case hv => intro σ; rw [← hsl σ]; exact hK σ
+  case hvc =>
+    intro x
+    exact hF.continuous.comp (continuous_id.prodMk continuous_const)
+  case hDvlip =>
+    intro σ
+    rw [← hsl σ]
+    refine lipschitzWith_of_nnnorm_fderiv_le (C := ⟨max C₂ 0, le_max_right _ _⟩)
+      (((hslc σ).fderiv_right (m := 1) hN2).differentiable one_ne_zero) (fun x => ?_)
+    rw [fderiv_fderiv_eq_curry2_iteratedFDeriv_two, ← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_mk]
+    calc ‖curry2 (iteratedFDeriv ℝ 2 (fun y => Function.uncurry v (σ, y)) x)‖
+        ≤ ‖iteratedFDeriv ℝ 2 (fun y => Function.uncurry v (σ, y)) x‖ := norm_curry2_le _
+      _ ≤ C₂ := hC₂ σ x
+      _ ≤ max C₂ 0 := le_max_left _ _
+  case hD2vclip =>
+    intro σ
+    rw [← hsl σ]
+    have hmap : fderiv ℝ (fderiv ℝ (fun y => Function.uncurry v (σ, y)))
+        = curry2 ∘ iteratedFDeriv ℝ 2 (fun y => Function.uncurry v (σ, y)) := by
+      funext x; exact fderiv_fderiv_eq_curry2_iteratedFDeriv_two _ x
+    rw [hmap]
+    exact hcurry2.comp (hNc σ)
+  case hD2vmlip => intro σ; rw [← hsl σ]; exact hNc σ
+  case hD3vmlip =>
+    intro σ
+    rw [← hsl σ]
+    exact lipschitzWith_fderiv_iteratedFDeriv_of_lipschitzWith_iteratedFDeriv_succ (n := 2) (hM₃ σ)
+  case hD3vlip => intro σ; rw [← hsl σ]; exact hM₃ σ
+
 end
 
 end SmoothDependenceCk
