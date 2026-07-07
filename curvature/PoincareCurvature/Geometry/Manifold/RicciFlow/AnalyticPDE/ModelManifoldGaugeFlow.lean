@@ -1621,6 +1621,65 @@ theorem exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover
         (hplace_state i) (hplace_win i))
   exact ⟨Φ, c, d, hanchor, hcd, hglob⟩
 
+universe uM
+
+/-- **Finite chart cover of a compact manifold — the cover-side data package consumed by the step-(v)
+globalisation capstone `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover`.**  For a compact
+Hausdorff manifold `M` charted on the model `H` (`I : ModelWithCorners ℝ E H`), there is a finite index
+type `ι`, chart centres `p : ι → M`, open patches `U : ι → Set M`, and compact patches
+`Q_M : ι → Set M` with:
+
+* `U i` open and covering `M` (`hopen`, `hcover`);
+* each open patch inside its chart source, `U i ⊆ (chartAt H (p i)).source` (`hU`);
+* each open patch inside its compact patch, `U i ⊆ Q_M i` (`hUQ`);
+* each `Q_M i` compact (`hQ_M`) and inside the extended-chart source
+  `Q_M i ⊆ (extChartAt I (p i)).source` (`hQ_M_src`).
+
+This is exactly the cover-side hypothesis bundle
+`hopen`/`hcover`/`hU`/`hUQ`/`hQ_M`/`hQ_M_src` of
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover`; the remaining per-patch field-analytic
+data (`hXchart`, cutoff `χ`, Lipschitz tube `state₀`, placements) are supplied separately from the real
+gauge field.  No analytic content: `M` compact + Hausdorff is locally compact, so around each point a
+compact neighbourhood `Q_M x` with `x ∈ interior (Q_M x) ⊆ Q_M x ⊆ (extChartAt I x).source` exists
+(`exists_compact_subset`); the interiors form an open cover, and compactness of `M` extracts a finite
+subcover (`isCompact_univ.elim_finite_subcover`).  The chart-source containment uses
+`extChartAt_source`. -/
+theorem exists_finite_chart_cover_compact
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type uM} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] :
+    ∃ (ι : Type uM) (_ : Finite ι) (p : ι → M) (U Q_M : ι → Set M),
+      (∀ i, IsOpen (U i)) ∧ (∀ x : M, ∃ i, x ∈ U i) ∧
+      (∀ i, U i ⊆ (chartAt H (p i)).source) ∧
+      (∀ i, U i ⊆ Q_M i) ∧ (∀ i, IsCompact (Q_M i)) ∧
+      (∀ i, Q_M i ⊆ (extChartAt I (p i)).source) := by
+  have hpt : ∀ x : M, ∃ K : Set M, IsCompact K ∧ x ∈ interior K ∧
+      K ⊆ (extChartAt I x).source := by
+    intro x
+    exact exists_compact_subset (isOpen_extChartAt_source (I := I) x)
+      (mem_extChartAt_source (I := I) x)
+  choose K hKcpt hKint hKsrc using hpt
+  have hcov : (Set.univ : Set M) ⊆ ⋃ x : M, interior (K x) := by
+    intro x _
+    exact Set.mem_iUnion.2 ⟨x, hKint x⟩
+  obtain ⟨t, ht⟩ := isCompact_univ.elim_finite_subcover (fun x : M => interior (K x))
+    (fun x => isOpen_interior) hcov
+  refine ⟨{x : M // x ∈ t}, inferInstance, Subtype.val,
+    fun i => interior (K i.1), fun i => K i.1, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · intro i; exact isOpen_interior
+  · intro x
+    have hx : x ∈ ⋃ i ∈ t, interior (K i) := ht (Set.mem_univ x)
+    rcases Set.mem_iUnion₂.1 hx with ⟨x0, hx0t, hx0int⟩
+    exact ⟨⟨x0, hx0t⟩, hx0int⟩
+  · intro i
+    have h : interior (K i.1) ⊆ (extChartAt I i.1).source :=
+      interior_subset.trans (hKsrc i.1)
+    rw [extChartAt_source I i.1] at h
+    exact h
+  · intro i; exact interior_subset
+  · intro i; exact hKcpt i.1
+  · intro i; exact hKsrc i.1
+
 end
 
 end SmoothDependenceCk
