@@ -1120,3 +1120,54 @@ assembling the four bricks above into `hslicesC3` = `∀ t, ContMDiffOn I I 3 (�
   4. Residual (b): supply the joint section-smoothness `hX` from the actual DeTurck gauge field `X`.
 Do NOT rebuild trivial-case chart closures; do NOT re-enter the Item-3 BilinearFormBundle geometric-`A`
 wall from this frontier.
+
+### Progress (2026-07-06, later 14) — Item 2 GAP 1: the step-(v) glue MACHINERY is now fully assembled (uniform Lipschitz + `hg'` + uniqueness → `hconj` → per-patch slice-`C³`), reducing GAP 1 to the orbit-containment estimate ALONE
+
+**What landed (sorry-free, axiom-clean `{propext, Classical.choice, Quot.sound}`; five additive
+theorems, one in `GaugeReduction/GaugeFlowAssembly.lean`, four in
+`AnalyticPDE/ModelManifoldGaugeFlow.lean`).**  Together these connect the previously-committed bricks
+(`contDiffOn_prod_chartPushforwardField`, `hasDerivWithinAt_maps3_eval_…`,
+`contDiff_three_maps3_…`, `extChartAt_comp_eqOn_of_lipschitzOnWith`,
+`contMDiffOn_of_extChartAt_conjugation'`) into the entire step-(v) chart-transfer chain, so the ONLY
+remaining GAP-1 content is the flow-trajectory-confinement (orbit-containment) estimate.
+
+* **`exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField`** (GaugeFlowAssembly) — the
+  *time-uniform* `hlip` datum.  A single Lipschitz constant `K` valid for **every** time slice
+  `chartPushforwardField I X p t`, `t ∈ Set.Icc a b`: apply `ContDiffOn.exists_lipschitzOnWith` to the
+  joint field `contDiffOn_prod_chartPushforwardField` on the compact convex product tube
+  `Set.Icc a b ×ˢ s`, then restrict to each fixed time (the shared first coordinate collapses the
+  sup-metric `edist (t,q) (t,q')` to `edist q q'` via `Prod.edist_eq` + `edist_self`).  Strengthens the
+  per-fixed-time `exists_lipschitzOnWith_chartPushforwardField` to the constant-in-`t` `hlip` shape.
+* **`hasDerivAt_maps3_eval_of_cutoff_eqOne`** — the `hg'` datum.  For the model gauge flow `G` of the cut
+  field `fun τ q ↦ χ (τ,q) • chartPushforwardField I X p τ q`, on an open window (`s ∈ 𝓝 t`) where
+  `χ (t, (G.maps3 t) q) = 1`, the cut-field within-derivative
+  `hasDerivWithinAt_maps3_eval_of_model_diffeomorph3GaugeFlowOn` collapses to the *uncut* field
+  (`one_smul`) and upgrades `HasDerivWithinAt → HasDerivAt`.  This is exactly
+  `HasDerivAt g (chartPushforwardField I X p t (g t)) t` with `g := fun τ ↦ (G.maps3 τ) q`.
+* **`extChartAt_comp_eqOn_maps3_of_cutoff_eqOne`** — step-(v) uniqueness packaging.  Feeds the two data
+  above into `extChartAt_comp_eqOn_of_lipschitzOnWith` with the model flow `G` as the comparison curve,
+  giving `Set.EqOn (extChartAt I p ∘ γ) (fun τ ↦ (G.maps3 τ) (extChartAt I p x)) (Ioo a b)` — the
+  `hconj` precursor — from the raw flow ODE (`hγ`/`hγ_src`), uniform `hlip`, agreement at `t₀` (`heq`),
+  and the orbit facts (`hχ`, `hγ_mem`, `hg_mem`).
+* **`contMDiffOn_flowSlice_of_cutoff_orbit_control`** — the step-(v) CAPSTONE.  Evaluating that `EqOn`
+  at the interior time `t` (`hconj`) and feeding it plus `contDiff_three_maps3_…` (`hΨ`) into
+  `contMDiffOn_of_extChartAt_conjugation'` (single chart `p`, `hFU` derived inline from `hγ_src` via
+  `extChartAt_source`) yields `ContMDiffOn I I 3 (fun x ↦ Φ t x) U` — the per-patch content of
+  `hslicesC3`.  With `contMDiff_of_locally_contMDiffOn` (Mathlib) over a finite chart cover of compact
+  `M`, this globalises to `ContMDiff I I 3 (Φ t)` once the orbit facts hold on each patch.
+* **`cutoff_eqOne_along_curve_of_graph_subset`** — reduces the `hχ` orbit face to graph-containment:
+  `∀ᶠ r in 𝓝ˢ K, χ r = 1` (the cutoff-window property) + `graph ⊆ K` ⟹ `χ ≡ 1` along the curve
+  (`Filter.Eventually.self_of_nhdsSet`).
+
+**Fractions of GAP 1.**  The step-(v) glue is now *machinery-complete*: `hlip`, `hg'`, the uniqueness
+identification `hconj`, and the per-patch spatial-`C³` transfer are all proved and composed.  The single
+remaining GAP-1 obligation is the **orbit-containment estimate** — for `x` in a chart patch and `τ` in
+the window: (i) `Φ τ x ∈ (extChartAt I p).source` (`hγ_src`); (ii) the model curve's graph stays in the
+cutoff window `K` and both curves stay in the state tube (`hχ` via
+`cutoff_eqOne_along_curve_of_graph_subset`, `hγ_mem`/`hg_mem`).  This is the flow-trajectory-confinement
+step (choose `K`/window small so the cut-field-flow orbit cannot escape), plus residual (b) supplying the
+joint section-smoothness `hX` from the actual DeTurck gauge field, and the finite-cover globalisation.
+These modules (`ModelManifoldGaugeFlow`, `GaugeFlowAssembly`) are still raw-material (not yet in the
+root import closure); wiring them into the closure happens when the compact gauge-flow existence is
+assembled end-to-end.  Do NOT rebuild trivial-case chart closures; do NOT re-enter the Item-3
+BilinearFormBundle geometric-`A` wall from this frontier.
