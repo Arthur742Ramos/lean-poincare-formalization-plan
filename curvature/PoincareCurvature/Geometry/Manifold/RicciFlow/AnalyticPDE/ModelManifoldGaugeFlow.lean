@@ -1877,6 +1877,82 @@ theorem exists_pos_closedBall_subset_extChartAt_target
   obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp (hopen.mem_nhds hmem)
   exact ⟨ε / 2, by linarith, (Metric.closedBall_subset_ball (by linarith)).trans hball⟩
 
+/-- **Finite chart BALL cover of a compact manifold.**  Strengthens `exists_finite_chart_cover_compact`:
+for a compact boundaryless finite-dimensional manifold, the cover can be chosen so that each compact patch
+`Q_M i` has its extended-chart image contained in an OPEN metric ball
+`Metric.ball (extChartAt I (p i) (p i)) (ρ i)` whose closure lies in the chart target.  Combined with the
+closed-ball-in-target existence and `GaugeFlowAssembly.exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField_ball`,
+this supplies the whole `state₀`/`hstate`/`hlip`/`hplace_state` residual of the step-(v) globalisation
+capstone `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip` directly from the
+per-patch chart field jet — taking `state₀ i := Metric.ball (extChartAt I (p i) (p i)) (ρ i)`.  The only
+remaining capstone input is then the two gauge-field jets `hXraw`/`hXchart`.
+
+Construction: around each point the closed-ball radius `R x` (from `exists_pos_closedBall_subset_extChartAt_target`)
+gives an open cover set `U x := (extChartAt I x).source ∩ extChartAt I x ⁻¹' Metric.ball _ (R x / 2)`
+(open by `ContinuousOn.isOpen_inter_preimage`), whose finite subcover is indexed; the patch
+`Q_M i := (extChartAt I (p i)).symm '' Metric.closedBall _ (R (p i) / 2)` is compact
+(`IsCompact.image_of_continuousOn`), lies in the chart source (`PartialEquiv.map_target`), and its image is
+the half-radius closed ball (`PartialEquiv.right_inv`) ⊆ the full open ball. -/
+theorem exists_finite_chart_ball_cover_compact
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type uM} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] :
+    ∃ (ι : Type uM) (_ : Finite ι) (p : ι → M) (U Q_M : ι → Set M) (ρ : ι → ℝ),
+      (∀ i, IsOpen (U i)) ∧ (∀ x : M, ∃ i, x ∈ U i) ∧
+      (∀ i, U i ⊆ (chartAt H (p i)).source) ∧
+      (∀ i, U i ⊆ Q_M i) ∧ (∀ i, IsCompact (Q_M i)) ∧
+      (∀ i, Q_M i ⊆ (extChartAt I (p i)).source) ∧
+      (∀ i, 0 < ρ i) ∧
+      (∀ i, Metric.closedBall (extChartAt I (p i) (p i)) (ρ i) ⊆ (extChartAt I (p i)).target) ∧
+      (∀ i, ∀ x ∈ Q_M i,
+        extChartAt I (p i) x ∈ Metric.ball (extChartAt I (p i) (p i)) (ρ i)) := by
+  choose R hRpos hRsub using
+    fun x : M => exists_pos_closedBall_subset_extChartAt_target (I := I) x
+  have hhalf : ∀ x : M,
+      Metric.closedBall (extChartAt I x x) (R x / 2) ⊆ (extChartAt I x).target := fun x =>
+    (Metric.closedBall_subset_closedBall (by linarith [hRpos x])).trans (hRsub x)
+  have hUopen : ∀ x : M, IsOpen ((extChartAt I x).source ∩
+      extChartAt I x ⁻¹' Metric.ball (extChartAt I x x) (R x / 2)) := fun x =>
+    (continuousOn_extChartAt (I := I) x).isOpen_inter_preimage
+      (isOpen_extChartAt_source (I := I) x) Metric.isOpen_ball
+  have hUmem : ∀ x : M, x ∈ (extChartAt I x).source ∩
+      extChartAt I x ⁻¹' Metric.ball (extChartAt I x x) (R x / 2) := fun x =>
+    ⟨mem_extChartAt_source (I := I) x, Metric.mem_ball_self (by linarith [hRpos x])⟩
+  have hcov : (Set.univ : Set M) ⊆ ⋃ x : M, ((extChartAt I x).source ∩
+      extChartAt I x ⁻¹' Metric.ball (extChartAt I x x) (R x / 2)) := fun x _ =>
+    Set.mem_iUnion.2 ⟨x, hUmem x⟩
+  obtain ⟨t, ht⟩ := isCompact_univ.elim_finite_subcover
+    (fun x : M => (extChartAt I x).source ∩
+      extChartAt I x ⁻¹' Metric.ball (extChartAt I x x) (R x / 2))
+    (fun x => hUopen x) hcov
+  refine ⟨{x : M // x ∈ t}, inferInstance, Subtype.val,
+    fun i => (extChartAt I i.1).source ∩
+      extChartAt I i.1 ⁻¹' Metric.ball (extChartAt I i.1 i.1) (R i.1 / 2),
+    fun i => (extChartAt I i.1).symm '' Metric.closedBall (extChartAt I i.1 i.1) (R i.1 / 2),
+    fun i => R i.1, fun i => hUopen i.1, ?_, ?_, ?_, ?_, ?_, fun i => hRpos i.1,
+    fun i => hRsub i.1, ?_⟩
+  · intro x
+    have hx : x ∈ ⋃ x0 ∈ t, ((extChartAt I x0).source ∩
+        extChartAt I x0 ⁻¹' Metric.ball (extChartAt I x0 x0) (R x0 / 2)) := ht (Set.mem_univ x)
+    rcases Set.mem_iUnion₂.1 hx with ⟨x0, hx0t, hx0⟩
+    exact ⟨⟨x0, hx0t⟩, hx0⟩
+  · intro i
+    rw [← extChartAt_source I i.1]
+    exact Set.inter_subset_left
+  · intro i y hy
+    exact ⟨extChartAt I i.1 y, Metric.ball_subset_closedBall hy.2,
+      (extChartAt I i.1).left_inv hy.1⟩
+  · intro i
+    exact (isCompact_closedBall _ _).image_of_continuousOn
+      ((continuousOn_extChartAt_symm (I := I) i.1).mono (hhalf i.1))
+  · intro i
+    exact Set.image_subset_iff.mpr
+      (fun z hz => (extChartAt I i.1).map_target (hhalf i.1 hz))
+  · intro i x hx
+    rcases hx with ⟨z, hz, rfl⟩
+    rw [(extChartAt I i.1).right_inv (hhalf i.1 hz)]
+    exact Metric.closedBall_subset_ball (by linarith [hRpos i.1]) hz
+
 end
 
 end SmoothDependenceCk
