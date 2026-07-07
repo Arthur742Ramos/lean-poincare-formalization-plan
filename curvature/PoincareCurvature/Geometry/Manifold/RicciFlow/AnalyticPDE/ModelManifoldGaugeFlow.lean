@@ -626,6 +626,22 @@ theorem exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window
     exists_diffeomorph3GaugeFlowOn_cutoff_chartPushforwardField hX hχC hχcs hχsub
       (by simpa using WithTop.coe_le_coe.mpr hn) s t₀⟩
 
+/-- **Model gauge-flow slices are `ContDiff ℝ 3` (the step-(v) `hΨ` datum).**  On the model manifold
+`E`, every time slice `G.maps3 t : E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E` of a raw `C³` gauge-flow witness is a
+bundled `C³` self-diffeomorphism, so its underlying map is `ContDiff ℝ 3` (`Diffeomorph.contMDiff`
+followed by the model-space `contMDiff_iff_contDiff`).  This is exactly the `hΨ : ContDiff ℝ 3 Ψ`
+hypothesis consumed by the chart-conjugation spatial-`C³` transfer
+`GaugeFlowAssembly.contMDiffOn_of_extChartAt_conjugation'` when the comparison flow `Ψ := G.maps3 t`
+is the model gauge flow produced by `exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`
+(GAP-1 step (v)). -/
+theorem contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn
+    [FiniteDimensional ℝ E] [CompleteSpace E]
+    {Xc : CovariantDerivative.TimeDependentVectorField (I := 𝓘(ℝ, E)) (M := E)}
+    {s : Set ℝ} {t₀ : ℝ}
+    (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E) Xc s t₀) (t : ℝ) :
+    ContDiff ℝ 3 (G.maps3 t : E → E) :=
+  contMDiff_iff_contDiff.mp (G.maps3 t).contMDiff
+
 end
 
 end SmoothDependenceCk
