@@ -120,6 +120,49 @@ theorem neg_intrinsicDeTurckVectorField_eq_raisedGaugeField_neg
     (by exact TangentSpace.fiberBundle) (by exact TangentSpace.vectorBundle)
     (g t) (intrinsicDeTurckOneForm (I := I) (M := M) g background t) _ _ _ bas x).symm
 
+set_option maxHeartbeats 1000000 in
+attribute [local irreducible] raisedGaugeField in
+/-- **Smoothness-class-general form of the reverse DeTurck gauge-field identity.**  For a `C²` metric
+family `g` (a `MetricFamily`) and *any* `C^m` metric family `g'` inducing the same fibre inner product
+(`(g t).inner y v w = (g' t).inner y v w`), the reverse intrinsic DeTurck gauge field
+`-intrinsicDeTurckVectorField g background t x` equals the metric-raised gauge field of the negated
+DeTurck one-form computed with the `C^m` metric `g' t`, `raisedGaugeField (g' t) (-…) bas x`.
+
+Proof: `neg_intrinsicDeTurckVectorField_eq_raisedGaugeField_neg` (the `C²` identity) composed with
+`raisedGaugeField_congr_inner` (the metric-raised gauge field depends only on the inner product, not the
+smoothness class).  Taking `m := ∞` this rewrites the reverse DeTurck gauge field as the raised field of
+a `C^∞` metric — exactly the `ℝ → ContMDiffRiemannianMetric I ∞` shape consumed by the compact-manifold
+gauge-flow raising capstone `exists_gaugeFlow_Ioo_of_timeDependent_raisingData` — closing the
+`n = 2` ↔ `n = ∞` metric-regularity step of the smoothness-ladder reconciliation.  The `local
+irreducible raisedGaugeField` keeps the final `.trans` from `whnf`-unfolding the local-frame/Gram-inverse
+sum and looping on the tangent-bundle fibre-instance mismatch (the later-33 diamond technique). -/
+theorem neg_intrinsicDeTurckVectorField_eq_raisedGaugeField_neg_of_inner_eq
+    {m : WithTop ℕ∞} [ContMDiffVectorBundle m E (TangentSpace I : M → Type _) I]
+    (g : MetricFamily (I := I) (M := M))
+    (g' : ℝ → Bundle.ContMDiffRiemannianMetric I m E (TangentSpace I : M → Type _))
+    (background : ConnectionFamily (I := I) (M := M))
+    (t : ℝ)
+    (hinner : ∀ (y : M) (v w : TangentSpace I y), (g t).inner y v w = (g' t).inner y v w)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ E)
+    (x : M) :
+    -intrinsicDeTurckVectorField (I := I) (M := M) g background t x
+      = @raisedGaugeField E _ _ H _ I m M _ _ E _ _ (TangentSpace I : M → Type _)
+          (by exact inferInstance)
+          (fun _ => by exact inferInstance)
+          (fun _ => by exact inferInstance)
+          (by exact TangentSpace.fiberBundle) (by exact TangentSpace.vectorBundle)
+          (g' t) (-intrinsicDeTurckOneForm (I := I) (M := M) g background t) _ _ _ bas x := by
+  refine (neg_intrinsicDeTurckVectorField_eq_raisedGaugeField_neg g background t bas x).trans ?_
+  exact @raisedGaugeField_congr_inner E _ _ H _ I 2 M _ _ E _ _
+    (TangentSpace I : M → Type _)
+    (by exact inferInstance)
+    (fun _ => by exact inferInstance)
+    (fun _ => by exact inferInstance)
+    (by exact TangentSpace.fiberBundle) (by exact TangentSpace.vectorBundle)
+    m ‹ContMDiffVectorBundle m E (TangentSpace I : M → Type _) I›
+    (g t) (g' t) hinner
+    (-intrinsicDeTurckOneForm (I := I) (M := M) g background t) _ _ _ bas x
+
 end RicciFlow
 
 
