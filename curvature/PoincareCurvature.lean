@@ -3,6 +3,7 @@
 import PoincareCurvature.Basic
 import PoincareCurvature.Analysis.MatrixSmoothness
 import PoincareCurvature.Analysis.ParametrizedInner
+import PoincareCurvature.Analysis.TimeDependentGram
 import PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection
 import PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp
 import PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection
