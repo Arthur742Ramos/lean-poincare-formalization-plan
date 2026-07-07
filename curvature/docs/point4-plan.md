@@ -1035,3 +1035,41 @@ neighbourhood of the (compact) trajectory inside `ℝ ×ˢ target` and `≡ 1` n
 (v) flow agreement on the trajectory window via `extChartAt_comp_eqOn_of_lipschitzOnWith` (the field
 equals the un-cut chart pushforward field where `χ ≡ 1`) + `contMDiffOn_of_extChartAt_conjugation'` ⇒
 `hslicesC3`.  Do NOT rebuild trivial-case chart closures.
+
+### Progress (2026-07-06, later 12) — Item 2 GAP 1: steps (i), (iii), (iv) of the model flow `Ψ` assembly are DONE — the bump-globalised chart pushforward field now produces a real `Diffeomorph3GaugeFlowOn` from joint section smoothness + a chart-target cutoff
+
+**What landed (sorry-free, axiom-clean `{propext, Classical.choice, Quot.sound}`).**
+
+* **`contDiffOn_prod_chartPushforwardField`** (`GaugeReduction/GaugeFlowAssembly.lean`) — GAP-1 step (i):
+  the joint `(τ, q)` `ContDiffOn ℝ n` of the chart pushforward field on `ℝ ×ˢ (extChartAt I p).target`,
+  from joint `C^n` regularity of the time-dependent section `(τ, y) ↦ ⟨y, X τ y⟩` on
+  `ℝ ×ˢ (extChartAt I p).source` (product model `𝓘(ℝ,ℝ).prod I`).  Runs the fixed-`p`-trivialization
+  characterisation (`Bundle.Trivialization.contMDiffOn_iff`) over the product source `ℝ × M`, composes
+  with the time-passenger chart inverse `(τ, q) ↦ (τ, symm q)` built from **CLM projections**
+  (`ContinuousLinearMap.fst/snd`, self-charted `ℝ × E`) to sidestep the product-charted `whnf`
+  instance-diamond, and reads off through `contMDiffOn_iff_contDiffOn`.  **Plumbing note:** the earlier
+  attempt via `rw [modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]` on a product-charted `hcomp`, and
+  a fully-spelled type annotation on `hcomp := hsnd.comp hΦ …`, each triggered a `whnf` timeout
+  (infinite, not slow — persisted at 1.2M heartbeats).  Fix: build `hΦ` with **self-charted** `ℝ × E`
+  source via CLM projections, and **omit the `hcomp` type annotation** (let it infer, then
+  `simp only [Function.comp_apply]` in the `congr`).
+* **`contDiff_hasCompactSupport_cutoff_chartPushforwardField`** (`AnalyticPDE/ModelManifoldGaugeFlow.lean`)
+  — GAP-1 step (iii): `contDiffOn_prod_chartPushforwardField` + `contDiff_and_hasCompactSupport_cutoff_smul`
+  ⇒ the cutoff multiple `(τ, q) ↦ χ (τ, q) • chartPushforwardField I X p τ q` is globally `ContDiff ℝ N`
+  on `ℝ × E` with compact support (chart target open via `isOpen_extChartAt_target`, needs
+  `[I.Boundaryless]`).
+* **`exists_diffeomorph3GaugeFlowOn_cutoff_chartPushforwardField`** (same file) — GAP-1 step (iv) capstone:
+  feeds that `(ContDiff, HasCompactSupport)` pair to
+  `exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport` ⇒ a real
+  `Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ,E)) (M := E) (X := fun τ q ↦ χ (τ,q) • chartPushforwardField …) s t₀`
+  — the model comparison flow `Ψ`.  (`Function.uncurry v = fun r ↦ χ r • cpf r.1 r.2` holds by `Prod`-eta
+  defeq, so the step-(iii) pair applies directly.)
+
+**Concrete next target.**  Two GAP-1 residuals remain between these and the compact-manifold gauge-flow
+lift: **(a)** step (ii) — construct the cutoff `χ : ℝ × E → ℝ`, `C^N`, compactly supported in
+`ℝ ×ˢ (extChartAt I p).target` and `≡ 1` on a neighbourhood of the (compact) trajectory window
+`Icc(-ε)ε ×ˢ {chart image of the compact orbit}` (`IsOpen.exists_contDiff_eqOn_one`-style bump around a
+compact set inside an open set); **(b)** supply the joint section-smoothness hypothesis `hX` from the
+actual gauge field `X` (currently assumed).  Then step (v) wires `Ψ` to `hslicesC3` via
+`extChartAt_comp_eqOn_of_lipschitzOnWith` (field agrees with the un-cut pushforward where `χ ≡ 1`) +
+`contMDiffOn_of_extChartAt_conjugation'`.  Do NOT rebuild trivial-case chart closures.
