@@ -589,6 +589,61 @@ theorem raisedGaugeField_eq_of_forall_inner_eq
     v = raisedGaugeField g ω bas y :=
   raisedGaugeField_eq_of_inner_eq g ω bas (by ext w; exact hv w)
 
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **The metric dual of the zero one-form is the zero vector.**  `raisedGaugeField g 0 bas y = 0`,
+since the zero vector's metric pairing is the zero functional (`raisedGaugeField_eq_of_forall_inner_eq`
+with `v = 0`). -/
+theorem raisedGaugeField_zero
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    (y : B) :
+    raisedGaugeField g (0 : ∀ z : B, V z →L[ℝ] ℝ) bas y = 0 :=
+  (raisedGaugeField_eq_of_forall_inner_eq g 0 bas (fun w => by simp)).symm
+
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **The metric dual is additive in the one-form.**  `raisedGaugeField g (ω₁ + ω₂) bas y =
+raisedGaugeField g ω₁ bas y + raisedGaugeField g ω₂ bas y`: the sum of the two duals pairs to
+`ω₁ + ω₂` under `g` (bilinearity of `g.inner` and `raisedGaugeField_inner_eq`), so uniqueness of the
+metric dual identifies it with the dual of the sum. -/
+theorem raisedGaugeField_add
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω₁ ω₂ : ∀ z : B, V z →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    (y : B) :
+    raisedGaugeField g (ω₁ + ω₂) bas y
+      = raisedGaugeField g ω₁ bas y + raisedGaugeField g ω₂ bas y :=
+  (raisedGaugeField_eq_of_forall_inner_eq g (ω₁ + ω₂) bas (fun w => by
+    simp only [map_add, ContinuousLinearMap.add_apply, Pi.add_apply,
+      raisedGaugeField_inner_eq])).symm
+
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **The metric dual is homogeneous in the one-form.**  `raisedGaugeField g (c • ω) bas y =
+c • raisedGaugeField g ω bas y`. -/
+theorem raisedGaugeField_smul
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (c : ℝ) (ω : ∀ z : B, V z →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    (y : B) :
+    raisedGaugeField g (c • ω) bas y = c • raisedGaugeField g ω bas y :=
+  (raisedGaugeField_eq_of_forall_inner_eq g (c • ω) bas (fun w => by
+    simp only [map_smul, ContinuousLinearMap.smul_apply, Pi.smul_apply,
+      raisedGaugeField_inner_eq])).symm
+
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **The metric dual negates with the one-form.**  `raisedGaugeField g (-ω) bas y =
+-raisedGaugeField g ω bas y`.  In particular a metric-raised *gauge field* built from the negation of
+a one-form (as with the reverse DeTurck gauge field `-♯ω`) is the negation of the raised field of the
+one-form itself. -/
+theorem raisedGaugeField_neg
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ∀ z : B, V z →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    (y : B) :
+    raisedGaugeField g (-ω) bas y = -raisedGaugeField g ω bas y :=
+  (raisedGaugeField_eq_of_forall_inner_eq g (-ω) bas (fun w => by
+    simp only [map_neg, ContinuousLinearMap.neg_apply, Pi.neg_apply,
+      raisedGaugeField_inner_eq])).symm
+
 /-- **Per-patch joint `(t, x)` smoothness of the global raised gauge field, as a tangent-style
 section.**  Over the canonical trivialization patch around any base point `x`, the globally-defined
 raised gauge field `raisedGaugeField (g ·) (ω ·) bas`, read as the section
