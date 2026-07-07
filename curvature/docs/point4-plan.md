@@ -1305,3 +1305,43 @@ section-smoothness) and the finite-cover globalisation.  **NEXT:** obtain `Φ`'s
 manifold flow existence and feed it to `exists_Ioo_forall_mem_of_continuousAt_source` /
 `…_graph_mem_compact_…_manifoldTarget` to discharge `hγ_src`/`hγ_mem` in the step-(v) capstone, then the
 finite-cover globalisation of `contMDiffOn_flowSlice_of_cutoff_orbit_control`.
+
+### Progress (2026-07-07, later 17) — Item 2 GAP 1: the named NEXT is DONE — joint continuity of the raw manifold gauge flow `Φ` at the anchor is now proved for both autonomous AND time-dependent fields, and bundled into the compact gauge flow
+
+**What landed (all in `GaugeReduction/ManifoldFlowExistence.lean`, additive, sorry-free, axiom-clean
+`{propext, Classical.choice, Quot.sound}`; four commits).**  The plan later-16 NEXT — obtain `Φ`'s joint
+continuity and feed it to `exists_Ioo_forall_mem_of_continuousAt_source` — is now closed on the
+continuity side.  The missing datum was that `exists_nhds_uniform_integralCurve` (the manifold flow box)
+proves the local flow through the *chart-conjugated Picard flow* `α`, which is `ContinuousOn`, but then
+discards that joint continuity.  Four additive theorems reclaim and propagate it:
+
+* **`exists_nhds_uniform_localFlow_continuousOn`** — the jointly-continuous local flow box.  Strengthens
+  `exists_nhds_uniform_integralCurve` to expose the explicit local flow map
+  `Ψ y t := (extChartAt I x₀).symm (α (extChartAt I x₀ y, t))` together with
+  `ContinuousOn (fun p : M × ℝ => Ψ p.1 p.2) (U ×ˢ Ioo (-ε) ε)` (via the chart / model-Picard-`α` /
+  chart-symm composition `ContinuousOn.comp` chain), keeping the original integral-curve clause verbatim.
+* **`continuousAt_zero_prod_flow_of_isMIntegralCurveOn`** — the *autonomous* joint-continuity-at-anchor
+  lemma.  Any anchored flow `Φ` whose orbits solve a `C¹` field's ODE on a uniform window `Ioo (-ε₀) ε₀`
+  (for `y` near `x₀`) is `ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x₀)`: the chosen orbit is pinned
+  to the flow box's `Ψ` by `isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless`, transferring
+  continuity across the `(t,y) ↦ (y,t)` swap (`ContinuousAt.comp_of_eq` + `ContinuousAt.congr`).
+* **`continuousAt_zero_prod_timeDependent_flow_of_hasMFDerivWithinAt`** — the *time-dependent* analogue
+  (the form the DeTurck gauge flow actually needs).  The lifted orbit `τ ↦ (τ, Φ τ y)` is an integral
+  curve of the autonomous field `(1, X··)` on `ℝ × M` (`autonomousLift_hasMFDerivWithinAt`); matching it
+  by autonomous uniqueness to the flow box `Ψ` on `ℝ × M` gives `Φ τ y = (Ψ (0,y) τ).2`, whence
+  `ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x₀)`.  All product-manifold instances resolve
+  automatically.
+* **`exists_timeDependent_flow_compact_continuousAt`** — the payoff: strengthens
+  `exists_timeDependent_flow_compact` so the compact time-dependent gauge flow `Φ` additionally satisfies
+  `∀ x, ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x)`.  This output has EXACTLY the shape
+  `ManifoldFlow.exists_Ioo_forall_mem_of_continuousAt_source` consumes
+  (`ContinuousAt (fun z : ℝ × Y => Ψ z.1 z.2) (t₀, x)` with `Y = M`, `t₀ = 0`, `Ψ = Φ`).
+
+**Fraction of GAP 1.**  The raw-manifold `Φ`-joint-continuity input to the step-(v) orbit-confinement
+(`hγ_src`/`hγ_mem`) is now available end-to-end for the actual compact gauge flow — no longer a "missing
+Banach→manifold ODE-regularity primitive", but derived from the manifold flow box's own continuous
+Picard `α` + integral-curve uniqueness.  **NEXT:** feed `exists_timeDependent_flow_compact_continuousAt`
+into `exists_Ioo_forall_mem_of_continuousAt_source` (open target = a chart source `(extChartAt I p).source`)
+to discharge `hγ_src`, and into `…_graph_mem_compact_…_manifoldTarget` for `hγ_mem`, in the step-(v)
+capstone `contMDiffOn_flowSlice_of_cutoff_orbit_control`; then residual (b) `hX` (the DeTurck gauge
+field's joint section-smoothness) and the finite-cover globalisation.
