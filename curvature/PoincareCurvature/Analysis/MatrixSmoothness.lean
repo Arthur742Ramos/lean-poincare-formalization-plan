@@ -266,6 +266,21 @@ theorem contMDiffOn_dotProduct {a b : N → (ι → ℝ)} {u : Set N}
   intro x hx
   rfl
 
+/-- **Smoothness of a coordinate bilinear form.**  If `A : N → (ι → ι → ℝ)` is a `ContMDiffOn`
+family of matrices and `u v : N → (ι → ℝ)` are `ContMDiffOn` families of vectors over an arbitrary
+base, then the scalar `x ↦ (u x) ⬝ᵥ ((A x) *ᵥ (v x))` is `ContMDiffOn`.  This is exactly the local
+coordinate expression `Uᵀ G V` for evaluating a matrix-valued tensor `A` (e.g. the metric readout
+`G`) on two vector fields — the tensor-evaluation building block for the joint space-time smoothness
+of Gram matrices and one-form pairings. -/
+theorem contMDiffOn_bilinForm {A : N → (ι → ι → ℝ)} {u v : N → (ι → ℝ)} {s : Set N}
+    (hu : ContMDiffOn J 𝓘(ℝ, ι → ℝ) n u s)
+    (hA : ContMDiffOn J 𝓘(ℝ, ι → ι → ℝ) n A s)
+    (hv : ContMDiffOn J 𝓘(ℝ, ι → ℝ) n v s) :
+    ContMDiffOn J 𝓘(ℝ) n
+      (fun x => (u x) ⬝ᵥ (show ι → ℝ from (show Matrix ι ι ℝ from A x) *ᵥ (v x))) s :=
+  contMDiffOn_dotProduct (J := J) (n := n) hu
+    (contMDiffOn_mulVec (J := J) (n := n) hA hv)
+
 end Manifold
 
 end PoincareCurvature.MatrixSmoothness
