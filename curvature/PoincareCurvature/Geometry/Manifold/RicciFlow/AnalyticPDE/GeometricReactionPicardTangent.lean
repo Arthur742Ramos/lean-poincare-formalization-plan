@@ -657,4 +657,52 @@ theorem deTurckReactionSectionMap_add_source_continuous_of_uniform_inCoordinates
   (deTurckReactionSectionMap_add_source_lipschitzWith_of_uniform_inCoordinates
     x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKp b).continuous
 
+/-- **`BanachEvolutionLocalSolutionIn` for the concrete geometric frozen Ricci–DeTurck operator, in the
+positive-definite locus, at the initial-metric section.**  Specialising
+`deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn` to `locus := positiveDefiniteLocus`
+and `σ₀ := g₀.toSection` for a genuine continuous Riemannian metric `g₀`: the geometric a-priori
+positivity containment `ContinuousRiemannianMetric.exists_pos_closedBall_toSection_subset_positiveDefiniteLocus`
+(openness of the positive-definite locus, from continuity of positive-definiteness on the finite compact
+cover) supplies a positive Picard radius `a` whose whole closed ball `closedBall g₀.toSection a` stays
+inside the locus, discharging the closed-ball Banach-solution bridge's `hsub` hypothesis.  Hence the
+frozen geometric operator `A τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t`
+admits a genuine `BanachEvolutionLocalSolutionIn` **constrained to the positive-definite locus**, at the
+metric section of `g₀`, on a forward window `[t₀, T]` with `T ∈ (t₀, T₀]` auto-chosen — unconditionally
+(the uniform Lipschitz `Kp` is discharged by compactness of the finite cover + continuity of `∇W`).  This
+is the precise positive-definite-locus-constrained Banach evolution solution the chart-closure
+`realization` field consumes (its `sol : BanachEvolutionLocalSolutionIn chart.A (positiveDefiniteLocus …)
+ivp.initialTime (ivp initial section)`), assembled here from the two previously independent halves: the
+geometric Banach existence and the a-priori positivity containment. -/
+theorem deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_positiveDefiniteLocus
+    {κ : Type*} [Finite κ] [Nontrivial E]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric E TM)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) :
+    ∃ (T : ℝ) (_ : t₀ < T),
+      Nonempty (RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn
+        (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous s
+          + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+              Kc hKc Ko hKo hKoEq hcover g t)
+        (positiveDefiniteLocus (M := M) (F := E) (W := TM)
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+        t₀ ⟨g₀.toSection, g₀.continuous_toSection⟩) := by
+  obtain ⟨a, ha, hsub⟩ := g₀.exists_pos_closedBall_toSection_subset_positiveDefiniteLocus
+    (M := M) (F := E) (W := TM) xc (fun i => trivializationAt BilF BilW (xc i))
+    (fun _ => rfl) Kc hKc Ko hKo hKoEq hcover
+  exact deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn
+    xc Kc hKc Ko hKo hKoEq hcover g background t hbackground
+    ⟨g₀.toSection, g₀.continuous_toSection⟩ t₀ T₀ hT₀ a (NNReal.coe_pos.mpr ha) _ hsub
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
