@@ -1680,6 +1680,44 @@ theorem exists_finite_chart_cover_compact
   · intro i; exact hKcpt i.1
   · intro i; exact hKsrc i.1
 
+/-- **Compact space-time window around the chart image of a compact patch — the `Kwin`/`hplace_win`
+data package consumed by the step-(v) globalisation capstone.**  For a compact patch
+`Q ⊆ (extChartAt I p).source` on a boundaryless manifold modelled on a finite-dimensional `E`, there is
+a compact window `Kwin ⊆ ℝ × E` with:
+
+* `Kwin ⊆ Set.univ ×ˢ (extChartAt I p).target` (the containment the cutoff `χ`'s
+  `tsupport ⊆ univ ×ˢ target` obligation `hsub` rests on);
+* every anchored chart image in its interior: `∀ x ∈ Q, ((0 : ℝ), extChartAt I p x) ∈ interior Kwin`
+  (the capstone's `hplace_win`).
+
+This is exactly the `Kwin`/`hplace_win` pair of
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover`; the cutoff `χ ≡ 1` near `Kwin` is then a
+smooth bump on `ℝ × E` supported in `univ ×ˢ target`.  No analytic content: the chart image
+`extChartAt I p '' Q` is compact (`isCompact_extChartAt_image`) and inside the open target
+(`PartialEquiv.image_source_eq_target`, `isOpen_extChartAt_target`); `E` finite-dimensional is locally
+compact, so `exists_compact_between` gives a compact `C` with
+`extChartAt I p '' Q ⊆ interior C ⊆ C ⊆ target`, and `Kwin := Icc (-1) 1 ×ˢ C` works
+(`interior_prod_eq`, `interior_Icc`). -/
+theorem exists_compact_window_of_compact_patch
+    [FiniteDimensional ℝ E]
+    {H M : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    [TopologicalSpace M] [ChartedSpace H M] {Q : Set M} {p : M}
+    (hQ : IsCompact Q) (hQsub : Q ⊆ (extChartAt I p).source) :
+    ∃ Kwin : Set (ℝ × E), IsCompact Kwin ∧
+      Kwin ⊆ Set.univ ×ˢ (extChartAt I p).target ∧
+      (∀ x ∈ Q, ((0 : ℝ), extChartAt I p x) ∈ interior Kwin) := by
+  have himg_cpt : IsCompact (extChartAt I p '' Q) := isCompact_extChartAt_image hQ hQsub
+  have himg_sub : extChartAt I p '' Q ⊆ (extChartAt I p).target := by
+    calc extChartAt I p '' Q ⊆ extChartAt I p '' (extChartAt I p).source := Set.image_mono hQsub
+      _ = (extChartAt I p).target := (extChartAt I p).image_source_eq_target
+  obtain ⟨C, hC_cpt, hC_int, hC_sub⟩ :=
+    exists_compact_between himg_cpt (isOpen_extChartAt_target (I := I) p) himg_sub
+  refine ⟨Set.Icc (-1 : ℝ) 1 ×ˢ C, isCompact_Icc.prod hC_cpt, ?_, ?_⟩
+  · exact Set.prod_mono (Set.subset_univ _) hC_sub
+  · intro x hx
+    rw [interior_prod_eq, interior_Icc]
+    exact ⟨by norm_num, hC_int (Set.mem_image_of_mem _ hx)⟩
+
 end
 
 end SmoothDependenceCk
