@@ -560,6 +560,64 @@ theorem raisedGaugeField_inner_eq
   ext w
   exact raisedVector_inner_eq g ω (trivializationAt F V y) bas hy0 w
 
+/-- **Per-patch joint `(t, x)` smoothness of the global raised gauge field, as a tangent-style
+section.**  Over the canonical trivialization patch around any base point `x`, the globally-defined
+raised gauge field `raisedGaugeField (g ·) (ω ·) bas`, read as the section
+`(t, y) ↦ TotalSpace.mk' F y (raisedGaugeField (g t) (ω t) bas y)`, is `ContMDiffOn` on
+`ℝ ×ˢ (trivializationAt F V x).baseSet`, given the joint smoothness `hg` of the (time-dependent)
+metric and `hω` of the one-form.  This packages the raising capstone
+`contMDiffOn_timeDependentRaisedSection` composed with the patch identity
+`raisedGaugeField_eq_localFrame`, entirely inside the abstract vector-bundle section so that no
+tangent-bundle instance is instantiated here; the compact-manifold gauge-flow assembly then applies it
+per chart to obtain the global gauge-field jet. -/
+theorem contMDiffOn_raisedGaugeField_tangentSection
+    (g : ℝ → Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ℝ → ∀ y : B, V y →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    (hg : ContMDiff (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] V y →L[ℝ] ℝ)) p.2 ((g p.1).inner p.2)))
+    (hω : ContMDiff (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] ℝ)) p.2 (ω p.1 p.2)))
+    (x : B) :
+    ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' F p.2 (raisedGaugeField (g p.1) (ω p.1) bas p.2))
+      (Set.univ ×ˢ (trivializationAt F V x).baseSet) := by
+  have hcap := contMDiffOn_timeDependentRaisedSection g ω (trivializationAt F V x) bas
+    (subset_rfl) hg.contMDiffOn hω.contMDiffOn
+  refine hcap.congr ?_
+  intro p hp
+  exact congrArg (TotalSpace.mk' F p.2)
+    (raisedGaugeField_eq_localFrame (g p.1) (ω p.1) (trivializationAt F V x) bas hp.2)
+
+/-- **Local gauge-field jet of the global raised field, packaged for the flow assembly.**  Around any
+base point `x` there is an open set (the base set of the canonical trivialization) containing `x` on
+whose time-full slab the raised gauge-field section
+`(t, y) ↦ TotalSpace.mk' F y (raisedGaugeField (g t) (ω t) bas y)` is `ContMDiffOn`.  This is exactly
+the spatially-local joint-smoothness hypothesis consumed by the compact-manifold gauge-flow assembly
+`exists_flow_Ioo_forall_contMDiff_of_locally_contMDiffOn_tangentSection_compact`.  All references to the
+trivialization live inside this abstract vector-bundle statement, so the flow assembly need only apply
+it (with the tangent bundle) without instantiating any trivialization by hand. -/
+theorem exists_isOpen_contMDiffOn_raisedGaugeField_tangentSection
+    (g : ℝ → Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ℝ → ∀ y : B, V y →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    (hg : ContMDiff (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F →L[ℝ] F →L[ℝ] ℝ)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] V y →L[ℝ] ℝ)) p.2 ((g p.1).inner p.2)))
+    (hω : ContMDiff (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F →L[ℝ] ℝ)) n
+      (fun p : ℝ × B ↦ TotalSpace.mk' (F →L[ℝ] ℝ)
+        (E := fun (y : B) ↦ (V y →L[ℝ] ℝ)) p.2 (ω p.1 p.2)))
+    (x : B) :
+    ∃ s : Set B, IsOpen s ∧ x ∈ s ∧
+      ContMDiffOn (𝓘(ℝ).prod IB) (IB.prod 𝓘(ℝ, F)) n
+        (fun p : ℝ × B ↦ TotalSpace.mk' F p.2 (raisedGaugeField (g p.1) (ω p.1) bas p.2))
+        (Set.univ ×ˢ s) :=
+  ⟨(trivializationAt F V x).baseSet, (trivializationAt F V x).open_baseSet,
+    FiberBundle.mem_baseSet_trivializationAt' x,
+    contMDiffOn_raisedGaugeField_tangentSection g ω bas hg hω x⟩
+
 end Gram
 
 end PoincareCurvature.ParametrizedInner
