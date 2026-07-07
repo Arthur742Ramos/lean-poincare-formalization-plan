@@ -1171,3 +1171,45 @@ These modules (`ModelManifoldGaugeFlow`, `GaugeFlowAssembly`) are still raw-mate
 root import closure); wiring them into the closure happens when the compact gauge-flow existence is
 assembled end-to-end.  Do NOT rebuild trivial-case chart closures; do NOT re-enter the Item-3
 BilinearFormBundle geometric-`A` wall from this frontier.
+
+### Progress (2026-07-07, later 15) — Item 2 GAP 1: the MODEL-side flow-trajectory-confinement is now MECHANICALLY ASSEMBLED; joint continuity of the model gauge flow is NOT a missing ODE-regularity primitive
+
+**Key finding.**  The joint continuity `(τ, q) ↦ (G.maps3 τ) q` of the model gauge flow — the input the
+step-(v) orbit-containment control was assumed to be blocked on — is *already available*.  It is not a
+missing Banach→manifold ODE-dependence primitive: the Grönwall joint-continuity theorem
+`SmoothDependenceCk.continuous_flow` (uniform-exponential Lipschitz-in-initial-value × integral-curve
+continuity-in-time) applies verbatim to any model gauge flow of a uniformly-in-time globally-Lipschitz
+field, and the compactly-supported cut field `χ • chartPushforwardField` *is* uniformly Lipschitz
+(constant extracted by the already-proved `exists_lipschitzWith_prodMk_left`).
+
+**What landed (sorry-free, axiom-clean `{propext, Classical.choice, Quot.sound}`; four additive theorems
+in `AnalyticPDE/ModelManifoldGaugeFlow.lean`).**
+
+* **`exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt`** — the *producing* companion of
+  `cutoff_eqOne_along_curve_of_graph_subset`.  Abstract tube-lemma confinement: for a flow `Ψ : ℝ → E → E`
+  whose space-time graph map is jointly continuous at each anchored point `(t₀, q)` (`q` in a compact `Q`)
+  and an open space-time target `W ⊇` the anchored graph, produces an honest window `Ioo a b ∋ t₀` with
+  `∀ τ ∈ Ioo a b, ∀ q ∈ Q, (τ, Ψ τ q) ∈ W`.  Proof: `IsCompact.eventually_forall_of_forall_eventually`
+  (each pointwise `ContinuousAt.preimage_mem_nhds`) + `mem_nhds_iff_exists_Ioo_subset`.
+* **`continuous_maps3_of_lipschitzWith`** — joint continuity of `(τ, q) ↦ (G.maps3 τ) q` for a model gauge
+  flow `G : Diffeomorph3GaugeFlowOn (X := X) Set.univ t₀` of a uniformly `K`-Lipschitz `X`, via
+  `continuous_flow`: each base curve is a global `IsIntegralCurve` (`hasDerivWithinAt_maps3_eval_…`
+  upgraded by `hasDerivWithinAt_univ`), anchored (`SmoothSelfDiffeomorph3Family.AnchoredAt.apply`).
+* **`continuous_maps3_of_contDiff_hasCompactSupport`** — the natural-interface form: same joint continuity
+  from `ContDiff ℝ N (uncurry v)` + `HasCompactSupport (uncurry v)` (`1 ≤ N`) alone, the uniform Lipschitz
+  *derived* internally via `exists_lipschitzWith_prodMk_left`.  This is exactly the data shape
+  `contDiff_hasCompactSupport_cutoff_chartPushforwardField` produces for the bump-globalised cut field.
+* **`exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith`** — the composition: the full model-flow
+  confinement window `∀ τ ∈ Ioo a b, ∀ q ∈ Q, (τ, (G.maps3 τ) q) ∈ W` from a compact `Q` + open
+  `W ⊇` anchored graph.
+
+**Fraction of GAP 1.**  The MODEL-curve orbit-containment facts of the step-(v) capstone
+(`contMDiffOn_flowSlice_of_cutoff_orbit_control`) — `hχ` (via `cutoff_eqOne_along_curve_of_graph_subset`)
+and `hg_mem` — are now mechanically assembled from existing infrastructure: cut-field
+`ContDiff`+`HasCompactSupport` ⟶ uniform Lipschitz ⟶ joint continuity ⟶ tube-lemma confinement
+`graph ⊆ K₀` (with `K₀` the cutoff window, anchored graph in its interior) ⟶ `χ ≡ 1` along the model
+curve.  The remaining GAP-1 obligations are on the **raw manifold flow `Φ`** side (`hγ_src`, `hγ_mem` —
+same mechanism but needs `Φ`'s joint continuity on the general compact `M`, i.e. a manifold-target
+generalisation of `exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt` fed by manifold
+continuous-dependence à la `ManifoldFlowExistence.exists_nhds_uniform_integralCurve`), plus residual (b)
+`hX` and the finite-cover globalisation.  NEXT: the manifold-target confinement + `Φ` joint continuity.
