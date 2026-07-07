@@ -26,6 +26,7 @@ import Mathlib.Topology.Compactness.Compact
 import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
+import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 
 open scoped Manifold Topology
 open Set Filter
@@ -1247,5 +1248,37 @@ theorem exists_timeDependent_flow_compact_inverse {E H M : Type*} [NormedAddComm
     rwa [hanchor x] at h
   · intro t ht; exact Function.leftInverse_invFun (hbij t ht).injective
   · intro t ht; exact Function.rightInverse_invFun (hbij t ht).surjective
+
+/-- **Space-time tangent jet from a jointly-smooth time-dependent vector field.**  The
+autonomisation field `(1, X)` on `ℝ × M` — the `hX` datum every compact time-dependent flow
+existence lemma above consumes, phrased as a `C^n` section of the *product* tangent bundle
+`TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)` — is `C^n` as soon as the underlying vector field `X`
+is `C^n` jointly in `(t, x)` as a section of the plain tangent bundle `TangentBundle I M`.
+
+This converts the exotic product-tangent-bundle smoothness obligation `hX` into the natural
+smoothness `ContMDiff ((𝓘(ℝ, ℝ)).prod I) I.tangent n (fun p ↦ ⟨p.2, X p.1 p.2⟩)` of the field
+itself — exactly the shape a joint space-time regularity result for the (real) Ricci–DeTurck gauge
+field produces, and the current bottleneck of the compact-manifold gauge-flow lift.  The proof pairs
+the constant `∂_t` section on `ℝ` (the unit vector field pulled back along `Prod.fst`) with the `X`
+section via `ContMDiff.prodMk`, then transports through the smooth inverse of Mathlib's canonical
+tangent-bundle-of-a-product equivalence `equivTangentBundleProd`. -/
+theorem contMDiff_spaceTimeField_of_contMDiff_tangentSection {E H M : Type*}
+    [NormedAddCommGroup E] [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M] {n : WithTop ℕ∞}
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) I.tangent n
+      (fun p : ℝ × M => (⟨p.2, X p.1 p.2⟩ : TangentBundle I M))) :
+    ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) n
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))) := by
+  have hconst : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ)).tangent n
+      (fun t : ℝ => (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) :=
+    (contMDiff_vectorSpace_iff_contDiff (V := fun _ : ℝ => (1 : ℝ))).mpr contDiff_const
+  have h1 : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (𝓘(ℝ, ℝ)).tangent n
+      (fun p : ℝ × M => (⟨p.1, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) :=
+    hconst.comp contMDiff_fst
+  have hpair := h1.prodMk hX
+  exact (contMDiff_equivTangentBundleProd_symm
+    (I := 𝓘(ℝ, ℝ)) (M := ℝ) (I' := I) (M' := M) (n := n)).comp hpair
 
 end PoincareCurvature.ManifoldFlow
