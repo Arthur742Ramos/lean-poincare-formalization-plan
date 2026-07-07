@@ -454,6 +454,32 @@ theorem exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport
     exact lipschitzWith_fderiv_iteratedFDeriv_of_lipschitzWith_iteratedFDeriv_succ (n := 2) (hM₃ σ)
   case hD3vlip => intro σ; rw [← hsl σ]; exact hM₃ σ
 
+/-- **A cutoff multiple of a locally-`C^n` field is globally `C^n` with compact support.**  If `w` is
+`C^n` on an open set `U`, and `χ` is a globally-`C^n`, compactly-supported cutoff with `tsupport χ ⊆ U`,
+then `fun x ↦ χ x • w x` is globally `C^n` and compactly supported.  This is the extension-by-zero step
+of the bump-globalisation: at a point of `tsupport χ ⊆ U` both factors are `C^n` (`ContDiffOn.contDiffAt`
+on the open `U`); off `tsupport χ` the product vanishes on the neighbourhood `(tsupport χ)ᶜ`
+(`image_eq_zero_of_notMem_tsupport`).  It globalises the chart-local pushforward field to a field defined
+and regular on all of the model space with compact support, the exact input shape of
+`exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport`. -/
+theorem contDiff_and_hasCompactSupport_cutoff_smul
+    {H : Type*} [NormedAddCommGroup H] [NormedSpace ℝ H]
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {n : WithTop ℕ∞} {U : Set H} {w : H → V} {χ : H → ℝ}
+    (hU : IsOpen U) (hw : ContDiffOn ℝ n w U)
+    (hχ : ContDiff ℝ n χ) (hχc : HasCompactSupport χ) (hsub : tsupport χ ⊆ U) :
+    ContDiff ℝ n (fun x => χ x • w x) ∧ HasCompactSupport (fun x => χ x • w x) := by
+  refine ⟨contDiff_iff_contDiffAt.mpr (fun x => ?_), ?_⟩
+  · by_cases hx : x ∈ tsupport χ
+    · exact hχ.contDiffAt.smul (hw.contDiffAt (hU.mem_nhds (hsub hx)))
+    · refine (contDiffAt_const (c := (0 : V))).congr_of_eventuallyEq ?_
+      filter_upwards [(isClosed_tsupport χ).isOpen_compl.mem_nhds hx] with y hy
+      rw [image_eq_zero_of_notMem_tsupport hy, zero_smul]
+  · refine hχc.of_isClosed_subset (isClosed_tsupport _) (closure_mono ?_)
+    intro x hx
+    rw [Function.mem_support] at hx ⊢
+    exact fun hχx => hx (by rw [hχx, zero_smul])
+
 end
 
 end SmoothDependenceCk
