@@ -1579,3 +1579,43 @@ whole package into `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_
 general-`M` `hslicesC3` window.  (GAP 2's chart `geometric`-for-all-`s` field remains the point-4 long
 pole: `ofLipschitzBoundedContinuous` still takes `hgeom` as a hypothesis, and the frozen operator supplies
 it only at the metric section.)
+
+### Item 2 (GAP 1) later-23 — the field-independent GAP-1 assembly is CLOSED: compact-`M` `C³` flow-slice regularity now follows from a SINGLE global field-smoothness hypothesis (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The later-22 NEXT — "wire the whole package into `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip`" — is DONE.  Two additive lemmas close the entire field-*independent* portion of GAP 1, reducing the general-compact-`M` step-(v) `hslicesC3` obligation to ONE hypothesis: the joint space-time smoothness of the gauge field.
+
+* **`PoincareCurvature.ManifoldFlow.contMDiff_spaceTimeField_of_contMDiff_tangentSection`**
+  (`GaugeReduction/ManifoldFlowExistence.lean`) — the **space-time tangent-jet bridge**.  Every compact
+  time-dependent gauge-flow existence lemma (`exists_timeDependent_flow_compact_*`,
+  `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`) consumes `hXraw` as a `C^n` section of
+  the *product* tangent bundle `TangentBundle ((𝓘(ℝ,ℝ)).prod I) (ℝ × M)` — the exotic autonomisation field
+  `(1, X)`.  This lemma produces that datum from the NATURAL smoothness
+  `ContMDiff ((𝓘(ℝ,ℝ)).prod I) I.tangent n (fun p ↦ ⟨p.2, X p.1 p.2⟩)` of the underlying field
+  `X : ℝ → (x:M) → TangentSpace I x`.  Proof: pair the constant `∂_t` unit section on `ℝ` (pulled back
+  along `Prod.fst`) with the `X` section via `ContMDiff.prodMk`, then transport through the smooth inverse
+  of Mathlib's tangent-bundle-of-a-product equivalence `equivTangentBundleProd`
+  (`contMDiff_equivTangentBundleProd_symm`).  (New import: `Mathlib.Geometry.Manifold.ContMDiffMFDeriv`.)
+* **`exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact`**
+  (`AnalyticPDE/ModelManifoldGaugeFlow.lean`, namespace `RicciFlow.AnalyticPDE.SmoothDependenceCk`) — the
+  **end-to-end GAP-1 assembly**.  From the single hypothesis
+  `hXfield : ContMDiff ((𝓘(ℝ,ℝ)).prod I) I.tangent ∞ (fun p ↦ ⟨p.2, X p.1 p.2⟩)` (compact boundaryless
+  finite-dim `M`), produces a global flow `Φ` on `Ioo c d ∋ 0`, anchored `Φ 0 = id`, with every slice
+  `Φ t` `ContMDiff I I 3`.  Internally discharges ALL field-independent capstone data: the finite chart
+  BALL cover (`exists_finite_chart_ball_cover_compact`), the two field jets `hXraw` (the bridge above) and
+  `hXchart` (`ContMDiff.contMDiffOn`, using `I.tangent = I.prod 𝓘(ℝ,E)`), the per-patch field-Lipschitz
+  tube on the chart ball (`exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField_ball`), the compact
+  space-time cutoff window (`exists_compact_window_of_compact_patch`) and its smooth bump
+  (`exists_contDiff_cutoff_one_nhdsSet_of_isCompact`), fed to the `…_windowLip` capstone with
+  `cw,dw := -1,1`, `state₀ i :=` the chart ball, `N := ∞`.
+
+**Net reduction.**  GAP 1's field-independent scaffolding — cover, both jets, tube, window, cutoff,
+globalisation — now composes into ONE lemma taking ONLY the global joint smoothness of the field.  Note
+this lemma is GENERIC in `X`: it is the general compact-manifold `C³` flow-slice regularity for *any*
+`C^∞` time-dependent vector field.  **NEXT (the remaining GAP-1 geometric core):** the global joint
+space-time smoothness `hXfield` of the REAL Ricci–DeTurck gauge field — i.e. a JOINT `(t,x)` version of
+`intrinsicDeTurckVectorField_contMDiffOn_of_contMDiffOn_intrinsicDeTurckOneForm`.  Ground-truth: all
+existing DeTurck-field smoothness is SPATIAL (fixed `t`); the joint version needs a *time-dependent*
+Riemannian-bundle raising framework (the `rieszMap`/`contMDiffOn_rieszMap_section` lemmas fix ONE metric
+via `[IsContMDiffRiemannianBundle I 2 E TM]`), which does not yet exist — a genuine missing sub-project.
+Also still open: packaging the forward `C³` flow into the `Diffeomorph3GaugeFlowOn` deliverable needs the
+inverse-slice `C³` + flow uniqueness (feeds `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`).
