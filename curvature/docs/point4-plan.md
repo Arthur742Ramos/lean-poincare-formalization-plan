@@ -1400,3 +1400,54 @@ over `isCompact_extChartAt_image` via `exists_Ioo_forall_and`, choose `t₀ = 0`
 `hγ`,`hγ_src`,`hγ_mem`,`hg_mem`,`hχ`,`heq` into `contMDiffOn_flowSlice_of_cutoff_orbit_control` — leaving
 ONLY the field-analytic faces `hlip` (`chartPushforwardField` Lipschitz on `state τ`) and `hnhds`, plus
 the residual (b) `hX` (DeTurck gauge field joint section-smoothness) and the finite-cover globalisation.
+
+### Progress (2026-07-07, later 19) — Item 2 GAP 1: step (v) is ASSEMBLED and GLOBALISED — the per-patch slice-`C³` capstone, its `Φ`-input variant, the finite-cover glue, and the end-to-end field-jets→global-slice-`C³` composition all land
+
+**What landed (all in `AnalyticPDE/ModelManifoldGaugeFlow.lean`, namespace
+`RicciFlow.AnalyticPDE.SmoothDependenceCk`, additive, sorry-free, axiom-clean
+`{propext, Classical.choice, Quot.sound}`; six commits).**  The later-18 NEXT — the FINAL step-(v)
+assembly — is now DONE, together with the finite-cover globalisation that follows it:
+
+* **`exists_Ioo_maps3_cutoff_eqOne_and_state_mem`** — the model-side `hχ` + `hg_mem` face bundle on a
+  single window, the model analogue of the raw-side `…_extChartAt_source_and_mem`: from a model gauge
+  flow `G` of a uniformly-`K`-Lipschitz field, a compact initial set `Q`, a cutoff `χ ≡ 1` near a
+  compact window `Kwin`, and an open state tube, it confines orbits into `interior Kwin` (⇒ `χ ≡ 1` via
+  `cutoff_eqOne_along_curve_of_graph_subset`) and into the state (⇒ `hg_mem`), merged by
+  `exists_Ioo_forall_and`.
+* **`exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem`** — END-TO-END model side: from the
+  chart field jet `hXchart` (`C^N`, `N ≥ 4`) + cutoff `χ`, it CONSTRUCTS the model gauge flow `G`
+  (`exists_diffeomorph3GaugeFlowOn_cutoff_chartPushforwardField`), DERIVES the cut field's uniform
+  Lipschitz constant from its compact support (`exists_lipschitzWith_prodMk_left`), and feeds the bundle
+  above — yielding `G` + `hχ` + `hg_mem` from field data alone.
+* **`contMDiffOn_flowSlice_perPatch_of_field_jets`** — the FINAL step-(v) per-patch capstone: wires the
+  raw-side flow bundle (`exists_timeDependent_flow_compact_extChartAt_source_and_mem`) + the model-side
+  producer above + the anchor-`heq` (`extChartAt_flow_eq_maps3_at_zero`, `t₀ = 0`) into
+  `contMDiffOn_flowSlice_of_cutoff_orbit_control` (with `sTime = univ` ⇒ `hnhds = univ_mem`, constant
+  `state τ = state₀`), giving `ContMDiffOn I I 3 (Φ t)` on the patch `U` from the two field jets alone.
+  KEY: the raw-bundle field `X : ℝ → (x:M) → TangentSpace I x` and the capstone/`chartPushforwardField`
+  field `X : ℝ → M → E` UNIFY BY DEFEQ (`TangentSpace I x ≡ E`) — one `X` feeds both sides, no coercion.
+* **`contMDiffOn_flowSlice_perPatch_of_flow`** — the `Φ`-input variant (finite-cover globalisation
+  ENABLER): takes the GLOBAL compact flow `Φ` (anchored + orbit ODE on `Ioo (-ε) ε` + joint continuity,
+  the output of `exists_timeDependent_flow_compact_continuousAt`) as a HYPOTHESIS and produces the
+  per-patch slice-`C³` window for THAT same `Φ`, intersecting the raw-confinement / model / ODE windows
+  explicitly.  Decouples the ONE global flow from the per-patch model work; no `[CompactSpace M]` needed.
+* **`exists_Ioo_forall_contMDiff_of_finite_cover`** — the finite-cover glue: given a finite OPEN cover
+  `U : ι → Set M` and, per patch, a window on which `Φ t` is `ContMDiffOn (U i)`, the finite intersection
+  of windows is an open nhd of `0` (`isOpen_iInter_of_finite`) containing an honest `Ioo c d ∋ 0`, on
+  which `contMDiff_of_locally_contMDiffOn` upgrades the per-patch `ContMDiffOn` to global `ContMDiff`.
+* **`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover`** — step (v) GLOBALISED: from the
+  global DeTurck field jet `hXraw` + the per-patch field-analytic data over a finite cover, it builds ONE
+  global flow `Φ` and yields `ContMDiff I I 3 (Φ t)` on a window `Ioo c d ∋ 0` (flow existence +
+  `perPatch_of_flow` per patch + finite-cover glue).
+
+**Fraction of GAP 1.**  The step-(v) assembly and its globalisation are now MECHANICALLY COMPLETE:
+`{raw flow, model flow, cutoff, orbit control, window intersection, finite-cover glue}` all compose,
+green and axiom-clean.  What remains for the general compact `M` is to SUPPLY the per-patch
+cutoff-flow package from the ACTUAL Ricci-DeTurck gauge field `X` — the residual `(b) hX` (the two field
+jets `hXraw`/`hXchart i` for the real gauge field), the per-patch cutoff `χ i` (a chart-window bump), the
+Lipschitz state tube `state₀ i` with its `hlip i` (`chartPushforwardField` Lipschitz), and the initial
+placements — plus a concrete finite chart cover.  **NEXT:** discharge the field-analytic residuals
+(`hlip i` via `exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField` on a compact tube; the
+placements by choosing `state₀`/`Kwin` as nhds of the compact chart-image of `Q_M`), and construct the
+finite chart cover of compact `M`, then feed all into
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover` for the general-`M` `hslicesC3` window.
