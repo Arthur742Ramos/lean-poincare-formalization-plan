@@ -1565,6 +1565,62 @@ theorem exists_Ioo_forall_contMDiff_of_finite_cover
   obtain ⟨i, hxi⟩ := hcover x
   exact ⟨U i, hopen i, hxi, hslice i t (htIoo i)⟩
 
+/-- **GAP-1 step (v), globalised: from the DeTurck gauge-field jet + per-patch field-analytic data over
+a finite chart cover to a single global flow whose slices are `ContMDiff I I 3` on a time window.**  This
+assembles the whole step (v): the global compact time-dependent flow `Φ` is constructed ONCE from the
+global `C¹` product-tangent field jet `hXraw` (`exists_timeDependent_flow_compact_continuousAt`); the
+`Φ`-input per-patch capstone `contMDiffOn_flowSlice_perPatch_of_flow` is applied on each patch `i` of a
+finite open cover to yield the per-patch slice-`C³` windows for that same `Φ`; and the finite-cover
+gluing `exists_Ioo_forall_contMDiff_of_finite_cover` intersects the windows and globalises to
+`ContMDiff I I 3 (Φ t)` on a single window `Set.Ioo c d ∋ 0`.
+
+Everything downstream of the two field jets (`hXraw`, the per-patch `hXchart i`) and the per-patch
+field-analytic residuals (the cutoffs `χ i`, states `state₀ i`, cut windows `Kwin i`, the Lipschitz
+control `hlip i`, and the initial-data placements) is now MECHANICAL.  What remains for a general compact
+`M` is to SUPPLY that per-patch data from the actual Ricci-DeTurck gauge field `X` — i.e. exhibit the
+finite chart cover with a cutoff-flow package on each patch — the residual `(b) hX` plus the
+field-analytic faces the plan isolates. -/
+theorem exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] [CompactSpace M] [IsManifold I 1 M]
+    {N : WithTop ℕ∞} [IsManifold I N M]
+    [ContMDiffVectorBundle N E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E}
+    (hXraw : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun q : ℝ × M => (⟨q, ((1 : ℝ), X q.1 q.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {ι : Type*} [Finite ι]
+    {p : ι → M} {U Q_M : ι → Set M} {χ : ι → (ℝ × E → ℝ)}
+    {Kwin : ι → Set (ℝ × E)} {state₀ : ι → Set E} {K : ι → ℝ≥0}
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hXchart : ∀ i, ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) N
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I (p i)).source))
+    (hχC : ∀ i, ContDiff ℝ N (χ i)) (hχc : ∀ i, HasCompactSupport (χ i))
+    (hsub : ∀ i, tsupport (χ i) ⊆ Set.univ ×ˢ (extChartAt I (p i)).target)
+    (hcut : ∀ i, ∀ᶠ r in 𝓝ˢ (Kwin i), (χ i) r = 1) (hN : 4 ≤ N)
+    (hstate : ∀ i, IsOpen (state₀ i))
+    (hlip : ∀ i, ∀ τ : ℝ, LipschitzOnWith (K i)
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ) (state₀ i))
+    (hU : ∀ i, U i ⊆ (chartAt H (p i)).source) (hUQ : ∀ i, U i ⊆ (Q_M i : Set M))
+    (hQ_M : ∀ i, IsCompact (Q_M i)) (hQ_M_src : ∀ i, Q_M i ⊆ (extChartAt I (p i)).source)
+    (hplace_state : ∀ i, ∀ x ∈ Q_M i, extChartAt I (p i) x ∈ state₀ i)
+    (hplace_win : ∀ i, ∀ x ∈ Q_M i, ((0 : ℝ), extChartAt I (p i) x) ∈ interior (Kwin i)) :
+    ∃ (Φ : ℝ → M → M) (c d : ℝ), (∀ x, Φ 0 x = x) ∧ (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (fun x : M => Φ t x) := by
+  obtain ⟨ε, hε, Φ, hanchor, horbit, hcontA⟩ :=
+    PoincareCurvature.ManifoldFlow.exists_timeDependent_flow_compact_continuousAt hXraw
+  obtain ⟨c, d, hcd, hglob⟩ :=
+    exists_Ioo_forall_contMDiff_of_finite_cover (Φ := Φ) hopen hcover
+      (fun i => contMDiffOn_flowSlice_perPatch_of_flow (X := X) (p := p i)
+        hε hanchor horbit hcontA (hXchart i) (hχC i) (hχc i) (hsub i) (hcut i) hN
+        (hstate i) (hlip i) (hU i) (hUQ i) (hQ_M i) (hQ_M_src i)
+        (hplace_state i) (hplace_win i))
+  exact ⟨Φ, c, d, hanchor, hcd, hglob⟩
+
 end
 
 end SmoothDependenceCk
