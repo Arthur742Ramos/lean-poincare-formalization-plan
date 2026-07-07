@@ -2088,3 +2088,47 @@ lemmas are spatial-only, `contMDiffOn` at fixed `t`) and `hg` (joint `(t, x)` sm
 metric's inner).  Both require a jointly-smooth (in particular time-differentiable) metric family, which
 a bare `MetricFamily` does not provide; they are the genuine analytic content still open on this front.
 (GAP 2's geometric chart `A`/Schauder realization remains the point-4 long pole.)
+
+### Item 3 (GAP 2 upstream) later-35 — the autonomous (frozen) linear resolvent is the operator exponential, with its smooth-dependence-on-parameters consequences (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+New standalone module `AnalyticPDE/AutonomousResolventExp.lean` (imports `SmoothDependenceCk` +
+Mathlib `NormedSpace.exp`; heavy files untouched; wired into the root).  It closes the *smooth-dependence*
+half of the frozen chart operator's realization at the model-space level — the recurring
+"Mathlib has ODE-flow dependence only at the Banach level, not `C^k`" blocker, resolved for the
+**autonomous bounded-linear** generator that the frozen geometric Ricci–DeTurck chart operator is.
+
+* **`isIntegralCurve_exp_smul_const`** (helper) — for a fixed generator `A₀ : E →L[ℝ] E` and initial
+  point `x`, the path `t ↦ exp ((t - t₀) • A₀) x` is a global integral curve of the autonomous vector
+  variational field `variationalFieldVec (fun _ => A₀)` (i.e. `γ'(t) = A₀ (γ t)`).  From Mathlib's
+  `hasDerivAt_exp_smul_const'` (`d/du exp (u • A₀) = A₀ * exp (u • A₀)`) precomposed with the shift
+  `t ↦ t - t₀` (`HasDerivAt.scomp`) and evaluated at the fixed direction via `HasDerivAt.clm_apply`.
+* **`fundamentalSolution_const_eq_exp`** — for a *time-independent* generator the campaign resolvent
+  `fundamentalSolution hA hΦ h0 t` (built abstractly from any `IsIntegralCurve` flow family via Picard–
+  Lindelöf/Grönwall) equals `NormedSpace.exp ((t - t₀) • A₀)`.  Both sides are integral curves of the
+  same globally `‖A₀‖`-Lipschitz autonomous field and send `t₀ ↦ x`; global uniqueness
+  `eq_of_isIntegralCurve_of_eq_at` forces equality.  This is the bridge from the `IsIntegralCurve`-based
+  resolvent used throughout the smooth-dependence layer to Mathlib's *analytic* `NormedSpace.exp`.
+* **`contDiff_exp_smul_const`** — `A₀ ↦ exp (s • A₀)` is `ContDiff ℝ n` (from `NormedSpace.exp_analytic`,
+  infinite-radius power series ⟹ `AnalyticOnNhd` ⟹ `ContDiff`, composed with the smooth rescaling).
+* **`contDiff_exp_smul_of_contDiff`** — parameter smoothness: a `C^n` generator family
+  `A : X → (E →L[ℝ] E)` gives a `C^n` resolvent `x ↦ exp (s • A x)`.
+* **`contDiff_exp_sub_smul_of_contDiff`** — joint `(time, parameter)` smoothness:
+  `(t, x) ↦ exp ((t - t₀) • A x)` is jointly `ContDiff ℝ n` on `ℝ × X`.  This is the exact
+  joint-smoothness shape the `SmoothMetricSectionCurveData.contMDiff` realization field consumes: for a
+  frozen bounded-linear generator whose *fibre* generator `A x` depends `C^n`-smoothly on the spatial
+  point `x`, `fundamentalSolution_const_eq_exp` identifies the Banach evolution with `exp ((t - t₀)•A x)`,
+  so this yields joint `(time, space)` regularity of the evolution with **no parabolic Schauder input** —
+  the 0th-order (frozen) generator's flow gains no derivatives but loses none.
+
+**Value / placement on the critical path.**  This is the *autonomous* (frozen) special case of the
+resolvent smooth-dependence needed for the `realization`/`contMDiff` field.  It is deliberately at the
+model-space `E →L[ℝ] E` level (no `ContinuousSectionSpace` bundle bookkeeping) so it is diamond-free and
+axiom-clean; the remaining connective work is to run the frozen geometric chart operator's *fibrewise*
+generator (continuous coefficient `P = ∇W`, smooth in `x`) through `fundamentalSolution_const_eq_exp` +
+`contDiff_exp_sub_smul_of_contDiff` at the section-space/bundle level.  **NEXT.**  Lift these to the
+tangent-`BilinearFormBundle` `ContinuousSectionSpace`: package `deTurckReactionSectionMap ∇W` as a
+`CSS →L[ℝ] CSS` bounded linear generator and identify the frozen Banach evolution curve's coordinate
+readout with `exp ((t - t₀) • L_x)` fibrewise, then feed spatial `C²` of `P` to
+`contDiff_exp_sub_smul_of_contDiff` for the `SmoothMetricSectionCurveData.contMDiff` field.  (GAP 2's
+*honest* geometric chart — the state-dependent 2nd-order/mild operator satisfying `geometric` for all
+`s` — still requires the parabolic Schauder smoothing gain and remains the point-4 long pole.)
