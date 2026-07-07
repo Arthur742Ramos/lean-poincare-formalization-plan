@@ -571,4 +571,90 @@ theorem deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordi
   exact deTurckReactionSectionMap_coord_dist_le_inCoordinates
     x0 Kc hKc Ko hKo hKoEq hcover hP s s' i x Kp (hKp i x)
 
+/-- **Global `LipschitzWith 2·Kp` for the bare frozen geometric DeTurck reaction operator.**  The
+unconstrained (`LipschitzWith`) strengthening of
+`deTurckReactionSectionMap_lipschitzOnWith_of_uniform_inCoordinates`: from a uniform bound `Kp` on the
+frozen coefficient `P`'s model-fibre readout over the finite compact cover, the reaction operator
+`deTurckReactionSectionMap …` is globally `LipschitzWith ⟨2·Kp, _⟩` on the whole `ContinuousSectionSpace`
+via the global finite-cover coordinate handoff `lipschitzWith_of_forall_coord_dist_le` — the exact
+`hlip` shape the Banach-space Picard–Lindelöf foundation consumes, and in particular giving global
+continuity of the mild representative (`LipschitzWith.continuous`). -/
+theorem deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (Kp : ℝ) (hKp0 : 0 ≤ Kp)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp) :
+    LipschitzWith ⟨2 * Kp, mul_nonneg (by norm_num) hKp0⟩
+      (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP) := by
+  rw [← lipschitzOnWith_univ]
+  exact deTurckReactionSectionMap_lipschitzOnWith_of_uniform_inCoordinates
+    x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKp Set.univ
+
+/-- **Global `LipschitzWith 2·Kp` for the affine frozen geometric DeTurck chart operator
+`A τ s = deTurckReactionSectionMap ∇W s + b`.**  The unconstrained strengthening of
+`deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordinates`: the fixed source `b`
+cancels in every coordinate distance (`coord_add_apply_topFibre` + fibre `dist_add_right`), so the affine
+chart operator is globally `LipschitzWith ⟨2·Kp, _⟩` on the whole section space — the `hlip` datum of the
+Banach-space Picard–Lindelöf foundation for the concrete tangent-bundle chart operator `A`, and giving
+its global continuity as a section-space map (`LipschitzWith.continuous`). -/
+theorem deTurckReactionSectionMap_add_source_lipschitzWith_of_uniform_inCoordinates
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (Kp : ℝ) (hKp0 : 0 ≤ Kp)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp)
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    LipschitzWith ⟨2 * Kp, mul_nonneg (by norm_num) hKp0⟩
+      (fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s + b) := by
+  rw [← lipschitzOnWith_univ]
+  exact deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordinates
+    x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKp b Set.univ
+
+/-- **The affine frozen geometric DeTurck chart operator `A τ s = deTurckReactionSectionMap ∇W s + b`
+is continuous as a section-space map.**  Immediate from its global Lipschitz bound
+`deTurckReactionSectionMap_add_source_lipschitzWith_of_uniform_inCoordinates`
+(`LipschitzWith.continuous`); the concrete geometric chart operator `A`, being globally Lipschitz, is in
+particular a continuous self-map of the `ContinuousSectionSpace`. -/
+theorem deTurckReactionSectionMap_add_source_continuous_of_uniform_inCoordinates
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (Kp : ℝ) (hKp0 : 0 ≤ Kp)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp)
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    Continuous
+      (fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s + b) :=
+  (deTurckReactionSectionMap_add_source_lipschitzWith_of_uniform_inCoordinates
+    x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKp b).continuous
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
