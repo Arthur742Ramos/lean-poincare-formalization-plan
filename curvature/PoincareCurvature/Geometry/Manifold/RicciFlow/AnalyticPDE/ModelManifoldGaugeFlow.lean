@@ -988,6 +988,28 @@ theorem exists_Ioo_forall_mem_of_continuousAt_source
         exact hcont)
   exact ⟨a, b, hmem, fun τ hτ => (hgraph τ hτ x rfl).2⟩
 
+/-- **Compact-window orbit-graph containment (manifold-target) — the bridge to
+`cutoff_eqOne_along_curve_of_graph_subset`.**  Where
+`exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_manifoldTarget` confines the orbit
+graphs into an *open* space-time target, this variant delivers containment in a *compact window* `K`
+whose **interior** contains the anchored graph — the exact `∀ τ ∈ s, (τ, g τ) ∈ K` datum that
+`cutoff_eqOne_along_curve_of_graph_subset` consumes (a cutoff `χ` with `∀ᶠ r in 𝓝ˢ K, χ r = 1` is then
+`≡ 1` along every confined orbit).  Proof: apply the open-target confinement to `interior K`
+(`isOpen_interior`), then `interior_subset`.  This closes the "open target ⟹ compact-window graph
+containment" glue for the raw-manifold side of GAP-1 step (v), uniformly over a compact chart patch. -/
+theorem exists_Ioo_forall_forall_graph_mem_compact_of_isCompact_of_continuousAt_manifoldTarget
+    {Y : Type*} [TopologicalSpace Y]
+    {Ψ : ℝ → Y → Y} {Q : Set Y} {K : Set (ℝ × Y)} {t₀ : ℝ}
+    (hQ : IsCompact Q)
+    (hgraph0 : ∀ q ∈ Q, ((t₀, Ψ t₀ q) : ℝ × Y) ∈ interior K)
+    (hcont : ∀ q ∈ Q, ContinuousAt (fun z : ℝ × Y => Ψ z.1 z.2) (t₀, q)) :
+    ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧
+      ∀ τ ∈ Set.Ioo a b, ∀ q ∈ Q, ((τ, Ψ τ q) : ℝ × Y) ∈ K := by
+  obtain ⟨a, b, hmem, hgraph⟩ :=
+    exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_manifoldTarget
+      hQ isOpen_interior hgraph0 hcont
+  exact ⟨a, b, hmem, fun τ hτ q hq => interior_subset (hgraph τ hτ q hq)⟩
+
 end
 
 end SmoothDependenceCk
