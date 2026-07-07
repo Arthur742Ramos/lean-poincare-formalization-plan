@@ -560,6 +560,35 @@ theorem raisedGaugeField_inner_eq
   ext w
   exact raisedVector_inner_eq g ω (trivializationAt F V y) bas hy0 w
 
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **`raisedGaugeField` is the unique metric dual of the one-form.**  Any vector `v : V y` whose
+metric pairing `g.inner y v` (as a continuous linear functional) equals `ω y` coincides with the
+globally-defined raised gauge field `raisedGaugeField g ω bas y`.  This is nondegeneracy
+(`eq_of_forall_inner_eq`) applied to `raisedGaugeField_inner_eq`: since both `v` and the raised field
+represent `ω y` under `g`, they are equal.  This is the bridge that lets *any* concretely-constructed
+metric dual — e.g. a Riesz-map raise `♯ω` — be identified with the coordinate-free `raisedGaugeField`
+consumed by the compact-manifold gauge-flow assembly. -/
+theorem raisedGaugeField_eq_of_inner_eq
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ∀ y : B, V y →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    {y : B} {v : V y} (hv : g.inner y v = ω y) :
+    v = raisedGaugeField g ω bas y := by
+  refine eq_of_forall_inner_eq g fun w => ?_
+  rw [hv, raisedGaugeField_inner_eq g ω bas y]
+
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **Pointwise-pairing form of `raisedGaugeField_eq_of_inner_eq`.**  If `v : V y` pairs with every
+`w` as `g.inner y v w = ω y w`, then `v = raisedGaugeField g ω bas y`.  This is the form most directly
+usable when a candidate dual is only known to represent `ω` slotwise. -/
+theorem raisedGaugeField_eq_of_forall_inner_eq
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ∀ y : B, V y →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    {y : B} {v : V y} (hv : ∀ w, g.inner y v w = ω y w) :
+    v = raisedGaugeField g ω bas y :=
+  raisedGaugeField_eq_of_inner_eq g ω bas (by ext w; exact hv w)
+
 /-- **Per-patch joint `(t, x)` smoothness of the global raised gauge field, as a tangent-style
 section.**  Over the canonical trivialization patch around any base point `x`, the globally-defined
 raised gauge field `raisedGaugeField (g ·) (ω ·) bas`, read as the section
