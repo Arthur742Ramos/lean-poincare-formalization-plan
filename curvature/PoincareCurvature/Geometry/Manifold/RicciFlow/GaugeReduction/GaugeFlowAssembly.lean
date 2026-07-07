@@ -518,4 +518,51 @@ theorem continuousOn_chartPushforwardField
   rw [hL, TangentBundle.trivializationAt_apply, tangentCoordChange_def]
   rfl
 
+/-- **`ContDiffOn` of the chart pushforward field from a `C^n` tangent-bundle section.**
+
+The smooth analogue of `continuousOn_chartPushforwardField`, upgrading continuity to `C^n`
+regularity — the form needed to discharge the `LipschitzOnWith` (`hlip`) hypothesis of
+`extChartAt_comp_eqOn_of_lipschitzOnWith` (a `C^1` field on a convex compact tube is Lipschitz).
+Again the varying-source-centre coordinate change is smooth only through the tangent-bundle chart
+representation: the fixed-trivialization section characterisation
+`Bundle.Trivialization.contMDiffOn_iff` (centred at `p`, not at the varying base point, using
+`MemTrivializationAtlas (trivializationAt E (TangentSpace I) p)`) turns `C^n`-ness of the section
+`y ↦ ⟨y, X τ y⟩` into `C^n`-ness of `y ↦ (trivializationAt E (TangentSpace I) p ⟨y, X τ y⟩).2`, whose
+value along the chart is exactly `chartPushforwardField` (`TangentBundle.trivializationAt_apply`).
+Composing with the `C^n` chart inverse and reading off `contMDiffOn_iff_contDiffOn` yields the model
+`ContDiffOn ℝ n` statement. -/
+theorem contDiffOn_chartPushforwardField {n : WithTop ℕ∞}
+    [IsManifold I n M] [ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M} {τ : ℝ}
+    (hX : ContMDiffOn I (I.prod 𝓘(ℝ, E)) n
+      (fun y : M => (⟨y, X τ y⟩ : TangentBundle I M)) (extChartAt I p).source) :
+    ContDiffOn ℝ n (chartPushforwardField I X p τ) (extChartAt I p).target := by
+  have hmaps : Set.MapsTo (fun y : M => (⟨y, X τ y⟩ : TangentBundle I M))
+      (extChartAt I p).source (trivializationAt E (TangentSpace I) p).source := by
+    intro y hy
+    rw [TangentBundle.trivializationAt_source]
+    rw [extChartAt_source] at hy
+    exact hy
+  have hsnd : ContMDiffOn I 𝓘(ℝ, E) n
+      (fun y => (trivializationAt E (TangentSpace I) p (⟨y, X τ y⟩ : TangentBundle I M)).2)
+      (extChartAt I p).source :=
+    (((trivializationAt E (TangentSpace I) p).contMDiffOn_iff hmaps).mp hX).2
+  have hcomp : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ, E) n
+      (fun q => (trivializationAt E (TangentSpace I) p
+        (⟨(extChartAt I p).symm q, X τ ((extChartAt I p).symm q)⟩ : TangentBundle I M)).2)
+      (extChartAt I p).target :=
+    hsnd.comp (contMDiffOn_extChartAt_symm p)
+      (fun q hq => (extChartAt I p).map_target hq)
+  rw [← contMDiffOn_iff_contDiffOn]
+  refine hcomp.congr (fun q hq => ?_)
+  have hy : (extChartAt I p).symm q ∈ (extChartAt I p).source := (extChartAt I p).map_target hq
+  have hqe : extChartAt I p ((extChartAt I p).symm q) = q := (extChartAt I p).right_inv hq
+  have hL : chartPushforwardField I X p τ q
+      = tangentCoordChange I ((extChartAt I p).symm q) p ((extChartAt I p).symm q)
+          (X τ ((extChartAt I p).symm q)) := by
+    conv_lhs => rw [← hqe]
+    exact chartPushforwardField_extChartAt X τ hy
+  rw [hL, TangentBundle.trivializationAt_apply, tangentCoordChange_def]
+  rfl
+
 end PoincareCurvature.GaugeFlowAssembly
