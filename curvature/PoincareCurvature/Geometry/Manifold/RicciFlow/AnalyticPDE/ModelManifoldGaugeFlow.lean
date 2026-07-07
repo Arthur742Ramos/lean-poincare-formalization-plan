@@ -1355,6 +1355,90 @@ theorem exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem
     (fun q hq => by rw [hanchor]; exact hwin0 q hq)
     (fun q hq => by rw [hanchor]; exact hstate0 q hq)
 
+/-- **Per-patch slice-`C³` of the compact-manifold gauge flow, assembled from the field jet alone
+(GAP-1 step (v) capstone assembly).**  This is the FINAL step-(v) assembly: from the two field-jet
+regularity inputs on a single compact chart patch `Q_M ⊆ (extChartAt I p).source` (the *global* `C¹`
+product-tangent smoothness `hXraw` feeding the raw manifold flow, and the *local* `C^N` (`N ≥ 4`)
+tangent-bundle smoothness `hXchart` on the chart source feeding the model comparison flow), a cutoff
+`χ` that is `≡ 1` near a compact window `Kwin`, and the two field-analytic residuals — the chart
+pushforward field's Lipschitz control on the state tube `state₀` (`hlip`) and the initial-data
+placement (`hplace_state`, `hplace_win`) — it produces the raw manifold gauge flow `Φ` and an honest
+open time window `Set.Ioo a b ∋ 0` on which every time slice `Φ t` is `ContMDiffOn I I 3` on the patch
+`U`.
+
+The proof wires together the two field-to-faces bundles committed for GAP 1:
+`exists_timeDependent_flow_compact_extChartAt_source_and_mem` (raw side: `Φ`, `hγ`, `hγ_src`, `hγ_mem`
+into `W = Set.univ ×ˢ state₀`) and `exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem`
+(model side: `G`, `hχ`, `hg_mem` over `Q := extChartAt I p '' Q_M`, compact by
+`isCompact_extChartAt_image`); it intersects their two time windows (`max`/`min` endpoints), takes the
+common anchor `0` — at which `heq` holds for free (`extChartAt_flow_eq_maps3_at_zero`) — and feeds all
+six orbit-control faces into `contMDiffOn_flowSlice_of_cutoff_orbit_control` with `sTime = Set.univ`
+(so `hnhds` is `Filter.univ_mem`) and constant `state τ = state₀`.  Only the field-analytic residuals
+`hlip` / `hplace_*` and the two field jets remain as hypotheses — exactly the GAP-1 step-(v) residual
+the plan isolates before the finite-cover globalisation. -/
+theorem contMDiffOn_flowSlice_perPatch_of_field_jets
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] [CompactSpace M] [IsManifold I 1 M]
+    {N : WithTop ℕ∞} [IsManifold I N M]
+    [ContMDiffVectorBundle N E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M} {χ : ℝ × E → ℝ}
+    {U Q_M : Set M} {Kwin : Set (ℝ × E)} {state₀ : Set E} {K : ℝ≥0}
+    (hXraw : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun q : ℝ × M => (⟨q, ((1 : ℝ), X q.1 q.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    (hXchart : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) N
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source))
+    (hχC : ContDiff ℝ N χ) (hχc : HasCompactSupport χ)
+    (hsub : tsupport χ ⊆ Set.univ ×ˢ (extChartAt I p).target)
+    (hcut : ∀ᶠ r in 𝓝ˢ Kwin, χ r = 1) (hN : 4 ≤ N)
+    (hstate : IsOpen state₀)
+    (hlip : ∀ τ : ℝ, LipschitzOnWith K
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) state₀)
+    (hU : U ⊆ (chartAt H p).source) (hUQ : U ⊆ (Q_M : Set M))
+    (hQ_M : IsCompact Q_M) (hQ_M_src : Q_M ⊆ (extChartAt I p).source)
+    (hplace_state : ∀ x ∈ Q_M, extChartAt I p x ∈ state₀)
+    (hplace_win : ∀ x ∈ Q_M, ((0 : ℝ), extChartAt I p x) ∈ interior Kwin) :
+    ∃ (Φ : ℝ → M → M) (a b : ℝ), (0 : ℝ) ∈ Set.Ioo a b ∧ (∀ x, Φ 0 x = x) ∧
+      ∀ t ∈ Set.Ioo a b, ContMDiffOn I I 3 (fun x : M => Φ t x) U := by
+  obtain ⟨Φ, a₁, b₁, hmem0₁, hanchor, hγ_raw, hsrcmem⟩ :=
+    exists_timeDependent_flow_compact_extChartAt_source_and_mem (X := X) (p := p)
+      hXraw hQ_M hQ_M_src (isOpen_univ.prod hstate)
+      (fun x hx => ⟨Set.mem_univ _, hplace_state x hx⟩)
+  obtain ⟨G, a₂, b₂, hmem0₂, hχ_mod, hg_mem_mod⟩ :=
+    exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem (X := X) (p := p)
+      hXchart hχC hχc hsub hN (0 : ℝ)
+      (isCompact_extChartAt_image hQ_M hQ_M_src) hcut hstate
+      (fun q hq => by obtain ⟨x, hx, rfl⟩ := hq; exact hplace_win x hx)
+      (fun q hq => by obtain ⟨x, hx, rfl⟩ := hq; exact hplace_state x hx)
+  refine ⟨Φ, max a₁ a₂, min b₁ b₂,
+    ⟨max_lt hmem0₁.1 hmem0₂.1, lt_min hmem0₁.2 hmem0₂.2⟩, hanchor, ?_⟩
+  intro t ht
+  have hsub₁ : Set.Ioo (max a₁ a₂) (min b₁ b₂) ⊆ Set.Ioo a₁ b₁ :=
+    Set.Ioo_subset_Ioo (le_max_left a₁ a₂) (min_le_left b₁ b₂)
+  have hsub₂ : Set.Ioo (max a₁ a₂) (min b₁ b₂) ⊆ Set.Ioo a₂ b₂ :=
+    Set.Ioo_subset_Ioo (le_max_right a₁ a₂) (min_le_right b₁ b₂)
+  have ht₀ : (0 : ℝ) ∈ Set.Ioo (max a₁ a₂) (min b₁ b₂) :=
+    ⟨max_lt hmem0₁.1 hmem0₂.1, lt_min hmem0₁.2 hmem0₂.2⟩
+  refine contMDiffOn_flowSlice_of_cutoff_orbit_control (X := X) (p := p) (χ := χ)
+    (state := fun _ : ℝ => state₀) G Φ hU ht ht₀ (fun τ _ => Filter.univ_mem)
+    (fun τ _ => hlip τ) ?_ ?_ ?_ ?_ ?_ ?_
+  · intro x hx τ hτ
+    exact (hγ_raw x (hUQ hx) τ (hsub₁ hτ)).mono hsub₁
+  · intro x hx τ hτ
+    exact (hsrcmem τ (hsub₁ hτ)).1 x (hUQ hx)
+  · intro x hx τ hτ
+    exact hχ_mod (extChartAt I p x) ⟨x, hUQ hx, rfl⟩ τ (hsub₂ hτ)
+  · intro x hx τ hτ
+    exact ((hsrcmem τ (hsub₁ hτ)).2 x (hUQ hx)).2
+  · intro x hx τ hτ
+    exact hg_mem_mod (extChartAt I p x) ⟨x, hUQ hx, rfl⟩ τ (hsub₂ hτ)
+  · intro x _
+    exact extChartAt_flow_eq_maps3_at_zero (p := p) G hanchor x
+
 end
 
 end SmoothDependenceCk
