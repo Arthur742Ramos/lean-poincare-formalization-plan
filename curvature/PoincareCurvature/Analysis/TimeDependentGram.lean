@@ -457,6 +457,49 @@ theorem raisedVector_inner_eq
   congr 1
   exact raisedVector_inner_localFrame_eq g ω e bas hx k
 
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **Nondegeneracy of a Riemannian metric on the left.**  If two vectors pair identically with every
+vector under `g.inner x`, they are equal.  (Positive-definiteness rules out a nonzero difference:
+`g.inner x (u - u') (u - u') = 0` forces `u = u'`.)  This is the uniqueness half of the metric-dual
+correspondence. -/
+theorem eq_of_forall_inner_eq
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    {x : B} {u u' : V x} (h : ∀ w, g.inner x u w = g.inner x u' w) : u = u' := by
+  by_contra hne
+  have e1 : g.inner x (u - u') = g.inner x u - g.inner x u' := map_sub (g.inner x) u u'
+  have hz : g.inner x (u - u') (u - u') = 0 := by
+    rw [e1, ContinuousLinearMap.sub_apply, h (u - u'), sub_self]
+  have hpos := g.pos x (u - u') (sub_ne_zero.mpr hne)
+  rw [hz] at hpos
+  exact lt_irrefl 0 hpos
+
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **Trivialization independence of the raised gauge vector.**  The metric-raised vector field of a
+one-form `ω`, computed via the local-frame Gram inverse of *any* trivialization `e` and model basis
+`bas`, is independent of that choice: two trivializations `e, e'` (with bases `bas, bas'`, possibly
+over different index types) covering `x` produce the *same* raised vector.  Both are the unique
+metric dual of `ω` at `x` (`raisedVector_inner_eq`), so nondegeneracy (`eq_of_forall_inner_eq`)
+identifies them.  This is exactly the compatibility that lets the per-chart raised sections be glued
+into a single globally-defined gauge field on the manifold. -/
+theorem raisedVector_trivialization_independent
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (ω : ∀ y : B, V y →L[ℝ] ℝ)
+    (e : Trivialization F (π F V)) [MemTrivializationAtlas e]
+    (e' : Trivialization F (π F V)) [MemTrivializationAtlas e']
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    {ι' : Type*} [Fintype ι'] [DecidableEq ι'] (bas' : Module.Basis ι' ℝ F)
+    {x : B} (hx : x ∈ e.baseSet) (hx' : x ∈ e'.baseSet) :
+    (∑ i, ((show Matrix ι ι ℝ from
+          (fun a b ↦ g.inner x (e.localFrame bas a x) (e.localFrame bas b x)))⁻¹
+        : Matrix ι ι ℝ).mulVec (fun j ↦ ω x (e.localFrame bas j x)) i
+      • e.localFrame bas i x)
+      = ∑ i, ((show Matrix ι' ι' ℝ from
+          (fun a b ↦ g.inner x (e'.localFrame bas' a x) (e'.localFrame bas' b x)))⁻¹
+        : Matrix ι' ι' ℝ).mulVec (fun j ↦ ω x (e'.localFrame bas' j x)) i
+      • e'.localFrame bas' i x := by
+  refine eq_of_forall_inner_eq g fun w => ?_
+  rw [raisedVector_inner_eq g ω e bas hx w, raisedVector_inner_eq g ω e' bas' hx' w]
+
 end Gram
 
 end PoincareCurvature.ParametrizedInner
