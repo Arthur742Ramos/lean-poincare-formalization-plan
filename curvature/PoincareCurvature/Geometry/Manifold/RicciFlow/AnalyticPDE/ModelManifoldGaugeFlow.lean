@@ -810,6 +810,22 @@ theorem contMDiffOn_flowSlice_of_cutoff_orbit_control
     (hγ x hx) (hγ_src x hx) ht₀ hlip (hχ x hx) (hγ_mem x hx) (hg_mem x hx) (heq x hx)
   exact hEqOn ht
 
+/-- **Reducing the `hχ` orbit-containment face of the step-(v) capstone to graph-containment in the
+compact cutoff window.**  The cutoff `χ` produced by
+`exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window` satisfies `∀ᶠ r in 𝓝ˢ K, χ r = 1` for
+the chosen compact window `K`.  Hence whenever the graph `τ ↦ (τ, g τ)` of the model comparison curve
+over the time set lies inside `K`, the cutoff equals one along it — `Filter.Eventually.self_of_nhdsSet`
+turns `χ ≡ 1` on a neighbourhood of `K` into `χ ≡ 1` on `K` itself.  This packages the `hχ` hypothesis of
+`extChartAt_comp_eqOn_maps3_of_cutoff_eqOne` / `contMDiffOn_flowSlice_of_cutoff_orbit_control` into the
+single geometric orbit-containment fact "the model curve's graph stays in the cutoff window", isolating
+the remaining delicate GAP-1 step (v) content to that flow-trajectory-confinement estimate. -/
+theorem cutoff_eqOne_along_curve_of_graph_subset
+    {χ : ℝ × E → ℝ} {g : ℝ → E} {s : Set ℝ} {K : Set (ℝ × E)}
+    (hχ : ∀ᶠ r in 𝓝ˢ K, χ r = 1)
+    (hgraph : ∀ τ ∈ s, ((τ, g τ) : ℝ × E) ∈ K) :
+    ∀ τ ∈ s, χ (τ, g τ) = 1 :=
+  fun τ hτ => hχ.self_of_nhdsSet (τ, g τ) (hgraph τ hτ)
+
 end
 
 end SmoothDependenceCk
