@@ -888,6 +888,23 @@ theorem continuous_maps3_of_lipschitzWith
     fun q => SmoothSelfDiffeomorph3Family.AnchoredAt.apply (Φ := G.maps3) G.anchored q
   exact continuous_flow (Φ := fun q τ => (G.maps3 τ) q) hX hΦ h0
 
+/-- **Joint continuity of the model gauge flow from the cut field's `ContDiff`/compact-support data.**
+The natural interface form of `continuous_maps3_of_lipschitzWith`: for a model gauge flow `G` of a field
+`v : ℝ → E → E` whose uncurried form is `ContDiff ℝ N` (`1 ≤ N`) with compact support — exactly the shape
+`contDiff_hasCompactSupport_cutoff_chartPushforwardField` produces for the bump-globalised cut field
+`χ • chartPushforwardField` — the total flow map `(τ, q) ↦ (G.maps3 τ) q` is jointly continuous.  The
+required uniform-in-time Lipschitz constant of the field is *derived* (not assumed) from the compact
+support via `exists_lipschitzWith_prodMk_left`, so no free-floating Lipschitz hypothesis is needed. -/
+theorem continuous_maps3_of_contDiff_hasCompactSupport
+    [FiniteDimensional ℝ E] [CompleteSpace E]
+    {v : ℝ → E → E} {t₀ : ℝ} {N : WithTop ℕ∞}
+    (hF : ContDiff ℝ N (Function.uncurry v))
+    (hcs : HasCompactSupport (Function.uncurry v)) (hN : 1 ≤ N)
+    (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E) (X := v) Set.univ t₀) :
+    Continuous (fun p : ℝ × E => (G.maps3 p.1) p.2) := by
+  obtain ⟨C, hC⟩ := exists_lipschitzWith_prodMk_left hF hcs hN
+  exact continuous_maps3_of_lipschitzWith G (fun t => hC t)
+
 /-- **Uniform short-time orbit-graph confinement for the model gauge flow.**  The direct composition of
 `continuous_maps3_of_lipschitzWith` (joint continuity of `(τ, q) ↦ (G.maps3 τ) q`) with the tube-lemma
 confinement `exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt`: for a model gauge flow `G`
