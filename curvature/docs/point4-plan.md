@@ -977,3 +977,61 @@ neighbourhood of the trajectory, obtaining a globally-`C^{3,1}` `v : ℝ → E �
 Lipschitz constant; prove its flow agrees with the raw-flow chart representation on the trajectory window
 (via `extChartAt_comp_eqOn_of_lipschitzOnWith` with `g := Ψ`), giving `hslicesC3`.  Do NOT rebuild
 trivial-case chart closures.
+
+### Progress (2026-07-06, later 11) — Item 2 GAP 1: the compact-support gauge-flow ENTRY POINT is DONE — `exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport` inhabits the raw `C³` gauge flow from a compactly-supported `C^N` (`N ≥ 4`) field ALONE, and the bump-globalisation cutoff-product brick is proved
+
+**What landed (all in `AnalyticPDE/ModelManifoldGaugeFlow.lean`, sorry-free, axiom-clean:
+`{propext, Classical.choice, Quot.sound}`).**  The previous session named the next target as the
+bump-function globalisation feeding `exists_flow_diffeomorph_three`.  A ground-truth read showed the
+`ContDiff`-packaged corollary `exists_diffeomorph3GaugeFlowOn_of_contDiff` already discharges the entire
+explicit `C^{3,1}` multilinear jet from a single `ContDiff ℝ n (uncurry v)` plus **five uniform-in-time
+Lipschitz bounds** on the spatial-derivative fields.  So the real remaining analytic content is *only*
+those five uniform bounds, which for a **compactly-supported** field are pure model-space facts.  Seven
+reusable bricks, ending in the full compact-support entry point:
+
+* **`norm_iteratedFDeriv_prodMk_left_le`** — `‖iteratedFDeriv ℝ n (fun y ↦ F (s, y)) x‖ ≤
+  ‖iteratedFDeriv ℝ n F (s, x)‖`.  The time-slice factors as `(p ↦ F (p + (s,0))) ∘ inr` with
+  `inr : E →L ℝ × E` the norm-`≤ 1` inclusion; `ContinuousLinearMap.iteratedFDeriv_comp_right` +
+  `iteratedFDeriv_comp_add_right` + `ContinuousMultilinearMap.norm_compContinuousLinearMap_le` +
+  `ContinuousLinearMap.norm_inr_le_one`.
+* **`exists_bound_iteratedFDeriv_prodMk_left`** — `HasCompactSupport F` ⇒ the slice iterated derivatives
+  are **uniformly bounded** in `(s, y)` (`HasCompactSupport.iteratedFDeriv` +
+  `HasCompactSupport.exists_bound_of_continuous`, dominated via the slice bound).
+* **`exists_lipschitzWith_iteratedFDeriv_prodMk_left`** — a single uniform Lipschitz constant for
+  `iteratedFDeriv ℝ n (fun y ↦ F (s,y))` over all `s` (order-`(n+1)` uniform bound +
+  `norm_fderiv_iteratedFDeriv` + `lipschitzWith_of_nnnorm_fderiv_le`).  This is the `hD2vmlip`/`hD3vlip`
+  shape (orders 2, 3).
+* **`exists_lipschitzWith_prodMk_left`** — the same for the slices *themselves* (`hv`), via
+  `norm_iteratedFDeriv_one`.
+* **`lipschitzWith_fderiv_iteratedFDeriv_of_lipschitzWith_iteratedFDeriv_succ`** — transports a
+  `LipschitzWith` bound on `iteratedFDeriv (n+1) f` to `fderiv (iteratedFDeriv n f)` across the currying
+  `LinearIsometryEquiv` (`fderiv_iteratedFDeriv` `rfl` + `Isometry.lipschitzWith_iff`).  The `hD3vmlip`
+  shape (same constant `M₃` as `hD3vlip`).
+* **`exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport`** — **the entry point**: from
+  `ContDiff ℝ N (uncurry v)` (`N ≥ 4`) + `HasCompactSupport (uncurry v)` ALONE (no separately-supplied
+  jet constants), `Nonempty (Diffeomorph3GaugeFlowOn (X := v) s t₀)` on the model manifold `E`.  The two
+  nested-`fderiv` hypotheses `hDvlip`/`hD2vclip` are discharged through the two-fold curry `curry2`
+  (norm-nonexpansive `norm_curry2_le`, linear `curry2_sub` ⇒ `LipschitzWith 1`) + the uniform order-2
+  bound; the rest from the bricks above.  Constants supplied explicitly.
+* **`contDiff_and_hasCompactSupport_cutoff_smul`** — the bump-globalisation step: a cutoff multiple
+  `χ • w` of a locally-`C^n` field `w` (`ContDiffOn ℝ n w U`) by a globally-`C^n`, compactly-supported
+  cutoff `χ` with `tsupport χ ⊆ U` is globally `C^n` AND compactly supported (extension-by-zero:
+  `ContDiffOn.contDiffAt` inside `U`, `image_eq_zero_of_notMem_tsupport` off `tsupport χ`).
+
+**Fractions of GAP 1.**  The temporal→spatial bridge (integral-curve uniqueness + fixed-chart-target
+`C³` transfer) and the chart-field regularity chain were already done; NOW the entire model flow `Ψ`
+construction is reduced to producing a *compactly-supported `C^N` (`N ≥ 4`) representative* of the chart
+pushforward field and calling the entry point — the two hardest ingredients (the explicit jet + its
+global Lipschitz constants, and the compact-support globalisation smoothness) are supplied.
+
+**Concrete next target.**  Assemble the model flow `Ψ`: (i) establish **joint** `(τ, y)`-smoothness of
+the section `y ↦ ⟨y, X τ y⟩` ⇒ joint `ContDiffOn ℝ N (chartPushforwardField)` on
+`ℝ ×ˢ (extChartAt I p).target` (the current `contDiffOn_chartPushforwardField` is per-fixed-`τ`; lift to
+joint via the joint-smooth section); (ii) pick a smooth cutoff `χ : ℝ × E → ℝ` compactly supported in a
+neighbourhood of the (compact) trajectory inside `ℝ ×ˢ target` and `≡ 1` near it
+(`IsOpen.exists_contDiff_...`); (iii) feed `w := uncurry (chartPushforwardField …)` and `χ` to
+`contDiff_and_hasCompactSupport_cutoff_smul` (with `H := ℝ × E`) ⇒ compactly-supported `C^N` field `v`;
+(iv) `exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport` ⇒ the raw `C³` gauge flow / `Ψ`;
+(v) flow agreement on the trajectory window via `extChartAt_comp_eqOn_of_lipschitzOnWith` (the field
+equals the un-cut chart pushforward field where `χ ≡ 1`) + `contMDiffOn_of_extChartAt_conjugation'` ⇒
+`hslicesC3`.  Do NOT rebuild trivial-case chart closures.
