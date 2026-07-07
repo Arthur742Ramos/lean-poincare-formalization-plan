@@ -1168,6 +1168,47 @@ theorem exists_Ioo_forall_forall_extChartAt_source_and_mem_of_continuousAt
     (exists_Ioo_forall_forall_mem_extChartAt_source_of_continuousAt hQ hQsub hanchor hcont)
     (exists_Ioo_forall_forall_extChartAt_mem_of_continuousAt hQ hQsub hW hanchor hgraph0 hcont)
 
+/-- **The compact-manifold time-dependent flow together with its raw-manifold orbit confinement, on one
+window.**  End-to-end assembly: from a jointly-`C¹` time-dependent field `X` on a compact boundaryless
+`T2` manifold, `exists_timeDependent_flow_compact_continuousAt` produces the anchored flow `Φ`
+(`Φ 0 = id`), its orbit ODE on `Ioo (-ε) ε`, and its joint continuity at every anchor `(0, x)`.  Feeding
+the joint continuity into `exists_Ioo_forall_forall_extChartAt_source_and_mem_of_continuousAt` and
+intersecting the resulting confinement window with the ODE window `Ioo (-ε) ε` (via
+`exists_Ioo_forall_and` against the identity confinement of `Ioo (-ε) ε`) yields a **single** open window
+`Set.Ioo a b ∋ 0` on which, over a compact chart patch `Q ⊆ (extChartAt I p).source`:
+the orbit ODE holds (`hγ`, `mono`-restricted from `Ioo (-ε) ε`), every orbit stays in the chart source
+(`hγ_src`), and the chart image of every orbit stays in the open space-time target `W` (`hγ_mem`).  This
+is the raw-manifold-side input package of `contMDiffOn_flowSlice_of_cutoff_orbit_control`, produced
+unconditionally from the field's jet — no assumed flow or confinement. -/
+theorem exists_timeDependent_flow_compact_extChartAt_source_and_mem
+    {H M : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E]
+    [BoundarylessManifold I M] [CompactSpace M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun q : ℝ × M => (⟨q, ((1 : ℝ), X q.1 q.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {Q : Set M} {p : M} {W : Set (ℝ × E)}
+    (hQ : IsCompact Q) (hQsub : Q ⊆ (extChartAt I p).source) (hW : IsOpen W)
+    (hgraph0 : ∀ x ∈ Q, ((0 : ℝ), extChartAt I p x) ∈ W) :
+    ∃ (Φ : ℝ → M → M) (a b : ℝ), (0 : ℝ) ∈ Set.Ioo a b ∧
+      (∀ x, Φ 0 x = x) ∧
+      (∀ x ∈ Q, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ x) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x)))) ∧
+      (∀ τ ∈ Set.Ioo a b,
+        (∀ x ∈ Q, Φ τ x ∈ (extChartAt I p).source) ∧
+        (∀ x ∈ Q, ((τ, extChartAt I p (Φ τ x)) : ℝ × E) ∈ W)) := by
+  obtain ⟨ε, hε, Φ, hanchor, horbit, hcontA⟩ :=
+    PoincareCurvature.ManifoldFlow.exists_timeDependent_flow_compact_continuousAt hX
+  have hconf := exists_Ioo_forall_forall_extChartAt_source_and_mem_of_continuousAt
+    (Φ := Φ) hQ hQsub hW (fun x _ => hanchor x) hgraph0 (fun x _ => hcontA x)
+  obtain ⟨a, b, hmem0, hboth⟩ := exists_Ioo_forall_and hconf
+    ⟨-ε, ε, ⟨neg_lt_zero.mpr hε, hε⟩, fun τ hτ => hτ⟩
+  have hsub : Set.Ioo a b ⊆ Set.Ioo (-ε) ε := fun τ hτ => (hboth τ hτ).2
+  refine ⟨Φ, a, b, hmem0, hanchor, ?_, fun τ hτ => (hboth τ hτ).1⟩
+  intro x _ τ hτ
+  exact (horbit x τ (hsub hτ)).mono hsub
+
 end
 
 end SmoothDependenceCk
