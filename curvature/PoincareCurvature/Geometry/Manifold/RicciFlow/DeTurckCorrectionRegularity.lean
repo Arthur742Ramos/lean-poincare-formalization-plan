@@ -908,4 +908,482 @@ theorem exists_intrinsicRicciDeTurckRHS_continuousSectionSpace_symm
         intrinsicRicciDeTurckRHS_symm (I := I) (M := M) g background t x u v
     _ = rhs x v u := (hrhs_val x v u).symm
 
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The intrinsic Ricci–DeTurck RHS as a named section-space value.**  The `def`-level companion of
+`exists_intrinsicRicciDeTurckRHS_continuousSectionSpace`: for a metric family `g`, a background
+connection family whose time-`t` slice is a `C¹` covariant derivative, this is the geometric
+Ricci–DeTurck right-hand side realised as a genuine element of the transported finite-cover
+`ContinuousSectionSpace`.  Having a *named* section-space value (rather than a bare existential) is what
+the geometric chart operator `A` and the mild-affine source term `b` can reference directly; its
+defining pointwise identity is `intrinsicRicciDeTurckRHSSectionSpace_apply`. -/
+noncomputable def intrinsicRicciDeTurckRHSSectionSpace
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+      (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover :=
+  ⟨Classical.choose
+      (exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero g background t hbackground),
+    (Classical.choose_spec
+      (exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero g background t hbackground)).1.continuous⟩
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- The named section-space Ricci–DeTurck RHS value agrees pointwise with the intrinsic
+`intrinsicRicciDeTurckRHS`.  This is the defining identity that ties the section-space value to the
+geometric right-hand side (the chart's `geometric` field content). -/
+@[simp] theorem intrinsicRicciDeTurckRHSSectionSpace_apply
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g background t hbackground x u v
+      = intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v :=
+  (Classical.choose_spec
+    (exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero g background t hbackground)).2 x u v
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- The named section-space Ricci–DeTurck RHS value is pointwise symmetric (it lies in the pointwise
+symmetric locus), a direct consequence of `intrinsicRicciDeTurckRHS_symm`. -/
+theorem intrinsicRicciDeTurckRHSSectionSpace_symm
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g background t hbackground x u v
+      = intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover
+          g background t hbackground x v u := by
+  rw [intrinsicRicciDeTurckRHSSectionSpace_apply, intrinsicRicciDeTurckRHSSectionSpace_apply,
+    intrinsicRicciDeTurckRHS_symm]
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- **Section-space self-DeTurck reduction (general Levi-Civita background).**  The section-space
+companion of `intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita`: when the background
+connection family is Levi-Civita for `g`, the named section-space Ricci–DeTurck RHS value reads out
+pointwise as the pure intrinsic Ricci-flow right-hand side `(-2)•Ric`.  The DeTurck reaction term
+vanishes in the metric's Levi-Civita gauge, so the affine chart split `A τ s = reaction s + b`
+degenerates to its principal source `b` on the identification. -/
+theorem intrinsicRicciDeTurckRHSSectionSpace_apply_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (hLC : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g background t hbackground x u v
+      = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v := by
+  rw [intrinsicRicciDeTurckRHSSectionSpace_apply]
+  exact congrArg (fun F => F t x u v)
+    (intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+      (I := I) (M := M) g background hLC)
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- **Section-space self-DeTurck reduction at the chosen Levi-Civita background.**  The directly
+consumable specialization of `intrinsicRicciDeTurckRHSSectionSpace_apply_eq_intrinsicRicciFlowRHS_of_isLeviCivita`
+to `background := chosenLeviCivitaFamily g` (with the canonical `C¹` witness
+`someContMDiffLeviCivitaConnection_contMDiff`, and Levi-Civita hypothesis discharged by
+`chosenLeviCivitaFamily_isLeviCivita`).  This is the exact section-space form the chart-closure
+identification consumes when the background is the flowing metric's own chosen Levi-Civita
+connection. -/
+theorem intrinsicRicciDeTurckRHSSectionSpace_chosenLeviCivitaFamily_apply_eq_intrinsicRicciFlowRHS
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g
+        (chosenLeviCivitaFamily (I := I) (M := M) g) t
+        (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+          (I := I) (M := M) g t)
+        x u v
+      = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v :=
+  intrinsicRicciDeTurckRHSSectionSpace_apply_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+    et Kc hKc Ko hKo hKoEq hcover g (chosenLeviCivitaFamily (I := I) (M := M) g) t
+    (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g t)
+    (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M) g)
+    x u v
+
+/-- **The intrinsic Ricci-flow principal part `(-2)•Ric` is a continuous `BilinearFormBundle`
+section**, unconditionally (no background hypothesis).  This is the second-order principal half of the
+intrinsic Ricci–DeTurck right-hand side split off from the DeTurck reaction: its continuous section is
+`(-2 : ℝ) • ricciBilinearFormSection (someContMDiffLeviCivitaConnection g t)`, continuous by
+`ricciBilinearFormSection_contMDiff_zero` and the vector-bundle scalar-multiple closure
+`ContMDiff.const_smul_section`.  Packaged as a `ContinuousSectionSpace` value
+(`intrinsicRicciFlowRHSSectionSpace`) it is the affine *source* term `b` of the frozen chart split
+`A τ s = reaction s + b` about the initial metric. -/
+theorem exists_intrinsicRicciFlowRHSSection_contMDiff_zero
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) :
+    ∃ rhs : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x,
+      ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+        (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := _root_.Bundle.BilinearFormBundle (V := TM)) x (rhs x)) ∧
+      ∀ (x : M) (u v : TM x),
+        rhs x u v = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v := by
+  letI : _root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x) :=
+    ⟨(g t).toRiemannianMetric⟩
+  haveI hcov :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g t
+  refine ⟨_, (ricciBilinearFormSection_contMDiff_zero (I := I) (M := M)
+      (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+        (I := I) (M := M) g t) (Module.finBasis ℝ E)).const_smul_section (a := (-2 : ℝ)), ?_⟩
+  intro x u v
+  have hval : ricciBilinearFormSection (I := I) (M := M)
+      (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+        (I := I) (M := M) g t) x u v = intrinsicRicciTensor (I := I) (M := M) g t x u v := by
+    rw [ricciBilinearFormSection_apply]; rfl
+  simp only [Pi.smul_apply, ContinuousLinearMap.smul_apply, smul_eq_mul, hval,
+    intrinsicRicciFlowRHS_apply, ricciFlowRHS_apply, intrinsicRicciTensor_apply]
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The intrinsic Ricci-flow principal part as a named section-space value.**  The `def`-level
+companion of `exists_intrinsicRicciFlowRHSSection_contMDiff_zero`: the second-order principal part
+`(-2)•Ric` of the intrinsic Ricci–DeTurck right-hand side realised as a genuine element of the
+transported finite-cover `ContinuousSectionSpace`.  Unlike `intrinsicRicciDeTurckRHSSectionSpace` it
+needs **no** background-connection hypothesis (the intrinsic Levi-Civita connection is automatically
+`C¹`).  This is the directly referenceable affine *source* `b` for the frozen chart split
+`A τ s = reaction s + b`; its defining pointwise identity is `intrinsicRicciFlowRHSSectionSpace_apply`. -/
+noncomputable def intrinsicRicciFlowRHSSectionSpace
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+      (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover :=
+  ⟨Classical.choose (exists_intrinsicRicciFlowRHSSection_contMDiff_zero g t),
+    (Classical.choose_spec (exists_intrinsicRicciFlowRHSSection_contMDiff_zero g t)).1.continuous⟩
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- The named section-space Ricci-flow principal value agrees pointwise with the intrinsic
+`intrinsicRicciFlowRHS`.  The defining identity tying the affine source `b` to the geometric
+second-order principal part. -/
+@[simp] theorem intrinsicRicciFlowRHSSectionSpace_apply
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ)
+    (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g t x u v
+      = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v :=
+  (Classical.choose_spec (exists_intrinsicRicciFlowRHSSection_contMDiff_zero g t)).2 x u v
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The intrinsic DeTurck correction (the frozen reaction of the metric section) as a named
+section-space value.**  The already-continuous zeroth-order DeTurck reaction section
+`intrinsicDeTurckCorrectionSection` (continuous by `intrinsicDeTurckCorrectionSection_contMDiff_zero`)
+packaged into the transported finite-cover `ContinuousSectionSpace`.  Together with
+`intrinsicRicciFlowRHSSectionSpace` (the principal source `b`) it makes the geometric Ricci–DeTurck
+right-hand side a genuine sum of two named `CSS` values; its defining pointwise identity is
+`intrinsicDeTurckCorrectionSectionSpace_apply`. -/
+noncomputable def intrinsicDeTurckCorrectionSectionSpace
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+      (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover :=
+  ⟨intrinsicDeTurckCorrectionSection (I := I) (M := M) g background t,
+    (intrinsicDeTurckCorrectionSection_contMDiff_zero (I := I) (M := M)
+      g background t hbackground).continuous⟩
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- The named section-space DeTurck correction value agrees pointwise with the geometric
+`intrinsicDeTurckCorrection`. -/
+@[simp] theorem intrinsicDeTurckCorrectionSectionSpace_apply
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) (u v : TM x) :
+    intrinsicDeTurckCorrectionSectionSpace et Kc hKc Ko hKo hKoEq hcover g background t hbackground
+        x u v
+      = intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v :=
+  intrinsicDeTurckCorrectionSection_apply (I := I) (M := M) g background t x u v
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The named geometric Ricci–DeTurck RHS value splits as principal source plus reaction, entirely in
+named section-space values.**  The pointwise affine decomposition
+`intrinsicRicciDeTurckRHSSectionSpace = intrinsicRicciFlowRHSSectionSpace +
+intrinsicDeTurckCorrectionSectionSpace`: the geometric operator `A`'s value section equals the sum of
+its second-order principal source `b` and its zeroth-order DeTurck reaction value, both packaged as
+genuine `ContinuousSectionSpace` elements.  This is the directly-consumable named-value form of the
+chart's frozen affine split `A τ s = reaction s + b` at the metric state. -/
+theorem intrinsicRicciDeTurckRHSSectionSpace_eq_intrinsicRicciFlowRHSSectionSpace_add_intrinsicDeTurckCorrectionSectionSpace
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) (u v : TM x) :
+    intrinsicRicciDeTurckRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g background t hbackground x u v
+      = intrinsicRicciFlowRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g t x u v
+        + intrinsicDeTurckCorrectionSectionSpace et Kc hKc Ko hKo hKoEq hcover
+            g background t hbackground x u v := by
+  rw [intrinsicRicciDeTurckRHSSectionSpace_apply, intrinsicRicciFlowRHSSectionSpace_apply,
+    intrinsicDeTurckCorrectionSectionSpace_apply, intrinsicRicciDeTurckRHS_apply]
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The intrinsic Ricci-flow principal source value is pointwise symmetric.**  The named
+second-order source value `b = (-2)•Ric` of the affine chart split `A τ s = reaction s + b` lies in
+the pointwise symmetric locus (the intrinsic Ricci tensor is symmetric, so its `(-2)`-multiple is too),
+a direct consequence of `intrinsicRicciFlowRHS_symm`.  Unlike the full-RHS symmetry
+`intrinsicRicciDeTurckRHSSectionSpace_symm` it needs **no** background-connection hypothesis (the
+source carries none).  This is the symmetric-locus content of the chart split's principal source. -/
+theorem intrinsicRicciFlowRHSSectionSpace_symm
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ)
+    (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g t x u v
+      = intrinsicRicciFlowRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g t x v u := by
+  rw [intrinsicRicciFlowRHSSectionSpace_apply, intrinsicRicciFlowRHSSectionSpace_apply]
+  exact intrinsicRicciFlowRHS_symm (I := I) (M := M) g t x u v
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- **The intrinsic DeTurck correction (reaction) value is pointwise symmetric.**  The named
+zeroth-order reaction value of the affine chart split lies in the pointwise symmetric locus,
+unconditionally (both derivation slots read out the metric-symmetric inner product), via
+`intrinsicDeTurckCorrection_symm`.  This is the symmetric-locus content of the chart split's reaction
+value; together with `intrinsicRicciFlowRHSSectionSpace_symm` it certifies that both named summands of
+the geometric Ricci–DeTurck RHS lie in the symmetric locus. -/
+theorem intrinsicDeTurckCorrectionSectionSpace_symm
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) (u v : TM x) :
+    intrinsicDeTurckCorrectionSectionSpace et Kc hKc Ko hKo hKoEq hcover
+        g background t hbackground x u v
+      = intrinsicDeTurckCorrectionSectionSpace et Kc hKc Ko hKo hKoEq hcover
+          g background t hbackground x v u := by
+  rw [intrinsicDeTurckCorrectionSectionSpace_apply, intrinsicDeTurckCorrectionSectionSpace_apply]
+  exact intrinsicDeTurckCorrection_symm (I := I) (M := M) g background t x u v
+
+
+/-- The **frozen-coefficient symmetrized DeTurck reaction** of a generic `BilinearFormBundle`
+section `s` with a tangent-endomorphism coefficient `P`:
+`x ↦ (s x).comp (P x) + ((s x).comp (P x)).flip`, whose fiber value is
+`(u, v) ↦ s x (P x u) v + s x (P x v) u`.  This is the generic-section analogue of
+`intrinsicDeTurckCorrectionSection` (which is exactly this reaction of the *metric* section with
+`P := ∇W`), written directly at the tangent bundle.  Unlike the abstract reaction operator
+`ContinuousSectionSpace.bilinearDerivationFieldLinearMap`, this construction never requires the
+`Π`-fiber-norm instance `[∀ x, SeminormedAddCommGroup (TangentSpace I x)]` (equivalently the
+`FiberBundle E (TangentSpace I)` diamond), so it elaborates and is regular at `W := TangentSpace I`
+via the fiber-norm-free bundle section algebra. -/
+noncomputable def bilinearFormSectionDeTurckReaction
+    (s : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x)
+    (P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) :
+    Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x :=
+  @HAdd.hAdd
+    (Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x)
+    (Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x)
+    (Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x) instHAdd
+    (fun x ↦ (s x).comp (P x))
+    (fun x ↦ ((s x).comp (P x)).flip)
+
+@[simp] lemma bilinearFormSectionDeTurckReaction_apply
+    (s : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x)
+    (P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x)
+    (x : M) (u v : TM x) :
+    bilinearFormSectionDeTurckReaction (I := I) (M := M) s P x u v
+      = s x (P x u) v + s x (P x v) u := by
+  simp only [bilinearFormSectionDeTurckReaction, Pi.add_apply, ContinuousLinearMap.add_apply,
+    ContinuousLinearMap.comp_apply]
+  congr 1
+
+/-- The frozen-coefficient symmetrized DeTurck reaction of a **continuous** `BilinearFormBundle`
+section with a **continuous** tangent-endomorphism coefficient is again a continuous
+`BilinearFormBundle` section, fiber-norm-free at the tangent bundle.  This is the generic-section
+generalisation of `intrinsicDeTurckCorrectionSection_contMDiff_zero`, assembled from
+`ContMDiff.clm_bundle_comp` (the composition `s ∘ P`), `contMDiff_flipBilinearFormSection_tangent_zero`
+(the slot-flip), and `ContMDiff.add_section`.  It is the output-regularity that makes the frozen-`P`
+reaction a well-defined operator on the tangent-bundle `ContinuousSectionSpace`. -/
+theorem bilinearFormSectionDeTurckReaction_contMDiff_zero
+    {s : Π x : M, _root_.Bundle.BilinearFormBundle (V := TM) x}
+    (hs : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x (s x)))
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x))) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 0
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x
+        (bilinearFormSectionDeTurckReaction (I := I) (M := M) s P x)) := by
+  have h1 := hs.clm_bundle_comp hP
+  have h2 := contMDiff_flipBilinearFormSection_tangent_zero h1
+  exact h1.add_section h2
+
+
+open PoincareCurvature.Bundle.Trivialization in
+/-- The **frozen-coefficient DeTurck reaction operator on the tangent-bundle continuous section
+space**.  For a continuous tangent-endomorphism coefficient `P` (typically the frozen DeTurck
+coefficient `∇W`), this sends a continuous `BilinearFormBundle` section `s` to the continuous section
+`x ↦ (s x).comp (P x) + ((s x).comp (P x)).flip`, whose fiber value is `(u, v) ↦ s(Pu, v) + s(Pv, u)`
+(the symmetrized frozen-coefficient DeTurck derivation).  Its well-definedness (the output is a genuine
+`ContinuousSectionSpace` element) is discharged by `bilinearFormSectionDeTurckReaction_contMDiff_zero`
+through the `ContMDiff 0 ↔ Continuous` bridge, entirely fiber-norm-free.
+
+This is the tangent-bundle (`W := TangentSpace I`) reaction operator that the abstract generic-fibre
+operator `ContinuousSectionSpace.bilinearDerivationFieldLinearMap` cannot supply at `TM`, because the
+latter demands the `Π`-fibre-norm instance `[∀ x, SeminormedAddCommGroup (TangentSpace I x)]`
+(equivalently the un-synthesizable `FiberBundle E (TangentSpace I)` normed diamond).  Here the operator
+is assembled directly from the fiber-norm-free bundle section algebra, so it lives on the concrete
+`BilinearFormBundle` section space the Ricci–DeTurck chart operator `A` acts on. -/
+noncomputable def deTurckReactionSectionMap
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x))) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+        (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+        (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover :=
+  fun s ↦ ⟨bilinearFormSectionDeTurckReaction (I := I) (M := M) s.toFun P,
+    (bilinearFormSectionDeTurckReaction_contMDiff_zero (I := I) (M := M)
+      (contMDiff_zero_iff.mpr s.continuous_toFun) (contMDiff_zero_iff.mpr hP)).continuous⟩
+
+open PoincareCurvature.Bundle.Trivialization in
+@[simp] lemma deTurckReactionSectionMap_apply
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := E →L[ℝ] E →L[ℝ] ℝ)
+      (V := _root_.Bundle.BilinearFormBundle (V := TM)) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) (u v : TM x) :
+    deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover hP s x u v
+      = s x (P x u) v + s x (P x v) u :=
+  bilinearFormSectionDeTurckReaction_apply (I := I) (M := M) s.toFun P x u v
+
 end RicciFlow

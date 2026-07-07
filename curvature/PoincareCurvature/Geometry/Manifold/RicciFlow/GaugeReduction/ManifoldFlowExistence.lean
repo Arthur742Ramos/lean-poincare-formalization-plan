@@ -26,6 +26,7 @@ import Mathlib.Topology.Compactness.Compact
 import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
+import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 
 open scoped Manifold Topology
 open Set Filter
@@ -194,6 +195,203 @@ theorem exists_nhds_uniform_integralCurve {E H M : Type*} [NormedAddCommGroup E]
         isOpen_interior, hf3⟩
     rw [← (extChartAt I x₀).right_inv hf3']
     exact hasFDerivWithinAt_tangentCoordChange ⟨hft1, hft2⟩
+
+/-- **Neighbourhood-uniform *jointly continuous* local flow box.** Strengthening of
+`exists_nhds_uniform_integralCurve` that additionally exposes the local flow map `Ψ : M → ℝ → M`
+(the chart-conjugated Picard flow) together with its *joint* `(y, t)`-continuity on
+`U ×ˢ Ioo (-ε) ε`.  For a `C¹` vector field `v` on a boundaryless complete manifold, every point
+`x₀` has a neighbourhood `U` and time radius `ε > 0` such that each `y ∈ U` flows along an integral
+curve `Ψ y` anchored at `y` (`Ψ y 0 = y`), and the total flow map `(y, t) ↦ Ψ y t` is continuous
+on `U ×ˢ Ioo (-ε) ε`.  The joint continuity is inherited from the model Picard flow `α`'s
+`ContinuousOn` through the chart `extChartAt I x₀` and its continuous inverse — the datum the
+manifold gauge-flow orbit-confinement control (`exists_Ioo_forall_mem_of_continuousAt_source`)
+consumes but that `exists_nhds_uniform_integralCurve` discards. -/
+theorem exists_nhds_uniform_localFlow_continuousOn {E H M : Type*}
+    [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    {v : (x : M) → TangentSpace I x}
+    (hv : ContMDiff I I.tangent 1 (fun x => (⟨x, v x⟩ : TangentBundle I M)))
+    (x₀ : M) :
+    ∃ U ∈ nhds x₀, ∃ ε > 0, ∃ Ψ : M → ℝ → M,
+      (∀ y ∈ U, Ψ y 0 = y ∧ IsMIntegralCurveOn (Ψ y) v (Set.Ioo (-ε) ε)) ∧
+      ContinuousOn (fun p : M × ℝ => Ψ p.1 p.2) (U ×ˢ Set.Ioo (-ε) ε) := by
+  have hx : I.IsInteriorPoint x₀ := BoundarylessManifold.isInteriorPoint
+  have hc : extChartAt I x₀ x₀ ∈ interior (extChartAt I x₀).target := (I.isInteriorPoint_iff).mp hx
+  have hvx := (hv x₀)
+  rw [contMDiffAt_iff] at hvx
+  obtain ⟨_, hvx⟩ := hvx
+  have hF := hvx.contDiffAt (range_mem_nhds_isInteriorPoint hx) |>.snd
+  obtain ⟨ε, hε, a, r, L, K, hr, hpl⟩ := IsPicardLindelof.of_contDiffAt_one hF
+  obtain ⟨α, hflow, hcont⟩ :=
+    (hpl 0).exists_forall_mem_closedBall_eq_hasDerivWithinAt_continuousOn
+  have hgc : ContinuousOn (fun t => α (extChartAt I x₀ x₀, t)) (Icc (0 - ε) (0 + ε)) :=
+    hcont.comp (by fun_prop) (fun t ht => ⟨Metric.mem_closedBall_self hr.le, ht⟩)
+  have hg0 : ContinuousAt (fun t => α (extChartAt I x₀ x₀, t)) 0 :=
+    hgc.continuousAt (Icc_mem_nhds (by linarith) (by linarith))
+  have hαc0 : α (extChartAt I x₀ x₀, (0 : ℝ)) ∈ interior (extChartAt I x₀).target := by
+    have h0 := (hflow (extChartAt I x₀ x₀) (Metric.mem_closedBall_self hr.le)).1
+    simp only at h0
+    rw [show α (extChartAt I x₀ x₀, (0 : ℝ)) = extChartAt I x₀ x₀ from h0]
+    exact hc
+  have g0W : (fun t => α (extChartAt I x₀ x₀, t)) ⁻¹' (interior (extChartAt I x₀).target) ∈ 𝓝 (0 : ℝ) :=
+    hg0.preimage_mem_nhds (isOpen_interior.mem_nhds hαc0)
+  obtain ⟨δ, hδ, hsub⟩ := Metric.mem_nhds_iff.mp g0W
+  set ε₁ := min δ ε / 2 with hε₁def
+  have hminpos : 0 < min δ ε := lt_min hδ hε
+  have hε₁pos : 0 < ε₁ := by rw [hε₁def]; linarith
+  have hε₁ltδ : ε₁ < δ := by
+    rw [hε₁def]; have := min_le_left δ ε; linarith
+  have hε₁ltε : ε₁ < ε := by
+    rw [hε₁def]; have := min_le_right δ ε; linarith
+  have htube : ∀ᶠ x in 𝓝 (extChartAt I x₀ x₀),
+      ∀ t ∈ Icc (-ε₁) ε₁, α (x, t) ∈ interior (extChartAt I x₀).target := by
+    apply IsCompact.eventually_forall_of_forall_eventually isCompact_Icc
+    intro t htK
+    have htIoo : t ∈ Ioo (0 - ε) (0 + ε) :=
+      ⟨by have := htK.1; linarith, by have := htK.2; linarith⟩
+    have hSnhds : (Metric.ball (extChartAt I x₀ x₀) (↑r) ×ˢ Ioo (0 - ε) (0 + ε))
+        ∈ 𝓝 (extChartAt I x₀ x₀, t) :=
+      (Metric.isOpen_ball.prod isOpen_Ioo).mem_nhds ⟨Metric.mem_ball_self hr, htIoo⟩
+    have hcontAt : ContinuousAt α (extChartAt I x₀ x₀, t) :=
+      hcont.continuousAt (mem_of_superset hSnhds
+        (Set.prod_mono Metric.ball_subset_closedBall Ioo_subset_Icc_self))
+    have hαW : α (extChartAt I x₀ x₀, t) ∈ interior (extChartAt I x₀).target := by
+      apply hsub
+      rw [Real.ball_eq_Ioo]
+      exact ⟨by have := htK.1; linarith, by have := htK.2; linarith⟩
+    exact hcontAt.preimage_mem_nhds (isOpen_interior.mem_nhds hαW)
+  have hUmem : (extChartAt I x₀) ⁻¹'
+      {x | (∀ t ∈ Icc (-ε₁) ε₁, α (x, t) ∈ interior (extChartAt I x₀).target) ∧
+        x ∈ Metric.ball (extChartAt I x₀ x₀) (↑r)} ∈ 𝓝 x₀ :=
+    (continuousAt_extChartAt x₀).preimage_mem_nhds
+      (htube.and (Metric.ball_mem_nhds _ hr))
+  set U := (extChartAt I x₀).source ∩ (extChartAt I x₀) ⁻¹'
+      {x | (∀ t ∈ Icc (-ε₁) ε₁, α (x, t) ∈ interior (extChartAt I x₀).target) ∧
+        x ∈ Metric.ball (extChartAt I x₀ x₀) (↑r)} with hUdef
+  refine ⟨U, Filter.inter_mem (extChartAt_source_mem_nhds x₀) hUmem, ε₁, hε₁pos,
+    fun y t => (extChartAt I x₀).symm (α (extChartAt I x₀ y, t)), ?_, ?_⟩
+  · -- integral-curve clause
+    intro y hy
+    rw [hUdef] at hy
+    set x := extChartAt I x₀ y with hxdef
+    have hxball : x ∈ Metric.closedBall (extChartAt I x₀ x₀) (↑r) :=
+      Metric.ball_subset_closedBall hy.2.2
+    have hball2 : ∀ t ∈ Icc (-ε₁) ε₁, α (x, t) ∈ interior (extChartAt I x₀).target := hy.2.1
+    set g : ℝ → E := fun s => α (x, s) with hgdef
+    refine ⟨?_, ?_⟩
+    · show (extChartAt I x₀).symm (g 0) = y
+      have h0 := (hflow x hxball).1
+      simp only at h0
+      rw [hgdef]
+      beta_reduce
+      rw [show α (x, (0 : ℝ)) = x from h0, hxdef,
+        PartialEquiv.left_inv _ hy.1]
+    · show IsMIntegralCurveOn ((extChartAt I x₀).symm ∘ g) v (Set.Ioo (-ε₁) ε₁)
+      intro t ht
+      let xₜ : M := (extChartAt I x₀).symm (g t)
+      have htIcc : t ∈ Icc (0 - ε) (0 + ε) :=
+        ⟨by have := ht.1; linarith, by have := ht.2; linarith⟩
+      have h : HasDerivAt g (x := t) <|
+          fderivWithin ℝ (extChartAt I x₀ ∘ (extChartAt I xₜ).symm)
+            (range I) (extChartAt I xₜ xₜ) (v xₜ) :=
+        ((hflow x hxball).2 t htIcc).hasDerivAt (Icc_mem_nhds (by have := ht.1; linarith)
+          (by have := ht.2; linarith))
+      rw [← tangentCoordChange_def] at h
+      have hf3 : g t ∈ interior (extChartAt I x₀).target :=
+        hball2 t (Ioo_subset_Icc_self ht)
+      have hf3' := mem_of_mem_of_subset hf3 interior_subset
+      have hft1 := mem_preimage.mp <|
+        mem_of_mem_of_subset hf3' (extChartAt I x₀).target_subset_preimage_source
+      have hft2 := mem_extChartAt_source (I := I) xₜ
+      apply HasMFDerivAt.hasMFDerivWithinAt
+      refine ⟨(continuousAt_extChartAt_symm'' hf3').comp h.continuousAt,
+        HasDerivWithinAt.hasFDerivWithinAt ?_⟩
+      simp only [mfld_simps, hasDerivWithinAt_univ]
+      change HasDerivAt ((extChartAt I xₜ ∘ (extChartAt I x₀).symm) ∘ g) (v xₜ) t
+      rw [← tangentCoordChange_self (I := I) (x := xₜ) (z := xₜ) (v := v xₜ) hft2,
+        ← tangentCoordChange_comp (x := x₀) ⟨⟨hft2, hft1⟩, hft2⟩]
+      apply HasFDerivAt.comp_hasDerivAt _ _ h
+      apply HasFDerivWithinAt.hasFDerivAt (s := range I) _ <|
+        mem_nhds_iff.mpr ⟨interior (extChartAt I x₀).target,
+          subset_trans interior_subset (extChartAt_target_subset_range ..),
+          isOpen_interior, hf3⟩
+      rw [← (extChartAt I x₀).right_inv hf3']
+      exact hasFDerivWithinAt_tangentCoordChange ⟨hft1, hft2⟩
+  · -- joint continuity clause
+    show ContinuousOn
+      (fun p : M × ℝ => (extChartAt I x₀).symm (α (extChartAt I x₀ p.1, p.2)))
+      (U ×ˢ Set.Ioo (-ε₁) ε₁)
+    have hprod : ContinuousOn (fun p : M × ℝ => (extChartAt I x₀ p.1, p.2))
+        (U ×ˢ Set.Ioo (-ε₁) ε₁) := by
+      refine ContinuousOn.prodMk ?_ continuousOn_snd
+      refine (continuousOn_extChartAt x₀).comp continuousOn_fst ?_
+      intro p hp
+      rw [hUdef] at hp
+      exact hp.1.1
+    have halpha : ContinuousOn (fun p : M × ℝ => α (extChartAt I x₀ p.1, p.2))
+        (U ×ˢ Set.Ioo (-ε₁) ε₁) := by
+      refine hcont.comp hprod ?_
+      intro p hp
+      rw [hUdef] at hp
+      exact ⟨Metric.ball_subset_closedBall hp.1.2.2,
+        by have := hp.2.1; linarith, by have := hp.2.2; linarith⟩
+    refine (continuousOn_extChartAt_symm x₀).comp halpha ?_
+    intro p hp
+    rw [hUdef] at hp
+    exact mem_of_mem_of_subset (hp.1.2.1 p.2 (Ioo_subset_Icc_self hp.2)) interior_subset
+
+/-- **Joint continuity at the anchor of an autonomous manifold flow — from the jointly-continuous
+local flow box and integral-curve uniqueness.** For a `C¹` vector field `v` on a boundaryless
+complete manifold, any flow map `Φ : ℝ → M → M` that is *anchored* (`Φ 0 y = y` for `y` near `x₀`)
+and whose orbits `τ ↦ Φ τ y` solve the field ODE on a *uniform* window `Ioo (-ε₀) ε₀` (for `y` near
+`x₀`) is jointly `(t, y)`-continuous at the anchor point `(0, x₀)`.  The chosen orbit is pinned to the
+jointly-continuous local flow `Ψ` of `exists_nhds_uniform_localFlow_continuousOn` by uniqueness of
+integral curves (`isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless`), transferring `Ψ`'s
+continuity across the coordinate swap `(t, y) ↦ (y, t)`.  This is the `ContinuousAt Φ (t₀, x)` datum
+the orbit-confinement control `exists_Ioo_forall_mem_of_continuousAt_source` consumes on the
+raw-manifold side of the step-(v) gauge-flow slice regularity. -/
+theorem continuousAt_zero_prod_flow_of_isMIntegralCurveOn {E H M : Type*}
+    [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {v : (x : M) → TangentSpace I x}
+    (hv : ContMDiff I I.tangent 1 (fun x => (⟨x, v x⟩ : TangentBundle I M)))
+    {Φ : ℝ → M → M} {x₀ : M} {ε₀ : ℝ} (hε₀ : 0 < ε₀)
+    (hanchor : ∀ᶠ y in 𝓝 x₀, Φ 0 y = y)
+    (horbit : ∀ᶠ y in 𝓝 x₀, IsMIntegralCurveOn (fun τ => Φ τ y) v (Set.Ioo (-ε₀) ε₀)) :
+    ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x₀) := by
+  obtain ⟨U₁, hU₁, ε₁, hε₁, Ψ, hΨ, hΨcont⟩ := exists_nhds_uniform_localFlow_continuousOn hv x₀
+  set ε₂ := min ε₀ ε₁ with hε₂def
+  have hε₂pos : 0 < ε₂ := lt_min hε₀ hε₁
+  have hsub₀ : Set.Ioo (-ε₂) ε₂ ⊆ Set.Ioo (-ε₀) ε₀ :=
+    Set.Ioo_subset_Ioo (by have := min_le_left ε₀ ε₁; linarith) (min_le_left ε₀ ε₁)
+  have hsub₁ : Set.Ioo (-ε₂) ε₂ ⊆ Set.Ioo (-ε₁) ε₁ :=
+    Set.Ioo_subset_Ioo (by have := min_le_right ε₀ ε₁; linarith) (min_le_right ε₀ ε₁)
+  set W : Set M := U₁ ∩ {y | Φ 0 y = y} ∩
+      {y | IsMIntegralCurveOn (fun τ => Φ τ y) v (Set.Ioo (-ε₀) ε₀)} with hWdef
+  have hWnhds : W ∈ 𝓝 x₀ :=
+    Filter.inter_mem (Filter.inter_mem hU₁ hanchor) horbit
+  have hagree : ∀ y ∈ W, ∀ τ ∈ Set.Ioo (-ε₂) ε₂, Φ τ y = Ψ y τ := by
+    intro y hyW τ hτ
+    rw [hWdef] at hyW
+    obtain ⟨hΨ0, hΨorbit⟩ := hΨ y hyW.1.1
+    have heq : Set.EqOn (fun τ => Φ τ y) (Ψ y) (Set.Ioo (-ε₂) ε₂) := by
+      refine isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless
+        (a := -ε₂) (b := ε₂) (t₀ := 0) ⟨by linarith, by linarith⟩ hv
+        (hyW.2.mono hsub₀) (hΨorbit.mono hsub₁) ?_
+      show Φ 0 y = Ψ y 0
+      rw [hyW.1.2, hΨ0]
+    exact heq hτ
+  have hΨcontAt : ContinuousAt (fun p : M × ℝ => Ψ p.1 p.2) (x₀, 0) :=
+    hΨcont.continuousAt (prod_mem_nhds hU₁ (Ioo_mem_nhds (by linarith) hε₁))
+  have hswapcont : ContinuousAt (fun z : ℝ × M => ((z.2, z.1) : M × ℝ)) (0, x₀) :=
+    (continuous_snd.prodMk continuous_fst).continuousAt
+  have hcompAt := hΨcontAt.comp_of_eq hswapcont rfl
+  refine hcompAt.congr ?_
+  have htime : Set.Ioo (-ε₂) ε₂ ∈ 𝓝 (0 : ℝ) := Ioo_mem_nhds (by linarith) hε₂pos
+  filter_upwards [prod_mem_nhds htime hWnhds] with z hz
+  exact (hagree z.2 hz.2 z.1 hz.1).symm
 
 /-- **Uniform existence time from the flow box and compactness.** On a compact
 manifold, the neighborhood-uniform flow box yields a single `ε > 0` working for
@@ -460,6 +658,71 @@ theorem autonomousLift_hasMFDerivWithinAt {E H M : Type*} [NormedAddCommGroup E]
   rw [ContinuousLinearMap.id_apply, Prod.smul_fst, ContinuousLinearMap.one_apply,
     smul_eq_mul, mul_one]
 
+/-- **Joint continuity at the anchor of a *time-dependent* manifold flow — via autonomisation and the
+jointly-continuous flow box.** For a jointly-`C¹` time-dependent field `X` on a boundaryless complete
+`T2` manifold, any flow map `Φ : ℝ → M → M` that is anchored (`Φ 0 y = y` for `y` near `x₀`) and whose
+orbits `τ ↦ Φ τ y` solve the time-dependent ODE on a *uniform* window `Ioo (-ε₀) ε₀` (for `y` near
+`x₀`) is jointly `(t, y)`-continuous at the anchor `(0, x₀)`.  The lifted orbit `τ ↦ (τ, Φ τ y)` is a
+genuine integral curve of the autonomous field `(1, X · ·)` on `ℝ × M` (`autonomousLift_hasMFDerivWithinAt`),
+so it is pinned by uniqueness (`isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless`) to the
+jointly-continuous local flow `Ψ` of `exists_nhds_uniform_localFlow_continuousOn` at the lifted anchor
+`(0, y)`, whence `Φ τ y = (Ψ (0, y) τ).2` inherits `Ψ`'s continuity.  This is the `ContinuousAt Φ (0, x)`
+datum the raw-manifold orbit-confinement control `exists_Ioo_forall_mem_of_continuousAt_source` consumes
+for the compact time-dependent gauge flow of Item 2. -/
+theorem continuousAt_zero_prod_timeDependent_flow_of_hasMFDerivWithinAt {E H M : Type*}
+    [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {Φ : ℝ → M → M} {x₀ : M} {ε₀ : ℝ} (hε₀ : 0 < ε₀)
+    (hanchor : ∀ᶠ y in 𝓝 x₀, Φ 0 y = y)
+    (horbit : ∀ᶠ y in 𝓝 x₀, ∀ τ ∈ Set.Ioo (-ε₀) ε₀,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ => Φ σ y) (Set.Ioo (-ε₀) ε₀) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) :
+    ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x₀) := by
+  obtain ⟨Ũ, hŨ, ε₁, hε₁, Ψ, hΨ, hΨcont⟩ :=
+    exists_nhds_uniform_localFlow_continuousOn (I := (𝓘(ℝ, ℝ)).prod I) hX (0, x₀)
+  set ε₂ := min ε₀ ε₁ with hε₂def
+  have hε₂pos : 0 < ε₂ := lt_min hε₀ hε₁
+  have hsub₀ : Set.Ioo (-ε₂) ε₂ ⊆ Set.Ioo (-ε₀) ε₀ :=
+    Set.Ioo_subset_Ioo (by have := min_le_left ε₀ ε₁; linarith) (min_le_left ε₀ ε₁)
+  have hsub₁ : Set.Ioo (-ε₂) ε₂ ⊆ Set.Ioo (-ε₁) ε₁ :=
+    Set.Ioo_subset_Ioo (by have := min_le_right ε₀ ε₁; linarith) (min_le_right ε₀ ε₁)
+  have h0mem : (fun y : M => ((0 : ℝ), y)) ⁻¹' Ũ ∈ 𝓝 x₀ :=
+    ((continuous_const.prodMk continuous_id).continuousAt).preimage_mem_nhds hŨ
+  set W : Set M := ((fun y : M => ((0 : ℝ), y)) ⁻¹' Ũ) ∩ {y | Φ 0 y = y} ∩
+      {y | ∀ τ ∈ Set.Ioo (-ε₀) ε₀,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ => Φ σ y) (Set.Ioo (-ε₀) ε₀) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))} with hWdef
+  have hWnhds : W ∈ 𝓝 x₀ :=
+    Filter.inter_mem (Filter.inter_mem h0mem hanchor) horbit
+  have hagree : ∀ y ∈ W, ∀ τ ∈ Set.Ioo (-ε₂) ε₂, Φ τ y = (Ψ (0, y) τ).2 := by
+    intro y hyW τ hτ
+    rw [hWdef] at hyW
+    obtain ⟨hΨ0, hΨorbit⟩ := hΨ (0, y) hyW.1.1
+    have hΓint : IsMIntegralCurveOn (fun σ => ((σ, Φ σ y) : ℝ × M))
+        (fun q : ℝ × M => ((1 : ℝ), X q.1 q.2)) (Set.Ioo (-ε₀) ε₀) :=
+      fun t ht => autonomousLift_hasMFDerivWithinAt ht (hyW.2 t ht)
+    have heq : Set.EqOn (fun σ => ((σ, Φ σ y) : ℝ × M)) (Ψ (0, y)) (Set.Ioo (-ε₂) ε₂) := by
+      refine isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless
+        (a := -ε₂) (b := ε₂) (t₀ := 0) ⟨by linarith, by linarith⟩ hX
+        (hΓint.mono hsub₀) (hΨorbit.mono hsub₁) ?_
+      show ((0, Φ 0 y) : ℝ × M) = Ψ (0, y) 0
+      rw [hyW.1.2, hΨ0]
+    have hh : ((τ, Φ τ y) : ℝ × M) = Ψ (0, y) τ := heq hτ
+    exact congrArg Prod.snd hh
+  have hΨcontAt : ContinuousAt (fun P : (ℝ × M) × ℝ => Ψ P.1 P.2) ((0, x₀), 0) :=
+    hΨcont.continuousAt (prod_mem_nhds hŨ (Ioo_mem_nhds (by linarith) hε₁))
+  have hembed : ContinuousAt (fun z : ℝ × M => ((((0 : ℝ), z.2), z.1) : (ℝ × M) × ℝ)) (0, x₀) :=
+    ((continuous_const.prodMk continuous_snd).prodMk continuous_fst).continuousAt
+  have hcomp := hΨcontAt.comp_of_eq hembed rfl
+  refine (hcomp.snd).congr ?_
+  have htime : Set.Ioo (-ε₂) ε₂ ∈ 𝓝 (0 : ℝ) := Ioo_mem_nhds (by linarith) hε₂pos
+  filter_upwards [prod_mem_nhds htime hWnhds] with z hz
+  exact (hagree z.2 hz.2 z.1 hz.1).symm
+
 /-- **Uniqueness of time-dependent integral curves.** Two time-dependent integral
 curves of a jointly-`C¹` field `X` on a boundaryless T2 manifold that agree at
 `t = 0` agree throughout `Ioo a b` (with `0 ∈ Ioo a b`). Proved by lifting to
@@ -649,6 +912,31 @@ theorem exists_timeDependent_flow_compact {E H M : Type*} [NormedAddCommGroup E]
   obtain ⟨ε, hε, huniform⟩ := exists_uniform_timeDependent_integralCurve_time hX
   choose γ hγ0 hγon using huniform
   exact ⟨ε, hε, fun t x => γ x t, hγ0, fun x t ht => hγon x t ht⟩
+
+/-- **Compact time-dependent gauge flow with joint continuity at the anchor.** Strengthening of
+`exists_timeDependent_flow_compact`: on a compact boundaryless `T2` manifold, the uniform-lifespan
+time-dependent flow `Φ` of a jointly-`C¹` field `X` additionally has, at *every* base point `x`, a
+jointly `(t, y)`-continuous total flow map at the anchor `(0, x)`
+(`continuousAt_zero_prod_timeDependent_flow_of_hasMFDerivWithinAt`, the anchor/orbit hypotheses being
+the flow's own `∀ x` clauses).  This is precisely the `ContinuousAt Φ (0, x)` datum
+`ManifoldFlow.exists_Ioo_forall_mem_of_continuousAt_source` consumes to confine each orbit to a chart
+patch over a short window (`hγ_src`), the raw-manifold input of the GAP-1 step-(v) slice-`C³`
+capstone. -/
+theorem exists_timeDependent_flow_compact_continuousAt {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)))) :
+    ∃ ε > 0, ∃ Φ : ℝ → M → M, (∀ x, Φ 0 x = x) ∧
+      (∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+        (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) ∧
+      (∀ x, ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x)) := by
+  obtain ⟨ε, hε, Φ, hanchor, horbit⟩ := exists_timeDependent_flow_compact hX
+  refine ⟨ε, hε, Φ, hanchor, horbit, fun x => ?_⟩
+  exact continuousAt_zero_prod_timeDependent_flow_of_hasMFDerivWithinAt hX hε
+    (Filter.Eventually.of_forall hanchor) (Filter.Eventually.of_forall horbit)
 
 /-- **Uniqueness of time-dependent integral curves anchored at any interior time.**
 For a jointly-`C¹` time-dependent field `X` on a boundaryless T2 manifold, two
@@ -960,5 +1248,37 @@ theorem exists_timeDependent_flow_compact_inverse {E H M : Type*} [NormedAddComm
     rwa [hanchor x] at h
   · intro t ht; exact Function.leftInverse_invFun (hbij t ht).injective
   · intro t ht; exact Function.rightInverse_invFun (hbij t ht).surjective
+
+/-- **Space-time tangent jet from a jointly-smooth time-dependent vector field.**  The
+autonomisation field `(1, X)` on `ℝ × M` — the `hX` datum every compact time-dependent flow
+existence lemma above consumes, phrased as a `C^n` section of the *product* tangent bundle
+`TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M)` — is `C^n` as soon as the underlying vector field `X`
+is `C^n` jointly in `(t, x)` as a section of the plain tangent bundle `TangentBundle I M`.
+
+This converts the exotic product-tangent-bundle smoothness obligation `hX` into the natural
+smoothness `ContMDiff ((𝓘(ℝ, ℝ)).prod I) I.tangent n (fun p ↦ ⟨p.2, X p.1 p.2⟩)` of the field
+itself — exactly the shape a joint space-time regularity result for the (real) Ricci–DeTurck gauge
+field produces, and the current bottleneck of the compact-manifold gauge-flow lift.  The proof pairs
+the constant `∂_t` section on `ℝ` (the unit vector field pulled back along `Prod.fst`) with the `X`
+section via `ContMDiff.prodMk`, then transports through the smooth inverse of Mathlib's canonical
+tangent-bundle-of-a-product equivalence `equivTangentBundleProd`. -/
+theorem contMDiff_spaceTimeField_of_contMDiff_tangentSection {E H M : Type*}
+    [NormedAddCommGroup E] [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M] {n : WithTop ℕ∞}
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) I.tangent n
+      (fun p : ℝ × M => (⟨p.2, X p.1 p.2⟩ : TangentBundle I M))) :
+    ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) n
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))) := by
+  have hconst : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ)).tangent n
+      (fun t : ℝ => (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) :=
+    (contMDiff_vectorSpace_iff_contDiff (V := fun _ : ℝ => (1 : ℝ))).mpr contDiff_const
+  have h1 : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (𝓘(ℝ, ℝ)).tangent n
+      (fun p : ℝ × M => (⟨p.1, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) :=
+    hconst.comp contMDiff_fst
+  have hpair := h1.prodMk hX
+  exact (contMDiff_equivTangentBundleProd_symm
+    (I := 𝓘(ℝ, ℝ)) (M := ℝ) (I' := I) (M' := M) (n := n)).comp hpair
 
 end PoincareCurvature.ManifoldFlow

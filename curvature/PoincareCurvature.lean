@@ -1,6 +1,9 @@
 -- This module serves as the root of the `PoincareCurvature` library.
 -- Import modules here that should be built as part of the library.
 import PoincareCurvature.Basic
+import PoincareCurvature.Analysis.MatrixSmoothness
+import PoincareCurvature.Analysis.ParametrizedInner
+import PoincareCurvature.Analysis.TimeDependentGram
 import PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection
 import PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp
 import PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection
@@ -11,3 +14,8 @@ import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curv
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.DowngradeNormFree
 import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckCorrectionRegularity
+import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckReactionAssembly
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReactionPicard
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReactionCoordBounds
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReactionPicardTangent
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CompactGaugeFlowRaising

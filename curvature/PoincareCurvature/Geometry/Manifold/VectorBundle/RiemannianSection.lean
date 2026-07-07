@@ -647,6 +647,38 @@ end Bundle
 
 namespace Bundle
 
+/-- **Fiberwise slot-flip depends continuously on the map.**  If `x ↦ h x` is continuous at `x₀` into
+the bilinear-map space `E →L[𝕜] Fₗ →L[𝕜] Gₗ`, then so is the pointwise slot-flip `x ↦ (h x).flip`.
+This is the `ContinuousAt` companion of the fact that `ContinuousLinearMap.flip` is a linear isometric
+equivalence (`ContinuousLinearMap.flipₗᵢ`), hence a continuous self-map of the bilinear-map space. -/
+theorem _root_.ContinuousAt.clm_flip {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E Fₗ Gₗ : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [NormedAddCommGroup Fₗ] [NormedSpace 𝕜 Fₗ] [NormedAddCommGroup Gₗ] [NormedSpace 𝕜 Gₗ]
+    {X : Type*} [TopologicalSpace X] {h : X → E →L[𝕜] Fₗ →L[𝕜] Gₗ} {x₀ : X}
+    (hh : ContinuousAt h x₀) :
+    ContinuousAt (fun x ↦ (h x).flip) x₀ := by
+  have hcont : Continuous (fun f : E →L[𝕜] Fₗ →L[𝕜] Gₗ ↦ f.flip) :=
+    (ContinuousLinearMap.flipₗᵢ 𝕜 E Fₗ Gₗ).continuous
+  exact hcont.continuousAt.comp hh
+
+/-- **Operator-norm bound for a bilinear conjugation.**  Composing a continuous bilinear map
+`f : E →L[𝕜] F →L[𝕜] G` with two continuous linear maps `gE : E' →L[𝕜] E`, `gF : F' →L[𝕜] F`
+multiplies the operator norms: `‖f.bilinearComp gE gF‖ ≤ ‖f‖ * ‖gE‖ * ‖gF‖`.  Proved from
+`bilinearComp = ((f.comp gE).flip.comp gF).flip` via `opNorm_flip` (isometric) and the submultiplicative
+`opNorm_comp_le`.  This is the fiber-level size estimate consumed when packaging the fiberwise
+bilinear-conjugation reaction operator as a bounded section-space operator. -/
+theorem _root_.ContinuousLinearMap.norm_bilinearComp_le {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E F G E' F' : Type*}
+    [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [SeminormedAddCommGroup F] [NormedSpace 𝕜 F]
+    [SeminormedAddCommGroup G] [NormedSpace 𝕜 G]
+    [SeminormedAddCommGroup E'] [NormedSpace 𝕜 E'] [SeminormedAddCommGroup F'] [NormedSpace 𝕜 F']
+    (f : E →L[𝕜] F →L[𝕜] G) (gE : E' →L[𝕜] E) (gF : F' →L[𝕜] F) :
+    ‖f.bilinearComp gE gF‖ ≤ ‖f‖ * ‖gE‖ * ‖gF‖ := by
+  rw [ContinuousLinearMap.bilinearComp, ContinuousLinearMap.opNorm_flip]
+  refine le_trans (ContinuousLinearMap.opNorm_comp_le _ _) ?_
+  rw [ContinuousLinearMap.opNorm_flip]
+  exact mul_le_mul_of_nonneg_right (ContinuousLinearMap.opNorm_comp_le _ _) (norm_nonneg _)
+
 section LocalCoordinatePositivity
 
 variable {M : Type*} [TopologicalSpace M]
@@ -820,6 +852,455 @@ lemma forall_pos_of_trivializationAt_bilinearFormBundle_forall_pos
   simpa [hdiag] using h
 
 end LocalCoordinatePositivity
+
+section BilinearConjugation
+
+/- A `BilinearFormBundle` over a vector bundle whose fibers are genuinely normed (the fiber topology
+is the norm topology, so no instance diamond arises), the setting in which the fiberwise bilinear
+conjugation `β ↦ β(P·, P·)` is available (`ContinuousLinearMap.bilinearComp` needs seminormed
+domains).  This is exactly the tangent-bundle situation the geometric Ricci–DeTurck reaction operator
+lives in. -/
+variable {M : Type*} [TopologicalSpace M]
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+variable {W : M → Type*} [∀ x, SeminormedAddCommGroup (W x)] [∀ x, NormedSpace ℝ (W x)]
+  [TopologicalSpace (_root_.Bundle.TotalSpace F W)]
+  [FiberBundle F W] [VectorBundle ℝ F W]
+
+local notation "BilF" => (F →L[ℝ] F →L[ℝ] ℝ)
+local notation "BilW" => BilinearFormBundle (V := W)
+
+/-- **Fiberwise bilinear conjugation preserves continuity of a `BilinearFormBundle` section.**
+Given a continuous section `s` of the bilinear-form bundle `BilW` and a continuous section `P` of the
+tangent endomorphism bundle `Hom(W, W)`, the pointwise conjugate `x ↦ (s x).bilinearComp (P x) (P x)`
+— the bilinear form `(u, v) ↦ s x (P x u) (P x v)` — is again a continuous `BilinearFormBundle`
+section.
+
+This is the reaction-operator continuity input built **directly on sections via a tangent-bundle
+endomorphism** `P`, avoiding the triple-nested hom bundle `Hom(BilW, BilW)` (whose `TotalSpace`
+instances do not synthesize).  Proof: reduce to continuity of the trivialization readout via
+`FiberBundle.continuousAt_totalSpace`; on the trivializing base set the readout of the conjugate
+equals `(readout s).bilinearComp (readout P) (readout P)`, where `readout s` is the bilinear-form
+readout of `s` and `readout P = inCoordinates F W F W x₀ x x₀ x (P x)` is the endomorphism readout of
+`P` (both continuous, from the two section-continuity hypotheses), and `f ↦ b.bilinearComp f f`
+is continuous through `ContinuousAt.clm_comp` / `ContinuousAt.clm_flip`
+(`bilinearComp = ((·.comp ·).flip.comp ·).flip`).  The coordinate identity uses
+`trivializationAt_bilinearFormBundle_apply_eq` together with `ContinuousLinearMap.inCoordinates_eq`. -/
+theorem continuous_bilinearComp_section
+    {s : Π x : M, BilW x}
+    (hs : Continuous (fun x ↦ TotalSpace.mk' BilF (E := BilW) x (s x)))
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x))) :
+    Continuous (fun x ↦ TotalSpace.mk' BilF (E := BilW) x
+      (((s x).bilinearComp (P x) (P x) : BilW x))) := by
+  rw [continuous_iff_continuousAt]
+  intro x₀
+  rw [FiberBundle.continuousAt_totalSpace BilF]
+  refine ⟨continuousAt_id, ?_⟩
+  -- Continuity of the bilinear-form readout of `s`.
+  have hs_at := hs.continuousAt (x := x₀)
+  rw [FiberBundle.continuousAt_totalSpace BilF] at hs_at
+  have hbil : ContinuousAt
+      (fun x ↦ (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2) x₀ := hs_at.2
+  -- Continuity of the endomorphism readout of `P`.
+  have hP_at := hP.continuousAt (x := x₀)
+  rw [continuousAt_hom_bundle] at hP_at
+  have hp : ContinuousAt
+      (fun x ↦ ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)) x₀ := hP_at.2
+  -- The bilinear conjugation of the two readouts is continuous.
+  have hg : ContinuousAt (fun x ↦
+      ((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2).bilinearComp
+        (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x))
+        (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x))) x₀ := by
+    have h1 := hbil.clm_comp hp
+    have h2 := h1.clm_flip
+    have h3 := h2.clm_comp hp
+    exact h3.clm_flip
+  -- On the trivializing base set the conjugate readout matches the conjugation of the readouts.
+  refine hg.congr ?_
+  filter_upwards [(trivializationAt F W x₀).open_baseSet.mem_nhds
+    (FiberBundle.mem_baseSet_trivializationAt F W x₀)] with x hx
+  have hIC : ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)
+      = ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx : W x →L[ℝ] F).comp
+          ((P x).comp
+            (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm : F →L[ℝ] W x)) :=
+    ContinuousLinearMap.inCoordinates_eq hx hx
+  have key : ∀ u : F,
+      ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) u)
+        = P x (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm u) := by
+    intro u
+    rw [hIC]
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply,
+      ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.symm_apply_apply]
+  ext u v
+  rw [ContinuousLinearMap.bilinearComp_apply,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx (s x)
+      (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) u)
+      (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) v),
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx
+      ((s x).bilinearComp (P x) (P x)) u v,
+    ContinuousLinearMap.bilinearComp_apply, key u, key v]
+
+/-- **Two-sided fiberwise bilinear composition preserves continuity of a `BilinearFormBundle`
+section.**  Given a continuous section `s` of the bilinear-form bundle `BilW` and two continuous
+sections `P`, `Q` of the tangent endomorphism bundle `Hom(W, W)`, the pointwise composite
+`x ↦ (s x).bilinearComp (P x) (Q x)` — the bilinear form `(u, v) ↦ s x (P x u) (Q x v)` — is again a
+continuous `BilinearFormBundle` section.
+
+This generalises `continuous_bilinearComp_section` (the conjugation case `Q = P`) to two *different*
+endomorphism sections.  It is the shape the intrinsic Ricci–DeTurck reaction (DeTurck-correction)
+term needs: that term is the *derivation* `s(P·, ·) + s(·, P·)`, i.e. a sum of one-sided
+compositions `(P, id)` and `(id, P)`, **not** a conjugation.  Proof is the two-section adaptation of
+`continuous_bilinearComp_section`: the readout of the composite is the continuous `bilinearComp` of
+the readout of `s` with the coordinate readouts of `P` and `Q`. -/
+theorem continuous_bilinearComp₂_section
+    {s : Π x : M, BilW x}
+    (hs : Continuous (fun x ↦ TotalSpace.mk' BilF (E := BilW) x (s x)))
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    {Q : Π x : M, W x →L[ℝ] W x}
+    (hQ : Continuous (fun x ↦ TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (Q x))) :
+    Continuous (fun x ↦ TotalSpace.mk' BilF (E := BilW) x
+      (((s x).bilinearComp (P x) (Q x) : BilW x))) := by
+  rw [continuous_iff_continuousAt]
+  intro x₀
+  rw [FiberBundle.continuousAt_totalSpace BilF]
+  refine ⟨continuousAt_id, ?_⟩
+  -- Continuity of the bilinear-form readout of `s`.
+  have hs_at := hs.continuousAt (x := x₀)
+  rw [FiberBundle.continuousAt_totalSpace BilF] at hs_at
+  have hbil : ContinuousAt
+      (fun x ↦ (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2) x₀ := hs_at.2
+  -- Continuity of the endomorphism readouts of `P` and `Q`.
+  have hP_at := hP.continuousAt (x := x₀)
+  rw [continuousAt_hom_bundle] at hP_at
+  have hp : ContinuousAt
+      (fun x ↦ ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)) x₀ := hP_at.2
+  have hQ_at := hQ.continuousAt (x := x₀)
+  rw [continuousAt_hom_bundle] at hQ_at
+  have hq : ContinuousAt
+      (fun x ↦ ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x)) x₀ := hQ_at.2
+  -- The two-sided bilinear composition of the readouts is continuous.
+  have hg : ContinuousAt (fun x ↦
+      ((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2).bilinearComp
+        (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x))
+        (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x))) x₀ := by
+    have h1 := hbil.clm_comp hp
+    have h2 := h1.clm_flip
+    have h3 := h2.clm_comp hq
+    exact h3.clm_flip
+  -- On the trivializing base set the composite readout matches the composition of the readouts.
+  refine hg.congr ?_
+  filter_upwards [(trivializationAt F W x₀).open_baseSet.mem_nhds
+    (FiberBundle.mem_baseSet_trivializationAt F W x₀)] with x hx
+  have hICp : ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)
+      = ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx : W x →L[ℝ] F).comp
+          ((P x).comp
+            (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm : F →L[ℝ] W x)) :=
+    ContinuousLinearMap.inCoordinates_eq hx hx
+  have hICq : ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x)
+      = ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx : W x →L[ℝ] F).comp
+          ((Q x).comp
+            (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm : F →L[ℝ] W x)) :=
+    ContinuousLinearMap.inCoordinates_eq hx hx
+  have keyP : ∀ u : F,
+      ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) u)
+        = P x (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm u) := by
+    intro u
+    rw [hICp]
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply,
+      ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.symm_apply_apply]
+  have keyQ : ∀ v : F,
+      ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x) v)
+        = Q x (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm v) := by
+    intro v
+    rw [hICq]
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply,
+      ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.symm_apply_apply]
+  ext u v
+  rw [ContinuousLinearMap.bilinearComp_apply,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx (s x)
+      (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) u)
+      (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x) v),
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx
+      ((s x).bilinearComp (P x) (Q x)) u v,
+    ContinuousLinearMap.bilinearComp_apply, keyP u, keyQ v]
+
+/-- **The bilinear-form trivialization readout of a fiberwise two-sided composition is the
+model-fibre `bilinearComp` of the readouts.**  On the trivializing base set of `x₀`, the
+`BilinearFormBundle` coordinate readout of `(s x).bilinearComp (P x) (Q x)` equals the `bilinearComp`
+of the coordinate readout of `s x` with the endomorphism readouts `inCoordinates F W F W x₀ x x₀ x
+(P x)` and `… (Q x)` — an identity entirely inside the clean model fibre `BilF = F →L[ℝ] F →L[ℝ] ℝ`
+(never the raw `BilW x` fibre).
+
+This is the pointwise readout identity internal to `continuous_bilinearComp₂_section`, extracted as a
+standalone reusable lemma.  Its purpose is the section-space Ricci–DeTurck reaction operator at the
+tangent bundle `W := TangentSpace I`: there the raw fibre norms `‖BilW x‖ = ‖TM x →L[ℝ] TM x →L[ℝ] ℝ‖`
+and `‖P x‖ = ‖TM x →L[ℝ] TM x‖` are not synthesizable (the transported-instance diamond / nested-CLM
+`synthInstance` blow-up), so the reaction operator's Lipschitz/coordinate bound must be phrased through
+the trivialization readout in the clean model fibre.  This lemma is exactly that reduction: it rewrites
+the readout of the reaction's fibre value as a `bilinearComp` of clean-fibre readouts, whose operator
+norm is controlled by `ContinuousLinearMap.norm_bilinearComp_le` over `BilF`/`F →L[ℝ] F` (no `BilW`
+norm, no `RiemannianBundle`). -/
+theorem trivializationAt_bilinearFormBundle_bilinearComp_readout_eq
+    (s : Π x : M, BilW x) (P Q : Π x : M, W x →L[ℝ] W x)
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    (trivializationAt BilF BilW x₀
+        (TotalSpace.mk' BilF x ((s x).bilinearComp (P x) (Q x)))).2
+      = ((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2).bilinearComp
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x))
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x)) := by
+  have hICp : ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)
+      = ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx : W x →L[ℝ] F).comp
+          ((P x).comp
+            (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm : F →L[ℝ] W x)) :=
+    ContinuousLinearMap.inCoordinates_eq hx hx
+  have hICq : ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x)
+      = ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx : W x →L[ℝ] F).comp
+          ((Q x).comp
+            (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm : F →L[ℝ] W x)) :=
+    ContinuousLinearMap.inCoordinates_eq hx hx
+  have keyP : ∀ u : F,
+      ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) u)
+        = P x (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm u) := by
+    intro u
+    rw [hICp]
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply,
+      ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.symm_apply_apply]
+  have keyQ : ∀ v : F,
+      ((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm
+          (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x) v)
+        = Q x (((trivializationAt F W x₀).continuousLinearEquivAt ℝ x hx).symm v) := by
+    intro v
+    rw [hICq]
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply,
+      ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.symm_apply_apply]
+  ext u v
+  rw [ContinuousLinearMap.bilinearComp_apply,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx (s x)
+      (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x) u)
+      (ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x) v),
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx
+      ((s x).bilinearComp (P x) (Q x)) u v,
+    ContinuousLinearMap.bilinearComp_apply, keyP u, keyQ v]
+
+/-- **The model-fibre readout norm bound for a fiberwise two-sided bilinear composition.**  The
+operator norm of the `BilinearFormBundle` coordinate readout of `(s x).bilinearComp (P x) (Q x)` is
+bounded by the product of the readout norm of `s x` and the model-fibre endomorphism readout norms
+`‖inCoordinates F W F W x₀ x x₀ x (P x)‖`, `‖… (Q x)‖`.  A direct consequence of the readout identity
+`trivializationAt_bilinearFormBundle_bilinearComp_readout_eq` and
+`ContinuousLinearMap.norm_bilinearComp_le`.
+
+Every norm on the right lives in the **clean model fibre** (`BilF = F →L[ℝ] F →L[ℝ] ℝ` and
+`F →L[ℝ] F`); no `‖BilW x‖` or `‖W x →L[ℝ] W x‖` appears.  This is the exact fiber-level Lipschitz/size
+estimate the section-space Ricci–DeTurck reaction operator needs, in a form that **elaborates at the
+tangent bundle** `W := TangentSpace I` (where the raw fibre norms are un-synthesizable): the
+endomorphism size datum enters only through its `E`-valued coordinate readout. -/
+theorem norm_trivializationAt_bilinearFormBundle_bilinearComp_readout_le
+    (s : Π x : M, BilW x) (P Q : Π x : M, W x →L[ℝ] W x)
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    ‖(trivializationAt BilF BilW x₀
+        (TotalSpace.mk' BilF x ((s x).bilinearComp (P x) (Q x)))).2‖
+      ≤ ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (Q x)‖ := by
+  rw [trivializationAt_bilinearFormBundle_bilinearComp_readout_eq s P Q x₀ x hx]
+  exact ContinuousLinearMap.norm_bilinearComp_le _ _ _
+
+/-- **Additivity of the bilinear-form trivialization readout.**  On the trivializing base set the
+`BilinearFormBundle` coordinate readout is additive in the fibre value: the readout of `b + c`
+equals the sum of the readouts of `b` and `c`.  A direct consequence of the fiberwise linearity of
+the trivialization (`trivializationAt_bilinearFormBundle_apply_eq`).
+
+This is the readout-linearity input consumed by any coordinate difference/Lipschitz bound in the
+continuous section space at the tangent bundle: it lets the readout of a sum of reaction summands
+(such as the two halves of the DeTurck-correction derivation) be split before estimating, staying in
+the clean model fibre `BilF = F →L[ℝ] F →L[ℝ] ℝ` throughout. -/
+theorem trivializationAt_bilinearFormBundle_readout_add
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) (b c : BilW x) :
+    (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (b + c))).2
+      = (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x b)).2
+        + (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x c)).2 := by
+  ext u v
+  simp only [ContinuousLinearMap.add_apply]
+  rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx (b + c) u v,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx b u v,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx c u v]
+  simp [ContinuousLinearMap.add_apply]
+
+/-- **Subtractivity of the bilinear-form trivialization readout.**  On the trivializing base set the
+`BilinearFormBundle` coordinate readout is subtractive in the fibre value: the readout of `b - c`
+equals the difference of the readouts of `b` and `c`.  A direct consequence of the fiberwise
+linearity of the trivialization (`trivializationAt_bilinearFormBundle_apply_eq`).
+
+This is the readout-linearity input consumed by the coordinate *Lipschitz* bound in the continuous
+section space: the bridge's `hlip` obligation is stated as `dist (coord (A t s) i x)
+(coord (A t s') i x) ≤ K · dist s s'`, and `dist` in the model fibre `BilF` is `‖· - ·‖`, so the two
+readouts of the two states must be combined into the readout of their fibrewise difference before the
+reaction size estimate is applied — all inside the clean model fibre. -/
+theorem trivializationAt_bilinearFormBundle_readout_sub
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) (b c : BilW x) :
+    (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (b - c))).2
+      = (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x b)).2
+        - (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x c)).2 := by
+  ext u v
+  simp only [ContinuousLinearMap.sub_apply]
+  rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx (b - c) u v,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx b u v,
+    trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W) x₀ x hx c u v]
+  simp [ContinuousLinearMap.sub_apply]
+
+/-- **The model-fibre readout of the identity endomorphism is the model identity.**  On the
+trivializing base set, the endomorphism coordinate readout of `ContinuousLinearMap.id ℝ (W x)` is
+`ContinuousLinearMap.id ℝ F` (the trivialization change of coordinates conjugates the identity to the
+identity).  Consequence of `ContinuousLinearMap.inCoordinates_eq` and
+`ContinuousLinearEquiv.coe_comp_coe_symm`. -/
+theorem inCoordinates_id_eq_id
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (ContinuousLinearMap.id ℝ (W x))
+      = ContinuousLinearMap.id ℝ F := by
+  rw [ContinuousLinearMap.inCoordinates_eq hx hx, ContinuousLinearMap.id_comp]
+  exact ContinuousLinearEquiv.coe_comp_coe_symm _
+
+/-- **The model-fibre readout of the identity endomorphism has norm at most `1`.**  Immediate from
+`inCoordinates_id_eq_id` and `ContinuousLinearMap.norm_id_le`.  This is the fibre-level size datum
+that lets the `‖id‖`-weighted slots of the DeTurck-correction derivation be absorbed into the
+constant `2`. -/
+theorem norm_inCoordinates_id_le
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (ContinuousLinearMap.id ℝ (W x))‖ ≤ 1 := by
+  rw [inCoordinates_id_eq_id (F := F) (W := W) x₀ x hx]
+  exact ContinuousLinearMap.norm_id_le
+
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **The model-fibre readout norm bound for the two-sided DeTurck-correction derivation.**  The
+operator norm of the `BilinearFormBundle` coordinate readout of the derivation value
+`(s x).bilinearComp (P x) id + (s x).bilinearComp id (P x)` — the fibre value of the intrinsic
+Ricci–DeTurck correction `(u, v) ↦ s x (P x u) v + s x u (P x v)` with the endomorphism coefficient
+`P` frozen — is bounded by `2 · ‖readout (s x)‖ · ‖inCoordinates … (P x)‖`.
+
+This is the exact fibre-level Lipschitz/size estimate for the *correct* DeTurck reaction shape (a
+two-sided derivation, not a conjugation), stated entirely through the clean model-fibre readouts
+`BilF = F →L[ℝ] F →L[ℝ] ℝ` and `F →L[ℝ] F`: no `‖BilW x‖` or `‖W x →L[ℝ] W x‖` appears, so it
+**elaborates at the tangent bundle** `W := TangentSpace I` (where the raw fibre norms are
+un-synthesizable).  Built from the plain composition readout bound
+`norm_trivializationAt_bilinearFormBundle_bilinearComp_readout_le` on each of the two one-sided
+summands, `norm_add_le` on the readout sum (via `trivializationAt_bilinearFormBundle_readout_add`),
+and the `‖id‖`-slot bound `norm_inCoordinates_id_le`. -/
+theorem norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le
+    (s : Π x : M, BilW x) (P : Π x : M, W x →L[ℝ] W x)
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    ‖(trivializationAt BilF BilW x₀
+        (TotalSpace.mk' BilF x
+          ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+            + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)))).2‖
+      ≤ 2 * ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by
+  have hid : ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x
+      (ContinuousLinearMap.id ℝ (W x))‖ ≤ 1 := norm_inCoordinates_id_le (F := F) (W := W) x₀ x hx
+  rw [trivializationAt_bilinearFormBundle_readout_add (F := F) (W := W) x₀ x hx
+    ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x)))
+    ((s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x))]
+  refine (norm_add_le
+    ((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+        ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))))).2)
+    ((trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+        ((s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)))).2)).trans ?_
+  have h₁ : ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+        ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))))).2‖
+      ≤ ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by
+    refine (norm_trivializationAt_bilinearFormBundle_bilinearComp_readout_le
+      s P (fun y => ContinuousLinearMap.id ℝ (W y)) x₀ x hx).trans ?_
+    calc ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (ContinuousLinearMap.id ℝ (W x))‖
+          ≤ ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ * 1 := by gcongr
+      _ = ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := mul_one _
+  have h₂ : ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+        ((s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)))).2‖
+      ≤ ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by
+    refine (norm_trivializationAt_bilinearFormBundle_bilinearComp_readout_le
+      s (fun y => ContinuousLinearMap.id ℝ (W y)) P x₀ x hx).trans ?_
+    calc ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (ContinuousLinearMap.id ℝ (W x))‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+          ≤ ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖ * 1
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by gcongr
+      _ = ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+            * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by rw [mul_one]
+  have hrw : 2 * ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+        * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+      = ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+        + ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2‖
+          * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖ := by ring
+  rw [hrw]
+  exact add_le_add h₁ h₂
+
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **The coordinate Lipschitz bound for the frozen-coefficient DeTurck-correction reaction.**  The
+model-fibre readout of the two-sided DeTurck-correction derivation is Lipschitz in the fibre value
+with constant `2 · ‖inCoordinates … (P x)‖`: the difference of the readouts of the derivation at two
+states `s x`, `s' x` (with a *common* frozen endomorphism `P`) is bounded by `2 · ‖inCoordinates …
+(P x)‖` times the difference of the readouts of the two states.
+
+This is **exactly the fibre content of the section-space Picard `hlip` obligation** for the
+frozen-coefficient reaction operator: the bridge's Lipschitz hypothesis reads
+`dist (coord (A t s) i x) (coord (A t s') i x) ≤ K · dist s s'`, and since the continuous-section
+coordinate `coord σ i x` is definitionally the trivialization readout
+`(trivializationAt BilF BilW (x0 i) (TotalSpace.mk' BilF x (σ x))).2` (`coordContinuousMap_apply`)
+and `dist` in the model fibre is `‖· - ·‖`, this lemma supplies the pointwise constant `2 · ‖readout
+P‖` for the DeTurck reaction `A t s = (u, v) ↦ s x (P x u) v + s x u (P x v)`.  Everything stays in
+the clean model fibre `BilF = F →L[ℝ] F →L[ℝ] ℝ` / `F →L[ℝ] F`, so it **elaborates at the tangent
+bundle** `W := TangentSpace I`.  Proof: combine the two state readouts into the readout of their
+fibrewise difference (`trivializationAt_bilinearFormBundle_readout_sub`), use the additivity of the
+derivation in the fibre value (`bilinearComp` is linear in its first slot), and apply the derivation
+size bound `norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le` to the difference
+section. -/
+theorem norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_sub_le
+    (s s' : Π x : M, BilW x) (P : Π x : M, W x →L[ℝ] W x)
+    (x₀ x : M) (hx : x ∈ (trivializationAt F W x₀).baseSet) :
+    ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+          ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+            + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)))).2
+        - (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x
+          ((s' x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+            + (s' x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)))).2‖
+      ≤ 2 * ‖ContinuousLinearMap.inCoordinates F W F W x₀ x x₀ x (P x)‖
+          * ‖(trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s x))).2
+              - (trivializationAt BilF BilW x₀ (TotalSpace.mk' BilF x (s' x))).2‖ := by
+  have hlin : (s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+          + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)
+        - ((s' x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+          + (s' x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x))
+      = (s x - s' x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+          + (s x - s' x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x) := by
+    ext u v
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.sub_apply,
+      ContinuousLinearMap.bilinearComp_apply, ContinuousLinearMap.id_apply]
+    ring
+  rw [← trivializationAt_bilinearFormBundle_readout_sub (F := F) (W := W) x₀ x hx
+      ((s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+        + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x))
+      ((s' x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+        + (s' x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x)),
+    hlin,
+    ← trivializationAt_bilinearFormBundle_readout_sub (F := F) (W := W) x₀ x hx (s x) (s' x)]
+  refine (norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le
+    (fun y => s y - s' y) P x₀ x hx).trans (le_of_eq ?_)
+  ring
+
+end BilinearConjugation
 
 section FiberwiseSymmetrization
 
@@ -3686,6 +4167,768 @@ theorem preferredBilinear_lipschitzOnWith_family_of_forall_fiber_dist_le_of_eq_t
     (hKoEq := hKoEq) (hcover := hcover)
     (stateSet := stateSet) (A := A)
     (C := C) hC0 hC (K := K) hfiber
+
+/-- The fiberwise bilinear-conjugation operator on the transported bilinear-form section space, as an
+`ℝ`-linear map: for a continuous tangent-endomorphism section `P` of `Hom(W, W)` it sends a section
+`s` of the bilinear-form bundle to the conjugate `x ↦ (s x).bilinearComp (P x) (P x)` (continuous by
+`Bundle.continuous_bilinearComp_section`).  This is the non-scalar zeroth-order reaction generator
+built directly on sections — the geometric shape a linearised Ricci–DeTurck curvature term takes —
+generalising `smulField`/`endoField` past the triple-nested `Hom(BilW, BilW)` bundle wall. -/
+noncomputable def bilinearConjFieldLinearMap
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x))) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover →ₗ[ℝ]
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover where
+  toFun s := ⟨fun x ↦ ((s x).bilinearComp (P x) (P x) : BilW x),
+    _root_.Bundle.continuous_bilinearComp_section s.continuous_toFun hP⟩
+  map_add' s t := by
+    refine ContinuousSectionSpace.ext (fun x ↦ ?_)
+    rw [add_apply]
+    show (((s + t) x).bilinearComp (P x) (P x) : BilW x)
+      = (s x).bilinearComp (P x) (P x) + (t x).bilinearComp (P x) (P x)
+    rw [add_apply]
+    ext u v
+    simp only [ContinuousLinearMap.bilinearComp_apply, ContinuousLinearMap.add_apply]
+  map_smul' c s := by
+    refine ContinuousSectionSpace.ext (fun x ↦ ?_)
+    rw [smul_apply]
+    show (((c • s) x).bilinearComp (P x) (P x) : BilW x)
+      = c • ((s x).bilinearComp (P x) (P x))
+    rw [smul_apply]
+    ext u v
+    simp only [ContinuousLinearMap.bilinearComp_apply, ContinuousLinearMap.smul_apply]
+
+@[simp]
+theorem bilinearConjFieldLinearMap_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (bilinearConjFieldLinearMap et Kc hKc Ko hKo hKoEq hcover hP s) x
+      = (s x).bilinearComp (P x) (P x) :=
+  rfl
+
+/-- **The fiberwise bilinear-conjugation operator packaged as a bounded section-space operator.**
+For a continuous tangent-endomorphism section `P` of `Hom(W, W)` whose section-space operator size is
+controlled on the finite cover by the trivialization-distorted, `‖P‖²`-weighted bound
+`‖(et i).continuousLinearMapAt ℝ x‖ · ‖(et i).symmL ℝ x‖ · ‖P x‖ · ‖P x‖ ≤ C`, the conjugation
+`s ↦ (x ↦ (s x).bilinearComp (P x) (P x))` is a `ContinuousSectionSpace →L[ℝ] ContinuousSectionSpace`
+of operator norm at most `C`.  This is a genuine non-scalar zeroth-order reaction generator on the
+transported bilinear-form section space — the `L t : CSS →L[ℝ] CSS` shape the section-space Picard
+`picard` field consumes — built through `mkContinuousOfForallCoordNormLe`: the coordinate readout of
+the image is `(et i).continuousLinearMapAt ℝ x ((s x).bilinearComp (P x) (P x))`, whose norm is bounded
+via `ContinuousLinearMap.norm_bilinearComp_le` (giving the `‖P x‖²` factor) after writing `s x` back
+through `(et i).symmL ℝ x`.  Avoids `endoField`'s triple-nested `Hom(BilW, BilW)` bundle. -/
+noncomputable def bilinearConjField
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ * ‖P x.1‖ ≤ C) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover →L[ℝ]
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover :=
+  mkContinuousOfForallCoordNormLe
+    (bilinearConjFieldLinearMap et Kc hKc Ko hKo hKoEq hcover hP) C hC
+    (fun s i x => by
+      rw [coord_apply]
+      show ‖(et i).continuousLinearMapAt ℝ x.1
+          ((s x.1).bilinearComp (P x.1) (P x.1) : BilW x.1)‖ ≤ C * ‖s‖
+      have hsx : ‖s x.1‖ ≤ ‖(et i).symmL ℝ x.1‖ * ‖s‖ := by
+        rw [apply_eq_symmL_coord s x.2]
+        refine le_trans (((et i).symmL ℝ x.1).le_opNorm _) ?_
+        exact mul_le_mul_of_nonneg_left (coord_norm_le_norm s i _) (norm_nonneg _)
+      calc ‖(et i).continuousLinearMapAt ℝ x.1
+              ((s x.1).bilinearComp (P x.1) (P x.1) : BilW x.1)‖
+          ≤ ‖(et i).continuousLinearMapAt ℝ x.1‖
+              * ‖((s x.1).bilinearComp (P x.1) (P x.1) : BilW x.1)‖ :=
+            ((et i).continuousLinearMapAt ℝ x.1).le_opNorm _
+        _ ≤ ‖(et i).continuousLinearMapAt ℝ x.1‖ * (‖s x.1‖ * ‖P x.1‖ * ‖P x.1‖) :=
+            mul_le_mul_of_nonneg_left
+              (ContinuousLinearMap.norm_bilinearComp_le _ _ _) (norm_nonneg _)
+        _ ≤ ‖(et i).continuousLinearMapAt ℝ x.1‖
+              * (‖(et i).symmL ℝ x.1‖ * ‖s‖ * ‖P x.1‖ * ‖P x.1‖) :=
+            mul_le_mul_of_nonneg_left
+              (mul_le_mul_of_nonneg_right
+                (mul_le_mul_of_nonneg_right hsx (norm_nonneg _)) (norm_nonneg _))
+              (norm_nonneg _)
+        _ = ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖
+              * ‖P x.1‖ * ‖P x.1‖ * ‖s‖ := by ring
+        _ ≤ C * ‖s‖ := mul_le_mul_of_nonneg_right (hbound i x) (norm_nonneg s))
+
+@[simp]
+theorem bilinearConjField_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ * ‖P x.1‖ ≤ C)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (bilinearConjField et Kc hKc Ko hKo hKoEq hcover hP C hC hbound s) x
+      = (s x).bilinearComp (P x) (P x) :=
+  rfl
+
+/-- The fiberwise bilinear-conjugation operator has operator norm at most the trivialization-distorted,
+`‖P‖²`-weighted fiber bound `C`. -/
+theorem bilinearConjField_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ * ‖P x.1‖ ≤ C) :
+    ‖bilinearConjField et Kc hKc Ko hKo hKoEq hcover hP C hC hbound‖ ≤ C :=
+  mkContinuousOfForallCoordNormLe_norm_le _ C hC _
+
+/-- The two-sided fiberwise bilinear-composition operator on the transported bilinear-form section
+space, as an `ℝ`-linear map: for two continuous tangent-endomorphism sections `P`, `Q` of `Hom(W, W)`
+it sends a section `s` to `x ↦ (s x).bilinearComp (P x) (Q x)` (the bilinear form
+`(u, v) ↦ s x (P x u) (Q x v)`, continuous by `Bundle.continuous_bilinearComp₂_section`).  This is
+the general non-scalar zeroth-order reaction generator built directly on sections; taking `Q = P`
+recovers `bilinearConjField`, while the one-sided cases `(P, id)` and `(id, P)` are the two summands
+of the intrinsic Ricci–DeTurck DeTurck-correction derivation `s(P·, ·) + s(·, P·)`. -/
+noncomputable def bilinearCompFieldLinearMap
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    {Q : Π x : M, W x →L[ℝ] W x}
+    (hQ : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (Q x))) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover →ₗ[ℝ]
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover where
+  toFun s := ⟨fun x ↦ ((s x).bilinearComp (P x) (Q x) : BilW x),
+    _root_.Bundle.continuous_bilinearComp₂_section s.continuous_toFun hP hQ⟩
+  map_add' s t := by
+    refine ContinuousSectionSpace.ext (fun x ↦ ?_)
+    rw [add_apply]
+    show (((s + t) x).bilinearComp (P x) (Q x) : BilW x)
+      = (s x).bilinearComp (P x) (Q x) + (t x).bilinearComp (P x) (Q x)
+    rw [add_apply]
+    ext u v
+    simp only [ContinuousLinearMap.bilinearComp_apply, ContinuousLinearMap.add_apply]
+  map_smul' c s := by
+    refine ContinuousSectionSpace.ext (fun x ↦ ?_)
+    rw [smul_apply]
+    show (((c • s) x).bilinearComp (P x) (Q x) : BilW x)
+      = c • ((s x).bilinearComp (P x) (Q x))
+    rw [smul_apply]
+    ext u v
+    simp only [ContinuousLinearMap.bilinearComp_apply, ContinuousLinearMap.smul_apply]
+
+@[simp]
+theorem bilinearCompFieldLinearMap_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    {Q : Π x : M, W x →L[ℝ] W x}
+    (hQ : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (Q x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (bilinearCompFieldLinearMap et Kc hKc Ko hKo hKoEq hcover hP hQ s) x
+      = (s x).bilinearComp (P x) (Q x) :=
+  rfl
+
+/-- **The two-sided fiberwise bilinear-composition operator packaged as a bounded section-space
+operator.**  For two continuous tangent-endomorphism sections `P`, `Q` of `Hom(W, W)` whose combined
+section-space operator size is controlled on the finite cover by the trivialization-distorted,
+`‖P‖·‖Q‖`-weighted bound
+`‖(et i).continuousLinearMapAt ℝ x‖ · ‖(et i).symmL ℝ x‖ · ‖P x‖ · ‖Q x‖ ≤ C`, the composition
+`s ↦ (x ↦ (s x).bilinearComp (P x) (Q x))` is a `ContinuousSectionSpace →L[ℝ] ContinuousSectionSpace`
+of operator norm at most `C`.  This generalises `bilinearConjField` (the `Q = P` conjugation) to two
+different endomorphisms; the one-sided instances `(P, id)`/`(id, P)` are the summands of the intrinsic
+Ricci–DeTurck reaction derivation.  Built through `mkContinuousOfForallCoordNormLe`, the coordinate
+readout norm being bounded via `ContinuousLinearMap.norm_bilinearComp_le` (the `‖P x‖·‖Q x‖` factor)
+after writing `s x` back through `(et i).symmL ℝ x`. -/
+noncomputable def bilinearCompField
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    {Q : Π x : M, W x →L[ℝ] W x}
+    (hQ : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (Q x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ * ‖Q x.1‖ ≤ C) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover →L[ℝ]
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover :=
+  mkContinuousOfForallCoordNormLe
+    (bilinearCompFieldLinearMap et Kc hKc Ko hKo hKoEq hcover hP hQ) C hC
+    (fun s i x => by
+      rw [coord_apply]
+      show ‖(et i).continuousLinearMapAt ℝ x.1
+          ((s x.1).bilinearComp (P x.1) (Q x.1) : BilW x.1)‖ ≤ C * ‖s‖
+      have hsx : ‖s x.1‖ ≤ ‖(et i).symmL ℝ x.1‖ * ‖s‖ := by
+        rw [apply_eq_symmL_coord s x.2]
+        refine le_trans (((et i).symmL ℝ x.1).le_opNorm _) ?_
+        exact mul_le_mul_of_nonneg_left (coord_norm_le_norm s i _) (norm_nonneg _)
+      calc ‖(et i).continuousLinearMapAt ℝ x.1
+              ((s x.1).bilinearComp (P x.1) (Q x.1) : BilW x.1)‖
+          ≤ ‖(et i).continuousLinearMapAt ℝ x.1‖
+              * ‖((s x.1).bilinearComp (P x.1) (Q x.1) : BilW x.1)‖ :=
+            ((et i).continuousLinearMapAt ℝ x.1).le_opNorm _
+        _ ≤ ‖(et i).continuousLinearMapAt ℝ x.1‖ * (‖s x.1‖ * ‖P x.1‖ * ‖Q x.1‖) :=
+            mul_le_mul_of_nonneg_left
+              (ContinuousLinearMap.norm_bilinearComp_le _ _ _) (norm_nonneg _)
+        _ ≤ ‖(et i).continuousLinearMapAt ℝ x.1‖
+              * (‖(et i).symmL ℝ x.1‖ * ‖s‖ * ‖P x.1‖ * ‖Q x.1‖) :=
+            mul_le_mul_of_nonneg_left
+              (mul_le_mul_of_nonneg_right
+                (mul_le_mul_of_nonneg_right hsx (norm_nonneg _)) (norm_nonneg _))
+              (norm_nonneg _)
+        _ = ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖
+              * ‖P x.1‖ * ‖Q x.1‖ * ‖s‖ := by ring
+        _ ≤ C * ‖s‖ := mul_le_mul_of_nonneg_right (hbound i x) (norm_nonneg s))
+
+@[simp]
+theorem bilinearCompField_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    {Q : Π x : M, W x →L[ℝ] W x}
+    (hQ : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (Q x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ * ‖Q x.1‖ ≤ C)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (bilinearCompField et Kc hKc Ko hKo hKoEq hcover hP hQ C hC hbound s) x
+      = (s x).bilinearComp (P x) (Q x) :=
+  rfl
+
+/-- The two-sided fiberwise bilinear-composition operator has operator norm at most the
+trivialization-distorted, `‖P‖·‖Q‖`-weighted fiber bound `C`. -/
+theorem bilinearCompField_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    {Q : Π x : M, W x →L[ℝ] W x}
+    (hQ : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (Q x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ * ‖Q x.1‖ ≤ C) :
+    ‖bilinearCompField et Kc hKc Ko hKo hKoEq hcover hP hQ C hC hbound‖ ≤ C :=
+  mkContinuousOfForallCoordNormLe_norm_le _ C hC _
+
+/-- **The frozen-coefficient intrinsic Ricci–DeTurck reaction (DeTurck-correction) operator, packaged
+as a bounded section-space operator.**  For a continuous tangent-endomorphism section `P` of
+`Hom(W, W)` whose section-space operator size is controlled on the finite cover by the
+trivialization-distorted bound `‖(et i).continuousLinearMapAt ℝ x‖ · ‖(et i).symmL ℝ x‖ · ‖P x‖ ≤ C`,
+the *derivation* `s ↦ (x ↦ (s x).bilinearComp (P x) id + (s x).bilinearComp id (P x))` —
+pointwise `(u, v) ↦ s x (P x u) v + s x u (P x v)` — is a
+`ContinuousSectionSpace →L[ℝ] ContinuousSectionSpace` of operator norm at most `2 · C`.
+
+This is exactly the shape of the intrinsic DeTurck correction
+`intrinsicDeTurckCorrection g background t x u v = (g t).inner x (∇W u) v + (g t).inner x u (∇W v)`
+(with `P = ∇W` the covariant derivative of the DeTurck vector field, a continuous `Hom(TM, TM)`
+section), read as a bounded operator on the transported bilinear-form section space by *freezing* the
+endomorphism coefficient `P`.  It is the sum of the two one-sided `bilinearCompField` instances
+`(P, id)` and `(id, P)`; the `‖id‖ ≤ 1` folding turns the single `‖P‖`-weighted bound into the two
+`bilinearCompField` bounds.  This is the `L t : CSS →L[ℝ] CSS` zeroth-order geometric reaction the
+frozen-coefficient section-space Picard route consumes. -/
+noncomputable def bilinearDerivationField
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ ≤ C) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover →L[ℝ]
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover :=
+  bilinearCompField et Kc hKc Ko hKo hKoEq hcover hP
+      (continuous_id_endo_section (𝕜 := ℝ) (F := F) (V := W)) C hC
+      (fun i x => (mul_le_of_le_one_right
+        (mul_nonneg (mul_nonneg (norm_nonneg _) (norm_nonneg _)) (norm_nonneg _))
+        ContinuousLinearMap.norm_id_le).trans (hbound i x))
+    + bilinearCompField et Kc hKc Ko hKo hKoEq hcover
+      (continuous_id_endo_section (𝕜 := ℝ) (F := F) (V := W)) hP C hC
+      (fun i x => (mul_le_mul_of_nonneg_right
+        (mul_le_of_le_one_right (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+          ContinuousLinearMap.norm_id_le)
+        (norm_nonneg _)).trans (hbound i x))
+
+@[simp]
+theorem bilinearDerivationField_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ ≤ C)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (bilinearDerivationField et Kc hKc Ko hKo hKoEq hcover hP C hC hbound s) x
+      = (s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+        + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x) := by
+  simp only [bilinearDerivationField, ContinuousLinearMap.add_apply, add_apply,
+    bilinearCompField_apply]
+
+/-- The frozen-coefficient DeTurck reaction operator, evaluated fiberwise on a tangent pair, is the
+symmetrized composition `s x (P x u) v + s x u (P x v)` — the exact pointwise form of the intrinsic
+DeTurck correction term. -/
+theorem bilinearDerivationField_apply_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ ≤ C)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) (u v : W x) :
+    (bilinearDerivationField et Kc hKc Ko hKo hKoEq hcover hP C hC hbound s) x u v
+      = s x (P x u) v + s x u (P x v) := by
+  rw [bilinearDerivationField_apply]
+  simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.bilinearComp_apply,
+    ContinuousLinearMap.id_apply]
+
+/-- The frozen-coefficient DeTurck reaction operator has operator norm at most `2 · C`, twice the
+`‖P‖`-weighted trivialization-distorted fiber bound (one `C` for each one-sided slot). -/
+theorem bilinearDerivationField_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (C : ℝ) (hC : 0 ≤ C)
+    (hbound : ∀ (i : κ) (x : Kc i),
+      ‖(et i).continuousLinearMapAt ℝ x.1‖ * ‖(et i).symmL ℝ x.1‖ * ‖P x.1‖ ≤ C) :
+    ‖bilinearDerivationField et Kc hKc Ko hKo hKoEq hcover hP C hC hbound‖ ≤ 2 * C := by
+  unfold bilinearDerivationField
+  refine (norm_add_le _ _).trans ?_
+  rw [two_mul]
+  exact add_le_add
+    (bilinearCompField_norm_le et Kc hKc Ko hKo hKoEq hcover hP _ C hC _)
+    (bilinearCompField_norm_le et Kc hKc Ko hKo hKoEq hcover _ hP C hC _)
+
+/-- **The frozen-coefficient DeTurck-correction reaction as an unbundled `ℝ`-linear map on the
+section space.**  Unlike `bilinearDerivationField` (which packages the derivation as a bounded
+`ContinuousSectionSpace →L[ℝ] ContinuousSectionSpace` and therefore needs the raw fiber-norm bound
+`hbound` — the estimate that is *un-elaborable* at `W := TangentSpace I` because `‖P x‖ =
+‖TM x →L[ℝ] TM x‖` is not synthesizable), this variant is the plain `LinearMap` `s ↦ (x ↦ (s x)
+.bilinearComp (P x) id + (s x).bilinearComp id (P x))`, whose only analytic input is the *continuity*
+of the two summands (`bilinearCompFieldLinearMap`, discharged by `continuous_bilinearComp₂_section`).
+This is exactly the shape `A t s` the section-space Picard bridge consumes as a plain
+`ℝ → ContinuousSectionSpace → ContinuousSectionSpace` map, freezing the endomorphism coefficient
+`P` (e.g. `∇W` about the initial metric).  Its coordinate readout Lipschitz control is supplied — in
+the clean model fibre — by `norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_sub_le`,
+so the operator never needs the raw fiber-norm `hbound` at all. -/
+noncomputable def bilinearDerivationFieldLinearMap
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x))) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover →ₗ[ℝ]
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover :=
+  bilinearCompFieldLinearMap et Kc hKc Ko hKo hKoEq hcover hP
+      (continuous_id_endo_section (𝕜 := ℝ) (F := F) (V := W))
+    + bilinearCompFieldLinearMap et Kc hKc Ko hKo hKoEq hcover
+      (continuous_id_endo_section (𝕜 := ℝ) (F := F) (V := W)) hP
+
+@[simp]
+theorem bilinearDerivationFieldLinearMap_apply
+    {κ : Type*} [Finite κ] [T2Space M]
+    (et : κ → _root_.Bundle.Trivialization BilF
+      (_root_.Bundle.TotalSpace.proj : _root_.Bundle.TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW) et Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (bilinearDerivationFieldLinearMap et Kc hKc Ko hKo hKoEq hcover hP s) x
+      = (s x).bilinearComp (P x) (ContinuousLinearMap.id ℝ (W x))
+        + (s x).bilinearComp (ContinuousLinearMap.id ℝ (W x)) (P x) := by
+  simp only [bilinearDerivationFieldLinearMap, LinearMap.add_apply, add_apply,
+    bilinearCompFieldLinearMap_apply]
+
+/-- **The compact coordinate readout of a bilinear-form section is the `trivializationAt` readout.**
+When the trivialization family is chosen to be the canonical `trivializationAt BilF BilW (x0 i)`, the
+continuous-section-space coordinate `(coord σ).1 i x` (`equivCompatibleCoordFamilySubmodule`) equals
+the raw fibre readout `(trivializationAt BilF BilW (x0 i) ⟨x, σ x⟩).2`.  This is the bridge between
+the two languages used on either side of the section-space Picard `hlip`/`hcenter` obligations: the
+bridge states them in the `coord` language, while the model-fibre estimates
+(`norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_*`) are proved in the
+`trivializationAt`-readout language.  Combines the general `coord_apply`
+(`(coord σ).1 i x = (et i).continuousLinearMapAt ℝ x (σ x)`) with the trivialization identity
+`continuousLinearMapAt = (e ⟨x, ·⟩).2` on the base set (`coe_linearMapAt_of_mem`). -/
+theorem bilinearFormBundle_coord_eq_trivializationAt_readout
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover σ).1 i x
+      = (trivializationAt BilF BilW (x0 i)
+          (_root_.Bundle.TotalSpace.mk' BilF x.1 (σ x.1))).2 := by
+  haveI hlin : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := F) (W := W) (x0 i)
+  rw [coord_apply σ i x]
+  simp only [_root_.Bundle.Trivialization.continuousLinearMapAt_apply,
+    _root_.Bundle.Trivialization.coe_linearMapAt_of_mem _ (hKc i x.2)]
+
+/-- **The section-space Picard `hlip` coordinate-Lipschitz bound for the frozen-coefficient
+DeTurck-correction reaction, at the canonical bilinear-form trivialization family.**  For the plain
+operator `bilinearDerivationFieldLinearMap` (the derivation `s ↦ (x ↦ (s x).bilinearComp (P x) id +
+(s x).bilinearComp id (P x))`), the section-space coordinate distance is controlled by
+`2·Kp·dist s s'`, where `Kp` is any uniform bound on the model-fibre endomorphism readout
+`‖inCoordinates F W F W (x0 i) x (x0 i) x (P x)‖` over the finite cover.  This is *exactly* the shape
+of the `hlip` hypothesis of
+`sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound`, with
+`K := 2·Kp`.  The proof passes through the coordinate-readout bridge
+`bilinearFormBundle_coord_eq_trivializationAt_readout` (translating the `coord` language of the Picard
+bridge into the `trivializationAt`-readout language) and applies the clean-model-fibre estimate
+`norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_sub_le`, whose Lipschitz constant
+`2‖inCoord P‖` is finally bounded by `2·Kp` and whose readout-difference is bounded by the
+section distance via `coord_dist_le_dist` — every norm in the clean model fibre, so it elaborates at
+`W := TangentSpace I` where the raw fibre norms are un-synthesizable. -/
+theorem bilinearDerivationFieldLinearMap_coord_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (Kp : ℝ)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates F W F W (x0 i) x.1 (x0 i) x.1 (P x.1)‖ ≤ Kp)
+    (s s' : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    dist
+      ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s)).1 i x)
+      ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s')).1 i x)
+      ≤ 2 * Kp * dist s s' := by
+  have hxW : x.1 ∈ (trivializationAt F W (x0 i)).baseSet := by simpa using hKc i x.2
+  have hKp0 : (0 : ℝ) ≤ Kp := le_trans (norm_nonneg _) (hKp i x)
+  rw [dist_eq_norm,
+    bilinearFormBundle_coord_eq_trivializationAt_readout x0 Kc hKc Ko hKo hKoEq hcover _ i x,
+    bilinearFormBundle_coord_eq_trivializationAt_readout x0 Kc hKc Ko hKo hKoEq hcover _ i x,
+    bilinearDerivationFieldLinearMap_apply, bilinearDerivationFieldLinearMap_apply]
+  refine (_root_.Bundle.norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_sub_le
+      (fun y => s y) (fun y => s' y) P (x0 i) x.1 hxW).trans ?_
+  have hcoord : ‖(trivializationAt BilF BilW (x0 i)
+        (_root_.Bundle.TotalSpace.mk' BilF x.1 (s x.1))).2
+      - (trivializationAt BilF BilW (x0 i)
+        (_root_.Bundle.TotalSpace.mk' BilF x.1 (s' x.1))).2‖ ≤ dist s s' := by
+    rw [← bilinearFormBundle_coord_eq_trivializationAt_readout x0 Kc hKc Ko hKo hKoEq hcover s i x,
+      ← bilinearFormBundle_coord_eq_trivializationAt_readout x0 Kc hKc Ko hKo hKoEq hcover s' i x,
+      ← dist_eq_norm]
+    exact coord_dist_le_dist s s' i x
+  refine mul_le_mul (mul_le_mul_of_nonneg_left (hKp i x) (by norm_num)) hcoord
+    (norm_nonneg _) (mul_nonneg (by norm_num) hKp0)
+
+/-- **The section-space Picard `hcenter` coordinate-norm bound for the frozen-coefficient
+DeTurck-correction reaction, at the canonical bilinear-form trivialization family.**  For the plain
+operator `bilinearDerivationFieldLinearMap`, the section-space coordinate norm of the reaction applied
+to a section `σ` is controlled by `2·Kp·‖σ‖`, where `Kp` uniformly bounds the model-fibre endomorphism
+readout `‖inCoordinates F W F W (x0 i) x (x0 i) x (P x)‖` over the finite cover.  Applied at the
+initial-metric section `σ = x0`, this is exactly the `hcenter` datum `‖(coord (A t x0)) i x‖ ≤ Mc`
+(with `Mc := 2·Kp·‖x0‖`) that the section-space Picard bridge
+`sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound` consumes for the
+reaction summand.  Companion of `bilinearDerivationFieldLinearMap_coord_dist_le`: same route through
+`bilinearFormBundle_coord_eq_trivializationAt_readout` and the clean-model-fibre size bound
+`norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le`, closing with
+`coord_norm_le_norm`. -/
+theorem bilinearDerivationFieldLinearMap_coord_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (Kp : ℝ)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates F W F W (x0 i) x.1 (x0 i) x.1 (P x.1)‖ ≤ Kp)
+    (σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    ‖(equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP σ)).1 i x‖
+      ≤ 2 * Kp * ‖σ‖ := by
+  have hxW : x.1 ∈ (trivializationAt F W (x0 i)).baseSet := by simpa using hKc i x.2
+  have hKp0 : (0 : ℝ) ≤ Kp := le_trans (norm_nonneg _) (hKp i x)
+  rw [bilinearFormBundle_coord_eq_trivializationAt_readout x0 Kc hKc Ko hKo hKoEq hcover _ i x,
+    bilinearDerivationFieldLinearMap_apply]
+  refine (_root_.Bundle.norm_trivializationAt_bilinearFormBundle_deTurckDerivation_readout_le
+      (fun y => σ y) P (x0 i) x.1 hxW).trans ?_
+  have hσ : ‖(trivializationAt BilF BilW (x0 i)
+        (_root_.Bundle.TotalSpace.mk' BilF x.1 (σ x.1))).2‖ ≤ ‖σ‖ := by
+    rw [← bilinearFormBundle_coord_eq_trivializationAt_readout x0 Kc hKc Ko hKo hKoEq hcover σ i x]
+    exact coord_norm_le_norm σ i x
+  calc 2 * ‖(trivializationAt BilF BilW (x0 i)
+          (_root_.Bundle.TotalSpace.mk' BilF x.1 (σ x.1))).2‖
+        * ‖ContinuousLinearMap.inCoordinates F W F W (x0 i) x.1 (x0 i) x.1 (P x.1)‖
+      ≤ 2 * ‖σ‖ * Kp := by
+        refine mul_le_mul (mul_le_mul_of_nonneg_left hσ (by norm_num)) (hKp i x)
+          (norm_nonneg _) (by positivity)
+    _ = 2 * Kp * ‖σ‖ := by ring
+
+/-- **Affine-operator coordinate Lipschitz bound (`hlip`) for the frozen DeTurck reaction plus a
+fixed source.**  For the affine section-space operator `s ↦ bilinearDerivationFieldLinearMap … s + b`
+(the frozen two-sided derivation `L` plus a fixed source `b`), the section-space coordinate distance
+is controlled by `2·Kp·dist s s'` — *the same constant as the linear reaction alone*, because the
+fixed source `b` contributes the identical coordinate summand `coord b i x` to both `A s` and `A s'`,
+which cancels in the coordinate distance (`coord_add_apply` + `add_sub_add_right_eq_sub`).  This is
+exactly the `hlip` datum the section-space Picard bridge consumes for the *affine* chart operator
+`A t s = L s + b` at the metric state, with `K := 2·Kp`. -/
+theorem bilinearDerivationFieldLinearMap_add_source_coord_dist_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (Kp : ℝ)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates F W F W (x0 i) x.1 (x0 i) x.1 (P x.1)‖ ≤ Kp)
+    (b s s' : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    dist
+      ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s + b)).1 i x)
+      ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s' + b)).1 i x)
+      ≤ 2 * Kp * dist s s' := by
+  rw [dist_eq_norm,
+    coord_add_apply (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover hP s) b i x,
+    coord_add_apply (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover hP s') b i x,
+    add_sub_add_right_eq_sub, ← dist_eq_norm]
+  exact bilinearDerivationFieldLinearMap_coord_dist_le
+    x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp s s' i x
+
+/-- **Affine-operator coordinate norm bound (`hcenter`) for the frozen DeTurck reaction plus a fixed
+source.**  For the affine section-space operator `σ ↦ bilinearDerivationFieldLinearMap … σ + b`, the
+section-space coordinate norm is controlled by `2·Kp·‖σ‖ + ‖b‖`: the reaction summand contributes
+`2·Kp·‖σ‖` (`bilinearDerivationFieldLinearMap_coord_norm_le`) and the fixed source `b` contributes at
+most `‖b‖` (`coord_norm_le_norm`), combined through `coord_add_apply` and the triangle inequality.
+Applied at the initial-metric section `σ = σ0`, this is exactly the `hcenter` datum
+`‖coord (A t σ0) i x‖ ≤ Mc` (with `Mc := 2·Kp·‖σ0‖ + ‖b‖`) that the section-space Picard bridge
+consumes for the affine chart operator `A t s = L s + b`. -/
+theorem bilinearDerivationFieldLinearMap_add_source_coord_norm_le
+    {κ : Type*} [Finite κ] [T2Space M]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, W x →L[ℝ] W x}
+    (hP : Continuous (fun x ↦ _root_.Bundle.TotalSpace.mk' (F →L[ℝ] F)
+      (E := fun x ↦ W x →L[ℝ] W x) x (P x)))
+    (Kp : ℝ)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates F W F W (x0 i) x.1 (x0 i) x.1 (P x.1)‖ ≤ Kp)
+    (b σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    ‖(equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+        (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP σ + b)).1 i x‖
+      ≤ 2 * Kp * ‖σ‖ + ‖b‖ := by
+  rw [coord_add_apply (bilinearDerivationFieldLinearMap (fun i => trivializationAt BilF BilW (x0 i))
+    Kc hKc Ko hKo hKoEq hcover hP σ) b i x]
+  refine (norm_add_le _ _).trans ?_
+  exact add_le_add
+    (bilinearDerivationFieldLinearMap_coord_norm_le x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp σ i x)
+    (coord_norm_le_norm b i x)
 
 end PreferredBilinearNormControl
 

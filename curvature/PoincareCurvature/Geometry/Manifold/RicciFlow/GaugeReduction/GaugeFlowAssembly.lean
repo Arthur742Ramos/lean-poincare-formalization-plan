@@ -156,4 +156,556 @@ theorem exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3
   exact ⟨ε, hε, exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow
     hε Φ G hΦ0 hΦC3 hGC3 hleft hright hderiv⟩
 
+/-- **Chart-conjugation `C³` transfer for a flow slice.**  If, on an open set `U` contained in the
+source chart at `x₀`, the map `F` is represented in the extended charts at `x₀` (source) and `F x₀`
+(target) by a globally `C³` model map `Ψ : E → E` — i.e.
+`extChartAt I (F x₀) (F x) = Ψ (extChartAt I x₀ x)` for every `x ∈ U` — and `F` maps `U` into the
+source chart at `F x₀`, then `F` is `ContMDiffOn I I 3` on `U`.
+
+This is the manifold-level `C³` regularity transfer for a flow slice: the model-manifold
+smooth-dependence tower (`SmoothDependenceManifold.exists_flow_diffeomorph_three` etc.) produces a
+globally `C³` chart-local flow `Ψ`, and this lemma lifts that `C³` regularity to `ContMDiffOn I I 3`
+of the genuine manifold flow slice on a chart-confined patch — exactly the
+`forward_contMDiffOn`/`backward_contMDiffOn` field of `LocalGluingData 3` the compact gauge-flow
+gluing route (`Diffeomorph3FlowExistence.exists_Ioo_gaugeFlow_…_localGluingData_…`) consumes.  The
+proof factors `F` as `(extChartAt I (F x₀)).symm ∘ Ψ ∘ (extChartAt I x₀)` on `U` (using the chart
+left-inverse identity) and composes the two `ContMDiffOn` chart maps with the globally-`C³` `Ψ`. -/
+theorem contMDiffOn_of_extChartAt_conjugation
+    {x₀ : M} {F : M → M} {U : Set M} {Ψ : E → E}
+    (hU : U ⊆ (chartAt H x₀).source)
+    (hΨ : ContDiff ℝ 3 Ψ)
+    (hFU : Set.MapsTo F U (chartAt H (F x₀)).source)
+    (hconj : ∀ x ∈ U, extChartAt I (F x₀) (F x) = Ψ (extChartAt I x₀ x)) :
+    ContMDiffOn I I 3 F U := by
+  have hchart : ContMDiffOn I 𝓘(ℝ, E) 3 (extChartAt I x₀) U :=
+    (contMDiffOn_extChartAt (I := I) (n := 3) (x := x₀)).mono hU
+  have hΨm : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3 Ψ := contMDiff_iff_contDiff.mpr hΨ
+  have hmid : ContMDiffOn I 𝓘(ℝ, E) 3 (fun x => Ψ (extChartAt I x₀ x)) U :=
+    hΨm.comp_contMDiffOn hchart
+  have hmaps : Set.MapsTo (fun x => Ψ (extChartAt I x₀ x)) U (extChartAt I (F x₀)).target := by
+    intro x hx
+    show Ψ (extChartAt I x₀ x) ∈ (extChartAt I (F x₀)).target
+    rw [← hconj x hx]
+    exact PartialEquiv.map_source (extChartAt I (F x₀))
+      (by rw [extChartAt_source]; exact hFU hx)
+  have hsymm : ContMDiffOn 𝓘(ℝ, E) I 3 (extChartAt I (F x₀)).symm
+      (extChartAt I (F x₀)).target := contMDiffOn_extChartAt_symm (F x₀)
+  have hcomp : ContMDiffOn I I 3
+      (fun x => (extChartAt I (F x₀)).symm (Ψ (extChartAt I x₀ x))) U :=
+    hsymm.comp hmid hmaps
+  refine hcomp.congr (fun x hx => ?_)
+  show F x = (extChartAt I (F x₀)).symm (Ψ (extChartAt I x₀ x))
+  rw [← hconj x hx]
+  exact (PartialEquiv.left_inv (extChartAt I (F x₀))
+    (by rw [extChartAt_source]; exact hFU hx)).symm
+
+/-- **`LocalGluingData 3` from chart-conjugation data.**  Packages the two chart-conjugation `C³`
+transfers (`contMDiffOn_of_extChartAt_conjugation`, applied to the forward slice `F` and its local
+inverse `G`) together with the mutual-inverse / mapping data into the exact
+`RicciFlow.LocalGluingData 3 F G U V` structure the compact gauge-flow gluing theorems
+(`Diffeomorph3FlowExistence.exists_…_gaugeFlow_…_localGluingData_…`) consume as their per-chart
+`hlocal` hypothesis.
+
+The two genuinely-analytic fields (`forward_contMDiffOn`/`backward_contMDiffOn`) are discharged by the
+chart-conjugation transfer from globally-`C³` model representatives `ΨF`, `ΨG` (supplied by the
+model-manifold smooth-dependence tower in each chart); the remaining fields are the topological
+open-ness, the mapping, and the local mutual-inverse identities, which the flow group law provides. -/
+theorem localGluingData_ofChartConjugation
+    {F G : M → M} {U V : Set M} {xF xG : M} {ΨF ΨG : E → E}
+    (hUopen : IsOpen U) (hVopen : IsOpen V)
+    (hFmaps : Set.MapsTo F U V) (hGmaps : Set.MapsTo G V U)
+    (hleft : Set.LeftInvOn G F U) (hright : Set.RightInvOn G F V)
+    (hUF : U ⊆ (chartAt H xF).source) (hΨF : ContDiff ℝ 3 ΨF)
+    (hFchart : Set.MapsTo F U (chartAt H (F xF)).source)
+    (hconjF : ∀ x ∈ U, extChartAt I (F xF) (F x) = ΨF (extChartAt I xF x))
+    (hVG : V ⊆ (chartAt H xG).source) (hΨG : ContDiff ℝ 3 ΨG)
+    (hGchart : Set.MapsTo G V (chartAt H (G xG)).source)
+    (hconjG : ∀ x ∈ V, extChartAt I (G xG) (G x) = ΨG (extChartAt I xG x)) :
+    LocalGluingData (I := I) (M := M) 3 F G U V where
+  source_open := hUopen
+  target_open := hVopen
+  forward_mapsTo := by simpa only [Set.univ_inter] using hFmaps
+  backward_mapsTo := by simpa only [Set.univ_inter] using hGmaps
+  forward_contMDiffOn := contMDiffOn_of_extChartAt_conjugation hUF hΨF hFchart hconjF
+  backward_contMDiffOn := contMDiffOn_of_extChartAt_conjugation hVG hΨG hGchart hconjG
+  left_invOn := by simpa only [Set.univ_inter] using hleft
+  right_invOn := by simpa only [Set.univ_inter] using hright
+
+/-- **Global slice `C³` regularity from per-point chart-conjugation.**  If every point `x : M` has a
+neighbourhood `U` on which the map `F` is represented, in the extended charts at some centre `x₀`
+(source) and `F x₀` (target), by a globally-`C³` model map `Ψ : E → E`, then `F` is globally
+`ContMDiff I I 3`.
+
+This is the `ContMDiff I I 3 (Φ t)` content of the compact gauge-flow reduction's `hslicesC3`
+hypothesis (`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`): each
+flow slice `Φ t : M → M` is, near every point, the chart-representation of a model `C³` flow supplied
+by the smooth-dependence tower, and this lemma glues those local chart-conjugation witnesses into
+global spatial `C³` regularity of the slice.  `ContMDiff` unfolds to `∀ x, ContMDiffAt`, each of which
+is `contMDiffOn_of_extChartAt_conjugation` restricted to the neighbourhood via
+`ContMDiffOn.contMDiffAt`. -/
+theorem contMDiff_of_forall_extChartAt_conjugation
+    {F : M → M}
+    (h : ∀ x : M, ∃ (x₀ : M) (U : Set M) (Ψ : E → E),
+      U ∈ 𝓝 x ∧ U ⊆ (chartAt H x₀).source ∧ ContDiff ℝ 3 Ψ ∧
+      Set.MapsTo F U (chartAt H (F x₀)).source ∧
+      (∀ y ∈ U, extChartAt I (F x₀) (F y) = Ψ (extChartAt I x₀ y))) :
+    ContMDiff I I 3 F := by
+  intro x
+  obtain ⟨x₀, U, Ψ, hUmem, hU, hΨ, hFU, hconj⟩ := h x
+  exact (contMDiffOn_of_extChartAt_conjugation hU hΨ hFU hconj).contMDiffAt hUmem
+
+/-- **Raw-flow chart-representation derivative.**  The chart-conjugation `C³` transfer
+(`contMDiffOn_of_extChartAt_conjugation`) is fed by identifying a flow slice with a model `C³` map in
+charts; that identification, in turn, rests on the flow curve's *chart representation* solving a model
+ODE.  This lemma supplies exactly that at the RAW (pre-`C³`) level: for an abstract curve `γ : ℝ → M`
+that satisfies the manifold flow ODE `HasMFDerivWithinAt … γ s t ((1).smulRight w)` at time `t` — the
+hypothesis form produced by the compact-manifold flow
+(`ManifoldFlow.exists_timeDependent_flow_compact_inverse`) *before* any spatial regularity is known —
+the chart representation `τ ↦ extChartAt I p (γ τ)`, in any preferred chart whose source contains
+`γ t`, has the within-set derivative `tangentCoordChange I (γ t) p (γ t) w`.
+
+This is the abstract-curve analogue of
+`RicciFlow.Diffeomorph3GaugeFlowOn.hasDerivWithinAt_extChartAt_eval_of_mem_source`, but with the
+gauge-flow structure (which presupposes `C³`) replaced by the bare `HasMFDerivWithinAt` datum, so it
+applies to the *raw* compact flow whose `C³` regularity is exactly what the `hslicesC3` hypothesis of
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` must establish.  The proof is the
+model ODE chain rule: compose the chart map's `HasMFDerivWithinAt` (`hasMFDerivWithinAt_extChartAt`)
+with the curve's, then rewrite the composite `mfderiv` through
+`mfderiv_chartAt_eq_tangentCoordChange`. -/
+theorem hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {p : M} {w : TangentSpace I (γ t)}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight w))
+    (hsrc_ext : γ t ∈ (extChartAt I p).source) :
+    HasDerivWithinAt (fun τ : ℝ ↦ extChartAt I p (γ τ))
+      (tangentCoordChange I (γ t) p (γ t) w) s t := by
+  have hsrc : γ t ∈ (chartAt H p).source := by
+    simpa only [extChartAt_source] using hsrc_ext
+  rw [hasDerivWithinAt_iff_hasFDerivWithinAt, ← hasMFDerivWithinAt_iff_hasFDerivWithinAt]
+  apply (HasMFDerivWithinAt.comp t (hasMFDerivWithinAt_extChartAt (I := I) hsrc) hγ
+    (Set.subset_preimage_image _ _)).congr_mfderiv
+  rw [ContinuousLinearMap.smulRight_one_eq_toSpanSingleton,
+    mfderiv_chartAt_eq_tangentCoordChange hsrc]
+  exact ContinuousLinearMap.comp_toSpanSingleton _ _
+
+/-- **Raw-flow chart-representation derivative in the centered chart.**  Specialization of
+`hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt` to the preferred chart centered at the
+time-`t` value `γ t`, where the tangent-coordinate change is the identity (`tangentCoordChange_self`),
+so the chart representation's within-set derivative is the flow velocity `w` itself.  This is the
+abstract-curve (raw-flow) analogue of
+`RicciFlow.Diffeomorph3GaugeFlowOn.hasDerivWithinAt_extChartAt_eval_self`. -/
+theorem hasDerivWithinAt_extChartAt_comp_self_of_hasMFDerivWithinAt
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {w : TangentSpace I (γ t)}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight w)) :
+    HasDerivWithinAt (fun τ : ℝ ↦ extChartAt I (γ t) (γ τ)) w s t := by
+  have h := hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt hγ
+    (mem_extChartAt_source (γ t))
+  rwa [tangentCoordChange_self (I := I) (x := γ t) (z := γ t) (v := w)
+    (mem_extChartAt_source (γ t))] at h
+
+/-- **Raw-flow chart-representation derivative, upgraded to `HasDerivAt`.**  When the time set `s`
+is a neighbourhood of `t` — the situation for the *open* flow window `Set.Ioo (-ε) ε` at an interior
+time, which is exactly the shape of the ODE hypothesis in
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` — the within-set derivative of
+`hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt` upgrades to a full `HasDerivAt`.  This is the
+form consumed by Mathlib's model integral-curve / ODE-uniqueness API (`IsIntegralCurve`,
+`ODE_solution_unique`), the next step in the raw-flow chart-conjugation route. -/
+theorem hasDerivAt_extChartAt_comp_of_hasMFDerivWithinAt
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {p : M} {w : TangentSpace I (γ t)}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight w))
+    (hs : s ∈ nhds t)
+    (hsrc_ext : γ t ∈ (extChartAt I p).source) :
+    HasDerivAt (fun τ : ℝ ↦ extChartAt I p (γ τ))
+      (tangentCoordChange I (γ t) p (γ t) w) t :=
+  (hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt hγ hsrc_ext).hasDerivAt hs
+
+/-- **Raw-flow chart-representation derivative in the centered chart, upgraded to `HasDerivAt`.**
+The centered (`p := γ t`) `HasDerivAt` form of `hasDerivAt_extChartAt_comp_of_hasMFDerivWithinAt`,
+whose derivative is the flow velocity `w` itself.  Together with the fixed-chart version this is the
+model-ODE datum the raw compact flow supplies to the integral-curve uniqueness comparison against the
+model-`C³` flow tower. -/
+theorem hasDerivAt_extChartAt_comp_self_of_hasMFDerivWithinAt
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {w : TangentSpace I (γ t)}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight w))
+    (hs : s ∈ nhds t) :
+    HasDerivAt (fun τ : ℝ ↦ extChartAt I (γ t) (γ τ)) w t :=
+  (hasDerivWithinAt_extChartAt_comp_self_of_hasMFDerivWithinAt hγ).hasDerivAt hs
+
+variable (I) in
+/-- **Chart pushforward vector field.**  The time-dependent vector field `X : ℝ → M → E` on the base
+manifold, transported into the model space `E` of the preferred chart `extChartAt I p`: a model point
+`q : E` is pulled back to `M` via the chart inverse `(extChartAt I p).symm`, the base field `X τ` is
+evaluated there, and the resulting tangent vector is pushed forward to the `p`-chart coordinates by the
+tangent coordinate change `tangentCoordChange`.
+
+This is the model-space vector field `f : ℝ → E → E` whose integral curves are the chart representations
+of the raw manifold flow curves; it is the object fed to the model ODE uniqueness API
+(`RicciFlow.ModelGaugeFlowODE.eqOn_Icc_of_lipschitzOnWith` and friends) to identify the raw compact
+flow's chart representation with the model-`C³` flow tower.  Because `X` lands in the model space `E`
+(rather than a point-dependent `TangentSpace I x`), the definition and its chart-image reduction below
+carry no dependent-type obstruction. -/
+noncomputable def chartPushforwardField (X : ℝ → M → E) (p : M) (τ : ℝ) (q : E) : E :=
+  tangentCoordChange I ((extChartAt I p).symm q) p ((extChartAt I p).symm q)
+    (X τ ((extChartAt I p).symm q))
+
+/-- Evaluated at the `p`-chart image of a base point `y ∈ (extChartAt I p).source`, the chart pushforward
+field reduces — via the chart's left inverse `PartialEquiv.left_inv` — to the tangent coordinate change
+of `X τ y` from the chart at `y` to the chart at `p`, evaluated at `y`. -/
+theorem chartPushforwardField_extChartAt (X : ℝ → M → E) {p y : M} (τ : ℝ)
+    (hy : y ∈ (extChartAt I p).source) :
+    chartPushforwardField I X p τ (extChartAt I p y) = tangentCoordChange I y p y (X τ y) := by
+  unfold chartPushforwardField
+  rw [(extChartAt I p).left_inv hy]
+
+/-- **The raw flow's chart representation is an integral curve of the chart pushforward field.**  Combining
+the raw-flow chart-representation derivative
+(`hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt`) with the field's chart-image value
+(`chartPushforwardField_extChartAt`): for an abstract curve `γ : ℝ → M` satisfying the bare manifold flow
+ODE `HasMFDerivWithinAt … γ s t ((1).smulRight (X t (γ t)))` at time `t` with `γ t` in the source of the
+preferred chart `extChartAt I p`, the chart representation `τ ↦ extChartAt I p (γ τ)` has within-set
+derivative `chartPushforwardField I X p t` evaluated at the *current* chart point `extChartAt I p (γ t)`.
+
+This is exactly the `RicciFlow.ModelGaugeFlowODE.LocalFlowSolution`-shaped integral-curve datum
+`HasDerivWithinAt (flow) (f t (flow t)) s t` (with `f := chartPushforwardField I X p`), now supplied by
+the RAW compact flow with **no spatial regularity assumed** — the first genuine consumer of the
+raw-flow chart-representation toolkit, feeding the model ODE uniqueness comparison against the
+model-`C³` flow. -/
+theorem hasDerivWithinAt_extChartAt_comp_chartPushforwardField
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {p : M} {X : ℝ → M → E}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))))
+    (hsrc_ext : γ t ∈ (extChartAt I p).source) :
+    HasDerivWithinAt (fun τ : ℝ ↦ extChartAt I p (γ τ))
+      (chartPushforwardField I X p t (extChartAt I p (γ t))) s t := by
+  rw [chartPushforwardField_extChartAt X t hsrc_ext]
+  exact hasDerivWithinAt_extChartAt_comp_of_hasMFDerivWithinAt hγ hsrc_ext
+
+/-- **`HasDerivAt` form of the chart-representation integral-curve property.**  When the time set `s` is
+a neighbourhood of `t` — the situation for the *open* flow window `Set.Ioo (-ε) ε` at an interior time —
+the within-set integral-curve derivative of
+`hasDerivWithinAt_extChartAt_comp_chartPushforwardField` upgrades to a full `HasDerivAt`, the form
+consumed by Mathlib's model integral-curve / ODE-uniqueness API. -/
+theorem hasDerivAt_extChartAt_comp_chartPushforwardField
+    {γ : ℝ → M} {s : Set ℝ} {t : ℝ} {p : M} {X : ℝ → M → E}
+    (hγ : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ s t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))))
+    (hs : s ∈ nhds t)
+    (hsrc_ext : γ t ∈ (extChartAt I p).source) :
+    HasDerivAt (fun τ : ℝ ↦ extChartAt I p (γ τ))
+      (chartPushforwardField I X p t (extChartAt I p (γ t))) t :=
+  (hasDerivWithinAt_extChartAt_comp_chartPushforwardField hγ hsrc_ext).hasDerivAt hs
+
+/-- **Chart-representation uniqueness against a co-integral curve of the chart pushforward field.**
+Given the raw manifold flow ODE for `γ` in the source of the preferred chart `extChartAt I p` over an
+open time window `Ioo a b`, and a second curve `g : ℝ → E` that is an integral curve of the *same*
+chart pushforward field `chartPushforwardField I X p` on that window and agrees with the chart
+representation `extChartAt I p ∘ γ` at an interior time `t₀`, if the field is `LipschitzOnWith K` on a
+state tube `state t` containing both curves then the two coincide on the whole window.
+
+This is the integral-curve uniqueness step that identifies the raw compact flow's chart representation
+with a comparison curve `g` — in the intended application `g` is the model-`C³` flow tower `Ψ`, so the
+conclusion upgrades the chart representation to `C³` (the `hslicesC3` content of
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`).  The Lipschitz hypothesis `hlip` is the
+`tangentCoordChange`/transition-map regularity supplied separately; everything else is now available
+unconditionally from the raw flow via `hasDerivAt_extChartAt_comp_chartPushforwardField`. -/
+theorem extChartAt_comp_eqOn_of_lipschitzOnWith
+    {γ : ℝ → M} {g : ℝ → E} {p : M} {X : ℝ → M → E}
+    {a b t₀ : ℝ} {K : NNReal} {state : ℝ → Set E}
+    (hγ : ∀ t ∈ Set.Ioo a b,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I γ (Set.Ioo a b) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))))
+    (hγ_src : ∀ t ∈ Set.Ioo a b, γ t ∈ (extChartAt I p).source)
+    (ht₀ : t₀ ∈ Set.Ioo a b)
+    (hlip : ∀ t ∈ Set.Ioo a b, LipschitzOnWith K (chartPushforwardField I X p t) (state t))
+    (hg' : ∀ t ∈ Set.Ioo a b, HasDerivAt g (chartPushforwardField I X p t (g t)) t)
+    (hγ_mem : ∀ t ∈ Set.Ioo a b, extChartAt I p (γ t) ∈ state t)
+    (hg_mem : ∀ t ∈ Set.Ioo a b, g t ∈ state t)
+    (heq : extChartAt I p (γ t₀) = g t₀) :
+    Set.EqOn (fun τ : ℝ ↦ extChartAt I p (γ τ)) g (Set.Ioo a b) :=
+  ODE_solution_unique_of_mem_Ioo (v := chartPushforwardField I X p) (s := state)
+    hlip ht₀
+    (fun t ht ↦ ⟨hasDerivAt_extChartAt_comp_chartPushforwardField (hγ t ht)
+      (Ioo_mem_nhds ht.1 ht.2) (hγ_src t ht), hγ_mem t ht⟩)
+    (fun t ht ↦ ⟨hg' t ht, hg_mem t ht⟩)
+    heq
+
+/-- **Chart-conjugation `C³` transfer with an independent target chart centre.**  Generalisation of
+`contMDiffOn_of_extChartAt_conjugation` in which the target chart is centred at an arbitrary `y₀ : M`
+rather than the image centre `F x₀`.  This is the form the *temporal* integral-curve identification
+produces: the chart representation `τ ↦ extChartAt I p (Φ τ x)` uses a single fixed chart `p` for both
+source and target, so the spatial conjugation identity it yields at a fixed time,
+`extChartAt I p (Φ t x) = Ψ (extChartAt I p x)`, has target centre `p` — generally distinct from
+`Φ t p`.  With this variant that fixed-chart identity discharges `ContMDiffOn I I 3 (Φ t)` on the
+chart-confined patch, feeding the `hslicesC3` spatial-`C³` obligation via
+`contMDiff_of_forall_extChartAt_conjugation`.
+
+The proof is identical to `contMDiffOn_of_extChartAt_conjugation` with `y₀` in place of `F x₀`; nothing
+in that argument uses `y₀ = F x₀`. -/
+theorem contMDiffOn_of_extChartAt_conjugation'
+    {x₀ y₀ : M} {F : M → M} {U : Set M} {Ψ : E → E}
+    (hU : U ⊆ (chartAt H x₀).source)
+    (hΨ : ContDiff ℝ 3 Ψ)
+    (hFU : Set.MapsTo F U (chartAt H y₀).source)
+    (hconj : ∀ x ∈ U, extChartAt I y₀ (F x) = Ψ (extChartAt I x₀ x)) :
+    ContMDiffOn I I 3 F U := by
+  have hchart : ContMDiffOn I 𝓘(ℝ, E) 3 (extChartAt I x₀) U :=
+    (contMDiffOn_extChartAt (I := I) (n := 3) (x := x₀)).mono hU
+  have hΨm : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3 Ψ := contMDiff_iff_contDiff.mpr hΨ
+  have hmid : ContMDiffOn I 𝓘(ℝ, E) 3 (fun x => Ψ (extChartAt I x₀ x)) U :=
+    hΨm.comp_contMDiffOn hchart
+  have hmaps : Set.MapsTo (fun x => Ψ (extChartAt I x₀ x)) U (extChartAt I y₀).target := by
+    intro x hx
+    show Ψ (extChartAt I x₀ x) ∈ (extChartAt I y₀).target
+    rw [← hconj x hx]
+    exact PartialEquiv.map_source (extChartAt I y₀)
+      (by rw [extChartAt_source]; exact hFU hx)
+  have hsymm : ContMDiffOn 𝓘(ℝ, E) I 3 (extChartAt I y₀).symm
+      (extChartAt I y₀).target := contMDiffOn_extChartAt_symm y₀
+  have hcomp : ContMDiffOn I I 3
+      (fun x => (extChartAt I y₀).symm (Ψ (extChartAt I x₀ x))) U :=
+    hsymm.comp hmid hmaps
+  refine hcomp.congr (fun x hx => ?_)
+  show F x = (extChartAt I y₀).symm (Ψ (extChartAt I x₀ x))
+  rw [← hconj x hx]
+  exact (PartialEquiv.left_inv (extChartAt I y₀)
+    (by rw [extChartAt_source]; exact hFU hx)).symm
+
+/-- **`ContinuousOn` of the chart pushforward field from a continuous tangent-bundle section.**
+
+The isolated varying-source-centre coordinate change `y ↦ tangentCoordChange I y p y` is *not*
+continuous — its source chart `chartAt H y` jumps discontinuously with `y` (and, via
+`tangentCoordChange_comp`, `tangentCoordChange I y p y` is the *inverse* of `tangentCoordChange I p y y`,
+which still reads the varying chart at `y`).  `chartPushforwardField` is continuous only through its
+identification with a genuine tangent-bundle chart representation: for `y ∈ (extChartAt I p).source`, the
+value `tangentCoordChange I y p y (X τ y)` (`chartPushforwardField_extChartAt`) is exactly the second
+component of the trivialization `trivializationAt E (TangentSpace I) p` applied to the section value
+`⟨y, X τ y⟩` (`trivializationAt_apply` — both unfold to the same
+`fderivWithin ℝ (extChartAt I p ∘ (extChartAt I y).symm) (range I) (extChartAt I y y)`).
+
+Consequently, whenever the section `y ↦ ⟨y, X τ y⟩` is `ContinuousOn` the chart source — the shape a
+genuine (e.g. DeTurck) vector field supplies, being a continuous section of the tangent bundle — the
+model field `chartPushforwardField I X p τ` is `ContinuousOn` the chart target.  This is the
+correctly-hypothesised field-regularity step feeding the `LipschitzOnWith` input of
+`extChartAt_comp_eqOn_of_lipschitzOnWith` (the plan's "`chartPushforwardField` `ContinuousOn`" target,
+here supplied with the section hypothesis it genuinely requires). -/
+theorem continuousOn_chartPushforwardField
+    {X : ℝ → M → E} {p : M} {τ : ℝ}
+    (hX : ContinuousOn (fun y : M => (⟨y, X τ y⟩ : TangentBundle I M))
+      (extChartAt I p).source) :
+    ContinuousOn (chartPushforwardField I X p τ) (extChartAt I p).target := by
+  have hsymm : Set.MapsTo (fun q => (extChartAt I p).symm q)
+      (extChartAt I p).target (extChartAt I p).source :=
+    fun q hq => (extChartAt I p).map_target hq
+  have h2 : ContinuousOn (fun q => (⟨(extChartAt I p).symm q,
+      X τ ((extChartAt I p).symm q)⟩ : TangentBundle I M)) (extChartAt I p).target :=
+    hX.comp (continuousOn_extChartAt_symm p) hsymm
+  have h3 : ContinuousOn (fun q => (trivializationAt E (TangentSpace I) p)
+      (⟨(extChartAt I p).symm q, X τ ((extChartAt I p).symm q)⟩ : TangentBundle I M))
+      (extChartAt I p).target := by
+    refine (trivializationAt E (TangentSpace I) p).continuousOn.comp h2 (fun q hq => ?_)
+    rw [TangentBundle.trivializationAt_source]
+    have hmem := (extChartAt I p).map_target hq
+    rw [extChartAt_source] at hmem
+    exact hmem
+  have hg : ContinuousOn (fun q => ((trivializationAt E (TangentSpace I) p)
+      (⟨(extChartAt I p).symm q, X τ ((extChartAt I p).symm q)⟩ : TangentBundle I M)).2)
+      (extChartAt I p).target :=
+    continuous_snd.comp_continuousOn h3
+  refine hg.congr (fun q hq => ?_)
+  have hy : (extChartAt I p).symm q ∈ (extChartAt I p).source := (extChartAt I p).map_target hq
+  have hqe : extChartAt I p ((extChartAt I p).symm q) = q := (extChartAt I p).right_inv hq
+  have hL : chartPushforwardField I X p τ q
+      = tangentCoordChange I ((extChartAt I p).symm q) p ((extChartAt I p).symm q)
+          (X τ ((extChartAt I p).symm q)) := by
+    conv_lhs => rw [← hqe]
+    exact chartPushforwardField_extChartAt X τ hy
+  rw [hL, TangentBundle.trivializationAt_apply, tangentCoordChange_def]
+  rfl
+
+/-- **`ContDiffOn` of the chart pushforward field from a `C^n` tangent-bundle section.**
+
+The smooth analogue of `continuousOn_chartPushforwardField`, upgrading continuity to `C^n`
+regularity — the form needed to discharge the `LipschitzOnWith` (`hlip`) hypothesis of
+`extChartAt_comp_eqOn_of_lipschitzOnWith` (a `C^1` field on a convex compact tube is Lipschitz).
+Again the varying-source-centre coordinate change is smooth only through the tangent-bundle chart
+representation: the fixed-trivialization section characterisation
+`Bundle.Trivialization.contMDiffOn_iff` (centred at `p`, not at the varying base point, using
+`MemTrivializationAtlas (trivializationAt E (TangentSpace I) p)`) turns `C^n`-ness of the section
+`y ↦ ⟨y, X τ y⟩` into `C^n`-ness of `y ↦ (trivializationAt E (TangentSpace I) p ⟨y, X τ y⟩).2`, whose
+value along the chart is exactly `chartPushforwardField` (`TangentBundle.trivializationAt_apply`).
+Composing with the `C^n` chart inverse and reading off `contMDiffOn_iff_contDiffOn` yields the model
+`ContDiffOn ℝ n` statement. -/
+theorem contDiffOn_chartPushforwardField {n : WithTop ℕ∞}
+    [IsManifold I n M] [ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M} {τ : ℝ}
+    (hX : ContMDiffOn I (I.prod 𝓘(ℝ, E)) n
+      (fun y : M => (⟨y, X τ y⟩ : TangentBundle I M)) (extChartAt I p).source) :
+    ContDiffOn ℝ n (chartPushforwardField I X p τ) (extChartAt I p).target := by
+  have hmaps : Set.MapsTo (fun y : M => (⟨y, X τ y⟩ : TangentBundle I M))
+      (extChartAt I p).source (trivializationAt E (TangentSpace I) p).source := by
+    intro y hy
+    rw [TangentBundle.trivializationAt_source]
+    rw [extChartAt_source] at hy
+    exact hy
+  have hsnd : ContMDiffOn I 𝓘(ℝ, E) n
+      (fun y => (trivializationAt E (TangentSpace I) p (⟨y, X τ y⟩ : TangentBundle I M)).2)
+      (extChartAt I p).source :=
+    (((trivializationAt E (TangentSpace I) p).contMDiffOn_iff hmaps).mp hX).2
+  have hcomp : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ, E) n
+      (fun q => (trivializationAt E (TangentSpace I) p
+        (⟨(extChartAt I p).symm q, X τ ((extChartAt I p).symm q)⟩ : TangentBundle I M)).2)
+      (extChartAt I p).target :=
+    hsnd.comp (contMDiffOn_extChartAt_symm p)
+      (fun q hq => (extChartAt I p).map_target hq)
+  rw [← contMDiffOn_iff_contDiffOn]
+  refine hcomp.congr (fun q hq => ?_)
+  have hy : (extChartAt I p).symm q ∈ (extChartAt I p).source := (extChartAt I p).map_target hq
+  have hqe : extChartAt I p ((extChartAt I p).symm q) = q := (extChartAt I p).right_inv hq
+  have hL : chartPushforwardField I X p τ q
+      = tangentCoordChange I ((extChartAt I p).symm q) p ((extChartAt I p).symm q)
+          (X τ ((extChartAt I p).symm q)) := by
+    conv_lhs => rw [← hqe]
+    exact chartPushforwardField_extChartAt X τ hy
+  rw [hL, TangentBundle.trivializationAt_apply, tangentCoordChange_def]
+  rfl
+
+/-- **`LipschitzOnWith` of the chart pushforward field on a convex compact tube.**  The field-regularity
+datum consumed by the `hlip` hypothesis of `extChartAt_comp_eqOn_of_lipschitzOnWith`: combining the `C^n`
+regularity `contDiffOn_chartPushforwardField` (`n ≠ 0`, so `C^1` suffices) with
+`ContDiffOn.exists_lipschitzOnWith` (a `C^1` function on a convex compact set is Lipschitz), the chart
+pushforward field of a `C^n` tangent-bundle section is `LipschitzOnWith` some constant `K` on any convex
+compact subset `s` of the chart target.  This closes the field-Lipschitz step of the temporal
+integral-curve uniqueness comparison (with `s` the state tube `state t`), reducing the remaining GAP-1
+analytic content to the existence of the model-`C³` comparison flow `Ψ` itself. -/
+theorem exists_lipschitzOnWith_chartPushforwardField {n : WithTop ℕ∞}
+    [IsManifold I n M] [ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M} {τ : ℝ}
+    (hX : ContMDiffOn I (I.prod 𝓘(ℝ, E)) n
+      (fun y : M => (⟨y, X τ y⟩ : TangentBundle I M)) (extChartAt I p).source)
+    (hn : n ≠ 0) {s : Set E} (hs_sub : s ⊆ (extChartAt I p).target)
+    (hs_conv : Convex ℝ s) (hs_comp : IsCompact s) :
+    ∃ K, LipschitzOnWith K (chartPushforwardField I X p τ) s :=
+  ((contDiffOn_chartPushforwardField hX).mono hs_sub).exists_lipschitzOnWith hn hs_conv hs_comp
+
+/-- **Joint `(τ, q)` `ContDiffOn` of the chart pushforward field from a jointly-`C^n`
+time-dependent tangent-bundle section.**  The time-uniform (product-domain) strengthening of
+`contDiffOn_chartPushforwardField`: from joint `C^n` regularity of the time-dependent section
+`(τ, y) ↦ ⟨y, X τ y⟩` on `ℝ ×ˢ (extChartAt I p).source` (as a map into the tangent bundle with the
+product model `𝓘(ℝ, ℝ).prod I`), the uncurried chart pushforward field
+`(τ, q) ↦ chartPushforwardField I X p τ q` is `ContDiffOn ℝ n` on `ℝ ×ˢ (extChartAt I p).target`.
+
+The proof runs the fixed-time argument of `contDiffOn_chartPushforwardField` with the product source
+manifold `ℝ × M`: the fixed-trivialization section characterisation
+(`Bundle.Trivialization.contMDiffOn_iff`, centred at `p`) turns the joint section smoothness into joint
+`C^n`-ness of `(τ, y) ↦ (trivializationAt E (TangentSpace I) p ⟨y, X τ y⟩).2`, which is composed with the
+time-passenger chart inverse `(τ, q) ↦ (τ, (extChartAt I p).symm q)` and read off through
+`modelWithCornersSelf_prod`/`chartedSpaceSelf_prod` + `contMDiffOn_iff_contDiffOn` on the model product
+`ℝ × E`.  This is the joint-in-time field regularity feeding the bump-function globalisation of the model
+gauge flow: a compactly-supported `C^N` representative of the pushforward field is what
+`exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport` consumes. -/
+theorem contDiffOn_prod_chartPushforwardField {n : WithTop ℕ∞}
+    [IsManifold I n M] [ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M}
+    (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) n
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source)) :
+    ContDiffOn ℝ n (fun r : ℝ × E => chartPushforwardField I X p r.1 r.2)
+      (Set.univ ×ˢ (extChartAt I p).target) := by
+  have hmaps : Set.MapsTo (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source)
+      (trivializationAt E (TangentSpace I) p).source := by
+    intro r hr
+    rw [TangentBundle.trivializationAt_source]
+    have hr2 := hr.2
+    rw [extChartAt_source] at hr2
+    exact hr2
+  have hsnd : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) n
+      (fun r : ℝ × M => (trivializationAt E (TangentSpace I) p
+        (⟨r.2, X r.1 r.2⟩ : TangentBundle I M)).2)
+      (Set.univ ×ˢ (extChartAt I p).source) :=
+    (((trivializationAt E (TangentSpace I) p).contMDiffOn_iff hmaps).mp hX).2
+  have hΦ : ContMDiffOn 𝓘(ℝ, ℝ × E) (𝓘(ℝ, ℝ).prod I) n
+      (fun r : ℝ × E => ((r.1 : ℝ), (extChartAt I p).symm r.2))
+      (Set.univ ×ˢ (extChartAt I p).target) :=
+    ((ContinuousLinearMap.fst ℝ ℝ E).contMDiff.contMDiffOn).prodMk
+      ((contMDiffOn_extChartAt_symm p).comp
+        ((ContinuousLinearMap.snd ℝ ℝ E).contMDiff.contMDiffOn)
+        (fun r hr => hr.2))
+  have hcomp :=
+    hsnd.comp hΦ (fun r hr => ⟨Set.mem_univ _, (extChartAt I p).map_target hr.2⟩)
+  rw [← contMDiffOn_iff_contDiffOn]
+  refine hcomp.congr (fun r hr => ?_)
+  simp only [Function.comp_apply]
+  have hq : r.2 ∈ (extChartAt I p).target := hr.2
+  have hy : (extChartAt I p).symm r.2 ∈ (extChartAt I p).source := (extChartAt I p).map_target hq
+  have hqe : extChartAt I p ((extChartAt I p).symm r.2) = r.2 := (extChartAt I p).right_inv hq
+  have hL : chartPushforwardField I X p r.1 r.2
+      = tangentCoordChange I ((extChartAt I p).symm r.2) p ((extChartAt I p).symm r.2)
+          (X r.1 ((extChartAt I p).symm r.2)) := by
+    conv_lhs => rw [← hqe]
+    exact chartPushforwardField_extChartAt X r.1 hy
+  rw [hL, TangentBundle.trivializationAt_apply, tangentCoordChange_def]
+  rfl
+
+/-- **Time-uniform `LipschitzOnWith` of the chart pushforward field on a convex compact tube.**  The
+time-independent (`hlip`) datum consumed by `extChartAt_comp_eqOn_of_lipschitzOnWith`: a *single*
+Lipschitz constant `K` valid for **every** time slice `chartPushforwardField I X p t`
+(`t ∈ Set.Icc a b`), obtained from the joint-in-time field regularity
+`contDiffOn_prod_chartPushforwardField` on the compact convex product tube `Set.Icc a b ×ˢ s`
+(`ContDiffOn.exists_lipschitzOnWith`), then restricting the joint Lipschitz bound to each time slice:
+for a fixed time `t` the two product points `(t, q)`, `(t, q')` share their first coordinate, so their
+sup-metric distance `edist (t, q) (t, q')` collapses to `edist q q'` (`Prod.edist_eq`, `edist_self`),
+turning the joint bound into the slice bound with the *same* constant.
+
+This is exactly the uniform-`K` shape the temporal integral-curve uniqueness comparison requires for its
+`hlip : ∀ t ∈ Set.Ioo a b, LipschitzOnWith K (chartPushforwardField I X p t) (state t)` hypothesis with
+a constant state tube `state t := s` (and `Set.Ioo a b ⊆ Set.Icc a b`), strengthening the
+per-fixed-time `exists_lipschitzOnWith_chartPushforwardField` to a bound uniform over the whole compact
+time interval — the field-Lipschitz input of the step-(v) GAP-1 glue that no longer varies with `t`. -/
+theorem exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField {n : WithTop ℕ∞}
+    [IsManifold I n M] [ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M}
+    (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) n
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source))
+    (hn : n ≠ 0) {a b : ℝ} {s : Set E} (hs_sub : s ⊆ (extChartAt I p).target)
+    (hs_conv : Convex ℝ s) (hs_comp : IsCompact s) :
+    ∃ K, ∀ t ∈ Set.Icc a b, LipschitzOnWith K (chartPushforwardField I X p t) s := by
+  have hsub : Set.Icc a b ×ˢ s ⊆ Set.univ ×ˢ (extChartAt I p).target :=
+    Set.prod_mono (Set.subset_univ _) hs_sub
+  have hconv : Convex ℝ (Set.Icc a b ×ˢ s) := (convex_Icc a b).prod hs_conv
+  have hcomp : IsCompact (Set.Icc a b ×ˢ s) := isCompact_Icc.prod hs_comp
+  obtain ⟨K, hK⟩ :=
+    ((contDiffOn_prod_chartPushforwardField hX).mono hsub).exists_lipschitzOnWith hn hconv hcomp
+  refine ⟨K, fun t ht => ?_⟩
+  intro q hq q' hq'
+  have hedist : edist ((t, q) : ℝ × E) (t, q') = edist q q' := by
+    rw [Prod.edist_eq]
+    dsimp only
+    rw [edist_self]
+    exact max_eq_right (zero_le _)
+  have hlip := hK (⟨ht, hq⟩ : ((t, q) : ℝ × E) ∈ Set.Icc a b ×ˢ s)
+    (⟨ht, hq'⟩ : ((t, q') : ℝ × E) ∈ Set.Icc a b ×ˢ s)
+  rw [hedist] at hlip
+  exact hlip
+
+/-- **Field-Lipschitz bound on an open ball tube from a closed-ball chart containment.**  Specialises
+`exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField` to a metric ball `state₀ := Metric.ball c ρ`
+whose closure `Metric.closedBall c ρ` lies in the chart target.  The closed ball is compact (finite
+dimension gives `ProperSpace E`) and convex, so the base lemma yields a uniform Lipschitz constant for
+`chartPushforwardField I X p t` on it over the whole time interval `Set.Icc a b`, and that restricts to
+the open ball `Metric.ball c ρ ⊆ Metric.closedBall c ρ`.  This is exactly the open, convex Lipschitz tube
+`state₀` datum (with its `hlip`) consumed by the step-(v) globalisation capstone
+(`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip`), discharged directly from the
+per-patch chart field jet — no global-in-time Lipschitz hypothesis needed. -/
+theorem exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField_ball {n : WithTop ℕ∞}
+    [IsManifold I n M] [ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E} {p : M}
+    (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) n
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I p).source))
+    (hn : n ≠ 0) {a b : ℝ} {c : E} {ρ : ℝ}
+    (hball : Metric.closedBall c ρ ⊆ (extChartAt I p).target) :
+    ∃ K, ∀ t ∈ Set.Icc a b, LipschitzOnWith K
+      (chartPushforwardField I X p t) (Metric.ball c ρ) := by
+  obtain ⟨K, hK⟩ := exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField hX hn
+    hball (convex_closedBall c ρ) (isCompact_closedBall c ρ)
+  exact ⟨K, fun t ht => (hK t ht).mono Metric.ball_subset_closedBall⟩
+
 end PoincareCurvature.GaugeFlowAssembly
