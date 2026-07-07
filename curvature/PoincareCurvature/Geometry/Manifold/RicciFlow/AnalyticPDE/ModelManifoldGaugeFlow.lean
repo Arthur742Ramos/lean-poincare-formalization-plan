@@ -1209,6 +1209,26 @@ theorem exists_timeDependent_flow_compact_extChartAt_source_and_mem
   intro x _ τ hτ
   exact (horbit x τ (hsub hτ)).mono hsub
 
+/-- **The `heq` datum of GAP-1 step (v) at the common anchor `0`.**  When the model gauge flow `G` is
+anchored at `0` (`Diffeomorph3GaugeFlowOn … sTime 0`) and the raw manifold flow `Φ` is anchored at `0`
+(`Φ 0 = id`), the step-(v) agreement `extChartAt I p (Φ t₀ x) = (G.maps3 t₀) (extChartAt I p x)` holds at
+the reference time `t₀ = 0`: both sides equal `extChartAt I p x` — the left because `Φ 0 x = x`, the right
+because `G.maps3 0 = id` (`SmoothSelfDiffeomorph3Family.AnchoredAt.apply`).  Choosing the reference time of
+`contMDiffOn_flowSlice_of_cutoff_orbit_control` to be the common anchor `0 ∈ Ioo a b` thus discharges its
+`heq` hypothesis for free — the integral-curve uniqueness comparison only needs agreement at a single
+interior time. -/
+theorem extChartAt_flow_eq_maps3_at_zero
+    {H M : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    [TopologicalSpace M] [ChartedSpace H M] [FiniteDimensional ℝ E] [CompleteSpace E]
+    {X' : ℝ → E → E} {sTime : Set ℝ}
+    (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E) (X := X') sTime 0)
+    {Φ : ℝ → M → M} {p : M}
+    (hanchor : ∀ x, Φ 0 x = x) (x : M) :
+    extChartAt I p (Φ 0 x) = (G.maps3 0) (extChartAt I p x) := by
+  rw [hanchor]
+  exact (SmoothSelfDiffeomorph3Family.AnchoredAt.apply (Φ := G.maps3) G.anchored
+    (extChartAt I p x)).symm
+
 end
 
 end SmoothDependenceCk
