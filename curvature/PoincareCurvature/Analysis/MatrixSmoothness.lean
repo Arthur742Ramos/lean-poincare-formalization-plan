@@ -136,6 +136,64 @@ theorem contMDiffOn_matrixInv {A : N → (ι → ι → ℝ)} {u : Set N}
     (contMDiffOn_matrixDetInv (J := J) (n := n) hA hdet).smul
       (contMDiffOn_matrixAdjugate (J := J) (n := n) hA)
 
+omit [DecidableEq ι] in
+/-- The `(i, j)` entry of a `ContMDiffOn` family of matrices is a `ContMDiffOn` scalar function. -/
+theorem contMDiffOn_matrixEntry {A : N → (ι → ι → ℝ)} {u : Set N}
+    (hA : ContMDiffOn J 𝓘(ℝ, ι → ι → ℝ) n A u) (i j : ι) :
+    ContMDiffOn J 𝓘(ℝ) n (fun x => A x i j) u := by
+  intro x hx
+  exact (contDiff_apply_apply (𝕜 := ℝ) (E := ℝ) (n := n) (i := i) (j := j)).comp_contMDiffWithinAt
+    (hA x hx)
+
+omit [DecidableEq ι] in
+/-- The `j`-th component of a `ContMDiffOn` family of vectors is a `ContMDiffOn` scalar function. -/
+theorem contMDiffOn_vecEntry {b : N → (ι → ℝ)} {u : Set N}
+    (hb : ContMDiffOn J 𝓘(ℝ, ι → ℝ) n b u) (j : ι) :
+    ContMDiffOn J 𝓘(ℝ) n (fun x => b x j) u := by
+  intro x hx
+  exact (contDiff_apply (𝕜 := ℝ) (E := ℝ) (n := n) (i := j)).comp_contMDiffWithinAt (hb x hx)
+
+/-- **Smoothness of the matrix–vector product.**  If `A : N → (ι → ι → ℝ)` and `b : N → (ι → ℝ)` are
+`ContMDiffOn` families over an arbitrary base, then `x ↦ (A x) *ᵥ (b x)` is `ContMDiffOn`. -/
+theorem contMDiffOn_mulVec {A : N → (ι → ι → ℝ)} {b : N → (ι → ℝ)} {u : Set N}
+    (hA : ContMDiffOn J 𝓘(ℝ, ι → ι → ℝ) n A u)
+    (hb : ContMDiffOn J 𝓘(ℝ, ι → ℝ) n b u) :
+    ContMDiffOn J 𝓘(ℝ, ι → ℝ) n
+      (fun x => (show ι → ℝ from (show Matrix ι ι ℝ from A x).mulVec (b x))) u := by
+  classical
+  rw [contMDiffOn_pi_space]
+  intro i
+  have hsum : ∀ s : Finset ι,
+      ContMDiffOn J 𝓘(ℝ) n (fun x => s.sum fun j => A x i j * b x j) u := by
+    intro s
+    refine Finset.induction_on s ?_ ?_
+    · simpa using (contMDiffOn_const : ContMDiffOn J 𝓘(ℝ) n (fun _ : N => (0 : ℝ)) u)
+    · intro j s hj hs
+      have hfirst : ContMDiffOn J 𝓘(ℝ) n (fun x => A x i j * b x j) u := by
+        simpa [smul_eq_mul] using
+          (contMDiffOn_matrixEntry (J := J) (n := n) hA i j).smul
+            (contMDiffOn_vecEntry (J := J) (n := n) hb j)
+      refine ContMDiffOn.congr (hfirst.add hs) ?_
+      intro x hx
+      simp [Finset.sum_insert, hj]
+  refine ContMDiffOn.congr (hsum Finset.univ) ?_
+  intro x hx
+  rfl
+
+/-- **Smoothness of the linear solve `A⁻¹ *ᵥ b` (Cramer solve).**  On the locus where `A` is
+nonsingular, the solution `x ↦ (A x)⁻¹ *ᵥ (b x)` of the linear system `(A x) y = b x` is
+`ContMDiffOn`.  This is exactly the shape of the raised-covector coefficient formula
+`cᵢ = ∑ⱼ (Gram⁻¹)ᵢⱼ · ω(frameⱼ)`, so it packages `contMDiffOn_matrixInv` for use in joint
+space-time Riemannian raising. -/
+theorem contMDiffOn_matrixInv_mulVec {A : N → (ι → ι → ℝ)} {b : N → (ι → ℝ)} {u : Set N}
+    (hA : ContMDiffOn J 𝓘(ℝ, ι → ι → ℝ) n A u)
+    (hb : ContMDiffOn J 𝓘(ℝ, ι → ℝ) n b u)
+    (hdet : ∀ x ∈ u, (show Matrix ι ι ℝ from A x).det ≠ 0) :
+    ContMDiffOn J 𝓘(ℝ, ι → ℝ) n
+      (fun x => (show ι → ℝ from ((show Matrix ι ι ℝ from A x)⁻¹ : Matrix ι ι ℝ).mulVec (b x))) u :=
+  contMDiffOn_mulVec (J := J) (n := n)
+    (contMDiffOn_matrixInv (J := J) (n := n) hA hdet) hb
+
 end Manifold
 
 end PoincareCurvature.MatrixSmoothness
