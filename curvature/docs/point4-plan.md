@@ -758,3 +758,57 @@ Ricci–DeTurck operator that yields `hbound : ‖A t x‖ ≤ L` on a Hölder b
 ingredient of `ofLipschitzBoundedContinuous`'s `hbound` in a Schauder norm), building on the completed
 model heat-kernel Schauder toolkit (`heatMild*` / `HeatKernelParabolicC0Alpha`).  Do NOT attempt to make a
 frozen linear operator serve as `chart.A` — `geometric` provably forbids it for positive-dimensional `M`.
+
+### Progress (2026-07-06, later 7) — Item 2 GAP 1: the chart-conjugation `C³` transfer that lifts the model flow tower to compact-`M` slice regularity is BUILT (both routes); and the Item-3 `picard` structural blocker SHARPENED
+
+**Strategic pivot this session.** A ground-truth read-only re-audit of the Item-3 chart route sharpened
+the prior formulation resolution into a *structural* blocker: the chart field
+`picard : IsPicardLindelof chart.A … a 0 L Kpic` is Mathlib's `IsPicardLindelof`, whose `norm_le`
+field demands `∀ t x ∈ closedBall (g₀.toSection) a, ‖chart.A t x‖ ≤ L` **in the `ContinuousSectionSpace`
+(C⁰/sup) norm on a C⁰ ball**.  For positive-dimensional `M` the `realization` decode forces `chart.A`
+to agree, along its Banach solution, with the genuine 2nd-order Ricci–DeTurck RHS (a `C²`-input,
+C⁰-unbounded operator), which is not even a well-defined `CSS → CSS` map, let alone C⁰-bounded on a C⁰
+ball.  So **no Hölder/Schauder a-priori bound inhabits `picard` as typed** — the ball in `norm_le` is
+the C⁰ `CSS` ball, not a Hölder ball.  The frozen-operator picard/Banach machinery (all prior sessions)
+is genuine but off this critical path.  Given that, the session pivoted to the **tractable GAP 1**
+(Item 2 compact chart-transfer), where the model-manifold `C³` smooth-dependence tower is DONE and the
+compact **gluing** machinery (`Diffeomorph3FlowExistence.exists_…_gaugeFlow_…_localGluingData_…`) is
+DONE — the missing link is constructing the per-chart local `C³` flow data from the tower.
+
+**Ground-truth GAP-1 map.**  The compact gauge-flow has two routes, both reducing to *local, chart-
+confined* `C³` regularity of the flow slices (never the global crossing-charts problem):
+* Route A (`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`) needs
+  `hslicesC3` = `∀ t, ContMDiff I I 3 (Φ t)` (global slice `C³`).
+* Route B (the `…_localGluingData_…` gluing family) needs, per chart `i` and time `t`,
+  `RicciFlow.LocalGluingData 3 (Fₗ i t) (Gₗ i t) (U t i) (V t i)`, whose only analytic fields are
+  `forward_contMDiffOn`/`backward_contMDiffOn` = `ContMDiffOn I I 3` on chart-confined opens.
+
+Nothing in the library constructed either from the model tower.  Three sorry-free, axiom-clean
+declarations landed in `GaugeReduction/GaugeFlowAssembly.lean` closing exactly this link:
+
+* **`contMDiffOn_of_extChartAt_conjugation`** — the core transfer: if on an open `U ⊆ (chartAt x₀).source`
+  the map `F` is represented in the extended charts at `x₀`/`F x₀` by a globally-`C³` model map
+  `Ψ : E → E` (`extChartAt I (F x₀) (F x) = Ψ (extChartAt I x₀ x)` on `U`) and `F` maps `U` into the
+  source chart at `F x₀`, then `ContMDiffOn I I 3 F U`.  Proof: factor `F =
+  (extChartAt I (F x₀)).symm ∘ Ψ ∘ (extChartAt I x₀)` on `U` (chart left-inverse), compose the two
+  `ContMDiffOn` chart maps (`contMDiffOn_extChartAt`/`_symm`) with `Ψ` (`contMDiff_iff_contDiff`).
+* **`localGluingData_ofChartConjugation`** — bundles the transfer for the forward slice `F` and its
+  local inverse `G` (plus open-ness, mapping, mutual-inverse data) into exactly
+  `RicciFlow.LocalGluingData 3 F G U V` — the Route B per-chart `hlocal` input.
+* **`contMDiff_of_forall_extChartAt_conjugation`** — glues per-point chart-conjugation witnesses into
+  global `ContMDiff I I 3 F` (`ContMDiff` = `∀ x, ContMDiffAt`, each via `ContMDiffOn.contMDiffAt` on
+  the neighbourhood) — the `ContMDiff I I 3 (Φ t)` content of Route A's `hslicesC3`.
+
+**Fractions of GAP 1.**  The tower→compact `C³`-regularity *transfer interface* is now DONE for both
+routes: given, per chart, the model `C³` representative `Ψ` and the chart-representation identity
+`hconj`, the local/global slice `C³` regularity (and the `LocalGluingData 3` package) follow with zero
+sorry/axiom.
+
+**Concrete next target.**  Produce `Ψ` and `hconj` from the *actual* compact flow: (i) the tangent-chart
+push of the `C³` DeTurck gauge field `X` is a `ContDiff ℝ 3` model field `v` on the chart target;
+(ii) its model flow `Ψ` (from `SmoothDependenceManifold.exists_flow_diffeomorph_three`) is globally
+`C³`; (iii) `hconj` — the manifold flow slice reads in charts as `Ψ` — follows from integral-curve
+uniqueness (the manifold flow's chart representation solves the pushed ODE).  Feeding those to the three
+transfer lemmas above discharges `hslicesC3` / the `hlocal` `LocalGluingData 3`, closing GAP 1
+unconditionally.  Do NOT route the genuine 2nd-order operator through `chart.A`'s C⁰ `picard` — the
+`IsPicardLindelof.norm_le` C⁰-ball bound provably forbids it for positive-dimensional `M`.
