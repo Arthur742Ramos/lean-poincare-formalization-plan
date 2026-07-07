@@ -156,4 +156,47 @@ theorem exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3
   exact ⟨ε, hε, exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow
     hε Φ G hΦ0 hΦC3 hGC3 hleft hright hderiv⟩
 
+/-- **Chart-conjugation `C³` transfer for a flow slice.**  If, on an open set `U` contained in the
+source chart at `x₀`, the map `F` is represented in the extended charts at `x₀` (source) and `F x₀`
+(target) by a globally `C³` model map `Ψ : E → E` — i.e.
+`extChartAt I (F x₀) (F x) = Ψ (extChartAt I x₀ x)` for every `x ∈ U` — and `F` maps `U` into the
+source chart at `F x₀`, then `F` is `ContMDiffOn I I 3` on `U`.
+
+This is the manifold-level `C³` regularity transfer for a flow slice: the model-manifold
+smooth-dependence tower (`SmoothDependenceManifold.exists_flow_diffeomorph_three` etc.) produces a
+globally `C³` chart-local flow `Ψ`, and this lemma lifts that `C³` regularity to `ContMDiffOn I I 3`
+of the genuine manifold flow slice on a chart-confined patch — exactly the
+`forward_contMDiffOn`/`backward_contMDiffOn` field of `LocalGluingData 3` the compact gauge-flow
+gluing route (`Diffeomorph3FlowExistence.exists_Ioo_gaugeFlow_…_localGluingData_…`) consumes.  The
+proof factors `F` as `(extChartAt I (F x₀)).symm ∘ Ψ ∘ (extChartAt I x₀)` on `U` (using the chart
+left-inverse identity) and composes the two `ContMDiffOn` chart maps with the globally-`C³` `Ψ`. -/
+theorem contMDiffOn_of_extChartAt_conjugation
+    {x₀ : M} {F : M → M} {U : Set M} {Ψ : E → E}
+    (hU : U ⊆ (chartAt H x₀).source)
+    (hΨ : ContDiff ℝ 3 Ψ)
+    (hFU : Set.MapsTo F U (chartAt H (F x₀)).source)
+    (hconj : ∀ x ∈ U, extChartAt I (F x₀) (F x) = Ψ (extChartAt I x₀ x)) :
+    ContMDiffOn I I 3 F U := by
+  have hchart : ContMDiffOn I 𝓘(ℝ, E) 3 (extChartAt I x₀) U :=
+    (contMDiffOn_extChartAt (I := I) (n := 3) (x := x₀)).mono hU
+  have hΨm : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) 3 Ψ := contMDiff_iff_contDiff.mpr hΨ
+  have hmid : ContMDiffOn I 𝓘(ℝ, E) 3 (fun x => Ψ (extChartAt I x₀ x)) U :=
+    hΨm.comp_contMDiffOn hchart
+  have hmaps : Set.MapsTo (fun x => Ψ (extChartAt I x₀ x)) U (extChartAt I (F x₀)).target := by
+    intro x hx
+    show Ψ (extChartAt I x₀ x) ∈ (extChartAt I (F x₀)).target
+    rw [← hconj x hx]
+    exact PartialEquiv.map_source (extChartAt I (F x₀))
+      (by rw [extChartAt_source]; exact hFU hx)
+  have hsymm : ContMDiffOn 𝓘(ℝ, E) I 3 (extChartAt I (F x₀)).symm
+      (extChartAt I (F x₀)).target := contMDiffOn_extChartAt_symm (F x₀)
+  have hcomp : ContMDiffOn I I 3
+      (fun x => (extChartAt I (F x₀)).symm (Ψ (extChartAt I x₀ x))) U :=
+    hsymm.comp hmid hmaps
+  refine hcomp.congr (fun x hx => ?_)
+  show F x = (extChartAt I (F x₀)).symm (Ψ (extChartAt I x₀ x))
+  rw [← hconj x hx]
+  exact (PartialEquiv.left_inv (extChartAt I (F x₀))
+    (by rw [extChartAt_source]; exact hFU hx)).symm
+
 end PoincareCurvature.GaugeFlowAssembly
