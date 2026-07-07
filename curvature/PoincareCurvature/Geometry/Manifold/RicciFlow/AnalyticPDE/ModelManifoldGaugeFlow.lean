@@ -1229,6 +1229,20 @@ theorem extChartAt_flow_eq_maps3_at_zero
   exact (SmoothSelfDiffeomorph3Family.AnchoredAt.apply (Φ := G.maps3) G.anchored
     (extChartAt I p x)).symm
 
+/-- **Compactness of the chart image of a compact patch.**  For a compact set `Q` contained in the
+chart source `(extChartAt I p).source`, its image `extChartAt I p '' Q ⊆ E` under the chart is compact —
+the continuous image (`continuousOn_extChartAt`, restricted to `Q`) of a compact set.  This is the
+compact model-space initial set `Q_E` over which the **model-curve** confinement
+`exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith` (for the `hg_mem` / `hχ` faces of the
+step-(v) capstone) is taken, obtained from the raw-manifold compact patch `Q` of the `hγ_src` / `hγ_mem`
+faces — the bridge between the two sides' initial sets. -/
+theorem isCompact_extChartAt_image
+    {H M : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    [TopologicalSpace M] [ChartedSpace H M]
+    {Q : Set M} {p : M} (hQ : IsCompact Q) (hQsub : Q ⊆ (extChartAt I p).source) :
+    IsCompact (extChartAt I p '' Q) :=
+  hQ.image_of_continuousOn ((continuousOn_extChartAt p).mono hQsub)
+
 end
 
 end SmoothDependenceCk
