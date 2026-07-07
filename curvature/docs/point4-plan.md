@@ -1073,3 +1073,50 @@ compact set inside an open set); **(b)** supply the joint section-smoothness hyp
 actual gauge field `X` (currently assumed).  Then step (v) wires `Ψ` to `hslicesC3` via
 `extChartAt_comp_eqOn_of_lipschitzOnWith` (field agrees with the un-cut pushforward where `χ ≡ 1`) +
 `contMDiffOn_of_extChartAt_conjugation'`.  Do NOT rebuild trivial-case chart closures.
+
+### Progress (2026-07-06, later 13) — Item 2 GAP 1: step (ii) cutoff `χ` is CONSTRUCTED (residual (a) closed), the window corollary packages it with `Ψ`, and the model-flow→step-(v) interface (`hΨ`/`hg'` readouts) is built
+
+**What landed (sorry-free, axiom-clean `{propext, Classical.choice, Quot.sound}`; all in
+`AnalyticPDE/ModelManifoldGaugeFlow.lean`).**
+
+* **`exists_contDiff_cutoff_one_nhdsSet_of_isCompact`** — GAP-1 step (ii), residual (a) CLOSED. On a
+  finite-dimensional real normed space `F`, for a compact `K` inside an open `U`, a globally-`C^n`
+  cutoff `χ : F → ℝ` with compact support, `tsupport χ ⊆ U`, `∀ᶠ x in 𝓝ˢ K, χ x = 1`, and
+  `0 ≤ χ ≤ 1`. Construction: interpose a compact `L` with `K ⊆ interior L ⊆ L ⊆ U`
+  (`exists_compact_between`, local compactness), apply the model-manifold cutoff
+  `exists_contMDiffMap_one_nhds_of_subset_interior` on `𝓘(ℝ, F)`, read `support ⊆ L` (compact) for
+  `HasCompactSupport` and `tsupport ⊆ L ⊆ U`, and transfer `ContMDiff → ContDiff`
+  (`contMDiff_iff_contDiff`).
+* **`exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`** — steps (ii)+(iv) packaged.
+  From joint `C^n` section regularity `hX` (`4 ≤ n`) and a *compact* window
+  `K ⊆ ℝ ×ˢ (extChartAt I p).target`, constructs `χ` (above, on the model `ℝ × E`) and returns both
+  `∀ᶠ r in 𝓝ˢ K, χ r = 1` and `Nonempty (Diffeomorph3GaugeFlowOn (cut field) s t₀)` (the model
+  comparison flow `Ψ`). Removes the "cutoff assumed" residual of the earlier capstone. (Cast bridge
+  `4 ≤ n : ℕ∞` ⟶ `(4 : WithTop ℕ∞) ≤ ↑n` via `WithTop.coe_le_coe` + `simpa`.)
+* **`contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn`** — the step-(v) `hΨ` datum. On `M = E`
+  every slice `G.maps3 t : E ≃ₘ^3⟮𝓘(ℝ,E),𝓘(ℝ,E)⟯ E` is `ContDiff ℝ 3` (`Diffeomorph.contMDiff` +
+  model `contMDiff_iff_contDiff`) — exactly the `hΨ : ContDiff ℝ 3 Ψ` input of
+  `contMDiffOn_of_extChartAt_conjugation'`. (Anchoring `G.maps3 t₀ = id` needs no new lemma:
+  `SmoothSelfDiffeomorph3Family.AnchoredAt.apply` gives `G.maps3 t₀ q = q` from `G.anchored`.)
+* **`hasDerivWithinAt_maps3_eval_of_model_diffeomorph3GaugeFlowOn`** — the step-(v) `hg'` core. On
+  `M = E` the manifold ODE readout `Diffeomorph3GaugeFlowOn.hasMFDerivWithinAt` becomes a genuine
+  `HasDerivWithinAt (fun τ ↦ G.maps3 τ q) (Xc t (G.maps3 t q)) s t` via the model-space
+  `HasMFDerivWithinAt.hasFDerivWithinAt` + `smulRight_one_eq_toSpanSingleton`. With
+  `g := τ ↦ G.maps3 τ (extChartAt I p x)` the comparison curve, this is the integral-curve datum of
+  `extChartAt_comp_eqOn_of_lipschitzOnWith` where `χ ≡ 1` (there `Xc = chartPushforwardField`).
+
+**Concrete next target (step (v) glue + residual (b)).** The remaining GAP-1 work is the *glue*
+assembling the four bricks above into `hslicesC3` = `∀ t, ContMDiffOn I I 3 (Φ t) U`:
+  1. Construct the **compact flow `Φ` on `M`** (Mathlib flow-by-vector-field / the raw compact flow),
+     living in the heavy `GaugeReduction/Diffeomorph3FlowExistence.lean` / `ModelGaugeFlowODE.lean`.
+  2. **Orbit-containment / `χ ≡ 1` control** — the genuinely delicate step: show the model curve
+     `τ ↦ G.maps3 τ (extChartAt I p x)` stays in the `χ ≡ 1` neighbourhood of the orbit window `K` for
+     the finite time window, so the cut field reduces to `chartPushforwardField` along it and
+     `hasDerivWithinAt_maps3_eval_…` upgrades to the `hg'` of `extChartAt_comp_eqOn_of_lipschitzOnWith`
+     (also upgrade `HasDerivWithinAt` on the open `Ioo` window to `HasDerivAt`).
+  3. For each `x ∈ U`, `extChartAt_comp_eqOn_of_lipschitzOnWith` (with `g` the model curve) evaluated at
+     `t` yields the spatial conjugation `extChartAt I p (Φ t x) = G.maps3 t (extChartAt I p x)`
+     (`hconj`); feed that + `contDiff_three_maps3_…` to `contMDiffOn_of_extChartAt_conjugation'`.
+  4. Residual (b): supply the joint section-smoothness `hX` from the actual DeTurck gauge field `X`.
+Do NOT rebuild trivial-case chart closures; do NOT re-enter the Item-3 BilinearFormBundle geometric-`A`
+wall from this frontier.
