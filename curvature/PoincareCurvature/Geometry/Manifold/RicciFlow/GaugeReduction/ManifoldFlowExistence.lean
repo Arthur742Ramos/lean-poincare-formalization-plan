@@ -657,6 +657,71 @@ theorem autonomousLift_hasMFDerivWithinAt {E H M : Type*} [NormedAddCommGroup E]
   rw [ContinuousLinearMap.id_apply, Prod.smul_fst, ContinuousLinearMap.one_apply,
     smul_eq_mul, mul_one]
 
+/-- **Joint continuity at the anchor of a *time-dependent* manifold flow — via autonomisation and the
+jointly-continuous flow box.** For a jointly-`C¹` time-dependent field `X` on a boundaryless complete
+`T2` manifold, any flow map `Φ : ℝ → M → M` that is anchored (`Φ 0 y = y` for `y` near `x₀`) and whose
+orbits `τ ↦ Φ τ y` solve the time-dependent ODE on a *uniform* window `Ioo (-ε₀) ε₀` (for `y` near
+`x₀`) is jointly `(t, y)`-continuous at the anchor `(0, x₀)`.  The lifted orbit `τ ↦ (τ, Φ τ y)` is a
+genuine integral curve of the autonomous field `(1, X · ·)` on `ℝ × M` (`autonomousLift_hasMFDerivWithinAt`),
+so it is pinned by uniqueness (`isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless`) to the
+jointly-continuous local flow `Ψ` of `exists_nhds_uniform_localFlow_continuousOn` at the lifted anchor
+`(0, y)`, whence `Φ τ y = (Ψ (0, y) τ).2` inherits `Ψ`'s continuity.  This is the `ContinuousAt Φ (0, x)`
+datum the raw-manifold orbit-confinement control `exists_Ioo_forall_mem_of_continuousAt_source` consumes
+for the compact time-dependent gauge flow of Item 2. -/
+theorem continuousAt_zero_prod_timeDependent_flow_of_hasMFDerivWithinAt {E H M : Type*}
+    [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {Φ : ℝ → M → M} {x₀ : M} {ε₀ : ℝ} (hε₀ : 0 < ε₀)
+    (hanchor : ∀ᶠ y in 𝓝 x₀, Φ 0 y = y)
+    (horbit : ∀ᶠ y in 𝓝 x₀, ∀ τ ∈ Set.Ioo (-ε₀) ε₀,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ => Φ σ y) (Set.Ioo (-ε₀) ε₀) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) :
+    ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x₀) := by
+  obtain ⟨Ũ, hŨ, ε₁, hε₁, Ψ, hΨ, hΨcont⟩ :=
+    exists_nhds_uniform_localFlow_continuousOn (I := (𝓘(ℝ, ℝ)).prod I) hX (0, x₀)
+  set ε₂ := min ε₀ ε₁ with hε₂def
+  have hε₂pos : 0 < ε₂ := lt_min hε₀ hε₁
+  have hsub₀ : Set.Ioo (-ε₂) ε₂ ⊆ Set.Ioo (-ε₀) ε₀ :=
+    Set.Ioo_subset_Ioo (by have := min_le_left ε₀ ε₁; linarith) (min_le_left ε₀ ε₁)
+  have hsub₁ : Set.Ioo (-ε₂) ε₂ ⊆ Set.Ioo (-ε₁) ε₁ :=
+    Set.Ioo_subset_Ioo (by have := min_le_right ε₀ ε₁; linarith) (min_le_right ε₀ ε₁)
+  have h0mem : (fun y : M => ((0 : ℝ), y)) ⁻¹' Ũ ∈ 𝓝 x₀ :=
+    ((continuous_const.prodMk continuous_id).continuousAt).preimage_mem_nhds hŨ
+  set W : Set M := ((fun y : M => ((0 : ℝ), y)) ⁻¹' Ũ) ∩ {y | Φ 0 y = y} ∩
+      {y | ∀ τ ∈ Set.Ioo (-ε₀) ε₀,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ => Φ σ y) (Set.Ioo (-ε₀) ε₀) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))} with hWdef
+  have hWnhds : W ∈ 𝓝 x₀ :=
+    Filter.inter_mem (Filter.inter_mem h0mem hanchor) horbit
+  have hagree : ∀ y ∈ W, ∀ τ ∈ Set.Ioo (-ε₂) ε₂, Φ τ y = (Ψ (0, y) τ).2 := by
+    intro y hyW τ hτ
+    rw [hWdef] at hyW
+    obtain ⟨hΨ0, hΨorbit⟩ := hΨ (0, y) hyW.1.1
+    have hΓint : IsMIntegralCurveOn (fun σ => ((σ, Φ σ y) : ℝ × M))
+        (fun q : ℝ × M => ((1 : ℝ), X q.1 q.2)) (Set.Ioo (-ε₀) ε₀) :=
+      fun t ht => autonomousLift_hasMFDerivWithinAt ht (hyW.2 t ht)
+    have heq : Set.EqOn (fun σ => ((σ, Φ σ y) : ℝ × M)) (Ψ (0, y)) (Set.Ioo (-ε₂) ε₂) := by
+      refine isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless
+        (a := -ε₂) (b := ε₂) (t₀ := 0) ⟨by linarith, by linarith⟩ hX
+        (hΓint.mono hsub₀) (hΨorbit.mono hsub₁) ?_
+      show ((0, Φ 0 y) : ℝ × M) = Ψ (0, y) 0
+      rw [hyW.1.2, hΨ0]
+    have hh : ((τ, Φ τ y) : ℝ × M) = Ψ (0, y) τ := heq hτ
+    exact congrArg Prod.snd hh
+  have hΨcontAt : ContinuousAt (fun P : (ℝ × M) × ℝ => Ψ P.1 P.2) ((0, x₀), 0) :=
+    hΨcont.continuousAt (prod_mem_nhds hŨ (Ioo_mem_nhds (by linarith) hε₁))
+  have hembed : ContinuousAt (fun z : ℝ × M => ((((0 : ℝ), z.2), z.1) : (ℝ × M) × ℝ)) (0, x₀) :=
+    ((continuous_const.prodMk continuous_snd).prodMk continuous_fst).continuousAt
+  have hcomp := hΨcontAt.comp_of_eq hembed rfl
+  refine (hcomp.snd).congr ?_
+  have htime : Set.Ioo (-ε₂) ε₂ ∈ 𝓝 (0 : ℝ) := Ioo_mem_nhds (by linarith) hε₂pos
+  filter_upwards [prod_mem_nhds htime hWnhds] with z hz
+  exact (hagree z.2 hz.2 z.1 hz.1).symm
+
 /-- **Uniqueness of time-dependent integral curves.** Two time-dependent integral
 curves of a jointly-`C¹` field `X` on a boundaryless T2 manifold that agree at
 `t = 0` agree throughout `Ioo a b` (with `0 ∈ Ioo a b`). Proved by lifting to
