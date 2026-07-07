@@ -1059,6 +1059,76 @@ theorem exists_Ioo_forall_forall_mem_extChartAt_source_of_continuousAt
   exact exists_Ioo_forall_forall_mem_of_isCompact_of_continuousAt_source
     hQ hUopen (fun x hx => by rw [hanchor x hx]; exact hQsub hx) hcont
 
+/-- **General tube-lemma confinement with distinct source/target types.**  Identical to
+`exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_manifoldTarget`, but allowing the
+compact initial set `Q ⊆ Y` and the space-time target `W ⊆ ℝ × Z` to live over *different* topological
+spaces `Y` (domain) and `Z` (codomain) — the proof never uses `Y = Z`.  This is what the raw-manifold
+`hγ_mem` control needs, where the confined quantity is the **chart image** `extChartAt I p (Φ τ x) : E`
+of the orbit `Φ τ x : M`, so the domain `M` and codomain `E` genuinely differ.  For a map `Ψ : ℝ → Y → Z`
+jointly continuous at each anchored point `(t₀, q)` (`q ∈ Q` compact) into an open space-time target `W`
+containing the anchored graph, there is an open time window `Set.Ioo a b ∋ t₀` on which every orbit
+graph `τ ↦ (τ, Ψ τ q)` stays in `W`. -/
+theorem exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_prod
+    {Y Z : Type*} [TopologicalSpace Y] [TopologicalSpace Z]
+    {Ψ : ℝ → Y → Z} {Q : Set Y} {W : Set (ℝ × Z)} {t₀ : ℝ}
+    (hQ : IsCompact Q) (hW : IsOpen W)
+    (hgraph0 : ∀ q ∈ Q, ((t₀, Ψ t₀ q) : ℝ × Z) ∈ W)
+    (hcont : ∀ q ∈ Q, ContinuousAt (fun z : ℝ × Y => Ψ z.1 z.2) (t₀, q)) :
+    ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧
+      ∀ τ ∈ Set.Ioo a b, ∀ q ∈ Q, ((τ, Ψ τ q) : ℝ × Z) ∈ W := by
+  have hev : ∀ᶠ τ in 𝓝 t₀, ∀ q ∈ Q, ((τ, Ψ τ q) : ℝ × Z) ∈ W := by
+    refine IsCompact.eventually_forall_of_forall_eventually hQ ?_
+    intro q hq
+    have hgraphcont :
+        ContinuousAt (fun z : ℝ × Y => ((z.1, Ψ z.1 z.2) : ℝ × Z)) (t₀, q) :=
+      continuousAt_fst.prodMk (hcont q hq)
+    exact hgraphcont.preimage_mem_nhds (hW.mem_nhds (hgraph0 q hq))
+  obtain ⟨l, u, hmem, hsub⟩ := mem_nhds_iff_exists_Ioo_subset.mp hev
+  exact ⟨l, u, hmem, fun τ hτ q hq => hsub hτ q hq⟩
+
+/-- **Joint continuity of the chart-composed manifold flow at the anchor.**  For an anchored flow
+`Φ` (`Φ 0 x = x`) jointly continuous at `(0, x)` with `x` in the chart source, the chart-composed map
+`z ↦ extChartAt I p (Φ z.1 z.2)` is `ContinuousAt (0, x)`: post-compose `Φ`'s joint continuity with the
+continuity of `extChartAt I p` at `Φ 0 x = x ∈ (extChartAt I p).source` (`continuousAt_extChartAt'`).
+This is the joint-continuity input the `hγ_mem` confinement of GAP-1 step (v) consumes (the confined
+quantity being the chart image of the orbit). -/
+theorem continuousAt_zero_prod_extChartAt_flow
+    {H M : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    [TopologicalSpace M] [ChartedSpace H M]
+    {Φ : ℝ → M → M} {p x : M}
+    (hxsrc : x ∈ (extChartAt I p).source)
+    (hanchor : Φ 0 x = x)
+    (hcont : ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x)) :
+    ContinuousAt (fun z : ℝ × M => extChartAt I p (Φ z.1 z.2)) (0, x) := by
+  have hchart : ContinuousAt (extChartAt I p) x := continuousAt_extChartAt' hxsrc
+  exact hchart.comp_of_eq hcont (by exact hanchor)
+
+/-- **The `hγ_mem` datum of GAP-1 step (v), produced from the raw manifold flow's joint continuity.**
+Applies the distinct-type tube-lemma confinement
+`exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_prod` to the chart-composed flow
+`Ψ τ x = extChartAt I p (Φ τ x)` (jointly continuous by `continuousAt_zero_prod_extChartAt_flow`), over a
+compact patch `Q ⊆ (extChartAt I p).source` and an open space-time target `W ⊆ ℝ × E` containing the
+anchored chart-image graph.  Yields an open window `Set.Ioo a b ∋ 0` on which the chart image of every
+orbit stays in `W`: `∀ τ ∈ Ioo a b, ∀ x ∈ Q, (τ, extChartAt I p (Φ τ x)) ∈ W`.  With `W` the state graph
+`{z | z.2 ∈ state z.1}` (open) this is exactly the `hγ_mem` hypothesis of
+`contMDiffOn_flowSlice_of_cutoff_orbit_control`. -/
+theorem exists_Ioo_forall_forall_extChartAt_mem_of_continuousAt
+    {H M : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    [TopologicalSpace M] [ChartedSpace H M]
+    {Φ : ℝ → M → M} {Q : Set M} {p : M} {W : Set (ℝ × E)}
+    (hQ : IsCompact Q) (hQsub : Q ⊆ (extChartAt I p).source) (hW : IsOpen W)
+    (hanchor : ∀ x ∈ Q, Φ 0 x = x)
+    (hgraph0 : ∀ x ∈ Q, ((0 : ℝ), extChartAt I p x) ∈ W)
+    (hcont : ∀ x ∈ Q, ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x)) :
+    ∃ a b : ℝ, (0 : ℝ) ∈ Set.Ioo a b ∧
+      ∀ τ ∈ Set.Ioo a b, ∀ x ∈ Q, ((τ, extChartAt I p (Φ τ x)) : ℝ × E) ∈ W := by
+  refine exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt_prod
+    (Ψ := fun τ x => extChartAt I p (Φ τ x)) (Q := Q) (W := W) hQ hW ?_ ?_
+  · intro x hx
+    simpa only [hanchor x hx] using hgraph0 x hx
+  · intro x hx
+    exact continuousAt_zero_prod_extChartAt_flow (hQsub hx) (hanchor x hx) (hcont x hx)
+
 end
 
 end SmoothDependenceCk
