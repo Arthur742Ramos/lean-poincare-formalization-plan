@@ -199,4 +199,36 @@ theorem contMDiffOn_of_extChartAt_conjugation
   exact (PartialEquiv.left_inv (extChartAt I (F x₀))
     (by rw [extChartAt_source]; exact hFU hx)).symm
 
+/-- **`LocalGluingData 3` from chart-conjugation data.**  Packages the two chart-conjugation `C³`
+transfers (`contMDiffOn_of_extChartAt_conjugation`, applied to the forward slice `F` and its local
+inverse `G`) together with the mutual-inverse / mapping data into the exact
+`RicciFlow.LocalGluingData 3 F G U V` structure the compact gauge-flow gluing theorems
+(`Diffeomorph3FlowExistence.exists_…_gaugeFlow_…_localGluingData_…`) consume as their per-chart
+`hlocal` hypothesis.
+
+The two genuinely-analytic fields (`forward_contMDiffOn`/`backward_contMDiffOn`) are discharged by the
+chart-conjugation transfer from globally-`C³` model representatives `ΨF`, `ΨG` (supplied by the
+model-manifold smooth-dependence tower in each chart); the remaining fields are the topological
+open-ness, the mapping, and the local mutual-inverse identities, which the flow group law provides. -/
+theorem localGluingData_ofChartConjugation
+    {F G : M → M} {U V : Set M} {xF xG : M} {ΨF ΨG : E → E}
+    (hUopen : IsOpen U) (hVopen : IsOpen V)
+    (hFmaps : Set.MapsTo F U V) (hGmaps : Set.MapsTo G V U)
+    (hleft : Set.LeftInvOn G F U) (hright : Set.RightInvOn G F V)
+    (hUF : U ⊆ (chartAt H xF).source) (hΨF : ContDiff ℝ 3 ΨF)
+    (hFchart : Set.MapsTo F U (chartAt H (F xF)).source)
+    (hconjF : ∀ x ∈ U, extChartAt I (F xF) (F x) = ΨF (extChartAt I xF x))
+    (hVG : V ⊆ (chartAt H xG).source) (hΨG : ContDiff ℝ 3 ΨG)
+    (hGchart : Set.MapsTo G V (chartAt H (G xG)).source)
+    (hconjG : ∀ x ∈ V, extChartAt I (G xG) (G x) = ΨG (extChartAt I xG x)) :
+    LocalGluingData (I := I) (M := M) 3 F G U V where
+  source_open := hUopen
+  target_open := hVopen
+  forward_mapsTo := by simpa only [Set.univ_inter] using hFmaps
+  backward_mapsTo := by simpa only [Set.univ_inter] using hGmaps
+  forward_contMDiffOn := contMDiffOn_of_extChartAt_conjugation hUF hΨF hFchart hconjF
+  backward_contMDiffOn := contMDiffOn_of_extChartAt_conjugation hVG hΨG hGchart hconjG
+  left_invOn := by simpa only [Set.univ_inter] using hleft
+  right_invOn := by simpa only [Set.univ_inter] using hright
+
 end PoincareCurvature.GaugeFlowAssembly
