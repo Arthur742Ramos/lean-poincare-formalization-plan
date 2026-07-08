@@ -9154,6 +9154,43 @@ theorem parabolicHolderSeminorm_comp_lipschitzWith_le {X E F : Type*} [PseudoMet
     (mul_nonneg (NNReal.coe_nonneg K) (parabolicHolderSeminorm_nonneg α u s))
     ((parabolicHolderWith_parabolicHolderSeminorm hu).comp_lipschitzWith hφ)
 
+/-- **Linear-operator stability of the parabolic `C^{0,α}` norm.**  For a continuous linear map `L`
+the difference `L ∘ u − L ∘ v = L ∘ (u − v)` is controlled by the operator norm:
+`‖L∘u − L∘v‖_{C^{0,α}} ≤ ‖L‖ · ‖u − v‖_{C^{0,α}}`.  The stability/contraction estimate a fixed-point
+argument on a linear (principal) chart part consumes.  Obtained from
+`parabolicC0AlphaNorm_continuousLinearMap_le` at `u − v` after collapsing `L(u z) − L(v z)` to
+`L(u z − v z)` with `map_sub`. -/
+theorem parabolicC0AlphaNorm_continuousLinearMap_sub_le {X E F : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {α : ℝ} {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    (L : E →L[ℝ] F) (huv : ParabolicC0AlphaOn α (fun z => u z - v z) s) :
+    parabolicC0AlphaNorm α (fun z => L (u z) - L (v z)) s
+      ≤ ‖L‖ * parabolicC0AlphaNorm α (fun z => u z - v z) s := by
+  have heq : (fun z => L (u z) - L (v z)) = (fun z => L (u z - v z)) := by
+    funext z; exact (map_sub L (u z) (v z)).symm
+  rw [heq]
+  exact parabolicC0AlphaNorm_continuousLinearMap_le L huv
+
+/-- **Nonlinear (Lipschitz) stability of the parabolic sup norm.**  For a `K`-Lipschitz `φ` the
+uniform difference of compositions is controlled: `‖φ∘u − φ∘v‖_{C^0} ≤ K · ‖u − v‖_{C^0}`.  The
+sup-norm contraction estimate on the reaction term a Schauder / mild fixed-point argument
+consumes. -/
+theorem parabolicSupNorm_comp_lipschitzWith_sub_le {X E F : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedAddCommGroup F] {u v : ℝ × X → E} {s : Set (ℝ × X)}
+    {K : ℝ≥0} {φ : E → F} (hφ : LipschitzWith K φ)
+    (huv : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B (fun z => u z - v z) s) :
+    parabolicSupNorm (fun z => φ (u z) - φ (v z)) s
+      ≤ (K : ℝ) * parabolicSupNorm (fun z => u z - v z) s := by
+  refine parabolicSupNorm_le
+    (mul_nonneg (NNReal.coe_nonneg K) (parabolicSupNorm_nonneg _ s)) ?_
+  intro p hp
+  calc
+    ‖φ (u p) - φ (v p)‖ = dist (φ (u p)) (φ (v p)) := (dist_eq_norm _ _).symm
+    _ ≤ (K : ℝ) * dist (u p) (v p) := hφ.dist_le_mul (u p) (v p)
+    _ = (K : ℝ) * ‖u p - v p‖ := by rw [dist_eq_norm]
+    _ ≤ (K : ℝ) * parabolicSupNorm (fun z => u z - v z) s :=
+      mul_le_mul_of_nonneg_left (norm_le_parabolicSupNorm huv hp) (NNReal.coe_nonneg K)
+
 end AnalyticPDE
 end RicciFlow
 
