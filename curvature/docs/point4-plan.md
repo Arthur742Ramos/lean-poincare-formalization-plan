@@ -2850,3 +2850,62 @@ supply that per-point package for the raw compact flow and feed
 the full `hslicesC3` → `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`, inhabiting
 `Diffeomorph3GaugeFlowOn` unconditionally.  Still: the Item-3 geometric chart (`A`/`picard`/Schauder)
 remains the independent long pole.
+
+### Progress (2026-07-08, later 13) — Item 2 GAP 1: abstract-flow adapters that let the `hslicesC3`-supplied fixed flow feed the C³ machinery — joint-continuity derivation + forward global C³ + Φ-side confinement faces (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+**Ground-truth finding (the precise GAP-1 gap).**  The target
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` hands its `hslicesC3`
+obligation a flow `Φ` from `ManifoldFlow.exists_timeDependent_flow_compact_inverse` carrying **only**
+`{anchor, ODE, left/right inverse}` — crucially **no joint space-time continuity**.  But every existing
+per-patch / finite-cover slice-`C³` capstone (`contMDiffOn_flowSlice_perPatch_of_flow[_windowLip]`,
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip`) either **produces its own** flow
+via `exists_timeDependent_flow_compact_continuousAt` or **assumes** `hcontA` (joint continuity).  The
+missing bridge is: *derive* the continuity of the abstract fixed flow.  This session builds that bridge
+and the abstract-flow analogues of the two key self-`Φ`-producing helpers.
+
+* **`ManifoldFlow.continuousAt_timeDependent_flow_of_anchor_ode`** (ManifoldFlowExistence.lean) — the
+  crux: any flow `Φ` on a compact boundaryless T2 manifold with anchor + `C¹`-field ODE on `Ioo (-ε) ε`
+  is `ContinuousAt (fun z ↦ Φ z.1 z.2) (0, x)`, with **no** continuity hypothesis.  The canonical
+  continuous flow `exists_timeDependent_flow_compact_continuousAt` shares its anchor+ODE, so
+  `timeDependent_flow_unique` forces agreement on `Ioo (-m) m ×ˢ univ` (`m = min ε ε'`, an open nbhd of
+  `(0,x)`), whence `ContinuousAt.congr` transfers the continuity.
+* **`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip_of_flow`**
+  (ModelManifoldGaugeFlow.lean) — the forward global slice-`C³` `∀ t ∈ Ioo c d, ContMDiff I I 3 (Φ t)`
+  for a **given** abstract `Φ` (anchor+ODE only), deriving `hcontA` via the above; verbatim the
+  `_windowLip` finite-cover capstone with the internal flow-production replaced by the supplied flow.
+  This is the **forward conjunct of `hslicesC3` for that same flow**, on a sub-window `Ioo c d ⊆
+  Ioo (-ε) ε`.
+* **`exists_timeDependent_flow_compact_extChartAt_source_and_mem_of_flow`**
+  (ModelManifoldGaugeFlow.lean) — the abstract-flow Φ-side confinement faces (orbit ∈ chart source,
+  chart image ∈ open target `W`, + windowed ODE), the abstract analogue of
+  `exists_timeDependent_flow_compact_extChartAt_source_and_mem`; the Φ-side of the per-point
+  cutoff-orbit-control package.
+
+**Window-obstruction finding (records the remaining GAP-1 shape precisely).**  All confinement-based
+slice-`C³` routes (finite-cover *and* the Route-A cutoff-orbit-control capstone `h`-package) anchor the
+model comparison flow at `0` (`G.maps3 0 = id`, `Φ 0 = id`), so the per-point window `Ioo a b` must
+contain **both** `0` and the evaluation time `t`, with orbit confinement over the whole span `[0,t]`.
+Hence every route yields `ContMDiff (Φ t)` only on a **sub-window** `Ioo (-ε') ε'` (the uniform
+chart-exit time over the finite cover), never the full inverse-supplier lifespan `Ioo (-ε) ε`.  This is
+fine for the *final result* — `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` returns
+`∃ ε > 0`, so a symmetric sub-window suffices — but it means the closure cannot go through that exact
+theorem (whose proof fixes `hslicesC3` at the full inverse-supplier `ε`); it needs a **new** final
+theorem taking the field's `C^N` (`N ≥ 4`) regularity, producing forward+backward slice-`C³` on a common
+sub-window, and applying `exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow` at that sub-window.
+
+**Fractions of GAP 1.**  Forward global slice-`C³` for the abstract fixed flow: **DONE** (on a
+sub-window, modulo per-patch field-analytic data supply).  Φ-side per-point package faces: **DONE**.
+Remaining: the **backward** global slice-`C³` for the abstract inverse flow `Gt` — which has **no**
+finite-cover gluer (backward `C³` comes from the model gauge flow's `C³` inverse `G.maps3⁻¹`, via the
+Route-A backward capstone `contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset`), so
+it needs the full per-point cutoff-orbit-control `h`-package (Φ-side now available; still to assemble the
+model-side `G`/`Kwin`/graph-confinement + anchor + tube-Lipschitz for the abstract flow).  **NEXT:**
+build the per-point `h`-package producer for the abstract flow (Φ-side via
+`..._extChartAt_source_and_mem_of_flow`; model-side via
+`exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem` +
+`exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith` for the `Kwin` graph-confinement + anchor
+`extChartAt_flow_eq_maps3_at_zero`), feed the paired capstone
+`contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_subset` quantified over `t` in the
+sub-window, then re-anchor to a symmetric sub-window and apply
+`exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow` — a new final GAP-1 theorem for a `C^N` field.
+The Item-3 geometric chart (`A`/`picard`/Schauder) remains the independent long pole.
