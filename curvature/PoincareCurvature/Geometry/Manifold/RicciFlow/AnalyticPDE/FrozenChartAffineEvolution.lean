@@ -279,4 +279,75 @@ theorem deTurckFrozenGeometricAffineEvolution_unique
       g background tFreeze hbackground t₀ σ0 t :=
   deTurckFrozenAffineEvolution_unique x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0 hy h0 t
 
+section AbstractAffineSmooth
+
+variable {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
+
+/-- **The affine autonomous fundamental solution is smooth in time.**  `t ↦ affineFundamentalSolution
+L b t₀ y₀ t` is `ContDiff ℝ n` for every `n`: it is the first coordinate of the operator-exponential
+orbit `t ↦ exp ((t - t₀) • affineAugment L b) (y₀, 1)`, and `NormedSpace.exp` is analytic on the
+(complete) augmented operator algebra, composed with the smooth affine scalar rescaling in `t`, the
+continuous-linear evaluation at `(y₀, 1)`, and the coordinate projection.  This is the parabolic-free
+time-regularity of the frozen (bounded-linear) chart evolution. -/
+theorem contDiff_affineFundamentalSolution (L : G →L[ℝ] G) (b : G) (t₀ : ℝ) (y₀ : G)
+    {n : WithTop ℕ∞} :
+    ContDiff ℝ n (affineFundamentalSolution L b t₀ y₀) := by
+  have hana : AnalyticOnNhd ℝ
+      (NormedSpace.exp : ((G × ℝ) →L[ℝ] (G × ℝ)) → ((G × ℝ) →L[ℝ] (G × ℝ))) Set.univ :=
+    fun x _ => NormedSpace.exp_analytic x
+  have hsmul : ContDiff ℝ n (fun t : ℝ => (t - t₀) • affineAugment L b) :=
+    (contDiff_id.sub contDiff_const).smul contDiff_const
+  have hexp : ContDiff ℝ n (fun t : ℝ => NormedSpace.exp ((t - t₀) • affineAugment L b)) :=
+    hana.contDiff.comp hsmul
+  have happly : ContDiff ℝ n
+      (fun t : ℝ => NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, 1)) :=
+    hexp.clm_apply contDiff_const
+  exact contDiff_fst.comp happly
+
+end AbstractAffineSmooth
+
+/-- The frozen affine chart evolution is `ContDiff ℝ n` in time. -/
+theorem contDiff_deTurckFrozenAffineEvolution
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    {n : WithTop ℕ∞} :
+    ContDiff ℝ n (deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0) :=
+  contDiff_affineFundamentalSolution
+    (deTurckReactionSectionMapL x0 Kc hKc Ko hKo hKoEq hcover hP) b t₀ σ0
+
+/-- The concrete geometric frozen chart evolution is `ContDiff ℝ n` in time — the explicit,
+parabolic-free time-regularity fed to the smooth realization. -/
+theorem contDiff_deTurckFrozenGeometricAffineEvolution
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (tFreeze : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background tFreeze) 1)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    {n : WithTop ℕ∞} :
+    ContDiff ℝ n (deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+      g background tFreeze hbackground t₀ σ0) :=
+  contDiff_deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
