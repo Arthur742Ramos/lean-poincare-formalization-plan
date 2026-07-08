@@ -1281,4 +1281,54 @@ theorem contMDiff_spaceTimeField_of_contMDiff_tangentSection {E H M : Type*}
   exact (contMDiff_equivTangentBundleProd_symm
     (I := 𝓘(ℝ, ℝ)) (M := ℝ) (I' := I) (M' := M) (n := n)).comp hpair
 
+/-- **Joint space-time continuity of an *abstract* time-dependent flow, derived from its ODE alone.**
+Any time-dependent flow `Φ` on a compact boundaryless T2 manifold that is anchored at `0`
+(`Φ 0 x = x`) and solves the flow ODE of a jointly-`C¹` field `X` on `Set.Ioo (-ε) ε` is jointly
+continuous in space-time at each anchor point `(0, x)` — even though **no** continuity of `Φ` is
+assumed as a hypothesis.  The point is that the canonical continuous flow
+`exists_timeDependent_flow_compact_continuousAt` produces a flow `Φ'` with the *same* anchor and ODE,
+and by the manifold flow uniqueness `timeDependent_flow_unique` the two agree on the intersection of
+their windows — an open space-time neighbourhood `Set.Ioo (-m) m ×ˢ Set.univ` of `(0, x)` — so `Φ`
+inherits `Φ'`'s `ContinuousAt` at `(0, x)` via `ContinuousAt.congr`.
+
+This is exactly the `hcontA` hypothesis of `contMDiffOn_flowSlice_perPatch_of_flow`, so it lets the
+compact gauge-flow slice-`C³` route consume an abstract flow — e.g. the `hslicesC3`-supplied flow of
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`, for which only the anchor and ODE are
+available and no joint continuity is given. -/
+theorem continuousAt_timeDependent_flow_of_anchor_ode {E H M : Type*} [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [TopologicalSpace M]
+    [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E] [BoundarylessManifold I M]
+    [CompactSpace M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {ε : ℝ} (hε : 0 < ε) {Φ : ℝ → M → M}
+    (hanchor : ∀ x, Φ 0 x = x)
+    (hflow : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ x)
+      (Set.Ioo (-ε) ε) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    (x : M) :
+    ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x) := by
+  obtain ⟨ε', hε', Φ', hanchor', hflow', hcont'⟩ :=
+    exists_timeDependent_flow_compact_continuousAt hX
+  have hmpos : (0 : ℝ) < min ε ε' := lt_min hε hε'
+  have hmono : Set.Ioo (-min ε ε') (min ε ε') ⊆ Set.Ioo (-ε) ε :=
+    Set.Ioo_subset_Ioo (neg_le_neg (min_le_left ε ε')) (min_le_left ε ε')
+  have hmono' : Set.Ioo (-min ε ε') (min ε ε') ⊆ Set.Ioo (-ε') ε' :=
+    Set.Ioo_subset_Ioo (neg_le_neg (min_le_right ε ε')) (min_le_right ε ε')
+  have hflowm : ∀ y, ∀ t ∈ Set.Ioo (-min ε ε') (min ε ε'),
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ τ y) (Set.Ioo (-min ε ε') (min ε ε')) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t y))) :=
+    fun y t ht => (hflow y t (hmono ht)).mono hmono
+  have hflow'm : ∀ y, ∀ t ∈ Set.Ioo (-min ε ε') (min ε ε'),
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => Φ' τ y) (Set.Ioo (-min ε ε') (min ε ε')) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ' t y))) :=
+    fun y t ht => (hflow' y t (hmono' ht)).mono hmono'
+  have hnhds : Set.Ioo (-min ε ε') (min ε ε') ×ˢ (Set.univ : Set M) ∈ nhds ((0 : ℝ), x) :=
+    (isOpen_Ioo.prod isOpen_univ).mem_nhds ⟨⟨neg_lt_zero.mpr hmpos, hmpos⟩, Set.mem_univ _⟩
+  have hEq : (fun z : ℝ × M => Φ' z.1 z.2) =ᶠ[nhds ((0 : ℝ), x)] (fun z => Φ z.1 z.2) := by
+    filter_upwards [hnhds] with z hz
+    show Φ' z.1 z.2 = Φ z.1 z.2
+    exact (timeDependent_flow_unique hX hmpos hanchor hanchor' hflowm hflow'm hz.1 z.2).symm
+  exact (hcont' x).congr hEq
+
 end PoincareCurvature.ManifoldFlow
