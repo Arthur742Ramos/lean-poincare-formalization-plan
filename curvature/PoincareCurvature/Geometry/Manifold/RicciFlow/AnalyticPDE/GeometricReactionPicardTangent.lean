@@ -192,6 +192,62 @@ theorem add_apply_tangent
   rw [hsymm s, hsymm t, hsymm (s + t),
     coord_add_apply_topFibre s t i ⟨x, hi⟩, map_add]
 
+/-- **The concrete affine frozen geometric Ricci–DeTurck chart operator, evaluated at the metric
+section, reproduces the intrinsic Ricci–DeTurck RHS at the fibre value.**  For the actual CSS-sum
+chart operator `A τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t` (the
+frozen reaction plus the `(-2)•Ric` source, on the concrete tangent `BilinearFormBundle` section space),
+its *pointwise fibre value* at the metric section `⟨(g t).toSection, …⟩` equals the geometric
+`intrinsicRicciDeTurckRHS g background t x u v`.  This is the fibre-value (`x u v`) form of the chart's
+`geometric`/`chartRHS_eq_intrinsic` identification at the center metric — obtained by pushing the CSS sum
+through the just-committed diamond-free pointwise add `add_apply_tangent`
+(`(L s + b) x = (L s) x + b x`), splitting the bilinear sum with `ContinuousLinearMap.add_apply`, and
+closing with the committed scalar identity
+`deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS`.
+Unlike that scalar identity (a bare sum `source x u v + reaction x u v`), this states the identity for the
+genuine `ContinuousSectionSpace`-valued operator the chart field `A` is, so it directly certifies
+`A t (metricSection) x u v = intrinsicRicciDeTurckRHS …` — the `s = metricSection` instance of the chart's
+`geometric` field, previously blocked by the `BilinearFormBundle` CSS-add wall. -/
+theorem deTurckReactionSectionMap_add_source_metricSection_apply_eq_intrinsicRicciDeTurckRHS
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) (u v : TM x) :
+    (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous
+          ⟨(g t).toSection, (g t).continuous_toSection⟩
+        + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover g t) x u v
+      = RicciFlow.intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v := by
+  have hpt : (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous
+          ⟨(g t).toSection, (g t).continuous_toSection⟩
+        + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover g t) x
+      = (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous
+          ⟨(g t).toSection, (g t).continuous_toSection⟩).toFun x
+        + (RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover g t).toFun x :=
+    add_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover _ _ x
+  rw [hpt, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply, add_comm]
+  exact deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS
+    (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+    g background t hbackground x u v
+
 /-- **The tangent-bundle DeTurck reaction operator's section-space Picard `hlip` coordinate bound.**
 For the concrete operator `deTurckReactionSectionMap … hP` on the tangent-bundle `BilinearFormBundle`
 continuous section space, the pointwise coordinate readout is Lipschitz-in-state:
