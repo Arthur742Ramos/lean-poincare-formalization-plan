@@ -2960,3 +2960,56 @@ the independent long pole; ground-truth this session re-confirmed the chart's `g
 2nd-order `intrinsicRicciDeTurckRHS` identity for arbitrary continuous `s`) is incompatible with its
 `picard` (Lipschitz/bounded on the `C⁰` section space) for any single operator — the mild/regularised
 reformulation is the genuine unsolved core there.
+
+### Progress (2026-07-08, later 15) — Item 2 GAP 1: the finite-cover Ψ-comparison slice-`C³` ladder (forward + backward global producers, paired + continuity-bootstrapped variants) and the co-solution supply connector into it (four commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Later-14 isolated the remaining GAP-1 content to the **per-point/per-patch comparison package producer** and
+named the finite-cover producers as the globalisation mechanism.  This session builds out the full
+**finite-cover Ψ-comparison ladder** in `AnalyticPDE/ModelManifoldGaugeFlow.lean`
+(`SmoothDependenceCk`) — the direct manifold-level route to `hslicesC3` from per-patch integral-curve
+comparison data (a diffeomorph model flow `Ψ i : ℝ → E ≃ₘ^3 E`, the raw gauge ODE, tube-Lipschitz control,
+the model co-solution, state placements, anchor) — plus the connector that discharges its distinctive
+co-solution hypothesis from the already-built confinement machinery.  All additive, sorry-free, axiom-clean.
+
+* **`exists_Ioo_forall_contMDiff_symm_of_comparison_finite_cover_of_flow`** — backward global producer:
+  composes the windowed per-patch inverse producer `contMDiffOn_symm_flowSlice_perPatch_of_flow` over a
+  finite open cover with the backward gluer `exists_Ioo_forall_contMDiff_symm_of_finite_cover`; delivers
+  the inverse conjunct `∃ c d, 0 ∈ Ioo c d ∧ ∀ t ∈ Ioo c d, ContMDiff (G t)` of `hslicesC3`.
+* **`contMDiffOn_flowSlice_perPatch_of_flow_comparison`** — windowed forward per-patch producer (the
+  `Φ t` analogue of the backward per-patch brick), extracting the forward map's `ContDiff ℝ 3` from
+  `(Ψ t).contMDiff`; consumes the SAME comparison package as the backward brick (minus the left inverse).
+* **`exists_Ioo_forall_contMDiff_of_comparison_finite_cover_of_flow`** — forward global producer
+  (mirrors the backward one via the forward gluer `exists_Ioo_forall_contMDiff_of_finite_cover`; needs
+  NO reference-window topological data).
+* **`exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow`** — paired producer: `⟨forward, backward⟩`
+  giving the EXACT `((∃ c₁ d₁, … ContMDiff (Φ t)) ∧ (∃ c₂ d₂, … ContMDiff (G t)))` conjunction concluded
+  by the `hslicesC3` hypothesis of
+  `GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3`, from ONE
+  uniform per-patch diffeomorph comparison supply (forward + backward per-patch bricks consume identical
+  data) plus the reference-window topological data.
+* **`exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow_of_surj_left`** — the same paired producer
+  but with the inverse-slice per-slice **continuity BOOTSTRAPPED** from the forward `C³`
+  (`ContMDiff (Φ t) ⟹ Continuous (Φ t)`), shrinking the backward reference window to
+  `Ioo (max lo c₁) (min hi d₁)`.  Its ONLY topological inputs are `hΦsurj` + `hGleft` — exactly the
+  `hright` (⟹ surjective) and `hleft` faces the capstone's `hslicesC3` supplies for an arbitrary flow
+  pair `(Φ, G)`.  So discharging `hslicesC3` from this producer needs ONLY the per-patch comparison
+  packages, no separately-argued per-slice continuity.
+* **`exists_Ioo_forall_forall_hasDerivAt_maps3_eval_of_lipschitzWith`** — the co-solution supply
+  connector: discharges the producers' distinctive `hg'` (`Ψ := G.maps3` solves the *un-cut*
+  `chartPushforwardField` ODE) uniformly over a patch, directly from the confinement machinery
+  (`exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith` on `interior Kwin`
+  ⟶ `cutoff_eqOne_along_curve_of_graph_subset` ⟶ `hasDerivAt_maps3_eval_of_cutoff_eqOne`).
+
+**Fractions of GAP 1.**  The globalisation route is now complete on BOTH sides in ONE uniform vocabulary,
+and the hardest per-patch hypothesis (`hg'`) has a direct connector from the confinement machinery.  The
+remaining GAP-1 content is the **per-patch package assembly** on a finite chart cover: for each patch,
+construct the cutoff model gauge flow `G i` (`exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem`),
+its compact `Q i`/`Kwin i` and cutoff (so the new `hg'` connector fires), the tube-Lipschitz `state i`
+(`exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField`), the anchor `heq₀`
+(`extChartAt_flow_eq_maps3_at_zero`), and the Φ-side placements (`hsrc`/`hγ_mem`/`hΦU` via
+`..._extChartAt_source_and_mem_of_flow`), then feed
+`exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow_of_surj_left` inside the capstone's
+`hslicesC3` intro.  **NEXT:** assemble the per-patch package for a single patch (all faces from the
+listed producers), then quantify over the finite cover and apply the continuity-bootstrapped paired
+producer to discharge `hslicesC3` and inhabit `Diffeomorph3GaugeFlowOn` unconditionally.  The Item-3
+geometric chart (`A`/`picard`/Schauder mild reformulation) remains the independent long pole.
