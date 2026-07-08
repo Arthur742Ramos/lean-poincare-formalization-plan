@@ -84,4 +84,36 @@ theorem exists_gaugeFlow_Ioo_of_timeDependent_raisingData
   obtain ⟨s, hs_open, hxs, hcont⟩ := h0
   exact ⟨s, hs_open, hxs, hcont⟩
 
+set_option maxHeartbeats 4000000 in
+set_option synthInstance.maxHeartbeats 4000000 in
+/-- **Static (time-independent) specialization of the compact-manifold gauge-flow capstone.**  For a
+*time-independent* smooth Riemannian metric `g₀` on the tangent bundle of a compact boundaryless
+manifold and a *time-independent* one-form `ω₀` (spatially smooth as a covector section), the
+metric-raised gauge field `raisedGaugeField g₀ ω₀ bas` flows: there is `Φ : ℝ → M → M` and an open
+interval `Ioo c d ∋ 0` with `Φ 0 = id` and each `Φ t` `C³`.  Obtained from
+`exists_gaugeFlow_Ioo_of_timeDependent_raisingData` at the constant families `fun _ ↦ g₀`,
+`fun _ ↦ ω₀`, whose joint `(t, x)`-smoothness inputs are discharged by
+`contMDiff_constMetricSection_prodSnd` (the metric, unconditionally) and
+`contMDiff_constOneFormSection_prodSnd` (the one-form, from its spatial smoothness `hω₀`).  This is the
+autonomous-gauge entry point of Item 2 GAP 1: the analytic residual is reduced to the *spatial*
+smoothness of the one-form section alone. -/
+theorem exists_gaugeFlow_Ioo_of_timeIndependent_raisingData
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] [CompactSpace M] [IsManifold I 1 M]
+    [ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I]
+    (g₀ : Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M → Type _))
+    (ω₀ : ∀ y : M, TangentSpace I y →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ E)
+    (hω₀ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
+      (fun y : M ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+        (E := fun (y : M) ↦ (TangentSpace I y →L[ℝ] ℝ)) y (ω₀ y))) :
+    ∃ (Φ : ℝ → M → M) (c d : ℝ), (∀ x, Φ 0 x = x) ∧ (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (fun x : M => Φ t x) :=
+  exists_gaugeFlow_Ioo_of_timeDependent_raisingData (fun _ => g₀) (fun _ => ω₀) bas
+    (g₀.contMDiff.comp contMDiff_snd)
+    (hω₀.comp contMDiff_snd)
+
 end PoincareCurvature.ParametrizedInner

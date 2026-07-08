@@ -1912,3 +1912,1104 @@ capstone's `raisedGaugeField g om`.  The natural bridge is the pointwise identit
   syntactic).  With that identity in hand, `raisedGaugeField_neg` turns it into the gauge-field form and
   the later-29 flow capstone yields the DeTurck `C³` gauge flow directly.  (GAP 2's geometric chart
   `A`/Schauder realization remains the point-4 long pole.)
+
+### Item 3 (GAP 2) later-31 — the geometric frozen chart operator's symmetry is certified: `A s ∈ symmetricLocus` + defect-zero, without the `geometric` field (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Ground-truth state on entry: the geometric-A `picard`/`lipschitz`/Banach-evolution-solution for the
+frozen operator `A s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t`
+(`deTurckFrozenGeometric_exists_isPicardLindelof`, `..._nonempty_banachEvolutionLocalSolutionIn_*`)
+are DONE.  The chart's remaining `geometric` field (`∀ s ∈ locus, ∃ g bg, A τ s = intrinsicRicciDeTurckRHS
+g bg τ`) is a GENUINE math gap: the frozen (bounded, coefficient-frozen-at-`g₀,t`) operator satisfies
+the identification ONLY at `s = (g t).toSection` (`deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS`),
+never for all `s` — the true state-dependent operator that would satisfy `geometric` is 2nd-order
+unbounded, so `picard` fails on it.  Reconciling the two (bounded ⟺ geometric) IS the parabolic
+long pole (`realization`/`encode`), unchanged.
+
+This session added, in `AnalyticPDE/GeometricReactionPicardTangent.lean` (all additive, axiom-clean),
+the **symmetry certification** of the frozen geometric chart operator — the direct frozen-operator
+analogues of the chart's `A_mem_symmetricLocus` / `A_coordwiseSymmetryDefect_eq_zero`, established
+WITHOUT the (unavailable) `geometric` field:
+* `deTurckReactionSectionMap_mem_symmetricLocus` — the `∇W` reaction summand lands in `symmetricLocus`
+  for EVERY section `s` (symmetric or not): `deTurckReactionSectionMap_apply` gives `s x (P u) v +
+  s x (P v) u`, manifestly symmetric in `(u,v)`; `ring`.  Unconditional.
+* `deTurckReactionSectionMap_add_mem_symmetricLocus` — `reaction s + b ∈ symmetricLocus` whenever
+  `b` is.  Proved via the `symmetricSectionSubmodule` add-closure (`mem_symmetricSectionSubmodule_iff`
+  + `add_mem`), which DODGES the `SeminormedAddCommGroup (BilinearFormBundle x)` Π-fibre diamond that
+  blocks a direct `ContinuousSectionSpace.add_apply` evaluation at `V := TangentSpace I` (the same
+  fibre-seminorm wall this file's coord-readout bridges were built to avoid — recorded so it is not
+  re-hit).  Needs `x0`/`het`.
+* `deTurckFrozenGeometric_A_mem_symmetricLocus` — the concrete frozen operator lands in
+  `symmetricLocus` (the `(-2)•Ric` source is symmetric by `intrinsicRicciFlowRHSSectionSpace_symm`).
+* `deTurckFrozenGeometric_A_coordwiseSymmetryDefect_eq_zero` — its
+  `coordwiseSymmetryDefectContinuousLinearMap` vanishes (via `..._eq_zero_iff`), the defect-zero datum
+  the symmetric-carrier / interval-defect chart machinery consumes.
+
+**Value.**  Certifies the geometric chart operator's Banach evolution VELOCITY is symmetric, so its
+solution curve stays a symmetric metric family — a realization-side consistency ingredient available
+independently of the chart assembly.  **NEXT (unchanged long pole):** the `geometric` field
+reconciliation and the `realization`/`encode` parabolic smoothing (`SmoothIntrinsicDeTurckRealization`
+/ `SmoothMetricSectionCurveData` from the frozen Banach solution) remain the point-4 critical path.
+A concrete next inch: the frozen operator's Banach solution curve stays in `positiveDefiniteLocus`
+(already the solution's constraint) AND `symmetricLocus` (now that its velocity is certified
+symmetric) — package the curve's symmetric-positive-definite membership toward the realized metric.
+
+### Item 3 (GAP 2) later-32 — the frozen geometric Ricci–DeTurck Banach solution curve is certified symmetric-positive-definite, in the IVP `realization` shape (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The later-31 NEXT inch — "package the curve's symmetric-positive-definite membership toward the
+realized metric" — is now discharged.  Key observation defeating the apparent need for the `geometric`
+field: the ODE symmetric-carrier invariance
+`exists_unique_in_symmetricPositiveDefiniteLocus_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn`
+routes the symmetric-positive-definite conclusion PURELY through *velocity symmetry*
+(`A τ s ∈ symmetricLocus`) — NOT through the chart's `geometric` identification.  We already have the
+velocity symmetry for the frozen operator (`deTurckFrozenGeometric_A_mem_symmetricLocus`, later-31), and
+its `picard` (`deTurckFrozenGeometric_exists_isPicardLindelof`) and uniform Lipschitz
+(`deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordinates`).  Feeding these three
+to the invariance lemma yields, in `AnalyticPDE/GeometricReactionPicardTangent.lean` (additive,
+axiom-clean):
+* `deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_symmetricPositiveDefiniteLocus` — the
+  frozen geometric operator, anchored at the metric section of a genuine continuous Riemannian metric
+  `g₀`, admits a positive-definite-locus Banach evolution local solution, forward-unique on the overlap,
+  **whose curve stays in `symmetricPositiveDefiniteLocus` at every time of its interval** (the
+  coordinatewise antisymmetric defect solves the same linear ODE, starts at `0` since `g₀` is symmetric,
+  hence stays `0`).
+* `deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_symmetricPositiveDefiniteLocus_ivp` —
+  the IVP-vocabulary specialisation (`g₀ := ivp.initialMetric.toContinuousRiemannianMetric`,
+  `t₀ := ivp.initialTime`), so the produced `sol` is anchored at
+  `InitialValueProblem.toContinuousSectionSpace … ivp` — *exactly* the shape the chart-closure
+  `RicciDeTurckChartClosureData.realization` / `SmoothMetricSectionCurveData` consume — now additionally
+  certified to trace a symmetric-positive-definite metric family (the `mem_spd` ingredient).
+
+**Formulation resolution (as requested by the primary directive).**  `picard : IsPicardLindelof A` is a
+Banach-space (bounded / Cauchy–Lipschitz) requirement.  Ground-truth: the frozen (coefficient-frozen-at-
+`g₀,t`) geometric operator `A τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t`
+is a BOUNDED 0th-order operator that inhabits `picard` and `lipschitz` DIRECTLY (Mathlib Banach ODE
+closes it) — but satisfies the geometric identification `A τ s = intrinsicRicciDeTurckRHS g bg τ` ONLY at
+the single metric section `s = (g t).toSection`
+(`deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS`),
+never for all `s ∈ positiveDefiniteLocus`.  The operator that satisfies `geometric` for all `s` is the
+true state-dependent 2nd-order Ricci–DeTurck RHS, which is C⁰-UNBOUNDED, so `picard` fails on it.  Hence
+`picard` and `geometric` are in direct tension and NO single bounded `A` inhabits both; closing the chart
+genuinely requires the parabolic mild/Schauder reconciliation (a mild/regularised representative that is
+bounded+Lipschitz AND faithfully represents the RHS via the heat-semigroup smoothing gain).  This is the
+unchanged point-4 long pole.  The later-32 results are the honest realization-side consistency
+ingredients (`sol` in realization shape + symmetric-PD certification of its curve) that the reconciliation
+will consume; they are available independently of it.
+
+**NEXT (unchanged long pole).**  The `SmoothMetricSectionCurveData` for the frozen solution needs its
+`contMDiff` field (spatial `C²` of every time slice) — which, even for the *bounded* frozen operator, is
+a genuine analytic result (C⁰ Banach ODE solution with a smooth-coefficient 0th-order generator stays
+spatially `C²`, needing a uniform-`C²` bound on the Picard iterates), and for the *real* operator is the
+full parabolic Schauder gain.  Absent that, the chart's `geometric`/`realization` reconciliation remains
+the critical path.
+
+### Item 2 (GAP 1) later-33 — the later-30 DeTurck↔`raisedGaugeField` instance diamond is DEFEATED: the intrinsic DeTurck vector field is the coordinate-free metric-raised gauge field (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The later-30 `NEXT` — "defeat the compounded tangent-bundle instance diamond so that
+`intrinsicDeTurckVectorField g bg t x = raisedGaugeField (g t) (intrinsicDeTurckOneForm g bg t) bas x`
+can be stated and proved" — is now discharged.  The diamond that stalled a prior session (the
+`rieszMap` `RiemannianBundle` path vs `raisedGaugeField`'s `FiberBundle`/`VectorBundle` path, looping at
+`whnf`/`isDefEq` even under a full positional `@`-pin + 4M heartbeats) is broken by a three-part
+technique, committed in the new leaf module
+`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/DeTurckRaisedGaugeField.lean`
+(non-`module`, importing both `RicciFlow.DeTurck` and `Analysis.TimeDependentGram`):
+
+* **`intrinsicDeTurckVectorField_eq_raisedGaugeField`** — the pointwise metric-dual identity.  Proof
+  shape that beats the diamond:
+  1. Prove the *scalar* pairing `hv : ∀ w, (g t).inner x (intrinsicDeTurckVectorField g bg t x) w =
+     intrinsicDeTurckOneForm g bg t x w` FIRST, entirely inside the `RiemannianBundle` world
+     (`letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩`; `change inner ℝ (rieszMap …) w = …`;
+     `rieszMap_apply_inner`).  No `raisedGaugeField` appears in this subgoal, so the two instance paths
+     are never inside one subterm.
+  2. Feed `hv` to the uniqueness lemma `raisedGaugeField_eq_of_forall_inner_eq`, which *produces* the
+     metric-dual equation rather than reconciling two pre-built sides.  Pin every tangent-bundle instance
+     positionally with `@` to the CANONICAL `inferInstance` / `TangentSpace.fiberBundle` /
+     `TangentSpace.vectorBundle` (matching the raising capstone's proven-good pins — crucially the
+     fibre `NormedAddCommGroup`/`NormedSpace` are left to `inferInstance`, i.e. the same instance
+     `rieszMap` uses, NOT `inferInstanceAs (NormedAddCommGroup E)`, which is a syntactically-different
+     defeq term that keeps the diamond alive).
+  3. `attribute [local irreducible] raisedGaugeField in` around the theorem — THIS is the decisive
+     stroke: with `raisedGaugeField` opaque, the final `exact`'s `isDefEq` compares the produced and goal
+     `raisedGaugeField` applications *syntactically* (they are the identical `@`-pinned term) instead of
+     `whnf`-unfolding the big local-frame/Gram-inverse sum and looping on the fibre instance mismatch.
+* **`neg_intrinsicDeTurckVectorField_eq_raisedGaugeField_neg`** — the reverse (DeTurck gauge) field form
+  `-intrinsicDeTurckVectorField g bg t x = raisedGaugeField (g t) (-intrinsicDeTurckOneForm g bg t) bas x`
+  (`intrinsicDeTurckGaugeField` is definitionally `-intrinsicDeTurckVectorField`).  Proof: `rw` the
+  identity, then `@`-pinned `raisedGaugeField_neg` (metric dual is linear ⇒ negates with the one-form).
+
+**Value.**  This is the pointwise bridge the later-29 flow capstone
+(`exists_gaugeFlow_Ioo_of_timeDependent_raisingData`, which flows `raisedGaugeField (g t) (om t) bas`)
+needs to be read as flowing the *genuine* DeTurck vector field: with `om := intrinsicDeTurckOneForm`, the
+capstone's field IS `intrinsicDeTurckVectorField` by this identity.  The general instance-pinning
+technique (`have`-first scalar reduction + canonical `inferInstance` fibre pins + `local irreducible`
+on the coordinate-free field) is now a reusable tool for any future `rieszMap`↔`raisedGaugeField`
+reconciliation.  **NEXT (Item 2 GAP 1 residual).**  Applying the capstone to the DeTurck case still
+needs the smoothness-ladder reconciliation: the capstone consumes `C^∞` joint `(t, x)` data
+(`g : ℝ → ContMDiffRiemannianMetric I ∞`, `hg`/`hom` at level `∞`), whereas a `MetricFamily` is `C²`; so
+the residual is either a `C²`-regularity version of the raising capstone or a `C^∞` upgrade of the
+DeTurck one-form's joint smoothness.  (GAP 2's geometric chart `A`/Schauder realization remains the
+point-4 long pole.)
+
+### Item 2 (GAP 1) later-34 — the smoothness-ladder's `n = 2` ↔ `n = ∞` metric-regularity step is CLOSED: the reverse DeTurck gauge field is the `C^∞`-metric-raised field of the negated one-form (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+The later-33 `NEXT` named the residual as "the capstone consumes `C^∞` joint `(t, x)` data
+(`g : ℝ → ContMDiffRiemannianMetric I ∞`, `hg`/`hom` at level `∞`), whereas a `MetricFamily` is `C²`".
+The **metric-regularity half** of that reconciliation is now discharged — the raised gauge field the
+capstone flows can be identified with the genuine DeTurck gauge field *across the `n = 2` ↔ `n = ∞`
+regularity gap*.  Two additive, axiom-clean landings:
+
+* **`raisedGaugeField_congr_inner`** (`Analysis/TimeDependentGram.lean`) — the metric-raised gauge field
+  depends only on the fibre inner product, not the metric's smoothness class: if `g` (class `n`) and
+  `g'` (class `m`) satisfy `g.inner y v w = g'.inner y v w` then
+  `raisedGaugeField g ω bas y = raisedGaugeField g' ω bas y`.  Both are the unique metric dual `♯ω` of a
+  common inner product, so `raisedGaugeField_eq_of_forall_inner_eq` identifies them.  Diamond-free (the
+  raised value's fibre type does not depend on the metric); no transported-instance reconciliation.
+* **`neg_intrinsicDeTurckVectorField_eq_raisedGaugeField_neg_of_inner_eq`**
+  (`AnalyticPDE/DeTurckRaisedGaugeField.lean`) — for a `MetricFamily` `g` (`C²`) and *any* `C^m` metric
+  family `g'` with `(g t).inner = (g' t).inner` (e.g. `m := ∞`, `g'` the `C^∞` metric and `g` its `C²`
+  downgrade), `-intrinsicDeTurckVectorField g background t x = raisedGaugeField (g' t) (-ω) bas x`.
+  Proof: the later-33 `C²` identity `neg_intrinsicDeTurckVectorField_eq_raisedGaugeField_neg` composed
+  (`.trans`) with `raisedGaugeField_congr_inner`.  The later-33 diamond returns at the `.trans`'s
+  `isDefEq` (a `whnf` timeout on the local-frame/Gram-inverse sum + tangent-fibre instance mismatch);
+  it is defeated the same way — full positional `@`-pin of every tangent-bundle instance to the
+  canonical `inferInstance`/`TangentSpace.fiberBundle`/`TangentSpace.vectorBundle`, plus
+  `attribute [local irreducible] raisedGaugeField in`, so the two `@`-identical `raisedGaugeField (g t)`
+  applications unify syntactically instead of unfolding.
+
+**Value.**  With `m := ∞` the reverse DeTurck gauge field is now expressible as
+`raisedGaugeField (g' t) (-intrinsicDeTurckOneForm g background t) bas`, whose metric argument
+`g' t : ContMDiffRiemannianMetric I ∞` is *exactly* the `ℝ → ContMDiffRiemannianMetric I ∞` shape the
+raising capstone `exists_gaugeFlow_Ioo_of_timeDependent_raisingData` requires — so the capstone's flowed
+field can be read as the genuine DeTurck gauge field with no residual `n = 2` ↔ `n = ∞` mismatch.
+`raisedGaugeField_congr_inner` is now a reusable metric-regularity bridge for any raised-field
+reconciliation.  **NEXT (Item 2 GAP 1 residual).**  Only the joint-smoothness *inputs* to the capstone
+remain: `hom` (joint `(t, x)` `C^∞` smoothness of `-intrinsicDeTurckOneForm g background`, which needs
+joint smoothness of the chosen Levi-Civita connection family — the existing DeTurck one-form smoothness
+lemmas are spatial-only, `contMDiffOn` at fixed `t`) and `hg` (joint `(t, x)` smoothness of the `C^∞`
+metric's inner).  Both require a jointly-smooth (in particular time-differentiable) metric family, which
+a bare `MetricFamily` does not provide; they are the genuine analytic content still open on this front.
+(GAP 2's geometric chart `A`/Schauder realization remains the point-4 long pole.)
+
+### Item 3 (GAP 2 upstream) later-35 — the autonomous (frozen) linear resolvent is the operator exponential, with its smooth-dependence-on-parameters consequences (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+New standalone module `AnalyticPDE/AutonomousResolventExp.lean` (imports `SmoothDependenceCk` +
+Mathlib `NormedSpace.exp`; heavy files untouched; wired into the root).  It closes the *smooth-dependence*
+half of the frozen chart operator's realization at the model-space level — the recurring
+"Mathlib has ODE-flow dependence only at the Banach level, not `C^k`" blocker, resolved for the
+**autonomous bounded-linear** generator that the frozen geometric Ricci–DeTurck chart operator is.
+
+* **`isIntegralCurve_exp_smul_const`** (helper) — for a fixed generator `A₀ : E →L[ℝ] E` and initial
+  point `x`, the path `t ↦ exp ((t - t₀) • A₀) x` is a global integral curve of the autonomous vector
+  variational field `variationalFieldVec (fun _ => A₀)` (i.e. `γ'(t) = A₀ (γ t)`).  From Mathlib's
+  `hasDerivAt_exp_smul_const'` (`d/du exp (u • A₀) = A₀ * exp (u • A₀)`) precomposed with the shift
+  `t ↦ t - t₀` (`HasDerivAt.scomp`) and evaluated at the fixed direction via `HasDerivAt.clm_apply`.
+* **`fundamentalSolution_const_eq_exp`** — for a *time-independent* generator the campaign resolvent
+  `fundamentalSolution hA hΦ h0 t` (built abstractly from any `IsIntegralCurve` flow family via Picard–
+  Lindelöf/Grönwall) equals `NormedSpace.exp ((t - t₀) • A₀)`.  Both sides are integral curves of the
+  same globally `‖A₀‖`-Lipschitz autonomous field and send `t₀ ↦ x`; global uniqueness
+  `eq_of_isIntegralCurve_of_eq_at` forces equality.  This is the bridge from the `IsIntegralCurve`-based
+  resolvent used throughout the smooth-dependence layer to Mathlib's *analytic* `NormedSpace.exp`.
+* **`contDiff_exp_smul_const`** — `A₀ ↦ exp (s • A₀)` is `ContDiff ℝ n` (from `NormedSpace.exp_analytic`,
+  infinite-radius power series ⟹ `AnalyticOnNhd` ⟹ `ContDiff`, composed with the smooth rescaling).
+* **`contDiff_exp_smul_of_contDiff`** — parameter smoothness: a `C^n` generator family
+  `A : X → (E →L[ℝ] E)` gives a `C^n` resolvent `x ↦ exp (s • A x)`.
+* **`contDiff_exp_sub_smul_of_contDiff`** — joint `(time, parameter)` smoothness:
+  `(t, x) ↦ exp ((t - t₀) • A x)` is jointly `ContDiff ℝ n` on `ℝ × X`.  This is the exact
+  joint-smoothness shape the `SmoothMetricSectionCurveData.contMDiff` realization field consumes: for a
+  frozen bounded-linear generator whose *fibre* generator `A x` depends `C^n`-smoothly on the spatial
+  point `x`, `fundamentalSolution_const_eq_exp` identifies the Banach evolution with `exp ((t - t₀)•A x)`,
+  so this yields joint `(time, space)` regularity of the evolution with **no parabolic Schauder input** —
+  the 0th-order (frozen) generator's flow gains no derivatives but loses none.
+
+**Value / placement on the critical path.**  This is the *autonomous* (frozen) special case of the
+resolvent smooth-dependence needed for the `realization`/`contMDiff` field.  It is deliberately at the
+model-space `E →L[ℝ] E` level (no `ContinuousSectionSpace` bundle bookkeeping) so it is diamond-free and
+axiom-clean; the remaining connective work is to run the frozen geometric chart operator's *fibrewise*
+generator (continuous coefficient `P = ∇W`, smooth in `x`) through `fundamentalSolution_const_eq_exp` +
+`contDiff_exp_sub_smul_of_contDiff` at the section-space/bundle level.  **NEXT.**  Lift these to the
+tangent-`BilinearFormBundle` `ContinuousSectionSpace`: package `deTurckReactionSectionMap ∇W` as a
+`CSS →L[ℝ] CSS` bounded linear generator and identify the frozen Banach evolution curve's coordinate
+readout with `exp ((t - t₀) • L_x)` fibrewise, then feed spatial `C²` of `P` to
+`contDiff_exp_sub_smul_of_contDiff` for the `SmoothMetricSectionCurveData.contMDiff` field.  (GAP 2's
+*honest* geometric chart — the state-dependent 2nd-order/mild operator satisfying `geometric` for all
+`s` — still requires the parabolic Schauder smoothing gain and remains the point-4 long pole.)
+
+### Item 3 (GAP 2) later-36 — raw-function-level linearity of the frozen DeTurck reaction operator committed; CSS-level `map_add`/`map_smul` blocked by the BilinearFormBundle concreteness wall (one commit; `{propext, Classical.choice, Quot.sound}`)
+
+The later-35 `NEXT` was to package `deTurckReactionSectionMap ∇W` as a bounded linear `CSS →L[ℝ] CSS`
+generator (for the frozen chart's autonomous resolvent).  The operator is manifestly linear
+(`deTurckReactionSectionMap_apply : s x u v = s x (P x u) v + s x (P x v) u`).  This session committed the
+**wall-free half** of that packaging, in `AnalyticPDE/GeometricReactionPicardTangent.lean` (additive,
+axiom-clean):
+
+* `bilinearFormSectionDeTurckReaction_add` / `bilinearFormSectionDeTurckReaction_smul` — the underlying
+  raw map `bilinearFormSectionDeTurckReaction · P` on the **raw Pi-function space** `Π x, BilW x` is
+  additive / ℝ-homogeneous.  Proved at the canonical `BilinearFormBundle` fibre
+  (`Pi.add_apply`/`Pi.smul_apply` + `bilinearFormSectionDeTurckReaction_apply` +
+  `ContinuousLinearMap.add_apply`/`smul_apply`, closed by `add_add_add_comm`/`smul_add`), which does
+  **not** meet the transported-section-add whnf wall because it never touches the
+  `ContinuousSectionSpace` add.
+* `deTurckReactionSectionMap_toFun` — the definitional bridge
+  `(deTurckReactionSectionMap … hP s).toFun = bilinearFormSectionDeTurckReaction s.toFun P` (`rfl`).
+
+**BLOCKER (BilinearFormBundle concreteness whnf wall).**  Assembling these into the `CSS`-level
+`deTurckReactionSectionMap_map_add : deTurckReactionSectionMap … (s + s') = deTurckReactionSectionMap … s
++ deTurckReactionSectionMap … s'` requires relating the transported `ContinuousSectionSpace` add of the
+**reaction sections** to the raw Pi add, i.e. applying `ContinuousSectionSpace.add_apply` to
+`deTurckReactionSectionMap … s` and `deTurckReactionSectionMap … s'`.  Every operation that touches these
+two reaction-section values in a defeq/whnf context blows past `maxHeartbeats 2000000`:
+  - `add_apply … (deTurckReactionSectionMap … s) (deTurckReactionSectionMap … s') y` — `whnf`/`isDefEq`
+    timeout (whereas the *identical* `add_apply … s s' y` on the **input** sections `s s'` succeeds
+    instantly — `hs : (s + s').toFun = s.toFun + s'.toFun` compiles).
+  - Tried and all hit the wall: `simp only [add_apply/ContinuousLinearMap.add_apply]` (fiber-add diamond
+    whnf), `rw [add_apply]` (clean "did not find pattern" — the goal carries the `.toFun` *projection*
+    form, `add_apply`'s LHS the `CoeFun` form), `Eq.trans ?_ (add_apply …).symm` (isDefEq timeout on the
+    fibre add `deTurck s x + deTurck s' x`), a universally-quantified `.toFun`-form `addp`, explicit-typed
+    `have`s, `set a := deTurckReactionSectionMap …` (kabstract whnf timeout), and
+    `attribute [local irreducible] deTurckReactionSectionMap` (does **not** help — the blowup is in the
+    `ContinuousSectionSpace`/`BilinearFormBundle` add machinery on the reaction-section *type*, not in
+    unfolding `deTurckReactionSectionMap`).
+  - Likely root cause: the return type of `deTurckReactionSectionMap` writes its `V` as
+    `_root_.Bundle.BilinearFormBundle (V := (TangentSpace I : M → Type _))` and its transported
+    `ContinuousSectionSpace.instAddCommGroup` carries the `BilinearFormBundle` fibre
+    NormedAddCommGroup/instance reachable by two paths; unifying the reaction-section value against
+    `add_apply`'s section binder forces a whnf through `equivCompatibleCoordFamilySubmodule` at the
+    concrete `BilW` fibre that does not terminate under the heartbeat budget.  Plain input sections `s s'`
+    avoid it because their type is the *binder* `ContinuousSectionSpace … (V := BilW) …` (notation),
+    syntactically aligned with `add_apply`'s expectation.
+
+**NEXT.**  A **definition-site** fix is likely required: either (a) give
+`deTurckReactionSectionMap`'s return type using the exact `BilW` notation / a fibre instance pinned to the
+single canonical `coordL`/`symmL` path so a reaction-section value is *syntactically* an `add_apply`
+section, or (b) prove a bespoke `deTurckReactionSectionMap_toFun_add` at the section level with the fibre
+instance supplied per the diamond-free eval API in `ContinuousSection` (`coord_apply`/`apply_eq_symmL_coord`),
+avoiding the transported-add whnf.  With `deTurckReactionSectionMap_toFun_add`/`_smul` in hand the
+`map_add'`/`map_smul'` fields, the `CSS →ₗ[ℝ] CSS` `deTurckReactionSectionLinearMap`, and the bounded
+`CSS →L[ℝ] CSS` `deTurckReactionSectionCLM` (norm bound from
+`deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates` + `exists_uniform_inCoord_bound`) all
+follow immediately — feeding the frozen chart's autonomous resolvent (later-35).
+
+### Item 3 (GAP 2) later-37 — CSS-level reaction linearity is DEFINITIVELY WALLED at the definition site (`isDefEq` timeout on `add_apply` at `BilW`); pivoted to the committed Levi–Civita gauge reduction of the concrete reaction operator (one commit; `{propext, Classical.choice, Quot.sound}`)
+
+**Wall — DEFINITIVE diagnosis (supersedes later-36's "whnf wall on reaction sections").**  The later-36
+`NEXT` (package `deTurckReactionSectionMap` as a `CSS →ₗ[ℝ] CSS`) is blocked far more fundamentally than a
+reaction-section `rw`-matcher issue.  A minimal probe — a bare
+`example … (s t : ContinuousSectionSpace … (V := BilW) …) (x : M) : (s + t) x = s x + t x :=
+  ContinuousSectionSpace.add_apply et Kc hKc Ko hKo hKoEq hcover s t x`
+on **plain opaque input sections** (NOT reaction outputs) — **fails** with
+`error: … (deterministic) timeout at `isDefEq`, maximum number of heartbeats (2000000) has been reached`.
+So *any* use of the `ContinuousSectionSpace` transported add/smul at the concrete tangent
+`BilinearFormBundle` fibre blows the elaborator's `isDefEq` budget, independent of the section terms.
+Contrast: `bilinearFormSectionDeTurckReaction_add/_smul` (raw `Π x, BilW x` add via `Pi.add_apply` +
+`ContinuousLinearMap.add_apply`) and every `dist`/`coord`/`LipschitzWith`/`IsPicardLindelof` lemma at `BilW`
+compile fine — because the **norm/metric** transports `rfl`-cleanly (`instCompleteSpace`'s `Isometry e := by
+… rfl`), whereas the **add** `s + t := e.symm (e s + e t)` (`Equiv.addCommGroup` on
+`equivCompatibleCoordFamilySubmodule e`) forces an `isDefEq` that unfolds the heavy composite equiv `e` at
+the concrete `BilW` submodule and does not terminate.  Attempts that ALL hit this: `rw [add_apply]` (also
+"did not find pattern"), term-mode `Eq.trans … (add_apply …).symm`, and the `example` above.
+**This is a genuine definition-site issue in `ContinuousSectionSpace.instAddCommGroup`** — the fix is to
+give the add/smul a fibre-`isDefEq`-cheap (pointwise `⟨s.toFun + t.toFun, …⟩`) representative matching the
+`rfl`-clean metric, but that is a non-additive core-instance refactor of `VectorBundle/ContinuousSection.lean`
+(the norm/module/complete structure all transport through `e`), deferred as too risky for an additive session.
+**Crucially, the `CSS`-linear/`CLM` packaging is a SIDE-QUEST, not the critical path:** the chart field
+`TimeDependentGeometricRicciDeTurckBanachChart.A` and the Picard bridge
+`sectionSpace_banachEvolutionLocalSolutionIn_exists_of_forall_coord_centerBound` both take `A` as a **raw
+function** `ℝ → CSS → CSS` with `dist`/`coord`-level `hlip`/`hcont`/`hcenter` (all wall-free); the linear
+packaging was only for the later-35 autonomous-`exp` resolvent.  So the wall does **not** block the chart
+`A`/`picard`.
+
+**Committed (wall-free, on the `chartRHS_eq_intrinsic`/`geometric` critical path).**  In
+`DeTurckReactionAssembly.lean`, the operator-level **Levi–Civita (self-DeTurck) gauge reduction** of the
+concrete tangent-bundle reaction operator, at the fibre-value (`x u v`) level (so no `CSS` add):
+* `deTurckReactionSectionMap_metricSection_apply_eq_zero_of_isLeviCivita` — on a Levi–Civita background
+  (`IsLeviCivita g background`) the concrete `deTurckReactionSectionMap` at the frozen coefficient `∇W`,
+  on the metric section, is `0` (from the committed center-point identification
+  `deTurckReactionSectionMap_metricSection_apply_eq_intrinsicDeTurckCorrection` +
+  `intrinsicDeTurckCorrection_eq_zero_of_isLeviCivita`).
+* `deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciFlowRHS_of_isLeviCivita`
+  — the affine center-point chart operator (`intrinsicRicciFlowRHSSectionSpace g t + deTurckReactionSectionMap`)
+  on the metric state collapses to the pure `intrinsicRicciFlowRHS g` on a Levi–Civita background (from the
+  committed `…_eq_intrinsicRicciDeTurckRHS` + `intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita`).
+This is the concrete operator-level form of the `RicciDeTurckSmoothRealizationData.chartRHS_eq_intrinsic`
+reduction: in the flowing metric's own chosen Levi–Civita gauge the chart operator on the metric state is
+exactly the geometric Ricci-flow RHS.
+
+**NEXT.**  (a) DEFINITION-SITE FIX (highest leverage, unblocks all `CSS`-operator-algebra at `BilW`): give
+`ContinuousSectionSpace` a pointwise, fibre-`isDefEq`-cheap `AddCommGroup`/`Module` whose `add_apply`/`smul_apply`
+are `rfl`, proved compatible with the existing `e`-transported norm — a dedicated, carefully-staged edit to
+`VectorBundle/ContinuousSection.lean` (verify the whole downstream stays green).  (b) The GENERAL-`M`
+state-dependent 2nd-order (mild/regularised) chart `A` satisfying `geometric` for all `s` (not just the metric
+state) + its bounded/Lipschitz `hbound`/`hlipBall`/`hcontTime` — the parabolic long pole — remains open.
+
+### Item 3 (GAP 2) later-38 — the BilinearFormBundle CSS-add wall is CRACKED: diamond-free pointwise `add_apply_tangent` at `BilW` (hom fibre topology), unblocking fibre-value chart-operator identities (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-37 declared the `ContinuousSectionSpace` add/smul at `BilW` **DEFINITIVELY WALLED** (an `isDefEq`
+`whnf` timeout on `add_apply` at the transported `AddCommGroup`/`BilinearFormBundle` fibre diamond, even
+on opaque input sections) and proposed a risky non-additive `instAddCommGroup` refactor as the only fix.
+**That diagnosis was too pessimistic.**  Ground-truth probing this session found the timeout is confined
+to *invoking* the seminormed-track `add_apply` (whose conclusion unification forces the transported-add
+`whnf`); the **hom-fibre-topology coordinate track** (`coord_add_apply_topFibre`,
+`bilinearFormBundle_coord_eq_trivializationAt_readout_tangent`, already used for the frozen operator's
+`picard`/`hlip`) routes around it entirely.  Three additive, axiom-clean landings in
+`AnalyticPDE/GeometricReactionPicardTangent.lean`:
+
+* **`coord_apply_tangent`** — the hom-topology `coord_apply`:
+  `(coord s).1 i x = (trivₓ₀ᵢ).continuousLinearMapAt ℝ x (s.toFun x)`, from the readout bridge +
+  `continuousLinearMapAt_apply`/`coe_linearMapAt_of_mem` (only `IsLinear`/Pretrivialization API — **no**
+  `FiberBundle`/fibre-`TopologicalSpace` diamond).
+* **`add_apply_tangent`** — the wall's target: `(s + t).toFun x = s.toFun x + t.toFun x` at `BilW`.
+  Proof routes each section value through the trivialization's *linear* inverse `symmₗ` (NOT `symmL`,
+  which drags in the `FiberBundle`/`VectorBundle` diamond): `σ.toFun x = symmₗ x (coord σ)` via
+  `symmₗ_linearMapAt`, the coordinate of the sum splits by `coord_add_apply_topFibre`, and `symmₗ` is
+  `ℝ`-linear (`map_add`).  Diamond-free because only `IsLinear`-level API is touched; the `symmₗ` step is
+  kept inside the proof (an in-proof `haveI hlin` supplies `IsLinear`, so it need not appear in a
+  statement where `IsLinear` cannot be synthesised ambiently).
+* **`deTurckReactionSectionMap_add_source_metricSection_apply_eq_intrinsicRicciDeTurckRHS`** — the payoff:
+  the *actual CSS-sum* chart operator `A τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t`,
+  evaluated at the metric section, has fibre value `A τ (metricSection) x u v = intrinsicRicciDeTurckRHS g
+  background t x u v` — the `s = metricSection` instance of the chart's `geometric`/`chartRHS_eq_intrinsic`
+  field, previously blocked because it needed `(L s + b) x u v = (L s) x u v + b x u v`.  Plus the
+  general-state companion **`deTurckReactionSectionMap_add_source_apply`**
+  (`(L s + b) x u v = s(Pu,v) + s(Pv,u) + b x u v` for arbitrary `s`).
+
+**Value / placement.**  The wall no longer blocks fibre-value (`x u v`) identities for the CSS-sum chart
+operator `A` — so the `geometric`/`chartRHS_eq_intrinsic` field is now provable at the metric section for
+the genuine operator (not just the bare scalar sum), and the CSS-linear reaction packaging
+(`deTurckReactionSectionMap_map_add`, later-36/37's blocker) is now reachable via `add_apply_tangent` on
+input sections + `bilinearFormSectionDeTurckReaction_add`.  The **`instAddCommGroup` definition-site
+refactor is NO LONGER NEEDED** for the fibre-value critical path.  **NEXT.**  (a) Lift the metric-section
+identity along a solution curve realized by a metric family (`chartRHS_eq_intrinsic` at `t = t₀` for the
+frozen operator, then the endpoint time-derivative for `realization`'s `boundary_hasTimeDerivative`).
+(b) The GENERAL-`s` `geometric` (honest state-dependent 2nd-order operator, `A τ s = intrinsicRicciDeTurckRHS`
+for the metric of `s`) is still the parabolic Schauder long pole — the honest operator is not defined on
+merely-`C⁰` sections, so it needs the Hölder/Schauder space reformulation (unchanged).
+
+### Item 3 (GAP 2) later-39 — the frozen DeTurck reaction operator is packaged as a bounded linear `CSS →L[ℝ] CSS`: CSS-level `map_add`/`map_smul` (wall-free) + unconditional continuity (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-38 cracked the `BilinearFormBundle` CSS-add wall with the diamond-free pointwise `add_apply_tangent`
+and noted that the later-36/37 blocker — the CSS-level linearity of `deTurckReactionSectionMap` — "is now
+reachable via `add_apply_tangent` on input sections + `bilinearFormSectionDeTurckReaction_add`."  This
+session executed that and bundled the result.  Three additive, axiom-clean landings in
+`AnalyticPDE/GeometricReactionPicardTangent.lean`:
+
+* **`deTurckReactionSectionMap_map_add`** — CSS-level additivity `A (s + t) = A s + A t` of the frozen
+  reaction self-map.  Proved wall-free: `ContinuousSectionSpace.ext` reduces to the fibre section value,
+  both the input sum `(s + t).toFun` and the output sum `(A s + A t).toFun` are split with the diamond-free
+  `add_apply_tangent`, and the raw-`Pi` reaction additivity `bilinearFormSectionDeTurckReaction_add`
+  closes it — never invoking the seminormed-track `add_apply` (whose `BilinearFormBundle` fibre `isDefEq`
+  timeout was the later-37 wall).
+* **`smul_apply_tangent`** (the scalar companion of `add_apply_tangent`, inlined coordinate-smul split via
+  `toCompatibleCoordFamilySubmoduleContinuousLinearMap`'s `map_smul` + `symmₗ` `ℝ`-linearity) and
+  **`deTurckReactionSectionMap_map_smul`** — CSS-level homogeneity `A (c • s) = c • A s`, same wall-free
+  route with `bilinearFormSectionDeTurckReaction_smul`.
+* **`deTurckReactionSectionMapL`** (+ `_apply`) — the frozen reaction operator bundled as a bounded linear
+  `CSS →L[ℝ] CSS`: `map_add'`/`map_smul'` are the two lemmas above, and `cont` is UNCONDITIONAL — the
+  compactness-derived uniform inCoordinates bound `exists_uniform_inCoord_bound` feeds
+  `deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates`, whose `.continuous` discharges it
+  with no `Kp` hypothesis.  This is the bounded-linear generator interface the later-35 autonomous
+  resolvent (`isIntegralCurve_exp_smul_const`, `fundamentalSolution_const_eq_exp`) consumes.
+
+**Value / placement.**  The later-36/37 blocker is fully resolved: the geometric reaction operator now has
+its complete linear-map structure, packaged as `CSS →L[ℝ] CSS`.  **NEXT.**  The frozen chart operator is
+AFFINE (`A τ s = L s + b`), so the homogeneous resolvent `exp((t-t₀)•L)` alone solves the WRONG ODE;
+connecting `deTurckReactionSectionMapL` to the realization needs the Duhamel term
+`∫ exp((t-r)•L) b dr` (a Bochner-integral construction, currently the tractable-but-nontrivial next
+piece toward `realization`'s smoothness), OR the general-`s` `geometric` remains the parabolic Schauder
+long pole (unchanged).  A cross-module import of `AutonomousResolventExp` into the geometric section-space
+files is the prerequisite for the Duhamel assembly.
+
+### Item 3 (GAP 2) later-40 — the Duhamel assembly is DONE via the affine augmentation (no Bochner integral needed): explicit global operator-exponential evolution of the frozen chart operator + its ODE/initial/uniqueness/time-smoothness, plus the reusable abstract Banach-level Grönwall uniqueness (four commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-39's `NEXT` named the Duhamel term `∫ exp((t-r)•L) b dr` as the tractable-but-nontrivial next
+piece.  That Bochner integral is **unnecessary**: the affine augmentation trick (`affineAugment` +
+`affineFundamentalSolution`, committed just after later-39) already gives the FULL affine solution of
+`σ' = L σ + b` in closed form (the first coordinate of the augmented operator-exponential orbit through
+`(σ₀, 1)`), with `hasDerivAt_affineFundamentalSolution` and `eq_affineFundamentalSolution_of_hasDerivAt`.
+This session performed the cross-module assembly.  New module
+`AnalyticPDE/FrozenChartAffineEvolution.lean` (non-`module`, imports both
+`GeometricReactionPicardTangent` and the non-`module` `AutonomousResolventExp`; wired into the root):
+
+* **`deTurckFrozenAffineEvolution`** (+ `_initial`, `hasDerivAt_`, `_unique`) — the explicit global
+  evolution `affineFundamentalSolution (deTurckReactionSectionMapL … hP) b t₀ σ₀` of the frozen chart
+  operator `A τ s = deTurckReactionSectionMap P s + b` on the complete section space `CSS`; solves the
+  exact frozen ODE and is the unique global classical solution.
+* **`deTurckFrozenGeometricAffineEvolution`** (+ `_initial`, `hasDerivAt_`, `_unique`) — the geometric
+  specialisation at the genuine data `P := ∇W` (`intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`)
+  and `b := intrinsicRicciFlowRHSSectionSpace g tFreeze`, matching the operator solved by
+  `deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn`.
+* **`contDiff_affineFundamentalSolution`** / **`contDiff_deTurckFrozenAffineEvolution`** /
+  **`contDiff_deTurckFrozenGeometricAffineEvolution`** — the evolution is `ContDiff ℝ n` in time (via
+  `exp` analyticity on the augmented operator algebra), the parabolic-free time-regularity the smooth
+  realization consumes.
+* **`banachEvolutionLocalSolution_curve_eq_affineFundamentalSolution`** — *abstract* (generic Banach
+  `G`, wall-free) within-interval uniqueness: any `BanachEvolutionLocalSolution` of `F t = fun y ↦ L y + b`
+  equals `affineFundamentalSolution L b t₀ y₀` on its interval, via `ODE_solution_unique` (global
+  Lipschitz = `L.lipschitz` + translation `edist`-isometry).  This is the reusable Banach-level
+  uniqueness core the chart `encode`/`realization` consume.
+
+**WALL / BLOCKER for the CSS-concrete Banach uniqueness.**  The section-space specialisation
+`banachEvolution_curve_eq_deTurckFrozenAffineEvolution` (any `BanachEvolutionLocalSolutionIn` of the
+CSS frozen operator = the smooth explicit evolution) is BLOCKED by the BilinearFormBundle concreteness
+wall.  Three routes were attempted and all hit a `whnf` timeout at 2 000 000 heartbeats:
+  (a) constructing the explicit `BanachEvolutionLocalSolution` structure over the CSS field `F` (the
+      `equation`-field defeq `F τ (curve τ) =?= deTurckReactionSectionMap … (curve τ) + b`);
+  (b) `LipschitzWith.of_dist_le_mul` + `dist_add_right` + `L.lipschitz.dist_le_mul` on `CSS`;
+  (c) `edist_add_right` + `(deTurckReactionSectionMapL …).lipschitz x y` — even after rewriting the
+      goal to `L x`/`L y` syntactically via `← deTurckReactionSectionMapL_apply`, the `exact` of the
+      CLM's `.lipschitz` walls (the `edist`/`LipschitzWith` obligation on `CSS` forces normalisation of
+      the `deTurckReactionSectionMap`-valued fibre).
+  The exact failing term is `(deTurckReactionSectionMapL x0 Kc … hP).lipschitz x y` used to discharge
+  `LipschitzWith ‖·‖₊ (fun s ↦ deTurckReactionSectionMap … s + b)` on `CSS`.  The ABSTRACT analogue over
+  generic Banach `G` (committed here) is wall-free — the wall is purely the CSS/`BilinearFormBundle`
+  metric-instance concreteness at the definition site, NOT the proof logic.  A definition-site fix
+  (a diamond-free / `edist`-transparent `CSS` metric on `BilinearFormBundle` sections, or a cached
+  `LipschitzWith` for `deTurckReactionSectionMapL` that does not re-force the fibre `edist`) unblocks
+  it, after which `banachEvolutionLocalSolution_curve_eq_affineFundamentalSolution` applies directly.
+
+**NEXT.**  Either (i) the definition-site CSS-metric fix above, then instantiate the abstract Banach
+uniqueness at `CSS` to get every frozen Banach solution = the smooth explicit evolution (the
+`realization`/`encode` smoothness+uniqueness), or (ii) supply the chart's `geometric` field for
+general `s` (the parabolic Schauder long pole, unchanged).
+
+### Item 3 (GAP 2) later-41 — the CSS-concrete uniqueness WALL is CRACKED wall-free (no definition-site metric fix needed): every frozen Banach solution = the explicit smooth affine evolution, hence its curve is `ContDiffOn` in time (five commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-40 recorded the CSS-concrete Banach uniqueness as BLOCKED by the `BilinearFormBundle`
+concreteness wall (three routes all `whnf`-timed-out at 2 000 000 heartbeats), with `NEXT` (i) = a
+definition-site `edist`-transparent CSS metric.  **That route is unnecessary.**  The wall came from
+proving `LipschitzWith K (fun s ↦ deTurckReactionSectionMap ∇W s + b)` via the *operator-norm* route
+`L.lipschitz`, which forces normalisation of the CSS `edist` on the `BilinearFormBundle` fibre.  The
+section-space Picard bridge never needed CSS `edist` in the first place — it consumes *coordinate*
+`dist` bounds — and the same coordinate route already gives a genuine global CSS `LipschitzWith`
+(`deTurckReactionSectionMap_add_source_lipschitzWith_of_uniform_inCoordinates`, via
+`lipschitzWith_of_forall_coord_dist_le` + the compactness bound `exists_uniform_inCoord_bound`).
+Feeding THAT Lipschitz datum to the *identical* Grönwall argument (`ODE_solution_unique`) closes the
+uniqueness with no `edist` normalisation, so the wall never arises.  New declarations (appended to
+`AnalyticPDE/FrozenChartAffineEvolution.lean`, all axiom-clean):
+
+* **`banachEvolution_curve_eq_deTurckFrozenAffineEvolution`** — any
+  `BanachEvolutionLocalSolution (fun _ ↦ fun s ↦ deTurckReactionSectionMap ∇W s + b) t₀ σ₀` has curve
+  `= deTurckFrozenAffineEvolution` on `Icc t₀ sol.terminalTime`.  The wall-free CSS realisation of
+  the abstract `banachEvolutionLocalSolution_curve_eq_affineFundamentalSolution`.
+* **`banachEvolutionIn_curve_eq_deTurckFrozenAffineEvolution`** — the state-constrained
+  (`BanachEvolutionLocalSolutionIn locus`) version, the exact shape the chart-closure
+  `encode`/`realization` carry.
+* **`banachEvolution_curve_eq_deTurckFrozenGeometricAffineEvolution`** — the concrete `∇W` /
+  `intrinsicRicciFlowRHSSectionSpace` geometric specialisation (matching
+  `deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn`).
+* **`banachEvolution_curve_contDiffOn_of_frozen`** (+ **`_frozenGeometric`**) — hence any frozen
+  Banach solution's curve is `ContDiffOn ℝ n` in time on its interval (uniqueness = explicit
+  evolution, composed with `contDiff_deTurckFrozenAffineEvolution` via `ContDiffOn.congr`): the
+  parabolic-free time-regularity the smooth realization consumes at the interval endpoints.
+
+**Progress on {A, picard, realization, encode}.**  For the FROZEN (autonomous, bounded-linear) chart
+operator, existence (`picard` → `BanachEvolutionLocalSolutionIn`) and the CSS Lipschitz `lipschitz`
+field were already committed; this session adds the CSS uniqueness core + curve time-smoothness — the
+`realization`/`encode` support lemmas for the frozen sub-problem, now wall-free.  The frozen operator
+still does NOT inhabit the full chart's `geometric` field for GENERAL `s` (it is only first-order in
+`s`, matching the intrinsic 2nd-order RHS only at the metric section), so the target
+`intrinsicLocalExistenceUniquenessFamily_pointFour` remains OPEN pending the real state-dependent
+operator + parabolic Schauder gain.
+
+**NEXT.**  Supply the chart's `geometric` field for general `s` (the state-dependent 2nd-order
+Ricci–DeTurck operator's section-space representative + parabolic Schauder regularity) — the long
+pole — OR connect the now-available frozen uniqueness/time-smoothness into the `realization`
+`RicciDeTurckSmoothRealizationData.of_chosenBackground_endpointTimeDerivative_chartRHS` constructor
+(the endpoint `HasTimeDerivativeAt` obligation) for a frozen-chart realization witness.
+
+### Item 3 (GAP 2) later-42 — the scalar section-curve `HasDerivAt` bridge is CRACKED diamond-free: pointwise evaluation `s ↦ s x u v` on the concrete `BilinearFormBundle` CSS is a genuine `CSS →L[ℝ] ℝ`, and it pushes any `CSS`-valued `HasDerivAt` to the scalar `HasDerivAt (fun τ ↦ f τ x u v) (f' x u v) t` (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-41 named `NEXT` = connect the frozen uniqueness/time-smoothness into the `realization` endpoint
+`HasTimeDerivativeAt` obligation.  The manifold-level bridge `hasTimeDerivativeAt_of_sectionCurve_hasDerivAt`
+(`SmoothRealization.lean`) already reduces that obligation to the **scalar** hypothesis
+`HasDerivAt (fun τ ↦ D.sectionCurve τ x u v) (gdot t x u v) t` for each `(x, u, v)`.  The missing link
+was pushing a `CSS`-valued `HasDerivAt` of the Banach curve through the pointwise evaluation
+`s ↦ s x u v` — blocked until now because that evaluation-as-a-CLM ran into the `BilinearFormBundle`
+fibre-instance / `whnf` wall (`coord_apply`, `coord_norm_le_norm`, and any nested `{ toLinearMap := … }`
+CLM constructor all time out at 2 000 000 heartbeats on the concrete CSS).
+
+**The wall was crossed on the Path-B (hom-fibre-topology) track**, mirroring `add_apply_tangent`.  New
+module `AnalyticPDE/SectionPointwiseDeriv.lean` (imports `GeometricReactionPicardTangent`) and additions
+to `FrozenChartAffineEvolution.lean`, all axiom-clean:
+
+* **`sectionScalarEvalCLM`** — `s ↦ s x u v` as `CSS →L[ℝ] ℝ`, built as the **flat** `ContinuousLinearMap`
+  structure (the nested/`mkContinuous`/`{ toLinearMap := … }` forms all `whnf`-blow-up): algebra fields
+  are the diamond-free `add_apply_tangent`/`smul_apply_tangent`; continuity is
+  `continuous_of_linear_of_bound` with the operator bound `|s x u v| ≤ ‖symmₗ-eval‖·‖s‖` from the
+  **Path-B** `coord_norm_le_norm_topFibre` (the seminormed-track `coord_norm_le_norm` times out) and the
+  finite-dimensional linear map `w ↦ (symmₗ w) u v` on `BilF`.  `sectionScalarEvalCLM_apply` is `rfl`.
+* **`hasDerivAt_scalarEval_of_hasDerivAt`** — `HasDerivAt f f' t → HasDerivAt (fun τ ↦ f τ x u v) (f' x u v) t`,
+  via `ContinuousLinearMap.hasFDerivAt.comp`.
+* **`hasDerivAt_scalarEval_banachEvolution_of_mem_Ioo`** (+ `_banachEvolutionIn_`) — the interior
+  scalar derivative of any Banach evolution solution: `sol.equation_hasDerivAt_of_mem_Ioo` pushed through.
+* **`hasDerivAt_scalarEval_deTurckFrozenGeometricAffineEvolution`** — the **endpoint-inclusive** scalar
+  derivative of the concrete geometric frozen chart evolution (the explicit affine evolution is globally
+  `HasDerivAt`, so this holds at the interval endpoints, unlike the `Ioo` Banach form): the exact
+  `initial`/`terminal`/`boundary_hasTimeDerivative` scalar data the smooth realization consumes for the
+  frozen chart.
+
+**Progress on {A, picard, realization, encode}.**  This session builds the **realization**-side scalar
+time-derivative plumbing for the frozen chart (the endpoint `HasTimeDerivativeAt` reduction is now fully
+supplied at the scalar level for the frozen geometric evolution).  Combined with the earlier frozen
+`picard`/`lipschitz`/uniqueness/time-smoothness, the frozen sub-problem's `realization` support lemmas
+are nearly complete — but the frozen operator still does NOT satisfy the chart's `geometric` field for
+general `s` (first-order vs the intrinsic 2nd-order RHS), so `intrinsicLocalExistenceUniquenessFamily_pointFour`
+remains OPEN pending the real state-dependent operator + parabolic Schauder gain.
+
+**NEXT.**  Assemble a frozen-chart `RicciDeTurckSmoothRealizationData` via
+`of_smoothMetricSectionCurve_endpointSectionDerivatives_chartRHS`, feeding
+`hasDerivAt_scalarEval_deTurckFrozenGeometricAffineEvolution` as the `initial_hasDerivAt`/`terminal_hasDerivAt`
+arguments (the remaining inputs are a `SmoothMetricSectionCurveData` realizing the frozen curve and the
+`chartRHS_eq_intrinsic` identity at the metric section, already available via
+`deTurckReactionSectionMap_add_source_metricSection_apply_eq_intrinsicRicciDeTurckRHS`) — OR the long pole:
+supply the chart's `geometric` field for general `s`.
+
+### Item 3 (GAP 2) later-43 — the frozen chart's SCALAR TIME-REGULARITY sub-obligation is COMPLETE (first-order + all-order), pushing the wall-free `ContDiffOn`/`ContDiff` curves through `sectionScalarEvalCLM` (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-42 supplied the first-order endpoint scalar `HasDerivAt` of the frozen geometric evolution.  This
+session lifts that to **full time-smoothness** of the scalar section-curves, in `FrozenChartAffineEvolution.lean`
+(additive, axiom-clean, diamond-free — reusing the committed `sectionScalarEvalCLM : CSS →L[ℝ] ℝ`):
+
+* **`contDiffOn_scalarEval_banachEvolution_of_frozen`** (+ **`_frozenGeometric`**) — for ANY Banach
+  evolution `sol` of the frozen field, `τ ↦ sol.curve τ x u v` is `ContDiffOn ℝ n` on
+  `Icc t₀ sol.terminalTime`, via `(sectionScalarEvalCLM …).contDiff.comp_contDiffOn` of the wall-free
+  curve regularity `banachEvolution_curve_contDiffOn_of_frozen`.  The all-order strengthening of the
+  interior first-order `hasDerivAt_scalarEval_banachEvolution_of_mem_Ioo`.
+* **`contDiff_scalarEval_deTurckFrozenGeometricAffineEvolution`** — for the EXPLICIT geometric affine
+  evolution, `τ ↦ evolution τ x u v` is `ContDiff ℝ n` on **all of ℝ** (`.contDiff.comp` of the global
+  `contDiff_deTurckFrozenGeometricAffineEvolution`).  The all-order companion of the first-order endpoint
+  `hasDerivAt_scalarEval_deTurckFrozenGeometricAffineEvolution` — exactly the spatial-curve datum the
+  smooth realization's endpoint/`boundary` `HasTimeDerivativeAt` obligations consume.
+
+**Progress on {A, picard, realization, encode}.**  With this, the frozen chart's **scalar time-regularity**
+support for `realization` is complete at every order.  **Confirmed blocker (unchanged, re-verified this
+session by ground-truth read):** the frozen line CANNOT be assembled into a `RicciDeTurckSmoothRealizationData`,
+because (i) the frozen (bounded, 1st-order) operator does NOT satisfy the chart's `geometric` field for
+general `s` (needs the 2nd-order intrinsic RHS; the reaction output of a merely-continuous `s` cannot equal
+a smooth intrinsic RHS), and (ii) `SmoothMetricSectionCurveData.mem_spd` demands global-in-time
+positive-definiteness, which the affine evolution `e^{τL}σ₀+…` loses for large `|τ|`.  Both trace to the
+same picard⇔geometric incompatibility on the C⁰ section space — the parabolic long pole.  **NEXT
+(unchanged long pole):** the state-dependent 2nd-order (mild/Schauder) operator satisfying BOTH `picard`
+and `geometric`, bridging the DONE abstract Schauder framework (`exists_shortTime_fixedPoint_of_schauder_gain`)
+and DONE model heat-mild toolkit to the geometric `BilinearFormBundle` section space.
+
+### Item 2 (GAP 1) later-44 — static (time-independent) specialization of the compact-`M` `C³` gauge-flow capstone committed; the JOINT DeTurck one-form dual-section smoothness is re-confirmed diamond-blocked (one commit; `{propext, Classical.choice, Quot.sound}`)
+
+Ground-truth entry state: the general-`M` flow capstone `exists_gaugeFlow_Ioo_of_timeDependent_raisingData`
+(later-29, `CompactGaugeFlowRaising.lean`) and the DeTurck↔`raisedGaugeField` identity family
+(`DeTurckRaisedGaugeField.lean`) are DONE.  The remaining Item-2 residual is the two joint `(t,x)`
+smoothness inputs `hg`/`hom` of the capstone for the *real* Ricci–DeTurck gauge data.
+
+* **`PoincareCurvature.ParametrizedInner.exists_gaugeFlow_Ioo_of_timeIndependent_raisingData`**
+  (`CompactGaugeFlowRaising.lean`, additive) — the **static** specialization: for a time-independent
+  smooth metric `g₀ : ContMDiffRiemannianMetric I ∞` and a *globally* spatially-smooth one-form `ω₀`
+  (`hω₀ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞ (fun y ↦ mk' (ω₀ y))`), the metric-raised gauge field
+  flows to a `C³`-in-space diffeomorphism family on a window around `0`.  Composes the general capstone
+  at the constant families `fun _ ↦ g₀` / `fun _ ↦ ω₀`, discharging the capstone's `hg`/`hom` via the
+  **inlined** `g₀.contMDiff.comp contMDiff_snd` / `hω₀.comp contMDiff_snd`.
+  **Plumbing discovery (avoid re-losing time):** calling the named const-family lemmas
+  `contMDiff_constMetricSection_prodSnd` / `contMDiff_constOneFormSection_prodSnd` at `V := TangentSpace I`
+  re-triggers the tangent-bundle `FiberBundle E (TangentSpace I)` instance diamond (`haveI … := by exact
+  TangentSpace.fiberBundle`/`vectorBundle` then gets *stuck* on the compounded `VectorBundle` synthesis).
+  **Inlining their bodies** (`g₀.contMDiff` / `hω₀` are already-elaborated `ContMDiff` facts, composed with
+  the plain `contMDiff_snd`) sidesteps the const-lemmas' explicit `[FiberBundle F V]`/`[VectorBundle …]`
+  binders entirely — no diamond, no `@`-pinning.
+
+**BLOCKER re-confirmed (the joint DeTurck one-form `hom`).**  Producing `hom` for the *actual*
+`intrinsicDeTurckOneForm g bg` — i.e. the joint `(t,x)` smoothness of the dual-bundle section
+`(t,x) ↦ mk' (intrinsicDeTurckOneForm g bg t x)` — was attempted by instantiating the field-independent
+joint section-from-coefficients builder `ParametrizedInner.contMDiffOn_raisedSection_of_coeff` at the
+**dual** tangent bundle `V⋆ = fun x ↦ TM x →L[ℝ] ℝ` (dual trivialization `e.continuousLinearMap eLine`,
+`continuousDualBasis bas`).  The *mathematical* proof is complete and clean — the pointwise dual-pairing
+bridge `e⋆.localFrame_coeff j x (ω x) = ω x (e.localFrame j x)` (as in the DONE spatial theorem
+`intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply`) rewrites the coefficient hypothesis into the
+frame-evaluation form, and `Bundle.Trivialization.eq_sum_localFrame_coeff_smul` collapses the resulting
+sum back to `ω x`.  But the builder requires `[∀ x, NormedAddCommGroup (V⋆ x)]`, `[FiberBundle F⋆ V⋆]`,
+`[VectorBundle ℝ F⋆ V⋆]`, `[ContMDiffVectorBundle n F⋆ V⋆ I]` as **explicit** binders at
+`V⋆ = fun x ↦ TM x →L[ℝ] ℝ`, and these hit the compounded tangent-*dual*-bundle diamond documented in
+later-28/30 ("strictly worse" than the primal `raisedGaugeField` wall):
+  - `NormedAddCommGroup (TangentSpace I x →L[ℝ] ℝ)` does not synthesize (`by exact inferInstance` fails);
+  - injecting it via `inferInstanceAs (NormedAddCommGroup (E →L[ℝ] ℝ))` (defeq `TM x = E`) *elaborates* but
+    then causes **kernel `declaration type mismatch`** on the `SMulHomClass`/`NormedSpace` proof fields —
+    the injected fiber instance is not the canonical bundle-framing one;
+  - `FiberBundle (E →L[ℝ] ℝ) (fun x ↦ TangentSpace I x →L[ℝ] ℝ)` fails to synthesize outright.
+The spatial theorem avoids this because it routes through `contMDiffOn_iff_localFrame_coeff` (whose
+instance requirements are pinned by `e⋆`'s *type* via unification, not by explicit `[…]` binders), which
+has no analogue for the `ℝ × M → TotalSpace` joint map.
+
+**NEXT.**  Either (a) defeat the dual-bundle diamond by full capstone-style `@`-pinning of *every*
+`contMDiffOn_raisedSection_of_coeff` instance argument with **defeq-preserving** `by exact` bridges (NOT
+fresh `inferInstanceAs`, which break the kernel) — the later-29 technique lifted to the dual bundle; or
+(b) prove a joint (`ℝ × M`-base) analogue of `Bundle.Trivialization.contMDiffOn_iff_localFrame_coeff` for
+the `ℝ × B → TotalSpace F V` map shape (instance-robust because `e⋆` pins the fibre instances by
+unification), then mirror `intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply` verbatim over
+`ℝ × M`; or (c) glue the DONE per-patch spatial one-form `ContMDiffOn`
+(`intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply`) over a finite chart cover of compact `M` into a
+GLOBAL spatial `ContMDiff`, which discharges the static corollary's `hω₀` for the static DeTurck gauge.
+(GAP 2's geometric chart `A`/Schauder `geometric` field remains the point-4 long pole.)
+
+### Item 3 (GAP 2) later-45 — operator-norm + whole-section growth bounds for the REAL frozen geometric DeTurck reaction operator on the `BilinearFormBundle` CSS (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Following the 2026-07-05 pivot ("build genuine PIECES of the geometric operator — a coordinate/operator
+bound for the REAL operator, NOT another model heat-kernel estimate"), this session supplies the
+operator-norm control of the honest (non-model) zeroth-order Ricci–DeTurck reaction generator, in the
+diamond-free `ContinuousSectionSpace` (CSS) whole-section norm.  Both additions live at the end of
+`AnalyticPDE/GeometricReactionPicardTangent.lean` (reusing the just-committed CLM
+`deTurckReactionSectionMapL` and its global `LipschitzWith ⟨2·Kp,_⟩`):
+
+* **`deTurckReactionSectionMapL_opNorm_le`** — `‖deTurckReactionSectionMapL ∇W‖ ≤ 2·Kp`: the operator
+  norm of the frozen geometric reaction as a bounded linear map, from a uniform bound `Kp` on the model-
+  fibre readout of the frozen tangent-endomorphism coefficient `P` over the finite compact cover.  Proof:
+  `ContinuousLinearMap.opNorm_le_bound` with the pointwise `‖L s‖ ≤ 2·Kp·‖s‖` derived from the map's
+  global `LipschitzWith` at the origin (`map_zero`).
+* **`deTurckReactionSectionMap_add_source_norm_le`** — `‖deTurckReactionSectionMap ∇W σ + b‖ ≤
+  2·Kp·‖σ‖ + ‖b‖`: the whole-section growth/centre bound of the *affine* chart operator
+  `A σ = L σ + b`, via `deTurckReactionSectionMapL_opNorm_le` (`ContinuousLinearMap.le_opNorm`) +
+  `norm_add_le`.  At `σ = σ0` this is exactly the `Mc = 2·Kp·‖σ0‖ + ‖b‖` centre-size shape the
+  section-space Picard/mild estimates consume — complementing the earlier per-coordinate
+  `bilinearDerivationFieldLinearMap_add_source_coord_norm_le` with a clean CSS-norm form.
+
+**Plumbing discovery (record to avoid re-losing time).**  The CSS `NormedAddCommGroup` is a
+*transported* instance (`equivCompatibleCoordFamilySubmodule`'s `LinearEquiv.normedAddCommGroup`), so
+`dist_zero_right` / `dist_eq_norm` do **not** fire as `rw`/`simp` lemmas on the LipschitzWith `dist`
+(pattern/instance-path mismatch — `simp only [dist_zero_right]` reports "made no progress"), and
+`LipschitzWith.norm_le_mul` fails to unify its `LipschitzWith` argument.  They DO work at **term level**
+(defeq): `(dist_zero_right _).symm` and `congrArg (fun t => c * t) (dist_zero_right s)` inside a `calc`
+close the dist↔norm conversion cleanly.  Use term-level `dist_zero_right`, not the tactic rewrite, on
+the transported CSS metric.
+
+**Progress on {A, picard, realization, encode}.**  These strengthen the `picard`/mild-estimate side for
+the frozen geometric operator: `deTurckReactionSectionMapL_opNorm_le` is the operator-norm growth
+constant a mild/semigroup resolvent `exp(τ·L)` of the split `A τ s = L s + b` consumes, and
+`deTurckReactionSectionMap_add_source_norm_le` is the whole-section centre bound.  **Unchanged long
+pole:** the `geometric` field still needs the state-dependent 2nd-order intrinsic RHS (the frozen
+bounded 1st-order operator cannot equal it for general continuous `s`), i.e. the mild/Schauder operator
+bridging the DONE model heat-mild toolkit to the geometric `BilinearFormBundle` section space.  **NEXT:**
+a resolvent growth bound `‖exp(τ·L)‖ ≤ Real.exp(2·Kp·|τ|)` (Mathlib has only `expSeries` summability,
+no `‖exp x‖ ≤ exp‖x‖`, so this needs a genuine series estimate) — or the state-dependent operator itself.
+
+### Item 3 (GAP 2) later-46 — well-posedness stability toolkit for the honest frozen geometric Ricci–DeTurck evolution: general operator-exp norm bound + resolvent/growth/continuous-dependence estimates (five commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Following the later-45 NEXT ("a resolvent growth bound `‖exp(τ·L)‖ ≤ Real.exp(2·Kp·|τ|)` — Mathlib has
+only `expSeries` summability, no `‖exp x‖ ≤ exp‖x‖` — or the state-dependent operator itself"), this
+session supplies the **entire missing exponential-estimate layer** and assembles it into the
+growth + Lipschitz-in-initial-data well-posedness stability of the REAL (non-model) frozen geometric
+section-space evolution.  Two commits live in `AnalyticPDE/AutonomousResolventExp.lean` (general layer),
+three connect it to the concrete `deTurckReactionSectionMapL ∇W` operator via
+`AnalyticPDE/FrozenChartAffineEvolution.lean`.
+
+* **`norm_exp_le`** — `‖NormedSpace.exp x‖ ≤ Real.exp ‖x‖` for any complete unit-norm-one normed
+  `ℝ`-algebra.  The missing Mathlib fact: elementary series comparison `‖∑ₙ xⁿ/n!‖ ≤ ∑ₙ ‖x‖ⁿ/n! =
+  exp‖x‖` via `norm_tsum_le_tsum_norm` + `Summable.tsum_le_tsum` + `norm_pow_le` + `Real.exp_eq_exp_ℝ`.
+* **`norm_exp_smul_le`** — `‖exp(τ • x)‖ ≤ Real.exp(|τ|·‖x‖)`: the resolvent growth bound (the later-45
+  NEXT, now general).
+* **`norm_affineAugment_le`** — `‖affineAugment L b‖ ≤ ‖L‖ + ‖b‖` (via `opNorm_le_bound`, coordinate
+  norms `≤ ‖p‖`).
+* **`norm_affineFundamentalSolution_le`** — `‖affineFundamentalSolution L b t₀ y₀ t‖ ≤
+  Real.exp(|t-t₀|·(‖L‖+‖b‖))·‖(y₀,1)‖`: at-most-exponential growth of the affine operator-exp evolution.
+* **`norm_affineFundamentalSolution_sub_le`** — `‖affineFundamentalSolution … y₀ t −
+  affineFundamentalSolution … y₀' t‖ ≤ Real.exp(|t-t₀|·(‖L‖+‖b‖))·‖y₀−y₀'‖`: continuous dependence on
+  initial data, via affineness (difference = homogeneous orbit of `(y₀−y₀',0)`, using `map_sub` of the
+  operator-exp CLM and `(y₀,1)−(y₀',1)=(y₀−y₀',0)`).
+* **`norm_deTurckFrozenAffineEvolution_le`** / **`norm_deTurckFrozenAffineEvolution_sub_le`** — the two
+  concrete geometric specialisations at `L = deTurckReactionSectionMapL ∇W`: growth and Lipschitz
+  dependence bounds with the real operator's `2·Kp` constant, composing the abstract bounds with
+  `deTurckReactionSectionMapL_opNorm_le` (`‖L‖ ≤ 2·Kp`).
+
+**Progress on {A, picard, realization, encode}.**  These are on the `picard`/mild-estimate side for the
+*frozen* geometric operator: the resolvent growth `‖exp(τ·L)‖ ≤ exp(|τ|·‖L‖)` and the whole-section
+growth + continuous-dependence estimates are exactly the well-posedness inputs a mild/Duhamel
+a-posteriori argument for the real chart consumes.  **Unchanged long pole:** the `geometric` field still
+needs the state-dependent 2nd-order intrinsic RHS (a frozen bounded 1st-order operator cannot equal it
+for general continuous `s`) — the mild/Schauder operator bridging the DONE model heat-mild toolkit to the
+geometric `BilinearFormBundle` section space.  **NEXT:** a Duhamel/variation-of-constants representation
+`affineFundamentalSolution L b t₀ y₀ t = exp((t-t₀)L) y₀ + ∫₀ exp((t-s)L) b ds` (the homogeneous orbit
+restricted to the `(v,0)` invariant subspace of `affineAugment` gives `exp((t-t₀)L)`), or the
+state-dependent operator itself.
+
+### Item 3 (GAP 2) later-47 — quantitative norm-functional lifts for the parabolic `C^{0,α}` Schauder framework: CLM operator-action, domain monotonicity, and Lipschitz-composition bounds (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Honoring the 2026-07-04 anti-toolkit steers (no more frozen-affine / model-heat-kernel estimate
+variants), this session resolves the **formulation question** explicitly and then advances the
+*legitimate* Item 3 frontier — the general parabolic `C^{0,α}` Hölder framework
+(`AnalyticPDE/ParabolicHolder.lean`, the true Schauder vocabulary Mathlib lacks).
+
+**Formulation finding (recorded per the PRIMARY DIRECTIVE).**  The chart's `A` must satisfy BOTH
+`picard` (Banach ODE existence — a bounded+Lipschitz representative closes this, already DONE for the
+frozen zeroth-order reaction operator) AND `geometric` (`A τ s x u v = intrinsicRicciDeTurckRHS g bg
+τ x u v` for some `g,bg`).  These are in tension: the intrinsic Ricci–DeTurck RHS is genuinely a
+**second-order** operator in `s` (principal part `g^{kl} ∇̂_k ∇̂_l s_{ij}`), so a bounded zeroth-order
+representative — however well its growth/Lipschitz/resolvent estimates are proven (later-45/46) —
+**cannot** equal it for general continuous `s`.  Therefore the frozen-affine well-posedness toolkit is
+NOT on the critical path to `geometric`; the honest route inhabits `A` as the true 2nd-order operator
+on a parabolic Hölder space and closes `picard`/existence via a **Schauder a-priori bound**, not
+Mathlib's bounded Banach-ODE existence.  The next real work is the parabolic `C^{0,α}` Schauder layer.
+
+**What was added (all top-level in `RicciFlow.AnalyticPDE`, appended additively at file end).**  The
+quantitative `ℝ`-valued norm-functional lifts of the already-present *predicate*-level parabolic
+operations — the forms a Schauder / mild fixed-point argument actually consumes (it needs `‖·‖`
+inequalities, not just class membership):
+
+* **`parabolicC0AlphaNorm_mono_domain`** — full-norm domain monotonicity `‖u‖_{C^{0,α}(s)} ≤
+  ‖u‖_{C^{0,α}(t)}` for `s ⊆ t` (Schauder localization primitive), from the two component
+  `*_mono_domain` lemmas.
+* **`parabolicHolderSeminorm_continuousLinearMap_le`** / **`parabolicSupNorm_continuousLinearMap_le`** /
+  **`parabolicC0AlphaNorm_continuousLinearMap_le`** — the CLM operator-action triple `‖L∘u‖ ≤ ‖L‖·‖u‖`
+  on all three parabolic norm functionals (the coordinate-readout estimate shape the geometric chart's
+  linear/principal parts consume), via the achieved-seminorm predicate lemmas + `le_opNorm`.
+* **`parabolicHolderSeminorm_comp_lipschitzWith_le`** — `[φ∘u]_α ≤ K·[u]_α` for `K`-Lipschitz `φ`.
+* **`parabolicC0AlphaNorm_continuousLinearMap_sub_le`** — linear-operator **stability**
+  `‖L∘u − L∘v‖_{C^{0,α}} ≤ ‖L‖·‖u−v‖_{C^{0,α}}` (via `map_sub` + the CLM-action bound).
+* **`parabolicSupNorm_comp_lipschitzWith_sub_le`** — nonlinear **contraction** `‖φ∘u − φ∘v‖_{C^0} ≤
+  K·‖u−v‖_{C^0}` (the reaction-term sup contraction a fixed point consumes).
+* **`parabolicSupNorm_comp_lipschitzWith_le`** / **`parabolicC0AlphaNorm_comp_lipschitzWith_le`** — the
+  absolute Lipschitz-composition bounds `‖φ∘u‖ ≤ K·‖u‖ + ‖φ 0‖` (sup and full norm), completing the
+  Lipschitz-composition family (absolute + difference/contraction).
+
+**Progress on {A, picard, realization, encode}.**  Framework layer for the `picard`/Schauder side of the
+*true* second-order geometric `A`: the CLM-action `C^{0,α}` bound is exactly the quantitative
+coordinate-readout Hölder estimate the geometric chart's linear parts need, and the Lipschitz-composition
+absolute+contraction bounds are the reaction-term a-priori/contraction inputs.  **Unchanged long pole:**
+the second-order geometric operator `A` on the `BilinearFormBundle` section space (the `whnf`/defeq
+concreteness wall) and its Schauder `picard`.  **NEXT:** the parabolic heat-potential / single-layer
+Schauder gain `‖u‖_{C^{2,α}} ≤ C(‖∂_t u − Δu‖_{C^{0,α}} + ‖u‖_{C^0})` connecting the DONE model
+heat-mild toolkit to these `C^{0,α}` norm functionals, or the definition of the geometric second-order
+operator itself.
+
+### Progress (2026-07-08, later 9) — Item 2 GAP 1: the raw-flow → Route-A `hslicesC3` chart-transfer bridge is CLOSED (per-patch + global gluer + global capstone); formulation finding REFINED (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+**Ground-truth re-audit.**  The later-8 "concrete next target" (the `chartPushforwardField` integral-curve
+identity + its regularity/Lipschitz toolkit) is DONE — `GaugeFlowAssembly.lean` already carries
+`chartPushforwardField`, `chartPushforwardField_extChartAt`, `hasDerivWithinAt/At_extChartAt_comp_chartPushforwardField`,
+`extChartAt_comp_eqOn_of_lipschitzOnWith` (temporal integral-curve uniqueness via `ODE_solution_unique_of_mem_Ioo`),
+`contMDiffOn_of_extChartAt_conjugation'` (fixed-chart `C³` transfer), and the full
+`continuousOn/contDiffOn/exists_lipschitzOnWith[_forall_mem_Icc][_ball]_chartPushforwardField` +
+`contDiffOn_prod_chartPushforwardField` regularity ladder.  The remaining GAP-1 *bridge* — turning the
+temporal uniqueness into the fixed-time SPATIAL conjugation and gluing to a global slice `C³` — was NOT
+yet assembled.  This session closed exactly that bridge (all additive, in `GaugeFlowAssembly.lean`,
+sorry-free, axiom-clean):
+
+* **`contMDiffOn_flowSlice_of_rawFlow_modelFlow_eqOn`** — per chart patch `U`: from the raw gauge ODE
+  (`HasMFDerivWithinAt … ((1).smulRight (X τ (Φ τ x)))`, no spatial regularity), a model-`C³` comparison
+  flow `Ψ` whose orbits co-solve the pushforward field and agree at an anchor time `t₀`, and the
+  uniform-in-time tube-Lipschitz control on `chartPushforwardField`, derive (via
+  `extChartAt_comp_eqOn_of_lipschitzOnWith` at time `t`, then `contMDiffOn_of_extChartAt_conjugation'`)
+  `ContMDiffOn I I 3 (Φ t) U`.
+* **`contMDiff_of_forall_extChartAt_conjugation'`** — the primed (single fixed chart `y₀ = x₀`) global
+  gluer, the analogue of `contMDiff_of_forall_extChartAt_conjugation`; matches the single-chart spatial
+  conjugation the temporal identification produces.
+* **`contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn`** — the GAP-1 capstone: from a per-BASE-POINT
+  family of local temporal comparison packages, produces global `ContMDiff I I 3 (Φ t)` = the Route-A
+  `hslicesC3` datum of `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`.
+
+**Formulation finding REFINED (sharpens later-47 / later-8).**  Reading the actual type
+`TimeDependentRiemannianMetric := TimeFamily (Bundle.ContMDiffRiemannianMetric I 2 E TM)` (smoothness order
+**2**, not `∞`): the realizable RHS `intrinsicRicciDeTurckRHS g bg τ` is built from `ricciTensor` of a
+`C²` metric, hence is a **continuous (C⁰)** section, NOT a smooth one.  So the earlier "a continuous
+`A τ s` cannot equal the *smooth* geometric RHS" phrasing is imprecise — the realizable set is C⁰
+sections, and the true `geometric` obstruction is **realizability/surjectivity** of the Ricci–DeTurck map
+onto C⁰ sections (rough continuous `s` are not realizable by `C²`-metric data), not a smooth-vs-continuous
+gap.  This does not reopen a frozen-operator shortcut (later-8's `chartRHS_eq_intrinsic`-only reconciliation
+still requires the realization `metric` to be a genuine Ricci–DeTurck flow — i.e. Items 1&2), and it
+confirms the critical path runs through the geometric flow.
+
+**Fractions of GAP 1.**  The raw-compact-flow → Route-A `hslicesC3` transfer is now END-TO-END modulo
+supplying, per base point, the local model-`C³` comparison flow `Ψ` and its co-solution/anchor data.
+**NEXT:** produce that per-point package from the actual compact flow — instantiate `X` with the `C³`
+DeTurck gauge field, obtain `Ψ` from `SmoothDependenceManifold.exists_flow_diffeomorph_three` applied to
+`chartPushforwardField`'s (now-proven) `ContDiffOn` field, and discharge the anchor/co-solution via
+integral-curve existence — feeding `contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn` → the Route-A
+capstone.  Do NOT route the genuine 2nd-order operator through `chart.A`'s C⁰ `picard`.
+
+### Progress (2026-07-08, later 10) — Item 2 GAP 1: Route-A `hslicesC3` gluer wired to the cutoff-model-flow + confinement machinery (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Following later-9's `NEXT` (feed cutoff-model-flow data into the abstract-`Ψ` Route-A capstone
+`GaugeFlowAssembly.contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn`), this session supplies the two
+*concrete-`G`* adapters that turn that capstone's abstract per-point package into one phrased entirely in
+the objects the cutoff/confinement machinery already produces.  Both live at the end of
+`AnalyticPDE/ModelManifoldGaugeFlow.lean` (additive, sorry-free, axiom-clean):
+
+* **`contMDiff_flowSlice_of_forall_cutoff_orbit_control`** — the concrete-`G` companion of the Route-A
+  capstone.  Per base point it consumes a genuine cutoff model gauge flow
+  `G : Diffeomorph3GaugeFlowOn (χ • chartPushforwardField) sTime t₀'` plus the pointwise cutoff datum
+  `hχ : χ (τ, (G.maps3 τ) (extChartAt I p y)) = 1`, *realises* the abstract comparison flow as
+  `Ψ := fun τ ↦ (G.maps3 τ)`, and discharges the capstone's two nontrivial `Ψ`-faces internally:
+  `hΨ := contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn G t` and the `hg'` integral-curve
+  co-solution `:= hasDerivAt_maps3_eval_of_cutoff_eqOne` (which collapses `χ • chartPushforwardField ↦
+  chartPushforwardField` where `χ ≡ 1`).  The `hΦU` `MapsTo` face falls out of `hγ_src` at time `t` via
+  `extChartAt_source`; raw-flow ODE / tube / anchor data thread through unchanged.  Output:
+  `ContMDiff I I 3 (Φ t)`.
+* **`contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset`** — the graph-form companion,
+  consuming the *native* cutoff-machinery output `∀ᶠ r in 𝓝ˢ Kwin, χ r = 1` (from
+  `exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`) together with the orbit-graph
+  confinement `(τ, (G.maps3 τ) (extChartAt I p y)) ∈ Kwin` in place of the pre-digested `hχ`, reducing
+  them to `hχ` via `cutoff_eqOne_along_curve_of_graph_subset`.  This isolates the remaining GAP-1 step-(v)
+  content to the single `orbit-graph ⊆ Kwin` estimate — for which the model side is already fully
+  producible (`exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith`, via joint continuity
+  `continuous_maps3_of_lipschitzWith`) and the raw side has its confinement ladder
+  (`exists_Ioo_forall_forall_mem_extChartAt_source_of_continuousAt` etc.).
+
+**Fractions of GAP 1.**  The Route-A gluer is now expressed purely in cutoff-model-flow + confinement
+vocabulary, so the abstract `Ψ`/`hg'` obligations are discharged once and for all.  **NEXT:** the final
+per-base-point assembly — obtain the raw compact flow `Φ` (`exists_timeDependent_flow_compact_*`) and, per
+patch, the cutoff model flow `G` (`exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`),
+intersect the several confinement windows (`exists_Ioo_forall_and`) into one `Ioo a b` per base point, and
+feed `contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset` → global `ContMDiff I I 3 (Φ t)`
+= the Route-A `hslicesC3` datum.  Still: do NOT route the genuine 2nd-order operator through `chart.A`'s
+C⁰ `picard`; the Item-3 geometric chart remains the independent long pole.
+
+### Progress (2026-07-08, later 11) — Item 2 GAP 1: the BACKWARD (inverse-slice `G t`) chart-transfer ladder, mirroring the forward one (four commits; each `{propext, Classical.choice, Quot.sound}`)
+
+**Ground-truth finding.**  The FORWARD flow-slice `C³` assembly is complete end-to-end
+(`contMDiffOn_flowSlice_perPatch_of_flow` → `exists_Ioo_forall_contMDiff_of_finite_cover` →
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover` → the `C^∞` wrapper
+`exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact`; the Route-A capstones
+`contMDiff_flowSlice_of_forall_cutoff_orbit_control[_of_graph_subset]` are an equivalent forward
+formulation).  But `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`'s `hslicesC3` requires
+BOTH the forward slice `Φ t` AND the inverse slice `G t` to be `ContMDiff I I 3` (to inhabit
+`maps3 : SmoothSelfDiffeomorph3Family`, i.e. a family of `C³` DIFFEOMORPHS with `C³` inverse).  The
+inverse-slice half had NO chart-transfer machinery.  Key observation: the model comparison flow slice
+`G.maps3 τ : E ≃ₘ^3 E` is a genuine `C³` self-diffeomorph, so `(G.maps3 τ).symm` is automatically `C³`,
+and the backward chart-conjugation `extChartAt p (G_t y) = (G.maps3 τ).symm (extChartAt p y)` follows
+ALGEBRAICALLY from the forward one plus `Φt ∘ Gt = id` — so the backward slice needs NO separate orbit
+confinement, only the same forward data.
+
+**What was added (all additive at the end of `GaugeReduction/GaugeFlowAssembly.lean`, sorry-free,
+axiom-clean).**  A complete backward-slice ladder mirroring the forward one:
+
+* **`contMDiffOn_symm_of_extChartAt_conjugation'`** — the inverse-map companion of
+  `contMDiffOn_of_extChartAt_conjugation'`: from the forward single-chart conjugation
+  `extChartAt x₀ (Φt x) = Ψ (extChartAt x₀ x)` on `U`, a `C³` left inverse `Ψsymm` of the model map, and
+  `Gt (Φt x) = x` on `U`, derives the backward conjugation and yields `ContMDiffOn I I 3 Gt (Φt '' U)`.
+* **`contMDiffOn_symm_of_extChartAt_conjugation_diffeomorph'`** — the directly-consumable specialisation
+  taking a genuine `C³` self-diffeomorph `Ψ : E ≃ₘ^3 E` (the shape of `G.maps3 τ`); `Ψ.symm` supplies the
+  `C³` left inverse (`Ψ.symm.contMDiff`) and left-inverse identity (`Ψ.symm_apply_apply`) for free.
+* **`contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn`** — the backward per-patch brick, dual to
+  `contMDiffOn_flowSlice_of_rawFlow_modelFlow_eqOn`: from the SAME temporal integral-curve comparison
+  data (raw gauge ODE, tube-Lipschitz, model co-solution + anchor) with the model flow as a diffeomorph
+  family `Ψ : ℝ → (E ≃ₘ^3 E)`, produces `ContMDiffOn I I 3 Gt (Φ t '' U)` via
+  `extChartAt_comp_eqOn_of_lipschitzOnWith` + the diffeomorph backward transfer.
+* **`contMDiff_symm_flowSlice_of_forall_openImage`** — the backward globaliser, dual to
+  `contMDiff_of_forall_extChartAt_conjugation'`: from an open-map + surjective forward slice `Φt` and
+  per-point open `U ∋ x` with `ContMDiffOn I I 3 Gt (Φt '' U)`, glues (via `IsOpenMap.image` +
+  `contMDiff_of_locally_contMDiffOn`) to global `ContMDiff I I 3 Gt`.
+
+**Fractions of GAP 1.**  Both halves of `hslicesC3` now have their full chart-transfer ladders
+(forward: prior sessions; backward: this session).  **NEXT:** supply the per-point BACKWARD packages from
+the actual compact flow — instantiate `Φt := Φ t` (the compact-flow slice), `Ψ := τ ↦ G.maps3 τ` (the
+model gauge flow), `Gt :=` the inverse flow, discharge `hGleft` (`Gt (Φt x) = x`) from
+`exists_timeDependent_flow_compact_inverse`'s `LeftInverse`, and the `IsOpenMap`/`Surjective` faces of
+the globaliser from the compact-flow slice being a homeomorphism (continuous bijection on compact `T2` ⇒
+`Homeomorph.isOpenMap`); feed the backward per-patch → `contMDiff_symm_flowSlice_of_forall_openImage` →
+`ContMDiff I I 3 (G t)`, pairing with the forward slice to discharge `hslicesC3` and inhabit
+`Diffeomorph3GaugeFlowOn` unconditionally.  Still: the Item-3 geometric chart (`A`/`picard`/Schauder)
+remains the independent long pole.
+
+### Progress (2026-07-08, later 12) — Item 2 GAP 1: the BACKWARD (inverse-slice) chart-transfer ladder completed to the `hslicesC3`-conclusion shape, mirroring the forward Route-A machinery (five commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Following later-11's `NEXT` (supply the per-point backward packages and assemble to `ContMDiff (G t)`),
+this session added the full set of backward *capstones* that consume per-point comparison packages and
+produce the inverse-slice `C³`, completing the backward mirror of the forward Route-A ladder and
+consolidating both halves into the exact `hslicesC3` conclusion shape.  All additive, sorry-free,
+axiom-clean.
+
+* **`GaugeFlowAssembly.contMDiff_symm_flowSlice_of_forall_rawFlow_modelFlow_eqOn`** — the abstract-`Ψ`
+  backward capstone, inverse-slice mirror of the forward
+  `contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn`.  From a continuous + surjective forward slice
+  `Φ t` with a global left inverse `Gt` on a compact `T2` `M` — packaged as a homeomorphism via
+  `Continuous.homeoOfEquivCompactToT2` ⟹ `IsOpenMap` — plus a per-base-point family of temporal
+  integral-curve comparison packages (diffeomorph model flow `Ψ : ℝ → (E ≃ₘ^3 E)`, raw gauge ODE,
+  tube-Lipschitz, co-solution + anchor), produces global `ContMDiff I I 3 Gt` by feeding the backward
+  per-patch brick `contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn` (shrunk to `interior U`) into
+  the globaliser `contMDiff_symm_flowSlice_of_forall_openImage`.
+* **`GaugeFlowAssembly.contMDiff_flowSlice_and_symm_of_forall_rawFlow_modelFlow_eqOn`** — the abstract-`Ψ`
+  *paired* capstone: one diffeomorph comparison package feeds *both* directions (forward extracts
+  `ContDiff ℝ 3 (Ψ t)` from `(Ψ t).contMDiff`), producing `ContMDiff (Φ t) ∧ ContMDiff Gt`.
+* **`SmoothDependenceCk.contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control`** and its
+  **`_of_graph_subset`** graph-form companion — the concrete-`G` backward capstones, inverse-slice
+  mirrors of the forward `contMDiff_flowSlice_of_forall_cutoff_orbit_control[_of_graph_subset]`.  They
+  consume the *native* cutoff-machinery output (cutoff model gauge flow `G`, the pointwise `χ≡1` datum
+  or the `∀ᶠ 𝓝ˢ Kwin` + orbit-graph confinement pair) plus the homeomorphism inputs, realise
+  `Ψ := fun τ ↦ G.maps3 τ` (a genuine `C³` diffeomorph family), discharge `hg'` via
+  `hasDerivAt_maps3_eval_of_cutoff_eqOne`, and delegate to the abstract backward capstone.
+* **`SmoothDependenceCk.contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_subset`** —
+  the concrete-`G` *paired* capstone: produces the exact `ContMDiff (Φ t) ∧ ContMDiff Gt` `hslicesC3`
+  conclusion at a fixed time from ONE uniform supply of native cutoff-model-flow packages plus only the
+  forward slice's spatial-inverse data (`Φ t` surjective, `Gt ∘ Φ t = id`).  Crucially it *derives*
+  `Continuous (Φ t)` from the forward `C³` conjunct (`ContMDiff.continuous`), so the backward half's
+  compact-`T2` homeomorphism obligation is absorbed into the forward half — no separately assumed
+  continuity.
+
+**Fractions of GAP 1.**  Both halves of `hslicesC3` now have their complete chart-transfer ladders
+*and* a consolidated paired capstone producing the conclusion shape directly.  The remaining GAP-1
+content is now cleanly isolated to **supplying the per-point cutoff-model-flow packages** from the
+actual compact flow: per base point, the cutoff model gauge flow `G`
+(`exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`), the intersected confinement window
+`Ioo a b`, and the single geometric **orbit-graph `⊆ Kwin` confinement estimate**; plus the flow's
+`Surjective`/`LeftInverse` inverse data (from `exists_timeDependent_flow_compact_inverse`).  **NEXT:**
+supply that per-point package for the raw compact flow and feed
+`contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_subset` (quantified over `t`) →
+the full `hslicesC3` → `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`, inhabiting
+`Diffeomorph3GaugeFlowOn` unconditionally.  Still: the Item-3 geometric chart (`A`/`picard`/Schauder)
+remains the independent long pole.
+
+### Progress (2026-07-08, later 13) — Item 2 GAP 1: abstract-flow adapters that let the `hslicesC3`-supplied fixed flow feed the C³ machinery — joint-continuity derivation + forward global C³ + Φ-side confinement faces (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+**Ground-truth finding (the precise GAP-1 gap).**  The target
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` hands its `hslicesC3`
+obligation a flow `Φ` from `ManifoldFlow.exists_timeDependent_flow_compact_inverse` carrying **only**
+`{anchor, ODE, left/right inverse}` — crucially **no joint space-time continuity**.  But every existing
+per-patch / finite-cover slice-`C³` capstone (`contMDiffOn_flowSlice_perPatch_of_flow[_windowLip]`,
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip`) either **produces its own** flow
+via `exists_timeDependent_flow_compact_continuousAt` or **assumes** `hcontA` (joint continuity).  The
+missing bridge is: *derive* the continuity of the abstract fixed flow.  This session builds that bridge
+and the abstract-flow analogues of the two key self-`Φ`-producing helpers.
+
+* **`ManifoldFlow.continuousAt_timeDependent_flow_of_anchor_ode`** (ManifoldFlowExistence.lean) — the
+  crux: any flow `Φ` on a compact boundaryless T2 manifold with anchor + `C¹`-field ODE on `Ioo (-ε) ε`
+  is `ContinuousAt (fun z ↦ Φ z.1 z.2) (0, x)`, with **no** continuity hypothesis.  The canonical
+  continuous flow `exists_timeDependent_flow_compact_continuousAt` shares its anchor+ODE, so
+  `timeDependent_flow_unique` forces agreement on `Ioo (-m) m ×ˢ univ` (`m = min ε ε'`, an open nbhd of
+  `(0,x)`), whence `ContinuousAt.congr` transfers the continuity.
+* **`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip_of_flow`**
+  (ModelManifoldGaugeFlow.lean) — the forward global slice-`C³` `∀ t ∈ Ioo c d, ContMDiff I I 3 (Φ t)`
+  for a **given** abstract `Φ` (anchor+ODE only), deriving `hcontA` via the above; verbatim the
+  `_windowLip` finite-cover capstone with the internal flow-production replaced by the supplied flow.
+  This is the **forward conjunct of `hslicesC3` for that same flow**, on a sub-window `Ioo c d ⊆
+  Ioo (-ε) ε`.
+* **`exists_timeDependent_flow_compact_extChartAt_source_and_mem_of_flow`**
+  (ModelManifoldGaugeFlow.lean) — the abstract-flow Φ-side confinement faces (orbit ∈ chart source,
+  chart image ∈ open target `W`, + windowed ODE), the abstract analogue of
+  `exists_timeDependent_flow_compact_extChartAt_source_and_mem`; the Φ-side of the per-point
+  cutoff-orbit-control package.
+
+**Window-obstruction finding (records the remaining GAP-1 shape precisely).**  All confinement-based
+slice-`C³` routes (finite-cover *and* the Route-A cutoff-orbit-control capstone `h`-package) anchor the
+model comparison flow at `0` (`G.maps3 0 = id`, `Φ 0 = id`), so the per-point window `Ioo a b` must
+contain **both** `0` and the evaluation time `t`, with orbit confinement over the whole span `[0,t]`.
+Hence every route yields `ContMDiff (Φ t)` only on a **sub-window** `Ioo (-ε') ε'` (the uniform
+chart-exit time over the finite cover), never the full inverse-supplier lifespan `Ioo (-ε) ε`.  This is
+fine for the *final result* — `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` returns
+`∃ ε > 0`, so a symmetric sub-window suffices — but it means the closure cannot go through that exact
+theorem (whose proof fixes `hslicesC3` at the full inverse-supplier `ε`); it needs a **new** final
+theorem taking the field's `C^N` (`N ≥ 4`) regularity, producing forward+backward slice-`C³` on a common
+sub-window, and applying `exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow` at that sub-window.
+
+**Fractions of GAP 1.**  Forward global slice-`C³` for the abstract fixed flow: **DONE** (on a
+sub-window, modulo per-patch field-analytic data supply).  Φ-side per-point package faces: **DONE**.
+Remaining: the **backward** global slice-`C³` for the abstract inverse flow `Gt` — which has **no**
+finite-cover gluer (backward `C³` comes from the model gauge flow's `C³` inverse `G.maps3⁻¹`, via the
+Route-A backward capstone `contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset`), so
+it needs the full per-point cutoff-orbit-control `h`-package (Φ-side now available; still to assemble the
+model-side `G`/`Kwin`/graph-confinement + anchor + tube-Lipschitz for the abstract flow).  **NEXT:**
+build the per-point `h`-package producer for the abstract flow (Φ-side via
+`..._extChartAt_source_and_mem_of_flow`; model-side via
+`exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem` +
+`exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith` for the `Kwin` graph-confinement + anchor
+`extChartAt_flow_eq_maps3_at_zero`), feed the paired capstone
+`contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_subset` quantified over `t` in the
+sub-window, then re-anchor to a symmetric sub-window and apply
+`exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow` — a new final GAP-1 theorem for a `C^N` field.
+The Item-3 geometric chart (`A`/`picard`/Schauder) remains the independent long pole.
+
+### Progress (2026-07-08, later 14) — Item 2 GAP 1: the "new final GAP-1 theorem" the later-13 window-obstruction called for — a three-rung ladder of sub-window gauge-flow existence capstones (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Later-13 pinned the exact GAP-1 obstruction: every confinement-based slice-`C³` route anchors its model
+comparison flow at `0` and confines the orbit over the whole span `[0, t]`, so it delivers
+`ContMDiff I I 3 (Φ t)` / `ContMDiff I I 3 (G t)` only on a **sub-window** `Ioo (-δ) δ` (the uniform
+chart-exit time over the finite cover), never on the full inverse-supplier lifespan `Ioo (-ε) ε`.  Hence
+the closure "cannot go through `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`, whose
+proof fixes `hslicesC3` at the full `ε`; it needs a **new** final theorem producing forward+backward
+slice-`C³` on a common sub-window and applying `exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow`
+at that sub-window."  This session builds exactly that new final theorem — as a clean three-rung ladder
+in `GaugeReduction/GaugeFlowAssembly.lean` (the small/fast assembly file, not the heavy
+ModelManifoldGaugeFlow), each rung a thin, safe reduction to the previous.  All additive, sorry-free,
+axiom-clean.
+
+* **`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3`** — the base rung: verbatim
+  `..._of_compact_of_flowSlicesC3` except `hslicesC3` is asked only to produce **some** `0 < δ ≤ ε` on
+  whose symmetric window `Ioo (-δ) δ` *both* slices are `C³`.  Since the final datum is returned as
+  `∃ ε > 0`, a symmetric sub-window suffices: the mutual-inverse / anchoring data restrict from
+  `Ioo (-ε) ε` to `Ioo (-δ) δ` by `fun t ht => hleft t (hsub ht)` etc., the ODE via
+  `HasMFDerivWithinAt.mono`, and `exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow` is applied at
+  `δ`.  This is the theorem later-13 named.
+* **`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3_indep`** — forward slice `Φ t`
+  and backward slice `G t` are allowed `C³` on **different** sub-windows `Ioo (-δ₁) δ₁` / `Ioo (-δ₂) δ₂`,
+  matching the honest two-route structure: forward `C³` from the finite-cover field-jet capstone, backward
+  `C³` from the cutoff-orbit-control route, each with its own uniform chart-exit sub-window and no a-priori
+  common size.  Reduces to the base rung via `δ := min δ₁ δ₂`.
+* **`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3`** — forward/backward `C³`
+  supplied on **asymmetric** windows `Ioo c d ∋ 0` — *exactly* the conclusion shape of the finite-cover
+  forward producer `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip_of_flow`
+  (`∃ c d, 0 ∈ Ioo c d ∧ ∀ t ∈ Ioo c d, ContMDiff I I 3 (Φ t)`) and its backward counterpart, which never
+  return symmetric windows.  Each is symmetrised internally to `Ioo (-δ) δ`, `δ := min (min (-c) d) ε`,
+  and handed to the `_indep` rung — so a caller feeds raw producer outputs with **no** window bookkeeping.
+
+**Fractions of GAP 1.**  The final-assembly obstruction is now **closed**: the sub-window / asymmetric
+gauge-flow capstones consume the confinement routes' native sub-window output directly.  The remaining
+GAP-1 content is purely the **per-point cutoff-orbit-control `h`-package producer** (Φ-side faces and the
+finite-cover forward producer both available from later-13; still to assemble the model-side
+`G`/`Kwin`/graph-confinement + anchor + tube-Lipschitz for the abstract flow and quantify the paired
+capstone `contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_subset` over `t`).
+**NEXT:** produce the per-point `h`-package on a sub-window (Φ-side via
+`..._extChartAt_source_and_mem_of_flow`; model-side via `exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem`
++ `exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith` + anchor `extChartAt_flow_eq_maps3_at_zero`),
+feed the paired capstone quantified over `t ∈` the sub-window to get
+`(∃ c d, 0 ∈ Ioo c d ∧ ∀ t ∈ Ioo c d, ContMDiff (Φ t) ∧ ContMDiff (G t))`, then apply
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3` — inhabiting
+`Diffeomorph3GaugeFlowOn` unconditionally.  The Item-3 geometric chart (`A`/`picard`/Schauder) remains
+the independent long pole; ground-truth this session re-confirmed the chart's `geometric` field (exact
+2nd-order `intrinsicRicciDeTurckRHS` identity for arbitrary continuous `s`) is incompatible with its
+`picard` (Lipschitz/bounded on the `C⁰` section space) for any single operator — the mild/regularised
+reformulation is the genuine unsolved core there.
+
+### Progress (2026-07-08, later 15) — Item 2 GAP 1: the finite-cover Ψ-comparison slice-`C³` ladder (forward + backward global producers, paired + continuity-bootstrapped variants) and the co-solution supply connector into it (four commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Later-14 isolated the remaining GAP-1 content to the **per-point/per-patch comparison package producer** and
+named the finite-cover producers as the globalisation mechanism.  This session builds out the full
+**finite-cover Ψ-comparison ladder** in `AnalyticPDE/ModelManifoldGaugeFlow.lean`
+(`SmoothDependenceCk`) — the direct manifold-level route to `hslicesC3` from per-patch integral-curve
+comparison data (a diffeomorph model flow `Ψ i : ℝ → E ≃ₘ^3 E`, the raw gauge ODE, tube-Lipschitz control,
+the model co-solution, state placements, anchor) — plus the connector that discharges its distinctive
+co-solution hypothesis from the already-built confinement machinery.  All additive, sorry-free, axiom-clean.
+
+* **`exists_Ioo_forall_contMDiff_symm_of_comparison_finite_cover_of_flow`** — backward global producer:
+  composes the windowed per-patch inverse producer `contMDiffOn_symm_flowSlice_perPatch_of_flow` over a
+  finite open cover with the backward gluer `exists_Ioo_forall_contMDiff_symm_of_finite_cover`; delivers
+  the inverse conjunct `∃ c d, 0 ∈ Ioo c d ∧ ∀ t ∈ Ioo c d, ContMDiff (G t)` of `hslicesC3`.
+* **`contMDiffOn_flowSlice_perPatch_of_flow_comparison`** — windowed forward per-patch producer (the
+  `Φ t` analogue of the backward per-patch brick), extracting the forward map's `ContDiff ℝ 3` from
+  `(Ψ t).contMDiff`; consumes the SAME comparison package as the backward brick (minus the left inverse).
+* **`exists_Ioo_forall_contMDiff_of_comparison_finite_cover_of_flow`** — forward global producer
+  (mirrors the backward one via the forward gluer `exists_Ioo_forall_contMDiff_of_finite_cover`; needs
+  NO reference-window topological data).
+* **`exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow`** — paired producer: `⟨forward, backward⟩`
+  giving the EXACT `((∃ c₁ d₁, … ContMDiff (Φ t)) ∧ (∃ c₂ d₂, … ContMDiff (G t)))` conjunction concluded
+  by the `hslicesC3` hypothesis of
+  `GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3`, from ONE
+  uniform per-patch diffeomorph comparison supply (forward + backward per-patch bricks consume identical
+  data) plus the reference-window topological data.
+* **`exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow_of_surj_left`** — the same paired producer
+  but with the inverse-slice per-slice **continuity BOOTSTRAPPED** from the forward `C³`
+  (`ContMDiff (Φ t) ⟹ Continuous (Φ t)`), shrinking the backward reference window to
+  `Ioo (max lo c₁) (min hi d₁)`.  Its ONLY topological inputs are `hΦsurj` + `hGleft` — exactly the
+  `hright` (⟹ surjective) and `hleft` faces the capstone's `hslicesC3` supplies for an arbitrary flow
+  pair `(Φ, G)`.  So discharging `hslicesC3` from this producer needs ONLY the per-patch comparison
+  packages, no separately-argued per-slice continuity.
+* **`exists_Ioo_forall_forall_hasDerivAt_maps3_eval_of_lipschitzWith`** — the co-solution supply
+  connector: discharges the producers' distinctive `hg'` (`Ψ := G.maps3` solves the *un-cut*
+  `chartPushforwardField` ODE) uniformly over a patch, directly from the confinement machinery
+  (`exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith` on `interior Kwin`
+  ⟶ `cutoff_eqOne_along_curve_of_graph_subset` ⟶ `hasDerivAt_maps3_eval_of_cutoff_eqOne`).
+
+**Fractions of GAP 1.**  The globalisation route is now complete on BOTH sides in ONE uniform vocabulary,
+and the hardest per-patch hypothesis (`hg'`) has a direct connector from the confinement machinery.  The
+remaining GAP-1 content is the **per-patch package assembly** on a finite chart cover: for each patch,
+construct the cutoff model gauge flow `G i` (`exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem`),
+its compact `Q i`/`Kwin i` and cutoff (so the new `hg'` connector fires), the tube-Lipschitz `state i`
+(`exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField`), the anchor `heq₀`
+(`extChartAt_flow_eq_maps3_at_zero`), and the Φ-side placements (`hsrc`/`hγ_mem`/`hΦU` via
+`..._extChartAt_source_and_mem_of_flow`), then feed
+`exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow_of_surj_left` inside the capstone's
+`hslicesC3` intro.  **NEXT:** assemble the per-patch package for a single patch (all faces from the
+listed producers), then quantify over the finite cover and apply the continuity-bootstrapped paired
+producer to discharge `hslicesC3` and inhabit `Diffeomorph3GaugeFlowOn` unconditionally.  The Item-3
+geometric chart (`A`/`picard`/Schauder mild reformulation) remains the independent long pole.

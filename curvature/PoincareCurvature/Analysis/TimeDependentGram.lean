@@ -659,6 +659,31 @@ theorem raisedGaugeField_sub
     simp only [map_sub, ContinuousLinearMap.sub_apply, Pi.sub_apply,
       raisedGaugeField_inner_eq])).symm
 
+omit [ContMDiffVectorBundle n F V IB] in
+/-- **The metric-raised gauge field depends only on the metric's inner product, not its smoothness
+class.**  If two smooth Riemannian metrics `g` (class `n`) and `g'` (class `m`) induce the same fibre
+inner product at every base point (`g.inner y v w = g'.inner y v w`), then their metric-raised gauge
+fields of the same one-form coincide: `raisedGaugeField g ω bas y = raisedGaugeField g' ω bas y`.
+Both are the unique metric dual `♯ω` under a common inner product, so the uniqueness characterisation
+`raisedGaugeField_eq_of_forall_inner_eq` identifies them.  This is the regularity bridge that lets a
+`C^∞` metric's raised field (consumed by the compact-manifold gauge-flow raising capstone, which
+requires a `ℝ → ContMDiffRiemannianMetric I ∞`) be identified with the `C²` metric-family raised field
+appearing in the intrinsic DeTurck one-form identities — closing the `n = 2` ↔ `n = ∞` step of the
+smoothness-ladder reconciliation.  Diamond-free: the fibre `V y` (and hence the raised value's type)
+does not depend on the metric, so no transported-instance reconciliation is required. -/
+theorem raisedGaugeField_congr_inner
+    {m : WithTop ℕ∞} [ContMDiffVectorBundle m F V IB]
+    (g : Bundle.ContMDiffRiemannianMetric IB n F V)
+    (g' : Bundle.ContMDiffRiemannianMetric IB m F V)
+    (hinner : ∀ (y : B) (v w : V y), g.inner y v w = g'.inner y v w)
+    (ω : ∀ z : B, V z →L[ℝ] ℝ)
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ F)
+    (y : B) :
+    raisedGaugeField g ω bas y = raisedGaugeField g' ω bas y := by
+  refine raisedGaugeField_eq_of_forall_inner_eq g' ω bas (fun w => ?_)
+  rw [← hinner y (raisedGaugeField g ω bas y) w]
+  exact DFunLike.congr_fun (raisedGaugeField_inner_eq g ω bas y) w
+
 /-- **Per-patch joint `(t, x)` smoothness of the global raised gauge field, as a tangent-style
 section.**  Over the canonical trivialization patch around any base point `x`, the globally-defined
 raised gauge field `raisedGaugeField (g ·) (ω ·) bas`, read as the section

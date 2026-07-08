@@ -1209,6 +1209,52 @@ theorem exists_timeDependent_flow_compact_extChartAt_source_and_mem
   intro x _ τ hτ
   exact (horbit x τ (hsub hτ)).mono hsub
 
+/-- **Chart-source confinement + membership faces for an *abstract* compact-manifold flow.**  Variant
+of `exists_timeDependent_flow_compact_extChartAt_source_and_mem` in which the raw manifold flow `Φ` is
+**supplied** (with only its anchor `hanchor` and ODE `horbit` on `Set.Ioo (-ε) ε`) rather than produced
+internally.  The joint space-time continuity needed to run the tube-lemma confinement
+(`exists_Ioo_forall_forall_extChartAt_source_and_mem_of_continuousAt`) is **derived** from the raw `C¹`
+field jet `hX` via `ManifoldFlow.continuousAt_timeDependent_flow_of_anchor_ode`.  On a short common
+window `Set.Ioo a b ∋ 0` it produces, for the *given* `Φ`, the two orbit-control faces the step-(v)
+capstone consumes on its `Φ`-side — every orbit stays in the chart source
+(`Φ τ x ∈ (extChartAt I p).source`) and its chart image stays in the open target `W`
+(`(τ, extChartAt I p (Φ τ x)) ∈ W`) — together with the ODE restricted to that window.  Instantiating
+`W := Set.univ ×ˢ state₀` gives the `Φ`-side `state`-membership face; this is the abstract-flow analogue
+that lets the per-point cutoff-orbit-control package be built for the `hslicesC3`-supplied flow of
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`. -/
+theorem exists_timeDependent_flow_compact_extChartAt_source_and_mem_of_flow
+    {H M : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E]
+    [BoundarylessManifold I M] [CompactSpace M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun q : ℝ × M => (⟨q, ((1 : ℝ), X q.1 q.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {ε : ℝ} (hε : 0 < ε) {Φ : ℝ → M → M}
+    (hanchor : ∀ x, Φ 0 x = x)
+    (horbit : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ x) (Set.Ioo (-ε) ε) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    {Q : Set M} {p : M} {W : Set (ℝ × E)}
+    (hQ : IsCompact Q) (hQsub : Q ⊆ (extChartAt I p).source) (hW : IsOpen W)
+    (hgraph0 : ∀ x ∈ Q, ((0 : ℝ), extChartAt I p x) ∈ W) :
+    ∃ a b : ℝ, (0 : ℝ) ∈ Set.Ioo a b ∧
+      (∀ x ∈ Q, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ x) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x)))) ∧
+      (∀ τ ∈ Set.Ioo a b,
+        (∀ x ∈ Q, Φ τ x ∈ (extChartAt I p).source) ∧
+        (∀ x ∈ Q, ((τ, extChartAt I p (Φ τ x)) : ℝ × E) ∈ W)) := by
+  have hcontA : ∀ x, ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x) := fun x =>
+    PoincareCurvature.ManifoldFlow.continuousAt_timeDependent_flow_of_anchor_ode hX hε hanchor horbit x
+  have hconf := exists_Ioo_forall_forall_extChartAt_source_and_mem_of_continuousAt
+    (Φ := Φ) hQ hQsub hW (fun x _ => hanchor x) hgraph0 (fun x _ => hcontA x)
+  obtain ⟨a, b, hmem0, hboth⟩ := exists_Ioo_forall_and hconf
+    ⟨-ε, ε, ⟨neg_lt_zero.mpr hε, hε⟩, fun τ hτ => hτ⟩
+  have hsub : Set.Ioo a b ⊆ Set.Ioo (-ε) ε := fun τ hτ => (hboth τ hτ).2
+  refine ⟨a, b, hmem0, ?_, fun τ hτ => (hboth τ hτ).1⟩
+  intro x _ τ hτ
+  exact (horbit x τ (hsub hτ)).mono hsub
+
 /-- **The `heq` datum of GAP-1 step (v) at the common anchor `0`.**  When the model gauge flow `G` is
 anchored at `0` (`Diffeomorph3GaugeFlowOn … sTime 0`) and the raw manifold flow `Φ` is anchored at `0`
 (`Φ 0 = id`), the step-(v) agreement `extChartAt I p (Φ t₀ x) = (G.maps3 t₀) (extChartAt I p x)` holds at
@@ -1763,6 +1809,69 @@ theorem exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip
         (hplace_state i) (hplace_win i))
   exact ⟨Φ, c, d, hanchor, hcd, hglob⟩
 
+/-- **Global slice-`C³` of an *abstract* compact-manifold flow from the field jets — the forward half
+of the `hslicesC3` obligation for a *given* flow.**  Identical to
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip`, except that the raw manifold
+flow `Φ` is **supplied as a hypothesis** (with only its anchor `hanchor` and ODE `horbit` on
+`Set.Ioo (-ε) ε`) rather than produced internally by
+`exists_timeDependent_flow_compact_continuousAt`.  The missing joint space-time continuity `hcontA`
+that the per-patch capstone needs is **derived** from the raw `C¹` field jet `hXraw` alone via
+`ManifoldFlow.continuousAt_timeDependent_flow_of_anchor_ode` (the abstract flow agrees, by
+`timeDependent_flow_unique`, with the canonical continuous flow on an open space-time neighbourhood of
+`{0} × M`).  The conclusion produces `ContMDiff I I 3 (Φ t)` for **that same** `Φ` on a window
+`Set.Ioo c d ∋ 0` — exactly the forward conjunct of the `hslicesC3` hypothesis of
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`, which hands the
+proof obligation a fixed abstract flow with no continuity datum.  The proof is verbatim the internal
+body of the `_windowLip` capstone with the internal flow-production `obtain` replaced by the supplied
+`Φ`/`hanchor`/`horbit` and the derived `hcontA`. -/
+theorem exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip_of_flow
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] [CompactSpace M] [IsManifold I 1 M]
+    {N : WithTop ℕ∞} [IsManifold I N M]
+    [ContMDiffVectorBundle N E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E}
+    (hXraw : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun q : ℝ × M => (⟨q, ((1 : ℝ), X q.1 q.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {Φ : ℝ → M → M} {ε : ℝ} (hε : 0 < ε)
+    (hanchor : ∀ x, Φ 0 x = x)
+    (horbit : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ x) (Set.Ioo (-ε) ε) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    {ι : Type*} [Finite ι] {cw dw : ℝ}
+    {p : ι → M} {U Q_M : ι → Set M} {χ : ι → (ℝ × E → ℝ)}
+    {Kwin : ι → Set (ℝ × E)} {state₀ : ι → Set E} {K : ι → ℝ≥0}
+    (hcd0 : (0 : ℝ) ∈ Set.Ioo cw dw)
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hXchart : ∀ i, ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) N
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I (p i)).source))
+    (hχC : ∀ i, ContDiff ℝ N (χ i)) (hχc : ∀ i, HasCompactSupport (χ i))
+    (hsub : ∀ i, tsupport (χ i) ⊆ Set.univ ×ˢ (extChartAt I (p i)).target)
+    (hcut : ∀ i, ∀ᶠ r in 𝓝ˢ (Kwin i), (χ i) r = 1) (hN : 4 ≤ N)
+    (hstate : ∀ i, IsOpen (state₀ i))
+    (hlip : ∀ i, ∀ τ ∈ Set.Icc cw dw, LipschitzOnWith (K i)
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ) (state₀ i))
+    (hU : ∀ i, U i ⊆ (chartAt H (p i)).source) (hUQ : ∀ i, U i ⊆ (Q_M i : Set M))
+    (hQ_M : ∀ i, IsCompact (Q_M i)) (hQ_M_src : ∀ i, Q_M i ⊆ (extChartAt I (p i)).source)
+    (hplace_state : ∀ i, ∀ x ∈ Q_M i, extChartAt I (p i) x ∈ state₀ i)
+    (hplace_win : ∀ i, ∀ x ∈ Q_M i, ((0 : ℝ), extChartAt I (p i) x) ∈ interior (Kwin i)) :
+    ∃ c d : ℝ, (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (fun x : M => Φ t x) := by
+  have hcontA : ∀ x, ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x) := fun x =>
+    PoincareCurvature.ManifoldFlow.continuousAt_timeDependent_flow_of_anchor_ode
+      hXraw hε hanchor horbit x
+  obtain ⟨c, d, hcd, hglob⟩ :=
+    exists_Ioo_forall_contMDiff_of_finite_cover (Φ := Φ) hopen hcover
+      (fun i => contMDiffOn_flowSlice_perPatch_of_flow_windowLip (X := X) (p := p i)
+        hε hcd0 hanchor horbit hcontA (hXchart i) (hχC i) (hχc i) (hsub i) (hcut i) hN
+        (hstate i) (hlip i) (hU i) (hUQ i) (hQ_M i) (hQ_M_src i)
+        (hplace_state i) (hplace_win i))
+  exact ⟨c, d, hcd, hglob⟩
+
 
 /-- **Finite chart cover of a compact manifold — the cover-side data package consumed by the step-(v)
 globalisation capstone `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover`.**  For a compact
@@ -2059,6 +2168,675 @@ theorem exists_flow_Ioo_forall_contMDiff_of_locally_contMDiffOn_tangentSection_c
       ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (fun x : M => Φ t x) :=
   exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact
     (contMDiff_of_locally_contMDiffOn_univ_prod hXloc)
+
+/-- **Global flow-slice `C³` (Route-A `hslicesC3`) from a per-point family of *cutoff model gauge
+flows* + orbit control.**  The concrete-`G` companion of the abstract-`Ψ` Route-A capstone
+`GaugeFlowAssembly.contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn`: instead of asking the caller
+to supply an abstract model comparison flow `Ψ` together with its `hg'` integral-curve co-solution, this
+form consumes, around every base point `x`, a genuine cutoff model gauge flow
+`G : Diffeomorph3GaugeFlowOn (χ • chartPushforwardField) sTime t₀'` and the *graph-containment* datum
+`hχ` (the cutoff `χ ≡ 1` along the model orbit) — exactly the package produced by the cutoff machinery
+`exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`.
+
+The abstract comparison flow is realised as `Ψ := fun τ ↦ (G.maps3 τ : E → E)`; its `hΨ` datum is the
+model-slice `C³` bound `contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn`, and its `hg'`
+integral-curve co-solution is `hasDerivAt_maps3_eval_of_cutoff_eqOne` (which collapses the cut field
+`χ • chartPushforwardField` to the un-cut `chartPushforwardField` on the region where `χ ≡ 1`, supplied
+by `hχ`).  The raw-flow ODE (`hγ`), chart-source stay (`hγ_src`), tube memberships (`hγ_mem`/`hg_mem`),
+tube-Lipschitz control (`hlip`), and anchor agreement (`heq₀`) are threaded through unchanged, and the
+`hΦU` `MapsTo` face is discharged from `hγ_src` at time `t` via `extChartAt_source`.  Feeding the
+resulting per-point abstract package to the Route-A global gluer yields `ContMDiff I I 3 (Φ t)` — the
+Route-A `hslicesC3` datum — directly from cutoff-model-flow data, no spatial regularity of `Φ`
+assumed. -/
+theorem contMDiff_flowSlice_of_forall_cutoff_orbit_control
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {Φ : ℝ → M → M} {t : ℝ}
+    (h : ∀ x : M, ∃ (p : M) (χ : ℝ × E → ℝ) (sTime : Set ℝ) (t₀' : ℝ)
+        (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+          (X := fun τ q => χ (τ, q) •
+            PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) sTime t₀')
+        (a b t₀ : ℝ) (K : NNReal) (state : ℝ → Set E) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, sTime ∈ 𝓝 τ) ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, χ (τ, (G.maps3 τ) (extChartAt I p y)) = 1) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = (G.maps3 t₀) (extChartAt I p y))) :
+    ContMDiff I I 3 (fun x : M => Φ t x) := by
+  refine PoincareCurvature.GaugeFlowAssembly.contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn
+    (Φ := Φ) (X := X) (t := t) (fun x => ?_)
+  obtain ⟨p, χ, sTime, t₀', G, a, b, t₀, K, state, U, hUmem, hU, ht, ht₀, hnhds, hlip,
+    hγ, hγ_src, hχ, hγ_mem, hg_mem, heq₀⟩ := h x
+  refine ⟨p, fun τ => (G.maps3 τ : E → E), a, b, t₀, K, state, U, hUmem, hU,
+    contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn G t, ?_, ht, ht₀, hlip,
+    hγ, hγ_src, ?_, hγ_mem, hg_mem, heq₀⟩
+  · intro y hy
+    have hsrc := hγ_src y hy t ht
+    rwa [extChartAt_source] at hsrc
+  · intro y hy τ hτ
+    exact hasDerivAt_maps3_eval_of_cutoff_eqOne G (hnhds τ hτ)
+      (mem_of_mem_nhds (hnhds τ hτ)) (extChartAt I p y) (hχ y hy τ hτ)
+
+/-- **Route-A `hslicesC3` from per-point cutoff model gauge flows, consuming the cutoff's *native*
+`𝓝ˢ`-eventually datum + orbit-graph confinement.**  The graph-form companion of
+`contMDiff_flowSlice_of_forall_cutoff_orbit_control`: instead of the pre-digested pointwise
+`hχ : χ (τ, (G.maps3 τ) (extChartAt I p y)) = 1`, it consumes the two facts the cutoff machinery
+`exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window` actually produces — the raw
+neighbourhood-of-a-compact-window cutoff datum `∀ᶠ r in 𝓝ˢ Kwin, χ r = 1`, and the geometric
+orbit-graph confinement `(τ, (G.maps3 τ) (extChartAt I p y)) ∈ Kwin` — reducing them to the pointwise
+`hχ` via `cutoff_eqOne_along_curve_of_graph_subset` (`Filter.Eventually.self_of_nhdsSet`).  This isolates
+the remaining GAP-1 step-(v) content to the single flow-trajectory-confinement estimate
+`orbit-graph ⊆ Kwin` (dischargeable, uniformly over a chart patch, by
+`exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt`), the honest interface between the
+cutoff-window machinery and the Route-A slice-`C³` gluer. -/
+theorem contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {Φ : ℝ → M → M} {t : ℝ}
+    (h : ∀ x : M, ∃ (p : M) (χ : ℝ × E → ℝ) (sTime : Set ℝ) (t₀' : ℝ)
+        (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+          (X := fun τ q => χ (τ, q) •
+            PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) sTime t₀')
+        (a b t₀ : ℝ) (K : NNReal) (state : ℝ → Set E) (Kwin : Set (ℝ × E)) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, sTime ∈ 𝓝 τ) ∧
+      (∀ᶠ r in 𝓝ˢ Kwin, χ r = 1) ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        ((τ, (G.maps3 τ) (extChartAt I p y)) : ℝ × E) ∈ Kwin) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = (G.maps3 t₀) (extChartAt I p y))) :
+    ContMDiff I I 3 (fun x : M => Φ t x) := by
+  refine contMDiff_flowSlice_of_forall_cutoff_orbit_control (X := X) (Φ := Φ) (t := t) (fun x => ?_)
+  obtain ⟨p, χ, sTime, t₀', G, a, b, t₀, K, state, Kwin, U, hUmem, hU, ht, ht₀, hnhds, hχK, hlip,
+    hγ, hγ_src, hgraph, hγ_mem, hg_mem, heq₀⟩ := h x
+  refine ⟨p, χ, sTime, t₀', G, a, b, t₀, K, state, U, hUmem, hU, ht, ht₀, hnhds, hlip,
+    hγ, hγ_src, ?_, hγ_mem, hg_mem, heq₀⟩
+  intro y hy
+  exact cutoff_eqOne_along_curve_of_graph_subset hχK (hgraph y hy)
+
+/-- **Inverse flow-slice `C³` (Route-A `hslicesC3` backward half) from per-point cutoff model gauge
+flows + orbit control.**  The concrete-`G` companion of the abstract-`Ψ` backward capstone
+`GaugeFlowAssembly.contMDiff_symm_flowSlice_of_forall_rawFlow_modelFlow_eqOn`, and the inverse-slice
+mirror of the forward `contMDiff_flowSlice_of_forall_cutoff_orbit_control`.  For the fixed time `t`, it
+produces `ContMDiff I I 3 Gt` for the spatial inverse `Gt` of the compact-flow slice `Φ t` — the
+backward half of the Route-A `hslicesC3` obligation — from:
+
+* the topological packaging of `Φ t` as a homeomorphism on the compact `T2` manifold `M`: continuity
+  `hΦcont` (supplied in the final assembly by the already-proved forward slice `C³`), surjectivity
+  `hΦsurj`, and the global left inverse `hGleft` (`Gt ∘ Φ t = id`); and
+* per base point `x`, exactly the same cutoff-model-flow package the forward capstone consumes — a
+  genuine cutoff model gauge flow `G : Diffeomorph3GaugeFlowOn (χ • chartPushforwardField) sTime t₀'`
+  with the pointwise cutoff datum `χ (τ, (G.maps3 τ) (extChartAt I p y)) = 1`, the raw gauge ODE,
+  tube-Lipschitz control, and confinement/anchor facts.
+
+The abstract comparison flow is realised as the genuine `C³`-*diffeomorph* family `Ψ := fun τ ↦ G.maps3 τ`
+(so its inverse is `C³` for free); its `hg'` integral-curve co-solution is
+`hasDerivAt_maps3_eval_of_cutoff_eqOne` (collapsing `χ • chartPushforwardField ↦ chartPushforwardField`
+where `χ ≡ 1`), and the `MapsTo` face falls out of the `src` datum at time `t`.  These feed the abstract
+backward capstone, whose homeomorphism gluer discharges the global inverse-slice `C³`.  Paired with the
+forward `contMDiff_flowSlice_of_forall_cutoff_orbit_control` this discharges both halves of `hslicesC3`
+in cutoff-model-flow vocabulary. -/
+theorem contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {Φ : ℝ → M → M} {Gt : M → M} {t : ℝ}
+    (hΦcont : Continuous (Φ t))
+    (hΦsurj : Function.Surjective (Φ t))
+    (hGleft : Function.LeftInverse Gt (Φ t))
+    (h : ∀ x : M, ∃ (p : M) (χ : ℝ × E → ℝ) (sTime : Set ℝ) (t₀' : ℝ)
+        (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+          (X := fun τ q => χ (τ, q) •
+            PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) sTime t₀')
+        (a b t₀ : ℝ) (K : NNReal) (state : ℝ → Set E) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, sTime ∈ 𝓝 τ) ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, χ (τ, (G.maps3 τ) (extChartAt I p y)) = 1) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = (G.maps3 t₀) (extChartAt I p y))) :
+    ContMDiff I I 3 Gt := by
+  refine PoincareCurvature.GaugeFlowAssembly.contMDiff_symm_flowSlice_of_forall_rawFlow_modelFlow_eqOn
+    (Φ := Φ) (Gt := Gt) (X := X) (t := t) hΦcont hΦsurj hGleft (fun x => ?_)
+  obtain ⟨p, χ, sTime, t₀', G, a, b, t₀, K, state, U, hUmem, hU, ht, ht₀, hnhds, hlip,
+    hγ, hγ_src, hχ, hγ_mem, hg_mem, heq₀⟩ := h x
+  refine ⟨p, fun τ => G.maps3 τ, a, b, t₀, K, state, U, hUmem, hU, ?_, ht, ht₀, hlip,
+    hγ, hγ_src, ?_, hγ_mem, hg_mem, heq₀⟩
+  · intro y hy
+    have hsrc := hγ_src y hy t ht
+    rwa [extChartAt_source] at hsrc
+  · intro y hy τ hτ
+    exact hasDerivAt_maps3_eval_of_cutoff_eqOne G (hnhds τ hτ)
+      (mem_of_mem_nhds (hnhds τ hτ)) (extChartAt I p y) (hχ y hy τ hτ)
+
+/-- **Inverse flow-slice `C³` (Route-A `hslicesC3` backward half), consuming the cutoff's *native*
+`𝓝ˢ`-eventually datum + orbit-graph confinement.**  The graph-form companion of
+`contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control`, and the inverse-slice mirror of the forward
+`contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset`.  Instead of the pre-digested
+pointwise `hχ : χ (τ, (G.maps3 τ) (extChartAt I p y)) = 1`, it consumes the two facts the cutoff
+machinery `exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window` actually produces — the raw
+neighbourhood-of-a-compact-window cutoff datum `∀ᶠ r in 𝓝ˢ Kwin, χ r = 1` and the geometric orbit-graph
+confinement `(τ, (G.maps3 τ) (extChartAt I p y)) ∈ Kwin` — reducing them to the pointwise `hχ` via
+`cutoff_eqOne_along_curve_of_graph_subset`, then delegating to the backward capstone
+`contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control`.  With the forward graph-form capstone this is
+the cutoff-machinery-native interface for both halves of `hslicesC3`: the remaining GAP-1 content is
+isolated to the single flow-trajectory-confinement estimate `orbit-graph ⊆ Kwin` plus the homeomorphism
+inputs (`Continuous`/`Surjective`/left-inverse of `Φ t`) that the compact `T2` forward slice supplies. -/
+theorem contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {Φ : ℝ → M → M} {Gt : M → M} {t : ℝ}
+    (hΦcont : Continuous (Φ t))
+    (hΦsurj : Function.Surjective (Φ t))
+    (hGleft : Function.LeftInverse Gt (Φ t))
+    (h : ∀ x : M, ∃ (p : M) (χ : ℝ × E → ℝ) (sTime : Set ℝ) (t₀' : ℝ)
+        (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+          (X := fun τ q => χ (τ, q) •
+            PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) sTime t₀')
+        (a b t₀ : ℝ) (K : NNReal) (state : ℝ → Set E) (Kwin : Set (ℝ × E)) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, sTime ∈ 𝓝 τ) ∧
+      (∀ᶠ r in 𝓝ˢ Kwin, χ r = 1) ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        ((τ, (G.maps3 τ) (extChartAt I p y)) : ℝ × E) ∈ Kwin) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = (G.maps3 t₀) (extChartAt I p y))) :
+    ContMDiff I I 3 Gt := by
+  refine contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control
+    (X := X) (Φ := Φ) (Gt := Gt) (t := t) hΦcont hΦsurj hGleft (fun x => ?_)
+  obtain ⟨p, χ, sTime, t₀', G, a, b, t₀, K, state, Kwin, U, hUmem, hU, ht, ht₀, hnhds, hχK, hlip,
+    hγ, hγ_src, hgraph, hγ_mem, hg_mem, heq₀⟩ := h x
+  refine ⟨p, χ, sTime, t₀', G, a, b, t₀, K, state, U, hUmem, hU, ht, ht₀, hnhds, hlip,
+    hγ, hγ_src, ?_, hγ_mem, hg_mem, heq₀⟩
+  intro y hy
+  exact cutoff_eqOne_along_curve_of_graph_subset hχK (hgraph y hy)
+
+/-- **Both slices `C³` (full Route-A `hslicesC3` conclusion, fixed time) from one per-point cutoff
+model gauge flow family.**  The concrete-`G` capstone of capstones: for the fixed time `t`, it produces
+the exact `ContMDiff I I 3 (Φ t) ∧ ContMDiff I I 3 Gt` shape of the `hslicesC3` conclusion of
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`, from *one* uniform
+per-base-point supply of cutoff-model-flow comparison packages (the native cutoff-machinery output —
+cutoff `G`, `∀ᶠ 𝓝ˢ` datum, orbit-graph confinement, raw gauge ODE, tube-Lipschitz, anchor) together
+with only the forward slice's spatial-inverse data `hΦsurj` (`Φ t` surjective) and `hGleft`
+(`Gt ∘ Φ t = id`).
+
+The forward conjunct is `contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset`; the
+inverse conjunct reuses that forward `C³` as the *continuity* input
+(`ContMDiff.continuous`) — so `Continuous (Φ t)` is *derived*, not assumed — and passes the same
+package (plus `hΦsurj`/`hGleft`) to
+`contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset`.  Quantifying `t` over the
+flow window discharges both conjuncts of `hslicesC3` from a single supply of comparison packages, the
+compact-`T2` homeomorphism obligation of the backward half being absorbed into the already-proved
+forward half. -/
+theorem contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_subset
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {Φ : ℝ → M → M} {Gt : M → M} {t : ℝ}
+    (hΦsurj : Function.Surjective (Φ t))
+    (hGleft : Function.LeftInverse Gt (Φ t))
+    (h : ∀ x : M, ∃ (p : M) (χ : ℝ × E → ℝ) (sTime : Set ℝ) (t₀' : ℝ)
+        (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+          (X := fun τ q => χ (τ, q) •
+            PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) sTime t₀')
+        (a b t₀ : ℝ) (K : NNReal) (state : ℝ → Set E) (Kwin : Set (ℝ × E)) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, sTime ∈ 𝓝 τ) ∧
+      (∀ᶠ r in 𝓝ˢ Kwin, χ r = 1) ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        ((τ, (G.maps3 τ) (extChartAt I p y)) : ℝ × E) ∈ Kwin) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = (G.maps3 t₀) (extChartAt I p y))) :
+    ContMDiff I I 3 (Φ t) ∧ ContMDiff I I 3 Gt := by
+  have hfwd : ContMDiff I I 3 (Φ t) :=
+    contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset (X := X) (Φ := Φ) (t := t) h
+  exact ⟨hfwd, contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset
+    (X := X) (Φ := Φ) (Gt := Gt) (t := t) hfwd.continuous hΦsurj hGleft h⟩
+
+/-- **Windowed backward per-patch inverse-slice `C³` producer.**  The inverse-slice (`G t`) analogue of
+`contMDiffOn_flowSlice_perPatch_of_flow`: a direct quantification over the time window of the fixed-time
+backward per-patch brick `GaugeFlowAssembly.contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn`.  Every
+one of that brick's comparison hypotheses is already uniform in `τ ∈ Set.Ioo a b` — a model-`C³`
+comparison flow `Ψ`, the tube-Lipschitz chart pushforward field, the raw gauge ODE, the model
+co-solution `hg'`, the state placements, and the anchor identity at `t₀` — while only the conclusion time
+and the spatial left inverse `G t` are time-specific.  Quantifying `t` over `Set.Ioo a b` (which contains
+`0`) therefore delivers, on that single window, the per-patch inverse regularity
+`ContMDiffOn I I 3 (G t) (Φ t '' U)` for every `t`.  This is exactly the per-patch datum
+`exists_Ioo_forall_contMDiff_symm_of_finite_cover` consumes as its `hpatch i`, so the two together
+globalise the inverse slice from local temporal integral-curve comparison data — the backward-side
+mirror of `contMDiffOn_flowSlice_perPatch_of_flow` + `exists_Ioo_forall_contMDiff_of_finite_cover`. -/
+theorem contMDiffOn_symm_flowSlice_perPatch_of_flow
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {Φ : ℝ → M → M} {G : ℝ → M → M}
+    {Ψ : ℝ → (E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)}
+    {p : M} {X : ℝ → M → E} {a b t₀ : ℝ} {K : NNReal} {state : ℝ → Set E} {U : Set M}
+    (hab0 : (0 : ℝ) ∈ Set.Ioo a b) (ht₀ : t₀ ∈ Set.Ioo a b)
+    (hU : U ⊆ (chartAt H p).source)
+    (hΦU : ∀ t ∈ Set.Ioo a b, Set.MapsTo (Φ t) U (chartAt H p).source)
+    (hlip : ∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ))
+    (hraw : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo a b) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x))))
+    (hsrc : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ x ∈ (extChartAt I p).source)
+    (hg' : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+      HasDerivAt (fun τ : ℝ ↦ (Ψ τ : E → E) (extChartAt I p x))
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ
+          ((Ψ τ : E → E) (extChartAt I p x))) τ)
+    (hγ_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ x) ∈ state τ)
+    (hg_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, (Ψ τ : E → E) (extChartAt I p x) ∈ state τ)
+    (heq₀ : ∀ x ∈ U, extChartAt I p (Φ t₀ x) = (Ψ t₀ : E → E) (extChartAt I p x))
+    (hGleft : ∀ t ∈ Set.Ioo a b, ∀ x ∈ U, G t (Φ t x) = x) :
+    ∃ a' b' : ℝ, (0 : ℝ) ∈ Set.Ioo a' b' ∧
+      ∀ t ∈ Set.Ioo a' b', ContMDiffOn I I 3 (G t) (Φ t '' U) := by
+  refine ⟨a, b, hab0, fun t ht => ?_⟩
+  exact PoincareCurvature.GaugeFlowAssembly.contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn
+    hU (hΦU t ht) ht ht₀ hlip hraw hsrc hg' hγ_mem hg_mem heq₀ (hGleft t ht)
+
+/-- **Backward finite-cover gluer for inverse flow slices (windowed).**  The inverse-slice (`G t`)
+analogue of `exists_Ioo_forall_contMDiff_of_finite_cover`: from a finite open cover `U : ι → Set M` of
+the compact `T2` manifold `M`, per-patch inverse-slice regularity windows (`hpatch`: on each patch a
+window `Set.Ioo (a i) (b i) ∋ 0` with `ContMDiffOn I I 3 (G t)` on the image `Φ t '' U i` for every `t`
+in that window), and the per-slice topological data on a reference window `Set.Ioo lo hi ∋ 0` (each
+`Φ t` continuous, surjective, with global left inverse `G t`), there is a single sub-window
+`Set.Ioo c d ∋ 0` on which `G t` is *globally* `ContMDiff I I 3`.
+
+This is the backward half of the `hslicesC3` conclusion
+(`∃ c d, 0 ∈ Set.Ioo c d ∧ ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (G t)`) consumed by
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3`.  Unlike
+the forward gluer, the inverse slice is globalised through the open-map route: on a compact `T2`
+manifold a continuous bijective `Φ t` is a homeomorphism (`Continuous.homeoOfEquivCompactToT2`), hence an
+open map, so the per-patch inverse regularity on `Φ t '' U i` glues to global `C³` via
+`GaugeFlowAssembly.contMDiff_symm_flowSlice_of_forall_openImage`.  The reference window `Set.Ioo lo hi`
+carries the topological data (in the asymmetric-capstone application it is the mutual-inverse window
+`Set.Ioo (-ε) ε`); the returned sub-window is contained in `Set.Ioo lo hi ∩ ⋂ i, Set.Ioo (a i) (b i)`. -/
+theorem exists_Ioo_forall_contMDiff_symm_of_finite_cover
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {ι : Type*} [Finite ι] {Φ : ℝ → M → M} {G : ℝ → M → M} {U : ι → Set M}
+    {lo hi : ℝ} (hlohi : (0 : ℝ) ∈ Set.Ioo lo hi)
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hΦcont : ∀ t ∈ Set.Ioo lo hi, Continuous (Φ t))
+    (hΦsurj : ∀ t ∈ Set.Ioo lo hi, Function.Surjective (Φ t))
+    (hGleft : ∀ t ∈ Set.Ioo lo hi, Function.LeftInverse (G t) (Φ t))
+    (hpatch : ∀ i : ι, ∃ a b : ℝ, (0 : ℝ) ∈ Set.Ioo a b ∧
+      ∀ t ∈ Set.Ioo a b, ContMDiffOn I I 3 (G t) (Φ t '' U i)) :
+    ∃ c d : ℝ, (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (G t) := by
+  choose a b hmem hslice using hpatch
+  have hWopen : IsOpen (Set.Ioo lo hi ∩ ⋂ i, Set.Ioo (a i) (b i)) :=
+    isOpen_Ioo.inter (isOpen_iInter_of_finite (fun i => isOpen_Ioo))
+  have hW0 : (0 : ℝ) ∈ Set.Ioo lo hi ∩ ⋂ i, Set.Ioo (a i) (b i) :=
+    ⟨hlohi, Set.mem_iInter.mpr (fun i => hmem i)⟩
+  obtain ⟨c, d, hcd, hsubW⟩ :=
+    mem_nhds_iff_exists_Ioo_subset.mp (hWopen.mem_nhds hW0)
+  refine ⟨c, d, hcd, fun t ht => ?_⟩
+  have htW : t ∈ Set.Ioo lo hi ∩ ⋂ i, Set.Ioo (a i) (b i) := hsubW ht
+  have htlohi : t ∈ Set.Ioo lo hi := htW.1
+  have htIoo : ∀ i, t ∈ Set.Ioo (a i) (b i) :=
+    fun i => Set.mem_iInter.mp htW.2 i
+  have hbij : Function.Bijective (Φ t) :=
+    ⟨(hGleft t htlohi).injective, hΦsurj t htlohi⟩
+  have hopenMap : IsOpenMap (Φ t) :=
+    (Continuous.homeoOfEquivCompactToT2 (f := Equiv.ofBijective (Φ t) hbij)
+      (hΦcont t htlohi)).isOpenMap
+  refine PoincareCurvature.GaugeFlowAssembly.contMDiff_symm_flowSlice_of_forall_openImage
+    hopenMap (hΦsurj t htlohi) (fun x => ?_)
+  obtain ⟨i, hxi⟩ := hcover x
+  exact ⟨U i, hopen i, hxi, hslice i t (htIoo i)⟩
+
+/-- **Global inverse-slice `C³` producer from per-patch model-comparison data (for a given flow).**  The
+backward-slice (`G t`) analogue of the forward finite-cover producer
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip_of_flow`: it composes the two
+backward bricks — the windowed per-patch inverse producer `contMDiffOn_symm_flowSlice_perPatch_of_flow`
+(applied on each patch `i` of a finite open cover, from that patch's integral-curve comparison data: a
+model-`C³` self-diffeomorph family `Ψ i`, the tube-Lipschitz chart pushforward field, the raw gauge ODE,
+the model co-solution `hg'`, the state placements, and the anchor identity at `t₀ i`) and the backward
+finite-cover gluer `exists_Ioo_forall_contMDiff_symm_of_finite_cover` (which, on a compact `T2` `M` where
+each continuous bijective `Φ t` is an open map, globalises the per-patch inverse regularity on `Φ t '' U i`
+to global `ContMDiff I I 3 (G t)`).  The reference window `Set.Ioo lo hi` carries the per-slice
+topological data (each `Φ t` continuous, surjective, with global left inverse `G t`).
+
+This delivers the backward conjunct `∃ c d, 0 ∈ Set.Ioo c d ∧ ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (G t)`
+of the `hslicesC3` hypothesis consumed by
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3`, mirroring
+on the inverse side what the field-jet finite-cover producer delivers for the forward slice — no window
+bookkeeping beyond intersecting the per-patch windows with the reference window is required of the caller. -/
+theorem exists_Ioo_forall_contMDiff_symm_of_comparison_finite_cover_of_flow
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {ι : Type*} [Finite ι] {Φ : ℝ → M → M} {G : ℝ → M → M}
+    {Ψ : ι → ℝ → (E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)}
+    {p : ι → M} {X : ℝ → M → E} {a b t₀ : ι → ℝ} {K : ι → NNReal}
+    {state : ι → ℝ → Set E} {U : ι → Set M} {lo hi : ℝ}
+    (hlohi : (0 : ℝ) ∈ Set.Ioo lo hi)
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hΦcont : ∀ t ∈ Set.Ioo lo hi, Continuous (Φ t))
+    (hΦsurj : ∀ t ∈ Set.Ioo lo hi, Function.Surjective (Φ t))
+    (hGleft : ∀ t ∈ Set.Ioo lo hi, Function.LeftInverse (G t) (Φ t))
+    (hab0 : ∀ i, (0 : ℝ) ∈ Set.Ioo (a i) (b i)) (ht₀ : ∀ i, t₀ i ∈ Set.Ioo (a i) (b i))
+    (hU : ∀ i, U i ⊆ (chartAt H (p i)).source)
+    (hΦU : ∀ i, ∀ t ∈ Set.Ioo (a i) (b i), Set.MapsTo (Φ t) (U i) (chartAt H (p i)).source)
+    (hlip : ∀ i, ∀ τ ∈ Set.Ioo (a i) (b i), LipschitzOnWith (K i)
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ) (state i τ))
+    (hraw : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo (a i) (b i)) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x))))
+    (hsrc : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i), Φ τ x ∈ (extChartAt I (p i)).source)
+    (hg' : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      HasDerivAt (fun τ : ℝ ↦ (Ψ i τ : E → E) (extChartAt I (p i) x))
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ
+          ((Ψ i τ : E → E) (extChartAt I (p i) x))) τ)
+    (hγ_mem : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      extChartAt I (p i) (Φ τ x) ∈ state i τ)
+    (hg_mem : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      (Ψ i τ : E → E) (extChartAt I (p i) x) ∈ state i τ)
+    (heq₀ : ∀ i, ∀ x ∈ U i,
+      extChartAt I (p i) (Φ (t₀ i) x) = (Ψ i (t₀ i) : E → E) (extChartAt I (p i) x))
+    (hGleft_patch : ∀ i, ∀ t ∈ Set.Ioo (a i) (b i), ∀ x ∈ U i, G t (Φ t x) = x) :
+    ∃ c d : ℝ, (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (G t) :=
+  exists_Ioo_forall_contMDiff_symm_of_finite_cover hlohi hopen hcover hΦcont hΦsurj hGleft
+    (fun i => contMDiffOn_symm_flowSlice_perPatch_of_flow (hab0 i) (ht₀ i) (hU i) (hΦU i)
+      (hlip i) (hraw i) (hsrc i) (hg' i) (hγ_mem i) (hg_mem i) (heq₀ i) (hGleft_patch i))
+
+/-- **Windowed forward per-patch flow-slice `C³` producer (diffeomorph comparison).**  The forward-slice
+(`Φ t`) analogue of `contMDiffOn_symm_flowSlice_perPatch_of_flow`: a direct quantification over the time
+window of the fixed-time forward per-patch brick
+`GaugeFlowAssembly.contMDiffOn_flowSlice_of_rawFlow_modelFlow_eqOn`, with the model comparison flow given
+as a genuine `C³` self-diffeomorph family `Ψ : ℝ → (E ≃ₘ^3 E)` (whose forward map's `C³` regularity is
+extracted from `(Ψ t).contMDiff`).  Every comparison hypothesis is uniform in `τ ∈ Set.Ioo a b`; only the
+conclusion time is `t`-specific, so quantifying `t` over `Set.Ioo a b` (∋ `0`) yields
+`ContMDiffOn I I 3 (Φ t) U` for every `t` in that window — the per-patch datum
+`exists_Ioo_forall_contMDiff_of_finite_cover` consumes as its `hpatch i`.  This consumes the SAME
+diffeomorph comparison package as the backward `contMDiffOn_symm_flowSlice_perPatch_of_flow` (minus the
+left-inverse datum), so ONE per-patch supply feeds both slices. -/
+theorem contMDiffOn_flowSlice_perPatch_of_flow_comparison
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {Φ : ℝ → M → M} {Ψ : ℝ → (E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)}
+    {p : M} {X : ℝ → M → E} {a b t₀ : ℝ} {K : NNReal} {state : ℝ → Set E} {U : Set M}
+    (hab0 : (0 : ℝ) ∈ Set.Ioo a b) (ht₀ : t₀ ∈ Set.Ioo a b)
+    (hU : U ⊆ (chartAt H p).source)
+    (hΦU : ∀ t ∈ Set.Ioo a b, Set.MapsTo (Φ t) U (chartAt H p).source)
+    (hlip : ∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ))
+    (hraw : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo a b) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x))))
+    (hsrc : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ x ∈ (extChartAt I p).source)
+    (hg' : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+      HasDerivAt (fun τ : ℝ ↦ (Ψ τ : E → E) (extChartAt I p x))
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ
+          ((Ψ τ : E → E) (extChartAt I p x))) τ)
+    (hγ_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ x) ∈ state τ)
+    (hg_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, (Ψ τ : E → E) (extChartAt I p x) ∈ state τ)
+    (heq₀ : ∀ x ∈ U, extChartAt I p (Φ t₀ x) = (Ψ t₀ : E → E) (extChartAt I p x)) :
+    ∃ a' b' : ℝ, (0 : ℝ) ∈ Set.Ioo a' b' ∧
+      ∀ t ∈ Set.Ioo a' b', ContMDiffOn I I 3 (Φ t) U := by
+  refine ⟨a, b, hab0, fun t ht => ?_⟩
+  exact PoincareCurvature.GaugeFlowAssembly.contMDiffOn_flowSlice_of_rawFlow_modelFlow_eqOn
+    (Ψ := fun τ => (Ψ τ : E → E)) hU (contMDiff_iff_contDiff.mp (Ψ t).contMDiff)
+    (hΦU t ht) ht ht₀ hlip hraw hsrc hg' hγ_mem hg_mem heq₀
+
+/-- **Global forward-slice `C³` producer from per-patch diffeomorph comparison data (for a given flow).**
+The forward-slice (`Φ t`) analogue of
+`exists_Ioo_forall_contMDiff_symm_of_comparison_finite_cover_of_flow`: composes the windowed forward
+per-patch producer `contMDiffOn_flowSlice_perPatch_of_flow_comparison` on each patch `i` of a finite open
+cover with the forward finite-cover gluer `exists_Ioo_forall_contMDiff_of_finite_cover` (which glues the
+per-patch `ContMDiffOn (Φ t) (U i)` to global `ContMDiff I I 3 (Φ t)` via
+`contMDiff_of_locally_contMDiffOn`).  Unlike the backward producer it needs NO reference-window
+topological data (no continuity/surjectivity/left-inverse of `Φ t`).  Delivers the forward conjunct
+`∃ c d, 0 ∈ Set.Ioo c d ∧ ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (Φ t)` of the `hslicesC3` hypothesis, from
+the SAME per-patch diffeomorph comparison supply the backward producer consumes. -/
+theorem exists_Ioo_forall_contMDiff_of_comparison_finite_cover_of_flow
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {ι : Type*} [Finite ι] {Φ : ℝ → M → M}
+    {Ψ : ι → ℝ → (E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)}
+    {p : ι → M} {X : ℝ → M → E} {a b t₀ : ι → ℝ} {K : ι → NNReal}
+    {state : ι → ℝ → Set E} {U : ι → Set M}
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hab0 : ∀ i, (0 : ℝ) ∈ Set.Ioo (a i) (b i)) (ht₀ : ∀ i, t₀ i ∈ Set.Ioo (a i) (b i))
+    (hU : ∀ i, U i ⊆ (chartAt H (p i)).source)
+    (hΦU : ∀ i, ∀ t ∈ Set.Ioo (a i) (b i), Set.MapsTo (Φ t) (U i) (chartAt H (p i)).source)
+    (hlip : ∀ i, ∀ τ ∈ Set.Ioo (a i) (b i), LipschitzOnWith (K i)
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ) (state i τ))
+    (hraw : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo (a i) (b i)) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x))))
+    (hsrc : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i), Φ τ x ∈ (extChartAt I (p i)).source)
+    (hg' : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      HasDerivAt (fun τ : ℝ ↦ (Ψ i τ : E → E) (extChartAt I (p i) x))
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ
+          ((Ψ i τ : E → E) (extChartAt I (p i) x))) τ)
+    (hγ_mem : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      extChartAt I (p i) (Φ τ x) ∈ state i τ)
+    (hg_mem : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      (Ψ i τ : E → E) (extChartAt I (p i) x) ∈ state i τ)
+    (heq₀ : ∀ i, ∀ x ∈ U i,
+      extChartAt I (p i) (Φ (t₀ i) x) = (Ψ i (t₀ i) : E → E) (extChartAt I (p i) x)) :
+    ∃ c d : ℝ, (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (Φ t) :=
+  exists_Ioo_forall_contMDiff_of_finite_cover hopen hcover
+    (fun i => contMDiffOn_flowSlice_perPatch_of_flow_comparison (hab0 i) (ht₀ i) (hU i) (hΦU i)
+      (hlip i) (hraw i) (hsrc i) (hg' i) (hγ_mem i) (hg_mem i) (heq₀ i))
+
+/-- **Paired global slice-`C³` producer (both `hslicesC3` conjuncts from one diffeomorph comparison
+supply).**  Combines the forward global producer
+`exists_Ioo_forall_contMDiff_of_comparison_finite_cover_of_flow` and the backward global producer
+`exists_Ioo_forall_contMDiff_symm_of_comparison_finite_cover_of_flow` into the exact conjunction
+`(∃ c₁ d₁, ∀ t ∈ …, ContMDiff (Φ t)) ∧ (∃ c₂ d₂, ∀ t ∈ …, ContMDiff (G t))` concluded by the `hslicesC3`
+hypothesis of `GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3`.
+Because the forward and backward per-patch bricks consume IDENTICAL diffeomorph comparison data (`Ψ i`,
+the raw gauge ODE, the tube-Lipschitz control, the model co-solution, the state placements, the anchor),
+ONE uniform per-patch supply — plus the reference-window topological data (each `Φ t`
+continuous/surjective with global left inverse `G t`) that only the inverse slice needs — discharges BOTH
+slice-`C³` conjuncts.  This is the direct precursor to discharging `hslicesC3`: only the construction of
+the per-patch comparison packages from the actual gauge field remains. -/
+theorem exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {ι : Type*} [Finite ι] {Φ : ℝ → M → M} {G : ℝ → M → M}
+    {Ψ : ι → ℝ → (E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)}
+    {p : ι → M} {X : ℝ → M → E} {a b t₀ : ι → ℝ} {K : ι → NNReal}
+    {state : ι → ℝ → Set E} {U : ι → Set M} {lo hi : ℝ}
+    (hlohi : (0 : ℝ) ∈ Set.Ioo lo hi)
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hΦcont : ∀ t ∈ Set.Ioo lo hi, Continuous (Φ t))
+    (hΦsurj : ∀ t ∈ Set.Ioo lo hi, Function.Surjective (Φ t))
+    (hGleft : ∀ t ∈ Set.Ioo lo hi, Function.LeftInverse (G t) (Φ t))
+    (hab0 : ∀ i, (0 : ℝ) ∈ Set.Ioo (a i) (b i)) (ht₀ : ∀ i, t₀ i ∈ Set.Ioo (a i) (b i))
+    (hU : ∀ i, U i ⊆ (chartAt H (p i)).source)
+    (hΦU : ∀ i, ∀ t ∈ Set.Ioo (a i) (b i), Set.MapsTo (Φ t) (U i) (chartAt H (p i)).source)
+    (hlip : ∀ i, ∀ τ ∈ Set.Ioo (a i) (b i), LipschitzOnWith (K i)
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ) (state i τ))
+    (hraw : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo (a i) (b i)) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x))))
+    (hsrc : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i), Φ τ x ∈ (extChartAt I (p i)).source)
+    (hg' : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      HasDerivAt (fun τ : ℝ ↦ (Ψ i τ : E → E) (extChartAt I (p i) x))
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ
+          ((Ψ i τ : E → E) (extChartAt I (p i) x))) τ)
+    (hγ_mem : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      extChartAt I (p i) (Φ τ x) ∈ state i τ)
+    (hg_mem : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      (Ψ i τ : E → E) (extChartAt I (p i) x) ∈ state i τ)
+    (heq₀ : ∀ i, ∀ x ∈ U i,
+      extChartAt I (p i) (Φ (t₀ i) x) = (Ψ i (t₀ i) : E → E) (extChartAt I (p i) x))
+    (hGleft_patch : ∀ i, ∀ t ∈ Set.Ioo (a i) (b i), ∀ x ∈ U i, G t (Φ t x) = x) :
+    (∃ c₁ d₁ : ℝ, (0 : ℝ) ∈ Set.Ioo c₁ d₁ ∧ ∀ t ∈ Set.Ioo c₁ d₁, ContMDiff I I 3 (Φ t)) ∧
+      (∃ c₂ d₂ : ℝ, (0 : ℝ) ∈ Set.Ioo c₂ d₂ ∧ ∀ t ∈ Set.Ioo c₂ d₂, ContMDiff I I 3 (G t)) :=
+  ⟨exists_Ioo_forall_contMDiff_of_comparison_finite_cover_of_flow hopen hcover hab0 ht₀ hU hΦU
+      hlip hraw hsrc hg' hγ_mem hg_mem heq₀,
+    exists_Ioo_forall_contMDiff_symm_of_comparison_finite_cover_of_flow hlohi hopen hcover
+      hΦcont hΦsurj hGleft hab0 ht₀ hU hΦU hlip hraw hsrc hg' hγ_mem hg_mem heq₀ hGleft_patch⟩
+
+/-- **Paired global slice-`C³` producer with the inverse-slice continuity BOOTSTRAPPED from the forward
+slice.**  Same as `exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow` but it does NOT take the
+per-slice continuity `hΦcont : ∀ t ∈ …, Continuous (Φ t)` as a hypothesis — it DERIVES it from the forward
+producer's output (`ContMDiff I I 3 (Φ t) ⟹ Continuous (Φ t)` via `ContMDiff.continuous`).  Concretely:
+the forward global producer supplies a window `Set.Ioo c₁ d₁ ∋ 0` on which every `Φ t` is `C³`; the
+reference window handed to the backward producer is shrunk to
+`Set.Ioo (max lo c₁) (min hi d₁) ⊆ Set.Ioo lo hi ∩ Set.Ioo c₁ d₁`, on which the surjectivity/left-inverse
+data restrict from `Set.Ioo lo hi` and the continuity is read off from the forward `C³`.
+
+The upshot: the ONLY topological inputs are the slice surjectivity `hΦsurj` and left inverse `hGleft` —
+exactly the `hright` (⟹ surjective) and `hleft` faces the `hslicesC3` hypothesis of
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3` supplies
+for an arbitrary flow pair `(Φ, G)`.  So discharging that `hslicesC3` from this producer needs only the
+per-patch diffeomorph comparison packages — no separately-argued per-slice continuity. -/
+theorem exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow_of_surj_left
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {ι : Type*} [Finite ι] {Φ : ℝ → M → M} {G : ℝ → M → M}
+    {Ψ : ι → ℝ → (E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)}
+    {p : ι → M} {X : ℝ → M → E} {a b t₀ : ι → ℝ} {K : ι → NNReal}
+    {state : ι → ℝ → Set E} {U : ι → Set M} {lo hi : ℝ}
+    (hlohi : (0 : ℝ) ∈ Set.Ioo lo hi)
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hΦsurj : ∀ t ∈ Set.Ioo lo hi, Function.Surjective (Φ t))
+    (hGleft : ∀ t ∈ Set.Ioo lo hi, Function.LeftInverse (G t) (Φ t))
+    (hab0 : ∀ i, (0 : ℝ) ∈ Set.Ioo (a i) (b i)) (ht₀ : ∀ i, t₀ i ∈ Set.Ioo (a i) (b i))
+    (hU : ∀ i, U i ⊆ (chartAt H (p i)).source)
+    (hΦU : ∀ i, ∀ t ∈ Set.Ioo (a i) (b i), Set.MapsTo (Φ t) (U i) (chartAt H (p i)).source)
+    (hlip : ∀ i, ∀ τ ∈ Set.Ioo (a i) (b i), LipschitzOnWith (K i)
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ) (state i τ))
+    (hraw : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo (a i) (b i)) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x))))
+    (hsrc : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i), Φ τ x ∈ (extChartAt I (p i)).source)
+    (hg' : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      HasDerivAt (fun τ : ℝ ↦ (Ψ i τ : E → E) (extChartAt I (p i) x))
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ
+          ((Ψ i τ : E → E) (extChartAt I (p i) x))) τ)
+    (hγ_mem : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      extChartAt I (p i) (Φ τ x) ∈ state i τ)
+    (hg_mem : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      (Ψ i τ : E → E) (extChartAt I (p i) x) ∈ state i τ)
+    (heq₀ : ∀ i, ∀ x ∈ U i,
+      extChartAt I (p i) (Φ (t₀ i) x) = (Ψ i (t₀ i) : E → E) (extChartAt I (p i) x))
+    (hGleft_patch : ∀ i, ∀ t ∈ Set.Ioo (a i) (b i), ∀ x ∈ U i, G t (Φ t x) = x) :
+    (∃ c₁ d₁ : ℝ, (0 : ℝ) ∈ Set.Ioo c₁ d₁ ∧ ∀ t ∈ Set.Ioo c₁ d₁, ContMDiff I I 3 (Φ t)) ∧
+      (∃ c₂ d₂ : ℝ, (0 : ℝ) ∈ Set.Ioo c₂ d₂ ∧ ∀ t ∈ Set.Ioo c₂ d₂, ContMDiff I I 3 (G t)) := by
+  have hfwd := exists_Ioo_forall_contMDiff_of_comparison_finite_cover_of_flow
+    hopen hcover hab0 ht₀ hU hΦU hlip hraw hsrc hg' hγ_mem hg_mem heq₀
+  refine ⟨hfwd, ?_⟩
+  obtain ⟨c₁, d₁, ⟨hc₁, hd₁⟩, hΦC3⟩ := hfwd
+  obtain ⟨hlo, hhi⟩ := hlohi
+  have hsub_lo : Set.Ioo (max lo c₁) (min hi d₁) ⊆ Set.Ioo lo hi :=
+    Set.Ioo_subset_Ioo (le_max_left _ _) (min_le_left _ _)
+  have hsub_c : Set.Ioo (max lo c₁) (min hi d₁) ⊆ Set.Ioo c₁ d₁ :=
+    Set.Ioo_subset_Ioo (le_max_right _ _) (min_le_right _ _)
+  have h0 : (0 : ℝ) ∈ Set.Ioo (max lo c₁) (min hi d₁) := ⟨max_lt hlo hc₁, lt_min hhi hd₁⟩
+  exact exists_Ioo_forall_contMDiff_symm_of_comparison_finite_cover_of_flow
+    h0 hopen hcover
+    (fun t ht => (hΦC3 t (hsub_c ht)).continuous)
+    (fun t ht => hΦsurj t (hsub_lo ht))
+    (fun t ht => hGleft t (hsub_lo ht))
+    hab0 ht₀ hU hΦU hlip hraw hsrc hg' hγ_mem hg_mem heq₀ hGleft_patch
+
+/-- **Windowed co-solution supply — the model `G.maps3`-orbit solves the *un-cut* chart pushforward ODE,
+uniformly over a chart patch, from graph confinement in the cutoff window.**  This discharges the
+distinctive co-solution hypothesis `hg'` of the Ψ-comparison producers
+(`contMDiffOn_flowSlice_perPatch_of_flow_comparison` and its `_symm` twin, with `Ψ := G.maps3`) directly
+from the confinement machinery.  For the model cutoff gauge flow `G` (of the cut field
+`χ • chartPushforwardField I X p` over all time, anchored at `t₀`) with the cut field uniformly Lipschitz,
+a compact initial set `Q` carrying every chart image `extChartAt I p x` (`x ∈ U`), and a compact
+space-time window `Kwin` with `χ ≡ 1` near it and the anchored graph in its interior, the short-time
+orbit-graph confinement `exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith` (applied to
+`interior Kwin`) yields a window `Set.Ioo a b ∋ t₀` on which every orbit graph stays in `Kwin`;
+`cutoff_eqOne_along_curve_of_graph_subset` then gives `χ ≡ 1` along each orbit, so
+`hasDerivAt_maps3_eval_of_cutoff_eqOne` upgrades the cut-field integral-curve derivative to the *un-cut*
+`chartPushforwardField` — exactly the `hg'` datum, uniformly for all `x ∈ U` and `τ` in the window. -/
+theorem exists_Ioo_forall_forall_hasDerivAt_maps3_eval_of_lipschitzWith
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {p : M} {χ : ℝ × E → ℝ} {t₀ : ℝ} {K : ℝ≥0}
+    {Q : Set E} {Kwin : Set (ℝ × E)} {U : Set M}
+    (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+      (X := fun τ q => χ (τ, q) •
+        PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) Set.univ t₀)
+    (hlipX : ∀ t, LipschitzWith K (fun q => χ (t, q) •
+        PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p t q))
+    (hQ : IsCompact Q)
+    (hχ1 : ∀ᶠ r in 𝓝ˢ Kwin, χ r = 1)
+    (hgraph0 : ∀ q ∈ Q, ((t₀, (G.maps3 t₀) q) : ℝ × E) ∈ interior Kwin)
+    (hUQ : ∀ x ∈ U, extChartAt I p x ∈ Q) :
+    ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧
+      ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasDerivAt (fun τ : ℝ => (G.maps3 τ) (extChartAt I p x))
+          (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ
+            ((G.maps3 τ) (extChartAt I p x))) τ := by
+  obtain ⟨a, b, ht₀ab, hgraph⟩ :=
+    exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith G hlipX hQ isOpen_interior hgraph0
+  refine ⟨a, b, ht₀ab, fun x hx τ hτ => ?_⟩
+  have hmemK : ∀ σ ∈ Set.Ioo a b, ((σ, (G.maps3 σ) (extChartAt I p x)) : ℝ × E) ∈ Kwin :=
+    fun σ hσ => interior_subset (hgraph σ hσ (extChartAt I p x) (hUQ x hx))
+  have hχτ : χ (τ, (G.maps3 τ) (extChartAt I p x)) = 1 :=
+    cutoff_eqOne_along_curve_of_graph_subset hχ1 hmemK τ hτ
+  exact hasDerivAt_maps3_eval_of_cutoff_eqOne G Filter.univ_mem (Set.mem_univ τ)
+    (extChartAt I p x) hχτ
 
 end
 

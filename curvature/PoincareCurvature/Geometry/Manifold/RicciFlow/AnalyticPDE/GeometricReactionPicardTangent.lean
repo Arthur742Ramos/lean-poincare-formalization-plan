@@ -118,6 +118,170 @@ theorem deTurckReactionSectionMap_coord_eq_readout
     (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
       Kc hKc Ko hKo hKoEq hcover hP σ) i x
 
+/-- **Tangent-bundle (`W := TangentSpace I`) hom-topology `coord_apply`.**  For a section `s` of the
+canonical `BilinearFormBundle` continuous section space at `W := TangentSpace I`, the compact coordinate
+readout `(coord s).1 i x` (`equivCompatibleCoordFamilySubmodule`) equals the trivialization's fibrewise
+`continuousLinearMapAt` applied to the pointwise value `s.toFun x`.  This is the fibre-topology-native
+(`ContinuousLinearMap.topologicalSpace` on the hom fibre) companion of the seminormed-fibre `coord_apply`,
+obtained by unfolding the readout bridge `bilinearFormBundle_coord_eq_trivializationAt_readout_tangent`
+into the on-baseSet linear map `(e ⟨x, ·⟩).2 = continuousLinearMapAt x` (`continuousLinearMapAt_apply` +
+`coe_linearMapAt_of_mem`), so that only `IsLinear`-level (Pretrivialization) API is used — sidestepping
+the `FiberBundle`/fibre-`TopologicalSpace` diamond that blocks the seminormed-track `coord_apply` at
+`BilW`. -/
+theorem coord_apply_tangent
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover s).1 i x
+      = (trivializationAt BilF BilW (x0 i)).continuousLinearMapAt ℝ x.1 (s.toFun x.1) := by
+  have hx : (x : M) ∈ (trivializationAt BilF BilW (x0 i)).baseSet := hKc i x.2
+  haveI hlin : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := E) (W := TM) (x0 i)
+  rw [bilinearFormBundle_coord_eq_trivializationAt_readout_tangent x0 Kc hKc Ko hKo hKoEq hcover s i x]
+  simp only [Trivialization.continuousLinearMapAt_apply,
+    (trivializationAt BilF BilW (x0 i)).coe_linearMapAt_of_mem hx]
+
+/-- **Pointwise additivity of the tangent-bundle continuous section space at the hom fibre topology.**
+`(s + t).toFun x = s.toFun x + t.toFun x` for sections `s t` of the canonical `BilinearFormBundle`
+continuous section space at `W := TangentSpace I`.  Unlike the seminormed-track `add_apply`, whose direct
+use at `BilW` blows the elaborator's `isDefEq` budget on the transported `AddCommGroup`/`BilinearFormBundle`
+fibre diamond, this hom-fibre-topology version routes entirely through the diamond-free coordinate track:
+each section value is recovered from its compact coordinate via the trivialization's linear inverse
+(`coord_apply_tangent` then `symmₗ_linearMapAt`), the coordinate of the sum splits additively
+(`coord_add_apply_topFibre`), and the fibre inverse `symmₗ` is `ℝ`-linear (`map_add`).  Only
+`IsLinear`-level (Pretrivialization) API is used, so no `FiberBundle`/fibre-`TopologicalSpace` diamond is
+triggered.  This is the wall-free pointwise-add companion that lets an affine section-space chart operator
+`A t s = L s + b` be evaluated at a fibre point (`A t s x u v = (L s) x u v + b x u v`), connecting its
+coordinate-level Picard data to a geometric fibre-value identification. -/
+theorem add_apply_tangent
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s t : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (s + t).toFun x = s.toFun x + t.toFun x := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  have hx : x ∈ (trivializationAt BilF BilW (x0 i)).baseSet := hKc i hi
+  haveI hlin : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := E) (W := TM) (x0 i)
+  have hsymm : ∀ (σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover),
+      σ.toFun x = (trivializationAt BilF BilW (x0 i)).symmₗ ℝ x
+        ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover σ).1 i ⟨x, hi⟩) := by
+    intro σ
+    rw [coord_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover σ i ⟨x, hi⟩,
+      Trivialization.continuousLinearMapAt_apply]
+    exact ((trivializationAt BilF BilW (x0 i)).symmₗ_linearMapAt hx (σ.toFun x)).symm
+  rw [hsymm s, hsymm t, hsymm (s + t),
+    coord_add_apply_topFibre s t i ⟨x, hi⟩, map_add]
+
+/-- **The concrete affine frozen geometric Ricci–DeTurck chart operator, evaluated at the metric
+section, reproduces the intrinsic Ricci–DeTurck RHS at the fibre value.**  For the actual CSS-sum
+chart operator `A τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t` (the
+frozen reaction plus the `(-2)•Ric` source, on the concrete tangent `BilinearFormBundle` section space),
+its *pointwise fibre value* at the metric section `⟨(g t).toSection, …⟩` equals the geometric
+`intrinsicRicciDeTurckRHS g background t x u v`.  This is the fibre-value (`x u v`) form of the chart's
+`geometric`/`chartRHS_eq_intrinsic` identification at the center metric — obtained by pushing the CSS sum
+through the just-committed diamond-free pointwise add `add_apply_tangent`
+(`(L s + b) x = (L s) x + b x`), splitting the bilinear sum with `ContinuousLinearMap.add_apply`, and
+closing with the committed scalar identity
+`deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS`.
+Unlike that scalar identity (a bare sum `source x u v + reaction x u v`), this states the identity for the
+genuine `ContinuousSectionSpace`-valued operator the chart field `A` is, so it directly certifies
+`A t (metricSection) x u v = intrinsicRicciDeTurckRHS …` — the `s = metricSection` instance of the chart's
+`geometric` field, previously blocked by the `BilinearFormBundle` CSS-add wall. -/
+theorem deTurckReactionSectionMap_add_source_metricSection_apply_eq_intrinsicRicciDeTurckRHS
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (x : M) (u v : TM x) :
+    (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous
+          ⟨(g t).toSection, (g t).continuous_toSection⟩
+        + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover g t) x u v
+      = RicciFlow.intrinsicRicciDeTurckRHS (I := I) (M := M) g background t x u v := by
+  have hpt : (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous
+          ⟨(g t).toSection, (g t).continuous_toSection⟩
+        + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover g t) x
+      = (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous
+          ⟨(g t).toSection, (g t).continuous_toSection⟩).toFun x
+        + (RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover g t).toFun x :=
+    add_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover _ _ x
+  rw [hpt, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply, add_comm]
+  exact deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS
+    (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+    g background t hbackground x u v
+
+/-- **Fibre-value decomposition of the affine frozen chart operator at an arbitrary state.**  For any
+state section `s`, frozen tangent-endomorphism coefficient `P`, and fixed source section `b`, the affine
+chart operator `A s = deTurckReactionSectionMap P s + b` has the explicit fibre value
+`(A s) x u v = s x (P x u) v + s x (P x v) u + b x u v`.  Obtained by pushing the CSS sum through the
+diamond-free pointwise add `add_apply_tangent`, splitting the bilinear sum with
+`ContinuousLinearMap.add_apply`, and unfolding the reaction fibre value with the raw-`Pi` reaction
+identity `deTurckReactionSectionMap_apply` — entirely wall-free at `BilW`.  This is the general-state
+companion of the metric-section identity above: it gives the chart velocity's fibre value at *every*
+positive-definite section, the shape the chart's `geometric`/`lipschitz` fibre reasoning consumes. -/
+theorem deTurckReactionSectionMap_add_source_apply
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (x : M) (u v : TM x) :
+    (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s + b) x u v
+      = s.toFun x (P x u) v + s.toFun x (P x v) u + b.toFun x u v := by
+  have hpt : (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s + b) x
+      = (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s).toFun x + b.toFun x :=
+    add_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover _ _ x
+  rw [hpt, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
+  simp only [deTurckReactionSectionMap_apply]
+
 /-- **The tangent-bundle DeTurck reaction operator's section-space Picard `hlip` coordinate bound.**
 For the concrete operator `deTurckReactionSectionMap … hP` on the tangent-bundle `BilinearFormBundle`
 continuous section space, the pointwise coordinate readout is Lipschitz-in-state:
@@ -796,5 +960,646 @@ theorem deTurckFrozenGeometric_exists_isPicardLindelof
     (RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
       Kc hKc Ko hKo hKoEq hcover g t)
     σ0 t₀ T₀ hT₀ a ha
+
+/-- **The tangent-bundle DeTurck reaction operator lands in the pointwise symmetric locus.**  By
+`deTurckReactionSectionMap_apply`, `deTurckReactionSectionMap … hP s x u v = s x (P x u) v +
+s x (P x v) u` is manifestly symmetric in `(u, v)` (the two summands merely swap), so the reaction
+operator maps *every* section `s` — symmetric or not — into the symmetric locus.  This is the
+operator-level (set-membership) companion of the pointwise `intrinsicDeTurckCorrectionSectionSpace_symm`
+value symmetry: it is exactly the datum certifying that the reaction summand of the affine chart split
+`A τ s = reaction s + b` keeps the Banach velocity in `symmetricLocus`. -/
+theorem deTurckReactionSectionMap_mem_symmetricLocus
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization BilF
+      (TotalSpace.proj : TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    deTurckReactionSectionMap et Kc hKc Ko hKo hKoEq hcover hP s
+      ∈ symmetricLocus (M := M) (F := E) (W := TM) et Kc hKc Ko hKo hKoEq hcover := by
+  intro x u v
+  simp only [deTurckReactionSectionMap_apply]
+  ring
+
+/-- **The affine DeTurck reaction operator preserves the symmetric locus.**  Adding a symmetric
+source `b` to the reaction value keeps the result symmetric: `deTurckReactionSectionMap … hP s + b`
+lies in the pointwise symmetric locus whenever `b` does.  This is the operator-level statement for the
+whole affine chart split `A τ s = reaction s + b`; combined with symmetry of the concrete `(-2)•Ric`
+source it certifies the geometric Ricci–DeTurck chart velocity is symmetric. -/
+theorem deTurckReactionSectionMap_add_mem_symmetricLocus
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (et : κ → Trivialization BilF
+      (TotalSpace.proj : TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (het : ∀ i, et i = trivializationAt BilF BilW (x0 i))
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover)
+    (hb : b ∈ symmetricLocus (M := M) (F := E) (W := TM) et Kc hKc Ko hKo hKoEq hcover)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    (deTurckReactionSectionMap et Kc hKc Ko hKo hKoEq hcover hP s + b)
+      ∈ symmetricLocus (M := M) (F := E) (W := TM) et Kc hKc Ko hKo hKoEq hcover := by
+  have hr := deTurckReactionSectionMap_mem_symmetricLocus
+    et Kc hKc Ko hKo hKoEq hcover hP s
+  rw [← mem_symmetricSectionSubmodule_iff x0 et het Kc hKc Ko hKo hKoEq hcover] at hr hb ⊢
+  exact add_mem hr hb
+
+/-- **The concrete geometric frozen Ricci–DeTurck chart operator lands in the symmetric locus.**
+For every section `s`, the frozen geometric operator value
+`A s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t` — the operator whose
+`IsPicardLindelof` is `deTurckFrozenGeometric_exists_isPicardLindelof` — lies in the pointwise
+symmetric locus.  The `∇W` reaction summand is symmetric unconditionally
+(`deTurckReactionSectionMap_mem_symmetricLocus`) and the principal `(-2)•Ric` source is symmetric by
+`intrinsicRicciFlowRHSSectionSpace_symm`.  This is the direct (frozen-operator) analogue of
+`TimeDependentGeometricRicciDeTurckBanachChart.A_mem_symmetricLocus`, established here without routing
+through the chart's `geometric` identification field: it certifies that the Banach evolution velocity
+of the geometric chart operator is symmetric, so its solution curve stays a symmetric metric family. -/
+theorem deTurckFrozenGeometric_A_mem_symmetricLocus
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover) :
+    (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+        Kc hKc Ko hKo hKoEq hcover
+        (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+          g background t hbackground).continuous s
+      + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover g t)
+      ∈ symmetricLocus (M := M) (F := E) (W := TM)
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover :=
+  deTurckReactionSectionMap_add_mem_symmetricLocus
+    xc (fun i => trivializationAt BilF BilW (xc i)) (fun _ => rfl) Kc hKc Ko hKo hKoEq hcover
+    (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+      g background t hbackground).continuous
+    (RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+      Kc hKc Ko hKo hKoEq hcover g t)
+    (fun x u v => RicciFlow.intrinsicRicciFlowRHSSectionSpace_symm
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover g t x u v)
+    s
+
+/-- **The geometric frozen Ricci–DeTurck chart operator has vanishing coordinatewise symmetry
+defect.**  The `coordwiseSymmetryDefectContinuousLinearMap` form of
+`deTurckFrozenGeometric_A_mem_symmetricLocus`, obtained through
+`coordwiseSymmetryDefectContinuousLinearMap_eq_zero_iff`: the transported coordinatewise
+antisymmetric-defect readout of the frozen geometric operator value vanishes.  This is the direct
+(frozen-operator) analogue of
+`TimeDependentGeometricRicciDeTurckBanachChart.A_coordwiseSymmetryDefect_eq_zero` — the defect-zero
+datum the symmetric-carrier / interval-defect chart machinery consumes — obtained here without the
+chart's `geometric` identification field. -/
+theorem deTurckFrozenGeometric_A_coordwiseSymmetryDefect_eq_zero
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover) :
+    coordwiseSymmetryDefectContinuousLinearMap (F := E) (V := BilW)
+        (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover
+        (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+            Kc hKc Ko hKo hKoEq hcover
+            (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+              g background t hbackground).continuous s
+          + RicciFlow.intrinsicRicciFlowRHSSectionSpace
+              (fun i => trivializationAt BilF BilW (xc i))
+              Kc hKc Ko hKo hKoEq hcover g t) = 0 :=
+  (coordwiseSymmetryDefectContinuousLinearMap_eq_zero_iff
+    (M := M) (F := E) (W := TM)
+    xc (fun i => trivializationAt BilF BilW (xc i)) (fun _ => rfl)
+    Kc hKc Ko hKo hKoEq hcover
+    (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+        Kc hKc Ko hKo hKoEq hcover
+        (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+          g background t hbackground).continuous s
+      + RicciFlow.intrinsicRicciFlowRHSSectionSpace
+          (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover g t)).2
+    (deTurckFrozenGeometric_A_mem_symmetricLocus
+      xc Kc hKc Ko hKo hKoEq hcover g background t hbackground s)
+
+/-- **The frozen geometric Ricci–DeTurck operator's Banach evolution solution stays in the symmetric
+positive-definite locus.**  Strengthening
+`deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_positiveDefiniteLocus` with a *symmetric*
+conclusion: the concrete frozen geometric operator
+`A τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t`, whose
+`IsPicardLindelof` datum is `deTurckFrozenGeometric_exists_isPicardLindelof` and whose uniform Lipschitz
+control is `deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordinates`, admits a
+Banach evolution local solution — anchored at the metric section `g₀.toSection` of a genuine continuous
+Riemannian metric `g₀`, constrained to the positive-definite locus, forward-unique on the overlap of
+Picard intervals — whose curve additionally stays in the *symmetric* positive-definite locus at every
+time of its interval.  The symmetric containment is obtained WITHOUT the chart's `geometric`
+identification field: it is fed purely by the frozen operator's velocity symmetry
+`deTurckFrozenGeometric_A_mem_symmetricLocus` (`A τ s ∈ symmetricLocus` for every section `s`) through
+the ODE symmetric-carrier invariance
+`exists_unique_in_symmetricPositiveDefiniteLocus_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn`
+(the coordinatewise antisymmetric defect satisfies the same linear ODE, starts at `0` since `g₀` is
+symmetric, hence stays `0`).  This certifies the frozen geometric Banach solution curve is a genuine
+symmetric-positive-definite metric family — the realization-side consistency datum a `RicciDeTurckChart`
+closure needs for its `sol` to decode into an intrinsic metric evolution — available independently of
+the `geometric`/`realization` parabolic reconciliation. -/
+theorem deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_symmetricPositiveDefiniteLocus
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ] [Nontrivial E]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (g₀ : _root_.Bundle.ContinuousRiemannianMetric E TM)
+    (t₀ T₀ : ℝ) (hT₀ : t₀ < T₀) :
+    ∃ sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn
+        (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous s
+          + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+              Kc hKc Ko hKo hKoEq hcover g t)
+        (positiveDefiniteLocus (M := M) (F := E) (W := TM)
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+        t₀ ⟨g₀.toSection, g₀.continuous_toSection⟩,
+      (∀ sol' : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn
+          (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+            Kc hKc Ko hKo hKoEq hcover
+            (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+              g background t hbackground).continuous s
+            + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+                Kc hKc Ko hKo hKoEq hcover g t)
+          (positiveDefiniteLocus (M := M) (F := E) (W := TM)
+            (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+          t₀ ⟨g₀.toSection, g₀.continuous_toSection⟩,
+        Set.EqOn sol.curve sol'.curve
+          (Set.Icc t₀ (min sol.terminalTime sol'.terminalTime))) ∧
+      ∀ ⦃τ : ℝ⦄, τ ∈ Set.Icc t₀ sol.terminalTime →
+        sol.curve τ ∈ symmetricPositiveDefiniteLocus (M := M) (F := E) (W := TM)
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover := by
+  have hKcTM : ∀ i, (Kc i : Set M) ⊆ (trivializationAt (E →L[ℝ] E) THom (xc i)).baseSet := by
+    intro i x hx
+    have hxi := hKc i hx
+    simpa using hxi
+  obtain ⟨Kp', hKp'0, hKp'b⟩ := exists_uniform_inCoord_bound xc Kc hKcTM
+    (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+      g background t hbackground).continuous
+  obtain ⟨Kp, T, hT, Mc, hPL⟩ := deTurckFrozenGeometric_exists_isPicardLindelof
+    xc Kc hKc Ko hKo hKoEq hcover g background t hbackground
+    ⟨g₀.toSection, g₀.continuous_toSection⟩ t₀ T₀ hT₀ 1 (by norm_num)
+  exact RicciFlow.AnalyticPDE.MetricLocusEvolution.exists_unique_in_symmetricPositiveDefiniteLocus_of_symmetricTimeDependentVectorField_isPicardLindelof_lipschitzOn
+    (M := M) (F := E) (W := TM)
+    xc (fun i => trivializationAt BilF BilW (xc i)) (fun _ => rfl)
+    Kc hKc Ko hKo hKoEq hcover inferInstance hT hPL
+    (mem_symmetricPositiveDefiniteLocus_of_continuousRiemannianMetric
+      (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover g₀)
+    (fun _ => deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordinates
+      xc Kc hKc Ko hKo hKoEq hcover
+      (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+        g background t hbackground).continuous Kp' hKp'0 hKp'b
+      (RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+        Kc hKc Ko hKo hKoEq hcover g t)
+      (positiveDefiniteLocus (M := M) (F := E) (W := TM)
+        (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover))
+    (fun _ s _ => deTurckFrozenGeometric_A_mem_symmetricLocus
+      xc Kc hKc Ko hKo hKoEq hcover g background t hbackground s)
+
+/-- **The frozen geometric Ricci–DeTurck Banach solution stays symmetric positive-definite, in the
+IVP vocabulary the chart-closure `realization` field consumes.**  The initial-value-problem
+specialisation of
+`deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_symmetricPositiveDefiniteLocus`
+obtained with `g₀ := ivp.initialMetric.toContinuousRiemannianMetric` and `t₀ := ivp.initialTime`: since
+`InitialValueProblem.toContinuousSectionSpace … ivp` is by definition
+`⟨ivp.initialMetric.toContinuousRiemannianMetric.toSection, …⟩`, the produced solution is anchored
+exactly at the IVP's initial section, on the IVP's initial time, constrained to the positive-definite
+locus, forward-unique, and — the new content — its curve stays in the *symmetric* positive-definite
+locus at every time of its interval.  This is *precisely* the shape of the `sol` argument the
+chart-closure `realization` field consumes
+(`BanachEvolutionLocalSolutionIn chart.A (positiveDefiniteLocus …) ivp.initialTime
+(InitialValueProblem.toContinuousSectionSpace … ivp)`), now additionally certified to trace a
+symmetric-positive-definite metric family — modulo the identification of the frozen geometric operator
+with the chart's `A`.  The symmetric containment is fed purely by the frozen operator's velocity
+symmetry (`deTurckFrozenGeometric_A_mem_symmetricLocus`), independent of the chart's `geometric`
+identification field. -/
+theorem deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_symmetricPositiveDefiniteLocus_ivp
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    {κ : Type*} [Finite κ] [Nontrivial E]
+    (xc : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (xc i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : RicciFlow.MetricFamily (I := I) (M := M))
+    (background : RicciFlow.ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (ivp : RicciFlow.InitialValueProblem (E := E) (H := H) (I := I) (M := M))
+    (T₀ : ℝ) (hT₀ : ivp.initialTime < T₀) :
+    ∃ sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn
+        (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+          Kc hKc Ko hKo hKoEq hcover
+          (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background t hbackground).continuous s
+          + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+              Kc hKc Ko hKo hKoEq hcover g t)
+        (positiveDefiniteLocus (M := M) (F := E) (W := TM)
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+        ivp.initialTime
+        (RicciFlow.AnalyticPDE.MetricLocusEvolution.InitialValueProblem.toContinuousSectionSpace
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover ivp),
+      (∀ sol' : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn
+          (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (xc i))
+            Kc hKc Ko hKo hKoEq hcover
+            (RicciFlow.intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+              g background t hbackground).continuous s
+            + RicciFlow.intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (xc i))
+                Kc hKc Ko hKo hKoEq hcover g t)
+          (positiveDefiniteLocus (M := M) (F := E) (W := TM)
+            (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover)
+          ivp.initialTime
+          (RicciFlow.AnalyticPDE.MetricLocusEvolution.InitialValueProblem.toContinuousSectionSpace
+            (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover ivp),
+        Set.EqOn sol.curve sol'.curve
+          (Set.Icc ivp.initialTime (min sol.terminalTime sol'.terminalTime))) ∧
+      ∀ ⦃τ : ℝ⦄, τ ∈ Set.Icc ivp.initialTime sol.terminalTime →
+        sol.curve τ ∈ symmetricPositiveDefiniteLocus (M := M) (F := E) (W := TM)
+          (fun i => trivializationAt BilF BilW (xc i)) Kc hKc Ko hKo hKoEq hcover :=
+  deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn_symmetricPositiveDefiniteLocus
+    xc Kc hKc Ko hKo hKoEq hcover g background t hbackground
+    ivp.initialMetric.toContinuousRiemannianMetric ivp.initialTime T₀ hT₀
+
+/-! ### Linearity of the frozen-coefficient DeTurck reaction operator (raw-function level)
+
+The frozen (coefficient-frozen) DeTurck reaction operator `deTurckReactionSectionMap … hP`, whose
+pointwise action `s x u v = s x (P x u) v + s x (P x v) u` is manifestly **linear** in the section `s`,
+is the bounded-linear generator whose autonomous resolvent `exp ((t - t₀) • ·)`
+(`AutonomousResolventExp`) is intended to supply the `SmoothMetricSectionCurveData.contMDiff`
+realization field of the frozen geometric chart.
+
+This section establishes the **raw-function-level linearity** of the underlying map
+`bilinearFormSectionDeTurckReaction` (`bilinearFormSectionDeTurckReaction_add`/`_smul`), proved at the
+canonical `BilinearFormBundle` fibre (fibre-diamond-free), together with the definitional bridge
+`deTurckReactionSectionMap_toFun` from the operator to that raw map.  These are the wall-free ingredients
+of the section-space `map_add'`/`map_smul'` linear packaging; the final packaging as a
+`ContinuousLinearMap` additionally requires transporting these through the `ContinuousSectionSpace`
+add/smul, which meets the `BilinearFormBundle` concreteness whnf wall on the *reaction sections* and is
+the remaining obstruction to the bundled `CSS →L[ℝ] CSS` generator. -/
+
+/-- **The raw (Pi-function-level) DeTurck reaction is additive in the section function.**  Proved at the
+canonical `BilinearFormBundle` fibre `BilW x = TM x →L[ℝ] TM x →L[ℝ] ℝ` (standard `ContinuousLinearMap`
+instances, *not* the transported section-space add), so `ContinuousLinearMap.add_apply` and `Pi.add_apply`
+reduce it to the scalar rearrangement `add_add_add_comm`.  This is the fibre-diamond-free core of the
+section-map additivity: it avoids the `ContinuousSectionSpace` transported-add whnf wall by working on the
+underlying `Π x, BilW x` function. -/
+theorem bilinearFormSectionDeTurckReaction_add
+    (f g : Π x : M, BilW x)
+    (P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) :
+    RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) (f + g) P
+      = RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) f P
+        + RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) g P := by
+  funext x
+  refine ContinuousLinearMap.ext fun u => ContinuousLinearMap.ext fun v => ?_
+  simp only [Pi.add_apply, RicciFlow.bilinearFormSectionDeTurckReaction_apply,
+    ContinuousLinearMap.add_apply]
+  exact add_add_add_comm _ _ _ _
+
+/-- **The raw (Pi-function-level) DeTurck reaction is homogeneous in the section function.**  Companion of
+`bilinearFormSectionDeTurckReaction_add`; proved at the canonical fibre so `ContinuousLinearMap.smul_apply`
+and `Pi.smul_apply` reduce it to `smul_add`, avoiding the transported section-space smul. -/
+theorem bilinearFormSectionDeTurckReaction_smul
+    (c : ℝ) (f : Π x : M, BilW x)
+    (P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) :
+    RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) (c • f) P
+      = c • RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) f P := by
+  funext x
+  refine ContinuousLinearMap.ext fun u => ContinuousLinearMap.ext fun v => ?_
+  simp only [Pi.smul_apply, RicciFlow.bilinearFormSectionDeTurckReaction_apply,
+    ContinuousLinearMap.smul_apply]
+  exact (smul_add c _ _).symm
+
+/-- The underlying section function of the frozen DeTurck reaction operator is the raw
+`bilinearFormSectionDeTurckReaction`; definitional, used to bridge the operator to the raw
+Pi-function-level additivity/homogeneity lemmas. -/
+@[simp] theorem deTurckReactionSectionMap_toFun
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization BilF
+      (TotalSpace.proj : TotalSpace BilF BilW → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      et Kc hKc Ko hKo hKoEq hcover) :
+    (deTurckReactionSectionMap et Kc hKc Ko hKo hKoEq hcover hP s).toFun
+      = RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) s.toFun P :=
+  rfl
+
+/-- **CSS-level additivity of the frozen tangent-bundle DeTurck reaction operator.**  The concrete
+section-space DeTurck reaction map `deTurckReactionSectionMap … hP` is additive as a map of
+`ContinuousSectionSpace`s: `A (s + t) = A s + A t`.  Proved wall-free at `W := TangentSpace I` by
+reducing to the raw-`Pi` reaction additivity `bilinearFormSectionDeTurckReaction_add` after splitting
+both the input sum `(s + t).toFun` and the output sum `(A s + A t).toFun` through the diamond-free
+pointwise add `add_apply_tangent` (which avoids the seminormed-track `add_apply`'s `BilinearFormBundle`
+fibre `isDefEq` timeout).  This is the additivity half of the bounded-linear packaging of the frozen
+reaction operator (`CSS →L[ℝ] CSS`) that feeds the autonomous resolvent. -/
+theorem deTurckReactionSectionMap_map_add
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s t : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP (s + t)
+      = deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s
+        + deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP t := by
+  refine ContinuousSectionSpace.ext (fun x => ?_)
+  rw [add_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover
+      (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s)
+      (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP t) x]
+  simp only [deTurckReactionSectionMap_toFun]
+  rw [show (s + t).toFun = s.toFun + t.toFun from
+      funext (add_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover s t),
+    bilinearFormSectionDeTurckReaction_add]
+  rfl
+
+/-- **Pointwise homogeneity of the tangent-bundle continuous section space at the hom fibre topology.**
+`(c • s).toFun x = c • s.toFun x` for a scalar `c` and a section `s` of the canonical
+`BilinearFormBundle` continuous section space at `W := TangentSpace I`.  The scalar companion of
+`add_apply_tangent`: same wall-free coordinate route (recover each section value from its compact
+coordinate via the trivialization's linear inverse `symmₗ`, split the coordinate of `c • s`
+homogeneously through the compact-coordinate `ContinuousLinearMap`'s `map_smul`, then use that `symmₗ`
+is `ℝ`-linear), touching only `IsLinear`-level (Pretrivialization) API so the
+`FiberBundle`/fibre-`TopologicalSpace` diamond is never triggered. -/
+theorem smul_apply_tangent
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (c : ℝ)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (c • s).toFun x = c • s.toFun x := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  have hx : x ∈ (trivializationAt BilF BilW (x0 i)).baseSet := hKc i hi
+  haveI hlin : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := E) (W := TM) (x0 i)
+  have hsymm : ∀ (σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover),
+      σ.toFun x = (trivializationAt BilF BilW (x0 i)).symmₗ ℝ x
+        ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover σ).1 i ⟨x, hi⟩) := by
+    intro σ
+    rw [coord_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover σ i ⟨x, hi⟩,
+      Trivialization.continuousLinearMapAt_apply]
+    exact ((trivializationAt BilF BilW (x0 i)).symmₗ_linearMapAt hx (σ.toFun x)).symm
+  have hcoord : (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover (c • s)).1 i ⟨x, hi⟩
+      = c • (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover s).1 i ⟨x, hi⟩ := by
+    have he : equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover (c • s)
+        = c • equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover s := by
+      rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover,
+        ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover (s := s),
+        map_smul]
+    rw [he]
+    simp only [SetLike.val_smul, Pi.smul_apply, ContinuousMap.smul_apply]
+  rw [hsymm s, hsymm (c • s), hcoord, map_smul]
+
+/-- **CSS-level homogeneity of the frozen tangent-bundle DeTurck reaction operator.**  Companion of
+`deTurckReactionSectionMap_map_add`: the concrete section-space DeTurck reaction map is homogeneous as a
+map of `ContinuousSectionSpace`s, `A (c • s) = c • A s`.  Same wall-free strategy — reduce to the
+raw-`Pi` reaction homogeneity `bilinearFormSectionDeTurckReaction_smul` after splitting both the input
+`(c • s).toFun` and the output `(c • A s).toFun` through the diamond-free pointwise smul
+`smul_apply_tangent`.  With `deTurckReactionSectionMap_map_add` this is the linear-map data for packaging
+the frozen reaction operator as a bounded `CSS →L[ℝ] CSS`. -/
+theorem deTurckReactionSectionMap_map_smul
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (c : ℝ)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP (c • s)
+      = c • deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s := by
+  refine ContinuousSectionSpace.ext (fun x => ?_)
+  rw [smul_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover c
+      (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s) x]
+  simp only [deTurckReactionSectionMap_toFun]
+  rw [show (c • s).toFun = c • s.toFun from
+      funext (smul_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover c s),
+    bilinearFormSectionDeTurckReaction_smul]
+  rfl
+
+/-- **The frozen tangent-bundle DeTurck reaction operator bundled as a bounded linear map
+`CSS →L[ℝ] CSS`.**  Packages the raw section-space reaction self-map `deTurckReactionSectionMap … hP`
+into a `ContinuousLinearMap`: its additivity/homogeneity are the just-committed
+`deTurckReactionSectionMap_map_add`/`deTurckReactionSectionMap_map_smul`, and its continuity is
+UNCONDITIONAL — the uniform inCoordinates bound `exists_uniform_inCoord_bound` (from continuity of the
+frozen coefficient `P` on the compact cover) feeds the global Lipschitz bound
+`deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates`, whose `.continuous` discharges the
+`cont` field with no `Kp` hypothesis.  This is the bounded-linear operator consumed by the autonomous
+resolvent `exp((t - t₀) • ·)` for the frozen (linear-part) Ricci–DeTurck evolution. -/
+noncomputable def deTurckReactionSectionMapL
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x))) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+      →L[ℝ] ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover where
+  toFun := deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+    Kc hKc Ko hKo hKoEq hcover hP
+  map_add' := deTurckReactionSectionMap_map_add x0 Kc hKc Ko hKo hKoEq hcover hP
+  map_smul' := deTurckReactionSectionMap_map_smul x0 Kc hKc Ko hKo hKoEq hcover hP
+  cont := by
+    obtain ⟨Kp, hKp0, hKpb⟩ :=
+      exists_uniform_inCoord_bound x0 Kc (fun i x hx => by simpa using hKc i hx) hP
+    exact (deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates
+      x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKpb).continuous
+
+/-- The bounded-linear packaging `deTurckReactionSectionMapL` applies as the raw reaction self-map. -/
+@[simp] theorem deTurckReactionSectionMapL_apply
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    deTurckReactionSectionMapL x0 Kc hKc Ko hKo hKoEq hcover hP s
+      = deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s :=
+  rfl
+
+/-- **Operator-norm bound `‖deTurckReactionSectionMapL‖ ≤ 2·Kp` for the frozen geometric DeTurck
+reaction as a bounded linear map.**  The genuine operator-norm control of the *real* (geometric,
+non-model) zeroth-order Ricci–DeTurck reaction generator on the `BilinearFormBundle` continuous section
+space: from a uniform bound `Kp` on the model-fibre readout of the frozen tangent-endomorphism
+coefficient `P` over the finite compact cover, the bounded-linear reaction map has operator norm at most
+`2·Kp`.  Obtained from its global `LipschitzWith ⟨2·Kp, _⟩`
+(`deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates`) evaluated against the origin
+(`map_zero`), fed to `ContinuousLinearMap.opNorm_le_bound`.  This is the operator-norm growth constant a
+mild/semigroup formulation consumes to bound the affine resolvent `exp(τ·L)` of the frozen chart split
+`A τ s = L s + b` — a coordinate/operator bound for the honest geometric reaction operator, not a model
+heat-kernel estimate. -/
+theorem deTurckReactionSectionMapL_opNorm_le
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (Kp : ℝ) (hKp0 : 0 ≤ Kp)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp) :
+    ‖deTurckReactionSectionMapL x0 Kc hKc Ko hKo hKoEq hcover hP‖ ≤ 2 * Kp := by
+  have hlip := deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates
+    x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKp
+  refine ContinuousLinearMap.opNorm_le_bound _ (by positivity) (fun s => ?_)
+  have h0 : deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover hP 0 = 0 :=
+    (deTurckReactionSectionMapL x0 Kc hKc Ko hKo hKoEq hcover hP).map_zero
+  rw [deTurckReactionSectionMapL_apply]
+  calc ‖deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s‖
+      = dist (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s)
+          (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP 0) := by rw [h0]; exact (dist_zero_right _).symm
+    _ ≤ 2 * Kp * dist s 0 := by simpa using hlip.dist_le_mul s 0
+    _ = 2 * Kp * ‖s‖ := congrArg (fun t => 2 * Kp * t) (dist_zero_right s)
+
+/-- **Whole-section growth bound `‖A σ‖ ≤ 2·Kp·‖σ‖ + ‖b‖` for the affine frozen geometric DeTurck
+chart operator `A σ = deTurckReactionSectionMap ∇W σ + b`.**  The continuous-section-space-norm (not
+per-coordinate) growth/centre bound of the *real* geometric chart operator: the linear reaction part is
+controlled by its operator norm `‖deTurckReactionSectionMapL ∇W‖ ≤ 2·Kp`
+(`deTurckReactionSectionMapL_opNorm_le`, via `ContinuousLinearMap.le_opNorm`), and the fixed source `b`
+adds at most `‖b‖` through the triangle inequality `norm_add_le`.  Evaluated at `σ = σ0` this is exactly
+the `Mc = 2·Kp·‖σ0‖ + ‖b‖` centre-size shape the section-space Picard/mild estimates consume — the honest
+geometric operator's growth bound in clean whole-section-norm form, complementing the per-coordinate
+`bilinearDerivationFieldLinearMap_add_source_coord_norm_le`. -/
+theorem deTurckReactionSectionMap_add_source_norm_le
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (Kp : ℝ) (hKp0 : 0 ≤ Kp)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp)
+    (b σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    ‖deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP σ + b‖ ≤ 2 * Kp * ‖σ‖ + ‖b‖ := by
+  have hop := deTurckReactionSectionMapL_opNorm_le
+    x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKp
+  have hL : ‖deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover hP σ‖ ≤ 2 * Kp * ‖σ‖ := by
+    rw [← deTurckReactionSectionMapL_apply]
+    exact (ContinuousLinearMap.le_opNorm _ _).trans
+      (mul_le_mul_of_nonneg_right hop (norm_nonneg _))
+  calc ‖deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP σ + b‖
+      ≤ ‖deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP σ‖ + ‖b‖ := norm_add_le _ _
+    _ ≤ 2 * Kp * ‖σ‖ + ‖b‖ := by linarith [hL]
 
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace

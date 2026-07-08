@@ -288,4 +288,80 @@ theorem deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq
       et Kc hKc Ko hKo hKoEq hcover g background t hbackground x u v,
     intrinsicRicciFlowRHSSectionSpace_apply, intrinsicRicciDeTurckRHS_apply]
 
+/-- **On a Levi–Civita background the tangent-bundle DeTurck reaction operator annihilates the metric
+section.**  When the fixed background connection is the Levi–Civita connection of the evolving metric
+`g` (`IsLeviCivita g background`), the intrinsic DeTurck vector field vanishes, so the geometric DeTurck
+correction is zero (`intrinsicDeTurckCorrection_eq_zero_of_isLeviCivita`); combined with the center-point
+identification `deTurckReactionSectionMap_metricSection_apply_eq_intrinsicDeTurckCorrection`, the concrete
+fiber-norm-free tangent-bundle reaction operator `deTurckReactionSectionMap` at the frozen coefficient
+`∇W` contributes nothing on the metric state.  This is the operator-level Levi–Civita (self-DeTurck)
+reduction: in the metric's own Levi–Civita gauge the reaction half of the chart operator `A` drops out. -/
+theorem deTurckReactionSectionMap_metricSection_apply_eq_zero_of_isLeviCivita
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (hLeviCivita : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    (x : M) (u v : TM x) :
+    deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover
+        (intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+          (I := I) (M := M) g background t hbackground).continuous
+        ⟨(g t).toSection, (g t).continuous_toSection⟩ x u v
+      = 0 := by
+  rw [deTurckReactionSectionMap_metricSection_apply_eq_intrinsicDeTurckCorrection
+      et Kc hKc Ko hKo hKoEq hcover g background t hbackground x u v]
+  simpa using congrArg (fun F => F t x u v)
+    (intrinsicDeTurckCorrection_eq_zero_of_isLeviCivita (I := I) (M := M) g background hLeviCivita)
+
+/-- **On a Levi–Civita background the affine tangent-bundle chart operator, evaluated at the metric
+section, is the pure intrinsic Ricci-flow right-hand side.**  Summing the second-order Ricci-flow
+principal source `intrinsicRicciFlowRHSSectionSpace g t` with the tangent-bundle DeTurck reaction
+`deTurckReactionSectionMap` at the frozen coefficient `∇W`, evaluated on the metric state, reproduces
+`intrinsicRicciDeTurckRHS g background`
+(`deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS`),
+which on a Levi–Civita background collapses to `intrinsicRicciFlowRHS g`
+(`intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita`) — the flowing metric's DeTurck term
+vanishes in its own Levi–Civita gauge.  This is the concrete operator-level form of the chart-closure
+`chartRHS_eq_intrinsic` reduction: in the chosen Levi–Civita gauge the chart operator `A` on the metric
+state is exactly the geometric Ricci-flow right-hand side. -/
+theorem deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+    {κ : Type*} [Finite κ]
+    (et : κ → Trivialization (E →L[ℝ] E →L[ℝ] ℝ)
+      (TotalSpace.proj :
+        TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) (_root_.Bundle.BilinearFormBundle (V := TM)) → M))
+    [∀ i, MemTrivializationAtlas (et i)]
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (et i).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M)) (t : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background t) 1)
+    (hLeviCivita : CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita
+      (I := I) (M := M) g background)
+    (x : M) (u v : TM x) :
+    intrinsicRicciFlowRHSSectionSpace et Kc hKc Ko hKo hKoEq hcover g t x u v
+      + deTurckReactionSectionMap (I := I) (M := M) et Kc hKc Ko hKo hKoEq hcover
+          (intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            (I := I) (M := M) g background t hbackground).continuous
+          ⟨(g t).toSection, (g t).continuous_toSection⟩ x u v
+      = intrinsicRicciFlowRHS (I := I) (M := M) g t x u v := by
+  rw [deTurckReactionSectionMap_metricSection_add_ricciFlowRHSSection_apply_eq_intrinsicRicciDeTurckRHS
+      et Kc hKc Ko hKo hKoEq hcover g background t hbackground x u v]
+  exact congrArg (fun F => F t x u v)
+    (intrinsicRicciDeTurckRHS_eq_intrinsicRicciFlowRHS_of_isLeviCivita
+      (I := I) (M := M) g background hLeviCivita)
+
 end RicciFlow
+
