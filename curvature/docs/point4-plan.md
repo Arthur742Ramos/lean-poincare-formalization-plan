@@ -2909,3 +2909,54 @@ build the per-point `h`-package producer for the abstract flow (Φ-side via
 sub-window, then re-anchor to a symmetric sub-window and apply
 `exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow` — a new final GAP-1 theorem for a `C^N` field.
 The Item-3 geometric chart (`A`/`picard`/Schauder) remains the independent long pole.
+
+### Progress (2026-07-08, later 14) — Item 2 GAP 1: the "new final GAP-1 theorem" the later-13 window-obstruction called for — a three-rung ladder of sub-window gauge-flow existence capstones (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Later-13 pinned the exact GAP-1 obstruction: every confinement-based slice-`C³` route anchors its model
+comparison flow at `0` and confines the orbit over the whole span `[0, t]`, so it delivers
+`ContMDiff I I 3 (Φ t)` / `ContMDiff I I 3 (G t)` only on a **sub-window** `Ioo (-δ) δ` (the uniform
+chart-exit time over the finite cover), never on the full inverse-supplier lifespan `Ioo (-ε) ε`.  Hence
+the closure "cannot go through `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`, whose
+proof fixes `hslicesC3` at the full `ε`; it needs a **new** final theorem producing forward+backward
+slice-`C³` on a common sub-window and applying `exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow`
+at that sub-window."  This session builds exactly that new final theorem — as a clean three-rung ladder
+in `GaugeReduction/GaugeFlowAssembly.lean` (the small/fast assembly file, not the heavy
+ModelManifoldGaugeFlow), each rung a thin, safe reduction to the previous.  All additive, sorry-free,
+axiom-clean.
+
+* **`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3`** — the base rung: verbatim
+  `..._of_compact_of_flowSlicesC3` except `hslicesC3` is asked only to produce **some** `0 < δ ≤ ε` on
+  whose symmetric window `Ioo (-δ) δ` *both* slices are `C³`.  Since the final datum is returned as
+  `∃ ε > 0`, a symmetric sub-window suffices: the mutual-inverse / anchoring data restrict from
+  `Ioo (-ε) ε` to `Ioo (-δ) δ` by `fun t ht => hleft t (hsub ht)` etc., the ODE via
+  `HasMFDerivWithinAt.mono`, and `exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow` is applied at
+  `δ`.  This is the theorem later-13 named.
+* **`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3_indep`** — forward slice `Φ t`
+  and backward slice `G t` are allowed `C³` on **different** sub-windows `Ioo (-δ₁) δ₁` / `Ioo (-δ₂) δ₂`,
+  matching the honest two-route structure: forward `C³` from the finite-cover field-jet capstone, backward
+  `C³` from the cutoff-orbit-control route, each with its own uniform chart-exit sub-window and no a-priori
+  common size.  Reduces to the base rung via `δ := min δ₁ δ₂`.
+* **`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3`** — forward/backward `C³`
+  supplied on **asymmetric** windows `Ioo c d ∋ 0` — *exactly* the conclusion shape of the finite-cover
+  forward producer `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip_of_flow`
+  (`∃ c d, 0 ∈ Ioo c d ∧ ∀ t ∈ Ioo c d, ContMDiff I I 3 (Φ t)`) and its backward counterpart, which never
+  return symmetric windows.  Each is symmetrised internally to `Ioo (-δ) δ`, `δ := min (min (-c) d) ε`,
+  and handed to the `_indep` rung — so a caller feeds raw producer outputs with **no** window bookkeeping.
+
+**Fractions of GAP 1.**  The final-assembly obstruction is now **closed**: the sub-window / asymmetric
+gauge-flow capstones consume the confinement routes' native sub-window output directly.  The remaining
+GAP-1 content is purely the **per-point cutoff-orbit-control `h`-package producer** (Φ-side faces and the
+finite-cover forward producer both available from later-13; still to assemble the model-side
+`G`/`Kwin`/graph-confinement + anchor + tube-Lipschitz for the abstract flow and quantify the paired
+capstone `contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_subset` over `t`).
+**NEXT:** produce the per-point `h`-package on a sub-window (Φ-side via
+`..._extChartAt_source_and_mem_of_flow`; model-side via `exists_diffeomorph3GaugeFlowOn_Ioo_cutoff_eqOne_and_state_mem`
++ `exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith` + anchor `extChartAt_flow_eq_maps3_at_zero`),
+feed the paired capstone quantified over `t ∈` the sub-window to get
+`(∃ c d, 0 ∈ Ioo c d ∧ ∀ t ∈ Ioo c d, ContMDiff (Φ t) ∧ ContMDiff (G t))`, then apply
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3` — inhabiting
+`Diffeomorph3GaugeFlowOn` unconditionally.  The Item-3 geometric chart (`A`/`picard`/Schauder) remains
+the independent long pole; ground-truth this session re-confirmed the chart's `geometric` field (exact
+2nd-order `intrinsicRicciDeTurckRHS` identity for arbitrary continuous `s`) is incompatible with its
+`picard` (Lipschitz/bounded on the `C⁰` section space) for any single operator — the mild/regularised
+reformulation is the genuine unsolved core there.
