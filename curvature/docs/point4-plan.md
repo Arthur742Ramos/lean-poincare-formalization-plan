@@ -2461,3 +2461,32 @@ arguments (the remaining inputs are a `SmoothMetricSectionCurveData` realizing t
 `chartRHS_eq_intrinsic` identity at the metric section, already available via
 `deTurckReactionSectionMap_add_source_metricSection_apply_eq_intrinsicRicciDeTurckRHS`) — OR the long pole:
 supply the chart's `geometric` field for general `s`.
+
+### Item 3 (GAP 2) later-43 — the frozen chart's SCALAR TIME-REGULARITY sub-obligation is COMPLETE (first-order + all-order), pushing the wall-free `ContDiffOn`/`ContDiff` curves through `sectionScalarEvalCLM` (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-42 supplied the first-order endpoint scalar `HasDerivAt` of the frozen geometric evolution.  This
+session lifts that to **full time-smoothness** of the scalar section-curves, in `FrozenChartAffineEvolution.lean`
+(additive, axiom-clean, diamond-free — reusing the committed `sectionScalarEvalCLM : CSS →L[ℝ] ℝ`):
+
+* **`contDiffOn_scalarEval_banachEvolution_of_frozen`** (+ **`_frozenGeometric`**) — for ANY Banach
+  evolution `sol` of the frozen field, `τ ↦ sol.curve τ x u v` is `ContDiffOn ℝ n` on
+  `Icc t₀ sol.terminalTime`, via `(sectionScalarEvalCLM …).contDiff.comp_contDiffOn` of the wall-free
+  curve regularity `banachEvolution_curve_contDiffOn_of_frozen`.  The all-order strengthening of the
+  interior first-order `hasDerivAt_scalarEval_banachEvolution_of_mem_Ioo`.
+* **`contDiff_scalarEval_deTurckFrozenGeometricAffineEvolution`** — for the EXPLICIT geometric affine
+  evolution, `τ ↦ evolution τ x u v` is `ContDiff ℝ n` on **all of ℝ** (`.contDiff.comp` of the global
+  `contDiff_deTurckFrozenGeometricAffineEvolution`).  The all-order companion of the first-order endpoint
+  `hasDerivAt_scalarEval_deTurckFrozenGeometricAffineEvolution` — exactly the spatial-curve datum the
+  smooth realization's endpoint/`boundary` `HasTimeDerivativeAt` obligations consume.
+
+**Progress on {A, picard, realization, encode}.**  With this, the frozen chart's **scalar time-regularity**
+support for `realization` is complete at every order.  **Confirmed blocker (unchanged, re-verified this
+session by ground-truth read):** the frozen line CANNOT be assembled into a `RicciDeTurckSmoothRealizationData`,
+because (i) the frozen (bounded, 1st-order) operator does NOT satisfy the chart's `geometric` field for
+general `s` (needs the 2nd-order intrinsic RHS; the reaction output of a merely-continuous `s` cannot equal
+a smooth intrinsic RHS), and (ii) `SmoothMetricSectionCurveData.mem_spd` demands global-in-time
+positive-definiteness, which the affine evolution `e^{τL}σ₀+…` loses for large `|τ|`.  Both trace to the
+same picard⇔geometric incompatibility on the C⁰ section space — the parabolic long pole.  **NEXT
+(unchanged long pole):** the state-dependent 2nd-order (mild/Schauder) operator satisfying BOTH `picard`
+and `geometric`, bridging the DONE abstract Schauder framework (`exists_shortTime_fixedPoint_of_schauder_gain`)
+and DONE model heat-mild toolkit to the geometric `BilinearFormBundle` section space.
