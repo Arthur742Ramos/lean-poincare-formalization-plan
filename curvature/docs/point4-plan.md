@@ -2490,3 +2490,58 @@ same picard⇔geometric incompatibility on the C⁰ section space — the parabo
 (unchanged long pole):** the state-dependent 2nd-order (mild/Schauder) operator satisfying BOTH `picard`
 and `geometric`, bridging the DONE abstract Schauder framework (`exists_shortTime_fixedPoint_of_schauder_gain`)
 and DONE model heat-mild toolkit to the geometric `BilinearFormBundle` section space.
+
+### Item 2 (GAP 1) later-44 — static (time-independent) specialization of the compact-`M` `C³` gauge-flow capstone committed; the JOINT DeTurck one-form dual-section smoothness is re-confirmed diamond-blocked (one commit; `{propext, Classical.choice, Quot.sound}`)
+
+Ground-truth entry state: the general-`M` flow capstone `exists_gaugeFlow_Ioo_of_timeDependent_raisingData`
+(later-29, `CompactGaugeFlowRaising.lean`) and the DeTurck↔`raisedGaugeField` identity family
+(`DeTurckRaisedGaugeField.lean`) are DONE.  The remaining Item-2 residual is the two joint `(t,x)`
+smoothness inputs `hg`/`hom` of the capstone for the *real* Ricci–DeTurck gauge data.
+
+* **`PoincareCurvature.ParametrizedInner.exists_gaugeFlow_Ioo_of_timeIndependent_raisingData`**
+  (`CompactGaugeFlowRaising.lean`, additive) — the **static** specialization: for a time-independent
+  smooth metric `g₀ : ContMDiffRiemannianMetric I ∞` and a *globally* spatially-smooth one-form `ω₀`
+  (`hω₀ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞ (fun y ↦ mk' (ω₀ y))`), the metric-raised gauge field
+  flows to a `C³`-in-space diffeomorphism family on a window around `0`.  Composes the general capstone
+  at the constant families `fun _ ↦ g₀` / `fun _ ↦ ω₀`, discharging the capstone's `hg`/`hom` via the
+  **inlined** `g₀.contMDiff.comp contMDiff_snd` / `hω₀.comp contMDiff_snd`.
+  **Plumbing discovery (avoid re-losing time):** calling the named const-family lemmas
+  `contMDiff_constMetricSection_prodSnd` / `contMDiff_constOneFormSection_prodSnd` at `V := TangentSpace I`
+  re-triggers the tangent-bundle `FiberBundle E (TangentSpace I)` instance diamond (`haveI … := by exact
+  TangentSpace.fiberBundle`/`vectorBundle` then gets *stuck* on the compounded `VectorBundle` synthesis).
+  **Inlining their bodies** (`g₀.contMDiff` / `hω₀` are already-elaborated `ContMDiff` facts, composed with
+  the plain `contMDiff_snd`) sidesteps the const-lemmas' explicit `[FiberBundle F V]`/`[VectorBundle …]`
+  binders entirely — no diamond, no `@`-pinning.
+
+**BLOCKER re-confirmed (the joint DeTurck one-form `hom`).**  Producing `hom` for the *actual*
+`intrinsicDeTurckOneForm g bg` — i.e. the joint `(t,x)` smoothness of the dual-bundle section
+`(t,x) ↦ mk' (intrinsicDeTurckOneForm g bg t x)` — was attempted by instantiating the field-independent
+joint section-from-coefficients builder `ParametrizedInner.contMDiffOn_raisedSection_of_coeff` at the
+**dual** tangent bundle `V⋆ = fun x ↦ TM x →L[ℝ] ℝ` (dual trivialization `e.continuousLinearMap eLine`,
+`continuousDualBasis bas`).  The *mathematical* proof is complete and clean — the pointwise dual-pairing
+bridge `e⋆.localFrame_coeff j x (ω x) = ω x (e.localFrame j x)` (as in the DONE spatial theorem
+`intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply`) rewrites the coefficient hypothesis into the
+frame-evaluation form, and `Bundle.Trivialization.eq_sum_localFrame_coeff_smul` collapses the resulting
+sum back to `ω x`.  But the builder requires `[∀ x, NormedAddCommGroup (V⋆ x)]`, `[FiberBundle F⋆ V⋆]`,
+`[VectorBundle ℝ F⋆ V⋆]`, `[ContMDiffVectorBundle n F⋆ V⋆ I]` as **explicit** binders at
+`V⋆ = fun x ↦ TM x →L[ℝ] ℝ`, and these hit the compounded tangent-*dual*-bundle diamond documented in
+later-28/30 ("strictly worse" than the primal `raisedGaugeField` wall):
+  - `NormedAddCommGroup (TangentSpace I x →L[ℝ] ℝ)` does not synthesize (`by exact inferInstance` fails);
+  - injecting it via `inferInstanceAs (NormedAddCommGroup (E →L[ℝ] ℝ))` (defeq `TM x = E`) *elaborates* but
+    then causes **kernel `declaration type mismatch`** on the `SMulHomClass`/`NormedSpace` proof fields —
+    the injected fiber instance is not the canonical bundle-framing one;
+  - `FiberBundle (E →L[ℝ] ℝ) (fun x ↦ TangentSpace I x →L[ℝ] ℝ)` fails to synthesize outright.
+The spatial theorem avoids this because it routes through `contMDiffOn_iff_localFrame_coeff` (whose
+instance requirements are pinned by `e⋆`'s *type* via unification, not by explicit `[…]` binders), which
+has no analogue for the `ℝ × M → TotalSpace` joint map.
+
+**NEXT.**  Either (a) defeat the dual-bundle diamond by full capstone-style `@`-pinning of *every*
+`contMDiffOn_raisedSection_of_coeff` instance argument with **defeq-preserving** `by exact` bridges (NOT
+fresh `inferInstanceAs`, which break the kernel) — the later-29 technique lifted to the dual bundle; or
+(b) prove a joint (`ℝ × M`-base) analogue of `Bundle.Trivialization.contMDiffOn_iff_localFrame_coeff` for
+the `ℝ × B → TotalSpace F V` map shape (instance-robust because `e⋆` pins the fibre instances by
+unification), then mirror `intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply` verbatim over
+`ℝ × M`; or (c) glue the DONE per-patch spatial one-form `ContMDiffOn`
+(`intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply`) over a finite chart cover of compact `M` into a
+GLOBAL spatial `ContMDiff`, which discharges the static corollary's `hω₀` for the static DeTurck gauge.
+(GAP 2's geometric chart `A`/Schauder `geometric` field remains the point-4 long pole.)
