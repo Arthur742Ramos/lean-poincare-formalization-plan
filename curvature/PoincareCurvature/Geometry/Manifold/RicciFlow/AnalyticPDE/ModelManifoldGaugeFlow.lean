@@ -1209,6 +1209,52 @@ theorem exists_timeDependent_flow_compact_extChartAt_source_and_mem
   intro x _ τ hτ
   exact (horbit x τ (hsub hτ)).mono hsub
 
+/-- **Chart-source confinement + membership faces for an *abstract* compact-manifold flow.**  Variant
+of `exists_timeDependent_flow_compact_extChartAt_source_and_mem` in which the raw manifold flow `Φ` is
+**supplied** (with only its anchor `hanchor` and ODE `horbit` on `Set.Ioo (-ε) ε`) rather than produced
+internally.  The joint space-time continuity needed to run the tube-lemma confinement
+(`exists_Ioo_forall_forall_extChartAt_source_and_mem_of_continuousAt`) is **derived** from the raw `C¹`
+field jet `hX` via `ManifoldFlow.continuousAt_timeDependent_flow_of_anchor_ode`.  On a short common
+window `Set.Ioo a b ∋ 0` it produces, for the *given* `Φ`, the two orbit-control faces the step-(v)
+capstone consumes on its `Φ`-side — every orbit stays in the chart source
+(`Φ τ x ∈ (extChartAt I p).source`) and its chart image stays in the open target `W`
+(`(τ, extChartAt I p (Φ τ x)) ∈ W`) — together with the ODE restricted to that window.  Instantiating
+`W := Set.univ ×ˢ state₀` gives the `Φ`-side `state`-membership face; this is the abstract-flow analogue
+that lets the per-point cutoff-orbit-control package be built for the `hslicesC3`-supplied flow of
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`. -/
+theorem exists_timeDependent_flow_compact_extChartAt_source_and_mem_of_flow
+    {H M : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M] [CompleteSpace E]
+    [BoundarylessManifold I M] [CompactSpace M] [T2Space M]
+    {X : ℝ → (x : M) → TangentSpace I x}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun q : ℝ × M => (⟨q, ((1 : ℝ), X q.1 q.2)⟩ : TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {ε : ℝ} (hε : 0 < ε) {Φ : ℝ → M → M}
+    (hanchor : ∀ x, Φ 0 x = x)
+    (horbit : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ x) (Set.Ioo (-ε) ε) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    {Q : Set M} {p : M} {W : Set (ℝ × E)}
+    (hQ : IsCompact Q) (hQsub : Q ⊆ (extChartAt I p).source) (hW : IsOpen W)
+    (hgraph0 : ∀ x ∈ Q, ((0 : ℝ), extChartAt I p x) ∈ W) :
+    ∃ a b : ℝ, (0 : ℝ) ∈ Set.Ioo a b ∧
+      (∀ x ∈ Q, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ x) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x)))) ∧
+      (∀ τ ∈ Set.Ioo a b,
+        (∀ x ∈ Q, Φ τ x ∈ (extChartAt I p).source) ∧
+        (∀ x ∈ Q, ((τ, extChartAt I p (Φ τ x)) : ℝ × E) ∈ W)) := by
+  have hcontA : ∀ x, ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x) := fun x =>
+    PoincareCurvature.ManifoldFlow.continuousAt_timeDependent_flow_of_anchor_ode hX hε hanchor horbit x
+  have hconf := exists_Ioo_forall_forall_extChartAt_source_and_mem_of_continuousAt
+    (Φ := Φ) hQ hQsub hW (fun x _ => hanchor x) hgraph0 (fun x _ => hcontA x)
+  obtain ⟨a, b, hmem0, hboth⟩ := exists_Ioo_forall_and hconf
+    ⟨-ε, ε, ⟨neg_lt_zero.mpr hε, hε⟩, fun τ hτ => hτ⟩
+  have hsub : Set.Ioo a b ⊆ Set.Ioo (-ε) ε := fun τ hτ => (hboth τ hτ).2
+  refine ⟨a, b, hmem0, ?_, fun τ hτ => (hboth τ hτ).1⟩
+  intro x _ τ hτ
+  exact (horbit x τ (hsub hτ)).mono hsub
+
 /-- **The `heq` datum of GAP-1 step (v) at the common anchor `0`.**  When the model gauge flow `G` is
 anchored at `0` (`Diffeomorph3GaugeFlowOn … sTime 0`) and the raw manifold flow `Φ` is anchored at `0`
 (`Φ 0 = id`), the step-(v) agreement `extChartAt I p (Φ t₀ x) = (G.maps3 t₀) (extChartAt I p x)` holds at
