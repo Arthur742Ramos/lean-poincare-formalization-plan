@@ -2163,6 +2163,68 @@ theorem contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset
   intro y hy
   exact cutoff_eqOne_along_curve_of_graph_subset hχK (hgraph y hy)
 
+/-- **Inverse flow-slice `C³` (Route-A `hslicesC3` backward half) from per-point cutoff model gauge
+flows + orbit control.**  The concrete-`G` companion of the abstract-`Ψ` backward capstone
+`GaugeFlowAssembly.contMDiff_symm_flowSlice_of_forall_rawFlow_modelFlow_eqOn`, and the inverse-slice
+mirror of the forward `contMDiff_flowSlice_of_forall_cutoff_orbit_control`.  For the fixed time `t`, it
+produces `ContMDiff I I 3 Gt` for the spatial inverse `Gt` of the compact-flow slice `Φ t` — the
+backward half of the Route-A `hslicesC3` obligation — from:
+
+* the topological packaging of `Φ t` as a homeomorphism on the compact `T2` manifold `M`: continuity
+  `hΦcont` (supplied in the final assembly by the already-proved forward slice `C³`), surjectivity
+  `hΦsurj`, and the global left inverse `hGleft` (`Gt ∘ Φ t = id`); and
+* per base point `x`, exactly the same cutoff-model-flow package the forward capstone consumes — a
+  genuine cutoff model gauge flow `G : Diffeomorph3GaugeFlowOn (χ • chartPushforwardField) sTime t₀'`
+  with the pointwise cutoff datum `χ (τ, (G.maps3 τ) (extChartAt I p y)) = 1`, the raw gauge ODE,
+  tube-Lipschitz control, and confinement/anchor facts.
+
+The abstract comparison flow is realised as the genuine `C³`-*diffeomorph* family `Ψ := fun τ ↦ G.maps3 τ`
+(so its inverse is `C³` for free); its `hg'` integral-curve co-solution is
+`hasDerivAt_maps3_eval_of_cutoff_eqOne` (collapsing `χ • chartPushforwardField ↦ chartPushforwardField`
+where `χ ≡ 1`), and the `MapsTo` face falls out of the `src` datum at time `t`.  These feed the abstract
+backward capstone, whose homeomorphism gluer discharges the global inverse-slice `C³`.  Paired with the
+forward `contMDiff_flowSlice_of_forall_cutoff_orbit_control` this discharges both halves of `hslicesC3`
+in cutoff-model-flow vocabulary. -/
+theorem contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {Φ : ℝ → M → M} {Gt : M → M} {t : ℝ}
+    (hΦcont : Continuous (Φ t))
+    (hΦsurj : Function.Surjective (Φ t))
+    (hGleft : Function.LeftInverse Gt (Φ t))
+    (h : ∀ x : M, ∃ (p : M) (χ : ℝ × E → ℝ) (sTime : Set ℝ) (t₀' : ℝ)
+        (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+          (X := fun τ q => χ (τ, q) •
+            PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) sTime t₀')
+        (a b t₀ : ℝ) (K : NNReal) (state : ℝ → Set E) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, sTime ∈ 𝓝 τ) ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, χ (τ, (G.maps3 τ) (extChartAt I p y)) = 1) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = (G.maps3 t₀) (extChartAt I p y))) :
+    ContMDiff I I 3 Gt := by
+  refine PoincareCurvature.GaugeFlowAssembly.contMDiff_symm_flowSlice_of_forall_rawFlow_modelFlow_eqOn
+    (Φ := Φ) (Gt := Gt) (X := X) (t := t) hΦcont hΦsurj hGleft (fun x => ?_)
+  obtain ⟨p, χ, sTime, t₀', G, a, b, t₀, K, state, U, hUmem, hU, ht, ht₀, hnhds, hlip,
+    hγ, hγ_src, hχ, hγ_mem, hg_mem, heq₀⟩ := h x
+  refine ⟨p, fun τ => G.maps3 τ, a, b, t₀, K, state, U, hUmem, hU, ?_, ht, ht₀, hlip,
+    hγ, hγ_src, ?_, hγ_mem, hg_mem, heq₀⟩
+  · intro y hy
+    have hsrc := hγ_src y hy t ht
+    rwa [extChartAt_source] at hsrc
+  · intro y hy τ hτ
+    exact hasDerivAt_maps3_eval_of_cutoff_eqOne G (hnhds τ hτ)
+      (mem_of_mem_nhds (hnhds τ hτ)) (extChartAt I p y) (hχ y hy τ hτ)
+
 end
 
 end SmoothDependenceCk
