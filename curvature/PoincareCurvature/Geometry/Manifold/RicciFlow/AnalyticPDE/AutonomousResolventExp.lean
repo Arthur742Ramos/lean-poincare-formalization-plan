@@ -22,7 +22,7 @@ integral-curve uniqueness `eq_of_isIntegralCurve_of_eq_at`; no PDE or manifold c
 @[expose] public noncomputable section
 
 open Set
-open scoped Topology NNReal
+open scoped Topology NNReal Nat
 
 namespace RicciFlow
 namespace AnalyticPDE
@@ -247,6 +247,40 @@ theorem contDiff_exp_sub_smul_of_contDiff
     ContDiff.sub contDiff_fst contDiff_const
   have h2 : ContDiff ℝ n (fun p : ℝ × X => A p.2) := ContDiff.comp hA contDiff_snd
   exact ContDiff.comp hana.contDiff (ContDiff.smul h1 h2)
+
+/-- **The operator/algebra exponential is dominated by the scalar exponential of the norm.**
+`‖exp x‖ ≤ Real.exp ‖x‖` for every element `x` of a complete normed algebra over `ℝ` whose unit has
+norm one.  This is the elementary series comparison `‖∑ₙ xⁿ/n!‖ ≤ ∑ₙ ‖x‖ⁿ/n! = exp ‖x‖`, using
+`‖xⁿ‖ ≤ ‖x‖ⁿ` termwise.  It is the missing Mathlib fact (only summability of the exponential series is
+available there) underlying every resolvent growth estimate `‖exp(τ·L)‖ ≤ exp(‖L‖·|τ|)`. -/
+theorem norm_exp_le {𝔸 : Type*} [NormedRing 𝔸] [NormOneClass 𝔸]
+    [NormedAlgebra ℝ 𝔸] [CompleteSpace 𝔸] (x : 𝔸) :
+    ‖NormedSpace.exp x‖ ≤ Real.exp ‖x‖ := by
+  have hsum : HasSum (fun n : ℕ => (n !⁻¹ : ℝ) • x ^ n) (NormedSpace.exp x) :=
+    NormedSpace.exp_series_hasSum_exp' (𝕂 := ℝ) x
+  have hsumR : HasSum (fun n : ℕ => (n !⁻¹ : ℝ) • ‖x‖ ^ n) (NormedSpace.exp ‖x‖) :=
+    NormedSpace.exp_series_hasSum_exp' (𝕂 := ℝ) ‖x‖
+  have hnormsummable : Summable (fun n : ℕ => ‖(n !⁻¹ : ℝ) • x ^ n‖) :=
+    NormedSpace.norm_expSeries_summable' (𝕂 := ℝ) x
+  have hRsummable : Summable (fun n : ℕ => (n !⁻¹ : ℝ) • ‖x‖ ^ n) := hsumR.summable
+  calc
+    ‖NormedSpace.exp x‖ = ‖∑' n : ℕ, (n !⁻¹ : ℝ) • x ^ n‖ := by rw [hsum.tsum_eq]
+    _ ≤ ∑' n : ℕ, ‖(n !⁻¹ : ℝ) • x ^ n‖ := norm_tsum_le_tsum_norm hnormsummable
+    _ ≤ ∑' n : ℕ, (n !⁻¹ : ℝ) • ‖x‖ ^ n := by
+        refine hnormsummable.tsum_le_tsum (fun n => ?_) hRsummable
+        rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (by positivity), smul_eq_mul]
+        exact mul_le_mul_of_nonneg_left (norm_pow_le x n) (by positivity)
+    _ = NormedSpace.exp ‖x‖ := hsumR.tsum_eq
+    _ = Real.exp ‖x‖ := by rw [Real.exp_eq_exp_ℝ]
+
+/-- **Resolvent growth bound.**  `‖exp (τ • x)‖ ≤ Real.exp (|τ| * ‖x‖)` for a scalar `τ : ℝ` and an
+element `x` of a complete unit-norm-one normed `ℝ`-algebra.  Specialised to a bounded operator
+`x = L : E →L[ℝ] E` this is the semigroup growth bound `‖exp(τ·L)‖ ≤ exp(|τ|·‖L‖)`. -/
+theorem norm_exp_smul_le {𝔸 : Type*} [NormedRing 𝔸] [NormOneClass 𝔸]
+    [NormedAlgebra ℝ 𝔸] [CompleteSpace 𝔸] (τ : ℝ) (x : 𝔸) :
+    ‖NormedSpace.exp (τ • x)‖ ≤ Real.exp (|τ| * ‖x‖) := by
+  have h := norm_exp_le (τ • x)
+  rwa [norm_smul, Real.norm_eq_abs] at h
 
 end SmoothDependenceCk
 end AnalyticPDE
