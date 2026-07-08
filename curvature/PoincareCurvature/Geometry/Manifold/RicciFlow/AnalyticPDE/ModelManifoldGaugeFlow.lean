@@ -2435,6 +2435,60 @@ theorem contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_sub
   exact ⟨hfwd, contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset
     (X := X) (Φ := Φ) (Gt := Gt) (t := t) hfwd.continuous hΦsurj hGleft h⟩
 
+/-- **Backward finite-cover gluer for inverse flow slices (windowed).**  The inverse-slice (`G t`)
+analogue of `exists_Ioo_forall_contMDiff_of_finite_cover`: from a finite open cover `U : ι → Set M` of
+the compact `T2` manifold `M`, per-patch inverse-slice regularity windows (`hpatch`: on each patch a
+window `Set.Ioo (a i) (b i) ∋ 0` with `ContMDiffOn I I 3 (G t)` on the image `Φ t '' U i` for every `t`
+in that window), and the per-slice topological data on a reference window `Set.Ioo lo hi ∋ 0` (each
+`Φ t` continuous, surjective, with global left inverse `G t`), there is a single sub-window
+`Set.Ioo c d ∋ 0` on which `G t` is *globally* `ContMDiff I I 3`.
+
+This is the backward half of the `hslicesC3` conclusion
+(`∃ c d, 0 ∈ Set.Ioo c d ∧ ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (G t)`) consumed by
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3`.  Unlike
+the forward gluer, the inverse slice is globalised through the open-map route: on a compact `T2`
+manifold a continuous bijective `Φ t` is a homeomorphism (`Continuous.homeoOfEquivCompactToT2`), hence an
+open map, so the per-patch inverse regularity on `Φ t '' U i` glues to global `C³` via
+`GaugeFlowAssembly.contMDiff_symm_flowSlice_of_forall_openImage`.  The reference window `Set.Ioo lo hi`
+carries the topological data (in the asymmetric-capstone application it is the mutual-inverse window
+`Set.Ioo (-ε) ε`); the returned sub-window is contained in `Set.Ioo lo hi ∩ ⋂ i, Set.Ioo (a i) (b i)`. -/
+theorem exists_Ioo_forall_contMDiff_symm_of_finite_cover
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {ι : Type*} [Finite ι] {Φ : ℝ → M → M} {G : ℝ → M → M} {U : ι → Set M}
+    {lo hi : ℝ} (hlohi : (0 : ℝ) ∈ Set.Ioo lo hi)
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hΦcont : ∀ t ∈ Set.Ioo lo hi, Continuous (Φ t))
+    (hΦsurj : ∀ t ∈ Set.Ioo lo hi, Function.Surjective (Φ t))
+    (hGleft : ∀ t ∈ Set.Ioo lo hi, Function.LeftInverse (G t) (Φ t))
+    (hpatch : ∀ i : ι, ∃ a b : ℝ, (0 : ℝ) ∈ Set.Ioo a b ∧
+      ∀ t ∈ Set.Ioo a b, ContMDiffOn I I 3 (G t) (Φ t '' U i)) :
+    ∃ c d : ℝ, (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (G t) := by
+  choose a b hmem hslice using hpatch
+  have hWopen : IsOpen (Set.Ioo lo hi ∩ ⋂ i, Set.Ioo (a i) (b i)) :=
+    isOpen_Ioo.inter (isOpen_iInter_of_finite (fun i => isOpen_Ioo))
+  have hW0 : (0 : ℝ) ∈ Set.Ioo lo hi ∩ ⋂ i, Set.Ioo (a i) (b i) :=
+    ⟨hlohi, Set.mem_iInter.mpr (fun i => hmem i)⟩
+  obtain ⟨c, d, hcd, hsubW⟩ :=
+    mem_nhds_iff_exists_Ioo_subset.mp (hWopen.mem_nhds hW0)
+  refine ⟨c, d, hcd, fun t ht => ?_⟩
+  have htW : t ∈ Set.Ioo lo hi ∩ ⋂ i, Set.Ioo (a i) (b i) := hsubW ht
+  have htlohi : t ∈ Set.Ioo lo hi := htW.1
+  have htIoo : ∀ i, t ∈ Set.Ioo (a i) (b i) :=
+    fun i => Set.mem_iInter.mp htW.2 i
+  have hbij : Function.Bijective (Φ t) :=
+    ⟨(hGleft t htlohi).injective, hΦsurj t htlohi⟩
+  have hopenMap : IsOpenMap (Φ t) :=
+    (Continuous.homeoOfEquivCompactToT2 (f := Equiv.ofBijective (Φ t) hbij)
+      (hΦcont t htlohi)).isOpenMap
+  refine PoincareCurvature.GaugeFlowAssembly.contMDiff_symm_flowSlice_of_forall_openImage
+    hopenMap (hΦsurj t htlohi) (fun x => ?_)
+  obtain ⟨i, hxi⟩ := hcover x
+  exact ⟨U i, hopen i, hxi, hslice i t (htIoo i)⟩
+
 end
 
 end SmoothDependenceCk
