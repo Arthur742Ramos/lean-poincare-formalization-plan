@@ -834,6 +834,46 @@ theorem contMDiffOn_flowSlice_of_rawFlow_modelFlow_eqOn
     (fun τ hτ => hg' x hx τ hτ) (fun τ hτ => hγ_mem x hx τ hτ)
     (fun τ hτ => hg_mem x hx τ hτ) (heq₀ x hx) ht
 
+/-- **Backward per-patch flow-slice `C³` in the raw-flow / model-diffeomorph setting.**  The
+inverse-map companion of `contMDiffOn_flowSlice_of_rawFlow_modelFlow_eqOn`: with the model comparison
+flow supplied as a genuine family of `C³` self-diffeomorphs `Ψ : ℝ → (E ≃ₘ^3 E)` (the shape of the
+model gauge-flow slice `τ ↦ G.maps3 τ`), the *same* temporal integral-curve comparison data that yields
+the forward slice `C³` also yields, for any `Gt` left-inverting `Φ t` on `U`,
+`ContMDiffOn I I 3 Gt (Φ t '' U)`.  The forward single-fixed-chart conjugation
+`extChartAt I p (Φ t x) = Ψ t (extChartAt I p x)` on `U` is produced exactly as in the forward lemma
+(via the temporal integral-curve uniqueness core `extChartAt_comp_eqOn_of_lipschitzOnWith`), then fed —
+with the diffeomorph `Ψ t` (whose `C³` inverse discharges the backward transfer) and the left-inverse
+datum — to `contMDiffOn_symm_of_extChartAt_conjugation_diffeomorph'`.  This is the backward per-patch
+brick of the `hslicesC3` inverse-slice obligation, produced from the raw flow ODE, tube-Lipschitz
+control, and model comparison alone — no spatial regularity of `Φ` or backward orbit confinement
+assumed. -/
+theorem contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn
+    {Φ : ℝ → M → M} {Ψ : ℝ → (E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)} {Gt : M → M} {p : M} {X : ℝ → M → E}
+    {a b t₀ t : ℝ} {K : NNReal} {state : ℝ → Set E} {U : Set M}
+    (hU : U ⊆ (chartAt H p).source)
+    (hΦU : Set.MapsTo (Φ t) U (chartAt H p).source)
+    (ht : t ∈ Set.Ioo a b)
+    (ht₀ : t₀ ∈ Set.Ioo a b)
+    (hlip : ∀ τ ∈ Set.Ioo a b, LipschitzOnWith K (chartPushforwardField I X p τ) (state τ))
+    (hraw : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo a b) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x))))
+    (hsrc : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ x ∈ (extChartAt I p).source)
+    (hg' : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+      HasDerivAt (fun τ : ℝ ↦ (Ψ τ : E → E) (extChartAt I p x))
+        (chartPushforwardField I X p τ ((Ψ τ : E → E) (extChartAt I p x))) τ)
+    (hγ_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ x) ∈ state τ)
+    (hg_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, (Ψ τ : E → E) (extChartAt I p x) ∈ state τ)
+    (heq₀ : ∀ x ∈ U, extChartAt I p (Φ t₀ x) = (Ψ t₀ : E → E) (extChartAt I p x))
+    (hGleft : ∀ x ∈ U, Gt (Φ t x) = x) :
+    ContMDiffOn I I 3 Gt (Φ t '' U) := by
+  refine contMDiffOn_symm_of_extChartAt_conjugation_diffeomorph' (Ψ := Ψ t) hΦU hU
+    (fun x hx => ?_) hGleft
+  exact extChartAt_comp_eqOn_of_lipschitzOnWith
+    (fun τ hτ => hraw x hx τ hτ) (fun τ hτ => hsrc x hx τ hτ) ht₀ hlip
+    (fun τ hτ => hg' x hx τ hτ) (fun τ hτ => hγ_mem x hx τ hτ)
+    (fun τ hτ => hg_mem x hx τ hτ) (heq₀ x hx) ht
+
 /-- **Global flow-slice `C³` (Route-A `hslicesC3`) from a per-point family of temporal integral-curve
 comparisons.**  The GAP-1 capstone: for the fixed time `t`, `ContMDiff I I 3 (Φ t)` — exactly the
 `hslicesC3` datum of `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` (Route A) — provided
