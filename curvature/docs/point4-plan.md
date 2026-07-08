@@ -2239,3 +2239,46 @@ are `rfl`, proved compatible with the existing `e`-transported norm — a dedica
 `VectorBundle/ContinuousSection.lean` (verify the whole downstream stays green).  (b) The GENERAL-`M`
 state-dependent 2nd-order (mild/regularised) chart `A` satisfying `geometric` for all `s` (not just the metric
 state) + its bounded/Lipschitz `hbound`/`hlipBall`/`hcontTime` — the parabolic long pole — remains open.
+
+### Item 3 (GAP 2) later-38 — the BilinearFormBundle CSS-add wall is CRACKED: diamond-free pointwise `add_apply_tangent` at `BilW` (hom fibre topology), unblocking fibre-value chart-operator identities (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-37 declared the `ContinuousSectionSpace` add/smul at `BilW` **DEFINITIVELY WALLED** (an `isDefEq`
+`whnf` timeout on `add_apply` at the transported `AddCommGroup`/`BilinearFormBundle` fibre diamond, even
+on opaque input sections) and proposed a risky non-additive `instAddCommGroup` refactor as the only fix.
+**That diagnosis was too pessimistic.**  Ground-truth probing this session found the timeout is confined
+to *invoking* the seminormed-track `add_apply` (whose conclusion unification forces the transported-add
+`whnf`); the **hom-fibre-topology coordinate track** (`coord_add_apply_topFibre`,
+`bilinearFormBundle_coord_eq_trivializationAt_readout_tangent`, already used for the frozen operator's
+`picard`/`hlip`) routes around it entirely.  Three additive, axiom-clean landings in
+`AnalyticPDE/GeometricReactionPicardTangent.lean`:
+
+* **`coord_apply_tangent`** — the hom-topology `coord_apply`:
+  `(coord s).1 i x = (trivₓ₀ᵢ).continuousLinearMapAt ℝ x (s.toFun x)`, from the readout bridge +
+  `continuousLinearMapAt_apply`/`coe_linearMapAt_of_mem` (only `IsLinear`/Pretrivialization API — **no**
+  `FiberBundle`/fibre-`TopologicalSpace` diamond).
+* **`add_apply_tangent`** — the wall's target: `(s + t).toFun x = s.toFun x + t.toFun x` at `BilW`.
+  Proof routes each section value through the trivialization's *linear* inverse `symmₗ` (NOT `symmL`,
+  which drags in the `FiberBundle`/`VectorBundle` diamond): `σ.toFun x = symmₗ x (coord σ)` via
+  `symmₗ_linearMapAt`, the coordinate of the sum splits by `coord_add_apply_topFibre`, and `symmₗ` is
+  `ℝ`-linear (`map_add`).  Diamond-free because only `IsLinear`-level API is touched; the `symmₗ` step is
+  kept inside the proof (an in-proof `haveI hlin` supplies `IsLinear`, so it need not appear in a
+  statement where `IsLinear` cannot be synthesised ambiently).
+* **`deTurckReactionSectionMap_add_source_metricSection_apply_eq_intrinsicRicciDeTurckRHS`** — the payoff:
+  the *actual CSS-sum* chart operator `A τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g t`,
+  evaluated at the metric section, has fibre value `A τ (metricSection) x u v = intrinsicRicciDeTurckRHS g
+  background t x u v` — the `s = metricSection` instance of the chart's `geometric`/`chartRHS_eq_intrinsic`
+  field, previously blocked because it needed `(L s + b) x u v = (L s) x u v + b x u v`.  Plus the
+  general-state companion **`deTurckReactionSectionMap_add_source_apply`**
+  (`(L s + b) x u v = s(Pu,v) + s(Pv,u) + b x u v` for arbitrary `s`).
+
+**Value / placement.**  The wall no longer blocks fibre-value (`x u v`) identities for the CSS-sum chart
+operator `A` — so the `geometric`/`chartRHS_eq_intrinsic` field is now provable at the metric section for
+the genuine operator (not just the bare scalar sum), and the CSS-linear reaction packaging
+(`deTurckReactionSectionMap_map_add`, later-36/37's blocker) is now reachable via `add_apply_tangent` on
+input sections + `bilinearFormSectionDeTurckReaction_add`.  The **`instAddCommGroup` definition-site
+refactor is NO LONGER NEEDED** for the fibre-value critical path.  **NEXT.**  (a) Lift the metric-section
+identity along a solution curve realized by a metric family (`chartRHS_eq_intrinsic` at `t = t₀` for the
+frozen operator, then the endpoint time-derivative for `realization`'s `boundary_hasTimeDerivative`).
+(b) The GENERAL-`s` `geometric` (honest state-dependent 2nd-order operator, `A τ s = intrinsicRicciDeTurckRHS`
+for the metric of `s`) is still the parabolic Schauder long pole — the honest operator is not defined on
+merely-`C⁰` sections, so it needs the Hölder/Schauder space reformulation (unchanged).
