@@ -164,4 +164,119 @@ theorem deTurckFrozenAffineEvolution_unique
   rw [deTurckReactionSectionMapL_apply]
   exact hy s
 
+/-- **The concrete geometric frozen Ricci–DeTurck chart operator's explicit global evolution.**
+Specialising `deTurckFrozenAffineEvolution` to the genuine geometric data: the DeTurck coefficient
+`P := ∇W = (chosenLeviCivitaFamily g tFreeze) (intrinsicDeTurckVectorField g background tFreeze)`
+(continuous via `intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`, needing only a `C¹`
+background slice) and the principal Ricci source `b := intrinsicRicciFlowRHSSectionSpace … g tFreeze`.
+This is the explicit global-in-time solution of the exact frozen geometric operator solved by
+`deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn`. -/
+noncomputable def deTurckFrozenGeometricAffineEvolution
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (tFreeze : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background tFreeze) 1)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover :=
+  deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+    (intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+      g background tFreeze hbackground).continuous
+    (intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover g tFreeze)
+    t₀ σ0
+
+/-- The concrete geometric frozen evolution starts at the initial section `σ₀`. -/
+theorem deTurckFrozenGeometricAffineEvolution_initial
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (tFreeze : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background tFreeze) 1)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+      g background tFreeze hbackground t₀ σ0 t₀ = σ0 :=
+  deTurckFrozenAffineEvolution_initial x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0
+
+/-- **The concrete geometric frozen evolution solves the exact frozen Ricci–DeTurck chart ODE.**
+`σ' = deTurckReactionSectionMap ∇W σ + intrinsicRicciFlowRHSSectionSpace g tFreeze` — the operator
+form fed to `deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn`.  Its explicit global
+solution is the affine operator-exponential evolution. -/
+theorem hasDerivAt_deTurckFrozenGeometricAffineEvolution
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (tFreeze : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background tFreeze) 1)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t : ℝ) :
+    HasDerivAt
+      (deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+        g background tFreeze hbackground t₀ σ0)
+      (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover
+          (intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background tFreeze hbackground).continuous
+          (deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+            g background tFreeze hbackground t₀ σ0 t)
+        + intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover g tFreeze) t :=
+  hasDerivAt_deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0 t
+
+/-- **Uniqueness for the concrete geometric frozen chart ODE.**  Any global solution of the exact
+frozen Ricci–DeTurck operator with value `σ₀` at `t₀` coincides with the explicit affine evolution. -/
+theorem deTurckFrozenGeometricAffineEvolution_unique
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (tFreeze : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background tFreeze) 1)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    {y : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover}
+    (hy : ∀ t, HasDerivAt y
+      (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover
+          (intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background tFreeze hbackground).continuous (y t)
+        + intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover g tFreeze) t)
+    (h0 : y t₀ = σ0) (t : ℝ) :
+    y t = deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+      g background tFreeze hbackground t₀ σ0 t :=
+  deTurckFrozenAffineEvolution_unique x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0 hy h0 t
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
