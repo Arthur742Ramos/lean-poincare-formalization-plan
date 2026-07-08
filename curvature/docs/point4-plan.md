@@ -2755,3 +2755,50 @@ intersect the several confinement windows (`exists_Ioo_forall_and`) into one `Io
 feed `contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset` → global `ContMDiff I I 3 (Φ t)`
 = the Route-A `hslicesC3` datum.  Still: do NOT route the genuine 2nd-order operator through `chart.A`'s
 C⁰ `picard`; the Item-3 geometric chart remains the independent long pole.
+
+### Progress (2026-07-08, later 11) — Item 2 GAP 1: the BACKWARD (inverse-slice `G t`) chart-transfer ladder, mirroring the forward one (four commits; each `{propext, Classical.choice, Quot.sound}`)
+
+**Ground-truth finding.**  The FORWARD flow-slice `C³` assembly is complete end-to-end
+(`contMDiffOn_flowSlice_perPatch_of_flow` → `exists_Ioo_forall_contMDiff_of_finite_cover` →
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover` → the `C^∞` wrapper
+`exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact`; the Route-A capstones
+`contMDiff_flowSlice_of_forall_cutoff_orbit_control[_of_graph_subset]` are an equivalent forward
+formulation).  But `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`'s `hslicesC3` requires
+BOTH the forward slice `Φ t` AND the inverse slice `G t` to be `ContMDiff I I 3` (to inhabit
+`maps3 : SmoothSelfDiffeomorph3Family`, i.e. a family of `C³` DIFFEOMORPHS with `C³` inverse).  The
+inverse-slice half had NO chart-transfer machinery.  Key observation: the model comparison flow slice
+`G.maps3 τ : E ≃ₘ^3 E` is a genuine `C³` self-diffeomorph, so `(G.maps3 τ).symm` is automatically `C³`,
+and the backward chart-conjugation `extChartAt p (G_t y) = (G.maps3 τ).symm (extChartAt p y)` follows
+ALGEBRAICALLY from the forward one plus `Φt ∘ Gt = id` — so the backward slice needs NO separate orbit
+confinement, only the same forward data.
+
+**What was added (all additive at the end of `GaugeReduction/GaugeFlowAssembly.lean`, sorry-free,
+axiom-clean).**  A complete backward-slice ladder mirroring the forward one:
+
+* **`contMDiffOn_symm_of_extChartAt_conjugation'`** — the inverse-map companion of
+  `contMDiffOn_of_extChartAt_conjugation'`: from the forward single-chart conjugation
+  `extChartAt x₀ (Φt x) = Ψ (extChartAt x₀ x)` on `U`, a `C³` left inverse `Ψsymm` of the model map, and
+  `Gt (Φt x) = x` on `U`, derives the backward conjugation and yields `ContMDiffOn I I 3 Gt (Φt '' U)`.
+* **`contMDiffOn_symm_of_extChartAt_conjugation_diffeomorph'`** — the directly-consumable specialisation
+  taking a genuine `C³` self-diffeomorph `Ψ : E ≃ₘ^3 E` (the shape of `G.maps3 τ`); `Ψ.symm` supplies the
+  `C³` left inverse (`Ψ.symm.contMDiff`) and left-inverse identity (`Ψ.symm_apply_apply`) for free.
+* **`contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn`** — the backward per-patch brick, dual to
+  `contMDiffOn_flowSlice_of_rawFlow_modelFlow_eqOn`: from the SAME temporal integral-curve comparison
+  data (raw gauge ODE, tube-Lipschitz, model co-solution + anchor) with the model flow as a diffeomorph
+  family `Ψ : ℝ → (E ≃ₘ^3 E)`, produces `ContMDiffOn I I 3 Gt (Φ t '' U)` via
+  `extChartAt_comp_eqOn_of_lipschitzOnWith` + the diffeomorph backward transfer.
+* **`contMDiff_symm_flowSlice_of_forall_openImage`** — the backward globaliser, dual to
+  `contMDiff_of_forall_extChartAt_conjugation'`: from an open-map + surjective forward slice `Φt` and
+  per-point open `U ∋ x` with `ContMDiffOn I I 3 Gt (Φt '' U)`, glues (via `IsOpenMap.image` +
+  `contMDiff_of_locally_contMDiffOn`) to global `ContMDiff I I 3 Gt`.
+
+**Fractions of GAP 1.**  Both halves of `hslicesC3` now have their full chart-transfer ladders
+(forward: prior sessions; backward: this session).  **NEXT:** supply the per-point BACKWARD packages from
+the actual compact flow — instantiate `Φt := Φ t` (the compact-flow slice), `Ψ := τ ↦ G.maps3 τ` (the
+model gauge flow), `Gt :=` the inverse flow, discharge `hGleft` (`Gt (Φt x) = x`) from
+`exists_timeDependent_flow_compact_inverse`'s `LeftInverse`, and the `IsOpenMap`/`Surjective` faces of
+the globaliser from the compact-flow slice being a homeomorphism (continuous bijection on compact `T2` ⇒
+`Homeomorph.isOpenMap`); feed the backward per-patch → `contMDiff_symm_flowSlice_of_forall_openImage` →
+`ContMDiff I I 3 (G t)`, pairing with the forward slice to discharge `hslicesC3` and inhabit
+`Diffeomorph3GaugeFlowOn` unconditionally.  Still: the Item-3 geometric chart (`A`/`picard`/Schauder)
+remains the independent long pole.
