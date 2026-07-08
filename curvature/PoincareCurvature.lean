@@ -21,3 +21,4 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReacti
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CompactGaugeFlowRaising
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.DeTurckRaisedGaugeField
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.AutonomousResolventExp
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FrozenChartAffineEvolution
