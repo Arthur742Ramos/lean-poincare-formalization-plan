@@ -2794,6 +2794,50 @@ theorem exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow_of_surj_left
     (fun t ht => hGleft t (hsub_lo ht))
     hab0 ht₀ hU hΦU hlip hraw hsrc hg' hγ_mem hg_mem heq₀ hGleft_patch
 
+/-- **Windowed co-solution supply — the model `G.maps3`-orbit solves the *un-cut* chart pushforward ODE,
+uniformly over a chart patch, from graph confinement in the cutoff window.**  This discharges the
+distinctive co-solution hypothesis `hg'` of the Ψ-comparison producers
+(`contMDiffOn_flowSlice_perPatch_of_flow_comparison` and its `_symm` twin, with `Ψ := G.maps3`) directly
+from the confinement machinery.  For the model cutoff gauge flow `G` (of the cut field
+`χ • chartPushforwardField I X p` over all time, anchored at `t₀`) with the cut field uniformly Lipschitz,
+a compact initial set `Q` carrying every chart image `extChartAt I p x` (`x ∈ U`), and a compact
+space-time window `Kwin` with `χ ≡ 1` near it and the anchored graph in its interior, the short-time
+orbit-graph confinement `exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith` (applied to
+`interior Kwin`) yields a window `Set.Ioo a b ∋ t₀` on which every orbit graph stays in `Kwin`;
+`cutoff_eqOne_along_curve_of_graph_subset` then gives `χ ≡ 1` along each orbit, so
+`hasDerivAt_maps3_eval_of_cutoff_eqOne` upgrades the cut-field integral-curve derivative to the *un-cut*
+`chartPushforwardField` — exactly the `hg'` datum, uniformly for all `x ∈ U` and `τ` in the window. -/
+theorem exists_Ioo_forall_forall_hasDerivAt_maps3_eval_of_lipschitzWith
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {p : M} {χ : ℝ × E → ℝ} {t₀ : ℝ} {K : ℝ≥0}
+    {Q : Set E} {Kwin : Set (ℝ × E)} {U : Set M}
+    (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+      (X := fun τ q => χ (τ, q) •
+        PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) Set.univ t₀)
+    (hlipX : ∀ t, LipschitzWith K (fun q => χ (t, q) •
+        PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p t q))
+    (hQ : IsCompact Q)
+    (hχ1 : ∀ᶠ r in 𝓝ˢ Kwin, χ r = 1)
+    (hgraph0 : ∀ q ∈ Q, ((t₀, (G.maps3 t₀) q) : ℝ × E) ∈ interior Kwin)
+    (hUQ : ∀ x ∈ U, extChartAt I p x ∈ Q) :
+    ∃ a b : ℝ, t₀ ∈ Set.Ioo a b ∧
+      ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasDerivAt (fun τ : ℝ => (G.maps3 τ) (extChartAt I p x))
+          (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ
+            ((G.maps3 τ) (extChartAt I p x))) τ := by
+  obtain ⟨a, b, ht₀ab, hgraph⟩ :=
+    exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith G hlipX hQ isOpen_interior hgraph0
+  refine ⟨a, b, ht₀ab, fun x hx τ hτ => ?_⟩
+  have hmemK : ∀ σ ∈ Set.Ioo a b, ((σ, (G.maps3 σ) (extChartAt I p x)) : ℝ × E) ∈ Kwin :=
+    fun σ hσ => interior_subset (hgraph σ hσ (extChartAt I p x) (hUQ x hx))
+  have hχτ : χ (τ, (G.maps3 τ) (extChartAt I p x)) = 1 :=
+    cutoff_eqOne_along_curve_of_graph_subset hχ1 hmemK τ hτ
+  exact hasDerivAt_maps3_eval_of_cutoff_eqOne G Filter.univ_mem (Set.mem_univ τ)
+    (extChartAt I p x) hχτ
+
 end
 
 end SmoothDependenceCk
