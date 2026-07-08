@@ -2624,3 +2624,52 @@ geometric `BilinearFormBundle` section space.  **NEXT:** a Duhamel/variation-of-
 `affineFundamentalSolution L b t₀ y₀ t = exp((t-t₀)L) y₀ + ∫₀ exp((t-s)L) b ds` (the homogeneous orbit
 restricted to the `(v,0)` invariant subspace of `affineAugment` gives `exp((t-t₀)L)`), or the
 state-dependent operator itself.
+
+### Item 3 (GAP 2) later-47 — quantitative norm-functional lifts for the parabolic `C^{0,α}` Schauder framework: CLM operator-action, domain monotonicity, and Lipschitz-composition bounds (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Honoring the 2026-07-04 anti-toolkit steers (no more frozen-affine / model-heat-kernel estimate
+variants), this session resolves the **formulation question** explicitly and then advances the
+*legitimate* Item 3 frontier — the general parabolic `C^{0,α}` Hölder framework
+(`AnalyticPDE/ParabolicHolder.lean`, the true Schauder vocabulary Mathlib lacks).
+
+**Formulation finding (recorded per the PRIMARY DIRECTIVE).**  The chart's `A` must satisfy BOTH
+`picard` (Banach ODE existence — a bounded+Lipschitz representative closes this, already DONE for the
+frozen zeroth-order reaction operator) AND `geometric` (`A τ s x u v = intrinsicRicciDeTurckRHS g bg
+τ x u v` for some `g,bg`).  These are in tension: the intrinsic Ricci–DeTurck RHS is genuinely a
+**second-order** operator in `s` (principal part `g^{kl} ∇̂_k ∇̂_l s_{ij}`), so a bounded zeroth-order
+representative — however well its growth/Lipschitz/resolvent estimates are proven (later-45/46) —
+**cannot** equal it for general continuous `s`.  Therefore the frozen-affine well-posedness toolkit is
+NOT on the critical path to `geometric`; the honest route inhabits `A` as the true 2nd-order operator
+on a parabolic Hölder space and closes `picard`/existence via a **Schauder a-priori bound**, not
+Mathlib's bounded Banach-ODE existence.  The next real work is the parabolic `C^{0,α}` Schauder layer.
+
+**What was added (all top-level in `RicciFlow.AnalyticPDE`, appended additively at file end).**  The
+quantitative `ℝ`-valued norm-functional lifts of the already-present *predicate*-level parabolic
+operations — the forms a Schauder / mild fixed-point argument actually consumes (it needs `‖·‖`
+inequalities, not just class membership):
+
+* **`parabolicC0AlphaNorm_mono_domain`** — full-norm domain monotonicity `‖u‖_{C^{0,α}(s)} ≤
+  ‖u‖_{C^{0,α}(t)}` for `s ⊆ t` (Schauder localization primitive), from the two component
+  `*_mono_domain` lemmas.
+* **`parabolicHolderSeminorm_continuousLinearMap_le`** / **`parabolicSupNorm_continuousLinearMap_le`** /
+  **`parabolicC0AlphaNorm_continuousLinearMap_le`** — the CLM operator-action triple `‖L∘u‖ ≤ ‖L‖·‖u‖`
+  on all three parabolic norm functionals (the coordinate-readout estimate shape the geometric chart's
+  linear/principal parts consume), via the achieved-seminorm predicate lemmas + `le_opNorm`.
+* **`parabolicHolderSeminorm_comp_lipschitzWith_le`** — `[φ∘u]_α ≤ K·[u]_α` for `K`-Lipschitz `φ`.
+* **`parabolicC0AlphaNorm_continuousLinearMap_sub_le`** — linear-operator **stability**
+  `‖L∘u − L∘v‖_{C^{0,α}} ≤ ‖L‖·‖u−v‖_{C^{0,α}}` (via `map_sub` + the CLM-action bound).
+* **`parabolicSupNorm_comp_lipschitzWith_sub_le`** — nonlinear **contraction** `‖φ∘u − φ∘v‖_{C^0} ≤
+  K·‖u−v‖_{C^0}` (the reaction-term sup contraction a fixed point consumes).
+* **`parabolicSupNorm_comp_lipschitzWith_le`** / **`parabolicC0AlphaNorm_comp_lipschitzWith_le`** — the
+  absolute Lipschitz-composition bounds `‖φ∘u‖ ≤ K·‖u‖ + ‖φ 0‖` (sup and full norm), completing the
+  Lipschitz-composition family (absolute + difference/contraction).
+
+**Progress on {A, picard, realization, encode}.**  Framework layer for the `picard`/Schauder side of the
+*true* second-order geometric `A`: the CLM-action `C^{0,α}` bound is exactly the quantitative
+coordinate-readout Hölder estimate the geometric chart's linear parts need, and the Lipschitz-composition
+absolute+contraction bounds are the reaction-term a-priori/contraction inputs.  **Unchanged long pole:**
+the second-order geometric operator `A` on the `BilinearFormBundle` section space (the `whnf`/defeq
+concreteness wall) and its Schauder `picard`.  **NEXT:** the parabolic heat-potential / single-layer
+Schauder gain `‖u‖_{C^{2,α}} ≤ C(‖∂_t u − Δu‖_{C^{0,α}} + ‖u‖_{C^0})` connecting the DONE model
+heat-mild toolkit to these `C^{0,α}` norm functionals, or the definition of the geometric second-order
+operator itself.
