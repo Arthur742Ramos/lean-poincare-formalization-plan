@@ -708,4 +708,48 @@ theorem exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField_ball {n : Wi
     hball (convex_closedBall c ρ) (isCompact_closedBall c ρ)
   exact ⟨K, fun t ht => (hK t ht).mono Metric.ball_subset_closedBall⟩
 
+/-- **Fixed-time flow-slice `C³` regularity from temporal integral-curve uniqueness against a
+model-`C³` flow.**  The genuine GAP-1 assembly step joining the two halves of the chart-transfer
+programme: temporal integral-curve uniqueness (`extChartAt_comp_eqOn_of_lipschitzOnWith`) and the
+fixed-chart `C³` conjugation transfer (`contMDiffOn_of_extChartAt_conjugation'`).
+
+For a raw manifold flow `Φ : ℝ → M → M` whose trajectories `τ ↦ Φ τ x` solve the bare gauge ODE
+`HasMFDerivWithinAt … ((1).smulRight (X τ (Φ τ x)))` on an open window `Ioo a b` and stay in the
+preferred chart `extChartAt I p`, and a model flow `Ψ : ℝ → E → E` whose orbits
+`τ ↦ Ψ τ (extChartAt I p x)` are integral curves of the chart pushforward field
+`chartPushforwardField I X p` agreeing with the raw chart representation at an interior anchor time
+`t₀`, the (uniform-in-time, tube-local) Lipschitz control on the pushforward field forces, at every
+window time `t`, the *spatial* conjugation identity `extChartAt I p (Φ t x) = Ψ t (extChartAt I p x)`
+on `U`.  Feeding that fixed-`t` identity (with the `C³` spatial slice `Ψ t`) to
+`contMDiffOn_of_extChartAt_conjugation'` (single fixed chart `p` for source and target) discharges
+`ContMDiffOn I I 3 (Φ t) U` on the chart-confined patch — the per-patch content that
+`contMDiff_of_forall_extChartAt_conjugation` glues into the global slice `C³` (`hslicesC3`) obligation
+of `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`.  No spatial regularity of `Φ`
+itself is assumed: it is *produced* from the raw ODE by comparison with the model-`C³` flow. -/
+theorem contMDiffOn_flowSlice_of_rawFlow_modelFlow_eqOn
+    {Φ : ℝ → M → M} {Ψ : ℝ → E → E} {p : M} {X : ℝ → M → E}
+    {a b t₀ t : ℝ} {K : NNReal} {state : ℝ → Set E} {U : Set M}
+    (hU : U ⊆ (chartAt H p).source)
+    (hΨ : ContDiff ℝ 3 (Ψ t))
+    (hΦU : Set.MapsTo (Φ t) U (chartAt H p).source)
+    (ht : t ∈ Set.Ioo a b)
+    (ht₀ : t₀ ∈ Set.Ioo a b)
+    (hlip : ∀ τ ∈ Set.Ioo a b, LipschitzOnWith K (chartPushforwardField I X p τ) (state τ))
+    (hraw : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo a b) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x))))
+    (hsrc : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ x ∈ (extChartAt I p).source)
+    (hg' : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+      HasDerivAt (fun τ : ℝ ↦ Ψ τ (extChartAt I p x))
+        (chartPushforwardField I X p τ (Ψ τ (extChartAt I p x))) τ)
+    (hγ_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ x) ∈ state τ)
+    (hg_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, Ψ τ (extChartAt I p x) ∈ state τ)
+    (heq₀ : ∀ x ∈ U, extChartAt I p (Φ t₀ x) = Ψ t₀ (extChartAt I p x)) :
+    ContMDiffOn I I 3 (Φ t) U := by
+  refine contMDiffOn_of_extChartAt_conjugation' hU hΨ hΦU (fun x hx => ?_)
+  exact extChartAt_comp_eqOn_of_lipschitzOnWith
+    (fun τ hτ => hraw x hx τ hτ) (fun τ hτ => hsrc x hx τ hτ) ht₀ hlip
+    (fun τ hτ => hg' x hx τ hτ) (fun τ hτ => hγ_mem x hx τ hτ)
+    (fun τ hτ => hg_mem x hx τ hτ) (heq₀ x hx) ht
+
 end PoincareCurvature.GaugeFlowAssembly
