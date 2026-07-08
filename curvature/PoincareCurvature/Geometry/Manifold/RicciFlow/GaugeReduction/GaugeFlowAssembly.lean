@@ -998,4 +998,50 @@ theorem contMDiff_symm_flowSlice_of_forall_rawFlow_modelFlow_eqOn
       hU hΦU ht ht₀ hlip hraw hsrc hg' hγ_mem hg_mem heq₀ (fun y _ => hGleft y)
   exact key.mono (Set.image_mono interior_subset)
 
+/-- **Both slices `C³` (Route-A `hslicesC3` conclusion, fixed time) from one per-point diffeomorph
+comparison family.**  Consolidates the forward capstone
+`contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn` and the backward capstone
+`contMDiff_symm_flowSlice_of_forall_rawFlow_modelFlow_eqOn` into the exact
+`ContMDiff I I 3 (Φ t) ∧ ContMDiff I I 3 Gt` shape of the `hslicesC3` conclusion of
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` at a fixed time `t`.
+
+A *single* per-base-point comparison package — carrying a genuine `C³` *diffeomorph* model flow
+`Ψ : ℝ → (E ≃ₘ^3 E)` (so its underlying map is `C³` and its inverse is `C³`), together with the raw
+gauge ODE, tube-Lipschitz control, integral-curve co-solution, and anchor agreement — feeds *both*
+directions: the forward slice `C³` extracts `ContDiff ℝ 3 (Ψ t)` from `(Ψ t).contMDiff` and applies
+the forward gluer; the inverse slice `C³` passes the same diffeomorph package (plus the compact-`T2`
+homeomorphism data `Continuous`/`Surjective`/left-inverse of `Φ t`) to the backward capstone.  This is
+the single-time `hslicesC3` datum; quantifying `t` over the flow window discharges both conjuncts of
+`hslicesC3` from one uniform supply of per-point comparison packages. -/
+theorem contMDiff_flowSlice_and_symm_of_forall_rawFlow_modelFlow_eqOn
+    [CompactSpace M]
+    {Φ : ℝ → M → M} {Gt : M → M} {X : ℝ → M → E} {t : ℝ}
+    (hΦcont : Continuous (Φ t))
+    (hΦsurj : Function.Surjective (Φ t))
+    (hGleft : Function.LeftInverse Gt (Φ t))
+    (h : ∀ x : M, ∃ (p : M) (Ψ : ℝ → (E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)) (a b t₀ : ℝ) (K : NNReal)
+        (state : ℝ → Set E) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧
+      Set.MapsTo (Φ t) U (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K (chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasDerivAt (fun τ : ℝ ↦ (Ψ τ : E → E) (extChartAt I p y))
+          (chartPushforwardField I X p τ ((Ψ τ : E → E) (extChartAt I p y))) τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, (Ψ τ : E → E) (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = (Ψ t₀ : E → E) (extChartAt I p y))) :
+    ContMDiff I I 3 (Φ t) ∧ ContMDiff I I 3 Gt := by
+  refine ⟨contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn (X := X) (Φ := Φ) (t := t)
+      (fun x => ?_),
+    contMDiff_symm_flowSlice_of_forall_rawFlow_modelFlow_eqOn hΦcont hΦsurj hGleft h⟩
+  obtain ⟨p, Ψ, a, b, t₀, K, state, U, hUmem, hU, hΦU, ht, ht₀, hlip,
+    hraw, hsrc, hg', hγ_mem, hg_mem, heq₀⟩ := h x
+  exact ⟨p, fun τ => (Ψ τ : E → E), a, b, t₀, K, state, U, hUmem, hU,
+    contMDiff_iff_contDiff.mp (Ψ t).contMDiff, hΦU, ht, ht₀, hlip,
+    hraw, hsrc, hg', hγ_mem, hg_mem, heq₀⟩
+
 end PoincareCurvature.GaugeFlowAssembly
