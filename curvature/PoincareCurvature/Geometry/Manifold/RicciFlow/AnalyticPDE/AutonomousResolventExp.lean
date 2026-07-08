@@ -330,6 +330,38 @@ theorem norm_affineFundamentalSolution_le {E : Type*} [NormedAddCommGroup E] [No
               Real.exp_le_exp.2
                 (mul_le_mul_of_nonneg_left (norm_affineAugment_le L b) (abs_nonneg _))
 
+/-- **Continuous dependence on initial data for the frozen (affine) chart evolution.**
+`‖affineFundamentalSolution L b t₀ y₀ t − affineFundamentalSolution L b t₀ y₀' t‖ ≤
+Real.exp (|t - t₀| · (‖L‖ + ‖b‖)) · ‖y₀ − y₀'‖`.  The evolution is *affine* in the initial value, so
+the difference of two orbits is the homogeneous orbit of `(y₀ − y₀', 0)`:
+`(exp A (y₀,1)).1 − (exp A (y₀',1)).1 = (exp A ((y₀,1) − (y₀',1))).1 = (exp A (y₀ − y₀', 0)).1`
+by linearity of `exp A` and of the projection, with `(y₀,1) − (y₀',1) = (y₀ − y₀', 0)`.  The resolvent
+growth bound then controls it.  This is the Lipschitz-in-initial-data / well-posedness stability of the
+honest frozen geometric section-space evolution, with the same at-most-exponential rate. -/
+theorem norm_affineFundamentalSolution_sub_le {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [CompleteSpace E] (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ y₀' : E) (t : ℝ) :
+    ‖affineFundamentalSolution L b t₀ y₀ t - affineFundamentalSolution L b t₀ y₀' t‖
+      ≤ Real.exp (|t - t₀| * (‖L‖ + ‖b‖)) * ‖y₀ - y₀'‖ := by
+  set A := (t - t₀) • affineAugment L b with hA
+  have key : (NormedSpace.exp A (y₀, (1:ℝ))).1 - (NormedSpace.exp A (y₀', (1:ℝ))).1
+      = (NormedSpace.exp A (y₀ - y₀', (0:ℝ))).1 := by
+    rw [← Prod.fst_sub, ← ContinuousLinearMap.map_sub]
+    congr 2
+    rw [Prod.mk_sub_mk, sub_self]
+  rw [affineFundamentalSolution, affineFundamentalSolution, ← hA, key]
+  have hnorm0 : ‖(y₀ - y₀', (0:ℝ))‖ = ‖y₀ - y₀'‖ := by
+    rw [Prod.norm_def, norm_zero, max_eq_left (norm_nonneg _)]
+  calc ‖(NormedSpace.exp A (y₀ - y₀', (0:ℝ))).1‖
+      ≤ ‖NormedSpace.exp A (y₀ - y₀', (0:ℝ))‖ := by rw [Prod.norm_def]; exact le_max_left _ _
+    _ ≤ ‖NormedSpace.exp A‖ * ‖(y₀ - y₀', (0:ℝ))‖ := ContinuousLinearMap.le_opNorm _ _
+    _ ≤ Real.exp (|t - t₀| * (‖L‖ + ‖b‖)) * ‖(y₀ - y₀', (0:ℝ))‖ := by
+        refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+        rw [hA]
+        refine (norm_exp_smul_le (t - t₀) (affineAugment L b)).trans ?_
+        exact Real.exp_le_exp.2
+          (mul_le_mul_of_nonneg_left (norm_affineAugment_le L b) (abs_nonneg _))
+    _ = Real.exp (|t - t₀| * (‖L‖ + ‖b‖)) * ‖y₀ - y₀'‖ := by rw [hnorm0]
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
