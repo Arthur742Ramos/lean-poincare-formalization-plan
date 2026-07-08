@@ -2369,3 +2369,48 @@ wall.  Three routes were attempted and all hit a `whnf` timeout at 2 000 000 hea
 uniqueness at `CSS` to get every frozen Banach solution = the smooth explicit evolution (the
 `realization`/`encode` smoothness+uniqueness), or (ii) supply the chart's `geometric` field for
 general `s` (the parabolic Schauder long pole, unchanged).
+
+### Item 3 (GAP 2) later-41 — the CSS-concrete uniqueness WALL is CRACKED wall-free (no definition-site metric fix needed): every frozen Banach solution = the explicit smooth affine evolution, hence its curve is `ContDiffOn` in time (five commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-40 recorded the CSS-concrete Banach uniqueness as BLOCKED by the `BilinearFormBundle`
+concreteness wall (three routes all `whnf`-timed-out at 2 000 000 heartbeats), with `NEXT` (i) = a
+definition-site `edist`-transparent CSS metric.  **That route is unnecessary.**  The wall came from
+proving `LipschitzWith K (fun s ↦ deTurckReactionSectionMap ∇W s + b)` via the *operator-norm* route
+`L.lipschitz`, which forces normalisation of the CSS `edist` on the `BilinearFormBundle` fibre.  The
+section-space Picard bridge never needed CSS `edist` in the first place — it consumes *coordinate*
+`dist` bounds — and the same coordinate route already gives a genuine global CSS `LipschitzWith`
+(`deTurckReactionSectionMap_add_source_lipschitzWith_of_uniform_inCoordinates`, via
+`lipschitzWith_of_forall_coord_dist_le` + the compactness bound `exists_uniform_inCoord_bound`).
+Feeding THAT Lipschitz datum to the *identical* Grönwall argument (`ODE_solution_unique`) closes the
+uniqueness with no `edist` normalisation, so the wall never arises.  New declarations (appended to
+`AnalyticPDE/FrozenChartAffineEvolution.lean`, all axiom-clean):
+
+* **`banachEvolution_curve_eq_deTurckFrozenAffineEvolution`** — any
+  `BanachEvolutionLocalSolution (fun _ ↦ fun s ↦ deTurckReactionSectionMap ∇W s + b) t₀ σ₀` has curve
+  `= deTurckFrozenAffineEvolution` on `Icc t₀ sol.terminalTime`.  The wall-free CSS realisation of
+  the abstract `banachEvolutionLocalSolution_curve_eq_affineFundamentalSolution`.
+* **`banachEvolutionIn_curve_eq_deTurckFrozenAffineEvolution`** — the state-constrained
+  (`BanachEvolutionLocalSolutionIn locus`) version, the exact shape the chart-closure
+  `encode`/`realization` carry.
+* **`banachEvolution_curve_eq_deTurckFrozenGeometricAffineEvolution`** — the concrete `∇W` /
+  `intrinsicRicciFlowRHSSectionSpace` geometric specialisation (matching
+  `deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn`).
+* **`banachEvolution_curve_contDiffOn_of_frozen`** (+ **`_frozenGeometric`**) — hence any frozen
+  Banach solution's curve is `ContDiffOn ℝ n` in time on its interval (uniqueness = explicit
+  evolution, composed with `contDiff_deTurckFrozenAffineEvolution` via `ContDiffOn.congr`): the
+  parabolic-free time-regularity the smooth realization consumes at the interval endpoints.
+
+**Progress on {A, picard, realization, encode}.**  For the FROZEN (autonomous, bounded-linear) chart
+operator, existence (`picard` → `BanachEvolutionLocalSolutionIn`) and the CSS Lipschitz `lipschitz`
+field were already committed; this session adds the CSS uniqueness core + curve time-smoothness — the
+`realization`/`encode` support lemmas for the frozen sub-problem, now wall-free.  The frozen operator
+still does NOT inhabit the full chart's `geometric` field for GENERAL `s` (it is only first-order in
+`s`, matching the intrinsic 2nd-order RHS only at the metric section), so the target
+`intrinsicLocalExistenceUniquenessFamily_pointFour` remains OPEN pending the real state-dependent
+operator + parabolic Schauder gain.
+
+**NEXT.**  Supply the chart's `geometric` field for general `s` (the state-dependent 2nd-order
+Ricci–DeTurck operator's section-space representative + parabolic Schauder regularity) — the long
+pole — OR connect the now-available frozen uniqueness/time-smoothness into the `realization`
+`RicciDeTurckSmoothRealizationData.of_chosenBackground_endpointTimeDerivative_chartRHS` constructor
+(the endpoint `HasTimeDerivativeAt` obligation) for a frozen-chart realization witness.
