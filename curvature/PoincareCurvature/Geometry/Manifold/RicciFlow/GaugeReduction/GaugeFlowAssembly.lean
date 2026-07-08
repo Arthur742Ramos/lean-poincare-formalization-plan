@@ -915,4 +915,27 @@ theorem contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn
     (fun τ hτ => hg' y hy τ hτ) (fun τ hτ => hγ_mem y hy τ hτ)
     (fun τ hτ => hg_mem y hy τ hτ) (heq₀ y hy) ht
 
+/-- **Global inverse-slice `C³` from per-point backward per-patch data against an open-map slice.**  The
+backward-slice globaliser, dual to `contMDiff_of_forall_extChartAt_conjugation'`: at a fixed time, if the
+forward slice `Φt` is an open map (its compact-manifold time-slices are diffeomorphisms, hence open) and
+surjective, and around every base point `x` there is an open neighbourhood `U ∋ x` on which the inverse
+slice `Gt` is `ContMDiffOn I I 3` on the forward image `Φt '' U` — precisely the datum produced by
+`contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn` — then `Gt` is globally `ContMDiff I I 3`.
+
+Every point `y = Φt x` (surjectivity) has the open neighbourhood `Φt '' U` (open by the open-map
+hypothesis) on which `Gt` is `ContMDiffOn`; `contMDiff_of_locally_contMDiffOn` glues these into global
+`ContMDiff`.  Composed with the per-patch backward lemma this discharges the inverse-slice (`G t`) `C³`
+half of the `hslicesC3` obligation of `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`
+(the forward half being handled by the primed forward gluer). -/
+theorem contMDiff_symm_flowSlice_of_forall_openImage
+    {Φt Gt : M → M}
+    (hopen : IsOpenMap Φt)
+    (hsurj : Function.Surjective Φt)
+    (h : ∀ x : M, ∃ U : Set M, IsOpen U ∧ x ∈ U ∧ ContMDiffOn I I 3 Gt (Φt '' U)) :
+    ContMDiff I I 3 Gt := by
+  refine contMDiff_of_locally_contMDiffOn (fun y => ?_)
+  obtain ⟨x, rfl⟩ := hsurj y
+  obtain ⟨U, hUopen, hxU, hGU⟩ := h x
+  exact ⟨Φt '' U, hopen U hUopen, ⟨x, hxU, rfl⟩, hGU⟩
+
 end PoincareCurvature.GaugeFlowAssembly
