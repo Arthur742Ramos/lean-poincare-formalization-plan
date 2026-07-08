@@ -189,4 +189,60 @@ theorem hasDerivAt_scalarEval_of_hasDerivAt
   rw [e1, e2]
   exact hcomp
 
+/-- **Interior scalar section-curve derivative of a Banach evolution local solution.** For `t` in the
+open evolution interval, the scalar curve `τ ↦ sol.curve τ x u v` has time-derivative
+`A t (sol.curve t) x u v`.  This is the interior scalar section-curve `HasDerivAt` datum that the
+smooth-realization bridge `hasTimeDerivativeAt_of_sectionCurve_hasDerivAt` consumes (obtained by
+pushing the `CSS`-level Banach ODE `equation_hasDerivAt_of_mem_Ioo` through `sectionScalarEvalCLM`). -/
+theorem hasDerivAt_scalarEval_banachEvolution_of_mem_Ioo
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {A : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover}
+    {t₀ : ℝ}
+    {u₀ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover}
+    (sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolution A t₀ u₀)
+    {t : ℝ} (ht : t ∈ Set.Ioo t₀ sol.terminalTime)
+    (x : M) (u v : TM x) :
+    HasDerivAt (fun τ : ℝ ↦ sol.curve τ x u v) (A t (sol.curve t) x u v) t :=
+  hasDerivAt_scalarEval_of_hasDerivAt x0 Kc hKc Ko hKo hKoEq hcover
+    (sol.equation_hasDerivAt_of_mem_Ioo ht) x u v
+
+/-- The state-constrained (`BanachEvolutionLocalSolutionIn`) form of
+`hasDerivAt_scalarEval_banachEvolution_of_mem_Ioo`: the exact shape the chart-closure
+`realization` field carries for the interior of the solution interval. -/
+theorem hasDerivAt_scalarEval_banachEvolutionIn_of_mem_Ioo
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {A : ℝ → ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover →
+      ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover}
+    {stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)}
+    {t₀ : ℝ}
+    {u₀ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover}
+    (sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn A stateSet t₀ u₀)
+    {t : ℝ} (ht : t ∈ Set.Ioo t₀ sol.terminalTime)
+    (x : M) (u v : TM x) :
+    HasDerivAt (fun τ : ℝ ↦ sol.curve τ x u v) (A t (sol.curve t) x u v) t :=
+  hasDerivAt_scalarEval_of_hasDerivAt x0 Kc hKc Ko hKo hKoEq hcover
+    (sol.toBanachEvolutionLocalSolution.equation_hasDerivAt_of_mem_Ioo ht) x u v
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
