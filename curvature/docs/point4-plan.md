@@ -2414,3 +2414,50 @@ Ricci–DeTurck operator's section-space representative + parabolic Schauder reg
 pole — OR connect the now-available frozen uniqueness/time-smoothness into the `realization`
 `RicciDeTurckSmoothRealizationData.of_chosenBackground_endpointTimeDerivative_chartRHS` constructor
 (the endpoint `HasTimeDerivativeAt` obligation) for a frozen-chart realization witness.
+
+### Item 3 (GAP 2) later-42 — the scalar section-curve `HasDerivAt` bridge is CRACKED diamond-free: pointwise evaluation `s ↦ s x u v` on the concrete `BilinearFormBundle` CSS is a genuine `CSS →L[ℝ] ℝ`, and it pushes any `CSS`-valued `HasDerivAt` to the scalar `HasDerivAt (fun τ ↦ f τ x u v) (f' x u v) t` (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-41 named `NEXT` = connect the frozen uniqueness/time-smoothness into the `realization` endpoint
+`HasTimeDerivativeAt` obligation.  The manifold-level bridge `hasTimeDerivativeAt_of_sectionCurve_hasDerivAt`
+(`SmoothRealization.lean`) already reduces that obligation to the **scalar** hypothesis
+`HasDerivAt (fun τ ↦ D.sectionCurve τ x u v) (gdot t x u v) t` for each `(x, u, v)`.  The missing link
+was pushing a `CSS`-valued `HasDerivAt` of the Banach curve through the pointwise evaluation
+`s ↦ s x u v` — blocked until now because that evaluation-as-a-CLM ran into the `BilinearFormBundle`
+fibre-instance / `whnf` wall (`coord_apply`, `coord_norm_le_norm`, and any nested `{ toLinearMap := … }`
+CLM constructor all time out at 2 000 000 heartbeats on the concrete CSS).
+
+**The wall was crossed on the Path-B (hom-fibre-topology) track**, mirroring `add_apply_tangent`.  New
+module `AnalyticPDE/SectionPointwiseDeriv.lean` (imports `GeometricReactionPicardTangent`) and additions
+to `FrozenChartAffineEvolution.lean`, all axiom-clean:
+
+* **`sectionScalarEvalCLM`** — `s ↦ s x u v` as `CSS →L[ℝ] ℝ`, built as the **flat** `ContinuousLinearMap`
+  structure (the nested/`mkContinuous`/`{ toLinearMap := … }` forms all `whnf`-blow-up): algebra fields
+  are the diamond-free `add_apply_tangent`/`smul_apply_tangent`; continuity is
+  `continuous_of_linear_of_bound` with the operator bound `|s x u v| ≤ ‖symmₗ-eval‖·‖s‖` from the
+  **Path-B** `coord_norm_le_norm_topFibre` (the seminormed-track `coord_norm_le_norm` times out) and the
+  finite-dimensional linear map `w ↦ (symmₗ w) u v` on `BilF`.  `sectionScalarEvalCLM_apply` is `rfl`.
+* **`hasDerivAt_scalarEval_of_hasDerivAt`** — `HasDerivAt f f' t → HasDerivAt (fun τ ↦ f τ x u v) (f' x u v) t`,
+  via `ContinuousLinearMap.hasFDerivAt.comp`.
+* **`hasDerivAt_scalarEval_banachEvolution_of_mem_Ioo`** (+ `_banachEvolutionIn_`) — the interior
+  scalar derivative of any Banach evolution solution: `sol.equation_hasDerivAt_of_mem_Ioo` pushed through.
+* **`hasDerivAt_scalarEval_deTurckFrozenGeometricAffineEvolution`** — the **endpoint-inclusive** scalar
+  derivative of the concrete geometric frozen chart evolution (the explicit affine evolution is globally
+  `HasDerivAt`, so this holds at the interval endpoints, unlike the `Ioo` Banach form): the exact
+  `initial`/`terminal`/`boundary_hasTimeDerivative` scalar data the smooth realization consumes for the
+  frozen chart.
+
+**Progress on {A, picard, realization, encode}.**  This session builds the **realization**-side scalar
+time-derivative plumbing for the frozen chart (the endpoint `HasTimeDerivativeAt` reduction is now fully
+supplied at the scalar level for the frozen geometric evolution).  Combined with the earlier frozen
+`picard`/`lipschitz`/uniqueness/time-smoothness, the frozen sub-problem's `realization` support lemmas
+are nearly complete — but the frozen operator still does NOT satisfy the chart's `geometric` field for
+general `s` (first-order vs the intrinsic 2nd-order RHS), so `intrinsicLocalExistenceUniquenessFamily_pointFour`
+remains OPEN pending the real state-dependent operator + parabolic Schauder gain.
+
+**NEXT.**  Assemble a frozen-chart `RicciDeTurckSmoothRealizationData` via
+`of_smoothMetricSectionCurve_endpointSectionDerivatives_chartRHS`, feeding
+`hasDerivAt_scalarEval_deTurckFrozenGeometricAffineEvolution` as the `initial_hasDerivAt`/`terminal_hasDerivAt`
+arguments (the remaining inputs are a `SmoothMetricSectionCurveData` realizing the frozen curve and the
+`chartRHS_eq_intrinsic` identity at the metric section, already available via
+`deTurckReactionSectionMap_add_source_metricSection_apply_eq_intrinsicRicciDeTurckRHS`) — OR the long pole:
+supply the chart's `geometric` field for general `s`.
