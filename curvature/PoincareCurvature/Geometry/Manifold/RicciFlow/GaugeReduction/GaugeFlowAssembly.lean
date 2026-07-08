@@ -938,4 +938,64 @@ theorem contMDiff_symm_flowSlice_of_forall_openImage
   obtain ⟨U, hUopen, hxU, hGU⟩ := h x
   exact ⟨Φt '' U, hopen U hUopen, ⟨x, hxU, rfl⟩, hGU⟩
 
+/-- **Global inverse-slice `C³` (Route-A `hslicesC3`, backward half) from a per-point family of
+temporal integral-curve comparisons.**  The inverse-slice mirror of the forward capstone
+`contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn`: for a fixed time `t`, `ContMDiff I I 3 Gt`
+for the spatial inverse `Gt` of the forward slice `Φ t` — exactly the inverse-slice `hslicesC3` datum
+of `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` (Route A) — provided:
+
+* the forward slice `Φ t` is *continuous* and *surjective*, and `Gt` left-inverts it globally (on a
+  compact `T2` manifold these package `Φ t` as a homeomorphism, so it is an open map — the topological
+  input the backward globaliser `contMDiff_symm_flowSlice_of_forall_openImage` consumes); and
+* around EVERY base point `x` there is a preferred chart `p`, a *diffeomorph* model comparison flow
+  `Ψ : ℝ → (E ≃ₘ^3 E)` (the shape `τ ↦ G.maps3 τ` of the model gauge-flow slice), an open window
+  `Ioo a b ∋ t, t₀`, a uniform tube-Lipschitz constant `K` for the chart pushforward field, and a
+  neighbourhood `U ∋ x` on which the raw flow trajectories solve the bare gauge ODE, stay in the chart,
+  and are compared (integral-curve co-solution + anchor agreement) with the model flow's orbits.
+
+Each local package yields, via the backward per-patch brick
+`contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn` (whose spatial conjugation comes from the
+temporal integral-curve uniqueness core `extChartAt_comp_eqOn_of_lipschitzOnWith`), the local
+`ContMDiffOn I I 3 Gt (Φ t '' U)`; the open-map surjective slice `Φ t` — obtained from
+`Continuous.homeoOfEquivCompactToT2` applied to the continuous bijection `Φ t` on compact `T2` `M` —
+then feeds `contMDiff_symm_flowSlice_of_forall_openImage` to glue those into global `C³`.  This is the
+direct bridge from "raw compact flow + model-`C³` comparison data, locally everywhere" to the
+inverse-slice `C³` obligation; paired with the forward capstone it discharges both halves of
+`hslicesC3`, no spatial regularity of `Φ` assumed anywhere. -/
+theorem contMDiff_symm_flowSlice_of_forall_rawFlow_modelFlow_eqOn
+    [CompactSpace M]
+    {Φ : ℝ → M → M} {Gt : M → M} {X : ℝ → M → E} {t : ℝ}
+    (hΦcont : Continuous (Φ t))
+    (hΦsurj : Function.Surjective (Φ t))
+    (hGleft : Function.LeftInverse Gt (Φ t))
+    (h : ∀ x : M, ∃ (p : M) (Ψ : ℝ → (E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)) (a b t₀ : ℝ) (K : NNReal)
+        (state : ℝ → Set E) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧
+      Set.MapsTo (Φ t) U (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K (chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasDerivAt (fun τ : ℝ ↦ (Ψ τ : E → E) (extChartAt I p y))
+          (chartPushforwardField I X p τ ((Ψ τ : E → E) (extChartAt I p y))) τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, (Ψ τ : E → E) (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = (Ψ t₀ : E → E) (extChartAt I p y))) :
+    ContMDiff I I 3 Gt := by
+  have hbij : Function.Bijective (Φ t) := ⟨hGleft.injective, hΦsurj⟩
+  have hopen : IsOpenMap (Φ t) :=
+    (Continuous.homeoOfEquivCompactToT2 (f := Equiv.ofBijective (Φ t) hbij) hΦcont).isOpenMap
+  refine contMDiff_symm_flowSlice_of_forall_openImage hopen hΦsurj (fun x => ?_)
+  obtain ⟨p, Ψ, a, b, t₀, K, state, U, hUmem, hU, hΦU, ht, ht₀, hlip,
+    hraw, hsrc, hg', hγ_mem, hg_mem, heq₀⟩ := h x
+  refine ⟨interior U, isOpen_interior, mem_interior_iff_mem_nhds.mpr hUmem, ?_⟩
+  have key : ContMDiffOn I I 3 Gt (Φ t '' U) :=
+    contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn
+      (Φ := Φ) (Ψ := Ψ) (Gt := Gt) (p := p) (X := X) (a := a) (b := b) (t₀ := t₀) (t := t)
+      (K := K) (state := state) (U := U)
+      hU hΦU ht ht₀ hlip hraw hsrc hg' hγ_mem hg_mem heq₀ (fun y _ => hGleft y)
+  exact key.mono (Set.image_mono interior_subset)
+
 end PoincareCurvature.GaugeFlowAssembly
