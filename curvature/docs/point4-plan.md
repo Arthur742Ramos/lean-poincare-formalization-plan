@@ -2282,3 +2282,37 @@ frozen operator, then the endpoint time-derivative for `realization`'s `boundary
 (b) The GENERAL-`s` `geometric` (honest state-dependent 2nd-order operator, `A τ s = intrinsicRicciDeTurckRHS`
 for the metric of `s`) is still the parabolic Schauder long pole — the honest operator is not defined on
 merely-`C⁰` sections, so it needs the Hölder/Schauder space reformulation (unchanged).
+
+### Item 3 (GAP 2) later-39 — the frozen DeTurck reaction operator is packaged as a bounded linear `CSS →L[ℝ] CSS`: CSS-level `map_add`/`map_smul` (wall-free) + unconditional continuity (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-38 cracked the `BilinearFormBundle` CSS-add wall with the diamond-free pointwise `add_apply_tangent`
+and noted that the later-36/37 blocker — the CSS-level linearity of `deTurckReactionSectionMap` — "is now
+reachable via `add_apply_tangent` on input sections + `bilinearFormSectionDeTurckReaction_add`."  This
+session executed that and bundled the result.  Three additive, axiom-clean landings in
+`AnalyticPDE/GeometricReactionPicardTangent.lean`:
+
+* **`deTurckReactionSectionMap_map_add`** — CSS-level additivity `A (s + t) = A s + A t` of the frozen
+  reaction self-map.  Proved wall-free: `ContinuousSectionSpace.ext` reduces to the fibre section value,
+  both the input sum `(s + t).toFun` and the output sum `(A s + A t).toFun` are split with the diamond-free
+  `add_apply_tangent`, and the raw-`Pi` reaction additivity `bilinearFormSectionDeTurckReaction_add`
+  closes it — never invoking the seminormed-track `add_apply` (whose `BilinearFormBundle` fibre `isDefEq`
+  timeout was the later-37 wall).
+* **`smul_apply_tangent`** (the scalar companion of `add_apply_tangent`, inlined coordinate-smul split via
+  `toCompatibleCoordFamilySubmoduleContinuousLinearMap`'s `map_smul` + `symmₗ` `ℝ`-linearity) and
+  **`deTurckReactionSectionMap_map_smul`** — CSS-level homogeneity `A (c • s) = c • A s`, same wall-free
+  route with `bilinearFormSectionDeTurckReaction_smul`.
+* **`deTurckReactionSectionMapL`** (+ `_apply`) — the frozen reaction operator bundled as a bounded linear
+  `CSS →L[ℝ] CSS`: `map_add'`/`map_smul'` are the two lemmas above, and `cont` is UNCONDITIONAL — the
+  compactness-derived uniform inCoordinates bound `exists_uniform_inCoord_bound` feeds
+  `deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates`, whose `.continuous` discharges it
+  with no `Kp` hypothesis.  This is the bounded-linear generator interface the later-35 autonomous
+  resolvent (`isIntegralCurve_exp_smul_const`, `fundamentalSolution_const_eq_exp`) consumes.
+
+**Value / placement.**  The later-36/37 blocker is fully resolved: the geometric reaction operator now has
+its complete linear-map structure, packaged as `CSS →L[ℝ] CSS`.  **NEXT.**  The frozen chart operator is
+AFFINE (`A τ s = L s + b`), so the homogeneous resolvent `exp((t-t₀)•L)` alone solves the WRONG ODE;
+connecting `deTurckReactionSectionMapL` to the realization needs the Duhamel term
+`∫ exp((t-r)•L) b dr` (a Bochner-integral construction, currently the tractable-but-nontrivial next
+piece toward `realization`'s smoothness), OR the general-`s` `geometric` remains the parabolic Schauder
+long pole (unchanged).  A cross-module import of `AutonomousResolventExp` into the geometric section-space
+files is the prerequisite for the Duhamel assembly.
