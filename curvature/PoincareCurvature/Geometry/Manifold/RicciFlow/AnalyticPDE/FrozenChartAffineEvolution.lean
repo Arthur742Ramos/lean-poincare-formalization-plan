@@ -775,4 +775,45 @@ theorem norm_deTurckFrozenAffineEvolution_le
   refine mul_le_mul_of_nonneg_left ?_ (abs_nonneg _)
   linarith [hop]
 
+/-- **Continuous dependence on initial data for the concrete geometric frozen Ricci–DeTurck chart
+evolution.**  `‖deTurckFrozenAffineEvolution … hP b t₀ σ0 t − deTurckFrozenAffineEvolution … hP b t₀
+σ0' t‖ ≤ Real.exp (|t - t₀| · (2·Kp + ‖b‖)) · ‖σ0 − σ0'‖`.  Composes the abstract
+Lipschitz-in-initial-data bound `norm_affineFundamentalSolution_sub_le` (difference of two affine
+orbits is the homogeneous orbit of the difference) with the real operator's generator-norm bound
+`deTurckReactionSectionMapL_opNorm_le` (`‖L‖ ≤ 2·Kp`).  Together with
+`norm_deTurckFrozenAffineEvolution_le` this is the pair of well-posedness stability estimates —
+at-most-exponential growth and Lipschitz dependence on the initial metric — of the honest geometric
+section-space operator's evolution. -/
+theorem norm_deTurckFrozenAffineEvolution_sub_le
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (Kp : ℝ) (hKp0 : 0 ≤ Kp)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp)
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ : ℝ)
+    (σ0 σ0' : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t : ℝ) :
+    ‖deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0 t
+        - deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0' t‖
+      ≤ Real.exp (|t - t₀| * (2 * Kp + ‖b‖)) * ‖σ0 - σ0'‖ := by
+  have hop := deTurckReactionSectionMapL_opNorm_le x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKp
+  simp only [deTurckFrozenAffineEvolution]
+  refine (norm_affineFundamentalSolution_sub_le
+    (deTurckReactionSectionMapL x0 Kc hKc Ko hKo hKoEq hcover hP) b t₀ σ0 σ0' t).trans ?_
+  refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+  refine Real.exp_le_exp.2 ?_
+  refine mul_le_mul_of_nonneg_left ?_ (abs_nonneg _)
+  linarith [hop]
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
