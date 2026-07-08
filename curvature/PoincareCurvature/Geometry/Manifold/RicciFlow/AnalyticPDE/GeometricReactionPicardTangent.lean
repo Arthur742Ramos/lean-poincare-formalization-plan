@@ -1520,4 +1520,46 @@ noncomputable def deTurckReactionSectionMapL
         Kc hKc Ko hKo hKoEq hcover hP s :=
   rfl
 
+/-- **Operator-norm bound `‖deTurckReactionSectionMapL‖ ≤ 2·Kp` for the frozen geometric DeTurck
+reaction as a bounded linear map.**  The genuine operator-norm control of the *real* (geometric,
+non-model) zeroth-order Ricci–DeTurck reaction generator on the `BilinearFormBundle` continuous section
+space: from a uniform bound `Kp` on the model-fibre readout of the frozen tangent-endomorphism
+coefficient `P` over the finite compact cover, the bounded-linear reaction map has operator norm at most
+`2·Kp`.  Obtained from its global `LipschitzWith ⟨2·Kp, _⟩`
+(`deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates`) evaluated against the origin
+(`map_zero`), fed to `ContinuousLinearMap.opNorm_le_bound`.  This is the operator-norm growth constant a
+mild/semigroup formulation consumes to bound the affine resolvent `exp(τ·L)` of the frozen chart split
+`A τ s = L s + b` — a coordinate/operator bound for the honest geometric reaction operator, not a model
+heat-kernel estimate. -/
+theorem deTurckReactionSectionMapL_opNorm_le
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (Kp : ℝ) (hKp0 : 0 ≤ Kp)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp) :
+    ‖deTurckReactionSectionMapL x0 Kc hKc Ko hKo hKoEq hcover hP‖ ≤ 2 * Kp := by
+  have hlip := deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates
+    x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKp
+  refine ContinuousLinearMap.opNorm_le_bound _ (by positivity) (fun s => ?_)
+  have h0 : deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover hP 0 = 0 :=
+    (deTurckReactionSectionMapL x0 Kc hKc Ko hKo hKoEq hcover hP).map_zero
+  rw [deTurckReactionSectionMapL_apply]
+  calc ‖deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s‖
+      = dist (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s)
+          (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP 0) := by rw [h0]; exact (dist_zero_right _).symm
+    _ ≤ 2 * Kp * dist s 0 := by simpa using hlip.dist_le_mul s 0
+    _ = 2 * Kp * ‖s‖ := congrArg (fun t => 2 * Kp * t) (dist_zero_right s)
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
