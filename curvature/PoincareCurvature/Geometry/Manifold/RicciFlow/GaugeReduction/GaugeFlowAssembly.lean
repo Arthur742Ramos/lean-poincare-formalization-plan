@@ -156,6 +156,49 @@ theorem exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3
   exact ⟨ε, hε, exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow
     hε Φ G hΦ0 hΦC3 hGC3 hleft hright hderiv⟩
 
+/-- **Compact-manifold gauge-flow existence, reduced to spatial-`C³` regularity of the flow slices on
+a *sub-window*.**
+
+The sub-window relaxation of `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`.  The
+compact-manifold time-dependent flow (`ManifoldFlow.exists_timeDependent_flow_compact_inverse`)
+produces the anchored mutually-inverse slice maps `Φ`, `G` solving the gauge ODE on some window
+`Ioo (-ε) ε`; but every confinement-based slice-`C³` route anchors its model comparison flow at `0`
+and confines the orbit over the whole span `[0, t]`, so it only delivers `ContMDiff I I 3 (Φ t)` /
+`ContMDiff I I 3 (G t)` on a possibly *smaller* symmetric sub-window `Ioo (-δ) δ` (the uniform
+chart-exit time over the finite cover) rather than on the full inverse-supplier lifespan
+`Ioo (-ε) ε`.  This theorem accepts exactly that: `hslicesC3` is asked only to produce **some**
+`0 < δ ≤ ε` on whose window the slices are spatially `C³`.  Since the final gauge-flow datum is
+returned as `∃ ε > 0`, a symmetric sub-window suffices — the mutual-inverse / anchoring / ODE data
+restrict from `Ioo (-ε) ε` to `Ioo (-δ) δ` (the ODE via `HasMFDerivWithinAt.mono`), and
+`exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow` is applied at the sub-window `δ`.  This
+removes the window obstruction that blocked the full-window `_of_compact_of_flowSlicesC3` from
+consuming the confinement routes' sub-window output. -/
+theorem exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3
+    [BoundarylessManifold I M] [CompactSpace M] [Nonempty M]
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    (hslicesC3 : ∀ (ε : ℝ), 0 < ε → ∀ (Φ G : ℝ → M → M),
+      (∀ x, Φ 0 x = x) →
+      (∀ x, ∀ t ∈ Set.Ioo (-ε) ε,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo (-ε) ε) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) →
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.LeftInverse (G t) (Φ t)) →
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.RightInverse (G t) (Φ t)) →
+      ∃ δ : ℝ, 0 < δ ∧ δ ≤ ε ∧
+        (∀ t ∈ Set.Ioo (-δ) δ, ContMDiff I I 3 (Φ t)) ∧
+          (∀ t ∈ Set.Ioo (-δ) δ, ContMDiff I I 3 (G t))) :
+    ∃ ε > 0, Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Set.Ioo (-ε) ε) 0) := by
+  obtain ⟨ε, hε, Φ, G, hΦ0, _hG0, hderiv, hleft, hright⟩ :=
+    ManifoldFlow.exists_timeDependent_flow_compact_inverse (I := I) (M := M) (X := X) hX
+  obtain ⟨δ, hδ, hδε, hΦC3, hGC3⟩ := hslicesC3 ε hε Φ G hΦ0 hderiv hleft hright
+  have hsub : Set.Ioo (-δ) δ ⊆ Set.Ioo (-ε) ε := fun t ht =>
+    ⟨lt_of_le_of_lt (neg_le_neg hδε) ht.1, lt_of_lt_of_le ht.2 hδε⟩
+  exact ⟨δ, hδ, exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow
+    hδ Φ G hΦ0 hΦC3 hGC3 (fun t ht => hleft t (hsub ht)) (fun t ht => hright t (hsub ht))
+    (fun x t ht => (hderiv x t (hsub ht)).mono hsub)⟩
+
 /-- **Chart-conjugation `C³` transfer for a flow slice.**  If, on an open set `U` contained in the
 source chart at `x₀`, the map `F` is represented in the extended charts at `x₀` (source) and `F x₀`
 (target) by a globally `C³` model map `Ψ : E → E` — i.e.
