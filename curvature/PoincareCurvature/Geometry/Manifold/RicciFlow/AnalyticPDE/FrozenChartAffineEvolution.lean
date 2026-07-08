@@ -1,5 +1,6 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReactionPicardTangent
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.AutonomousResolventExp
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SectionPointwiseDeriv
 
 /-!
 # The frozen (affine) Ricci–DeTurck chart operator's explicit global evolution
@@ -576,5 +577,45 @@ theorem banachEvolution_curve_contDiffOn_of_frozenGeometric
     ContDiffOn ℝ n sol.curve (Set.Icc t₀ sol.terminalTime) :=
   banachEvolution_curve_contDiffOn_of_frozen
     x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0 sol
+
+/-- **Scalar pointwise section-curve derivative of the concrete geometric frozen chart evolution
+(everywhere, including interval endpoints).**  Pushing the globally-smooth `CSS`-level frozen ODE
+`hasDerivAt_deTurckFrozenGeometricAffineEvolution` through the scalar evaluation `sectionScalarEvalCLM`
+gives, for every `t` and fibre point `(x, u, v)`, the scalar derivative of
+`τ ↦ (frozen evolution) τ x u v`.  Unlike the interior `hasDerivAt_scalarEval_banachEvolution_of_mem_Ioo`
+form (valid only on the open interval), this holds at the endpoints too — the explicit affine
+evolution is globally `HasDerivAt` — so it supplies the endpoint scalar `HasDerivAt` data that the
+smooth-realization `boundary_hasTimeDerivative`/`initial`/`terminal` obligations demand for the frozen
+chart. -/
+theorem hasDerivAt_scalarEval_deTurckFrozenGeometricAffineEvolution
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (tFreeze : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background tFreeze) 1)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t : ℝ) (x : M) (u v : TangentSpace I x) :
+    HasDerivAt
+      (fun τ : ℝ ↦ deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+        g background tFreeze hbackground t₀ σ0 τ x u v)
+      ((deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover
+            (intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+              g background tFreeze hbackground).continuous
+            (deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+              g background tFreeze hbackground t₀ σ0 t)
+          + intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+              Kc hKc Ko hKo hKoEq hcover g tFreeze) x u v) t :=
+  hasDerivAt_scalarEval_of_hasDerivAt x0 Kc hKc Ko hKo hKoEq hcover
+    (hasDerivAt_deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+      g background tFreeze hbackground t₀ σ0 t) x u v
 
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
