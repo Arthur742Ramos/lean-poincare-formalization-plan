@@ -2316,3 +2316,56 @@ connecting `deTurckReactionSectionMapL` to the realization needs the Duhamel ter
 piece toward `realization`'s smoothness), OR the general-`s` `geometric` remains the parabolic Schauder
 long pole (unchanged).  A cross-module import of `AutonomousResolventExp` into the geometric section-space
 files is the prerequisite for the Duhamel assembly.
+
+### Item 3 (GAP 2) later-40 — the Duhamel assembly is DONE via the affine augmentation (no Bochner integral needed): explicit global operator-exponential evolution of the frozen chart operator + its ODE/initial/uniqueness/time-smoothness, plus the reusable abstract Banach-level Grönwall uniqueness (four commits; each `{propext, Classical.choice, Quot.sound}`)
+
+later-39's `NEXT` named the Duhamel term `∫ exp((t-r)•L) b dr` as the tractable-but-nontrivial next
+piece.  That Bochner integral is **unnecessary**: the affine augmentation trick (`affineAugment` +
+`affineFundamentalSolution`, committed just after later-39) already gives the FULL affine solution of
+`σ' = L σ + b` in closed form (the first coordinate of the augmented operator-exponential orbit through
+`(σ₀, 1)`), with `hasDerivAt_affineFundamentalSolution` and `eq_affineFundamentalSolution_of_hasDerivAt`.
+This session performed the cross-module assembly.  New module
+`AnalyticPDE/FrozenChartAffineEvolution.lean` (non-`module`, imports both
+`GeometricReactionPicardTangent` and the non-`module` `AutonomousResolventExp`; wired into the root):
+
+* **`deTurckFrozenAffineEvolution`** (+ `_initial`, `hasDerivAt_`, `_unique`) — the explicit global
+  evolution `affineFundamentalSolution (deTurckReactionSectionMapL … hP) b t₀ σ₀` of the frozen chart
+  operator `A τ s = deTurckReactionSectionMap P s + b` on the complete section space `CSS`; solves the
+  exact frozen ODE and is the unique global classical solution.
+* **`deTurckFrozenGeometricAffineEvolution`** (+ `_initial`, `hasDerivAt_`, `_unique`) — the geometric
+  specialisation at the genuine data `P := ∇W` (`intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero`)
+  and `b := intrinsicRicciFlowRHSSectionSpace g tFreeze`, matching the operator solved by
+  `deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn`.
+* **`contDiff_affineFundamentalSolution`** / **`contDiff_deTurckFrozenAffineEvolution`** /
+  **`contDiff_deTurckFrozenGeometricAffineEvolution`** — the evolution is `ContDiff ℝ n` in time (via
+  `exp` analyticity on the augmented operator algebra), the parabolic-free time-regularity the smooth
+  realization consumes.
+* **`banachEvolutionLocalSolution_curve_eq_affineFundamentalSolution`** — *abstract* (generic Banach
+  `G`, wall-free) within-interval uniqueness: any `BanachEvolutionLocalSolution` of `F t = fun y ↦ L y + b`
+  equals `affineFundamentalSolution L b t₀ y₀` on its interval, via `ODE_solution_unique` (global
+  Lipschitz = `L.lipschitz` + translation `edist`-isometry).  This is the reusable Banach-level
+  uniqueness core the chart `encode`/`realization` consume.
+
+**WALL / BLOCKER for the CSS-concrete Banach uniqueness.**  The section-space specialisation
+`banachEvolution_curve_eq_deTurckFrozenAffineEvolution` (any `BanachEvolutionLocalSolutionIn` of the
+CSS frozen operator = the smooth explicit evolution) is BLOCKED by the BilinearFormBundle concreteness
+wall.  Three routes were attempted and all hit a `whnf` timeout at 2 000 000 heartbeats:
+  (a) constructing the explicit `BanachEvolutionLocalSolution` structure over the CSS field `F` (the
+      `equation`-field defeq `F τ (curve τ) =?= deTurckReactionSectionMap … (curve τ) + b`);
+  (b) `LipschitzWith.of_dist_le_mul` + `dist_add_right` + `L.lipschitz.dist_le_mul` on `CSS`;
+  (c) `edist_add_right` + `(deTurckReactionSectionMapL …).lipschitz x y` — even after rewriting the
+      goal to `L x`/`L y` syntactically via `← deTurckReactionSectionMapL_apply`, the `exact` of the
+      CLM's `.lipschitz` walls (the `edist`/`LipschitzWith` obligation on `CSS` forces normalisation of
+      the `deTurckReactionSectionMap`-valued fibre).
+  The exact failing term is `(deTurckReactionSectionMapL x0 Kc … hP).lipschitz x y` used to discharge
+  `LipschitzWith ‖·‖₊ (fun s ↦ deTurckReactionSectionMap … s + b)` on `CSS`.  The ABSTRACT analogue over
+  generic Banach `G` (committed here) is wall-free — the wall is purely the CSS/`BilinearFormBundle`
+  metric-instance concreteness at the definition site, NOT the proof logic.  A definition-site fix
+  (a diamond-free / `edist`-transparent `CSS` metric on `BilinearFormBundle` sections, or a cached
+  `LipschitzWith` for `deTurckReactionSectionMapL` that does not re-force the fibre `edist`) unblocks
+  it, after which `banachEvolutionLocalSolution_curve_eq_affineFundamentalSolution` applies directly.
+
+**NEXT.**  Either (i) the definition-site CSS-metric fix above, then instantiate the abstract Banach
+uniqueness at `CSS` to get every frozen Banach solution = the smooth explicit evolution (the
+`realization`/`encode` smoothness+uniqueness), or (ii) supply the chart's `geometric` field for
+general `s` (the parabolic Schauder long pole, unchanged).
