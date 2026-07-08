@@ -9191,6 +9191,44 @@ theorem parabolicSupNorm_comp_lipschitzWith_sub_le {X E F : Type*} [PseudoMetric
     _ ≤ (K : ℝ) * parabolicSupNorm (fun z => u z - v z) s :=
       mul_le_mul_of_nonneg_left (norm_le_parabolicSupNorm huv hp) (NNReal.coe_nonneg K)
 
+/-- **Nonlinear (Lipschitz) sup-norm bound with the affine constant `‖φ 0‖`.**  For a `K`-Lipschitz
+`φ`, `‖φ ∘ u‖_{C^0} ≤ K · ‖u‖_{C^0} + ‖φ 0‖`.  The absolute (non-difference) sup control of a
+Lipschitz reaction term; the additive `‖φ 0‖` is the value at the origin. -/
+theorem parabolicSupNorm_comp_lipschitzWith_le {X E F : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedAddCommGroup F] {u : ℝ × X → E} {s : Set (ℝ × X)}
+    {K : ℝ≥0} {φ : E → F} (hφ : LipschitzWith K φ)
+    (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) :
+    parabolicSupNorm (fun z => φ (u z)) s ≤ (K : ℝ) * parabolicSupNorm u s + ‖φ 0‖ := by
+  refine parabolicSupNorm_le
+    (add_nonneg (mul_nonneg (NNReal.coe_nonneg K) (parabolicSupNorm_nonneg u s))
+      (norm_nonneg _)) ?_
+  intro p hp
+  have hlip : ‖φ (u p) - φ 0‖ ≤ (K : ℝ) * ‖u p‖ := by
+    calc
+      ‖φ (u p) - φ 0‖ = dist (φ (u p)) (φ 0) := (dist_eq_norm _ _).symm
+      _ ≤ (K : ℝ) * dist (u p) 0 := hφ.dist_le_mul (u p) 0
+      _ = (K : ℝ) * ‖u p‖ := by rw [dist_eq_norm, sub_zero]
+  have htri : ‖φ (u p)‖ ≤ ‖φ (u p) - φ 0‖ + ‖φ 0‖ := by
+    have := norm_sub_norm_le (φ (u p)) (φ 0); linarith
+  have hsupbd := mul_le_mul_of_nonneg_left (norm_le_parabolicSupNorm hu hp) (NNReal.coe_nonneg K)
+  linarith
+
+/-- **Nonlinear (Lipschitz) parabolic `C^{0,α}` bound with the affine constant `‖φ 0‖`.**
+`‖φ ∘ u‖_{C^{0,α}} ≤ K · ‖u‖_{C^{0,α}} + ‖φ 0‖` for a `K`-Lipschitz `φ`.  Combines the affine
+sup-norm bound with the Hölder-seminorm Lipschitz-composition bound; the absolute `C^{0,α}` control
+of the Lipschitz reaction term a Schauder / mild a-priori bound consumes. -/
+theorem parabolicC0AlphaNorm_comp_lipschitzWith_le {X E F : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedAddCommGroup F] {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    {K : ℝ≥0} {φ : E → F} (hφ : LipschitzWith K φ) (hu : ParabolicC0AlphaOn α u s) :
+    parabolicC0AlphaNorm α (fun z => φ (u z)) s
+      ≤ (K : ℝ) * parabolicC0AlphaNorm α u s + ‖φ 0‖ := by
+  obtain ⟨B, hB0, H, hH0, hbdd, hhol⟩ := hu
+  have hsup := parabolicSupNorm_comp_lipschitzWith_le hφ ⟨B, hB0, hbdd⟩
+  have hhol' := parabolicHolderSeminorm_comp_lipschitzWith_le hφ ⟨H, hH0, hhol⟩
+  unfold parabolicC0AlphaNorm
+  rw [mul_add]
+  linarith
+
 end AnalyticPDE
 end RicciFlow
 
