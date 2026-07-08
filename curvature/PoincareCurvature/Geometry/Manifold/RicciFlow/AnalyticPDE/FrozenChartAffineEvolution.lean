@@ -440,4 +440,75 @@ theorem banachEvolution_curve_eq_deTurckFrozenAffineEvolution
       x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0 τ).hasDerivWithinAt)
     (by rw [sol.initial_eq, deTurckFrozenAffineEvolution_initial]) ht
 
+/-- **State-constrained (`BanachEvolutionLocalSolutionIn`) CSS-concrete uniqueness for the frozen
+affine chart operator — WALL-FREE.**  The `locus`-constrained specialisation of
+`banachEvolution_curve_eq_deTurckFrozenAffineEvolution`: any state-preserving Banach evolution
+`sol : BanachEvolutionLocalSolutionIn (fun _ ↦ fun s ↦ deTurckReactionSectionMap ∇W s + b) locus t₀ σ₀`
+has its curve equal to the explicit affine evolution on its interval.  Immediate by forgetting the
+state-set data (`sol.toBanachEvolutionLocalSolution`), whose field, curve and terminal time coincide
+with `sol`'s.  This is exactly the uniqueness shape the chart-closure `encode`/`realization` fields
+consume, since they carry `BanachEvolutionLocalSolutionIn chart.A (positiveDefiniteLocus …)`. -/
+theorem banachEvolutionIn_curve_eq_deTurckFrozenAffineEvolution
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (locus : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover))
+    (sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolutionIn
+      (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s + b) locus t₀ σ0)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ sol.terminalTime) :
+    sol.curve t = deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0 t :=
+  banachEvolution_curve_eq_deTurckFrozenAffineEvolution
+    x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0 sol.toBanachEvolutionLocalSolution ht
+
+/-- **CSS-concrete uniqueness for the CONCRETE geometric frozen Ricci–DeTurck chart operator —
+WALL-FREE.**  The geometric specialisation of `banachEvolution_curve_eq_deTurckFrozenAffineEvolution`
+at the genuine data `P := ∇W` and `b := intrinsicRicciFlowRHSSectionSpace g tFreeze`: any Banach
+evolution of the exact frozen geometric field
+`F τ s = deTurckReactionSectionMap ∇W s + intrinsicRicciFlowRHSSectionSpace g tFreeze`
+(the operator solved by `deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn`) equals the
+explicit geometric affine evolution `deTurckFrozenGeometricAffineEvolution` on its interval.  The
+identity `deTurckFrozenGeometricAffineEvolution = deTurckFrozenAffineEvolution` at the geometric
+`∇W`/Ricci-source data holds by definition, so the general wall-free uniqueness applies verbatim. -/
+theorem banachEvolution_curve_eq_deTurckFrozenGeometricAffineEvolution
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (tFreeze : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background tFreeze) 1)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolution
+      (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover
+          (intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background tFreeze hbackground).continuous s
+        + intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover g tFreeze) t₀ σ0)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ sol.terminalTime) :
+    sol.curve t = deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+      g background tFreeze hbackground t₀ σ0 t :=
+  banachEvolution_curve_eq_deTurckFrozenAffineEvolution
+    x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0 sol ht
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
