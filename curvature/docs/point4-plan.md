@@ -2718,3 +2718,40 @@ DeTurck gauge field, obtain `Ψ` from `SmoothDependenceManifold.exists_flow_diff
 `chartPushforwardField`'s (now-proven) `ContDiffOn` field, and discharge the anchor/co-solution via
 integral-curve existence — feeding `contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn` → the Route-A
 capstone.  Do NOT route the genuine 2nd-order operator through `chart.A`'s C⁰ `picard`.
+
+### Progress (2026-07-08, later 10) — Item 2 GAP 1: Route-A `hslicesC3` gluer wired to the cutoff-model-flow + confinement machinery (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Following later-9's `NEXT` (feed cutoff-model-flow data into the abstract-`Ψ` Route-A capstone
+`GaugeFlowAssembly.contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn`), this session supplies the two
+*concrete-`G`* adapters that turn that capstone's abstract per-point package into one phrased entirely in
+the objects the cutoff/confinement machinery already produces.  Both live at the end of
+`AnalyticPDE/ModelManifoldGaugeFlow.lean` (additive, sorry-free, axiom-clean):
+
+* **`contMDiff_flowSlice_of_forall_cutoff_orbit_control`** — the concrete-`G` companion of the Route-A
+  capstone.  Per base point it consumes a genuine cutoff model gauge flow
+  `G : Diffeomorph3GaugeFlowOn (χ • chartPushforwardField) sTime t₀'` plus the pointwise cutoff datum
+  `hχ : χ (τ, (G.maps3 τ) (extChartAt I p y)) = 1`, *realises* the abstract comparison flow as
+  `Ψ := fun τ ↦ (G.maps3 τ)`, and discharges the capstone's two nontrivial `Ψ`-faces internally:
+  `hΨ := contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn G t` and the `hg'` integral-curve
+  co-solution `:= hasDerivAt_maps3_eval_of_cutoff_eqOne` (which collapses `χ • chartPushforwardField ↦
+  chartPushforwardField` where `χ ≡ 1`).  The `hΦU` `MapsTo` face falls out of `hγ_src` at time `t` via
+  `extChartAt_source`; raw-flow ODE / tube / anchor data thread through unchanged.  Output:
+  `ContMDiff I I 3 (Φ t)`.
+* **`contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset`** — the graph-form companion,
+  consuming the *native* cutoff-machinery output `∀ᶠ r in 𝓝ˢ Kwin, χ r = 1` (from
+  `exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`) together with the orbit-graph
+  confinement `(τ, (G.maps3 τ) (extChartAt I p y)) ∈ Kwin` in place of the pre-digested `hχ`, reducing
+  them to `hχ` via `cutoff_eqOne_along_curve_of_graph_subset`.  This isolates the remaining GAP-1 step-(v)
+  content to the single `orbit-graph ⊆ Kwin` estimate — for which the model side is already fully
+  producible (`exists_Ioo_forall_forall_graph_maps3_mem_of_lipschitzWith`, via joint continuity
+  `continuous_maps3_of_lipschitzWith`) and the raw side has its confinement ladder
+  (`exists_Ioo_forall_forall_mem_extChartAt_source_of_continuousAt` etc.).
+
+**Fractions of GAP 1.**  The Route-A gluer is now expressed purely in cutoff-model-flow + confinement
+vocabulary, so the abstract `Ψ`/`hg'` obligations are discharged once and for all.  **NEXT:** the final
+per-base-point assembly — obtain the raw compact flow `Φ` (`exists_timeDependent_flow_compact_*`) and, per
+patch, the cutoff model flow `G` (`exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`),
+intersect the several confinement windows (`exists_Ioo_forall_and`) into one `Ioo a b` per base point, and
+feed `contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset` → global `ContMDiff I I 3 (Φ t)`
+= the Route-A `hslicesC3` datum.  Still: do NOT route the genuine 2nd-order operator through `chart.A`'s
+C⁰ `picard`; the Item-3 geometric chart remains the independent long pole.
