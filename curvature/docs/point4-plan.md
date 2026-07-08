@@ -2545,3 +2545,43 @@ unification), then mirror `intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_app
 (`intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply`) over a finite chart cover of compact `M` into a
 GLOBAL spatial `ContMDiff`, which discharges the static corollary's `hω₀` for the static DeTurck gauge.
 (GAP 2's geometric chart `A`/Schauder `geometric` field remains the point-4 long pole.)
+
+### Item 3 (GAP 2) later-45 — operator-norm + whole-section growth bounds for the REAL frozen geometric DeTurck reaction operator on the `BilinearFormBundle` CSS (two commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Following the 2026-07-05 pivot ("build genuine PIECES of the geometric operator — a coordinate/operator
+bound for the REAL operator, NOT another model heat-kernel estimate"), this session supplies the
+operator-norm control of the honest (non-model) zeroth-order Ricci–DeTurck reaction generator, in the
+diamond-free `ContinuousSectionSpace` (CSS) whole-section norm.  Both additions live at the end of
+`AnalyticPDE/GeometricReactionPicardTangent.lean` (reusing the just-committed CLM
+`deTurckReactionSectionMapL` and its global `LipschitzWith ⟨2·Kp,_⟩`):
+
+* **`deTurckReactionSectionMapL_opNorm_le`** — `‖deTurckReactionSectionMapL ∇W‖ ≤ 2·Kp`: the operator
+  norm of the frozen geometric reaction as a bounded linear map, from a uniform bound `Kp` on the model-
+  fibre readout of the frozen tangent-endomorphism coefficient `P` over the finite compact cover.  Proof:
+  `ContinuousLinearMap.opNorm_le_bound` with the pointwise `‖L s‖ ≤ 2·Kp·‖s‖` derived from the map's
+  global `LipschitzWith` at the origin (`map_zero`).
+* **`deTurckReactionSectionMap_add_source_norm_le`** — `‖deTurckReactionSectionMap ∇W σ + b‖ ≤
+  2·Kp·‖σ‖ + ‖b‖`: the whole-section growth/centre bound of the *affine* chart operator
+  `A σ = L σ + b`, via `deTurckReactionSectionMapL_opNorm_le` (`ContinuousLinearMap.le_opNorm`) +
+  `norm_add_le`.  At `σ = σ0` this is exactly the `Mc = 2·Kp·‖σ0‖ + ‖b‖` centre-size shape the
+  section-space Picard/mild estimates consume — complementing the earlier per-coordinate
+  `bilinearDerivationFieldLinearMap_add_source_coord_norm_le` with a clean CSS-norm form.
+
+**Plumbing discovery (record to avoid re-losing time).**  The CSS `NormedAddCommGroup` is a
+*transported* instance (`equivCompatibleCoordFamilySubmodule`'s `LinearEquiv.normedAddCommGroup`), so
+`dist_zero_right` / `dist_eq_norm` do **not** fire as `rw`/`simp` lemmas on the LipschitzWith `dist`
+(pattern/instance-path mismatch — `simp only [dist_zero_right]` reports "made no progress"), and
+`LipschitzWith.norm_le_mul` fails to unify its `LipschitzWith` argument.  They DO work at **term level**
+(defeq): `(dist_zero_right _).symm` and `congrArg (fun t => c * t) (dist_zero_right s)` inside a `calc`
+close the dist↔norm conversion cleanly.  Use term-level `dist_zero_right`, not the tactic rewrite, on
+the transported CSS metric.
+
+**Progress on {A, picard, realization, encode}.**  These strengthen the `picard`/mild-estimate side for
+the frozen geometric operator: `deTurckReactionSectionMapL_opNorm_le` is the operator-norm growth
+constant a mild/semigroup resolvent `exp(τ·L)` of the split `A τ s = L s + b` consumes, and
+`deTurckReactionSectionMap_add_source_norm_le` is the whole-section centre bound.  **Unchanged long
+pole:** the `geometric` field still needs the state-dependent 2nd-order intrinsic RHS (the frozen
+bounded 1st-order operator cannot equal it for general continuous `s`), i.e. the mild/Schauder operator
+bridging the DONE model heat-mild toolkit to the geometric `BilinearFormBundle` section space.  **NEXT:**
+a resolvent growth bound `‖exp(τ·L)‖ ≤ Real.exp(2·Kp·|τ|)` (Mathlib has only `expSeries` summability,
+no `‖exp x‖ ≤ exp‖x‖`, so this needs a genuine series estimate) — or the state-dependent operator itself.
