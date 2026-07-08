@@ -618,4 +618,75 @@ theorem hasDerivAt_scalarEval_deTurckFrozenGeometricAffineEvolution
     (hasDerivAt_deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
       g background tFreeze hbackground t₀ σ0 t) x u v
 
+/-- **Full time-smoothness of the scalar section-curve of a frozen chart Banach solution.**  Pushing
+the wall-free time-regularity `banachEvolution_curve_contDiffOn_of_frozen` (the `CSS`-valued curve is
+`ContDiffOn ℝ n` on its interval, being the explicit affine evolution) through the diamond-free scalar
+evaluation `sectionScalarEvalCLM` (a `CSS →L[ℝ] ℝ`, hence `C^∞`): for every fibre point `(x, u, v)`
+the scalar curve `τ ↦ sol.curve τ x u v` is `ContDiffOn ℝ n` on `Icc t₀ sol.terminalTime`.  This is the
+all-order strengthening of the first-order interior `hasDerivAt_scalarEval_banachEvolution_of_mem_Ioo`,
+and the `C^k`-in-time realization ingredient the smooth realization consumes for the frozen chart. -/
+theorem contDiffOn_scalarEval_banachEvolution_of_frozen
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolution
+      (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s + b) t₀ σ0)
+    {n : WithTop ℕ∞}
+    (x : M) (u v : TangentSpace I x) :
+    ContDiffOn ℝ n (fun τ : ℝ ↦ sol.curve τ x u v) (Set.Icc t₀ sol.terminalTime) := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  have hcurve : ContDiffOn ℝ n sol.curve (Set.Icc t₀ sol.terminalTime) :=
+    banachEvolution_curve_contDiffOn_of_frozen x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0 sol
+  exact ((sectionScalarEvalCLM x0 Kc hKc Ko hKo hKoEq hcover i x hi u v).contDiff.comp_contDiffOn
+    hcurve).congr (fun τ _ => by
+      simp only [Function.comp_apply, sectionScalarEvalCLM_apply])
+
+/-- **Full time-smoothness of the scalar section-curve of the CONCRETE geometric frozen Ricci–DeTurck
+Banach solution.**  The geometric specialisation of `contDiffOn_scalarEval_banachEvolution_of_frozen`
+at the genuine data `P := ∇W`, `b := intrinsicRicciFlowRHSSectionSpace g tFreeze`: for every fibre
+point `(x, u, v)` the scalar curve `τ ↦ sol.curve τ x u v` of any Banach evolution of the exact frozen
+geometric field is `ContDiffOn ℝ n` in time on its interval — the `C^k`-in-time realization ingredient
+for the concrete Ricci–DeTurck chart. -/
+theorem contDiffOn_scalarEval_banachEvolution_of_frozenGeometric
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (tFreeze : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background tFreeze) 1)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolution
+      (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover
+          (intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background tFreeze hbackground).continuous s
+        + intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover g tFreeze) t₀ σ0)
+    {n : WithTop ℕ∞}
+    (x : M) (u v : TangentSpace I x) :
+    ContDiffOn ℝ n (fun τ : ℝ ↦ sol.curve τ x u v) (Set.Icc t₀ sol.terminalTime) :=
+  contDiffOn_scalarEval_banachEvolution_of_frozen
+    x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0 sol x u v
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
