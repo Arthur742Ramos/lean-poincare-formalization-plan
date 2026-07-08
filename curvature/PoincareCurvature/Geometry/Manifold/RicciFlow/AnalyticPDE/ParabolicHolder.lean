@@ -9084,6 +9084,76 @@ theorem parabolicC0AlphaNorm_interpolation_le
   unfold parabolicC0AlphaNorm
   exact add_le_add (le_refl _) (parabolicHolderSeminorm_interpolation_le hθ0 hθ1 hu)
 
+/-- **Domain monotonicity of the parabolic `C^{0,α}` norm.**  Restricting to a subset can only
+decrease the full `C^{0,α}` norm: for `s ⊆ t` with `u` in the parabolic `C^{0,α}` class on the
+larger set `t`, `‖u‖_{C^{0,α}(s)} ≤ ‖u‖_{C^{0,α}(t)}`.  Combines the sup-norm and Hölder-seminorm
+domain-monotonicity lemmas; the localization estimate a Schauder cut-off / subdomain argument
+consumes. -/
+theorem parabolicC0AlphaNorm_mono_domain {X E : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] {α : ℝ} {u : ℝ × X → E} {s t : Set (ℝ × X)}
+    (hst : s ⊆ t) (ht : ParabolicC0AlphaOn α u t) :
+    parabolicC0AlphaNorm α u s ≤ parabolicC0AlphaNorm α u t := by
+  obtain ⟨B, hB0, H, hH0, hbdd, hhol⟩ := ht
+  unfold parabolicC0AlphaNorm
+  exact add_le_add
+    (parabolicSupNorm_mono_domain hst ⟨B, hB0, hbdd⟩)
+    (parabolicHolderSeminorm_mono_domain hst ⟨H, hH0, hhol⟩)
+
+/-- **A continuous linear map contracts the parabolic Hölder seminorm by its operator norm.**
+`[L ∘ u]_α ≤ ‖L‖ · [u]_α`.  The quantitative seminorm form of
+`ParabolicHolderWith.continuousLinearMap`, achieved at the seminorm constant. -/
+theorem parabolicHolderSeminorm_continuousLinearMap_le {X E F : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (L : E →L[ℝ] F) (hu : ParabolicHolderOn α u s) :
+    parabolicHolderSeminorm α (fun z => L (u z)) s ≤ ‖L‖ * parabolicHolderSeminorm α u s :=
+  parabolicHolderSeminorm_le
+    (mul_nonneg (norm_nonneg L) (parabolicHolderSeminorm_nonneg α u s))
+    ((parabolicHolderWith_parabolicHolderSeminorm hu).continuousLinearMap L)
+
+/-- **A continuous linear map contracts the parabolic sup norm by its operator norm.**
+`‖L ∘ u‖_{C^0} ≤ ‖L‖ · ‖u‖_{C^0}`, from the pointwise operator-norm bound
+`‖L (u p)‖ ≤ ‖L‖ · ‖u p‖`. -/
+theorem parabolicSupNorm_continuousLinearMap_le {X E F : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (L : E →L[ℝ] F) (hu : ∃ B ≥ (0 : ℝ), ParabolicBoundedWith B u s) :
+    parabolicSupNorm (fun z => L (u z)) s ≤ ‖L‖ * parabolicSupNorm u s := by
+  refine parabolicSupNorm_le (mul_nonneg (norm_nonneg L) (parabolicSupNorm_nonneg u s)) ?_
+  intro p hp
+  calc
+    ‖L (u p)‖ ≤ ‖L‖ * ‖u p‖ := L.le_opNorm (u p)
+    _ ≤ ‖L‖ * parabolicSupNorm u s :=
+      mul_le_mul_of_nonneg_left (norm_le_parabolicSupNorm hu hp) (norm_nonneg L)
+
+/-- **A continuous linear map contracts the parabolic `C^{0,α}` norm by its operator norm.**
+`‖L ∘ u‖_{C^{0,α}} ≤ ‖L‖ · ‖u‖_{C^{0,α}}`.  Combines the sup-norm and Hölder-seminorm operator-norm
+bounds; the coordinate-readout estimate the geometric chart's linear (principal / inclusion /
+projection) parts consume. -/
+theorem parabolicC0AlphaNorm_continuousLinearMap_le {X E F : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedSpace ℝ E] [NormedSpace ℝ F]
+    {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    (L : E →L[ℝ] F) (hu : ParabolicC0AlphaOn α u s) :
+    parabolicC0AlphaNorm α (fun z => L (u z)) s ≤ ‖L‖ * parabolicC0AlphaNorm α u s := by
+  obtain ⟨B, hB0, H, hH0, hbdd, hhol⟩ := hu
+  unfold parabolicC0AlphaNorm
+  rw [mul_add]
+  exact add_le_add
+    (parabolicSupNorm_continuousLinearMap_le L ⟨B, hB0, hbdd⟩)
+    (parabolicHolderSeminorm_continuousLinearMap_le L ⟨H, hH0, hhol⟩)
+
+/-- **A Lipschitz map contracts the parabolic Hölder seminorm by its Lipschitz constant.**
+`[φ ∘ u]_α ≤ K · [u]_α` for `φ` `K`-Lipschitz.  The quantitative seminorm form of
+`ParabolicHolderWith.comp_lipschitzWith`; the nonlinear-composition Hölder estimate a Schauder
+fixed-point contraction on the reaction term consumes. -/
+theorem parabolicHolderSeminorm_comp_lipschitzWith_le {X E F : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup E] [NormedAddCommGroup F] {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
+    {K : ℝ≥0} {φ : E → F} (hφ : LipschitzWith K φ) (hu : ParabolicHolderOn α u s) :
+    parabolicHolderSeminorm α (fun z => φ (u z)) s ≤ (K : ℝ) * parabolicHolderSeminorm α u s :=
+  parabolicHolderSeminorm_le
+    (mul_nonneg (NNReal.coe_nonneg K) (parabolicHolderSeminorm_nonneg α u s))
+    ((parabolicHolderWith_parabolicHolderSeminorm hu).comp_lipschitzWith hφ)
+
 end AnalyticPDE
 end RicciFlow
 
