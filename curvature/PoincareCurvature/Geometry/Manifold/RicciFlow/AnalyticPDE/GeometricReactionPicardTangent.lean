@@ -1338,4 +1338,43 @@ Pi-function-level additivity/homogeneity lemmas. -/
       = RicciFlow.bilinearFormSectionDeTurckReaction (I := I) (M := M) s.toFun P :=
   rfl
 
+/-- **CSS-level additivity of the frozen tangent-bundle DeTurck reaction operator.**  The concrete
+section-space DeTurck reaction map `deTurckReactionSectionMap … hP` is additive as a map of
+`ContinuousSectionSpace`s: `A (s + t) = A s + A t`.  Proved wall-free at `W := TangentSpace I` by
+reducing to the raw-`Pi` reaction additivity `bilinearFormSectionDeTurckReaction_add` after splitting
+both the input sum `(s + t).toFun` and the output sum `(A s + A t).toFun` through the diamond-free
+pointwise add `add_apply_tangent` (which avoids the seminormed-track `add_apply`'s `BilinearFormBundle`
+fibre `isDefEq` timeout).  This is the additivity half of the bounded-linear packaging of the frozen
+reaction operator (`CSS →L[ℝ] CSS`) that feeds the autonomous resolvent. -/
+theorem deTurckReactionSectionMap_map_add
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s t : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP (s + t)
+      = deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s
+        + deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP t := by
+  refine ContinuousSectionSpace.ext (fun x => ?_)
+  rw [add_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover
+      (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s)
+      (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP t) x]
+  simp only [deTurckReactionSectionMap_toFun]
+  rw [show (s + t).toFun = s.toFun + t.toFun from
+      funext (add_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover s t),
+    bilinearFormSectionDeTurckReaction_add]
+  rfl
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
