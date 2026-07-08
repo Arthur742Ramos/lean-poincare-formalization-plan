@@ -775,4 +775,45 @@ theorem contMDiffOn_flowSlice_of_rawFlow_modelFlow_eqOn
     (fun τ hτ => hg' x hx τ hτ) (fun τ hτ => hγ_mem x hx τ hτ)
     (fun τ hτ => hg_mem x hx τ hτ) (heq₀ x hx) ht
 
+/-- **Global flow-slice `C³` (Route-A `hslicesC3`) from a per-point family of temporal integral-curve
+comparisons.**  The GAP-1 capstone: for the fixed time `t`, `ContMDiff I I 3 (Φ t)` — exactly the
+`hslicesC3` datum of `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` (Route A) — provided
+that around EVERY base point `x` there is a preferred chart `p`, a model-`C³` comparison flow `Ψ`, an
+open window `Ioo a b ∋ t, t₀`, a uniform tube-Lipschitz constant `K` for the chart pushforward field, and
+a neighbourhood `U ∋ x` on which the raw flow trajectories solve the bare gauge ODE, stay in the chart,
+and are compared (integral-curve co-solution + anchor agreement) with the model flow's orbits.
+
+Each local package yields, via the temporal integral-curve uniqueness core
+`extChartAt_comp_eqOn_of_lipschitzOnWith`, the single-fixed-chart spatial conjugation
+`extChartAt I p (Φ t y) = Ψ t (extChartAt I p y)` on `U`; the primed global gluer
+`contMDiff_of_forall_extChartAt_conjugation'` then assembles those into global `C³`.  This is the direct
+bridge from "raw compact flow + model-`C³` comparison data, locally everywhere" to the Route-A slice-`C³`
+obligation — no spatial regularity of `Φ` assumed anywhere. -/
+theorem contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn
+    {Φ : ℝ → M → M} {X : ℝ → M → E} {t : ℝ}
+    (h : ∀ x : M, ∃ (p : M) (Ψ : ℝ → E → E) (a b t₀ : ℝ) (K : NNReal)
+        (state : ℝ → Set E) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧ ContDiff ℝ 3 (Ψ t) ∧
+      Set.MapsTo (Φ t) U (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K (chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasDerivAt (fun τ : ℝ ↦ Ψ τ (extChartAt I p y))
+          (chartPushforwardField I X p τ (Ψ τ (extChartAt I p y))) τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Ψ τ (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = Ψ t₀ (extChartAt I p y))) :
+    ContMDiff I I 3 (Φ t) := by
+  refine contMDiff_of_forall_extChartAt_conjugation' (fun x => ?_)
+  obtain ⟨p, Ψ, a, b, t₀, K, state, U, hUmem, hU, hΨ, hΦU, ht, ht₀, hlip,
+    hraw, hsrc, hg', hγ_mem, hg_mem, heq₀⟩ := h x
+  refine ⟨p, U, Ψ t, hUmem, hU, hΨ, hΦU, fun y hy => ?_⟩
+  exact extChartAt_comp_eqOn_of_lipschitzOnWith
+    (fun τ hτ => hraw y hy τ hτ) (fun τ hτ => hsrc y hy τ hτ) ht₀ hlip
+    (fun τ hτ => hg' y hy τ hτ) (fun τ hτ => hγ_mem y hy τ hτ)
+    (fun τ hτ => hg_mem y hy τ hτ) (heq₀ y hy) ht
+
 end PoincareCurvature.GaugeFlowAssembly
