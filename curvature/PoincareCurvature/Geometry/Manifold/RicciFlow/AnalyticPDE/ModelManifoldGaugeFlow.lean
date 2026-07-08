@@ -2435,6 +2435,49 @@ theorem contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_sub
   exact ⟨hfwd, contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset
     (X := X) (Φ := Φ) (Gt := Gt) (t := t) hfwd.continuous hΦsurj hGleft h⟩
 
+/-- **Windowed backward per-patch inverse-slice `C³` producer.**  The inverse-slice (`G t`) analogue of
+`contMDiffOn_flowSlice_perPatch_of_flow`: a direct quantification over the time window of the fixed-time
+backward per-patch brick `GaugeFlowAssembly.contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn`.  Every
+one of that brick's comparison hypotheses is already uniform in `τ ∈ Set.Ioo a b` — a model-`C³`
+comparison flow `Ψ`, the tube-Lipschitz chart pushforward field, the raw gauge ODE, the model
+co-solution `hg'`, the state placements, and the anchor identity at `t₀` — while only the conclusion time
+and the spatial left inverse `G t` are time-specific.  Quantifying `t` over `Set.Ioo a b` (which contains
+`0`) therefore delivers, on that single window, the per-patch inverse regularity
+`ContMDiffOn I I 3 (G t) (Φ t '' U)` for every `t`.  This is exactly the per-patch datum
+`exists_Ioo_forall_contMDiff_symm_of_finite_cover` consumes as its `hpatch i`, so the two together
+globalise the inverse slice from local temporal integral-curve comparison data — the backward-side
+mirror of `contMDiffOn_flowSlice_perPatch_of_flow` + `exists_Ioo_forall_contMDiff_of_finite_cover`. -/
+theorem contMDiffOn_symm_flowSlice_perPatch_of_flow
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {Φ : ℝ → M → M} {G : ℝ → M → M}
+    {Ψ : ℝ → (E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)}
+    {p : M} {X : ℝ → M → E} {a b t₀ : ℝ} {K : NNReal} {state : ℝ → Set E} {U : Set M}
+    (hab0 : (0 : ℝ) ∈ Set.Ioo a b) (ht₀ : t₀ ∈ Set.Ioo a b)
+    (hU : U ⊆ (chartAt H p).source)
+    (hΦU : ∀ t ∈ Set.Ioo a b, Set.MapsTo (Φ t) U (chartAt H p).source)
+    (hlip : ∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ))
+    (hraw : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo a b) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x))))
+    (hsrc : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ x ∈ (extChartAt I p).source)
+    (hg' : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b,
+      HasDerivAt (fun τ : ℝ ↦ (Ψ τ : E → E) (extChartAt I p x))
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ
+          ((Ψ τ : E → E) (extChartAt I p x))) τ)
+    (hγ_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ x) ∈ state τ)
+    (hg_mem : ∀ x ∈ U, ∀ τ ∈ Set.Ioo a b, (Ψ τ : E → E) (extChartAt I p x) ∈ state τ)
+    (heq₀ : ∀ x ∈ U, extChartAt I p (Φ t₀ x) = (Ψ t₀ : E → E) (extChartAt I p x))
+    (hGleft : ∀ t ∈ Set.Ioo a b, ∀ x ∈ U, G t (Φ t x) = x) :
+    ∃ a' b' : ℝ, (0 : ℝ) ∈ Set.Ioo a' b' ∧
+      ∀ t ∈ Set.Ioo a' b', ContMDiffOn I I 3 (G t) (Φ t '' U) := by
+  refine ⟨a, b, hab0, fun t ht => ?_⟩
+  exact PoincareCurvature.GaugeFlowAssembly.contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn
+    hU (hΦU t ht) ht ht₀ hlip hraw hsrc hg' hγ_mem hg_mem heq₀ (hGleft t ht)
+
 /-- **Backward finite-cover gluer for inverse flow slices (windowed).**  The inverse-slice (`G t`)
 analogue of `exists_Ioo_forall_contMDiff_of_finite_cover`: from a finite open cover `U : ι → Set M` of
 the compact `T2` manifold `M`, per-patch inverse-slice regularity windows (`hpatch`: on each patch a
