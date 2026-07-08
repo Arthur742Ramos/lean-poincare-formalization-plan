@@ -708,6 +708,29 @@ theorem exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField_ball {n : Wi
     hball (convex_closedBall c ρ) (isCompact_closedBall c ρ)
   exact ⟨K, fun t ht => (hK t ht).mono Metric.ball_subset_closedBall⟩
 
+/-- **Global single-chart-conjugation `C³` gluer.**  The primed (single fixed chart `x₀`, i.e.
+`y₀ = x₀`) analogue of `contMDiff_of_forall_extChartAt_conjugation`: a map `F : M → M` that, near every
+point, agrees in ONE preferred extended chart `extChartAt I x₀` with a globally-`C³` model map `Ψ` — the
+target read in the SAME chart `x₀` as the source, `extChartAt I x₀ (F y) = Ψ (extChartAt I x₀ y)` — is
+globally `ContMDiff I I 3`.  Each local witness is discharged by the fixed-chart transfer
+`contMDiffOn_of_extChartAt_conjugation'` and upgraded to `ContMDiffAt` on the neighbourhood.
+
+This is the gluer matching the single-fixed-chart conjugation produced by the *temporal* integral-curve
+identification (`contMDiffOn_flowSlice_of_rawFlow_modelFlow_eqOn` below), whose spatial conjugation
+`extChartAt I p (Φ t x) = Ψ t (extChartAt I p x)` uses one chart `p` for both source and target — hence
+it feeds THIS gluer (not the image-centred `contMDiff_of_forall_extChartAt_conjugation`) to assemble the
+global slice `C³` (`hslicesC3`) obligation of `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`. -/
+theorem contMDiff_of_forall_extChartAt_conjugation'
+    {F : M → M}
+    (h : ∀ x : M, ∃ (x₀ : M) (U : Set M) (Ψ : E → E),
+      U ∈ 𝓝 x ∧ U ⊆ (chartAt H x₀).source ∧ ContDiff ℝ 3 Ψ ∧
+      Set.MapsTo F U (chartAt H x₀).source ∧
+      (∀ y ∈ U, extChartAt I x₀ (F y) = Ψ (extChartAt I x₀ y))) :
+    ContMDiff I I 3 F := by
+  intro x
+  obtain ⟨x₀, U, Ψ, hUmem, hU, hΨ, hFU, hconj⟩ := h x
+  exact (contMDiffOn_of_extChartAt_conjugation' hU hΨ hFU hconj).contMDiffAt hUmem
+
 /-- **Fixed-time flow-slice `C³` regularity from temporal integral-curve uniqueness against a
 model-`C³` flow.**  The genuine GAP-1 assembly step joining the two halves of the chart-transfer
 programme: temporal integral-curve uniqueness (`extChartAt_comp_eqOn_of_lipschitzOnWith`) and the
