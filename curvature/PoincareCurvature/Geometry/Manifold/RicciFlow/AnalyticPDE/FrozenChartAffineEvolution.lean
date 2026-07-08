@@ -377,4 +377,67 @@ theorem contDiff_deTurckFrozenGeometricAffineEvolution
       g background tFreeze hbackground t₀ σ0) :=
   contDiff_deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0
 
+/-- **CSS-concrete within-interval uniqueness of the frozen affine chart operator's Banach evolution
+— WALL-FREE.**  Any `BanachEvolutionLocalSolution` of the concrete section-space frozen chart field
+`F τ s = deTurckReactionSectionMap ∇W s + b` has its curve equal to the explicit affine evolution
+`deTurckFrozenAffineEvolution` on the whole solution interval `Icc t₀ sol.terminalTime`.
+
+This is the CSS specialisation of `banachEvolutionLocalSolution_curve_eq_affineFundamentalSolution`
+that earlier sessions could not close: routing the field's Lipschitz bound through
+`L.lipschitz` (the operator-norm route) forced a `whnf`/`edist` normalisation of the
+`BilinearFormBundle` section fibre and walled at 2 000 000 heartbeats.  Here the *identical*
+Grönwall-uniqueness argument (`ODE_solution_unique`) is fed the **coordinate-route** Lipschitz bound
+`deTurckReactionSectionMap_add_source_lipschitzWith_of_uniform_inCoordinates` — a genuine global
+`LipschitzWith ⟨2·Kp, _⟩` for `s ↦ deTurckReactionSectionMap ∇W s + b` obtained from the finite-cover
+coordinate distance handoff (`lipschitzWith_of_forall_coord_dist_le`), whose uniform bound `Kp` on the
+coefficient's model-fibre readout comes free from compactness of the finite cover + continuity of `P`
+(`exists_uniform_inCoord_bound`).  This route never evaluates the CSS `edist`, so the wall does not
+arise, and the explicit evolution's own `HasDerivAt`/`ContDiff`/initial-value data
+(`hasDerivAt_deTurckFrozenAffineEvolution`, `contDiff_deTurckFrozenAffineEvolution`,
+`deTurckFrozenAffineEvolution_initial`) close the uniqueness.  This is the CSS-concrete
+`encode`/`realization` uniqueness datum the abstract Banach-level core previously delivered only over a
+generic Banach space. -/
+theorem banachEvolution_curve_eq_deTurckFrozenAffineEvolution
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolution
+      (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s + b) t₀ σ0)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ sol.terminalTime) :
+    sol.curve t = deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0 t := by
+  have hKcTM : ∀ i, (Kc i : Set M) ⊆ (trivializationAt (E →L[ℝ] E) THom (x0 i)).baseSet := by
+    intro i x hx
+    have hxi := hKc i hx
+    simpa using hxi
+  obtain ⟨Kp, hKp0, hKpb⟩ := exists_uniform_inCoord_bound x0 Kc hKcTM hP
+  have hF : ∀ τ : ℝ, LipschitzWith ⟨2 * Kp, mul_nonneg (by norm_num) hKp0⟩
+      ((fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s + b) τ) :=
+    fun _ => deTurckReactionSectionMap_add_source_lipschitzWith_of_uniform_inCoordinates
+      x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKpb b
+  exact ODE_solution_unique
+    (v := fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+      Kc hKc Ko hKo hKoEq hcover hP s + b)
+    (K := ⟨2 * Kp, mul_nonneg (by norm_num) hKp0⟩) (a := t₀) (b := sol.terminalTime) hF
+    (sol.continuousOn_Icc_of_le_terminal le_rfl)
+    (fun τ hτ => sol.equation_hasDerivWithinAt_Ici_of_mem_Ico hτ)
+    (contDiff_deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0
+      (n := 1)).continuous.continuousOn
+    (fun τ _ => (hasDerivAt_deTurckFrozenAffineEvolution
+      x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0 τ).hasDerivWithinAt)
+    (by rw [sol.initial_eq, deTurckFrozenAffineEvolution_initial]) ht
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
