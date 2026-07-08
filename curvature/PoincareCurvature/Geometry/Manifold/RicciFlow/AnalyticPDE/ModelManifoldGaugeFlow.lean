@@ -2060,6 +2060,63 @@ theorem exists_flow_Ioo_forall_contMDiff_of_locally_contMDiffOn_tangentSection_c
   exists_flow_Ioo_forall_contMDiff_of_contMDiff_tangentSection_compact
     (contMDiff_of_locally_contMDiffOn_univ_prod hXloc)
 
+/-- **Global flow-slice `C³` (Route-A `hslicesC3`) from a per-point family of *cutoff model gauge
+flows* + orbit control.**  The concrete-`G` companion of the abstract-`Ψ` Route-A capstone
+`GaugeFlowAssembly.contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn`: instead of asking the caller
+to supply an abstract model comparison flow `Ψ` together with its `hg'` integral-curve co-solution, this
+form consumes, around every base point `x`, a genuine cutoff model gauge flow
+`G : Diffeomorph3GaugeFlowOn (χ • chartPushforwardField) sTime t₀'` and the *graph-containment* datum
+`hχ` (the cutoff `χ ≡ 1` along the model orbit) — exactly the package produced by the cutoff machinery
+`exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`.
+
+The abstract comparison flow is realised as `Ψ := fun τ ↦ (G.maps3 τ : E → E)`; its `hΨ` datum is the
+model-slice `C³` bound `contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn`, and its `hg'`
+integral-curve co-solution is `hasDerivAt_maps3_eval_of_cutoff_eqOne` (which collapses the cut field
+`χ • chartPushforwardField` to the un-cut `chartPushforwardField` on the region where `χ ≡ 1`, supplied
+by `hχ`).  The raw-flow ODE (`hγ`), chart-source stay (`hγ_src`), tube memberships (`hγ_mem`/`hg_mem`),
+tube-Lipschitz control (`hlip`), and anchor agreement (`heq₀`) are threaded through unchanged, and the
+`hΦU` `MapsTo` face is discharged from `hγ_src` at time `t` via `extChartAt_source`.  Feeding the
+resulting per-point abstract package to the Route-A global gluer yields `ContMDiff I I 3 (Φ t)` — the
+Route-A `hslicesC3` datum — directly from cutoff-model-flow data, no spatial regularity of `Φ`
+assumed. -/
+theorem contMDiff_flowSlice_of_forall_cutoff_orbit_control
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {Φ : ℝ → M → M} {t : ℝ}
+    (h : ∀ x : M, ∃ (p : M) (χ : ℝ × E → ℝ) (sTime : Set ℝ) (t₀' : ℝ)
+        (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+          (X := fun τ q => χ (τ, q) •
+            PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) sTime t₀')
+        (a b t₀ : ℝ) (K : NNReal) (state : ℝ → Set E) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, sTime ∈ 𝓝 τ) ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, χ (τ, (G.maps3 τ) (extChartAt I p y)) = 1) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = (G.maps3 t₀) (extChartAt I p y))) :
+    ContMDiff I I 3 (fun x : M => Φ t x) := by
+  refine PoincareCurvature.GaugeFlowAssembly.contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn
+    (Φ := Φ) (X := X) (t := t) (fun x => ?_)
+  obtain ⟨p, χ, sTime, t₀', G, a, b, t₀, K, state, U, hUmem, hU, ht, ht₀, hnhds, hlip,
+    hγ, hγ_src, hχ, hγ_mem, hg_mem, heq₀⟩ := h x
+  refine ⟨p, fun τ => (G.maps3 τ : E → E), a, b, t₀, K, state, U, hUmem, hU,
+    contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn G t, ?_, ht, ht₀, hlip,
+    hγ, hγ_src, ?_, hγ_mem, hg_mem, heq₀⟩
+  · intro y hy
+    have hsrc := hγ_src y hy t ht
+    rwa [extChartAt_source] at hsrc
+  · intro y hy τ hτ
+    exact hasDerivAt_maps3_eval_of_cutoff_eqOne G (hnhds τ hτ)
+      (mem_of_mem_nhds (hnhds τ hτ)) (extChartAt I p y) (hχ y hy τ hτ)
+
 end
 
 end SmoothDependenceCk
