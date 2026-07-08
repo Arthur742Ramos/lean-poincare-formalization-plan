@@ -304,6 +304,33 @@ theorem contDiff_affineFundamentalSolution (L : G →L[ℝ] G) (b : G) (t₀ : �
     hexp.clm_apply contDiff_const
   exact contDiff_fst.comp happly
 
+/-- **Abstract within-interval uniqueness of Banach evolution solutions for an affine autonomous
+field.**  Any `BanachEvolutionLocalSolution` of `F t = fun y ↦ L y + b` (bounded-linear generator `L`
+plus a constant source `b`) has its curve equal to the explicit affine fundamental solution on its
+interval.  The field is globally `‖L‖`-Lipschitz (translation by the constant `b` is an
+`edist`-isometry, so only `L`'s bounded-linear Lipschitz bound remains), and both the given solution
+and the explicit `affineFundamentalSolution` solve the same ODE from the same initial value, so
+Grönwall uniqueness (`ODE_solution_unique`) forces them to agree.  This is the reusable Banach-level
+uniqueness core that the frozen Ricci–DeTurck chart's `encode`/`realization` fields consume once the
+section-space affine generator is supplied. -/
+theorem banachEvolutionLocalSolution_curve_eq_affineFundamentalSolution
+    (L : G →L[ℝ] G) (b : G) (t₀ : ℝ) (y₀ : G)
+    (sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolution
+      (fun _ : ℝ => fun y => L y + b) t₀ y₀)
+    {t : ℝ} (ht : t ∈ Set.Icc t₀ sol.terminalTime) :
+    sol.curve t = affineFundamentalSolution L b t₀ y₀ t := by
+  have hF : ∀ τ : ℝ, LipschitzWith ‖L‖₊ ((fun _ : ℝ => fun y => L y + b) τ) := by
+    intro _ x y
+    simp only [edist_add_right]
+    exact L.lipschitz x y
+  exact ODE_solution_unique
+    (v := fun _ : ℝ => fun y => L y + b) (K := ‖L‖₊) (a := t₀) (b := sol.terminalTime) hF
+    (sol.continuousOn_Icc_of_le_terminal le_rfl)
+    (fun τ hτ => sol.equation_hasDerivWithinAt_Ici_of_mem_Ico hτ)
+    (contDiff_affineFundamentalSolution L b t₀ y₀ (n := 1)).continuous.continuousOn
+    (fun τ _ => (hasDerivAt_affineFundamentalSolution L b t₀ y₀ τ).hasDerivWithinAt)
+    (by rw [sol.initial_eq, affineFundamentalSolution_initial]) ht
+
 end AbstractAffineSmooth
 
 /-- The frozen affine chart evolution is `ContDiff ℝ n` in time. -/
