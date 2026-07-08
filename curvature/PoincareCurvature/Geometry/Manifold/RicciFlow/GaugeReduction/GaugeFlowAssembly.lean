@@ -503,6 +503,28 @@ theorem contMDiffOn_symm_of_extChartAt_conjugation'
   · rintro y ⟨x, hx, rfl⟩
     rw [hGleft x hx, hconj x hx, hΨsymmΨ x hx]
 
+/-- **Backward flow-slice `C³` transfer against a genuine model diffeomorph.**  The
+`Diffeomorph`-specialised form of `contMDiffOn_symm_of_extChartAt_conjugation'`: when the forward slice
+`Φt` is chart-conjugate on `U` to a genuine `C³` self-diffeomorph `Ψ` of the model space `E`
+(`extChartAt I x₀ (Φt x) = Ψ (extChartAt I x₀ x)`) and `Gt` left-inverts `Φt` on `U`, the inverse slice
+`Gt` is `ContMDiffOn I I 3` on the forward image `Φt '' U`.  The `C³` left inverse and its left-inverse
+identity are supplied by the diffeomorph's own `Ψ.symm` (`Ψ.symm.contMDiff` / `Ψ.symm_apply_apply`), so
+no separate model-inverse data is needed.  This is the directly-consumable backward companion for the
+model gauge-flow slice `Ψ := (G.maps3 τ : E → E)` (which is exactly such a `C³` self-diffeomorph, its
+`C³`-ness being `contDiff_three_maps3_of_model_diffeomorph3GaugeFlowOn`), delivering the inverse-slice
+`C³` half of `hslicesC3` from the forward conjugation alone. -/
+theorem contMDiffOn_symm_of_extChartAt_conjugation_diffeomorph'
+    {x₀ : M} {Φt Gt : M → M} {U : Set M}
+    (Ψ : E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)
+    (hΦU : Set.MapsTo Φt U (chartAt H x₀).source)
+    (hU : U ⊆ (chartAt H x₀).source)
+    (hconj : ∀ x ∈ U, extChartAt I x₀ (Φt x) = Ψ (extChartAt I x₀ x))
+    (hGleft : ∀ x ∈ U, Gt (Φt x) = x) :
+    ContMDiffOn I I 3 Gt (Φt '' U) :=
+  contMDiffOn_symm_of_extChartAt_conjugation' (Ψ := (Ψ : E → E)) (Ψsymm := (Ψ.symm : E → E))
+    (contMDiff_iff_contDiff.mp Ψ.symm.contMDiff) hΦU hU hconj
+    (fun x _ => Ψ.symm_apply_apply _) hGleft
+
 /-- **`ContinuousOn` of the chart pushforward field from a continuous tangent-bundle section.**
 
 The isolated varying-source-centre coordinate change `y ↦ tangentCoordChange I y p y` is *not*
