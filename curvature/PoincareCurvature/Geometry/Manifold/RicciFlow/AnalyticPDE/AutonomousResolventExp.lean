@@ -282,6 +282,54 @@ theorem norm_exp_smul_le {𝔸 : Type*} [NormedRing 𝔸] [NormOneClass 𝔸]
   have h := norm_exp_le (τ • x)
   rwa [norm_smul, Real.norm_eq_abs] at h
 
+/-- **Operator-norm bound for the augmented generator.**  `‖affineAugment L b‖ ≤ ‖L‖ + ‖b‖`.
+The augmentation `(v, s) ↦ (L v + s • b, 0)` never amplifies more than the linear part plus the
+source: at every `p = (v, s)`, `‖L v + s • b‖ ≤ ‖L‖‖v‖ + |s|‖b‖ ≤ (‖L‖ + ‖b‖)‖p‖` since both
+coordinate norms are `≤ ‖p‖`.  This is the operator-norm growth constant of the affine chart split
+that the resolvent bound consumes. -/
+theorem norm_affineAugment_le {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (L : E →L[ℝ] E) (b : E) :
+    ‖affineAugment L b‖ ≤ ‖L‖ + ‖b‖ := by
+  refine ContinuousLinearMap.opNorm_le_bound _ (by positivity) (fun p => ?_)
+  rw [affineAugment_apply, Prod.norm_def, norm_zero, max_eq_left (norm_nonneg _)]
+  have hp1 : ‖p.1‖ ≤ ‖p‖ := by rw [Prod.norm_def]; exact le_max_left _ _
+  have hp2 : ‖p.2‖ ≤ ‖p‖ := by rw [Prod.norm_def]; exact le_max_right _ _
+  calc ‖L p.1 + p.2 • b‖
+      ≤ ‖L p.1‖ + ‖p.2 • b‖ := norm_add_le _ _
+    _ ≤ ‖L‖ * ‖p‖ + ‖b‖ * ‖p‖ := by
+        gcongr
+        · exact (L.le_opNorm p.1).trans (by gcongr)
+        · rw [norm_smul, Real.norm_eq_abs, ← Real.norm_eq_abs, mul_comm]
+          gcongr
+    _ = (‖L‖ + ‖b‖) * ‖p‖ := by ring
+
+/-- **Exponential growth bound for the frozen (affine) Ricci–DeTurck chart evolution.**
+`‖affineFundamentalSolution L b t₀ y₀ t‖ ≤ Real.exp (|t - t₀| · (‖L‖ + ‖b‖)) · ‖(y₀, 1)‖`.
+The explicit evolution is the first coordinate of the augmented operator-exponential orbit through
+`(y₀, 1)`; the first-coordinate projection is `1`-Lipschitz, the orbit is dominated by
+`‖exp((t - t₀) • affineAugment L b)‖ · ‖(y₀, 1)‖`, and the resolvent growth bound
+`norm_exp_smul_le` together with `norm_affineAugment_le` controls the operator exponential.  This is
+the at-most-exponential-in-time stability estimate of the honest frozen geometric chart solution — the
+whole-section growth control a mild/Duhamel argument consumes. -/
+theorem norm_affineFundamentalSolution_le {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [CompleteSpace E] (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) :
+    ‖affineFundamentalSolution L b t₀ y₀ t‖
+      ≤ Real.exp (|t - t₀| * (‖L‖ + ‖b‖)) * ‖(y₀, (1 : ℝ))‖ := by
+  rw [affineFundamentalSolution]
+  calc ‖(NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, (1 : ℝ))).1‖
+      ≤ ‖NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, (1 : ℝ))‖ := by
+        rw [Prod.norm_def]; exact le_max_left _ _
+    _ ≤ ‖NormedSpace.exp ((t - t₀) • affineAugment L b)‖ * ‖(y₀, (1 : ℝ))‖ :=
+        ContinuousLinearMap.le_opNorm _ _
+    _ ≤ Real.exp (|t - t₀| * (‖L‖ + ‖b‖)) * ‖(y₀, (1 : ℝ))‖ := by
+        gcongr
+        calc ‖NormedSpace.exp ((t - t₀) • affineAugment L b)‖
+            ≤ Real.exp (|t - t₀| * ‖affineAugment L b‖) :=
+              norm_exp_smul_le (t - t₀) (affineAugment L b)
+          _ ≤ Real.exp (|t - t₀| * (‖L‖ + ‖b‖)) :=
+              Real.exp_le_exp.2
+                (mul_le_mul_of_nonneg_left (norm_affineAugment_le L b) (abs_nonneg _))
+
 end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
