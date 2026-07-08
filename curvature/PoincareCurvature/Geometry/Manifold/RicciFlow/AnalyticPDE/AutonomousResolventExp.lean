@@ -55,6 +55,96 @@ theorem isIntegralCurve_exp_smul_const (A₀ : E →L[ℝ] E) (t₀ : ℝ) (x : 
     simpa using this
   simpa [variationalFieldVec, ContinuousLinearMap.mul_apply] using hpt
 
+/-! ### The affine autonomous ODE `y' = L y + b`
+
+The frozen (autonomous) Ricci–DeTurck chart operator is **affine** in the section state,
+`A τ s = L s + b`, so its Banach evolution solves the *affine* linear ODE `y' = L y + b`, **not** the
+homogeneous one solved by `exp ((t - t₀) • L)`.  We solve the affine ODE explicitly and globally by the
+classical augmentation trick: adjoin a scalar coordinate that carries the constant `b`.  On `E × ℝ` the
+**augmented generator** `(v, s) ↦ (L v + s • b, 0)` is a genuine bounded linear operator whose scalar
+coordinate is conserved (`≡ 1`), and the first coordinate of its operator-exponential orbit through
+`(y₀, 1)` is the affine solution.  Everything reduces to `isIntegralCurve_exp_smul_const` on `E × ℝ`;
+no PDE, integral, or manifold content is used. -/
+
+/-- **The augmented generator** on `E × ℝ` turning the affine ODE `y' = L y + b` into a homogeneous
+linear one: `(v, s) ↦ (L v + s • b, 0)`.  The scalar coordinate `s` carries the inhomogeneity `b` and
+is conserved by the flow (its own derivative is `0`), so starting it at `1` reproduces the `+ b`. -/
+noncomputable def affineAugment (L : E →L[ℝ] E) (b : E) : (E × ℝ) →L[ℝ] (E × ℝ) :=
+  (L.comp (ContinuousLinearMap.fst ℝ E ℝ)
+      + (ContinuousLinearMap.snd ℝ E ℝ).smulRight b).prod (0 : (E × ℝ) →L[ℝ] ℝ)
+
+omit [CompleteSpace E] in
+@[simp] theorem affineAugment_apply (L : E →L[ℝ] E) (b : E) (p : E × ℝ) :
+    affineAugment L b p = (L p.1 + p.2 • b, 0) := by
+  simp [affineAugment]
+
+/-- **The affine autonomous fundamental solution** `y(t)`: the first coordinate of the augmented
+operator-exponential orbit through `(y₀, 1)`.  It is the global solution of `y' = L y + b`,
+`y t₀ = y₀`. -/
+noncomputable def affineFundamentalSolution
+    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) : E :=
+  (NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, 1)).1
+
+/-- **The scalar coordinate is conserved.**  The second coordinate of the augmented orbit through
+`(y₀, 1)` is identically `1`: it solves `s' = 0` with `s t₀ = 1`, so global constancy
+(`is_const_of_deriv_eq_zero`) pins it to `1`.  This is exactly what turns the augmented flow's first
+coordinate into the genuine `+ b` inhomogeneity. -/
+theorem affineAugment_snd_orbit_eq_one (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) :
+    (NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, 1)).2 = 1 := by
+  have hsnd : ∀ s : ℝ,
+      HasDerivAt (fun s => (NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1)).2) 0 s := by
+    intro s
+    have hc :
+        HasDerivAt (fun s => NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1))
+          (affineAugment L b (NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1))) s := by
+      simpa [variationalFieldVec] using
+        isIntegralCurve_exp_smul_const (affineAugment L b) t₀ (y₀, 1) s
+    have hproj := (ContinuousLinearMap.snd ℝ E ℝ).hasFDerivAt.comp_hasDerivAt s hc
+    simpa [Function.comp, ContinuousLinearMap.coe_snd', affineAugment_apply] using hproj
+  have hconst :=
+    is_const_of_deriv_eq_zero
+      (f := fun s => (NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1)).2)
+      (fun s => (hsnd s).differentiableAt) (fun s => (hsnd s).deriv) t t₀
+  have h0 : (NormedSpace.exp ((t₀ - t₀) • affineAugment L b) (y₀, 1)).2 = 1 := by
+    simp [sub_self, zero_smul, NormedSpace.exp_zero]
+  exact hconst.trans h0
+
+omit [CompleteSpace E] in
+/-- **`y t₀ = y₀`.**  The affine fundamental solution starts at the initial value. -/
+theorem affineFundamentalSolution_initial (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) :
+    affineFundamentalSolution L b t₀ y₀ t₀ = y₀ := by
+  simp [affineFundamentalSolution, sub_self, zero_smul, NormedSpace.exp_zero,
+    ContinuousLinearMap.one_apply]
+
+/-- **The affine fundamental solution solves the affine ODE `y' = L y + b`.**  For every time `t`,
+`HasDerivAt (affineFundamentalSolution L b t₀ y₀) (L (affineFundamentalSolution L b t₀ y₀ t) + b) t`.
+The augmented orbit is a global integral curve of the autonomous, bounded-linear augmented generator by
+`isIntegralCurve_exp_smul_const`; projecting to the first coordinate and using that the scalar
+coordinate stays `1` (`affineAugment_snd_orbit_eq_one`) yields the affine field `L y + b`.  This is the
+Banach evolution of the frozen (affine) Ricci–DeTurck chart operator `A τ s = L s + b`. -/
+theorem hasDerivAt_affineFundamentalSolution
+    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) :
+    HasDerivAt (affineFundamentalSolution L b t₀ y₀)
+      (L (affineFundamentalSolution L b t₀ y₀ t) + b) t := by
+  have hc :
+      HasDerivAt (fun s => NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1))
+        (affineAugment L b (NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, 1))) t := by
+    simpa [variationalFieldVec] using
+      isIntegralCurve_exp_smul_const (affineAugment L b) t₀ (y₀, 1) t
+  have hproj := (ContinuousLinearMap.fst ℝ E ℝ).hasFDerivAt.comp_hasDerivAt t hc
+  have hfst :
+      HasDerivAt (affineFundamentalSolution L b t₀ y₀)
+        ((affineAugment L b (NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, 1))).1) t := by
+    simpa [Function.comp, ContinuousLinearMap.coe_fst', affineFundamentalSolution] using hproj
+  have hval :
+      (affineAugment L b (NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, 1))).1
+        = L (affineFundamentalSolution L b t₀ y₀ t) + b := by
+    rw [affineAugment_apply]
+    simp only [affineFundamentalSolution]
+    rw [affineAugment_snd_orbit_eq_one, one_smul]
+  rw [hval] at hfst
+  exact hfst
+
 variable {Φ : E → ℝ → E} {t₀ : ℝ}
 
 /-- **The autonomous fundamental solution is the operator exponential.**  For a *time-independent*
