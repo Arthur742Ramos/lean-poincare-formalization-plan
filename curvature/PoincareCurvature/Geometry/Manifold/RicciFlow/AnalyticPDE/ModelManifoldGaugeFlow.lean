@@ -2728,6 +2728,72 @@ theorem exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow
     exists_Ioo_forall_contMDiff_symm_of_comparison_finite_cover_of_flow hlohi hopen hcover
       hΦcont hΦsurj hGleft hab0 ht₀ hU hΦU hlip hraw hsrc hg' hγ_mem hg_mem heq₀ hGleft_patch⟩
 
+/-- **Paired global slice-`C³` producer with the inverse-slice continuity BOOTSTRAPPED from the forward
+slice.**  Same as `exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow` but it does NOT take the
+per-slice continuity `hΦcont : ∀ t ∈ …, Continuous (Φ t)` as a hypothesis — it DERIVES it from the forward
+producer's output (`ContMDiff I I 3 (Φ t) ⟹ Continuous (Φ t)` via `ContMDiff.continuous`).  Concretely:
+the forward global producer supplies a window `Set.Ioo c₁ d₁ ∋ 0` on which every `Φ t` is `C³`; the
+reference window handed to the backward producer is shrunk to
+`Set.Ioo (max lo c₁) (min hi d₁) ⊆ Set.Ioo lo hi ∩ Set.Ioo c₁ d₁`, on which the surjectivity/left-inverse
+data restrict from `Set.Ioo lo hi` and the continuity is read off from the forward `C³`.
+
+The upshot: the ONLY topological inputs are the slice surjectivity `hΦsurj` and left inverse `hGleft` —
+exactly the `hright` (⟹ surjective) and `hleft` faces the `hslicesC3` hypothesis of
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3` supplies
+for an arbitrary flow pair `(Φ, G)`.  So discharging that `hslicesC3` from this producer needs only the
+per-patch diffeomorph comparison packages — no separately-argued per-slice continuity. -/
+theorem exists_flowSlicesC3Pair_of_comparison_finite_cover_of_flow_of_surj_left
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {ι : Type*} [Finite ι] {Φ : ℝ → M → M} {G : ℝ → M → M}
+    {Ψ : ι → ℝ → (E ≃ₘ^3⟮𝓘(ℝ, E), 𝓘(ℝ, E)⟯ E)}
+    {p : ι → M} {X : ℝ → M → E} {a b t₀ : ι → ℝ} {K : ι → NNReal}
+    {state : ι → ℝ → Set E} {U : ι → Set M} {lo hi : ℝ}
+    (hlohi : (0 : ℝ) ∈ Set.Ioo lo hi)
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hΦsurj : ∀ t ∈ Set.Ioo lo hi, Function.Surjective (Φ t))
+    (hGleft : ∀ t ∈ Set.Ioo lo hi, Function.LeftInverse (G t) (Φ t))
+    (hab0 : ∀ i, (0 : ℝ) ∈ Set.Ioo (a i) (b i)) (ht₀ : ∀ i, t₀ i ∈ Set.Ioo (a i) (b i))
+    (hU : ∀ i, U i ⊆ (chartAt H (p i)).source)
+    (hΦU : ∀ i, ∀ t ∈ Set.Ioo (a i) (b i), Set.MapsTo (Φ t) (U i) (chartAt H (p i)).source)
+    (hlip : ∀ i, ∀ τ ∈ Set.Ioo (a i) (b i), LipschitzOnWith (K i)
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ) (state i τ))
+    (hraw : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo (a i) (b i)) τ
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ x))))
+    (hsrc : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i), Φ τ x ∈ (extChartAt I (p i)).source)
+    (hg' : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      HasDerivAt (fun τ : ℝ ↦ (Ψ i τ : E → E) (extChartAt I (p i) x))
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ
+          ((Ψ i τ : E → E) (extChartAt I (p i) x))) τ)
+    (hγ_mem : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      extChartAt I (p i) (Φ τ x) ∈ state i τ)
+    (hg_mem : ∀ i, ∀ x ∈ U i, ∀ τ ∈ Set.Ioo (a i) (b i),
+      (Ψ i τ : E → E) (extChartAt I (p i) x) ∈ state i τ)
+    (heq₀ : ∀ i, ∀ x ∈ U i,
+      extChartAt I (p i) (Φ (t₀ i) x) = (Ψ i (t₀ i) : E → E) (extChartAt I (p i) x))
+    (hGleft_patch : ∀ i, ∀ t ∈ Set.Ioo (a i) (b i), ∀ x ∈ U i, G t (Φ t x) = x) :
+    (∃ c₁ d₁ : ℝ, (0 : ℝ) ∈ Set.Ioo c₁ d₁ ∧ ∀ t ∈ Set.Ioo c₁ d₁, ContMDiff I I 3 (Φ t)) ∧
+      (∃ c₂ d₂ : ℝ, (0 : ℝ) ∈ Set.Ioo c₂ d₂ ∧ ∀ t ∈ Set.Ioo c₂ d₂, ContMDiff I I 3 (G t)) := by
+  have hfwd := exists_Ioo_forall_contMDiff_of_comparison_finite_cover_of_flow
+    hopen hcover hab0 ht₀ hU hΦU hlip hraw hsrc hg' hγ_mem hg_mem heq₀
+  refine ⟨hfwd, ?_⟩
+  obtain ⟨c₁, d₁, ⟨hc₁, hd₁⟩, hΦC3⟩ := hfwd
+  obtain ⟨hlo, hhi⟩ := hlohi
+  have hsub_lo : Set.Ioo (max lo c₁) (min hi d₁) ⊆ Set.Ioo lo hi :=
+    Set.Ioo_subset_Ioo (le_max_left _ _) (min_le_left _ _)
+  have hsub_c : Set.Ioo (max lo c₁) (min hi d₁) ⊆ Set.Ioo c₁ d₁ :=
+    Set.Ioo_subset_Ioo (le_max_right _ _) (min_le_right _ _)
+  have h0 : (0 : ℝ) ∈ Set.Ioo (max lo c₁) (min hi d₁) := ⟨max_lt hlo hc₁, lt_min hhi hd₁⟩
+  exact exists_Ioo_forall_contMDiff_symm_of_comparison_finite_cover_of_flow
+    h0 hopen hcover
+    (fun t ht => (hΦC3 t (hsub_c ht)).continuous)
+    (fun t ht => hΦsurj t (hsub_lo ht))
+    (fun t ht => hGleft t (hsub_lo ht))
+    hab0 ht₀ hU hΦU hlip hraw hsrc hg' hγ_mem hg_mem heq₀ hGleft_patch
+
 end
 
 end SmoothDependenceCk
