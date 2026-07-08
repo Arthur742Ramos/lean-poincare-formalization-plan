@@ -2673,3 +2673,48 @@ concreteness wall) and its Schauder `picard`.  **NEXT:** the parabolic heat-pote
 Schauder gain `‖u‖_{C^{2,α}} ≤ C(‖∂_t u − Δu‖_{C^{0,α}} + ‖u‖_{C^0})` connecting the DONE model
 heat-mild toolkit to these `C^{0,α}` norm functionals, or the definition of the geometric second-order
 operator itself.
+
+### Progress (2026-07-08, later 9) — Item 2 GAP 1: the raw-flow → Route-A `hslicesC3` chart-transfer bridge is CLOSED (per-patch + global gluer + global capstone); formulation finding REFINED (three commits; each `{propext, Classical.choice, Quot.sound}`)
+
+**Ground-truth re-audit.**  The later-8 "concrete next target" (the `chartPushforwardField` integral-curve
+identity + its regularity/Lipschitz toolkit) is DONE — `GaugeFlowAssembly.lean` already carries
+`chartPushforwardField`, `chartPushforwardField_extChartAt`, `hasDerivWithinAt/At_extChartAt_comp_chartPushforwardField`,
+`extChartAt_comp_eqOn_of_lipschitzOnWith` (temporal integral-curve uniqueness via `ODE_solution_unique_of_mem_Ioo`),
+`contMDiffOn_of_extChartAt_conjugation'` (fixed-chart `C³` transfer), and the full
+`continuousOn/contDiffOn/exists_lipschitzOnWith[_forall_mem_Icc][_ball]_chartPushforwardField` +
+`contDiffOn_prod_chartPushforwardField` regularity ladder.  The remaining GAP-1 *bridge* — turning the
+temporal uniqueness into the fixed-time SPATIAL conjugation and gluing to a global slice `C³` — was NOT
+yet assembled.  This session closed exactly that bridge (all additive, in `GaugeFlowAssembly.lean`,
+sorry-free, axiom-clean):
+
+* **`contMDiffOn_flowSlice_of_rawFlow_modelFlow_eqOn`** — per chart patch `U`: from the raw gauge ODE
+  (`HasMFDerivWithinAt … ((1).smulRight (X τ (Φ τ x)))`, no spatial regularity), a model-`C³` comparison
+  flow `Ψ` whose orbits co-solve the pushforward field and agree at an anchor time `t₀`, and the
+  uniform-in-time tube-Lipschitz control on `chartPushforwardField`, derive (via
+  `extChartAt_comp_eqOn_of_lipschitzOnWith` at time `t`, then `contMDiffOn_of_extChartAt_conjugation'`)
+  `ContMDiffOn I I 3 (Φ t) U`.
+* **`contMDiff_of_forall_extChartAt_conjugation'`** — the primed (single fixed chart `y₀ = x₀`) global
+  gluer, the analogue of `contMDiff_of_forall_extChartAt_conjugation`; matches the single-chart spatial
+  conjugation the temporal identification produces.
+* **`contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn`** — the GAP-1 capstone: from a per-BASE-POINT
+  family of local temporal comparison packages, produces global `ContMDiff I I 3 (Φ t)` = the Route-A
+  `hslicesC3` datum of `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`.
+
+**Formulation finding REFINED (sharpens later-47 / later-8).**  Reading the actual type
+`TimeDependentRiemannianMetric := TimeFamily (Bundle.ContMDiffRiemannianMetric I 2 E TM)` (smoothness order
+**2**, not `∞`): the realizable RHS `intrinsicRicciDeTurckRHS g bg τ` is built from `ricciTensor` of a
+`C²` metric, hence is a **continuous (C⁰)** section, NOT a smooth one.  So the earlier "a continuous
+`A τ s` cannot equal the *smooth* geometric RHS" phrasing is imprecise — the realizable set is C⁰
+sections, and the true `geometric` obstruction is **realizability/surjectivity** of the Ricci–DeTurck map
+onto C⁰ sections (rough continuous `s` are not realizable by `C²`-metric data), not a smooth-vs-continuous
+gap.  This does not reopen a frozen-operator shortcut (later-8's `chartRHS_eq_intrinsic`-only reconciliation
+still requires the realization `metric` to be a genuine Ricci–DeTurck flow — i.e. Items 1&2), and it
+confirms the critical path runs through the geometric flow.
+
+**Fractions of GAP 1.**  The raw-compact-flow → Route-A `hslicesC3` transfer is now END-TO-END modulo
+supplying, per base point, the local model-`C³` comparison flow `Ψ` and its co-solution/anchor data.
+**NEXT:** produce that per-point package from the actual compact flow — instantiate `X` with the `C³`
+DeTurck gauge field, obtain `Ψ` from `SmoothDependenceManifold.exists_flow_diffeomorph_three` applied to
+`chartPushforwardField`'s (now-proven) `ContDiffOn` field, and discharge the anchor/co-solution via
+integral-curve existence — feeding `contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn` → the Route-A
+capstone.  Do NOT route the genuine 2nd-order operator through `chart.A`'s C⁰ `picard`.
