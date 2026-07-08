@@ -1467,4 +1467,57 @@ theorem deTurckReactionSectionMap_map_smul
     bilinearFormSectionDeTurckReaction_smul]
   rfl
 
+/-- **The frozen tangent-bundle DeTurck reaction operator bundled as a bounded linear map
+`CSS →L[ℝ] CSS`.**  Packages the raw section-space reaction self-map `deTurckReactionSectionMap … hP`
+into a `ContinuousLinearMap`: its additivity/homogeneity are the just-committed
+`deTurckReactionSectionMap_map_add`/`deTurckReactionSectionMap_map_smul`, and its continuity is
+UNCONDITIONAL — the uniform inCoordinates bound `exists_uniform_inCoord_bound` (from continuity of the
+frozen coefficient `P` on the compact cover) feeds the global Lipschitz bound
+`deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates`, whose `.continuous` discharges the
+`cont` field with no `Kp` hypothesis.  This is the bounded-linear operator consumed by the autonomous
+resolvent `exp((t - t₀) • ·)` for the frozen (linear-part) Ricci–DeTurck evolution. -/
+noncomputable def deTurckReactionSectionMapL
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x))) :
+    ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
+      →L[ℝ] ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover where
+  toFun := deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+    Kc hKc Ko hKo hKoEq hcover hP
+  map_add' := deTurckReactionSectionMap_map_add x0 Kc hKc Ko hKo hKoEq hcover hP
+  map_smul' := deTurckReactionSectionMap_map_smul x0 Kc hKc Ko hKo hKoEq hcover hP
+  cont := by
+    obtain ⟨Kp, hKp0, hKpb⟩ :=
+      exists_uniform_inCoord_bound x0 Kc (fun i x hx => by simpa using hKc i hx) hP
+    exact (deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates
+      x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKpb).continuous
+
+/-- The bounded-linear packaging `deTurckReactionSectionMapL` applies as the raw reaction self-map. -/
+@[simp] theorem deTurckReactionSectionMapL_apply
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    deTurckReactionSectionMapL x0 Kc hKc Ko hKo hKoEq hcover hP s
+      = deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s :=
+  rfl
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
