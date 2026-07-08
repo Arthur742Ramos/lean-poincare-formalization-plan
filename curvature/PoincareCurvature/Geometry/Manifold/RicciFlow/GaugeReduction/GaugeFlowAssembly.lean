@@ -240,6 +240,51 @@ theorem exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3_i
     exact hGC3 t ⟨lt_of_le_of_lt (neg_le_neg (min_le_right δ₁ δ₂)) ht.1,
       lt_of_lt_of_le ht.2 (min_le_right δ₁ δ₂)⟩
 
+/-- **Compact-manifold gauge-flow existence from forward / backward slice-`C³` on *asymmetric*
+sub-windows `Ioo c d ∋ 0`.**
+
+The directly-consumable form of `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3_indep`:
+the forward and backward slice-`C³` regularity are supplied on possibly *asymmetric* open windows
+`Ioo c₁ d₁ ∋ 0` and `Ioo c₂ d₂ ∋ 0` — precisely the conclusion shape of the finite-cover forward
+producer `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip_of_flow`
+(`∃ c d, 0 ∈ Ioo c d ∧ ∀ t ∈ Ioo c d, ContMDiff I I 3 (Φ t)`) and its backward counterpart, which
+never return symmetric windows.  Each asymmetric window is symmetrised internally to
+`Ioo (-δ) δ` with `δ := min (min (-c) d) ε > 0` (so `Ioo (-δ) δ ⊆ Ioo c d` and `δ ≤ ε`), then handed to
+the independent-sub-window capstone.  This lets a caller feed the raw producer outputs with no manual
+window bookkeeping. -/
+theorem exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowAsymSubwindowSlicesC3
+    [BoundarylessManifold I M] [CompactSpace M] [Nonempty M]
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    (hslicesC3 : ∀ (ε : ℝ), 0 < ε → ∀ (Φ G : ℝ → M → M),
+      (∀ x, Φ 0 x = x) →
+      (∀ x, ∀ t ∈ Set.Ioo (-ε) ε,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo (-ε) ε) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) →
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.LeftInverse (G t) (Φ t)) →
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.RightInverse (G t) (Φ t)) →
+      (∃ c₁ d₁ : ℝ, (0 : ℝ) ∈ Set.Ioo c₁ d₁ ∧ ∀ t ∈ Set.Ioo c₁ d₁, ContMDiff I I 3 (Φ t)) ∧
+        (∃ c₂ d₂ : ℝ, (0 : ℝ) ∈ Set.Ioo c₂ d₂ ∧ ∀ t ∈ Set.Ioo c₂ d₂, ContMDiff I I 3 (G t))) :
+    ∃ ε > 0, Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Set.Ioo (-ε) ε) 0) := by
+  refine exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3_indep hX ?_
+  intro ε hε Φ G hΦ0 hderiv hleft hright
+  obtain ⟨⟨c₁, d₁, hcd₁, hΦC3⟩, ⟨c₂, d₂, hcd₂, hGC3⟩⟩ :=
+    hslicesC3 ε hε Φ G hΦ0 hderiv hleft hright
+  obtain ⟨hc₁, hd₁⟩ := hcd₁
+  obtain ⟨hc₂, hd₂⟩ := hcd₂
+  refine ⟨⟨min (min (-c₁) d₁) ε, lt_min (lt_min (neg_pos.mpr hc₁) hd₁) hε, min_le_right _ _, ?_⟩,
+    ⟨min (min (-c₂) d₂) ε, lt_min (lt_min (neg_pos.mpr hc₂) hd₂) hε, min_le_right _ _, ?_⟩⟩
+  · intro t ht
+    have h1 : min (min (-c₁) d₁) ε ≤ -c₁ := (min_le_left _ _).trans (min_le_left _ _)
+    have h2 : min (min (-c₁) d₁) ε ≤ d₁ := (min_le_left _ _).trans (min_le_right _ _)
+    exact hΦC3 t ⟨by linarith [ht.1], by linarith [ht.2]⟩
+  · intro t ht
+    have h1 : min (min (-c₂) d₂) ε ≤ -c₂ := (min_le_left _ _).trans (min_le_left _ _)
+    have h2 : min (min (-c₂) d₂) ε ≤ d₂ := (min_le_left _ _).trans (min_le_right _ _)
+    exact hGC3 t ⟨by linarith [ht.1], by linarith [ht.2]⟩
+
 /-- **Chart-conjugation `C³` transfer for a flow slice.**  If, on an open set `U` contained in the
 source chart at `x₀`, the map `F` is represented in the extended charts at `x₀` (source) and `F x₀`
 (target) by a globally `C³` model map `Ψ : E → E` — i.e.
