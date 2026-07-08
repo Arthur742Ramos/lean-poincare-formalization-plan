@@ -689,4 +689,49 @@ theorem contDiffOn_scalarEval_banachEvolution_of_frozenGeometric
   contDiffOn_scalarEval_banachEvolution_of_frozen
     x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0 sol x u v
 
+/-- **Global all-order time-smoothness of the scalar section-curve of the explicit geometric frozen
+Ricci–DeTurck affine evolution.**  Pushing the `CSS`-level global smoothness
+`contDiff_deTurckFrozenGeometricAffineEvolution` through the diamond-free scalar evaluation
+`sectionScalarEvalCLM`: for every fibre point `(x, u, v)` the scalar curve
+`τ ↦ (frozen geometric evolution) τ x u v` is `ContDiff ℝ n` on all of `ℝ` (not merely on an
+interval — the explicit affine evolution is globally smooth).  This is the all-order companion of the
+first-order endpoint datum `hasDerivAt_scalarEval_deTurckFrozenGeometricAffineEvolution`. -/
+theorem contDiff_scalarEval_deTurckFrozenGeometricAffineEvolution
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (tFreeze : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background tFreeze) 1)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    {n : WithTop ℕ∞}
+    (x : M) (u v : TangentSpace I x) :
+    ContDiff ℝ n (fun τ : ℝ ↦ deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+      g background tFreeze hbackground t₀ σ0 τ x u v) := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  have hcomp : ContDiff ℝ n
+      (fun τ : ℝ ↦ sectionScalarEvalCLM x0 Kc hKc Ko hKo hKoEq hcover i x hi u v
+        (deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+          g background tFreeze hbackground t₀ σ0 τ)) := by
+    simpa [Function.comp_def] using
+      (sectionScalarEvalCLM x0 Kc hKc Ko hKo hKoEq hcover i x hi u v).contDiff.comp
+        (contDiff_deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+          g background tFreeze hbackground t₀ σ0)
+  have e1 : (fun τ : ℝ ↦ deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+        g background tFreeze hbackground t₀ σ0 τ x u v)
+      = fun τ : ℝ ↦ sectionScalarEvalCLM x0 Kc hKc Ko hKo hKoEq hcover i x hi u v
+          (deTurckFrozenGeometricAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover
+            g background tFreeze hbackground t₀ σ0 τ) := by
+    funext τ; rw [sectionScalarEvalCLM_apply]
+  rw [e1]
+  exact hcomp
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
