@@ -734,4 +734,45 @@ theorem contDiff_scalarEval_deTurckFrozenGeometricAffineEvolution
   rw [e1]
   exact hcomp
 
+/-- **Exponential-in-time whole-section growth bound for the frozen (affine) Ricci–DeTurck chart
+evolution.**  `‖deTurckFrozenAffineEvolution … hP b t₀ σ0 t‖ ≤
+Real.exp (|t - t₀| · (2·Kp + ‖b‖)) · ‖(σ0, 1)‖`, where `Kp` is any uniform bound on the model-fibre
+readout of the frozen reaction coefficient `P` over the finite compact cover.  The explicit evolution
+is the affine operator-exponential fundamental solution of `σ' = deTurckReactionSectionMap P σ + b`; its
+generator norm is `‖deTurckReactionSectionMapL P‖ ≤ 2·Kp` (`deTurckReactionSectionMapL_opNorm_le`), so
+the abstract growth estimate `norm_affineFundamentalSolution_le` — itself the resolvent bound
+`‖exp(τ·L)‖ ≤ exp(|τ|·‖L‖)` applied to the augmented generator — specialises to this concrete
+at-most-exponential bound for the honest geometric section-space operator.  This is the whole-section
+stability control that a mild/Duhamel a-posteriori argument for the real Ricci–DeTurck chart consumes. -/
+theorem norm_deTurckFrozenAffineEvolution_le
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (Kp : ℝ) (hKp0 : 0 ≤ Kp)
+    (hKp : ∀ (i : κ) (x : Kc i),
+      ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp)
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t : ℝ) :
+    ‖deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0 t‖
+      ≤ Real.exp (|t - t₀| * (2 * Kp + ‖b‖)) * ‖(σ0, (1 : ℝ))‖ := by
+  have hop := deTurckReactionSectionMapL_opNorm_le x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKp
+  rw [deTurckFrozenAffineEvolution]
+  refine (norm_affineFundamentalSolution_le
+    (deTurckReactionSectionMapL x0 Kc hKc Ko hKo hKoEq hcover hP) b t₀ σ0 t).trans ?_
+  refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+  refine Real.exp_le_exp.2 ?_
+  refine mul_le_mul_of_nonneg_left ?_ (abs_nonneg _)
+  linarith [hop]
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
