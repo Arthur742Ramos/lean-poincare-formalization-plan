@@ -2276,6 +2276,56 @@ theorem contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset
   intro y hy
   exact cutoff_eqOne_along_curve_of_graph_subset hχK (hgraph y hy)
 
+/-- **Both slices `C³` (full Route-A `hslicesC3` conclusion, fixed time) from one per-point cutoff
+model gauge flow family.**  The concrete-`G` capstone of capstones: for the fixed time `t`, it produces
+the exact `ContMDiff I I 3 (Φ t) ∧ ContMDiff I I 3 Gt` shape of the `hslicesC3` conclusion of
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`, from *one* uniform
+per-base-point supply of cutoff-model-flow comparison packages (the native cutoff-machinery output —
+cutoff `G`, `∀ᶠ 𝓝ˢ` datum, orbit-graph confinement, raw gauge ODE, tube-Lipschitz, anchor) together
+with only the forward slice's spatial-inverse data `hΦsurj` (`Φ t` surjective) and `hGleft`
+(`Gt ∘ Φ t = id`).
+
+The forward conjunct is `contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset`; the
+inverse conjunct reuses that forward `C³` as the *continuity* input
+(`ContMDiff.continuous`) — so `Continuous (Φ t)` is *derived*, not assumed — and passes the same
+package (plus `hΦsurj`/`hGleft`) to
+`contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset`.  Quantifying `t` over the
+flow window discharges both conjuncts of `hslicesC3` from a single supply of comparison packages, the
+compact-`T2` homeomorphism obligation of the backward half being absorbed into the already-proved
+forward half. -/
+theorem contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_subset
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [CompactSpace M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {Φ : ℝ → M → M} {Gt : M → M} {t : ℝ}
+    (hΦsurj : Function.Surjective (Φ t))
+    (hGleft : Function.LeftInverse Gt (Φ t))
+    (h : ∀ x : M, ∃ (p : M) (χ : ℝ × E → ℝ) (sTime : Set ℝ) (t₀' : ℝ)
+        (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+          (X := fun τ q => χ (τ, q) •
+            PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) sTime t₀')
+        (a b t₀ : ℝ) (K : NNReal) (state : ℝ → Set E) (Kwin : Set (ℝ × E)) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, sTime ∈ 𝓝 τ) ∧
+      (∀ᶠ r in 𝓝ˢ Kwin, χ r = 1) ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        ((τ, (G.maps3 τ) (extChartAt I p y)) : ℝ × E) ∈ Kwin) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = (G.maps3 t₀) (extChartAt I p y))) :
+    ContMDiff I I 3 (Φ t) ∧ ContMDiff I I 3 Gt := by
+  have hfwd : ContMDiff I I 3 (Φ t) :=
+    contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset (X := X) (Φ := Φ) (t := t) h
+  exact ⟨hfwd, contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset
+    (X := X) (Φ := Φ) (Gt := Gt) (t := t) hfwd.continuous hΦsurj hGleft h⟩
+
 end
 
 end SmoothDependenceCk
