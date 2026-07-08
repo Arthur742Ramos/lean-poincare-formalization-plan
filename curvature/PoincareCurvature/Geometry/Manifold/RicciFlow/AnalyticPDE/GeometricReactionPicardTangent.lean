@@ -1377,4 +1377,94 @@ theorem deTurckReactionSectionMap_map_add
     bilinearFormSectionDeTurckReaction_add]
   rfl
 
+/-- **Pointwise homogeneity of the tangent-bundle continuous section space at the hom fibre topology.**
+`(c • s).toFun x = c • s.toFun x` for a scalar `c` and a section `s` of the canonical
+`BilinearFormBundle` continuous section space at `W := TangentSpace I`.  The scalar companion of
+`add_apply_tangent`: same wall-free coordinate route (recover each section value from its compact
+coordinate via the trivialization's linear inverse `symmₗ`, split the coordinate of `c • s`
+homogeneously through the compact-coordinate `ContinuousLinearMap`'s `map_smul`, then use that `symmₗ`
+is `ℝ`-linear), touching only `IsLinear`-level (Pretrivialization) API so the
+`FiberBundle`/fibre-`TopologicalSpace` diamond is never triggered. -/
+theorem smul_apply_tangent
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (c : ℝ)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (c • s).toFun x = c • s.toFun x := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  have hx : x ∈ (trivializationAt BilF BilW (x0 i)).baseSet := hKc i hi
+  haveI hlin : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := E) (W := TM) (x0 i)
+  have hsymm : ∀ (σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover),
+      σ.toFun x = (trivializationAt BilF BilW (x0 i)).symmₗ ℝ x
+        ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover σ).1 i ⟨x, hi⟩) := by
+    intro σ
+    rw [coord_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover σ i ⟨x, hi⟩,
+      Trivialization.continuousLinearMapAt_apply]
+    exact ((trivializationAt BilF BilW (x0 i)).symmₗ_linearMapAt hx (σ.toFun x)).symm
+  have hcoord : (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover (c • s)).1 i ⟨x, hi⟩
+      = c • (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover s).1 i ⟨x, hi⟩ := by
+    have he : equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover (c • s)
+        = c • equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover s := by
+      rw [← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover,
+        ← toCompatibleCoordFamilySubmoduleContinuousLinearMap_apply
+            (𝕜 := ℝ) (F := BilF) (V := BilW)
+            (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover (s := s),
+        map_smul]
+    rw [he]
+    simp only [SetLike.val_smul, Pi.smul_apply, ContinuousMap.smul_apply]
+  rw [hsymm s, hsymm (c • s), hcoord, map_smul]
+
+/-- **CSS-level homogeneity of the frozen tangent-bundle DeTurck reaction operator.**  Companion of
+`deTurckReactionSectionMap_map_add`: the concrete section-space DeTurck reaction map is homogeneous as a
+map of `ContinuousSectionSpace`s, `A (c • s) = c • A s`.  Same wall-free strategy — reduce to the
+raw-`Pi` reaction homogeneity `bilinearFormSectionDeTurckReaction_smul` after splitting both the input
+`(c • s).toFun` and the output `(c • A s).toFun` through the diamond-free pointwise smul
+`smul_apply_tangent`.  With `deTurckReactionSectionMap_map_add` this is the linear-map data for packaging
+the frozen reaction operator as a bounded `CSS →L[ℝ] CSS`. -/
+theorem deTurckReactionSectionMap_map_smul
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (c : ℝ)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
+    deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP (c • s)
+      = c • deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s := by
+  refine ContinuousSectionSpace.ext (fun x => ?_)
+  rw [smul_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover c
+      (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s) x]
+  simp only [deTurckReactionSectionMap_toFun]
+  rw [show (c • s).toFun = c • s.toFun from
+      funext (smul_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover c s),
+    bilinearFormSectionDeTurckReaction_smul]
+  rfl
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
