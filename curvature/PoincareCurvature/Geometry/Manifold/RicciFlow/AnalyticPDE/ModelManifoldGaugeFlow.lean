@@ -1763,6 +1763,69 @@ theorem exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip
         (hplace_state i) (hplace_win i))
   exact ⟨Φ, c, d, hanchor, hcd, hglob⟩
 
+/-- **Global slice-`C³` of an *abstract* compact-manifold flow from the field jets — the forward half
+of the `hslicesC3` obligation for a *given* flow.**  Identical to
+`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip`, except that the raw manifold
+flow `Φ` is **supplied as a hypothesis** (with only its anchor `hanchor` and ODE `horbit` on
+`Set.Ioo (-ε) ε`) rather than produced internally by
+`exists_timeDependent_flow_compact_continuousAt`.  The missing joint space-time continuity `hcontA`
+that the per-patch capstone needs is **derived** from the raw `C¹` field jet `hXraw` alone via
+`ManifoldFlow.continuousAt_timeDependent_flow_of_anchor_ode` (the abstract flow agrees, by
+`timeDependent_flow_unique`, with the canonical continuous flow on an open space-time neighbourhood of
+`{0} × M`).  The conclusion produces `ContMDiff I I 3 (Φ t)` for **that same** `Φ` on a window
+`Set.Ioo c d ∋ 0` — exactly the forward conjunct of the `hslicesC3` hypothesis of
+`GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`, which hands the
+proof obligation a fixed abstract flow with no continuity datum.  The proof is verbatim the internal
+body of the `_windowLip` capstone with the internal flow-production `obtain` replaced by the supplied
+`Φ`/`hanchor`/`horbit` and the derived `hcontA`. -/
+theorem exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip_of_flow
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    [BoundarylessManifold I M] [CompactSpace M] [IsManifold I 1 M]
+    {N : WithTop ℕ∞} [IsManifold I N M]
+    [ContMDiffVectorBundle N E (TangentSpace I : M → Type _) I]
+    {X : ℝ → M → E}
+    (hXraw : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun q : ℝ × M => (⟨q, ((1 : ℝ), X q.1 q.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    {Φ : ℝ → M → M} {ε : ℝ} (hε : 0 < ε)
+    (hanchor : ∀ x, Φ 0 x = x)
+    (horbit : ∀ x, ∀ t ∈ Set.Ioo (-ε) ε,
+      HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ x) (Set.Ioo (-ε) ε) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    {ι : Type*} [Finite ι] {cw dw : ℝ}
+    {p : ι → M} {U Q_M : ι → Set M} {χ : ι → (ℝ × E → ℝ)}
+    {Kwin : ι → Set (ℝ × E)} {state₀ : ι → Set E} {K : ι → ℝ≥0}
+    (hcd0 : (0 : ℝ) ∈ Set.Ioo cw dw)
+    (hopen : ∀ i, IsOpen (U i)) (hcover : ∀ x : M, ∃ i, x ∈ U i)
+    (hXchart : ∀ i, ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) N
+      (fun r : ℝ × M => (⟨r.2, X r.1 r.2⟩ : TangentBundle I M))
+      (Set.univ ×ˢ (extChartAt I (p i)).source))
+    (hχC : ∀ i, ContDiff ℝ N (χ i)) (hχc : ∀ i, HasCompactSupport (χ i))
+    (hsub : ∀ i, tsupport (χ i) ⊆ Set.univ ×ˢ (extChartAt I (p i)).target)
+    (hcut : ∀ i, ∀ᶠ r in 𝓝ˢ (Kwin i), (χ i) r = 1) (hN : 4 ≤ N)
+    (hstate : ∀ i, IsOpen (state₀ i))
+    (hlip : ∀ i, ∀ τ ∈ Set.Icc cw dw, LipschitzOnWith (K i)
+      (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X (p i) τ) (state₀ i))
+    (hU : ∀ i, U i ⊆ (chartAt H (p i)).source) (hUQ : ∀ i, U i ⊆ (Q_M i : Set M))
+    (hQ_M : ∀ i, IsCompact (Q_M i)) (hQ_M_src : ∀ i, Q_M i ⊆ (extChartAt I (p i)).source)
+    (hplace_state : ∀ i, ∀ x ∈ Q_M i, extChartAt I (p i) x ∈ state₀ i)
+    (hplace_win : ∀ i, ∀ x ∈ Q_M i, ((0 : ℝ), extChartAt I (p i) x) ∈ interior (Kwin i)) :
+    ∃ c d : ℝ, (0 : ℝ) ∈ Set.Ioo c d ∧
+      ∀ t ∈ Set.Ioo c d, ContMDiff I I 3 (fun x : M => Φ t x) := by
+  have hcontA : ∀ x, ContinuousAt (fun z : ℝ × M => Φ z.1 z.2) (0, x) := fun x =>
+    PoincareCurvature.ManifoldFlow.continuousAt_timeDependent_flow_of_anchor_ode
+      hXraw hε hanchor horbit x
+  obtain ⟨c, d, hcd, hglob⟩ :=
+    exists_Ioo_forall_contMDiff_of_finite_cover (Φ := Φ) hopen hcover
+      (fun i => contMDiffOn_flowSlice_perPatch_of_flow_windowLip (X := X) (p := p i)
+        hε hcd0 hanchor horbit hcontA (hXchart i) (hχC i) (hχc i) (hsub i) (hcut i) hN
+        (hstate i) (hlip i) (hU i) (hUQ i) (hQ_M i) (hQ_M_src i)
+        (hplace_state i) (hplace_win i))
+  exact ⟨c, d, hcd, hglob⟩
+
 
 /-- **Finite chart cover of a compact manifold — the cover-side data package consumed by the step-(v)
 globalisation capstone `exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover`.**  For a compact
