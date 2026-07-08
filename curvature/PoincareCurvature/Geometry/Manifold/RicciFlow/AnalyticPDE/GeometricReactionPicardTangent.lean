@@ -248,6 +248,40 @@ theorem deTurckReactionSectionMap_add_source_metricSection_apply_eq_intrinsicRic
     (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover
     g background t hbackground x u v
 
+/-- **Fibre-value decomposition of the affine frozen chart operator at an arbitrary state.**  For any
+state section `s`, frozen tangent-endomorphism coefficient `P`, and fixed source section `b`, the affine
+chart operator `A s = deTurckReactionSectionMap P s + b` has the explicit fibre value
+`(A s) x u v = s x (P x u) v + s x (P x v) u + b x u v`.  Obtained by pushing the CSS sum through the
+diamond-free pointwise add `add_apply_tangent`, splitting the bilinear sum with
+`ContinuousLinearMap.add_apply`, and unfolding the reaction fibre value with the raw-`Pi` reaction
+identity `deTurckReactionSectionMap_apply` — entirely wall-free at `BilW`.  This is the general-state
+companion of the metric-section identity above: it gives the chart velocity's fibre value at *every*
+positive-definite section, the shape the chart's `geometric`/`lipschitz` fibre reasoning consumes. -/
+theorem deTurckReactionSectionMap_add_source_apply
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (x : M) (u v : TM x) :
+    (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s + b) x u v
+      = s.toFun x (P x u) v + s.toFun x (P x v) u + b.toFun x u v := by
+  have hpt : (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s + b) x
+      = (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover hP s).toFun x + b.toFun x :=
+    add_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover _ _ x
+  rw [hpt, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
+  simp only [deTurckReactionSectionMap_apply]
+
 /-- **The tangent-bundle DeTurck reaction operator's section-space Picard `hlip` coordinate bound.**
 For the concrete operator `deTurckReactionSectionMap … hP` on the tangent-bundle `BilinearFormBundle`
 continuous section space, the pointwise coordinate readout is Lipschitz-in-state:
