@@ -2585,3 +2585,42 @@ bounded 1st-order operator cannot equal it for general continuous `s`), i.e. the
 bridging the DONE model heat-mild toolkit to the geometric `BilinearFormBundle` section space.  **NEXT:**
 a resolvent growth bound `‖exp(τ·L)‖ ≤ Real.exp(2·Kp·|τ|)` (Mathlib has only `expSeries` summability,
 no `‖exp x‖ ≤ exp‖x‖`, so this needs a genuine series estimate) — or the state-dependent operator itself.
+
+### Item 3 (GAP 2) later-46 — well-posedness stability toolkit for the honest frozen geometric Ricci–DeTurck evolution: general operator-exp norm bound + resolvent/growth/continuous-dependence estimates (five commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Following the later-45 NEXT ("a resolvent growth bound `‖exp(τ·L)‖ ≤ Real.exp(2·Kp·|τ|)` — Mathlib has
+only `expSeries` summability, no `‖exp x‖ ≤ exp‖x‖` — or the state-dependent operator itself"), this
+session supplies the **entire missing exponential-estimate layer** and assembles it into the
+growth + Lipschitz-in-initial-data well-posedness stability of the REAL (non-model) frozen geometric
+section-space evolution.  Two commits live in `AnalyticPDE/AutonomousResolventExp.lean` (general layer),
+three connect it to the concrete `deTurckReactionSectionMapL ∇W` operator via
+`AnalyticPDE/FrozenChartAffineEvolution.lean`.
+
+* **`norm_exp_le`** — `‖NormedSpace.exp x‖ ≤ Real.exp ‖x‖` for any complete unit-norm-one normed
+  `ℝ`-algebra.  The missing Mathlib fact: elementary series comparison `‖∑ₙ xⁿ/n!‖ ≤ ∑ₙ ‖x‖ⁿ/n! =
+  exp‖x‖` via `norm_tsum_le_tsum_norm` + `Summable.tsum_le_tsum` + `norm_pow_le` + `Real.exp_eq_exp_ℝ`.
+* **`norm_exp_smul_le`** — `‖exp(τ • x)‖ ≤ Real.exp(|τ|·‖x‖)`: the resolvent growth bound (the later-45
+  NEXT, now general).
+* **`norm_affineAugment_le`** — `‖affineAugment L b‖ ≤ ‖L‖ + ‖b‖` (via `opNorm_le_bound`, coordinate
+  norms `≤ ‖p‖`).
+* **`norm_affineFundamentalSolution_le`** — `‖affineFundamentalSolution L b t₀ y₀ t‖ ≤
+  Real.exp(|t-t₀|·(‖L‖+‖b‖))·‖(y₀,1)‖`: at-most-exponential growth of the affine operator-exp evolution.
+* **`norm_affineFundamentalSolution_sub_le`** — `‖affineFundamentalSolution … y₀ t −
+  affineFundamentalSolution … y₀' t‖ ≤ Real.exp(|t-t₀|·(‖L‖+‖b‖))·‖y₀−y₀'‖`: continuous dependence on
+  initial data, via affineness (difference = homogeneous orbit of `(y₀−y₀',0)`, using `map_sub` of the
+  operator-exp CLM and `(y₀,1)−(y₀',1)=(y₀−y₀',0)`).
+* **`norm_deTurckFrozenAffineEvolution_le`** / **`norm_deTurckFrozenAffineEvolution_sub_le`** — the two
+  concrete geometric specialisations at `L = deTurckReactionSectionMapL ∇W`: growth and Lipschitz
+  dependence bounds with the real operator's `2·Kp` constant, composing the abstract bounds with
+  `deTurckReactionSectionMapL_opNorm_le` (`‖L‖ ≤ 2·Kp`).
+
+**Progress on {A, picard, realization, encode}.**  These are on the `picard`/mild-estimate side for the
+*frozen* geometric operator: the resolvent growth `‖exp(τ·L)‖ ≤ exp(|τ|·‖L‖)` and the whole-section
+growth + continuous-dependence estimates are exactly the well-posedness inputs a mild/Duhamel
+a-posteriori argument for the real chart consumes.  **Unchanged long pole:** the `geometric` field still
+needs the state-dependent 2nd-order intrinsic RHS (a frozen bounded 1st-order operator cannot equal it
+for general continuous `s`) — the mild/Schauder operator bridging the DONE model heat-mild toolkit to the
+geometric `BilinearFormBundle` section space.  **NEXT:** a Duhamel/variation-of-constants representation
+`affineFundamentalSolution L b t₀ y₀ t = exp((t-t₀)L) y₀ + ∫₀ exp((t-s)L) b ds` (the homogeneous orbit
+restricted to the `(v,0)` invariant subspace of `affineAugment` gives `exp((t-t₀)L)`), or the
+state-dependent operator itself.
