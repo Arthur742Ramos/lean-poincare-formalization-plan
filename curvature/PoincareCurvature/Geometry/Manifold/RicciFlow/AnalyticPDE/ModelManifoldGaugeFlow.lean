@@ -2117,6 +2117,52 @@ theorem contMDiff_flowSlice_of_forall_cutoff_orbit_control
     exact hasDerivAt_maps3_eval_of_cutoff_eqOne G (hnhds τ hτ)
       (mem_of_mem_nhds (hnhds τ hτ)) (extChartAt I p y) (hχ y hy τ hτ)
 
+/-- **Route-A `hslicesC3` from per-point cutoff model gauge flows, consuming the cutoff's *native*
+`𝓝ˢ`-eventually datum + orbit-graph confinement.**  The graph-form companion of
+`contMDiff_flowSlice_of_forall_cutoff_orbit_control`: instead of the pre-digested pointwise
+`hχ : χ (τ, (G.maps3 τ) (extChartAt I p y)) = 1`, it consumes the two facts the cutoff machinery
+`exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window` actually produces — the raw
+neighbourhood-of-a-compact-window cutoff datum `∀ᶠ r in 𝓝ˢ Kwin, χ r = 1`, and the geometric
+orbit-graph confinement `(τ, (G.maps3 τ) (extChartAt I p y)) ∈ Kwin` — reducing them to the pointwise
+`hχ` via `cutoff_eqOne_along_curve_of_graph_subset` (`Filter.Eventually.self_of_nhdsSet`).  This isolates
+the remaining GAP-1 step-(v) content to the single flow-trajectory-confinement estimate
+`orbit-graph ⊆ Kwin` (dischargeable, uniformly over a chart patch, by
+`exists_Ioo_forall_forall_graph_mem_of_isCompact_of_continuousAt`), the honest interface between the
+cutoff-window machinery and the Route-A slice-`C³` gluer. -/
+theorem contMDiff_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I] [SigmaCompactSpace M]
+    {X : ℝ → M → E} {Φ : ℝ → M → M} {t : ℝ}
+    (h : ∀ x : M, ∃ (p : M) (χ : ℝ × E → ℝ) (sTime : Set ℝ) (t₀' : ℝ)
+        (G : RicciFlow.Diffeomorph3GaugeFlowOn (I := 𝓘(ℝ, E)) (M := E)
+          (X := fun τ q => χ (τ, q) •
+            PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ q) sTime t₀')
+        (a b t₀ : ℝ) (K : NNReal) (state : ℝ → Set E) (Kwin : Set (ℝ × E)) (U : Set M),
+      U ∈ nhds x ∧ U ⊆ (chartAt H p).source ∧ t ∈ Set.Ioo a b ∧ t₀ ∈ Set.Ioo a b ∧
+      (∀ τ ∈ Set.Ioo a b, sTime ∈ 𝓝 τ) ∧
+      (∀ᶠ r in 𝓝ˢ Kwin, χ r = 1) ∧
+      (∀ τ ∈ Set.Ioo a b, LipschitzOnWith K
+        (PoincareCurvature.GaugeFlowAssembly.chartPushforwardField I X p τ) (state τ)) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun σ : ℝ => Φ σ y) (Set.Ioo a b) τ
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X τ (Φ τ y)))) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, Φ τ y ∈ (extChartAt I p).source) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b,
+        ((τ, (G.maps3 τ) (extChartAt I p y)) : ℝ × E) ∈ Kwin) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, extChartAt I p (Φ τ y) ∈ state τ) ∧
+      (∀ y ∈ U, ∀ τ ∈ Set.Ioo a b, (G.maps3 τ) (extChartAt I p y) ∈ state τ) ∧
+      (∀ y ∈ U, extChartAt I p (Φ t₀ y) = (G.maps3 t₀) (extChartAt I p y))) :
+    ContMDiff I I 3 (fun x : M => Φ t x) := by
+  refine contMDiff_flowSlice_of_forall_cutoff_orbit_control (X := X) (Φ := Φ) (t := t) (fun x => ?_)
+  obtain ⟨p, χ, sTime, t₀', G, a, b, t₀, K, state, Kwin, U, hUmem, hU, ht, ht₀, hnhds, hχK, hlip,
+    hγ, hγ_src, hgraph, hγ_mem, hg_mem, heq₀⟩ := h x
+  refine ⟨p, χ, sTime, t₀', G, a, b, t₀, K, state, U, hUmem, hU, ht, ht₀, hnhds, hlip,
+    hγ, hγ_src, ?_, hγ_mem, hg_mem, heq₀⟩
+  intro y hy
+  exact cutoff_eqOne_along_curve_of_graph_subset hχK (hgraph y hy)
+
 end
 
 end SmoothDependenceCk
