@@ -199,6 +199,47 @@ theorem exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3
     hδ Φ G hΦ0 hΦC3 hGC3 (fun t ht => hleft t (hsub ht)) (fun t ht => hright t (hsub ht))
     (fun x t ht => (hderiv x t (hsub ht)).mono hsub)⟩
 
+/-- **Compact-manifold gauge-flow existence from *independent* forward / backward slice-`C³`
+sub-windows.**
+
+A refinement of `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3` in which the
+forward slice `Φ t` and the backward slice `G t` are allowed to be spatially `C³` on *different*
+sub-windows `Ioo (-δ₁) δ₁` and `Ioo (-δ₂) δ₂`.  This matches the honest structure of the two
+slice-`C³` routes: the forward regularity comes from the finite-cover field-jet capstone
+(`exists_flow_Ioo_forall_contMDiff_of_field_jets_finite_cover_windowLip_of_flow`) and the backward
+regularity from the cutoff-orbit-control route
+(`contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control_of_graph_subset`), each producing its own
+uniform chart-exit sub-window with no a-priori common size.  Taking the common sub-window
+`δ := min δ₁ δ₂` reduces to the paired sub-window capstone: both `C³` families restrict to
+`Ioo (-δ) δ` (`Ioo`-monotonicity), and the gauge-flow datum is returned on that intersection. -/
+theorem exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3_indep
+    [BoundarylessManifold I M] [CompactSpace M] [Nonempty M]
+    {X : CovariantDerivative.TimeDependentVectorField (I := I) (M := M)}
+    (hX : ContMDiff ((𝓘(ℝ, ℝ)).prod I) (((𝓘(ℝ, ℝ)).prod I).tangent) 1
+      (fun p : ℝ × M => (⟨p, ((1 : ℝ), X p.1 p.2)⟩ :
+        TangentBundle ((𝓘(ℝ, ℝ)).prod I) (ℝ × M))))
+    (hslicesC3 : ∀ (ε : ℝ), 0 < ε → ∀ (Φ G : ℝ → M → M),
+      (∀ x, Φ 0 x = x) →
+      (∀ x, ∀ t ∈ Set.Ioo (-ε) ε,
+        HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ : ℝ ↦ Φ τ x) (Set.Ioo (-ε) ε) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) →
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.LeftInverse (G t) (Φ t)) →
+      (∀ t ∈ Set.Ioo (-ε) ε, Function.RightInverse (G t) (Φ t)) →
+      (∃ δ₁ : ℝ, 0 < δ₁ ∧ δ₁ ≤ ε ∧ ∀ t ∈ Set.Ioo (-δ₁) δ₁, ContMDiff I I 3 (Φ t)) ∧
+        (∃ δ₂ : ℝ, 0 < δ₂ ∧ δ₂ ≤ ε ∧ ∀ t ∈ Set.Ioo (-δ₂) δ₂, ContMDiff I I 3 (G t))) :
+    ∃ ε > 0, Nonempty (Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Set.Ioo (-ε) ε) 0) := by
+  refine exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSubwindowSlicesC3 hX ?_
+  intro ε hε Φ G hΦ0 hderiv hleft hright
+  obtain ⟨⟨δ₁, hδ₁, hδ₁ε, hΦC3⟩, ⟨δ₂, hδ₂, hδ₂ε, hGC3⟩⟩ :=
+    hslicesC3 ε hε Φ G hΦ0 hderiv hleft hright
+  refine ⟨min δ₁ δ₂, lt_min hδ₁ hδ₂, (min_le_left δ₁ δ₂).trans hδ₁ε, ?_, ?_⟩
+  · intro t ht
+    exact hΦC3 t ⟨lt_of_le_of_lt (neg_le_neg (min_le_left δ₁ δ₂)) ht.1,
+      lt_of_lt_of_le ht.2 (min_le_left δ₁ δ₂)⟩
+  · intro t ht
+    exact hGC3 t ⟨lt_of_le_of_lt (neg_le_neg (min_le_right δ₁ δ₂)) ht.1,
+      lt_of_lt_of_le ht.2 (min_le_right δ₁ δ₂)⟩
+
 /-- **Chart-conjugation `C³` transfer for a flow slice.**  If, on an open set `U` contained in the
 source chart at `x₀`, the map `F` is represented in the extended charts at `x₀` (source) and `F x₀`
 (target) by a globally `C³` model map `Ψ : E → E` — i.e.
