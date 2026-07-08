@@ -145,6 +145,42 @@ theorem hasDerivAt_affineFundamentalSolution
   rw [hval] at hfst
   exact hfst
 
+omit [CompleteSpace E] in
+/-- **Uniqueness for the affine autonomous ODE `y' = L y + b`.**  Two global solutions that agree at
+one time agree everywhere.  Their difference solves the *homogeneous* linear equation `d' = L d` with
+`d t₀ = 0`, so homogeneous integral-curve uniqueness (`variationalVec_eq_of_isIntegralCurve`, with the
+zero curve) forces it to vanish identically. -/
+theorem affineODE_unique (L : E →L[ℝ] E) (b : E) {y₁ y₂ : ℝ → E}
+    (h1 : ∀ t, HasDerivAt y₁ (L (y₁ t) + b) t)
+    (h2 : ∀ t, HasDerivAt y₂ (L (y₂ t) + b) t)
+    {t₀ : ℝ} (h : y₁ t₀ = y₂ t₀) (t : ℝ) : y₁ t = y₂ t := by
+  have hu1 : IsIntegralCurve (fun t => y₁ t - y₂ t) (variationalFieldVec (fun _ => L)) := by
+    intro t
+    have hd := (h1 t).sub (h2 t)
+    have heq : (L (y₁ t) + b) - (L (y₂ t) + b) = L (y₁ t - y₂ t) := by
+      rw [map_sub]; abel
+    simpa only [variationalFieldVec, heq] using hd
+  have hu2 : IsIntegralCurve (fun _ : ℝ => (0 : E)) (variationalFieldVec (fun _ => L)) := by
+    intro t
+    simpa [variationalFieldVec] using hasDerivAt_const t (0 : E)
+  have hzero : (fun t => y₁ t - y₂ t) t₀ = (fun _ : ℝ => (0 : E)) t₀ := by
+    simp [h]
+  have hdiff := variationalVec_eq_of_isIntegralCurve
+    (A := fun _ => L) (K := ‖L‖₊) (fun _ => le_rfl) hu1 hu2 hzero t
+  simpa [sub_eq_zero] using hdiff
+
+/-- **The affine fundamental solution is the unique solution.**  Any global solution `y` of
+`y' = L y + b` with `y t₀ = y₀` coincides with `affineFundamentalSolution L b t₀ y₀`.  This is the
+uniqueness half of the affine Cauchy problem for the frozen chart operator, the ingredient that a
+chart-closure `encode` field consumes. -/
+theorem eq_affineFundamentalSolution_of_hasDerivAt
+    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) {y : ℝ → E}
+    (hy : ∀ t, HasDerivAt y (L (y t) + b) t) (h0 : y t₀ = y₀) (t : ℝ) :
+    y t = affineFundamentalSolution L b t₀ y₀ t := by
+  refine affineODE_unique L b hy
+    (fun s => hasDerivAt_affineFundamentalSolution L b t₀ y₀ s) (t₀ := t₀) ?_ t
+  rw [h0, affineFundamentalSolution_initial]
+
 variable {Φ : E → ℝ → E} {t₀ : ℝ}
 
 /-- **The autonomous fundamental solution is the operator exponential.**  For a *time-independent*
