@@ -2802,3 +2802,51 @@ the globaliser from the compact-flow slice being a homeomorphism (continuous bij
 `ContMDiff I I 3 (G t)`, pairing with the forward slice to discharge `hslicesC3` and inhabit
 `Diffeomorph3GaugeFlowOn` unconditionally.  Still: the Item-3 geometric chart (`A`/`picard`/Schauder)
 remains the independent long pole.
+
+### Progress (2026-07-08, later 12) — Item 2 GAP 1: the BACKWARD (inverse-slice) chart-transfer ladder completed to the `hslicesC3`-conclusion shape, mirroring the forward Route-A machinery (five commits; each `{propext, Classical.choice, Quot.sound}`)
+
+Following later-11's `NEXT` (supply the per-point backward packages and assemble to `ContMDiff (G t)`),
+this session added the full set of backward *capstones* that consume per-point comparison packages and
+produce the inverse-slice `C³`, completing the backward mirror of the forward Route-A ladder and
+consolidating both halves into the exact `hslicesC3` conclusion shape.  All additive, sorry-free,
+axiom-clean.
+
+* **`GaugeFlowAssembly.contMDiff_symm_flowSlice_of_forall_rawFlow_modelFlow_eqOn`** — the abstract-`Ψ`
+  backward capstone, inverse-slice mirror of the forward
+  `contMDiff_flowSlice_of_forall_rawFlow_modelFlow_eqOn`.  From a continuous + surjective forward slice
+  `Φ t` with a global left inverse `Gt` on a compact `T2` `M` — packaged as a homeomorphism via
+  `Continuous.homeoOfEquivCompactToT2` ⟹ `IsOpenMap` — plus a per-base-point family of temporal
+  integral-curve comparison packages (diffeomorph model flow `Ψ : ℝ → (E ≃ₘ^3 E)`, raw gauge ODE,
+  tube-Lipschitz, co-solution + anchor), produces global `ContMDiff I I 3 Gt` by feeding the backward
+  per-patch brick `contMDiffOn_symm_flowSlice_of_rawFlow_modelFlow_eqOn` (shrunk to `interior U`) into
+  the globaliser `contMDiff_symm_flowSlice_of_forall_openImage`.
+* **`GaugeFlowAssembly.contMDiff_flowSlice_and_symm_of_forall_rawFlow_modelFlow_eqOn`** — the abstract-`Ψ`
+  *paired* capstone: one diffeomorph comparison package feeds *both* directions (forward extracts
+  `ContDiff ℝ 3 (Ψ t)` from `(Ψ t).contMDiff`), producing `ContMDiff (Φ t) ∧ ContMDiff Gt`.
+* **`SmoothDependenceCk.contMDiff_symm_flowSlice_of_forall_cutoff_orbit_control`** and its
+  **`_of_graph_subset`** graph-form companion — the concrete-`G` backward capstones, inverse-slice
+  mirrors of the forward `contMDiff_flowSlice_of_forall_cutoff_orbit_control[_of_graph_subset]`.  They
+  consume the *native* cutoff-machinery output (cutoff model gauge flow `G`, the pointwise `χ≡1` datum
+  or the `∀ᶠ 𝓝ˢ Kwin` + orbit-graph confinement pair) plus the homeomorphism inputs, realise
+  `Ψ := fun τ ↦ G.maps3 τ` (a genuine `C³` diffeomorph family), discharge `hg'` via
+  `hasDerivAt_maps3_eval_of_cutoff_eqOne`, and delegate to the abstract backward capstone.
+* **`SmoothDependenceCk.contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_subset`** —
+  the concrete-`G` *paired* capstone: produces the exact `ContMDiff (Φ t) ∧ ContMDiff Gt` `hslicesC3`
+  conclusion at a fixed time from ONE uniform supply of native cutoff-model-flow packages plus only the
+  forward slice's spatial-inverse data (`Φ t` surjective, `Gt ∘ Φ t = id`).  Crucially it *derives*
+  `Continuous (Φ t)` from the forward `C³` conjunct (`ContMDiff.continuous`), so the backward half's
+  compact-`T2` homeomorphism obligation is absorbed into the forward half — no separately assumed
+  continuity.
+
+**Fractions of GAP 1.**  Both halves of `hslicesC3` now have their complete chart-transfer ladders
+*and* a consolidated paired capstone producing the conclusion shape directly.  The remaining GAP-1
+content is now cleanly isolated to **supplying the per-point cutoff-model-flow packages** from the
+actual compact flow: per base point, the cutoff model gauge flow `G`
+(`exists_diffeomorph3GaugeFlowOn_cutoff_eqOne_of_isCompact_window`), the intersected confinement window
+`Ioo a b`, and the single geometric **orbit-graph `⊆ Kwin` confinement estimate**; plus the flow's
+`Surjective`/`LeftInverse` inverse data (from `exists_timeDependent_flow_compact_inverse`).  **NEXT:**
+supply that per-point package for the raw compact flow and feed
+`contMDiff_flowSlice_and_symm_of_forall_cutoff_orbit_control_of_graph_subset` (quantified over `t`) →
+the full `hslicesC3` → `exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3`, inhabiting
+`Diffeomorph3GaugeFlowOn` unconditionally.  Still: the Item-3 geometric chart (`A`/`picard`/Schauder)
+remains the independent long pole.
