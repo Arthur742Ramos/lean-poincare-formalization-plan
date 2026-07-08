@@ -466,6 +466,43 @@ theorem contMDiffOn_of_extChartAt_conjugation'
   exact (PartialEquiv.left_inv (extChartAt I y₀)
     (by rw [extChartAt_source]; exact hFU hx)).symm
 
+/-- **Backward chart-conjugation `C³` transfer for a flow slice.**  The inverse-map companion of
+`contMDiffOn_of_extChartAt_conjugation'`: if the forward slice `Φt` is represented on `U` by a globally
+`C³` model map `Ψ` in the single fixed chart at `x₀`
+(`extChartAt I x₀ (Φt x) = Ψ (extChartAt I x₀ x)`), the model map has a `C³` left inverse `Ψsymm`
+(`Ψsymm (Ψ (extChartAt I x₀ x)) = extChartAt I x₀ x` on the chart image of `U`), and `Gt` is a left
+inverse of `Φt` on `U` (`Gt (Φt x) = x`), then the inverse slice `Gt` is `ContMDiffOn I I 3` on the
+forward image `Φt '' U`.
+
+The backward conjugation `extChartAt I x₀ (Gt y) = Ψsymm (extChartAt I x₀ y)` at `y = Φt x ∈ Φt '' U`
+is derived algebraically from the forward one: `extChartAt I x₀ (Gt (Φt x)) = extChartAt I x₀ x` (left
+inverse) equals `Ψsymm (Ψ (extChartAt I x₀ x)) = Ψsymm (extChartAt I x₀ (Φt x))` (left-inverse of the
+model map applied to the forward conjugation).  The result then follows from
+`contMDiffOn_of_extChartAt_conjugation'` applied to `Gt` with model map `Ψsymm`, source and target chart
+both centred at `x₀`.  When `Ψ` is the model gauge-flow diffeomorph slice `(G.maps3 τ : E → E)` and
+`Ψsymm := (G.maps3 τ).symm` — a genuine `C³` self-diffeomorph of `E` — the left-inverse hypothesis is
+automatic; this supplies the backward slice-`C³` (inverse `G t`) half of the `hslicesC3` obligation of
+`exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_flowSlicesC3` directly from the same forward flow data,
+requiring no separate backward orbit confinement. -/
+theorem contMDiffOn_symm_of_extChartAt_conjugation'
+    {x₀ : M} {Φt Gt : M → M} {U : Set M} {Ψ Ψsymm : E → E}
+    (hΨsymm : ContDiff ℝ 3 Ψsymm)
+    (hΦU : Set.MapsTo Φt U (chartAt H x₀).source)
+    (hU : U ⊆ (chartAt H x₀).source)
+    (hconj : ∀ x ∈ U, extChartAt I x₀ (Φt x) = Ψ (extChartAt I x₀ x))
+    (hΨsymmΨ : ∀ x ∈ U, Ψsymm (Ψ (extChartAt I x₀ x)) = extChartAt I x₀ x)
+    (hGleft : ∀ x ∈ U, Gt (Φt x) = x) :
+    ContMDiffOn I I 3 Gt (Φt '' U) := by
+  refine contMDiffOn_of_extChartAt_conjugation' (x₀ := x₀) (y₀ := x₀)
+    (F := Gt) (Ψ := Ψsymm) ?_ hΨsymm ?_ ?_
+  · rintro y ⟨x, hx, rfl⟩
+    exact hΦU hx
+  · rintro y ⟨x, hx, rfl⟩
+    rw [hGleft x hx]
+    exact hU hx
+  · rintro y ⟨x, hx, rfl⟩
+    rw [hGleft x hx, hconj x hx, hΨsymmΨ x hx]
+
 /-- **`ContinuousOn` of the chart pushforward field from a continuous tangent-bundle section.**
 
 The isolated varying-source-centre coordinate change `y ↦ tangentCoordChange I y p y` is *not*
