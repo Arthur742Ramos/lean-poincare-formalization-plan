@@ -511,4 +511,70 @@ theorem banachEvolution_curve_eq_deTurckFrozenGeometricAffineEvolution
   banachEvolution_curve_eq_deTurckFrozenAffineEvolution
     x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0 sol ht
 
+/-- **Any frozen affine chart Banach solution has a `ContDiffOn` (smooth-in-time) curve — WALL-FREE.**
+Combining the wall-free uniqueness `banachEvolution_curve_eq_deTurckFrozenAffineEvolution` (the curve
+equals the explicit affine evolution on its interval) with the explicit evolution's global time
+smoothness `contDiff_deTurckFrozenAffineEvolution` (via `ContDiffOn.congr`): the curve of *any* Banach
+evolution of the frozen field `F τ s = deTurckReactionSectionMap ∇W s + b` is `ContDiffOn ℝ n` on
+`Icc t₀ sol.terminalTime`.  This is the parabolic-free time-regularity of the Banach curve that the
+smooth realization consumes at the interval endpoints. -/
+theorem banachEvolution_curve_contDiffOn_of_frozen
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    {P : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x}
+    (hP : Continuous (fun x ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) x (P x)))
+    (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolution
+      (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+        Kc hKc Ko hKo hKoEq hcover hP s + b) t₀ σ0)
+    {n : WithTop ℕ∞} :
+    ContDiffOn ℝ n sol.curve (Set.Icc t₀ sol.terminalTime) :=
+  (contDiff_deTurckFrozenAffineEvolution x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0
+    (n := n)).contDiffOn.congr
+    (fun t ht => banachEvolution_curve_eq_deTurckFrozenAffineEvolution
+      x0 Kc hKc Ko hKo hKoEq hcover hP b t₀ σ0 sol ht)
+
+/-- **Any CONCRETE geometric frozen Ricci–DeTurck Banach solution has a `ContDiffOn` curve —
+WALL-FREE.**  The geometric specialisation of `banachEvolution_curve_contDiffOn_of_frozen` at the
+genuine data `P := ∇W`, `b := intrinsicRicciFlowRHSSectionSpace g tFreeze`: the curve of any Banach
+evolution of the exact frozen geometric field (the operator solved by
+`deTurckFrozenGeometric_nonempty_banachEvolutionLocalSolutionIn`) is `ContDiffOn ℝ n` in time on its
+interval — the smooth-in-time realization ingredient for the concrete Ricci–DeTurck chart. -/
+theorem banachEvolution_curve_contDiffOn_of_frozenGeometric
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
+    (tFreeze : ℝ)
+    (hbackground : CovariantDerivative.ContMDiffCovariantDerivative (background tFreeze) 1)
+    (t₀ : ℝ)
+    (σ0 : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (sol : RicciFlow.AnalyticPDE.BanachEvolutionLocalSolution
+      (fun _ : ℝ => fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+          Kc hKc Ko hKo hKoEq hcover
+          (intrinsicDeTurckVectorField_covariantDerivative_contMDiff_zero
+            g background tFreeze hbackground).continuous s
+        + intrinsicRicciFlowRHSSectionSpace (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover g tFreeze) t₀ σ0)
+    {n : WithTop ℕ∞} :
+    ContDiffOn ℝ n sol.curve (Set.Icc t₀ sol.terminalTime) :=
+  banachEvolution_curve_contDiffOn_of_frozen
+    x0 Kc hKc Ko hKo hKoEq hcover _ _ t₀ σ0 sol
+
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace
