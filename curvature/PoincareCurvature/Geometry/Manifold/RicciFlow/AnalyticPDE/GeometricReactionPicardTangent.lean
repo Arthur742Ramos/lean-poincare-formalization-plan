@@ -118,6 +118,80 @@ theorem deTurckReactionSectionMap_coord_eq_readout
     (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
       Kc hKc Ko hKo hKoEq hcover hP σ) i x
 
+/-- **Tangent-bundle (`W := TangentSpace I`) hom-topology `coord_apply`.**  For a section `s` of the
+canonical `BilinearFormBundle` continuous section space at `W := TangentSpace I`, the compact coordinate
+readout `(coord s).1 i x` (`equivCompatibleCoordFamilySubmodule`) equals the trivialization's fibrewise
+`continuousLinearMapAt` applied to the pointwise value `s.toFun x`.  This is the fibre-topology-native
+(`ContinuousLinearMap.topologicalSpace` on the hom fibre) companion of the seminormed-fibre `coord_apply`,
+obtained by unfolding the readout bridge `bilinearFormBundle_coord_eq_trivializationAt_readout_tangent`
+into the on-baseSet linear map `(e ⟨x, ·⟩).2 = continuousLinearMapAt x` (`continuousLinearMapAt_apply` +
+`coe_linearMapAt_of_mem`), so that only `IsLinear`-level (Pretrivialization) API is used — sidestepping
+the `FiberBundle`/fibre-`TopologicalSpace` diamond that blocks the seminormed-track `coord_apply` at
+`BilW`. -/
+theorem coord_apply_tangent
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (i : κ) (x : Kc i) :
+    (equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+        (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover s).1 i x
+      = (trivializationAt BilF BilW (x0 i)).continuousLinearMapAt ℝ x.1 (s.toFun x.1) := by
+  have hx : (x : M) ∈ (trivializationAt BilF BilW (x0 i)).baseSet := hKc i x.2
+  haveI hlin : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := E) (W := TM) (x0 i)
+  rw [bilinearFormBundle_coord_eq_trivializationAt_readout_tangent x0 Kc hKc Ko hKo hKoEq hcover s i x]
+  simp only [Trivialization.continuousLinearMapAt_apply,
+    (trivializationAt BilF BilW (x0 i)).coe_linearMapAt_of_mem hx]
+
+/-- **Pointwise additivity of the tangent-bundle continuous section space at the hom fibre topology.**
+`(s + t).toFun x = s.toFun x + t.toFun x` for sections `s t` of the canonical `BilinearFormBundle`
+continuous section space at `W := TangentSpace I`.  Unlike the seminormed-track `add_apply`, whose direct
+use at `BilW` blows the elaborator's `isDefEq` budget on the transported `AddCommGroup`/`BilinearFormBundle`
+fibre diamond, this hom-fibre-topology version routes entirely through the diamond-free coordinate track:
+each section value is recovered from its compact coordinate via the trivialization's linear inverse
+(`coord_apply_tangent` then `symmₗ_linearMapAt`), the coordinate of the sum splits additively
+(`coord_add_apply_topFibre`), and the fibre inverse `symmₗ` is `ℝ`-linear (`map_add`).  Only
+`IsLinear`-level (Pretrivialization) API is used, so no `FiberBundle`/fibre-`TopologicalSpace` diamond is
+triggered.  This is the wall-free pointwise-add companion that lets an affine section-space chart operator
+`A t s = L s + b` be evaluated at a fibre point (`A t s x u v = (L s) x u v + b x u v`), connecting its
+coordinate-level Picard data to a geometric fibre-value identification. -/
+theorem add_apply_tangent
+    {κ : Type*} [Finite κ]
+    (x0 : κ → M)
+    (Kc : κ → TopologicalSpace.Compacts M)
+    (hKc : ∀ i, (Kc i : Set M) ⊆ (trivializationAt BilF BilW (x0 i)).baseSet)
+    (Ko : κ → κ → TopologicalSpace.Compacts M)
+    (hKo : ∀ i j, (Ko i j : Set M) ⊆ (Kc i : Set M) ∩ (Kc j : Set M))
+    (hKoEq : ∀ i j, (Ko i j : Set M) = (Kc i : Set M) ∩ (Kc j : Set M))
+    (hcover : (⋃ i, (Kc i : Set M)) = Set.univ)
+    (s t : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
+    (x : M) :
+    (s + t).toFun x = s.toFun x + t.toFun x := by
+  obtain ⟨i, hi⟩ : ∃ i, x ∈ (Kc i : Set M) :=
+    Set.mem_iUnion.mp (by rw [hcover]; exact Set.mem_univ x)
+  have hx : x ∈ (trivializationAt BilF BilW (x0 i)).baseSet := hKc i hi
+  haveI hlin : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := E) (W := TM) (x0 i)
+  have hsymm : ∀ (σ : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover),
+      σ.toFun x = (trivializationAt BilF BilW (x0 i)).symmₗ ℝ x
+        ((equivCompatibleCoordFamilySubmodule (𝕜 := ℝ) (F := BilF) (V := BilW)
+          (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover σ).1 i ⟨x, hi⟩) := by
+    intro σ
+    rw [coord_apply_tangent x0 Kc hKc Ko hKo hKoEq hcover σ i ⟨x, hi⟩,
+      Trivialization.continuousLinearMapAt_apply]
+    exact ((trivializationAt BilF BilW (x0 i)).symmₗ_linearMapAt hx (σ.toFun x)).symm
+  rw [hsymm s, hsymm t, hsymm (s + t),
+    coord_add_apply_topFibre s t i ⟨x, hi⟩, map_add]
+
 /-- **The tangent-bundle DeTurck reaction operator's section-space Picard `hlip` coordinate bound.**
 For the concrete operator `deTurckReactionSectionMap … hP` on the tangent-bundle `BilinearFormBundle`
 continuous section space, the pointwise coordinate readout is Lipschitz-in-state:
