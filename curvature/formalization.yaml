@@ -1,0 +1,129 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Static connection and curvature infrastructure in Lean"
+  description: >-
+    Formalizes a reusable static manifold layer for covariant derivatives and
+    curvature. The selected results prove that the raw curvature commutator is
+    alternating in its vector-field arguments and that two torsion-free,
+    metric-compatible affine connections have identical connection data at the
+    current manifold API boundary. The surrounding checked package also
+    contains the bundled curvature tensor, Ricci and scalar contractions,
+    Levi-Civita existence, sectional curvature, and Bianchi infrastructure.
+    It does not claim Ricci-flow local existence or the Poincare Conjecture.
+  authors:
+    - "Arthur Freitas Ramos"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arthur Freitas Ramos"
+
+classification:
+  arxiv: ["math.DG", "math.LO"]
+  msc2020: ["53C21", "53C25", "03B35"]
+
+sources:
+  - title: "Mathlib4 manifold and covariant-derivative infrastructure"
+    authors:
+      - "Mathlib contributors"
+    id: "https://github.com/leanprover-community/mathlib4"
+    type: "software"
+    location: "https://github.com/leanprover-community/mathlib4"
+    relationship: "builds-on"
+    note: >-
+      The development extends Mathlib's manifold, vector-bundle,
+      covariant-derivative, torsion, and Riemannian APIs with a static
+      curvature layer.
+    license: "Apache-2.0"
+    author_endorsement: "not-contacted"
+  - title: "Nozione di parallelismo in una varietà qualunque e conseguente specificazione geometrica della curvatura riemanniana"
+    authors:
+      - "Tullio Levi-Civita"
+    id: "Rendiconti del Circolo Matematico di Palermo 42 (1917), 173-205"
+    type: "article"
+    location: "https://encyclopediaofmath.org/wiki/Levi-Civita_connection"
+    relationship: "independently-proves"
+    note: >-
+      The 1917 paper is the historical source for the connection construction;
+      the linked reference records the standard uniqueness statement. The
+      formalization gives a kernel-checked formulation of the torsion-free and
+      metric-compatibility uniqueness argument.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+
+related_formalizations: []
+
+status:
+  scope: >-
+    The selected surface covers arbitrary smooth finite-dimensional model
+    spaces and manifolds under the stated Mathlib manifold hypotheses. It
+    proves the alternating raw curvature commutator for a bundled covariant
+    derivative and the vanishing of the difference one-form between any two
+    Levi-Civita connections. The implementation boundary additionally
+    packages static curvature tensors and contractions, but this candidate
+    does not claim a general Ricci-flow existence theorem, surgery, or a proof
+    of the Poincare Conjecture. The two `sorry` declarations occur only as
+    deliberate statement holes in `Challenge.lean`.
+  sorry_count: 2
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent-assisted"
+      models: ["GPT-5 Codex"]
+      framework: "Lean 4 and Mathlib"
+      tool_setup: >-
+        Pinned Lean/Mathlib builds, closure-safe Challenge compilation,
+        kernel checking, and an independent Comparator/NanoDa replay with
+        immutable dependency revisions.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "subscription-based"
+        hardware: "local machine"
+      prompting_notes: "The final statements and proofs are checked by Lean's kernel."
+  spend_usd: "subscription-based"
+  notes: >-
+    The statement surface is isolated from project-specific source modules;
+    the solution imports the checked static curvature package.
+
+fidelity:
+  divergences: >-
+    The Challenge reconstructs only the small public statement vocabulary
+    needed by the selected results from Mathlib's underlying covariant-
+    derivative API. The implementation contains the full reusable static
+    curvature package and its supporting constructions. This is an intentional
+    statement/implementation separation for Comparator replay; the selected
+    public definitions are nevertheless compared by body, not treated as
+    Comparator definition holes. This is not a claim that the Challenge
+    reproduces the entire implementation file layout.
+
+review:
+  status: "self-assessed"
+  reviewers:
+    - "none"
+  notes: >-
+    Local preparation requires both `scripts/verify-palomar.sh` and the
+    pinned `scripts/verify-comparator.sh` replay. Hosted mechanical
+    verification, editorial review, registration, and public indexing are not
+    inferred from local compilation and have not been attempted for this
+    candidate.
+
+alignment:
+  namespace: "PoincareCurvature.Palomar"
+  statements:
+    - source: "Alternating curvature commutator"
+      lean: "PoincareCurvature.Palomar.curvature_commutator_skew"
+      module: "Solution.lean"
+      status: "proved"
+      note: "The raw curvature commutator changes sign when its vector-field arguments are exchanged."
+    - source: "Levi-Civita uniqueness"
+      lean: "PoincareCurvature.Palomar.levi_civita_uniqueness"
+      module: "Solution.lean"
+      status: "proved"
+      note: "Two torsion-free, metric-compatible affine connections have zero difference one-form."
+
+acknowledgements: >-
+  Mathlib contributors for the manifold, vector-bundle, covariant-derivative,
+  torsion, and Riemannian infrastructure; and the Palomar Registry project for
+  the statement/solution Comparator workflow.

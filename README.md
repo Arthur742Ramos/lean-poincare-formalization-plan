@@ -13,6 +13,8 @@ style of the Annals of Formalized Mathematics.
 
 - `docs/roadmap.md`: the main roadmap, with AFM-scale project slices
 - `docs/dependencies.md`: dependency structure and a suggested execution order
+- `docs/palomar-submission-plan.md`: the proposed portfolio of focused Palomar
+  submission candidates
 - `curvature/`: Lean/mathlib subproject for the front-end connection and
   curvature layers of the roadmap
 

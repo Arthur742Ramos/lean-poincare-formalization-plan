@@ -1276,6 +1276,17 @@ direct spatial-Hölder, unit-diameter, closed-ball, and closed-cylinder
 Gram-entry variants for local chart callers.
 It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
 
+## Palomar Submission 01
+
+The root of this subproject also contains the initial Palomar preparation
+surface for the static connection and curvature contribution. See
+`PALOMAR.md`, `Challenge.lean`, `Solution.lean`, `comparator.json`, and
+`formalization.yaml` for the selected statements and reproducibility checks.
+Run `bash scripts/verify-palomar.sh` for the full local package/metadata audit,
+then `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh` for
+the explicit macOS Comparator plus NanoDa replay. This surface is preparation
+only; no external Palomar intake has been made.
+
 ## Build
 
 From this directory:
