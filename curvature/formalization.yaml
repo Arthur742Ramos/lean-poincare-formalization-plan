@@ -14,6 +14,8 @@ project:
     It does not claim Ricci-flow local existence or the Poincare Conjecture.
   authors:
     - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
   license: "Apache-2.0"
   responsible_maintainers:
     - "Arthur Freitas Ramos"
