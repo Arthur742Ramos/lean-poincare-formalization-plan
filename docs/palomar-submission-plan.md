@@ -30,7 +30,7 @@ and authorization relationship have been explicitly confirmed.
 
 | ID | Candidate | Main mathematical boundary | Current status |
 | --- | --- | --- | --- |
-| 01 | Static connection and curvature core | Covariant derivatives along vector fields, the raw curvature commutator, and Levi-Civita uniqueness | Locally prepared; not submitted |
+| 01 | Static connection and curvature core | Covariant derivatives along vector fields, the raw curvature commutator, and Levi-Civita uniqueness | Correcting first hosted mechanical failure |
 | 02 | Tensorial curvature and contractions | Bundled curvature tensor, Ricci curvature, and scalar curvature | Source code exists; isolate after 01 |
 | 03 | Static Riemannian identities | Levi-Civita existence, sectional curvature, and first/second Bianchi identities | Source code exists; isolate after 02 |
 | 04 | Time-dependent geometric structures | One-parameter sections, connections, metrics, and slicewise curvature | Source code exists; isolate after 03 |
@@ -84,6 +84,10 @@ the source closure, Challenge/Solution replay, metadata, license, local build,
 and proof-mechanism audits pass.
 
 Current state: the full package audit and pinned Comparator/NanoDa replay pass
-locally (the macOS replay uses an explicit unsandboxed development fallback);
-the repository-level Linux workflow is wired for the same two gates; no
-Palomar intake has been made.
+locally (the macOS replay uses an explicit unsandboxed development fallback),
+and the repository-level Linux workflow is wired for the same two gates. A
+first hosted attempt at commit `22c21dd473fc77a5d93745df976fd27ec1e9ab4a`
+failed only because the root `LICENSE` did not have one unambiguous standard
+SPDX match. The correction uses the official full Apache-2.0 text and adds an
+exact local fingerprint check; the corrected commit must be pushed and
+revalidated before a retry.

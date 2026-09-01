@@ -1284,8 +1284,11 @@ surface for the static connection and curvature contribution. See
 `formalization.yaml` for the selected statements and reproducibility checks.
 Run `bash scripts/verify-palomar.sh` for the full local package/metadata audit,
 then `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh` for
-the explicit macOS Comparator plus NanoDa replay. This surface is preparation
-only; no external Palomar intake has been made.
+the explicit macOS Comparator plus NanoDa replay. The first hosted attempt at
+the preceding public commit failed only on Palomar's standard SPDX license
+fingerprint; this revision replaces the root license with the official full
+Apache-2.0 text and adds a matching local fingerprint gate. A retry must use
+the new immutable commit.
 
 ## Build
 

@@ -32,8 +32,12 @@ repository-relative fields are:
 - formalization metadata: `curvature/formalization.yaml`;
 - license: the repository-root `LICENSE` file.
 
-These are recorded for reproducibility only. They are not an intake receipt,
-submission identifier, or review result.
+These identify the exact intake surface. The first hosted attempt at commit
+`22c21dd473fc77a5d93745df976fd27ec1e9ab4a` failed mechanical verification
+because the repository license text did not have one unambiguous standard SPDX
+match. This revision replaces it with the official full Apache-2.0 text and
+adds an exact local fingerprint check; a retry must use the new immutable
+commit.
 
 ## Local checks
 
@@ -62,7 +66,9 @@ Lean4Export v4.29.1, Landrun, and NanoDa by full commit.
 
 ## External status
 
-This candidate is locally prepared only. It has not been submitted to
-Palomar. An external intake will require a fresh check of the current
-Palomar contract, the exact public repository and immutable commit, the
-Comparator configuration, and the authorized maintainer relationship.
+The first candidate was submitted to Palomar at the commit recorded above but
+failed hosted mechanical verification on the license fingerprint alone. The
+current correction is locally prepared; after the new commit is public, an
+external retry still requires a fresh check of the current Palomar contract,
+the exact immutable commit, the Comparator configuration, and the authorized
+maintainer relationship.

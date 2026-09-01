@@ -106,10 +106,11 @@ review:
     - "none"
   notes: >-
     Local preparation requires both `scripts/verify-palomar.sh` and the
-    pinned `scripts/verify-comparator.sh` replay. Hosted mechanical
-    verification, editorial review, registration, and public indexing are not
-    inferred from local compilation and have not been attempted for this
-    candidate.
+    pinned `scripts/verify-comparator.sh` replay. A first hosted mechanical
+    attempt failed only on the root license fingerprint; this revision uses the
+    official full Apache-2.0 text and adds a matching local fingerprint gate.
+    Editorial review, registration, and public indexing are not inferred from
+    local compilation or that failed mechanical attempt.
 
 alignment:
   namespace: "PoincareCurvature.Palomar"

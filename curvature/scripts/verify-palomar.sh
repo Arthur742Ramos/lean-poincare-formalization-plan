@@ -15,6 +15,7 @@ done
 
 python3 - "$repository_root" <<'PY'
 import json
+import hashlib
 import pathlib
 import re
 import subprocess
@@ -42,6 +43,13 @@ licenses = [
 ]
 if len(licenses) != 1:
     raise SystemExit(f"error: expected exactly one root license, found {licenses}")
+expected_license_sha256 = "5f3751276afe718ffa78ec1fc61490d4185712554bcb6a90059416dc424ce9a6"
+actual_license_sha256 = hashlib.sha256(licenses[0].read_bytes()).hexdigest()
+if actual_license_sha256 != expected_license_sha256:
+    raise SystemExit(
+        "error: root LICENSE is not the canonical Apache-2.0 text with the "
+        "project copyright notice"
+    )
 
 artifact_suffixes = {
     ".a", ".bc", ".dll", ".dylib", ".ilean", ".ir", ".o", ".obj",
@@ -188,4 +196,4 @@ import Solution
 EOF
 
 git diff --check
-echo "Submission 01 local checks passed. No external Palomar intake was attempted."
+echo "Submission 01 local checks passed."
