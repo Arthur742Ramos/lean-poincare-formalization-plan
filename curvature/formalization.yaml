@@ -99,11 +99,10 @@ automation:
         Comparator/NanoDa replay supplied automated checks.
   spend_usd: "subscription-based"
   notes: >-
-    Fuller role and oversight record: the Submission 03 repository document
-    `curvature/AGENT-CONTRIBUTION-03.md`. The final artifact metadata will pin
-    that record to an immutable public commit. It distinguishes agent proof
-    engineering from human mathematical selection, attribution, review, and
-    submission responsibility.
+    Fuller role and oversight record: the immutable repository document at
+    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/a8e33e4f5215105089ede1f45ed3e67b78d3ae4e/curvature/AGENT-CONTRIBUTION-03.md
+    . It distinguishes agent proof engineering from human mathematical
+    selection, attribution, review, and submission responsibility.
 
 fidelity:
   divergences: >-
