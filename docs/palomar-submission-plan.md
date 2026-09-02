@@ -31,8 +31,8 @@ and authorization relationship have been explicitly confirmed.
 | ID | Candidate | Main mathematical boundary | Current status |
 | --- | --- | --- | --- |
 | 01 | Raw Bianchi curvature identities | Pointwise first and raw differential second Bianchi identities for torsion-free affine connections | Accepted by Palomar (user-confirmed); immutable artifact at `04b00ba308fc5196a07a5cf7a9c6f985505ea041` |
-| 02 | Raw curvature tensoriality and metric compatibility | Pointwise scalar tensoriality in all three slots and metric skew-adjointness of the raw curvature commutator | Preparing |
-| 03 | Static Riemannian identities | Levi-Civita existence, sectional curvature, and Ricci/scalar curvature identities | Source code exists; isolate after 02 |
+| 02 | Raw curvature tensoriality and metric compatibility | Pointwise scalar tensoriality in all three slots and metric skew-adjointness of the raw curvature commutator | Passed by Palomar (user-confirmed); immutable artifact at `db821d6c926bc3fd9622893cc48e23637d406651` |
+| 03 | Levi-Civita connections and metric-determined curvature invariants | Levi-Civita existence, curvature-tensor independence, Ricci symmetry, and Ricci/scalar-curvature invariance | Preparing locally |
 | 04 | Time-dependent geometric structures | One-parameter sections, connections, metrics, and slicewise curvature | Source code exists; isolate after 03 |
 | 05 | Continuous sections and smoothing | Coordinate models, finite-cover gluing, smooth approximation, and convex fiber constraints | Source code exists; audit as a separate library contribution |
 | 06 | The open metric cone | Symmetric positive-definite bilinear-form sections and openness in the section-space model | Source code exists; audit separately |
@@ -56,9 +56,10 @@ library result has an independently defensible boundary.
 
 ## Order of work
 
-1. Preserve the accepted 01 artifact and package/validate 02 as the next
-   non-overlapping raw-curvature result family.
-2. Audit the dependency closure and research value of 03–06, then prepare the
+1. Preserve the accepted 01 artifact and the passed 02 artifact while
+   packaging/validating 03 as the next non-overlapping static Riemannian result
+   family.
+2. Audit the dependency closure and research value of 04–06, then prepare the
    strongest non-overlapping candidates.
 3. Package the analytic candidates 07–11 only around proved theorem clusters;
    keep point-4 interfaces and special cases clearly labeled as scaffolding.
@@ -110,6 +111,37 @@ do not reselect the accepted Bianchi surface, the immediate commutator sign
 change, or textbook Levi-Civita uniqueness. The candidate-specific role and
 oversight record is `curvature/AGENT-CONTRIBUTION-02.md`.
 
-Current state: Challenge/Solution and metadata are being prepared locally;
-the final public commit, local Lean/Comparator checks, and any Palomar intake
-remain to be completed separately.
+Current state: Palomar passed this artifact according to the maintainer's
+status report. Its accepted public artifact is recorded at immutable commit
+`db821d6c926bc3fd9622893cc48e23637d406651`; the hosted receipt is maintained
+with the submission record rather than treated as a substitute for the commit.
+
+## Submission 03: Levi–Civita connections and metric-determined curvature invariants
+
+The third candidate moves from raw curvature identities to the static
+Riemannian package built on the bundled curvature and contraction
+infrastructure. It selects:
+
+- `PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection`;
+- `PoincareCurvature.Palomar.curvatureTensor_eq_of_isLeviCivita`;
+- `PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita`;
+- `PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita`; and
+- `PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita`.
+
+This is a materially larger theorem family than the earlier elementary
+commutator-skew and Levi–Civita-uniqueness wrappers: it connects existence of
+the canonical connection to the metric-determined curvature tensor and both
+principal trace contractions. The underlying mathematics is classical and is
+presented as a formalization/adaptation, not as an original theorem or
+priority claim.
+
+The Challenge/Solution boundary uses three explicit Comparator definition
+holes for the canonical curvature tensor, Ricci curvature, and scalar
+curvature. The Challenge exposes their exact source types; the Solution
+imports the actual package constructions and proves the five selected
+statements. The candidate-specific role and oversight record is
+`curvature/AGENT-CONTRIBUTION-03.md`.
+
+Current state: local Lean 4.33 elaboration and the pinned Comparator/NanoDa
+replay pass. The repository verifier, final public commit, and any Palomar
+intake remain to be completed separately.

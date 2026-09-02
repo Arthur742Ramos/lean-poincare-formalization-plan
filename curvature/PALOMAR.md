@@ -1,36 +1,39 @@
-# Palomar Submission 02
+# Palomar Submission 03
 
-## Tensoriality and metric skew-adjointness of raw curvature
+## Levi–Civita connections and metric-determined curvature invariants
 
-This candidate packages the next proof-bearing static curvature layer of the
+This candidate packages the next proof-bearing static Riemannian layer of the
 `PoincareCurvature` development. The selected surface exposes the following
 coherent theorem family:
 
-- `PoincareCurvature.Palomar.raw_curvature_left_tensoriality`, pointwise
-  scalar linearity in the left tangent-field slot;
-- `PoincareCurvature.Palomar.raw_curvature_middle_tensoriality`, pointwise
-  scalar linearity in the middle tangent-field slot;
-- `PoincareCurvature.Palomar.raw_curvature_right_tensoriality`, pointwise
-  scalar linearity in the bundle-section slot; and
-- `PoincareCurvature.Palomar.raw_curvature_metric_skew_adjointness`, the
-  metric-compatibility curvature commutator identity.
+- `PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection`, existence
+  of a global C^1 Levi–Civita covariant derivative;
+- `PoincareCurvature.Palomar.curvatureTensor_eq_of_isLeviCivita`, independence
+  of the bundled curvature tensor from the chosen Levi–Civita realization;
+- `PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita`, symmetry of
+  the Ricci contraction; and
+- `PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita` and
+  `PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita`, independence
+  of the Ricci and scalar-curvature contractions from that realization.
 
-Together these results establish the core locality/tensoriality behavior of
-the raw curvature commutator and its compatibility with a Riemannian inner
-product. The selected statements retain the explicit regularity hypotheses
-needed by the manifold proofs. The proved side imports the checked tensorial
-curvature implementation; the statement side imports only Mathlib's
-covariant-derivative, Lie-bracket, and Riemannian APIs and reconstructs the
-small public vocabulary needed for Comparator replay.
+Together these results connect the existence of the canonical connection to
+the metric-determined curvature tensor and its two principal contractions.
+They are standard consequences of the classical fundamental theorem of
+Riemannian geometry and the usual curvature identities. The submission makes
+no claim of a new theorem or priority; its contribution is the kernel-checked
+formalization and integration of this theorem family at the current Mathlib
+manifold/vector-bundle API boundary.
 
-These are standard differential-geometric identities, not claims of new
-mathematics or priority. The contribution is the kernel-checked formalization
-and its integration with the current Mathlib manifold/vector-bundle boundary.
-The later bundled curvature and Ricci/scalar contraction definitions remain in
-the implementation package but are not silently counted as selected results.
+The Challenge imports only Mathlib and contains five deliberate theorem holes
+plus three deliberate definition holes for the canonical bundled curvature
+tensor, Ricci curvature, and scalar curvature. The exact source types of those
+three definitions are exposed so that the Comparator can check the public
+interface, while `Solution.lean` imports the actual package constructions and
+proves all five selected statements. This definition-hole mechanism is
+documented in `formalization.yaml` and `AGENT-CONTRIBUTION-03.md`.
 
 The complete automation and human-oversight record is in
-`AGENT-CONTRIBUTION-02.md`.
+`AGENT-CONTRIBUTION-03.md`.
 
 ## Nested-project intake paths
 
@@ -44,9 +47,9 @@ repository-relative intake fields are:
 - formalization metadata: `curvature/formalization.yaml`;
 - license: the repository-root `LICENSE` file.
 
-The accepted Submission 01 artifact remains reproducible at its own immutable
-commit. This candidate uses a later immutable commit and a distinct
-Comparator theorem surface.
+The accepted Submission 01 and passed Submission 02 artifacts remain
+reproducible at their own immutable commits. This candidate uses a later
+immutable commit and a distinct Comparator theorem/definition surface.
 
 ## Local checks
 

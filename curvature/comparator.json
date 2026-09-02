@@ -2,10 +2,16 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "PoincareCurvature.Palomar.raw_curvature_left_tensoriality",
-    "PoincareCurvature.Palomar.raw_curvature_middle_tensoriality",
-    "PoincareCurvature.Palomar.raw_curvature_right_tensoriality",
-    "PoincareCurvature.Palomar.raw_curvature_metric_skew_adjointness"
+    "PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection",
+    "PoincareCurvature.Palomar.curvatureTensor_eq_of_isLeviCivita",
+    "PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita",
+    "PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita",
+    "PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita"
+  ],
+  "definition_names": [
+    "CovariantDerivative.curvatureTensor",
+    "CovariantDerivative.ricciCurvature",
+    "CovariantDerivative.scalarCurvature"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": true

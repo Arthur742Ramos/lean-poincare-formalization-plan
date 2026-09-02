@@ -2,19 +2,17 @@
 version: "v0.4"
 
 project:
-  name: "Tensoriality and metric skew-adjointness of raw curvature in Lean"
+  name: "Levi–Civita connections and metric-determined curvature invariants in Lean"
   description: >-
-    Formalizes the core tensoriality behavior of the raw curvature commutator
-    for covariant derivatives on smooth finite-dimensional manifolds. The
-    selected results prove pointwise scalar linearity in the left tangent-field
-    slot, the middle tangent-field slot, and the bundle-section slot, together
-    with skew-adjointness of the curvature commutator under metric
-    compatibility. These are standard differential-geometric identities; the
-    contribution claimed here is their kernel-checked formalization with the
-    regularity hypotheses exposed at the Mathlib manifold/vector-bundle API
-    boundary, not a new discovery or a priority claim. The implementation also
-    contains the resulting bundled curvature and Ricci/scalar contraction
-    infrastructure, which is outside this selected surface.
+    Formalizes a coherent static Riemannian theorem family for smooth
+    finite-dimensional manifolds: existence of a global C^1 Levi–Civita
+    covariant derivative, independence of the bundled curvature tensor from
+    the chosen Levi–Civita realization, symmetry of the Ricci contraction, and
+    independence of both Ricci and scalar curvature from that realization.
+    These are standard classical results assembled at the current Mathlib
+    manifold/vector-bundle API boundary. The contribution claimed here is a
+    kernel-checked Lean formalization of the theorem family and its bundled
+    constructions, not a new mathematical discovery or a priority claim.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -37,8 +35,8 @@ sources:
     relationship: "builds-on"
     note: >-
       The development extends Mathlib's manifold, vector-bundle,
-      covariant-derivative, Lie-bracket, and Riemannian APIs with a proved raw
-      curvature tensoriality and metric-compatibility layer.
+      covariant-derivative, torsion, and Riemannian APIs with a proved
+      Levi–Civita existence and curvature-contraction layer.
     license: "Apache-2.0"
     author_endorsement: "not-contacted"
   - title: "Foundations of Differential Geometry, Vol. I"
@@ -50,11 +48,12 @@ sources:
     location: "https://books.google.com/books/about/Foundations_of_Differential_Geometry_Vol.html?id=ss7bEAAAQBAJ"
     relationship: "formalizes"
     note: >-
-      Standard differential-geometry source relationship for the curvature
-      tensoriality and metric-compatibility identities represented here. The
-      submission makes no claim that the underlying mathematics is original;
-      its claim is a kernel-checked Lean formalization at the stated API
-      boundary.
+      The selected existence, curvature-independence, Ricci-symmetry, and
+      trace-invariance statements are standard consequences of the classical
+      fundamental theorem of Riemannian geometry and the usual curvature
+      contraction identities. This is an explicit formalization/adaptation of
+      that source-based theorem family, not an original theorem or priority
+      claim; the repository supplies the Lean constructions and proofs.
     license: "unknown"
     author_endorsement: "not-contacted"
 
@@ -63,15 +62,17 @@ related_formalizations: []
 status:
   scope: >-
     The selected surface covers arbitrary smooth finite-dimensional model
-    spaces, manifolds, vector bundles, covariant derivatives, and the stated
-    C^1/C^2 regularity assumptions. It proves pointwise scalar linearity of
-    the raw curvature commutator in all three slots, with the stronger global
-    C^2 hypothesis required in the section slot, and proves the inner-product
-    skew-adjointness identity for metric-compatible covariant derivatives.
-    The four `sorry` declarations occur only as deliberate statement holes in
-    `Challenge.lean`.
-  sorry_count: 4
-  sorry_in_definitions: 0
+    spaces, Hausdorff manifolds, tangent bundles with Riemannian structure,
+    covariant derivatives, and the explicit C^1/C^2 regularity assumptions
+    required by the source theorems. It selects five results connecting
+    Levi–Civita existence to intrinsic curvature, Ricci, and scalar-curvature
+    invariants. `Challenge.lean` contains eight deliberate holes: five
+    theorem statement holes and three definition holes for the canonical
+    bundled curvature tensor, Ricci curvature, and scalar curvature. The
+    corresponding `Solution.lean` declarations use the actual constructions
+    and proofs from the package.
+  sorry_count: 8
+  sorry_in_definitions: 3
   axioms: []
 
 automation:
@@ -88,79 +89,92 @@ automation:
         spend_usd: "subscription-based"
         hardware: "local machine"
       prompting_notes: >-
-        GPT-5 Codex materially performed the candidate audit, theorem-surface
-        drafting, Challenge/Solution alignment, metadata and documentation
-        updates, and reproducibility checks. The agent did not determine
-        authorship, source priority, or mathematical novelty. Human authors
-        selected and approved the theorem family, author list, source
-        relationships, scope claims, and final artifact; Lean's kernel and
-        the independent Comparator/NanoDa replay supplied automated checks.
+        GPT-5 Codex materially performed the Submission 03 candidate audit,
+        theorem-surface drafting, exact Challenge/Solution declaration
+        alignment, definition-hole setup, metadata and documentation updates,
+        and reproducibility checks. The agent did not determine authorship,
+        source priority, or mathematical novelty. Human authors selected and
+        approved the theorem family, author list, source relationships, scope
+        claims, and final artifact; Lean's kernel and the independent
+        Comparator/NanoDa replay supplied automated checks.
   spend_usd: "subscription-based"
   notes: >-
-    Fuller role and oversight record: the immutable repository document at
-    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/5b609f29b02b0352afaf5edf3e352c45922cf28d/curvature/AGENT-CONTRIBUTION-02.md
-    . It distinguishes agent proof engineering from human mathematical
-    selection, attribution, review, and submission responsibility.
+    Fuller role and oversight record: the Submission 03 repository document
+    `curvature/AGENT-CONTRIBUTION-03.md`. The final artifact metadata will pin
+    that record to an immutable public commit. It distinguishes agent proof
+    engineering from human mathematical selection, attribution, review, and
+    submission responsibility.
 
 fidelity:
   divergences: >-
-    The Challenge reconstructs only the small public vocabulary needed by the
-    selected raw curvature statements from Mathlib's underlying
-    covariant-derivative API. The Solution imports the checked tensorial
-    curvature implementation and proves the same four statements by its
-    public theorem declarations. The surrounding implementation contains
-    additional bundled and contracted curvature results. This is an
-    intentional statement/implementation separation for Comparator replay.
+    The Challenge imports only Mathlib and reconstructs the public vocabulary
+    needed by the selected statements. Its three declarations of
+    `CovariantDerivative.curvatureTensor`, `ricciCurvature`, and
+    `scalarCurvature` are deliberate Comparator definition holes: their exact
+    source types are exposed, while their bodies are supplied by the
+    implementation in `Solution.lean` and its package imports. The five
+    theorem declarations remain ordinary statement holes and are compared
+    exactly. This is an intentional, documented statement/implementation
+    separation for independent Comparator replay, not an omission from the
+    proved source package.
 
 review:
   status: "self-assessed"
   reviewers:
     - "none"
   notes: >-
-    Submission 02 is deliberately scoped to the nontrivial tensoriality and
-    metric-compatibility layer rather than repeating the accepted Bianchi
-    identity surface or selecting the elementary commutator-skew and
-    Levi-Civita-uniqueness wrappers. The identities are standard; no original
-    mathematical result or priority is claimed. Local preparation requires
-    both `scripts/verify-palomar.sh` and the pinned
+    Submission 03 is deliberately scoped to a larger static Riemannian package
+    rather than repeating the accepted Bianchi surface or the earlier
+    elementary commutator-skew and Levi–Civita-uniqueness wrappers. Its five
+    results connect existence of the canonical connection to the curvature
+    tensor and both of its principal contractions, giving a coherent
+    metric-determined invariant layer. The underlying mathematics is standard;
+    no original result or priority is claimed. Local preparation requires both
+    `scripts/verify-palomar.sh` and the pinned
     `scripts/verify-comparator.sh` replay.
 
 alignment:
   namespace: "PoincareCurvature.Palomar"
   statements:
-    - source: "Pointwise scalar linearity of raw curvature in the left tangent-field slot"
-      lean: "PoincareCurvature.Palomar.raw_curvature_left_tensoriality"
+    - source: "Existence of a global C^1 Levi–Civita connection"
+      lean: "PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        A differentiable scalar multiplier is evaluated at the base point in
-        the raw curvature commutator.
-    - source: "Pointwise scalar linearity of raw curvature in the middle tangent-field slot"
-      lean: "PoincareCurvature.Palomar.raw_curvature_middle_tensoriality"
+        A smooth finite-dimensional Riemannian manifold admits a covariant
+        derivative that is torsion-free, metric-compatible, and C^1.
+    - source: "Curvature tensor independence of the Levi–Civita realization"
+      lean: "PoincareCurvature.Palomar.curvatureTensor_eq_of_isLeviCivita"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        A differentiable scalar multiplier is evaluated at the base point in
-        the second tangent-field input.
-    - source: "Pointwise scalar linearity of raw curvature in the bundle-section slot"
-      lean: "PoincareCurvature.Palomar.raw_curvature_right_tensoriality"
+        Two C^1 Levi–Civita covariant derivatives induce the same bundled
+        curvature tensor pointwise.
+    - source: "Ricci symmetry for a Levi–Civita connection"
+      lean: "PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        A globally C^2 scalar multiplier is evaluated at the base point in the
-        section input, with the commutator identity for the derivative of the
-        Lie bracket supplying the cancellation.
-    - source: "Metric-compatibility skew-adjointness of raw curvature"
-      lean: "PoincareCurvature.Palomar.raw_curvature_metric_skew_adjointness"
+        The trace contraction of the curvature tensor is symmetric under the
+        stated regularity and Levi–Civita hypotheses.
+    - source: "Ricci-curvature independence of the Levi–Civita realization"
+      lean: "PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        The inner products of the curvature commutator applied to two smooth
-        sections cancel under the displayed metric-compatibility rule.
+        The Ricci contraction is the same for any two C^1 Levi–Civita
+        covariant derivatives associated with the fixed metric.
+    - source: "Scalar-curvature independence of the Levi–Civita realization"
+      lean: "PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        The scalar trace contraction is likewise independent of the chosen
+        Levi–Civita covariant derivative.
 
 acknowledgements: >-
   Mathlib contributors for the manifold, vector-bundle, covariant-derivative,
-  Lie-bracket, and Riemannian infrastructure; the classical
-  differential-geometry literature for the standard identities formalized
-  here; and the Palomar Registry project for the statement/solution
-  Comparator workflow.
+  torsion, and Riemannian infrastructure; Kobayashi and Nomizu and the
+  classical differential-geometry literature for the standard theorem family
+  formalized here; and the Palomar Registry project for the
+  statement/solution Comparator workflow.
