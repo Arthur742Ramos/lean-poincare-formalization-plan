@@ -27,6 +27,8 @@ bootstrap, not a from-scratch development.
 import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence
 import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ManifoldFlowExistence
 
+set_option backward.isDefEq.respectTransparency false
+
 open scoped Manifold Topology ContDiff
 
 namespace PoincareCurvature.GaugeFlowAssembly
@@ -115,7 +117,6 @@ theorem exists_diffeomorph3GaugeFlowOn_of_windowed_inverse_flow
   · intro x
     simp only [if_pos h0mem]; exact hanchor x
   · intro t ht x
-    simp only []
     rw [if_pos ht]
     refine (hderiv x t ht).congr_mono ?_ ?_ (subset_refl _)
     · intro τ hτ; simp only [if_pos hτ]
@@ -703,6 +704,9 @@ theorem continuousOn_chartPushforwardField
           (X τ ((extChartAt I p).symm q)) := by
     conv_lhs => rw [← hqe]
     exact chartPushforwardField_extChartAt X τ hy
+  change chartPushforwardField I X p τ q =
+    ((trivializationAt E (TangentSpace I) p)
+      (⟨(extChartAt I p).symm q, X τ ((extChartAt I p).symm q)⟩ : TangentBundle I M)).2
   rw [hL, TangentBundle.trivializationAt_apply, tangentCoordChange_def]
   rfl
 
@@ -867,7 +871,7 @@ theorem exists_lipschitzOnWith_forall_mem_Icc_chartPushforwardField {n : WithTop
     rw [Prod.edist_eq]
     dsimp only
     rw [edist_self]
-    exact max_eq_right (zero_le _)
+    exact max_eq_right (by positivity)
   have hlip := hK (⟨ht, hq⟩ : ((t, q) : ℝ × E) ∈ Set.Icc a b ×ˢ s)
     (⟨ht, hq'⟩ : ((t, q') : ℝ × E) ∈ Set.Icc a b ×ˢ s)
   rw [hedist] at hlip

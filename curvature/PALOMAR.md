@@ -39,9 +39,11 @@ match. The corrected attempt at commit
 `7bf6cc5a17356c3cea71cc4c273434801b8ccd04` then failed because its Mathlib
 revision was not an ancestor of canonical `master`. The current correction
 pins Mathlib to canonical ancestor
-`8a178386ffc0f5fef0b77738bb5449d50efeea95`, aligns the Lean/Comparator stack
-to Lean 4.29.0, and adds local license and dependency-ancestry gates. A retry
-must use the new immutable commit.
+`8a178386ffc0f5fef0b77738bb5449d50efeea95`. The previously submitted artifact
+at commit `c50584bb804865fd9a54ebb5362ba3eee864e212` used Lean 4.29.0. The
+current development artifact is being upgraded to Lean 4.33.0 with Mathlib
+revision `db584cd6d46c92f209a44c0f1c829460d327499d` and matching Lean4Export
+revision `15f6055e299ad5b89345e533cc2192f4cc00f659`.
 
 ## Local checks
 
@@ -66,13 +68,12 @@ PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh
 
 The environment flag is required only for this macOS development fallback;
 Linux runs use the pinned Landrun sandbox. The script pins Comparator,
-Lean4Export v4.29.0, Landrun, and NanoDa by full commit.
+Lean4Export v4.33.0, Landrun, and NanoDa by full commit.
 
 ## External status
 
-The first candidate was submitted to Palomar at the commit recorded above but
-failed hosted mechanical verification on the license fingerprint alone. The
-current correction is locally prepared; after the new commit is public, an
-external retry still requires a fresh check of the current Palomar contract,
-the exact immutable commit, the Comparator configuration, and the authorized
-maintainer relationship.
+The first candidate was submitted to Palomar at the earlier immutable commit
+recorded above. This Lean 4.33.0 upgrade is a new artifact: after it is
+committed and public, any external retry still requires a fresh check of the
+current Palomar contract, the exact immutable commit, the Comparator
+configuration, and the authorized maintainer relationship.

@@ -28,6 +28,8 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
   [SigmaCompactSpace M]
 
+set_option backward.isDefEq.respectTransparency false
+
 /-- The primitive pointwise derivative form of the intrinsic DeTurck gauge-flow equation
 for a `C^3` diffeomorphism family. -/
 def Diffeomorph3IntrinsicGaugeFlowDerivativeOn
@@ -185,6 +187,7 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeOn.continuousWithinAt_eval_
       (fun τ : ℝ ↦ e.symm (e ((Φ τ) x))) s t := by
     simpa [Function.comp_def] using hcomp'
   have hsource' : ∀ᶠ τ in 𝓝[s] t, (Φ τ) x ∈ e.source := by
+    change (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' e.source ∈ 𝓝[s] t
     simpa [e] using (hchart t ht x).1
   exact hcomp.congr_of_eventuallyEq
     (hsource'.mono fun τ hτ ↦ by simpa [e] using (e.left_inv hτ).symm)
@@ -371,6 +374,7 @@ theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeOn.toChartDerivativeOn
       simpa [Function.comp_def] using hcomp'
     have hsourcep_eventually :
         ∀ᶠ τ in 𝓝[s] t, (Φ τ) x ∈ (extChartAt I p).source := by
+      change (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' (extChartAt I p).source ∈ 𝓝[s] t
       simpa [p] using hsourcep
     exact hcomp_mfld.congr_of_eventuallyEq
       (hsourcep_eventually.mono fun τ hτ ↦ by
@@ -530,6 +534,7 @@ theorem Diffeomorph3IntrinsicGaugeFlowChartDerivativeAtOn.continuousAt_eval_self
   have hcomp : ContinuousAt (fun τ : ℝ ↦ e.symm (e ((Φ τ) x))) t := by
     simpa [Function.comp_def] using hcomp'
   have hsource' : ∀ᶠ τ in 𝓝 t, (Φ τ) x ∈ e.source := by
+    change (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' e.source ∈ 𝓝 t
     simpa [e] using (hchart t ht x).1
   exact hcomp.congr_of_eventuallyEq
     (hsource'.mono fun τ hτ ↦ by simpa [e] using (e.left_inv hτ).symm)
@@ -621,6 +626,7 @@ theorem Diffeomorph3IntrinsicGaugeFlowFixedChartDerivativeAtOn.toChartDerivative
       ⟨hsrcp, hsrcy⟩
   have hsourcep_eventually :
       ∀ᶠ τ in 𝓝 t, (Φ τ) x ∈ (extChartAt I p).source := by
+    change (fun τ : ℝ ↦ (Φ τ) x) ⁻¹' (extChartAt I p).source ∈ 𝓝 t
     simpa [p] using hsourcep
   have hmaps :
       ∀ᶠ τ in 𝓝 t,
@@ -843,11 +849,14 @@ theorem Diffeomorph3IntrinsicGaugeFlowDerivativeOn.of_chartDerivativeOn
     Diffeomorph3IntrinsicGaugeFlowDerivativeOn
       (I := I) (M := M) Φ g background s := by
   intro t ht x
-  rw [HasMFDerivWithinAt]
   refine ⟨hchart.continuousWithinAt_eval_self ht x, ?_⟩
-  have h := (hchart t ht x).2
-  rw [hasDerivWithinAt_iff_hasFDerivWithinAt] at h
-  simpa [writtenInExtChartAt] using h
+  have h := (hchart t ht x).2.hasFDerivWithinAt
+  unfold TangentSpace at h ⊢
+  simpa [TangentSpace, writtenInExtChartAt, extChartAt_model_space_eq_id,
+    Function.comp_def, PartialEquiv.refl_coe, modelWithCornersSelf_coe,
+    modelWithCornersSelf_coe_symm, chartAt_self_eq, OpenPartialHomeomorph.refl_apply,
+    OpenPartialHomeomorph.coe_toPartialEquiv, range_id, inter_univ, preimage_id_eq, id_eq,
+    ContinuousLinearMap.smulRight_one_eq_toSpanSingleton] using h
 
 /-- Fixed-chart intrinsic ODE data directly supplies the primitive intrinsic
 manifold derivative data within the same time set. -/
@@ -968,11 +977,14 @@ theorem Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn.of_chartDerivativeAtOn
     Diffeomorph3IntrinsicGaugeFlowDerivativeAtOn
       (I := I) (M := M) Φ g background s := by
   intro t ht x
-  rw [HasMFDerivAt]
   refine ⟨hchart.continuousAt_eval_self ht x, ?_⟩
-  have h := (hchart t ht x).2
-  rw [hasDerivAt_iff_hasFDerivAt] at h
-  simpa [writtenInExtChartAt] using h
+  have h := (hchart t ht x).2.hasFDerivAt
+  unfold TangentSpace at h ⊢
+  simpa [TangentSpace, writtenInExtChartAt, extChartAt_model_space_eq_id,
+    Function.comp_def, PartialEquiv.refl_coe, modelWithCornersSelf_coe,
+    modelWithCornersSelf_coe_symm, chartAt_self_eq, OpenPartialHomeomorph.refl_apply,
+    OpenPartialHomeomorph.coe_toPartialEquiv, range_id, inter_univ, preimage_id_eq, id_eq,
+    ContinuousLinearMap.smulRight_one_eq_toSpanSingleton] using h
 
 /-- Ordinary fixed-chart intrinsic ODE data directly supplies primitive
 ordinary intrinsic manifold derivative data. -/
@@ -2176,10 +2188,13 @@ theorem SmoothSelfDiffeomorph3Family.hasMFDerivWithinAt_of_satisfiesGaugeFlowOn
       Φ.toSmoothSelfDiffeomorph2Family.toSmoothSelfMapFamily
       (intrinsicDeTurckGaugeField (I := I) (M := M) g background) s)
     {t : ℝ} (ht : t ∈ s) (x : M) :
-    HasMFDerivAt[s] (fun τ : ℝ ↦ (Φ τ) x) t
+  HasMFDerivAt[s] (fun τ : ℝ ↦ (Φ τ) x) t
       ((1 : ℝ →L[ℝ] ℝ).smulRight
         (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x))) := by
-  simpa using hflow.hasMFDerivWithinAt ht x
+  change HasMFDerivAt[s] (fun τ : ℝ ↦ (Φ τ) x) t
+    ((1 : ℝ →L[ℝ] ℝ).smulRight
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((Φ t) x)))
+  exact hflow.hasMFDerivWithinAt ht x
 
 /-- For `C^3` diffeomorphism families, the geometric intrinsic DeTurck
 gauge-flow statement is equivalent to the primitive derivative data used by
@@ -3610,9 +3625,12 @@ theorem innerHasDerivAt_of_hasTimeDerivativeOn
           (((G.maps3 sol) τ).pushforwardTangent x v))
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         (G.gauge sol) t x u v) t := by
-  simpa using
-    sol.1.gaugeCorrectedPullbackMetric_inner_hasDerivAt_of_hasTimeDerivativeOn
-      (G.gauge sol) (hpullDerivative sol) ht x u v
+  refine (sol.1.gaugeCorrectedPullbackMetric_inner_hasDerivAt_of_hasTimeDerivativeOn
+    (G.gauge sol) (hpullDerivative sol) ht x u v).congr_of_eventuallyEq ?_
+  filter_upwards [] with τ
+  rw [ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.gauge_maps,
+    SmoothSelfDiffeomorph3.pushforwardTangent_apply,
+    SmoothSelfDiffeomorph3.pushforwardTangent_apply]
 
 end ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
 
@@ -3930,9 +3948,12 @@ theorem innerHasDerivAt_of_hasTimeDerivativeOn
           (((G.maps3 ivp sol) τ).pushforwardTangent x v))
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         (G.gauge ivp sol) t x u v) t := by
-  simpa using
-    (G.forInitialValueProblem ivp).innerHasDerivAt_of_hasTimeDerivativeOn
-      (hpullDerivative ivp) sol ht x u v
+  refine ((G.forInitialValueProblem ivp).innerHasDerivAt_of_hasTimeDerivativeOn
+    (hpullDerivative ivp) sol ht x u v).congr_of_eventuallyEq ?_
+  filter_upwards [] with τ
+  rw [ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily.forInitialValueProblem_maps3,
+    SmoothSelfDiffeomorph3.pushforwardTangent_apply,
+    SmoothSelfDiffeomorph3.pushforwardTangent_apply]
 
 end ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
 
@@ -3956,7 +3977,10 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniquenessFamily.toGaugeRe
   pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowDerivativeTimeDerivative
     G.maps3 G.anchored G.derivativeFamily
     (fun ivp sol ↦ by
-      simpa using hpullDerivative ivp sol)
+      simpa only [
+        ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily.gaugeViaDerivative,
+        ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily.gaugeCorrectedPullbackVelocity_gauge_eq_gaugeViaDerivative] using
+        hpullDerivative ivp sol)
 
 /-- Intrinsic Ricci-flow theorem-family projection from a geometric `C^3`
 gauge-flow family and a pulled-back metric time derivative. -/
@@ -4088,7 +4112,10 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducibl
   pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowDerivativeTimeDerivative
     G.maps3 G.anchored G.derivativeData
     (fun sol ↦ by
-      simpa using hpullDerivative sol)
+      simpa only [
+        ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.gaugeViaDerivative,
+        ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.gaugeCorrectedPullbackVelocity_gauge_eq_gaugeViaDerivative] using
+        hpullDerivative sol)
 
 /-- Intrinsic Ricci-flow theorem-package projection from a geometric `C^3`
 gauge-flow bundle and a pulled-back metric time derivative. -/

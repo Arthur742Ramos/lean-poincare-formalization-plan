@@ -716,7 +716,7 @@ theorem contMDiffCovariantDerivative_of_isLeviCivita
     intro x hx
     have hσat :
         ContMDiffAt I (I.prod 𝓘(ℝ, E)) (1 + 1) (T% σ) x := by
-      simpa using hσ x hx
+      exact contMDiffWithinAt_univ.mp (hσ x hx)
     have hσx : MDiffAt (T% σ) x := hσat.mdifferentiableAt (by simp)
     simp [cov₀, g.eq_of_isLeviCivita hcov hcov₀ hσx])
 

@@ -90,7 +90,9 @@ first hosted attempt at commit `22c21dd473fc77a5d93745df976fd27ec1e9ab4a`
 failed because the root `LICENSE` did not have one unambiguous standard SPDX
 match. The corrected commit `7bf6cc5a17356c3cea71cc4c273434801b8ccd04` then
 failed because its Mathlib revision was not an ancestor of canonical
-`master`. The current correction pins Mathlib to canonical ancestor
-`8a178386ffc0f5fef0b77738bb5449d50efeea95`, aligns the Lean/Comparator stack
-to Lean 4.29.0, and adds local license and dependency-ancestry gates. This
-correction must be committed, pushed, and revalidated before a retry.
+`master`. The previously submitted artifact was commit
+`c50584bb804865fd9a54ebb5362ba3eee864e212` on Lean 4.29.0. The current
+development artifact upgrades to Lean 4.33.0 with Mathlib revision
+`db584cd6d46c92f209a44c0f1c829460d327499d` and matching Lean4Export revision
+`15f6055e299ad5b89345e533cc2192f4cc00f659`. This upgrade must be committed,
+pushed, and revalidated before any retry.

@@ -24,6 +24,7 @@ import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 import Mathlib.Geometry.Manifold.IntegralCurve.Transform
 import Mathlib.Topology.Compactness.Compact
 import Mathlib.Analysis.ODE.PicardLindelof
+import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
@@ -32,6 +33,8 @@ open scoped Manifold Topology
 open Set Filter
 
 namespace PoincareCurvature.ManifoldFlow
+
+set_option backward.isDefEq.respectTransparency false
 
 /-- **Per-point local integral curve in `Ioo` shape.** For a `C¹` vector field `v`
 on a boundaryless complete manifold, every point `x₀` admits some `ε > 0` and an
@@ -97,6 +100,7 @@ theorem exists_nhds_uniform_integralCurve {E H M : Type*} [NormedAddCommGroup E]
     (hv : ContMDiff I I.tangent 1 (fun x => (⟨x, v x⟩ : TangentBundle I M)))
     (x₀ : M) :
     ∃ U ∈ nhds x₀, ∃ ε > 0, ∀ y ∈ U, ∃ γ : ℝ → M, γ 0 = y ∧ IsMIntegralCurveOn γ v (Set.Ioo (-ε) ε) := by
+  letI : ContinuousSMul ℝ E := IsBoundedSMul.continuousSMul
   have hx : I.IsInteriorPoint x₀ := BoundarylessManifold.isInteriorPoint
   have hc : extChartAt I x₀ x₀ ∈ interior (extChartAt I x₀).target := (I.isInteriorPoint_iff).mp hx
   have hvx := (hv x₀)
@@ -216,6 +220,7 @@ theorem exists_nhds_uniform_localFlow_continuousOn {E H M : Type*}
     ∃ U ∈ nhds x₀, ∃ ε > 0, ∃ Ψ : M → ℝ → M,
       (∀ y ∈ U, Ψ y 0 = y ∧ IsMIntegralCurveOn (Ψ y) v (Set.Ioo (-ε) ε)) ∧
       ContinuousOn (fun p : M × ℝ => Ψ p.1 p.2) (U ×ˢ Set.Ioo (-ε) ε) := by
+  letI : ContinuousSMul ℝ E := IsBoundedSMul.continuousSMul
   have hx : I.IsInteriorPoint x₀ := BoundarylessManifold.isInteriorPoint
   have hc : extChartAt I x₀ x₀ ∈ interior (extChartAt I x₀).target := (I.isInteriorPoint_iff).mp hx
   have hvx := (hv x₀)
@@ -473,6 +478,7 @@ theorem isTimeDependentIntegralCurve_of_autonomous {E H M : Type*} [NormedAddCom
         (((1 : ℝ), X (Γ t).1 (Γ t).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ t)))) :
     ∀ t ∈ s, HasMFDerivWithinAt (𝓘(ℝ, ℝ)) I (fun τ => (Γ τ).2) s t
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X t ((Γ t).2))) := by
+  letI : ContinuousSMul ℝ ℝ := ContinuousMul.to_continuousSMul
   intro t ht
   have hsnd : HasMFDerivAt ((𝓘(ℝ, ℝ)).prod I) I Prod.snd (Γ t)
       (ContinuousLinearMap.snd ℝ (TangentSpace 𝓘(ℝ, ℝ) (Γ t).1) (TangentSpace I (Γ t).2)) :=
@@ -486,7 +492,7 @@ theorem isTimeDependentIntegralCurve_of_autonomous {E H M : Type*} [NormedAddCom
           (((1 : ℝ), X (Γ t).1 (Γ t).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ t)))
       = (1 : ℝ →L[ℝ] ℝ).smulRight (X t ((Γ t).2)) := by
     ext
-    simp [hfst t ht]
+    simp [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smulRight_apply, hfst t ht]
   exact hclm ▸ hcomp
 
 /-- **The time component tracks the parameter.** An integral curve `Γ` of the
@@ -503,6 +509,7 @@ theorem autonomous_fst_eq_id {E H M : Type*} [NormedAddCommGroup E] [NormedSpace
       ((1 : ℝ →L[ℝ] ℝ).smulRight
         (((1 : ℝ), X (Γ t).1 (Γ t).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ t)))) :
     ∀ t ∈ s, (Γ t).1 = t := by
+  letI : ContinuousSMul ℝ ℝ := ContinuousMul.to_continuousSMul
   set φ : ℝ → ℝ := fun τ => (Γ τ).1 with hφ
   have hd : ∀ τ ∈ s, HasDerivWithinAt φ 1 s τ := by
     intro τ hτ
@@ -518,7 +525,7 @@ theorem autonomous_fst_eq_id {E H M : Type*} [NormedAddCommGroup E] [NormedSpace
         (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ)
           (((1 : ℝ), X (Γ τ).1 (Γ τ).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ τ))))
         (1 : ℝ) = (1 : ℝ)
-    simp
+    simp [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smulRight_apply]
   have hderiv : ∀ τ ∈ s, deriv φ τ = 1 := fun τ hτ =>
     ((hd τ hτ).hasDerivAt (hs.mem_nhds hτ)).deriv
   have hdiff : DifferentiableOn ℝ φ s := fun τ hτ => (hd τ hτ).differentiableWithinAt
@@ -548,6 +555,7 @@ theorem autonomous_fst_eq_add {E H M : Type*} [NormedAddCommGroup E] [NormedSpac
       ((1 : ℝ →L[ℝ] ℝ).smulRight
         (((1 : ℝ), X (Γ t).1 (Γ t).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ t)))) :
     ∀ t ∈ s, (Γ t).1 = t₀ + t := by
+  letI : ContinuousSMul ℝ ℝ := ContinuousMul.to_continuousSMul
   set φ : ℝ → ℝ := fun τ => (Γ τ).1 with hφ
   have hd : ∀ τ ∈ s, HasDerivWithinAt φ 1 s τ := by
     intro τ hτ
@@ -563,7 +571,7 @@ theorem autonomous_fst_eq_add {E H M : Type*} [NormedAddCommGroup E] [NormedSpac
         (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ)
           (((1 : ℝ), X (Γ τ).1 (Γ τ).2) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (Γ τ))))
         (1 : ℝ) = (1 : ℝ)
-    simp
+    simp [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smulRight_apply]
   have hderiv : ∀ τ ∈ s, deriv φ τ = 1 := fun τ hτ =>
     ((hd τ hτ).hasDerivAt (hs.mem_nhds hτ)).deriv
   have hdiff : DifferentiableOn ℝ φ s := fun τ hτ => (hd τ hτ).differentiableWithinAt
@@ -647,7 +655,7 @@ theorem autonomousLift_hasMFDerivWithinAt {E H M : Type*} [NormedAddCommGroup E]
     HasMFDerivWithinAt (𝓘(ℝ, ℝ)) ((𝓘(ℝ, ℝ)).prod I) (fun τ => (τ, γ τ)) s t
       ((1 : ℝ →L[ℝ] ℝ).smulRight (((1 : ℝ), X t (γ t)) : TangentSpace ((𝓘(ℝ, ℝ)).prod I) (t, γ t))) := by
   have hid : HasMFDerivWithinAt (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ)) (id : ℝ → ℝ) s t
-      (ContinuousLinearMap.id ℝ ℝ) := hasMFDerivWithinAt_id s t
+      (ContinuousLinearMap.id ℝ (TangentSpace 𝓘(ℝ, ℝ) t)) := hasMFDerivWithinAt_id s t
   have h := hid.prodMk hγ
   refine h.congr_mfderiv ?_
   refine ContinuousLinearMap.ext fun r => ?_
@@ -781,8 +789,7 @@ theorem flow_group_law {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E
     (s t : ℝ) (x : M) :
     Φ (s + t) x = Φ s (Φ t x) := by
   have hγ1 : IsMIntegralCurve (fun τ => Φ (τ + t) x) v := by
-    have h := (hcurve x).comp_add t
-    convert h using 1
+    simpa [Function.comp_def] using (hcurve x).comp_add t
   have hγ2 : IsMIntegralCurve (fun τ => Φ τ (Φ t x)) v := hcurve (Φ t x)
   have heq : (fun τ => Φ (τ + t) x) = (fun τ => Φ τ (Φ t x)) :=
     isMIntegralCurve_eq_of_contMDiff (t₀ := 0)

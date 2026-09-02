@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Analysis.ODE.Basic
+public import Mathlib.Analysis.ODE.ExistUnique
 public import Mathlib.Analysis.ODE.Gronwall
 public import Mathlib.Analysis.ODE.PicardLindelof
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
@@ -603,7 +604,10 @@ theorem isIntegralCurve_variationalFieldVec_add {A : ℝ → (E →L[ℝ] E)} {u
     IsIntegralCurve (fun t => u t + w t) (variationalFieldVec A) := by
   intro t
   have h := (hu t).add (hw t)
-  simpa only [variationalFieldVec, map_add] using h
+  have h' : HasDerivAt (fun s => u s + w s)
+      (A t (u t) + A t (w t)) t :=
+    h.congr_of_eventuallyEq (Filter.Eventually.of_forall (fun _ => rfl))
+  simpa only [variationalFieldVec, map_add] using h'
 
 /-- **Superposition (homogeneity).**  A scalar multiple of a solution of the vector
 variational ODE is again a solution. -/
@@ -612,7 +616,9 @@ theorem isIntegralCurve_variationalFieldVec_smul {A : ℝ → (E →L[ℝ] E)} {
     IsIntegralCurve (fun t => c • u t) (variationalFieldVec A) := by
   intro t
   have h := (hu t).const_smul c
-  simpa only [variationalFieldVec, map_smul] using h
+  have h' : HasDerivAt (fun s => c • u s) (c • A t (u t)) t :=
+    h.congr_of_eventuallyEq (Filter.Eventually.of_forall (fun _ => rfl))
+  simpa only [variationalFieldVec, map_smul] using h'
 
 /-!
 ### The fundamental solution operator `D_x Φ_t` as a bounded operator
@@ -900,8 +906,13 @@ theorem norm_flow_sub_variational_le
         (A s (g s - f s - w s) + (v s (g s) - v s (f s) - A s (g s - f s))) s
     have hd := ((hg s).sub (hf s)).sub (hw s)
     convert hd using 1
-    simp only [variationalFieldVec, map_sub]
-    abel
+    · funext r
+      rfl
+    · change A s (g s - f s - w s) +
+          (v s (g s) - v s (f s) - A s (g s - f s)) =
+        v s (g s) - v s (f s) - A s (w s)
+      simp only [map_sub]
+      abel
   -- the base and perturbed fields differ by at most `δ`, uniformly in `(s, u)`
   have hpert : ∀ s u, dist (variationalFieldVec A s u)
       (A s u + (v s (g s) - v s (f s) - A s (g s - f s))) ≤ δ := by
@@ -1509,7 +1520,8 @@ theorem hasFDerivAt_flow_of_lipschitz_deriv
     exact mul_le_mul_of_nonneg_left (max_le_max hab le_rfl) hL
   · have hbase : Tendsto (fun r : ℝ => L * r) (𝓝[≥] (0 : ℝ)) (𝓝 0) := by
       have h2 : Tendsto (fun r : ℝ => L * r) (𝓝 (0 : ℝ)) (𝓝 0) := by
-        simpa using (continuous_const.mul continuous_id).tendsto (0 : ℝ)
+        have hc : Continuous (fun r : ℝ => L * r) := by fun_prop
+        simpa only [mul_zero] using hc.tendsto (0 : ℝ)
       exact h2.mono_left nhdsWithin_le_nhds
     refine hbase.congr' ?_
     filter_upwards [self_mem_nhdsWithin] with r hr
@@ -1932,7 +1944,8 @@ theorem hasFDerivAt_flow_of_lipschitz_deriv_eventually
     exact mul_le_mul_of_nonneg_left (max_le_max hab le_rfl) hL
   · have hbase : Tendsto (fun r : ℝ => L * r) (𝓝[≥] (0 : ℝ)) (𝓝 0) := by
       have h2 : Tendsto (fun r : ℝ => L * r) (𝓝 (0 : ℝ)) (𝓝 0) := by
-        simpa using (continuous_const.mul continuous_id).tendsto (0 : ℝ)
+        have hc : Continuous (fun r : ℝ => L * r) := by fun_prop
+        simpa only [mul_zero] using hc.tendsto (0 : ℝ)
       exact h2.mono_left nhdsWithin_le_nhds
     refine hbase.congr' ?_
     filter_upwards [self_mem_nhdsWithin] with r hr
@@ -2324,7 +2337,8 @@ theorem hasDerivAt_fundamentalSolution {A : ℝ → (E →L[ℝ] E)} {K : ℝ≥
   intro ε hε
   have hUnhds : {σ : ℝ | ‖H σ - H t‖ < ε} ∈ 𝓝 t := by
     refine (isOpen_lt ((hHcont.sub continuous_const).norm) continuous_const).mem_nhds ?_
-    simpa using hε
+    change ‖H t - H t‖ < ε
+    simpa only [sub_self, norm_zero] using hε
   obtain ⟨δ, hδ, hball⟩ := Metric.mem_nhds_iff.mp hUnhds
   filter_upwards [Metric.ball_mem_nhds t hδ] with s hs
   refine ContinuousLinearMap.opNorm_le_bound _
@@ -3776,7 +3790,8 @@ theorem exists_isIntegralCurveOn_Icc_of_lipschitzWith [CompleteSpace E]
     · -- norm bound on the ball
       have hxa : dist x x₀ ≤ a := by
         have := Metric.mem_closedBall.mp hx
-        simpa using this
+        change dist x x₀ ≤ a at this
+        exact this
       have h_first : ‖v t x - v t x₀‖ ≤ (K : ℝ) * a := by
         rw [← dist_eq_norm]
         refine le_trans ((hlip t).dist_le_mul x x₀) ?_
@@ -3795,7 +3810,8 @@ theorem exists_isIntegralCurveOn_Icc_of_lipschitzWith [CompleteSpace E]
         rw [show (t₀ + h) - t₀ = h by ring, show t₀ - (t₀ - h) = h by ring, max_self]
       rw [hmax, NNReal.coe_zero, sub_zero]
       exact hLh
-  obtain ⟨γ, hγ0, hγd⟩ := hpl.exists_eq_forall_mem_Icc_hasDerivWithinAt₀
+  obtain ⟨γ, hγ0, hγd⟩ :=
+    IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀ hpl
   exact ⟨γ, hγ0, fun t ht => hγd t ht⟩
 
 /-- **Local existence of an integral curve at a point (Picard–Lindelöf).**  The

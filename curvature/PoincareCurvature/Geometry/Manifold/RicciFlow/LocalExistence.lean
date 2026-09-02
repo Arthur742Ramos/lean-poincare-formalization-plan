@@ -1422,8 +1422,10 @@ def LocalSolution.toIntrinsicLocalSolution
   toIntrinsicSolution := sol.toSolution.toIntrinsicSolution
   interval_subset := sol.interval_subset
   matchesInitialMetric := by
-    simpa [IntrinsicMatchesInitialMetric, MatchesInitialMetric]
-      using sol.matchesInitialMetric
+    change ∀ x : M, ∀ u v : TM x,
+      metricTensor (I := I) (M := M) sol.toSolution.metric ivp.initialTime x u v =
+        ivp.initialMetric.inner x u v
+    exact sol.matchesInitialMetric
 
 @[simp] theorem LocalSolution.restrictTerminal_toIntrinsicLocalSolution
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -1849,7 +1851,9 @@ theorem intrinsicLocalSolution_initial_connection_eq
     {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
     sol₁.toIntrinsicSolution.toSolution.connection ivp.initialTime σ x =
       sol₂.toIntrinsicSolution.toSolution.connection ivp.initialTime σ x := by
-  simpa using localSolution_initial_connection_eq
+  change sol₁.toLocalSolution.toSolution.connection ivp.initialTime σ x =
+    sol₂.toLocalSolution.toSolution.connection ivp.initialTime σ x
+  exact localSolution_initial_connection_eq
     (I := I) (M := M) sol₁.toLocalSolution sol₂.toLocalSolution hσ
 
 /-- On an intrinsic local Ricci-flow solution, vanishing metric velocity on the interval forces the
@@ -1914,9 +1918,10 @@ theorem intrinsicLocalSolution_zero_velocity_iff_ricciTensor_zero
       intro t ht x u v
       simpa [IntrinsicLocalSolution.toLocalSolution, IntrinsicSolution.toSolution, intrinsicRicciTensor]
         using hRicciZero t ht x u v
-    simpa [IntrinsicLocalSolution.toLocalSolution] using
-      (localSolution_zero_velocity_iff_ricciTensor_zero (I := I) (M := M) sol.toLocalSolution).2
-        hRicciZero'
+    change ∀ t ∈ Set.Icc ivp.initialTime sol.terminalTime, ∀ x : M, ∀ u v : TM x,
+      sol.toLocalSolution.toSolution.metricVelocity t x u v = 0
+    exact (localSolution_zero_velocity_iff_ricciTensor_zero
+      (I := I) (M := M) sol.toLocalSolution).2 hRicciZero'
 
 /-- If the metric velocity vanishes on the whole intrinsic local-solution interval, then the metric
 tensor stays equal to the initial metric tensor on that interval. -/

@@ -159,7 +159,12 @@ theorem exists_flow_differentiable_of_lipschitz_deriv_backward [CompleteSpace E]
     exact ((hvc x).comp continuous_neg).neg
   have hderivw : ∀ s x, HasFDerivAt (w s) (Dw s x) x := by
     intro s x
-    simpa only [hw_def, hDw_def] using (hderiv (-s) x).neg
+    change HasFDerivAt (fun y => -(v (-s) y)) (-(Dv (-s) x)) x
+    have hfun : (fun y => -(v (-s) y)) = -(v (-s)) := by
+      funext y
+      rfl
+    rw [hfun]
+    exact (hderiv (-s) x).neg
   have hDwc : Continuous fun p : ℝ × E => Dw p.1 p.2 := by
     simp only [hDw_def]
     exact (hDvc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
@@ -251,7 +256,12 @@ theorem exists_flow_contDiff_one_of_lipschitz_deriv_backward [CompleteSpace E]
     exact ((hvc x).comp continuous_neg).neg
   have hderivw : ∀ s x, HasFDerivAt (w s) (Dw s x) x := by
     intro s x
-    simpa only [hw_def, hDw_def] using (hderiv (-s) x).neg
+    change HasFDerivAt (fun y => -(v (-s) y)) (-(Dv (-s) x)) x
+    have hfun : (fun y => -(v (-s) y)) = -(v (-s)) := by
+      funext y
+      rfl
+    rw [hfun]
+    exact (hderiv (-s) x).neg
   have hDwc : Continuous fun p : ℝ × E => Dw p.1 p.2 := by
     simp only [hDw_def]
     exact (hDvc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
@@ -368,7 +378,12 @@ theorem exists_flow_contDiff_two_of_lipschitz_secondDeriv_backward [CompleteSpac
     exact ((hvc x).comp continuous_neg).neg
   have hDw : ∀ s ξ, HasFDerivAt (w s) (Dw s ξ) ξ := by
     intro s ξ
-    simpa only [hw_def, hDw_def] using (hDv (-s) ξ).neg
+    change HasFDerivAt (fun y => -(v (-s) y)) (-(Dv (-s) ξ)) ξ
+    have hfun : (fun y => -(v (-s) y)) = -(v (-s)) := by
+      funext y
+      rfl
+    rw [hfun]
+    exact (hDv (-s) ξ).neg
   have hDwc : Continuous fun p : ℝ × E => Dw p.1 p.2 := by
     simp only [hDw_def]
     exact (hDvc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
@@ -379,7 +394,12 @@ theorem exists_flow_contDiff_two_of_lipschitz_secondDeriv_backward [CompleteSpac
     exact (hDvlip (-s)).dist_le_mul a b
   have hD2w : ∀ s ξ, HasFDerivAt (Dw s) (D2w s ξ) ξ := by
     intro s ξ
-    simpa only [hDw_def, hD2w_def] using (hD2v (-s) ξ).neg
+    change HasFDerivAt (fun y => -(Dv (-s) y)) (-(D2v (-s) ξ)) ξ
+    have hfun : (fun y => -(Dv (-s) y)) = -(Dv (-s)) := by
+      funext y
+      rfl
+    rw [hfun]
+    exact (hD2v (-s) ξ).neg
   have hD2wc : Continuous fun p : ℝ × E => D2w p.1 p.2 := by
     simp only [hD2w_def]
     exact (hD2vc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
@@ -542,14 +562,26 @@ theorem exists_flow_contDiff_three_of_lipschitz_thirdDeriv_backward [CompleteSpa
   have hwc : ∀ x, Continuous fun s => w s x := by
     intro x; simp only [hw_def]; exact ((hvc x).comp continuous_neg).neg
   have hDw : ∀ s ξ, HasFDerivAt (w s) (Dw s ξ) ξ := by
-    intro s ξ; simpa only [hw_def, hDw_def] using (hDv (-s) ξ).neg
+    intro s ξ
+    change HasFDerivAt (fun y => -(v (-s) y)) (-(Dv (-s) ξ)) ξ
+    have hfun : (fun y => -(v (-s) y)) = -(v (-s)) := by
+      funext y
+      rfl
+    rw [hfun]
+    exact (hDv (-s) ξ).neg
   have hDwc : Continuous fun p : ℝ × E => Dw p.1 p.2 := by
     simp only [hDw_def]; exact (hDvc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
   have hDwlip : ∀ s, LipschitzWith L (Dw s) := by
     intro s; refine LipschitzWith.of_dist_le_mul fun a b => ?_
     simp only [hDw_def, dist_neg_neg]; exact (hDvlip (-s)).dist_le_mul a b
   have hD2wc : ∀ s ξ, HasFDerivAt (Dw s) (D2wc s ξ) ξ := by
-    intro s ξ; simpa only [hDw_def, hD2wc_def] using (hD2vc (-s) ξ).neg
+    intro s ξ
+    change HasFDerivAt (fun y => -(Dv (-s) y)) (-(D2vc (-s) ξ)) ξ
+    have hfun : (fun y => -(Dv (-s) y)) = -(Dv (-s)) := by
+      funext y
+      rfl
+    rw [hfun]
+    exact (hD2vc (-s) ξ).neg
   have hD2wcc : Continuous fun p : ℝ × E => D2wc p.1 p.2 := by
     simp only [hD2wc_def]; exact (hD2vcc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
   have hD2wclip : ∀ s, LipschitzWith M₂ (D2wc s) := by
@@ -559,7 +591,13 @@ theorem exists_flow_contDiff_three_of_lipschitz_thirdDeriv_backward [CompleteSpa
     intro s; refine LipschitzWith.of_dist_le_mul fun a b => ?_
     simp only [hD2wm_def, dist_neg_neg]; exact (hD2vmlip (-s)).dist_le_mul a b
   have hD3wm : ∀ s ξ, HasFDerivAt (D2wm s) (D3wm s ξ) ξ := by
-    intro s ξ; simpa only [hD2wm_def, hD3wm_def] using (hD3vm (-s) ξ).neg
+    intro s ξ
+    change HasFDerivAt (fun y => -(D2vm (-s) y)) (-(D3vm (-s) ξ)) ξ
+    have hfun : (fun y => -(D2vm (-s) y)) = -(D2vm (-s)) := by
+      funext y
+      rfl
+    rw [hfun]
+    exact (hD3vm (-s) ξ).neg
   have hD3wmc : Continuous fun p : ℝ × E => D3wm p.1 p.2 := by
     simp only [hD3wm_def]; exact (hD3vmc.comp ((continuous_fst.neg).prodMk continuous_snd)).neg
   have hD3wmlip : ∀ s, LipschitzWith M₃ (D3wm s) := by

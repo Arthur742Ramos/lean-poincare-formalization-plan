@@ -51,7 +51,7 @@ if actual_license_sha256 != expected_license_sha256:
         "project copyright notice"
     )
 
-expected_mathlib_revision = "8a178386ffc0f5fef0b77738bb5449d50efeea95"
+expected_mathlib_revision = "db584cd6d46c92f209a44c0f1c829460d327499d"
 manifest = json.loads((root / "lake-manifest.json").read_text(encoding="utf-8"))
 mathlib = next(
     (package for package in manifest.get("packages", [])

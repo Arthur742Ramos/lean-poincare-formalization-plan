@@ -1287,17 +1287,19 @@ then `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh` for
 the explicit macOS Comparator plus NanoDa replay. The first hosted attempt at
 the preceding public commit failed only on Palomar's standard SPDX license
 fingerprint. The corrected commit then failed because its Mathlib revision was
-not an ancestor of canonical `master`. The current revision pins Mathlib to
-canonical ancestor `8a178386ffc0f5fef0b77738bb5449d50efeea95`, aligns the
-Lean/Comparator stack to Lean 4.29.0, and adds matching local license and
-dependency-ancestry gates. A retry must use the new immutable commit.
+not an ancestor of canonical `master`. The previously submitted artifact was
+`c50584bb804865fd9a54ebb5362ba3eee864e212` on Lean 4.29.0. The current
+development artifact upgrades to Lean 4.33.0 with Mathlib revision
+`db584cd6d46c92f209a44c0f1c829460d327499d` and matching Lean4Export revision
+`15f6055e299ad5b89345e533cc2192f4cc00f659`; any retry must use its new
+immutable commit.
 
 ## Build
 
 From this directory:
 
 ```powershell
-lake +leanprover/lean4:v4.29.1 build PoincareCurvature
+lake +leanprover/lean4:v4.33.0 build PoincareCurvature
 ```
 
 The heavier Ricci-flow local-existence scaffold is intentionally kept
@@ -1305,5 +1307,5 @@ out of the root target for faster routine iteration. Build it explicitly when
 working on that layer:
 
 ```powershell
-lake +leanprover/lean4:v4.29.1 build PoincareCurvature.RicciFlowLocalExistence
+lake +leanprover/lean4:v4.33.0 build PoincareCurvature.RicciFlowLocalExistence
 ```

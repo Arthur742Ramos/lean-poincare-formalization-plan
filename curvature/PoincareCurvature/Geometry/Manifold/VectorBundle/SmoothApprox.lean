@@ -84,14 +84,16 @@ theorem ContinuousOn.exists_contMDiffOn_approx
   haveI : SecondCountableTopology U := inferInstance
   haveI : LocallyCompactSpace U := U.isOpenEmbedding'.locallyCompactSpace
   haveI : SigmaCompactSpace U := inferInstance
-  let fU : U → F := fun x ↦ f x
-  let εU : U → ℝ := fun x ↦ ε x
+  let fU : U → F := (U : Set M).domRestrict f
+  let εU : U → ℝ := (U : Set M).domRestrict ε
   have hfU : Continuous fU := by
-    simpa [fU, Set.restrict] using
-      (continuousOn_iff_continuous_restrict (f := f) (s := (U : Set M))).mp (by simpa [U] using hf)
+    dsimp [fU]
+    exact (continuousOn_iff_continuous_domRestrict (f := f) (s := (U : Set M))).mp
+      (by simpa [U] using hf)
   have hεU : Continuous εU := by
-    simpa [εU, Set.restrict] using
-      (continuousOn_iff_continuous_restrict (f := ε) (s := (U : Set M))).mp (by simpa [U] using hε)
+    dsimp [εU]
+    exact (continuousOn_iff_continuous_domRestrict (f := ε) (s := (U : Set M))).mp
+      (by simpa [U] using hε)
   have hεU_pos : ∀ x : U, 0 < εU x := fun x ↦ hε_pos x x.2
   obtain ⟨gU, hgU, _⟩ := hfU.exists_contMDiff_approx (I := I) (n := n) hεU hεU_pos
   let g : M → F := fun x ↦ if hx : x ∈ s then gU ⟨x, hx⟩ else 0

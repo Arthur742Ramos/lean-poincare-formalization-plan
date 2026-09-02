@@ -38,6 +38,8 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 namespace CovariantDerivative
 
+set_option backward.isDefEq.respectTransparency false
+
 local notation "TM" => (TangentSpace I : M → Type _)
 
 section SmoothExtend
@@ -61,6 +63,13 @@ lemma tsupport_smoothExtendBump_subset (x : M) :
       (trivializationAt F V x).baseSet :=
   (smoothExtendBumpData (I := I) (F := F) (V := V) x).2
 
+private lemma smoothBump_eq_zero_of_not_mem
+    {x y : M} (φ : SmoothBumpFunction I x)
+    (hφsupp : tsupport φ ⊆ (trivializationAt F V x).baseSet)
+    (hy : y ∉ (trivializationAt F V x).baseSet) : (φ : M → ℝ) y = 0 := by
+  by_contra hφ
+  exact hy (hφsupp (subset_closure hφ))
+
 lemma contMDiffOn_extend_baseSet_two {x : M} (v : V x) :
     ContMDiffOn I (I.prod 𝓘(ℝ, F)) 2 (T% (extend F v)) (trivializationAt F V x).baseSet := by
   let t := trivializationAt F V x
@@ -76,23 +85,26 @@ lemma contMDiffOn_extend_baseSet_one {x : M} (v : V x) :
     ContMDiffOn I (I.prod 𝓘(ℝ, F)) 1 (T% (extend F v)) (trivializationAt F V x).baseSet :=
   (contMDiffOn_extend_baseSet_two (I := I) (F := F) (V := V) v).of_le (by simp)
 
-lemma extend_add {x : M} (v w : V x) :
-    extend F (v + w) = extend F v + extend F w := by
+lemma extend_add_of_mem {x : M} (v w : V x) {y : M}
+    (hy : y ∈ (trivializationAt F V x).baseSet) :
+    extend F (v + w) y = extend F v y + extend F w y := by
   let t := trivializationAt F V x
   have hx : x ∈ t.baseSet := FiberBundle.mem_baseSet_trivializationAt F V x
-  funext y
-  change (t.symmₗ ℝ y) ((t ⟨x, v + w⟩).2) =
-      (t.symmₗ ℝ y) ((t ⟨x, v⟩).2) + (t.symmₗ ℝ y) ((t ⟨x, w⟩).2)
+  change t.symm y ((t ⟨x, v + w⟩).2) =
+      t.symm y ((t ⟨x, v⟩).2) + t.symm y ((t ⟨x, w⟩).2)
+  rw [← t.symmₗ_apply (R := ℝ) hy, ← t.symmₗ_apply (R := ℝ) hy,
+    ← t.symmₗ_apply (R := ℝ) hy]
   rw [show (t ⟨x, v + w⟩).2 = (t ⟨x, v⟩).2 + (t ⟨x, w⟩).2 by
     simpa [t.coe_linearMapAt_of_mem hx] using (t.linearMapAt ℝ x).map_add v w]
   exact (t.symmₗ ℝ y).map_add _ _
 
-lemma extend_smul {x : M} (c : ℝ) (v : V x) :
-    extend F (c • v) = c • extend F v := by
+lemma extend_smul_of_mem {x : M} (c : ℝ) (v : V x) {y : M}
+    (hy : y ∈ (trivializationAt F V x).baseSet) :
+    extend F (c • v) y = c • extend F v y := by
   let t := trivializationAt F V x
   have hx : x ∈ t.baseSet := FiberBundle.mem_baseSet_trivializationAt F V x
-  funext y
-  change (t.symmₗ ℝ y) ((t ⟨x, c • v⟩).2) = c • (t.symmₗ ℝ y) ((t ⟨x, v⟩).2)
+  change t.symm y ((t ⟨x, c • v⟩).2) = c • t.symm y ((t ⟨x, v⟩).2)
+  rw [← t.symmₗ_apply (R := ℝ) hy, ← t.symmₗ_apply (R := ℝ) hy]
   have hcv : t.linearMapAt ℝ x (c • v) = (t ⟨x, c • v⟩).2 := by
     simpa using congrFun (t.coe_linearMapAt_of_mem (R := ℝ) hx) (c • v)
   have hv : t.linearMapAt ℝ x v = (t ⟨x, v⟩).2 := by
@@ -179,13 +191,13 @@ lemma smoothExtend_trivializationAt_localFrame_eventuallyEq
   exact extend_trivializationAt_localFrame_apply_of_mem_baseSet
     (F := F) (V := V) b x hy i
 
-lemma eventually_eq_sum_smoothExtend_trivializationAt_localFrame_coeff_smul
+lemma eventually_eq_sum_smoothExtend_trivializationAt_localFrameCoeff_smul
     {ι : Type*} [Fintype ι] (b : Module.Basis ι ℝ F)
     (σ : Π x : M, V x) (x : M) :
     ∀ᶠ y in nhds x,
       σ y =
         ∑ i : ι,
-          ((trivializationAt F V x).localFrame_coeff I b i y (σ y)) •
+          ((trivializationAt F V x).localFrameCoeff I b i y (σ y)) •
             smoothExtend (I := I) (F := F) (V := V) x
               ((trivializationAt F V x).localFrame b i x) y := by
   classical
@@ -193,7 +205,7 @@ lemma eventually_eq_sum_smoothExtend_trivializationAt_localFrame_coeff_smul
   have hx : x ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt F V x
   have hsum :
       ∀ᶠ y in nhds x,
-        σ y = ∑ i : ι, e.localFrame_coeff I b i y (σ y) • e.localFrame b i y := by
+        σ y = ∑ i : ι, e.localFrameCoeff I b i y (σ y) • e.localFrame b i y := by
     simpa [e] using
       e.eventually_eq_localFrame_sum_coeff_smul (I := I) (b := b) (s := σ) hx
   have hframes :
@@ -207,15 +219,15 @@ lemma eventually_eq_sum_smoothExtend_trivializationAt_localFrame_coeff_smul
       (I := I) (F := F) (V := V) b x i
   filter_upwards [hsum, hframes] with y hsumy hframey
   calc
-    σ y = ∑ i : ι, e.localFrame_coeff I b i y (σ y) • e.localFrame b i y := hsumy
+    σ y = ∑ i : ι, e.localFrameCoeff I b i y (σ y) • e.localFrame b i y := hsumy
     _ = ∑ i : ι,
-          e.localFrame_coeff I b i y (σ y) •
+          e.localFrameCoeff I b i y (σ y) •
             smoothExtend (I := I) (F := F) (V := V) x (e.localFrame b i x) y := by
           refine Finset.sum_congr rfl ?_
           intro i _
           rw [hframey i]
     _ = ∑ i : ι,
-          ((trivializationAt F V x).localFrame_coeff I b i y (σ y)) •
+          ((trivializationAt F V x).localFrameCoeff I b i y (σ y)) •
             smoothExtend (I := I) (F := F) (V := V) x
               ((trivializationAt F V x).localFrame b i x) y := by
           rfl
@@ -225,28 +237,67 @@ lemma smoothExtend_add (x : M) (v w : V x) :
       smoothExtend (I := I) (F := F) (V := V) x v +
         smoothExtend (I := I) (F := F) (V := V) x w := by
   funext y
-  simp [smoothExtend, extend_add, smul_add]
+  by_cases hy : y ∈ (trivializationAt F V x).baseSet
+  · simp only [smoothExtend, Pi.add_apply]
+    change (smoothExtendBump (I := I) (F := F) (V := V) x : M → ℝ) y •
+        extend F (v + w) y =
+      (smoothExtendBump (I := I) (F := F) (V := V) x : M → ℝ) y • extend F v y +
+        (smoothExtendBump (I := I) (F := F) (V := V) x : M → ℝ) y • extend F w y
+    rw [extend_add_of_mem (F := F) (V := V) v w hy]
+    exact smul_add _ _ _
+  · have hφ := smoothBump_eq_zero_of_not_mem
+      (I := I) (F := F) (V := V)
+      (smoothExtendBump (I := I) (F := F) (V := V) x)
+      (tsupport_smoothExtendBump_subset (I := I) (F := F) (V := V) x) hy
+    simp [smoothExtend, hφ]
 
 lemma smoothExtend_smul (x : M) (c : ℝ) (v : V x) :
     smoothExtend (I := I) (F := F) (V := V) x (c • v) =
       c • smoothExtend (I := I) (F := F) (V := V) x v := by
   funext y
-  simp [smoothExtend, extend_smul, smul_smul, mul_comm]
+  by_cases hy : y ∈ (trivializationAt F V x).baseSet
+  · simp only [smoothExtend, Pi.smul_apply]
+    change (smoothExtendBump (I := I) (F := F) (V := V) x : M → ℝ) y •
+        extend F (c • v) y =
+      c • ((smoothExtendBump (I := I) (F := F) (V := V) x : M → ℝ) y • extend F v y)
+    rw [extend_smul_of_mem (F := F) (V := V) c v hy]
+    simp [smul_smul, mul_comm]
+  · have hφ := smoothBump_eq_zero_of_not_mem
+      (I := I) (F := F) (V := V)
+      (smoothExtendBump (I := I) (F := F) (V := V) x)
+      (tsupport_smoothExtendBump_subset (I := I) (F := F) (V := V) x) hy
+    simp [smoothExtend, hφ]
 
 lemma smoothExtendWithBump_add
-    (x : M) (φ : SmoothBumpFunction I x) (v w : V x) :
+    (x : M) (φ : SmoothBumpFunction I x) (v w : V x)
+    (hφsupp : tsupport φ ⊆ (trivializationAt F V x).baseSet) :
     smoothExtendWithBump (I := I) (F := F) (V := V) x φ (v + w) =
       smoothExtendWithBump (I := I) (F := F) (V := V) x φ v +
         smoothExtendWithBump (I := I) (F := F) (V := V) x φ w := by
   funext y
-  simp [smoothExtendWithBump, extend_add, smul_add]
+  by_cases hy : y ∈ (trivializationAt F V x).baseSet
+  · simp only [smoothExtendWithBump, Pi.add_apply]
+    change (φ : M → ℝ) y • extend F (v + w) y =
+      (φ : M → ℝ) y • extend F v y + (φ : M → ℝ) y • extend F w y
+    rw [extend_add_of_mem (F := F) (V := V) v w hy]
+    exact smul_add _ _ _
+  · have hφ := smoothBump_eq_zero_of_not_mem (I := I) (F := F) (V := V) φ hφsupp hy
+    simp [smoothExtendWithBump, hφ]
 
 lemma smoothExtendWithBump_smul
-    (x : M) (φ : SmoothBumpFunction I x) (c : ℝ) (v : V x) :
+    (x : M) (φ : SmoothBumpFunction I x) (c : ℝ) (v : V x)
+    (hφsupp : tsupport φ ⊆ (trivializationAt F V x).baseSet) :
     smoothExtendWithBump (I := I) (F := F) (V := V) x φ (c • v) =
       c • smoothExtendWithBump (I := I) (F := F) (V := V) x φ v := by
   funext y
-  simp [smoothExtendWithBump, extend_smul, smul_smul, mul_comm]
+  by_cases hy : y ∈ (trivializationAt F V x).baseSet
+  · simp only [smoothExtendWithBump, Pi.smul_apply]
+    change (φ : M → ℝ) y • extend F (c • v) y =
+      c • ((φ : M → ℝ) y • extend F v y)
+    rw [extend_smul_of_mem (F := F) (V := V) c v hy]
+    simp [smul_smul, mul_comm]
+  · have hφ := smoothBump_eq_zero_of_not_mem (I := I) (F := F) (V := V) φ hφsupp hy
+    simp [smoothExtendWithBump, hφ]
 
 lemma smoothExtend_contMDiff_two (x : M) (v : V x) :
     ContMDiff I (I.prod 𝓘(ℝ, F)) 2
@@ -288,19 +339,19 @@ lemma smoothExtendWithBump_contMDiff_two_of_tsupport_subset
       (n := 2) (ψ := (φ : M → ℝ))
       hφ.contMDiffOn (trivializationAt F V x).open_baseSet hφsupp hv
 
-lemma smoothExtend_localFrame_coeff_contMDiff_two
+lemma smoothExtend_localFrameCoeff_contMDiff_two
     {ι : Type*} [Fintype ι] (b : Module.Basis ι ℝ F)
     (x : M) (w : V x) (i : ι) :
     ContMDiff I 𝓘(ℝ) 2
       (fun y ↦
-        (trivializationAt F V x).localFrame_coeff I b i y
+        (trivializationAt F V x).localFrameCoeff I b i y
           (smoothExtend (I := I) (F := F) (V := V) x w y)) := by
   letI := b.finiteDimensional_of_finite
   let e := trivializationAt F V x
   let φ : SmoothBumpFunction I x := smoothExtendBump (I := I) (F := F) (V := V) x
   have hbase :
       ContMDiffOn I 𝓘(ℝ) 2
-        (fun y ↦ e.localFrame_coeff I b i y
+        (fun y ↦ e.localFrameCoeff I b i y
           (smoothExtend (I := I) (F := F) (V := V) x w y)) e.baseSet := by
     have hs :
         ContMDiffOn I (I.prod 𝓘(ℝ, F)) 2
@@ -308,12 +359,12 @@ lemma smoothExtend_localFrame_coeff_contMDiff_two
             (smoothExtend (I := I) (F := F) (V := V) x w y)) e.baseSet :=
       (smoothExtend_contMDiff_two (I := I) (F := F) (V := V) x w).contMDiffOn
     simpa [e] using
-      contMDiffOn_localFrame_coeff (I := I) (e := e) (b := b)
+      contMDiffOn_localFrameCoeff (I := I) (e := e) (b := b)
         (t := e.baseSet) (k := (2 : WithTop ℕ∞))
         e.open_baseSet (subset_refl _) hs i
   have hcompl :
       ContMDiffOn I 𝓘(ℝ) 2
-        (fun y ↦ e.localFrame_coeff I b i y
+        (fun y ↦ e.localFrameCoeff I b i y
           (smoothExtend (I := I) (F := F) (V := V) x w y)) (tsupport φ)ᶜ := by
     have hzero :
         ContMDiffOn I 𝓘(ℝ) 2 (fun _ : M ↦ (0 : ℝ)) (tsupport φ)ᶜ :=
@@ -355,7 +406,7 @@ private lemma contMDiff_extDerivFun_apply
     {f : M → ℝ} {X : Π x : M, TM x}
     (hf : ContMDiff I 𝓘(ℝ) 2 f)
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (fun y ↦ TotalSpace.mk' E y (X y))) :
-    ContMDiff I 𝓘(ℝ) 1 (fun y ↦ extDerivFun (I := I) f y (X y)) := by
+    ContMDiff I 𝓘(ℝ) 1 (fun y ↦ mvfderiv (I := I) f y (X y)) := by
   have htf : ContMDiff I.tangent 𝓘(ℝ).tangent 1 (tangentMap I 𝓘(ℝ) f) :=
     hf.contMDiff_tangentMap (m := 1) (by norm_num)
   have hcomp : ContMDiff I 𝓘(ℝ).tangent 1
@@ -364,19 +415,21 @@ private lemma contMDiff_extDerivFun_apply
   have hsnd : ContMDiff I 𝓘(ℝ) 1
       (fun y ↦ (tangentMap I 𝓘(ℝ) f (TotalSpace.mk' E y (X y))).2) :=
     (contMDiff_snd_tangentBundle_modelSpace ℝ 𝓘(ℝ)).comp hcomp
-  simpa [extDerivFun] using hsnd
+  change ContMDiff I 𝓘(ℝ) 1
+    (fun y ↦ (tangentMap I 𝓘(ℝ) f (TotalSpace.mk' E y (X y))).2)
+  exact hsnd
 
 private lemma mdiffAt_extDerivFun_apply
     {f : M → ℝ} {X : Π x : M, TM x} {x : M}
     (hf : ContMDiff I 𝓘(ℝ) 2 f)
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (fun y ↦ TotalSpace.mk' E y (X y))) :
-    MDiffAt (fun y ↦ extDerivFun (I := I) f y (X y)) x :=
+    MDiffAt (fun y ↦ mvfderiv (I := I) f y (X y)) x :=
   ((contMDiff_extDerivFun_apply (I := I) (f := f) (X := X) hf hX) x).mdifferentiableAt
     one_ne_zero
 
 private lemma extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_mpullbackWithin
     {g : M → ℝ} {X : Π x : M, TM x} {x : M} (hg : MDiffAt g x) :
-    extDerivFun (I := I) g x (X x) =
+    mvfderiv (I := I) g x (X x) =
       fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) x g) (Set.range I)
         ((extChartAt I x) x)
         (VectorField.mpullbackWithin 𝓘(ℝ, E) I (extChartAt I x).symm X (Set.range I)
@@ -389,14 +442,16 @@ private lemma extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_mpullbackWit
     have hx : (extChartAt I x).symm ((extChartAt I x) x) = x := by
       simp
     rw [hx]
-    simpa using (mfderivWithin_extChartAt_symm_inverse_apply (I := I) (x := x) (v := X x))
+    set_option backward.isDefEq.respectTransparency false in
+      exact mfderivWithin_extChartAt_symm_inverse_apply (I := I) (x := x) (v := X x)
   rw [hmp]
-  simpa [extDerivFun] using congr($(hg.mfderiv) (X x))
+  change (NormedSpace.fromTangentSpace (g x)) ((mfderiv% g x) (X x)) = _
+  exact congrArg (fun L => (NormedSpace.fromTangentSpace (g x)) (L (X x))) hg.mfderiv
 
 private lemma extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_mpullbackWithin_of_mem
     {g : M → ℝ} {X : Π x : M, TM x} {x y : M}
     (hy : y ∈ (extChartAt I x).source) (hg : MDiffAt g y) :
-    extDerivFun (I := I) g y (X y) =
+    mvfderiv (I := I) g y (X y) =
       fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) x g) (Set.range I)
         ((extChartAt I x) y)
         (VectorField.mpullbackWithin 𝓘(ℝ, E) I (extChartAt I x).symm X (Set.range I)
@@ -410,14 +465,14 @@ private lemma extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_mpullbackWit
   have hz_range : z ∈ Set.range I := by
     simpa [φ, z] using extChartAt_target_subset_range x hz
   have hg' : HasMFDerivAt I 𝓘(ℝ) g (φ.symm z) (mfderiv% g y) := by
-    convert hg.hasMFDerivAt using 1 <;> simpa [hy_eq]
+    rw [hy_eq]
+    exact hg.hasMFDerivAt
   have hcomp :
       HasMFDerivWithinAt 𝓘(ℝ, E) 𝓘(ℝ) (g ∘ φ.symm) (Set.range I) z
         ((mfderiv% g y).comp (mfderiv[Set.range I] φ.symm z)) := by
-    simpa [hy_eq] using
-      (HasMFDerivAt.comp_hasMFDerivWithinAt
-        (f := φ.symm) (s := Set.range I) (x := z) hg'
-        (mdifferentiableWithinAt_extChartAt_symm hz).hasMFDerivWithinAt)
+    exact HasMFDerivAt.comp_hasMFDerivWithinAt
+      (f := φ.symm) (s := Set.range I) (x := z) hg'
+      (mdifferentiableWithinAt_extChartAt_symm hz).hasMFDerivWithinAt
   have hderiv :
       fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) x g) (Set.range I) z =
         (((mfderiv% g y).comp (mfderiv[Set.range I] φ.symm z)) : E →L[ℝ] ℝ) := by
@@ -449,7 +504,7 @@ private lemma writtenInExtChartAt_extDerivFun_apply_eventuallyEq_fderivWithin
     {f : M → ℝ} {X : Π x : M, TM x} {x : M}
     (hf : ContMDiff I 𝓘(ℝ) 2 f)
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (fun y ↦ TotalSpace.mk' E y (X y))) :
-    writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ extDerivFun (I := I) f y (X y))
+    writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ mvfderiv (I := I) f y (X y))
       =ᶠ[nhdsWithin ((extChartAt I x) x) (Set.range I)]
         fun z ↦
           fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) x f) (Set.range I) z
@@ -461,8 +516,8 @@ private lemma writtenInExtChartAt_extDerivFun_apply_eventuallyEq_fderivWithin
   have hz_eq : (extChartAt I x) y = z := by
     simpa [y] using PartialEquiv.right_inv (extChartAt I x) hz
   calc
-    writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ extDerivFun (I := I) f y (X y)) z
-      = extDerivFun (I := I) f y (X y) := by
+    writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ mvfderiv (I := I) f y (X y)) z
+      = mvfderiv (I := I) f y (X y) := by
           rfl
     _ = fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) x f) (Set.range I) ((extChartAt I x) y)
           (VectorField.mpullbackWithin 𝓘(ℝ, E) I (extChartAt I x).symm X (Set.range I)
@@ -479,9 +534,9 @@ lemma extDerivFun_lieBracket_commutator
     (hf : ContMDiff I 𝓘(ℝ) 2 f)
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (fun y ↦ TotalSpace.mk' E y (X y)))
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (fun y ↦ TotalSpace.mk' E y (Y y))) :
-    extDerivFun (I := I) (fun y ↦ extDerivFun (I := I) f y (Y y)) x (X x) -
-      extDerivFun (I := I) (fun y ↦ extDerivFun (I := I) f y (X y)) x (Y x) -
-      extDerivFun (I := I) f x (VectorField.mlieBracket I X Y x) = 0 := by
+    mvfderiv (I := I) (fun y ↦ mvfderiv (I := I) f y (Y y)) x (X x) -
+      mvfderiv (I := I) (fun y ↦ mvfderiv (I := I) f y (X y)) x (Y x) -
+      mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x) = 0 := by
   let φ := extChartAt I x
   let z : E := φ x
   let F : E → ℝ := writtenInExtChartAt I 𝓘(ℝ) x f
@@ -505,34 +560,38 @@ lemma extDerivFun_lieBracket_commutator
       DifferentiableWithinAt ℝ X' (Set.range I) z := by
     simpa [X', φ, z] using
       (MDifferentiableWithinAt.differentiableWithinAt_mpullbackWithin_vectorField
-        (I := I) (s := Set.univ) (x := x) (V := X) (by simpa using hXmd))
+        (I := I) (s := Set.univ) (x := x) (V := X) (by
+          change MDiffAt[Set.univ] (T% X) x
+          exact hXmd))
   have hYdiff :
       DifferentiableWithinAt ℝ Y' (Set.range I) z := by
     simpa [Y', φ, z] using
       (MDifferentiableWithinAt.differentiableWithinAt_mpullbackWithin_vectorField
-        (I := I) (s := Set.univ) (x := x) (V := Y) (by simpa using hYmd))
+        (I := I) (s := Set.univ) (x := x) (V := Y) (by
+          change MDiffAt[Set.univ] (T% Y) x
+          exact hYmd))
   have hEqY :
-      writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ extDerivFun (I := I) f y (Y y))
+      writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ mvfderiv (I := I) f y (Y y))
         =ᶠ[nhdsWithin z (Set.range I)] fun w ↦ fderivWithin ℝ F (Set.range I) w (Y' w) := by
     simpa [F, Y', φ, z] using
       (writtenInExtChartAt_extDerivFun_apply_eventuallyEq_fderivWithin
         (I := I) (f := f) (X := Y) (x := x) hf hY)
   have hEqX :
-      writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ extDerivFun (I := I) f y (X y))
+      writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ mvfderiv (I := I) f y (X y))
         =ᶠ[nhdsWithin z (Set.range I)] fun w ↦ fderivWithin ℝ F (Set.range I) w (X' w) := by
     simpa [F, X', φ, z] using
       (writtenInExtChartAt_extDerivFun_apply_eventuallyEq_fderivWithin
         (I := I) (f := f) (X := X) (x := x) hf hX)
   have hEqY' :
       fderivWithin ℝ
-          (writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ extDerivFun (I := I) f y (Y y)))
+          (writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ mvfderiv (I := I) f y (Y y)))
           (Set.range I) z =
         fderivWithin ℝ (fun w ↦ fderivWithin ℝ F (Set.range I) w (Y' w))
           (Set.range I) z :=
     hEqY.fderivWithin_eq_of_mem hz_range
   have hEqX' :
       fderivWithin ℝ
-          (writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ extDerivFun (I := I) f y (X y)))
+          (writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ mvfderiv (I := I) f y (X y)))
           (Set.range I) z =
         fderivWithin ℝ (fun w ↦ fderivWithin ℝ F (Set.range I) w (X' w))
           (Set.range I) z := by
@@ -541,6 +600,8 @@ lemma extDerivFun_lieBracket_commutator
       VectorField.mpullbackWithin 𝓘(ℝ, E) I φ.symm (VectorField.mlieBracket I X Y)
         (Set.range I) z =
         VectorField.lieBracketWithin ℝ X' Y' (Set.range I) z := by
+    have hpoint : φ.symm z = x := by
+      simp [φ, z]
     have hφ :
         CMDiffAt[Set.range I] 2 φ.symm z := by
       simpa [φ, z] using
@@ -549,8 +610,14 @@ lemma extDerivFun_lieBracket_commutator
       (VectorField.mpullbackWithin_mlieBracketWithin
         (I := 𝓘(ℝ, E)) (I' := I) (f := φ.symm) (V := X) (W := Y)
         (x₀ := z) (s := Set.range I) (t := Set.univ)
-        (by simpa [φ, z] using hXmd)
-        (by simpa [φ, z] using hYmd)
+        (by
+          rw [hpoint]
+          change MDiffAt[Set.univ] (T% X) x
+          exact hXmd)
+        (by
+          rw [hpoint]
+          change MDiffAt[Set.univ] (T% Y) x
+          exact hYmd)
         I.uniqueMDiffOn hφ hz_range (by simp) (by simp) hz_closure)
   have hLie :
       fderivWithin ℝ F (Set.range I) z (VectorField.lieBracketWithin ℝ X' Y' (Set.range I) z) =
@@ -562,28 +629,28 @@ lemma extDerivFun_lieBracket_commutator
       (f := F) (V := X') (W := Y') hF (by simp) I.uniqueDiffOn hz_closure hz_range
       hYdiff hXdiff
   have hfx : MDiffAt f x := (hf x).mdifferentiableAt (by simp : (2 : WithTop ℕ∞) ≠ 0)
-  have hgX : MDiffAt (fun y ↦ extDerivFun (I := I) f y (X y)) x :=
+  have hgX : MDiffAt (fun y ↦ mvfderiv (I := I) f y (X y)) x :=
     mdiffAt_extDerivFun_apply (I := I) (f := f) (X := X) hf hX
-  have hgY : MDiffAt (fun y ↦ extDerivFun (I := I) f y (Y y)) x :=
+  have hgY : MDiffAt (fun y ↦ mvfderiv (I := I) f y (Y y)) x :=
     mdiffAt_extDerivFun_apply (I := I) (f := f) (X := Y) hf hY
   calc
-    extDerivFun (I := I) (fun y ↦ extDerivFun (I := I) f y (Y y)) x (X x) -
-        extDerivFun (I := I) (fun y ↦ extDerivFun (I := I) f y (X y)) x (Y x) -
-        extDerivFun (I := I) f x (VectorField.mlieBracket I X Y x)
+    mvfderiv (I := I) (fun y ↦ mvfderiv (I := I) f y (Y y)) x (X x) -
+        mvfderiv (I := I) (fun y ↦ mvfderiv (I := I) f y (X y)) x (Y x) -
+        mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x)
       =
         fderivWithin ℝ
-            (writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ extDerivFun (I := I) f y (Y y)))
+            (writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ mvfderiv (I := I) f y (Y y)))
             (Set.range I) z (X' z) -
           fderivWithin ℝ
-              (writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ extDerivFun (I := I) f y (X y)))
+              (writtenInExtChartAt I 𝓘(ℝ) x (fun y ↦ mvfderiv (I := I) f y (X y)))
               (Set.range I) z (Y' z) -
           fderivWithin ℝ F (Set.range I) z
             (VectorField.mpullbackWithin 𝓘(ℝ, E) I φ.symm (VectorField.mlieBracket I X Y)
               (Set.range I) z) := by
           rw [extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_mpullbackWithin
-                (I := I) (g := fun y ↦ extDerivFun (I := I) f y (Y y)) (X := X) hgY,
+                (I := I) (g := fun y ↦ mvfderiv (I := I) f y (Y y)) (X := X) hgY,
               extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_mpullbackWithin
-                (I := I) (g := fun y ↦ extDerivFun (I := I) f y (X y)) (X := Y) hgX,
+                (I := I) (g := fun y ↦ mvfderiv (I := I) f y (X y)) (X := Y) hgX,
               extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_mpullbackWithin
                 (I := I) (g := f) (X := VectorField.mlieBracket I X Y) hfx]
     _ =
@@ -619,8 +686,10 @@ private lemma mdifferentiableAt_along_of_mdifferentiableAt
         (fun y ↦
           TotalSpace.mk' (E →L[ℝ] F)
             (E := fun z : M ↦ TangentSpace I z →L[ℝ] V z) y (cov σ y)) := by
-    simpa [contMDiffOn_univ] using
-      Hcov.contMDiff (by simpa [contMDiffOn_univ] using hσ)
+    apply contMDiffOn_univ.mp
+    exact Hcov.contMDiff (by
+      apply contMDiffOn_univ.mpr
+      convert hσ using 1 <;> norm_num)
   simpa [CovariantDerivative.along] using
     ((hCovSection x).mdifferentiableAt one_ne_zero).clm_bundle_apply hX
 
@@ -633,7 +702,7 @@ theorem curvatureAux_inner_add_eq_zero_of_metricCompatible
       ∀ {x : M} {σ τ : Π x : M, V x},
         MDiffAt (T% σ) x → MDiffAt (T% τ) x →
           ∀ u : TangentSpace I x,
-            extDerivFun (fun y ↦ inner ℝ (σ y) (τ y)) x u =
+            mvfderiv (I := I) (fun y ↦ inner ℝ (σ y) (τ y)) x u =
               inner ℝ (cov σ x u) (τ x) + inner ℝ (σ x) (cov τ x u))
     {X Y : Π x : M, TM x} {σ τ : Π x : M, V x} {x : M}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (fun y ↦ TotalSpace.mk' E y (X y)))
@@ -653,7 +722,7 @@ theorem curvatureAux_inner_add_eq_zero_of_metricCompatible
     (hτ x).mdifferentiableAt (by simp : (2 : WithTop ℕ∞) ≠ 0)
   have hmetric_along {x0 : M} {Z : Π x : M, TM x} {ρ υ : Π x : M, V x}
       (hρ : MDiffAt (T% ρ) x0) (hυ : MDiffAt (T% υ) x0) :
-      extDerivFun (I := I) (fun y ↦ inner ℝ (ρ y) (υ y)) x0 (Z x0) =
+      mvfderiv (I := I) (fun y ↦ inner ℝ (ρ y) (υ y)) x0 (Z x0) =
         inner ℝ (cov.along Z ρ x0) (υ x0) +
           inner ℝ (ρ x0) (cov.along Z υ x0) := by
     simpa [CovariantDerivative.along] using hmetric (x := x0) hρ hυ (Z x0)
@@ -713,7 +782,7 @@ theorem curvatureAux_inner_add_eq_zero_of_metricCompatible
       ContMDiff.inner_bundle (IM := I) (IB := I) (F := F) (E := V) hσ₁ hYτ
     exact (h x).mdifferentiableAt one_ne_zero
   have hDY_fun :
-      (fun y ↦ extDerivFun (I := I) f y (Y y)) =
+      (fun y ↦ mvfderiv (I := I) f y (Y y)) =
         fun y ↦ inner ℝ (cov.along Y σ y) (τ y) +
           inner ℝ (σ y) (cov.along Y τ y) := by
     funext y
@@ -723,7 +792,7 @@ theorem curvatureAux_inner_add_eq_zero_of_metricCompatible
       (hτ y).mdifferentiableAt (by simp : (2 : WithTop ℕ∞) ≠ 0)
     simpa [f] using hmetric_along (x0 := y) (Z := Y) hσy hτy
   have hDX_fun :
-      (fun y ↦ extDerivFun (I := I) f y (X y)) =
+      (fun y ↦ mvfderiv (I := I) f y (X y)) =
         fun y ↦ inner ℝ (cov.along X σ y) (τ y) +
           inner ℝ (σ y) (cov.along X τ y) := by
     funext y
@@ -733,43 +802,43 @@ theorem curvatureAux_inner_add_eq_zero_of_metricCompatible
       (hτ y).mdifferentiableAt (by simp : (2 : WithTop ℕ∞) ≠ 0)
     simpa [f] using hmetric_along (x0 := y) (Z := X) hσy hτy
   have hDXY :
-      extDerivFun (I := I) (fun y ↦ extDerivFun (I := I) f y (Y y)) x (X x) =
+      mvfderiv (I := I) (fun y ↦ mvfderiv (I := I) f y (Y y)) x (X x) =
         (inner ℝ (cov.along X (cov.along Y σ) x) (τ x) +
           inner ℝ (cov.along Y σ x) (cov.along X τ x)) +
         (inner ℝ (cov.along X σ x) (cov.along Y τ x) +
           inner ℝ (σ x) (cov.along X (cov.along Y τ) x)) := by
     rw [hDY_fun]
-    change extDerivFun (I := I)
+    change mvfderiv (I := I)
         ((fun y ↦ inner ℝ (cov.along Y σ y) (τ y)) +
           fun y ↦ inner ℝ (σ y) (cov.along Y τ y)) x (X x) =
         (inner ℝ (cov.along X (cov.along Y σ) x) (τ x) +
           inner ℝ (cov.along Y σ x) (cov.along X τ x)) +
         (inner ℝ (cov.along X σ x) (cov.along Y τ x) +
           inner ℝ (σ x) (cov.along X (cov.along Y τ) x))
-    rw [extDerivFun_add hinnerYστ hinnerσYτ]
+    rw [mvfderiv_add hinnerYστ hinnerσYτ]
     simp only [ContinuousLinearMap.add_apply]
     rw [hmetric_along (x0 := x) (Z := X) hYσmd hτmd,
       hmetric_along (x0 := x) (Z := X) hσmd hYτmd]
   have hDYX :
-      extDerivFun (I := I) (fun y ↦ extDerivFun (I := I) f y (X y)) x (Y x) =
+      mvfderiv (I := I) (fun y ↦ mvfderiv (I := I) f y (X y)) x (Y x) =
         (inner ℝ (cov.along Y (cov.along X σ) x) (τ x) +
           inner ℝ (cov.along X σ x) (cov.along Y τ x)) +
         (inner ℝ (cov.along Y σ x) (cov.along X τ x) +
           inner ℝ (σ x) (cov.along Y (cov.along X τ) x)) := by
     rw [hDX_fun]
-    change extDerivFun (I := I)
+    change mvfderiv (I := I)
         ((fun y ↦ inner ℝ (cov.along X σ y) (τ y)) +
           fun y ↦ inner ℝ (σ y) (cov.along X τ y)) x (Y x) =
         (inner ℝ (cov.along Y (cov.along X σ) x) (τ x) +
           inner ℝ (cov.along X σ x) (cov.along Y τ x)) +
         (inner ℝ (cov.along Y σ x) (cov.along X τ x) +
           inner ℝ (σ x) (cov.along Y (cov.along X τ) x))
-    rw [extDerivFun_add hinnerXστ hinnerσXτ]
+    rw [mvfderiv_add hinnerXστ hinnerσXτ]
     simp only [ContinuousLinearMap.add_apply]
     rw [hmetric_along (x0 := x) (Z := Y) hXσmd hτmd,
       hmetric_along (x0 := x) (Z := Y) hσmd hXτmd]
   have hDbr :
-      extDerivFun (I := I) f x (VectorField.mlieBracket I X Y x) =
+      mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x) =
         inner ℝ (cov.along (VectorField.mlieBracket I X Y) σ x) (τ x) +
           inner ℝ (σ x) (cov.along (VectorField.mlieBracket I X Y) τ x) := by
     simpa [f, CovariantDerivative.along] using
@@ -796,7 +865,11 @@ private lemma along_const_smul_right_apply
     {X : Π x : M, TM x} {σ : Π x : M, V x} {x : M} (c : ℝ)
     (hσ : MDiffAt (T% σ) x) :
     cov.along X (c • σ) x = c • cov.along X σ x := by
-  simpa using
+  have hfun : (fun _ : M ↦ c) • σ = c • σ := by
+    funext y
+    rfl
+  rw [← hfun]
+  simpa [mvfderiv] using
     (cov.along_smul_right_apply (x := x) (X := X) (f := fun _ ↦ c)
       mdifferentiableAt_const hσ)
 
@@ -849,7 +922,7 @@ private lemma curvatureAux_add_left_apply
           cov.along (VectorField.mlieBracket I X Y) σ x) +
         (cov.along X' (cov.along Y σ) x - cov.along Y (cov.along X' σ) x -
           cov.along (VectorField.mlieBracket I X' Y) σ x) := by
-            abel_nf
+            simp [sub_eq_add_neg, smul_smul, neg_smul] <;> abel
     _ = cov.curvatureAux X Y σ x + cov.curvatureAux X' Y σ x := by
           simp [CovariantDerivative.curvatureAux]
 
@@ -862,7 +935,11 @@ private lemma curvatureAux_smul_left_apply
   have hYX : MDiffAt (T% (cov.along X σ)) x := cov.mdifferentiableAt_along_of_contMDiff hX hσ
   have hXx : MDiffAt (T% X) x := (hX x).mdifferentiableAt one_ne_zero
   have hXsmul : cov.along (c • X) σ = c • cov.along X σ := by
-    simpa using (cov.along_smul_left (f := fun _ ↦ c) X σ)
+    have hfun : (fun _ : M ↦ c) • X = c • X := by
+      funext y
+      rfl
+    rw [← hfun]
+    exact cov.along_smul_left (f := fun _ ↦ c) X σ
   have h1 :
       cov.along (c • X) (cov.along Y σ) x = c • cov.along X (cov.along Y σ) x := by
     simp [CovariantDerivative.along, map_smul]
@@ -907,16 +984,15 @@ lemma curvatureAux_smul_fun_left_apply
   have h2 :
       cov.along Y (cov.along (f • X) σ) x =
         f x • cov.along Y (cov.along X σ) x +
-          extDerivFun (I := I) f x (Y x) • cov.along X σ x := by
+          mvfderiv (I := I) f x (Y x) • cov.along X σ x := by
     rw [hXsmul]
     exact cov.along_smul_right_apply (x := x) (f := f) (X := Y) (σ := cov.along X σ) hf hYX
   have h3 :
       cov.along (VectorField.mlieBracket I (f • X) Y) σ x =
-        -(extDerivFun (I := I) f x (Y x)) • cov.along X σ x +
+        -(mvfderiv (I := I) f x (Y x)) • cov.along X σ x +
           f x • cov.along (VectorField.mlieBracket I X Y) σ x := by
-    rw [CovariantDerivative.along, VectorField.mlieBracket_smul_left hf hXx, extDerivFun]
+    rw [CovariantDerivative.along, VectorField.mlieBracket_smul_left hf hXx, mvfderiv]
     simp [CovariantDerivative.along, map_add, map_smul]
-    rw [← neg_smul, map_smul, neg_smul]
   calc
     cov.curvatureAux (f • X) Y σ x
         = cov.along (f • X) (cov.along Y σ) x -
@@ -925,14 +1001,14 @@ lemma curvatureAux_smul_fun_left_apply
               simp [CovariantDerivative.curvatureAux]
     _ = f x • cov.along X (cov.along Y σ) x -
           (f x • cov.along Y (cov.along X σ) x +
-            extDerivFun (I := I) f x (Y x) • cov.along X σ x) -
-          (-(extDerivFun (I := I) f x (Y x)) • cov.along X σ x +
+            mvfderiv (I := I) f x (Y x) • cov.along X σ x) -
+          (-(mvfderiv (I := I) f x (Y x)) • cov.along X σ x +
             f x • cov.along (VectorField.mlieBracket I X Y) σ x) := by
               rw [h1, h2, h3]
     _ = f x • cov.along X (cov.along Y σ) x -
           f x • cov.along Y (cov.along X σ) x -
           f x • cov.along (VectorField.mlieBracket I X Y) σ x := by
-            simpa [sub_eq_add_neg, smul_smul, add_assoc, add_left_comm, add_comm]
+            simp [sub_eq_add_neg, smul_smul, neg_smul] <;> abel
     _ = f x • (cov.along X (cov.along Y σ) x - cov.along Y (cov.along X σ) x -
           cov.along (VectorField.mlieBracket I X Y) σ x) := by
             rw [smul_sub, smul_sub]
@@ -993,7 +1069,11 @@ private lemma curvatureAux_smul_middle_apply
   have hYσ : MDiffAt (T% (cov.along Y σ)) x := cov.mdifferentiableAt_along_of_contMDiff hY hσ
   have hYx : MDiffAt (T% Y) x := (hY x).mdifferentiableAt one_ne_zero
   have hYsmul : cov.along (c • Y) σ = c • cov.along Y σ := by
-    simpa using (cov.along_smul_left (f := fun _ ↦ c) Y σ)
+    have hfun : (fun _ : M ↦ c) • Y = c • Y := by
+      funext y
+      rfl
+    rw [← hfun]
+    exact cov.along_smul_left (f := fun _ ↦ c) Y σ
   have h1 :
       cov.along X (cov.along (c • Y) σ) x = c • cov.along X (cov.along Y σ) x := by
     rw [hYsmul]
@@ -1035,7 +1115,7 @@ lemma curvatureAux_smul_fun_middle_apply
   have h1 :
       cov.along X (cov.along (f • Y) σ) x =
         f x • cov.along X (cov.along Y σ) x +
-          extDerivFun (I := I) f x (X x) • cov.along Y σ x := by
+          mvfderiv (I := I) f x (X x) • cov.along Y σ x := by
     rw [hYsmul]
     exact cov.along_smul_right_apply (x := x) (f := f) (X := X) (σ := cov.along Y σ) hf hYσ
   have h2 :
@@ -1043,9 +1123,9 @@ lemma curvatureAux_smul_fun_middle_apply
     simpa using congrArg (fun s => s x) (cov.along_smul_left f Y (cov.along X σ))
   have h3 :
       cov.along (VectorField.mlieBracket I X (f • Y)) σ x =
-        extDerivFun (I := I) f x (X x) • cov.along Y σ x +
+        mvfderiv (I := I) f x (X x) • cov.along Y σ x +
           f x • cov.along (VectorField.mlieBracket I X Y) σ x := by
-    simp [CovariantDerivative.along, VectorField.mlieBracket_smul_right hf hYx, extDerivFun,
+    simp [CovariantDerivative.along, VectorField.mlieBracket_smul_right hf hYx, mvfderiv,
       map_add, map_smul]
   calc
     cov.curvatureAux X (f • Y) σ x
@@ -1054,9 +1134,9 @@ lemma curvatureAux_smul_fun_middle_apply
             cov.along (VectorField.mlieBracket I X (f • Y)) σ x := by
               simp [CovariantDerivative.curvatureAux]
     _ = (f x • cov.along X (cov.along Y σ) x +
-            extDerivFun (I := I) f x (X x) • cov.along Y σ x) -
+            mvfderiv (I := I) f x (X x) • cov.along Y σ x) -
           f x • cov.along Y (cov.along X σ) x -
-          (extDerivFun (I := I) f x (X x) • cov.along Y σ x +
+          (mvfderiv (I := I) f x (X x) • cov.along Y σ x +
             f x • cov.along (VectorField.mlieBracket I X Y) σ x) := by
               rw [h1, h2, h3]
     _ = f x • cov.along X (cov.along Y σ) x -
@@ -1168,15 +1248,15 @@ lemma curvatureAux_smul_fun_right_apply_of_commutator
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (fun y ↦ TotalSpace.mk' E y (X y)))
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (fun y ↦ TotalSpace.mk' E y (Y y)))
     (hσ : ContMDiff I (I.prod 𝓘(ℝ, F)) 2 (fun y ↦ TotalSpace.mk' F y (σ y)))
-    (hgX : MDiffAt (fun y ↦ extDerivFun (I := I) f y (X y)) x)
-    (hgY : MDiffAt (fun y ↦ extDerivFun (I := I) f y (Y y)) x)
+    (hgX : MDiffAt (fun y ↦ mvfderiv (I := I) f y (X y)) x)
+    (hgY : MDiffAt (fun y ↦ mvfderiv (I := I) f y (Y y)) x)
     (hcomm :
-      extDerivFun (I := I) (fun y ↦ extDerivFun (I := I) f y (Y y)) x (X x) -
-        extDerivFun (I := I) (fun y ↦ extDerivFun (I := I) f y (X y)) x (Y x) -
-        extDerivFun (I := I) f x (VectorField.mlieBracket I X Y x) = 0) :
+      mvfderiv (I := I) (fun y ↦ mvfderiv (I := I) f y (Y y)) x (X x) -
+        mvfderiv (I := I) (fun y ↦ mvfderiv (I := I) f y (X y)) x (Y x) -
+        mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x) = 0) :
     cov.curvatureAux X Y (f • σ) x = f x • cov.curvatureAux X Y σ x := by
-  let gX : M → ℝ := fun y ↦ extDerivFun (I := I) f y (X y)
-  let gY : M → ℝ := fun y ↦ extDerivFun (I := I) f y (Y y)
+  let gX : M → ℝ := fun y ↦ mvfderiv (I := I) f y (X y)
+  let gY : M → ℝ := fun y ↦ mvfderiv (I := I) f y (Y y)
   have hσx : MDiffAt (T% σ) x := (hσ x).mdifferentiableAt (by simp : (2 : WithTop ℕ∞) ≠ 0)
   have hYσ : MDiffAt (T% (cov.along Y σ)) x := cov.mdifferentiableAt_along_of_contMDiff hY hσ
   have hXσ : MDiffAt (T% (cov.along X σ)) x := cov.mdifferentiableAt_along_of_contMDiff hX hσ
@@ -1193,9 +1273,9 @@ lemma curvatureAux_smul_fun_right_apply_of_commutator
   have h1 :
       cov.along X (cov.along Y (f • σ)) x =
         f x • cov.along X (cov.along Y σ) x +
-          extDerivFun (I := I) f x (X x) • cov.along Y σ x +
+          mvfderiv (I := I) f x (X x) • cov.along Y σ x +
           gY x • cov.along X σ x +
-          extDerivFun (I := I) gY x (X x) • σ x := by
+          mvfderiv (I := I) gY x (X x) • σ x := by
     rw [hYsmul]
     rw [cov.along_add_right_apply (x := x) (X := X)]
     · rw [cov.along_smul_right_apply (x := x) (f := f) (X := X) (σ := cov.along Y σ)
@@ -1207,9 +1287,9 @@ lemma curvatureAux_smul_fun_right_apply_of_commutator
   have h2 :
       cov.along Y (cov.along X (f • σ)) x =
         f x • cov.along Y (cov.along X σ) x +
-          extDerivFun (I := I) f x (Y x) • cov.along X σ x +
+          mvfderiv (I := I) f x (Y x) • cov.along X σ x +
           gX x • cov.along Y σ x +
-          extDerivFun (I := I) gX x (Y x) • σ x := by
+          mvfderiv (I := I) gX x (Y x) • σ x := by
     rw [hXsmul]
     rw [cov.along_add_right_apply (x := x) (X := Y)]
     · rw [cov.along_smul_right_apply (x := x) (f := f) (X := Y) (σ := cov.along X σ)
@@ -1221,18 +1301,18 @@ lemma curvatureAux_smul_fun_right_apply_of_commutator
   have h3 :
       cov.along (VectorField.mlieBracket I X Y) (f • σ) x =
         f x • cov.along (VectorField.mlieBracket I X Y) σ x +
-          extDerivFun (I := I) f x (VectorField.mlieBracket I X Y x) • σ x := by
+          mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x) • σ x := by
     exact cov.along_smul_right_apply (x := x) (f := f) (X := VectorField.mlieBracket I X Y)
       (σ := σ) (hf x) hσx
   have hcomm' :
-      extDerivFun (I := I) gY x (X x) -
-        extDerivFun (I := I) gX x (Y x) -
-        extDerivFun (I := I) f x (VectorField.mlieBracket I X Y x) = 0 := by
+      mvfderiv (I := I) gY x (X x) -
+        mvfderiv (I := I) gX x (Y x) -
+        mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x) = 0 := by
     simpa [gX, gY] using hcomm
   have hcommσ :
-      extDerivFun (I := I) gY x (X x) • σ x -
-        extDerivFun (I := I) gX x (Y x) • σ x -
-        extDerivFun (I := I) f x (VectorField.mlieBracket I X Y x) • σ x = 0 := by
+      mvfderiv (I := I) gY x (X x) • σ x -
+        mvfderiv (I := I) gX x (Y x) • σ x -
+        mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x) • σ x = 0 := by
     have htmp := congrArg (fun r : ℝ ↦ r • σ x) hcomm'
     simpa [sub_smul] using htmp
   calc
@@ -1242,24 +1322,24 @@ lemma curvatureAux_smul_fun_right_apply_of_commutator
             cov.along (VectorField.mlieBracket I X Y) (f • σ) x := by
               simp [CovariantDerivative.curvatureAux]
     _ = (f x • cov.along X (cov.along Y σ) x +
-            extDerivFun (I := I) f x (X x) • cov.along Y σ x +
+            mvfderiv (I := I) f x (X x) • cov.along Y σ x +
             gY x • cov.along X σ x +
-            extDerivFun (I := I) gY x (X x) • σ x) -
+            mvfderiv (I := I) gY x (X x) • σ x) -
           (f x • cov.along Y (cov.along X σ) x +
-            extDerivFun (I := I) f x (Y x) • cov.along X σ x +
+            mvfderiv (I := I) f x (Y x) • cov.along X σ x +
             gX x • cov.along Y σ x +
-            extDerivFun (I := I) gX x (Y x) • σ x) -
+            mvfderiv (I := I) gX x (Y x) • σ x) -
           (f x • cov.along (VectorField.mlieBracket I X Y) σ x +
-            extDerivFun (I := I) f x (VectorField.mlieBracket I X Y x) • σ x) := by
+            mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x) • σ x) := by
               rw [h1, h2, h3]
     _ = f x • cov.along X (cov.along Y σ) x -
           f x • cov.along Y (cov.along X σ) x -
           f x • cov.along (VectorField.mlieBracket I X Y) σ x +
-          (extDerivFun (I := I) gY x (X x) • σ x -
-            extDerivFun (I := I) gX x (Y x) • σ x -
-            extDerivFun (I := I) f x (VectorField.mlieBracket I X Y x) • σ x) := by
+          (mvfderiv (I := I) gY x (X x) • σ x -
+            mvfderiv (I := I) gX x (Y x) • σ x -
+            mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x) • σ x) := by
               dsimp [gX, gY]
-              abel_nf
+              simp [sub_eq_add_neg, smul_smul, neg_smul] <;> abel
     _ = f x • cov.along X (cov.along Y σ) x -
           f x • cov.along Y (cov.along X σ) x -
           f x • cov.along (VectorField.mlieBracket I X Y) σ x := by
@@ -1277,13 +1357,13 @@ lemma curvatureAux_smul_fun_right_apply_of_commutator_contMDiff
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (fun y ↦ TotalSpace.mk' E y (Y y)))
     (hσ : ContMDiff I (I.prod 𝓘(ℝ, F)) 2 (fun y ↦ TotalSpace.mk' F y (σ y)))
     (hcomm :
-      extDerivFun (I := I) (fun y ↦ extDerivFun (I := I) f y (Y y)) x (X x) -
-        extDerivFun (I := I) (fun y ↦ extDerivFun (I := I) f y (X y)) x (Y x) -
-        extDerivFun (I := I) f x (VectorField.mlieBracket I X Y x) = 0) :
+      mvfderiv (I := I) (fun y ↦ mvfderiv (I := I) f y (Y y)) x (X x) -
+        mvfderiv (I := I) (fun y ↦ mvfderiv (I := I) f y (X y)) x (Y x) -
+        mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x) = 0) :
     cov.curvatureAux X Y (f • σ) x = f x • cov.curvatureAux X Y σ x := by
-  have hgX : MDiffAt (fun y ↦ extDerivFun (I := I) f y (X y)) x :=
+  have hgX : MDiffAt (fun y ↦ mvfderiv (I := I) f y (X y)) x :=
     mdiffAt_extDerivFun_apply (I := I) (f := f) (X := X) hf hX
-  have hgY : MDiffAt (fun y ↦ extDerivFun (I := I) f y (Y y)) x :=
+  have hgY : MDiffAt (fun y ↦ mvfderiv (I := I) f y (Y y)) x :=
     mdiffAt_extDerivFun_apply (I := I) (f := f) (X := Y) hf hY
   exact cov.curvatureAux_smul_fun_right_apply_of_commutator
     (fun z ↦ (hf z).mdifferentiableAt (by simp : (2 : WithTop ℕ∞) ≠ 0))
@@ -1317,16 +1397,15 @@ private theorem curvatureAux_tensorial_left
     have h2 :
         cov.along Y (cov.along (f • X) σ) x =
           f x • cov.along Y (cov.along X σ) x +
-            extDerivFun (I := I) f x (Y x) • cov.along X σ x := by
+            mvfderiv (I := I) f x (Y x) • cov.along X σ x := by
       rw [hXsmul]
       exact cov.along_smul_right_apply (x := x) (f := f) (X := Y) (σ := cov.along X σ) hf hYX
     have h3 :
         cov.along (VectorField.mlieBracket I (f • X) Y) σ x =
-          -(extDerivFun (I := I) f x (Y x)) • cov.along X σ x +
+          -(mvfderiv (I := I) f x (Y x)) • cov.along X σ x +
             f x • cov.along (VectorField.mlieBracket I X Y) σ x := by
-      rw [CovariantDerivative.along, VectorField.mlieBracket_smul_left hf hX, extDerivFun]
+      rw [CovariantDerivative.along, VectorField.mlieBracket_smul_left hf hX, mvfderiv]
       simp [CovariantDerivative.along, map_add, map_smul]
-      rw [← neg_smul, map_smul, neg_smul]
     calc
       cov.curvatureAux (f • X) Y σ x
           = cov.along (f • X) (cov.along Y σ) x -
@@ -1335,14 +1414,14 @@ private theorem curvatureAux_tensorial_left
                 simp [CovariantDerivative.curvatureAux]
       _ = f x • cov.along X (cov.along Y σ) x -
             (f x • cov.along Y (cov.along X σ) x +
-              extDerivFun (I := I) f x (Y x) • cov.along X σ x) -
-            (-(extDerivFun (I := I) f x (Y x)) • cov.along X σ x +
+              mvfderiv (I := I) f x (Y x) • cov.along X σ x) -
+            (-(mvfderiv (I := I) f x (Y x)) • cov.along X σ x +
               f x • cov.along (VectorField.mlieBracket I X Y) σ x) := by
                 rw [h1, h2, h3]
       _ = f x • cov.along X (cov.along Y σ) x -
             f x • cov.along Y (cov.along X σ) x -
             f x • cov.along (VectorField.mlieBracket I X Y) σ x := by
-              simpa [sub_eq_add_neg, smul_smul, add_assoc, add_left_comm, add_comm]
+              simp [sub_eq_add_neg, smul_smul, neg_smul] <;> abel
       _ = f x • (cov.along X (cov.along Y σ) x - cov.along Y (cov.along X σ) x -
             cov.along (VectorField.mlieBracket I X Y) σ x) := by
               rw [smul_sub, smul_sub]
@@ -1400,7 +1479,7 @@ private theorem curvatureAux_tensorial_middle
     have h1 :
         cov.along X (cov.along (f • Y) σ) x =
           f x • cov.along X (cov.along Y σ) x +
-            extDerivFun (I := I) f x (X x) • cov.along Y σ x := by
+            mvfderiv (I := I) f x (X x) • cov.along Y σ x := by
       rw [hYsmul]
       exact cov.along_smul_right_apply (x := x) (f := f) (X := X) (σ := cov.along Y σ) hf hYσ
     have h2 :
@@ -1408,9 +1487,9 @@ private theorem curvatureAux_tensorial_middle
       simpa using congrArg (fun s => s x) (cov.along_smul_left f Y (cov.along X σ))
     have h3 :
         cov.along (VectorField.mlieBracket I X (f • Y)) σ x =
-          extDerivFun (I := I) f x (X x) • cov.along Y σ x +
+          mvfderiv (I := I) f x (X x) • cov.along Y σ x +
             f x • cov.along (VectorField.mlieBracket I X Y) σ x := by
-      simp [CovariantDerivative.along, VectorField.mlieBracket_smul_right hf hY, extDerivFun,
+      simp [CovariantDerivative.along, VectorField.mlieBracket_smul_right hf hY, mvfderiv,
         map_add, map_smul]
     calc
       cov.curvatureAux X (f • Y) σ x
@@ -1419,9 +1498,9 @@ private theorem curvatureAux_tensorial_middle
               cov.along (VectorField.mlieBracket I X (f • Y)) σ x := by
                 simp [CovariantDerivative.curvatureAux]
       _ = (f x • cov.along X (cov.along Y σ) x +
-            extDerivFun (I := I) f x (X x) • cov.along Y σ x) -
+            mvfderiv (I := I) f x (X x) • cov.along Y σ x) -
             f x • cov.along Y (cov.along X σ) x -
-            (extDerivFun (I := I) f x (X x) • cov.along Y σ x +
+            (mvfderiv (I := I) f x (X x) • cov.along Y σ x +
               f x • cov.along (VectorField.mlieBracket I X Y) σ x) := by
                 rw [h1, h2, h3]
       _ = f x • cov.along X (cov.along Y σ) x -
@@ -1753,7 +1832,7 @@ lemma curvatureAux_eq_of_finite_sum_eq_right_apply
 section expands in the local frame of `trivializationAt F V x`; if the corresponding coefficient
 functions are globally `C²` and agree at `x`, then the raw curvature commutator sees the same
 right slot. -/
-lemma curvatureAux_eq_of_trivializationAt_localFrame_coeff_eq_right_apply
+lemma curvatureAux_eq_of_trivializationAt_localFrameCoeff_eq_right_apply
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (b : Module.Basis ι ℝ F)
     {X Y : Π x : M, TM x} {σ τ : Π x : M, V x} {x : M}
@@ -1763,28 +1842,28 @@ lemma curvatureAux_eq_of_trivializationAt_localFrame_coeff_eq_right_apply
     (hτ : ContMDiff I (I.prod 𝓘(ℝ, F)) 2 (fun y ↦ TotalSpace.mk' F y (τ y)))
     (hσcoeff : ∀ i : ι,
       ContMDiff I 𝓘(ℝ) 2
-        (fun y ↦ (trivializationAt F V x).localFrame_coeff I b i y (σ y)))
+        (fun y ↦ (trivializationAt F V x).localFrameCoeff I b i y (σ y)))
     (hτcoeff : ∀ i : ι,
       ContMDiff I 𝓘(ℝ) 2
-        (fun y ↦ (trivializationAt F V x).localFrame_coeff I b i y (τ y)))
+        (fun y ↦ (trivializationAt F V x).localFrameCoeff I b i y (τ y)))
     (hcoeff_eq : ∀ i : ι,
-      (trivializationAt F V x).localFrame_coeff I b i x (σ x) =
-        (trivializationAt F V x).localFrame_coeff I b i x (τ x)) :
+      (trivializationAt F V x).localFrameCoeff I b i x (σ x) =
+        (trivializationAt F V x).localFrameCoeff I b i x (τ x)) :
     cov.curvatureAux X Y σ x = cov.curvatureAux X Y τ x := by
   let e := trivializationAt F V x
-  let f : ι → M → ℝ := fun i y ↦ e.localFrame_coeff I b i y (σ y)
-  let g : ι → M → ℝ := fun i y ↦ e.localFrame_coeff I b i y (τ y)
+  let f : ι → M → ℝ := fun i y ↦ e.localFrameCoeff I b i y (σ y)
+  let g : ι → M → ℝ := fun i y ↦ e.localFrameCoeff I b i y (τ y)
   let σs : ι → Π y : M, V y :=
     fun i ↦ smoothExtend (I := I) (F := F) (V := V) x (e.localFrame b i x)
   have hσsum :
       ∀ᶠ y in nhds x, σ y = ∑ i : ι, f i y • σs i y := by
     simpa [f, σs, e] using
-      eventually_eq_sum_smoothExtend_trivializationAt_localFrame_coeff_smul
+      eventually_eq_sum_smoothExtend_trivializationAt_localFrameCoeff_smul
         (I := I) (F := F) (V := V) b σ x
   have hτsum :
       ∀ᶠ y in nhds x, τ y = ∑ i : ι, g i y • σs i y := by
     simpa [g, σs, e] using
-      eventually_eq_sum_smoothExtend_trivializationAt_localFrame_coeff_smul
+      eventually_eq_sum_smoothExtend_trivializationAt_localFrameCoeff_smul
         (I := I) (F := F) (V := V) b τ x
   have hf : ∀ i : ι, ContMDiff I 𝓘(ℝ) 2 (f i) := by
     intro i
@@ -2021,7 +2100,7 @@ The right-slot representative need not be eventually equal to the canonical smoo
 it is enough for its `trivializationAt` frame coefficients to be `C²` and to agree at the
 base point with the coefficients of the target fiber vector.  The canonical extension's
 coefficient regularity is automatic from the bump-supported extension construction. -/
-lemma curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right
+lemma curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrameCoeff_right
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (b : Module.Basis ι ℝ F)
     {X Y : Π x : M, TM x} {σ : Π x : M, V x} {x : M}
@@ -2032,29 +2111,29 @@ lemma curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_r
     (hXu : X x = u) (hYv : Y x = v)
     (hσcoeff : ∀ i : ι,
       ContMDiff I 𝓘(ℝ) 2
-        (fun y ↦ (trivializationAt F V x).localFrame_coeff I b i y (σ y)))
+        (fun y ↦ (trivializationAt F V x).localFrameCoeff I b i y (σ y)))
     (hcoeff_eq : ∀ i : ι,
-      (trivializationAt F V x).localFrame_coeff I b i x (σ x) =
-        (trivializationAt F V x).localFrame_coeff I b i x w) :
+      (trivializationAt F V x).localFrameCoeff I b i x (σ x) =
+        (trivializationAt F V x).localFrameCoeff I b i x w) :
     cov.curvatureAux X Y σ x = curvatureTensor (cov := cov) x u v w := by
   let τ : Π y : M, V y := smoothExtend (I := I) (F := F) (V := V) x w
   have hτ : ContMDiff I (I.prod 𝓘(ℝ, F)) 2 (fun y ↦ TotalSpace.mk' F y (τ y)) := by
     simpa [τ] using smoothExtend_contMDiff_two (I := I) (F := F) (V := V) x w
   have hτcoeff : ∀ i : ι,
       ContMDiff I 𝓘(ℝ) 2
-        (fun y ↦ (trivializationAt F V x).localFrame_coeff I b i y (τ y)) := by
+        (fun y ↦ (trivializationAt F V x).localFrameCoeff I b i y (τ y)) := by
     intro i
     simpa [τ] using
-      smoothExtend_localFrame_coeff_contMDiff_two
+      smoothExtend_localFrameCoeff_contMDiff_two
         (I := I) (F := F) (V := V) b x w i
   have hcoeff_eq' : ∀ i : ι,
-      (trivializationAt F V x).localFrame_coeff I b i x (σ x) =
-        (trivializationAt F V x).localFrame_coeff I b i x (τ x) := by
+      (trivializationAt F V x).localFrameCoeff I b i x (σ x) =
+        (trivializationAt F V x).localFrameCoeff I b i x (τ x) := by
     intro i
     simpa [τ, smoothExtend_apply] using hcoeff_eq i
   have hright :
       cov.curvatureAux X Y σ x = cov.curvatureAux X Y τ x :=
-    cov.curvatureAux_eq_of_trivializationAt_localFrame_coeff_eq_right_apply
+    cov.curvatureAux_eq_of_trivializationAt_localFrameCoeff_eq_right_apply
       b hX hY hσ hτ hσcoeff hτcoeff hcoeff_eq'
   have hτlocal : ∀ᶠ y in nhds x, τ y = smoothExtend (I := I) (F := F) (V := V) x w y := by
     filter_upwards [] with y

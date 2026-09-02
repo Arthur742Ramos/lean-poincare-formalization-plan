@@ -2665,7 +2665,7 @@ theorem hasDerivAt_of_eventuallyEq_bilinearForm_linear_apply_apply_of_comp_deriv
 manifold function is the within Fréchet derivative of its chart expression. -/
 theorem extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_center
     {φ : M → ℝ} {p : M} (hφ : MDiffAt φ p) (X : TangentSpace I p) :
-    extDerivFun (I := I) φ p X =
+    mvfderiv (I := I) φ p X =
       fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) p φ) (Set.range I)
         ((extChartAt I p) p) X := by
   let z : E := (extChartAt I p) p
@@ -2706,7 +2706,7 @@ canonical `extend` sections through two tangent vectors. -/
 theorem chosenLeviCivitaFamily_extDerivFun_inner_extend_eq
     (g : MetricFamily (I := I) (M := M)) (t : ℝ) (p : M)
     (X u v : TangentSpace I p) :
-    extDerivFun (I := I)
+    mvfderiv (I := I)
         (fun y : M ↦ (g t).inner y
           (FiberBundle.extend E u y) (FiberBundle.extend E v y)) p X =
       (g t).inner p
@@ -4842,7 +4842,7 @@ theorem metricBilinearCoordinateField_fixedTime_fderivWithin_sourceTangentCoordi
       (Set.range I) ((extChartAt I p) p)) X
         (sourceTangentCoordinate (I := I) p u)
         (sourceTangentCoordinate (I := I) p v) =
-      extDerivFun (I := I)
+      mvfderiv (I := I)
         (fun y : M ↦ (g t).inner y
           (FiberBundle.extend E u y) (FiberBundle.extend E v y)) p X := by
   let z : E := (extChartAt I p) p
@@ -4928,7 +4928,7 @@ theorem metricBilinearCoordinateField_fixedTime_fderivWithin_tangentVectorOfCoor
     (fderivWithin ℝ
       (fun yE : E ↦ metricBilinearCoordinateField (I := I) (M := M) g p (t, yE))
       (Set.range I) ((extChartAt I p) p)) X uE vE =
-      extDerivFun (I := I)
+      mvfderiv (I := I)
         (fun y : M ↦ (g t).inner y
           (FiberBundle.extend E (tangentVectorOfCoordinate (I := I) p uE) y)
           (FiberBundle.extend E (tangentVectorOfCoordinate (I := I) p vE) y)) p X := by

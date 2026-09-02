@@ -52,35 +52,35 @@ lemma continuousOn_localFrame_baseSet [ContMDiffVectorBundle 1 F V I] (i : ι) :
 
 /-- If a section is continuous on an open subset of a trivialization domain, then each local-frame
 coefficient function is continuous there. -/
-lemma continuousOn_localFrame_coeff
+lemma continuousOn_localFrameCoeff
     [FiniteDimensional 𝕜 F] [CompleteSpace 𝕜] [ContMDiffVectorBundle 1 F V I]
     (ht : IsOpen t) (ht' : t ⊆ e.baseSet) (hs : ContinuousOn (T% s) t) (i : ι) :
-    ContinuousOn ((LinearMap.piApply (e.localFrame_coeff I b i)) s) t := by
+    ContinuousOn ((LinearMap.piApply (e.localFrameCoeff I b i)) s) t := by
   have hs' : CMDiff[t] (0 : WithTop ℕ∞) (T% s) := by
     rwa [contMDiffOn_zero_iff]
   simpa [contMDiffOn_zero_iff] using
-    (contMDiffOn_localFrame_coeff (I := I) (e := e) (b := b) (t := t)
+    (contMDiffOn_localFrameCoeff (I := I) (e := e) (b := b) (t := t)
       (k := (0 : WithTop ℕ∞)) ht ht' hs' i)
 
 /-- On an open subset of a trivialization domain, a section is continuous iff each local-frame
 coefficient function is continuous. -/
-lemma continuousOn_iff_localFrame_coeff
+lemma continuousOn_iff_localFrameCoeff
     [FiniteDimensional 𝕜 F] [CompleteSpace 𝕜] [ContMDiffVectorBundle 1 F V I]
     (ht : IsOpen t) (ht' : t ⊆ e.baseSet) :
     ContinuousOn (T% s) t ↔
-      ∀ i, ContinuousOn ((LinearMap.piApply (e.localFrame_coeff I b i)) s) t := by
+      ∀ i, ContinuousOn ((LinearMap.piApply (e.localFrameCoeff I b i)) s) t := by
   simpa [contMDiffOn_zero_iff] using
-    (contMDiffOn_iff_localFrame_coeff (I := I) (e := e) (b := b) (t := t)
+    (contMDiffOn_iff_localFrameCoeff (I := I) (e := e) (b := b) (t := t)
       (k := (0 : WithTop ℕ∞)) ht ht')
 
 /-- On a trivialization domain, a section is continuous iff each local-frame coefficient function is
 continuous. -/
-lemma continuousOn_baseSet_iff_localFrame_coeff
+lemma continuousOn_baseSet_iff_localFrameCoeff
     [FiniteDimensional 𝕜 F] [CompleteSpace 𝕜] [ContMDiffVectorBundle 1 F V I] :
     ContinuousOn (T% s) e.baseSet ↔
-      ∀ i, ContinuousOn ((LinearMap.piApply (e.localFrame_coeff I b i)) s) e.baseSet := by
+      ∀ i, ContinuousOn ((LinearMap.piApply (e.localFrameCoeff I b i)) s) e.baseSet := by
   simpa [contMDiffOn_zero_iff] using
-    (contMDiffOn_baseSet_iff_localFrame_coeff (I := I) (e := e) (b := b)
+    (contMDiffOn_baseSet_iff_localFrameCoeff (I := I) (e := e) (b := b)
       (s := s) (k := (0 : WithTop ℕ∞)))
 
 /-- Package a continuous section, read in a compatible trivialization, as an `F`-valued continuous
@@ -95,7 +95,7 @@ def coordContinuousMap (K : TopologicalSpace.Compacts M) (hK : (K : Set M) ⊆ e
       simpa [e.mem_source] using hy
     have hcoord : ContinuousOn (fun y ↦ (e ((T% s) y)).2) e.baseSet :=
       continuous_snd.comp_continuousOn htriv
-    exact continuousOn_iff_continuous_restrict.mp (hcoord.mono hK)
+    exact continuousOn_iff_continuous_domRestrict.mp (hcoord.mono hK)
 
 @[simp]
 lemma coordContinuousMap_apply (K : TopologicalSpace.Compacts M) (hK : (K : Set M) ⊆ e.baseSet)
@@ -113,7 +113,7 @@ def coordChangeContinuousMap
     have hchg : ContinuousOn (fun b ↦ Trivialization.coordChangeL 𝕜 e e' b : M → F →L[𝕜] F) (e.baseSet ∩ e'.baseSet) :=
       continuousOn_coordChange (R := 𝕜) (e := e) (e' := e')
     have hchg' : Continuous fun x : K ↦ (Trivialization.coordChangeL 𝕜 e e' x.1 : F →L[𝕜] F) := by
-      exact continuousOn_iff_continuous_restrict.mp (hchg.mono hK)
+      exact continuousOn_iff_continuous_domRestrict.mp (hchg.mono hK)
     exact hchg'.clm_apply u.continuous
 
 @[simp]
@@ -134,7 +134,7 @@ def coordChangeLContinuousMap
     have hchg : ContinuousOn (fun b ↦ Trivialization.coordChangeL 𝕜 e e' b : M → F →L[𝕜] F)
         (e.baseSet ∩ e'.baseSet) :=
       continuousOn_coordChange (R := 𝕜) (e := e) (e' := e')
-    exact continuousOn_iff_continuous_restrict.mp (hchg.mono hK)
+    exact continuousOn_iff_continuous_domRestrict.mp (hchg.mono hK)
 
 @[simp]
 lemma coordChangeLContinuousMap_apply
@@ -324,11 +324,11 @@ def localFrameCoeffContinuousMap
     [FiniteDimensional 𝕜 F] [CompleteSpace 𝕜] [ContMDiffVectorBundle 1 F V I]
     (K : TopologicalSpace.Compacts M) (hK : (K : Set M) ⊆ e.baseSet)
     (hs : ContinuousOn (T% s) e.baseSet) (i : ι) : C(K, 𝕜) where
-  toFun x := e.localFrame_coeff I b i x.1 (s x.1)
+  toFun x := e.localFrameCoeff I b i x.1 (s x.1)
   continuous_toFun := by
-    have hcoeff : ContinuousOn ((LinearMap.piApply (e.localFrame_coeff I b i)) s) e.baseSet :=
-      (continuousOn_baseSet_iff_localFrame_coeff (I := I) (e := e) (b := b) (s := s)).mp hs i
-    exact continuousOn_iff_continuous_restrict.mp (hcoeff.mono hK)
+    have hcoeff : ContinuousOn ((LinearMap.piApply (e.localFrameCoeff I b i)) s) e.baseSet :=
+      (continuousOn_baseSet_iff_localFrameCoeff (I := I) (e := e) (b := b) (s := s)).mp hs i
+    exact continuousOn_iff_continuous_domRestrict.mp (hcoeff.mono hK)
 
 @[simp]
 lemma localFrameCoeffContinuousMap_apply
@@ -336,7 +336,7 @@ lemma localFrameCoeffContinuousMap_apply
     (K : TopologicalSpace.Compacts M) (hK : (K : Set M) ⊆ e.baseSet)
     (hs : ContinuousOn (T% s) e.baseSet) (i : ι) (x : K) :
     localFrameCoeffContinuousMap (I := I) (e := e) b K hK hs i x =
-      e.localFrame_coeff I b i x.1 (s x.1) := rfl
+      e.localFrameCoeff I b i x.1 (s x.1) := rfl
 
 /-- The pointwise local-frame reconstruction formula can be read directly from the packaged
 coefficient maps on a compact subset of the trivialization domain. -/
@@ -346,7 +346,7 @@ lemma eq_sum_localFrameCoeffContinuousMap_smul
     (hs : ContinuousOn (T% s) e.baseSet) (x : K) :
     s x.1 = ∑ i, localFrameCoeffContinuousMap (I := I) (e := e) b K hK hs i x • e.localFrame b i x.1 := by
   simpa [localFrameCoeffContinuousMap] using
-    (e.eq_sum_localFrame_coeff_smul (I := I) (b := b) (s := s) (x' := x.1) (hK x.2))
+    (e.eq_sum_localFrameCoeff_smul (I := I) (b := b) (s := s) (x' := x.1) (hK x.2))
 
 /-- On a compact subset of a trivialization domain, a continuous section is completely determined by
 its packaged local-frame coefficient maps. -/
@@ -362,7 +362,7 @@ lemma eqOn_compact_iff_localFrameCoeffContinuousMap_eq
   · intro h i
     ext x
     simpa [localFrameCoeffContinuousMap] using
-      (e.localFrame_coeff_congr (I := I) (b := b) (s := s) (s' := s') (x := x.1) (i := i)
+      (e.localFrameCoeff_congr (I := I) (b := b) (s := s) (s' := s') (x := x.1) (i := i)
         (h x.1 x.2))
   · intro h x hx
     let xK : K := ⟨x, hx⟩
@@ -461,10 +461,34 @@ lemma coordFamilyOfSection_compatible
       restrictToCompact (fun _ hx ↦ (hKo i j hx).2)
         (coordFamilyOfSection (s := s) et Kc hKc hs j) := by
   intro i j
-  simpa [coordFamilyOfSection] using
-    (coordContinuousMap_coordChangeL (𝕜 := 𝕜) (e := et i) (e' := et j)
-    (K := Ko i j) (hK := fun _ hx ↦ ⟨hKc i ((hKo i j hx).1), hKc j ((hKo i j hx).2)⟩)
-    (s := s) hs.continuousOn hs.continuousOn)
+  have hleft :
+      restrictToCompact (fun _ hx ↦ (hKo i j hx).1)
+          (coordContinuousMap (e := et i) (Kc i) (hKc i) hs.continuousOn) =
+        coordContinuousMap (e := et i) (Ko i j)
+          (fun _ hx ↦ hKc i ((hKo i j hx).1)) hs.continuousOn := by
+    exact restrictToCompact_coordContinuousMap
+      (e := et i) (s := s) (K := Ko i j) (L := Kc i)
+      (fun _ hx ↦ (hKo i j hx).1) (hKc i) hs.continuousOn
+  have hright :
+      restrictToCompact (fun _ hx ↦ (hKo i j hx).2)
+          (coordContinuousMap (e := et j) (Kc j) (hKc j) hs.continuousOn) =
+        coordContinuousMap (e := et j) (Ko i j)
+          (fun _ hx ↦ hKc j ((hKo i j hx).2)) hs.continuousOn := by
+    exact restrictToCompact_coordContinuousMap
+      (e := et j) (s := s) (K := Ko i j) (L := Kc j)
+      (fun _ hx ↦ (hKo i j hx).2) (hKc j) hs.continuousOn
+  change
+    coordChangeContinuousMap (𝕜 := 𝕜) (e := et i) (e' := et j) (Ko i j)
+        (fun _ hx ↦ ⟨hKc i ((hKo i j hx).1), hKc j ((hKo i j hx).2)⟩)
+        (restrictToCompact (fun _ hx ↦ (hKo i j hx).1)
+          (coordContinuousMap (e := et i) (Kc i) (hKc i) hs.continuousOn)) =
+      restrictToCompact (fun _ hx ↦ (hKo i j hx).2)
+        (coordContinuousMap (e := et j) (Kc j) (hKc j) hs.continuousOn)
+  rw [hleft, hright]
+  exact coordContinuousMap_coordChangeL
+    (𝕜 := 𝕜) (e := et i) (e' := et j) (K := Ko i j)
+      (fun _ hx ↦ ⟨hKc i ((hKo i j hx).1), hKc j ((hKo i j hx).2)⟩)
+      hs.continuousOn hs.continuousOn
 
 /-- The compatible compact coordinate family associated to a continuous section. -/
 def compatibleCoordFamilyOfSection
@@ -544,10 +568,28 @@ def coordFamilyCompatibilityLinearMap
   toFun := coordFamilyCompatibilityError (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo
   map_add' u v := by
     funext i j
-    simp [coordFamilyCompatibilityError, sub_eq_add_neg, add_assoc, add_left_comm, add_comm]
+    apply ContinuousMap.ext
+    intro x
+    change
+      (et i).coordChangeL 𝕜 (et j) x
+          ((u i) ⟨x, (hKo i j x.2).1⟩ + (v i) ⟨x, (hKo i j x.2).1⟩) -
+        ((u j) ⟨x, (hKo i j x.2).2⟩ + (v j) ⟨x, (hKo i j x.2).2⟩) =
+      ((et i).coordChangeL 𝕜 (et j) x ((u i) ⟨x, (hKo i j x.2).1⟩) -
+          (u j) ⟨x, (hKo i j x.2).2⟩) +
+        ((et i).coordChangeL 𝕜 (et j) x ((v i) ⟨x, (hKo i j x.2).1⟩) -
+          (v j) ⟨x, (hKo i j x.2).2⟩)
+    rw [map_add]
+    abel
   map_smul' c u := by
     funext i j
-    simp [coordFamilyCompatibilityError, sub_eq_add_neg, smul_add]
+    apply ContinuousMap.ext
+    intro x
+    change
+      (et i).coordChangeL 𝕜 (et j) x
+          (c • (u i) ⟨x, (hKo i j x.2).1⟩) - c • (u j) ⟨x, (hKo i j x.2).2⟩ =
+        c • ((et i).coordChangeL 𝕜 (et j) x ((u i) ⟨x, (hKo i j x.2).1⟩) -
+          (u j) ⟨x, (hKo i j x.2).2⟩)
+    rw [map_smul, smul_sub]
 
 /-- The compact coordinate families satisfying the overlap equations form the kernel of the overlap
 defect map. -/
@@ -628,8 +670,16 @@ lemma coordFamilyCompatibilityComponentContinuousLinearMap_apply
       i j u =
       coordFamilyCompatibilityError (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo u i j := by
   ext x
-  simp [coordFamilyCompatibilityComponentContinuousLinearMap, coordFamilyCompatibilityError,
-    restrictToCompact_apply]
+  change
+    coordChangeContinuousMap (𝕜 := 𝕜) (e := et i) (e' := et j) (Ko i j)
+        (fun _ hx ↦ ⟨hKc i ((hKo i j hx).1), hKc j ((hKo i j hx).2)⟩)
+        (restrictToCompact (fun _ hx ↦ (hKo i j hx).1) (u i)) x -
+      restrictToCompact (fun _ hx ↦ (hKo i j hx).2) (u j) x =
+    coordChangeContinuousMap (𝕜 := 𝕜) (e := et i) (e' := et j) (Ko i j)
+        (fun _ hx ↦ ⟨hKc i ((hKo i j hx).1), hKc j ((hKo i j hx).2)⟩)
+        (restrictToCompact (fun _ hx ↦ (hKo i j hx).1) (u i)) x -
+      restrictToCompact (fun _ hx ↦ (hKo i j hx).2) (u j) x
+  rfl
 
 /-- The full overlap defect map, packaged as a continuous linear map into the family of compact
 overlap defects. -/
@@ -776,7 +826,17 @@ lemma totalSpaceMapOnCompactOfCoordFamily_eq_on_overlap
   have hcoord :
       (et i).coordChangeL 𝕜 (et j) x (u i ⟨x, hxi⟩) = u j ⟨x, hxj⟩ := by
     have h := congrArg (fun f ↦ f xKo) (hu i j)
-    simpa [coordChangeContinuousMap_apply, restrictToCompact_apply, xKo] using h
+    change
+      (et i).coordChangeL 𝕜 (et j) x
+          (u i ⟨x, (hKo i j hxKo).1⟩) =
+        u j ⟨x, (hKo i j hxKo).2⟩ at h
+    have hxi' : (⟨x, (hKo i j hxKo).1⟩ : Kc i) = ⟨x, hxi⟩ := by
+      apply Subtype.ext
+      rfl
+    have hxj' : (⟨x, (hKo i j hxKo).2⟩ : Kc j) = ⟨x, hxj⟩ := by
+      apply Subtype.ext
+      rfl
+    simpa [hxi', hxj'] using h
   have hb : x ∈ (et i).baseSet ∩ (et j).baseSet := ⟨hKc i hxi, hKc j hxj⟩
   change (⟨x, (et i).symm x (u i ⟨x, hxi⟩)⟩ : TotalSpace F V) =
     ⟨x, (et j).symm x (u j ⟨x, hxj⟩)⟩
@@ -878,15 +938,16 @@ lemma continuous_totalSpaceMapOfCompatibleCoordFamily
   · intro i
     exact (Kc i).isCompact.isClosed
   · intro i
-    rw [continuousOn_iff_continuous_restrict]
+    rw [continuousOn_iff_continuous_domRestrict]
     have hrestrict :
-        (S i).restrict g =
+        (S i).domRestrict g =
           fun x : S i => totalSpaceMapOnCompactOfCoordFamily (F := F) et Kc hKc u i x := by
       funext x
       exact totalSpaceMapOfCompatibleCoordFamily_of_mem
         (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo u hu hKoEq hcover (i := i) (x := x.1) x.2
     rw [hrestrict]
-    simpa using (totalSpaceMapOnCompactOfCoordFamily (F := F) et Kc hKc u i).continuous
+    simpa [S, totalSpaceMapOnCompactOfCoordFamily] using
+      (totalSpaceMapOnCompactOfCoordFamily (F := F) et Kc hKc u i).continuous
 
 /-- Reconstruct a section from a compatible compact coordinate family on a covering compact
 trivializing family. -/
@@ -997,7 +1058,8 @@ lemma coordFamilyCompatible_zero
       restrictToCompact (fun _ hx ↦ (hKo i j hx).2) (0 : C(Kc j, F)) := by
   intro i j
   ext x
-  simp
+  change (et i).coordChangeL 𝕜 (et j) x 0 = 0
+  exact map_zero _
 
 /-- Compatibility on overlaps is preserved by addition of coordinate families. -/
 lemma coordFamilyCompatible_add
@@ -1028,7 +1090,17 @@ lemma coordFamilyCompatible_add
   ext x
   have hux := congrArg (fun f => f x) (hu i j)
   have hvx := congrArg (fun f => f x) (hv i j)
-  simp [hux, hvx]
+  change
+    (et i).coordChangeL 𝕜 (et j) x
+        ((u i) ⟨x, (hKo i j x.2).1⟩ + (v i) ⟨x, (hKo i j x.2).1⟩) =
+      (u j) ⟨x, (hKo i j x.2).2⟩ + (v j) ⟨x, (hKo i j x.2).2⟩
+  change
+    (et i).coordChangeL 𝕜 (et j) x ((u i) ⟨x, (hKo i j x.2).1⟩) =
+      (u j) ⟨x, (hKo i j x.2).2⟩ at hux
+  change
+    (et i).coordChangeL 𝕜 (et j) x ((v i) ⟨x, (hKo i j x.2).1⟩) =
+      (v j) ⟨x, (hKo i j x.2).2⟩ at hvx
+  rw [map_add, hux, hvx]
 
 /-- Compatibility on overlaps is preserved by scalar multiplication. -/
 lemma coordFamilyCompatible_smul
@@ -1053,7 +1125,13 @@ lemma coordFamilyCompatible_smul
   intro i j
   ext x
   have hux := congrArg (fun f => f x) (hu i j)
-  simp [hux]
+  change
+    (et i).coordChangeL 𝕜 (et j) x (c • (u i) ⟨x, (hKo i j x.2).1⟩) =
+      c • (u j) ⟨x, (hKo i j x.2).2⟩
+  change
+    (et i).coordChangeL 𝕜 (et j) x ((u i) ⟨x, (hKo i j x.2).1⟩) =
+      (u j) ⟨x, (hKo i j x.2).2⟩ at hux
+  rw [map_smul, hux]
 
 /-- If two continuous sections have the same compact coordinate family, then they agree on the
 union of the compact pieces. -/
@@ -1944,18 +2022,16 @@ theorem coord_dist_le_of_trivialization_opNorm_le
   have hx : x.1 ∈ (et i).baseSet := hKc i x.2
   have hscoord :
       ((e s).1 i x) = (et i).continuousLinearMapAt 𝕜 x.1 (s x.1) := by
-    simp [e, equivCompatibleCoordFamilySubmodule, toSubtype,
-      continuousSectionEquivCompatibleCoordFamilySubmodule,
-      continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
-      compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
-      Bundle.Trivialization.linearMapAt_apply, hx]
+    change (et i ((T% s) x.1)).2 =
+      (et i).continuousLinearMapAt 𝕜 x.1 (s x.1)
+    exact (Bundle.Trivialization.continuousLinearMapAt_apply_of_mem
+      (R := 𝕜) (e := et i) hx (s x.1)).symm
   have htcoord :
       ((e t).1 i x) = (et i).continuousLinearMapAt 𝕜 x.1 (t x.1) := by
-    simp [e, equivCompatibleCoordFamilySubmodule, toSubtype,
-      continuousSectionEquivCompatibleCoordFamilySubmodule,
-      continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
-      compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
-      Bundle.Trivialization.linearMapAt_apply, hx]
+    change (et i ((T% t) x.1)).2 =
+      (et i).continuousLinearMapAt 𝕜 x.1 (t x.1)
+    exact (Bundle.Trivialization.continuousLinearMapAt_apply_of_mem
+      (R := 𝕜) (e := et i) hx (t x.1)).symm
   calc
     dist ((e s).1 i x) ((e t).1 i x)
         = dist ((et i).continuousLinearMapAt 𝕜 x.1 (s x.1))
@@ -1985,11 +2061,10 @@ theorem coord_apply
         (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover s).1 i x =
       (et i).continuousLinearMapAt 𝕜 x.1 (s x.1) := by
   have hx : x.1 ∈ (et i).baseSet := hKc i x.2
-  simp [equivCompatibleCoordFamilySubmodule, toSubtype,
-    continuousSectionEquivCompatibleCoordFamilySubmodule,
-    continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
-    compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
-    Bundle.Trivialization.linearMapAt_apply, hx]
+  change (et i ((T% s) x.1)).2 =
+    (et i).continuousLinearMapAt 𝕜 x.1 (s x.1)
+  exact (Bundle.Trivialization.continuousLinearMapAt_apply_of_mem
+    (R := 𝕜) (e := et i) hx (s x.1)).symm
 
 /-- Inversion of `coord_apply`: on a trivializing piece the pointwise value of a section is
 recovered from its compact coordinate readout by the trivialization's backwards fiber map. -/
