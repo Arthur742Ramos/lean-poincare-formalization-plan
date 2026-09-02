@@ -9,7 +9,7 @@ pp.unicode.fun = true # pretty-prints `fun a ↦ b`
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.29.1"
+rev = "8a178386ffc0f5fef0b77738bb5449d50efeea95"
 
 [[lean_lib]]
 name = "PoincareCurvature"

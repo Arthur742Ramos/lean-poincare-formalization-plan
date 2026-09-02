@@ -51,6 +51,22 @@ if actual_license_sha256 != expected_license_sha256:
         "project copyright notice"
     )
 
+expected_mathlib_revision = "8a178386ffc0f5fef0b77738bb5449d50efeea95"
+manifest = json.loads((root / "lake-manifest.json").read_text(encoding="utf-8"))
+mathlib = next(
+    (package for package in manifest.get("packages", [])
+     if package.get("name") == "mathlib"),
+    None,
+)
+if mathlib is None or any(
+    mathlib.get(field) != expected_mathlib_revision
+    for field in ("rev", "inputRev")
+):
+    raise SystemExit(
+        "error: Mathlib must be pinned to canonical master ancestor "
+        f"{expected_mathlib_revision}"
+    )
+
 artifact_suffixes = {
     ".a", ".bc", ".dll", ".dylib", ".ilean", ".ir", ".o", ".obj",
     ".olean", ".so", ".trace",

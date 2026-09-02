@@ -107,10 +107,13 @@ review:
   notes: >-
     Local preparation requires both `scripts/verify-palomar.sh` and the
     pinned `scripts/verify-comparator.sh` replay. A first hosted mechanical
-    attempt failed only on the root license fingerprint; this revision uses the
-    official full Apache-2.0 text and adds a matching local fingerprint gate.
+    attempt failed on the root license fingerprint. The corrected commit then
+    failed because its Mathlib revision was not an ancestor of canonical
+    `master`; this revision pins canonical ancestor
+    `8a178386ffc0f5fef0b77738bb5449d50efeea95`, aligns the Lean/Comparator
+    stack to Lean 4.29.0, and adds local license and dependency-ancestry gates.
     Editorial review, registration, and public indexing are not inferred from
-    local compilation or that failed mechanical attempt.
+    local compilation or either failed mechanical attempt.
 
 alignment:
   namespace: "PoincareCurvature.Palomar"

@@ -1286,9 +1286,11 @@ Run `bash scripts/verify-palomar.sh` for the full local package/metadata audit,
 then `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh` for
 the explicit macOS Comparator plus NanoDa replay. The first hosted attempt at
 the preceding public commit failed only on Palomar's standard SPDX license
-fingerprint; this revision replaces the root license with the official full
-Apache-2.0 text and adds a matching local fingerprint gate. A retry must use
-the new immutable commit.
+fingerprint. The corrected commit then failed because its Mathlib revision was
+not an ancestor of canonical `master`. The current revision pins Mathlib to
+canonical ancestor `8a178386ffc0f5fef0b77738bb5449d50efeea95`, aligns the
+Lean/Comparator stack to Lean 4.29.0, and adds matching local license and
+dependency-ancestry gates. A retry must use the new immutable commit.
 
 ## Build
 

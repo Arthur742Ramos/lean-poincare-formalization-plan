@@ -35,9 +35,13 @@ repository-relative fields are:
 These identify the exact intake surface. The first hosted attempt at commit
 `22c21dd473fc77a5d93745df976fd27ec1e9ab4a` failed mechanical verification
 because the repository license text did not have one unambiguous standard SPDX
-match. This revision replaces it with the official full Apache-2.0 text and
-adds an exact local fingerprint check; a retry must use the new immutable
-commit.
+match. The corrected attempt at commit
+`7bf6cc5a17356c3cea71cc4c273434801b8ccd04` then failed because its Mathlib
+revision was not an ancestor of canonical `master`. The current correction
+pins Mathlib to canonical ancestor
+`8a178386ffc0f5fef0b77738bb5449d50efeea95`, aligns the Lean/Comparator stack
+to Lean 4.29.0, and adds local license and dependency-ancestry gates. A retry
+must use the new immutable commit.
 
 ## Local checks
 
@@ -62,7 +66,7 @@ PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh
 
 The environment flag is required only for this macOS development fallback;
 Linux runs use the pinned Landrun sandbox. The script pins Comparator,
-Lean4Export v4.29.1, Landrun, and NanoDa by full commit.
+Lean4Export v4.29.0, Landrun, and NanoDa by full commit.
 
 ## External status
 

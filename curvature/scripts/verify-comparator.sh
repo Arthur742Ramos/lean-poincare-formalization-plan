@@ -12,10 +12,10 @@ comparator_dir="$cache_root/comparator"
 lean4export_dir="$cache_root/lean4export"
 nanoda_dir="$cache_root/nanoda"
 
-# Lean4Export v4.29.1 is the exporter compatible with this package.  The
+# Lean4Export v4.29.0 is the exporter compatible with this package.  The
 # Comparator and NanoDa revisions are immutable so the replay is repeatable.
 comparator_commit=68a064109f01c08f47c8edc9f51d6a2bbffaa188
-lean4export_commit=6f4e21dd70c3c11d7fbd07d39e3192792c657448
+lean4export_commit=5a53b634f6a3e21e55b4852337c4fcf0781ad1aa
 landrun_commit=811cfff51ceaf3d9843708aa6d22e9b84ccac8b4
 nanoda_commit=68d5ca9db226849b41a6fff59d796ff19d0a8840
 

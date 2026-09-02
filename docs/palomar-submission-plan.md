@@ -30,7 +30,7 @@ and authorization relationship have been explicitly confirmed.
 
 | ID | Candidate | Main mathematical boundary | Current status |
 | --- | --- | --- | --- |
-| 01 | Static connection and curvature core | Covariant derivatives along vector fields, the raw curvature commutator, and Levi-Civita uniqueness | Correcting first hosted mechanical failure |
+| 01 | Static connection and curvature core | Covariant derivatives along vector fields, the raw curvature commutator, and Levi-Civita uniqueness | Correcting hosted dependency-ancestry failure |
 | 02 | Tensorial curvature and contractions | Bundled curvature tensor, Ricci curvature, and scalar curvature | Source code exists; isolate after 01 |
 | 03 | Static Riemannian identities | Levi-Civita existence, sectional curvature, and first/second Bianchi identities | Source code exists; isolate after 02 |
 | 04 | Time-dependent geometric structures | One-parameter sections, connections, metrics, and slicewise curvature | Source code exists; isolate after 03 |
@@ -87,7 +87,10 @@ Current state: the full package audit and pinned Comparator/NanoDa replay pass
 locally (the macOS replay uses an explicit unsandboxed development fallback),
 and the repository-level Linux workflow is wired for the same two gates. A
 first hosted attempt at commit `22c21dd473fc77a5d93745df976fd27ec1e9ab4a`
-failed only because the root `LICENSE` did not have one unambiguous standard
-SPDX match. The correction uses the official full Apache-2.0 text and adds an
-exact local fingerprint check; the corrected commit must be pushed and
-revalidated before a retry.
+failed because the root `LICENSE` did not have one unambiguous standard SPDX
+match. The corrected commit `7bf6cc5a17356c3cea71cc4c273434801b8ccd04` then
+failed because its Mathlib revision was not an ancestor of canonical
+`master`. The current correction pins Mathlib to canonical ancestor
+`8a178386ffc0f5fef0b77738bb5449d50efeea95`, aligns the Lean/Comparator stack
+to Lean 4.29.0, and adds local license and dependency-ancestry gates. This
+correction must be committed, pushed, and revalidated before a retry.
