@@ -2,16 +2,20 @@
 version: "v0.4"
 
 project:
-  name: "Static connection and curvature infrastructure in Lean"
+  name: "Raw Bianchi identities for torsion-free affine connections in Lean"
   description: >-
-    Formalizes a reusable static manifold layer for covariant derivatives and
-    curvature. The selected results prove that the raw curvature commutator is
-    alternating in its vector-field arguments and that two torsion-free,
-    metric-compatible affine connections have identical connection data at the
-    current manifold API boundary. The surrounding checked package also
+    Formalizes a coherent raw curvature-identity layer for torsion-free affine
+    connections on smooth finite-dimensional manifolds. The selected results
+    are the pointwise first Bianchi identity and the pointwise raw differential
+    second Bianchi identity, with the regularity hypotheses required by their
+    commutator proofs made explicit. These are standard mathematical results;
+    the contribution claimed here is their kernel-checked formalization and
+    integration with Mathlib's manifold and covariant-derivative APIs, not a
+    new discovery or a priority claim. The surrounding checked package also
     contains the bundled curvature tensor, Ricci and scalar contractions,
-    Levi-Civita existence, sectional curvature, and Bianchi infrastructure.
-    It does not claim Ricci-flow local existence or the Poincare Conjecture.
+    Levi-Civita existence and uniqueness, sectional curvature, and additional
+    Bianchi infrastructure. It does not claim Ricci-flow local existence or the
+    Poincare Conjecture.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -34,9 +38,26 @@ sources:
     relationship: "builds-on"
     note: >-
       The development extends Mathlib's manifold, vector-bundle,
-      covariant-derivative, torsion, and Riemannian APIs with a static
-      curvature layer.
+      covariant-derivative, torsion, and Riemannian APIs with a raw curvature
+      identity layer.
     license: "Apache-2.0"
+    author_endorsement: "not-contacted"
+  - title: "Sui simboli a quattro indici e sulla curvatura di Riemann"
+    authors:
+      - "Luigi Bianchi"
+    id: "https://archimede.dimai.unifi.it/archimede/matematicaitaliana/schede_opere/68bianchi02.html"
+    type: "article"
+    location: "https://archimede.dimai.unifi.it/archimede/matematicaitaliana/schede_opere/68bianchi02.html"
+    relationship: "formalizes"
+    note: >-
+      This is the historical source relationship for the selected first and
+      second Bianchi curvature identities. The archival record also describes
+      an earlier 1889 Padova appearance without proof and a preceding
+      communication by Ricci, so this submission makes no exclusive priority
+      or originality claim for the underlying mathematics. The selected Lean
+      theorems are a kernel-checked formalization at the stated Mathlib API
+      boundary.
+    license: "unknown"
     author_endorsement: "not-contacted"
   - title: "Nozione di parallelismo in una varietà qualunque e conseguente specificazione geometrica della curvatura riemanniana"
     authors:
@@ -44,12 +65,29 @@ sources:
     id: "Rendiconti del Circolo Matematico di Palermo 42 (1917), 173-205"
     type: "article"
     location: "https://encyclopediaofmath.org/wiki/Levi-Civita_connection"
-    relationship: "independently-proves"
+    relationship: "background"
     note: >-
-      The 1917 paper is the historical source for the connection construction;
-      the linked reference records the standard uniqueness statement. The
-      formalization gives a kernel-checked formulation of the torsion-free and
-      metric-compatibility uniqueness argument.
+      The 1917 paper supplies historical background for the connection
+      construction. The classical uniqueness statement remains in the checked
+      supporting library but is not selected for this submission and is not
+      presented as an original result.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+  - title: "Foundations of Differential Geometry, Vol. I"
+    authors:
+      - "Shoshichi Kobayashi"
+      - "Katsumi Nomizu"
+    id: "https://books.google.com/books/about/Foundations_of_Differential_Geometry_Vol.html?id=ss7bEAAAQBAJ"
+    type: "book"
+    location: "https://books.google.com/books/about/Foundations_of_Differential_Geometry_Vol.html?id=ss7bEAAAQBAJ"
+    relationship: "background"
+    note: >-
+      Standard differential-geometry background for curvature and torsion
+      identities. The former Palomar wrapper
+      `curvature_commutator_skew` is the immediate standard sign change of the
+      defining commutator; it is retained only as supporting API material, is
+      not independently claimed here, and has been removed from the selected
+      surface rather than being represented as a new theorem.
     license: "unknown"
     author_endorsement: "not-contacted"
 
@@ -59,12 +97,13 @@ status:
   scope: >-
     The selected surface covers arbitrary smooth finite-dimensional model
     spaces and manifolds under the stated Mathlib manifold hypotheses. It
-    proves the alternating raw curvature commutator for a bundled covariant
-    derivative and the vanishing of the difference one-form between any two
-    Levi-Civita connections. The implementation boundary additionally
-    packages static curvature tensors and contractions, but this candidate
-    does not claim a general Ricci-flow existence theorem, surgery, or a proof
-    of the Poincare Conjecture. The two `sorry` declarations occur only as
+    proves the pointwise cyclic first Bianchi identity for the raw curvature
+    commutator and the pointwise cyclic raw differential second Bianchi identity
+    for a torsion-free tangent connection, with explicit C^2/C^3 vector-field
+    regularity and manifold smoothness assumptions. The surrounding package
+    additionally contains bundled curvature, contractions, and
+    Levi-Civita/sectional-curvature infrastructure, but those are not silently
+    counted as selected results. The two `sorry` declarations occur only as
     deliberate statement holes in `Challenge.lean`.
   sorry_count: 2
   sorry_in_definitions: 0
@@ -74,44 +113,57 @@ automation:
   methods:
     - method: "agent-assisted"
       models: ["GPT-5 Codex"]
-      framework: "Lean 4 and Mathlib"
+      framework: "Codex with Lean 4.33 and Mathlib"
       tool_setup: >-
-        Pinned Lean/Mathlib builds, closure-safe Challenge compilation,
-        kernel checking, and an independent Comparator/NanoDa replay with
-        immutable dependency revisions.
+        Repository-scoped mathematical formalization and proof engineering;
+        Lean 4.33 migration; Challenge/Solution construction; pinned kernel
+        builds; and independent Comparator/NanoDa replay.
       cost:
         wall_time: "not tracked"
         spend_usd: "subscription-based"
         hardware: "local machine"
-      prompting_notes: "The final statements and proofs are checked by Lean's kernel."
+      prompting_notes: >-
+        GPT-5 Codex materially performed repository exploration, API and
+        dependency migration, Lean declaration/proof drafting and revision,
+        Challenge/Solution boundary construction, metadata and documentation
+        updates, and reproducibility checks. The agent did not determine
+        authorship, source priority, or mathematical novelty. Human authors
+        selected and approved the theorem family, author list, source
+        relationships, scope claims, and final artifact; Lean's kernel and
+        the independent Comparator/NanoDa replay supplied automated checks.
   spend_usd: "subscription-based"
   notes: >-
-    The statement surface is isolated from project-specific source modules;
-    the solution imports the checked static curvature package.
+    Fuller role and oversight record, pinned before the final metadata change:
+    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/4e45649b194fd5a0b11e87cb8c2a61edbed1a1cb/curvature/AGENT-CONTRIBUTION.md
+    The document distinguishes agent-generated proof engineering from human
+    mathematical selection, attribution, review, and submission responsibility.
 
 fidelity:
   divergences: >-
-    The Challenge reconstructs only the small public statement vocabulary
-    needed by the selected results from Mathlib's underlying covariant-
-    derivative API. The implementation contains the full reusable static
-    curvature package and its supporting constructions. This is an intentional
-    statement/implementation separation for Comparator replay; the selected
-    public definitions are nevertheless compared by body, not treated as
-    Comparator definition holes. This is not a claim that the Challenge
-    reproduces the entire implementation file layout.
+    The Challenge reconstructs only the small public vocabulary needed by the
+    selected raw Bianchi statements from Mathlib's underlying
+    covariant-derivative API, including a local copy of the raw differential
+    Bianchi expression. The Solution imports the checked Bianchi implementation
+    and proves the same public statements by its existing theorem declarations.
+    The surrounding implementation contains additional bundled and contracted
+    curvature results. This is an intentional statement/implementation
+    separation for Comparator replay; the selected public definition is
+    compared by body, not treated as a Comparator definition hole.
 
 review:
   status: "self-assessed"
   reviewers:
     - "none"
   notes: >-
-    Local preparation requires both `scripts/verify-palomar.sh` and the
-    pinned `scripts/verify-comparator.sh` replay. A first hosted mechanical
-    attempt failed on the root license fingerprint. The corrected commit then
-    failed because its Mathlib revision was not an ancestor of canonical
-    `master`. The previously submitted artifact was
-    `c50584bb804865fd9a54ebb5362ba3eee864e212` on Lean 4.29.0. The current
-    development artifact upgrades to Lean 4.33.0, Mathlib revision
+    This revision responds to substantive review of the former surface: the
+    elementary commutator skew and textbook Levi-Civita uniqueness wrappers are
+    no longer selected. The current surface instead selects the first and raw
+    differential second Bianchi theorem family. Local preparation requires both
+    `scripts/verify-palomar.sh` and the pinned
+    `scripts/verify-comparator.sh` replay. A previous hosted attempt failed on
+    the root license fingerprint; a corrected attempt then failed because its
+    Mathlib revision was not an ancestor of canonical `master`. The current
+    development is pinned to Lean 4.33.0, Mathlib revision
     `db584cd6d46c92f209a44c0f1c829460d327499d`, and Lean4Export revision
     `15f6055e299ad5b89345e533cc2192f4cc00f659`. Editorial review, registration,
     and public indexing are not inferred from local compilation or earlier
@@ -120,18 +172,24 @@ review:
 alignment:
   namespace: "PoincareCurvature.Palomar"
   statements:
-    - source: "Alternating curvature commutator"
-      lean: "PoincareCurvature.Palomar.curvature_commutator_skew"
+    - source: "Pointwise first Bianchi identity for a torsion-free affine connection"
+      lean: "PoincareCurvature.Palomar.first_bianchi_raw_of_torsion_free"
       module: "Solution.lean"
       status: "proved"
-      note: "The raw curvature commutator changes sign when its vector-field arguments are exchanged."
-    - source: "Levi-Civita uniqueness"
-      lean: "PoincareCurvature.Palomar.levi_civita_uniqueness"
+      note: >-
+        The cyclic sum of the raw curvature commutator on three C^2 tangent
+        vector fields vanishes pointwise when torsion is zero.
+    - source: "Pointwise raw differential second Bianchi identity"
+      lean: "PoincareCurvature.Palomar.second_bianchi_raw_of_torsion_free"
       module: "Solution.lean"
       status: "proved"
-      note: "Two torsion-free, metric-compatible affine connections have zero difference one-form."
+      note: >-
+        The cyclic sum of the raw covariant derivative of curvature vanishes
+        pointwise on three C^2 fields and one C^3 field when torsion is zero.
 
 acknowledgements: >-
   Mathlib contributors for the manifold, vector-bundle, covariant-derivative,
-  torsion, and Riemannian infrastructure; and the Palomar Registry project for
-  the statement/solution Comparator workflow.
+  torsion, and Riemannian infrastructure; Luigi Bianchi and the classical
+  differential-geometry literature for the standard identities formalized
+  here; and the Palomar Registry project for the statement/solution Comparator
+  workflow.

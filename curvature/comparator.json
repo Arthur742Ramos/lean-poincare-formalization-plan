@@ -2,8 +2,8 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "PoincareCurvature.Palomar.curvature_commutator_skew",
-    "PoincareCurvature.Palomar.levi_civita_uniqueness"
+    "PoincareCurvature.Palomar.first_bianchi_raw_of_torsion_free",
+    "PoincareCurvature.Palomar.second_bianchi_raw_of_torsion_free"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": true

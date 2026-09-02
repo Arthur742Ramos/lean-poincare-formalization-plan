@@ -111,8 +111,8 @@ try:
 except (OSError, UnicodeError, json.JSONDecodeError) as error:
     raise SystemExit(f"error: comparator.json is invalid: {error}")
 expected_theorems = [
-    "PoincareCurvature.Palomar.curvature_commutator_skew",
-    "PoincareCurvature.Palomar.levi_civita_uniqueness",
+    "PoincareCurvature.Palomar.first_bianchi_raw_of_torsion_free",
+    "PoincareCurvature.Palomar.second_bianchi_raw_of_torsion_free",
 ]
 if comparator.get("challenge_module") != "Challenge":
     raise SystemExit("error: comparator challenge_module must be Challenge")
@@ -207,8 +207,8 @@ lake env lean Solution.lean
 lake env lean --src-deps Solution.lean
 lake env lean /dev/stdin <<'EOF'
 import Solution
-#print axioms PoincareCurvature.Palomar.curvature_commutator_skew
-#print axioms PoincareCurvature.Palomar.levi_civita_uniqueness
+#print axioms PoincareCurvature.Palomar.first_bianchi_raw_of_torsion_free
+#print axioms PoincareCurvature.Palomar.second_bianchi_raw_of_torsion_free
 EOF
 
 git diff --check

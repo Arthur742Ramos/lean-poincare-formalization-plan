@@ -1,11 +1,10 @@
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
-import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
 public noncomputable section
 
-open Bundle FiberBundle
+open Bundle
 open scoped Bundle Manifold ContDiff
 
 section CovariantDerivativeDefinitions
@@ -36,66 +35,73 @@ end CovariantDerivative
 
 end CovariantDerivativeDefinitions
 
-section StaticLeviCivita
-
-variable {E : Type*} [hREGroup : NormedAddCommGroup E] [hRESpace : NormedSpace ℝ E]
-  {H : Type*} [hRHTop : TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-  {M : Type*} [hRMTop : TopologicalSpace M] [hRCharted : ChartedSpace H M]
-  [hRFinite : FiniteDimensional ℝ E] [hRComplete : CompleteSpace E]
-  [hRManifold : IsManifold I 2 M]
-  [hRRiemannian : RiemannianBundle (TangentSpace I : M → Type _)]
-  [hRSmooth : IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
-
-local notation "TM" => (TangentSpace I : M → Type _)
-local notation "⟪" x ", " y "⟫" => inner ℝ x y
-
-namespace CovariantDerivative
-
-def IsTorsionFree (cov : CovariantDerivative I E TM) : Prop :=
-  cov.torsion = 0
-
-def IsMetricCompatibleTangent (cov : CovariantDerivative I E TM) : Prop :=
-  ∀ {x : M} {σ τ : Π x : M, TangentSpace I x},
-    MDiffAt (T% σ) x → MDiffAt (T% τ) x →
-      ∀ u : TangentSpace I x,
-        mvfderiv (I := I) (fun y ↦ ⟪σ y, τ y⟫) x u =
-          ⟪cov σ x u, τ x⟫ + ⟪σ x, cov τ x u⟫
-
-def IsLeviCivita (cov : CovariantDerivative I E TM) : Prop :=
-  cov.IsTorsionFree ∧ cov.IsMetricCompatibleTangent
-
-end CovariantDerivative
-
-end StaticLeviCivita
-
 namespace PoincareCurvature.Palomar
 
-theorem curvature_commutator_skew
-    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
-    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-    {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
-    {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
-    [∀ x, AddCommGroup (V x)] [∀ x, Module 𝕜 (V x)]
-    [∀ x, TopologicalSpace (V x)] [∀ x, IsTopologicalAddGroup (V x)]
-    [∀ x, ContinuousSMul 𝕜 (V x)] [FiberBundle F V] [VectorBundle 𝕜 F V]
-    (cov : CovariantDerivative I F V)
-    (X Y : Π x : M, TangentSpace I x) (σ : Π x : M, V x) :
-    cov.curvatureAux X Y σ = -cov.curvatureAux Y X σ := by
-  sorry
-
-theorem levi_civita_uniqueness
+/- The raw form of the second Bianchi identity is kept local to the Palomar
+surface so that Challenge and Solution expose the same small definition without
+importing the implementation module. -/
+def rawSecondBianchi
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-    [FiniteDimensional ℝ E] [CompleteSpace E]
-    [IsManifold I 2 M]
-    [RiemannianBundle (TangentSpace I : M → Type _)]
-    [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
-    (cov cov' : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (hcov : cov.IsLeviCivita) (hcov' : cov'.IsLeviCivita) :
-    CovariantDerivative.difference cov cov' = 0 := by
+    [IsManifold I ∞ M]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (X Y Z W : Π x : M, TangentSpace I x) : Π x : M, TangentSpace I x :=
+  cov.along X (cov.curvatureAux Y Z W) -
+    cov.curvatureAux (cov.along X Y) Z W -
+    cov.curvatureAux Y (cov.along X Z) W -
+    cov.curvatureAux Y Z (cov.along X W)
+
+/-- The pointwise first Bianchi identity for a torsion-free affine connection. -/
+theorem first_bianchi_raw_of_torsion_free
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    [CompleteSpace E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    (hT : cov.torsion = 0)
+    {X Y Z : Π x : M, TangentSpace I x} {x : M}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
+      (fun y ↦ TotalSpace.mk' E y (X y)))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
+      (fun y ↦ TotalSpace.mk' E y (Y y)))
+    (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
+      (fun y ↦ TotalSpace.mk' E y (Z y))) :
+    cov.curvatureAux X Y Z x + cov.curvatureAux Y Z X x + cov.curvatureAux Z X Y x = 0 := by
+  sorry
+
+/-- The pointwise raw differential second Bianchi identity for a torsion-free affine connection. -/
+theorem second_bianchi_raw_of_torsion_free
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    [CompleteSpace E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] [cov.ContMDiffCovariantDerivative 2]
+    [IsManifold I (minSmoothness ℝ 2) M]
+    [IsManifold I (minSmoothness ℝ 3) M]
+    [IsManifold I (minSmoothness ℝ 4) M]
+    [IsManifold I ((2 : ℕ∞) + 1) M]
+    [IsManifold I ((3 : ℕ∞) + 1) M]
+    (hT : cov.torsion = 0)
+    {X Y Z W : Π x : M, TangentSpace I x} {x : M}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
+      (fun y ↦ TotalSpace.mk' E y (X y)))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
+      (fun y ↦ TotalSpace.mk' E y (Y y)))
+    (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
+      (fun y ↦ TotalSpace.mk' E y (Z y)))
+    (hW : ContMDiff I (I.prod 𝓘(ℝ, E)) 3
+      (fun y ↦ TotalSpace.mk' E y (W y))) :
+    rawSecondBianchi cov X Y Z W x + rawSecondBianchi cov Y Z X W x +
+      rawSecondBianchi cov Z X Y W x = 0 := by
   sorry
 
 end PoincareCurvature.Palomar

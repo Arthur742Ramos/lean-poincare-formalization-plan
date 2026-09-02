@@ -30,9 +30,9 @@ and authorization relationship have been explicitly confirmed.
 
 | ID | Candidate | Main mathematical boundary | Current status |
 | --- | --- | --- | --- |
-| 01 | Static connection and curvature core | Covariant derivatives along vector fields, the raw curvature commutator, and Levi-Civita uniqueness | Correcting hosted dependency-ancestry failure |
+| 01 | Raw Bianchi curvature identities | Pointwise first and raw differential second Bianchi identities for torsion-free affine connections | Revising after substantive research-interest review |
 | 02 | Tensorial curvature and contractions | Bundled curvature tensor, Ricci curvature, and scalar curvature | Source code exists; isolate after 01 |
-| 03 | Static Riemannian identities | Levi-Civita existence, sectional curvature, and first/second Bianchi identities | Source code exists; isolate after 02 |
+| 03 | Static Riemannian identities | Levi-Civita existence, sectional curvature, and Ricci/scalar curvature identities | Source code exists; isolate after 02 |
 | 04 | Time-dependent geometric structures | One-parameter sections, connections, metrics, and slicewise curvature | Source code exists; isolate after 03 |
 | 05 | Continuous sections and smoothing | Coordinate models, finite-cover gluing, smooth approximation, and convex fiber constraints | Source code exists; audit as a separate library contribution |
 | 06 | The open metric cone | Symmetric positive-definite bilinear-form sections and openness in the section-space model | Source code exists; audit separately |
@@ -56,7 +56,7 @@ library result has an independently defensible boundary.
 
 ## Order of work
 
-1. Package and validate 01 from the already completed static connection layer.
+1. Package and validate 01 from the already completed raw Bianchi layer.
 2. Audit the dependency closure and research value of 02–06, then prepare the
    strongest non-overlapping candidates.
 3. Package the analytic candidates 07–11 only around proved theorem clusters;
@@ -67,32 +67,33 @@ library result has an independently defensible boundary.
 5. Treat 12–18 as later milestone submissions whose status changes only when
    their actual mathematical content is proved.
 
-## Submission 01: static connection and curvature core
+## Submission 01: raw Bianchi curvature identities
 
 The first candidate is the `curvature/` Lean package. Its Palomar surface is
 prepared in that directory.
 
 Selected statements:
 
-- `PoincareCurvature.Palomar.curvature_commutator_skew`
-- `PoincareCurvature.Palomar.levi_civita_uniqueness`
+- `PoincareCurvature.Palomar.first_bianchi_raw_of_torsion_free`
+- `PoincareCurvature.Palomar.second_bianchi_raw_of_torsion_free`
 
-The implementation imports the static `PoincareCurvature.Basic` boundary. It
-does not import the root aggregate or the internal Ricci-flow scaffold as part
-of the selected proof surface. The candidate will be called ready only after
-the source closure, Challenge/Solution replay, metadata, license, local build,
-and proof-mechanism audits pass.
+The implementation imports the checked Bianchi module. It does not import the
+root aggregate or the internal Ricci-flow scaffold as part of the selected proof
+surface. The candidate formalizes the standard first and raw differential second
+Bianchi identities, with the regularity hypotheses used by the commutator proofs;
+it does not claim new mathematical priority. The former commutator-skew and
+Levi-Civita-uniqueness wrappers remain supporting library results, not selected
+research-interest results.
 
-Current state: the full package audit and pinned Comparator/NanoDa replay pass
-locally (the macOS replay uses an explicit unsandboxed development fallback),
-and the repository-level Linux workflow is wired for the same two gates. A
-first hosted attempt at commit `22c21dd473fc77a5d93745df976fd27ec1e9ab4a`
-failed because the root `LICENSE` did not have one unambiguous standard SPDX
-match. The corrected commit `7bf6cc5a17356c3cea71cc4c273434801b8ccd04` then
-failed because its Mathlib revision was not an ancestor of canonical
-`master`. The previously submitted artifact was commit
-`c50584bb804865fd9a54ebb5362ba3eee864e212` on Lean 4.29.0. The current
-development artifact upgrades to Lean 4.33.0 with Mathlib revision
+The complete role and oversight record is in
+`curvature/AGENT-CONTRIBUTION.md`.
+
+Current state: the revised Challenge/Solution surface and pinned
+Comparator/NanoDa replay are being revalidated locally (the macOS replay uses
+an explicit unsandboxed development fallback), and the repository-level Linux
+workflow is wired for the same two gates. The prior Lean 4.33.0 artifact was
+returned for its elementary theorem selection, incomplete provenance account,
+and incomplete automation disclosure. This revision uses Mathlib revision
 `db584cd6d46c92f209a44c0f1c829460d327499d` and matching Lean4Export revision
-`15f6055e299ad5b89345e533cc2192f4cc00f659`. This upgrade must be committed,
-pushed, and revalidated before any retry.
+`15f6055e299ad5b89345e533cc2192f4cc00f659`; it must be committed, pushed, and
+revalidated before any new external retry.
