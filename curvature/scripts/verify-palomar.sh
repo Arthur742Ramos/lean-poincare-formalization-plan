@@ -101,9 +101,9 @@ imports = [
 if not imports or any(not module.startswith("Mathlib.") for module in imports):
     raise SystemExit(f"error: Challenge.lean imports outside Mathlib: {imports}")
 challenge_holes = len(re.findall(r"^\s*sorry\s*$", challenge_text, re.MULTILINE))
-if challenge_holes != 2:
+if challenge_holes != 4:
     raise SystemExit(
-        f"error: expected two deliberate Challenge proof holes, found {challenge_holes}"
+        f"error: expected four deliberate Challenge proof holes, found {challenge_holes}"
     )
 
 try:
@@ -111,17 +111,19 @@ try:
 except (OSError, UnicodeError, json.JSONDecodeError) as error:
     raise SystemExit(f"error: comparator.json is invalid: {error}")
 expected_theorems = [
-    "PoincareCurvature.Palomar.first_bianchi_raw_of_torsion_free",
-    "PoincareCurvature.Palomar.second_bianchi_raw_of_torsion_free",
+    "PoincareCurvature.Palomar.raw_curvature_left_tensoriality",
+    "PoincareCurvature.Palomar.raw_curvature_middle_tensoriality",
+    "PoincareCurvature.Palomar.raw_curvature_right_tensoriality",
+    "PoincareCurvature.Palomar.raw_curvature_metric_skew_adjointness",
 ]
 if comparator.get("challenge_module") != "Challenge":
     raise SystemExit("error: comparator challenge_module must be Challenge")
 if comparator.get("solution_module") != "Solution":
     raise SystemExit("error: comparator solution_module must be Solution")
 if comparator.get("theorem_names") != expected_theorems:
-    raise SystemExit("error: comparator theorem surface does not match Submission 01")
+    raise SystemExit("error: comparator theorem surface does not match Submission 02")
 if "definition_names" in comparator:
-    raise SystemExit("error: Submission 01 must compare its public definitions by body")
+    raise SystemExit("error: Submission 02 must compare its public definitions by body")
 if comparator.get("enable_nanoda") is not True:
     raise SystemExit("error: comparator.json must enable NanoDa")
 if not set(comparator.get("permitted_axioms", [])) <= {
@@ -207,9 +209,11 @@ lake env lean Solution.lean
 lake env lean --src-deps Solution.lean
 lake env lean /dev/stdin <<'EOF'
 import Solution
-#print axioms PoincareCurvature.Palomar.first_bianchi_raw_of_torsion_free
-#print axioms PoincareCurvature.Palomar.second_bianchi_raw_of_torsion_free
+#print axioms PoincareCurvature.Palomar.raw_curvature_left_tensoriality
+#print axioms PoincareCurvature.Palomar.raw_curvature_middle_tensoriality
+#print axioms PoincareCurvature.Palomar.raw_curvature_right_tensoriality
+#print axioms PoincareCurvature.Palomar.raw_curvature_metric_skew_adjointness
 EOF
 
 git diff --check
-echo "Submission 01 local checks passed."
+echo "Submission 02 local checks passed."

@@ -1,6 +1,6 @@
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
-import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
+import Mathlib.Geometry.Manifold.Riemannian.Basic
 
 public noncomputable section
 
@@ -37,71 +37,81 @@ end CovariantDerivativeDefinitions
 
 namespace PoincareCurvature.Palomar
 
-/- The raw form of the second Bianchi identity is kept local to the Palomar
-surface so that Challenge and Solution expose the same small definition without
-importing the implementation module. -/
-def rawSecondBianchi
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-    [IsManifold I ∞ M]
-    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X Y Z W : Π x : M, TangentSpace I x) : Π x : M, TangentSpace I x :=
-  cov.along X (cov.curvatureAux Y Z W) -
-    cov.curvatureAux (cov.along X Y) Z W -
-    cov.curvatureAux Y (cov.along X Z) W -
-    cov.curvatureAux Y Z (cov.along X W)
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
+  [∀ x, AddCommGroup (V x)] [∀ x, Module ℝ (V x)]
+  [∀ x, TopologicalSpace (V x)] [∀ x, IsTopologicalAddGroup (V x)]
+  [∀ x, ContinuousSMul ℝ (V x)] [FiberBundle F V] [VectorBundle ℝ F V]
+  [ContMDiffVectorBundle 2 F V I]
 
-/-- The pointwise first Bianchi identity for a torsion-free affine connection. -/
-theorem first_bianchi_raw_of_torsion_free
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [CompleteSpace E]
-    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
-    [IsManifold I ∞ M]
-    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
-    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    [cov.ContMDiffCovariantDerivative 1]
-    [IsManifold I (minSmoothness ℝ 3) M]
-    [IsManifold I ((2 : ℕ∞) + 1) M]
-    (hT : cov.torsion = 0)
-    {X Y Z : Π x : M, TangentSpace I x} {x : M}
-    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
+local notation "TM" => (TangentSpace I : M → Type _)
+
+variable (cov : CovariantDerivative I F V) [cov.ContMDiffCovariantDerivative 1]
+
+/-- The raw curvature commutator is pointwise linear in its left tangent-field slot. -/
+theorem raw_curvature_left_tensoriality
+    {f : M → ℝ} {X Y : Π x : M, TM x} {σ : Π x : M, V x} {x : M}
+    (hf : MDiffAt f x)
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
       (fun y ↦ TotalSpace.mk' E y (X y)))
-    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
       (fun y ↦ TotalSpace.mk' E y (Y y)))
-    (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
-      (fun y ↦ TotalSpace.mk' E y (Z y))) :
-    cov.curvatureAux X Y Z x + cov.curvatureAux Y Z X x + cov.curvatureAux Z X Y x = 0 := by
+    (hσ : ContMDiff I (I.prod 𝓘(ℝ, F)) 2
+      (fun y ↦ TotalSpace.mk' F y (σ y))) :
+    cov.curvatureAux (f • X) Y σ x = f x • cov.curvatureAux X Y σ x := by
   sorry
 
-/-- The pointwise raw differential second Bianchi identity for a torsion-free affine connection. -/
-theorem second_bianchi_raw_of_torsion_free
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    [CompleteSpace E]
-    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
-    [IsManifold I ∞ M]
-    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
-    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    [cov.ContMDiffCovariantDerivative 1] [cov.ContMDiffCovariantDerivative 2]
-    [IsManifold I (minSmoothness ℝ 2) M]
-    [IsManifold I (minSmoothness ℝ 3) M]
-    [IsManifold I (minSmoothness ℝ 4) M]
-    [IsManifold I ((2 : ℕ∞) + 1) M]
-    [IsManifold I ((3 : ℕ∞) + 1) M]
-    (hT : cov.torsion = 0)
-    {X Y Z W : Π x : M, TangentSpace I x} {x : M}
-    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
+/-- The raw curvature commutator is pointwise linear in its middle tangent-field slot. -/
+theorem raw_curvature_middle_tensoriality
+    {f : M → ℝ} {X Y : Π x : M, TM x} {σ : Π x : M, V x} {x : M}
+    (hf : MDiffAt f x)
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
       (fun y ↦ TotalSpace.mk' E y (X y)))
-    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
       (fun y ↦ TotalSpace.mk' E y (Y y)))
-    (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) 2
-      (fun y ↦ TotalSpace.mk' E y (Z y)))
-    (hW : ContMDiff I (I.prod 𝓘(ℝ, E)) 3
-      (fun y ↦ TotalSpace.mk' E y (W y))) :
-    rawSecondBianchi cov X Y Z W x + rawSecondBianchi cov Y Z X W x +
-      rawSecondBianchi cov Z X Y W x = 0 := by
+    (hσ : ContMDiff I (I.prod 𝓘(ℝ, F)) 2
+      (fun y ↦ TotalSpace.mk' F y (σ y))) :
+    cov.curvatureAux X (f • Y) σ x = f x • cov.curvatureAux X Y σ x := by
+  sorry
+
+/-- The raw curvature commutator is pointwise linear in its bundle-section slot. -/
+theorem raw_curvature_right_tensoriality
+    {f : M → ℝ} {X Y : Π x : M, TM x} {σ : Π x : M, V x} {x : M}
+    (hf : ContMDiff I 𝓘(ℝ) 2 f)
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (fun y ↦ TotalSpace.mk' E y (X y)))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (fun y ↦ TotalSpace.mk' E y (Y y)))
+    (hσ : ContMDiff I (I.prod 𝓘(ℝ, F)) 2
+      (fun y ↦ TotalSpace.mk' F y (σ y))) :
+    cov.curvatureAux X Y (f • σ) x = f x • cov.curvatureAux X Y σ x := by
+  sorry
+
+set_option maxHeartbeats 1000000 in
+/-- Metric compatibility makes the raw curvature commutator skew-adjoint. -/
+theorem raw_curvature_metric_skew_adjointness
+    [RiemannianBundle V] [IsContMDiffRiemannianBundle I 2 F V]
+    (hmetric :
+      ∀ {x : M} {σ τ : Π x : M, V x},
+        MDiffAt (T% σ) x → MDiffAt (T% τ) x →
+          ∀ u : TangentSpace I x,
+            mvfderiv (I := I) (fun y ↦ inner ℝ (σ y) (τ y)) x u =
+              inner ℝ (cov σ x u) (τ x) + inner ℝ (σ x) (cov τ x u))
+    {X Y : Π x : M, TM x} {σ τ : Π x : M, V x} {x : M}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (fun y ↦ TotalSpace.mk' E y (X y)))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (fun y ↦ TotalSpace.mk' E y (Y y)))
+    (hσ : ContMDiff I (I.prod 𝓘(ℝ, F)) 2
+      (fun y ↦ TotalSpace.mk' F y (σ y)))
+    (hτ : ContMDiff I (I.prod 𝓘(ℝ, F)) 2
+      (fun y ↦ TotalSpace.mk' F y (τ y))) :
+    inner ℝ (cov.curvatureAux X Y σ x) (τ x) +
+      inner ℝ (σ x) (cov.curvatureAux X Y τ x) = 0 := by
   sorry
 
 end PoincareCurvature.Palomar

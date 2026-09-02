@@ -2,8 +2,10 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "PoincareCurvature.Palomar.first_bianchi_raw_of_torsion_free",
-    "PoincareCurvature.Palomar.second_bianchi_raw_of_torsion_free"
+    "PoincareCurvature.Palomar.raw_curvature_left_tensoriality",
+    "PoincareCurvature.Palomar.raw_curvature_middle_tensoriality",
+    "PoincareCurvature.Palomar.raw_curvature_right_tensoriality",
+    "PoincareCurvature.Palomar.raw_curvature_metric_skew_adjointness"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": true

@@ -1,48 +1,52 @@
-# Palomar Submission 01
+# Palomar Submission 02
 
-## Raw Bianchi identities for torsion-free affine connections
+## Tensoriality and metric skew-adjointness of raw curvature
 
-This candidate packages the first proof-bearing static curvature-identity layer
-of the `PoincareCurvature` development. The selected surface exposes the
-following coherent theorem family:
+This candidate packages the next proof-bearing static curvature layer of the
+`PoincareCurvature` development. The selected surface exposes the following
+coherent theorem family:
 
-- `PoincareCurvature.Palomar.first_bianchi_raw_of_torsion_free`, the pointwise
-  cyclic first Bianchi identity for the raw curvature commutator;
-- `PoincareCurvature.Palomar.second_bianchi_raw_of_torsion_free`, the pointwise
-  cyclic raw differential second Bianchi identity.
+- `PoincareCurvature.Palomar.raw_curvature_left_tensoriality`, pointwise
+  scalar linearity in the left tangent-field slot;
+- `PoincareCurvature.Palomar.raw_curvature_middle_tensoriality`, pointwise
+  scalar linearity in the middle tangent-field slot;
+- `PoincareCurvature.Palomar.raw_curvature_right_tensoriality`, pointwise
+  scalar linearity in the bundle-section slot; and
+- `PoincareCurvature.Palomar.raw_curvature_metric_skew_adjointness`, the
+  metric-compatibility curvature commutator identity.
 
-The selected statements include the C^2/C^3 field regularity and manifold
-smoothness assumptions used by the proofs. The proved side imports the checked
-Bianchi implementation; the statement side imports only Mathlib's manifold,
-covariant-derivative, torsion, and Lie-bracket APIs and reconstructs the small
-public vocabulary needed for Comparator replay.
+Together these results establish the core locality/tensoriality behavior of
+the raw curvature commutator and its compatibility with a Riemannian inner
+product. The selected statements retain the explicit regularity hypotheses
+needed by the manifold proofs. The proved side imports the checked tensorial
+curvature implementation; the statement side imports only Mathlib's
+covariant-derivative, Lie-bracket, and Riemannian APIs and reconstructs the
+small public vocabulary needed for Comparator replay.
 
-These are standard differential-geometric identities, not a claim of new
-mathematics. The historical source relationship and the earlier Ricci/Padova
-priority context are recorded in `formalization.yaml`. The former
-`curvature_commutator_skew` and `levi_civita_uniqueness` wrappers remain
-supporting library results and are deliberately not the research-interest
-boundary of this candidate.
+These are standard differential-geometric identities, not claims of new
+mathematics or priority. The contribution is the kernel-checked formalization
+and its integration with the current Mathlib manifold/vector-bundle boundary.
+The later bundled curvature and Ricci/scalar contraction definitions remain in
+the implementation package but are not silently counted as selected results.
 
-The automation role and human oversight record is pinned in
-`AGENT-CONTRIBUTION.md`.
+The complete automation and human-oversight record is in
+`AGENT-CONTRIBUTION-02.md`.
 
 ## Nested-project intake paths
 
-The package intentionally lives at `curvature/` inside the roadmap repository.
-The repository-relative intake fields are:
+The package lives at `curvature/` inside the roadmap repository. The intended
+repository-relative intake fields are:
 
 - repository: `Arthur742Ramos/lean-poincare-formalization-plan`;
+- branch: `dev/point4-campaign`;
 - project directory: `curvature`;
 - Comparator configuration: `curvature/comparator.json`;
 - formalization metadata: `curvature/formalization.yaml`;
 - license: the repository-root `LICENSE` file.
 
-The earlier hosted artifact used the old two-theorem surface and was returned
-for substantive research-interest and provenance clarification. This revision
-uses Lean 4.33.0, Mathlib revision
-`db584cd6d46c92f209a44c0f1c829460d327499d`, and matching Lean4Export revision
-`15f6055e299ad5b89345e533cc2192f4cc00f659`.
+The accepted Submission 01 artifact remains reproducible at its own immutable
+commit. This candidate uses a later immutable commit and a distinct
+Comparator theorem surface.
 
 ## Local checks
 
@@ -52,27 +56,21 @@ Run from this directory:
 bash scripts/verify-palomar.sh
 ```
 
-The check builds the complete pinned package and the two explicit Lake targets,
-compiles both statement and solution files, checks the Challenge and Solution
-import boundaries and size limits, validates the Comparator and metadata shapes,
-and prints the kernel axiom declarations for the two selected theorems. The
-public `rawSecondBianchi` definition is intentionally not listed as a
-Comparator definition hole: the stricter replay compares its body as well.
-
-For the independent Comparator plus NanoDa replay, use:
+For the independent Comparator plus NanoDa replay on this macOS development
+machine, use:
 
 ```sh
 PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh
 ```
 
-The environment flag is required only for this macOS development fallback;
-Linux runs use the pinned Landrun sandbox. The script pins Comparator, Lean4Export
-v4.33.0, Landrun, and NanoDa by full commit.
+The replay pins Comparator, Lean4Export, Landrun, and NanoDa by full commit.
+Linux runs use the pinned Landrun sandbox directly.
 
 ## External status
 
-The previously submitted Lean 4.33.0 artifact is not this revised theorem
-surface. After this revision is committed, pushed, and locally revalidated, a
-new external Palomar action must be treated as a fresh artifact-specific
-submission; local checks do not imply hosted verification, editorial review,
-registration, or public indexing.
+This document records local preparation only. A Palomar submission requires a
+fresh action for the final public commit, with the exact repository, full SHA,
+project directory, Comparator path, metadata path, and authorization
+relationship verified at submission time. Local checks do not imply hosted
+mechanical verification, renderability, editorial review, registration, or
+public indexing.

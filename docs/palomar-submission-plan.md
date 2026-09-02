@@ -30,8 +30,8 @@ and authorization relationship have been explicitly confirmed.
 
 | ID | Candidate | Main mathematical boundary | Current status |
 | --- | --- | --- | --- |
-| 01 | Raw Bianchi curvature identities | Pointwise first and raw differential second Bianchi identities for torsion-free affine connections | Revising after substantive research-interest review |
-| 02 | Tensorial curvature and contractions | Bundled curvature tensor, Ricci curvature, and scalar curvature | Source code exists; isolate after 01 |
+| 01 | Raw Bianchi curvature identities | Pointwise first and raw differential second Bianchi identities for torsion-free affine connections | Accepted by Palomar (user-confirmed); immutable artifact at `04b00ba308fc5196a07a5cf7a9c6f985505ea041` |
+| 02 | Raw curvature tensoriality and metric compatibility | Pointwise scalar tensoriality in all three slots and metric skew-adjointness of the raw curvature commutator | Preparing |
 | 03 | Static Riemannian identities | Levi-Civita existence, sectional curvature, and Ricci/scalar curvature identities | Source code exists; isolate after 02 |
 | 04 | Time-dependent geometric structures | One-parameter sections, connections, metrics, and slicewise curvature | Source code exists; isolate after 03 |
 | 05 | Continuous sections and smoothing | Coordinate models, finite-cover gluing, smooth approximation, and convex fiber constraints | Source code exists; audit as a separate library contribution |
@@ -56,8 +56,9 @@ library result has an independently defensible boundary.
 
 ## Order of work
 
-1. Package and validate 01 from the already completed raw Bianchi layer.
-2. Audit the dependency closure and research value of 02–06, then prepare the
+1. Preserve the accepted 01 artifact and package/validate 02 as the next
+   non-overlapping raw-curvature result family.
+2. Audit the dependency closure and research value of 03–06, then prepare the
    strongest non-overlapping candidates.
 3. Package the analytic candidates 07–11 only around proved theorem clusters;
    keep point-4 interfaces and special cases clearly labeled as scaffolding.
@@ -88,12 +89,27 @@ research-interest results.
 The complete role and oversight record is in
 `curvature/AGENT-CONTRIBUTION.md`.
 
-Current state: the revised Challenge/Solution surface and pinned
-Comparator/NanoDa replay are being revalidated locally (the macOS replay uses
-an explicit unsandboxed development fallback), and the repository-level Linux
-workflow is wired for the same two gates. The prior Lean 4.33.0 artifact was
-returned for its elementary theorem selection, incomplete provenance account,
-and incomplete automation disclosure. This revision uses Mathlib revision
-`db584cd6d46c92f209a44c0f1c829460d327499d` and matching Lean4Export revision
-`15f6055e299ad5b89345e533cc2192f4cc00f659`; it must be committed, pushed, and
-revalidated before any new external retry.
+Current state: Palomar accepted the revised artifact according to the
+maintainer's status report. Its exact public commit is
+`04b00ba308fc5196a07a5cf7a9c6f985505ea041`; hosted verification and editorial
+acceptance are not conflated with registration or public indexing.
+
+## Submission 02: raw curvature tensoriality and metric compatibility
+
+The next candidate retains the same checked `curvature/` implementation but
+uses a distinct Comparator surface. It selects:
+
+- `PoincareCurvature.Palomar.raw_curvature_left_tensoriality`;
+- `PoincareCurvature.Palomar.raw_curvature_middle_tensoriality`;
+- `PoincareCurvature.Palomar.raw_curvature_right_tensoriality`; and
+- `PoincareCurvature.Palomar.raw_curvature_metric_skew_adjointness`.
+
+These statements formalize the nontrivial pointwise tensoriality and metric
+skew-adjointness behavior of the raw curvature commutator. They deliberately
+do not reselect the accepted Bianchi surface, the immediate commutator sign
+change, or textbook Levi-Civita uniqueness. The candidate-specific role and
+oversight record is `curvature/AGENT-CONTRIBUTION-02.md`.
+
+Current state: Challenge/Solution and metadata are being prepared locally;
+the final public commit, local Lean/Comparator checks, and any Palomar intake
+remain to be completed separately.
