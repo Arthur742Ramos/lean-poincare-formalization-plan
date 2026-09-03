@@ -105,8 +105,8 @@ automation:
   spend_usd: "subscription-based"
   notes: >-
     Fuller role and oversight record: the immutable repository document at
-    `curvature/AGENT-CONTRIBUTION-04.md`, pinned to the pre-final public
-    artifact commit in the final metadata. It distinguishes agent proof
+    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/eee14606d83153a96223c31ad43d404d4f46b0ee/curvature/AGENT-CONTRIBUTION-04.md.
+    It distinguishes agent proof
     engineering and packaging from human mathematical selection, attribution,
     review, and publication responsibility.
 

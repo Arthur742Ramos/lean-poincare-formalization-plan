@@ -176,6 +176,7 @@ time-dependent Levi–Civita correction, Ricci curvature, and scalar curvature,
 alongside eight theorem statement holes. The candidate-specific role and
 oversight record is `curvature/AGENT-CONTRIBUTION-04.md`.
 
-Current state: the Challenge/Solution surface elaborates under Lean 4.33 and
-the pinned independent Comparator/NanoDa replay is being checked. The final
-public commit and any Palomar intake remain separate actions.
+Current state: the Challenge/Solution surface, repository verifier, and pinned
+independent Comparator/NanoDa replay pass under Lean 4.33. The prepared
+artifact is publicly pushed on `dev/point4-campaign`; this public preparation
+is separate from any Palomar intake, which has not been submitted.
