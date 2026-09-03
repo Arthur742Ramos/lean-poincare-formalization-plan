@@ -2,19 +2,24 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection",
-    "PoincareCurvature.Palomar.leviCivitaConnection_isLeviCivita",
-    "PoincareCurvature.Palomar.contMDiffCovariantDerivative_leviCivitaConnection",
-    "PoincareCurvature.Palomar.leviCivitaConnection_eq_leviCivitaConnection",
-    "PoincareCurvature.Palomar.contMDiffCovariantDerivative_of_isLeviCivita",
-    "PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita",
-    "PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita",
-    "PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita"
+    "PoincareCurvature.Palomar.parabolicDistance_dilation",
+    "PoincareCurvature.Palomar.parabolicClosedBall_zero_mapsTo_dilation",
+    "PoincareCurvature.Palomar.parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact",
+    "PoincareCurvature.Palomar.parabolicC0AlphaWith_comp_parabolicDistanceLe",
+    "PoincareCurvature.Palomar.parabolicC0AlphaWith_inv_sub_inv",
+    "PoincareCurvature.Palomar.parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall",
+    "PoincareCurvature.Palomar.parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall"
   ],
   "definition_names": [
-    "CovariantDerivative.TimeDependentRiemannianMetric.leviCivitaConnection",
-    "CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature",
-    "CovariantDerivative.TimeDependentRiemannianMetric.scalarCurvature"
+    "RicciFlow.AnalyticPDE.parabolicDistance",
+    "RicciFlow.AnalyticPDE.parabolicBall",
+    "RicciFlow.AnalyticPDE.parabolicClosedBall",
+    "RicciFlow.AnalyticPDE.ParabolicHolderWith",
+    "RicciFlow.AnalyticPDE.ParabolicBoundedWith",
+    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith",
+    "RicciFlow.AnalyticPDE.ParabolicC0AlphaOn",
+    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith.invSubBoundConst",
+    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith.invSubHolderConst"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": true

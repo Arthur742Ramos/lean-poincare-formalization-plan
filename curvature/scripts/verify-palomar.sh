@@ -101,9 +101,9 @@ imports = [
 if not imports or any(not module.startswith("Mathlib.") for module in imports):
     raise SystemExit(f"error: Challenge.lean imports outside Mathlib: {imports}")
 challenge_holes = len(re.findall(r"^\s*sorry\s*$", challenge_text, re.MULTILINE))
-if challenge_holes != 11:
+if challenge_holes != 7:
     raise SystemExit(
-        f"error: expected eleven deliberate Challenge holes, found {challenge_holes}"
+        f"error: expected seven deliberate Challenge theorem holes, found {challenge_holes}"
     )
 
 try:
@@ -111,28 +111,33 @@ try:
 except (OSError, UnicodeError, json.JSONDecodeError) as error:
     raise SystemExit(f"error: comparator.json is invalid: {error}")
 expected_theorems = [
-    "PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection",
-    "PoincareCurvature.Palomar.leviCivitaConnection_isLeviCivita",
-    "PoincareCurvature.Palomar.contMDiffCovariantDerivative_leviCivitaConnection",
-    "PoincareCurvature.Palomar.leviCivitaConnection_eq_leviCivitaConnection",
-    "PoincareCurvature.Palomar.contMDiffCovariantDerivative_of_isLeviCivita",
-    "PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita",
-    "PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita",
-    "PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita",
+    "PoincareCurvature.Palomar.parabolicDistance_dilation",
+    "PoincareCurvature.Palomar.parabolicClosedBall_zero_mapsTo_dilation",
+    "PoincareCurvature.Palomar.parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact",
+    "PoincareCurvature.Palomar.parabolicC0AlphaWith_comp_parabolicDistanceLe",
+    "PoincareCurvature.Palomar.parabolicC0AlphaWith_inv_sub_inv",
+    "PoincareCurvature.Palomar.parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall",
+    "PoincareCurvature.Palomar.parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall",
 ]
 expected_definitions = [
-    "CovariantDerivative.TimeDependentRiemannianMetric.leviCivitaConnection",
-    "CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature",
-    "CovariantDerivative.TimeDependentRiemannianMetric.scalarCurvature",
+    "RicciFlow.AnalyticPDE.parabolicDistance",
+    "RicciFlow.AnalyticPDE.parabolicBall",
+    "RicciFlow.AnalyticPDE.parabolicClosedBall",
+    "RicciFlow.AnalyticPDE.ParabolicHolderWith",
+    "RicciFlow.AnalyticPDE.ParabolicBoundedWith",
+    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith",
+    "RicciFlow.AnalyticPDE.ParabolicC0AlphaOn",
+    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith.invSubBoundConst",
+    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith.invSubHolderConst",
 ]
 if comparator.get("challenge_module") != "Challenge":
     raise SystemExit("error: comparator challenge_module must be Challenge")
 if comparator.get("solution_module") != "Solution":
     raise SystemExit("error: comparator solution_module must be Solution")
 if comparator.get("theorem_names") != expected_theorems:
-    raise SystemExit("error: comparator theorem surface does not match Submission 04")
+    raise SystemExit("error: comparator theorem surface does not match corrected Submission 04")
 if comparator.get("definition_names") != expected_definitions:
-    raise SystemExit("error: definition-hole surface does not match Submission 04")
+    raise SystemExit("error: auditable definition surface does not match corrected Submission 04")
 if comparator.get("enable_nanoda") is not True:
     raise SystemExit("error: comparator.json must enable NanoDa")
 if not set(comparator.get("permitted_axioms", [])) <= {
@@ -218,14 +223,13 @@ lake env lean Solution.lean
 lake env lean --src-deps Solution.lean
 lake env lean /dev/stdin <<'EOF'
 import Solution
-#print axioms PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection
-#print axioms PoincareCurvature.Palomar.leviCivitaConnection_isLeviCivita
-#print axioms PoincareCurvature.Palomar.contMDiffCovariantDerivative_leviCivitaConnection
-#print axioms PoincareCurvature.Palomar.leviCivitaConnection_eq_leviCivitaConnection
-#print axioms PoincareCurvature.Palomar.contMDiffCovariantDerivative_of_isLeviCivita
-#print axioms PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita
-#print axioms PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita
-#print axioms PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita
+#print axioms PoincareCurvature.Palomar.parabolicDistance_dilation
+#print axioms PoincareCurvature.Palomar.parabolicClosedBall_zero_mapsTo_dilation
+#print axioms PoincareCurvature.Palomar.parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact
+#print axioms PoincareCurvature.Palomar.parabolicC0AlphaWith_comp_parabolicDistanceLe
+#print axioms PoincareCurvature.Palomar.parabolicC0AlphaWith_inv_sub_inv
+#print axioms PoincareCurvature.Palomar.parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall
+#print axioms PoincareCurvature.Palomar.parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall
 EOF
 
 git diff --check

@@ -1,41 +1,44 @@
 # Palomar Submission 04
 
-## Time-dependent Levi–Civita families and curvature invariants
+## Parabolic scaling, compact localization, and inverse stability
 
-This candidate isolates the explicit-time geometric interface already proved
-in `PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TimeDependent.lean`.
-The time variable is represented by an `ℝ`-indexed family, and all geometric
-claims are made slice by slice. The selected surface is:
+This corrected candidate packages the parabolic-analysis interface in
+`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ParabolicHolder.lean`
+and its finite-cover composition in
+`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/InverseLocalization.lean`.
+It replaces the failed time-indexed Levi–Civita surface with a connected
+analytic result family:
 
-- `PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection`, existence
-  of a slicewise Levi–Civita family with C^1 slices;
-- `PoincareCurvature.Palomar.leviCivitaConnection_isLeviCivita`, correctness of
-  the canonical slicewise correction;
-- `PoincareCurvature.Palomar.contMDiffCovariantDerivative_leviCivitaConnection`,
-  preservation of slice regularity;
-- `PoincareCurvature.Palomar.leviCivitaConnection_eq_leviCivitaConnection`,
-  independence of the correction from the background family;
-- `PoincareCurvature.Palomar.contMDiffCovariantDerivative_of_isLeviCivita`,
-  regularity of every slicewise Levi–Civita family;
-- `PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita`, time-slice
-  symmetry of Ricci curvature; and
-- `PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita` and
-  `PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita`, invariance
-  of the two contractions under the choice of Levi–Civita family.
+- `PoincareCurvature.Palomar.parabolicDistance_dilation`, the exact
+  square-time/linear-space scaling identity;
+- `PoincareCurvature.Palomar.parabolicClosedBall_zero_mapsTo_dilation`, the
+  corresponding closed-ball transport statement;
+- `PoincareCurvature.Palomar.parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact`,
+  finite compact localization with closed-ball control;
+- `PoincareCurvature.Palomar.parabolicC0AlphaWith_comp_parabolicDistanceLe`,
+  pullback scaling of explicit parabolic Hölder constants;
+- `PoincareCurvature.Palomar.parabolicC0AlphaWith_inv_sub_inv`, an explicit
+  reciprocal-difference estimate; and
+- `PoincareCurvature.Palomar.parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall`
+  together with
+  `PoincareCurvature.Palomar.parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall`,
+  finite-cover globalization and its inverse-stability composition.
 
-This is a standard formalization/adaptation of the classical slicewise
-Levi–Civita and curvature theory, not a new theorem or priority claim. The
-source module implements the time-dependent results by applying the static
-constructions at each time; it does not assert time differentiability, a
-Ricci-flow solution, or a parabolic existence theorem.
+The intended research audience is geometric analysts working with parabolic
+chart estimates: the selected statements expose the exact anisotropic scaling,
+the compact localization mechanism, and explicit nonlinear reciprocal bounds
+needed when inverse coefficient families are globalized across a finite cover.
+The mathematical ingredients are standard, and the repository makes no claim
+of original discovery or priority. The new inverse-localization declaration is
+a repository-derived composition of the checked source lemmas, not a claimed
+independent external theorem.
 
-The Challenge imports only Mathlib and contains eight deliberate theorem holes
-plus three deliberate definition holes for the time-dependent Levi–Civita
-correction, Ricci curvature, and scalar curvature. The exact source types of
-those definitions are exposed so the Comparator can check the public
-interface, while `Solution.lean` imports the actual source module and proves
-all eight selected statements. This mechanism is documented in
-`formalization.yaml` and `AGENT-CONTRIBUTION-04.md`.
+The Challenge exposes the actual formulas for the parabolic distance, its open
+and closed balls, the bounded/Hölder predicates, the combined `C^{0,α}`
+predicate, and both reciprocal constants. It has seven deliberate theorem
+holes and no definition holes. It makes no manifold, Hausdorff, or
+sigma-compactness claim; the selected domain is arbitrary pseudo-metric
+time-space.
 
 ## Nested-project intake paths
 
@@ -50,8 +53,9 @@ repository-relative intake fields are:
 - license: the repository-root `LICENSE` file.
 
 The accepted Submission 01, passed Submission 02, and accepted Submission 03
-artifacts remain reproducible at their own immutable commits. This candidate
-uses a distinct time-dependent Comparator theorem/definition surface.
+artifacts remain reproducible at their own immutable commits. This corrected
+candidate supersedes the failed Submission 04 time-dependent surface and uses
+a distinct parabolic-analysis Comparator theorem surface.
 
 ## Local checks
 

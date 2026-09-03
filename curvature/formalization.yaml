@@ -2,14 +2,15 @@
 version: "v0.4"
 
 project:
-  name: "Time-dependent Levi–Civita families and curvature invariants in Lean"
+  name: "Parabolic Hölder localization and inverse stability in Lean"
   description: >-
-    Formalizes an explicit-time geometric interface for smooth finite-dimensional
-    Riemannian manifolds: slicewise Levi–Civita existence and regularity,
-    background-independent Levi–Civita correction, and time-slice Ricci and
-    scalar-curvature invariance. The time parameter is represented explicitly
-    as an indexed family; this submission does not claim time differentiability,
-    Ricci-flow existence, or a new mathematical theorem.
+    Formalizes a reusable anisotropic parabolic-analysis package for geometric
+    PDE: the square-root time/spatial parabolic distance, compact finite-ball
+    localization, pullback scaling, nonlinear reciprocal-difference bounds with
+    explicit constants, and a derived finite-cover inverse-localization theorem.
+    The selected result is a proof-bearing analytic framework for coefficient
+    stability in coordinate Ricci–DeTurck arguments; it does not claim a
+    Ricci-flow existence theorem or a new priority result.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -19,11 +20,11 @@ project:
     - "Arthur Freitas Ramos"
 
 classification:
-  arxiv: ["math.DG", "math.LO"]
-  msc2020: ["53C21", "53C25", "03B35"]
+  arxiv: ["math.AP", "math.DG", "math.LO"]
+  msc2020: ["35B65", "35K15", "53C44", "03B35"]
 
 sources:
-  - title: "Mathlib4 manifold and covariant-derivative infrastructure"
+  - title: "Mathlib4 analysis and metric-space infrastructure"
     authors:
       - "Mathlib contributors"
     id: "https://github.com/leanprover-community/mathlib4"
@@ -31,51 +32,49 @@ sources:
     location: "https://github.com/leanprover-community/mathlib4"
     relationship: "builds-on"
     note: >-
-      The development builds on Mathlib's manifold, tangent-bundle,
-      covariant-derivative, regularity, and Riemannian APIs. The selected
-      constructions and proofs are supplied by the PoincareCurvature source
-      package rather than asserted as Mathlib theorems.
+      The Challenge imports only Mathlib's real powers, norms, metric spaces,
+      compactness, finite sets, and basic analysis infrastructure. The selected
+      theorem proofs come from the PoincareCurvature source package.
     license: "Apache-2.0"
     author_endorsement: "not-contacted"
-  - title: "Foundations of Differential Geometry, Vol. I"
+  - title: "PoincareCurvature parabolic-analysis source package"
     authors:
-      - "Shoshichi Kobayashi"
-      - "Katsumi Nomizu"
-    id: "https://books.google.com/books/about/Foundations_of_Differential_Geometry_Vol.html?id=ss7bEAAAQBAJ"
-    type: "book"
-    location: "https://books.google.com/books/about/Foundations_of_Differential_Geometry_Vol.html?id=ss7bEAAAQBAJ"
+      - "Arthur Freitas Ramos"
+      - "David Barros Hulak"
+      - "Ruy J. G. B. de Queiroz"
+    id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan"
+    type: "software"
+    location: "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ParabolicHolder.lean"
     relationship: "formalizes"
     note: >-
-      The classical source supplies the underlying fundamental theorem of
-      Riemannian geometry, uniqueness of the Levi–Civita connection, and the
-      standard curvature/Ricci contraction identities. The selected results
-      are not presented as independently discovered: they are an explicit
-      ℝ-indexed adaptation of those slicewise statements, implemented in
-      `PoincareCurvature/.../CovariantDerivative/TimeDependent.lean` by
-      applying the static constructions at each time. The repository's
-      contribution is the Lean interface, proof integration, and checked
-      regularity/invariance package; no priority claim is made.
-    license: "unknown"
+      The source modules prove the parabolic metric, exact anisotropic scaling,
+      compact localization, pullback, Hölder closure, and nonlinear reciprocal
+      estimates selected here. The added inverse-localization theorem is an
+      explicit composition of those source lemmas, not a translation of a
+      separately claimed external theorem. The result is presented as
+      repository-level formalization and proof engineering, not as an original
+      mathematical discovery or priority claim.
+    license: "Apache-2.0"
     author_endorsement: "not-contacted"
 
 related_formalizations: []
 
 status:
   scope: >-
-    The selected surface covers arbitrary smooth finite-dimensional model
-    spaces, Hausdorff manifolds, C^2 time-indexed Riemannian metrics on the
-    tangent bundle, time-indexed covariant derivatives, and the explicit
-    slice-wise C^1 hypotheses used by the source results. It selects eight
-    theorem statements: time-dependent Levi–Civita existence, correction
-    correctness and regularity, background-family independence, regularity of
-    every slicewise Levi–Civita family, Ricci symmetry, and Ricci/scalar
-    invariance. `Challenge.lean` contains eleven deliberate holes: eight
-    theorem holes and three definition holes for the time-dependent
-    Levi–Civita correction, Ricci curvature, and scalar curvature. The
-    corresponding `Solution.lean` declarations use the actual constructions
-    and proofs from `TimeDependent.lean`.
-  sorry_count: 11
-  sorry_in_definitions: 3
+    The selected domain is arbitrary pseudo-metric time-space `ℝ × X`; no
+    manifold, Hausdorff, sigma-compactness, or Ricci-flow solution assumption
+    is hidden in the stated surface. The package exposes the square-root
+    time-weighted parabolic distance, open and closed parabolic balls,
+    `ParabolicHolderWith`, `ParabolicBoundedWith`, `ParabolicC0AlphaWith`, and
+    `ParabolicC0AlphaOn` with their actual formulas. It selects seven theorem
+    statements: exact parabolic dilation scaling; dilation transport of the
+    origin-centered closed ball; finite compact localization into
+    closed-ball-controlled open covers; pullback scaling; finite-cover
+    `C^{0,α}` globalization; explicit reciprocal-difference stability; and the
+    derived finite-cover inverse-localization result. `Challenge.lean` contains
+    seven deliberate theorem holes and no definition holes.
+  sorry_count: 7
+  sorry_in_definitions: 0
   axioms: []
 
 automation:
@@ -84,123 +83,99 @@ automation:
       models: ["GPT-5 Codex"]
       framework: "Codex with Lean 4.33 and Mathlib"
       tool_setup: >-
-        Repository-scoped source audit; exact Challenge/Solution declaration
-        alignment; pinned Lean builds; and independent Comparator/NanoDa
-        replay with the time-dependent theorem and definition surface.
+        Repository-scoped source audit; exact Challenge/Solution alignment;
+        pinned Lean builds; and independent Comparator/NanoDa replay over the
+        parabolic theorem and definition surface.
       cost:
         wall_time: "not tracked"
         spend_usd: "subscription-based"
         hardware: "local machine"
       prompting_notes: >-
-        GPT-5 Codex materially performed the Submission 04 source audit of the
-        time-dependent module, theorem-cluster selection proposal, exact
-        Challenge/Solution drafting, definition-hole setup, Comparator and
-        verifier updates, documentation, and reproducibility checks. The agent
-        did not determine authorship, source priority, or mathematical novelty.
-        Human authors selected and approved the theorem family, author list,
-        source relationship, scope limits, and final public artifact; human
-        oversight included review of the source and diff plus authorization of
-        the public push. Lean's kernel and the independent Comparator/NanoDa
-        replay supplied automated checks.
+        GPT-5 Codex performed the source audit, selected the corrected analytic
+        theorem cluster, drafted the Challenge/Solution declarations, added the
+        finite-cover inverse-localization composition, updated the verifier and
+        documentation, and ran reproducibility checks. Humans selected and
+        approved the authorship, mathematical boundary, source relationship,
+        scope limits, and final public artifact; they reviewed the source/diff
+        and authorized the public push and Palomar submission. Lean's kernel and
+        the independent Comparator/NanoDa replay verify formal consistency and
+        reproducibility, not authorship or novelty.
   spend_usd: "subscription-based"
-  notes: >-
-    Fuller role and oversight record: the immutable repository document at
-    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/eee14606d83153a96223c31ad43d404d4f46b0ee/curvature/AGENT-CONTRIBUTION-04.md.
-    It distinguishes agent proof
+  notes: |
+    Fuller role and oversight record: the immutable repository document is
+    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/eee14606d83153a96223c31ad43d404d4f46b0ee/curvature/AGENT-CONTRIBUTION-04.md
+    This pointer is updated to the corrected candidate's package commit before
+    the final metadata commit. The document distinguishes agent proof
     engineering and packaging from human mathematical selection, attribution,
     review, and publication responsibility.
 
 fidelity:
   divergences: >-
-    The Challenge imports only Mathlib and reconstructs the public vocabulary
-    needed by the selected statements: time-indexed covariant derivatives and
-    Riemannian metrics, the slicewise Levi–Civita predicate, and the three
-    time-dependent constructions. The declarations of
-    `TimeDependentRiemannianMetric.leviCivitaConnection`, `ricciCurvature`,
-    and `scalarCurvature` are deliberate Comparator definition holes: their
-    exact source types are exposed, while their bodies are supplied by the
-    implementation imported by `Solution.lean`. The eight theorem declarations
-    remain ordinary statement holes and are compared exactly. This is an
-    intentional statement/implementation separation for independent replay,
-    not an omission from the proved source package.
+    `Challenge.lean` imports only Mathlib and reproduces the selected public
+    vocabulary with auditable formulas. Its definitions are ordinary Lean
+    definitions, not `sorry` declarations. `Solution.lean` imports the checked
+    PoincareCurvature parabolic source modules and supplies exact wrappers for
+    the seven selected statements, including the new finite-cover composition.
+    No Ricci or scalar-curvature function is selected, and no theorem is
+    represented by an unconstrained time-indexed repackaging.
 
 review:
   status: "self-assessed"
   reviewers:
     - "none"
   notes: >-
-    Submission 04 is a library-level theorem cluster with an explicit time
-    parameter. Its substantive boundary is the combination of existential
-    slicewise selection, regularity transfer, background-independent
-    Levi–Civita correction, and intrinsic Ricci/scalar invariants; it is not
-    merely a renamed pointwise theorem. The mathematics is standard and is
-    described as a formalization/adaptation, not as an original result. It does
-    not claim time-dependent PDE estimates, short-time Ricci-flow existence, or
-    any broader point-4 theorem.
+    This corrected candidate replaces the failed time-indexed Levi–Civita
+    surface. Its research-interest case is the connected analytic mechanism:
+    exact anisotropic dilation and closed-ball transport feed compact
+    finite-cover globalization, change-of-variables scaling, and explicit
+    nonlinear reciprocal-difference control, culminating in a finite-cover
+    inverse-localization theorem. That theorem family is directly reusable for
+    inverse metric coefficients in geometric PDE chart estimates. The
+    mathematical ingredients are standard and the repository makes no
+    originality or priority claim; the contribution is the checked,
+    compositional Lean artifact and its explicit constants.
 
 alignment:
   namespace: "PoincareCurvature.Palomar"
   statements:
-    - source: "Time-dependent Levi–Civita family existence with slice regularity"
-      lean: "PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection"
+    - source: "Exact parabolic dilation scaling"
+      lean: "PoincareCurvature.Palomar.parabolicDistance_dilation"
       module: "Solution.lean"
       status: "proved"
-      note: >-
-        A C^2 time-indexed metric family admits a slicewise Levi–Civita family
-        whose slices are C^1.
-    - source: "Slicewise Levi–Civita correction correctness"
-      lean: "PoincareCurvature.Palomar.leviCivitaConnection_isLeviCivita"
+      note: "Scaling time by `r^2` and space by `r` scales the distance by exactly `|r|`."
+    - source: "Dilation transport of the origin-centered closed ball"
+      lean: "PoincareCurvature.Palomar.parabolicClosedBall_zero_mapsTo_dilation"
       module: "Solution.lean"
       status: "proved"
-      note: >-
-        The canonical correction of any background family is Levi–Civita for
-        the metric family at each time.
-    - source: "Regularity preservation by the slicewise correction"
-      lean: "PoincareCurvature.Palomar.contMDiffCovariantDerivative_leviCivitaConnection"
+      note: "The exact dilation maps the closed ball of radius `ρ` into the ball of radius `|r| * ρ`."
+    - source: "Finite compact parabolic localization"
+      lean: "PoincareCurvature.Palomar.parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact"
       module: "Solution.lean"
       status: "proved"
-      note: >-
-        Slice-wise C^1 regularity of the background family is preserved by the
-        Levi–Civita correction.
-    - source: "Background-family independence of the Levi–Civita correction"
-      lean: "PoincareCurvature.Palomar.leviCivitaConnection_eq_leviCivitaConnection"
+      note: "A compact subset of an open set admits a finite parabolic-ball cover whose matching closed balls stay inside the open set."
+    - source: "Parabolic pullback scaling"
+      lean: "PoincareCurvature.Palomar.parabolicC0AlphaWith_comp_parabolicDistanceLe"
       module: "Solution.lean"
       status: "proved"
-      note: >-
-        Any two background families produce the same corrected connection on
-        smooth sections at every time.
-    - source: "Regularity of every slicewise Levi–Civita family"
-      lean: "PoincareCurvature.Palomar.contMDiffCovariantDerivative_of_isLeviCivita"
+      note: "A map with controlled parabolic-distance expansion transports `C^{0,α}` control with the explicit factor `L^α`."
+    - source: "Finite-cover `C^{0,α}` globalization"
+      lean: "PoincareCurvature.Palomar.parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall"
       module: "Solution.lean"
       status: "proved"
-      note: >-
-        Under the compactness and metric hypotheses, every family satisfying
-        the slicewise Levi–Civita predicate has the selected C^1 regularity.
-    - source: "Time-slice Ricci symmetry for Levi–Civita families"
-      lean: "PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita"
+      note: "Local existential bounded/Hölder controls on doubled closed balls globalize over a finite parabolic cover."
+    - source: "Explicit reciprocal-difference stability"
+      lean: "PoincareCurvature.Palomar.parabolicC0AlphaWith_inv_sub_inv"
       module: "Solution.lean"
       status: "proved"
-      note: >-
-        The Ricci contraction is symmetric at each time under the stated
-        regularity and manifold hypotheses.
-    - source: "Time-dependent Ricci invariance"
-      lean: "PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita"
+      note: "The displayed reciprocal bound uses the actual `invSubBoundConst` and `invSubHolderConst` formulas under a common lower norm bound."
+    - source: "Finite-cover inverse localization"
+      lean: "PoincareCurvature.Palomar.parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall"
       module: "Solution.lean"
       status: "proved"
-      note: >-
-        The Ricci contraction agrees for any two regular slicewise
-        Levi–Civita families for the same metric family.
-    - source: "Time-dependent scalar-curvature invariance"
-      lean: "PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita"
-      module: "Solution.lean"
-      status: "proved"
-      note: >-
-        The scalar trace contraction likewise agrees for any two regular
-        slicewise Levi–Civita families.
+      note: "The repository-derived composition globalizes local controls for two nonvanishing families and their difference before applying reciprocal stability."
 
 acknowledgements: >-
-  Mathlib contributors for the manifold, vector-bundle, covariant-derivative,
-  regularity, and Riemannian infrastructure; Kobayashi and Nomizu and the
-  classical differential-geometry literature for the underlying theorem
-  family; the human authors and reviewers for selection and verification; and
-  the Palomar Registry project for the statement/solution Comparator workflow.
+  Mathlib contributors for the real-analysis, normed-group, metric-space, and
+  compactness infrastructure; the human authors for mathematical selection,
+  authorship, attribution, review, and publication responsibility; and the
+  Palomar Registry project for the statement/solution Comparator workflow.
