@@ -2,17 +2,21 @@
 version: "v0.4"
 
 project:
-  name: "Ricci-DeTurck gauge reduction and curvature transport in Lean"
+  name: "Ricci-DeTurck pullback transport and metric-cone evolution in Lean"
   description: >-
-    Formalizes the gauge-reduction identity behind the Ricci-DeTurck method.
-    In a time-dependent bilinear-tensor model, an anchored gauge pulls back the
-    metric and tangent data; when the source satisfies the Ricci-DeTurck
-    equation and the gauge correction is subtracted, the transformed velocity
-    is exactly the intrinsic `-2 Ric` velocity. The selected theorem family
-    also proves preservation of the initial metric and invariance of the
-    finite-dimensional Ricci trace under tangent-map conjugation. This is a
-    geometric transport and cancellation result, not a claim of the full
-    nonlinear compact-manifold Ricci-flow existence theorem.
+    Formalizes an auditable coordinate reduction of the Ricci-DeTurck method.
+    Metrics are continuous bilinear forms, the Ricci tensor is explicitly the
+    metric composed with a specified Ricci endomorphism. Independent Frechet,
+    gauge, and tangent-transport derivative data yield the derivative of the
+    pulled-back metric. The capstone combines that calculation with the source
+    Ricci-DeTurck equation and proves intrinsic -2 Ric evolution. A Ricci
+    vector field on the same bilinear-form state space has a Picard-Lindelof
+    existence and uniqueness theorem inside the symmetric positive-definite
+    cone. A finite-dimensional scalar-trace transport lemma is retained as
+    supporting code but is not selected as a standalone claim. This is a
+    coordinate adaptation of the gauge mechanism, not the full nonlinear
+    compact-manifold Ricci-flow existence theorem and not a claim of original
+    mathematical discovery.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -32,13 +36,13 @@ sources:
     id: "10.4310/jdg/1214509286"
     type: "article"
     location: "https://doi.org/10.4310/jdg/1214509286"
-    relationship: "formalizes"
+    relationship: "adapts"
     note: >-
-      The selected theorem family formalizes the Ricci-DeTurck gauge
-      correction, its cancellation against the source equation, and the
-      curvature transport readout in an explicit bilinear-tensor model. It
-      does not claim DeTurck's full nonlinear short-time theorem or its
-      original priority.
+      This is the mathematical source for the Ricci-DeTurck gauge idea and
+      the pullback reduction from a gauge-fixed equation to Ricci flow. The
+      Lean result adapts that mechanism to an explicit fixed-tangent model;
+      it does not purport to formalize DeTurck's full nonlinear parabolic
+      short-time theorem or to claim priority for the underlying mathematics.
     license: "unknown"
     author_endorsement: "not-contacted"
 
@@ -46,18 +50,18 @@ related_formalizations: []
 
 status:
   scope: >-
-    The selected Challenge surface is an explicit time-dependent bilinear
-    tensor model over a point type `M` and a fixed normed real tangent model
-    `E`. `pullbackBilinear` is the usual pullback by a gauge map and tangent
-    transport. `SatisfiesDeTurckEquation` states the source Ricci-DeTurck
-    equation after evaluation at the gauge image, and `IsIntrinsicRicciFlow`
-    states scalar time differentiation together with the `-2 Ric` law. The
-    seven compared declarations prove the gauge correction cancellation,
-    derivative and initial-value readouts, the resulting intrinsic-flow
-    theorem, and trace invariance under finite-dimensional conjugation. The
-    development does not claim arbitrary compact-manifold local existence,
-    Schauder estimates, or the Poincare Conjecture.
-  sorry_count: 7
+    The selected Challenge surface is a typed time-dependent coordinate model
+    over a normed base type M and a normed real tangent model E. A metric is a
+    continuous bilinear form E ->L E ->L R. `ricciTensor` is metric composition
+    with an explicitly supplied continuous Ricci endomorphism. The derivative
+    theorem uses independent Frechet derivatives for the metric, time
+    derivatives for the gauge, and time derivatives for the tangent transport.
+    The final two theorems use the explicitly defined Ricci vector field on the
+    bilinear-form state space and give Picard-Lindelof existence and uniqueness
+    inside the positive-definite cone. The surface is not an
+    arbitrary-Hausdorff-manifold regularity theorem and does not claim
+    Schauder estimates or compact-manifold Ricci-flow local existence.
+  sorry_count: 6
   sorry_in_definitions: 0
   axioms: []
 
@@ -67,112 +71,109 @@ automation:
       models: ["GPT-5 Codex"]
       framework: "Codex with Lean 4.33 and Mathlib"
       tool_setup: >-
-        Repository-scoped audit of the prior Palomar review, theorem-boundary
-        redesign toward the geometric Ricci-DeTurck gauge reduction, exact
-        Challenge/Solution alignment, pinned Lean builds, source-closure and
-        metadata checks, and independent Comparator/NanoDa replay.
+        The agent audited the Palomar rejection, redesigned the Comparator
+        boundary around typed bilinear forms and Ricci transport, implemented
+        the Challenge/Solution declarations and proofs, synchronized the
+        repository documents, and ran Lean, source-closure, metadata, and
+        Comparator/NanoDa checks. Human authors selected and approved the
+        mathematical target, source relationship, authorship, limitations,
+        and submission decision.
       cost:
         wall_time: "not tracked"
         spend_usd: "subscription-based"
         hardware: "local machine"
       prompting_notes: >-
-        GPT-5 Codex identified that the earlier frozen affine ODE selection was
-        routine for Palomar's research-interest gate, then prepared this
-        focused gauge-reduction and curvature-transport surface. Humans
-        selected and approved the authorship, source relationship, theorem
-        boundary, limitations, and publication decision. Lean kernel and
-        independent Comparator/NanoDa replay verify formal consistency and
-        reproducibility, not authorship or novelty.
+        GPT-5 Codex supplied proof engineering, repository editing, and
+        reproducibility checks. It did not determine mathematical authorship,
+        source priority, or novelty. Human oversight consisted of selecting
+        the result family, reviewing the exact definitions and hypotheses,
+        checking the provenance and limitations, and approving publication.
   spend_usd: "subscription-based"
   notes: |
-    Fuller role and oversight record: the immutable repository document is
-    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/ec6216b7a9331df24dba822ea154a022e5d3168f/curvature/AGENT-CONTRIBUTION-04.md
-    It records the agent's proof-engineering and packaging role separately from
-    the human authors' mathematical selection, attribution, review, and
-    publication responsibility. This pointer is replaced by the immutable
-    public commit containing that document before Palomar intake.
+    Fuller contribution and oversight record: the immutable public document is
+    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/eb688e34a070d6195c0cc1cb4c215b2127b87fc9/curvature/AGENT-CONTRIBUTION-04.md
+    This immutable commit contains the corrected record and the synchronized
+    Comparator surface.
 
 fidelity:
   divergences: >-
-    `Challenge.lean` imports only Mathlib and states the gauge pullback,
-    Ricci-DeTurck source equation, corrected velocity, scalar derivative, and
-    trace-conjugation identities in an explicit fixed-tangent-model setting.
-    `Solution.lean` proves the same declarations and additionally imports the
-    checked Ricci-flow gauge-transport development, whose concrete
-    `GaugeReducedIntrinsicDeTurckLocalSolution` and
-    `ResearchTheorems` results motivate and implement the selected boundary.
-    The abstraction is intentional: it makes the mathematical statement
-    auditable without importing the large project-specific manifold source
-    closure into Challenge.
+    `Challenge.lean` imports only Mathlib and exposes the exact formulas and
+    hypotheses compared by Palomar. `Solution.lean` proves the same
+    declarations directly from pinned Mathlib calculus, linear-algebra, and
+    ODE results. The larger manifold-level Ricci-flow files in the repository
+    provide implementation context and source development, but are not
+    imported into either compared surface, so no project-local theorem is
+    hidden behind the Challenge boundary.
 
 review:
   status: "self-assessed"
   reviewers:
     - "none"
   notes: >-
-    This submission replaces the prior routine frozen affine Banach-space ODE
-    selection with the geometric identity that gives the Ricci-DeTurck method
-    its research relevance. The compared statements isolate the pullback
-    metric, source-equation cancellation, initial-time anchoring, intrinsic
-    Ricci-flow consequence, and curvature trace transport. The result is
-    classical and is presented as a formalization/adaptation, not an original
-    theorem or a claim of full Ricci-flow local existence.
+    This revision addresses the previous review by removing the stale
+    frozen-affine Comparator description, replacing the unconstrained scalar
+    Ricci family with typed bilinear and endomorphism data, removing the
+    derivative theorem that assumed its conclusion, removing the routine
+    standalone trace theorem from the selected surface, and specializing the
+    metric-cone theorems to the explicitly defined Ricci vector field. The
+    result remains explicitly presented as a standard adaptation of the
+    Ricci-DeTurck mechanism rather than an original theorem or a claim of full
+    nonlinear PDE local existence.
 
 alignment:
   namespace: "PoincareCurvature.Palomar"
   statements:
-    - source: "Gauge pullback evaluation"
-      lean: "PoincareCurvature.Palomar.pullbackBilinear_apply"
+    - source: "Gauge-pullback derivative from independent C1 data"
+      lean: "PoincareCurvature.Palomar.gauge_pullback_has_derivAt_of_C1_data"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        Identifies the pulled-back bilinear tensor with the usual metric and
-        tangent-map evaluation at the gauge image.
-    - source: "Ricci-DeTurck correction cancellation"
-      lean: "PoincareCurvature.Palomar.gauge_corrected_velocity_eq_neg_two_pullbackRicci"
+        Applies the chain rule and two continuous-linear-map product rules to
+        the explicitly defined pullback; the target derivative is not assumed.
+    - source: "Ricci-tensor pullback transport"
+      lean: "PoincareCurvature.Palomar.ricciTensor_pullback_transport"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        Subtracting the gauge correction from the source Ricci-DeTurck equation
-        leaves exactly the pulled-back intrinsic `-2 Ric` term.
-    - source: "Gauge-pulled metric derivative"
-      lean: "PoincareCurvature.Palomar.gauge_reduction_has_derivAt"
+        The explicit definition `ricciTensor g R = g.comp R` makes the
+        tangent-conjugation identity auditable by evaluation.
+    - source: "Positive-definite metric pullback"
+      lean: "PoincareCurvature.Palomar.pullbackMetric_preserves_symmetricPositiveDefinite"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        Transfers the verified scalar time derivative of the pullback metric
-        into the corrected velocity readout.
-    - source: "Anchored initial metric preservation"
-      lean: "PoincareCurvature.Palomar.anchored_pullbackBilinear_eq_initial"
-      module: "Solution.lean"
-      status: "proved"
-      note: >-
-        An anchored gauge and identity tangent transport at the initial time
-        preserve the initial bilinear tensor.
-    - source: "Intrinsic Ricci-flow gauge reduction"
+        The tangent transport is an equivalence, so symmetry and strict
+        positivity of the source metric form are preserved by the explicit
+        pullback formula. The correction-cancellation lemma and scalar trace
+        transport are retained as internal supporting facts, not selected as
+        standalone results.
+    - source: "Typed intrinsic Ricci-flow gauge reduction"
       lean: "PoincareCurvature.Palomar.ricciDeTurckGaugeReduction"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        Combines derivative data with Ricci-DeTurck cancellation to produce the
-        intrinsic Ricci-flow law for the pulled-back metric.
-    - source: "Curvature trace conjugation"
-      lean: "PoincareCurvature.Palomar.trace_conjugation_invariant"
+        Combines the independently derived pullback derivative, source
+        cancellation, and Ricci-tensor transport into the intrinsic flow law.
+    - source: "Metric-cone Picard-Lindelof existence"
+      lean: "PoincareCurvature.Palomar.metricCone_local_flow_exists"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        Proves the finite-dimensional Ricci trace is unchanged by tangent-map
-        conjugation.
-    - source: "Gauge-reduction curvature readout"
-      lean: "PoincareCurvature.Palomar.gauge_reduction_trace_readout"
+        Constructs a local evolution for the explicitly defined Ricci vector
+        field on bilinear forms that remains inside the symmetric-positive-
+        definite metric cone under an explicit inclusion.
+    - source: "Metric-cone solution uniqueness"
+      lean: "PoincareCurvature.Palomar.metricCone_local_flow_unique"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        Applies trace conjugation to the scalar velocity readout used by the
-        Ricci-DeTurck transport formula.
+        Uses the state-constrained ODE uniqueness theorem on the common
+        forward interval, retaining the cone hypotheses in the conclusion.
 
 acknowledgements: >-
-  Mathlib contributors for the calculus, normed-space, and finite-dimensional
-  trace infrastructure; the human authors for mathematical selection,
-  authorship, attribution, review, and publication responsibility; and the
-  Palomar Registry project for the statement/solution Comparator workflow.
+  Mathlib contributors for the calculus, continuous-linear-map,
+  finite-dimensional trace, and Picard-Lindelof infrastructure; Dennis M.
+  DeTurck for the source Ricci-DeTurck mechanism; the human authors for
+  mathematical selection, authorship, attribution, review, and publication
+  responsibility; and the Palomar Registry project for the
+  statement/solution Comparator workflow.
