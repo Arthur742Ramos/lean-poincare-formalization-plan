@@ -1,163 +1,78 @@
-import Mathlib.Analysis.SpecialFunctions.Pow.Real
-import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
 import Mathlib.Analysis.Normed.Operator.NormedSpace
-import Mathlib.Topology.MetricSpace.Basic
-import Mathlib.Topology.MetricSpace.Cover
-import Mathlib.Topology.MetricSpace.ProperSpace
+import Mathlib.Analysis.SpecialFunctions.Exponential
 
 @[expose] public noncomputable section
 
-open Set
-open scoped Topology NNReal BigOperators
-
 namespace RicciFlow
 namespace AnalyticPDE
+namespace SmoothDependenceCk
 
-def parabolicDistance {X : Type*} [PseudoMetricSpace X] (p q : ℝ × X) : ℝ :=
-  max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2)
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-def parabolicBall {X : Type*} [PseudoMetricSpace X] (p : ℝ × X) (R : ℝ) :
-    Set (ℝ × X) :=
-  {q | parabolicDistance p q < R}
+/-- The augmented generator `(v, s) ↦ (L v + s • b, 0)` for an affine ODE. -/
+noncomputable def affineAugment (L : E →L[ℝ] E) (b : E) : (E × ℝ) →L[ℝ] (E × ℝ) :=
+  (L.comp (ContinuousLinearMap.fst ℝ E ℝ)
+      + (ContinuousLinearMap.snd ℝ E ℝ).smulRight b).prod (0 : (E × ℝ) →L[ℝ] ℝ)
 
-def parabolicClosedBall {X : Type*} [PseudoMetricSpace X] (p : ℝ × X) (R : ℝ) :
-    Set (ℝ × X) :=
-  {q | parabolicDistance p q ≤ R}
+/-- First coordinate of the augmented operator-exponential orbit through `(y₀, 1)`. -/
+noncomputable def affineFundamentalSolution
+    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) : E :=
+  (NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, 1)).1
 
-namespace parabolicBall
-end parabolicBall
-
-def ParabolicHolderWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
-    (C α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
-  ∀ ⦃p : ℝ × X⦄, p ∈ s → ∀ ⦃q : ℝ × X⦄, q ∈ s →
-    ‖u p - u q‖ ≤ C * (parabolicDistance p q) ^ α
-
-def ParabolicBoundedWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
-    (B : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
-  ∀ ⦃p : ℝ × X⦄, p ∈ s → ‖u p‖ ≤ B
-
-def ParabolicC0AlphaWith {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
-    (B H α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
-  ParabolicBoundedWith B u s ∧ ParabolicHolderWith H α u s
-
-def ParabolicC0AlphaOn {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
-    (α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
-  ∃ B ≥ 0, ∃ H ≥ 0, ParabolicC0AlphaWith B H α u s
-
-namespace ParabolicC0AlphaWith
-
-variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
-variable {B H α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
-
-def invSubBoundConst (δ Bd : ℝ) : ℝ :=
-  (δ⁻¹ * Bd) * δ⁻¹
-
-def invSubHolderConst (δ Ha Hb Bd Hd : ℝ) : ℝ :=
-  (δ⁻¹ * Bd) * (δ⁻¹ * Hb * δ⁻¹) +
-    δ⁻¹ * (δ⁻¹ * Hd + Bd * (δ⁻¹ * Ha * δ⁻¹))
-
-end ParabolicC0AlphaWith
-
-namespace ParabolicC0AlphaOn
-
-variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
-variable {α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
-
-end ParabolicC0AlphaOn
-
+end SmoothDependenceCk
 end AnalyticPDE
 end RicciFlow
 
 namespace PoincareCurvature.Palomar
 
-theorem parabolicDistance_dilation
-    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
-    (r : ℝ) (p q : ℝ × X) :
-    RicciFlow.AnalyticPDE.parabolicDistance
-        (r ^ 2 * p.1, r • p.2) (r ^ 2 * q.1, r • q.2) =
-      |r| * RicciFlow.AnalyticPDE.parabolicDistance p q := by
+theorem affineAugment_snd_orbit_eq_one
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) :
+    (NormedSpace.exp ((t - t₀) • RicciFlow.AnalyticPDE.SmoothDependenceCk.affineAugment L b)
+      (y₀, 1)).2 = 1 := by
   sorry
 
-theorem parabolicClosedBall_zero_mapsTo_dilation
-    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] {r ρ : ℝ} :
-    Set.MapsTo (fun p : ℝ × X => (r ^ 2 * p.1, r • p.2))
-      (RicciFlow.AnalyticPDE.parabolicClosedBall (0 : ℝ × X) ρ)
-      (RicciFlow.AnalyticPDE.parabolicClosedBall (0 : ℝ × X) (|r| * ρ)) := by
+theorem affineFundamentalSolution_initial
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) :
+    RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀ t₀ = y₀ := by
   sorry
 
-theorem parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact
-    {X : Type*} [PseudoMetricSpace X] {K U : Set (ℝ × X)}
-    (hK : IsCompact K) (hUopen : IsOpen U) (hKU : K ⊆ U) :
-    ∃ N : Finset (ℝ × X),
-      (∀ x ∈ N, x ∈ K) ∧
-      ∃ R : (ℝ × X) → ℝ,
-        (∀ x ∈ N, 0 < R x) ∧
-        (∀ x ∈ N, RicciFlow.AnalyticPDE.parabolicClosedBall x (R x) ⊆ U) ∧
-        K ⊆ ⋃ x ∈ N, RicciFlow.AnalyticPDE.parabolicBall x (R x) := by
+theorem hasDerivAt_affineFundamentalSolution
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) :
+    HasDerivAt (RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀)
+      (L (RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀ t) + b) t := by
   sorry
 
-theorem parabolicC0AlphaWith_comp_parabolicDistanceLe
-    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
-    {B H α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
-    {Y : Type*} [PseudoMetricSpace Y] {L : ℝ}
-    {φ : ℝ × Y → ℝ × X} {t : Set (ℝ × Y)}
-    (hu : RicciFlow.AnalyticPDE.ParabolicC0AlphaWith B H α u s)
-    (hH : 0 ≤ H) (hα : 0 ≤ α) (hL : 0 ≤ L)
-    (hmaps : Set.MapsTo φ t s)
-    (hφ : ∀ ⦃p : ℝ × Y⦄, p ∈ t → ∀ ⦃q : ℝ × Y⦄, q ∈ t →
-      RicciFlow.AnalyticPDE.parabolicDistance (φ p) (φ q) ≤
-        L * RicciFlow.AnalyticPDE.parabolicDistance p q) :
-    RicciFlow.AnalyticPDE.ParabolicC0AlphaWith B (H * L ^ α) α
-      (fun p => u (φ p)) t := by
+theorem affineODE_unique
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    (L : E →L[ℝ] E) (b : E) {y₁ y₂ : ℝ → E}
+    (h1 : ∀ t, HasDerivAt y₁ (L (y₁ t) + b) t)
+    (h2 : ∀ t, HasDerivAt y₂ (L (y₂ t) + b) t)
+    {t₀ : ℝ} (h : y₁ t₀ = y₂ t₀) (t : ℝ) : y₁ t = y₂ t := by
   sorry
 
-theorem parabolicC0AlphaWith_inv_sub_inv
-    {X : Type*} [PseudoMetricSpace X]
-    {𝕜 : Type*} [NormedField 𝕜] {δ : ℝ}
-    {a b : ℝ × X → 𝕜} {Ba Ha Bb Hb Bd Hd α : ℝ} {s : Set (ℝ × X)}
-    (ha : RicciFlow.AnalyticPDE.ParabolicC0AlphaWith Ba Ha α a s)
-    (hb : RicciFlow.AnalyticPDE.ParabolicC0AlphaWith Bb Hb α b s)
-    (hdiff : RicciFlow.AnalyticPDE.ParabolicC0AlphaWith Bd Hd α
-      (fun z => a z - b z) s)
-    (hδpos : 0 < δ)
-    (hδa : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖a p‖)
-    (hδb : ∀ ⦃p : ℝ × X⦄, p ∈ s → δ ≤ ‖b p‖)
-    (hBd : 0 ≤ Bd) :
-    RicciFlow.AnalyticPDE.ParabolicC0AlphaWith
-      (RicciFlow.AnalyticPDE.ParabolicC0AlphaWith.invSubBoundConst δ Bd)
-      (RicciFlow.AnalyticPDE.ParabolicC0AlphaWith.invSubHolderConst
-        δ Ha Hb Bd Hd) α
-      (fun z => (a z)⁻¹ - (b z)⁻¹) s := by
+theorem eq_affineFundamentalSolution_of_hasDerivAt
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) {y : ℝ → E}
+    (hy : ∀ t, HasDerivAt y (L (y t) + b) t) (h0 : y t₀ = y₀) (t : ℝ) :
+    y t = RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀ t := by
   sorry
 
-theorem parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall
-    {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E]
-    {α : ℝ} {u : ℝ × X → E} {r : ℝ} {K : Set (ℝ × X)}
-    (N : Finset (ℝ × X)) (hα : 0 < α) (hr : 0 < r)
-    (hcover : K ⊆ ⋃ y ∈ N, RicciFlow.AnalyticPDE.parabolicBall y r)
-    (hlocal : ∀ y ∈ N, RicciFlow.AnalyticPDE.ParabolicC0AlphaOn α u
-      (RicciFlow.AnalyticPDE.parabolicClosedBall y (2 * r))) :
-    RicciFlow.AnalyticPDE.ParabolicC0AlphaOn α u K := by
+theorem norm_affineFundamentalSolution_le
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) :
+    ‖RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀ t‖
+      ≤ Real.exp (|t - t₀| * (‖L‖ + ‖b‖)) * ‖(y₀, (1 : ℝ))‖ := by
   sorry
 
-theorem parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall
-    {X : Type*} [PseudoMetricSpace X]
-    {𝕜 : Type*} [NormedField 𝕜] {α δ r : ℝ} {K : Set (ℝ × X)}
-    (N : Finset (ℝ × X)) (hα : 0 < α) (hr : 0 < r)
-    {a b : ℝ × X → 𝕜}
-    (hcover : K ⊆ ⋃ y ∈ N, RicciFlow.AnalyticPDE.parabolicBall y r)
-    (hlocal_a : ∀ y ∈ N, RicciFlow.AnalyticPDE.ParabolicC0AlphaOn α a
-      (RicciFlow.AnalyticPDE.parabolicClosedBall y (2 * r)))
-    (hlocal_b : ∀ y ∈ N, RicciFlow.AnalyticPDE.ParabolicC0AlphaOn α b
-      (RicciFlow.AnalyticPDE.parabolicClosedBall y (2 * r)))
-    (hlocal_diff : ∀ y ∈ N,
-      RicciFlow.AnalyticPDE.ParabolicC0AlphaOn α (fun z => a z - b z)
-        (RicciFlow.AnalyticPDE.parabolicClosedBall y (2 * r)))
-    (hδpos : 0 < δ)
-    (hδa : ∀ ⦃p : ℝ × X⦄, p ∈ K → δ ≤ ‖a p‖)
-    (hδb : ∀ ⦃p : ℝ × X⦄, p ∈ K → δ ≤ ‖b p‖) :
-    RicciFlow.AnalyticPDE.ParabolicC0AlphaOn α
-      (fun z => (a z)⁻¹ - (b z)⁻¹) K := by
+theorem norm_affineFundamentalSolution_sub_le
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ y₀' : E) (t : ℝ) :
+    ‖RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀ t -
+        RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀' t‖
+      ≤ Real.exp (|t - t₀| * (‖L‖ + ‖b‖)) * ‖y₀ - y₀'‖ := by
   sorry
 
 end PoincareCurvature.Palomar

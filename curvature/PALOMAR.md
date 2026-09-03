@@ -1,44 +1,41 @@
 # Palomar Submission 04
 
-## Parabolic scaling, compact localization, and inverse stability
+## Frozen Ricci–DeTurck affine chart evolution
 
-This corrected candidate packages the parabolic-analysis interface in
-`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ParabolicHolder.lean`
-and its finite-cover composition in
-`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/InverseLocalization.lean`.
-It replaces the failed time-indexed Levi–Civita surface with a connected
-analytic result family:
+This corrected candidate replaces the rejected parabolic-infrastructure-only
+surface with a connected frozen affine evolution result. The selected
+definitions are the explicit block operator
+`(v, s) ↦ (L v + s • b, 0)` and the first coordinate of its operator
+exponential at `(y₀, 1)`. The selected theorem family proves scalar-coordinate
+conservation, the initial value, the affine ODE, global uniqueness and
+representation, exponential growth, and Lipschitz dependence on initial data.
 
-- `PoincareCurvature.Palomar.parabolicDistance_dilation`, the exact
-  square-time/linear-space scaling identity;
-- `PoincareCurvature.Palomar.parabolicClosedBall_zero_mapsTo_dilation`, the
-  corresponding closed-ball transport statement;
-- `PoincareCurvature.Palomar.parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact`,
-  finite compact localization with closed-ball control;
-- `PoincareCurvature.Palomar.parabolicC0AlphaWith_comp_parabolicDistanceLe`,
-  pullback scaling of explicit parabolic Hölder constants;
-- `PoincareCurvature.Palomar.parabolicC0AlphaWith_inv_sub_inv`, an explicit
-  reciprocal-difference estimate; and
-- `PoincareCurvature.Palomar.parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall`
-  together with
-  `PoincareCurvature.Palomar.parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall`,
-  finite-cover globalization and its inverse-stability composition.
+The model is intentionally stated over an arbitrary complete normed real vector
+space with bounded linear data `L` and `b`. It is the frozen affine analytic
+core motivated by the Ricci–DeTurck chart, not a claim of the full nonlinear
+Ricci-flow PDE, Schauder estimates, or short-time existence theorem. The
+mathematical relationships are recorded in `formalization.yaml`: DeTurck is
+background for the geometric motivation, while Hille–Phillips is the source
+formalized/adapted for the operator-exponential affine evolution. These are
+standard results; no originality or priority claim is made.
 
-The intended research audience is geometric analysts working with parabolic
-chart estimates: the selected statements expose the exact anisotropic scaling,
-the compact localization mechanism, and explicit nonlinear reciprocal bounds
-needed when inverse coefficient families are globalized across a finite cover.
-The mathematical ingredients are standard, and the repository makes no claim
-of original discovery or priority. The new inverse-localization declaration is
-a repository-derived composition of the checked source lemmas, not a claimed
-independent external theorem.
+The exact selected surface is:
 
-The Challenge exposes the actual formulas for the parabolic distance, its open
-and closed balls, the bounded/Hölder predicates, the combined `C^{0,α}`
-predicate, and both reciprocal constants. It has seven deliberate theorem
-holes and no definition holes. It makes no manifold, Hausdorff, or
-sigma-compactness claim; the selected domain is arbitrary pseudo-metric
-time-space.
+- `PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one`;
+- `PoincareCurvature.Palomar.affineFundamentalSolution_initial`;
+- `PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution`;
+- `PoincareCurvature.Palomar.affineODE_unique`;
+- `PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt`;
+- `PoincareCurvature.Palomar.norm_affineFundamentalSolution_le`; and
+- `PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le`.
+
+`Challenge.lean` imports only Mathlib and exposes the actual block-operator and
+operator-exponential formulas. It has seven deliberate theorem holes and no
+definition holes. `Solution.lean` imports the checked proof-bearing
+autonomous operator-exponential development and supplies all seven wrappers.
+The repository's broader parabolic and coordinate modules remain library
+material outside this Comparator selection; they are not claimed by the four
+Palomar surface files to be part of this result.
 
 ## Nested-project intake paths
 
@@ -53,9 +50,10 @@ repository-relative intake fields are:
 - license: the repository-root `LICENSE` file.
 
 The accepted Submission 01, passed Submission 02, and accepted Submission 03
-artifacts remain reproducible at their own immutable commits. This corrected
-candidate supersedes the failed Submission 04 time-dependent surface and uses
-a distinct parabolic-analysis Comparator theorem surface.
+artifacts remain reproducible at their own immutable commits. The failed
+Submission 04 artifact is not reused as the Palomar ID for this corrected
+surface; the new intake must use the fresh final commit with the Palomar ID
+field left blank unless the registry auto-detects an already-public record.
 
 ## Local checks
 

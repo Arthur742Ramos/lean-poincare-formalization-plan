@@ -2,24 +2,17 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "PoincareCurvature.Palomar.parabolicDistance_dilation",
-    "PoincareCurvature.Palomar.parabolicClosedBall_zero_mapsTo_dilation",
-    "PoincareCurvature.Palomar.parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact",
-    "PoincareCurvature.Palomar.parabolicC0AlphaWith_comp_parabolicDistanceLe",
-    "PoincareCurvature.Palomar.parabolicC0AlphaWith_inv_sub_inv",
-    "PoincareCurvature.Palomar.parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall",
-    "PoincareCurvature.Palomar.parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall"
+    "PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one",
+    "PoincareCurvature.Palomar.affineFundamentalSolution_initial",
+    "PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution",
+    "PoincareCurvature.Palomar.affineODE_unique",
+    "PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt",
+    "PoincareCurvature.Palomar.norm_affineFundamentalSolution_le",
+    "PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le"
   ],
   "definition_names": [
-    "RicciFlow.AnalyticPDE.parabolicDistance",
-    "RicciFlow.AnalyticPDE.parabolicBall",
-    "RicciFlow.AnalyticPDE.parabolicClosedBall",
-    "RicciFlow.AnalyticPDE.ParabolicHolderWith",
-    "RicciFlow.AnalyticPDE.ParabolicBoundedWith",
-    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith",
-    "RicciFlow.AnalyticPDE.ParabolicC0AlphaOn",
-    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith.invSubBoundConst",
-    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith.invSubHolderConst"
+    "RicciFlow.AnalyticPDE.SmoothDependenceCk.affineAugment",
+    "RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": true

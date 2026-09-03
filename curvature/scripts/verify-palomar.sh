@@ -111,24 +111,17 @@ try:
 except (OSError, UnicodeError, json.JSONDecodeError) as error:
     raise SystemExit(f"error: comparator.json is invalid: {error}")
 expected_theorems = [
-    "PoincareCurvature.Palomar.parabolicDistance_dilation",
-    "PoincareCurvature.Palomar.parabolicClosedBall_zero_mapsTo_dilation",
-    "PoincareCurvature.Palomar.parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact",
-    "PoincareCurvature.Palomar.parabolicC0AlphaWith_comp_parabolicDistanceLe",
-    "PoincareCurvature.Palomar.parabolicC0AlphaWith_inv_sub_inv",
-    "PoincareCurvature.Palomar.parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall",
-    "PoincareCurvature.Palomar.parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall",
+    "PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one",
+    "PoincareCurvature.Palomar.affineFundamentalSolution_initial",
+    "PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution",
+    "PoincareCurvature.Palomar.affineODE_unique",
+    "PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt",
+    "PoincareCurvature.Palomar.norm_affineFundamentalSolution_le",
+    "PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le",
 ]
 expected_definitions = [
-    "RicciFlow.AnalyticPDE.parabolicDistance",
-    "RicciFlow.AnalyticPDE.parabolicBall",
-    "RicciFlow.AnalyticPDE.parabolicClosedBall",
-    "RicciFlow.AnalyticPDE.ParabolicHolderWith",
-    "RicciFlow.AnalyticPDE.ParabolicBoundedWith",
-    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith",
-    "RicciFlow.AnalyticPDE.ParabolicC0AlphaOn",
-    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith.invSubBoundConst",
-    "RicciFlow.AnalyticPDE.ParabolicC0AlphaWith.invSubHolderConst",
+    "RicciFlow.AnalyticPDE.SmoothDependenceCk.affineAugment",
+    "RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution",
 ]
 if comparator.get("challenge_module") != "Challenge":
     raise SystemExit("error: comparator challenge_module must be Challenge")
@@ -223,13 +216,13 @@ lake env lean Solution.lean
 lake env lean --src-deps Solution.lean
 lake env lean /dev/stdin <<'EOF'
 import Solution
-#print axioms PoincareCurvature.Palomar.parabolicDistance_dilation
-#print axioms PoincareCurvature.Palomar.parabolicClosedBall_zero_mapsTo_dilation
-#print axioms PoincareCurvature.Palomar.parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact
-#print axioms PoincareCurvature.Palomar.parabolicC0AlphaWith_comp_parabolicDistanceLe
-#print axioms PoincareCurvature.Palomar.parabolicC0AlphaWith_inv_sub_inv
-#print axioms PoincareCurvature.Palomar.parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall
-#print axioms PoincareCurvature.Palomar.parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall
+#print axioms PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one
+#print axioms PoincareCurvature.Palomar.affineFundamentalSolution_initial
+#print axioms PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution
+#print axioms PoincareCurvature.Palomar.affineODE_unique
+#print axioms PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt
+#print axioms PoincareCurvature.Palomar.norm_affineFundamentalSolution_le
+#print axioms PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le
 EOF
 
 git diff --check

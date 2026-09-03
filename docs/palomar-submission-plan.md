@@ -33,14 +33,14 @@ and authorization relationship have been explicitly confirmed.
 | 01 | Raw Bianchi curvature identities | Pointwise first and raw differential second Bianchi identities for torsion-free affine connections | Accepted by Palomar (user-confirmed); immutable artifact at `04b00ba308fc5196a07a5cf7a9c6f985505ea041` |
 | 02 | Raw curvature tensoriality and metric compatibility | Pointwise scalar tensoriality in all three slots and metric skew-adjointness of the raw curvature commutator | Passed by Palomar (user-confirmed); immutable artifact at `db821d6c926bc3fd9622893cc48e23637d406651` |
 | 03 | Levi-Civita connections and metric-determined curvature invariants | Levi-Civita existence, curvature-tensor independence, Ricci symmetry, and Ricci/scalar-curvature invariance | Accepted by Palomar (user-confirmed); immutable artifact at `80b71f3a239ac2b294c91c66d020476f667a1306` |
-| 04 | Parabolic scaling, compact localization, and inverse stability | Exact anisotropic scaling, finite compact localization, Hölder pullback/globalization, and explicit reciprocal-difference stability | Corrected candidate in progress; prior time-indexed attempt failed AI review and is superseded |
+| 04 | Frozen Ricci–DeTurck affine evolution | Explicit block-operator augmentation, operator-exponential frozen evolution, global affine ODE uniqueness, growth, and initial-data stability | Corrected candidate in progress; prior parabolic-only attempt failed AI review and is superseded |
 | 05 | Continuous sections and smoothing | Coordinate models, finite-cover gluing, smooth approximation, and convex fiber constraints | Source code exists; audit as a separate library contribution |
 | 06 | The open metric cone | Symmetric positive-definite bilinear-form sections and openness in the section-space model | Source code exists; audit separately |
-| 07 | Parabolic Holder primitives | Parabolic neighborhoods, Holder controls, covers, patching, and closure estimates | Absorbed into corrected Submission 04 candidate |
-| 08 | Matrix and local-frame estimates | Determinant/inverse/Christoffel estimates and coordinate Ricci-DeTurck bounds | Source code exists; reserve for a later matrix/local-frame candidate |
+| 07 | Parabolic Holder primitives | Parabolic neighborhoods, Holder controls, covers, patching, and closure estimates | Supporting library material; not selected in corrected Submission 04 |
+| 08 | Matrix and local-frame estimates | Determinant/inverse/Christoffel estimates and coordinate Ricci-DeTurck bounds | Supporting library material; reserve higher local-frame forms for later |
 | 09 | Gauge transport | Pullback/pushforward of metrics, vector fields, connections, torsion, curvature, and Ricci data | Source code exists; isolate from point-4 scaffolding |
 | 10 | Ricci-DeTurck gauge reduction | Background-dependent DeTurck equations and reduction back to intrinsic Ricci flow | Partially developed; do not present as local existence |
-| 11 | Frozen chart evolution | The proved affine/linear evolution and stability theory for the frozen geometric operator | Partially developed; audit theorem scope before packaging |
+| 11 | Frozen chart evolution | The proved affine/linear evolution and stability theory for the frozen geometric operator | Selected as the corrected Submission 04 boundary; geometric positive-definite specialization remains a later refinement |
 | 12 | General local existence and uniqueness | Compact-manifold Ricci-flow local existence in arbitrary dimension | Future; remains open until the canonical theorem and audit gates pass |
 | 13 | Evolution and maximum principles | Curvature evolution equations and parabolic maximum-principle consequences | Future |
 | 14 | Distance distortion and compactness | Length/distance control, blow-up, rescaling, and compactness of flows | Future |
@@ -57,8 +57,8 @@ library result has an independently defensible boundary.
 ## Order of work
 
 1. Preserve the accepted 01 and 03 artifacts and the passed 02 artifact while
-   packaging/validating 04 as the next non-overlapping parabolic-analysis
-   result family.
+   packaging/validating 04 as the next non-overlapping frozen Ricci–DeTurck
+   analytic result family.
 2. Audit the dependency closure and research value of 05–06, then prepare the
    strongest non-overlapping candidates.
 3. Package the analytic candidates 07–11 only around proved theorem clusters;
@@ -147,36 +147,36 @@ status report. Its exact public commit is
 `80b71f3a239ac2b294c91c66d020476f667a1306`; hosted acceptance is not conflated
 with registration or public indexing.
 
-## Submission 04: parabolic scaling, compact localization, and inverse stability
+## Submission 04: frozen Ricci–DeTurck affine evolution
 
-The corrected fourth candidate replaces the failed time-indexed Levi–Civita
-surface with the connected analytic package in
-`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ParabolicHolder.lean`
-and `.../Parabolic/InverseLocalization.lean`. It selects:
+The corrected fourth candidate replaces the failed time-indexed and
+parabolic-only surfaces with the connected frozen affine evolution core in
+`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/AutonomousResolventExp.lean`.
+It selects seven declarations:
 
-- `PoincareCurvature.Palomar.parabolicDistance_dilation`;
-- `PoincareCurvature.Palomar.parabolicClosedBall_zero_mapsTo_dilation`;
-- `PoincareCurvature.Palomar.parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact`;
-- `PoincareCurvature.Palomar.parabolicC0AlphaWith_comp_parabolicDistanceLe`;
-- `PoincareCurvature.Palomar.parabolicC0AlphaWith_inv_sub_inv`;
-- `PoincareCurvature.Palomar.parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall`; and
-- `PoincareCurvature.Palomar.parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall`.
+- `PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one`;
+- `PoincareCurvature.Palomar.affineFundamentalSolution_initial`;
+- `PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution`;
+- `PoincareCurvature.Palomar.affineODE_unique`;
+- `PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt`;
+- `PoincareCurvature.Palomar.norm_affineFundamentalSolution_le`; and
+- `PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le`.
 
-Together these expose the exact square-time/linear-space scaling, its action on
-closed balls, compact finite localization, explicit Hölder pullback and
-globalization, and reciprocal-difference control. The final theorem composes
-finite-cover globalization for two coefficient families and their difference
-with the explicit inverse estimate, giving a reusable inverse-localization
-statement for parabolic chart estimates. This is a stronger connected analytic
-target than the rejected slicewise textbook family, while remaining honest
-about provenance: the ingredients are standard, the final declaration is a
-repository-derived composition, and no originality or priority claim is made.
+These declarations construct the global affine operator-exponential
+evolution, prove its ODE and global uniqueness/representation, and give
+explicit exponential growth and Lipschitz initial-data bounds. This is the
+frozen Banach-space analytic core motivated by the geometric Ricci–DeTurck
+chart, rather than a routine repackaging of parabolic scaling lemmas. The
+ingredients are standard and their mathematical sources are identified in
+`curvature/formalization.yaml`; no originality or priority claim is made.
 
-The Challenge exposes actual formulas for all selected definitions, has seven
-theorem statement holes, and has no definition holes. It deliberately makes no
-manifold, Hausdorff, or sigma-compactness claim. The candidate-specific role
-and oversight record is `curvature/AGENT-CONTRIBUTION-04.md`; the immutable
-pointer to that record is pinned in `curvature/formalization.yaml`.
+The Challenge exposes actual formulas for the block augmentation and affine
+solution, has seven theorem statement holes, and has no definition holes. It
+deliberately makes no manifold, Hausdorff, or sigma-compactness claim. The
+broader parabolic and coordinate files are supporting library material, not
+selected by this Comparator surface. The candidate-specific role and oversight record is
+`curvature/AGENT-CONTRIBUTION-04.md`; the immutable pointer to that record is
+pinned in `curvature/formalization.yaml`.
 
 Current state: the corrected Challenge/Solution surface builds under Lean 4.33.
 The repository verifier and independent Comparator/NanoDa replay must pass on

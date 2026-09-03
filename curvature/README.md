@@ -1274,14 +1274,29 @@ primitive inputs, all with matching spatial-Hölder Gram-entry input forms; the
 single-frame existential schematic RHS entrywise-difference bridge now also has
 direct spatial-Hölder, unit-diameter, closed-ball, and closed-cylinder
 Gram-entry variants for local chart callers.
-It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
+The repository also contains a separate frozen affine Ricci–DeTurck chart
+evolution layer; the selected Palomar surface records that stronger analytic
+core without claiming the full nonlinear Schauder or Ricci-flow existence
+theorem.
 
-## Palomar Submission 01
+## Palomar Submission 04 (current preparation surface)
 
-The root of this subproject also contains the initial Palomar preparation
-surface for the static connection and curvature contribution. See
-`PALOMAR.md`, `Challenge.lean`, `Solution.lean`, `comparator.json`, and
-`formalization.yaml` for the selected statements and reproducibility checks.
+The current Palomar preparation surface is the frozen affine Ricci–DeTurck
+analytic core, not the obsolete static connection/curvature configuration and
+not the earlier parabolic-infrastructure selection. The files
+`Challenge.lean`, `Solution.lean`, `comparator.json`, and
+`formalization.yaml` select the explicit block-operator augmentation and its
+operator-exponential affine evolution: scalar-coordinate conservation, the
+initial value, the affine ODE, global uniqueness and representation, and
+exponential growth and initial-data stability bounds. The broader parabolic
+and coordinate modules remain supporting library material and are not part of
+this four-file Comparator surface.
+
+The older static-geometry wording belongs to an earlier/different submission
+configuration and does not describe the current four Palomar files. See
+`PALOMAR.md`, `AGENT-CONTRIBUTION-04.md`, and `formalization.yaml` for the
+source relationships, contribution/oversight record, exact theorem surface,
+and scope boundaries.
 Run `bash scripts/verify-palomar.sh` for the full local package/metadata audit,
 then `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh` for
 the explicit macOS Comparator plus NanoDa replay. The first hosted attempt at

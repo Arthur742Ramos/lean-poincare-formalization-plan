@@ -2,15 +2,15 @@
 version: "v0.4"
 
 project:
-  name: "Parabolic Hölder localization and inverse stability in Lean"
+  name: "Frozen affine Ricci–DeTurck chart evolution in Lean"
   description: >-
-    Formalizes a reusable anisotropic parabolic-analysis package for geometric
-    PDE: the square-root time/spatial parabolic distance, compact finite-ball
-    localization, pullback scaling, nonlinear reciprocal-difference bounds with
-    explicit constants, and a derived finite-cover inverse-localization theorem.
-    The selected result is a proof-bearing analytic framework for coefficient
-    stability in coordinate Ricci–DeTurck arguments; it does not claim a
-    Ricci-flow existence theorem or a new priority result.
+    Formalizes the auditable analytic core of a frozen affine chart model:
+    the augmented operator exponential, conservation of its scalar coordinate,
+    the global affine ODE and its uniqueness/representation theorems, and
+    explicit exponential growth and initial-data stability bounds. The
+    selected model is stated over an arbitrary complete normed real vector
+    space and does not claim the full nonlinear Ricci-flow PDE, Schauder
+    estimates, or short-time existence theorem.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -24,55 +24,49 @@ classification:
   msc2020: ["35B65", "35K15", "53E20", "03B35"]
 
 sources:
-  - title: "Mathlib4 analysis and metric-space infrastructure"
+  - title: "Deforming metrics in the direction of their Ricci tensors"
     authors:
-      - "Mathlib contributors"
-    id: "https://github.com/leanprover-community/mathlib4"
-    type: "software"
-    location: "https://github.com/leanprover-community/mathlib4"
-    relationship: "builds-on"
+      - "Dennis M. DeTurck"
+    id: "10.4310/jdg/1214509286"
+    type: "article"
+    location: "https://doi.org/10.4310/jdg/1214509286"
+    relationship: "background"
     note: >-
-      The Challenge imports only Mathlib's real powers, norms, metric spaces,
-      compactness, finite sets, and basic analysis infrastructure. The selected
-      theorem proofs come from the PoincareCurvature source package.
-    license: "Apache-2.0"
+      Mathematical provenance for the Ricci–DeTurck gauge and the frozen-chart
+      motivation. This submission does not claim DeTurck's nonlinear flow
+      theorem or its original priority; its selected Lean model abstracts the
+      frozen affine chart equation to bounded linear data `L` and `b`.
+    license: "unknown"
     author_endorsement: "not-contacted"
-  - title: "PoincareCurvature parabolic-analysis source package"
+  - title: "Functional Analysis and Semi-Groups"
     authors:
-      - "Arthur Freitas Ramos"
-      - "David Barros Hulak"
-      - "Ruy J. G. B. de Queiroz"
-    id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan"
-    type: "software"
-    location: "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ParabolicHolder.lean"
+      - "Einar Hille"
+      - "Ralph S. Phillips"
+    id: "https://bookstore.ams.org/COLL/31"
+    type: "book"
+    location: "https://bookstore.ams.org/COLL/31"
     relationship: "formalizes"
     note: >-
-      The source modules prove the parabolic metric, exact anisotropic scaling,
-      compact localization, pullback, Hölder closure, and nonlinear reciprocal
-      estimates selected here. The added inverse-localization theorem is an
-      explicit composition of those source lemmas, not a translation of a
-      separately claimed external theorem. The result is presented as
-      repository-level formalization and proof engineering, not as an original
-      mathematical discovery or priority claim.
-    license: "Apache-2.0"
+      Mathematical source for the Banach-space operator-exponential evolution
+      and its standard uniqueness and growth framework. The seven selected
+      declarations are a kernel-checked formalization/adaptation of this
+      affine autonomous result family in the frozen-chart model.
+    license: "unknown"
     author_endorsement: "not-contacted"
 
 related_formalizations: []
 
 status:
   scope: >-
-    The selected domain is arbitrary pseudo-metric time-space `ℝ × X`; no
-    manifold, Hausdorff, sigma-compactness, or Ricci-flow solution assumption
-    is hidden in the stated surface. The package exposes the square-root
-    time-weighted parabolic distance, open and closed parabolic balls,
-    `ParabolicHolderWith`, `ParabolicBoundedWith`, `ParabolicC0AlphaWith`, and
-    `ParabolicC0AlphaOn` with their actual formulas. It selects seven theorem
-    statements: exact parabolic dilation scaling; dilation transport of the
-    origin-centered closed ball; finite compact localization into
-    closed-ball-controlled open covers; pullback scaling; finite-cover
-    `C^{0,α}` globalization; explicit reciprocal-difference stability; and the
-    derived finite-cover inverse-localization result. `Challenge.lean` contains
-    seven deliberate theorem holes and no definition holes.
+    The selected Challenge surface is the explicit affine model over an
+    arbitrary complete normed real vector space `E`, with bounded linear map
+    `L`, source vector `b`, initial state `y₀`, and times `t₀,t`. The definition
+    `affineAugment` exposes the block operator `(v,s) ↦ (L v + s • b, 0)`, and
+    `affineFundamentalSolution` exposes the first coordinate of its operator
+    exponential at `(y₀,1)`. No manifold, Hausdorff, sigma-compactness, or
+    nonlinear Ricci-flow-solution assumption is hidden in the selected surface.
+    `Challenge.lean` contains seven deliberate theorem holes and no definition
+    holes.
   sorry_count: 7
   sorry_in_definitions: 0
   axioms: []
@@ -83,98 +77,103 @@ automation:
       models: ["GPT-5 Codex"]
       framework: "Codex with Lean 4.33 and Mathlib"
       tool_setup: >-
-        Repository-scoped source audit; exact Challenge/Solution alignment;
-        pinned Lean builds; and independent Comparator/NanoDa replay over the
-        parabolic theorem and definition surface.
+        Repository-scoped failure audit; theorem-boundary redesign; exact
+        Challenge/Solution alignment; pinned Lean builds; source-closure and
+        metadata checks; and independent Comparator/NanoDa replay over the
+        frozen affine theorem surface.
       cost:
         wall_time: "not tracked"
         spend_usd: "subscription-based"
         hardware: "local machine"
       prompting_notes: >-
-        GPT-5 Codex performed the source audit, selected the corrected analytic
-        theorem cluster, drafted the Challenge/Solution declarations, added the
-        finite-cover inverse-localization composition, updated the verifier and
+        GPT-5 Codex audited the failed submission, identified the provenance,
+        documentation, and research-interest defects, selected the stronger
+        frozen affine evolution boundary, authored the Challenge/Solution
+        declarations, updated the comparator, verifier, metadata, and
         documentation, and ran reproducibility checks. Humans selected and
-        approved the authorship, mathematical boundary, source relationship,
-        scope limits, and final public artifact; they reviewed the source/diff
-        and authorized the public push and Palomar submission. Lean's kernel and
-        the independent Comparator/NanoDa replay verify formal consistency and
-        reproducibility, not authorship or novelty.
+        approved the authorship, external sources, theorem boundary, scope
+        limits, and final public artifact; they reviewed the mathematical
+        interpretation and exact diff and authorized the public push and
+        Palomar submission. Lean's kernel and the independent Comparator/NanoDa
+        replay verify formal consistency and reproducibility, not authorship or
+        novelty.
   spend_usd: "subscription-based"
   notes: |
     Fuller role and oversight record: the immutable repository document is
-    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/a10baaf326c0205fe47e9ff07be8dacb8738ff26/curvature/AGENT-CONTRIBUTION-04.md
-    The document distinguishes agent proof engineering and packaging from
-    human mathematical selection, attribution, review, and publication
-    responsibility.
+    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/COMMIT_TO_BE_PINNED/curvature/AGENT-CONTRIBUTION-04.md
+    It records the agent's proof-engineering and packaging role separately from
+    the human authors' mathematical selection, attribution, review, and
+    publication responsibility. The pointer will be replaced by the immutable
+    public commit that contains that document before submission.
 
 fidelity:
   divergences: >-
-    `Challenge.lean` imports only Mathlib and reproduces the selected public
-    vocabulary with auditable formulas. Its definitions are ordinary Lean
-    definitions, not `sorry` declarations. `Solution.lean` imports the checked
-    PoincareCurvature parabolic source modules and supplies exact wrappers for
-    the seven selected statements, including the new finite-cover composition.
-    No Ricci or scalar-curvature function is selected, and no theorem is
-    represented by an unconstrained time-indexed repackaging.
+    `Challenge.lean` imports only Mathlib and gives the exact block-operator
+    and first-coordinate operator-exponential definitions, followed by the
+    seven selected statement holes. `Solution.lean` imports the checked
+    proof-bearing autonomous operator-exponential development and supplies
+    exact wrappers for all seven statements. The model is intentionally the
+    frozen affine Banach-space core, not the full nonlinear Ricci-flow PDE.
 
 review:
   status: "self-assessed"
   reviewers:
     - "none"
   notes: >-
-    This corrected candidate replaces the failed time-indexed Levi–Civita
-    surface. Its research-interest case is the connected analytic mechanism:
-    exact anisotropic dilation and closed-ball transport feed compact
-    finite-cover globalization, change-of-variables scaling, and explicit
-    nonlinear reciprocal-difference control, culminating in a finite-cover
-    inverse-localization theorem. That theorem family is directly reusable for
-    inverse metric coefficients in geometric PDE chart estimates. The
-    mathematical ingredients are standard and the repository makes no
-    originality or priority claim; the contribution is the checked,
-    compositional Lean artifact and its explicit constants.
+    This corrected candidate replaces the rejected parabolic-infrastructure
+    selection with a stronger, auditable frozen affine evolution family: the
+    explicit augmented orbit, conserved scalar coordinate, global affine ODE,
+    uniqueness and representation, exponential growth, and Lipschitz
+    initial-data stability. The results are standard and their mathematical
+    sources are identified above; the repository makes no claim of original
+    discovery or priority. The formalization contribution is the checked Lean
+    boundary and its explicit frozen-chart interpretation, not an absent
+    nonlinear Ricci-flow existence or Schauder theorem.
 
 alignment:
   namespace: "PoincareCurvature.Palomar"
   statements:
-    - source: "Exact parabolic dilation scaling"
-      lean: "PoincareCurvature.Palomar.parabolicDistance_dilation"
+    - source: "Augmented-flow scalar conservation"
+      lean: "PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one"
       module: "Solution.lean"
       status: "proved"
-      note: "Scaling time by `r^2` and space by `r` scales the distance by exactly `|r|`."
-    - source: "Dilation transport of the origin-centered closed ball"
-      lean: "PoincareCurvature.Palomar.parabolicClosedBall_zero_mapsTo_dilation"
+      note: >-
+        The second coordinate of the augmented operator-exponential orbit is
+        identically one, recovering the affine source term.
+    - source: "Affine evolution initial value"
+      lean: "PoincareCurvature.Palomar.affineFundamentalSolution_initial"
       module: "Solution.lean"
       status: "proved"
-      note: "The exact dilation maps the closed ball of radius `ρ` into the ball of radius `|r| * ρ`."
-    - source: "Finite compact parabolic localization"
-      lean: "PoincareCurvature.Palomar.parabolicBall_exists_finset_cover_closedBall_subset_open_of_isCompact"
+      note: "The explicit global affine evolution starts at the prescribed state."
+    - source: "Frozen-chart affine ODE"
+      lean: "PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution"
       module: "Solution.lean"
       status: "proved"
-      note: "A compact subset of an open set admits a finite parabolic-ball cover whose matching closed balls stay inside the open set."
-    - source: "Parabolic pullback scaling"
-      lean: "PoincareCurvature.Palomar.parabolicC0AlphaWith_comp_parabolicDistanceLe"
+      note: "The operator-exponential formula has derivative `L y + b` at every time."
+    - source: "Global affine ODE uniqueness"
+      lean: "PoincareCurvature.Palomar.affineODE_unique"
       module: "Solution.lean"
       status: "proved"
-      note: "A map with controlled parabolic-distance expansion transports `C^{0,α}` control with the explicit factor `L^α`."
-    - source: "Finite-cover `C^{0,α}` globalization"
-      lean: "PoincareCurvature.Palomar.parabolicC0AlphaOn_of_finset_parabolicBall_cover_closedBall"
+      note: "Two global solutions of the frozen affine equation agreeing once agree everywhere."
+    - source: "Affine fundamental-solution representation"
+      lean: "PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt"
       module: "Solution.lean"
       status: "proved"
-      note: "Local existential bounded/Hölder controls on doubled closed balls globalize over a finite parabolic cover."
-    - source: "Explicit reciprocal-difference stability"
-      lean: "PoincareCurvature.Palomar.parabolicC0AlphaWith_inv_sub_inv"
+      note: "Every global solution with the prescribed initial value is the explicit orbit."
+    - source: "Exponential growth bound"
+      lean: "PoincareCurvature.Palomar.norm_affineFundamentalSolution_le"
       module: "Solution.lean"
       status: "proved"
-      note: "The displayed reciprocal bound uses the actual `invSubBoundConst` and `invSubHolderConst` formulas under a common lower norm bound."
-    - source: "Finite-cover inverse localization"
-      lean: "PoincareCurvature.Palomar.parabolicC0AlphaOn_inverse_difference_of_finset_parabolicBall_cover_closedBall"
+      note: "The augmented operator norm gives an explicit at-most-exponential whole-state bound."
+    - source: "Continuous dependence on initial data"
+      lean: "PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le"
       module: "Solution.lean"
       status: "proved"
-      note: "The repository-derived composition globalizes local controls for two nonvanishing families and their difference before applying reciprocal stability."
+      note: "Two affine evolutions differ by an explicit exponential Lipschitz bound in their starts."
 
 acknowledgements: >-
-  Mathlib contributors for the real-analysis, normed-group, metric-space, and
-  compactness infrastructure; the human authors for mathematical selection,
-  authorship, attribution, review, and publication responsibility; and the
-  Palomar Registry project for the statement/solution Comparator workflow.
+  Mathlib contributors for the real-analysis, normed-space, and
+  operator-exponential infrastructure; the human authors for mathematical
+  selection, authorship, attribution, review, and publication responsibility;
+  and the Palomar Registry project for the statement/solution Comparator
+  workflow.
