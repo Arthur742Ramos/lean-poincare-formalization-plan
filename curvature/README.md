@@ -67,28 +67,27 @@ The next active milestone is therefore still the general point-4 theorem.
 
 ## Research-interest theorem
 
-The public root now includes
-`Geometry.Manifold.RicciFlow.ResearchTheorems`. Its primary theorem,
-`ChosenIntrinsicDeTurckLocalSolution.ricciDeTurckGaugeReduction_of_innerDerivative`,
-is a geometric DeTurck result rather than an autonomous ODE exercise: raw
-anchored `C^3` gauge and pulled-back-metric derivative data construct the
-complete gauge-reduced package and an intrinsic Ricci-flow solution with the
-same initial metric. The companion
-`GaugeReducedIntrinsicDeTurckLocalSolution.ricciDeTurckGaugeReduction` gives
-the intrinsic `-2 Ric` readout, while `ricciDeTurckGaugeReduction_trace` gives
-the curvature-transport formula as the trace of the tangent-map-conjugated
-pulled-back background Ricci endomorphism.
+The current Palomar surface is a typed coordinate model of the
+Ricci–DeTurck pullback mechanism. `Challenge.lean` and `Solution.lean` expose
+continuous bilinear metric forms, define the Ricci tensor by composition with
+a specified Ricci endomorphism, derive the gauge-pullback derivative from
+independent C¹ data, and combine those facts with a Ricci vector-field
+evolution in the positive-definite metric cone. The main reduction therefore
+has a genuine geometric tensor target and the analytic state-preservation and
+uniqueness capstone is tied to the Ricci right-hand side; it is not the earlier
+scalar-function cancellation or arbitrary frozen-affine ODE selection. A
+finite-dimensional scalar-trace transport lemma remains as supporting code but
+is not selected by the Comparator.
 
-The Palomar Challenge/Solution surface for this result is kept intentionally
-small in `Challenge.lean` and `Solution.lean`: it states the same pullback,
-correction-cancellation, initial-value, intrinsic-flow, and trace-transport
-claims in an explicit fixed-tangent-model abstraction. The full manifold-level
-implementation remains in `ResearchTheorems.lean`; neither surface claims the
-unproved general compact-manifold point-4 theorem.
+The corresponding manifold-level implementation context is in
+`Geometry.Manifold.RicciFlow.ResearchTheorems`, but the Palomar Challenge
+deliberately remains Mathlib-only so its formulas and hypotheses are auditable
+without importing the project source. The selected result is an adaptation of
+the Ricci–DeTurck method, not a claim of the full nonlinear compact-manifold
+Ricci-flow existence theorem or a claim of original mathematical discovery.
 
 The frozen affine evolution modules remain supporting Banach-space
-well-posedness infrastructure; they are not the headline mathematical
-submission.
+well-posedness infrastructure; they are not the selected submission.
 The scaffold now contains proof-bearing stationary theorem packages for
 subsingleton tangent/model spaces and for rank-one tangent/model spaces
 (`Module.finrank ℝ E ≤ 1`), plus a thin `LocalExistence.RankOne` extension
@@ -1300,28 +1299,27 @@ single-frame existential schematic RHS entrywise-difference bridge now also has
 direct spatial-Hölder, unit-diameter, closed-ball, and closed-cylinder
 Gram-entry variants for local chart callers.
 The repository also contains a separate frozen affine Ricci–DeTurck chart
-evolution layer; the selected Palomar surface records that stronger analytic
-core without claiming the full nonlinear Schauder or Ricci-flow existence
-theorem.
+evolution layer; it remains supporting analytic infrastructure and is not part
+of the selected Palomar Comparator surface.
 
 ## Palomar Submission 04 (current preparation surface)
 
-The current Palomar preparation surface is the frozen affine Ricci–DeTurck
-analytic core, not the obsolete static connection/curvature configuration and
-not the earlier parabolic-infrastructure selection. The files
-`Challenge.lean`, `Solution.lean`, `comparator.json`, and
-`formalization.yaml` select the explicit block-operator augmentation and its
-operator-exponential affine evolution: scalar-coordinate conservation, the
-initial value, the affine ODE, global uniqueness and representation, and
-exponential growth and initial-data stability bounds. The broader parabolic
-and coordinate modules remain supporting library material and are not part of
-this four-file Comparator surface.
+The current Palomar preparation surface is the typed Ricci–DeTurck pullback
+and metric-cone evolution package. The files `Challenge.lean`, `Solution.lean`,
+`comparator.json`, and `formalization.yaml` select the independent pullback
+derivative calculation, Ricci-tensor transport, SPD preservation, intrinsic
+`-2 Ric` reduction, and Picard–Lindelöf existence/uniqueness for the explicitly
+defined Ricci vector field inside the symmetric-positive-definite metric cone.
+The definitions expose the formulas used by those claims, and the selected
+surface no longer includes `gauge_reduction_has_derivAt`, which assumed its
+own conclusion, or a standalone finite-dimensional trace-conjugation result.
 
-The older static-geometry wording belongs to an earlier/different submission
-configuration and does not describe the current four Palomar files. See
-`PALOMAR.md`, `AGENT-CONTRIBUTION-04.md`, and `formalization.yaml` for the
-source relationships, contribution/oversight record, exact theorem surface,
-and scope boundaries.
+The older static-geometry, parabolic-infrastructure, and frozen-affine wording
+belongs to earlier/different configurations and does not describe the current
+four-file Comparator surface. See `PALOMAR.md`,
+`AGENT-CONTRIBUTION-04.md`, and `formalization.yaml` for the source
+relationship, contribution/oversight record, exact theorem surface, and scope
+boundaries.
 Run `bash scripts/verify-palomar.sh` for the full local package/metadata audit,
 then `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh` for
 the explicit macOS Comparator plus NanoDa replay. The first hosted attempt at

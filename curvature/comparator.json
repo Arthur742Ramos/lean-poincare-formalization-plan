@@ -2,17 +2,18 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "PoincareCurvature.Palomar.pullbackBilinear_apply",
-    "PoincareCurvature.Palomar.gauge_corrected_velocity_eq_neg_two_pullbackRicci",
-    "PoincareCurvature.Palomar.gauge_reduction_has_derivAt",
-    "PoincareCurvature.Palomar.anchored_pullbackBilinear_eq_initial",
+    "PoincareCurvature.Palomar.gauge_pullback_has_derivAt_of_C1_data",
+    "PoincareCurvature.Palomar.ricciTensor_pullback_transport",
+    "PoincareCurvature.Palomar.pullbackMetric_preserves_symmetricPositiveDefinite",
     "PoincareCurvature.Palomar.ricciDeTurckGaugeReduction",
-    "PoincareCurvature.Palomar.trace_conjugation_invariant",
-    "PoincareCurvature.Palomar.gauge_reduction_trace_readout"
+    "PoincareCurvature.Palomar.metricCone_local_flow_exists",
+    "PoincareCurvature.Palomar.metricCone_local_flow_unique"
   ],
   "definition_names": [
-    "PoincareCurvature.Palomar.pullbackBilinear",
-    "PoincareCurvature.Palomar.SatisfiesDeTurckEquation",
+    "PoincareCurvature.Palomar.pullbackMetric",
+    "PoincareCurvature.Palomar.ricciTensorFamily",
+    "PoincareCurvature.Palomar.RicciMetricCone",
+    "PoincareCurvature.Palomar.ricciFlowVectorField",
     "PoincareCurvature.Palomar.IsIntrinsicRicciFlow"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],

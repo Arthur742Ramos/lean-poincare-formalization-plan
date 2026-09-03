@@ -101,9 +101,9 @@ imports = [
 if not imports or any(not module.startswith("Mathlib.") for module in imports):
     raise SystemExit(f"error: Challenge.lean imports outside Mathlib: {imports}")
 challenge_holes = len(re.findall(r"^\s*sorry\s*$", challenge_text, re.MULTILINE))
-if challenge_holes != 7:
+if challenge_holes != 6:
     raise SystemExit(
-        f"error: expected seven deliberate Challenge theorem holes, found {challenge_holes}"
+        f"error: expected six deliberate Challenge theorem holes, found {challenge_holes}"
     )
 
 try:
@@ -111,17 +111,18 @@ try:
 except (OSError, UnicodeError, json.JSONDecodeError) as error:
     raise SystemExit(f"error: comparator.json is invalid: {error}")
 expected_theorems = [
-    "PoincareCurvature.Palomar.pullbackBilinear_apply",
-    "PoincareCurvature.Palomar.gauge_corrected_velocity_eq_neg_two_pullbackRicci",
-    "PoincareCurvature.Palomar.gauge_reduction_has_derivAt",
-    "PoincareCurvature.Palomar.anchored_pullbackBilinear_eq_initial",
+    "PoincareCurvature.Palomar.gauge_pullback_has_derivAt_of_C1_data",
+    "PoincareCurvature.Palomar.ricciTensor_pullback_transport",
+    "PoincareCurvature.Palomar.pullbackMetric_preserves_symmetricPositiveDefinite",
     "PoincareCurvature.Palomar.ricciDeTurckGaugeReduction",
-    "PoincareCurvature.Palomar.trace_conjugation_invariant",
-    "PoincareCurvature.Palomar.gauge_reduction_trace_readout",
+    "PoincareCurvature.Palomar.metricCone_local_flow_exists",
+    "PoincareCurvature.Palomar.metricCone_local_flow_unique",
 ]
 expected_definitions = [
-    "PoincareCurvature.Palomar.pullbackBilinear",
-    "PoincareCurvature.Palomar.SatisfiesDeTurckEquation",
+    "PoincareCurvature.Palomar.pullbackMetric",
+    "PoincareCurvature.Palomar.ricciTensorFamily",
+    "PoincareCurvature.Palomar.RicciMetricCone",
+    "PoincareCurvature.Palomar.ricciFlowVectorField",
     "PoincareCurvature.Palomar.IsIntrinsicRicciFlow",
 ]
 if comparator.get("challenge_module") != "Challenge":
@@ -129,9 +130,9 @@ if comparator.get("challenge_module") != "Challenge":
 if comparator.get("solution_module") != "Solution":
     raise SystemExit("error: comparator solution_module must be Solution")
 if comparator.get("theorem_names") != expected_theorems:
-    raise SystemExit("error: comparator theorem surface does not match the gauge-reduction submission")
+    raise SystemExit("error: comparator theorem surface does not match the metric-cone gauge-reduction submission")
 if comparator.get("definition_names") != expected_definitions:
-    raise SystemExit("error: auditable definition surface does not match the gauge-reduction submission")
+    raise SystemExit("error: auditable definition surface does not match the metric-cone gauge-reduction submission")
 if comparator.get("enable_nanoda") is not True:
     raise SystemExit("error: comparator.json must enable NanoDa")
 if not set(comparator.get("permitted_axioms", [])) <= {
@@ -217,13 +218,12 @@ lake env lean Solution.lean
 lake env lean --src-deps Solution.lean
 lake env lean /dev/stdin <<'EOF'
 import Solution
-#print axioms PoincareCurvature.Palomar.pullbackBilinear_apply
-#print axioms PoincareCurvature.Palomar.gauge_corrected_velocity_eq_neg_two_pullbackRicci
-#print axioms PoincareCurvature.Palomar.gauge_reduction_has_derivAt
-#print axioms PoincareCurvature.Palomar.anchored_pullbackBilinear_eq_initial
+#print axioms PoincareCurvature.Palomar.gauge_pullback_has_derivAt_of_C1_data
+#print axioms PoincareCurvature.Palomar.ricciTensor_pullback_transport
+#print axioms PoincareCurvature.Palomar.pullbackMetric_preserves_symmetricPositiveDefinite
 #print axioms PoincareCurvature.Palomar.ricciDeTurckGaugeReduction
-#print axioms PoincareCurvature.Palomar.trace_conjugation_invariant
-#print axioms PoincareCurvature.Palomar.gauge_reduction_trace_readout
+#print axioms PoincareCurvature.Palomar.metricCone_local_flow_exists
+#print axioms PoincareCurvature.Palomar.metricCone_local_flow_unique
 EOF
 
 git diff --check

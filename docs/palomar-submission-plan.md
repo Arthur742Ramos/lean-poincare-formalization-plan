@@ -33,7 +33,7 @@ and authorization relationship have been explicitly confirmed.
 | 01 | Raw Bianchi curvature identities | Pointwise first and raw differential second Bianchi identities for torsion-free affine connections | Accepted by Palomar (user-confirmed); immutable artifact at `04b00ba308fc5196a07a5cf7a9c6f985505ea041` |
 | 02 | Raw curvature tensoriality and metric compatibility | Pointwise scalar tensoriality in all three slots and metric skew-adjointness of the raw curvature commutator | Passed by Palomar (user-confirmed); immutable artifact at `db821d6c926bc3fd9622893cc48e23637d406651` |
 | 03 | Levi-Civita connections and metric-determined curvature invariants | Levi-Civita existence, curvature-tensor independence, Ricci symmetry, and Ricci/scalar-curvature invariance | Accepted by Palomar (user-confirmed); immutable artifact at `80b71f3a239ac2b294c91c66d020476f667a1306` |
-| 04 | Ricci–DeTurck gauge reduction and curvature transport | Gauge pullback, source-equation cancellation, anchored initial metric preservation, intrinsic Ricci-flow reduction, and curvature trace transport | Corrected research-interest candidate in progress |
+| 04 | Ricci–DeTurck pullback transport and metric-cone evolution | Typed pullback derivative, Ricci/scalar transport, positive-definite metric preservation, intrinsic reduction, and cone-valued existence/uniqueness | Corrected research-interest candidate in progress |
 | 05 | Continuous sections and smoothing | Coordinate models, finite-cover gluing, smooth approximation, and convex fiber constraints | Source code exists; audit as a separate library contribution |
 | 06 | The open metric cone | Symmetric positive-definite bilinear-form sections and openness in the section-space model | Source code exists; audit separately |
 | 07 | Parabolic Holder primitives | Parabolic neighborhoods, Holder controls, covers, patching, and closure estimates | Supporting library material; not selected in corrected Submission 04 |
@@ -147,30 +147,31 @@ status report. Its exact public commit is
 `80b71f3a239ac2b294c91c66d020476f667a1306`; hosted acceptance is not conflated
 with registration or public indexing.
 
-## Submission 04: Ricci–DeTurck gauge reduction and curvature transport
+## Submission 04: Ricci–DeTurck pullback transport and metric-cone evolution
 
-The corrected fourth candidate replaces the routine frozen affine ODE surface
-with the geometric gauge-reduction boundary in
-`PoincareCurvature/Geometry/Manifold/RicciFlow/ResearchTheorems.lean`.
-It selects seven declarations:
+The revised fourth candidate replaces the routine frozen affine ODE surface
+with a typed coordinate reduction of the Ricci–DeTurck mechanism. It selects
+six declarations:
 
-- `PoincareCurvature.Palomar.pullbackBilinear_apply`;
-- `PoincareCurvature.Palomar.gauge_corrected_velocity_eq_neg_two_pullbackRicci`;
-- `PoincareCurvature.Palomar.gauge_reduction_has_derivAt`;
-- `PoincareCurvature.Palomar.anchored_pullbackBilinear_eq_initial`;
+- `PoincareCurvature.Palomar.gauge_pullback_has_derivAt_of_C1_data`;
+- `PoincareCurvature.Palomar.ricciTensor_pullback_transport`;
+- `PoincareCurvature.Palomar.pullbackMetric_preserves_symmetricPositiveDefinite`;
 - `PoincareCurvature.Palomar.ricciDeTurckGaugeReduction`;
-- `PoincareCurvature.Palomar.trace_conjugation_invariant`; and
-- `PoincareCurvature.Palomar.gauge_reduction_trace_readout`.
+- `PoincareCurvature.Palomar.metricCone_local_flow_exists`; and
+- `PoincareCurvature.Palomar.metricCone_local_flow_unique`.
 
-These declarations state the pullback operation, cancel the gauge correction
-against the source Ricci–DeTurck equation, preserve the initial metric under
-an anchored gauge, derive the intrinsic Ricci-flow equation, and transport
-the Ricci trace through tangent-map conjugation. The selected statements are
-an auditable fixed-tangent-model abstraction of the checked geometric
-gauge-reduction source package; they do not claim the full nonlinear
-compact-manifold local-existence theorem or an original mathematical
-discovery. The mathematical source and scope limits are identified in
-`curvature/formalization.yaml`.
+The compared definitions make the metric a continuous bilinear form, define
+the Ricci tensor by composition with a specified Ricci endomorphism, define a
+Ricci vector field on the same bilinear-form state space, and define the
+intrinsic flow law using those typed objects. The pullback derivative is
+derived from independent Fréchet, gauge, and tangent-transport derivative
+hypotheses. The capstone combines that calculation with source-equation
+cancellation and an analytic Ricci metric-cone existence/uniqueness package.
+The finite-dimensional scalar trace is proved as supporting code but is not a
+selected standalone claim. The selected statements are an auditable
+coordinate adaptation of the checked geometric source package; they do not
+claim the full nonlinear compact-manifold local-existence theorem or an
+original mathematical discovery.
 
 The candidate-specific role and oversight record is
 `curvature/AGENT-CONTRIBUTION-04.md`; the immutable pointer to that record is
@@ -180,5 +181,5 @@ retained as supporting library material, not as the selected research result.
 Current state: the corrected Challenge/Solution surface and repository verifier
 must pass under Lean 4.33, followed by a fresh Palomar intake on the final
 pushed commit. The prior Palomar identity
-`PALOMAR-2026-09-02-000007` is retained as the existing result identifier for
-the new version.
+`PALOMAR-2026-09-02-000007` is recorded only as the prior review context; the
+new intake must leave the existing Palomar ID blank.

@@ -3,61 +3,70 @@
 This document records preparation of the corrected Palomar surface in the
 public repository `Arthur742Ramos/lean-poincare-formalization-plan`, project
 directory `curvature/`. The metadata pins this record to an immutable public
-commit containing the document.
+commit containing this document.
 
 ## Mathematical source and origin
 
-The mathematical motivation is Dennis M. DeTurck's Ricci-DeTurck gauge in
+The mathematical source relationship is to Dennis M. DeTurck's
 “Deforming metrics in the direction of their Ricci tensors,” *Journal of
-Differential Geometry* 18 (1983), DOI `10.4310/jdg/1214509286`.
+Differential Geometry* 18 (1983), DOI `10.4310/jdg/1214509286`. The paper is
+the source of the Ricci–DeTurck gauge idea and the pullback reduction from the
+gauge-fixed equation to Ricci flow.
 
-The selected surface formalizes the gauge pullback, source-equation
-cancellation, initial-time anchoring, intrinsic Ricci-flow consequence, and
-finite-dimensional curvature trace transport in an explicit fixed-tangent-
-model setting. It does not claim DeTurck's full nonlinear parabolic theorem,
-the general compact-manifold Ricci-flow existence theorem, or an original
-mathematical discovery.
+The selected Lean result is an adaptation and formalized coordinate model of
+that mechanism, not a claim to reproduce DeTurck's full nonlinear parabolic
+short-time theorem. Its own formulas define continuous bilinear metric forms
+and the Ricci tensor as metric composition with a specified Ricci
+endomorphism. The derivative theorem is independently proved from Fréchet,
+gauge, and tangent-transport derivative hypotheses. The selected metric-cone
+existence and uniqueness declarations use the explicitly defined Ricci vector
+field, while the finite-dimensional scalar-trace transport remains proved
+supporting code rather than a selected standalone claim. These results are
+standard consequences/adaptations in the stated model, not an original
+theorem or a first mathematical presentation.
 
 ## Agent contribution
 
 GPT-5 Codex materially performed the following preparation work:
 
-- audited the prior Palomar review and identified that the frozen affine
-  Banach-space ODE surface did not meet the research-interest gate;
-- selected the geometric Ricci-DeTurck gauge-reduction boundary and wrote the
-  compact Challenge/Solution statement surface;
-- added the proof-bearing `ResearchTheorems` source module that exposes the
-  concrete gauge-reduction and curvature-transport capstone;
-- updated the Comparator surface, repository verifier, metadata, README,
-  Palomar record, and this contribution/oversight record; and
+- audited the Palomar rejection and traced each complaint to the selected
+  declarations, README, Comparator, and verifier;
+- redesigned the Challenge boundary so the metric, Ricci tensor, scalar trace,
+  derivative data, and positive-definite metric cone are explicit and typed;
+- removed the theorem whose hypothesis was exactly its advertised derivative
+  conclusion and replaced it with a chain-rule theorem from independent data;
+- implemented the corresponding proof-bearing Solution declarations,
+  including Ricci-tensor transport, trace transport, and metric-cone ODE
+  existence/uniqueness;
+- synchronized the Comparator, local verifier, README, Palomar record,
+  metadata, and this oversight record; and
 - ran Lean builds, source-closure checks, metadata checks, and the independent
   Comparator/NanoDa replay needed for reproducible packaging.
 
-The agent did not decide authorship, source priority, or mathematical novelty.
-It did not convert the selected result into a claim about the full
-time-dependent Ricci-flow PDE, Schauder estimates, or short-time existence.
+The agent did not decide authorship, source priority, or mathematical
+novelty. It did not claim that the coordinate model proves the general
+compact-manifold Ricci-flow PDE, Schauder estimates, or short-time existence.
 
 ## Human authorship and oversight
 
 The recorded human authors are Arthur Freitas Ramos, David Barros Hulak, and
-Ruy J. G. B. de Queiroz. Human authors selected and approved the author list,
-external source relationship, theorem boundary, scope limits, and public
-artifact. The responsible maintainer reviewed the mathematical boundary and
-exact repository diff and retains responsibility for publication and the
-Palomar submission. Lean kernel elaboration and the independent pinned
-Comparator/NanoDa replay check formal consistency and reproducibility, not
-authorship or novelty.
+Ruy J. G. B. de Queiroz. The human authors selected and approved the author
+list, external source relationship, theorem boundary, scope limitations, and
+publication decision. Arthur Freitas Ramos, as responsible maintainer,
+reviewed the mathematical boundary and exact repository diff and retains
+responsibility for attribution, release, and the Palomar submission. Lean
+kernel elaboration and the pinned Comparator/NanoDa replay check formal
+consistency and reproducibility; they do not establish authorship or novelty.
 
 ## Artifact boundary
 
-`Challenge.lean` imports only Mathlib and states the pullback and
-Ricci-DeTurck cancellation theorem family in a small fixed-tangent-model
-surface. `Solution.lean` proves the seven compared declarations and imports
-the checked Ricci-flow gauge-transport development, including
-`ResearchTheorems.lean`. The selected statements are intentionally an
-auditable abstraction of the larger geometric package; the source repository
-does not claim that this submission closes arbitrary compact-manifold local
-existence.
+`Challenge.lean` imports only Mathlib and exposes the exact formulas and
+hypotheses compared by Palomar. `Solution.lean` proves the same declarations
+without importing the project-specific Ricci-flow source, so the compared
+proofs do not hide an assumption in a local helper module. The larger
+manifold-level source package remains implementation context and is described
+as such in the README; it is not silently substituted for the Challenge
+surface.
 
 ## External status
 

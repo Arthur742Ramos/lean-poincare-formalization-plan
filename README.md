@@ -52,16 +52,20 @@ repository.
 
 ## Research-facing submission
 
-The current research-facing Lean result is the Ricci--DeTurck gauge-reduction
-capstone in
-`curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/ResearchTheorems.lean`.
-Its `ChosenIntrinsicDeTurckLocalSolution.ricciDeTurckGaugeReduction_of_innerDerivative`
-theorem turns raw anchored `C^3` gauge and pulled-back-metric derivative data
-into a complete intrinsic Ricci-flow solution, preserving the initial metric.
-The companion readout identifies the velocity both with `-2 Ric` and with the
-trace of the conjugated pulled-back background Ricci endomorphism. The frozen
-affine Banach-space evolution remains supporting analytic infrastructure, not
-the headline result.
+The current research-facing Lean target is the typed Ricci–DeTurck pullback
+and metric-cone evolution surface in `curvature/`. Its Comparator exposes
+continuous bilinear metric forms, an explicitly defined Ricci tensor, an
+independently derived gauge-pullback derivative, the source-equation
+cancellation to intrinsic `-2 Ric` flow, and Picard–Lindelöf
+existence/uniqueness for the explicitly defined Ricci vector field while the
+state remains a symmetric-positive-definite metric. The finite-dimensional
+scalar trace remains supporting code rather than a selected standalone result.
+The larger manifold-level implementation context is in
+`curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/ResearchTheorems.lean`;
+the selected four-file surface is an auditable coordinate adaptation and does
+not claim the full nonlinear compact-manifold Ricci-flow existence theorem.
+The frozen affine Banach-space evolution remains supporting infrastructure,
+not the selected result.
 
 The current exception is `curvature/`, which now contains a concrete Lean
 package for covariant derivatives along vector fields, the raw curvature
