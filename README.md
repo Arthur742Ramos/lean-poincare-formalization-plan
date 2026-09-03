@@ -48,6 +48,19 @@ anticipated.
 This is intentionally a research-program repository, not an implementation
 repository.
 
+## Research-facing submission
+
+The current research-facing Lean result is the Ricci--DeTurck gauge-reduction
+capstone in
+`curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/ResearchTheorems.lean`.
+Its `ChosenIntrinsicDeTurckLocalSolution.ricciDeTurckGaugeReduction_of_innerDerivative`
+theorem turns raw anchored `C^3` gauge and pulled-back-metric derivative data
+into a complete intrinsic Ricci-flow solution, preserving the initial metric.
+The companion readout identifies the velocity both with `-2 Ric` and with the
+trace of the conjugated pulled-back background Ricci endomorphism. The frozen
+affine Banach-space evolution remains supporting analytic infrastructure, not
+the headline result.
+
 The current exception is `curvature/`, which now contains a concrete Lean
 package for covariant derivatives along vector fields, the raw curvature
 commutator, a bundled curvature tensor, Ricci/scalar curvature, metric

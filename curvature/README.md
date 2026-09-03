@@ -64,6 +64,24 @@ current `RicciFlow.LocalExistence` material does not yet prove compact
 Ricci-flow local existence/uniqueness in arbitrary dimension. It is kept as an
 internal scaffold, not as part of the public proof-bearing package surface.
 The next active milestone is therefore still the general point-4 theorem.
+
+## Research-interest theorem
+
+The public root now includes
+`Geometry.Manifold.RicciFlow.ResearchTheorems`. Its primary theorem,
+`ChosenIntrinsicDeTurckLocalSolution.ricciDeTurckGaugeReduction_of_innerDerivative`,
+is a geometric DeTurck result rather than an autonomous ODE exercise: raw
+anchored `C^3` gauge and pulled-back-metric derivative data construct the
+complete gauge-reduced package and an intrinsic Ricci-flow solution with the
+same initial metric. The companion
+`GaugeReducedIntrinsicDeTurckLocalSolution.ricciDeTurckGaugeReduction` gives
+the intrinsic `-2 Ric` readout, while `ricciDeTurckGaugeReduction_trace` gives
+the curvature-transport formula as the trace of the tangent-map-conjugated
+pulled-back background Ricci endomorphism.
+
+The frozen affine evolution modules remain supporting Banach-space
+well-posedness infrastructure; they are not the headline mathematical
+submission.
 The scaffold now contains proof-bearing stationary theorem packages for
 subsingleton tangent/model spaces and for rank-one tangent/model spaces
 (`Module.finrank ℝ E ≤ 1`), plus a thin `LocalExistence.RankOne` extension
