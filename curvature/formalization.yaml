@@ -86,7 +86,7 @@ automation:
   spend_usd: "subscription-based"
   notes: |
     Fuller role and oversight record: the immutable repository document is
-    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/TO_BE_REPLACED/curvature/AGENT-CONTRIBUTION-04.md
+    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/5a0a0184662aa6c5a3c6c060a717ab538e81e404/curvature/AGENT-CONTRIBUTION-04.md
     It records the agent's proof-engineering and packaging role separately from
     the human authors' mathematical selection, attribution, review, and
     publication responsibility. This pointer is replaced by the immutable
