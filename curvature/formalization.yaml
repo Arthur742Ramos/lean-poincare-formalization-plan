@@ -2,17 +2,14 @@
 version: "v0.4"
 
 project:
-  name: "Levi–Civita connections and metric-determined curvature invariants in Lean"
+  name: "Time-dependent Levi–Civita families and curvature invariants in Lean"
   description: >-
-    Formalizes a coherent static Riemannian theorem family for smooth
-    finite-dimensional manifolds: existence of a global C^1 Levi–Civita
-    covariant derivative, independence of the bundled curvature tensor from
-    the chosen Levi–Civita realization, symmetry of the Ricci contraction, and
-    independence of both Ricci and scalar curvature from that realization.
-    These are standard classical results assembled at the current Mathlib
-    manifold/vector-bundle API boundary. The contribution claimed here is a
-    kernel-checked Lean formalization of the theorem family and its bundled
-    constructions, not a new mathematical discovery or a priority claim.
+    Formalizes an explicit-time geometric interface for smooth finite-dimensional
+    Riemannian manifolds: slicewise Levi–Civita existence and regularity,
+    background-independent Levi–Civita correction, and time-slice Ricci and
+    scalar-curvature invariance. The time parameter is represented explicitly
+    as an indexed family; this submission does not claim time differentiability,
+    Ricci-flow existence, or a new mathematical theorem.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -34,9 +31,10 @@ sources:
     location: "https://github.com/leanprover-community/mathlib4"
     relationship: "builds-on"
     note: >-
-      The development extends Mathlib's manifold, vector-bundle,
-      covariant-derivative, torsion, and Riemannian APIs with a proved
-      Levi–Civita existence and curvature-contraction layer.
+      The development builds on Mathlib's manifold, tangent-bundle,
+      covariant-derivative, regularity, and Riemannian APIs. The selected
+      constructions and proofs are supplied by the PoincareCurvature source
+      package rather than asserted as Mathlib theorems.
     license: "Apache-2.0"
     author_endorsement: "not-contacted"
   - title: "Foundations of Differential Geometry, Vol. I"
@@ -48,12 +46,15 @@ sources:
     location: "https://books.google.com/books/about/Foundations_of_Differential_Geometry_Vol.html?id=ss7bEAAAQBAJ"
     relationship: "formalizes"
     note: >-
-      The selected existence, curvature-independence, Ricci-symmetry, and
-      trace-invariance statements are standard consequences of the classical
-      fundamental theorem of Riemannian geometry and the usual curvature
-      contraction identities. This is an explicit formalization/adaptation of
-      that source-based theorem family, not an original theorem or priority
-      claim; the repository supplies the Lean constructions and proofs.
+      The classical source supplies the underlying fundamental theorem of
+      Riemannian geometry, uniqueness of the Levi–Civita connection, and the
+      standard curvature/Ricci contraction identities. The selected results
+      are not presented as independently discovered: they are an explicit
+      ℝ-indexed adaptation of those slicewise statements, implemented in
+      `PoincareCurvature/.../CovariantDerivative/TimeDependent.lean` by
+      applying the static constructions at each time. The repository's
+      contribution is the Lean interface, proof integration, and checked
+      regularity/invariance package; no priority claim is made.
     license: "unknown"
     author_endorsement: "not-contacted"
 
@@ -62,16 +63,18 @@ related_formalizations: []
 status:
   scope: >-
     The selected surface covers arbitrary smooth finite-dimensional model
-    spaces, Hausdorff manifolds, tangent bundles with Riemannian structure,
-    covariant derivatives, and the explicit C^1/C^2 regularity assumptions
-    required by the source theorems. It selects five results connecting
-    Levi–Civita existence to intrinsic curvature, Ricci, and scalar-curvature
-    invariants. `Challenge.lean` contains eight deliberate holes: five
-    theorem statement holes and three definition holes for the canonical
-    bundled curvature tensor, Ricci curvature, and scalar curvature. The
+    spaces, Hausdorff manifolds, C^2 time-indexed Riemannian metrics on the
+    tangent bundle, time-indexed covariant derivatives, and the explicit
+    slice-wise C^1 hypotheses used by the source results. It selects eight
+    theorem statements: time-dependent Levi–Civita existence, correction
+    correctness and regularity, background-family independence, regularity of
+    every slicewise Levi–Civita family, Ricci symmetry, and Ricci/scalar
+    invariance. `Challenge.lean` contains eleven deliberate holes: eight
+    theorem holes and three definition holes for the time-dependent
+    Levi–Civita correction, Ricci curvature, and scalar curvature. The
     corresponding `Solution.lean` declarations use the actual constructions
-    and proofs from the package.
-  sorry_count: 8
+    and proofs from `TimeDependent.lean`.
+  sorry_count: 11
   sorry_in_definitions: 3
   axioms: []
 
@@ -81,99 +84,123 @@ automation:
       models: ["GPT-5 Codex"]
       framework: "Codex with Lean 4.33 and Mathlib"
       tool_setup: >-
-        Repository-scoped mathematical formalization and proof engineering;
-        Challenge/Solution construction; pinned kernel builds; and independent
-        Comparator/NanoDa replay.
+        Repository-scoped source audit; exact Challenge/Solution declaration
+        alignment; pinned Lean builds; and independent Comparator/NanoDa
+        replay with the time-dependent theorem and definition surface.
       cost:
         wall_time: "not tracked"
         spend_usd: "subscription-based"
         hardware: "local machine"
       prompting_notes: >-
-        GPT-5 Codex materially performed the Submission 03 candidate audit,
-        theorem-surface drafting, exact Challenge/Solution declaration
-        alignment, definition-hole setup, metadata and documentation updates,
-        and reproducibility checks. The agent did not determine authorship,
-        source priority, or mathematical novelty. Human authors selected and
-        approved the theorem family, author list, source relationships, scope
-        claims, and final artifact; Lean's kernel and the independent
-        Comparator/NanoDa replay supplied automated checks.
+        GPT-5 Codex materially performed the Submission 04 source audit of the
+        time-dependent module, theorem-cluster selection proposal, exact
+        Challenge/Solution drafting, definition-hole setup, Comparator and
+        verifier updates, documentation, and reproducibility checks. The agent
+        did not determine authorship, source priority, or mathematical novelty.
+        Human authors selected and approved the theorem family, author list,
+        source relationship, scope limits, and final public artifact; human
+        oversight included review of the source and diff plus authorization of
+        the public push. Lean's kernel and the independent Comparator/NanoDa
+        replay supplied automated checks.
   spend_usd: "subscription-based"
   notes: >-
     Fuller role and oversight record: the immutable repository document at
-    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/a8e33e4f5215105089ede1f45ed3e67b78d3ae4e/curvature/AGENT-CONTRIBUTION-03.md
-    . It distinguishes agent proof engineering from human mathematical
-    selection, attribution, review, and submission responsibility.
+    `curvature/AGENT-CONTRIBUTION-04.md`, pinned to the pre-final public
+    artifact commit in the final metadata. It distinguishes agent proof
+    engineering and packaging from human mathematical selection, attribution,
+    review, and publication responsibility.
 
 fidelity:
   divergences: >-
     The Challenge imports only Mathlib and reconstructs the public vocabulary
-    needed by the selected statements. Its three declarations of
-    `CovariantDerivative.curvatureTensor`, `ricciCurvature`, and
-    `scalarCurvature` are deliberate Comparator definition holes: their exact
-    source types are exposed, while their bodies are supplied by the
-    implementation in `Solution.lean` and its package imports. The five
-    theorem declarations remain ordinary statement holes and are compared
-    exactly. This is an intentional, documented statement/implementation
-    separation for independent Comparator replay, not an omission from the
-    proved source package.
+    needed by the selected statements: time-indexed covariant derivatives and
+    Riemannian metrics, the slicewise Levi–Civita predicate, and the three
+    time-dependent constructions. The declarations of
+    `TimeDependentRiemannianMetric.leviCivitaConnection`, `ricciCurvature`,
+    and `scalarCurvature` are deliberate Comparator definition holes: their
+    exact source types are exposed, while their bodies are supplied by the
+    implementation imported by `Solution.lean`. The eight theorem declarations
+    remain ordinary statement holes and are compared exactly. This is an
+    intentional statement/implementation separation for independent replay,
+    not an omission from the proved source package.
 
 review:
   status: "self-assessed"
   reviewers:
     - "none"
   notes: >-
-    Submission 03 is deliberately scoped to a larger static Riemannian package
-    rather than repeating the accepted Bianchi surface or the earlier
-    elementary commutator-skew and Levi–Civita-uniqueness wrappers. Its five
-    results connect existence of the canonical connection to the curvature
-    tensor and both of its principal contractions, giving a coherent
-    metric-determined invariant layer. The underlying mathematics is standard;
-    no original result or priority is claimed. Local preparation requires both
-    `scripts/verify-palomar.sh` and the pinned
-    `scripts/verify-comparator.sh` replay.
+    Submission 04 is a library-level theorem cluster with an explicit time
+    parameter. Its substantive boundary is the combination of existential
+    slicewise selection, regularity transfer, background-independent
+    Levi–Civita correction, and intrinsic Ricci/scalar invariants; it is not
+    merely a renamed pointwise theorem. The mathematics is standard and is
+    described as a formalization/adaptation, not as an original result. It does
+    not claim time-dependent PDE estimates, short-time Ricci-flow existence, or
+    any broader point-4 theorem.
 
 alignment:
   namespace: "PoincareCurvature.Palomar"
   statements:
-    - source: "Existence of a global C^1 Levi–Civita connection"
+    - source: "Time-dependent Levi–Civita family existence with slice regularity"
       lean: "PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        A smooth finite-dimensional Riemannian manifold admits a covariant
-        derivative that is torsion-free, metric-compatible, and C^1.
-    - source: "Curvature tensor independence of the Levi–Civita realization"
-      lean: "PoincareCurvature.Palomar.curvatureTensor_eq_of_isLeviCivita"
+        A C^2 time-indexed metric family admits a slicewise Levi–Civita family
+        whose slices are C^1.
+    - source: "Slicewise Levi–Civita correction correctness"
+      lean: "PoincareCurvature.Palomar.leviCivitaConnection_isLeviCivita"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        Two C^1 Levi–Civita covariant derivatives induce the same bundled
-        curvature tensor pointwise.
-    - source: "Ricci symmetry for a Levi–Civita connection"
+        The canonical correction of any background family is Levi–Civita for
+        the metric family at each time.
+    - source: "Regularity preservation by the slicewise correction"
+      lean: "PoincareCurvature.Palomar.contMDiffCovariantDerivative_leviCivitaConnection"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        Slice-wise C^1 regularity of the background family is preserved by the
+        Levi–Civita correction.
+    - source: "Background-family independence of the Levi–Civita correction"
+      lean: "PoincareCurvature.Palomar.leviCivitaConnection_eq_leviCivitaConnection"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        Any two background families produce the same corrected connection on
+        smooth sections at every time.
+    - source: "Regularity of every slicewise Levi–Civita family"
+      lean: "PoincareCurvature.Palomar.contMDiffCovariantDerivative_of_isLeviCivita"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        Under the compactness and metric hypotheses, every family satisfying
+        the slicewise Levi–Civita predicate has the selected C^1 regularity.
+    - source: "Time-slice Ricci symmetry for Levi–Civita families"
       lean: "PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        The trace contraction of the curvature tensor is symmetric under the
-        stated regularity and Levi–Civita hypotheses.
-    - source: "Ricci-curvature independence of the Levi–Civita realization"
+        The Ricci contraction is symmetric at each time under the stated
+        regularity and manifold hypotheses.
+    - source: "Time-dependent Ricci invariance"
       lean: "PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        The Ricci contraction is the same for any two C^1 Levi–Civita
-        covariant derivatives associated with the fixed metric.
-    - source: "Scalar-curvature independence of the Levi–Civita realization"
+        The Ricci contraction agrees for any two regular slicewise
+        Levi–Civita families for the same metric family.
+    - source: "Time-dependent scalar-curvature invariance"
       lean: "PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        The scalar trace contraction is likewise independent of the chosen
-        Levi–Civita covariant derivative.
+        The scalar trace contraction likewise agrees for any two regular
+        slicewise Levi–Civita families.
 
 acknowledgements: >-
   Mathlib contributors for the manifold, vector-bundle, covariant-derivative,
-  torsion, and Riemannian infrastructure; Kobayashi and Nomizu and the
-  classical differential-geometry literature for the standard theorem family
-  formalized here; and the Palomar Registry project for the
-  statement/solution Comparator workflow.
+  regularity, and Riemannian infrastructure; Kobayashi and Nomizu and the
+  classical differential-geometry literature for the underlying theorem
+  family; the human authors and reviewers for selection and verification; and
+  the Palomar Registry project for the statement/solution Comparator workflow.

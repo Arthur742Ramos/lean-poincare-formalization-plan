@@ -101,9 +101,9 @@ imports = [
 if not imports or any(not module.startswith("Mathlib.") for module in imports):
     raise SystemExit(f"error: Challenge.lean imports outside Mathlib: {imports}")
 challenge_holes = len(re.findall(r"^\s*sorry\s*$", challenge_text, re.MULTILINE))
-if challenge_holes != 8:
+if challenge_holes != 11:
     raise SystemExit(
-        f"error: expected eight deliberate Challenge holes, found {challenge_holes}"
+        f"error: expected eleven deliberate Challenge holes, found {challenge_holes}"
     )
 
 try:
@@ -112,24 +112,27 @@ except (OSError, UnicodeError, json.JSONDecodeError) as error:
     raise SystemExit(f"error: comparator.json is invalid: {error}")
 expected_theorems = [
     "PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection",
-    "PoincareCurvature.Palomar.curvatureTensor_eq_of_isLeviCivita",
+    "PoincareCurvature.Palomar.leviCivitaConnection_isLeviCivita",
+    "PoincareCurvature.Palomar.contMDiffCovariantDerivative_leviCivitaConnection",
+    "PoincareCurvature.Palomar.leviCivitaConnection_eq_leviCivitaConnection",
+    "PoincareCurvature.Palomar.contMDiffCovariantDerivative_of_isLeviCivita",
     "PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita",
     "PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita",
     "PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita",
 ]
 expected_definitions = [
-    "CovariantDerivative.curvatureTensor",
-    "CovariantDerivative.ricciCurvature",
-    "CovariantDerivative.scalarCurvature",
+    "CovariantDerivative.TimeDependentRiemannianMetric.leviCivitaConnection",
+    "CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature",
+    "CovariantDerivative.TimeDependentRiemannianMetric.scalarCurvature",
 ]
 if comparator.get("challenge_module") != "Challenge":
     raise SystemExit("error: comparator challenge_module must be Challenge")
 if comparator.get("solution_module") != "Solution":
     raise SystemExit("error: comparator solution_module must be Solution")
 if comparator.get("theorem_names") != expected_theorems:
-    raise SystemExit("error: comparator theorem surface does not match Submission 03")
+    raise SystemExit("error: comparator theorem surface does not match Submission 04")
 if comparator.get("definition_names") != expected_definitions:
-    raise SystemExit("error: definition-hole surface does not match Submission 03")
+    raise SystemExit("error: definition-hole surface does not match Submission 04")
 if comparator.get("enable_nanoda") is not True:
     raise SystemExit("error: comparator.json must enable NanoDa")
 if not set(comparator.get("permitted_axioms", [])) <= {
@@ -216,11 +219,14 @@ lake env lean --src-deps Solution.lean
 lake env lean /dev/stdin <<'EOF'
 import Solution
 #print axioms PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection
-#print axioms PoincareCurvature.Palomar.curvatureTensor_eq_of_isLeviCivita
+#print axioms PoincareCurvature.Palomar.leviCivitaConnection_isLeviCivita
+#print axioms PoincareCurvature.Palomar.contMDiffCovariantDerivative_leviCivitaConnection
+#print axioms PoincareCurvature.Palomar.leviCivitaConnection_eq_leviCivitaConnection
+#print axioms PoincareCurvature.Palomar.contMDiffCovariantDerivative_of_isLeviCivita
 #print axioms PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita
 #print axioms PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita
 #print axioms PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita
 EOF
 
 git diff --check
-echo "Submission 03 local checks passed."
+echo "Submission 04 local checks passed."

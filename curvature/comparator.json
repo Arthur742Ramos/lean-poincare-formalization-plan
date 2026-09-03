@@ -3,15 +3,18 @@
   "solution_module": "Solution",
   "theorem_names": [
     "PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection",
-    "PoincareCurvature.Palomar.curvatureTensor_eq_of_isLeviCivita",
+    "PoincareCurvature.Palomar.leviCivitaConnection_isLeviCivita",
+    "PoincareCurvature.Palomar.contMDiffCovariantDerivative_leviCivitaConnection",
+    "PoincareCurvature.Palomar.leviCivitaConnection_eq_leviCivitaConnection",
+    "PoincareCurvature.Palomar.contMDiffCovariantDerivative_of_isLeviCivita",
     "PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita",
     "PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita",
     "PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita"
   ],
   "definition_names": [
-    "CovariantDerivative.curvatureTensor",
-    "CovariantDerivative.ricciCurvature",
-    "CovariantDerivative.scalarCurvature"
+    "CovariantDerivative.TimeDependentRiemannianMetric.leviCivitaConnection",
+    "CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature",
+    "CovariantDerivative.TimeDependentRiemannianMetric.scalarCurvature"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": true

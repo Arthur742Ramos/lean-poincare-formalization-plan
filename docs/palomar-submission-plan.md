@@ -32,8 +32,8 @@ and authorization relationship have been explicitly confirmed.
 | --- | --- | --- | --- |
 | 01 | Raw Bianchi curvature identities | Pointwise first and raw differential second Bianchi identities for torsion-free affine connections | Accepted by Palomar (user-confirmed); immutable artifact at `04b00ba308fc5196a07a5cf7a9c6f985505ea041` |
 | 02 | Raw curvature tensoriality and metric compatibility | Pointwise scalar tensoriality in all three slots and metric skew-adjointness of the raw curvature commutator | Passed by Palomar (user-confirmed); immutable artifact at `db821d6c926bc3fd9622893cc48e23637d406651` |
-| 03 | Levi-Civita connections and metric-determined curvature invariants | Levi-Civita existence, curvature-tensor independence, Ricci symmetry, and Ricci/scalar-curvature invariance | Preparing locally |
-| 04 | Time-dependent geometric structures | One-parameter sections, connections, metrics, and slicewise curvature | Source code exists; isolate after 03 |
+| 03 | Levi-Civita connections and metric-determined curvature invariants | Levi-Civita existence, curvature-tensor independence, Ricci symmetry, and Ricci/scalar-curvature invariance | Accepted by Palomar (user-confirmed); immutable artifact at `80b71f3a239ac2b294c91c66d020476f667a1306` |
+| 04 | Time-dependent Levi-Civita families and curvature invariants | Explicit-time slicewise existence, regularity, background independence, Ricci symmetry, and Ricci/scalar invariance | Preparing locally |
 | 05 | Continuous sections and smoothing | Coordinate models, finite-cover gluing, smooth approximation, and convex fiber constraints | Source code exists; audit as a separate library contribution |
 | 06 | The open metric cone | Symmetric positive-definite bilinear-form sections and openness in the section-space model | Source code exists; audit separately |
 | 07 | Parabolic Holder primitives | Parabolic neighborhoods, Holder controls, covers, patching, and closure estimates | Source code exists; select a coherent theorem cluster |
@@ -56,10 +56,10 @@ library result has an independently defensible boundary.
 
 ## Order of work
 
-1. Preserve the accepted 01 artifact and the passed 02 artifact while
-   packaging/validating 03 as the next non-overlapping static Riemannian result
-   family.
-2. Audit the dependency closure and research value of 04–06, then prepare the
+1. Preserve the accepted 01 and 03 artifacts and the passed 02 artifact while
+   packaging/validating 04 as the next non-overlapping explicit-time
+   Riemannian result family.
+2. Audit the dependency closure and research value of 05–06, then prepare the
    strongest non-overlapping candidates.
 3. Package the analytic candidates 07–11 only around proved theorem clusters;
    keep point-4 interfaces and special cases clearly labeled as scaffolding.
@@ -142,6 +142,40 @@ imports the actual package constructions and proves the five selected
 statements. The candidate-specific role and oversight record is
 `curvature/AGENT-CONTRIBUTION-03.md`.
 
-Current state: local Lean 4.33 elaboration and the pinned Comparator/NanoDa
-replay pass. The repository verifier, final public commit, and any Palomar
-intake remain to be completed separately.
+Current state: Palomar accepted this artifact according to the maintainer's
+status report. Its exact public commit is
+`80b71f3a239ac2b294c91c66d020476f667a1306`; hosted acceptance is not conflated
+with registration or public indexing.
+
+## Submission 04: time-dependent Levi–Civita families and curvature invariants
+
+The fourth candidate isolates the explicit-time interface in
+`PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TimeDependent.lean`.
+The time variable is represented as an `ℝ`-indexed family, and all geometric
+claims remain slice-wise. It selects:
+
+- `PoincareCurvature.Palomar.exists_contMDiffLeviCivitaConnection`;
+- `PoincareCurvature.Palomar.leviCivitaConnection_isLeviCivita`;
+- `PoincareCurvature.Palomar.contMDiffCovariantDerivative_leviCivitaConnection`;
+- `PoincareCurvature.Palomar.leviCivitaConnection_eq_leviCivitaConnection`;
+- `PoincareCurvature.Palomar.contMDiffCovariantDerivative_of_isLeviCivita`;
+- `PoincareCurvature.Palomar.ricciCurvature_symm_of_isLeviCivita`;
+- `PoincareCurvature.Palomar.ricciCurvature_eq_of_isLeviCivita`; and
+- `PoincareCurvature.Palomar.scalarCurvature_eq_of_isLeviCivita`.
+
+This is a standard explicit-time formalization/adaptation of the classical
+slicewise Levi–Civita and curvature theory. The source proves the family-level
+statements by applying the static constructions at each time; no new theorem,
+time-differentiability claim, Ricci-flow existence claim, or priority claim is
+made. The cluster's formalization value is the reusable combination of
+existential selection, regularity transfer, background-independent correction,
+and intrinsic contraction invariance for later geometric-analysis modules.
+
+The Challenge/Solution boundary exposes three definition holes for the
+time-dependent Levi–Civita correction, Ricci curvature, and scalar curvature,
+alongside eight theorem statement holes. The candidate-specific role and
+oversight record is `curvature/AGENT-CONTRIBUTION-04.md`.
+
+Current state: the Challenge/Solution surface elaborates under Lean 4.33 and
+the pinned independent Comparator/NanoDa replay is being checked. The final
+public commit and any Palomar intake remain separate actions.
