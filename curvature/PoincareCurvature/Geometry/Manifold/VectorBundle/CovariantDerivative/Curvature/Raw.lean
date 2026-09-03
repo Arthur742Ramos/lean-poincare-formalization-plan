@@ -19,22 +19,23 @@ required tensoriality statements and package this operation as a multilinear map
 open Bundle
 open scoped Manifold ContDiff
 
-variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
-  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-  {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
-  {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
-  [∀ x, AddCommGroup (V x)] [∀ x, Module 𝕜 (V x)]
-  [∀ x, TopologicalSpace (V x)] [∀ x, IsTopologicalAddGroup (V x)]
-  [∀ x, ContinuousSMul 𝕜 (V x)] [FiberBundle F V] [VectorBundle 𝕜 F V]
+variable {𝕜 : Type*} [hField : NontriviallyNormedField 𝕜]
+  {E : Type*} [hEGroup : NormedAddCommGroup E] [hESpace : NormedSpace 𝕜 E]
+  {H : Type*} [hHTop : TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+  {M : Type*} [hMTop : TopologicalSpace M] [hCharted : ChartedSpace H M]
+  {F : Type*} [hFGroup : NormedAddCommGroup F] [hFSpace : NormedSpace 𝕜 F]
+  {V : M → Type*} [hTotalTop : TopologicalSpace (TotalSpace F V)]
+  [hVAdd : ∀ x, AddCommGroup (V x)] [hVModule : ∀ x, Module 𝕜 (V x)]
+  [hVTop : ∀ x, TopologicalSpace (V x)] [hVAddTop : ∀ x, IsTopologicalAddGroup (V x)]
+  [hVSMul : ∀ x, ContinuousSMul 𝕜 (V x)] [hFiber : FiberBundle F V]
+  [hVector : VectorBundle 𝕜 F V]
 
 namespace CovariantDerivative
 
 variable (cov : CovariantDerivative I F V)
 
 /-- The raw curvature commutator associated to a covariant derivative. -/
-def curvatureAux (X Y : Π x : M, TangentSpace I x) (σ : Π x : M, V x) : Π x : M, V x :=
+abbrev curvatureAux (X Y : Π x : M, TangentSpace I x) (σ : Π x : M, V x) : Π x : M, V x :=
   cov.along X (cov.along Y σ) - cov.along Y (cov.along X σ) -
     cov.along (VectorField.mlieBracket I X Y) σ
 

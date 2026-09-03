@@ -197,12 +197,18 @@ noncomputable def intrinsicDeTurckCorrectionSection
 @[simp] lemma intrinsicDeTurckCorrectionSection_apply
     (g : MetricFamily (I := I) (M := M)) (background : ConnectionFamily (I := I) (M := M))
     (t : ℝ) (x : M) (u v : TM x) :
-    intrinsicDeTurckCorrectionSection (I := I) (M := M) g background t x u v =
+      intrinsicDeTurckCorrectionSection (I := I) (M := M) g background t x u v =
       intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v := by
-  simp only [intrinsicDeTurckCorrectionSection, Pi.add_apply, ContinuousLinearMap.add_apply,
-    ContinuousLinearMap.comp_apply, intrinsicDeTurckCorrection_apply]
-  congr 1
-  exact (g t).symm x _ u
+  change
+    (((g t).inner x).comp
+        ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+          (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x) u v +
+      ((((g t).inner x).comp
+        ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+          (intrinsicDeTurckVectorField (I := I) (M := M) g background t) x)).flip) u v) =
+      intrinsicDeTurckCorrection (I := I) (M := M) g background t x u v
+  exact (intrinsicDeTurckCorrection_eq_metricComp_add_flip
+    (I := I) (M := M) g background t x u v).symm
 
 /-- The intrinsic DeTurck correction is a continuous `BilinearFormBundle` section for a `C¹`
 background connection slice.  This is the symmetrized covariant part of the intrinsic Ricci–DeTurck
@@ -294,7 +300,7 @@ theorem curvatureAux_contMDiff_zero
   haveI : IsManifold I ((2 : ℕ∞) + 1) M :=
     IsManifold.of_le (n := (∞ : WithTop ℕ∞)) (by exact_mod_cast le_top)
   have hZ2 : ContMDiff I (I.prod 𝓘(ℝ, E)) (1 + 1)
-      (fun x ↦ TotalSpace.mk' E x (Z x)) := by simpa using hZ
+      (fun x ↦ TotalSpace.mk' E x (Z x)) := hZ.of_le (by norm_num)
   have hYZ1 : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
       (fun x ↦ TotalSpace.mk' E x (cov.along Y Z x)) :=
     cov.contMDiff_along (hY.of_le (by norm_num)) hZ2
@@ -424,7 +430,7 @@ theorem curvatureAux_apply_eq_of_eventuallyEq_fields
     exact IsCovariantDerivativeOn.congr_of_eventuallyEq
       (hcov := cov.isCovariantDerivativeOnUniv) hs ht Filter.univ_mem hst
   have hσ2' : ContMDiff I (I.prod 𝓘(ℝ, E)) (1 + 1)
-      (fun z ↦ TotalSpace.mk' E z (σ z)) := by simpa using hσ
+      (fun z ↦ TotalSpace.mk' E z (σ z)) := hσ.of_le (by norm_num)
   have hAlongYσ : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
       (fun z ↦ TotalSpace.mk' E z (cov.along Y σ z)) := cov.contMDiff_along hY hσ2'
   have hAlongXσ : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
@@ -493,7 +499,7 @@ theorem curvatureAux_apply_eq_of_eventuallyEq_fields
 For a `C¹` tangent connection and vector fields `ea`, `eb`, `ec` that are `C²` *only on* an open set
 `u`, the raw curvature commutator at any `y ∈ u` equals the bundled curvature tensor evaluated on the
 frame values.  This is the `On`-version of
-`curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right`: the fields are
+`curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrameCoeff_right`: the fields are
 globalised by a bump supported in `u ∩ trivializationAt.baseSet` (so the global comparison field's
 trivialization coefficients are `C²` on that patch and vanish off the bump), the value tensoriality is
 applied to the globalisation, and the germ-move `curvatureAux_apply_eq_of_eventuallyEq_fields` transfers
@@ -545,29 +551,29 @@ theorem curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame
   have hXea : X =ᶠ[nhds y] ea := by
     filter_upwards [hψ1] with z hz
     have : ψ z = 1 := hz
-    simp [hXdef, this]
+    simp [hXdef, this] <;> rfl
   have hYeb : Y =ᶠ[nhds y] eb := by
     filter_upwards [hψ1] with z hz
     have : ψ z = 1 := hz
-    simp [hYdef, this]
+    simp [hYdef, this] <;> rfl
   have hσec : σ =ᶠ[nhds y] ec := by
     filter_upwards [hψ1] with z hz
     have : ψ z = 1 := hz
-    simp [hσdef, this]
+    simp [hσdef, this] <;> rfl
   have hgerm : cov.curvatureAux ea eb ec y = cov.curvatureAux X Y σ y :=
     curvatureAux_apply_eq_of_eventuallyEq_fields
       (hXglob.of_le (by norm_num)) (hYglob.of_le (by norm_num)) hσglob
       hXea.symm hYeb.symm hσec.symm
   let b := Module.finBasis ℝ E
   have hσcoeff : ∀ i, ContMDiff I 𝓘(ℝ) 2
-      (fun z ↦ e.localFrame_coeff I b i z (σ z)) := by
+      (fun z ↦ e.localFrameCoeff I b i z (σ z)) := by
     intro i
     have hbase : ContMDiffOn I 𝓘(ℝ) 2
-        (fun z ↦ e.localFrame_coeff I b i z (σ z)) u' :=
-      contMDiffOn_localFrame_coeff (I := I) (e := e) (b := b) (t := u')
+        (fun z ↦ e.localFrameCoeff I b i z (σ z)) u' :=
+      contMDiffOn_localFrameCoeff (I := I) (e := e) (b := b) (t := u')
         (k := (2 : WithTop ℕ∞)) hu'open hu'sube hσglob.contMDiffOn i
     have hcompl : ContMDiffOn I 𝓘(ℝ) 2
-        (fun z ↦ e.localFrame_coeff I b i z (σ z)) (tsupport ψ)ᶜ := by
+        (fun z ↦ e.localFrameCoeff I b i z (σ z)) (tsupport ψ)ᶜ := by
       have hzero : ContMDiffOn I 𝓘(ℝ) 2 (fun _ : M ↦ (0 : ℝ)) (tsupport ψ)ᶜ :=
         contMDiff_const.contMDiffOn
       refine hzero.congr ?_
@@ -585,11 +591,11 @@ theorem curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame
   have hYy : Y y = eb y := by simp [hYdef, hψy1]
   have hσy : σ y = ec y := by simp [hσdef, hψy1]
   have hcoeff_eq : ∀ i,
-      e.localFrame_coeff I b i y (σ y) = e.localFrame_coeff I b i y (ec y) := by
+      e.localFrameCoeff I b i y (σ y) = e.localFrameCoeff I b i y (ec y) := by
     intro i; rw [hσy]
   have htens : cov.curvatureAux X Y σ y =
       CovariantDerivative.curvatureTensor (cov := cov) y (ea y) (eb y) (ec y) :=
-    cov.curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right
+    cov.curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrameCoeff_right
       (b := b) (X := X) (Y := Y) (σ := σ) (x := y)
       (hXglob.of_le (by norm_num)) (hYglob.of_le (by norm_num)) hσglob
       hXy hYy hσcoeff hcoeff_eq
@@ -645,6 +651,7 @@ theorem continuousOn_clm_of_forall_apply_basis
   have hcomp : ContinuousOn (fun x : M ↦ recon (fun i ↦ f x (b i))) t :=
     hcont.comp_continuousOn hg
   refine hcomp.congr (fun x _ ↦ ?_)
+  change f x = recon (fun i ↦ f x (b i))
   rw [hrecon_apply, ← hrec x]
 
 /-- **Frame-component continuity criterion for `BilinearFormBundle` sections.**
@@ -692,33 +699,33 @@ theorem contMDiff_zero_bilinearFormBundleSection_of_forall_localFrame
 
 /-- The local-frame coefficient linear functional coincides with the basis representation coefficient
 for the induced basis on a trivialization fiber.  This is the section-free form of the (`@[simp]`)
-`localFrame_coeff_apply_of_mem_baseSet`, obtained by evaluating the latter at a section pinned to the
+`localFrameCoeff_apply_of_mem_baseSet`, obtained by evaluating the latter at a section pinned to the
 value `V` at `x`. -/
-lemma repr_basisAt_eq_localFrame_coeff
+lemma repr_basisAt_eq_localFrameCoeff
     {ι : Type*} (b : Module.Basis ι ℝ E) (x0 : M)
     {x : M} (hx : x ∈ (trivializationAt E TM x0).baseSet) (V : TM x) (k : ι) :
     ((trivializationAt E TM x0).basisAt b hx).repr V k
-      = (trivializationAt E TM x0).localFrame_coeff I b k x V := by
+      = (trivializationAt E TM x0).localFrameCoeff I b k x V := by
   classical
   haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
     ContMDiffVectorBundle.of_le (n := 2) (by norm_num)
-  have h := (trivializationAt E TM x0).localFrame_coeff_apply_of_mem_baseSet (I := I) b hx
+  have h := (trivializationAt E TM x0).localFrameCoeff_apply_of_mem_baseSet (I := I) b hx
     (Function.update (0 : Π y : M, TM y) x V) k
   simpa using h.symm
 
 /-- **Trace expansion of Ricci curvature in a local trivialization frame.**
 For `x` in the trivialization base set at `x0`, the Ricci curvature is the frame trace of the
 curvature endomorphism: `ricci x u w = ∑ₖ εᵏ(x) (R(eₖ x, u) w)`, where `eₖ = localFrame b k` is the
-induced frame and `εᵏ = localFrame_coeff b k` the dual coframe.  The trace is metric-independent
+induced frame and `εᵏ = localFrameCoeff b k` the dual coframe.  The trace is metric-independent
 (`LinearMap.trace_eq_matrix_trace` over the frame basis), so any `RiemannianBundle` instance works. -/
-lemma ricciCurvature_eq_sum_localFrame_coeff
+lemma ricciCurvature_eq_sum_localFrameCoeff
     [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     [cov.ContMDiffCovariantDerivative 1]
     {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E) (x0 : M)
     {x : M} (hx : x ∈ (trivializationAt E TM x0).baseSet) (u w : TM x) :
     CovariantDerivative.ricciCurvature (cov := cov) x u w =
-      ∑ k, (trivializationAt E TM x0).localFrame_coeff I b k x
+      ∑ k, (trivializationAt E TM x0).localFrameCoeff I b k x
         (CovariantDerivative.curvatureTensor (cov := cov) x
           ((trivializationAt E TM x0).localFrame b k x) u w) := by
   classical
@@ -728,7 +735,7 @@ lemma ricciCurvature_eq_sum_localFrame_coeff
   rw [Matrix.diag_apply, LinearMap.toMatrix_apply,
     CovariantDerivative.ricciEndomorphism_apply,
     (trivializationAt E TM x0).localFrame_apply_of_mem_baseSet b hx]
-  exact repr_basisAt_eq_localFrame_coeff b x0 hx _ k
+  exact repr_basisAt_eq_localFrameCoeff b x0 hx _ k
 
 /-- The intrinsic Ricci tensor packaged as a genuine `BilinearFormBundle` (i.e. continuous-linear)
 section: the linear-map-valued Ricci curvature `ricciCurvature cov x : TM x →ₗ TM x →ₗ ℝ` is promoted
@@ -753,10 +760,10 @@ noncomputable def ricciBilinearFormSection
 Continuity is established via the frame-component criterion
 `contMDiff_zero_bilinearFormBundleSection_of_forall_localFrame`: at each base point `x0`, the
 scalar `x ↦ ricci x (eᵢ x) (eⱼ x)` is expanded by the frame trace formula
-`ricciCurvature_eq_sum_localFrame_coeff` into a finite sum of `localFrame_coeff` applied to
+`ricciCurvature_eq_sum_localFrameCoeff` into a finite sum of `localFrameCoeff` applied to
 `curvatureTensor x (eₖ x)(eᵢ x)(eⱼ x)`; each summand is continuous because the frame contraction of
 the curvature tensor is a continuous `TM`-section (`curvatureTensor_contMDiffOn_frame_zero`) and the
-coframe coefficient of a continuous section is continuous (`contMDiffOn_localFrame_coeff` at `k = 0`).
+coframe coefficient of a continuous section is continuous (`contMDiffOn_localFrameCoeff` at `k = 0`).
 This supplies the last outstanding input — the continuous Ricci section `rs` — to
 `exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection`. -/
 theorem ricciBilinearFormSection_contMDiff_zero
@@ -780,7 +787,7 @@ theorem ricciBilinearFormSection_contMDiff_zero
   have hsum : Set.EqOn
       (fun x ↦ ricciBilinearFormSection (I := I) (M := M) cov x
         ((trivializationAt E TM x0).localFrame b i x) ((trivializationAt E TM x0).localFrame b j x))
-      (fun x ↦ ∑ k, (trivializationAt E TM x0).localFrame_coeff I b k x
+      (fun x ↦ ∑ k, (trivializationAt E TM x0).localFrameCoeff I b k x
         (CovariantDerivative.curvatureTensor (cov := cov) x
           ((trivializationAt E TM x0).localFrame b k x)
           ((trivializationAt E TM x0).localFrame b i x)
@@ -789,13 +796,13 @@ theorem ricciBilinearFormSection_contMDiff_zero
     intro x hx
     dsimp only
     rw [ricciBilinearFormSection_apply]
-    exact ricciCurvature_eq_sum_localFrame_coeff b x0 hx
+    exact ricciCurvature_eq_sum_localFrameCoeff b x0 hx
       ((trivializationAt E TM x0).localFrame b i x) ((trivializationAt E TM x0).localFrame b j x)
   refine ContinuousOn.congr ?_ hsum
   refine continuousOn_finset_sum Finset.univ (fun k _ ↦ ?_)
   have hcurv := curvatureTensor_contMDiffOn_frame_zero (cov := cov) hbase
     (hframe k) (hframe i) (hframe j)
-  have hcoeff := contMDiffOn_localFrame_coeff (I := I) (e := trivializationAt E TM x0) (b := b)
+  have hcoeff := contMDiffOn_localFrameCoeff (I := I) (e := trivializationAt E TM x0) (b := b)
     (k := (0 : WithTop ℕ∞)) hbase (subset_refl _) hcurv k
   exact hcoeff.continuousOn
 

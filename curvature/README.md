@@ -1292,14 +1292,47 @@ primitive inputs, all with matching spatial-Hölder Gram-entry input forms; the
 single-frame existential schematic RHS entrywise-difference bridge now also has
 direct spatial-Hölder, unit-diameter, closed-ball, and closed-cylinder
 Gram-entry variants for local chart callers.
-It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
+The repository also contains a separate frozen affine Ricci–DeTurck chart
+evolution layer; the selected Palomar surface records that stronger analytic
+core without claiming the full nonlinear Schauder or Ricci-flow existence
+theorem.
+
+## Palomar Submission 04 (current preparation surface)
+
+The current Palomar preparation surface is the frozen affine Ricci–DeTurck
+analytic core, not the obsolete static connection/curvature configuration and
+not the earlier parabolic-infrastructure selection. The files
+`Challenge.lean`, `Solution.lean`, `comparator.json`, and
+`formalization.yaml` select the explicit block-operator augmentation and its
+operator-exponential affine evolution: scalar-coordinate conservation, the
+initial value, the affine ODE, global uniqueness and representation, and
+exponential growth and initial-data stability bounds. The broader parabolic
+and coordinate modules remain supporting library material and are not part of
+this four-file Comparator surface.
+
+The older static-geometry wording belongs to an earlier/different submission
+configuration and does not describe the current four Palomar files. See
+`PALOMAR.md`, `AGENT-CONTRIBUTION-04.md`, and `formalization.yaml` for the
+source relationships, contribution/oversight record, exact theorem surface,
+and scope boundaries.
+Run `bash scripts/verify-palomar.sh` for the full local package/metadata audit,
+then `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh` for
+the explicit macOS Comparator plus NanoDa replay. The first hosted attempt at
+the preceding public commit failed only on Palomar's standard SPDX license
+fingerprint. The corrected commit then failed because its Mathlib revision was
+not an ancestor of canonical `master`. The previously submitted artifact was
+`c50584bb804865fd9a54ebb5362ba3eee864e212` on Lean 4.29.0. The current
+development artifact upgrades to Lean 4.33.0 with Mathlib revision
+`db584cd6d46c92f209a44c0f1c829460d327499d` and matching Lean4Export revision
+`15f6055e299ad5b89345e533cc2192f4cc00f659`; any retry must use its new
+immutable commit.
 
 ## Build
 
 From this directory:
 
 ```powershell
-lake +leanprover/lean4:v4.29.1 build PoincareCurvature
+lake +leanprover/lean4:v4.33.0 build PoincareCurvature
 ```
 
 The heavier Ricci-flow local-existence scaffold is intentionally kept
@@ -1307,5 +1340,5 @@ out of the root target for faster routine iteration. Build it explicitly when
 working on that layer:
 
 ```powershell
-lake +leanprover/lean4:v4.29.1 build PoincareCurvature.RicciFlowLocalExistence
+lake +leanprover/lean4:v4.33.0 build PoincareCurvature.RicciFlowLocalExistence
 ```

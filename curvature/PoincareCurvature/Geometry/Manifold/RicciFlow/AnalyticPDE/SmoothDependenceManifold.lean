@@ -59,6 +59,8 @@ namespace SmoothDependenceCk
 
 @[expose] public noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {v : ℝ → E → E} {K : ℝ≥0} {t₀ : ℝ}
 variable {Φ : E → ℝ → E}

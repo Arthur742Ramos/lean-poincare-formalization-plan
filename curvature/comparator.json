@@ -1,0 +1,19 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one",
+    "PoincareCurvature.Palomar.affineFundamentalSolution_initial",
+    "PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution",
+    "PoincareCurvature.Palomar.affineODE_unique",
+    "PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt",
+    "PoincareCurvature.Palomar.norm_affineFundamentalSolution_le",
+    "PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le"
+  ],
+  "definition_names": [
+    "RicciFlow.AnalyticPDE.SmoothDependenceCk.affineAugment",
+    "RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}

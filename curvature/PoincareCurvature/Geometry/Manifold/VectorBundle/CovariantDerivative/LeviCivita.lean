@@ -28,13 +28,13 @@ one-form vanishes.
 open Bundle FiberBundle
 open scoped Bundle Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-  [FiniteDimensional ℝ E] [CompleteSpace E]
-  [IsManifold I 2 M]
-  [RiemannianBundle (TangentSpace I : M → Type _)]
-  [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+variable {E : Type*} [hREGroup : NormedAddCommGroup E] [hRESpace : NormedSpace ℝ E]
+  {H : Type*} [hRHTop : TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [hRMTop : TopologicalSpace M] [hRCharted : ChartedSpace H M]
+  [hRFinite : FiniteDimensional ℝ E] [hRComplete : CompleteSpace E]
+  [hRManifold : IsManifold I 2 M]
+  [hRRiemannian : RiemannianBundle (TangentSpace I : M → Type _)]
+  [hRSmooth : IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "TStar" => (fun x : M ↦ TangentSpace I x →L[ℝ] ℝ)
@@ -274,7 +274,7 @@ def IsMetricCompatibleTangent (cov : CovariantDerivative I E TM) : Prop :=
   ∀ {x : M} {σ τ : Π x : M, TangentSpace I x},
     MDiffAt (T% σ) x → MDiffAt (T% τ) x →
       ∀ u : TangentSpace I x,
-        extDerivFun (fun y ↦ ⟪σ y, τ y⟫) x u =
+        mvfderiv (I := I) (fun y ↦ ⟪σ y, τ y⟫) x u =
           ⟪cov σ x u, τ x⟫ + ⟪σ x, cov τ x u⟫
 
 /-- A Levi-Civita connection is a torsion-free, metric-compatible affine connection. -/
@@ -350,9 +350,9 @@ lemma difference_inner_eq_neg_of_metricCompatible
     simpa [σ] using (mdifferentiableAt_extend (I := I) (F := E) v)
   have hτ : MDiffAt (T% τ) x := by
     simpa [τ] using (mdifferentiableAt_extend (I := I) (F := E) w)
-  have h₁ : extDerivFun (fun y ↦ ⟪σ y, τ y⟫) x u =
+  have h₁ : mvfderiv (I := I) (fun y ↦ ⟪σ y, τ y⟫) x u =
       ⟪cov σ x u, τ x⟫ + ⟪σ x, cov τ x u⟫ := hcov hσ hτ u
-  have h₂ : extDerivFun (fun y ↦ ⟪σ y, τ y⟫) x u =
+  have h₂ : mvfderiv (I := I) (fun y ↦ ⟪σ y, τ y⟫) x u =
       ⟪cov' σ x u, τ x⟫ + ⟪σ x, cov' τ x u⟫ := hcov' hσ hτ u
   have hsub :
       (⟪cov σ x u, τ x⟫ + ⟪σ x, cov τ x u⟫) -
@@ -521,14 +521,14 @@ variable (cov : CovariantDerivative I E TM)
 noncomputable def metricDefectAux (cov : CovariantDerivative I E TM) (x : M)
     (σ τ : Π y : M, TangentSpace I y) :
     TangentSpace I x →L[ℝ] ℝ :=
-  extDerivFun (I := I) (fun y ↦ ⟪σ y, τ y⟫) x -
+  mvfderiv (I := I) (fun y ↦ ⟪σ y, τ y⟫) x -
     (InnerProductSpace.toDual ℝ (TangentSpace I x) (τ x)).comp (cov σ x) -
     (InnerProductSpace.toDual ℝ (TangentSpace I x) (σ x)).comp (cov τ x)
 
 lemma metricDefectAux_apply (cov : CovariantDerivative I E TM) (x : M)
     (σ τ : Π y : M, TangentSpace I y) (u : TangentSpace I x) :
     metricDefectAux cov x σ τ u =
-      extDerivFun (I := I) (fun y ↦ ⟪σ y, τ y⟫) x u -
+      mvfderiv (I := I) (fun y ↦ ⟪σ y, τ y⟫) x u -
         ⟪cov σ x u, τ x⟫ - ⟪σ x, cov τ x u⟫ := by
   simp [metricDefectAux, real_inner_comm, sub_eq_add_neg, add_assoc, add_left_comm, add_comm]
 
@@ -584,7 +584,7 @@ theorem contMDiffOn_metricDefectAux_section
   have hext :
       ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
         (fun x ↦ TotalSpace.mk' (E →L[ℝ] ℝ) (E := TStar) x
-          (extDerivFun (I := I) (fun y ↦ ⟪σ y, τ y⟫) x)) s := by
+          (mvfderiv (I := I) (fun y ↦ ⟪σ y, τ y⟫) x)) s := by
     intro x hx
     exact (((hinner x hx).contMDiffAt (hs.mem_nhds hx)).extDerivSection
       (I := I) (E := E) (m := 1) (n := 2) (by norm_num)).contMDiffWithinAt
@@ -663,7 +663,8 @@ theorem contMDiffOn_torsion_section
   letI : IsManifold I (minSmoothness ℝ 2) M := by
     simpa using (inferInstance : IsManifold I 2 M)
   letI : IsManifold I ((2 : ℕ∞) + 1) M := by
-    simpa using (inferInstance : IsManifold I 3 M)
+    apply IsManifold.of_le (n := 3)
+    norm_num
   have hBracketWithin :
       ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
         (fun y ↦ TotalSpace.mk' E y (VectorField.mlieBracketWithin I σ τ s y)) s := by
@@ -725,16 +726,20 @@ theorem metricDefectAux_tensorial_left (cov : CovariantDerivative I E TM) (x : M
     ext u
     have hinner : MDiffAt (fun y ↦ ⟪σ y, τ y⟫) x := mdiffAt_inner_sections (hσ := hσ) (hτ := hτ)
     have hprod :
-        extDerivFun (I := I) (fun y ↦ f y * ⟪σ y, τ y⟫) x u =
-          f x * extDerivFun (I := I) (fun y ↦ ⟪σ y, τ y⟫) x u +
-            ⟪σ x, τ x⟫ * extDerivFun (I := I) f x u := by
-      have hmul := (hf.hasMFDerivAt.mul hinner.hasMFDerivAt).mfderiv
-      unfold extDerivFun
-      simpa [mul_comm, mul_left_comm, mul_assoc] using congr(($hmul u))
+        mvfderiv (I := I) (fun y ↦ f y * ⟪σ y, τ y⟫) x u =
+          f x * mvfderiv (I := I) (fun y ↦ ⟪σ y, τ y⟫) x u +
+            ⟪σ x, τ x⟫ * mvfderiv (I := I) f x u := by
+      have hfun : (fun y ↦ f y * ⟪σ y, τ y⟫) =
+          f * (fun y ↦ ⟪σ y, τ y⟫) := by
+        rfl
+      have hmul := congrArg (fun L => L u)
+        (mvfderiv_mul (I := I) hf hinner)
+      rw [← hfun] at hmul
+      simpa [smul_eq_mul] using hmul
     have hcov :=
       (CovariantDerivative.isCovariantDerivativeOn cov).leibniz hσ hf (x := x)
     have hcovu :
-        cov (f • σ) x u = f x • cov σ x u + extDerivFun (I := I) f x u • σ x := by
+        cov (f • σ) x u = f x • cov σ x u + mvfderiv (I := I) f x u • σ x := by
       simpa using congr(($hcov u))
     rw [metricDefectAux_apply]
     conv_rhs =>
@@ -749,15 +754,15 @@ theorem metricDefectAux_tensorial_left (cov : CovariantDerivative I E TM) (x : M
     have hinnerσ' : MDiffAt (fun y ↦ ⟪σ' y, τ y⟫) x :=
       mdiffAt_inner_sections (hσ := hσ') (hτ := hτ)
     have hinner :
-        extDerivFun (I := I) (fun y ↦ ⟪(σ + σ') y, τ y⟫) x =
-          extDerivFun (I := I) (fun y ↦ ⟪σ y, τ y⟫) x +
-            extDerivFun (I := I) (fun y ↦ ⟪σ' y, τ y⟫) x := by
+        mvfderiv (I := I) (fun y ↦ ⟪(σ + σ') y, τ y⟫) x =
+          mvfderiv (I := I) (fun y ↦ ⟪σ y, τ y⟫) x +
+            mvfderiv (I := I) (fun y ↦ ⟪σ' y, τ y⟫) x := by
       have hsum :
           (fun y ↦ ⟪(σ + σ') y, τ y⟫) =
             (fun y ↦ ⟪σ y, τ y⟫) + fun y ↦ ⟪σ' y, τ y⟫ := by
         funext y
         simp [inner_add_left]
-      rw [hsum, extDerivFun_add hinnerσ hinnerσ']
+      rw [hsum, mvfderiv_add hinnerσ hinnerσ']
     have hcov :=
       (CovariantDerivative.isCovariantDerivativeOn cov).add hσ hσ' (x := x)
     rw [metricDefectAux_apply]
@@ -806,7 +811,7 @@ noncomputable def metricDefect (cov : CovariantDerivative I E TM) (x : M) :
 
 lemma metricDefect_apply (cov : CovariantDerivative I E TM) (x : M) (u v w : TangentSpace I x) :
     cov.metricDefect x v w u =
-      extDerivFun (I := I) (fun y ↦ ⟪extend E v y, extend E w y⟫) x u -
+      mvfderiv (I := I) (fun y ↦ ⟪extend E v y, extend E w y⟫) x u -
         ⟪cov (extend E v) x u, w⟫ - ⟪v, cov (extend E w) x u⟫ := by
   have h := congrArg (fun f ↦ f u)
     (TensorialAt.mkHom₂_apply_eq_extend
@@ -869,8 +874,8 @@ lemma metricDefect_symm (cov : CovariantDerivative I E TM) (x : M) (v w : Tangen
     cov.metricDefect x v w = cov.metricDefect x w v := by
   ext u
   simp only [metricDefect_apply]
-  have hext : extDerivFun (I := I) (fun y ↦ ⟪extend E v y, extend E w y⟫) x u =
-      extDerivFun (I := I) (fun y ↦ ⟪extend E w y, extend E v y⟫) x u := by
+  have hext : mvfderiv (I := I) (fun y ↦ ⟪extend E v y, extend E w y⟫) x u =
+      mvfderiv (I := I) (fun y ↦ ⟪extend E w y, extend E v y⟫) x u := by
     have hswap :
         (fun y ↦ ⟪extend E v y, extend E w y⟫) =
           fun y ↦ ⟪extend E w y, extend E v y⟫ := by
@@ -893,7 +898,7 @@ lemma isMetricCompatibleTangent_iff_metricDefect_eq_zero
         (by simpa using (mdifferentiableAt_extend (I := I) (F := E) v))
         (by simpa using (mdifferentiableAt_extend (I := I) (F := E) w))
         u
-    have hcompat' : extDerivFun (I := I) (fun y ↦ ⟪extend E v y, extend E w y⟫) x u =
+    have hcompat' : mvfderiv (I := I) (fun y ↦ ⟪extend E v y, extend E w y⟫) x u =
         ⟪cov (extend E v) x u, w⟫ + ⟪v, cov (extend E w) x u⟫ := by simpa using hcompat
     linarith
   · intro h
@@ -909,14 +914,8 @@ lemma isMetricCompatibleTangent_iff_metricDefect_eq_zero
 noncomputable def flipLastTwo (x : M) :
     ((TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) →L[ℝ]
       TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
-  LinearMap.toContinuousLinearMap
-    { toFun := fun B => ContinuousLinearMap.flip B
-      map_add' := by
-        intro B C
-        rfl
-      map_smul' := by
-        intro c B
-        rfl }
+  ContinuousLinearEquiv.toContinuousLinearMap
+    ((ContinuousLinearMap.flipₗᵢ ℝ (TangentSpace I x) (TangentSpace I x) ℝ).toContinuousLinearEquiv)
 
 @[simp] lemma flipLastTwo_apply (x : M)
     (B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -978,29 +977,50 @@ theorem contMDiff_torsionInner_section
 
 noncomputable def swapFirstTwoMap (x : M)
     (B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ)) :
-    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ) :=
-  LinearMap.toContinuousLinearMap
-    { toFun := fun v =>
-        LinearMap.toContinuousLinearMap
-          { toFun := fun u => B u v
-            map_add' := by
-              intro u₁ u₂
-              ext w
-              simpa [ContinuousLinearMap.add_apply] using
-                congrArg (fun F => F v) (B.map_add u₁ u₂)
-            map_smul' := by
-              intro c u
-              ext w
-              simpa [ContinuousLinearMap.smul_apply, RingHom.id_apply] using
-                congrArg (fun F => F v) (B.map_smulₛₗ c u) }
-      map_add' := by
-        intro v₁ v₂
-        ext u w
-        simpa using (B u).map_add v₁ v₂
-      map_smul' := by
-        intro c v
-        ext u w
-        simpa [RingHom.id_apply] using (B u).map_smulₛₗ c v }
+    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ) := by
+  letI : AddCommGroup (TangentSpace I x →L[ℝ] ℝ) := ContinuousLinearMap.addCommGroup
+  letI : Module ℝ (TangentSpace I x →L[ℝ] ℝ) := ContinuousLinearMap.module
+  letI : AddCommGroup
+      (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
+    ContinuousLinearMap.addCommGroup
+  letI : Module ℝ
+      (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
+    ContinuousLinearMap.module
+  exact
+    LinearMap.toContinuousLinearMap
+      { toFun := fun v =>
+          LinearMap.toContinuousLinearMap
+            { toFun := fun u =>
+                LinearMap.toContinuousLinearMap
+                  { toFun := fun w => B u v w
+                    map_add' := by
+                      intro w₁ w₂
+                      simpa [ContinuousLinearMap.add_apply] using
+                        congrArg (fun F => F w₁ + F w₂) (B u v).map_add w₁ w₂
+                    map_smul' := by
+                      intro c w
+                      simpa [ContinuousLinearMap.smul_apply, RingHom.id_apply] using
+                        congrArg (fun F => F w) ((B u v).map_smulₛₗ c w) }
+              map_add' := by
+                intro u₁ u₂
+                ext w
+                simpa [ContinuousLinearMap.add_apply] using
+                  congrArg (fun F => F v w) (B.map_add u₁ u₂)
+              map_smul' := by
+                intro c u
+                ext w
+                simpa [ContinuousLinearMap.smul_apply, RingHom.id_apply] using
+                  congrArg (fun F => F v w) (B.map_smulₛₗ c u) }
+        map_add' := by
+          intro v₁ v₂
+          ext u w
+          simpa [ContinuousLinearMap.add_apply] using
+            congrArg (fun F => F u w) ((B u).map_add v₁ v₂)
+        map_smul' := by
+          intro c v
+          ext u w
+          simpa [ContinuousLinearMap.smul_apply, RingHom.id_apply] using
+            congrArg (fun F => F u w) ((B u).map_smulₛₗ c v) }
 
 @[simp] lemma swapFirstTwoMap_apply (x : M)
     (B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ))
@@ -1010,38 +1030,48 @@ noncomputable def swapFirstTwoMap (x : M)
 noncomputable def reverseArgs (x : M)
     (B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ)) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ) :=
-  LinearMap.toContinuousLinearMap
-    { toFun := fun v =>
-        LinearMap.toContinuousLinearMap
-          { toFun := fun u =>
-              LinearMap.toContinuousLinearMap
-                { toFun := fun w => B w u v
-                  map_add' := by
-                    intro w₁ w₂
-                    simpa [ContinuousLinearMap.add_apply] using
-                      congrArg (fun F => F u v) (B.map_add w₁ w₂)
-                  map_smul' := by
-                    intro c w
-                    simpa [ContinuousLinearMap.smul_apply, RingHom.id_apply] using
-                      congrArg (fun F => F u v) (B.map_smulₛₗ c w) }
-            map_add' := by
-              intro u₁ u₂
-              ext w
-              simpa [ContinuousLinearMap.add_apply] using
-                congrArg (fun F => F v) ((B w).map_add u₁ u₂)
-            map_smul' := by
-              intro c u
-              ext w
-              simpa [ContinuousLinearMap.smul_apply, RingHom.id_apply] using
-                congrArg (fun F => F v) ((B w).map_smulₛₗ c u) }
-      map_add' := by
-        intro v₁ v₂
-        ext u w
-        simpa using (B w u).map_add v₁ v₂
-      map_smul' := by
-        intro c v
-        ext u w
-        simpa [RingHom.id_apply] using (B w u).map_smulₛₗ c v }
+  by
+    letI : AddCommGroup (TangentSpace I x →L[ℝ] ℝ) := ContinuousLinearMap.addCommGroup
+    letI : Module ℝ (TangentSpace I x →L[ℝ] ℝ) := ContinuousLinearMap.module
+    letI : AddCommGroup
+        (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
+      ContinuousLinearMap.addCommGroup
+    letI : Module ℝ
+        (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
+      ContinuousLinearMap.module
+    exact
+      LinearMap.toContinuousLinearMap
+        { toFun := fun v =>
+            LinearMap.toContinuousLinearMap
+              { toFun := fun u =>
+                  LinearMap.toContinuousLinearMap
+                    { toFun := fun w => B w u v
+                      map_add' := by
+                        intro w₁ w₂
+                        simpa [ContinuousLinearMap.add_apply] using
+                          congrArg (fun F => F u v) (B.map_add w₁ w₂)
+                      map_smul' := by
+                        intro c w
+                        simpa [ContinuousLinearMap.smul_apply, RingHom.id_apply] using
+                          congrArg (fun F => F u v) (B.map_smulₛₗ c w) }
+                map_add' := by
+                  intro u₁ u₂
+                  ext w
+                  simpa [ContinuousLinearMap.add_apply] using
+                    congrArg (fun F => F v) ((B w).map_add u₁ u₂)
+                map_smul' := by
+                  intro c u
+                  ext w
+                  simpa [ContinuousLinearMap.smul_apply, RingHom.id_apply] using
+                    congrArg (fun F => F v) ((B w).map_smulₛₗ c u) }
+          map_add' := by
+            intro v₁ v₂
+            ext u w
+            simpa using (B w u).map_add v₁ v₂
+          map_smul' := by
+            intro c v
+            ext u w
+            simpa [RingHom.id_apply] using (B w u).map_smulₛₗ c v }
 
 @[simp] lemma reverseArgs_apply (x : M)
     (B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ))
@@ -1083,11 +1113,15 @@ noncomputable def correctionFunctional (cov : CovariantDerivative I E TM) (x : M
     correctionFunctional cov x v u w =
       (cov.metricDefect x v w u + cov.metricDefect x u w v - cov.metricDefect x u v w -
           ⟪cov.torsion x u v, w⟫ + ⟪cov.torsion x v w, u⟫ - ⟪cov.torsion x w u, v⟫) / 2 := by
-  simp only [correctionFunctional, swapFirstTwoMap_apply, reverseArgs_apply,
-    flipLastTwo_apply, torsionInnerFunctional_apply, ContinuousLinearMap.comp_apply,
-    ContinuousLinearMap.add_apply, ContinuousLinearMap.sub_apply, ContinuousLinearMap.neg_apply,
-    ContinuousLinearMap.smul_apply, sub_eq_add_neg, smul_eq_mul]
-  ring_nf
+  simp [correctionFunctional, swapFirstTwoMap, reverseArgs, flipLastTwo,
+    torsionInnerFunctional, ContinuousLinearMap.comp_apply, sub_eq_add_neg, smul_eq_mul]
+  change
+    (2⁻¹ : ℝ) *
+      (cov.metricDefect x v w u + cov.metricDefect x u w v - cov.metricDefect x u v w -
+        ⟪cov.torsion x u v, w⟫ + ⟪cov.torsion x v w, u⟫ - ⟪cov.torsion x w u, v⟫) =
+      (cov.metricDefect x v w u + cov.metricDefect x u w v - cov.metricDefect x u v w -
+        ⟪cov.torsion x u v, w⟫ + ⟪cov.torsion x v w, u⟫ - ⟪cov.torsion x w u, v⟫) / 2
+  ring
 
 noncomputable def continuousDualBasis {ι : Type*} (b : Module.Basis ι ℝ E) :
     Module.Basis ι ℝ (E →L[ℝ] ℝ) := by
@@ -1252,7 +1286,7 @@ theorem contMDiffOn_correctionFunctional_section
     simp [eStar, eLine, hu' hx]
   have hcoeff :
       ∀ i, ContMDiffOn I 𝓘(ℝ) 1
-        ((LinearMap.piApply (eStar.localFrame_coeff I (continuousDualBasis b) i)) corrSec) u := by
+        ((LinearMap.piApply (eStar.localFrameCoeff I (continuousDualBasis b) i)) corrSec) u := by
     intro i
     have hframe :
         ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2
@@ -1268,9 +1302,9 @@ theorem contMDiffOn_correctionFunctional_section
     have hxE : x ∈ e.baseSet := hu' hx
     have hxStar : x ∈ eStar.baseSet := huStar hx
     rw [Bundle.Trivialization.localFrame_apply_of_mem_baseSet (e := e) (b := b) hxE,
-      show ((LinearMap.piApply (eStar.localFrame_coeff I (continuousDualBasis b) i)) corrSec) x =
-          eStar.localFrame_coeff I (continuousDualBasis b) i x (corrSec x) by rfl,
-      Bundle.Trivialization.localFrame_coeff_eq_coeff
+      show ((LinearMap.piApply (eStar.localFrameCoeff I (continuousDualBasis b) i)) corrSec) x =
+          eStar.localFrameCoeff I (continuousDualBasis b) i x (corrSec x) by rfl,
+      Bundle.Trivialization.localFrameCoeff_eq_coeff
         (I := I) (e := eStar) (b := continuousDualBasis b) (s := corrSec) (hxe := hxStar) (i := i),
       continuousDualBasis_repr]
     simp [corrSec, eStar, eLine, Bundle.Trivialization.continuousLinearMap_apply,
@@ -1289,9 +1323,9 @@ theorem contMDiffOn_correctionFunctional_section
       simp [hsStar, IsLocalFrameOn.toBasisAt, Bundle.Trivialization.localFrame,
         Bundle.Trivialization.basisAt, huStar hx]
     change hsStar.coeff i x (corrSec x) =
-      eStar.localFrame_coeff I (continuousDualBasis b) i x (corrSec x)
+      eStar.localFrameCoeff I (continuousDualBasis b) i x (corrSec x)
     rw [IsLocalFrameOn.coeff_apply_of_mem (hs := hsStar) hx corrSec i,
-      Bundle.Trivialization.localFrame_coeff_apply_of_mem_baseSet
+      Bundle.Trivialization.localFrameCoeff_apply_of_mem_baseSet
         (I := I) (e := eStar) (b := continuousDualBasis b) (hx := huStar hx)
         (s := corrSec) (i := i)]
     simp [hbasis]
@@ -1436,12 +1470,13 @@ private theorem contDiff_matrix_updateRow {ι : Type*} [Fintype ι] [DecidableEq
   classical
   rw [contDiff_pi]
   intro k
+  change ContDiff ℝ 2 (fun A : ι → ι → ℝ => Function.update A j (Pi.single i (1 : ℝ)) k)
   by_cases hk : k = j
   · subst hk
-    simpa using
+    simpa [Function.update] using
       (contDiff_const : ContDiff ℝ 2 (fun _ : ι → ι → ℝ => (Pi.single i (1 : ℝ) : ι → ℝ)))
-  · simpa [Matrix.updateRow_apply, hk] using
-      (contDiff_apply (𝕜 := ℝ) (E := ι → ℝ) (i := k))
+  · simpa [Function.update, hk] using
+      (contDiff_apply (𝕜 := ℝ) (E := ι → ℝ) (n := (2 : WithTop ℕ∞)) (i := k))
 
 private theorem contDiff_matrix_adjugate {ι : Type*} [Fintype ι] [DecidableEq ι] :
     ContDiff ℝ 2
@@ -1451,8 +1486,15 @@ private theorem contDiff_matrix_adjugate {ι : Type*} [Fintype ι] [DecidableEq 
   intro i
   rw [contDiff_pi]
   intro j
-  simpa [Function.comp, Matrix.adjugate_apply] using
-    (contDiff_matrix_det (ι := ι)).comp (contDiff_matrix_updateRow (ι := ι) i j)
+  change ContDiff ℝ 2 (fun A : ι → ι → ℝ => Matrix.adjugate (Matrix.of A) i j)
+  have hEq :
+      (fun A : ι → ι → ℝ => Matrix.adjugate (Matrix.of A) i j) =
+        (fun A : ι → ι → ℝ => ((Matrix.of A).updateRow j (Pi.single i (1 : ℝ))).det) := by
+    funext A
+    exact Matrix.adjugate_apply (Matrix.of A) i j
+  rw [hEq]
+  convert (contDiff_matrix_det (ι := ι)).comp
+    (contDiff_matrix_updateRow (ι := ι) i j) using 1 <;> rfl
 
 theorem contMDiffOn_localFrameGramMatrix_det
     [IsContMDiffRiemannianBundle I 2 E TM]
@@ -1463,9 +1505,11 @@ theorem contMDiffOn_localFrameGramMatrix_det
     ContMDiffOn I 𝓘(ℝ) 2
       (fun x => Matrix.det (show Matrix ι ι ℝ from localFrameGramMatrix (I := I) e b x)) u := by
   intro x hx
-  simpa using
-    (contDiff_matrix_det (ι := ι)).comp_contMDiffWithinAt
-      (contMDiffOn_localFrameGramMatrix (I := I) (E := E) e b hu hu' x hx)
+  have h := (contDiff_matrix_det (ι := ι)).comp_contMDiffWithinAt
+    (contMDiffOn_localFrameGramMatrix (I := I) (E := E) e b hu hu' x hx)
+  exact ContMDiffWithinAt.congr h (by
+    intro y hy
+    rfl) (by rfl)
 
 theorem localFrameGramMatrix_pos
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
@@ -1605,9 +1649,11 @@ theorem contMDiffOn_localFrameGramMatrix_adjugate
         (show ι → ι → ℝ from
           Matrix.adjugate (show Matrix ι ι ℝ from localFrameGramMatrix (I := I) e b x))) u := by
   intro x hx
-  simpa using
-    (contDiff_matrix_adjugate (ι := ι)).comp_contMDiffWithinAt
-      (contMDiffOn_localFrameGramMatrix (I := I) (E := E) e b hu hu' x hx)
+  have h := (contDiff_matrix_adjugate (ι := ι)).comp_contMDiffWithinAt
+    (contMDiffOn_localFrameGramMatrix (I := I) (E := E) e b hu hu' x hx)
+  exact ContMDiffWithinAt.congr h (by
+    intro y hy
+    rfl) (by rfl)
 
 theorem contMDiffOn_localFrameGramMatrix_inv
     [IsContMDiffRiemannianBundle I 2 E TM]
@@ -1619,9 +1665,14 @@ theorem contMDiffOn_localFrameGramMatrix_inv
       (fun x =>
         (show ι → ι → ℝ from
           (((show Matrix ι ι ℝ from localFrameGramMatrix (I := I) e b x)⁻¹ : Matrix ι ι ℝ)))) u := by
-  simpa [Matrix.inv_def, Ring.inverse_eq_inv] using
-    (contMDiffOn_localFrameGramMatrix_det_inv (I := I) (E := E) e b hu hu').smul
-      (contMDiffOn_localFrameGramMatrix_adjugate (I := I) (E := E) e b hu hu')
+  refine ContMDiffOn.congr
+    ((contMDiffOn_localFrameGramMatrix_det_inv (I := I) (E := E) e b hu hu').smul
+      (contMDiffOn_localFrameGramMatrix_adjugate (I := I) (E := E) e b hu hu')) ?_
+  intro x hx
+  change (show Matrix ι ι ℝ from localFrameGramMatrix (I := I) e b x)⁻¹ =
+    ((show Matrix ι ι ℝ from localFrameGramMatrix (I := I) e b x).det)⁻¹ •
+      Matrix.adjugate (show Matrix ι ι ℝ from localFrameGramMatrix (I := I) e b x)
+  rw [Matrix.inv_def, Ring.inverse_eq_inv]
 
 noncomputable def rieszMap (x : M) :
     (TangentSpace I x →L[ℝ] ℝ) →L[ℝ] TangentSpace I x :=
@@ -1630,13 +1681,14 @@ noncomputable def rieszMap (x : M) :
 @[simp] lemma rieszMap_apply_inner (x : M)
     (φ : TangentSpace I x →L[ℝ] ℝ) (w : TangentSpace I x) :
     ⟪rieszMap (I := I) x φ, w⟫ = φ w := by
-  simpa [rieszMap] using InnerProductSpace.toDual_symm_apply
+  change ⟪(InnerProductSpace.toDual ℝ (TangentSpace I x)).symm φ, w⟫ = φ w
+  exact InnerProductSpace.toDual_symm_apply
 
-lemma localFrame_coeff_rieszMap
+lemma localFrameCoeff_rieszMap
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M)) [MemTrivializationAtlas e]
     {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
     {omega : Π x : M, TStar x} {x : M} (hx : x ∈ e.baseSet) (i : ι) :
-    e.localFrame_coeff I b i x (rieszMap (I := I) x (omega x)) =
+    e.localFrameCoeff I b i x (rieszMap (I := I) x (omega x)) =
       ∑ j,
         (((show Matrix ι ι ℝ from localFrameGramMatrix (I := I) e b x)⁻¹ : Matrix ι ι ℝ) i j) *
           omega x (e.localFrame b j x) := by
@@ -1685,10 +1737,10 @@ lemma localFrame_coeff_rieszMap
         ∑ j, (A⁻¹) i j * omega x (e.localFrame b j x) := by
     simpa [Matrix.mulVec, dotProduct] using congrFun hc i
   calc
-    e.localFrame_coeff I b i x (rieszMap (I := I) x (omega x))
+    e.localFrameCoeff I b i x (rieszMap (I := I) x (omega x))
         = c i := by
             simpa [v, c] using
-              (Bundle.Trivialization.localFrame_coeff_apply_of_mem_baseSet
+              (Bundle.Trivialization.localFrameCoeff_apply_of_mem_baseSet
                 (I := I) (e := e) (b := b) (hx := hx)
                 (s := fun y => rieszMap (I := I) y (omega y)) (i := i))
     _ = ∑ j, (A⁻¹) i j * omega x (e.localFrame b j x) := hci
@@ -1727,16 +1779,16 @@ theorem contMDiffOn_rieszMap_section
     intro j
     have hj :
         ContMDiffOn I 𝓘(ℝ) 1
-          ((LinearMap.piApply (eStar.localFrame_coeff I (continuousDualBasis b) j)) omega) u :=
-      contMDiffOn_localFrame_coeff
+          ((LinearMap.piApply (eStar.localFrameCoeff I (continuousDualBasis b) j)) omega) u :=
+      contMDiffOn_localFrameCoeff
         (I := I) (e := eStar) (b := continuousDualBasis b) hu huStar hω j
     refine ContMDiffOn.congr hj ?_
     intro x hx
     have hxE : x ∈ e.baseSet := hu' hx
     have hxStar : x ∈ eStar.baseSet := huStar hx
-    rw [show ((LinearMap.piApply (eStar.localFrame_coeff I (continuousDualBasis b) j)) omega) x =
-        eStar.localFrame_coeff I (continuousDualBasis b) j x (omega x) by rfl,
-      Bundle.Trivialization.localFrame_coeff_eq_coeff
+    rw [show ((LinearMap.piApply (eStar.localFrameCoeff I (continuousDualBasis b) j)) omega) x =
+        eStar.localFrameCoeff I (continuousDualBasis b) j x (omega x) by rfl,
+      Bundle.Trivialization.localFrameCoeff_eq_coeff
         (I := I) (e := eStar) (b := continuousDualBasis b) (s := omega) (hxe := hxStar) (i := j),
       continuousDualBasis_repr]
     simp [eStar, eLine, Bundle.Trivialization.continuousLinearMap_apply,
@@ -1753,7 +1805,7 @@ theorem contMDiffOn_rieszMap_section
     exact (hi j).of_le (by norm_num)
   have hcoeff :
       ∀ i, ContMDiffOn I 𝓘(ℝ) 1
-        ((LinearMap.piApply (e.localFrame_coeff I b i))
+        ((LinearMap.piApply (e.localFrameCoeff I b i))
           (fun x => rieszMap (I := I) x (omega x))) u := by
     intro i
     have hsum :
@@ -1789,9 +1841,9 @@ theorem contMDiffOn_rieszMap_section
     refine ContMDiffOn.congr (hsum Finset.univ) ?_
     intro x hx
     simpa using
-      (localFrame_coeff_rieszMap (I := I) (E := E) (e := e) (b := b)
+      (localFrameCoeff_rieszMap (I := I) (E := E) (e := e) (b := b)
         (omega := omega) (hx := hu' hx) (i := i))
-  exact (contMDiffOn_iff_localFrame_coeff
+  exact (contMDiffOn_iff_localFrameCoeff
     (I := I) (e := e) (b := b)
     (s := fun x => rieszMap (I := I) x (omega x)) (t := u) (k := (1 : WithTop ℕ∞)) hu hu').2 hcoeff
 
@@ -1894,13 +1946,13 @@ theorem contMDiffOn_leviCivitaCorrection_partial_section
   have hsx : s x = v := by
     simpa [s, basis, Bundle.Trivialization.localFrame_apply_of_mem_baseSet (e := e) (b := b) hxE]
       using basis.sum_repr v
-  have hcoeff_v : ∀ i, e.localFrame_coeff I b i x v = basis.repr v i := by
+  have hcoeff_v : ∀ i, e.localFrameCoeff I b i x v = basis.repr v i := by
     intro i
     calc
-      e.localFrame_coeff I b i x v = e.localFrame_coeff I b i x (s x) := by rw [hsx]
+      e.localFrameCoeff I b i x v = e.localFrameCoeff I b i x (s x) := by rw [hsx]
       _ = basis.repr (s x) i := by
             simpa [basis] using
-              (Bundle.Trivialization.localFrame_coeff_apply_of_mem_baseSet
+              (Bundle.Trivialization.localFrameCoeff_apply_of_mem_baseSet
                 (I := I) (e := e) (b := b) (hx := hxE) (s := s) (i := i))
       _ = basis.repr v i := by rw [hsx]
   have hdual_basis :
@@ -1910,13 +1962,20 @@ theorem contMDiffOn_leviCivitaCorrection_partial_section
     rw [Bundle.Trivialization.localFrame_apply_of_mem_baseSet
       (e := eStar) (b := continuousDualBasis b) hxStar,
       Bundle.Trivialization.localFrame_apply_of_mem_baseSet (e := e) (b := b) hxE]
-    simp only [Bundle.Trivialization.basisAt]
-    change ((eStar.symmL ℝ x ((continuousDualBasis b) i)) (e.symmL ℝ x (b j))) = if i = j then 1 else 0
-    rw [eStar.symmL_apply ℝ]
+    simp only [Bundle.Trivialization.basisAt, Module.Basis.map_apply]
+    rw [Bundle.Trivialization.linearEquivAt_symm_apply,
+      Bundle.Trivialization.linearEquivAt_symm_apply]
+    rw [← Bundle.Trivialization.symmL_apply (R := ℝ) e hxE]
+    set_option backward.isDefEq.respectTransparency false in
     have hsymm :
         eStar.symm x ((continuousDualBasis b) i) =
           (eLine.symmL ℝ x).comp (((continuousDualBasis b) i).comp (e.continuousLinearMapAt ℝ x)) := by
-      simpa [eStar] using
+      change
+        (Bundle.Pretrivialization.continuousLinearMap (RingHom.id ℝ) e eLine).symm x
+            ((continuousDualBasis b) i) =
+          (eLine.symmL ℝ x).comp
+            (((continuousDualBasis b) i).comp (e.continuousLinearMapAt ℝ x))
+      simpa [eLine] using
         (Bundle.Pretrivialization.continuousLinearMap_symm_apply'
           (σ := RingHom.id ℝ) (e₁ := e) (e₂ := eLine) (b := x)
           (hb := ⟨hxE, by simp [eLine]⟩) ((continuousDualBasis b) i))
@@ -1925,7 +1984,7 @@ theorem contMDiffOn_leviCivitaCorrection_partial_section
     rw [Bundle.Trivialization.continuousLinearMapAt_symmL (e := e) (R := ℝ) (hb := hxE)]
     simpa [eLine, continuousDualBasis, Finsupp.single_apply, eq_comm]
   have hdual_apply :
-      ∀ i, eStar.localFrame (continuousDualBasis b) i x v = e.localFrame_coeff I b i x v := by
+      ∀ i, eStar.localFrame (continuousDualBasis b) i x v = e.localFrameCoeff I b i x v := by
     intro i
     calc
       eStar.localFrame (continuousDualBasis b) i x v
@@ -1943,12 +2002,12 @@ theorem contMDiffOn_leviCivitaCorrection_partial_section
             simpa [basis, Bundle.Trivialization.localFrame_apply_of_mem_baseSet (e := e) (b := b) hxE]
               using congrArg (fun r : ℝ ↦ basis.repr v j * r) (hdual_basis i j)
       _ = basis.repr v i := by simp
-      _ = e.localFrame_coeff I b i x v := by rw [hcoeff_v i]
+      _ = e.localFrameCoeff I b i x v := by rw [hcoeff_v i]
   have hdecomp :
       ∑ i, (eStar.localFrame (continuousDualBasis b) i x) v • e.localFrame b i x = v := by
     calc
       ∑ i, (eStar.localFrame (continuousDualBasis b) i x) v • e.localFrame b i x
-          = ∑ i, e.localFrame_coeff I b i x v • e.localFrame b i x := by
+          = ∑ i, e.localFrameCoeff I b i x v • e.localFrame b i x := by
               refine Finset.sum_congr rfl ?_
               intro i hi
               rw [hdual_apply i]
@@ -2045,13 +2104,13 @@ theorem contMDiffOn_leviCivitaCorrection_section
   have hsx : s x = v := by
     simpa [s, basis, Bundle.Trivialization.localFrame_apply_of_mem_baseSet (e := e) (b := b) hxE]
       using basis.sum_repr v
-  have hcoeff_v : ∀ i, e.localFrame_coeff I b i x v = basis.repr v i := by
+  have hcoeff_v : ∀ i, e.localFrameCoeff I b i x v = basis.repr v i := by
     intro i
     calc
-      e.localFrame_coeff I b i x v = e.localFrame_coeff I b i x (s x) := by rw [hsx]
+      e.localFrameCoeff I b i x v = e.localFrameCoeff I b i x (s x) := by rw [hsx]
       _ = basis.repr (s x) i := by
             simpa [basis] using
-              (Bundle.Trivialization.localFrame_coeff_apply_of_mem_baseSet
+              (Bundle.Trivialization.localFrameCoeff_apply_of_mem_baseSet
                 (I := I) (e := e) (b := b) (hx := hxE) (s := s) (i := i))
       _ = basis.repr v i := by rw [hsx]
   have hdual_basis :
@@ -2061,13 +2120,20 @@ theorem contMDiffOn_leviCivitaCorrection_section
     rw [Bundle.Trivialization.localFrame_apply_of_mem_baseSet
       (e := eStar) (b := continuousDualBasis b) hxStar,
       Bundle.Trivialization.localFrame_apply_of_mem_baseSet (e := e) (b := b) hxE]
-    simp only [Bundle.Trivialization.basisAt]
-    change ((eStar.symmL ℝ x ((continuousDualBasis b) i)) (e.symmL ℝ x (b j))) = if i = j then 1 else 0
-    rw [eStar.symmL_apply ℝ]
+    simp only [Bundle.Trivialization.basisAt, Module.Basis.map_apply]
+    rw [Bundle.Trivialization.linearEquivAt_symm_apply,
+      Bundle.Trivialization.linearEquivAt_symm_apply]
+    rw [← Bundle.Trivialization.symmL_apply (R := ℝ) e hxE]
+    set_option backward.isDefEq.respectTransparency false in
     have hsymm :
         eStar.symm x ((continuousDualBasis b) i) =
           (eLine.symmL ℝ x).comp (((continuousDualBasis b) i).comp (e.continuousLinearMapAt ℝ x)) := by
-      simpa [eStar] using
+      change
+        (Bundle.Pretrivialization.continuousLinearMap (RingHom.id ℝ) e eLine).symm x
+            ((continuousDualBasis b) i) =
+          (eLine.symmL ℝ x).comp
+            (((continuousDualBasis b) i).comp (e.continuousLinearMapAt ℝ x))
+      simpa [eLine] using
         (Bundle.Pretrivialization.continuousLinearMap_symm_apply'
           (σ := RingHom.id ℝ) (e₁ := e) (e₂ := eLine) (b := x)
           (hb := ⟨hxE, by simp [eLine]⟩) ((continuousDualBasis b) i))
@@ -2076,7 +2142,7 @@ theorem contMDiffOn_leviCivitaCorrection_section
     rw [Bundle.Trivialization.continuousLinearMapAt_symmL (e := e) (R := ℝ) (hb := hxE)]
     simpa [eLine, continuousDualBasis, Finsupp.single_apply, eq_comm]
   have hdual_apply :
-      ∀ i, eStar.localFrame (continuousDualBasis b) i x v = e.localFrame_coeff I b i x v := by
+      ∀ i, eStar.localFrame (continuousDualBasis b) i x v = e.localFrameCoeff I b i x v := by
     intro i
     calc
       eStar.localFrame (continuousDualBasis b) i x v
@@ -2094,12 +2160,12 @@ theorem contMDiffOn_leviCivitaCorrection_section
             simpa [basis, Bundle.Trivialization.localFrame_apply_of_mem_baseSet (e := e) (b := b) hxE]
               using congrArg (fun r : ℝ ↦ basis.repr v j * r) (hdual_basis i j)
       _ = basis.repr v i := by simp
-      _ = e.localFrame_coeff I b i x v := by rw [hcoeff_v i]
+      _ = e.localFrameCoeff I b i x v := by rw [hcoeff_v i]
   have hdecomp :
       ∑ i, (eStar.localFrame (continuousDualBasis b) i x) v • e.localFrame b i x = v := by
     calc
       ∑ i, (eStar.localFrame (continuousDualBasis b) i x) v • e.localFrame b i x
-          = ∑ i, e.localFrame_coeff I b i x v • e.localFrame b i x := by
+          = ∑ i, e.localFrameCoeff I b i x v • e.localFrame b i x := by
               refine Finset.sum_congr rfl ?_
               intro i hi
               rw [hdual_apply i]

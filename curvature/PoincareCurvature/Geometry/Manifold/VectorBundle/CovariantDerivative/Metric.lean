@@ -42,7 +42,7 @@ def IsMetricCompatible (cov : CovariantDerivative I F V) : Prop :=
   ∀ {x : M} {σ τ : Π x : M, V x},
     MDiffAt (T% σ) x → MDiffAt (T% τ) x →
       ∀ u : TangentSpace I x,
-        extDerivFun (fun y ↦ ⟪σ y, τ y⟫) x u =
+        mvfderiv (I := I) (fun y ↦ ⟪σ y, τ y⟫) x u =
           ⟪cov σ x u, τ x⟫ + ⟪σ x, cov τ x u⟫
 
 variable {cov : CovariantDerivative I F V}
@@ -50,7 +50,7 @@ variable {cov : CovariantDerivative I F V}
 lemma IsMetricCompatible.inner_eq_add (hcov : cov.IsMetricCompatible)
     {x : M} {X : Π x : M, TangentSpace I x} {σ τ : Π x : M, V x}
     (hσ : MDiffAt (T% σ) x) (hτ : MDiffAt (T% τ) x) :
-    extDerivFun (fun y ↦ ⟪σ y, τ y⟫) x (X x) =
+    mvfderiv (I := I) (fun y ↦ ⟪σ y, τ y⟫) x (X x) =
       ⟪cov.along X σ x, τ x⟫ + ⟪σ x, cov.along X τ x⟫ := by
   simpa [CovariantDerivative.along] using hcov hσ hτ (X x)
 
