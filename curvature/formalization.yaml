@@ -91,7 +91,7 @@ automation:
   spend_usd: "subscription-based"
   notes: |
     Fuller contribution and oversight record: the immutable public document is
-    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/eb688e34a070d6195c0cc1cb4c215b2127b87fc9/curvature/AGENT-CONTRIBUTION-04.md
+    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/eb688e3462e70cc318d2394f19783e93620985f7/curvature/AGENT-CONTRIBUTION-04.md
     This immutable commit contains the corrected record and the synchronized
     Comparator surface.
 
