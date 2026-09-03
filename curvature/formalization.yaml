@@ -23,7 +23,7 @@ project:
 
 classification:
   arxiv: ["math.DG", "math.AP", "math.LO"]
-  msc2020: ["53C25", "53C44", "35K15", "03B35"]
+  msc2020: ["53C25", "53E20", "35K15", "03B35"]
 
 sources:
   - title: "Deforming metrics in the direction of their Ricci tensors"
