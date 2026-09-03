@@ -79,6 +79,13 @@ the intrinsic `-2 Ric` readout, while `ricciDeTurckGaugeReduction_trace` gives
 the curvature-transport formula as the trace of the tangent-map-conjugated
 pulled-back background Ricci endomorphism.
 
+The Palomar Challenge/Solution surface for this result is kept intentionally
+small in `Challenge.lean` and `Solution.lean`: it states the same pullback,
+correction-cancellation, initial-value, intrinsic-flow, and trace-transport
+claims in an explicit fixed-tangent-model abstraction. The full manifold-level
+implementation remains in `ResearchTheorems.lean`; neither surface claims the
+unproved general compact-manifold point-4 theorem.
+
 The frozen affine evolution modules remain supporting Banach-space
 well-posedness infrastructure; they are not the headline mathematical
 submission.

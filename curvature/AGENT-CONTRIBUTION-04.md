@@ -1,68 +1,69 @@
 # Submission 04 contribution and oversight record
 
 This document records preparation of the corrected Palomar surface in the
-public repository `Arthur742Ramos/lean-poincare-formalization-plan`, branch
-`dev/point4-campaign`, project directory `curvature/`. The metadata pins this
-record to an immutable public commit containing the document.
+public repository `Arthur742Ramos/lean-poincare-formalization-plan`, project
+directory `curvature/`. The metadata pins this record to an immutable public
+commit containing the document.
 
 ## Mathematical source and origin
 
-The geometric motivation is Dennis M. DeTurck's Ricci–DeTurck gauge in
+The mathematical motivation is Dennis M. DeTurck's Ricci-DeTurck gauge in
 “Deforming metrics in the direction of their Ricci tensors,” *Journal of
-Differential Geometry* 18 (1983), DOI `10.4310/jdg/1214509286`. It is cited as
-background for the frozen-chart interpretation; this submission does not
-claim to formalize DeTurck's full nonlinear parabolic theorem.
+Differential Geometry* 18 (1983), DOI `10.4310/jdg/1214509286`.
 
-The selected theorem family is the standard operator-exponential treatment of
-the affine autonomous equation `y' = L y + b` on a complete normed real vector
-space. Its mathematical source is Einar Hille and Ralph S. Phillips,
-*Functional Analysis and Semi-Groups*, AMS Colloquium Publications 31. The
-seven declarations are a formalization/adaptation of that standard result
-family using the block-operator augmentation; they are not claimed as original
-proofs or as a first presentation. The repository's parabolic and coordinate
-modules are broader supporting library material and are not part of this
-Palomar selection.
+The selected surface formalizes the gauge pullback, source-equation
+cancellation, initial-time anchoring, intrinsic Ricci-flow consequence, and
+finite-dimensional curvature trace transport in an explicit fixed-tangent-
+model setting. It does not claim DeTurck's full nonlinear parabolic theorem,
+the general compact-manifold Ricci-flow existence theorem, or an original
+mathematical discovery.
 
 ## Agent contribution
 
 GPT-5 Codex materially performed the following preparation work:
 
-- audited the failed parabolic-only selection and traced the Palomar review
-  defects in provenance, README scope, and research-interest evidence;
-- selected the stronger frozen affine evolution boundary and aligned its
-  Challenge/Solution statements with the existing proof-bearing development;
-- authored the corrected Challenge/Solution declarations and updated the
-  Comparator surface, repository verifier, metadata, README, Palomar record,
-  and this contribution/oversight record;
-- removed the auxiliary coordinate target from the selected surface after the
-  independent Comparator exposed a definition-target mismatch, preserving the
-  stronger affine family as the auditable result; and
-- ran Lean 4.33 builds, source-closure checks, metadata checks, and the
-  independent Comparator/NanoDa replay needed for reproducible packaging.
+- audited the prior Palomar review and identified that the frozen affine
+  Banach-space ODE surface did not meet the research-interest gate;
+- selected the geometric Ricci-DeTurck gauge-reduction boundary and wrote the
+  compact Challenge/Solution statement surface;
+- added the proof-bearing `ResearchTheorems` source module that exposes the
+  concrete gauge-reduction and curvature-transport capstone;
+- updated the Comparator surface, repository verifier, metadata, README,
+  Palomar record, and this contribution/oversight record; and
+- ran Lean builds, source-closure checks, metadata checks, and the independent
+  Comparator/NanoDa replay needed for reproducible packaging.
 
 The agent did not decide authorship, source priority, or mathematical novelty.
-It did not convert the selected analytic core into a claim about a full
-time-dependent Ricci-flow PDE, Schauder estimates, or first discovery.
+It did not convert the selected result into a claim about the full
+time-dependent Ricci-flow PDE, Schauder estimates, or short-time existence.
 
 ## Human authorship and oversight
 
 The recorded human authors are Arthur Freitas Ramos, David Barros Hulak, and
 Ruy J. G. B. de Queiroz. Human authors selected and approved the author list,
-external source relationships, corrected theorem family, scope limits, and
-public artifact. The responsible maintainer reviewed the mathematical
-boundary and exact repository diff and retains responsibility for publication
-and the Palomar submission. Human oversight covers attribution, the decision
-to replace the weak selection, and authorization of the public push and new
-submission. Lean kernel elaboration and the independent pinned
+external source relationship, theorem boundary, scope limits, and public
+artifact. The responsible maintainer reviewed the mathematical boundary and
+exact repository diff and retains responsibility for publication and the
+Palomar submission. Lean kernel elaboration and the independent pinned
 Comparator/NanoDa replay check formal consistency and reproducibility, not
 authorship or novelty.
 
 ## Artifact boundary
 
-`Challenge.lean` imports only Mathlib, exposes actual bodies for the block
-operator and operator-exponential solution, and has seven deliberate theorem
-holes with no definition holes. `Solution.lean` imports the checked
-autonomous operator-exponential development and supplies seven proved
-wrappers. The final public commit and external Palomar status are recorded
-separately; local preparation is not itself an acceptance or registration
-claim.
+`Challenge.lean` imports only Mathlib and states the pullback and
+Ricci-DeTurck cancellation theorem family in a small fixed-tangent-model
+surface. `Solution.lean` proves the seven compared declarations and imports
+the checked Ricci-flow gauge-transport development, including
+`ResearchTheorems.lean`. The selected statements are intentionally an
+auditable abstraction of the larger geometric package; the source repository
+does not claim that this submission closes arbitrary compact-manifold local
+existence.
+
+## External status
+
+This document records local preparation only. A Palomar submission requires a
+fresh action for the final public commit, with the exact public repository,
+full SHA, project directory, Comparator path, metadata path, and authorization
+relationship verified at submission time. Local checks do not imply hosted
+mechanical verification, renderability, editorial review, registration, or
+public indexing.

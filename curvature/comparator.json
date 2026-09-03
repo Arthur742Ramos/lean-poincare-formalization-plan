@@ -2,17 +2,18 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one",
-    "PoincareCurvature.Palomar.affineFundamentalSolution_initial",
-    "PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution",
-    "PoincareCurvature.Palomar.affineODE_unique",
-    "PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt",
-    "PoincareCurvature.Palomar.norm_affineFundamentalSolution_le",
-    "PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le"
+    "PoincareCurvature.Palomar.pullbackBilinear_apply",
+    "PoincareCurvature.Palomar.gauge_corrected_velocity_eq_neg_two_pullbackRicci",
+    "PoincareCurvature.Palomar.gauge_reduction_has_derivAt",
+    "PoincareCurvature.Palomar.anchored_pullbackBilinear_eq_initial",
+    "PoincareCurvature.Palomar.ricciDeTurckGaugeReduction",
+    "PoincareCurvature.Palomar.trace_conjugation_invariant",
+    "PoincareCurvature.Palomar.gauge_reduction_trace_readout"
   ],
   "definition_names": [
-    "RicciFlow.AnalyticPDE.SmoothDependenceCk.affineAugment",
-    "RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution"
+    "PoincareCurvature.Palomar.pullbackBilinear",
+    "PoincareCurvature.Palomar.SatisfiesDeTurckEquation",
+    "PoincareCurvature.Palomar.IsIntrinsicRicciFlow"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": true

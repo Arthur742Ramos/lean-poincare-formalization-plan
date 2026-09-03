@@ -111,26 +111,27 @@ try:
 except (OSError, UnicodeError, json.JSONDecodeError) as error:
     raise SystemExit(f"error: comparator.json is invalid: {error}")
 expected_theorems = [
-    "PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one",
-    "PoincareCurvature.Palomar.affineFundamentalSolution_initial",
-    "PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution",
-    "PoincareCurvature.Palomar.affineODE_unique",
-    "PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt",
-    "PoincareCurvature.Palomar.norm_affineFundamentalSolution_le",
-    "PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le",
+    "PoincareCurvature.Palomar.pullbackBilinear_apply",
+    "PoincareCurvature.Palomar.gauge_corrected_velocity_eq_neg_two_pullbackRicci",
+    "PoincareCurvature.Palomar.gauge_reduction_has_derivAt",
+    "PoincareCurvature.Palomar.anchored_pullbackBilinear_eq_initial",
+    "PoincareCurvature.Palomar.ricciDeTurckGaugeReduction",
+    "PoincareCurvature.Palomar.trace_conjugation_invariant",
+    "PoincareCurvature.Palomar.gauge_reduction_trace_readout",
 ]
 expected_definitions = [
-    "RicciFlow.AnalyticPDE.SmoothDependenceCk.affineAugment",
-    "RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution",
+    "PoincareCurvature.Palomar.pullbackBilinear",
+    "PoincareCurvature.Palomar.SatisfiesDeTurckEquation",
+    "PoincareCurvature.Palomar.IsIntrinsicRicciFlow",
 ]
 if comparator.get("challenge_module") != "Challenge":
     raise SystemExit("error: comparator challenge_module must be Challenge")
 if comparator.get("solution_module") != "Solution":
     raise SystemExit("error: comparator solution_module must be Solution")
 if comparator.get("theorem_names") != expected_theorems:
-    raise SystemExit("error: comparator theorem surface does not match corrected Submission 04")
+    raise SystemExit("error: comparator theorem surface does not match the gauge-reduction submission")
 if comparator.get("definition_names") != expected_definitions:
-    raise SystemExit("error: auditable definition surface does not match corrected Submission 04")
+    raise SystemExit("error: auditable definition surface does not match the gauge-reduction submission")
 if comparator.get("enable_nanoda") is not True:
     raise SystemExit("error: comparator.json must enable NanoDa")
 if not set(comparator.get("permitted_axioms", [])) <= {
@@ -216,13 +217,13 @@ lake env lean Solution.lean
 lake env lean --src-deps Solution.lean
 lake env lean /dev/stdin <<'EOF'
 import Solution
-#print axioms PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one
-#print axioms PoincareCurvature.Palomar.affineFundamentalSolution_initial
-#print axioms PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution
-#print axioms PoincareCurvature.Palomar.affineODE_unique
-#print axioms PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt
-#print axioms PoincareCurvature.Palomar.norm_affineFundamentalSolution_le
-#print axioms PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le
+#print axioms PoincareCurvature.Palomar.pullbackBilinear_apply
+#print axioms PoincareCurvature.Palomar.gauge_corrected_velocity_eq_neg_two_pullbackRicci
+#print axioms PoincareCurvature.Palomar.gauge_reduction_has_derivAt
+#print axioms PoincareCurvature.Palomar.anchored_pullbackBilinear_eq_initial
+#print axioms PoincareCurvature.Palomar.ricciDeTurckGaugeReduction
+#print axioms PoincareCurvature.Palomar.trace_conjugation_invariant
+#print axioms PoincareCurvature.Palomar.gauge_reduction_trace_readout
 EOF
 
 git diff --check

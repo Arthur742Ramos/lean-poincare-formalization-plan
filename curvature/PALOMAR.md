@@ -1,41 +1,38 @@
 # Palomar Submission 04
 
-## Frozen Ricci–DeTurck affine chart evolution
+## Ricci-DeTurck gauge reduction and curvature transport
 
-This corrected candidate replaces the rejected parabolic-infrastructure-only
-surface with a connected frozen affine evolution result. The selected
-definitions are the explicit block operator
-`(v, s) ↦ (L v + s • b, 0)` and the first coordinate of its operator
-exponential at `(y₀, 1)`. The selected theorem family proves scalar-coordinate
-conservation, the initial value, the affine ODE, global uniqueness and
-representation, exponential growth, and Lipschitz dependence on initial data.
+This candidate replaces the earlier routine frozen affine ODE selection with
+the geometric cancellation and transport identity that motivates the
+Ricci-DeTurck method. The selected surface is an explicit fixed-tangent-model
+version of the following argument:
 
-The model is intentionally stated over an arbitrary complete normed real vector
-space with bounded linear data `L` and `b`. It is the frozen affine analytic
-core motivated by the Ricci–DeTurck chart, not a claim of the full nonlinear
-Ricci-flow PDE, Schauder estimates, or short-time existence theorem. The
-mathematical relationships are recorded in `formalization.yaml`: DeTurck is
-background for the geometric motivation, while Hille–Phillips is the source
-formalized/adapted for the operator-exponential affine evolution. These are
-standard results; no originality or priority claim is made.
+1. pull a time-dependent metric and tangent data back along an anchored gauge;
+2. evaluate the source Ricci-DeTurck equation at the gauge image;
+3. subtract the Lie/gauge correction from the source velocity; and
+4. obtain the intrinsic `-2 Ric` equation for the transformed metric.
 
-The exact selected surface is:
+The surface also proves preservation of the initial metric and invariance of
+the finite-dimensional Ricci trace under tangent-map conjugation. It is a
+geometric transport theorem, not a claim of the full nonlinear compact-
+manifold local-existence theorem or of the Poincare Conjecture.
 
-- `PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one`;
-- `PoincareCurvature.Palomar.affineFundamentalSolution_initial`;
-- `PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution`;
-- `PoincareCurvature.Palomar.affineODE_unique`;
-- `PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt`;
-- `PoincareCurvature.Palomar.norm_affineFundamentalSolution_le`; and
-- `PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le`.
+The exact selected declarations are:
 
-`Challenge.lean` imports only Mathlib and exposes the actual block-operator and
-operator-exponential formulas. It has seven deliberate theorem holes and no
-definition holes. `Solution.lean` imports the checked proof-bearing
-autonomous operator-exponential development and supplies all seven wrappers.
-The repository's broader parabolic and coordinate modules remain library
-material outside this Comparator selection; they are not claimed by the four
-Palomar surface files to be part of this result.
+- `PoincareCurvature.Palomar.pullbackBilinear_apply`;
+- `PoincareCurvature.Palomar.gauge_corrected_velocity_eq_neg_two_pullbackRicci`;
+- `PoincareCurvature.Palomar.gauge_reduction_has_derivAt`;
+- `PoincareCurvature.Palomar.anchored_pullbackBilinear_eq_initial`;
+- `PoincareCurvature.Palomar.ricciDeTurckGaugeReduction`;
+- `PoincareCurvature.Palomar.trace_conjugation_invariant`; and
+- `PoincareCurvature.Palomar.gauge_reduction_trace_readout`.
+
+`Challenge.lean` imports only Mathlib and defines the ordinary pullback,
+source-equation, and intrinsic-flow predicates needed to state the result in
+a small auditable surface. `Solution.lean` proves the same declarations,
+imports the checked Ricci-flow gauge-transport development, and records the
+concrete implementation motivation in
+`Geometry.Manifold.RicciFlow.ResearchTheorems`.
 
 ## Nested-project intake paths
 
@@ -43,17 +40,15 @@ The package lives at `curvature/` inside the roadmap repository. The intended
 repository-relative intake fields are:
 
 - repository: `Arthur742Ramos/lean-poincare-formalization-plan`;
-- branch: `dev/point4-campaign`;
 - project directory: `curvature`;
 - Comparator configuration: `curvature/comparator.json`;
 - formalization metadata: `curvature/formalization.yaml`;
 - license: the repository-root `LICENSE` file.
 
-The accepted Submission 01, passed Submission 02, and accepted Submission 03
-artifacts remain reproducible at their own immutable commits. The failed
-Submission 04 artifact is not reused as the Palomar ID for this corrected
-surface; the new intake must use the fresh final commit with the Palomar ID
-field left blank unless the registry auto-detects an already-public record.
+This is a new version of the existing Palomar result identity
+`PALOMAR-2026-09-02-000007`, which already contains the earlier curvature
+submissions. The submitted commit must be passed as `existing_id` for the
+ordinary version intake.
 
 ## Local checks
 

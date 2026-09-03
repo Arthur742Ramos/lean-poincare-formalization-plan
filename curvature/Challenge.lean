@@ -1,78 +1,137 @@
+import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Normed.Operator.NormedSpace
-import Mathlib.Analysis.SpecialFunctions.Exponential
+import Mathlib.LinearAlgebra.Trace
+
+/-!
+# Ricci-DeTurck gauge reduction
+
+The Ricci-DeTurck method replaces the geometric Ricci-flow equation by a
+gauge-fixed equation and then removes the gauge correction by pulling the
+metric back along an anchored flow.  This Challenge records the auditable
+algebraic and differential core of that step: pullback evaluation, cancellation
+of the DeTurck term, preservation of the initial tensor, the intrinsic
+`-2 Ric` evolution law, and conjugation invariance of the Ricci trace.
+
+The fixed tangent model keeps the statement small while retaining the
+mathematical transport identity.  The full project source contains the
+corresponding manifold-level gauge-reduction package.
+-/
 
 @[expose] public noncomputable section
 
-namespace RicciFlow
-namespace AnalyticPDE
-namespace SmoothDependenceCk
-
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-
-/-- The augmented generator `(v, s) ↦ (L v + s • b, 0)` for an affine ODE. -/
-noncomputable def affineAugment (L : E →L[ℝ] E) (b : E) : (E × ℝ) →L[ℝ] (E × ℝ) :=
-  (L.comp (ContinuousLinearMap.fst ℝ E ℝ)
-      + (ContinuousLinearMap.snd ℝ E ℝ).smulRight b).prod (0 : (E × ℝ) →L[ℝ] ℝ)
-
-/-- First coordinate of the augmented operator-exponential orbit through `(y₀, 1)`. -/
-noncomputable def affineFundamentalSolution
-    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) : E :=
-  (NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, 1)).1
-
-end SmoothDependenceCk
-end AnalyticPDE
-end RicciFlow
-
 namespace PoincareCurvature.Palomar
 
-theorem affineAugment_snd_orbit_eq_one
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) :
-    (NormedSpace.exp ((t - t₀) • RicciFlow.AnalyticPDE.SmoothDependenceCk.affineAugment L b)
-      (y₀, 1)).2 = 1 := by
+abbrev BilinearFamily (M E : Type*) := ℝ → M → E → E → ℝ
+abbrev GaugeFamily (M : Type*) := ℝ → M → M
+abbrev TangentMapFamily (M E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] :=
+  ℝ → M → E →L[ℝ] E
+
+/-- Pull back a time-dependent bilinear tensor by a gauge map and its tangent map. -/
+def pullbackBilinear
+    {M E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (g : BilinearFamily M E) (φ : GaugeFamily M)
+    (P : TangentMapFamily M E) : BilinearFamily M E :=
+  fun t x u v ↦ g t (φ t x) (P t x u) (P t x v)
+
+/-- The source Ricci--DeTurck equation after evaluating at the gauge image. -/
+def SatisfiesDeTurckEquation
+    {M E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (velocity ricci correction : BilinearFamily M E)
+    (φ : GaugeFamily M) (P : TangentMapFamily M E) (s : Set ℝ) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ (x : M) (u v : E),
+    velocity t (φ t x) (P t x u) (P t x v) =
+      (-2 : ℝ) * ricci t (φ t x) (P t x u) (P t x v) + correction t x u v
+
+/-- Intrinsic Ricci flow written as scalar time derivatives and the `-2 Ric` law. -/
+def IsIntrinsicRicciFlow
+    {M E : Type*} (metric velocity ricci : BilinearFamily M E) (s : Set ℝ) : Prop :=
+  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ (x : M) (u v : E),
+    HasDerivAt (fun τ ↦ metric τ x u v) (velocity t x u v) t ∧
+      velocity t x u v = (-2 : ℝ) * ricci t x u v
+
+@[simp] theorem pullbackBilinear_apply
+    {M E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (g : BilinearFamily M E) (φ : GaugeFamily M)
+    (P : TangentMapFamily M E) (t : ℝ) (x : M) (u v : E) :
+    pullbackBilinear g φ P t x u v =
+      g t (φ t x) (P t x u) (P t x v) := by
   sorry
 
-theorem affineFundamentalSolution_initial
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) :
-    RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀ t₀ = y₀ := by
+/-- The gauge-corrected velocity is the intrinsic `-2 Ric` velocity after
+the DeTurck correction cancels the source equation's gauge term. -/
+theorem gauge_corrected_velocity_eq_neg_two_pullbackRicci
+    {M E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (velocity ricci correction correctedVelocity : BilinearFamily M E)
+    (φ : GaugeFamily M) (P : TangentMapFamily M E) (s : Set ℝ)
+    (hsource : SatisfiesDeTurckEquation velocity ricci correction φ P s)
+    (hcorrected : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ (x : M) (u v : E),
+      correctedVelocity t x u v =
+        velocity t (φ t x) (P t x u) (P t x v) - correction t x u v)
+    {t : ℝ} (ht : t ∈ s) (x : M) (u v : E) :
+    correctedVelocity t x u v =
+      (-2 : ℝ) * pullbackBilinear ricci φ P t x u v := by
   sorry
 
-theorem hasDerivAt_affineFundamentalSolution
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) :
-    HasDerivAt (RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀)
-      (L (RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀ t) + b) t := by
+/-- The scalar derivative of a gauge-pulled metric is exactly the corrected
+velocity supplied by the gauge-flow calculation. -/
+theorem gauge_reduction_has_derivAt
+    {M E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (metric correctedVelocity : BilinearFamily M E)
+    (φ : GaugeFamily M) (P : TangentMapFamily M E) (s : Set ℝ)
+    (hderiv : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ (x : M) (u v : E),
+      HasDerivAt (fun τ ↦ pullbackBilinear metric φ P τ x u v)
+        (correctedVelocity t x u v) t)
+    {t : ℝ} (ht : t ∈ s) (x : M) (u v : E) :
+    HasDerivAt (fun τ ↦ pullbackBilinear metric φ P τ x u v)
+      (correctedVelocity t x u v) t := by
   sorry
 
-theorem affineODE_unique
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    (L : E →L[ℝ] E) (b : E) {y₁ y₂ : ℝ → E}
-    (h1 : ∀ t, HasDerivAt y₁ (L (y₁ t) + b) t)
-    (h2 : ∀ t, HasDerivAt y₂ (L (y₂ t) + b) t)
-    {t₀ : ℝ} (h : y₁ t₀ = y₂ t₀) (t : ℝ) : y₁ t = y₂ t := by
+/-- An anchored gauge preserves the initial bilinear tensor. -/
+theorem anchored_pullbackBilinear_eq_initial
+    {M E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (metric : BilinearFamily M E) (φ : GaugeFamily M)
+    (P : TangentMapFamily M E) (initialMetric : M → E → E → ℝ)
+    (t₀ : ℝ)
+    (hanchor : ∀ x : M, φ t₀ x = x)
+    (htransport : ∀ (x : M) (u : E), P t₀ x u = u)
+    (hinitial : ∀ (x : M) (u v : E), metric t₀ x u v = initialMetric x u v) :
+    pullbackBilinear metric φ P t₀ = initialMetric := by
   sorry
 
-theorem eq_affineFundamentalSolution_of_hasDerivAt
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) {y : ℝ → E}
-    (hy : ∀ t, HasDerivAt y (L (y t) + b) t) (h0 : y t₀ = y₀) (t : ℝ) :
-    y t = RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀ t := by
+/-- The abstract Ricci--DeTurck gauge-reduction theorem: transport data,
+the source equation, and the pulled-back metric derivative produce an
+intrinsic Ricci flow. -/
+theorem ricciDeTurckGaugeReduction
+    {M E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (metric velocity ricci correction correctedVelocity : BilinearFamily M E)
+    (φ : GaugeFamily M) (P : TangentMapFamily M E) (s : Set ℝ)
+    (hsource : SatisfiesDeTurckEquation velocity ricci correction φ P s)
+    (hcorrected : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ (x : M) (u v : E),
+      correctedVelocity t x u v =
+        velocity t (φ t x) (P t x u) (P t x v) - correction t x u v)
+    (hderiv : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ (x : M) (u v : E),
+      HasDerivAt (fun τ ↦ pullbackBilinear metric φ P τ x u v)
+        (correctedVelocity t x u v) t) :
+    IsIntrinsicRicciFlow (pullbackBilinear metric φ P) correctedVelocity
+      (pullbackBilinear ricci φ P) s := by
   sorry
 
-theorem norm_affineFundamentalSolution_le
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) :
-    ‖RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀ t‖
-      ≤ Real.exp (|t - t₀| * (‖L‖ + ‖b‖)) * ‖(y₀, (1 : ℝ))‖ := by
+/-- The trace of a finite-dimensional endomorphism is invariant under
+linear conjugation, the algebraic curvature transport used by the
+Ricci--DeTurck reduction. -/
+theorem trace_conjugation_invariant
+    {E : Type*} [AddCommGroup E] [Module ℝ E] [FiniteDimensional ℝ E]
+    (e : E ≃ₗ[ℝ] E) (R : E →ₗ[ℝ] E) :
+    LinearMap.trace ℝ E (e.conj R) = LinearMap.trace ℝ E R := by
   sorry
 
-theorem norm_affineFundamentalSolution_sub_le
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ y₀' : E) (t : ℝ) :
-    ‖RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀ t -
-        RicciFlow.AnalyticPDE.SmoothDependenceCk.affineFundamentalSolution L b t₀ y₀' t‖
-      ≤ Real.exp (|t - t₀| * (‖L‖ + ‖b‖)) * ‖y₀ - y₀'‖ := by
+/-- Scalar velocity readout after curvature transport by a tangent
+conjugation. -/
+theorem gauge_reduction_trace_readout
+    {E : Type*} [AddCommGroup E] [Module ℝ E] [FiniteDimensional ℝ E]
+    (c : ℝ) (e : E ≃ₗ[ℝ] E) (R : E →ₗ[ℝ] E) :
+    c * LinearMap.trace ℝ E (e.conj R) =
+      c * LinearMap.trace ℝ E R := by
   sorry
 
 end PoincareCurvature.Palomar

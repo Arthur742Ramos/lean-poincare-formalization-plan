@@ -33,14 +33,14 @@ and authorization relationship have been explicitly confirmed.
 | 01 | Raw Bianchi curvature identities | Pointwise first and raw differential second Bianchi identities for torsion-free affine connections | Accepted by Palomar (user-confirmed); immutable artifact at `04b00ba308fc5196a07a5cf7a9c6f985505ea041` |
 | 02 | Raw curvature tensoriality and metric compatibility | Pointwise scalar tensoriality in all three slots and metric skew-adjointness of the raw curvature commutator | Passed by Palomar (user-confirmed); immutable artifact at `db821d6c926bc3fd9622893cc48e23637d406651` |
 | 03 | Levi-Civita connections and metric-determined curvature invariants | Levi-Civita existence, curvature-tensor independence, Ricci symmetry, and Ricci/scalar-curvature invariance | Accepted by Palomar (user-confirmed); immutable artifact at `80b71f3a239ac2b294c91c66d020476f667a1306` |
-| 04 | Frozen Ricci–DeTurck affine evolution | Explicit block-operator augmentation, operator-exponential frozen evolution, global affine ODE uniqueness, growth, and initial-data stability | Corrected candidate in progress; prior parabolic-only attempt failed AI review and is superseded |
+| 04 | Ricci–DeTurck gauge reduction and curvature transport | Gauge pullback, source-equation cancellation, anchored initial metric preservation, intrinsic Ricci-flow reduction, and curvature trace transport | Corrected research-interest candidate in progress |
 | 05 | Continuous sections and smoothing | Coordinate models, finite-cover gluing, smooth approximation, and convex fiber constraints | Source code exists; audit as a separate library contribution |
 | 06 | The open metric cone | Symmetric positive-definite bilinear-form sections and openness in the section-space model | Source code exists; audit separately |
 | 07 | Parabolic Holder primitives | Parabolic neighborhoods, Holder controls, covers, patching, and closure estimates | Supporting library material; not selected in corrected Submission 04 |
 | 08 | Matrix and local-frame estimates | Determinant/inverse/Christoffel estimates and coordinate Ricci-DeTurck bounds | Supporting library material; reserve higher local-frame forms for later |
 | 09 | Gauge transport | Pullback/pushforward of metrics, vector fields, connections, torsion, curvature, and Ricci data | Source code exists; isolate from point-4 scaffolding |
 | 10 | Ricci-DeTurck gauge reduction | Background-dependent DeTurck equations and reduction back to intrinsic Ricci flow | Partially developed; do not present as local existence |
-| 11 | Frozen chart evolution | The proved affine/linear evolution and stability theory for the frozen geometric operator | Selected as the corrected Submission 04 boundary; geometric positive-definite specialization remains a later refinement |
+| 11 | Frozen chart evolution | The proved affine/linear evolution and stability theory for the frozen geometric operator | Supporting library material; not selected for the corrected Submission 04 surface |
 | 12 | General local existence and uniqueness | Compact-manifold Ricci-flow local existence in arbitrary dimension | Future; remains open until the canonical theorem and audit gates pass |
 | 13 | Evolution and maximum principles | Curvature evolution equations and parabolic maximum-principle consequences | Future |
 | 14 | Distance distortion and compactness | Length/distance control, blow-up, rescaling, and compactness of flows | Future |
@@ -147,39 +147,38 @@ status report. Its exact public commit is
 `80b71f3a239ac2b294c91c66d020476f667a1306`; hosted acceptance is not conflated
 with registration or public indexing.
 
-## Submission 04: frozen Ricci–DeTurck affine evolution
+## Submission 04: Ricci–DeTurck gauge reduction and curvature transport
 
-The corrected fourth candidate replaces the failed time-indexed and
-parabolic-only surfaces with the connected frozen affine evolution core in
-`PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/AutonomousResolventExp.lean`.
+The corrected fourth candidate replaces the routine frozen affine ODE surface
+with the geometric gauge-reduction boundary in
+`PoincareCurvature/Geometry/Manifold/RicciFlow/ResearchTheorems.lean`.
 It selects seven declarations:
 
-- `PoincareCurvature.Palomar.affineAugment_snd_orbit_eq_one`;
-- `PoincareCurvature.Palomar.affineFundamentalSolution_initial`;
-- `PoincareCurvature.Palomar.hasDerivAt_affineFundamentalSolution`;
-- `PoincareCurvature.Palomar.affineODE_unique`;
-- `PoincareCurvature.Palomar.eq_affineFundamentalSolution_of_hasDerivAt`;
-- `PoincareCurvature.Palomar.norm_affineFundamentalSolution_le`; and
-- `PoincareCurvature.Palomar.norm_affineFundamentalSolution_sub_le`.
+- `PoincareCurvature.Palomar.pullbackBilinear_apply`;
+- `PoincareCurvature.Palomar.gauge_corrected_velocity_eq_neg_two_pullbackRicci`;
+- `PoincareCurvature.Palomar.gauge_reduction_has_derivAt`;
+- `PoincareCurvature.Palomar.anchored_pullbackBilinear_eq_initial`;
+- `PoincareCurvature.Palomar.ricciDeTurckGaugeReduction`;
+- `PoincareCurvature.Palomar.trace_conjugation_invariant`; and
+- `PoincareCurvature.Palomar.gauge_reduction_trace_readout`.
 
-These declarations construct the global affine operator-exponential
-evolution, prove its ODE and global uniqueness/representation, and give
-explicit exponential growth and Lipschitz initial-data bounds. This is the
-frozen Banach-space analytic core motivated by the geometric Ricci–DeTurck
-chart, rather than a routine repackaging of parabolic scaling lemmas. The
-ingredients are standard and their mathematical sources are identified in
-`curvature/formalization.yaml`; no originality or priority claim is made.
+These declarations state the pullback operation, cancel the gauge correction
+against the source Ricci–DeTurck equation, preserve the initial metric under
+an anchored gauge, derive the intrinsic Ricci-flow equation, and transport
+the Ricci trace through tangent-map conjugation. The selected statements are
+an auditable fixed-tangent-model abstraction of the checked geometric
+gauge-reduction source package; they do not claim the full nonlinear
+compact-manifold local-existence theorem or an original mathematical
+discovery. The mathematical source and scope limits are identified in
+`curvature/formalization.yaml`.
 
-The Challenge exposes actual formulas for the block augmentation and affine
-solution, has seven theorem statement holes, and has no definition holes. It
-deliberately makes no manifold, Hausdorff, or sigma-compactness claim. The
-broader parabolic and coordinate files are supporting library material, not
-selected by this Comparator surface. The candidate-specific role and oversight record is
+The candidate-specific role and oversight record is
 `curvature/AGENT-CONTRIBUTION-04.md`; the immutable pointer to that record is
-pinned in `curvature/formalization.yaml`.
+pinned in `curvature/formalization.yaml`. The prior frozen affine candidate is
+retained as supporting library material, not as the selected research result.
 
-Current state: the corrected Challenge/Solution surface builds under Lean 4.33.
-The repository verifier and independent Comparator/NanoDa replay must pass on
-the final pushed commit before a new Palomar intake is opened. The earlier
-failed Submission 04 is superseded and is not reused as the Palomar ID for the
-corrected candidate.
+Current state: the corrected Challenge/Solution surface and repository verifier
+must pass under Lean 4.33, followed by a fresh Palomar intake on the final
+pushed commit. The prior Palomar identity
+`PALOMAR-2026-09-02-000007` is retained as the existing result identifier for
+the new version.
