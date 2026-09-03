@@ -5,6 +5,9 @@ public noncomputable section
 
 namespace PoincareCurvature.Palomar
 
+local instance palomarContinuousSMul : ContinuousSMul ℝ ℝ :=
+  ContinuousMul.to_continuousSMul
+
 abbrev BilinearFamily (M E : Type*) := ℝ → M → E → E → ℝ
 abbrev GaugeFamily (M : Type*) := ℝ → M → M
 abbrev TangentMapFamily (M E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] :=
