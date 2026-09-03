@@ -21,7 +21,7 @@ project:
 
 classification:
   arxiv: ["math.AP", "math.DG", "math.LO"]
-  msc2020: ["35B65", "35K15", "53C44", "03B35"]
+  msc2020: ["35B65", "35K15", "53E20", "03B35"]
 
 sources:
   - title: "Mathlib4 analysis and metric-space infrastructure"
