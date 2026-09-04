@@ -1,131 +1,115 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
 version: "v0.4"
-
 project:
-  name: "Contracted second Bianchi identity and the divergence-free Einstein tensor"
+  name: "Double-contracted second Bianchi identity for metric-compatible torsion-free connections"
   description: >-
-    Formalizes the contracted second Bianchi identity and the resulting
-    divergence-free Einstein tensor from an explicit finite-dimensional
-    Riemannian tensor interface. The result is a classical theorem of
-    differential geometry and general relativity, presented as a
-    formalization/adaptation rather than as an original mathematical claim.
+    Proves the orthonormal double contraction of the actual corrected curvature
+    derivative of a tangent connection on a smooth finite-dimensional real
+    manifold. The derivative symmetries and cyclic Bianchi equations are
+    derived from torsion-freeness and metric compatibility, not assumed as
+    abstract tensor data. No separate Einstein-divergence theorem is selected.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
     - "Ruy J. G. B. de Queiroz"
   license: "Apache-2.0"
-  responsible_maintainers:
-    - "Arthur Freitas Ramos"
-
+  responsible_maintainers: ["Arthur Freitas Ramos"]
 classification:
   arxiv: ["math.DG", "gr-qc", "math.LO"]
-  msc2020: ["53C25", "83C05", "03B35"]
-
+  msc2020: ["53B20", "53C21", "03B35"]
 sources:
-  - title: "Einstein Manifolds"
-    authors:
-      - "Arthur L. Besse"
-    id: "10.1007/978-3-540-74311-8"
-    type: "book"
-    location: "https://link.springer.com/book/10.1007/978-3-540-74311-8"
-    relationship: "formalizes"
+  - title: "Lecture Notes on General Relativity"
+    authors: ["Sean M. Carroll"]
+    id: "https://ned.ipac.caltech.edu/level5/March01/Carroll3/Carroll3.html"
+    type: "lecture notes"
+    location: "Section 3, equations (3.87)-(3.94)"
+    relationship: "adapts"
     note: >-
-      Primary mathematical source for the classical Bianchi identities, their
-      Ricci and scalar-curvature contractions, and the divergence-free Einstein
-      tensor. This repository formalizes/adapts that established result; it
-      does not claim mathematical originality or first presentation.
+      Classical differential Bianchi identity and its double contraction,
+      specialized here to positive-definite Riemannian metrics and expressed
+      as orthonormal contractions of the corrected connection commutator.
+      The subsequent Einstein-tensor reformulation is not a selected result.
+      This is not a mathematical originality or first-presentation claim.
     license: "unknown"
     author_endorsement: "not-contacted"
-
+  - title: "Einstein Manifolds"
+    authors: ["Arthur L. Besse"]
+    id: "10.1007/978-3-540-74311-8"
+    type: "book"
+    relationship: "background"
+    note: "Previously cited background on Riemannian curvature and the Bianchi identities."
+    license: "unknown"
+    author_endorsement: "not-contacted"
 related_formalizations: []
-
 status:
   scope: >-
-    The selected Challenge surface is a finite-dimensional real inner-product
-    space with an explicit multilinear curvature tensor and covariant
-    derivative tensor. It displays Ricci, scalar curvature, their derivative
-    contractions, the Einstein tensor, and its divergence in a finite
-    orthonormal basis. The derivative pair symmetries and cyclic second
-    Bianchi identity are explicit hypotheses of the tensor interface. The
-    package therefore proves the contraction layer without claiming an
-    unproved bridge from every field to a specific evolving manifold metric.
-  sorry_count: 2
+    Smooth Hausdorff real manifolds with a finite-dimensional complete model
+    space; tangent bundle smoothness through order three, connection smoothness
+    through order two, and Riemannian bundle smoothness through order two
+    (including an explicit order-one instance). The selected theorem assumes
+    torsion-freeness and metric compatibility. It contracts the corrected
+    curvature derivative evaluated on canonical smooth extensions in an
+    orthonormal tangent basis. Compactness and sigma-compactness are not required.
+    A separate identification with derivatives of the Ricci/scalar fields,
+    extension independence as a bundled derivative tensor, and an Einstein
+    divergence theorem are not claimed.
+  sorry_count: 1
   sorry_in_definitions: 0
   axioms: []
-
 automation:
   methods:
-    - method: "agent-assisted"
-      models: ["GPT-5 Codex"]
+    - method: "agent"
+      models: ["GPT-5 Codex", "GPT-6 Codex"]
       framework: "Codex with Lean 4.33 and Mathlib"
       tool_setup: >-
-        The agent audited the existing registered versions and supporting
-        curvature source, selected the contracted-Bianchi theorem family,
-        designed the auditable tensor and trace interface, implemented the
-        explicit contraction proof, and prepared the separate project,
-        Comparator, metadata, documentation, and reproducibility checks.
-        Human authors selected and approved the mathematical target, source
-        relationship, authorship, limitations, and any submission decision.
-      cost:
-        wall_time: "not tracked"
-        spend_usd: "subscription-based"
-        hardware: "local machine"
+        GPT-5 Codex prepared the superseded tensor abstraction. GPT-6 Codex
+        audited its scope, proved the connection-derived derivative symmetries
+        and contraction, prepared the standalone dependency closure, revised
+        metadata and documentation, and ran verification. Arthur directed the
+        mathematical target, authorship list, and repairs through reviewer
+        feedback. Independent proof review by each named author is not recorded.
       prompting_notes: >-
-        GPT-5 Codex supplied repository auditing, Lean proof engineering,
-        documentation, metadata preparation, and local verification. It did
-        not determine authorship, source priority, novelty, or publication
-        responsibility.
-  spend_usd: "subscription-based"
+        The user supplied the reviewer objections and requested a substantive
+        repair. The replacement derives the differential curvature identities
+        from a connection and removes the unsupported Einstein-divergence claim.
   notes: >-
-    Fuller contribution and oversight record: [AGENT-CONTRIBUTION.md](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/1df56a940cb9e30fbf21591c6f10129591157c75/contracted-bianchi/AGENT-CONTRIBUTION.md)
-    is pinned to immutable preparation commit
-    1df56a940cb9e30fbf21591c6f10129591157c75, which contains the record and
-    the synchronized project surface. This is a distinct project path and
-    This standalone project has its own Comparator identity. A future Palomar
-    intake must leave the external existing_id field blank and must be opened
-    as a new result.
-
+    Fuller contribution and oversight record:
+    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/62247eaa896503a8cbe1f6245ac95ad4a062a644/contracted-bianchi/AGENT-CONTRIBUTION.md
+    is pinned to the immutable commit containing the replacement proof and record.
 fidelity:
   divergences: >-
-    Challenge.lean imports only Mathlib and exposes the tensor fields, their
-    symmetry hypotheses, the trace definitions, and the two selected theorem
-    statements. Solution.lean independently repeats the interface and proves
-    the same declarations using only the pinned Mathlib dependency. The finite
-    contraction argument is explicit at the Comparator boundary, with no local
-    path dependency.
-
+    The selected statement is the explicit double contraction of the corrected
+    curvature derivative, with canonical smooth extensions and an orthonormal
+    basis. It does not assert a separately formalized equality with the
+    differential of scalar curvature or divergence of a Ricci/Einstein field.
+    Source index conventions are adapted to the repository's curvature
+    commutator. The local dependency closure is included in this project;
+    only Mathlib is an external Lean dependency.
 review:
   status: "self-assessed"
-  reviewers:
-    - "none"
+  reviewers: ["none"]
   notes: >-
-    Preparation only; no Palomar submission has been made for this project.
-    The selected result is the canonical contracted Bianchi identity and its
-    Einstein-tensor corollary, with a specialist audience in differential
-    geometry and general relativity. The classical source relationship and the
-    tensor-level scope are stated explicitly; no originality claim is made.
-
+    An earlier abstract version of this project was submitted and failed
+    mechanical verification; this stronger geometric replacement is unregistered.
+    Any fresh intake must have a blank existing_id. The mathematical interest
+    is the differential curvature constraint obtained from a torsion-free
+    metric-compatible connection, with an audience in Riemannian geometry and
+    geometric field equations. The proof derives the curvature derivative
+    symmetries, rather than assuming a tensor with those identities. Editorial
+    acceptance is not claimed.
 alignment:
   namespace: "ContractedBianchi"
   statements:
-    - source: "Contracted second Bianchi identity"
+    - source: "Double-contracted second Bianchi identity, in curvature-derivative form"
       lean: "ContractedBianchi.contractedSecondBianchi"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        The proof contracts the displayed cyclic second-Bianchi identity in an
-        orthonormal basis and uses the displayed derivative pair symmetries.
-    - source: "Divergence-free Einstein tensor"
-      lean: "ContractedBianchi.einsteinTensorDivergence"
-      module: "Solution.lean"
-      status: "proved"
-      note: >-
-        This is derived algebraically from the contracted identity and the
-        explicit definition of the Einstein divergence; it is not assumed.
-
+        Uses the actual corrected connection derivative; proves its skew and
+        interchange symmetries using differentiability and metric compatibility,
+        obtains the cyclic second Bianchi equation from torsion-freeness,
+        and performs the two finite contractions.
 acknowledgements: >-
-  Mathlib contributors for finite-dimensional inner-product spaces, orthonormal
-  bases, finite sums, and linear-map infrastructure; Arthur L. Besse for the
-  classical mathematical source; the human authors for theorem selection,
-  authorship, attribution, review, and publication responsibility; and the
-  Palomar Registry project for its reproducible statement/solution workflow.
+  Mathlib contributors for manifold, bundle, derivative, and finite-sum
+  infrastructure; the repository curvature-library contributors; and the
+  cited mathematical sources for the established classical result.
