@@ -1,4 +1,4 @@
-import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.ContractedBianchi
+import Mathlib.Analysis.InnerProductSpace.PiL2
 
 /-!
 # Solution: contracted second Bianchi identity

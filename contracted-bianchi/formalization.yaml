@@ -81,18 +81,19 @@ automation:
     is pinned to immutable preparation commit
     eb6ade88bd15ccb06e66aa20f24affe090adaadf, which contains the record and
     the synchronized project surface. This is a distinct project path and
-    Comparator identity from the registered curvature/ surface. A future
-    Palomar intake must leave the external existing_id field blank; it must not
-    be submitted as a version of PALOMAR-2026-09-02-000007.
+    Comparator identity from the older curvature/ surface. A future Palomar
+    intake for this standalone project must leave the external existing_id
+    field blank and must be opened as a new result.
 
 fidelity:
   divergences: >-
     Challenge.lean imports only Mathlib and exposes the tensor fields, their
     symmetry hypotheses, the trace definitions, and the two selected theorem
-    statements. Solution.lean imports the pinned parent curvature package and
-    proves the same declarations. The source package supplies a raw
-    manifold-level second-Bianchi ingredient, while this project makes the
-    finite contraction argument explicit at the Comparator boundary.
+    statements. Solution.lean independently repeats the interface and proves
+    the same declarations using only the pinned Mathlib dependency. The older
+    curvature/ package was audited as related formal context, while this
+    project makes the finite contraction argument explicit at the Comparator
+    boundary without a path dependency on that older surface.
 
 review:
   status: "self-assessed"

@@ -17,9 +17,10 @@ The relationship is `formalizes`: this repository gives a Lean
 formalization/adaptation of the classical contraction argument.  The theorem
 is not claimed as an original mathematical result or as a first presentation.
 Mathlib provides general finite-dimensional linear algebra and basis-sum
-infrastructure.  The parent `curvature/` package provides the raw
-manifold-level second-Bianchi identity and its regularity setup.  Those are
-formal dependencies, not substitutes for the mathematical source.
+infrastructure.  The parent `curvature/` package was audited as related
+formal context and contains a raw manifold-level second-Bianchi identity, but
+it is not a dependency of this standalone project.  Neither Mathlib nor the
+parent package is being presented as the mathematical source.
 
 ## Agent contribution
 
@@ -59,12 +60,12 @@ mathematical-origin statements.
 
 `Challenge.lean` imports Mathlib only and exposes the tensor fields, their
 symmetry and Bianchi hypotheses, the trace definitions, and the two selected
-conclusions with proof holes.  `Solution.lean` imports the pinned parent
-curvature package and proves the same theorem statements.  The contraction
-argument is explicit in `Solution.lean`; neither divergence conclusion is
-assumed as a hypothesis.
+conclusions with proof holes.  `Solution.lean` independently repeats that
+auditable interface and proves the same theorem statements using only the
+pinned Mathlib dependency.  The contraction argument is explicit in
+`Solution.lean`; neither divergence conclusion is assumed as a hypothesis.
 
 This project has a distinct project path and Comparator identity from the
-registered `curvature/` surface.  A future Palomar intake for this directory
-must be a new submission with a blank `existing_id`; it must not refer to
-`PALOMAR-2026-09-02-000007` as a version lineage.
+older `curvature/` surface.  A future Palomar intake for this directory must
+be a new submission with a blank `existing_id`; it must not reuse the older
+surface's Palomar lineage.
