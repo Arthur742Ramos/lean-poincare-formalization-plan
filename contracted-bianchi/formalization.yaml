@@ -77,9 +77,9 @@ automation:
         responsibility.
   spend_usd: "subscription-based"
   notes: >-
-    Fuller contribution and oversight record: [AGENT-CONTRIBUTION.md](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/eb6ade88bd15ccb06e66aa20f24affe090adaadf/contracted-bianchi/AGENT-CONTRIBUTION.md)
+    Fuller contribution and oversight record: [AGENT-CONTRIBUTION.md](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/1df56a940cb9e30fbf21591c6f10129591157c75/contracted-bianchi/AGENT-CONTRIBUTION.md)
     is pinned to immutable preparation commit
-    eb6ade88bd15ccb06e66aa20f24affe090adaadf, which contains the record and
+    1df56a940cb9e30fbf21591c6f10129591157c75, which contains the record and
     the synchronized project surface. This is a distinct project path and
     Comparator identity from the older curvature/ surface. A future Palomar
     intake for this standalone project must leave the external existing_id
