@@ -264,13 +264,13 @@ derivative tensors, explicit pair symmetries, the cyclic second-Bianchi
 hypothesis, and the finite orthonormal-basis trace formulas for Ricci and
 scalar curvature. The Solution performs the contraction and derives the
 divergence-free Einstein tensor; neither conclusion is smuggled in as a
-hypothesis. The current scope is intentionally tensor-level. It records the
-raw manifold second-Bianchi theorem in the parent package as a formal
-dependency, but does not claim a fully discharged manifold-to-tensor bridge
-for every derivative symmetry.
+hypothesis. The current scope is intentionally tensor-level. The older parent
+package is related formal context, but the new project is self-contained and
+does not claim a fully discharged manifold-to-tensor bridge for every
+derivative symmetry.
 
 This is a new mathematical result family for Palomar intake, not a correction
 or version of `PALOMAR-2026-09-02-000007`: the project directory and Comparator
 identity differ, and the external `existing_id` must remain blank. It will not
 be called submission-ready until the pinned contribution record, clean build,
-proof-hole audit, and any remaining geometric-scope concerns have been checked.
+proof-hole audit, and remaining geometric-scope concerns have been checked.
