@@ -2,21 +2,17 @@
 version: "v0.4"
 
 project:
-  name: "Ricci-DeTurck pullback transport and metric-cone evolution in Lean"
+  name: "Diffeomorphism transport of connections and curvature in Lean"
   description: >-
-    Formalizes an auditable coordinate reduction of the Ricci-DeTurck method.
-    Metrics are continuous bilinear forms, the Ricci tensor is explicitly the
-    metric composed with a specified Ricci endomorphism. Independent Frechet,
-    gauge, and tangent-transport derivative data yield the derivative of the
-    pulled-back metric. The capstone combines that calculation with the source
-    Ricci-DeTurck equation and proves intrinsic -2 Ric evolution. A Ricci
-    vector field on the same bilinear-form state space has a Picard-Lindelof
-    existence and uniqueness theorem inside the symmetric positive-definite
-    cone. A finite-dimensional scalar-trace transport lemma is retained as
-    supporting code but is not selected as a standalone claim. This is a
-    coordinate adaptation of the gauge mechanism, not the full nonlinear
-    compact-manifold Ricci-flow existence theorem and not a claim of original
-    mathematical discovery.
+    Formalizes the fixed-diffeomorphism transport of a covariant derivative on
+    the tangent bundle of a smooth finite-dimensional manifold. The selected
+    statements expose the tangent pushforward and pullback, define the
+    pulled-back connection and raw curvature commutator, and prove transport
+    of curvature and torsion together with preservation of metric compatibility
+    and the Levi-Civita property. The result is a standard geometric
+    naturality theorem family formalized from the repository's proved source;
+    it is not claimed as an original mathematical discovery or as a proof of
+    Ricci-flow local existence.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -30,19 +26,34 @@ classification:
   msc2020: ["53C25", "53E20", "35K15", "03B35"]
 
 sources:
-  - title: "Deforming metrics in the direction of their Ricci tensors"
+  - title: "Foundations of Differential Geometry, Volume I"
     authors:
-      - "Dennis M. DeTurck"
-    id: "10.4310/jdg/1214509286"
-    type: "article"
-    location: "https://doi.org/10.4310/jdg/1214509286"
-    relationship: "adapts"
+      - "Shoshichi Kobayashi"
+      - "Katsumi Nomizu"
+    id: "10.1007/978-1-4757-9966-8"
+    type: "book"
+    location: "https://link.springer.com/book/10.1007/978-1-4757-9966-8"
+    relationship: "formalizes"
     note: >-
-      This is the mathematical source for the Ricci-DeTurck gauge idea and
-      the pullback reduction from a gauge-fixed equation to Ricci flow. The
-      Lean result adapts that mechanism to an explicit fixed-tangent model;
-      it does not purport to formalize DeTurck's full nonlinear parabolic
-      short-time theorem or to claim priority for the underlying mathematics.
+      The classical source for affine connections, torsion, curvature, and
+      their natural transport under diffeomorphisms. The selected statements
+      are the standard pullback-connection consequences of that theory, not a
+      new theorem and not a claim that this repository originated the result.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+
+  - title: "Riemannian Manifolds: An Introduction to Curvature"
+    authors:
+      - "John M. Lee"
+    id: "10.1007/978-3-319-91755-9"
+    type: "book"
+    location: "https://link.springer.com/book/10.1007/978-3-319-91755-9"
+    relationship: "formalizes"
+    note: >-
+      Provides the standard Riemannian formulation in which a diffeomorphism
+      pulls back the metric and its Levi-Civita connection. The Lean surface
+      states metric compatibility through the explicit inner-product pullback
+      equation and proves the corresponding connection transport.
     license: "unknown"
     author_endorsement: "not-contacted"
 
@@ -50,19 +61,18 @@ related_formalizations: []
 
 status:
   scope: >-
-    The selected Challenge surface is a typed time-dependent coordinate model
-    over a normed base type M and a normed real tangent model E. A metric is a
-    continuous bilinear form E ->L E ->L R. `ricciTensor` is metric composition
-    with an explicitly supplied continuous Ricci endomorphism. The derivative
-    theorem uses independent Frechet derivatives for the metric, time
-    derivatives for the gauge, and time derivatives for the tangent transport.
-    The final two theorems use the explicitly defined Ricci vector field on the
-    bilinear-form state space and give Picard-Lindelof existence and uniqueness
-    inside the positive-definite cone. The surface is not an
-    arbitrary-Hausdorff-manifold regularity theorem and does not claim
-    Schauder estimates or compact-manifold Ricci-flow local existence.
-  sorry_count: 6
-  sorry_in_definitions: 0
+    The selected Challenge surface is a smooth finite-dimensional Hausdorff
+    manifold with a bundled `C^2` self-diffeomorphism, its invertible tangent
+    map, a covariant derivative on the tangent bundle, and the explicit raw
+    curvature commutator. The selected metric statements quantify over smooth
+    Riemannian metrics and include the pointwise equation identifying the
+    target inner product with the pullback metric. The declarations therefore
+    concern actual manifold connections and Levi-Civita structure, not an
+    unconstrained endomorphism, scalar family, or generic ODE. This package
+    proves geometric transport only; it does not claim Ricci-flow PDE local
+    existence, Schauder estimates, or research novelty.
+  sorry_count: 7
+  sorry_in_definitions: 1
   axioms: []
 
 automation:
@@ -71,109 +81,105 @@ automation:
       models: ["GPT-5 Codex"]
       framework: "Codex with Lean 4.33 and Mathlib"
       tool_setup: >-
-        The agent audited the Palomar rejection, redesigned the Comparator
-        boundary around typed bilinear forms and Ricci transport, implemented
-        the Challenge/Solution declarations and proofs, synchronized the
-        repository documents, and ran Lean, source-closure, metadata, and
-        Comparator/NanoDa checks. Human authors selected and approved the
-        mathematical target, source relationship, authorship, limitations,
-        and submission decision.
+        The agent audited the rejected coordinate and ODE candidates, selected
+        the repository's strongest already-proved manifold transport family,
+        implemented the aligned Challenge/Solution declarations, synchronized
+        the repository documents and verifier, and ran Lean, source-closure,
+        metadata, and Comparator/NanoDa checks. Human authors selected and
+        approved the mathematical target, source relationship, authorship,
+        limitations, and submission decision.
       cost:
         wall_time: "not tracked"
         spend_usd: "subscription-based"
         hardware: "local machine"
       prompting_notes: >-
-        GPT-5 Codex supplied proof engineering, repository editing, and
-        reproducibility checks. It did not determine mathematical authorship,
-        source priority, or novelty. Human oversight consisted of selecting
-        the result family, reviewing the exact definitions and hypotheses,
-        checking the provenance and limitations, and approving publication.
+        GPT-5 Codex supplied repository auditing, theorem-surface design,
+        Lean proof engineering, documentation edits, and reproducibility
+        checks. It did not determine mathematical authorship, source priority,
+        or novelty. Human oversight consisted of selecting the result family,
+        reviewing the exact definitions and hypotheses, checking the
+        provenance and limitations, and approving the submission decision.
   spend_usd: "subscription-based"
   notes: |
     Fuller contribution and oversight record: the immutable public document is
-    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/eb688e3462e70cc318d2394f19783e93620985f7/curvature/AGENT-CONTRIBUTION-04.md
-    This immutable commit contains the corrected record and the synchronized
-    Comparator surface.
+    pinned after the preparation commit in
+    `curvature/AGENT-CONTRIBUTION-05.md`. The final metadata revision will
+    replace this placeholder with the exact immutable commit URL containing
+    that document and the synchronized Comparator surface.
 
 fidelity:
   divergences: >-
-    `Challenge.lean` imports only Mathlib and exposes the exact formulas and
-    hypotheses compared by Palomar. `Solution.lean` proves the same
-    declarations directly from pinned Mathlib calculus, linear-algebra, and
-    ODE results. The larger manifold-level Ricci-flow files in the repository
-    provide implementation context and source development, but are not
-    imported into either compared surface, so no project-local theorem is
-    hidden behind the Challenge boundary.
+    `Challenge.lean` imports only Mathlib and exposes the tangent-map,
+    covariant-derivative, curvature-commutator, torsion, and metric-compatibility
+    formulas compared by Palomar. `Solution.lean` proves the same declarations
+    by invoking the fully proved manifold transport source in the pinned
+    repository. The source import is explicit in Solution.lean and is not
+    available to Challenge.lean; the mathematical definitions and hypotheses
+    remain visible at the Comparator boundary.
 
 review:
   status: "self-assessed"
   reviewers:
     - "none"
   notes: >-
-    This revision addresses the previous review by removing the stale
-    frozen-affine Comparator description, replacing the unconstrained scalar
-    Ricci family with typed bilinear and endomorphism data, removing the
-    derivative theorem that assumed its conclusion, removing the routine
-    standalone trace theorem from the selected surface, and specializing the
-    metric-cone theorems to the explicitly defined Ricci vector field. The
-    result remains explicitly presented as a standard adaptation of the
-    Ricci-DeTurck mechanism rather than an original theorem or a claim of full
-    nonlinear PDE local existence.
+    This revision removes the stale affine, metric-cone, and gauge-reduction
+    surface entirely. It selects the already-proved fixed-diffeomorphism
+    transport of a genuine tangent-bundle connection, raw curvature, torsion,
+    metric compatibility, and Levi-Civita structure. The relationship to the
+    classical sources is stated as standard formalization/adaptation; no
+    originality or Ricci-flow existence claim is made.
 
 alignment:
   namespace: "PoincareCurvature.Palomar"
   statements:
-    - source: "Gauge-pullback derivative from independent C1 data"
-      lean: "PoincareCurvature.Palomar.gauge_pullback_has_derivAt_of_C1_data"
+    - source: "Raw curvature commutator under pullback connection"
+      lean: "PoincareCurvature.Palomar.curvatureAux_pullbackCovariantDerivative"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        Applies the chain rule and two continuous-linear-map product rules to
-        the explicitly defined pullback; the target derivative is not assumed.
-    - source: "Ricci-tensor pullback transport"
-      lean: "PoincareCurvature.Palomar.ricciTensor_pullback_transport"
+        The raw commutator is transported by the explicit pushforward/pullback
+        connection formula and the naturality of the Lie bracket.
+    - source: "Pointwise raw curvature transport"
+      lean: "PoincareCurvature.Palomar.curvatureAux_pullbackCovariantDerivative_apply"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        The explicit definition `ricciTensor g R = g.comp R` makes the
-        tangent-conjugation identity auditable by evaluation.
-    - source: "Positive-definite metric pullback"
-      lean: "PoincareCurvature.Palomar.pullbackMetric_preserves_symmetricPositiveDefinite"
+        This is the component-level form after applying the explicit inverse
+        tangent map at the source point.
+    - source: "Torsion transport under pullback connection"
+      lean: "PoincareCurvature.Palomar.torsion_pullbackCovariantDerivative"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        The tangent transport is an equivalence, so symmetry and strict
-        positivity of the source metric form are preserved by the explicit
-        pullback formula. The correction-cancellation lemma and scalar trace
-        transport are retained as internal supporting facts, not selected as
-        standalone results.
-    - source: "Typed intrinsic Ricci-flow gauge reduction"
-      lean: "PoincareCurvature.Palomar.ricciDeTurckGaugeReduction"
+        Torsion is transported pointwise by the inverse tangent map, with the
+        differentiability hypotheses on the two tangent vector fields shown.
+    - source: "Preservation of torsion-freeness"
+      lean: "PoincareCurvature.Palomar.isTorsionFree_pullbackCovariantDerivative"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        Combines the independently derived pullback derivative, source
-        cancellation, and Ricci-tensor transport into the intrinsic flow law.
-    - source: "Metric-cone Picard-Lindelof existence"
-      lean: "PoincareCurvature.Palomar.metricCone_local_flow_exists"
+        The pointwise torsion transport theorem gives the global predicate
+        preservation result for a torsion-free affine connection.
+    - source: "Preservation of metric compatibility"
+      lean: "PoincareCurvature.Palomar.isMetricCompatibleTangent_pullbackCovariantDerivative"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        Constructs a local evolution for the explicitly defined Ricci vector
-        field on bilinear forms that remains inside the symmetric-positive-
-        definite metric cone under an explicit inclusion.
-    - source: "Metric-cone solution uniqueness"
-      lean: "PoincareCurvature.Palomar.metricCone_local_flow_unique"
+        The hypothesis explicitly identifies the target metric inner product
+        with the tangent pullback of the source metric, so the transported
+        compatibility statement is not vacuous.
+    - source: "Preservation of the Levi-Civita property"
+      lean: "PoincareCurvature.Palomar.isLeviCivita_pullbackCovariantDerivative"
       module: "Solution.lean"
       status: "proved"
       note: >-
-        Uses the state-constrained ODE uniqueness theorem on the common
-        forward interval, retaining the cone hypotheses in the conclusion.
+        Combines the transported torsion-free and metric-compatibility
+        properties for the explicitly pulled-back connection.
 
 acknowledgements: >-
-  Mathlib contributors for the calculus, continuous-linear-map,
-  finite-dimensional trace, and Picard-Lindelof infrastructure; Dennis M.
-  DeTurck for the source Ricci-DeTurck mechanism; the human authors for
-  mathematical selection, authorship, attribution, review, and publication
-  responsibility; and the Palomar Registry project for the
-  statement/solution Comparator workflow.
+  Mathlib contributors for the manifold, tangent-bundle, covariant-derivative,
+  and Riemannian infrastructure; Kobayashi, Nomizu, and Lee for the classical
+  differential-geometric source material; the human authors for mathematical
+  selection, authorship, attribution, review, and publication responsibility;
+  and the Palomar Registry project for the statement/solution Comparator
+  workflow.

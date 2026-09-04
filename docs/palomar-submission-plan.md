@@ -33,7 +33,8 @@ and authorization relationship have been explicitly confirmed.
 | 01 | Raw Bianchi curvature identities | Pointwise first and raw differential second Bianchi identities for torsion-free affine connections | Accepted by Palomar (user-confirmed); immutable artifact at `04b00ba308fc5196a07a5cf7a9c6f985505ea041` |
 | 02 | Raw curvature tensoriality and metric compatibility | Pointwise scalar tensoriality in all three slots and metric skew-adjointness of the raw curvature commutator | Passed by Palomar (user-confirmed); immutable artifact at `db821d6c926bc3fd9622893cc48e23637d406651` |
 | 03 | Levi-Civita connections and metric-determined curvature invariants | Levi-Civita existence, curvature-tensor independence, Ricci symmetry, and Ricci/scalar-curvature invariance | Accepted by Palomar (user-confirmed); immutable artifact at `80b71f3a239ac2b294c91c66d020476f667a1306` |
-| 04 | Ricci–DeTurck pullback transport and metric-cone evolution | Typed pullback derivative, Ricci/scalar transport, positive-definite metric preservation, intrinsic reduction, and cone-valued existence/uniqueness | Corrected research-interest candidate in progress |
+| 04 | Diffeomorphism transport of connections and curvature | Tangent transport, pullback covariant derivative, raw curvature/torsion transport, and Levi–Civita preservation | Superseded; retained as historical review context |
+| 05 | Geometric connection transport | Fixed `C^2` diffeomorphism covariance of the tangent-bundle connection, curvature, torsion, metric compatibility, and Levi–Civita property | Current candidate being submitted |
 | 05 | Continuous sections and smoothing | Coordinate models, finite-cover gluing, smooth approximation, and convex fiber constraints | Source code exists; audit as a separate library contribution |
 | 06 | The open metric cone | Symmetric positive-definite bilinear-form sections and openness in the section-space model | Source code exists; audit separately |
 | 07 | Parabolic Holder primitives | Parabolic neighborhoods, Holder controls, covers, patching, and closure estimates | Supporting library material; not selected in corrected Submission 04 |
@@ -57,9 +58,9 @@ library result has an independently defensible boundary.
 ## Order of work
 
 1. Preserve the accepted 01 and 03 artifacts and the passed 02 artifact while
-   packaging/validating 04 as the next non-overlapping frozen Ricci–DeTurck
-   analytic result family.
-2. Audit the dependency closure and research value of 05–06, then prepare the
+   packaging/validating 05 as the next non-overlapping manifold-level geometry
+   result family.
+2. Audit the dependency closure and research value of 06–07, then prepare the
    strongest non-overlapping candidates.
 3. Package the analytic candidates 07–11 only around proved theorem clusters;
    keep point-4 interfaces and special cases clearly labeled as scaffolding.
@@ -147,39 +148,33 @@ status report. Its exact public commit is
 `80b71f3a239ac2b294c91c66d020476f667a1306`; hosted acceptance is not conflated
 with registration or public indexing.
 
-## Submission 04: Ricci–DeTurck pullback transport and metric-cone evolution
+## Submission 05: geometric connection transport
 
-The revised fourth candidate replaces the routine frozen affine ODE surface
-with a typed coordinate reduction of the Ricci–DeTurck mechanism. It selects
-six declarations:
+The current candidate selects the fixed-diffeomorphism transport family from
+`curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeTransport.lean`:
 
-- `PoincareCurvature.Palomar.gauge_pullback_has_derivAt_of_C1_data`;
-- `PoincareCurvature.Palomar.ricciTensor_pullback_transport`;
-- `PoincareCurvature.Palomar.pullbackMetric_preserves_symmetricPositiveDefinite`;
-- `PoincareCurvature.Palomar.ricciDeTurckGaugeReduction`;
-- `PoincareCurvature.Palomar.metricCone_local_flow_exists`; and
-- `PoincareCurvature.Palomar.metricCone_local_flow_unique`.
+- `PoincareCurvature.Palomar.curvatureAux_pullbackCovariantDerivative`;
+- `PoincareCurvature.Palomar.curvatureAux_pullbackCovariantDerivative_apply`;
+- `PoincareCurvature.Palomar.torsion_pullbackCovariantDerivative`;
+- `PoincareCurvature.Palomar.isTorsionFree_pullbackCovariantDerivative`;
+- `PoincareCurvature.Palomar.isMetricCompatibleTangent_pullbackCovariantDerivative`; and
+- `PoincareCurvature.Palomar.isLeviCivita_pullbackCovariantDerivative`.
 
-The compared definitions make the metric a continuous bilinear form, define
-the Ricci tensor by composition with a specified Ricci endomorphism, define a
-Ricci vector field on the same bilinear-form state space, and define the
-intrinsic flow law using those typed objects. The pullback derivative is
-derived from independent Fréchet, gauge, and tangent-transport derivative
-hypotheses. The capstone combines that calculation with source-equation
-cancellation and an analytic Ricci metric-cone existence/uniqueness package.
-The finite-dimensional scalar trace is proved as supporting code but is not a
-selected standalone claim. The selected statements are an auditable
-coordinate adaptation of the checked geometric source package; they do not
-claim the full nonlinear compact-manifold local-existence theorem or an
-original mathematical discovery.
+The compared definitions are the actual tangent pushforward/pullback, the
+pullback covariant derivative, the raw curvature commutator, torsion-free
+structure, metric compatibility, and the Levi–Civita predicate. The metric
+compatibility theorems include the explicit equation identifying the target
+inner product with the source metric pulled back by the tangent map. The
+source-backed Solution proofs are genuine manifold theorems; the classical
+provenance is recorded as standard affine-connection/Riemannian naturality,
+not as an originality claim.
 
 The candidate-specific role and oversight record is
-`curvature/AGENT-CONTRIBUTION-04.md`; the immutable pointer to that record is
-pinned in `curvature/formalization.yaml`. The prior frozen affine candidate is
-retained as supporting library material, not as the selected research result.
+`curvature/AGENT-CONTRIBUTION-05.md`; the final metadata pins it to an
+immutable commit. The earlier coordinate, metric-cone, and frozen-affine
+submissions remain historical or supporting material and are not selected by
+this Comparator surface.
 
-Current state: the corrected Challenge/Solution surface and repository verifier
-must pass under Lean 4.33, followed by a fresh Palomar intake on the final
-pushed commit. The prior Palomar identity
-`PALOMAR-2026-09-02-000007` is recorded only as the prior review context; the
-new intake must leave the existing Palomar ID blank.
+Current state: validate the Challenge/Solution surface and repository verifier
+under Lean 4.33, push the final commit, and start a fresh Palomar intake with
+the prior Palomar identity left blank.

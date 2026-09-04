@@ -2,19 +2,25 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "PoincareCurvature.Palomar.gauge_pullback_has_derivAt_of_C1_data",
-    "PoincareCurvature.Palomar.ricciTensor_pullback_transport",
-    "PoincareCurvature.Palomar.pullbackMetric_preserves_symmetricPositiveDefinite",
-    "PoincareCurvature.Palomar.ricciDeTurckGaugeReduction",
-    "PoincareCurvature.Palomar.metricCone_local_flow_exists",
-    "PoincareCurvature.Palomar.metricCone_local_flow_unique"
+    "PoincareCurvature.Palomar.curvatureAux_pullbackCovariantDerivative",
+    "PoincareCurvature.Palomar.curvatureAux_pullbackCovariantDerivative_apply",
+    "PoincareCurvature.Palomar.torsion_pullbackCovariantDerivative",
+    "PoincareCurvature.Palomar.isTorsionFree_pullbackCovariantDerivative",
+    "PoincareCurvature.Palomar.isMetricCompatibleTangent_pullbackCovariantDerivative",
+    "PoincareCurvature.Palomar.isLeviCivita_pullbackCovariantDerivative"
   ],
   "definition_names": [
-    "PoincareCurvature.Palomar.pullbackMetric",
-    "PoincareCurvature.Palomar.ricciTensorFamily",
-    "PoincareCurvature.Palomar.RicciMetricCone",
-    "PoincareCurvature.Palomar.ricciFlowVectorField",
-    "PoincareCurvature.Palomar.IsIntrinsicRicciFlow"
+    "CovariantDerivative.along",
+    "CovariantDerivative.curvatureAux",
+    "RicciFlow.SmoothSelfDiffeomorph2.tangentMap",
+    "RicciFlow.SmoothSelfDiffeomorph2.pushforwardTangent",
+    "RicciFlow.SmoothSelfDiffeomorph2.pullbackTangent",
+    "RicciFlow.SmoothSelfDiffeomorph2.pushforwardVectorField",
+    "RicciFlow.SmoothSelfDiffeomorph2.pullbackVectorField",
+    "RicciFlow.SmoothSelfDiffeomorph2.pullbackCovariantDerivative",
+    "CovariantDerivative.IsTorsionFree",
+    "CovariantDerivative.IsMetricCompatibleTangent",
+    "CovariantDerivative.IsLeviCivita"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": true

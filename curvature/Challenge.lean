@@ -1,299 +1,239 @@
-import Mathlib.Analysis.Calculus.Deriv.Basic
-import Mathlib.Analysis.Calculus.FDeriv.CompCLM
-import Mathlib.Analysis.Normed.Operator.NormedSpace
-import Mathlib.Analysis.ODE.ExistUnique
-import Mathlib.LinearAlgebra.Trace
+import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
+import Mathlib.Geometry.Manifold.LocalDiffeomorph
+import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
+import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
+import Mathlib.Geometry.Manifold.VectorField.LieBracket
+import Mathlib.Geometry.Manifold.VectorField.Pullback
+import Mathlib.Geometry.Manifold.Riemannian.Basic
 
 /-!
-# Auditable Ricci--DeTurck transport and metric-cone evolution
+# Diffeomorphism transport of connections and curvature
 
-This Challenge exposes a small but typed coordinate model of the gauge-reduction
-mechanism.  A metric is a continuous bilinear form, its Ricci tensor is the
-metric composed with a specified Ricci endomorphism, and scalar curvature is
-the finite-dimensional trace of that endomorphism.  The selected differential
-statement derives the pullback velocity from independent Fréchet and time
-derivative data; it does not assume the derivative it is meant to prove.
+This Challenge isolates a genuine manifold-level transport theorem from the
+repository's Ricci-flow development.  A bundled `C^2` self-diffeomorphism
+induces an invertible tangent map; the pulled-back affine connection is given
+by the displayed pushforward/pullback formula, and `curvatureAux` is the
+displayed covariant-derivative commutator.  The selected results prove raw
+curvature and torsion transport and preservation of metric compatibility and
+the Levi–Civita property.
 
-The final two declarations package the analytic capstone: Picard--Lindelöf
-evolution inside the cone of symmetric positive-definite forms and uniqueness
-of cone-valued solutions.  The full project source contains the manifold-level
-chart and gauge-flow infrastructure that instantiates this coordinate model.
+The metric compatibility statements quantify over an independently supplied
+smooth target metric whose inner product satisfies the explicit pullback
+formula.  Thus the result is about actual tangent bundles and covariant
+derivatives, not an unconstrained endomorphism or scalar-family model.
 -/
 
 @[expose] public noncomputable section
 
-open Function intervalIntegral MeasureTheory Metric Set
-open scoped NNReal Topology
-open ODE
+open Bundle
+open scoped Manifold ContDiff
+
+namespace RicciFlow
+
+theorem connectionDifferenceTraceOneForm._proof_1 : Nat.AtLeastTwo (1 + 1) :=
+  Nat.instAtLeastTwoHAddOfNat 1
+
+end RicciFlow
+
+local notation "palomarRegularityTwo" =>
+  @OfNat.ofNat (WithTop ENat) (nat_lit 2)
+    (@instOfNatAtLeastTwo (WithTop ENat) (nat_lit 2) (@WithTop.natCast ENat ENat.instNatCast)
+      RicciFlow.connectionDifferenceTraceOneForm._proof_1)
+
+local notation "palomarDefinitionRegularityTwo" =>
+  @OfNat.ofNat (WithTop ENat) (nat_lit 2)
+    (@instOfNatAtLeastTwo (WithTop ENat) (nat_lit 2) (@WithTop.natCast ENat ENat.instNatCast)
+      (@Nat.instAtLeastTwoHAddOfNat
+        (@OfNat.ofNat Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))
+        (@Nat.instNeZeroSucc (@OfNat.ofNat Nat (nat_lit 0) (instOfNatNat (nat_lit 0))))))
+
+namespace CovariantDerivative
+
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+  {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
+  [∀ x, AddCommGroup (V x)] [∀ x, Module 𝕜 (V x)]
+  [∀ x, TopologicalSpace (V x)] [∀ x, IsTopologicalAddGroup (V x)]
+  [∀ x, ContinuousSMul 𝕜 (V x)] [FiberBundle F V]
+  [VectorBundle 𝕜 F V]
+
+def along (cov : CovariantDerivative I F V)
+    (X : Π x : M, TangentSpace I x) (σ : Π x : M, V x) : Π x : M, V x :=
+  fun x ↦ cov σ x (X x)
+
+abbrev curvatureAux (cov : CovariantDerivative I F V)
+    (X Y : Π x : M, TangentSpace I x) (σ : Π x : M, V x) : Π x : M, V x :=
+  cov.along X (cov.along Y σ) - cov.along Y (cov.along X σ) -
+    cov.along (VectorField.mlieBracket I X Y) σ
+
+end CovariantDerivative
+
+namespace CovariantDerivative
+
+variable {E : Type*} [hREGroup : NormedAddCommGroup E] [hRESpace : NormedSpace ℝ E]
+  {H : Type*} [hRHTop : TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [hRMTop : TopologicalSpace M] [hRCharted : ChartedSpace H M]
+  [hRFinite : FiniteDimensional ℝ E] [hRComplete : CompleteSpace E]
+  [hRManifold : IsManifold I palomarDefinitionRegularityTwo M]
+  [hRRiemannian : RiemannianBundle (TangentSpace I : M → Type _)]
+
+local notation "TM" => (TangentSpace I : M → Type _)
+
+def IsTorsionFree (cov : CovariantDerivative I E TM) : Prop :=
+  cov.torsion = 0
+
+def IsMetricCompatibleTangent
+    (cov : CovariantDerivative I E TM) : Prop :=
+  ∀ {x : M} {σ τ : Π x : M, TangentSpace I x},
+    MDiffAt (T% σ) x → MDiffAt (T% τ) x →
+      ∀ u : TangentSpace I x,
+        mvfderiv (I := I) (fun y ↦ inner ℝ (σ y) (τ y)) x u =
+          inner ℝ (cov σ x u) (τ x) + inner ℝ (σ x) (cov τ x u)
+
+def IsLeviCivita (cov : CovariantDerivative I E TM) : Prop :=
+  cov.IsTorsionFree ∧ cov.IsMetricCompatibleTangent
+
+end CovariantDerivative
+
+namespace RicciFlow
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [IsManifold I ∞ M]
+  [ContMDiffVectorBundle palomarDefinitionRegularityTwo E (TangentSpace I : M → Type _) I]
+
+abbrev SmoothSelfDiffeomorph2 := M ≃ₘ^palomarRegularityTwo⟮I, I⟯ M
+
+namespace SmoothSelfDiffeomorph2
+
+variable (φ : SmoothSelfDiffeomorph2 (I := I) (M := M))
+
+noncomputable abbrev tangentMap (x : M) :
+    TangentSpace I x ≃L[ℝ] TangentSpace I (φ x) :=
+  φ.mfderivToContinuousLinearEquiv (by simp) x
+
+abbrev pushforwardTangent (x : M) :
+    TangentSpace I x →L[ℝ] TangentSpace I (φ x) := φ.tangentMap x
+
+abbrev pullbackTangent (x : M) :
+    TangentSpace I (φ x) →L[ℝ] TangentSpace I x := (φ.tangentMap x).symm
+
+def pushforwardVectorField
+    (X : Π x : M, TangentSpace I x) : Π x : M, TangentSpace I x :=
+  fun y ↦
+    cast (congrArg (fun z : M => TangentSpace I z) (φ.apply_symm_apply y))
+      (φ.pushforwardTangent (φ.symm y) (X (φ.symm y)))
+
+def pullbackVectorField
+    (X : Π x : M, TangentSpace I x) : Π x : M, TangentSpace I x :=
+  fun x ↦ φ.pullbackTangent x (X (φ x))
+
+noncomputable def pullbackCovariantDerivative
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
+    CovariantDerivative I E (TangentSpace I : M → Type _) where
+  toFun := fun X x ↦
+    (φ.pullbackTangent x).comp <|
+      (cov (φ.pushforwardVectorField X) (φ x)).comp (φ.pushforwardTangent x)
+  isCovariantDerivativeOnUniv := by
+    have _hT2 : T2Space M := inferInstance
+    have _hFinite : FiniteDimensional ℝ E := inferInstance
+    have _hComplete : CompleteSpace E := inferInstance
+    have _hManifold : IsManifold I ∞ M := inferInstance
+    have _hTangent : ContMDiffVectorBundle palomarDefinitionRegularityTwo E (TangentSpace I : M → Type _) I := inferInstance
+    sorry
+
+end SmoothSelfDiffeomorph2
+
+end RicciFlow
 
 namespace PoincareCurvature.Palomar
 
-abbrev BilinearForm (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] :=
-  E →L[ℝ] E →L[ℝ] ℝ
+open RicciFlow
 
-abbrev MetricFamily (M E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] :=
-  ℝ → M → BilinearForm E
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [IsManifold I ∞ M]
+  [ContMDiffVectorBundle palomarRegularityTwo E (TangentSpace I : M → Type _) I]
 
-abbrev RicciEndomorphismFamily
-    (M E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] :=
-  ℝ → M → E →L[ℝ] E
-
-abbrev GaugeFamily (M : Type*) := ℝ → M → M
-
-abbrev TangentTransportFamily
-    (M E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] :=
-  ℝ → M → (E ≃L[ℝ] E)
-
-/-- Compose a continuous bilinear form with independent maps in its two slots. -/
-noncomputable def composeBilinear
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (g : BilinearForm E) (A B : E →L[ℝ] E) : BilinearForm E :=
-  (ContinuousLinearMap.apply ℝ (E →L[ℝ] ℝ) B).comp
-    ((ContinuousLinearMap.precompR E g).comp A)
-
-@[simp] theorem composeBilinear_apply
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (g : BilinearForm E) (A B : E →L[ℝ] E) (u v : E) :
-    composeBilinear g A B u v = g (A u) (B v) := by
-  simp [composeBilinear, ContinuousLinearMap.precompR]
-
-/-- The Ricci tensor associated with a metric and a specified Ricci endomorphism. -/
-def ricciTensor
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (g : BilinearForm E) (R : E →L[ℝ] E) : BilinearForm E :=
-  g.comp R
-
-/-- Pull back a metric by a gauge map and an invertible tangent transport. -/
-noncomputable def pullbackMetric
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (metric : MetricFamily M E) (φ : GaugeFamily M)
-    (P : TangentTransportFamily M E) : MetricFamily M E :=
-  fun t x ↦ composeBilinear (metric t (φ t x))
-    (P t x).toContinuousLinearMap (P t x).toContinuousLinearMap
-
-@[simp] theorem pullbackMetric_apply
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (metric : MetricFamily M E) (φ : GaugeFamily M)
-    (P : TangentTransportFamily M E) (t : ℝ) (x : M) (u v : E) :
-    pullbackMetric metric φ P t x u v =
-      metric t (φ t x) (P t x u) (P t x v) := by
-  simp [pullbackMetric]
-
-def ricciTensorFamily
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (metric : MetricFamily M E) (R : RicciEndomorphismFamily M E) :
-    MetricFamily M E :=
-  fun t x ↦ ricciTensor (metric t x) (R t x)
-
-/-- Transport the Ricci endomorphism by the tangent equivalence. -/
-noncomputable def conjugatedRicciEndomorphism
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (R : RicciEndomorphismFamily M E) (φ : GaugeFamily M)
-    (P : TangentTransportFamily M E) : RicciEndomorphismFamily M E :=
-  fun t x ↦ (P t x).symm.toContinuousLinearMap.comp
-    ((R t (φ t x)).comp (P t x).toContinuousLinearMap)
-
-/-- Scalar curvature is the trace of the specified Ricci endomorphism. -/
-def scalarCurvatureFamily
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-    (R : RicciEndomorphismFamily M E) : ℝ → M → ℝ :=
-  fun t x ↦ LinearMap.trace ℝ E (R t x).toLinearMap
-
-def IsSymmetricPositiveDefiniteForm
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (g : BilinearForm E) : Prop :=
-  (∀ u v, g u v = g v u) ∧ ∀ u, u ≠ 0 → 0 < g u u
-
-/-- The positive-definite cone in the state space of bilinear forms. -/
-def RicciMetricCone
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] : Set (BilinearForm E) :=
-  {g | IsSymmetricPositiveDefiniteForm g}
-
-/-- The Ricci vector field on the fixed tangent model. -/
-def ricciFlowVectorField
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (R : ℝ → E →L[ℝ] E) : ℝ → BilinearForm E → BilinearForm E :=
-  fun t g ↦ (-2 : ℝ) • ricciTensor g (R t)
-
-/-- The chain-rule velocity of a pulled-back metric. -/
-noncomputable def pullbackMetricVelocity
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (metric : MetricFamily M E) (φ : GaugeFamily M)
-    (P : TangentTransportFamily M E)
-    (Dmetric : ℝ × M → (ℝ × M) →L[ℝ] BilinearForm E)
-    (V : ℝ → M → M) (DP : ℝ → M → E →L[ℝ] E) : MetricFamily M E :=
-  fun t x ↦
-    composeBilinear (Dmetric (t, φ t x) (1, V t x))
-        (P t x).toContinuousLinearMap (P t x).toContinuousLinearMap +
-      composeBilinear (metric t (φ t x)) (DP t x)
-        (P t x).toContinuousLinearMap +
-      composeBilinear (metric t (φ t x)) (P t x).toContinuousLinearMap (DP t x)
-
-/-- The source equation after evaluating at the gauge image. -/
-def SatisfiesRicciDeTurckEquation
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (metric : MetricFamily M E) (metricVelocity : MetricFamily M E)
-    (R : RicciEndomorphismFamily M E) (correction : MetricFamily M E)
-    (φ : GaugeFamily M) (P : TangentTransportFamily M E) (s : Set ℝ) : Prop :=
-  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ (x : M) (u v : E),
-    metricVelocity t (φ t x) (P t x u) (P t x v) =
-      (-2 : ℝ) * ricciTensorFamily metric R t (φ t x) (P t x u) (P t x v) +
-        correction t x u v
-
-/-- Intrinsic Ricci flow, with the metric and Ricci tensor tied by their types. -/
-def IsIntrinsicRicciFlow
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (metric velocity : MetricFamily M E) (R : RicciEndomorphismFamily M E)
-    (s : Set ℝ) : Prop :=
-  ∀ ⦃t : ℝ⦄, t ∈ s → ∀ (x : M) (u v : E),
-    HasDerivAt (fun τ ↦ metric τ x u v) (velocity t x u v) t ∧
-      velocity t x u v = (-2 : ℝ) * ricciTensorFamily metric R t x u v
-
-/-- Independent C¹ data yield the actual derivative of the gauge pullback. -/
-theorem gauge_pullback_has_derivAt_of_C1_data
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (metric : MetricFamily M E) (φ : GaugeFamily M)
-    (P : TangentTransportFamily M E)
-    (Dmetric : ℝ × M → (ℝ × M) →L[ℝ] BilinearForm E)
-    (V : ℝ → M → M) (DP : ℝ → M → E →L[ℝ] E)
-    (hmetric : ∀ t x, HasFDerivAt
-      (fun q : ℝ × M ↦ metric q.1 q.2) (Dmetric (t, x)) (t, x))
-    (hφ : ∀ t x, HasDerivAt (fun τ ↦ φ τ x) (V t x) t)
-    (hP : ∀ t x, HasDerivAt (fun τ ↦ (P τ x).toContinuousLinearMap)
-      (DP t x) t)
-    (t : ℝ) (x : M) (u v : E) :
-    HasDerivAt (fun τ ↦ pullbackMetric metric φ P τ x u v)
-      (pullbackMetricVelocity metric φ P Dmetric V DP t x u v) t := by
+theorem curvatureAux_pullbackCovariantDerivative
+    (φ : RicciFlow.SmoothSelfDiffeomorph2 (I := I) (M := M))
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    {X Y σ : Π x : M, TangentSpace I x}
+    (hX : MDiff (T% X)) (hY : MDiff (T% Y)) :
+    (φ.pullbackCovariantDerivative cov).curvatureAux X Y σ =
+      φ.pullbackVectorField
+        (cov.curvatureAux
+          (φ.pushforwardVectorField X)
+          (φ.pushforwardVectorField Y)
+          (φ.pushforwardVectorField σ)) := by
   sorry
 
-/-- The Ricci tensor commutes with pullback when its endomorphism is conjugated. -/
-theorem ricciTensor_pullback_transport
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (metric : MetricFamily M E) (R : RicciEndomorphismFamily M E)
-    (φ : GaugeFamily M) (P : TangentTransportFamily M E) :
-    pullbackMetric (ricciTensorFamily metric R) φ P =
-      ricciTensorFamily (pullbackMetric metric φ P)
-        (conjugatedRicciEndomorphism R φ P) := by
+theorem curvatureAux_pullbackCovariantDerivative_apply
+    (φ : RicciFlow.SmoothSelfDiffeomorph2 (I := I) (M := M))
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    {X Y σ : Π x : M, TangentSpace I x} {x : M}
+    (hX : MDiff (T% X)) (hY : MDiff (T% Y)) :
+    (φ.pullbackCovariantDerivative cov).curvatureAux X Y σ x =
+      φ.pullbackTangent x
+        (cov.curvatureAux
+          (φ.pushforwardVectorField X)
+          (φ.pushforwardVectorField Y)
+          (φ.pushforwardVectorField σ) (φ x)) := by
   sorry
 
-/-- The scalar trace is preserved by the same Ricci transport. -/
-theorem scalarCurvature_pullback_transport
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [FiniteDimensional ℝ E]
-    (R : RicciEndomorphismFamily M E) (φ : GaugeFamily M)
-    (P : TangentTransportFamily M E) :
-    scalarCurvatureFamily (conjugatedRicciEndomorphism R φ P) =
-      fun t x ↦ scalarCurvatureFamily R t (φ t x) := by
-  funext t x
-  change LinearMap.trace ℝ E
-      (((P t x).symm.toContinuousLinearMap.comp
-        ((R t (φ t x)).comp (P t x).toContinuousLinearMap)).toLinearMap) =
-    LinearMap.trace ℝ E (R t (φ t x)).toLinearMap
-  rw [show
-    ((P t x).symm.toContinuousLinearMap.comp
-      ((R t (φ t x)).comp (P t x).toContinuousLinearMap)).toLinearMap =
-      (P t x).symm.toLinearEquiv.conj (R t (φ t x)).toLinearMap by
-        rw [LinearEquiv.conj_apply]
-        ext z
-        simp]
-  exact LinearMap.trace_conj' _ _
-
-/-- The DeTurck correction cancels after the pulled-back evaluation. -/
-theorem gauge_corrected_velocity_eq_neg_two_pullbackRicci
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (metric : MetricFamily M E) (metricVelocity : MetricFamily M E)
-    (R : RicciEndomorphismFamily M E) (correction correctedVelocity : MetricFamily M E)
-    (φ : GaugeFamily M) (P : TangentTransportFamily M E) (s : Set ℝ)
-    (hsource : SatisfiesRicciDeTurckEquation metric metricVelocity R correction φ P s)
-    (hcorrected : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ (x : M) (u v : E),
-      correctedVelocity t x u v =
-        metricVelocity t (φ t x) (P t x u) (P t x v) - correction t x u v)
-    {t : ℝ} (ht : t ∈ s) (x : M) (u v : E) :
-    correctedVelocity t x u v =
-      (-2 : ℝ) * ricciTensorFamily metric R t (φ t x) (P t x u) (P t x v) := by
-  rw [hcorrected ht x u v, hsource ht x u v]
-  ring
-
-/-- Pullback by an invertible tangent transport preserves positive-definiteness. -/
-theorem pullbackMetric_preserves_symmetricPositiveDefinite
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (metric : MetricFamily M E) (φ : GaugeFamily M)
-    (P : TangentTransportFamily M E) {t : ℝ} {x : M}
-    (hmetric : IsSymmetricPositiveDefiniteForm (metric t (φ t x))) :
-    IsSymmetricPositiveDefiniteForm (pullbackMetric metric φ P t x) := by
+theorem torsion_pullbackCovariantDerivative
+    (φ : RicciFlow.SmoothSelfDiffeomorph2 (I := I) (M := M))
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    {X Y : Π x : M, TangentSpace I x} {x : M}
+    (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x) :
+    ((φ.pullbackCovariantDerivative cov).torsion x) (X x) (Y x) =
+      φ.pullbackTangent x
+        ((cov.torsion (φ x)) (φ.pushforwardTangent x (X x))
+          (φ.pushforwardTangent x (Y x))) := by
   sorry
 
-/-- C¹ gauge data plus the source equation produce the intrinsic Ricci flow law. -/
-theorem ricciDeTurckGaugeReduction
-    {M E : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup E] [NormedSpace ℝ E]
-    (metric : MetricFamily M E) (metricVelocity : MetricFamily M E)
-    (R : RicciEndomorphismFamily M E) (correction correctedVelocity : MetricFamily M E)
-    (φ : GaugeFamily M) (P : TangentTransportFamily M E) (s : Set ℝ)
-    (Dmetric : ℝ × M → (ℝ × M) →L[ℝ] BilinearForm E)
-    (V : ℝ → M → M) (DP : ℝ → M → E →L[ℝ] E)
-    (hmetric : ∀ t x, HasFDerivAt
-      (fun q : ℝ × M ↦ metric q.1 q.2) (Dmetric (t, x)) (t, x))
-    (hφ : ∀ t x, HasDerivAt (fun τ ↦ φ τ x) (V t x) t)
-    (hP : ∀ t x, HasDerivAt (fun τ ↦ (P τ x).toContinuousLinearMap)
-      (DP t x) t)
-    (hvelocity : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ x,
-      correctedVelocity t x = pullbackMetricVelocity metric φ P Dmetric V DP t x)
-    (hsource : SatisfiesRicciDeTurckEquation metric metricVelocity R correction φ P s)
-    (hcorrected : ∀ ⦃t : ℝ⦄, t ∈ s → ∀ (x : M) (u v : E),
-      correctedVelocity t x u v =
-        metricVelocity t (φ t x) (P t x u) (P t x v) - correction t x u v) :
-    IsIntrinsicRicciFlow (pullbackMetric metric φ P) correctedVelocity
-      (conjugatedRicciEndomorphism R φ P) s := by
+theorem isTorsionFree_pullbackCovariantDerivative
+    (φ : RicciFlow.SmoothSelfDiffeomorph2 (I := I) (M := M))
+    [RiemannianBundle (TangentSpace I : M → Type _)]
+    [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : cov.IsTorsionFree) :
+    (φ.pullbackCovariantDerivative cov).IsTorsionFree := by
   sorry
 
-/-- Ricci evolution that remains in the positive-definite metric cone. -/
-theorem metricCone_local_flow_exists
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [FiniteDimensional ℝ E]
-    {tmin tmax : ℝ} (t₀ : Icc tmin tmax)
-    {g₀ : BilinearForm E} {a L K : ℝ≥0} (R : ℝ → E →L[ℝ] E)
-    (hpicard : IsPicardLindelof (ricciFlowVectorField R) t₀ g₀ a 0 L K)
-    (hcone : closedBall g₀ a ⊆ RicciMetricCone) :
-    ∃ g : ℝ → BilinearForm E, g t₀ = g₀ ∧
-      (∀ t ∈ Icc tmin tmax,
-        HasDerivWithinAt g (ricciFlowVectorField R t (g t)) (Icc tmin tmax) t) ∧
-      ∀ t ∈ Icc tmin tmax, g t ∈ RicciMetricCone := by
+theorem isMetricCompatibleTangent_pullbackCovariantDerivative
+    (φ : RicciFlow.SmoothSelfDiffeomorph2 (I := I) (M := M))
+    {g g' : Bundle.ContMDiffRiemannianMetric I 2 E (TangentSpace I : M → Type _)}
+    (hinner : ∀ x : M, ∀ u v : TangentSpace I x,
+      g'.inner x u v =
+        g.inner (φ x) (φ.pushforwardTangent x u) (φ.pushforwardTangent x v))
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+      ⟨g.toRiemannianMetric⟩; cov.IsMetricCompatibleTangent) :
+    letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+      ⟨g'.toRiemannianMetric⟩;
+    (φ.pullbackCovariantDerivative cov).IsMetricCompatibleTangent := by
   sorry
 
-/-- Uniqueness of two positive-definite Ricci-flow solutions. -/
-theorem metricCone_local_flow_unique
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [FiniteDimensional ℝ E]
-    {R : ℝ → E →L[ℝ] E} {tmin tmax : ℝ} {K : ℝ≥0}
-    {α β : ℝ → BilinearForm E}
-    (hLip : ∀ t ∈ Ico tmin tmax,
-      LipschitzOnWith K (ricciFlowVectorField R t) RicciMetricCone)
-    (hαcont : ContinuousOn α (Icc tmin tmax))
-    (hαderiv : ∀ t ∈ Ico tmin tmax,
-      HasDerivWithinAt α (ricciFlowVectorField R t (α t)) (Ici t) t)
-    (hαstate : ∀ t ∈ Icc tmin tmax, α t ∈ RicciMetricCone)
-    (hβcont : ContinuousOn β (Icc tmin tmax))
-    (hβderiv : ∀ t ∈ Ico tmin tmax,
-      HasDerivWithinAt β (ricciFlowVectorField R t (β t)) (Ici t) t)
-    (hβstate : ∀ t ∈ Icc tmin tmax, β t ∈ RicciMetricCone)
-    (hinitial : α tmin = β tmin) :
-    EqOn α β (Icc tmin tmax) ∧
-      (∀ t ∈ Icc tmin tmax, α t ∈ RicciMetricCone) ∧
-      (∀ t ∈ Icc tmin tmax, β t ∈ RicciMetricCone) := by
+theorem isLeviCivita_pullbackCovariantDerivative
+    (φ : RicciFlow.SmoothSelfDiffeomorph2 (I := I) (M := M))
+    {g g' : Bundle.ContMDiffRiemannianMetric I 2 E (TangentSpace I : M → Type _)}
+    (hinner : ∀ x : M, ∀ u v : TangentSpace I x,
+      g'.inner x u v =
+        g.inner (φ x) (φ.pushforwardTangent x u) (φ.pushforwardTangent x v))
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+      ⟨g.toRiemannianMetric⟩; cov.IsLeviCivita) :
+    letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+      ⟨g'.toRiemannianMetric⟩;
+    (φ.pullbackCovariantDerivative cov).IsLeviCivita := by
   sorry
 
 end PoincareCurvature.Palomar

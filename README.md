@@ -52,20 +52,17 @@ repository.
 
 ## Research-facing submission
 
-The current research-facing Lean target is the typed Ricci–DeTurck pullback
-and metric-cone evolution surface in `curvature/`. Its Comparator exposes
-continuous bilinear metric forms, an explicitly defined Ricci tensor, an
-independently derived gauge-pullback derivative, the source-equation
-cancellation to intrinsic `-2 Ric` flow, and Picard–Lindelöf
-existence/uniqueness for the explicitly defined Ricci vector field while the
-state remains a symmetric-positive-definite metric. The finite-dimensional
-scalar trace remains supporting code rather than a selected standalone result.
-The larger manifold-level implementation context is in
-`curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/ResearchTheorems.lean`;
-the selected four-file surface is an auditable coordinate adaptation and does
-not claim the full nonlinear compact-manifold Ricci-flow existence theorem.
-The frozen affine Banach-space evolution remains supporting infrastructure,
-not the selected result.
+The current research-facing Lean target is the geometric connection-transport
+surface in `curvature/`. Its Comparator exposes bundled `C²`
+self-diffeomorphisms, their tangent pushforward/pullback, the explicit
+pullback of a covariant derivative, raw curvature and torsion transport, and
+preservation of metric compatibility and the Levi–Civita property under an
+explicit pullback-inner-product equation. The classical provenance and the
+distinction between standard formalization and original mathematics are
+recorded in `curvature/formalization.yaml`. The selected surface does not claim
+Ricci-flow PDE local existence, Schauder estimates, or completion of the
+Poincare Conjecture. Older coordinate, metric-cone, and frozen-affine packages
+remain supporting or historical material, not the selected result.
 
 The current exception is `curvature/`, which now contains a concrete Lean
 package for covariant derivatives along vector fields, the raw curvature

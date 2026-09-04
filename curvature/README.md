@@ -67,24 +67,23 @@ The next active milestone is therefore still the general point-4 theorem.
 
 ## Research-interest theorem
 
-The current Palomar surface is a typed coordinate model of the
-Ricci–DeTurck pullback mechanism. `Challenge.lean` and `Solution.lean` expose
-continuous bilinear metric forms, define the Ricci tensor by composition with
-a specified Ricci endomorphism, derive the gauge-pullback derivative from
-independent C¹ data, and combine those facts with a Ricci vector-field
-evolution in the positive-definite metric cone. The main reduction therefore
-has a genuine geometric tensor target and the analytic state-preservation and
-uniqueness capstone is tied to the Ricci right-hand side; it is not the earlier
-scalar-function cancellation or arbitrary frozen-affine ODE selection. A
-finite-dimensional scalar-trace transport lemma remains as supporting code but
-is not selected by the Comparator.
+The current Palomar surface is a genuine manifold-level transport package.
+`Challenge.lean` and `Solution.lean` expose bundled `C²`
+self-diffeomorphisms, their tangent pushforward/pullback, the explicit
+pullback formula for a covariant derivative, and the raw curvature commutator.
+The selected theorems transport curvature and torsion and preserve metric
+compatibility and the Levi–Civita property under an explicit pullback
+inner-product equation. They do not use an unconstrained Ricci endomorphism,
+scalar family, or generic ODE field, and they make no intrinsic Ricci-flow
+existence claim.
 
-The corresponding manifold-level implementation context is in
-`Geometry.Manifold.RicciFlow.ResearchTheorems`, but the Palomar Challenge
-deliberately remains Mathlib-only so its formulas and hypotheses are auditable
-without importing the project source. The selected result is an adaptation of
-the Ricci–DeTurck method, not a claim of the full nonlinear compact-manifold
-Ricci-flow existence theorem or a claim of original mathematical discovery.
+The mathematical origin is the standard naturality theory of affine
+connections and Riemannian metrics, with the classical sources recorded in
+`formalization.yaml`. The repository's
+`Geometry.Manifold.RicciFlow.GaugeTransport` file is the Lean implementation
+source used by `Solution.lean`; `Challenge.lean` remains Mathlib-only so the
+selected formulas and hypotheses are auditable. This is a formalization and
+adaptation of established mathematics, not a claim of original discovery.
 
 The frozen affine evolution modules remain supporting Banach-space
 well-posedness infrastructure; they are not the selected submission.
@@ -1302,24 +1301,21 @@ The repository also contains a separate frozen affine Ricci–DeTurck chart
 evolution layer; it remains supporting analytic infrastructure and is not part
 of the selected Palomar Comparator surface.
 
-## Palomar Submission 04 (current preparation surface)
+## Palomar Submission 05 (current preparation surface)
 
-The current Palomar preparation surface is the typed Ricci–DeTurck pullback
-and metric-cone evolution package. The files `Challenge.lean`, `Solution.lean`,
-`comparator.json`, and `formalization.yaml` select the independent pullback
-derivative calculation, Ricci-tensor transport, SPD preservation, intrinsic
-`-2 Ric` reduction, and Picard–Lindelöf existence/uniqueness for the explicitly
-defined Ricci vector field inside the symmetric-positive-definite metric cone.
-The definitions expose the formulas used by those claims, and the selected
-surface no longer includes `gauge_reduction_has_derivAt`, which assumed its
-own conclusion, or a standalone finite-dimensional trace-conjugation result.
+The current Palomar preparation surface is the geometric connection-transport
+package. The files `Challenge.lean`, `Solution.lean`, `comparator.json`, and
+`formalization.yaml` select the explicit tangent pushforward/pullback, the
+pulled-back covariant derivative, raw curvature and torsion transport, and
+preservation of metric compatibility and the Levi–Civita property. The metric
+hypothesis is an explicit pointwise pullback-inner-product equation, so the
+surface does not describe arbitrary Ricci or scalar data.
 
-The older static-geometry, parabolic-infrastructure, and frozen-affine wording
-belongs to earlier/different configurations and does not describe the current
-four-file Comparator surface. See `PALOMAR.md`,
-`AGENT-CONTRIBUTION-04.md`, and `formalization.yaml` for the source
-relationship, contribution/oversight record, exact theorem surface, and scope
-boundaries.
+The older coordinate, parabolic, frozen-affine, and metric-cone wording belongs
+to superseded configurations and does not describe the current Comparator
+surface. See `PALOMAR.md`, `AGENT-CONTRIBUTION-05.md`, and
+`formalization.yaml` for the classical source relationship, contribution and
+oversight record, exact theorem surface, and scope boundaries.
 Run `bash scripts/verify-palomar.sh` for the full local package/metadata audit,
 then `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh` for
 the explicit macOS Comparator plus NanoDa replay. The first hosted attempt at
