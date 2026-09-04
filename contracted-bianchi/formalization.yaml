@@ -1,0 +1,132 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Contracted second Bianchi identity and the divergence-free Einstein tensor"
+  description: >-
+    Formalizes the contracted second Bianchi identity and the resulting
+    divergence-free Einstein tensor from an explicit finite-dimensional
+    Riemannian tensor interface. The result is a classical theorem of
+    differential geometry and general relativity, presented as a
+    formalization/adaptation rather than as an original mathematical claim.
+  authors:
+    - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arthur Freitas Ramos"
+
+classification:
+  arxiv: ["math.DG", "gr-qc", "math.LO"]
+  msc2020: ["53C25", "83C05", "03B35"]
+
+sources:
+  - title: "Einstein Manifolds"
+    authors:
+      - "Arthur L. Besse"
+    id: "10.1007/978-3-540-74311-8"
+    type: "book"
+    location: "https://link.springer.com/book/10.1007/978-3-540-74311-8"
+    relationship: "formalizes"
+    note: >-
+      Primary mathematical source for the classical Bianchi identities, their
+      Ricci and scalar-curvature contractions, and the divergence-free Einstein
+      tensor. This repository formalizes/adapts that established result; it
+      does not claim mathematical originality or first presentation.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+
+related_formalizations: []
+
+status:
+  scope: >-
+    The selected Challenge surface is a finite-dimensional real inner-product
+    space with an explicit multilinear curvature tensor and covariant
+    derivative tensor. It displays Ricci, scalar curvature, their derivative
+    contractions, the Einstein tensor, and its divergence in a finite
+    orthonormal basis. The derivative pair symmetries and cyclic second
+    Bianchi identity are explicit hypotheses of the tensor interface. The
+    package therefore proves the contraction layer without claiming an
+    unproved bridge from every field to a specific evolving manifold metric.
+  sorry_count: 2
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent-assisted"
+      models: ["GPT-5 Codex"]
+      framework: "Codex with Lean 4.33 and Mathlib"
+      tool_setup: >-
+        The agent audited the existing registered versions and supporting
+        curvature source, selected the contracted-Bianchi theorem family,
+        designed the auditable tensor and trace interface, implemented the
+        explicit contraction proof, and prepared the separate project,
+        Comparator, metadata, documentation, and reproducibility checks.
+        Human authors selected and approved the mathematical target, source
+        relationship, authorship, limitations, and any submission decision.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "subscription-based"
+        hardware: "local machine"
+      prompting_notes: >-
+        GPT-5 Codex supplied repository auditing, Lean proof engineering,
+        documentation, metadata preparation, and local verification. It did
+        not determine authorship, source priority, novelty, or publication
+        responsibility.
+  spend_usd: "subscription-based"
+  notes: >-
+    Fuller contribution and oversight record: [AGENT-CONTRIBUTION.md](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/eb6ade88bd15ccb06e66aa20f24affe090adaadf/contracted-bianchi/AGENT-CONTRIBUTION.md)
+    is pinned to immutable preparation commit
+    eb6ade88bd15ccb06e66aa20f24affe090adaadf, which contains the record and
+    the synchronized project surface. This is a distinct project path and
+    Comparator identity from the registered curvature/ surface. A future
+    Palomar intake must leave the external existing_id field blank; it must not
+    be submitted as a version of PALOMAR-2026-09-02-000007.
+
+fidelity:
+  divergences: >-
+    Challenge.lean imports only Mathlib and exposes the tensor fields, their
+    symmetry hypotheses, the trace definitions, and the two selected theorem
+    statements. Solution.lean imports the pinned parent curvature package and
+    proves the same declarations. The source package supplies a raw
+    manifold-level second-Bianchi ingredient, while this project makes the
+    finite contraction argument explicit at the Comparator boundary.
+
+review:
+  status: "self-assessed"
+  reviewers:
+    - "none"
+  notes: >-
+    Preparation only; no Palomar submission has been made for this project.
+    The selected result is the canonical contracted Bianchi identity and its
+    Einstein-tensor corollary, with a specialist audience in differential
+    geometry and general relativity. The classical source relationship and the
+    tensor-level scope are stated explicitly; no originality claim is made.
+
+alignment:
+  namespace: "ContractedBianchi"
+  statements:
+    - source: "Contracted second Bianchi identity"
+      lean: "ContractedBianchi.contractedSecondBianchi"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        The proof contracts the displayed cyclic second-Bianchi identity in an
+        orthonormal basis and uses the displayed derivative pair symmetries.
+    - source: "Divergence-free Einstein tensor"
+      lean: "ContractedBianchi.einsteinTensorDivergence"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        This is derived algebraically from the contracted identity and the
+        explicit definition of the Einstein divergence; it is not assumed.
+
+acknowledgements: >-
+  Mathlib contributors for finite-dimensional inner-product spaces, orthonormal
+  bases, finite sums, and linear-map infrastructure; Arthur L. Besse for the
+  classical mathematical source; the parent PoincareCurvature package for the
+  raw second-Bianchi formalization; the human authors for theorem selection,
+  authorship, attribution, review, and publication responsibility; and the
+  Palomar Registry project for its reproducible statement/solution workflow.
