@@ -1,67 +1,47 @@
 # Agent contribution and human oversight
 
-This record describes preparation of the separate `contracted-bianchi/`
-surface in the public repository
-`Arthur742Ramos/lean-poincare-formalization-plan`.
+## Authorship and oversight evidence
 
-## Mathematical origin
+The authors named at the user's direction are Arthur Freitas Ramos,
+David Barros Hulak, and Ruy J. G. B. de Queiroz. Arthur Freitas Ramos is the
+responsible maintainer. In this conversation Arthur selected the
+contracted-Bianchi target, requested the authorship list, supplied reviewer
+objections, and authorized repair of the submission.
 
-The contracted second Bianchi identity and the divergence-free Einstein tensor
-are classical results of Riemannian geometry and general relativity.  The
-primary mathematical source for this presentation is:
+There is no recorded independent line-by-line proof review by each named
+author. Do not infer that all authors inspected every definition or verified
+the completed replacement. Lean/Comparator checking checks formal proofs,
+not author consent, mathematical originality, or editorial suitability.
 
-- Arthur L. Besse, *Einstein Manifolds*, Springer, 1987,
-  [doi:10.1007/978-3-540-74311-8](https://doi.org/10.1007/978-3-540-74311-8).
+## Agent work
 
-The relationship is `formalizes`: this repository gives a Lean
-formalization/adaptation of the classical contraction argument.  The theorem
-is not claimed as an original mathematical result or as a first presentation.
-Mathlib provides general finite-dimensional linear algebra and basis-sum
-infrastructure; it is not being presented as the mathematical source.
+GPT-5 Codex prepared the earlier independent-tensor abstraction, metadata,
+and Comparator. That abstraction compiled but did not connect its derivative
+to the metric connection.
 
-## Agent contribution
+GPT-6 Codex audited those shortcomings and implemented the replacement:
+regularity of the curvature section; first-pair skew symmetry of its
+covariant derivative; differentiation of curvature skew-adjointness using
+metric compatibility; differentiation of the first Bianchi identity;
+derivative pair interchange; and contraction of the actual second Bianchi
+identity for a torsion-free connection. It also prepared the Challenge and
+Solution wrappers, vendored dependency closure, source mapping, disclosure,
+metadata, and verification.
 
-GPT-5 Codex materially contributed to this preparation by:
+The agent removed the separate Einstein-divergence claim because a
+trace/differentiation bridge for that field is not part of this result.
+Human oversight consists of the recorded target selection, review feedback,
+and requested changes; no additional human audit is invented here.
 
-- auditing the prior Palomar versions and the repository's proved curvature
-  boundary;
-- identifying the contracted second Bianchi identity as a separate theorem
-  family rather than another transport or ODE wrapper;
-- designing the explicit multilinear tensor interface and trace-contraction
-  definitions in the Challenge surface;
-- implementing and compiling the finite contraction proof and its
-  divergence-free Einstein-tensor corollary;
-- preparing the separate project path, pinned build files, Comparator,
-  documentation, and metadata; and
-- running Lean compilation and consistency checks on the selected modules.
+## Origin and implementation provenance
 
-The agent did not determine mathematical authorship, source priority,
-originality, or the decision to publish.  It also did not silently turn the
-tensor-level hypotheses into a manifold-level theorem: the selected fields
-state exactly which derivative symmetries the contraction proof uses.
+This is a formal adaptation of the classical contraction identity, not
+original mathematics. The directly checked source is Sean M. Carroll,
+*Lecture Notes on General Relativity*, section 3, equations (3.87)–(3.94),
+https://ned.ipac.caltech.edu/level5/March01/Carroll3/Carroll3.html.
+Besse's *Einstein Manifolds* is background. The mathematical provenance is
+distinct from the implementation provenance in VENDORED-SOURCES.md.
 
-## Human authorship and oversight
-
-The recorded authors are Arthur Freitas Ramos, David Barros Hulak, and Ruy J.
-G. B. de Queiroz.  The human authors selected the result family, approved the
-source relationship and limitations, reviewed the displayed definitions and
-hypotheses, and retain responsibility for authorship, attribution, and any
-external submission.  Arthur Freitas Ramos is the responsible maintainer.
-
-Lean kernel checking and the pinned Comparator replay establish formal
-elaboration and reproducibility; they do not establish novelty or research
-priority.  The human review therefore remains the basis for the authorship and
-mathematical-origin statements.
-
-## Artifact boundary
-
-`Challenge.lean` imports Mathlib only and exposes the tensor fields, their
-symmetry and Bianchi hypotheses, the trace definitions, and the two selected
-conclusions with proof holes.  `Solution.lean` independently repeats that
-auditable interface and proves the same theorem statements using only the
-pinned Mathlib dependency.  The contraction argument is explicit in
-`Solution.lean`; neither divergence conclusion is assumed as a hypothesis.
-
-This project is a standalone project with its own Comparator identity.  A
-future Palomar intake for this directory must be a new submission with a blank
-`existing_id`.
+The dependency closure comes from the repository's committed curvature
+library, with the new bridge included explicitly. Existing unrelated
+uncommitted source changes are not part of that copied closure.

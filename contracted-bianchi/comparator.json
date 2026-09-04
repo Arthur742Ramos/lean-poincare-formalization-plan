@@ -2,20 +2,19 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "ContractedBianchi.contractedSecondBianchi",
-    "ContractedBianchi.einsteinTensorDivergence"
+    "ContractedBianchi.contractedSecondBianchi"
   ],
   "definition_names": [
-    "ContractedBianchi.Tensor4",
-    "ContractedBianchi.Tensor5",
-    "ContractedBianchi.ricci",
-    "ContractedBianchi.scalarCurvature",
-    "ContractedBianchi.ricciDerivative",
-    "ContractedBianchi.scalarCurvatureDerivative",
-    "ContractedBianchi.ricciDivergence",
-    "ContractedBianchi.einsteinTensor",
-    "ContractedBianchi.einsteinDivergence"
+    "CovariantDerivative.curvatureCovariantDerivative",
+    "CovariantDerivative.curvatureCovariantDerivativeInner",
+    "CovariantDerivative.secondBianchiAux",
+    "CovariantDerivative.curvatureAux",
+    "CovariantDerivative.along"
   ],
-  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
   "enable_nanoda": true
 }

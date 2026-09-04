@@ -19,3 +19,7 @@ name = "Challenge"
 
 [[lean_lib]]
 name = "Solution"
+
+[[lean_lib]]
+name = "PoincareCurvature"
+globs = ["PoincareCurvature.+"]

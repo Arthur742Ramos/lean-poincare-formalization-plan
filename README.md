@@ -47,13 +47,20 @@ anticipated.
 
 ## Scope
 
-This is intentionally a research-program repository, not an implementation
-repository.
+This repository contains a research program and concrete Lean packages for
+parts of its differential-geometric infrastructure.
 
 ## Research-facing submission
 
-The current research-facing Lean target is the geometric connection-transport
-surface in `curvature/`. Its Comparator exposes bundled `C²`
+The new standalone submission target is
+[`contracted-bianchi/`](contracted-bianchi/README.md). It proves the
+double-contracted second Bianchi identity for the actual curvature derivative
+of a torsion-free metric-compatible manifold connection. Its Challenge,
+Solution, Comparator, and metadata live in that directory. It does not claim
+a separate Ricci-field differentiation or Einstein-divergence theorem.
+
+The separate geometric connection-transport surface remains in `curvature/`.
+Its Comparator exposes bundled `C²`
 self-diffeomorphisms, their tangent pushforward/pullback, the explicit
 pullback of a covariant derivative, raw curvature and torsion transport, and
 preservation of metric compatibility and the Levi–Civita property under an
