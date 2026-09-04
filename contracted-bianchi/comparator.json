@@ -8,7 +8,6 @@
   "definition_names": [
     "ContractedBianchi.Tensor4",
     "ContractedBianchi.Tensor5",
-    "ContractedBianchi.CurvatureDerivativeData",
     "ContractedBianchi.ricci",
     "ContractedBianchi.scalarCurvature",
     "ContractedBianchi.ricciDerivative",
