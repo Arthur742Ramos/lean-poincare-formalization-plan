@@ -101,11 +101,9 @@ automation:
         provenance and limitations, and approving the submission decision.
   spend_usd: "subscription-based"
   notes: |
-    Fuller contribution and oversight record: the immutable public document is
-    pinned after the preparation commit in
-    `curvature/AGENT-CONTRIBUTION-05.md`. The final metadata revision will
-    replace this placeholder with the exact immutable commit URL containing
-    that document and the synchronized Comparator surface.
+    Fuller contribution and oversight record: [AGENT-CONTRIBUTION-05.md](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/e0f3438b55206b6bf443e07c907d199e3aa3e497/curvature/AGENT-CONTRIBUTION-05.md)
+    is pinned to the immutable preparation commit that contains the record and
+    the synchronized Comparator surface.
 
 fidelity:
   divergences: >-
