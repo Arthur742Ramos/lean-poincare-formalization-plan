@@ -32,11 +32,10 @@ about an unconstrained scalar family.
 The proof performs the finite contraction of the cyclic second Bianchi identity.
 The hypotheses used by that contraction are explicit fields of
 `CurvatureDerivativeData`: the derivative's pair skew-symmetry, pair
-interchange symmetry, and cyclic second-Bianchi identity.  The older source
-module in `curvature/` contains a related raw manifold-level second-Bianchi
-identity from a covariant-derivative construction.  This standalone project
-records the contraction layer separately and does not silently claim that every
-derivative symmetry has already been bridged to a particular metric connection.
+interchange symmetry, and cyclic second-Bianchi identity.  This standalone
+project records the contraction layer separately and does not silently claim
+that every derivative symmetry has already been bridged to a particular metric
+connection.
 
 ## Source relationship and authorship
 
@@ -45,9 +44,8 @@ formalization/adaptation rather than an original theorem.  The primary source
 relationship is to Arthur L. Besse's *Einstein Manifolds*, whose treatment of
 the Bianchi identities, Ricci contraction, scalar curvature, and the
 divergence-free Einstein tensor supplies the mathematical origin.  Mathlib
-supplies the finite-dimensional formal infrastructure.  The parent `curvature/`
-package is related formal context, not a dependency or the mathematical origin
-of the contracted identity.
+supplies the finite-dimensional formal infrastructure; it is not being cited
+as the mathematical origin of the contracted identity.
 
 The authors are Arthur Freitas Ramos, David Barros Hulak, and Ruy J. G. B. de
 Queiroz.  The detailed agent contribution and human oversight record is in

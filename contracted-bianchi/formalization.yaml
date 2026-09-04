@@ -81,19 +81,18 @@ automation:
     is pinned to immutable preparation commit
     1df56a940cb9e30fbf21591c6f10129591157c75, which contains the record and
     the synchronized project surface. This is a distinct project path and
-    Comparator identity from the older curvature/ surface. A future Palomar
-    intake for this standalone project must leave the external existing_id
-    field blank and must be opened as a new result.
+    This standalone project has its own Comparator identity. A future Palomar
+    intake must leave the external existing_id field blank and must be opened
+    as a new result.
 
 fidelity:
   divergences: >-
     Challenge.lean imports only Mathlib and exposes the tensor fields, their
     symmetry hypotheses, the trace definitions, and the two selected theorem
     statements. Solution.lean independently repeats the interface and proves
-    the same declarations using only the pinned Mathlib dependency. The older
-    curvature/ package was audited as related formal context, while this
-    project makes the finite contraction argument explicit at the Comparator
-    boundary without a path dependency on that older surface.
+    the same declarations using only the pinned Mathlib dependency. The finite
+    contraction argument is explicit at the Comparator boundary, with no local
+    path dependency.
 
 review:
   status: "self-assessed"
@@ -127,7 +126,6 @@ alignment:
 acknowledgements: >-
   Mathlib contributors for finite-dimensional inner-product spaces, orthonormal
   bases, finite sums, and linear-map infrastructure; Arthur L. Besse for the
-  classical mathematical source; the parent PoincareCurvature package for the
-  raw second-Bianchi formalization; the human authors for theorem selection,
+  classical mathematical source; the human authors for theorem selection,
   authorship, attribution, review, and publication responsibility; and the
   Palomar Registry project for its reproducible statement/solution workflow.
