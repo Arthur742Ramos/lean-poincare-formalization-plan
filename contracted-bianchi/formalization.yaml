@@ -79,7 +79,7 @@ automation:
         from a connection and removes the unsupported Einstein-divergence claim.
   notes: >-
     Fuller contribution and oversight record:
-    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/62247eaa896503a8cbe1f6245ac95ad4a062a644/contracted-bianchi/AGENT-CONTRIBUTION.md
+    https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/12cebb809524d0cd185c6cd7bcb5b73d3562bce1/contracted-bianchi/AGENT-CONTRIBUTION.md
     is pinned to the immutable commit containing the replacement proof and record.
 fidelity:
   divergences: >-
