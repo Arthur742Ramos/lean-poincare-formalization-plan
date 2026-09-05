@@ -25,8 +25,9 @@ skew symmetry, last-pair skew symmetry, pair interchange, and differentiated
 first Bianchi identity are proved. The cyclic second Bianchi identity follows
 from torsion-freeness. None of these equations is a premise of the selected
 theorem, and there is no independent curvature/derivative tensor parameter.
-The proof side instantiates the explicit extension argument with the
-repository's canonical smooth extension.
+The proof works for every supplied extension satisfying the stated hypotheses.
+The local library also provides canonical smooth extensions, but the selected
+Solution does not specialize to them.
 
 ## Exact scope
 
@@ -71,7 +72,7 @@ Run `lake build` from this directory. Lean 4.33.0 and Mathlib are pinned.
 The Comparator includes the definitions of the connection-derived curvature
 derivative and its raw commutator. The Challenge imports only Mathlib/core-facing
 manifold interfaces. The Solution imports the committed local dependency
-closure to instantiate the explicit extension interface; it has no path
+closure to prove the identity for the supplied extensions; it has no path
 dependency on the parent project.
 See [VENDORED-SOURCES.md](VENDORED-SOURCES.md) and
 [AGENT-CONTRIBUTION.md](AGENT-CONTRIBUTION.md).

@@ -6,8 +6,8 @@ project:
     Proves the orthonormal double contraction of the actual corrected curvature
     derivative of a tangent connection on a smooth finite-dimensional real
     manifold. The Challenge exposes the corrected commutator and the smooth
-    tangent-vector extensions explicitly; the Solution instantiates those
-    extensions with the repository's canonical construction. The derivative
+    tangent-vector extensions explicitly; the Solution proves the identity
+    for every supplied extension satisfying the stated hypotheses. The derivative
     symmetries and cyclic Bianchi equations are derived from torsion-freeness
     and metric compatibility, not assumed as abstract tensor data. No separate
     Einstein-divergence theorem is selected.
@@ -85,8 +85,8 @@ fidelity:
   divergences: >-
     The selected statement is the explicit double contraction of the corrected
     curvature derivative, with anchored smooth extensions and an orthonormal
-    basis. The proof-side Solution uses the canonical smooth extension from
-    the local dependency closure. It does not assert a separately formalized equality with the
+    basis. The Solution uses the section-level theorem from the local dependency
+    closure for the supplied extensions. It does not assert a separately formalized equality with the
     differential of scalar curvature or divergence of a Ricci/Einstein field.
     Source index conventions are adapted to the repository's curvature
     commutator. The local dependency closure is included in this project;

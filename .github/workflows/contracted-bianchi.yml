@@ -40,3 +40,5 @@ jobs:
           cache: false
       - name: Verify using real Linux Landrun
         run: bash contracted-bianchi/scripts/verify-comparator.sh
+      - name: Check Challenge without candidate library imports
+        run: python3 contracted-bianchi/scripts/check-challenge-boundary.py

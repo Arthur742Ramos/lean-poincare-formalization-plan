@@ -3,12 +3,12 @@
 The selected theorem is `ContractedBianchi.contractedSecondBianchi`.
 The current repair keeps the pointwise orthonormal statement but makes the
 Challenge surface independent of the candidate-local `PoincareCurvature`
-namespace. The final immutable commit is the commit containing this document;
-the exact SHA is recorded by Git at submission time.
+namespace. Use the final repository SHA recorded at submission time, including
+any subsequent metadata corrections.
 
 Verified locally during preparation:
 
-- Standalone `lake build`: passed (2,981 jobs).
+- Solution and dependency build: passed (2,981 jobs).
 - Canonical-style direct Lean compile of `Challenge.lean` with only the pinned
   dependency search paths: passed; the only warning is its intentional `sorry`.
 - Comparator: passed for the replacement Challenge and Solution.
@@ -28,6 +28,27 @@ The local replay used the explicit macOS Landrun fallback. This does not
 claim Linux isolation, Palomar-hosted verification, rendering, editorial
 acceptance, or registration. The dedicated GitHub workflow runs the same
 pinned verifier with real Landrun on Linux.
+
+## Follow-up audit
+
+The Linux workflow for `7f3a8968e8aad68cfe7ee73746ba8f9e2d348629`
+[passed](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/33935112139),
+including Comparator, NanoDa, and the Lean kernel. The subsequent documentation
+correction makes clear that Solution proves the identity for the supplied
+extensions; it does not choose the canonical extension.
+
+`python3 scripts/check-challenge-boundary.py` passes locally. Its negative
+control verifies that importing the local proof library fails, then compiles
+the real Challenge successfully with the same dependency-only environment.
+This regression check is also included in the Linux workflow. It checks
+standalone compilation, not the full Palomar HTML renderer.
+
+The anchoring hypothesis is present to identify the supplied fields with the
+stated tangent vectors. The finite-sum identity holds more generally, so its
+proof does not need anchoring or orthonormality. It does use the connection's
+torsion-freeness, metric compatibility, and section regularity. Extension
+independence and the Ricci/scalar differentiation bridge remain outside the
+selected result; editorial acceptance has not been established.
 
 ## Reproduce
 
@@ -59,5 +80,5 @@ Repository: `Arthur742Ramos/lean-poincare-formalization-plan`.
 Project directory: `contracted-bianchi`.
 Comparator: `contracted-bianchi/comparator.json`.
 Metadata: `contracted-bianchi/formalization.yaml`.
-Existing ID: blank. Use the final metadata commit, not the implementation
-commit above. No new Palomar intake was created by this preparation.
+Existing ID: blank. Use the final metadata commit. The last resubmission attempt
+was rate-limited and created no new intake.
