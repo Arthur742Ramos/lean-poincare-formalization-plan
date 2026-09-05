@@ -64,6 +64,29 @@ current `RicciFlow.LocalExistence` material does not yet prove compact
 Ricci-flow local existence/uniqueness in arbitrary dimension. It is kept as an
 internal scaffold, not as part of the public proof-bearing package surface.
 The next active milestone is therefore still the general point-4 theorem.
+
+## Research-interest theorem
+
+The current Palomar surface is a genuine manifold-level transport package.
+`Challenge.lean` and `Solution.lean` expose bundled `C²`
+self-diffeomorphisms, their tangent pushforward/pullback, the explicit
+pullback formula for a covariant derivative, and the raw curvature commutator.
+The selected theorems transport curvature and torsion and preserve metric
+compatibility and the Levi–Civita property under an explicit pullback
+inner-product equation. They do not use an unconstrained Ricci endomorphism,
+scalar family, or generic ODE field, and they make no intrinsic Ricci-flow
+existence claim.
+
+The mathematical origin is the standard naturality theory of affine
+connections and Riemannian metrics, with the classical sources recorded in
+`formalization.yaml`. The repository's
+`Geometry.Manifold.RicciFlow.GaugeTransport` file is the Lean implementation
+source used by `Solution.lean`; `Challenge.lean` remains Mathlib-only so the
+selected formulas and hypotheses are auditable. This is a formalization and
+adaptation of established mathematics, not a claim of original discovery.
+
+The frozen affine evolution modules remain supporting Banach-space
+well-posedness infrastructure; they are not the selected submission.
 The scaffold now contains proof-bearing stationary theorem packages for
 subsingleton tangent/model spaces and for rank-one tangent/model spaces
 (`Module.finrank ℝ E ≤ 1`), plus a thin `LocalExistence.RankOne` extension
@@ -1274,14 +1297,43 @@ primitive inputs, all with matching spatial-Hölder Gram-entry input forms; the
 single-frame existential schematic RHS entrywise-difference bridge now also has
 direct spatial-Hölder, unit-diameter, closed-ball, and closed-cylinder
 Gram-entry variants for local chart callers.
-It still does not include the Schauder estimates or Ricci-DeTurck Banach chart.
+The repository also contains a separate frozen affine Ricci–DeTurck chart
+evolution layer; it remains supporting analytic infrastructure and is not part
+of the selected Palomar Comparator surface.
+
+## Palomar Submission 05 (current preparation surface)
+
+The current Palomar preparation surface is the geometric connection-transport
+package. The files `Challenge.lean`, `Solution.lean`, `comparator.json`, and
+`formalization.yaml` select the explicit tangent pushforward/pullback, the
+pulled-back covariant derivative, raw curvature and torsion transport, and
+preservation of metric compatibility and the Levi–Civita property. The metric
+hypothesis is an explicit pointwise pullback-inner-product equation, so the
+surface does not describe arbitrary Ricci or scalar data.
+
+The older coordinate, parabolic, frozen-affine, and metric-cone wording belongs
+to superseded configurations and does not describe the current Comparator
+surface. See `PALOMAR.md`, `AGENT-CONTRIBUTION-05.md`, and
+`formalization.yaml` for the classical source relationship, contribution and
+oversight record, exact theorem surface, and scope boundaries.
+Run `bash scripts/verify-palomar.sh` for the full local package/metadata audit,
+then `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh` for
+the explicit macOS Comparator plus NanoDa replay. The first hosted attempt at
+the preceding public commit failed only on Palomar's standard SPDX license
+fingerprint. The corrected commit then failed because its Mathlib revision was
+not an ancestor of canonical `master`. The previously submitted artifact was
+`c50584bb804865fd9a54ebb5362ba3eee864e212` on Lean 4.29.0. The current
+development artifact upgrades to Lean 4.33.0 with Mathlib revision
+`db584cd6d46c92f209a44c0f1c829460d327499d` and matching Lean4Export revision
+`15f6055e299ad5b89345e533cc2192f4cc00f659`; any retry must use its new
+immutable commit.
 
 ## Build
 
 From this directory:
 
 ```powershell
-lake +leanprover/lean4:v4.29.1 build PoincareCurvature
+lake +leanprover/lean4:v4.33.0 build PoincareCurvature
 ```
 
 The heavier Ricci-flow local-existence scaffold is intentionally kept
@@ -1289,5 +1341,5 @@ out of the root target for faster routine iteration. Build it explicitly when
 working on that layer:
 
 ```powershell
-lake +leanprover/lean4:v4.29.1 build PoincareCurvature.RicciFlowLocalExistence
+lake +leanprover/lean4:v4.33.0 build PoincareCurvature.RicciFlowLocalExistence
 ```

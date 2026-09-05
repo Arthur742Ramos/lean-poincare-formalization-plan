@@ -1,0 +1,183 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Diffeomorphism transport of connections and curvature in Lean"
+  description: >-
+    Formalizes the fixed-diffeomorphism transport of a covariant derivative on
+    the tangent bundle of a smooth finite-dimensional manifold. The selected
+    statements expose the tangent pushforward and pullback, define the
+    pulled-back connection and raw curvature commutator, and prove transport
+    of curvature and torsion together with preservation of metric compatibility
+    and the Levi-Civita property. The result is a standard geometric
+    naturality theorem family formalized from the repository's proved source;
+    it is not claimed as an original mathematical discovery or as a proof of
+    Ricci-flow local existence.
+  authors:
+    - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arthur Freitas Ramos"
+
+classification:
+  arxiv: ["math.DG", "math.AP", "math.LO"]
+  msc2020: ["53C25", "53E20", "35K15", "03B35"]
+
+sources:
+  - title: "Foundations of Differential Geometry, Volume I"
+    authors:
+      - "Shoshichi Kobayashi"
+      - "Katsumi Nomizu"
+    id: "10.1007/978-1-4757-9966-8"
+    type: "book"
+    location: "https://link.springer.com/book/10.1007/978-1-4757-9966-8"
+    relationship: "formalizes"
+    note: >-
+      The classical source for affine connections, torsion, curvature, and
+      their natural transport under diffeomorphisms. The selected statements
+      are the standard pullback-connection consequences of that theory, not a
+      new theorem and not a claim that this repository originated the result.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+
+  - title: "Riemannian Manifolds: An Introduction to Curvature"
+    authors:
+      - "John M. Lee"
+    id: "10.1007/978-3-319-91755-9"
+    type: "book"
+    location: "https://link.springer.com/book/10.1007/978-3-319-91755-9"
+    relationship: "formalizes"
+    note: >-
+      Provides the standard Riemannian formulation in which a diffeomorphism
+      pulls back the metric and its Levi-Civita connection. The Lean surface
+      states metric compatibility through the explicit inner-product pullback
+      equation and proves the corresponding connection transport.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+
+related_formalizations: []
+
+status:
+  scope: >-
+    The selected Challenge surface is a smooth finite-dimensional Hausdorff
+    manifold with a bundled `C^2` self-diffeomorphism, its invertible tangent
+    map, a covariant derivative on the tangent bundle, and the explicit raw
+    curvature commutator. The selected metric statements quantify over smooth
+    Riemannian metrics and include the pointwise equation identifying the
+    target inner product with the pullback metric. The declarations therefore
+    concern actual manifold connections and Levi-Civita structure, not an
+    unconstrained endomorphism, scalar family, or generic ODE. This package
+    proves geometric transport only; it does not claim Ricci-flow PDE local
+    existence, Schauder estimates, or research novelty.
+  sorry_count: 7
+  sorry_in_definitions: 1
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent-assisted"
+      models: ["GPT-5 Codex"]
+      framework: "Codex with Lean 4.33 and Mathlib"
+      tool_setup: >-
+        The agent audited the rejected coordinate and ODE candidates, selected
+        the repository's strongest already-proved manifold transport family,
+        implemented the aligned Challenge/Solution declarations, synchronized
+        the repository documents and verifier, and ran Lean, source-closure,
+        metadata, and Comparator/NanoDa checks. Human authors selected and
+        approved the mathematical target, source relationship, authorship,
+        limitations, and submission decision.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "subscription-based"
+        hardware: "local machine"
+      prompting_notes: >-
+        GPT-5 Codex supplied repository auditing, theorem-surface design,
+        Lean proof engineering, documentation edits, and reproducibility
+        checks. It did not determine mathematical authorship, source priority,
+        or novelty. Human oversight consisted of selecting the result family,
+        reviewing the exact definitions and hypotheses, checking the
+        provenance and limitations, and approving the submission decision.
+  spend_usd: "subscription-based"
+  notes: |
+    Fuller contribution and oversight record: [AGENT-CONTRIBUTION-05.md](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/e0f3438b55206b6bf443e07c907d199e3aa3e497/curvature/AGENT-CONTRIBUTION-05.md)
+    is pinned to the immutable preparation commit that contains the record and
+    the synchronized Comparator surface.
+
+fidelity:
+  divergences: >-
+    `Challenge.lean` imports only Mathlib and exposes the tangent-map,
+    covariant-derivative, curvature-commutator, torsion, and metric-compatibility
+    formulas compared by Palomar. `Solution.lean` proves the same declarations
+    by invoking the fully proved manifold transport source in the pinned
+    repository. The source import is explicit in Solution.lean and is not
+    available to Challenge.lean; the mathematical definitions and hypotheses
+    remain visible at the Comparator boundary.
+
+review:
+  status: "self-assessed"
+  reviewers:
+    - "none"
+  notes: >-
+    This revision removes the stale affine, metric-cone, and gauge-reduction
+    surface entirely. It selects the already-proved fixed-diffeomorphism
+    transport of a genuine tangent-bundle connection, raw curvature, torsion,
+    metric compatibility, and Levi-Civita structure. The relationship to the
+    classical sources is stated as standard formalization/adaptation; no
+    originality or Ricci-flow existence claim is made.
+
+alignment:
+  namespace: "PoincareCurvature.Palomar"
+  statements:
+    - source: "Raw curvature commutator under pullback connection"
+      lean: "PoincareCurvature.Palomar.curvatureAux_pullbackCovariantDerivative"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        The raw commutator is transported by the explicit pushforward/pullback
+        connection formula and the naturality of the Lie bracket.
+    - source: "Pointwise raw curvature transport"
+      lean: "PoincareCurvature.Palomar.curvatureAux_pullbackCovariantDerivative_apply"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        This is the component-level form after applying the explicit inverse
+        tangent map at the source point.
+    - source: "Torsion transport under pullback connection"
+      lean: "PoincareCurvature.Palomar.torsion_pullbackCovariantDerivative"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        Torsion is transported pointwise by the inverse tangent map, with the
+        differentiability hypotheses on the two tangent vector fields shown.
+    - source: "Preservation of torsion-freeness"
+      lean: "PoincareCurvature.Palomar.isTorsionFree_pullbackCovariantDerivative"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        The pointwise torsion transport theorem gives the global predicate
+        preservation result for a torsion-free affine connection.
+    - source: "Preservation of metric compatibility"
+      lean: "PoincareCurvature.Palomar.isMetricCompatibleTangent_pullbackCovariantDerivative"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        The hypothesis explicitly identifies the target metric inner product
+        with the tangent pullback of the source metric, so the transported
+        compatibility statement is not vacuous.
+    - source: "Preservation of the Levi-Civita property"
+      lean: "PoincareCurvature.Palomar.isLeviCivita_pullbackCovariantDerivative"
+      module: "Solution.lean"
+      status: "proved"
+      note: >-
+        Combines the transported torsion-free and metric-compatibility
+        properties for the explicitly pulled-back connection.
+
+acknowledgements: >-
+  Mathlib contributors for the manifold, tangent-bundle, covariant-derivative,
+  and Riemannian infrastructure; Kobayashi, Nomizu, and Lee for the classical
+  differential-geometric source material; the human authors for mathematical
+  selection, authorship, attribution, review, and publication responsibility;
+  and the Palomar Registry project for the statement/solution Comparator
+  workflow.

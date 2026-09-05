@@ -105,7 +105,8 @@ theorem bilinearDerivationFieldLinearMap_add_source_banachEvolutionLocalSolution
       Kc hKc Ko hKo hKoEq hcover hP s + b)
     σ0 locus t₀ T hT a ⟨2 * Kp, by linarith⟩
     ⟨2 * Kp * ‖σ0‖ + ‖b‖,
-      add_nonneg (mul_nonneg (mul_nonneg (by norm_num) hKp0) (norm_nonneg _)) (norm_nonneg _)⟩
+      add_nonneg (mul_nonneg (mul_nonneg (by norm_num) hKp0) (norm_nonneg σ0))
+        (norm_nonneg b)⟩
     ?_ ?_ ?_ ?_ hsub
   · intro t _ht s _hs s' _hs' i x
     exact bilinearDerivationFieldLinearMap_add_source_coord_dist_le

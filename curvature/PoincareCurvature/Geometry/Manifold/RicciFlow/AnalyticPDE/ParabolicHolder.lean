@@ -293,8 +293,8 @@ theorem metric_closedBall_subset {δ : ℝ} (hδ_space : δ < R) (hδ_time : δ 
   exact parabolicDistance.lt_of_prod_dist_le hδ_space hδ_time hR hq
 
 theorem isOpen (p : ℝ × X) (R : ℝ) : IsOpen (parabolicBall p R) := by
-  simpa [parabolicBall] using
-    (parabolicDistance.continuous_fixed_left p).isOpen_preimage (Iio R) isOpen_Iio
+  change IsOpen ((fun q => parabolicDistance p q) ⁻¹' Iio R)
+  exact (parabolicDistance.continuous_fixed_left p).isOpen_preimage (Iio R) isOpen_Iio
 
 theorem mem_nhds (hR : 0 < R) : parabolicBall p R ∈ 𝓝 p :=
   (isOpen p R).mem_nhds (center_mem hR)
@@ -334,7 +334,9 @@ theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
   have hεne : ε ≠ 0 := by
     intro hε
     have hδ0 : δ = 0 := by
-      simpa [ε] using congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+      have hε' := congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+      change δ = (0 : ℝ) at hε'
+      exact hε'
     linarith
   rcases Metric.exists_finite_isCover_of_isCompact (s := K) (ε := ε) hεne hK with
     ⟨N, hNK, hNfinite, hcover⟩
@@ -346,7 +348,7 @@ theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
   rcases mem_iUnion.1 hy with ⟨hyN, hzball⟩
   refine mem_iUnion.2 ⟨y, mem_iUnion.2 ⟨hyN, ?_⟩⟩
   exact (metric_closedBall_subset (p := y) (R := R) (δ := (ε : ℝ))
-    (by simpa [ε] using hδ_space) (by simpa [ε] using hδ_time) hR) hzball
+    (by change δ < R; exact hδ_space) (by change δ < R ^ 2; exact hδ_time) hR) hzball
 
 /-- A compact set covered by an open set has a finite parabolic-ball cover whose balls remain
 inside that open set.  The radii may depend on the center. -/
@@ -470,8 +472,8 @@ theorem metric_closedBall_subset {δ : ℝ} (hδ_space : δ ≤ R) (hδ_time : �
   exact parabolicDistance.le_of_prod_dist_le hδ_space hδ_time hR hq
 
 theorem isClosed (p : ℝ × X) (R : ℝ) : IsClosed (parabolicClosedBall p R) := by
-  simpa [parabolicClosedBall] using
-    isClosed_Iic.preimage (parabolicDistance.continuous_fixed_left p)
+  change IsClosed ((fun q => parabolicDistance p q) ⁻¹' Iic R)
+  exact isClosed_Iic.preimage (parabolicDistance.continuous_fixed_left p)
 
 theorem isCompact [ProperSpace X] (p : ℝ × X) (R : ℝ) :
     IsCompact (parabolicClosedBall p R) := by
@@ -495,7 +497,9 @@ theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
   have hεne : ε ≠ 0 := by
     intro hε
     have hδ0 : δ = 0 := by
-      simpa [ε] using congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+      have hε' := congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+      change δ = (0 : ℝ) at hε'
+      exact hε'
     linarith
   rcases Metric.exists_finite_isCover_of_isCompact (s := K) (ε := ε) hεne hK with
     ⟨N, hNK, hNfinite, hcover⟩
@@ -507,7 +511,7 @@ theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
   rcases mem_iUnion.1 hy with ⟨hyN, hzball⟩
   refine mem_iUnion.2 ⟨y, mem_iUnion.2 ⟨hyN, ?_⟩⟩
   exact (metric_closedBall_subset (p := y) (R := R) (δ := (ε : ℝ))
-    (by simpa [ε] using hδ_space) (by simpa [ε] using hδ_time) hR.le) hzball
+    (by change δ ≤ R; exact hδ_space) (by change δ ≤ R ^ 2; exact hδ_time) hR.le) hzball
 
 /-- A compact subset of an open set has one positive parabolic closed-ball radius around every
 one of its points still contained in that open set. -/
@@ -651,9 +655,11 @@ theorem space_dist_lt_of_mem (hq : q ∈ parabolicCylinder p timeRadius spaceRad
 
 theorem isOpen (p : ℝ × X) (timeRadius spaceRadius : ℝ) :
     IsOpen (parabolicCylinder p timeRadius spaceRadius) := by
-  simpa [parabolicCylinder] using
-    (((continuous_const.sub continuous_fst).abs.isOpen_preimage (Iio timeRadius) isOpen_Iio).inter
-      ((continuous_const.dist continuous_snd).isOpen_preimage (Iio spaceRadius) isOpen_Iio))
+  change IsOpen
+    ((fun q : ℝ × X => |p.1 - q.1|) ⁻¹' Iio timeRadius ∩
+      (fun q : ℝ × X => dist p.2 q.2) ⁻¹' Iio spaceRadius)
+  exact ((continuous_const.sub continuous_fst).abs.isOpen_preimage (Iio timeRadius) isOpen_Iio).inter
+    ((continuous_const.dist continuous_snd).isOpen_preimage (Iio spaceRadius) isOpen_Iio)
 
 theorem mem_nhds (ht : 0 < timeRadius) (hs : 0 < spaceRadius) :
     parabolicCylinder p timeRadius spaceRadius ∈ 𝓝 p :=
@@ -705,7 +711,9 @@ theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
   have hεne : ε ≠ 0 := by
     intro hε
     have hδ0 : δ = 0 := by
-      simpa [ε] using congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+      have hε' := congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+      change δ = (0 : ℝ) at hε'
+      exact hε'
     linarith
   rcases Metric.exists_finite_isCover_of_isCompact (s := K) (ε := ε) hεne hK with
     ⟨N, hNK, hNfinite, hcover⟩
@@ -718,7 +726,8 @@ theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
   refine mem_iUnion.2 ⟨y, mem_iUnion.2 ⟨hyN, ?_⟩⟩
   exact (metric_closedBall_subset (p := y) (timeRadius := timeRadius)
     (spaceRadius := spaceRadius) (δ := (ε : ℝ))
-    (by simpa [ε] using hδ_time) (by simpa [ε] using hδ_space)) hzball
+    (by change δ < timeRadius; exact hδ_time)
+    (by change δ < spaceRadius; exact hδ_space)) hzball
 
 /-- A compact set covered by an open set has a finite product-parabolic-cylinder cover whose
 cylinders remain inside that open set.  The time and spatial radii may depend on the center. -/
@@ -897,9 +906,11 @@ theorem space_dist_le_of_mem (hq : q ∈ parabolicClosedCylinder p timeRadius sp
 
 theorem isClosed (p : ℝ × X) (timeRadius spaceRadius : ℝ) :
     IsClosed (parabolicClosedCylinder p timeRadius spaceRadius) := by
-  simpa [parabolicClosedCylinder] using
-    ((isClosed_Iic.preimage (continuous_const.sub continuous_fst).abs).inter
-      (isClosed_Iic.preimage (continuous_const.dist continuous_snd)))
+  change IsClosed
+    ((fun q : ℝ × X => |p.1 - q.1|) ⁻¹' Iic timeRadius ∩
+      (fun q : ℝ × X => dist p.2 q.2) ⁻¹' Iic spaceRadius)
+  exact (isClosed_Iic.preimage (continuous_const.sub continuous_fst).abs).inter
+    (isClosed_Iic.preimage (continuous_const.dist continuous_snd))
 
 theorem subset_metric_closedBall {ε : ℝ} (ht : timeRadius ≤ ε) (hs : spaceRadius ≤ ε) :
     parabolicClosedCylinder p timeRadius spaceRadius ⊆ Metric.closedBall p ε := by
@@ -941,7 +952,9 @@ theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
   have hεne : ε ≠ 0 := by
     intro hε
     have hδ0 : δ = 0 := by
-      simpa [ε] using congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+      have hε' := congrArg (fun x : ℝ≥0 => (x : ℝ)) hε
+      change δ = (0 : ℝ) at hε'
+      exact hε'
     linarith
   rcases Metric.exists_finite_isCover_of_isCompact (s := K) (ε := ε) hεne hK with
     ⟨N, hNK, hNfinite, hcover⟩
@@ -954,7 +967,8 @@ theorem exists_finite_cover_of_isCompact {K : Set (ℝ × X)} (hK : IsCompact K)
   refine mem_iUnion.2 ⟨y, mem_iUnion.2 ⟨hyN, ?_⟩⟩
   exact (metric_closedBall_subset (p := y) (timeRadius := timeRadius)
     (spaceRadius := spaceRadius) (δ := (ε : ℝ))
-    (by simpa [ε] using hδ_time) (by simpa [ε] using hδ_space)) hzball
+    (by change δ ≤ timeRadius; exact hδ_time)
+    (by change δ ≤ spaceRadius; exact hδ_space)) hzball
 
 /-- A compact subset of an open set has one positive product-parabolic closed-cylinder radius
 around every one of its points still contained in that open set. -/
@@ -9231,4 +9245,3 @@ theorem parabolicC0AlphaNorm_comp_lipschitzWith_le {X E F : Type*} [PseudoMetric
 
 end AnalyticPDE
 end RicciFlow
-

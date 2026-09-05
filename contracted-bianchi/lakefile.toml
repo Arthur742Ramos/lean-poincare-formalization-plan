@@ -1,0 +1,25 @@
+name = "ContractedBianchi"
+version = "0.1.0"
+keywords = ["math", "differential-geometry", "general-relativity"]
+defaultTargets = ["ContractedBianchi", "Challenge", "Solution"]
+
+[leanOptions]
+pp.unicode.fun = true
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "db584cd6d46c92f209a44c0f1c829460d327499d"
+
+[[lean_lib]]
+name = "ContractedBianchi"
+
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"
+
+[[lean_lib]]
+name = "PoincareCurvature"
+globs = ["PoincareCurvature.+"]

@@ -24,7 +24,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 /-- Scalar-linearity of the scalar exterior derivative, applied to a tangent vector. -/
 lemma extDerivFun_const_smul_apply (c : ℝ) {f : M → ℝ} {x : M} (u : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x) :
-    extDerivFun (I := I) (fun y ↦ c * f y) x u = c * extDerivFun (I := I) f x u := by
+    mvfderiv (I := I) (fun y ↦ c * f y) x u = c * mvfderiv (I := I) f x u := by
   have hfun : (fun y : M ↦ c * f y) = (fun _ : M ↦ c) • f := by
     funext y; simp [smul_eq_mul]
   rw [hfun]

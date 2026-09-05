@@ -7,6 +7,7 @@ public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffe
 
 set_option linter.unusedSectionVars false
 set_option linter.all false
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # Existence interfaces for `C^3` DeTurck gauge flows
@@ -3370,9 +3371,10 @@ theorem toIntrinsicFixedChartDerivativeOn
   intro t ht x
   exact ⟨hmem t ht x,
     by
-      simpa using
-        G.eventuallyWithin_mem_extChartAt_source_eval_of_mem_source
-          ht (chartCenter t x) x (hmem t ht x),
+      change (fun τ : ℝ ↦ (G.maps3 τ) x) ⁻¹'
+        (extChartAt I (chartCenter t x)).source ∈ 𝓝[s] t
+      exact G.eventuallyWithin_mem_extChartAt_source_eval_of_mem_source
+        ht (chartCenter t x) x (hmem t ht x),
     by
       simpa using
         G.hasDerivWithinAt_extChartAt_eval_of_mem_source
@@ -3398,9 +3400,10 @@ theorem toIntrinsicFixedChartDerivativeOn_congr_vectorField_nhdsWithin
   intro t ht x
   exact ⟨hmem t ht x,
     by
-      simpa using
-        G.eventuallyWithin_mem_extChartAt_source_eval_of_mem_source
-          ht (chartCenter t x) x (hmem t ht x),
+      change (fun τ : ℝ ↦ (G.maps3 τ) x) ⁻¹'
+        (extChartAt I (chartCenter t x)).source ∈ 𝓝[s] t
+      exact G.eventuallyWithin_mem_extChartAt_source_eval_of_mem_source
+        ht (chartCenter t x) x (hmem t ht x),
     by
       simpa using
         G.hasDerivWithinAt_extChartAt_eval_congr_vectorField_of_mem_source
@@ -3424,9 +3427,10 @@ theorem toIntrinsicFixedChartDerivativeAtOn
   intro t ht x
   exact ⟨hmem t ht x,
     by
-      simpa using
-        G.eventually_mem_extChartAt_source_eval_of_mem_source
-          (hs ht) (chartCenter t x) x (hmem t ht x),
+      change (fun τ : ℝ ↦ (G.maps3 τ) x) ⁻¹'
+        (extChartAt I (chartCenter t x)).source ∈ 𝓝 t
+      exact G.eventually_mem_extChartAt_source_eval_of_mem_source
+        (hs ht) (chartCenter t x) x (hmem t ht x),
     by
       simpa using
         G.hasDerivAt_extChartAt_eval_of_mem_source
@@ -3457,9 +3461,10 @@ theorem toIntrinsicFixedChartDerivativeAtOn_congr_vectorField_nhdsWithin
     simpa [nhdsWithin_eq_nhds.2 (hs ht)] using hY t ht
   exact ⟨hmem t ht x,
     by
-      simpa using
-        G.eventually_mem_extChartAt_source_eval_of_mem_source
-          (hs ht) (chartCenter t x) x (hmem t ht x),
+      change (fun τ : ℝ ↦ (G.maps3 τ) x) ⁻¹'
+        (extChartAt I (chartCenter t x)).source ∈ 𝓝 t
+      exact G.eventually_mem_extChartAt_source_eval_of_mem_source
+        (hs ht) (chartCenter t x) x (hmem t ht x),
     by
       simpa using
         G.hasDerivAt_extChartAt_eval_congr_vectorField_of_mem_source
@@ -3777,7 +3782,9 @@ def of_autonomousIntegralCurves
     Diffeomorph3GaugeFlowOn (I := I) (M := M) (fun _ ↦ X) s t₀ :=
   of_satisfiesGaugeFlowOn maps3 anchored (by
     intro x t ht
-    simpa using hcurves x t ht)
+    have h := hcurves x t ht
+    unfold TangentSpace at h ⊢
+    convert h using 1 <;> rfl)
 
 /-- Proof-level raw `C³` gauge-flow existence from autonomous Mathlib
 integral-curve data for a `C³` diffeomorphism family. -/
@@ -3832,7 +3839,9 @@ theorem autonomousIntegralCurveOn
     (x : M) :
     IsMIntegralCurveOn (I := I) (fun t : ℝ ↦ (G.maps3 t) x) X s := by
   intro t ht
-  simpa using G.satisfies x t ht
+  change HasMFDerivAt[s] (fun t : ℝ ↦ (G.maps3 t) x) t
+    ((1 : ℝ →L[ℝ] ℝ).smulRight (X ((G.maps3 t) x)))
+  exact G.satisfies x t ht
 
 /-- Two anchored raw `C³` autonomous gauge flows for the same `C¹` vector field
 agree on the open interval where both solve the ODE. -/
@@ -4567,7 +4576,13 @@ noncomputable def of_hasDerivWithinAt_extChartAt_eval_self
       refine ⟨hcont t ht x, ?_⟩
       have h := hderiv t ht x
       rw [hasDerivWithinAt_iff_hasFDerivWithinAt] at h
-      simpa [writtenInExtChartAt] using h)
+      simpa [writtenInExtChartAt, extChartAt_model_space_eq_id,
+        Function.comp_def, PartialEquiv.refl_coe, modelWithCornersSelf_coe,
+        modelWithCornersSelf_coe_symm, chartAt_self_eq,
+        OpenPartialHomeomorph.refl_apply,
+        OpenPartialHomeomorph.coe_toPartialEquiv, range_id, inter_univ,
+        preimage_id_eq, id_eq,
+        ContinuousLinearMap.smulRight_one_eq_toSpanSingleton] using h)
 
 /-- Proof-level raw `C^3` gauge-flow existence from preferred-chart ODE
 derivatives on the time set. -/
@@ -4673,7 +4688,8 @@ theorem continuousWithinAt_eval_of_hasDerivWithinAt_extChartAt_eval_self_of_even
       (fun τ : ℝ ↦ e.symm (e ((maps3 τ) x))) s t := by
     simpa [Function.comp_def] using hcomp'
   have hsource' : ∀ᶠ τ in 𝓝[s] t, (maps3 τ) x ∈ e.source := by
-    simpa [e] using hsource
+    change (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' e.source ∈ 𝓝[s] t
+    exact hsource
   exact hcomp.congr_of_eventuallyEq
     (hsource'.mono fun τ hτ ↦ by simpa [e] using (e.left_inv hτ).symm)
     (by simpa [e] using (e.left_inv hx).symm)
@@ -4839,9 +4855,11 @@ noncomputable def of_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhd
     (hY : ∀ t ∈ s, ∀ᶠ τ in 𝓝[s] t, ∀ x : M,
       Y τ ((maps3 τ) x) = X τ ((maps3 τ) x)) :
     Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
-  (of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
+    (of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source
     (I := I) (M := M) (X := Y) (s := s) (t₀ := t₀)
-    maps3 anchored hsource hderiv).congr_vectorField_nhdsWithin hY
+    maps3 anchored hsource hderiv).congr_vectorField_nhdsWithin (by
+      simpa [of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source,
+        of_hasDerivWithinAt_extChartAt_eval_self, of_hasMFDerivWithinAt] using hY)
 
 /-- Proof-level raw `C^3` gauge-flow existence from centered preferred-chart
 ODE data for a model vector field identified with the target field along the
@@ -5151,7 +5169,8 @@ theorem continuousAt_eval_of_hasDerivAt_extChartAt_eval_self_of_eventually_mem_s
   have hcomp : ContinuousAt (fun τ : ℝ ↦ e.symm (e ((maps3 τ) x))) t := by
     simpa [Function.comp_def] using hcomp'
   have hsource' : ∀ᶠ τ in 𝓝 t, (maps3 τ) x ∈ e.source := by
-    simpa [e] using hsource
+    change (fun τ : ℝ ↦ (maps3 τ) x) ⁻¹' e.source ∈ 𝓝 t
+    exact hsource
   exact hcomp.congr_of_eventuallyEq
     (hsource'.mono fun τ hτ ↦ by simpa [e] using (e.left_inv hτ).symm)
 
@@ -5259,7 +5278,11 @@ noncomputable def of_hasDerivAtOn_extChartAt_eval_self_of_vectorField_eq_nhdsWit
     Diffeomorph3GaugeFlowOn (I := I) (M := M) X s t₀ :=
   (of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source
     (I := I) (M := M) (X := Y) (s := s) (t₀ := t₀)
-    maps3 anchored hsource hderiv).congr_vectorField_nhdsWithin hY
+    maps3 anchored hsource hderiv).congr_vectorField_nhdsWithin (by
+      simpa [of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source,
+        of_hasDerivAtOn_extChartAt_eval_self,
+        of_hasDerivWithinAt_extChartAt_eval_self,
+        of_hasMFDerivWithinAt] using hY)
 
 /-- Proof-level raw `C^3` gauge-flow existence from ordinary centered
 preferred-chart ODE data for a model vector field identified with the target
@@ -5396,9 +5419,14 @@ noncomputable def of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq
     (hY : ∀ t ∈ Ioo tmin tmax, ∀ᶠ τ in 𝓝[Ioo tmin tmax] t, ∀ x : M,
       Y τ ((maps3 τ) x) = X τ ((maps3 τ) x)) :
     Diffeomorph3GaugeFlowOn (I := I) (M := M) X (Ioo tmin tmax) t₀ :=
-  (of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source
+    (of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source
     (I := I) (M := M) (X := Y) (tmin := tmin) (tmax := tmax) (t₀ := t₀)
-    maps3 anchored hsource hderiv).congr_vectorField_nhdsWithin hY
+    maps3 anchored hsource hderiv).congr_vectorField_nhdsWithin (by
+      simpa [of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source,
+        of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source,
+        of_hasDerivAtOn_extChartAt_eval_self,
+        of_hasDerivWithinAt_extChartAt_eval_self,
+        of_hasMFDerivWithinAt] using hY)
 
 /-- Proof-level raw `C^3` gauge-flow existence on the open Picard interior
 from closed-interval centered preferred-chart ODE data for a model vector field
@@ -7068,7 +7096,15 @@ theorem of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_h
     [of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
       of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
       of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin,
-      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin]
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivAtOn_extChartAt_eval_self,
+      of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivWithinAt_extChartAt_eval_self,
+      of_hasMFDerivWithinAt,
+      SmoothSelfDiffeomorph3Family.ofInverse_apply_apply]
     using hτ.2 hz
 
 /-- Build a raw `C^3` gauge-flow witness on the closed Picard interval from
@@ -7529,8 +7565,11 @@ noncomputable def of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSou
         simpa [Fₑ, Uₑ, ht] using hFLocal t htIcc i
     · cases i with
       | none =>
-        simpa [Fₑ, Uₑ, ht, contMDiffOn_univ] using
-          (contMDiff_id : ContMDiff I I 3 (fun x : M ↦ x))
+        have h_id : (id : M → M) = (fun x : M ↦ x) := by rfl
+        have hcont : ContMDiff I I 3 (fun x : M ↦ x) := by
+          rw [← h_id]
+          exact contMDiff_id
+        simpa [Fₑ, Uₑ, ht, contMDiffOn_univ] using hcont
       | some i =>
         intro x hx
         exact False.elim (by simpa [Fₑ, Uₑ, ht] using hx)
@@ -7545,8 +7584,11 @@ noncomputable def of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSou
         simpa [Gₑ, Vₑ, ht] using hGLocal t htIcc i
     · cases i with
       | none =>
-        simpa [Gₑ, Vₑ, ht, contMDiffOn_univ] using
-          (contMDiff_id : ContMDiff I I 3 (fun x : M ↦ x))
+        have h_id : (id : M → M) = (fun x : M ↦ x) := by rfl
+        have hcont : ContMDiff I I 3 (fun x : M ↦ x) := by
+          rw [← h_id]
+          exact contMDiff_id
+        simpa [Gₑ, Vₑ, ht, contMDiffOn_univ] using hcont
       | some i =>
         intro x hx
         exact False.elim (by simpa [Gₑ, Vₑ, ht] using hx)
@@ -7720,6 +7762,13 @@ theorem of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_loc
       of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
       of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin,
       of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivAtOn_extChartAt_eval_self,
+      of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivWithinAt_extChartAt_eval_self,
+      of_hasMFDerivWithinAt,
       Fₑ, Uₑ, T, hτT]
     using hEqₑ
 
@@ -7907,8 +7956,11 @@ noncomputable def of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSou
         simpa [Fₑ, Uₑ, ht] using hFLocal t htIcc i
     · cases i with
       | none =>
-        simpa [Fₑ, Uₑ, ht, contMDiffOn_univ] using
-          (contMDiff_id : ContMDiff I I 3 (fun x : M ↦ x))
+        have h_id : (id : M → M) = (fun x : M ↦ x) := by rfl
+        have hcont : ContMDiff I I 3 (fun x : M ↦ x) := by
+          rw [← h_id]
+          exact contMDiff_id
+        simpa [Fₑ, Uₑ, ht, contMDiffOn_univ] using hcont
       | some i =>
         intro x hx
         exact False.elim (by simpa [Fₑ, Uₑ, ht] using hx)
@@ -7923,8 +7975,11 @@ noncomputable def of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSou
         simpa [Gₑ, Vₑ, ht] using hGLocal t htIcc i
     · cases i with
       | none =>
-        simpa [Gₑ, Vₑ, ht, contMDiffOn_univ] using
-          (contMDiff_id : ContMDiff I I 3 (fun x : M ↦ x))
+        have h_id : (id : M → M) = (fun x : M ↦ x) := by rfl
+        have hcont : ContMDiff I I 3 (fun x : M ↦ x) := by
+          rw [← h_id]
+          exact contMDiff_id
+        simpa [Gₑ, Vₑ, ht, contMDiffOn_univ] using hcont
       | some i =>
         intro x hx
         exact False.elim (by simpa [Gₑ, Vₑ, ht] using hx)
@@ -8560,7 +8615,25 @@ theorem of_Icc_timeDependent_iUnion_localGluingData_pointwiseSource_of_local_has
     [of_Icc_timeDependent_iUnion_localGluingData_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
       of_Icc_timeDependent_iUnion_localGluingData_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
       of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
-      of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin]
+      of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_timeDependent_iUnion_compatibleGluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
+      of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivAtOn_extChartAt_eval_self,
+      of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivWithinAt_extChartAt_eval_self,
+      of_hasMFDerivWithinAt,
+      SmoothSelfDiffeomorph3Family.ofInverse_apply_apply]
     using hreadout
 
 /-- Build a raw `C^3` gauge-flow witness on the closed Picard interval from
@@ -8700,7 +8773,25 @@ theorem of_Icc_timeDependent_iUnion_openPreimage_localGluingData_of_local_hasDer
       of_Icc_timeDependent_iUnion_localGluingData_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
       of_Icc_timeDependent_iUnion_localGluingData_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
       of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
-      of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin]
+      of_Icc_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_timeDependent_iUnion_compatibleGluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
+      of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivAtOn_extChartAt_eval_self,
+      of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivWithinAt_extChartAt_eval_self,
+      of_hasMFDerivWithinAt,
+      SmoothSelfDiffeomorph3Family.ofInverse_apply_apply]
     using hreadout
 
 /-- Build a raw `C^3` gauge-flow witness from interval-local compatible
@@ -9013,6 +9104,21 @@ theorem of_Icc_subset_timeSet_timeDependent_iUnion_openPreimage_localGluingData_
       of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
       of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
       of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin_on_Icc,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_of_local_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_timeDependent_iUnion_compatibleGluedSlices_pointwiseSource_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_timeDependent_iUnion_compatibleGluedSlices_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_Icc_extChartAt_eval_self_of_continuousWithinAt_vectorField_eq_nhdsWithin,
+      of_inverseOn_univ_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_vectorField_eq_nhdsWithin,
+      of_hasDerivWithinAt_Icc_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivAtOn_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivAtOn_extChartAt_eval_self,
+      of_hasDerivWithinAt_extChartAt_eval_self_of_eventually_mem_source,
+      of_hasDerivWithinAt_extChartAt_eval_self,
+      of_hasMFDerivWithinAt,
+      SmoothSelfDiffeomorph3Family.ofInverse_apply_apply,
       Fₑ, Uₑ, T, htT]
     using hEqₑ
 
@@ -12638,8 +12744,22 @@ theorem auxiliaryEqAlong_of_solution_eq_restrictSymmetricIcc
               G.solution.1.toIntrinsicDeTurckSolution.background τ
               ((G.flow.maps3 τ) x) := by
   intro t ht
-  simpa [hGsol] using
-    hYAlong t (by simpa [hGsol] using ht)
+  have htimeSet : G.solution.1.toIntrinsicDeTurckSolution.timeSet =
+      Icc (ivp.initialTime - ε) (ivp.initialTime + ε) := by
+    rw [hGsol]
+    rfl
+  have hmetric : G.solution.1.toIntrinsicDeTurckSolution.metric =
+      sol.1.toIntrinsicDeTurckSolution.metric := by
+    rw [hGsol]
+    rfl
+  have hbackground : G.solution.1.toIntrinsicDeTurckSolution.background =
+      sol.1.toIntrinsicDeTurckSolution.background := by
+    rw [hGsol]
+    rfl
+  have htIcc : t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε) := by
+    rw [← htimeSet]
+    exact ht
+  simpa only [htimeSet, hmetric, hbackground] using hYAlong t htIcc
 
 /-- Transport selected restricted-symmetric time membership back to the
 ambient chosen solution time set. -/
@@ -13780,19 +13900,26 @@ theorem exists_restrictSymmetricIcc_routeData_with_finiteSubcover_Icc_subset_cov
   · intro ivp t ht
     exact (hspec ivp).1 t ht
   · intro ivp
-    simpa [G] using (hGivp ivp).1
+    simpa [G, SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem]
+      using (hGivp ivp).1
   · intro ivp
-    simpa [G] using (hGivp ivp).2.1
+    simpa [G, SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem]
+      using (hGivp ivp).2.1
   · intro ivp t ht i x hx
-    simpa [G] using (hGivp ivp).2.2.1 t ht i x hx
+    simpa [G, SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem]
+      using (hGivp ivp).2.2.1 t ht i x hx
   · intro ivp t ht i
-    simpa [G] using (hGivp ivp).2.2.2.1 ht i
+    simpa [G, SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem]
+      using (hGivp ivp).2.2.2.1 ht i
   · intro ivp t ht i x hx
-    simpa [G] using (hGivp ivp).2.2.2.2.1 ht i x hx
+    simpa [G, SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem]
+      using (hGivp ivp).2.2.2.2.1 ht i x hx
   · intro ivp t ht i x hx
-    simpa [G] using (hGivp ivp).2.2.2.2.2.1 ht i x hx
+    simpa [G, SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem]
+      using (hGivp ivp).2.2.2.2.2.1 ht i x hx
   · intro ivp t ht
-    simpa [G] using (hGivp ivp).2.2.2.2.2.2 ht
+    simpa [G, SelectedIntrinsicDeTurckGaugeFlowExistenceFamily.of_forInitialValueProblem]
+      using (hGivp ivp).2.2.2.2.2.2 ht
 
 /-- Theorem-family scalar time-derivative data for the metrics pulled back by
 the selected raw intrinsic DeTurck gauge flows. -/

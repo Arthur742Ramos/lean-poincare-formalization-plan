@@ -103,7 +103,9 @@ theorem preferredBilinear_symmL_opNorm_le_of_linearMapAt_opNorm_le
         (mul_le_mul_of_nonneg_right hC (norm_nonneg v))
     have hAuv : (A B) u v = B (S u) (S v) := by
       dsimp [A, S]
-      simpa using trivializationAt_bilinearFormBundle_symm_apply_eq
+      rw [Bundle.Trivialization.symmL_apply (R := ℝ)
+        (trivializationAt BilF BilW x0) (by simpa using hx) B]
+      exact trivializationAt_bilinearFormBundle_symm_apply_eq
         (F := F) (W := W) x0 x hx B u v
     calc
       ‖(A B) u v‖ = ‖B (S u) (S v)‖ := by rw [hAuv]
@@ -165,19 +167,11 @@ theorem preferredBilinear_fiber_dist_le_of_coord_dist_le_of_linearMapAt_opNorm_l
   have hscoord :
       (eCoord s).1 i xK =
         (trivializationAt BilF BilW (x0 i)).continuousLinearMapAt ℝ x (s x) := by
-    simp [eCoord, equivCompatibleCoordFamilySubmodule, toSubtype,
-      continuousSectionEquivCompatibleCoordFamilySubmodule,
-      continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
-      compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
-      Bundle.Trivialization.linearMapAt_apply, hxW, xK]
+    simpa [eCoord] using coord_apply s i xK
   have htcoord :
       (eCoord t).1 i xK =
         (trivializationAt BilF BilW (x0 i)).continuousLinearMapAt ℝ x (t x) := by
-    simp [eCoord, equivCompatibleCoordFamilySubmodule, toSubtype,
-      continuousSectionEquivCompatibleCoordFamilySubmodule,
-      continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
-      compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
-      Bundle.Trivialization.linearMapAt_apply, hxW, xK]
+    simpa [eCoord] using coord_apply t i xK
   have hsrec : A ((eCoord s).1 i xK) = s x := by
     dsimp [A]
     rw [hscoord]
@@ -610,6 +604,7 @@ theorem eventually_norm_fixed_trivializationAt_symmL_lt_of_mem_baseSet
     have hcoord_apply :
         (e0.coordChangeL ℝ ex y : F →L[ℝ] F) v =
           ex.continuousLinearEquivAt ℝ y hy.2 (e0.symmL ℝ y v) := by
+      rw [e0.symmL_apply hy.1]
       rw [← hcoord_eq]
       simp
     rw [ContinuousLinearMap.comp_apply, hcoord_apply]
@@ -645,7 +640,8 @@ theorem exists_uniform_norm_fixed_trivializationAt_symmL_le_of_compact
   let U : ∀ x ∈ (K : Set M), Set M := fun x hx ↦ {y | ‖e0.symmL ℝ y‖ < C ⟨x, hx⟩}
   have hU : ∀ x (hx : x ∈ (K : Set M)), U x hx ∈ 𝓝 x := by
     intro x hxK
-    simpa [U] using hCevent ⟨x, hxK⟩
+    change ∀ᶠ y in 𝓝 x, ‖e0.symmL ℝ y‖ < C ⟨x, hxK⟩
+    exact hCevent ⟨x, hxK⟩
   rcases K.isCompact.elim_nhds_subcover' U hU with ⟨t, htcover⟩
   refine ⟨(∑ x ∈ t, C x) + 1, ?_, ?_⟩
   · have hsum_nonneg : 0 ≤ ∑ x ∈ t, C x :=
@@ -1152,4 +1148,3 @@ end PreferredBilinearRiemannianSmoothApprox
 end ContinuousSectionSpace
 end Bundle.Trivialization
 end PoincareCurvature
-

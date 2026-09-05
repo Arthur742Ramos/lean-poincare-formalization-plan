@@ -8,6 +8,7 @@ public import Mathlib.Topology.MetricSpace.Contracting
 public import Mathlib.Topology.ContinuousMap.Bounded.Basic
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 public import Mathlib.Analysis.ODE.PicardLindelof
+public import Mathlib.Analysis.ODE.ExistUnique
 public import Mathlib.Analysis.ODE.Gronwall
 
 /-!
@@ -139,12 +140,16 @@ theorem integral_heatKernel1D {t : ℝ} (ht : 0 < t) :
 `∂ₓ K(t, x) = K(t, x) · (-x / (2 t))`. -/
 theorem hasDerivAt_heatKernel1D_space {t : ℝ} (ht : 0 < t) (x : ℝ) :
     HasDerivAt (fun y => heatKernel1D t y)
-      (heatKernel1D t x * (-x / (2 * t))) x := by
+    (heatKernel1D t x * (-x / (2 * t))) x := by
   have htne : (4 * t) ≠ 0 := by positivity
   -- Derivative of the exponent `f y = -y²/(4t)`: `f' = -2x/(4t) = -x/(2t)`.
   have hf : HasDerivAt (fun y : ℝ => -y ^ 2 / (4 * t)) (-x / (2 * t)) x := by
     have hpow : HasDerivAt (fun y : ℝ => -y ^ 2) (-(2 * x)) x := by
-      simpa using (hasDerivAt_pow 2 x).neg
+      have hneg : HasDerivAt (-(fun y : ℝ => y ^ 2)) (-(2 * x)) x := by
+        simpa using (hasDerivAt_pow 2 x).neg
+      apply hneg.congr_of_eventuallyEq
+      filter_upwards [] with y
+      rfl
     have hdiv := hpow.div_const (4 * t)
     -- `-(2x)/(4t) = -x/(2t)`.
     have heq : -(2 * x) / (4 * t) = -x / (2 * t) := by
@@ -172,7 +177,8 @@ theorem hasDerivAt_heatKernel1D_space_second {t : ℝ} (ht : 0 < t) (x : ℝ) :
   -- Second factor: `∂ₓ (-y/(2t)) = -1/(2t)`.
   have hg : HasDerivAt (fun y : ℝ => -y / (2 * t)) (-1 / (2 * t)) x := by
     have hid : HasDerivAt (fun y : ℝ => -y) (-1 : ℝ) x := by
-      simpa using (hasDerivAt_id x).neg
+      rw [show (fun y : ℝ => -y) = -(id : ℝ → ℝ) by funext y; rfl]
+      exact (hasDerivAt_id x).neg
     simpa using hid.div_const (2 * t)
   -- Product rule.
   have hmul := hK.mul hg
@@ -270,7 +276,7 @@ lemma hasDerivAt_heatKernel1D_space_sub {t : ℝ} (ht : 0 < t) (x y : ℝ) :
       (heatKernel1D t (x - y) * (-(x - y) / (2 * t))) x := by
   have hin : HasDerivAt (fun z => z - y) 1 x := (hasDerivAt_id x).sub_const y
   have h := (hasDerivAt_heatKernel1D_space ht (x - y)).comp x hin
-  simpa using h
+  simpa only [Function.comp_def, mul_one] using h
 
 /-- The chain-rule second spatial derivative of the reflected/translated kernel:
 `∂ₓ (z ↦ ∂ₓK(t, z - y)) = K(t, x-y) · ((x-y)²/(4t²) - 1/(2t))`. -/
@@ -279,7 +285,7 @@ lemma hasDerivAt_heatKernel1D_space_second_sub {t : ℝ} (ht : 0 < t) (x y : ℝ
       (heatKernel1D t (x - y) * ((x - y) ^ 2 / (4 * t ^ 2) - 1 / (2 * t))) x := by
   have hin : HasDerivAt (fun z => z - y) 1 x := (hasDerivAt_id x).sub_const y
   have h := (hasDerivAt_heatKernel1D_space_second ht (x - y)).comp x hin
-  simpa only [Function.comp, mul_one] using h
+  simpa only [Function.comp_def, mul_one] using h
 
 /-- The negated kernel's spatial derivative. -/
 theorem hasDerivAt_neg_heatKernel1D_space {t : ℝ} (ht : 0 < t) (x : ℝ) :
@@ -694,7 +700,7 @@ theorem hasDerivAt_heatSemigroup1D_space {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ
     have hcomp : HasDerivAt (fun z : ℝ => heatKernel1D t (z - y))
         (heatKernel1D t (z - y) * (-(z - y) / (2 * t))) z := by
       have := (hasDerivAt_heatKernel1D_space ht (z - y)).comp z hin
-      simpa using this
+      simpa only [Function.comp_def, mul_one] using this
     have := hcomp.mul_const (f y)
     simpa only [hF, hF'] using this
   have key := hasDerivAt_integral_of_dominated_loc_of_deriv_le
@@ -1651,7 +1657,12 @@ theorem continuous_heatKernelND_update (n : ℕ) (t : ℝ) (x : Fin n → ℝ) (
   have hupd : Continuous (fun r : ℝ => Function.update x i r) := by
     refine continuous_pi (fun j => ?_)
     by_cases hj : j = i
-    · subst hj; simpa [Function.update_self] using (continuous_id : Continuous (fun r : ℝ => r))
+    · subst hj
+      have heq : (fun a : ℝ => Function.update x j a j) = id := by
+        funext a
+        simp only [Function.update_self, id_eq]
+      rw [heq]
+      exact continuous_id
     · simpa [Function.update_of_ne hj] using (continuous_const : Continuous (fun _ : ℝ => x j))
   exact (continuous_heatKernelND t).comp hupd
 
@@ -1937,9 +1948,9 @@ lemma hasDerivAt_heatKernelND_coord (n : ℕ) (t : ℝ) (ht : 0 < t)
     rw [Function.update_of_ne (Finset.ne_of_mem_erase hj)]
   rw [hfun]
   have hbase := (hasDerivAt_heatKernel1D_space ht (x i)).mul_const P
-  convert hbase using 1
-  rw [heatKernelND_eq_update_mul n t x i, ← hP]
-  ring
+  exact hbase.congr_deriv (by
+    rw [heatKernelND_eq_update_mul n t x i, hP]
+    ring)
 
 /-- Differentiability of the `n`-dim kernel along a coordinate. -/
 lemma differentiableAt_heatKernelND_coord (n : ℕ) (t : ℝ) (ht : 0 < t)
@@ -1996,9 +2007,9 @@ lemma hasDerivAt_heatKernelND_coord_second (n : ℕ) (t : ℝ) (ht : 0 < t)
     rw [heatKernelND_update_factor n t x i r, hP]
     ring
   rw [hfun]
-  convert (hasDerivAt_heatKernel1D_space_second ht (x i)).mul_const P using 1
-  rw [heatKernelND_eq_update_mul n t x i, hP]
-  ring
+  exact (hasDerivAt_heatKernel1D_space_second ht (x i)).mul_const P |>.congr_deriv (by
+    rw [heatKernelND_eq_update_mul n t x i, hP]
+    ring)
 
 /-- The `n`-dim kernel is Lipschitz along a single coordinate, with explicit constant. -/
 theorem heatKernelND_update_sub_abs_le (n : ℕ) (t : ℝ) (ht : 0 < t)
@@ -2113,13 +2124,13 @@ lemma hasDerivAt_heatKernelND_time (n : ℕ) (t : ℝ) (ht : 0 < t) (x : Fin n �
     funext s
     rw [Finset.prod_apply, heatKernelND_apply]
   rw [hfun]
-  convert h using 1
-  rw [← heatKernelND_laplacian_eq n t ht x]
-  apply Finset.sum_congr rfl
-  intro i _
-  rw [smul_eq_mul, heatKernelND_apply,
-      ← Finset.mul_prod_erase Finset.univ (fun j => heatKernel1D t (x j)) (Finset.mem_univ i)]
-  ring
+  exact h.congr_deriv (by
+    rw [heatKernelND_apply, Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro i _
+    rw [← Finset.mul_prod_erase Finset.univ (fun j => heatKernel1D t (x j))
+      (Finset.mem_univ i)]
+    ring)
 
 /-- Differentiability of the `n`-dim kernel in time. -/
 lemma differentiableAt_heatKernelND_time (n : ℕ) (t : ℝ) (ht : 0 < t)
@@ -2866,7 +2877,9 @@ lemma integral_sq_mul_exp_neg_mul_sq {b : ℝ} (hb : 0 < b) :
     have h3 : HasDerivAt (fun x : ℝ => -(x / (2 * b))) (-(1 / (2 * b))) x := by
       have hid : HasDerivAt (fun x : ℝ => x / (2 * b)) (1 / (2 * b)) x := by
         simpa using (hasDerivAt_id x).div_const (2 * b)
-      simpa using hid.neg
+      rw [show (fun x : ℝ => -(x / (2 * b))) = -(fun x : ℝ => x / (2 * b)) by
+        funext x; rfl]
+      exact hid.neg
     have hmul := h3.mul h2
     have heqv :
         (-(1 / (2 * b))) * Real.exp (-b * x ^ 2)
@@ -3239,7 +3252,7 @@ lemma hasDerivAt_frozenHeatKernel1D_time {a t : ℝ} (ha : 0 < a) (ht : 0 < t) (
     simpa using (hasDerivAt_id t).const_mul a
   have houter := hasDerivAt_heatKernel1D_time (mul_pos ha ht) x
   have hcomp := houter.comp t hinner
-  simpa [frozenHeatKernel1D, Function.comp, mul_comm] using hcomp
+  simpa [frozenHeatKernel1D, Function.comp_def, mul_comm] using hcomp
 
 /-- **The frozen kernel solves the `a`-diffusion equation** `∂ₜGₐ = a·∂ₓₓGₐ`. -/
 lemma frozenHeatKernel1D_heatEquation {a t : ℝ} (ha : 0 < a) (ht : 0 < t) (x : ℝ) :
@@ -4691,7 +4704,8 @@ lemma bounded_lipschitz_evolution_exists {E : Type*} [NormedAddCommGroup E] [Nor
       have hmax : max (T - 0) ((0 : ℝ) - 0) = T := by simp; linarith
       rw [hmax]
       nlinarith
-  obtain ⟨α, hα0, hαderiv⟩ := hpl.exists_eq_forall_mem_Icc_hasDerivWithinAt₀
+  obtain ⟨α, hα0, hαderiv⟩ :=
+    IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀ hpl
   refine ⟨α, ?_, ?_⟩
   · simpa [ht₀] using hα0
   · intro t ht
@@ -4805,7 +4819,8 @@ lemma bounded_lipschitz_evolution_exists_timeDependent
     ∃ α : ℝ → E, α 0 = x0 ∧
       (∀ t ∈ Set.Icc (0 : ℝ) T, HasDerivWithinAt α (g t (α t)) (Set.Icc 0 T) t) := by
   have hpl := isPicardLindelof_of_bounded_lipschitz_timeDependent g x0 T hT L K hbound hlip hcont
-  obtain ⟨α, hα0, hαderiv⟩ := hpl.exists_eq_forall_mem_Icc_hasDerivWithinAt₀
+  obtain ⟨α, hα0, hαderiv⟩ :=
+    IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀ hpl
   exact ⟨α, hα0, hαderiv⟩
 
 /-- **Uniqueness** of the ODE solution for a uniformly Lipschitz time-dependent field
@@ -4891,7 +4906,8 @@ lemma bounded_lipschitz_evolution_exists_timeDependent_Icc
       (∀ t ∈ Set.Icc t₀ T, HasDerivWithinAt α (g t (α t)) (Set.Icc t₀ T) t) := by
   have hpl :=
     isPicardLindelof_of_bounded_lipschitz_timeDependent_Icc g x0 t₀ T hT L K hbound hlip hcont
-  obtain ⟨α, hα0, hαderiv⟩ := hpl.exists_eq_forall_mem_Icc_hasDerivWithinAt₀
+  obtain ⟨α, hα0, hαderiv⟩ :=
+    IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt₀ hpl
   exact ⟨α, hα0, hαderiv⟩
 
 /-- **Uniqueness on `[t₀, T]`** of the ODE solution for a uniformly Lipschitz time-dependent
@@ -5158,7 +5174,8 @@ theorem hasDerivAt_heatSemigroupND_coord {n : ℕ} {t : ℝ} (ht : 0 < t)
     exact hcont.aestronglyMeasurable.mul hfm
   -- Gaussian-envelope domination.
   have hboundint : Integrable bound (volume : Measure (Fin n → ℝ)) := by
-    simpa only [hbound] using (integrable_gaussianEnvelope_erase_prod ht x k).const_mul M
+    simpa only [hbound, Pi.sub_apply] using
+      (integrable_gaussianEnvelope_erase_prod ht x k).const_mul M
   have hbnd : ∀ᵐ y ∂(volume : Measure (Fin n → ℝ)),
       ∀ s ∈ Metric.ball (x k) 1, ‖F' s y‖ ≤ bound y := by
     filter_upwards with y s hs

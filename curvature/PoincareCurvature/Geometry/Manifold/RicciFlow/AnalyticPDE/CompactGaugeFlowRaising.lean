@@ -80,7 +80,7 @@ theorem exists_gaugeFlow_Ioo_of_timeDependent_raisingData
       (by exact inferInstance) (fun _ => by exact inferInstanceAs (NormedAddCommGroup E))
       (fun _ => by exact inferInstanceAs (NormedSpace ℝ E))
       (by exact TangentSpace.fiberBundle) (by exact TangentSpace.vectorBundle)
-      (by exact inferInstance) g om _ _ _ bas hg hom x
+      (by exact ‹ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I›) g om _ _ _ bas hg hom x
   obtain ⟨s, hs_open, hxs, hcont⟩ := h0
   exact ⟨s, hs_open, hxs, hcont⟩
 
