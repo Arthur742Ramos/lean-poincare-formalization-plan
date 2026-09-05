@@ -315,4 +315,114 @@ theorem curvatureCovariantDerivativeInner_doubleContraction
     linarith
   linarith
 
+/-! A source-facing version of the contraction theorem.  Unlike the pointwise wrapper above,
+this theorem takes the smooth vector fields used in the corrected derivative explicitly.  That
+form is useful to keep a Palomar Challenge independent of candidate-local helper modules while
+retaining the same connection-derived proof. -/
+theorem curvatureCovariantDerivativeInner_doubleContraction_sections
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+    (x : M) (hT : cov.torsion = 0) (hmetric : cov.IsMetricCompatibleTangent)
+    {ι : Type*} [Fintype ι]
+    (e : ι → Π y : M, TangentSpace I y)
+    (w : Π y : M, TangentSpace I y)
+    (he : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) 3 (T% (e i)))
+    (hw : ContMDiff I (I.prod 𝓘(ℝ, E)) 3 (T% w)) :
+    (∑ i, ∑ k, inner ℝ
+      (cov.secondBianchiAux w (e k) (e i) (e i) x) (e k x)) =
+      2 * ∑ i, ∑ k, inner ℝ
+        (cov.secondBianchiAux (e i) (e k) (e i) w x) (e k x) := by
+  let SmoothSection := {X : Π y : M, TangentSpace I y //
+    ContMDiff I (I.prod 𝓘(ℝ, E)) 3 (T% X)}
+  let ef : ι → SmoothSection := fun i ↦ ⟨e i, he i⟩
+  let wf : SmoothSection := ⟨w, hw⟩
+  let D : SmoothSection → SmoothSection → SmoothSection → SmoothSection →
+      SmoothSection → ℝ := fun p a b c d ↦
+    inner ℝ (cov.secondBianchiAux p.1 a.1 b.1 c.1 x) (d.1 x)
+  have hfirst (p a b c d : SmoothSection) :
+      D p a b c d = -D p b a c d := by
+    have h := secondBianchiAux_swap_curvature_slots cov x
+      (X := p.1) (Y := a.1) (Z := b.1) (W := c.1)
+      (a.2.of_le (by norm_num : (2 : WithTop ℕ∞) ≤ 3))
+      (b.2.of_le (by norm_num : (2 : WithTop ℕ∞) ≤ 3)) c.2
+    have h' := congrArg (fun z : TangentSpace I x ↦ inner ℝ z (d.1 x)) h
+    change inner ℝ (cov.secondBianchiAux p.1 a.1 b.1 c.1 x) (d.1 x) =
+      -inner ℝ (cov.secondBianchiAux p.1 b.1 a.1 c.1 x) (d.1 x)
+    simpa only [inner_neg_left] using h'
+  have hlast (p a b c d : SmoothSection) :
+      D p a b c d = -D p a b d c := by
+    have h := secondBianchiAux_inner_skew cov hmetric x
+      (p.2.of_le (by norm_num : (2 : WithTop ℕ∞) ≤ 3))
+      a.2 b.2 c.2 d.2
+    have hc : inner ℝ (c.1 x)
+        (cov.secondBianchiAux p.1 a.1 b.1 d.1 x) =
+        inner ℝ (cov.secondBianchiAux p.1 a.1 b.1 d.1 x) (c.1 x) :=
+      real_inner_comm _ _
+    change inner ℝ (cov.secondBianchiAux p.1 a.1 b.1 c.1 x) (d.1 x) =
+      -inner ℝ (cov.secondBianchiAux p.1 a.1 b.1 d.1 x) (c.1 x)
+    linarith [h, hc]
+  have hcyclic (p a b c d : SmoothSection) :
+      D p a b c d + D p b c a d + D p c a b d = 0 := by
+    have h := secondBianchiAux_firstBianchi_inner cov hT x (d.1 x)
+      (p.2.of_le (by norm_num : (2 : WithTop ℕ∞) ≤ 3)) a.2 b.2 c.2
+    simpa only [D] using h
+  have hpair (p a b c d : SmoothSection) :
+      D p a b c d = D p c d a b := by
+    have hf := hfirst p
+    have hl := hlast p
+    have hb := hcyclic p
+    linarith only [hb a b c d, hb a b d c, hb a c d b, hb b c d a,
+      hf c a b d, hl a b d c, hf d a b c, hl a c d b,
+      hf d a c b, hl a d c b, hl b c d a, hl c d b a,
+      hf d b c a, hl b d c a]
+  have hsum :
+      (∑ i, ∑ k, D wf (ef k) (ef i) (ef i) (ef k)) +
+      (∑ i, ∑ k, D (ef k) (ef i) wf (ef i) (ef k)) +
+      (∑ i, ∑ k, D (ef i) wf (ef k) (ef i) (ef k)) = 0 := by
+    simp only [← Finset.sum_add_distrib]
+    apply Finset.sum_eq_zero
+    intro i _
+    apply Finset.sum_eq_zero
+    intro k _
+    have h := cov.secondBianchiAux_apply_of_torsion_eq_zero
+      (hT := hT) (x := x)
+      (X := wf.1) (Y := (ef k).1) (Z := (ef i).1) (W := (ef i).1)
+      (wf.2.of_le (by norm_num : (2 : WithTop ℕ∞) ≤ 3))
+      ((ef k).2.of_le (by norm_num : (2 : WithTop ℕ∞) ≤ 3))
+      ((ef i).2.of_le (by norm_num : (2 : WithTop ℕ∞) ≤ 3))
+      (ef i).2
+    have h' := congrArg (fun z : TangentSpace I x ↦ inner ℝ z ((ef k).1 x)) h
+    simpa only [D, inner_add_left, inner_zero_left] using h'
+  have hsecond :
+      (∑ i, ∑ k, D (ef k) (ef i) wf (ef i) (ef k)) =
+      -(∑ i, ∑ k, D (ef i) (ef k) (ef i) wf (ef k)) := by
+    rw [Finset.sum_comm]
+    simp only [← Finset.sum_neg_distrib]
+    apply Finset.sum_congr rfl
+    intro i _
+    apply Finset.sum_congr rfl
+    intro k _
+    change D (ef i) (ef k) wf (ef k) (ef i) =
+      -D (ef i) (ef k) (ef i) wf (ef k)
+    exact (hfirst (ef i) (ef k) wf (ef k) (ef i)).trans
+      (congrArg Neg.neg (hpair (ef i) wf (ef k) (ef k) (ef i)))
+  have hthird :
+      (∑ i, ∑ k, D (ef i) wf (ef k) (ef i) (ef k)) =
+      -(∑ i, ∑ k, D (ef i) (ef k) (ef i) wf (ef k)) := by
+    simp only [← Finset.sum_neg_distrib]
+    apply Finset.sum_congr rfl
+    intro i _
+    apply Finset.sum_congr rfl
+    intro k _
+    have h : D (ef i) (ef k) (ef i) wf (ef k) =
+        -D (ef i) wf (ef k) (ef i) (ef k) :=
+      (hpair (ef i) (ef k) (ef i) wf (ef k)).trans
+        (hlast (ef i) wf (ef k) (ef k) (ef i))
+    linarith
+  have hmain :
+      (∑ i, ∑ k, D wf (ef k) (ef i) (ef i) (ef k)) =
+      2 * ∑ i, ∑ k, D (ef i) (ef k) (ef i) wf (ef k) := by
+    linarith
+  simpa [D, ef, wf] using hmain
+
 end CovariantDerivative

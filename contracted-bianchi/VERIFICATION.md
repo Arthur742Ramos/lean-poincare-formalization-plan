@@ -1,12 +1,16 @@
 # Verification of the geometric replacement
 
 The selected theorem is `ContractedBianchi.contractedSecondBianchi`.
-Its implementation and contribution record were committed at
-`62247eaa896503a8cbe1f6245ac95ad4a062a644`.
+The current repair keeps the pointwise orthonormal statement but makes the
+Challenge surface independent of the candidate-local `PoincareCurvature`
+namespace. The final immutable commit is the commit containing this document;
+the exact SHA is recorded by Git at submission time.
 
 Verified locally during preparation:
 
-- Standalone `lake build`: passed (2,985 jobs).
+- Standalone `lake build`: passed (2,981 jobs).
+- Canonical-style direct Lean compile of `Challenge.lean` with only the pinned
+  dependency search paths: passed; the only warning is its intentional `sorry`.
 - Comparator: passed for the replacement Challenge and Solution.
 - NanoDa kernel: accepted the solution.
 - Lean default kernel: accepted the solution.
@@ -15,6 +19,10 @@ Verified locally during preparation:
 - The immutable contribution pointer contains the actual document.
 - All ten unchanged vendored Lean modules match their recorded source blobs.
 - One intentional Challenge proof hole; no Solution or dependency proof holes.
+
+The Challenge imports only Mathlib/core-facing manifold interfaces. The local
+`PoincareCurvature` closure is imported only by the Solution-side proof and is
+not required to render the Challenge.
 
 The local replay used the explicit macOS Landrun fallback. This does not
 claim Linux isolation, Palomar-hosted verification, rendering, editorial

@@ -5,11 +5,12 @@
     "ContractedBianchi.contractedSecondBianchi"
   ],
   "definition_names": [
-    "CovariantDerivative.curvatureCovariantDerivative",
-    "CovariantDerivative.curvatureCovariantDerivativeInner",
-    "CovariantDerivative.secondBianchiAux",
-    "CovariantDerivative.curvatureAux",
-    "CovariantDerivative.along"
+    "ContractedBianchi.along",
+    "ContractedBianchi.curvatureAux",
+    "ContractedBianchi.secondBianchiAux",
+    "ContractedBianchi.IsMetricCompatibleTangent",
+    "ContractedBianchi.curvatureCovariantDerivative",
+    "ContractedBianchi.curvatureCovariantDerivativeInner"
   ],
   "permitted_axioms": [
     "propext",

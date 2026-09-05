@@ -8,8 +8,9 @@ The repository's Apache-2.0 license applies. This is implementation provenance,
 not a replacement for the mathematical sources in formalization.yaml.
 
 The new `Curvature/ContractedBianchiBridge.lean` is the proved geometric
-extension for this submission. `Curvature/ContractedBianchi.lean` has an
-introductory documentation correction; its mathematical code is unchanged.
+extension for this submission. It also contains the generic section-level
+bridge used by the Mathlib-only Challenge surface. `Curvature/ContractedBianchi.lean`
+has an introductory documentation correction; its mathematical code is unchanged.
 No unrelated uncommitted Tensor.lean changes were copied.
 
 | Module path beneath PoincareCurvature/ | Original Git blob |

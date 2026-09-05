@@ -33,6 +33,15 @@ trace/differentiation bridge for that field is not part of this result.
 Human oversight consists of the recorded target selection, review feedback,
 and requested changes; no additional human audit is invented here.
 
+For the renderability repair, GPT-6 Codex removed the candidate-local
+`PoincareCurvature` import from `Challenge.lean`, exposed the corrected
+commutator and anchored smooth-extension hypotheses directly in the Challenge,
+and added the corresponding generic section-level bridge theorem to the
+Solution-side dependency closure. The canonical-style direct Lean compile and
+Comparator replay were rerun after that change. This repair preserves the
+pointwise orthonormal contraction while making the Challenge compile from the
+allowlisted Mathlib/core-facing search path.
+
 ## Origin and implementation provenance
 
 This is a formal adaptation of the classical contraction identity, not

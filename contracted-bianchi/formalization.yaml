@@ -5,9 +5,12 @@ project:
   description: >-
     Proves the orthonormal double contraction of the actual corrected curvature
     derivative of a tangent connection on a smooth finite-dimensional real
-    manifold. The derivative symmetries and cyclic Bianchi equations are
-    derived from torsion-freeness and metric compatibility, not assumed as
-    abstract tensor data. No separate Einstein-divergence theorem is selected.
+    manifold. The Challenge exposes the corrected commutator and the smooth
+    tangent-vector extensions explicitly; the Solution instantiates those
+    extensions with the repository's canonical construction. The derivative
+    symmetries and cyclic Bianchi equations are derived from torsion-freeness
+    and metric compatibility, not assumed as abstract tensor data. No separate
+    Einstein-divergence theorem is selected.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -47,9 +50,11 @@ status:
     space; tangent bundle smoothness through order three, connection smoothness
     through order two, and Riemannian bundle smoothness through order two
     (including an explicit order-one instance). The selected theorem assumes
-    torsion-freeness and metric compatibility. It contracts the corrected
-    curvature derivative evaluated on canonical smooth extensions in an
-    orthonormal tangent basis. Compactness and sigma-compactness are not required.
+    torsion-freeness and metric compatibility. At the selected point it takes
+    an explicit C^3 extension for each tangent vector, anchored by evaluation
+    at that point, and contracts the resulting corrected curvature derivative
+    in an orthonormal tangent basis. Compactness and sigma-compactness are not
+    required.
     A separate identification with derivatives of the Ricci/scalar fields,
     extension independence as a bundled derivative tensor, and an Einstein
     divergence theorem are not claimed.
@@ -79,8 +84,9 @@ automation:
 fidelity:
   divergences: >-
     The selected statement is the explicit double contraction of the corrected
-    curvature derivative, with canonical smooth extensions and an orthonormal
-    basis. It does not assert a separately formalized equality with the
+    curvature derivative, with anchored smooth extensions and an orthonormal
+    basis. The proof-side Solution uses the canonical smooth extension from
+    the local dependency closure. It does not assert a separately formalized equality with the
     differential of scalar curvature or divergence of a Ricci/Einstein field.
     Source index conventions are adapted to the repository's curvature
     commutator. The local dependency closure is included in this project;
