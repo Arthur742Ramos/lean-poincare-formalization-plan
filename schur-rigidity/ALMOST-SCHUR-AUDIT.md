@@ -1,5 +1,13 @@
 # Almost-Schur feasibility audit
 
+Implementation follow-up: see `../almost-schur/README.md`. The external
+candidate now rebuilds at both its original pin and an explicitly patched
+Lean 4.33 pin, with axiom checks for the three audited endpoint theorems.
+The new project has proved gradient, Hessian/Laplacian and trace-free tensor
+norm foundations. The audit below records the initial search; its original
+"not built" observations are historical, not the latest validation status.
+The full almost-Schur inequality and equality case remain unproved.
+
 Date: 2026-09-06. Status: source/dependency audit completed; theorem not
 implemented, no replacement Comparator prepared, no submission authorized by
 this document. The maintainer authorized pursuing this direction, beginning
