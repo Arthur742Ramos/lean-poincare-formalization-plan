@@ -65,18 +65,33 @@ research theorem.
 - `AlmostSchur.ConnectionCoordinates`: derives the actual connection's local
   frame expansion from additivity, Leibniz, and differentiable coefficient
   reconstruction. Constructs bilinear frame-connection coefficients and proves
-  the coordinate formula with an explicit coefficient-derivative term.
-  Its identification with the chart's Fréchet derivative remains unfinished.
+  the coordinate formula with the actual chart Fréchet derivative.
+- `AlmostSchur.MetricConnectionCoordinates` and `TorsionCoordinates`:
+  derive coordinate metric compatibility and symmetry from the actual
+  metric-compatible, torsion-free manifold connection.
+- `AlmostSchur.DivergenceCoordinates`, `ChartFlux`, and `ChartGreen`:
+  identify intrinsic divergence with coordinate density divergence and prove
+  Green's identity for chart-supported fields.
+- `AlmostSchur.DivergenceRegularity` and `GlobalGreen`: continuity and
+  integrability of the relevant fields, a finite smooth chart partition of
+  unity, and global integration by parts against normalized Riemannian volume.
+- `AlmostSchur.GradientRegularity` and `HessianSymmetry`: regularity of the
+  actual Riesz gradient and symmetry of the C2 covariant Hessian, derived from
+  metric compatibility and vanishing torsion.
+- `AlmostSchur.GlobalEnergy`: the global Dirichlet form, nonnegative energy,
+  Green's identity for the actual Laplacian, and its zero integral.
+- `AlmostSchur.EnergyKernel`: a vanishing differential forces local constancy
+  by the coordinate mean-value theorem and constancy on connected manifolds.
+  Together with `GlobalEnergy`'s everywhere-zero-gradient characterization,
+  this identifies the energy kernel. It is not a uniform coercivity estimate.
 
-The new local analytic results use finite-dimensional coordinate spaces.
-They are not yet transported through `extChartAt` to the manifold connection.
-The coordinate metric-compatibility assumption is the usual differential
-Gram-matrix identity; its connection-trace consequence is proved, not assumed.
-The local cometric operator is not yet identified with the manifold
-`AlmostSchur.laplacian`. No global Poisson solver or Bochner formula is assumed.
+The local analytic results use finite-dimensional coordinate spaces and are
+transported through `extChartAt` to the manifold connection. Coordinate metric
+compatibility, torsion cancellation, and the global Green identity are proved,
+not assumed. No global Poisson solver or Bochner formula is assumed.
 
-The Hessian is defined relative to a supplied connection; symmetry and smooth
-regularity are not yet proved here. The final result must use Levi–Civita.
+The Hessian is defined relative to a supplied connection; symmetry holds for
+metric-compatible torsion-free connections. The final result must use Levi–Civita.
 All definitions are total as in Mathlib; differentiability obligations must be
 discharged when interpreting or differentiating them.
 
@@ -102,8 +117,8 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-The development passes a local build (3591 jobs), the vendored-source check,
-and an axiom audit of all 150 public declarations.
+The development passes a local build (3631 jobs), the vendored-source check,
+and an axiom audit of all 228 public declarations.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
 evidence and must be checked at the exact source commit.
@@ -111,14 +126,10 @@ The volume/chart modules retain non-fatal local-instance style warnings.
 
 ## Remaining work, in order
 
-1. Transport the coordinate connection/metric compatibility and Green
-   identities through manifold charts; assemble with a partition of unity.
-   Finish smooth manifold gradient/Hessian theory. Local energy is proved,
-   but global integration by parts is not.
-2. Mean-zero coercivity, weak Poisson existence and smooth elliptic regularity.
-3. Integrated Bochner and the geometric almost-Schur inequality.
-4. Einstein equality rigidity, exact source/hypothesis audit.
-5. Only then: independent Challenge/Solution packaging and kernel replay.
+1. Mean-zero coercivity, weak Poisson existence and smooth elliptic regularity.
+2. Integrated Bochner and the geometric almost-Schur inequality.
+3. Einstein equality rigidity, exact source/hypothesis audit.
+4. Only then: independent Challenge/Solution packaging and kernel replay.
 
 The normalized density measure is now constructed, with finite positive total
 mass under the hypotheses above. Equality with intrinsic Hausdorff volume is

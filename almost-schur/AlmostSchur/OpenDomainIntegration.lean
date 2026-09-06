@@ -78,6 +78,30 @@ variable {W : Type*} [NormedAddCommGroup W] [InnerProductSpace ℝ W]
   [FiniteDimensional ℝ W] [MeasurableSpace W] [BorelSpace W]
   {ν : Measure W} [Measure.IsAddHaarMeasure ν]
 
+omit [MeasurableSpace W] [BorelSpace W] in
+/-- The derivative trace of a C1 field is continuous on its open domain. -/
+theorem continuousOn_localDivergence {U : Set W} (hU : IsOpen U) (X : W → W)
+    (hX : ContDiffOn ℝ 1 X U) : ContinuousOn (localDivergence X) U := by
+  classical
+  let b := stdOrthonormalBasis ℝ W
+  have heq : localDivergence X = fun x => ∑ i, inner ℝ (b i) (fderiv ℝ X x (b i)) := by
+    funext x
+    exact localDivergence_eq_sum X x b
+  rw [heq]
+  apply continuousOn_finset_sum
+  intro i _
+  exact continuousOn_const.inner
+    ((hX.continuousOn_fderiv_of_isOpen hU (by norm_num)).clm_apply continuousOn_const)
+
+omit [MeasurableSpace W] [BorelSpace W] in
+/-- Positive C1 density and C1 field give continuous density divergence. -/
+theorem continuousOn_localDensityDivergence {U : Set W} (hU : IsOpen U)
+    (ρ : W → ℝ) (X : W → W) (hρ : ContDiffOn ℝ 1 ρ U)
+    (hX : ContDiffOn ℝ 1 X U) (hpos : ∀ x ∈ U, 0 < ρ x) :
+    ContinuousOn (localDensityDivergence ρ X) U :=
+  (continuousOn_localDivergence hU _ (hρ.smul hX)).div hρ.continuousOn
+    (fun x hx => (hpos x hx).ne')
+
 /-- Vector Green identity on an open domain: the test function is C1 only
 on that domain, and the vector field has compact support inside it. -/
 theorem integral_mul_localDivergence_openDomain {U : Set W} (hU : IsOpen U)

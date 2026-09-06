@@ -130,4 +130,102 @@ theorem covariantDerivative_coordinates
     intro i _
     rw [localFrame_coordinates e b x hx]
 
+set_option backward.isDefEq.respectTransparency false in
+/-- Differentiation in a chart is differentiation on the manifold evaluated
+on the inverse tangent trivialization. -/
+theorem fderiv_chart_comp [I.Boundaryless]
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (a : M → F) (c x : M) (hx : x ∈ (chartAt H c).source)
+    (ha : MDiffAt a x) (u : E) :
+    fderiv ℝ (a ∘ (extChartAt I c).symm) (extChartAt I c x) u =
+      mvfderiv I a x ((trivializationAt E TM c).symmL ℝ x u) := by
+  have hx' : x ∈ (extChartAt I c).source := by simpa using hx
+  have hi := mdifferentiableWithinAt_extChartAt_symm
+    (I := I) (x := c) ((extChartAt I c).map_source hx')
+  have hi' : MDiffAt (extChartAt I c).symm (extChartAt I c x) := by
+    simpa only [I.range_eq_univ, mdifferentiableWithinAt_univ] using hi
+  have h := mfderiv_comp_apply_of_eq (extChartAt I c x) ha hi'
+    ((extChartAt I c).left_inv hx') u
+  rw [TangentBundle.symmL_trivializationAt hx]
+  simp only [I.range_eq_univ, mfderivWithin_univ, mvfderiv, mfderiv_eq_fderiv,
+    ContinuousLinearMap.comp_apply] at *
+  convert! h using 0
+
+/-- The coefficient reconstruction also holds outside the trivialization
+domain, where both sides are defined to be zero. -/
+theorem localFrameCoeff_sum_coordinates {ι : Type*} [Fintype ι]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (σ : Π x : M, TM x) (x : M) :
+    (∑ i : ι, e.localFrameCoeff I b i x (σ x) • b i) =
+      e.continuousLinearMapAt ℝ x (σ x) := by
+  by_cases hx : x ∈ e.baseSet
+  · simp only [e.localFrameCoeff_eq_coeff (b := b) hx, b.sum_repr,
+      e.continuousLinearMapAt_apply_of_mem ℝ hx]
+  · simp [e.localFrameCoeff_apply_of_notMem_baseSet b hx,
+      Trivialization.continuousLinearMapAt_apply, e.linearMapAt_def_of_notMem hx]
+
+/-- The genuine covariant derivative is the ordinary derivative of the
+coordinate vector field plus its frame-connection term. -/
+theorem covariantDerivative_chart [I.Boundaryless]
+    (cov : CovariantDerivative I E TM) {ι : Type*} [Fintype ι]
+    (b : Module.Basis ι ℝ E) (σ : Π x : M, TM x) (c x : M)
+    (hx : x ∈ (chartAt H c).source) (hσ : MDiffAt (T% σ) x) (u : E) :
+    let e := trivializationAt E TM c
+    e.continuousLinearMapAt ℝ x (cov σ x (e.symmL ℝ x u)) =
+      frameConnectionCoefficients cov e b x u (e.continuousLinearMapAt ℝ x (σ x)) +
+        fderiv ℝ (fun z => e.continuousLinearMapAt ℝ ((extChartAt I c).symm z)
+          (σ ((extChartAt I c).symm z))) (extChartAt I c x) u := by
+  classical
+  let e := trivializationAt E TM c
+  have hxe : x ∈ e.baseSet := hx
+  let a := fun i y => e.localFrameCoeff I b i y (σ y)
+  have ha (i : ι) : MDiffAt (a i) x := mdifferentiableAt_localFrameCoeff b hxe hσ i
+  have hx' : x ∈ (extChartAt I c).source := by simpa using hx
+  have hi : MDiffAt (extChartAt I c).symm (extChartAt I c x) := by
+    simpa only [I.range_eq_univ, mdifferentiableWithinAt_univ] using
+      (mdifferentiableWithinAt_extChartAt_symm (I := I) (x := c)
+        ((extChartAt I c).map_source hx'))
+  have hd (i : ι) : DifferentiableAt ℝ (a i ∘ (extChartAt I c).symm)
+      (extChartAt I c x) :=
+    mdifferentiableAt_iff_differentiableAt.mp
+      ((ha i).comp_of_eq (extChartAt I c x) hi ((extChartAt I c).left_inv hx'))
+  change e.continuousLinearMapAt ℝ x (cov σ x (e.symmL ℝ x u)) = _
+  rw [covariantDerivative_coordinates cov e b σ x hxe hσ]
+  congr 1
+  have heq : (fun z => e.continuousLinearMapAt ℝ ((extChartAt I c).symm z)
+      (σ ((extChartAt I c).symm z))) =
+      (fun z => ∑ i : ι, (a i ∘ (extChartAt I c).symm) z • b i) := by
+    funext z
+    exact (localFrameCoeff_sum_coordinates e b σ _).symm
+  rw [heq, fderiv_fun_sum (fun i _ => (hd i).smul_const (b i))]
+  simp only [ContinuousLinearMap.sum_apply]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [fderiv_smul_const (hd i), ContinuousLinearMap.smulRight_apply,
+    fderiv_chart_comp (a i) c x hx (ha i)]
+
+/-- The local frame is precisely the inverse trivialization of the basis,
+including the common zero extension outside the chart. -/
+theorem localFrame_eq_symmL {ι : Type*}
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E) (i : ι) (x : M) :
+    e.localFrame b i x = e.symmL ℝ x (b i) := by
+  by_cases hx : x ∈ e.baseSet
+  · rw [e.localFrame_apply_of_mem_baseSet b hx]
+    change (e.linearEquivAt ℝ x hx).symm (b i) = _
+    rw [e.linearEquivAt_symm_apply, e.symmL_apply hx]
+  · rw [e.localFrame_apply_of_notMem b hx, e.symmL_apply_of_notMem hx]
+
+/-- Connection coefficients on a basis vector recover the derivative of
+that actual frame vector. -/
+theorem frameConnectionCoefficients_basis
+    (cov : CovariantDerivative I E TM) {ι : Type*} [Fintype ι]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E) (x : M) (u : E) (i : ι) :
+    frameConnectionCoefficients cov e b x u (b i) =
+      e.continuousLinearMapAt ℝ x (cov (e.localFrame b i) x (e.symmL ℝ x u)) := by
+  classical
+  simp [frameConnectionCoefficients_apply, Finsupp.single_apply]
+
 end AlmostSchur

@@ -17,3 +17,14 @@ public import AlmostSchur.NormalizedMeasure
 public import AlmostSchur.VolumeIntegration
 public import AlmostSchur.OpenDomainIntegration
 public import AlmostSchur.ConnectionCoordinates
+public import AlmostSchur.MetricConnectionCoordinates
+public import AlmostSchur.TorsionCoordinates
+public import AlmostSchur.DivergenceCoordinates
+public import AlmostSchur.ChartFlux
+public import AlmostSchur.ChartGreen
+public import AlmostSchur.DivergenceRegularity
+public import AlmostSchur.GlobalGreen
+public import AlmostSchur.GradientRegularity
+public import AlmostSchur.GlobalEnergy
+public import AlmostSchur.HessianSymmetry
+public import AlmostSchur.EnergyKernel
