@@ -12,6 +12,12 @@ before the Ricci-flow-with-surgery endpoint is reached.
 
 ## Registration lineage clarification
 
+**Maintainer instruction (2026-09-06): every future submission in this project
+is a new entry, not a version update.** Use a distinct result subproject and
+Comparator path, with no existing Palomar ID. Preserve the historical versions
+below as history only. If registry rules prevent a separate entry, report that
+conflict; do not silently submit a new version. See the root `AGENTS.md`.
+
 The first three artifacts were not three Palomar registry IDs. They reused
 the same repository/project/Comparator identity, so Palomar correctly kept
 them as versions 1--3 of `PALOMAR-2026-09-02-000007`:
@@ -71,7 +77,8 @@ and authorization relationship have been explicitly confirmed.
 | 17 | Non-collapsing and ancient solutions | No-local-collapsing and the dimension-three singularity-model theory | Future |
 | 18 | Canonical neighborhoods and surgery | Neck/cap recognition and Ricci flow with surgery | Future; high-value differentiated target |
 | 19 | Topology, extinction, and Poincare corollaries | Topological surgery bookkeeping, finite-time extinction, and topological/smooth corollaries | Future; final endpoint family |
-| CB-01 | Contracted second Bianchi identity | Explicit Ricci/scalar trace contraction of the cyclic second Bianchi identity and divergence-free Einstein tensor | In preparation as a fresh `contracted-bianchi/` project; no Palomar ID or `existing_id` assigned |
+| CB-01 | Double-contracted second Bianchi identity | Double contraction of the actual corrected curvature derivative; no separate Ricci/scalar differentiation or Einstein-divergence identity | Passed (user-confirmed 2026-09-06), submitted commit `90d215d81d30a5f67922dce00dfa160b4878e1c5`; public registration not independently checked |
+| SR-01 | Schur rigidity and geometric contracted Bianchi | Actual Ricci/scalar differentiation, divergence-free Einstein tensor, and global Einstein-factor constancy; three-dimensional full-curvature rigidity | All four selected theorems proved; local build, Comparator and NanoDa passed. Distinct `schur-rigidity/` new entry under preparation, never CB-01 v2; see its verification record for hosted status |
 
 The table is a portfolio, not a promise that every row should be submitted as
 written. A row may be merged with a neighboring row when the dependency closure
@@ -84,8 +91,9 @@ library result has an independently defensible boundary.
    are versions 1--3 of the existing Palomar identity
    `PALOMAR-2026-09-02-000007`.
 2. Do not resubmit 05. Its 784… intake was an attempted version 4 of that
-   identity and was withdrawn; any future intake at the same identity must set
-   the external `existing_id` field to the full Palomar ID.
+   identity and was withdrawn. Under the current maintainer instruction, do
+   not make further intakes at that identity; build genuinely distinct new
+   entries instead.
 3. Audit 06–12 for a theorem-level consequence that is stronger than routine
    transport, projection, scaling, or ODE assembly. No unreviewed row is
    currently cleared for submission.
@@ -96,10 +104,11 @@ library result has an independently defensible boundary.
 5. Treat 13–19 as later milestone submissions whose status changes only when
    their actual mathematical content is proved and the same notability gate
    has been met.
-6. Keep `contracted-bianchi/` on a fresh-submission track. Its Comparator
-   selects the contracted identity and divergence-free Einstein tensor under a
-   new project path; do not populate an `existing_id` with the registered
-   curvature record.
+6. Preserve the passed `contracted-bianchi/` artifact. Its selected result is
+   the double-contracted corrected curvature-derivative identity, not a
+   separate Einstein-divergence theorem. Prepare the actual geometric
+   Ricci/scalar identities and rigidity consequences under the distinct
+   `schur-rigidity/` path with a blank `existing_id`.
 
 ## What passed, and why the later candidate failed
 
