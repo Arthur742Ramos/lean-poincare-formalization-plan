@@ -10,7 +10,11 @@ Lean differentiation bridges improve the formal library but do not by
 themselves establish a distinct mathematical extension. No amount of receipt
 repair establishes that missing mathematical contribution.
 
-## Candidate direction requiring a scope decision
+## Authorized research direction; implementation not yet complete
+
+The maintainer has authorized pursuing almost-Schur, starting with feasibility.
+See [the completed initial audit](ALMOST-SCHUR-AUDIT.md) for source mapping,
+dependency evidence, semantic pitfalls and ordered implementation gates.
 
 De Lellis and Topping's *Almost-Schur lemma*, Theorem 1.1, gives a quantitative
 extension: on a closed connected Riemannian manifold of dimension n >= 3 with
@@ -35,8 +39,8 @@ the equality-case argument. These cannot be supplied as hypotheses replacing
 the mathematical work. Availability of these dependencies in the wider
 repository and pinned Mathlib still needs a dedicated feasibility audit.
 
-Before changing the selected result, agree the expanded scope with the
-maintainer. Then map the exact source theorem and all hypotheses, audit prior
+Before changing the selected result, discharge the audit's implementation
+gates. Map the exact source theorem and all hypotheses, audit prior
 formalizations and attribution, prove the geometric and analytic obligations,
 and independently verify the resulting immutable Challenge/Solution boundary.
 Do not replace the current Comparator with an unproved or conditional stand-in.
