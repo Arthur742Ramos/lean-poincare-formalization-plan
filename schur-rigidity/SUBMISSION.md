@@ -1,4 +1,4 @@
-# New-entry submission preparation
+# New-entry submission
 
 Title: **Schur rigidity and geometric contracted Bianchi**
 
@@ -9,8 +9,25 @@ Title: **Schur rigidity and geometric contracted Bianchi**
 - Prepared artifact commit: `4317d35a3cf3bbf02859fcd811e8dacc83f51739`.
   Do not use a moving branch name or silently substitute a later commit.
 - Existing entry ID: **leave blank**. This is never a v2 of another entry.
-- Authorization: Arthur Freitas Ramos requested preparation as maintainer.
-  Preparation does not authorize intake or public registration.
+- Authorization: Arthur Freitas Ramos explicitly authorized this exact prepared
+  artifact's intake with "Let's submit it" on 2026-09-06. Relationship:
+  responsible author or maintainer. Public registration remains a separate
+  decision after the private review.
+
+## Intake receipt
+
+- Submission ID: `l20vtgq7gct2`
+- Created: 2026-09-06 at 16:21:03 UTC
+- Exact source: `4317d35a3cf3bbf02859fcd811e8dacc83f51739`
+- Existing ID omitted: new Schur entry, not a version update.
+- Initial service status: `verifying` (preparation and mechanical verification
+  queued). No editorial result or public registration is claimed.
+- Used the documented GitHub CLI tag-and-secret-gist proof-of-access flow.
+  Both temporary proof artifacts were deleted after verification of access.
+- Registration consent: false.
+
+The credential-bearing status link is deliberately not recorded in the
+repository. Do not create another intake merely because the review is pending.
 
 ## Suggested description
 
@@ -37,9 +54,9 @@ belongs to this prepared artifact. Its [Linux verification run](https://github.c
 is bound to the same commit. This handoff document may be updated later to
 record receipts without changing that immutable artifact identity.
 
-Linux Comparator/NanoDa and isolated Challenge verification passed; the
-receipt is recorded in `VERIFICATION.md`. Obtain explicit submission
-authorization before intake. Preparation is complete, but no intake has
-been made for this new entry.
+Independent Linux Comparator/NanoDa and isolated Challenge verification passed;
+the receipt is recorded in `VERIFICATION.md`. The authorized Palomar intake
+above is now pending its own hosted checks. Show the private review and obtain
+explicit registration authorization before publishing it.
 If registry rules prevent a new independent entry, report the conflict
 instead of using an existing ID or submitting a version update.

@@ -47,5 +47,7 @@ Builds retain non-fatal style, deprecated-API and unused-section-variable
 warnings. The four intentional Challenge theorem placeholders are separate
 from the verified Solution, whose axiom closure contains no `sorryAx`.
 
-The new entry is mechanically verified and prepared. No Palomar intake,
-editorial approval or public registration has been performed for it.
+The artifact passed these independent mechanical checks. Palomar intake
+`l20vtgq7gct2` was subsequently created on 2026-09-06 at 16:21:03 UTC and queued
+its own hosted verification. No Palomar editorial result or public registration
+is claimed; see `SUBMISSION.md` for the distinct intake receipt.
