@@ -12,7 +12,7 @@ case. Measurability of chart images is proved through its restricted embedding.
 
 @[expose] public noncomputable section
 open Bundle Set MeasureTheory
-open scoped Manifold
+open scoped Manifold ENNReal
 
 namespace AlmostSchur
 
@@ -124,5 +124,91 @@ theorem chartMetricIntegral_eq (b : Module.Basis ι ℝ E) (c c' : M) {s : Set M
   simp only [coordinateMetric, F, Function.comp_apply, (extChartAt I c).left_inv (hc hx),
     (extChartAt I c').left_inv (hc' hx), smul_eq_mul]
   rw [ht, mul_assoc]
+
+/-- Nonnegative metric-density integration, including infinite mass. -/
+def chartMetricLIntegral (b : Module.Basis ι ℝ E) (c : M) (s : Set M)
+    (f : M → ℝ≥0∞) : ℝ≥0∞ :=
+  ∫⁻ y in extChartAt I c '' s,
+    ENNReal.ofReal (matrixDensity (coordinateMetric (I := I) b c y)) *
+      f ((extChartAt I c).symm y) ∂μ
+
+/-- Chart independence also holds before any finiteness or integrability
+assumption, as needed for constructing a measure. -/
+theorem chartMetricLIntegral_eq (b : Module.Basis ι ℝ E) (c c' : M) {s : Set M}
+    (hs : MeasurableSet s) (hc : s ⊆ (extChartAt I c).source)
+    (hc' : s ⊆ (extChartAt I c').source) (f : M → ℝ≥0∞) :
+    chartMetricLIntegral (I := I) μ b c s f =
+      chartMetricLIntegral (I := I) μ b c' s f := by
+  let F := extChartAt I c' ∘ (extChartAt I c).symm
+  have hd : ∀ y ∈ extChartAt I c '' s, DifferentiableAt ℝ F y := by
+    rintro y ⟨x, hx, rfl⟩
+    exact extChartAt_transition_differentiableAt c c' x (hc hx) (hc' hx)
+  have h := lintegral_image_eq_lintegral_abs_det_fderiv_mul μ
+    (measurableSet_extChartAt_image c hs hc)
+    (fun y hy => (hd y hy).hasFDerivAt.hasFDerivWithinAt)
+    (extChartAt_transition_injOn c c' hc hc')
+    (fun y => ENNReal.ofReal (matrixDensity (coordinateMetric (I := I) b c' y)) *
+      f ((extChartAt I c').symm y))
+  rw [extChartAt_transition_image c c' hc] at h
+  unfold chartMetricLIntegral
+  rw [h]
+  apply setLIntegral_congr_fun (measurableSet_extChartAt_image c hs hc)
+  rintro y ⟨x, hx, rfl⟩
+  have ht := tangentChart_density_transition (I := I) b c c' x
+    (by simpa only [extChartAt_source, Set.mem_inter_iff] using And.intro (hc hx) (hc' hx))
+  simp only [coordinateMetric, F, Function.comp_apply, (extChartAt I c).left_inv (hc hx),
+    (extChartAt I c').left_inv (hc' hx)]
+  rw [ht, ENNReal.ofReal_mul (abs_nonneg _), mul_assoc]
+
+/-- The Riemannian density measure on one chart, extended by zero off its
+source. The restricted chart is a measurable embedding. -/
+def chartMetricMeasure (b : Module.Basis ι ℝ E) (c : M) : Measure M :=
+  let e := boundarylessExtChart (I := I) c
+  Measure.map (Subtype.val : e.source → M)
+    ((μ.withDensity fun y => ENNReal.ofReal
+      (matrixDensity (coordinateMetric (I := I) b c y))).comap
+        (e.source.domRestrict e))
+
+/-- On a measurable subset of its chart, the measure is exactly the
+nonnegative integral of the metric density. -/
+theorem chartMetricMeasure_apply (b : Module.Basis ι ℝ E) (c : M) {s : Set M}
+    (hs : MeasurableSet s) (hc : s ⊆ (extChartAt I c).source) :
+    chartMetricMeasure (I := I) μ b c s =
+      chartMetricLIntegral (I := I) μ b c s (fun _ => 1) := by
+  let e := boundarylessExtChart (I := I) c
+  have he := e.isOpenEmbedding_restrict.measurableEmbedding
+  have heq : e.source.domRestrict e '' (Subtype.val ⁻¹' s) = extChartAt I c '' s := by
+    ext y
+    constructor
+    · rintro ⟨⟨x, hx⟩, hxs, rfl⟩
+      exact ⟨x, hxs, rfl⟩
+    · rintro ⟨x, hx, rfl⟩
+      exact ⟨⟨x, hc hx⟩, hx, rfl⟩
+  unfold chartMetricMeasure
+  rw [Measure.map_apply measurable_subtype_coe hs,
+    Measure.comap_apply _ he.injective (fun t ht => he.measurableSet_image' ht) _
+      (measurable_subtype_coe hs)]
+  rw [heq, withDensity_apply _ (measurableSet_extChartAt_image c hs hc)]
+  simp only [chartMetricLIntegral, mul_one]
+
+/-- The chart measures agree on every measurable common domain. -/
+theorem chartMetricMeasure_apply_eq (b : Module.Basis ι ℝ E) (c c' : M) {s : Set M}
+    (hs : MeasurableSet s) (hc : s ⊆ (extChartAt I c).source)
+    (hc' : s ⊆ (extChartAt I c').source) :
+    chartMetricMeasure (I := I) μ b c s = chartMetricMeasure (I := I) μ b c' s := by
+  rw [chartMetricMeasure_apply μ b c hs hc, chartMetricMeasure_apply μ b c' hs hc']
+  exact chartMetricLIntegral_eq μ b c c' hs hc hc' _
+
+/-- Compatibility as equality of measures restricted to an overlap, the
+gluing condition for a global Riemannian measure. -/
+theorem chartMetricMeasure_restrict_eq (b : Module.Basis ι ℝ E) (c c' : M)
+    {s : Set M} (hs : MeasurableSet s) (hc : s ⊆ (extChartAt I c).source)
+    (hc' : s ⊆ (extChartAt I c').source) :
+    (chartMetricMeasure (I := I) μ b c).restrict s =
+      (chartMetricMeasure (I := I) μ b c').restrict s := by
+  ext t ht
+  rw [Measure.restrict_apply ht, Measure.restrict_apply ht]
+  exact chartMetricMeasure_apply_eq μ b c c' (ht.inter hs)
+    (fun _ hx => hc hx.2) (fun _ hx => hc' hx.2)
 
 end AlmostSchur

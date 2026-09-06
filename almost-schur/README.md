@@ -39,7 +39,9 @@ research theorem.
   tangent metric and their density transformation by the genuine derivative
   of a manifold chart change.
 - `AlmostSchur.ChartIntegration`: measurable chart images and equality of
-  metric-density integrals in two charts on any measurable overlap.
+  metric-density integrals in two charts on any measurable overlap, including
+  nonnegative integrals with infinite values. Constructs local density measures
+  and proves equality of their restrictions to measurable chart overlaps.
 
 The new local analytic results use finite-dimensional coordinate spaces.
 They are not yet transported through `extChartAt` to the manifold connection.
@@ -76,7 +78,7 @@ The volume extension passed a local build (3493 jobs) and
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
 The chart metric/integration extension passes a local build (3585 jobs),
-the vendored-source check, and an axiom audit of all 93 public declarations.
+the vendored-source check, and an axiom audit of all 99 public declarations.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
 evidence and must be checked at the exact source commit.

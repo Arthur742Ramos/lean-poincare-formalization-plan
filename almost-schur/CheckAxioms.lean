@@ -93,3 +93,9 @@ import AlmostSchur
 #print axioms AlmostSchur.measurableSet_extChartAt_image
 #print axioms AlmostSchur.chartMetricIntegral
 #print axioms AlmostSchur.chartMetricIntegral_eq
+#print axioms AlmostSchur.chartMetricLIntegral
+#print axioms AlmostSchur.chartMetricLIntegral_eq
+#print axioms AlmostSchur.chartMetricMeasure
+#print axioms AlmostSchur.chartMetricMeasure_apply
+#print axioms AlmostSchur.chartMetricMeasure_apply_eq
+#print axioms AlmostSchur.chartMetricMeasure_restrict_eq
