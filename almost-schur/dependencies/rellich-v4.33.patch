@@ -1,0 +1,2469 @@
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/H1.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/H1.lean
+index fcec4d8..2ceff7f 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/H1.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/H1.lean
+@@ -72,3 +72,3 @@ def C1c : Submodule ℝ (E → ℝ) where
+     refine ⟨contDiff_const, ?_⟩
+-    simpa using (HasCompactSupport.zero : HasCompactSupport (fun _ : E => (0 : ℝ)))
++    simpa using! (HasCompactSupport.zero : HasCompactSupport (fun _ : E => (0 : ℝ)))
+   add_mem' := by
+@@ -80,3 +80,3 @@ def C1c : Submodule ℝ (E → ℝ) where
+     -- `HasCompactSupport` is stable under pointwise scalar multiplication.
+-    simpa using (HasCompactSupport.smul_left (f := fun _ : E => c) hf.2)
++    simpa using! (HasCompactSupport.smul_left (f := fun _ : E => c) hf.2)
+ 
+@@ -90,3 +90,3 @@ lemma continuous_grad {f : E → ℝ} (hf : ContDiff ℝ 1 f) : Continuous (grad
+     (InnerProductSpace.toDual ℝ E).symm.continuous.comp hcont
+-  simpa [grad] using this
++  simpa [grad] using! this
+ 
+@@ -97,3 +97,3 @@ lemma hasCompactSupport_grad {f : E → ℝ} (hf : HasCompactSupport f) :
+   -- `grad` is composition with a linear map sending `0` to `0`.
+-  simpa [grad] using
++  simpa [grad] using!
+     (HasCompactSupport.comp_left (f := fderiv ℝ f) (g := (InnerProductSpace.toDual ℝ E).symm)
+@@ -104,3 +104,3 @@ lemma tsupport_grad_subset (f : E → ℝ) : tsupport (grad (E := E) f) ⊆ tsup
+       tsupport (grad (E := E) f) ⊆ tsupport (fderiv ℝ f) := by
+-    simpa [grad, Function.comp] using
++    simpa [grad, Function.comp] using!
+       (tsupport_comp_subset
+@@ -150,3 +150,3 @@ private lemma toL2_add (f g : ↥(C1c (E := E))) :
+     _ = ((toL2 (μ := μ) (E := E) f + toL2 (μ := μ) (E := E) g : L2ℝ (μ := μ)) : E → ℝ) x := by
+-      simpa [Pi.add_apply] using hxadd.symm
++      simpa [Pi.add_apply] using! hxadd.symm
+ 
+@@ -201,3 +201,3 @@ private lemma toL2Grad_add (f g : ↥(C1c (E := E))) :
+             E → E) x := by
+-        simpa [Pi.add_apply] using hxadd.symm
++        simpa [Pi.add_apply] using! hxadd.symm
+ 
+@@ -223,3 +223,3 @@ private lemma toL2Grad_smul (c : ℝ) (f : ↥(C1c (E := E))) :
+       -- `Lp.coeFn_smul` gives the pointwise evaluation of `c • f` in `L²`.
+-      simpa [Pi.smul_apply] using hxsmul.symm
++      simpa [Pi.smul_apply] using! hxsmul.symm
+ 
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/H2.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/H2.lean
+index 903c360..bf46fce 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/H2.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/H2.lean
+@@ -50,3 +50,3 @@ def C2c : Submodule ℝ (E → ℝ) where
+     refine ⟨contDiff_const, ?_⟩
+-    simpa using (HasCompactSupport.zero : HasCompactSupport (fun _ : E => (0 : ℝ)))
++    simpa using! (HasCompactSupport.zero : HasCompactSupport (fun _ : E => (0 : ℝ)))
+   add_mem' := by
+@@ -57,3 +57,3 @@ def C2c : Submodule ℝ (E → ℝ) where
+     refine ⟨hf.1.const_smul c, ?_⟩
+-    simpa using (HasCompactSupport.smul_left (f := fun _ : E => c) hf.2)
++    simpa using! (HasCompactSupport.smul_left (f := fun _ : E => c) hf.2)
+ 
+@@ -79,4 +79,4 @@ lemma contDiff_grad_of_contDiff2 {f : E → ℝ} (hf : ContDiff ℝ 2 f) :
+   have hfderiv' : ContDiff ℝ 1 fun x => (fderiv ℝ f x : StrongDual ℝ E) := by
+-    simpa using hfderiv
+-  simpa [grad] using (InnerProductSpace.toDual ℝ E).symm.contDiff.comp hfderiv'
++    simpa using! hfderiv
++  simpa [grad] using! (InnerProductSpace.toDual ℝ E).symm.contDiff.comp hfderiv'
+ 
+@@ -85,3 +85,3 @@ lemma continuous_hess {f : E → ℝ} (hf : ContDiff ℝ 2 f) : Continuous (hess
+   have hcont : Continuous (fderiv ℝ (grad (E := E) f)) := hgrad.continuous_fderiv one_ne_zero
+-  simpa [hess] using hcont
++  simpa [hess] using! hcont
+ 
+@@ -91,3 +91,3 @@ lemma hasCompactSupport_hess {f : E → ℝ} (hf : HasCompactSupport f) :
+   have : HasCompactSupport (fderiv ℝ (grad (E := E) f)) := hcs_grad.fderiv ℝ
+-  simpa [hess] using this
++  simpa [hess] using! this
+ 
+@@ -151,3 +151,3 @@ private lemma toL2Hess_add (f g : ↥(C2c (E := E))) :
+     have := hess_add (E := E) f.2.1 g.2.1
+-    simpa using congrArg (fun h => h x) this
++    simpa using! congrArg (fun h => h x) this
+   calc
+@@ -161,3 +161,3 @@ private lemma toL2Hess_add (f g : ↥(C2c (E := E))) :
+             E → (E →L[ℝ] E)) x := by
+-        simpa [Pi.add_apply] using hxadd.symm
++        simpa [Pi.add_apply] using! hxadd.symm
+ 
+@@ -176,3 +176,3 @@ private lemma toL2Hess_smul (c : ℝ) (f : ↥(C2c (E := E))) :
+     have := hess_smul (E := E) (c := c) (f := f.1) f.2.1
+-    simpa using congrArg (fun h => h x) this
++    simpa using! congrArg (fun h => h x) this
+   calc
+@@ -183,3 +183,3 @@ private lemma toL2Hess_smul (c : ℝ) (f : ↥(C2c (E := E))) :
+         ((c • toL2Hess (μ := μ) (E := E) f : L2EE (μ := μ)) : E → (E →L[ℝ] E)) x := by
+-        simpa [Pi.smul_apply] using hxsmul.symm
++        simpa [Pi.smul_apply] using! hxsmul.symm
+ 
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Approximation.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Approximation.lean
+index 1ae0860..3cf5db5 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Approximation.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Approximation.lean
+@@ -81,5 +81,5 @@ lemma kernelMeasure_univ (hψc : Continuous ψ) (hψcs : HasCompactSupport ψ) (
+   -- Conclude using `∫ ψ = 1`.
+-  simpa [hψint] using (hwd.trans hlin)
++  simpa [hψint] using! (hwd.trans hlin)
+ 
+-local instance instIsProbabilityMeasure_kernelMeasure
++private lemma instIsProbabilityMeasure_kernelMeasure
+     (hψc : Continuous ψ) (hψcs : HasCompactSupport ψ)
+@@ -106,3 +106,3 @@ lemma integral_kernelMeasure_eq_integral_smul (hψc : Continuous ψ) (hψ0 : ∀
+         ∫ x, (ENNReal.ofReal (ψ x)).toReal • (g x) ∂(volume : Measure E) := by
+-    simpa [kernelMeasure] using hwd
++    simpa [kernelMeasure] using! hwd
+   -- Simplify `toReal (ofReal _)` using `ψ ≥ 0`.
+@@ -120,3 +120,3 @@ lemma integral_kernelMeasure_eq_integral_mul (hψc : Continuous ψ) (hψ0 : ∀
+       ∫ x, (ψ x) * (g x) ∂(volume : Measure E) := by
+-  simpa [smul_eq_mul] using integral_kernelMeasure_eq_integral_smul (E := E) (ψ := ψ) hψc hψ0 g
++  simpa [smul_eq_mul] using! integral_kernelMeasure_eq_integral_smul (E := E) (ψ := ψ) hψc hψ0 g
+ 
+@@ -157,3 +157,3 @@ lemma sq_integral_le_integral_sq_of_isProbabilityMeasure {α : Type*} [Measurabl
+       0 ≤ (∫ x, (f x) ^ 2 ∂μ) - (∫ x, f x ∂μ) ^ 2 := by
+-    simpa [ProbabilityTheory.variance_eq_sub (μ := μ) hf] using hvar
++    simpa [ProbabilityTheory.variance_eq_sub (μ := μ) hf] using! hvar
+   linarith
+@@ -191,3 +191,3 @@ lemma norm_sq_translateL2_sub_extendByZeroL2_eq_integral_sq (t : E)
+       MeasureTheory.measurePreserving_sub_right (μ := (volume : Measure E)) t
+-    simpa [Function.comp] using (hmp.quasiMeasurePreserving.ae_eq_comp hF_ae)
++    simpa [Function.comp] using! (hmp.quasiMeasurePreserving.ae_eq_comp hF_ae)
+   -- TranslateL2 gives `F(x - t)` a.e.
+@@ -196,3 +196,3 @@ lemma norm_sq_translateL2_sub_extendByZeroL2_eq_integral_sq (t : E)
+         fun x => (F : E → ℝ) (x - t) := by
+-    simpa [sub_eq_add_neg] using (translateL2_ae_eq (μ := (volume : Measure E)) (-t) F)
++    simpa [sub_eq_add_neg] using! (translateL2_ae_eq (μ := (volume : Measure E)) (-t) F)
+   have htrans' :
+@@ -210,3 +210,3 @@ lemma norm_sq_translateL2_sub_extendByZeroL2_eq_integral_sq (t : E)
+           ((translateL2 (μ := (volume : Measure E)) (-t)) F) x - F x := by
+-      simpa using hxsub
++      simpa using! hxsub
+     -- Rewrite to the desired expression using the two pointwise identities.
+@@ -223,5 +223,5 @@ lemma norm_sq_translateL2_sub_extendByZeroL2_eq_integral_sq (t : E)
+       refine MeasureTheory.integral_congr_ae ?_
+-      simpa using hdiff.pow_const 2
++      simpa using! hdiff.pow_const 2
+     exact h1.trans h2
+-  simpa [F, f] using hcalc
++  simpa [F, f] using! hcalc
+ 
+@@ -241,3 +241,3 @@ private lemma kernelMeasure_le_smul_volume (hψc : Continuous ψ) (hψcs : HasCo
+       -- `ψ ≥ 0`, so `‖ψ x‖ = ψ x`.
+-      simpa [Real.norm_eq_abs, abs_of_nonneg (hψ0 x)] using hx'
++      simpa [Real.norm_eq_abs, abs_of_nonneg (hψ0 x)] using! hx'
+     exact ENNReal.ofReal_le_ofReal hx
+@@ -290,3 +290,3 @@ lemma smoothFun_sub_extendByZeroFun_sq_le_integral_sq
+         (μ := (volume : Measure E)) x
+-    simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hadd.comp hneg
++    simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using! hadd.comp hneg
+   have hf_shift_vol :
+@@ -307,3 +307,3 @@ lemma smoothFun_sub_extendByZeroFun_sq_le_integral_sq
+       smoothFun (E := E) (K := K) ψ u x = ∫ t, f (x - t) ∂μ := by
+-    simpa [μ, f] using smoothFun_eq_integral_kernelMeasure (E := E) (K := K) (ψ := ψ) hψc hψ0 u x
++    simpa [μ, f] using! smoothFun_eq_integral_kernelMeasure (E := E) (K := K) (ψ := ψ) hψc hψ0 u x
+   have hdiff :
+@@ -317,4 +317,4 @@ lemma smoothFun_sub_extendByZeroFun_sq_le_integral_sq
+           ∫ t, (f (x - t) - f x) ∂μ := by
+-      simpa using (MeasureTheory.integral_sub hint (MeasureTheory.integrable_const (f x))).symm
+-    simpa [hsmooth, hconst] using this
++      simpa using! (MeasureTheory.integral_sub hint (MeasureTheory.integrable_const (f x))).symm
++    simpa [hsmooth, hconst] using! this
+   -- Apply Jensen/variance inequality to `t ↦ f(x - t) - f(x)`.
+@@ -323,3 +323,3 @@ lemma smoothFun_sub_extendByZeroFun_sq_le_integral_sq
+       (μ := μ) (f := fun t : E => f (x - t) - f x) hg
+-  simpa [hdiff, μ, f] using hJ
++  simpa [hdiff, μ, f] using! hJ
+ 
+@@ -353,3 +353,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+     have hxsub' : (S - F) x = S x - F x := by
+-      simpa using hxsub
++      simpa using! hxsub
+     rw [hxsub', hxS, hxF]
+@@ -363,3 +363,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+       refine MeasureTheory.integral_congr_ae ?_
+-      simpa using hSF_ae.pow_const 2
++      simpa using! hSF_ae.pow_const 2
+     exact h1.trans h2
+@@ -381,3 +381,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+           (volume : Measure E) := by
+-      simpa [Real.norm_eq_abs, sq_abs] using hv_int
++      simpa [Real.norm_eq_abs, sq_abs] using! hv_int
+     exact hv_sq.congr (hSF_ae.pow_const 2)
+@@ -397,3 +397,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+         hf_mem (by decide)
+-    simpa [Real.norm_eq_abs, sq_abs] using hf_int
++    simpa [Real.norm_eq_abs, sq_abs] using! hf_int
+   have hfst_map :
+@@ -401,3 +401,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+         (Measure.map Prod.fst ((volume : Measure E).prod μ)) := by
+-    simpa [Measure.map_fst_prod] using hf_sq_int
++    simpa [Measure.map_fst_prod] using! hf_sq_int
+   have hf_fst_sq_prod :
+@@ -416,3 +416,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+     have := (hsub.integrable_comp hf_fst_sq_prod.aestronglyMeasurable).2 hf_fst_sq_prod
+-    simpa [Function.comp] using this
++    simpa [Function.comp] using! this
+   have hdom :
+@@ -420,3 +420,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+         ((volume : Measure E).prod μ) := by
+-    simpa [mul_add, two_mul] using (hf_shift_sq_prod.add hf_fst_sq_prod).const_mul (2 : ℝ)
++    simpa [mul_add, two_mul] using! (hf_shift_sq_prod.add hf_fst_sq_prod).const_mul (2 : ℝ)
+   have hf_fst_aesm :
+@@ -428,3 +428,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+             ((volume : Measure E).prod μ)) := by
+-      simpa [Measure.map_fst_prod] using hf_mem.1
++      simpa [Measure.map_fst_prod] using! hf_mem.1
+     exact MeasureTheory.AEStronglyMeasurable.comp_measurable
+@@ -438,3 +438,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+       hf_fst_aesm hsub
+-    simpa [Function.comp] using this
++    simpa [Function.comp] using! this
+   have h_aesm :
+@@ -446,3 +446,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+       hf_shift_aesm.sub hf_fst_aesm
+-    simpa [h] using (hsub'.pow 2)
++    simpa [h] using! (hsub'.pow 2)
+   have hint_h : MeasureTheory.Integrable h ((volume : Measure E).prod μ) := by
+@@ -454,3 +454,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+       -- `(a - b)^2 ≤ 2(a^2 + b^2)` as a special case of `add_sq_le`.
+-      simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using
++      simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using!
+         (add_sq_le (a := f (x - t)) (b := -f x))
+@@ -460,3 +460,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+       abs_of_nonneg (show 0 ≤ (2 : ℝ) by norm_num),
+-      abs_of_nonneg hsum_nonneg] using hineq
++      abs_of_nonneg hsum_nonneg] using! hineq
+   have hRHS_int :
+@@ -464,3 +464,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+         (fun x : E => ∫ t, (f (x - t) - f x) ^ 2 ∂μ) (volume : Measure E) := by
+-    simpa [h] using hint_h.integral_prod_left
++    simpa [h] using! hint_h.integral_prod_left
+   have hpoint :
+@@ -471,3 +471,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+     intro x
+-    simpa [f, μ] using
++    simpa [f, μ] using!
+       (smoothFun_sub_extendByZeroFun_sq_le_integral_sq (E := E) (K := K) (ψ := ψ)
+@@ -482,3 +482,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+         ∫ t, (∫ x, (f (x - t) - f x) ^ 2 ∂(volume : Measure E)) ∂μ := by
+-    simpa using (MeasureTheory.integral_integral_swap (μ := (volume : Measure E)) (ν := μ)
++    simpa using! (MeasureTheory.integral_integral_swap (μ := (volume : Measure E)) (ν := μ)
+       (f := fun x t => (f (x - t) - f x) ^ 2) hint_h)
+@@ -491,3 +491,3 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+     -- Use the previously proved integral identity.
+-    simpa [F, f] using
++    simpa [F, f] using!
+       (norm_sq_translateL2_sub_extendByZeroL2_eq_integral_sq
+@@ -504,6 +504,6 @@ lemma norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_ex
+     have : ‖S - F‖ ^ 2 ≤ ∫ x, (∫ t, (f (x - t) - f x) ^ 2 ∂μ) ∂(volume : Measure E) := by
+-      simpa [hnorm_sq] using hinterm
++      simpa [hnorm_sq] using! hinterm
+     exact this.trans_eq (hswap.trans hRHS_rewrite)
+   -- Restore the original statement.
+-  simpa [S, F, μ] using hmain
++  simpa [S, F, μ] using! hmain
+ 
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/ArzelaAscoli.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/ArzelaAscoli.lean
+index 37fe123..4bbb75c 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/ArzelaAscoli.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/ArzelaAscoli.lean
+@@ -154,3 +154,3 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+     have hs : IsCompact s := by
+-      simpa [s] using isCompact_closedBall (0 : ℝ) (R * (mK * Cψ))
++      simpa [s] using! isCompact_closedBall (0 : ℝ) (R * (mK * Cψ))
+     -- Pointwise compact range: each function in `A` takes values in `s`.
+@@ -162,3 +162,3 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+       have hu_norm : ‖u‖ ≤ R := by
+-        simpa [Metric.mem_closedBall, dist_eq_norm] using hu_ball
++        simpa [Metric.mem_closedBall, dist_eq_norm] using! hu_ball
+       -- Build the `L²(K)` kernel element.
+@@ -189,4 +189,4 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+                 hker] with t ht hrep
+-            simpa [kx, hrep] using ht))
+-        simpa [mK] using this
++            simpa [kx, hrep] using! ht))
++        simpa [mK] using! this
+       -- Express the smoothing value as an `L²` inner product, then apply Cauchy–Schwarz.
+@@ -216,3 +216,3 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+           |smoothFun (E := E) (K := K) ψ u (x : E)| ≤ ‖u‖ * ‖kx‖ := by
+-        simpa [hinner] using
++        simpa [hinner] using!
+           (abs_real_inner_le_norm (u : MeasureTheory.Lp ℝ (2 : ℝ≥0∞) μ) kx)
+@@ -226,4 +226,4 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+         simpa [smoothBCF_apply (E := E) (K := K) (ψ := ψ) hK hKm hψc hψcs u x,
+-          dist_eq_norm, Real.norm_eq_abs] using habs'
+-      simpa [s, Metric.mem_closedBall, dist_eq_norm] using this
++          dist_eq_norm, Real.norm_eq_abs] using! habs'
++      simpa [s, Metric.mem_closedBall, dist_eq_norm] using! this
+     -- Equicontinuity for `A`.
+@@ -242,3 +242,3 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+             in_s (f := (f : BoundedContinuousFunction (↥(Kψ (K := K) (ψ := ψ))) ℝ)) x f.property
+-          simpa [s, Metric.mem_closedBall] using this
++          simpa [s, Metric.mem_closedBall] using! this
+         have hy0 : dist ((f : BoundedContinuousFunction (↥(Kψ (K := K) (ψ := ψ))) ℝ) y) 0 ≤
+@@ -248,3 +248,3 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+             in_s (f := (f : BoundedContinuousFunction (↥(Kψ (K := K) (ψ := ψ))) ℝ)) y f.property
+-          simpa [s, Metric.mem_closedBall] using this
++          simpa [s, Metric.mem_closedBall] using! this
+         have hx0' :
+@@ -252,3 +252,3 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+           have : dist ((f : BoundedContinuousFunction (↥(Kψ (K := K) (ψ := ψ))) ℝ) x) 0 ≤ 0 := by
+-            simpa [hmK0] using hx0
++            simpa [hmK0] using! hx0
+           exact le_antisymm this dist_nonneg
+@@ -257,3 +257,3 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+           have : dist ((f : BoundedContinuousFunction (↥(Kψ (K := K) (ψ := ψ))) ℝ) y) 0 ≤ 0 := by
+-            simpa [hmK0] using hy0
++            simpa [hmK0] using! hy0
+           exact le_antisymm this dist_nonneg
+@@ -263,3 +263,3 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+           dist_eq_zero.1 hy0'
+-        simpa [hx, hy] using hε
++        simpa [hx, hy] using! hε
+       · have hRmK_ne : R * mK ≠ 0 := mul_ne_zero hR0 hmK0
+@@ -267,3 +267,3 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+         have hε2pos : 0 < ε2 := by
+-          simpa [ε2] using half_pos hε
++          simpa [ε2] using! half_pos hε
+         let ε' : ℝ := ε2 / (R * mK)
+@@ -284,5 +284,5 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+               smoothBCF (E := E) (K := K) (ψ := ψ) hK hKm hψc hψcs u := by
+-          simpa using hu_eq.symm
++          simpa using! hu_eq.symm
+         have hu_norm : ‖u‖ ≤ R := by
+-          simpa [Metric.mem_closedBall, dist_eq_norm] using hu_ball
++          simpa [Metric.mem_closedBall, dist_eq_norm] using! hu_ball
+         -- Kernel elements at `x` and `y`.
+@@ -319,3 +319,3 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+           have hxy' : dist ((x : E) - t) ((y : E) - t) < δ := by
+-            simpa [sub_eq_add_neg, add_assoc] using hxy
++            simpa [sub_eq_add_neg, add_assoc] using! hxy
+           have hψxy : dist (ψ ((x : E) - t)) (ψ ((y : E) - t)) < ε' :=
+@@ -323,10 +323,10 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+           have : ‖ψ ((x : E) - t) - ψ ((y : E) - t)‖ ≤ ε' := by
+-            simpa [dist_eq_norm, sub_eq_add_neg] using le_of_lt hψxy
+-          have hx' : kx t = ψ ((x : E) - t) := by simpa [kx] using hx_t
+-          have hy' : ky t = ψ ((y : E) - t) := by simpa [ky] using hy_t
++            simpa [dist_eq_norm, sub_eq_add_neg] using! le_of_lt hψxy
++          have hx' : kx t = ψ ((x : E) - t) := by simpa [kx] using! hx_t
++          have hy' : ky t = ψ ((y : E) - t) := by simpa [ky] using! hy_t
+           have hnorm : ‖kx t - ky t‖ ≤ ε' := by
+-            simpa [hx', hy'] using this
++            simpa [hx', hy'] using! this
+           have hsub' : (kx - ky) t = kx t - ky t := by
+-            simpa [Pi.sub_apply] using hsub
+-          simpa [hsub'.symm] using hnorm
++            simpa [Pi.sub_apply] using! hsub
++          simpa [hsub'.symm] using! hnorm
+         have hkdiff : ‖kx - ky‖ ≤ mK * ε' := by
+@@ -334,3 +334,3 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+             (f := (kx - ky : MeasureTheory.Lp ℝ (2 : ℝ≥0∞) μ)) (hC := le_of_lt hε'pos) h_ae)
+-          simpa [mK, mul_comm, mul_left_comm, mul_assoc] using this
++          simpa [mK, mul_comm, mul_left_comm, mul_assoc] using! this
+         -- Bound the difference of values using Cauchy–Schwarz.
+@@ -401,7 +401,7 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+                   inner ℝ (u : MeasureTheory.Lp ℝ (2 : ℝ≥0∞) μ) (kx - ky) := by
+-              simpa [smoothBCF_apply (E := E) (K := K) (ψ := ψ) hK hKm hψc hψcs] using this
++              simpa [smoothBCF_apply (E := E) (K := K) (ψ := ψ) hK hKm hψc hψcs] using! this
+             have hCS :=
+               (abs_real_inner_le_norm (u : MeasureTheory.Lp ℝ (2 : ℝ≥0∞) μ) (kx - ky))
+-            simpa [this', dist_eq_norm, Real.norm_eq_abs] using hCS
+-          simpa [dist_eq_norm] using this
++            simpa [this', dist_eq_norm, Real.norm_eq_abs] using! hCS
++          simpa [dist_eq_norm] using! this
+         have hle :
+@@ -421,4 +421,4 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+           have : R * mK * ε' = ε2 := by
+-            simpa [ε', mul_assoc] using hε'lt
+-          simpa [mul_assoc] using this
++            simpa [ε', mul_assoc] using! hε'lt
++          simpa [mul_assoc] using! this
+         have hle' :
+@@ -426,5 +426,5 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+                 (smoothBCF (E := E) (K := K) (ψ := ψ) hK hKm hψc hψcs u y) ≤ ε2 := by
+-          simpa [hRmkε'] using hle
++          simpa [hRmkε'] using! hle
+         have hε2lt : ε2 < ε := by
+-          simpa [ε2] using half_lt_self hε
++          simpa [ε2] using! half_lt_self hε
+         have :
+@@ -433,6 +433,6 @@ theorem smoothBCF_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurabl
+           lt_of_le_of_lt hle' hε2lt
+-        simpa [hu_eq'] using this
++        simpa [hu_eq'] using! this
+     have H : Equicontinuous ((↑) : A → ↥(Kψ (K := K) (ψ := ψ)) → ℝ) := H'.equicontinuous
+     -- Apply Arzelà–Ascoli.
+-    simpa [A, s] using
++    simpa [A, s] using!
+       (BoundedContinuousFunction.arzela_ascoli (α := ↥(Kψ (K := K) (ψ := ψ))) (β := ℝ)
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Compactness.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Compactness.lean
+index 00cba3a..0d8744d 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Compactness.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Compactness.lean
+@@ -74,3 +74,3 @@ private def smoothOn (hKm : MeasurableSet K) (hψc : Continuous ψ) (hψcs : Has
+       continuous_smoothFun (E := E) (K := K) (ψ := ψ) (hKm := hKm) hψc hψcs u
+-    simpa using this.comp continuous_subtype_val
++    simpa using! this.comp continuous_subtype_val
+ 
+@@ -108,4 +108,4 @@ lemma uniformContinuous_ψ (hψc : Continuous ψ) (hψcs : HasCompactSupport ψ)
+   have hx' : ¬ dist (ψ x) 0 < ε := by
+-    simpa [Set.mem_compl_iff, Set.mem_setOf_eq] using hx
+-  have hxε : ε ≤ dist (ψ x) 0 := le_of_not_gt (by simpa [gt_iff_lt] using hx')
++    simpa [Set.mem_compl_iff, Set.mem_setOf_eq] using! hx
++  have hxε : ε ≤ dist (ψ x) 0 := le_of_not_gt (by simpa [gt_iff_lt] using! hx')
+   have hx0 : ψ x ≠ 0 := by
+@@ -113,9 +113,9 @@ lemma uniformContinuous_ψ (hψc : Continuous ψ) (hψcs : HasCompactSupport ψ)
+     have : dist (ψ x) 0 = 0 := by simp [hψ0]
+-    have : ε ≤ 0 := by simpa [this] using hxε
++    have : ε ≤ 0 := by simpa [this] using! hxε
+     exact not_lt_of_ge this hε
+   have hx_supp : x ∈ Function.support ψ := by
+-    simpa [Function.support] using hx0
++    simpa [Function.support] using! hx0
+   have hx_tsupp : x ∈ tsupport ψ := by
+     have : x ∈ closure (Function.support ψ) := subset_closure hx_supp
+-    simpa [tsupport] using this
++    simpa [tsupport] using! this
+   exact hx_tsupp
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/FrechetKolmogorov.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/FrechetKolmogorov.lean
+index 6af8031..6bb3714 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/FrechetKolmogorov.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/FrechetKolmogorov.lean
+@@ -82,3 +82,3 @@ lemma norm_smoothL2_sub_extendByZeroL2_le_of_integral_translateL2_sub_extendByZe
+     refine (le_trans ?_ htrans)
+-    simpa using
++    simpa using!
+       norm_sq_smoothL2_sub_extendByZeroL2_le_integral_norm_sq_translateL2_sub_extendByZeroL2
+@@ -127,3 +127,3 @@ theorem totallyBounded_extendByZeroL2_image_of_forall_exists_translationIntegral
+   have hyDist : dist (smoothL2 (E := E) (K := K) ψ hK hKm hψc hψcs u) y < ε / 2 := by
+-    simpa [Metric.ball, Set.mem_setOf_eq] using hyBall
++    simpa [Metric.ball, Set.mem_setOf_eq] using! hyBall
+   have hdist_smooth_ext :
+@@ -141,4 +141,4 @@ theorem totallyBounded_extendByZeroL2_image_of_forall_exists_translationIntegral
+             (extendByZeroL2 (E := E) (K := K) hKm u) ≤ ε / 2 := by
+-      simpa [dist_eq_norm] using hnorm
+-    simpa [dist_comm] using hdist
++      simpa [dist_eq_norm] using! hnorm
++    simpa [dist_comm] using! hdist
+   have hxDist : dist (extendByZeroL2 (E := E) (K := K) hKm u) y < ε := by
+@@ -156,5 +156,5 @@ theorem totallyBounded_extendByZeroL2_image_of_forall_exists_translationIntegral
+       lt_of_le_of_lt htri hlt
+-    simpa [add_halves ε] using htmp
++    simpa [add_halves ε] using! htmp
+   have hxBall : extendByZeroL2 (E := E) (K := K) hKm u ∈ Metric.ball y ε := by
+-    simpa [Metric.ball, Set.mem_setOf_eq] using hxDist
++    simpa [Metric.ball, Set.mem_setOf_eq] using! hxDist
+   exact Set.mem_iUnion.2 ⟨y, Set.mem_iUnion.2 ⟨hyT, hxBall⟩⟩
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Kernels.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Kernels.lean
+index 833b243..d252623 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Kernels.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Kernels.lean
+@@ -70,3 +70,3 @@ theorem exists_kernel_tsupport_subset_ball_integral_eq_one {δ : ℝ} (hδ : 0 <
+       0 < ∫ x, f x ∂(volume : Measure E) := by
+-    simpa using
++    simpa using!
+       (Continuous.integral_pos_of_hasCompactSupport_nonneg_nonzero (μ := (volume : Measure E))
+@@ -75,3 +75,3 @@ theorem exists_kernel_tsupport_subset_ball_integral_eq_one {δ : ℝ} (hδ : 0 <
+   have hI0 : I ≠ 0 := ne_of_gt hIpos
+-  have hIpos' : 0 < I := by simpa [I] using hIpos
++  have hIpos' : 0 < I := by simpa [I] using! hIpos
+   -- Normalize: `ψ = I⁻¹ • f`.
+@@ -79,5 +79,5 @@ theorem exists_kernel_tsupport_subset_ball_integral_eq_one {δ : ℝ} (hδ : 0 <
+   have hψc : Continuous ψ := by
+-    simpa [ψ] using (continuous_const.mul hf_cont)
++    simpa [ψ] using! (continuous_const.mul hf_cont)
+   have hψcs : HasCompactSupport ψ := by
+-    simpa [ψ, smul_eq_mul] using
++    simpa [ψ, smul_eq_mul] using!
+       (HasCompactSupport.smul_left (f := fun _x : E => I⁻¹) (f' := f) hf_cs)
+@@ -87,4 +87,4 @@ theorem exists_kernel_tsupport_subset_ball_integral_eq_one {δ : ℝ} (hδ : 0 <
+       have : 0 ≤ I := le_of_lt hIpos'
+-      simpa using inv_nonneg.2 this
+-    simpa [ψ] using mul_nonneg hInv (hf_nonneg x)
++      simpa using! inv_nonneg.2 this
++    simpa [ψ] using! mul_nonneg hInv (hf_nonneg x)
+   have hψint : ∫ x, ψ x ∂(volume : Measure E) = 1 := by
+@@ -92,3 +92,3 @@ theorem exists_kernel_tsupport_subset_ball_integral_eq_one {δ : ℝ} (hδ : 0 <
+       -- Pull out the constant scalar.
+-      simpa [ψ, I] using
++      simpa [ψ, I] using!
+         (MeasureTheory.integral_const_mul (μ := (volume : Measure E)) (r := I⁻¹) (f := f))
+@@ -98,3 +98,3 @@ theorem exists_kernel_tsupport_subset_ball_integral_eq_one {δ : ℝ} (hδ : 0 <
+     have hsub : tsupport ψ ⊆ tsupport f := by
+-      simpa [ψ, smul_eq_mul] using (tsupport_smul_subset_right (f := fun _x : E => I⁻¹) (g := f))
++      simpa [ψ, smul_eq_mul] using! (tsupport_smul_subset_right (f := fun _x : E => I⁻¹) (g := f))
+     exact hsub.trans hf_tsupp
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Smoothing.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Smoothing.lean
+index 3543832..a531a55 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Smoothing.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Smoothing.lean
+@@ -52,3 +52,3 @@ private lemma tsupport_indicator_subset_closure (s : Set E) (f : E → ℝ) :
+   -- `closure s`.
+-  simpa [tsupport] using closure_mono (Set.support_indicator_subset (s := s) (f := f))
++  simpa [tsupport] using! closure_mono (Set.support_indicator_subset (s := s) (f := f))
+ 
+@@ -61,3 +61,3 @@ private lemma hasCompactSupport_indicator_of_isCompact (s : Set E) (hs : IsCompa
+   have : tsupport (s.indicator f) ⊆ closure s := tsupport_indicator_subset_closure (E := E) s f
+-  simpa [hs_closed.closure_eq] using this
++  simpa [hs_closed.closure_eq] using! this
+ 
+@@ -88,3 +88,3 @@ lemma hasCompactSupport_extendByZeroFun (hK : IsCompact K)
+   -- The indicator is pointwise supported in `K`.
+-  simpa [extendByZeroFun] using
++  simpa [extendByZeroFun] using!
+     (hasCompactSupport_indicator_of_isCompact (E := E) (s := K) hK (f := fun x => u x))
+@@ -100,3 +100,3 @@ noncomputable def extendByZeroL2 (hKm : MeasurableSet K)
+       MeasureTheory.MemLp (extendByZeroFun (K := K) u) (2 : ℝ≥0∞) (volume : Measure E) := by
+-    simpa [extendByZeroFun] using
++    simpa [extendByZeroFun] using!
+       (MeasureTheory.memLp_indicator_iff_restrict (μ := (volume : Measure E)) (p := (2 : ℝ≥0∞))
+@@ -164,3 +164,3 @@ lemma continuous_smoothFun
+       MeasureTheory.Lp.memLp u
+-    simpa [extendByZeroFun] using
++    simpa [extendByZeroFun] using!
+       (MeasureTheory.memLp_indicator_iff_restrict (μ := (volume : Measure E)) (p := (2 : ℝ≥0∞))
+@@ -172,3 +172,3 @@ lemma continuous_smoothFun
+     exact hf_memLp.locallyIntegrable h12
+-  simpa [smoothFun] using
++  simpa [smoothFun] using!
+     (hψcs.continuous_convolution_right
+@@ -182,3 +182,3 @@ lemma hasCompactSupport_smoothFun (hK : IsCompact K) (hψcs : HasCompactSupport
+     hasCompactSupport_extendByZeroFun (K := K) hK u
+-  simpa [smoothFun] using
++  simpa [smoothFun] using!
+     (hf.convolution (L := ContinuousLinearMap.lsmul ℝ ℝ)
+@@ -193,3 +193,3 @@ lemma support_smoothFun_subset_add_tsupport
+         Function.support (extendByZeroFun (E := E) (K := K) u) + Function.support ψ := by
+-    simpa [smoothFun] using
++    simpa [smoothFun] using!
+       (support_convolution_subset (L := ContinuousLinearMap.lsmul ℝ ℝ) (μ := (volume : Measure E))
+@@ -199,3 +199,3 @@ lemma support_smoothFun_subset_add_tsupport
+   have h2 : Function.support ψ ⊆ tsupport ψ := by
+-    simpa [tsupport] using (subset_closure : Function.support ψ ⊆ closure (Function.support ψ))
++    simpa [tsupport] using! (subset_closure : Function.support ψ ⊆ closure (Function.support ψ))
+   exact hsupp.trans (add_subset_add h1 h2)
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Transfer.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Transfer.lean
+index 51414a8..9f5bf7e 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Transfer.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Transfer.lean
+@@ -111,3 +111,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+           (F : E → ℝ) =ᵐ[(volume : Measure E)] (Su : E → ℝ) - (Sv : E → ℝ) := by
+-        simpa [F, g, Su, Sv] using
++        simpa [F, g, Su, Sv] using!
+           (MeasureTheory.Lp.coeFn_sub (μ := (volume : Measure E)) Su Sv)
+@@ -123,6 +123,6 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+               smoothFun (E := E) (K := K) ψ u x - smoothFun (E := E) (K := K) ψ v x := by
+-        simpa [Pi.sub_apply] using hsub.trans (hu.sub hv)
++        simpa [Pi.sub_apply] using! hsub.trans (hu.sub hv)
+       exact MeasureTheory.ae_restrict_of_ae (μ := (volume : Measure E)) (s := s) hF
+     have hFs_ae : ((Fs : E → ℝ) =ᵐ[μs] g) := by
+-      simpa [Fs, g] using
++      simpa [Fs, g] using!
+         (MeasureTheory.MemLp.coeFn_toLp (μ := μs) (p := (2 : ℝ≥0∞)) (f := g) hg_restrict)
+@@ -141,3 +141,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+           (Bu - Bv).norm_coe_le_norm x'
+-        simpa [hBu, hBv] using this
++        simpa [hBu, hBv] using! this
+       filter_upwards
+@@ -147,3 +147,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+       -- rewrite through the AE equalities
+-      simpa [hFs, hF] using this
++      simpa [hFs, hF] using! this
+     have hnorm_Fs : ‖Fs‖ ≤ mS * ‖Bu - Bv‖ := by
+@@ -151,3 +151,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+         (f := Fs) (hC := hBuBv) hbound)
+-      simpa [mS] using this
++      simpa [mS] using! this
+     -- Relate the `L²` norm on `volume` to the restricted norm on `μs` using extension-by-zero.
+@@ -159,6 +159,6 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+       have hu_supp : Function.support (smoothFun (E := E) (K := K) ψ u) ⊆ s := by
+-        simpa [s] using
++        simpa [s] using!
+           (support_smoothFun_subset_add_tsupport (E := E) (K := K) (ψ := ψ) u)
+       have hv_supp : Function.support (smoothFun (E := E) (K := K) ψ v) ⊆ s := by
+-        simpa [s] using
++        simpa [s] using!
+           (support_smoothFun_subset_add_tsupport (E := E) (K := K) (ψ := ψ) v)
+@@ -166,6 +166,6 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+         have : x ∉ Function.support (smoothFun (E := E) (K := K) ψ u) := fun hx' => hx (hu_supp hx')
+-        simpa [Function.support] using this
++        simpa [Function.support] using! this
+       have hv0 : smoothFun (E := E) (K := K) ψ v x = 0 := by
+         have : x ∉ Function.support (smoothFun (E := E) (K := K) ψ v) := fun hx' => hx (hv_supp hx')
+-        simpa [Function.support] using this
++        simpa [Function.support] using! this
+       simp [hu0, hv0]
+@@ -180,3 +180,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+             (F : E → ℝ) =ᵐ[(volume : Measure E)] (Su : E → ℝ) - (Sv : E → ℝ) := by
+-          simpa [F, g, Su, Sv] using
++          simpa [F, g, Su, Sv] using!
+             (MeasureTheory.Lp.coeFn_sub (μ := (volume : Measure E)) Su Sv)
+@@ -192,4 +192,4 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+                 smoothFun (E := E) (K := K) ψ u x - smoothFun (E := E) (K := K) ψ v x := by
+-          simpa [Pi.sub_apply] using hsub.trans (hu.sub hv)
+-        simpa [g] using hF
++          simpa [Pi.sub_apply] using! hsub.trans (hu.sub hv)
++        simpa [g] using! hF
+       filter_upwards [hF_ae_full] with x hx
+@@ -198,3 +198,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+         hsupport x hxnot
+-      simpa [hx] using this
++      simpa [hx] using! this
+     have hF_ind :
+@@ -215,3 +215,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+           s.indicator fun x : E => (Fs : E → ℝ) x := by
+-      simpa [Fext] using
++      simpa [Fext] using!
+         (MeasureTheory.Lp.extendByZeroₗᵢ_ae_eq
+@@ -223,3 +223,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+       have := (MeasureTheory.ae_restrict_iff' (μ := (volume : Measure E)) (s := s) hs).1 hFs_ae
+-      simpa [g] using this
++      simpa [g] using! this
+     have hindicator :
+@@ -235,3 +235,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+       refine MeasureTheory.Lp.ext ?_
+-      simpa [g, F] using hFext_ae'
++      simpa [g, F] using! hFext_ae'
+     have hnorm_F : ‖F‖ ≤ mS * ‖Bu - Bv‖ := by
+@@ -242,6 +242,6 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+       have : ‖Fext‖ ≤ mS * ‖Bu - Bv‖ := by
+-        simpa [hnorm_ext] using hnorm_Fs
+-      simpa [hFext_eq] using this
++        simpa [hnorm_ext] using! hnorm_Fs
++      simpa [hFext_eq] using! this
+     -- Convert to the `dist` statement.
+-    simpa [Su, Sv, Bu, Bv, F, dist_eq_norm, mS, mul_assoc] using hnorm_F
++    simpa [Su, Sv, Bu, Bv, F, dist_eq_norm, mS, mul_assoc] using! hnorm_F
+   have hTB_B : TotallyBounded B := by
+@@ -264,3 +264,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+             dist (smoothL2 (E := E) (K := K) ψ hK hKm hψc hψcs u) c ≤ 0 := by
+-          simpa [c, hmS0] using hle
++          simpa [c, hmS0] using! hle
+         exact le_antisymm this dist_nonneg
+@@ -270,3 +270,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+       -- membership in the open ball follows from `dist = 0` and `ε > 0`
+-      simpa [Metric.mem_ball, hdist0] using hε
++      simpa [Metric.mem_ball, hdist0] using! hε
+     · have hmSpos : 0 < mS := lt_of_le_of_ne hmS (Ne.symm hmS0)
+@@ -316,3 +316,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+             smoothBCF (E := E) (K := K) (ψ := ψ) hK hKm hψc hψcs (uOf f') = f := by
+-          simpa [f'] using huOfEq f'
++          simpa [f'] using! huOfEq f'
+         have hdist' :
+@@ -320,3 +320,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+                 (smoothBCF (E := E) (K := K) (ψ := ψ) hK hKm hψc hψcs (uOf f')) < δ := by
+-          simpa [hf_eq] using hf_ball'
++          simpa [hf_eq] using! hf_ball'
+         have : mS * dist (smoothBCF (E := E) (K := K) (ψ := ψ) hK hKm hψc hψcs u)
+@@ -331,4 +331,4 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+               _ = mS * ε / mS := (mul_div_assoc mS ε mS).symm
+-              _ = ε := by simpa using (mul_div_cancel_left₀ ε hmS_ne)
+-          simpa [hmul] using this
++              _ = ε := by simpa using! (mul_div_cancel_left₀ ε hmS_ne)
++          simpa [hmul] using! this
+         exact lt_of_le_of_lt hle this
+@@ -345,3 +345,3 @@ theorem smoothL2_image_closedBall_isCompact (hK : IsCompact K) (hKm : Measurable
+     isCompact_iff_totallyBounded_isComplete.2 ⟨hTB_closure, hcomplete⟩
+-  simpa [B, U] using hcompact_closure
++  simpa [B, U] using! hcompact_closure
+ 
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/TranslationIntegral.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/TranslationIntegral.lean
+index cdb4346..8e617ea 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/TranslationIntegral.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/TranslationIntegral.lean
+@@ -89,3 +89,3 @@ theorem integral_norm_sq_translateL2_sub_le_sq_of_tsupport_subset_ball
+   have hμzero : μ ((Metric.ball (0 : E) δ)ᶜ) = 0 := by
+-    simpa [μ] using kernelMeasure_compl_ball_eq_zero_of_tsupport_subset (E := E) (ψ := ψ) hψsupp
++    simpa [μ] using! kernelMeasure_compl_ball_eq_zero_of_tsupport_subset (E := E) (ψ := ψ) hψsupp
+   have hAE_ball : (Metric.ball (0 : E) δ) ∈ MeasureTheory.ae μ :=
+@@ -104,3 +104,3 @@ theorem integral_norm_sq_translateL2_sub_le_sq_of_tsupport_subset_ball
+     have hηnonneg : 0 ≤ η ^ 2 := sq_nonneg _
+-    simpa [Real.norm_eq_abs, abs_of_nonneg hnonneg, abs_of_nonneg hηnonneg] using hsq
++    simpa [Real.norm_eq_abs, abs_of_nonneg hnonneg, abs_of_nonneg hηnonneg] using! hsq
+   have hnorm_int :
+@@ -109,3 +109,3 @@ theorem integral_norm_sq_translateL2_sub_le_sq_of_tsupport_subset_ball
+           ∂μ‖ ≤ η ^ 2 * μ.real Set.univ := by
+-    simpa using
++    simpa using!
+       (MeasureTheory.norm_integral_le_of_norm_le_const (μ := μ)
+@@ -130,4 +130,4 @@ theorem integral_norm_sq_translateL2_sub_le_sq_of_tsupport_subset_ball
+     -- Replace `‖·‖` by `abs` in `ℝ` and simplify `μ.real univ = 1`.
+-    simpa [Real.norm_eq_abs, hμreal, mul_one] using this
+-  simpa [abs_of_nonneg hnonneg_int, μ] using habs
++    simpa [Real.norm_eq_abs, hμreal, mul_one] using! this
++  simpa [abs_of_nonneg hnonneg_int, μ] using! habs
+ 
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/Rellich.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/Rellich.lean
+index 4cd9bb3..d2c4ea2 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/Rellich.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/Rellich.lean
+@@ -121,3 +121,4 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+       change ‖x‖ ≤ (1 : ℝ)
+-      exact (mem_closedBall_zero_iff.mp hx)
++      simpa only [Metric.mem_closedBall, Subtype.dist_eq, Submodule.coe_zero,
++        dist_zero_right] using! hx
+     have hTx' : ‖T x‖ ≤ C := by
+@@ -126,6 +127,6 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+           (h1ToL2 (μ := (volume : Measure E)) (E := E)).le_opNorm (x : H1vol)
+-        simpa [T, h1OnToL2, C] using h
++        simpa [T, h1OnToL2, C] using! h
+       refine hTx.trans ?_
+       have : C * ‖(x : H1vol)‖ ≤ C * (1 : ℝ) := mul_le_mul_of_nonneg_left hx' hCnonneg
+-      simpa [mul_one] using this
++      simpa [mul_one] using! this
+     have hnorm_ext :
+@@ -135,5 +136,5 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+       have : ‖L2Compactness.extendByZeroL2 (E := E) (K := K) hKm u‖ ≤ C := by
+-        simpa [hxEq] using hTx'
+-      simpa [hnorm_ext] using this
+-    simpa [Metric.closedBall, dist_eq_norm] using hu'
++        simpa [hxEq] using! hTx'
++      simpa [hnorm_ext] using! this
++    simpa [Metric.closedBall, dist_eq_norm] using! hu'
+   have hApprox :
+@@ -159,3 +160,4 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+       change ‖x‖ ≤ (1 : ℝ)
+-      exact (mem_closedBall_zero_iff.mp hx)
++      simpa only [Metric.mem_closedBall, Subtype.dist_eq, Submodule.coe_zero,
++        dist_zero_right] using! hx
+     have hmod :
+@@ -165,3 +167,3 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+       have ht' : ‖t‖ ≤ ε / 2 := le_of_lt (by
+-        simpa [Metric.ball, dist_eq_norm, mem_setOf_eq] using ht)
++        simpa [Metric.ball, dist_eq_norm, mem_setOf_eq] using! ht)
+       have hgrad_le :
+@@ -169,3 +171,3 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+         let V : Type _ := (E →₂[(volume : Measure E)] ℝ) × (E →₂[(volume : Measure E)] E)
+-        simpa [h1ToL2Grad, V] using (norm_snd_le (x := ((x : H1vol) : V)))
++        simpa [h1ToL2Grad, V] using! (norm_snd_le (x := ((x : H1vol) : V)))
+       have hgrad_le_one :
+@@ -180,3 +182,3 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+             ‖t‖ * ‖h1ToL2Grad (μ := (volume : Measure E)) (E := E) (x : H1vol)‖ := by
+-        simpa [neg_neg] using htr
++        simpa [neg_neg] using! htr
+       have hle :
+@@ -184,3 +186,3 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+             ‖t‖ * ‖h1ToL2Grad (μ := (volume : Measure E)) (E := E) (x : H1vol)‖ := by
+-        simpa [T, h1OnToL2, hxEq] using htr'
++        simpa [T, h1OnToL2, hxEq] using! htr'
+       refine hle.trans ?_
+@@ -190,3 +192,3 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+         refine mul_le_mul_of_nonneg_left hgrad_le_one (by linarith)
+-      simpa [mul_one] using this
++      simpa [mul_one] using! this
+     have hη : 0 ≤ ε / 2 := le_of_lt hδ
+@@ -195,3 +197,3 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+         (E := E) (ψ := ψ) hψc hψcs hψ0 hψint (δ := ε / 2) (η := ε / 2) hη hψsupp (T x) hmod
+-    simpa [hxEq] using hbound
++    simpa [hxEq] using! hbound
+   have hcomp : IsCompact (closure (T '' Metric.closedBall (0 : ↥(h1On (E := E) K hKm)) 1)) := by
+@@ -231,3 +233,3 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+               h1ToL2 (μ := (volume : Measure E)) (E := E) (x : H1vol) := by
+-          simpa using hu
++          simpa using! hu
+         have hTx : T x = L2Compactness.extendByZeroL2 (E := E) (K := K) hKm u := by
+@@ -238,5 +240,5 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+                   (μ := (volume : Measure E)) (E := ℝ) (p := (2 : ℝ≥0∞)) (s := K) hKm) u := by
+-                  simpa using hu0.symm
++                  simpa using! hu0.symm
+             _ = L2Compactness.extendByZeroL2 (E := E) (K := K) hKm u := by
+-                  simpa using
++                  simpa using!
+                     (L2Compactness.extendByZeroL2_eq_extendByZeroₗᵢ (E := E) (K := K) hKm u).symm
+@@ -252,3 +254,3 @@ theorem isCompactOperator_h1OnToL2 {K : Set E} (_hK : IsCompact K) (hKm : Measur
+       (hKm := hKm) hR hA_ball hApprox
+-    simpa [hA_eq] using this
++    simpa [hA_eq] using! this
+   -- Use the topological definition of `IsCompactOperator` to avoid expensive normed-space
+@@ -292,3 +294,3 @@ lemma isClosed_range_extendByZero (K : Set E) (hKm : MeasurableSet K) :
+     constructor <;> rintro ⟨u, rfl⟩ <;> exact ⟨u, rfl⟩
+-  simpa [hEq] using hcr
++  simpa [hEq] using! hcr
+ 
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/SupportedH1.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/SupportedH1.lean
+index 9375345..4536b78 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/SupportedH1.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/SupportedH1.lean
+@@ -81,3 +81,3 @@ lemma mem_range_extendByZeroₗᵢ_toLp_of_tsupport_subset {F : Type*} [NormedAd
+             E → F) =ᵐ[μ] K.indicator fun x : E => (u : E → F) x := by
+-    simpa using
++    simpa using!
+       (MeasureTheory.Lp.extendByZeroₗᵢ_ae_eq (μ := μ) (E := F) (p := (2 : ℝ≥0∞)) (s := K) hKm u)
+@@ -95,3 +95,3 @@ lemma mem_range_extendByZeroₗᵢ_toLp_of_tsupport_subset {F : Type*} [NormedAd
+       _ = f x := hxOn hxK
+-      _ = (hf.toLp f : E → F) x := by simpa using hxLp.symm
++      _ = (hf.toLp f : E → F) x := by simpa using! hxLp.symm
+   · -- off `K`, the indicator is `0`, and `f x = 0`.
+@@ -100,3 +100,3 @@ lemma mem_range_extendByZeroₗᵢ_toLp_of_tsupport_subset {F : Type*} [NormedAd
+         exact fun hx' => hxK (hK hx')
+-      simpa using (image_eq_zero_of_notMem_tsupport (f := f) this)
++      simpa using! (image_eq_zero_of_notMem_tsupport (f := f) this)
+     simp [hxK, hxExt, hxLp, hfx]
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/Translation.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/Translation.lean
+index c009eb8..1143164 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/Translation.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/Translation.lean
+@@ -49,3 +49,3 @@ lemma contDiff_translate {f : E → ℝ} (hf : ContDiff ℝ 1 f) (a : E) :
+   -- `x ↦ x + a` is `C^∞`; compose.
+-  simpa [translate] using hf.comp (contDiff_id.add contDiff_const)
++  simpa [translate] using! hf.comp (contDiff_id.add contDiff_const)
+ 
+@@ -54,3 +54,3 @@ lemma hasCompactSupport_translate {F : Type*} [Zero F] {f : E → F}
+     (hf : HasCompactSupport f) (a : E) : HasCompactSupport (translate (E := E) a f) := by
+-  simpa [translate] using hf.comp_homeomorph (Homeomorph.addRight a)
++  simpa [translate] using! hf.comp_homeomorph (Homeomorph.addRight a)
+ 
+@@ -62,3 +62,3 @@ lemma grad_translate (a : E) (f : E → ℝ) (x : E) :
+   -- Reduce to the standard `fderiv` translation lemma.
+-  simpa [translate] using (fderiv_comp_add_right (𝕜 := ℝ) (f := f) (x := x) a)
++  simpa [translate] using! (fderiv_comp_add_right (𝕜 := ℝ) (f := f) (x := x) a)
+ 
+@@ -98,3 +98,3 @@ noncomputable def translateL2 {F : Type*} [NormedAddCommGroup F] [NormedSpace 
+   classical
+-  simpa using
++  simpa using!
+     (MeasureTheory.Lp.compMeasurePreservingₗᵢ (𝕜 := ℝ) (E := F) (p := (2 : ENNReal))
+@@ -108,3 +108,3 @@ lemma translateL2_ae_eq {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (
+   -- Reduce to `Lp.coeFn_compMeasurePreserving`.
+-  simpa [translateL2] using
++  simpa [translateL2] using!
+     (MeasureTheory.Lp.coeFn_compMeasurePreserving (g := (g : MeasureTheory.Lp F (2 : ENNReal) μ))
+@@ -127,3 +127,3 @@ lemma translateL2_toL2 (a : E) (f : ↥(C1c (E := E))) :
+       -- Move the a.e. equality through a measure-preserving map.
+-      simpa [Function.comp, Pi.add_apply] using
++      simpa [Function.comp, Pi.add_apply] using!
+         (Measure.QuasiMeasurePreserving.ae_eq_comp
+@@ -135,3 +135,3 @@ lemma translateL2_toL2 (a : E) (f : ↥(C1c (E := E))) :
+     -- `toL2` agrees a.e. with the underlying translated function.
+-    simpa [translateC1c, translate] using
++    simpa [translateC1c, translate] using!
+       (memLp_of_mem_C1c (μ := μ) (E := E) (translateC1c (E := E) a f).2).coeFn_toLp
+@@ -152,3 +152,3 @@ lemma translateL2_toL2Grad (a : E) (f : ↥(C1c (E := E))) :
+           fun x => grad (E := E) f.1 (x + a) := by
+-      simpa [Function.comp, Pi.add_apply] using
++      simpa [Function.comp, Pi.add_apply] using!
+         (Measure.QuasiMeasurePreserving.ae_eq_comp
+@@ -167,3 +167,3 @@ lemma translateL2_toL2Grad (a : E) (f : ↥(C1c (E := E))) :
+       funext x
+-      simpa [translate] using grad_translate (E := E) a f.1 x
++      simpa [translate] using! grad_translate (E := E) a f.1 x
+     exact hTo.trans (by simp [hGrad])
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimate.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimate.lean
+index fcec373..c6374b1 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimate.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimate.lean
+@@ -55,3 +55,3 @@ lemma hasDerivAt_line (x a : E) (t : ℝ) :
+   have hsmul : HasDerivAt (fun t : ℝ => t • a) a t := by
+-    simpa [one_smul] using (hasDerivAt_id t).smul_const a
++    simpa [one_smul] using! (hasDerivAt_id t).smul_const a
+   exact HasDerivAt.const_add x hsmul
+@@ -90,3 +90,3 @@ lemma enorm_fderiv_apply_le_enorm_grad_mul (f : E → ℝ) (x a : E) :
+     -- `grad f x = (toDual).symm (fderiv f x)` and `toDual.symm` is an isometry.
+-    simpa [grad] using
++    simpa [grad] using!
+       (LinearIsometry.enorm_map
+@@ -95,3 +95,3 @@ lemma enorm_fderiv_apply_le_enorm_grad_mul (f : E → ℝ) (x a : E) :
+   -- Replace the operator norm by the gradient norm.
+-  simpa [h₂, mul_assoc, mul_left_comm, mul_comm] using h₁
++  simpa [h₂, mul_assoc, mul_left_comm, mul_comm] using! h₁
+ 
+@@ -106,3 +106,3 @@ lemma enorm_deriv_comp_line_le (x a : E) {f : E → ℝ} (hf : ContDiff ℝ 1 f)
+   simpa [deriv_comp_line (hf := hf) (x := x) (a := a) t,
+-    mul_comm, mul_left_comm, mul_assoc] using this
++    mul_comm, mul_left_comm, mul_assoc] using! this
+ 
+@@ -116,3 +116,3 @@ lemma enorm_sub_le_enorm_mul_lintegral_grad (x a : E) {f : E → ℝ} (hf : Cont
+     have hInner : ContDiff ℝ ⊤ (fun t : ℝ => x + t • a) := by
+-      simpa [line] using
++      simpa [line] using!
+         (contDiff_const.add (contDiff_id.smul (contDiff_const : ContDiff ℝ ⊤ (fun _ : ℝ => a))))
+@@ -122,3 +122,3 @@ lemma enorm_sub_le_enorm_mul_lintegral_grad (x a : E) {f : E → ℝ} (hf : Cont
+       ‖f (x + a) - f x‖ₑ ≤ ∫⁻ t in Icc (0 : ℝ) 1, ‖deriv (fun t : ℝ => f (x + t • a)) t‖ₑ := by
+-    simpa using
++    simpa using!
+       (enorm_sub_le_lintegral_deriv_of_contDiffOn_Icc (f := fun t : ℝ => f (x + t • a))
+@@ -133,3 +133,3 @@ lemma enorm_sub_le_enorm_mul_lintegral_grad (x a : E) {f : E → ℝ} (hf : Cont
+     -- `deriv` along `t ↦ x + t•a` is controlled by the gradient.
+-    simpa [line, mul_assoc, mul_left_comm, mul_comm] using
++    simpa [line, mul_assoc, mul_left_comm, mul_comm] using!
+       (enorm_deriv_comp_line_le (x := x) (a := a) (f := f) hf (t := t))
+@@ -155,3 +155,3 @@ lemma enorm_sub_le_enorm_mul_lintegral_grad (x a : E) {f : E → ℝ} (hf : Cont
+   exact le_of_eq <| by
+-    simpa [mul_assoc] using
++    simpa [mul_assoc] using!
+       (MeasureTheory.lintegral_const_mul (μ := volume.restrict (Icc (0 : ℝ) 1)) (r := ‖a‖ₑ)
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimateH1.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimateH1.lean
+index 6bac2f7..ec7ea43 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimateH1.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimateH1.lean
+@@ -75,4 +75,4 @@ theorem norm_translateL2_sub_h1ToL2_le (a : E) (u : ↥(h1 (μ := μ) (E := E)))
+             translateL2 (μ := μ) (F := ℝ) a v.1 - v.1 := by
+-        simpa [sub_eq_add_neg] using htr.sub hfst
+-      simpa using (continuous_norm.comp hsub)
++        simpa [sub_eq_add_neg] using! htr.sub hfst
++      simpa using! (continuous_norm.comp hsub)
+     have hg :
+@@ -82,3 +82,3 @@ theorem norm_translateL2_sub_h1ToL2_le (a : E) (u : ↥(h1 (μ := μ) (E := E)))
+       have hnorm : Continuous fun v : V => ‖v.2‖ := continuous_norm.comp hsnd
+-      simpa [mul_assoc] using (continuous_const.mul hnorm)
++      simpa [mul_assoc] using! (continuous_const.mul hnorm)
+     exact isClosed_le hf hg
+@@ -87,3 +87,3 @@ theorem norm_translateL2_sub_h1ToL2_le (a : E) (u : ↥(h1 (μ := μ) (E := E)))
+     -- Reduce to the `C¹_c` estimate.
+-    simpa [S, graph, toL2Linear, toL2GradLinear] using
++    simpa [S, graph, toL2Linear, toL2GradLinear] using!
+       norm_translateL2_sub_toL2_le (μ := μ) (E := E) a f
+@@ -110,3 +110,3 @@ theorem norm_translateL2_sub_h1ToL2_le (a : E) (u : ↥(h1 (μ := μ) (E := E)))
+   -- Unpack membership in `S` and rewrite in terms of the bundled maps `h1ToL2` and `h1ToL2Grad`.
+-  simpa [S, V, h1ToL2, h1ToL2Grad] using huS
++  simpa [S, V, h1ToL2, h1ToL2Grad] using! huS
+ 
+diff --git a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimateL2.lean b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimateL2.lean
+index 9a903af..6a0c629 100644
+--- a/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimateL2.lean
++++ b/RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimateL2.lean
+@@ -73,3 +73,3 @@ private lemma lintegral_rpow_two_le_lintegral_rpow_two
+           (∫⁻ _t : ℝ, (1 : ℝ≥0∞) ^ (2 : ℝ) ∂(μI : Measure ℝ)) ^ (1 / (2 : ℝ)) := by
+-    simpa [Pi.mul_apply] using
++    simpa [Pi.mul_apply] using!
+       (ENNReal.lintegral_mul_le_Lp_mul_Lq (μ := (μI : Measure ℝ)) holderConj_two_two
+@@ -82,3 +82,3 @@ private lemma lintegral_rpow_two_le_lintegral_rpow_two
+         (∫⁻ t, g t ^ (2 : ℝ) ∂(μI : Measure ℝ)) ^ (1 / (2 : ℝ)) := by
+-    simpa [h1, mul_one] using hHolder
++    simpa [h1, mul_one] using! hHolder
+   -- Raise to the power `2` and simplify `((A)^(1/2))^2 = A`.
+@@ -87,5 +87,5 @@ private lemma lintegral_rpow_two_le_lintegral_rpow_two
+   -- Rewrite the RHS using `rpow_mul`.
+-  simpa [ENNReal.rpow_mul] using (h'.trans_eq (by
++  simpa [ENNReal.rpow_mul] using! (h'.trans_eq (by
+     have : (1 / (2 : ℝ)) * (2 : ℝ) = (1 : ℝ) := by norm_num
+-    simpa [this] using
++    simpa [this] using!
+       (ENNReal.rpow_mul
+@@ -114,3 +114,3 @@ lemma enorm_translateL2_sub_toL2_le (a : E) (f : ↥(C1c (E := E))) :
+           (fun x => (toL2 (μ := μ) (E := E) f : E → ℝ) (x + a)) =ᵐ[μ] fun x => f.1 (x + a) := by
+-        simpa [Function.comp, Pi.add_apply] using
++        simpa [Function.comp, Pi.add_apply] using!
+           (Measure.QuasiMeasurePreserving.ae_eq_comp
+@@ -127,3 +127,3 @@ lemma enorm_translateL2_sub_toL2_le (a : E) (f : ↥(C1c (E := E))) :
+         (toL2 (μ := μ) (E := E) f), h₁, h₂] with x hxsub hx1 hx2
+-      simpa [hx1, hx2, Pi.sub_apply] using hxsub
++      simpa [hx1, hx2, Pi.sub_apply] using! hxsub
+     -- Convert the `Lp` norm to `eLpNorm` and rewrite using a.e. equality.
+@@ -136,4 +136,4 @@ lemma enorm_translateL2_sub_toL2_le (a : E) (f : ↥(C1c (E := E))) :
+           MeasureTheory.eLpNorm (fun x : E => f.1 (x + a) - f.1 x) (2 : ℝ≥0∞) μ :=
+-      MeasureTheory.eLpNorm_congr_ae (μ := μ) (p := (2 : ℝ≥0∞)) (by simpa [d] using hsub)
+-    simpa [d] using hd0.trans hd1
++      MeasureTheory.eLpNorm_congr_ae (μ := μ) (p := (2 : ℝ≥0∞)) (by simpa [d] using! hsub)
++    simpa [d] using! hd0.trans hd1
+   have hGrad :
+@@ -199,3 +199,3 @@ lemma enorm_translateL2_sub_toL2_le (a : E) (f : ↥(C1c (E := E))) :
+                 ∂(μI : Measure ℝ)) ^ (2 : ℝ) := by
+-              simpa using
++              simpa using!
+                 (ENNReal.mul_rpow_of_nonneg ‖a‖ₑ
+@@ -224,3 +224,3 @@ lemma enorm_translateL2_sub_toL2_le (a : E) (f : ↥(C1c (E := E))) :
+           (ENNReal.continuous_rpow_const (y := (2 : ℝ))).measurable
+-        simpa [F] using (hpow.comp hbase).aemeasurable
++        simpa [F] using! (hpow.comp hbase).aemeasurable
+       have hTonelli :
+@@ -240,3 +240,3 @@ lemma enorm_translateL2_sub_toL2_le (a : E) (f : ↥(C1c (E := E))) :
+               = ∫⁻ z, F z ∂μ.prod (μI : Measure ℝ) := by
+-                  simpa [F] using hprod.symm
++                  simpa [F] using! hprod.symm
+           _ = ∫⁻ t, ∫⁻ x, F (x, t) ∂μ ∂(μI : Measure ℝ) := hprod_symm
+@@ -256,3 +256,3 @@ lemma enorm_translateL2_sub_toL2_le (a : E) (f : ↥(C1c (E := E))) :
+           exact hpow.comp hbase
+-        simpa [Function.comp, add_assoc] using
++        simpa [Function.comp, add_assoc] using!
+           (MeasureTheory.measurePreserving_add_right μ (t • a)).lintegral_comp (μ := μ) (ν := μ)
+@@ -285,4 +285,4 @@ lemma enorm_translateL2_sub_toL2_le (a : E) (f : ↥(C1c (E := E))) :
+                   -- `AEMeasurable.lintegral_prod_right'`.
+-                  simpa [F] using (hmeas.lintegral_prod_right' (μ := μ) (ν := (μI : Measure ℝ)))
+-                simpa [mul_assoc] using
++                  simpa [F] using! (hmeas.lintegral_prod_right' (μ := μ) (ν := (μI : Measure ℝ)))
++                simpa [mul_assoc] using!
+                   (MeasureTheory.lintegral_const_mul'' (μ := μ) (r := ‖a‖ₑ ^ (2 : ℝ))
+@@ -310,3 +310,3 @@ lemma enorm_translateL2_sub_toL2_le (a : E) (f : ↥(C1c (E := E))) :
+       simpa [ENNReal.mul_rpow_of_nonneg, show (0 : ℝ) ≤ (1 / (2 : ℝ)) by nlinarith,
+-        mul_assoc, mul_left_comm, mul_comm] using hsq'
++        mul_assoc, mul_left_comm, mul_comm] using! hsq'
+     have hroot : (‖a‖ₑ ^ (2 : ℕ)) ^ ((2 : ℝ)⁻¹) = ‖a‖ₑ := by
+@@ -321,7 +321,7 @@ lemma enorm_translateL2_sub_toL2_le (a : E) (f : ↥(C1c (E := E))) :
+           have hmul : (2 : ℝ) * ((2 : ℝ)⁻¹) = (1 : ℝ) := by norm_num
+-          simpa [hmul, ENNReal.rpow_one] using this
+-    simpa [hroot, mul_assoc, mul_left_comm, mul_comm] using hsq''
++          simpa [hmul, ENNReal.rpow_one] using! this
++    simpa [hroot, mul_assoc, mul_left_comm, mul_comm] using! hsq''
+   -- Finish: translate back to the original `L²` norms.
+   -- (The final `simp` is safe since we have explicit `eLpNorm` equalities above.)
+-  simpa [hL2, hGrad] using hCore
++  simpa [hL2, hGrad] using! hCore
+ 
+@@ -348,3 +348,3 @@ lemma norm_translateL2_sub_toL2_le (a : E) (f : ↥(C1c (E := E))) :
+     exact (ENNReal.toReal_le_toReal hA_ne_top hB_ne_top).2 h
+-  simpa [ENNReal.toReal_mul, toReal_enorm'] using h'
++  simpa [ENNReal.toReal_mul, toReal_enorm'] using! h'
+ 
+diff --git a/RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitz.lean b/RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitz.lean
+index 4397f6b..3ad6d5e 100644
+--- a/RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitz.lean
++++ b/RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitz.lean
+@@ -56,3 +56,3 @@ not be global because they need not coincide definitionally with Riemannian stru
+ @[reducible]
+-private def normedAddCommGroupTangentSpaceVectorSpace (x : E) :
++private noncomputable def normedAddCommGroupTangentSpaceVectorSpace (x : E) :
+     NormedAddCommGroup (TangentSpace (𝓘(ℝ, E)) x) :=
+@@ -63,3 +63,3 @@ attribute [local instance] normedAddCommGroupTangentSpaceVectorSpace
+ @[reducible]
+-private def normedSpaceTangentSpaceVectorSpace (x : E) :
++private noncomputable def normedSpaceTangentSpaceVectorSpace (x : E) :
+     NormedSpace ℝ (TangentSpace (𝓘(ℝ, E)) x) :=
+@@ -151,3 +151,3 @@ theorem lipschitzOnWith_symm_extChartAt_ofRiemannianMetric
+         have : t ∈ ⇑η ⁻¹' P := hη.2 ht
+-        simpa [Set.mem_preimage] using this
++        simpa [Set.mem_preimage] using! this
+       have hbound :
+@@ -161,3 +161,3 @@ theorem lipschitzOnWith_symm_extChartAt_ofRiemannianMetric
+   -- Finish the Lipschitz inequality by rewriting `edist` on `M` as `riemannianEDist`.
+-  simpa [IsRiemannianManifold.out (I := I) (M := M)] using (hdist.trans hlen)
++  simpa [IsRiemannianManifold.out (I := I) (M := M)] using! (hdist.trans hlen)
+ 
+diff --git a/RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitzForward.lean b/RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitzForward.lean
+index ff4738c..159078c 100644
+--- a/RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitzForward.lean
++++ b/RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitzForward.lean
+@@ -48,3 +48,3 @@ Mathlib’s approach in `Mathlib.Geometry.Manifold.Riemannian.Basic`).
+ @[reducible]
+-private def normedAddCommGroupTangentSpaceVectorSpace (x : E) :
++private noncomputable def normedAddCommGroupTangentSpaceVectorSpace (x : E) :
+     NormedAddCommGroup (TangentSpace (𝓘(ℝ, E)) x) :=
+@@ -55,3 +55,3 @@ attribute [local instance] normedAddCommGroupTangentSpaceVectorSpace
+ @[reducible]
+-private def normedSpaceTangentSpaceVectorSpace (x : E) :
++private noncomputable def normedSpaceTangentSpaceVectorSpace (x : E) :
+     NormedSpace ℝ (TangentSpace (𝓘(ℝ, E)) x) :=
+@@ -81,3 +81,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+     filter_upwards [hC] with y hy
+-    simpa [P] using hy
++    simpa [P] using! hy
+   have hx_source : (chartAt H x).source ∈ 𝓝 x := chart_source_mem_nhds H x
+@@ -97,8 +97,8 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+   have hy₁_edist : edist x y₁ < (r : ℝ≥0∞) := by
+-    have : riemannianEDist I x y₁ < (r : ℝ≥0∞) := by simpa [r] using hy₁
+-    simpa [IsRiemannianManifold.out (I := I) (M := M)] using this
++    have : riemannianEDist I x y₁ < (r : ℝ≥0∞) := by simpa [r] using! hy₁
++    simpa [IsRiemannianManifold.out (I := I) (M := M)] using! this
+   have hy₂_edist : edist x y₂ < (r : ℝ≥0∞) := by
+-    have : riemannianEDist I x y₂ < (r : ℝ≥0∞) := by simpa [r] using hy₂
+-    simpa [IsRiemannianManifold.out (I := I) (M := M)] using this
+-  have hy₁x_edist : edist y₁ x < (r : ℝ≥0∞) := by simpa [edist_comm] using hy₁_edist
++    have : riemannianEDist I x y₂ < (r : ℝ≥0∞) := by simpa [r] using! hy₂
++    simpa [IsRiemannianManifold.out (I := I) (M := M)] using! this
++  have hy₁x_edist : edist y₁ x < (r : ℝ≥0∞) := by simpa [edist_comm] using! hy₁_edist
+   have hdist_edist_lt : edist y₁ y₂ < (r : ℝ≥0∞) + (r : ℝ≥0∞) := by
+@@ -110,3 +110,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+     -- rewrite `edist` as `riemannianEDist`
+-    simpa [IsRiemannianManifold.out (I := I) (M := M)] using hdist_edist_lt
++    simpa [IsRiemannianManifold.out (I := I) (M := M)] using! hdist_edist_lt
+   have hb_fin : ((C : ℝ≥0∞) * riemannianEDist I y₁ y₂) < ∞ := by
+@@ -142,3 +142,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+         -- `dist + δ < (r + r) + r`
+-        simpa [add_assoc] using (ENNReal.add_lt_add_of_lt_of_le hδ_ne_top hdist_lt hδ_le)
++        simpa [add_assoc] using! (ENNReal.add_lt_add_of_lt_of_le hδ_ne_top hdist_lt hδ_le)
+       have hc3r : ((r : ℝ≥0∞) + (r : ℝ≥0∞)) + (r : ℝ≥0∞) < (c : ℝ≥0∞) := by
+@@ -151,3 +151,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+         -- coerce to `ℝ≥0∞`
+-        simpa [add_assoc, add_left_comm, add_comm] using
++        simpa [add_assoc, add_left_comm, add_comm] using!
+           (by exact_mod_cast this : (r + r + r : ℝ≥0∞) < (c : ℝ≥0∞))
+@@ -160,3 +160,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+         have hδ_ne_top : δ ≠ (⊤ : ℝ≥0∞) := ne_of_lt (lt_of_le_of_lt hδ_le (by simp))
+-        simpa [add_assoc] using hlen.trans (ENNReal.add_lt_add_of_lt_of_le hδ_ne_top hdist_lt hδ_le)
++        simpa [add_assoc] using! hlen.trans (ENNReal.add_lt_add_of_lt_of_le hδ_ne_top hdist_lt hδ_le)
+     have hγ_mem : ∀ t ∈ Icc (0 : ℝ) 1, γ t ∈ P ∩ (chartAt H x).source := by
+@@ -171,3 +171,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+       have hlen_mono : pathELength I γ 0 t ≤ pathELength I γ 0 1 := by
+-        simpa using pathELength_mono (I := I) (γ := γ) (a' := (0 : ℝ)) (a := 0) (b := t) (b' := 1)
++        simpa using! pathELength_mono (I := I) (γ := γ) (a' := (0 : ℝ)) (a := 0) (b := t) (b' := 1)
+           (le_rfl) ht.2
+@@ -176,3 +176,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+           -- rewrite `edist` as `riemannianEDist`
+-          simpa [IsRiemannianManifold.out (I := I) (M := M)] using hdist_y₁
++          simpa [IsRiemannianManifold.out (I := I) (M := M)] using! hdist_y₁
+         refine lt_of_le_of_lt (this.trans hlen_mono) hlen_lt_c34
+@@ -190,3 +190,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+                 (c : ℝ) / 4 + ((c : ℝ) / 4 + (c : ℝ) / 4 + (c : ℝ) / 4) = (c : ℝ))
+-            simpa [add_assoc, add_left_comm, add_comm] using
++            simpa [add_assoc, add_left_comm, add_comm] using!
+               (by exact_mod_cast this :
+@@ -194,3 +194,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+           exact (lt_of_le_of_lt htri (hsum.trans_eq this))
+-        simpa [IsRiemannianManifold.out (I := I) (M := M)] using hxγt_edist
++        simpa [IsRiemannianManifold.out (I := I) (M := M)] using! hxγt_edist
+       exact hc hxγt
+@@ -216,3 +216,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+           have hsymm : ‖γ' 0 - γ' 1‖ₑ = ‖γ' 1 - γ' 0‖ₑ := by
+-            simpa using (enorm_sub_rev (γ' 0) (γ' 1))
++            simpa using! (enorm_sub_rev (γ' 0) (γ' 1))
+           simp [edist_eq_enorm_sub, hsymm]
+@@ -247,3 +247,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+             have : γ t ∈ P := (hγ_mem t ht).1
+-            simpa [P] using this
++            simpa [P] using! this
+           exact hlt.le
+@@ -256,3 +256,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+       -- Unfold `γ'` at the endpoints.
+-      simpa [γ', Function.comp, hγ0, hγ1] using hI'
++      simpa [γ', Function.comp, hγ0, hγ1] using! hI'
+     have hδ_mul : (C : ℝ≥0∞) * δ ≤ (ε : ℝ≥0∞) := by
+@@ -262,3 +262,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+       -- cancel `C` (finite and nonzero)
+-      simpa [ENNReal.mul_div_cancel C_ne (by simp)] using this
++      simpa [ENNReal.mul_div_cancel C_ne (by simp)] using! this
+     have hfinal :
+@@ -275,3 +275,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+               -- `add_le_add_left` produces the inequality with potentially swapped summands; normalize.
+-              simpa [add_assoc, add_left_comm, add_comm] using
++              simpa [add_assoc, add_left_comm, add_comm] using!
+                 (add_le_add_left hδ_mul ((C : ℝ≥0∞) * riemannianEDist I y₁ y₂))
+@@ -279,3 +279,3 @@ theorem lipschitzOnWith_extChartAt_ofRiemannianMetric
+   -- Conclude in terms of `edist` on `M`.
+-  simpa [IsRiemannianManifold.out (I := I) (M := M)] using hmain
++  simpa [IsRiemannianManifold.out (I := I) (M := M)] using! hmain
+ 
+diff --git a/RellichKondrachov/Geometry/Manifold/Riemannian/VolumeMeasure/Finiteness.lean b/RellichKondrachov/Geometry/Manifold/Riemannian/VolumeMeasure/Finiteness.lean
+index a5f899f..7f80d73 100644
+--- a/RellichKondrachov/Geometry/Manifold/Riemannian/VolumeMeasure/Finiteness.lean
++++ b/RellichKondrachov/Geometry/Manifold/Riemannian/VolumeMeasure/Finiteness.lean
+@@ -68,3 +68,3 @@ theorem riemannianVolumeMeasure_isFiniteMeasureOnCompacts :
+           inter_mem_nhdsWithin (range I) (Metric.ball_mem_nhds _ r_pos)
+-        simpa [s, inter_comm, inter_left_comm, inter_assoc] using this
++        simpa [s, inter_comm, inter_left_comm, inter_assoc] using! this
+       have hpre : (extChartAt I x) ⁻¹' s ∈ 𝓝 x :=
+@@ -77,3 +77,3 @@ theorem riemannianVolumeMeasure_isFiniteMeasureOnCompacts :
+         refine ⟨extChartAt I x y, hyU, ?_⟩
+-        simpa [hyS] using (extChartAt I x).left_inv hyS
++        simpa [hyS] using! (extChartAt I x).left_inv hyS
+       have hs_fin : (μH[Module.finrank ℝ E] : Measure E) s < ∞ := by
+@@ -93,3 +93,3 @@ theorem riemannianVolumeMeasure_isFiniteMeasureOnCompacts :
+             infer_instance
+-          simpa using
++          simpa using!
+             (isCompact_closedBall (extChartAt I x x) r).measure_lt_top
+@@ -112,3 +112,3 @@ theorem riemannianVolumeMeasure_isFiniteMeasureOnCompacts :
+     exact U_fin x
+-  simpa [riemannianVolumeMeasure] using hμ
++  simpa [riemannianVolumeMeasure] using! hμ
+ 
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/ChartDataRiemannian.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/ChartDataRiemannian.lean
+index 32655e3..c81d56b 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/ChartDataRiemannian.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/ChartDataRiemannian.lean
+@@ -146,3 +146,3 @@ private lemma isOpen_chartBallSource (x : M) (r : ℝ) :
+   -- Use a `ContinuousOn` preimage lemma, and reorder intersections.
+-  simpa [inter_left_comm, inter_assoc, inter_comm] using
++  simpa [inter_left_comm, inter_assoc, inter_comm] using!
+     (ContinuousOn.isOpen_inter_preimage (f := extChartAt I x) (s := (extChartAt I x).source)
+@@ -194,3 +194,3 @@ theorem exists_riemannianFiniteChartData :
+     intro x
+-    simpa [U] using isOpen_chartBallSource (I := I) x (r' x)
++    simpa [U] using! isOpen_chartBallSource (I := I) x (r' x)
+   have hcover : (univ : Set M) ⊆ ⋃ x : M, U x := by
+@@ -229,3 +229,3 @@ theorem exists_riemannianFiniteChartData :
+         -- `extChartAt.source = chartAt.source`.
+-        simpa [extChartAt_source] using hsubU.trans this }
++        simpa [extChartAt_source] using! hsubU.trans this }
+   -- Produce the additional Lipschitz data indexed by `d.ι`.
+@@ -245,3 +245,3 @@ theorem exists_riemannianFiniteChartData :
+           exact Metric.ball_subset_ball (min_le_left _ _) hy.1)
+-      simpa [IsRiemannianManifold.out (I := I) (M := M)] using (hLip' (x := y₁) hy₁ (y := y₂) hy₂)
++      simpa [IsRiemannianManifold.out (I := I) (M := M)] using! (hLip' (x := y₁) hy₁ (y := y₂) hy₂)
+     riemannianLipschitz := fun i x₁ hx₁ x₂ hx₂ => by
+@@ -274,3 +274,3 @@ theorem exists_riemannianFiniteChartData :
+           have hy_symm : (extChartAt I x).symm (extChartAt I x y) = y := (extChartAt I x).left_inv hy_source
+-          simpa only [hx_symm, hy_symm] using hLip'
++          simpa only [hx_symm, hy_symm] using! hLip'
+         have hy_edist_lt :
+@@ -278,3 +278,3 @@ theorem exists_riemannianFiniteChartData :
+           have hy_dist : dist (extChartAt I x y) (extChartAt I x x) < r' x := by
+-            simpa [Metric.mem_ball, dist_comm] using hy_ball
++            simpa [Metric.mem_ball, dist_comm] using! hy_ball
+           have hr' : r' x ≤ ((rM x / Cinv x : ℝ≥0) : ℝ) := min_le_right _ _
+@@ -287,3 +287,3 @@ theorem exists_riemannianFiniteChartData :
+             (edist_lt_ofReal).2 hy_dist'
+-          simpa [edist_comm, ENNReal.ofReal_coe_nnreal] using this
++          simpa [edist_comm, ENNReal.ofReal_coe_nnreal] using! this
+         have hC_ne : (Cinv x : ℝ≥0∞) ≠ 0 := by exact_mod_cast (ne_of_gt (Cinv_pos x))
+@@ -295,3 +295,3 @@ theorem exists_riemannianFiniteChartData :
+               edist (extChartAt I x x) (extChartAt I x y) < (rM x : ℝ≥0∞) / (Cinv x : ℝ≥0∞) := by
+-            simpa [ENNReal.coe_div hC_ne'] using hy_edist_lt
++            simpa [ENNReal.coe_div hC_ne'] using! hy_edist_lt
+           have hmul :=
+@@ -301,4 +301,4 @@ theorem exists_riemannianFiniteChartData :
+               edist (extChartAt I x x) (extChartAt I x y) * (Cinv x : ℝ≥0∞) < (rM x : ℝ≥0∞) := by
+-            simpa [ENNReal.div_mul_cancel hC_ne hC_ne_top] using hmul
+-          simpa [mul_comm] using hmul'
++            simpa [ENNReal.div_mul_cancel hC_ne hC_ne_top] using! hmul
++          simpa [mul_comm] using! hmul'
+         have : riemannianEDist I x y < (rM x : ℝ≥0∞) := by
+@@ -306,3 +306,3 @@ theorem exists_riemannianFiniteChartData :
+           have hle : riemannianEDist I x y ≤ (Cinv x : ℝ≥0∞) * edist (extChartAt I x x) (extChartAt I x y) := by
+-            simpa [IsRiemannianManifold.out (I := I) (M := M)] using hLip_symm_xy
++            simpa [IsRiemannianManifold.out (I := I) (M := M)] using! hLip_symm_xy
+           exact lt_of_le_of_lt hle hmul_lt
+@@ -312,3 +312,3 @@ theorem exists_riemannianFiniteChartData :
+         (hLipFwdBall x).mono hU_sub
+-      simpa [IsRiemannianManifold.out (I := I) (M := M)] using (hLipU (x := x₁) hx₁ (y := x₂) hx₂)
++      simpa [IsRiemannianManifold.out (I := I) (M := M)] using! (hLipU (x := x₁) hx₁ (y := x₂) hx₂)
+     subordinate_ball := fun i => ?_
+@@ -317,3 +317,3 @@ theorem exists_riemannianFiniteChartData :
+   have hsubU : closure (Function.support (ρ i : M → ℝ)) ⊆ U (i : M) := hρsub i
+-  simpa [U, d] using hsubU
++  simpa [U, d] using! hsubU
+ 
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureLp.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureLp.lean
+index e28fa06..935eabe 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureLp.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureLp.lean
+@@ -87,3 +87,3 @@ lemma measurePreserving_extChartAtMk (μ : Measure M) (i : d.ι) :
+       exact Measure.map_congr (extChartAt_ae_eq_extChartAtMk (d := d) (I := I) (μ := μ) i).symm
+-    simpa [FiniteChartData.chartMeasure] using hmap
++    simpa [FiniteChartData.chartMeasure] using! hmap
+ 
+@@ -96,3 +96,3 @@ noncomputable def chartPullbackL2 {F : Type*} [NormedAddCommGroup F] [NormedSpac
+   classical
+-  simpa using
++  simpa using!
+     (MeasureTheory.Lp.compMeasurePreservingₗᵢ (𝕜 := ℝ) (E := F) (p := (2 : ENNReal))
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureRiemannian.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureRiemannian.lean
+index cbf8d4c..2cbd6e5 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureRiemannian.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureRiemannian.lean
+@@ -109,5 +109,5 @@ lemma chartMeasure_restrict_le_hausdorff (i : dR.d.ι) :
+       have hclosed : IsClosed (range I) := ModelWithCorners.isClosed_range (I := I)
+-      simpa [extChartAt_target (I := I) (x := dR.d.center i), inter_assoc, inter_comm, inter_left_comm] using
++      simpa [extChartAt_target (I := I) (x := dR.d.center i), inter_assoc, inter_comm, inter_left_comm] using!
+         (hopen.measurableSet.inter hclosed.measurableSet)
+-    simpa [S, chartBall, hball, htarget] using hball.inter htarget
++    simpa [S, chartBall, hball, htarget] using! hball.inter htarget
+   intro A
+@@ -129,3 +129,3 @@ lemma chartMeasure_restrict_le_hausdorff (i : dR.d.ι) :
+     intro y₁ hy₁ y₂ hy₂
+-    simpa [IsRiemannianManifold.out (I := I) (M := M)] using
++    simpa [IsRiemannianManifold.out (I := I) (M := M)] using!
+       dR.riemannianLipschitz_symm i y₁ hy₁ y₂ hy₂
+@@ -189,5 +189,5 @@ lemma chartMeasure_restrict_le_hausdorff (i : dR.d.ι) :
+           ((dR.C i : ℝ≥0∞) ^ (Module.finrank ℝ E : ℝ)) * μE (t ∩ S) := by
+-      simpa [hμM, μE] using hleHaus
++      simpa [hμM, μE] using! hleHaus
+     -- Convert the inequality to the restricted-measure form.
+-    simpa [Measure.restrict_apply, ht_meas, Measure.smul_apply, hChart] using hle'
++    simpa [Measure.restrict_apply, ht_meas, Measure.smul_apply, hChart] using! hle'
+   -- Conclude for `A` via monotonicity and `toMeasurable`.
+@@ -229,5 +229,5 @@ lemma hausdorff_restrict_le_chartMeasure (i : dR.d.ι) :
+       have hclosed : IsClosed (range I) := ModelWithCorners.isClosed_range (I := I)
+-      simpa [extChartAt_target (I := I) (x := dR.d.center i), inter_assoc, inter_comm, inter_left_comm] using
++      simpa [extChartAt_target (I := I) (x := dR.d.center i), inter_assoc, inter_comm, inter_left_comm] using!
+         (hopen.measurableSet.inter hclosed.measurableSet)
+-    simpa [S, chartBall, hball, htarget] using hball.inter htarget
++    simpa [S, chartBall, hball, htarget] using! hball.inter htarget
+   intro A
+@@ -252,3 +252,3 @@ lemma hausdorff_restrict_le_chartMeasure (i : dR.d.ι) :
+     intro x₁ hx₁ x₂ hx₂
+-    simpa [IsRiemannianManifold.out (I := I) (M := M)] using dR.riemannianLipschitz i x₁ hx₁ x₂ hx₂
++    simpa [IsRiemannianManifold.out (I := I) (M := M)] using! dR.riemannianLipschitz i x₁ hx₁ x₂ hx₂
+   -- Rewrite `chartMeasure` as the `μM`-measure of a `symm` image on the chart target.
+@@ -303,3 +303,3 @@ lemma hausdorff_restrict_le_chartMeasure (i : dR.d.ι) :
+         dist y (extChartAt I (dR.d.center i) (dR.d.center i)) < dR.r i := by
+-      simpa [Metric.mem_ball] using hy_ball
++      simpa [Metric.mem_ball] using! hy_ball
+     have hy_dist' :
+@@ -307,5 +307,5 @@ lemma hausdorff_restrict_le_chartMeasure (i : dR.d.ι) :
+             (extChartAt I (dR.d.center i) (dR.d.center i)) < dR.r i := by
+-      simpa only [this] using hy_dist
++      simpa only [this] using! hy_dist
+     -- Turn the `dist` inequality back into a membership statement.
+-    simpa [U, Metric.mem_ball] using hy_dist'
++    simpa [U, Metric.mem_ball] using! hy_dist'
+   have hLipApre : LipschitzOnWith (dR.Cfwd i) (extChartAt I (dR.d.center i)) Apre :=
+@@ -316,3 +316,3 @@ lemma hausdorff_restrict_le_chartMeasure (i : dR.d.ι) :
+       (extChartAt I (dR.d.center i)) '' Apre = t ∩ S := by
+-    simpa [Apre] using
++    simpa [Apre] using!
+       (PartialEquiv.image_symm_image_of_subset_target (e := extChartAt I (dR.d.center i)) hSubT)
+@@ -324,3 +324,3 @@ lemma hausdorff_restrict_le_chartMeasure (i : dR.d.ι) :
+             μM ((extChartAt I (dR.d.center i)).symm '' (t ∩ S)) := by
+-      simpa [μE, hμM, Apre] using hleHaus
++      simpa [μE, hμM, Apre] using! hleHaus
+     -- Match the definitional expansions of `extChartAt` / `extChartAt.symm` in `hleHaus'`.
+@@ -328,7 +328,7 @@ lemma hausdorff_restrict_le_chartMeasure (i : dR.d.ι) :
+         (fun a : M => (I (chartAt H (dR.d.center i) a))) '' Apre = t ∩ S := by
+-      simpa [extChartAt_coe, Function.comp] using himage
++      simpa [extChartAt_coe, Function.comp] using! himage
+     have hChart' : chartMeasure (t ∩ S) = μM (((chartAt H (dR.d.center i)).symm ∘ I.symm) '' (t ∩ S)) := by
+-      simpa [extChartAt_coe_symm] using hChart
++      simpa [extChartAt_coe_symm] using! hChart
+     -- Rewrite `f '' Apre = t ∩ S` and `μM Apre = chartMeasure (t ∩ S)`.
+-    simpa [himage', hChart', extChartAt_coe_symm, Function.comp] using hleHaus'
++    simpa [himage', hChart', extChartAt_coe_symm, Function.comp] using! hleHaus'
+   have hchart_t : (chartMeasure.restrict S) t = (chartMeasure.restrict S) A := by
+@@ -338,3 +338,3 @@ lemma hausdorff_restrict_le_chartMeasure (i : dR.d.ι) :
+       (μE.restrict S) t ≤ ((dR.Cfwd i : ℝ≥0∞) ^ (Module.finrank ℝ E : ℝ)) • (chartMeasure.restrict S) t := by
+-    simpa [Measure.restrict_apply, ht_meas, Measure.smul_apply, hS_meas, hle'] using hle'
++    simpa [Measure.restrict_apply, ht_meas, Measure.smul_apply, hS_meas, hle'] using! hle'
+   have hright_A :
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureRiemannianVolume.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureRiemannianVolume.lean
+index 66958b0..c1bf852 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureRiemannianVolume.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureRiemannianVolume.lean
+@@ -84,3 +84,3 @@ private lemma volume_closedBall_unit_ne_zero :
+       0 < (volume : Measure E) (Metric.closedBall (0 : E) 1) := by
+-    simpa using (Metric.measure_closedBall_pos (μ := (volume : Measure E)) (x := (0 : E)) (r := (1 : ℝ))
++    simpa using! (Metric.measure_closedBall_pos (μ := (volume : Measure E)) (x := (0 : E)) (r := (1 : ℝ))
+       (by norm_num))
+@@ -110,5 +110,5 @@ private lemma hausdorff_div_volume_closedBall_unit_ne_top :
+   have hdenInv : (((volume : Measure E) (Metric.closedBall (0 : E) 1))⁻¹) ≠ ∞ := by
+-    simpa using (ENNReal.inv_ne_top.2 hden0)
++    simpa using! (ENNReal.inv_ne_top.2 hden0)
+   -- Expand `/` and use `mul_ne_top`.
+-  simpa [div_eq_mul_inv] using (ENNReal.mul_ne_top hnum hdenInv)
++  simpa [div_eq_mul_inv] using! (ENNReal.mul_ne_top hnum hdenInv)
+ 
+@@ -123,3 +123,3 @@ private lemma volume_div_hausdorff_closedBall_unit_ne_top :
+         0 < (μH[(Module.finrank ℝ E : ℝ)] : Measure E) (Metric.closedBall (0 : E) 1) := by
+-      simpa using
++      simpa using!
+         (Metric.measure_closedBall_pos
+@@ -129,4 +129,4 @@ private lemma volume_div_hausdorff_closedBall_unit_ne_top :
+   have hdenInv : (((μH[(Module.finrank ℝ E : ℝ)] : Measure E) (Metric.closedBall (0 : E) 1))⁻¹) ≠ ∞ := by
+-    simpa using (ENNReal.inv_ne_top.2 hden0)
+-  simpa [div_eq_mul_inv] using (ENNReal.mul_ne_top hnum hdenInv)
++    simpa using! (ENNReal.inv_ne_top.2 hden0)
++  simpa [div_eq_mul_inv] using! (ENNReal.mul_ne_top hnum hdenInv)
+ 
+@@ -147,3 +147,3 @@ lemma chartMeasure_volume_constant_ne_top (i : dR.d.ι) :
+     hausdorff_div_volume_closedBall_unit_ne_top (E := E)
+-  simpa using (ENNReal.mul_ne_top hC hratio)
++  simpa using! (ENNReal.mul_ne_top hC hratio)
+ 
+@@ -164,3 +164,3 @@ lemma volume_chartMeasure_constant_ne_top (i : dR.d.ι) :
+     exact ENNReal.rpow_ne_top_of_nonneg hexp hbase
+-  simpa [mul_assoc, mul_left_comm, mul_comm] using (ENNReal.mul_ne_top hratio hCfwd)
++  simpa [mul_assoc, mul_left_comm, mul_comm] using! (ENNReal.mul_ne_top hratio hCfwd)
+ 
+@@ -190,3 +190,3 @@ lemma chartMeasure_restrict_le_volume (i : dR.d.ι) :
+             ((volume : Measure E) (Metric.closedBall (0 : E) 1))) • (volume : Measure E) := by
+-    simpa using (RellichKondrachov.hausdorffMeasure_eq_smul_volume (E := E))
++    simpa using! (RellichKondrachov.hausdorffMeasure_eq_smul_volume (E := E))
+   have hHvol_restrict :
+@@ -199,3 +199,3 @@ lemma chartMeasure_restrict_le_volume (i : dR.d.ι) :
+       congrArg (fun μ : Measure E => μ.restrict (chartBall (dR := dR) (I := I) i)) hHvol
+-    simpa using this
++    simpa using! this
+   -- Combine scalars.
+@@ -230,3 +230,3 @@ lemma volume_restrict_le_chartMeasure (i : dR.d.ι) :
+           (μH[(Module.finrank ℝ E : ℝ)] : Measure E)) := by
+-    simpa using (RellichKondrachov.volume_eq_smul_hausdorffMeasure (E := E))
++    simpa using! (RellichKondrachov.volume_eq_smul_hausdorffMeasure (E := E))
+   have hVolS :
+@@ -236,3 +236,3 @@ lemma volume_restrict_le_chartMeasure (i : dR.d.ι) :
+           (μH[(Module.finrank ℝ E : ℝ)] : Measure E)).restrict S := by
+-    simpa using congrArg (fun μ : Measure E => μ.restrict S) hVol
++    simpa using! congrArg (fun μ : Measure E => μ.restrict S) hVol
+   have hVolS' :
+@@ -242,3 +242,3 @@ lemma volume_restrict_le_chartMeasure (i : dR.d.ι) :
+           (μH[(Module.finrank ℝ E : ℝ)] : Measure E).restrict S := by
+-    simpa [Measure.restrict_smul] using hVolS
++    simpa [Measure.restrict_smul] using! hVolS
+   have hHaus :
+@@ -268,5 +268,5 @@ lemma volume_restrict_le_chartMeasure (i : dR.d.ι) :
+           ((μH[(Module.finrank ℝ E : ℝ)] : Measure E) (Metric.closedBall (0 : E) 1)))
+-    simpa [Measure.smul_apply, smul_smul, mul_assoc, mul_left_comm, mul_comm] using this
++    simpa [Measure.smul_apply, smul_smul, mul_assoc, mul_left_comm, mul_comm] using! this
+   -- Conclude by rewriting the left-hand side as `volume.restrict S`.
+-  simpa [S, hVolS'] using (le_trans (le_of_eq hVolS') this)
++  simpa [S, hVolS'] using! (le_trans (le_of_eq hVolS') this)
+ 
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/H1.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/H1.lean
+index 94d1e4f..eb83806 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/H1.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/H1.lean
+@@ -65,6 +65,6 @@ def C1 : Submodule ℝ (M → ℝ) where
+     -- `0` is (locally) constant, hence `C¹`.
+-    simpa using (contMDiff_const (I := I) (I' := (𝓘(ℝ, ℝ))) (n := (1 : WithTop ℕ∞)) (c := (0 : ℝ)))
++    simpa using! (contMDiff_const (I := I) (I' := (𝓘(ℝ, ℝ))) (n := (1 : WithTop ℕ∞)) (c := (0 : ℝ)))
+   add_mem' := by
+     intro f g hf hg
+-    simpa using (hf.add hg)
++    simpa using! (hf.add hg)
+   smul_mem' := by
+@@ -74,6 +74,6 @@ def C1 : Submodule ℝ (M → ℝ) where
+         ContMDiff I (𝓘(ℝ, ℝ)) 1 (fun _ : M => c) := by
+-      simpa using
++      simpa using!
+         (contMDiff_const (I := I) (I' := (𝓘(ℝ, ℝ))) (n := (1 : WithTop ℕ∞)) (c := c))
+     -- `c • f = (fun _ => c) * f`.
+-    simpa [Pi.mul_def, Pi.smul_def, smul_eq_mul] using (hc.mul hf)
++    simpa [Pi.mul_def, Pi.smul_def, smul_eq_mul] using! (hc.mul hf)
+ 
+@@ -96,3 +96,3 @@ private noncomputable def localizeToC1c (i : d.ι) :
+               (f.1 + g.1) ((extChartAt I (d.center i)).symm y) := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_mem (s := (extChartAt I (d.center i)).target) (a := y)
+@@ -105,3 +105,3 @@ private noncomputable def localizeToC1c (i : d.ι) :
+               f.1 ((extChartAt I (d.center i)).symm y) := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_mem
+@@ -116,3 +116,3 @@ private noncomputable def localizeToC1c (i : d.ι) :
+               g.1 ((extChartAt I (d.center i)).symm y) := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_mem
+@@ -127,3 +127,3 @@ private noncomputable def localizeToC1c (i : d.ι) :
+       have hfg : localize (d := d) (f.1 + g.1) i y = 0 := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_notMem
+@@ -136,3 +136,3 @@ private noncomputable def localizeToC1c (i : d.ι) :
+       have hf : localize (d := d) f.1 i y = 0 := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_notMem
+@@ -144,3 +144,3 @@ private noncomputable def localizeToC1c (i : d.ι) :
+       have hg : localize (d := d) g.1 i y = 0 := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_notMem
+@@ -159,3 +159,3 @@ private noncomputable def localizeToC1c (i : d.ι) :
+               (c • f.1) ((extChartAt I (d.center i)).symm y) := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_mem
+@@ -171,3 +171,3 @@ private noncomputable def localizeToC1c (i : d.ι) :
+               f.1 ((extChartAt I (d.center i)).symm y) := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_mem
+@@ -191,5 +191,5 @@ private noncomputable def localizeToC1c (i : d.ι) :
+                 simp [mul_assoc]
+-      simpa [smul_eq_mul, Pi.smul_apply, hcf, hf] using this
++      simpa [smul_eq_mul, Pi.smul_apply, hcf, hf] using! this
+     · have hcf : localize (d := d) (c • f.1) i y = 0 := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_notMem
+@@ -202,3 +202,3 @@ private noncomputable def localizeToC1c (i : d.ι) :
+       have hf : localize (d := d) f.1 i y = 0 := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_notMem
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/H2.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/H2.lean
+index e358e96..8698e31 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/H2.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/H2.lean
+@@ -68,6 +68,6 @@ def C2 : Submodule ℝ (M → ℝ) where
+   zero_mem' := by
+-    simpa using (contMDiff_const (I := I) (I' := (𝓘(ℝ, ℝ))) (n := (2 : WithTop ℕ∞)) (c := (0 : ℝ)))
++    simpa using! (contMDiff_const (I := I) (I' := (𝓘(ℝ, ℝ))) (n := (2 : WithTop ℕ∞)) (c := (0 : ℝ)))
+   add_mem' := by
+     intro f g hf hg
+-    simpa using (hf.add hg)
++    simpa using! (hf.add hg)
+   smul_mem' := by
+@@ -76,6 +76,6 @@ def C2 : Submodule ℝ (M → ℝ) where
+         ContMDiff I (𝓘(ℝ, ℝ)) 2 (fun _ : M => c) := by
+-      simpa using
++      simpa using!
+         (contMDiff_const (I := I) (I' := (𝓘(ℝ, ℝ))) (n := (2 : WithTop ℕ∞)) (c := c))
+     -- Scalar multiplication on `ℝ` is multiplication.
+-    simpa [Pi.mul_def, Pi.smul_def, smul_eq_mul] using (hc.mul hf)
++    simpa [Pi.mul_def, Pi.smul_def, smul_eq_mul] using! (hc.mul hf)
+ 
+@@ -123,3 +123,3 @@ private noncomputable def localizeToC2c (i : d.ι) :
+               (f.1 + g.1) ((extChartAt I (d.center i)).symm y) := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_mem (s := (extChartAt I (d.center i)).target) (a := y)
+@@ -132,3 +132,3 @@ private noncomputable def localizeToC2c (i : d.ι) :
+               f.1 ((extChartAt I (d.center i)).symm y) := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_mem
+@@ -143,3 +143,3 @@ private noncomputable def localizeToC2c (i : d.ι) :
+               g.1 ((extChartAt I (d.center i)).symm y) := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_mem
+@@ -153,3 +153,3 @@ private noncomputable def localizeToC2c (i : d.ι) :
+       have hfg : localize (d := d) (f.1 + g.1) i y = 0 := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_notMem
+@@ -162,3 +162,3 @@ private noncomputable def localizeToC2c (i : d.ι) :
+       have hf : localize (d := d) f.1 i y = 0 := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_notMem
+@@ -170,3 +170,3 @@ private noncomputable def localizeToC2c (i : d.ι) :
+       have hg : localize (d := d) g.1 i y = 0 := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_notMem
+@@ -187,3 +187,3 @@ private noncomputable def localizeToC2c (i : d.ι) :
+                 ((extChartAt I (d.center i)).symm y) := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_mem
+@@ -199,3 +199,3 @@ private noncomputable def localizeToC2c (i : d.ι) :
+               f.1 ((extChartAt I (d.center i)).symm y) := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_mem
+@@ -218,6 +218,6 @@ private noncomputable def localizeToC2c (i : d.ι) :
+                 simp [mul_assoc]
+-      simpa [smul_eq_mul, Pi.smul_apply, hcf, hf] using this
++      simpa [smul_eq_mul, Pi.smul_apply, hcf, hf] using! this
+     ·
+       have hcf : localize (d := d) (c • f.1) i y = 0 := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_notMem
+@@ -230,3 +230,3 @@ private noncomputable def localizeToC2c (i : d.ι) :
+       have hf : localize (d := d) f.1 i y = 0 := by
+-        simpa [FiniteChartData.localize] using
++        simpa [FiniteChartData.localize] using!
+           (Set.indicator_of_notMem
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/Localization.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/Localization.lean
+index 1e86876..d4d56ee 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/Localization.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/Localization.lean
+@@ -105,3 +105,3 @@ lemma support_localize_subset_rhoSupportImage (f : M → ℝ) (i : d.ι) :
+       -- `indicator` vanishes outside the target.
+-      simpa [localize] using
++      simpa [localize] using!
+         (Set.indicator_of_notMem (s := (chart (d := d) i).target) (a := y)
+@@ -114,3 +114,3 @@ lemma support_localize_subset_rhoSupportImage (f : M → ℝ) (i : d.ι) :
+     -- On the target, `indicator` is the identity.
+-    simpa [localize] using
++    simpa [localize] using!
+       (Set.indicator_of_mem (s := (chart (d := d) i).target) (a := y)
+@@ -187,3 +187,3 @@ private lemma contDiffOn_localize_target {f : M → ℝ}
+       -- Each partition-of-unity function is `C^∞`, hence `C^1`.
+-      simpa using
++      simpa using!
+         (d.ρ i).contMDiff.of_le
+@@ -196,3 +196,3 @@ private lemma contDiffOn_localize_target {f : M → ℝ}
+       -- This is `C^1` on the chart target.
+-      simpa [chart] using
++      simpa [chart] using!
+         (contMDiffOn_extChartAt_symm (I := I) (n := (1 : WithTop ℕ∞)) (x := d.center i))
+@@ -204,3 +204,3 @@ private lemma contDiffOn_localize_target {f : M → ℝ}
+     -- Convert `ContMDiffOn` to `ContDiffOn` for maps between vector spaces.
+-    simpa using (contMDiffOn_iff_contDiffOn (𝕜 := ℝ) (E := E) (E' := ℝ)).1 hComp
++    simpa using! (contMDiffOn_iff_contDiffOn (𝕜 := ℝ) (E := E) (E' := ℝ)).1 hComp
+   -- Rewrite `localize` as an indicator and use that on the target it's equal to
+@@ -213,3 +213,3 @@ private lemma contDiffOn_localize_target {f : M → ℝ}
+     intro y hy
+-    simpa [localize] using
++    simpa [localize] using!
+       (Set.indicator_of_mem (s := (chart (d := d) i).target) (a := y)
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/LocalizationH2.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/LocalizationH2.lean
+index 20c8d23..b1d3a85 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/LocalizationH2.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/LocalizationH2.lean
+@@ -69,3 +69,3 @@ private lemma contDiffOn_localize_target {f : M → ℝ}
+     have hρ : ContMDiff I Iℝ 2 fun x : M => d.ρ i x := by
+-      simpa using
++      simpa using!
+         (d.ρ i).contMDiff.of_le
+@@ -78,3 +78,3 @@ private lemma contDiffOn_localize_target {f : M → ℝ}
+         ContMDiffOn 𝓘(ℝ, E) I 2 (chart (d := d) i).symm (chart (d := d) i).target := by
+-      simpa [chart] using
++      simpa [chart] using!
+         (contMDiffOn_extChartAt_symm (I := I) (n := (2 : WithTop ℕ∞)) (x := d.center i))
+@@ -85,3 +85,3 @@ private lemma contDiffOn_localize_target {f : M → ℝ}
+       (hg.comp_contMDiffOn hs)
+-    simpa using (contMDiffOn_iff_contDiffOn (𝕜 := ℝ) (E := E) (E' := ℝ)).1 hComp
++    simpa using! (contMDiffOn_iff_contDiffOn (𝕜 := ℝ) (E := E) (E' := ℝ)).1 hComp
+   have hEq :
+@@ -92,3 +92,3 @@ private lemma contDiffOn_localize_target {f : M → ℝ}
+     intro y hy
+-    simpa [FiniteChartData.localize] using
++    simpa [FiniteChartData.localize] using!
+       (Set.indicator_of_mem (s := (chart (d := d) i).target) (a := y)
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachov.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachov.lean
+index 85beae2..c4cc367 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachov.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachov.lean
+@@ -70,7 +70,7 @@ private lemma isCompactOperator_fintype_sum {X Y : Type*} [TopologicalSpace X] [
+     refine Finset.induction_on (s := (Finset.univ : Finset ι)) ?_ ?_
+-    · simpa using (isCompactOperator_zero : IsCompactOperator (fun _ : X => (0 : Y)))
++    · simpa using! (isCompactOperator_zero : IsCompactOperator (fun _ : X => (0 : Y)))
+     · intro a s ha hs
+       have hfa : IsCompactOperator (f a) := hf a
+-      simpa [Finset.sum_insert ha, add_comm, add_left_comm, add_assoc] using hfa.add hs
+-  simpa using huniv
++      simpa [Finset.sum_insert ha, add_comm, add_left_comm, add_assoc] using! hfa.add hs
++  simpa using! huniv
+ 
+@@ -88,3 +88,3 @@ theorem isCompactOperator_h1ToL2_of_summands (μ : Measure M) [IsFiniteMeasure 
+   -- `h1ToL2` is a finite sum over the chart index type.
+-  simpa [h1ToL2] using
++  simpa [h1ToL2] using!
+     (isCompactOperator_fintype_sum
+@@ -109,3 +109,3 @@ theorem isCompactOperator_h2ToL2_of_summands (μ : Measure M) [IsFiniteMeasure 
+   classical
+-  simpa [h2ToL2] using
++  simpa [h2ToL2] using!
+     (isCompactOperator_fintype_sum
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Chartwise.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Chartwise.lean
+index 456a6a4..3d73b4f 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Chartwise.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Chartwise.lean
+@@ -127,3 +127,3 @@ noncomputable def h1ToChartL2Range :
+   intro x
+-  simpa using (h1ToChartL2_mem_extendByZero_range (dR := dR) (I := I) i x)
++  simpa using! (h1ToChartL2_mem_extendByZero_range (dR := dR) (I := I) i x)
+ 
+@@ -149,3 +149,3 @@ private noncomputable def h1ToChartL2GradRange :
+   intro x
+-  simpa using (h1ToChartL2Grad_mem_extendByZero_range (dR := dR) (I := I) i x)
++  simpa using! (h1ToChartL2Grad_mem_extendByZero_range (dR := dR) (I := I) i x)
+ 
+@@ -180,3 +180,3 @@ noncomputable def h1ToChartL2RangeVol :
+                   (rhoSupportImage_measurable (dR := dR) (I := I) i)).toLinearMap)) := by
+-    simpa using (eL2RangeChartVol (dR := dR) (I := I) (i := i) (F := ℝ))
++    simpa using! (eL2RangeChartVol (dR := dR) (I := I) (i := i) (F := ℝ))
+   exact e.toContinuousLinearMap.comp (h1ToChartL2Range (dR := dR) (I := I) (i := i))
+@@ -205,3 +205,3 @@ private noncomputable def h1ToChartL2GradRangeVol :
+                   (rhoSupportImage_measurable (dR := dR) (I := I) i)).toLinearMap)) := by
+-    simpa using (eL2RangeChartVol (dR := dR) (I := I) (i := i) (F := E))
++    simpa using! (eL2RangeChartVol (dR := dR) (I := I) (i := i) (F := E))
+   exact e.toContinuousLinearMap.comp (h1ToChartL2GradRange (dR := dR) (I := I) (i := i))
+@@ -247,3 +247,3 @@ private lemma restrict_le_one_smul {α : Type*} [MeasurableSpace α] (μ : Measu
+     μ.restrict s ≤ (1 : ℝ≥0∞) • μ := by
+-  simpa [one_smul] using (Measure.restrict_le_self (μ := μ) (s := s))
++  simpa [one_smul] using! (Measure.restrict_le_self (μ := μ) (s := s))
+ 
+@@ -263,4 +263,4 @@ private noncomputable def l2ChartToVolumeOnRhoSupportImage (i : dR.d.ι) (F : Ty
+       (μ := μchart) (ν := μchart.restrict K) (E := F) (p := (2 : ℝ≥0∞)) (c := (1 : ℝ≥0∞))
+-      (by simpa using (one_ne_top : (1 : ℝ≥0∞) ≠ ∞)) (restrict_le_one_smul (μ := μchart) (s := K))
+-      (by simpa using (ENNReal.coe_ne_top (2 : ℕ)))
++      (by simpa using! (one_ne_top : (1 : ℝ≥0∞) ≠ ∞)) (restrict_le_one_smul (μ := μchart) (s := K))
++      (by simpa using! (ENNReal.coe_ne_top (2 : ℕ)))
+   -- Change measure on the restricted spaces.
+@@ -325,3 +325,3 @@ private lemma support_subset_of_tsupport_subset {F : Type*} [Zero F]
+   have hsupp : Function.support g ⊆ tsupport g := by
+-    simpa [tsupport] using (subset_closure : Function.support g ⊆ closure (Function.support g))
++    simpa [tsupport] using! (subset_closure : Function.support g ⊆ closure (Function.support g))
+   exact hsupp.trans h
+@@ -339,3 +339,3 @@ private lemma indicator_ae_eq_of_ae_eq_restrict
+     have h0' : (μ.restrict K) {x | ¬f x = g x} = 0 := (MeasureTheory.ae_iff).1 hEq
+-    simpa [ne_eq] using h0'
++    simpa [ne_eq] using! h0'
+   have hnullEq : NullMeasurableSet {x | f x = g x} (μ.restrict K) :=
+@@ -344,3 +344,3 @@ private lemma indicator_ae_eq_of_ae_eq_restrict
+     -- Complement of the equality set.
+-    simpa [Set.compl_setOf, ne_eq] using hnullEq.compl
++    simpa [Set.compl_setOf, ne_eq] using! hnullEq.compl
+   have hK0 : μ ({x | f x ≠ g x} ∩ K) = 0 := by
+@@ -350,3 +350,3 @@ private lemma indicator_ae_eq_of_ae_eq_restrict
+       Measure.restrict_apply₀ (μ := μ) (s := K) (t := {x | f x ≠ g x}) hnullNe
+-    simpa [hEqRestr] using h0
++    simpa [hEqRestr] using! h0
+   have hsubset :
+@@ -361,3 +361,3 @@ private lemma indicator_ae_eq_of_ae_eq_restrict
+         -- `x ∉ support g` means `g x = 0`.
+-        simpa [Function.support, Set.mem_setOf_eq] using hxnsupp
++        simpa [Function.support, Set.mem_setOf_eq] using! hxnsupp
+       have hfx0 : K.indicator f x = 0 := by simp [hxK]
+@@ -366,3 +366,3 @@ private lemma indicator_ae_eq_of_ae_eq_restrict
+       -- On `K`, the indicator is the identity.
+-      simpa [Set.indicator_of_mem hxK] using hx
++      simpa [Set.indicator_of_mem hxK] using! hx
+     exact ⟨hne, hxK⟩
+@@ -373,3 +373,3 @@ private lemma indicator_ae_eq_of_ae_eq_restrict
+     refine (MeasureTheory.ae_iff).2 ?_
+-    simpa [ne_eq] using hbad0
++    simpa [ne_eq] using! hbad0
+   exact this
+@@ -402,6 +402,6 @@ private lemma l2EquivVolumeOnRhoSupportImage'_coeFn_ae_eq (i : dR.d.ι) (F : Typ
+   have hμ_le : μchart.restrict K ≤ cChartVol • (volume : Measure E).restrict K := by
+-    simpa [μM, μchart, K, cChartVol] using
++    simpa [μM, μchart, K, cChartVol] using!
+       chartMeasure_restrict_rhoSupportImage_le_volume (dR := dR) (I := I) i
+   have hvol_le : (volume : Measure E).restrict K ≤ cVolChart • μchart.restrict K := by
+-    simpa [μM, μchart, K, cVolChart] using
++    simpa [μM, μchart, K, cVolChart] using!
+       volume_restrict_rhoSupportImage_le_chartMeasure (dR := dR) (I := I) i
+@@ -413,3 +413,3 @@ private lemma l2EquivVolumeOnRhoSupportImage'_coeFn_ae_eq (i : dR.d.ι) (F : Typ
+   -- Unfold and apply the general `changeMeasureEquiv` coherence lemma.
+-  simpa [l2EquivVolumeOnRhoSupportImage', μM, μchart, K, cVolChart, cChartVol] using
++  simpa [l2EquivVolumeOnRhoSupportImage', μM, μchart, K, cVolChart, cChartVol] using!
+     (MeasureTheory.Lp.changeMeasureEquiv_coeFn_ae_eq
+@@ -442,6 +442,6 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2_of_tsupport_subset (i : dR.d
+     have hxmem : MeasureTheory.MemLp g.1 (2 : ℝ≥0∞) μchart := by
+-      simpa using
++      simpa using!
+         (RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.memLp_of_mem_C1c
+           (μ := μchart) (E := E) (f := g.1) g.2)
+-    simpa [RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2] using hxmem.coeFn_toLp
++    simpa [RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2] using! hxmem.coeFn_toLp
+   have hxK : (x : E → ℝ) =ᵐ[μchart.restrict K] g.1 :=
+@@ -452,3 +452,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2_of_tsupport_subset (i : dR.d
+   have hν_le : μchart.restrict K ≤ (1 : ℝ≥0∞) • μchart := by
+-    simpa using (Measure.restrict_le_self (μ := μchart) (s := K))
++    simpa using! (Measure.restrict_le_self (μ := μchart) (s := K))
+   let r :
+@@ -457,3 +457,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2_of_tsupport_subset (i : dR.d
+       (μ := μchart) (ν := μchart.restrict K) (E := ℝ) (p := (2 : ℝ≥0∞)) (c := (1 : ℝ≥0∞))
+-      (by simp) (by simpa using (Measure.restrict_le_self (μ := μchart) (s := K))) (by simp)
++      (by simp) (by simpa using! (Measure.restrict_le_self (μ := μchart) (s := K))) (by simp)
+   let e : (E →₂[μchart.restrict K] ℝ) ≃L[ℝ] (E →₂[(volume : Measure E).restrict K] ℝ) :=
+@@ -464,3 +464,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2_of_tsupport_subset (i : dR.d
+   have hr : (r x : E → ℝ) =ᵐ[μchart.restrict K] (x : E → ℝ) := by
+-    simpa [r] using
++    simpa [r] using!
+       (MeasureTheory.Lp.changeMeasureL_coeFn_ae_eq (μ := μchart) (ν := μchart.restrict K) (E := ℝ)
+@@ -475,3 +475,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2_of_tsupport_subset (i : dR.d
+             μchart.restrict K) := by
+-    simpa [μM, μchart, K] using
++    simpa [μM, μchart, K] using!
+       volume_restrict_rhoSupportImage_le_chartMeasure (dR := dR) (I := I) (i := i)
+@@ -483,3 +483,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2_of_tsupport_subset (i : dR.d
+     -- Use the specialized lemma for `l2EquivVolumeOnRhoSupportImage'`.
+-    simpa [e, μM, μchart, K] using
++    simpa [e, μM, μchart, K] using!
+       (l2EquivVolumeOnRhoSupportImage'_coeFn_ae_eq (dR := dR) (I := I) (i := i) (F := ℝ) (f := r x))
+@@ -493,3 +493,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2_of_tsupport_subset (i : dR.d
+     · have hgmem : MeasureTheory.MemLp g.1 (2 : ℝ≥0∞) ((volume : Measure E).restrict K) := by
+-        simpa using
++        simpa using!
+           (RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.memLp_of_mem_C1c
+@@ -500,3 +500,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2_of_tsupport_subset (i : dR.d
+         K.indicator fun z : E => (e (r x) : E → ℝ) z := by
+-    simpa [ez] using
++    simpa [ez] using!
+       (MeasureTheory.Lp.extendByZeroₗᵢ_ae_eq (μ := (volume : Measure E)) (p := (2 : ℝ≥0∞))
+@@ -507,6 +507,6 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2_of_tsupport_subset (i : dR.d
+     have hymem : MeasureTheory.MemLp g.1 (2 : ℝ≥0∞) (volume : Measure E) := by
+-      simpa using
++      simpa using!
+         (RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.memLp_of_mem_C1c
+           (μ := (volume : Measure E)) (E := E) (f := g.1) g.2)
+-    simpa [RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2] using hymem.coeFn_toLp
++    simpa [RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2] using! hymem.coeFn_toLp
+   have hT :
+@@ -516,3 +516,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2_of_tsupport_subset (i : dR.d
+     -- This is definitional: `l2ChartToVolumeOnRhoSupportImage` is `ez ∘ e ∘ r`.
+-    simpa [l2ChartToVolumeOnRhoSupportImage, r, e, ez] using hez
++    simpa [l2ChartToVolumeOnRhoSupportImage, r, e, ez] using! hez
+   exact hT.trans (hInd.trans hy.symm)
+@@ -555,6 +555,6 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2Grad_of_tsupport_subset (i :
+           (2 : ℝ≥0∞) μchart := by
+-      simpa using
++      simpa using!
+         (RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.memLp_grad_of_mem_C1c
+           (μ := μchart) (E := E) (f := g.1) g.2)
+-    simpa [RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2Grad] using hxmem.coeFn_toLp
++    simpa [RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2Grad] using! hxmem.coeFn_toLp
+   have hxK :
+@@ -564,3 +564,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2Grad_of_tsupport_subset (i :
+   have hν_le : μchart.restrict K ≤ (1 : ℝ≥0∞) • μchart := by
+-    simpa using (Measure.restrict_le_self (μ := μchart) (s := K))
++    simpa using! (Measure.restrict_le_self (μ := μchart) (s := K))
+   let r :
+@@ -569,3 +569,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2Grad_of_tsupport_subset (i :
+       (μ := μchart) (ν := μchart.restrict K) (E := E) (p := (2 : ℝ≥0∞)) (c := (1 : ℝ≥0∞))
+-      (by simp) (by simpa using (Measure.restrict_le_self (μ := μchart) (s := K))) (by simp)
++      (by simp) (by simpa using! (Measure.restrict_le_self (μ := μchart) (s := K))) (by simp)
+   let e : (E →₂[μchart.restrict K] E) ≃L[ℝ] (E →₂[(volume : Measure E).restrict K] E) :=
+@@ -576,3 +576,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2Grad_of_tsupport_subset (i :
+   have hr : (r x : E → E) =ᵐ[μchart.restrict K] (x : E → E) := by
+-    simpa [r] using
++    simpa [r] using!
+       (MeasureTheory.Lp.changeMeasureL_coeFn_ae_eq (μ := μchart) (ν := μchart.restrict K) (E := E)
+@@ -589,3 +589,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2Grad_of_tsupport_subset (i :
+             μchart.restrict K) := by
+-    simpa [μM, μchart, K] using
++    simpa [μM, μchart, K] using!
+       volume_restrict_rhoSupportImage_le_chartMeasure (dR := dR) (I := I) (i := i)
+@@ -598,3 +598,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2Grad_of_tsupport_subset (i :
+   have he : (e (r x) : E → E) =ᵐ[(volume : Measure E).restrict K] (r x : E → E) := by
+-    simpa [e, μM, μchart, K] using
++    simpa [e, μM, μchart, K] using!
+       (l2EquivVolumeOnRhoSupportImage'_coeFn_ae_eq (dR := dR) (I := I) (i := i) (F := E) (f := r x))
+@@ -615,3 +615,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2Grad_of_tsupport_subset (i :
+             (2 : ℝ≥0∞) ((volume : Measure E).restrict K) := by
+-        simpa using
++        simpa using!
+           (RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.memLp_grad_of_mem_C1c
+@@ -622,3 +622,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2Grad_of_tsupport_subset (i :
+         K.indicator fun z : E => (e (r x) : E → E) z := by
+-    simpa [ez] using
++    simpa [ez] using!
+       (MeasureTheory.Lp.extendByZeroₗᵢ_ae_eq (μ := (volume : Measure E)) (p := (2 : ℝ≥0∞))
+@@ -632,6 +632,6 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2Grad_of_tsupport_subset (i :
+           (2 : ℝ≥0∞) (volume : Measure E) := by
+-      simpa using
++      simpa using!
+         (RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.memLp_grad_of_mem_C1c
+           (μ := (volume : Measure E)) (E := E) (f := g.1) g.2)
+-    simpa [RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2Grad] using hymem.coeFn_toLp
++    simpa [RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2Grad] using! hymem.coeFn_toLp
+   have hT :
+@@ -640,3 +640,3 @@ private lemma l2ChartToVolumeOnRhoSupportImage_toL2Grad_of_tsupport_subset (i :
+         ] K.indicator fun z : E => (e (r x) : E → E) z := by
+-    simpa [l2ChartToVolumeOnRhoSupportImage, r, e, ez] using hez
++    simpa [l2ChartToVolumeOnRhoSupportImage, r, e, ez] using! hez
+   exact hT.trans (hInd.trans hy.symm)
+@@ -662,3 +662,3 @@ private lemma chartTargetToVolumeTarget_h1GraphChart (i : dR.d.ι)
+   have htsupp : tsupport g.1 ⊆ K := by
+-    simpa [g, K] using
++    simpa [g, K] using!
+       (FiniteChartData.tsupport_localize_subset_rhoSupportImage (d := dR.d) (I := I) (f := f.1) i)
+@@ -670,3 +670,3 @@ private lemma chartTargetToVolumeTarget_h1GraphChart (i : dR.d.ι)
+           RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2 (μ := μchart) (E := E) g := by
+-      simpa [μchart, μM, K, g] using
++      simpa [μchart, μM, K, g] using!
+         (FiniteChartData.h1GraphChart_fst (d := dR.d) (I := I) (μ := μM) i f)
+@@ -677,3 +677,3 @@ private lemma chartTargetToVolumeTarget_h1GraphChart (i : dR.d.ι)
+       RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2GradLinear,
+-      hfst] using
++      hfst] using!
+       (l2ChartToVolumeOnRhoSupportImage_toL2_of_tsupport_subset (dR := dR) (I := I) (i := i) g htsupp)
+@@ -683,3 +683,3 @@ private lemma chartTargetToVolumeTarget_h1GraphChart (i : dR.d.ι)
+           RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2Grad (μ := μchart) (E := E) g := by
+-      simpa [μchart, μM, K, g] using
++      simpa [μchart, μM, K, g] using!
+         (FiniteChartData.h1GraphChart_snd (d := dR.d) (I := I) (μ := μM) i f)
+@@ -689,3 +689,3 @@ private lemma chartTargetToVolumeTarget_h1GraphChart (i : dR.d.ι)
+       RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.toL2GradLinear,
+-      hsnd] using
++      hsnd] using!
+       (l2ChartToVolumeOnRhoSupportImage_toL2Grad_of_tsupport_subset (dR := dR) (I := I) (i := i) g htsupp)
+@@ -729,3 +729,3 @@ private lemma projToVolumeTarget_h1Graph (i : dR.d.ι)
+   -- Conclude using graph compatibility on `h1GraphChart`.
+-  simpa [hproj, hi, μchart, K] using
++  simpa [hproj, hi, μchart, K] using!
+     (chartTargetToVolumeTarget_h1GraphChart (dR := dR) (I := I) (i := i) f)
+@@ -750,3 +750,3 @@ private lemma projToVolumeTarget_mem_euclidean_h1 (i : dR.d.ι)
+   have hx_closure : (x.1 : FiniteChartData.h1Target (d := dR.d) (I := I) μM) ∈ closure A := by
+-    simpa [FiniteChartData.h1, Submodule.topologicalClosure_coe, A] using x.2
++    simpa [FiniteChartData.h1, Submodule.topologicalClosure_coe, A] using! x.2
+   let T :
+@@ -773,3 +773,3 @@ private lemma projToVolumeTarget_mem_euclidean_h1 (i : dR.d.ι)
+       refine ⟨g, ?_⟩
+-      simpa [T, g, μM, μchart, K] using
++      simpa [T, g, μM, μchart, K] using!
+         (projToVolumeTarget_h1Graph (dR := dR) (I := I) (i := i) f).symm
+@@ -780,3 +780,3 @@ private lemma projToVolumeTarget_mem_euclidean_h1 (i : dR.d.ι)
+           Set (↥(E →₂[(volume : Measure E)] ℝ) × ↥(E →₂[(volume : Measure E)] E))) := by
+-    simpa using
++    simpa using!
+       (RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.isClosed_h1 (μ := (volume : Measure E)) (E := E))
+@@ -792,4 +792,4 @@ private lemma projToVolumeTarget_mem_euclidean_h1 (i : dR.d.ι)
+           Set (↥(E →₂[(volume : Measure E)] ℝ) × ↥(E →₂[(volume : Measure E)] E))) := by
+-    simpa [hClosed.closure_eq] using hx_closure_h1
+-  simpa [T] using this
++    simpa [hClosed.closure_eq] using! hx_closure_h1
++  simpa [T] using! this
+ 
+@@ -822,4 +822,4 @@ private lemma projToVolumeTarget_fst_mem_extendByZero_range (i : dR.d.ι)
+           (μ := μchart) (ν := μchart.restrict K) (E := ℝ) (p := (2 : ℝ≥0∞)) (c := (1 : ℝ≥0∞))
+-          (by simpa using (one_ne_top : (1 : ℝ≥0∞) ≠ ∞)) (restrict_le_one_smul (μ := μchart) (s := K))
+-          (by simpa using (ENNReal.coe_ne_top (2 : ℕ))) u)
++          (by simpa using! (one_ne_top : (1 : ℝ≥0∞) ≠ ∞)) (restrict_le_one_smul (μ := μchart) (s := K))
++          (by simpa using! (ENNReal.coe_ne_top (2 : ℕ))) u)
+   have hmem :
+@@ -834,3 +834,3 @@ private lemma projToVolumeTarget_fst_mem_extendByZero_range (i : dR.d.ι)
+     simp [w, l2ChartToVolumeOnRhoSupportImage]
+-  simpa [hfst, u] using hmem
++  simpa [hfst, u] using! hmem
+ 
+@@ -854,3 +854,3 @@ private noncomputable def h1ToChartVolH1 (i : dR.d.ι) :
+   -- Use the closure lemma on `projToVolumeTarget` and rewrite through `T`.
+-  simpa [T] using (projToVolumeTarget_mem_euclidean_h1 (dR := dR) (I := I) (i := i) x)
++  simpa [T] using! (projToVolumeTarget_mem_euclidean_h1 (dR := dR) (I := I) (i := i) x)
+ 
+@@ -891,3 +891,3 @@ private noncomputable def h1ToChartVolH1On (i : dR.d.ι) :
+   -- Rewrite and apply the range lemma.
+-  simpa [this, K] using
++  simpa [this, K] using!
+     (projToVolumeTarget_fst_mem_extendByZero_range (dR := dR) (I := I) (i := i)
+@@ -933,3 +933,3 @@ omit [T2Space M] in
+           (h1ToChartL2Range (dR := dR) (I := I) (i := i)) x := by
+-      simpa [uK] using
++      simpa [uK] using!
+         (LinearIsometry.equivRange eChart).apply_symm_apply
+@@ -938,3 +938,3 @@ omit [T2Space M] in
+     have := congrArg Subtype.val this
+-    simpa [eChart] using this
++    simpa [eChart] using! this
+   -- The `changeMeasureL` used in `l2ChartToVolumeOnRhoSupportImage` from `μchart` to `μchart.restrict K`.
+@@ -944,4 +944,4 @@ omit [T2Space M] in
+       (μ := μchart) (ν := μchart.restrict K) (E := ℝ) (p := (2 : ℝ≥0∞)) (c := (1 : ℝ≥0∞))
+-      (by simpa using (one_ne_top : (1 : ℝ≥0∞) ≠ ∞)) (restrict_le_one_smul (μ := μchart) (s := K))
+-      (by simpa using (ENNReal.coe_ne_top (2 : ℕ)))
++      (by simpa using! (one_ne_top : (1 : ℝ≥0∞) ≠ ∞)) (restrict_le_one_smul (μ := μchart) (s := K))
++      (by simpa using! (ENNReal.coe_ne_top (2 : ℕ)))
+   -- `uK` is the same as `changeMeasureL` applied to `u`, since `u` is supported in `K`.
+@@ -956,3 +956,3 @@ omit [T2Space M] in
+             K.indicator fun x => uK x := by
+-        simpa [eChart] using
++        simpa [eChart] using!
+           (MeasureTheory.Lp.extendByZeroₗᵢ_ae_eq (μ := μchart) (E := ℝ) (p := (2 : ℝ≥0∞)) (s := K)
+@@ -962,3 +962,3 @@ omit [T2Space M] in
+         -- `heChart_uK` is equality in `L²`, hence a.e. equality.
+-        simpa [heChart_uK] using (MeasureTheory.Lp.coeFn_ae_eq (μ := μchart) (f := (eChart uK)) (g := u) heChart_uK)
++        simpa [heChart_uK] using! (MeasureTheory.Lp.coeFn_ae_eq (μ := μchart) (f := (eChart uK)) (g := u) heChart_uK)
+       -- Combine.
+@@ -969,3 +969,3 @@ omit [T2Space M] in
+       -- On `K`, the indicator equals the function itself.
+-      simpa [this] using hx
++      simpa [this] using! hx
+     have hu_restrict : (u : E → ℝ) =ᵐ[μchart.restrict K] fun x => uK x :=
+@@ -977,5 +977,5 @@ omit [T2Space M] in
+         (p := (2 : ℝ≥0∞)) (c := (1 : ℝ≥0∞))
+-        (by simpa using (one_ne_top : (1 : ℝ≥0∞) ≠ ∞))
++        (by simpa using! (one_ne_top : (1 : ℝ≥0∞) ≠ ∞))
+         (restrict_le_one_smul (μ := μchart) (s := K))
+-        (by simpa using (ENNReal.coe_ne_top (2 : ℕ))) u
++        (by simpa using! (ENNReal.coe_ne_top (2 : ℕ))) u
+     refine MeasureTheory.Lp.ext (μ := μchart.restrict K) (E := ℝ) (p := (2 : ℝ≥0∞)) ?_
+@@ -1022,3 +1022,3 @@ omit [T2Space M] in
+           (p := (2 : ℝ≥0∞)) (c := (1 : ℝ≥0∞))
+-          (hc₁ := (by simpa using (one_ne_top : (1 : ℝ≥0∞) ≠ ∞)))
++          (hc₁ := (by simpa using! (one_ne_top : (1 : ℝ≥0∞) ≠ ∞)))
+           (hc₂ := _)
+@@ -1026,3 +1026,3 @@ omit [T2Space M] in
+           (hν₂ := _)
+-          (hp₁ := (by simpa using (ENNReal.coe_ne_top (2 : ℕ))))
++          (hp₁ := (by simpa using! (ENNReal.coe_ne_top (2 : ℕ))))
+           (hp₂ := _))
+@@ -1047,3 +1047,3 @@ omit [T2Space M] in
+ We now apply Euclidean Rellich compactness on Lebesgue `volume` (supported in `K`) and transport
+-compactness back to the chart measure using the `extendByZero`-range equivalence.
++compactness back to the chart measure using! the `extendByZero`-range equivalence.
+ -/
+@@ -1094,3 +1094,3 @@ theorem isCompactOperator_h1ToChartL2Range (i : dR.d.ι) :
+     -- is definitional (unification fills the proof term).
+-    simpa [volRange] using
++    simpa [volRange] using!
+       (RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.isCompactOperator_h1OnToL2_codRestrict_range_extendByZero
+@@ -1208,8 +1208,8 @@ theorem isCompactOperator_h1ToChartL2Range (i : dR.d.ι) :
+       -- Identify the transported chartwise `L²` component with the `projToVolumeTarget` scalar output.
+-      simpa using (eL2RangeChartVol_h1ToChartL2Range_coe (dR := dR) (I := I) (E := E) (i := i) x)
++      simpa using! (eL2RangeChartVol_h1ToChartL2Range_coe (dR := dR) (I := I) (E := E) (i := i) x)
+     -- Now cancel the forward equivalence.
+     -- (`simp` uses `ContinuousLinearEquiv.apply_symm_apply`.)
+-    simpa using congrArg ((eL2RangeChartVol (dR := dR) (I := I) (i := i) (F := ℝ)).symm) this
++    simpa using! congrArg ((eL2RangeChartVol (dR := dR) (I := I) (i := i) (F := ℝ)).symm) this
+   -- Rewrite the goal using the identification and apply the established compactness.
+-  simpa [hEq] using hcompVol''
++  simpa [hEq] using! hcompVol''
+ 
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Global.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Global.lean
+index 64c018f..f142f5c 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Global.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Global.lean
+@@ -80,3 +80,3 @@ private lemma isCompactOperator_chartToGlobalL2_h1ToChartL2 (i : dR.d.ι) :
+   have hcomp : IsCompactOperator (h1ToChartL2Range (dR := dR) (I := I) (i := i) : _ → _) := by
+-    simpa [μchart, K] using (isCompactOperator_h1ToChartL2Range (dR := dR) (I := I) (E := E) i)
++    simpa [μchart, K] using! (isCompactOperator_h1ToChartL2Range (dR := dR) (I := I) (E := E) i)
+   -- Postcompose by the inclusion into `L²(μchart)` and then by `chartToGlobalL2`.
+@@ -101,3 +101,3 @@ private lemma isCompactOperator_chartToGlobalL2_h1ToChartL2 (i : dR.d.ι) :
+   -- Identify the composite through the range with the original summand.
+-  simpa [h1ToChartL2Range, μchart, K] using hcomp''
++  simpa [h1ToChartL2Range, μchart, K] using! hcomp''
+ 
+@@ -121,3 +121,3 @@ theorem isCompactOperator_h1ToL2_riemannianVolume :
+   intro i
+-  simpa [μM] using (isCompactOperator_chartToGlobalL2_h1ToChartL2 (dR := dR) (I := I) (E := E) i)
++  simpa [μM] using! (isCompactOperator_chartToGlobalL2_h1ToChartL2 (dR := dR) (I := I) (E := E) i)
+ 
+diff --git a/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Transport.lean b/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Transport.lean
+index 093fdab..e6a2157 100644
+--- a/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Transport.lean
++++ b/RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Transport.lean
+@@ -125,3 +125,3 @@ private lemma restrict_le_of_subset {α : Type*} [MeasurableSpace α] {μ ν : M
+   -- Rewrite both sides using `restrict_restrict` and simplify the intersections using `t ⊆ s`.
+-  simpa [Measure.restrict_restrict ht, Measure.restrict_smul, inter_eq_left.mpr hts] using h'
++  simpa [Measure.restrict_restrict ht, Measure.restrict_smul, inter_eq_left.mpr hts] using! h'
+ 
+@@ -174,3 +174,3 @@ private lemma h1ToChart_mem_euclidean_h1 (i : dR.d.ι)
+   have hx_closure : (x.1 : FiniteChartData.h1Target (d := dR.d) (I := I) μM) ∈ closure A := by
+-    simpa [FiniteChartData.h1, Submodule.topologicalClosure_coe, A] using x.2
++    simpa [FiniteChartData.h1, Submodule.topologicalClosure_coe, A] using! x.2
+   -- Project to the `i`-th chart coordinate in the ambient product.
+@@ -196,3 +196,3 @@ private lemma h1ToChart_mem_euclidean_h1 (i : dR.d.ι)
+               (μ := μchart) (E := E)) := by
+-      simpa [μchart] using
++      simpa [μchart] using!
+         (FiniteChartData.h1GraphChart_mem_range_euclidean_graph (d := dR.d) (I := I) (μ := μM) i f)
+@@ -204,3 +204,3 @@ private lemma h1ToChart_mem_euclidean_h1 (i : dR.d.ι)
+           Set (FiniteChartData.h1TargetE (d := dR.d) (I := I) μM i)) := by
+-    simpa [FiniteChartData.h1TargetE, μchart] using
++    simpa [FiniteChartData.h1TargetE, μchart] using!
+       (RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.isClosed_h1
+@@ -217,5 +217,5 @@ private lemma h1ToChart_mem_euclidean_h1 (i : dR.d.ι)
+           Set (FiniteChartData.h1TargetE (d := dR.d) (I := I) μM i)) := by
+-    simpa [hClosed.closure_eq] using hx_closure_h1
++    simpa [hClosed.closure_eq] using! hx_closure_h1
+   -- Rewrite the projection as `h1ToChart`.
+-  simpa [FiniteChartData.h1ToChart] using this
++  simpa [FiniteChartData.h1ToChart] using! this
+ 
+@@ -242,3 +242,3 @@ private noncomputable def h1ToChartH1 (i : dR.d.ι) :
+   intro x
+-  simpa using (h1ToChart_mem_euclidean_h1 (dR := dR) (I := I) (E := E) i x)
++  simpa using! (h1ToChart_mem_euclidean_h1 (dR := dR) (I := I) (E := E) i x)
+ 
+@@ -273,3 +273,3 @@ private lemma h1GraphChart_fst_mem_extendByZero_range (i : dR.d.ι)
+             FiniteChartData.localize_mem_C1c (d := dR.d) (I := I) (f := f.1) f.2 i⟩ := by
+-    simpa [μchart, μM, K] using
++    simpa [μchart, μM, K] using!
+       (FiniteChartData.h1GraphChart_fst (d := dR.d) (I := I) (μ := μM) i f)
+@@ -280,3 +280,3 @@ private lemma h1GraphChart_fst_mem_extendByZero_range (i : dR.d.ι)
+         (2 : ℝ≥0∞) μchart := by
+-    simpa using
++    simpa using!
+       (RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.memLp_of_mem_C1c
+@@ -287,3 +287,3 @@ private lemma h1GraphChart_fst_mem_extendByZero_range (i : dR.d.ι)
+       tsupport (FiniteChartData.localize (d := dR.d) (I := I) f.1 i) ⊆ K := by
+-    simpa [K] using
++    simpa [K] using!
+       (FiniteChartData.tsupport_localize_subset_rhoSupportImage (d := dR.d) (I := I) (f := f.1) i)
+@@ -291,3 +291,3 @@ private lemma h1GraphChart_fst_mem_extendByZero_range (i : dR.d.ι)
+   open Analysis.FunctionalSpaces.Sobolev.Euclidean in
+-  simpa [hL2, toL2] using
++  simpa [hL2, toL2] using!
+     (mem_range_extendByZeroₗᵢ_toLp_of_tsupport_subset
+@@ -320,3 +320,3 @@ private lemma h1GraphChart_snd_mem_extendByZero_range (i : dR.d.ι)
+             FiniteChartData.localize_mem_C1c (d := dR.d) (I := I) (f := f.1) f.2 i⟩ := by
+-    simpa [μchart, μM, K] using
++    simpa [μchart, μM, K] using!
+       (FiniteChartData.h1GraphChart_snd (d := dR.d) (I := I) (μ := μM) i f)
+@@ -327,3 +327,3 @@ private lemma h1GraphChart_snd_mem_extendByZero_range (i : dR.d.ι)
+         (2 : ℝ≥0∞) μchart := by
+-    simpa using
++    simpa using!
+       (RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.memLp_grad_of_mem_C1c
+@@ -334,3 +334,3 @@ private lemma h1GraphChart_snd_mem_extendByZero_range (i : dR.d.ι)
+       tsupport (FiniteChartData.localize (d := dR.d) (I := I) f.1 i) ⊆ K := by
+-    simpa [K] using
++    simpa [K] using!
+       (FiniteChartData.tsupport_localize_subset_rhoSupportImage (d := dR.d) (I := I) (f := f.1) i)
+@@ -345,3 +345,3 @@ private lemma h1GraphChart_snd_mem_extendByZero_range (i : dR.d.ι)
+   open Analysis.FunctionalSpaces.Sobolev.Euclidean in
+-  simpa [hL2Grad, toL2Grad] using
++  simpa [hL2Grad, toL2Grad] using!
+     (mem_range_extendByZeroₗᵢ_toLp_of_tsupport_subset
+@@ -383,3 +383,3 @@ lemma h1ToChartL2_mem_extendByZero_range (i : dR.d.ι)
+       constructor <;> rintro ⟨u, rfl⟩ <;> exact ⟨u, rfl⟩
+-    simpa [hEq] using hcr
++    simpa [hEq] using! hcr
+   -- Work in the ambient product space: `x` lies in the closure of `range h1Graph`.
+@@ -392,3 +392,3 @@ lemma h1ToChartL2_mem_extendByZero_range (i : dR.d.ι)
+     -- Unfold `h1` as a topological closure.
+-    simpa [FiniteChartData.h1, Submodule.topologicalClosure_coe, A] using x.2
++    simpa [FiniteChartData.h1, Submodule.topologicalClosure_coe, A] using! x.2
+   have hf_mem : fTarget x.1 ∈ closure (Set.image fTarget A) :=
+@@ -403,3 +403,3 @@ lemma h1ToChartL2_mem_extendByZero_range (i : dR.d.ι)
+     -- Reduce to the dense range used to define `h1`.
+-    simpa [fTarget, FiniteChartData.h1Graph, LinearMap.pi_apply] using
++    simpa [fTarget, FiniteChartData.h1Graph, LinearMap.pi_apply] using!
+       (h1GraphChart_fst_mem_extendByZero_range (dR := dR) (I := I) i g)
+@@ -414,3 +414,3 @@ lemma h1ToChartL2_mem_extendByZero_range (i : dR.d.ι)
+       closure_mono hImage
+-    simpa [hClosed.closure_eq] using this
++    simpa [hClosed.closure_eq] using! this
+   have :
+@@ -420,3 +420,3 @@ lemma h1ToChartL2_mem_extendByZero_range (i : dR.d.ι)
+   -- Rewrite `fTarget x.1` back to `h1ToChartL2`.
+-  simpa [fTarget, FiniteChartData.h1ToChartL2, FiniteChartData.h1ToChart] using this
++  simpa [fTarget, FiniteChartData.h1ToChartL2, FiniteChartData.h1ToChart] using! this
+ 
+@@ -450,3 +450,3 @@ lemma h1ToChartL2Grad_mem_extendByZero_range (i : dR.d.ι)
+       constructor <;> rintro ⟨u, rfl⟩ <;> exact ⟨u, rfl⟩
+-    simpa [hEq] using hcr
++    simpa [hEq] using! hcr
+   let A : Set (FiniteChartData.h1Target (d := dR.d) (I := I) μM) :=
+@@ -457,3 +457,3 @@ lemma h1ToChartL2Grad_mem_extendByZero_range (i : dR.d.ι)
+   have hx_closure : (x.1 : FiniteChartData.h1Target (d := dR.d) (I := I) μM) ∈ closure A := by
+-    simpa [FiniteChartData.h1, Submodule.topologicalClosure_coe, A] using x.2
++    simpa [FiniteChartData.h1, Submodule.topologicalClosure_coe, A] using! x.2
+   have hf_mem : fTarget x.1 ∈ closure (Set.image fTarget A) :=
+@@ -467,3 +467,3 @@ lemma h1ToChartL2Grad_mem_extendByZero_range (i : dR.d.ι)
+     rcases hzA with ⟨g, rfl⟩
+-    simpa [fTarget, FiniteChartData.h1Graph, LinearMap.pi_apply] using
++    simpa [fTarget, FiniteChartData.h1Graph, LinearMap.pi_apply] using!
+       (h1GraphChart_snd_mem_extendByZero_range (dR := dR) (I := I) i g)
+@@ -477,3 +477,3 @@ lemma h1ToChartL2Grad_mem_extendByZero_range (i : dR.d.ι)
+       closure_mono hImage
+-    simpa [hClosed.closure_eq] using this
++    simpa [hClosed.closure_eq] using! this
+   have :
+@@ -483,3 +483,3 @@ lemma h1ToChartL2Grad_mem_extendByZero_range (i : dR.d.ι)
+   simpa [fTarget, FiniteChartData.h1ToChartL2Grad,
+-    FiniteChartData.h1ToChart] using this
++    FiniteChartData.h1ToChart] using! this
+ 
+@@ -515,6 +515,6 @@ private lemma h1ToChartH1_mem_h1OnMeasure (i : dR.d.ι)
+     simpa [h1ToChartH1, RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.h1ToL2,
+-      FiniteChartData.h1ToChartL2, FiniteChartData.h1ToChart] using
++      FiniteChartData.h1ToChartL2, FiniteChartData.h1ToChart] using!
+       (h1ToChartL2_mem_extendByZero_range (dR := dR) (I := I) i x)
+   -- Finish by unfolding the `comap` definition.
+-  simpa [RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.h1OnMeasure, hKm] using hxL2
++  simpa [RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.h1OnMeasure, hKm] using! hxL2
+ 
+@@ -538,3 +538,3 @@ private noncomputable def h1ToChartH1OnMeasure (i : dR.d.ι) :
+   intro x
+-  simpa [hKm] using (h1ToChartH1_mem_h1OnMeasure (dR := dR) (I := I) (E := E) i x)
++  simpa [hKm] using! (h1ToChartH1_mem_h1OnMeasure (dR := dR) (I := I) (E := E) i x)
+ 
+@@ -612,3 +612,3 @@ noncomputable def l2EquivVolumeOnRhoSupportImage' (i : dR.d.ι) (F : Type*)
+           (volume : Measure E).restrict K := by
+-    simpa [μM, μchart, K] using
++    simpa [μM, μchart, K] using!
+       chartMeasure_restrict_rhoSupportImage_le_volume (dR := dR) (I := I) i
+@@ -620,3 +620,3 @@ noncomputable def l2EquivVolumeOnRhoSupportImage' (i : dR.d.ι) (F : Type*)
+             μchart.restrict K) := by
+-    simpa [μM, μchart, K] using
++    simpa [μM, μchart, K] using!
+       volume_restrict_rhoSupportImage_le_chartMeasure (dR := dR) (I := I) i
+@@ -625,3 +625,3 @@ noncomputable def l2EquivVolumeOnRhoSupportImage' (i : dR.d.ι) (F : Type*)
+         0 < (volume : Measure E) (Metric.closedBall (0 : E) 1) := by
+-      simpa using
++      simpa using!
+         (Metric.measure_closedBall_pos (μ := (volume : Measure E))
+@@ -643,3 +643,3 @@ noncomputable def l2EquivVolumeOnRhoSupportImage' (i : dR.d.ι) (F : Type*)
+         0 < (μH[(Module.finrank ℝ E : ℝ)] : Measure E) (Metric.closedBall (0 : E) 1) := by
+-      simpa using
++      simpa using!
+         (Metric.measure_closedBall_pos
+@@ -652,4 +652,4 @@ noncomputable def l2EquivVolumeOnRhoSupportImage' (i : dR.d.ι) (F : Type*)
+     have hdenInv : (((volume : Measure E) (Metric.closedBall (0 : E) 1))⁻¹) ≠ ∞ := by
+-      simpa using (ENNReal.inv_ne_top.2 hVolBall_ne_zero)
+-    simpa [div_eq_mul_inv] using (ENNReal.mul_ne_top hHausBall_ne_top hdenInv)
++      simpa using! (ENNReal.inv_ne_top.2 hVolBall_ne_zero)
++    simpa [div_eq_mul_inv] using! (ENNReal.mul_ne_top hHausBall_ne_top hdenInv)
+   have hVolDivHaus_ne_top :
+@@ -659,4 +659,4 @@ noncomputable def l2EquivVolumeOnRhoSupportImage' (i : dR.d.ι) (F : Type*)
+         (((μH[(Module.finrank ℝ E : ℝ)] : Measure E) (Metric.closedBall (0 : E) 1))⁻¹) ≠ ∞ := by
+-      simpa using (ENNReal.inv_ne_top.2 hHausBall_ne_zero)
+-    simpa [div_eq_mul_inv] using (ENNReal.mul_ne_top hVolBall_ne_top hdenInv)
++      simpa using! (ENNReal.inv_ne_top.2 hHausBall_ne_zero)
++    simpa [div_eq_mul_inv] using! (ENNReal.mul_ne_top hVolBall_ne_top hdenInv)
+   have hcChartVol :
+@@ -669,3 +669,3 @@ noncomputable def l2EquivVolumeOnRhoSupportImage' (i : dR.d.ι) (F : Type*)
+       exact ENNReal.rpow_ne_top_of_nonneg hexp hbase
+-    simpa using (ENNReal.mul_ne_top hC hHausDivVol_ne_top)
++    simpa using! (ENNReal.mul_ne_top hC hHausDivVol_ne_top)
+   have hcVolChart :
+@@ -678,3 +678,3 @@ noncomputable def l2EquivVolumeOnRhoSupportImage' (i : dR.d.ι) (F : Type*)
+       exact ENNReal.rpow_ne_top_of_nonneg hexp hbase
+-    simpa [mul_assoc, mul_left_comm, mul_comm] using (ENNReal.mul_ne_top hVolDivHaus_ne_top hCfwd)
++    simpa [mul_assoc, mul_left_comm, mul_comm] using! (ENNReal.mul_ne_top hVolDivHaus_ne_top hCfwd)
+   have hp : (2 : ℝ≥0∞) ≠ ∞ := by simp
+@@ -745,6 +745,6 @@ noncomputable def l2ExtendByZeroRangeEquivVolumeOnRhoSupportImage' (i : dR.d.ι)
+   have hμ_le : μchart.restrict K ≤ cChartVol • (volume : Measure E).restrict K := by
+-    simpa [cChartVol, μM, μchart, K] using
++    simpa [cChartVol, μM, μchart, K] using!
+       chartMeasure_restrict_rhoSupportImage_le_volume (dR := dR) (I := I) i
+   have hvol_le : (volume : Measure E).restrict K ≤ cVolChart • μchart.restrict K := by
+-    simpa [cVolChart, μM, μchart, K] using
++    simpa [cVolChart, μM, μchart, K] using!
+       volume_restrict_rhoSupportImage_le_chartMeasure (dR := dR) (I := I) i
+@@ -756,3 +756,3 @@ noncomputable def l2ExtendByZeroRangeEquivVolumeOnRhoSupportImage' (i : dR.d.ι)
+   -- Transport the range through restricted `L²` and change-of-measure equivalence.
+-  simpa [cVolChart, cChartVol, eChart, eVol] using
++  simpa [cVolChart, cChartVol, eChart, eVol] using!
+     (MeasureTheory.Lp.extendByZeroRangeEquivOfRestrictChangeMeasureEquiv
+diff --git a/RellichKondrachov/MeasureTheory/Function/LpSpace/ChangeMeasureLeSmul.lean b/RellichKondrachov/MeasureTheory/Function/LpSpace/ChangeMeasureLeSmul.lean
+index bc77a1d..be999cd 100644
+--- a/RellichKondrachov/MeasureTheory/Function/LpSpace/ChangeMeasureLeSmul.lean
++++ b/RellichKondrachov/MeasureTheory/Function/LpSpace/ChangeMeasureLeSmul.lean
+@@ -42,3 +42,3 @@ private lemma memLp_changeMeasure {c : ℝ≥0∞} (hc : c ≠ ∞) (hν : ν 
+   have hfμ : MeasureTheory.MemLp (fun x : α => f x) p μ := by
+-    simpa using (MeasureTheory.Lp.memLp f)
++    simpa using! (MeasureTheory.Lp.memLp f)
+   exact
+@@ -54,3 +54,3 @@ private lemma changeMeasureFun_coe {c : ℝ≥0∞} (hc : c ≠ ∞) (hν : ν 
+     (changeMeasureFun (μ := μ) (ν := ν) (p := p) hc hν f : α → E) =ᵐ[ν] f := by
+-    simpa [changeMeasureFun] using
++    simpa [changeMeasureFun] using!
+       (MeasureTheory.MemLp.coeFn_toLp (memLp_changeMeasure (μ := μ) (ν := ν) (p := p) hc hν f))
+@@ -67,3 +67,3 @@ noncomputable def changeMeasureₗ {c : ℝ≥0∞} (hc : c ≠ ∞) (hν : ν 
+       habs.ae_le (by
+-        simpa using (MeasureTheory.Lp.coeFn_add (μ := μ) f g))
++        simpa using! (MeasureTheory.Lp.coeFn_add (μ := μ) f g))
+     filter_upwards
+@@ -83,8 +83,8 @@ noncomputable def changeMeasureₗ {c : ℝ≥0∞} (hc : c ≠ ∞) (hν : ν 
+               changeMeasureFun (μ := μ) (ν := ν) (p := p) hc hν g) x := by
+-      simpa [Pi.add_apply] using hadd.symm
++      simpa [Pi.add_apply] using! hadd.symm
+     calc
+       changeMeasureFun (μ := μ) (ν := ν) (p := p) hc hν (f + g) x = (f + g) x := by
+-            simpa using hfg
++            simpa using! hfg
+       _ = f x + g x := by
+-            simpa [Pi.add_apply] using haddμ
++            simpa [Pi.add_apply] using! haddμ
+       _ = (changeMeasureFun (μ := μ) (ν := ν) (p := p) hc hν f) x +
+@@ -100,3 +100,3 @@ noncomputable def changeMeasureₗ {c : ℝ≥0∞} (hc : c ≠ ∞) (hν : ν 
+       habs.ae_le (by
+-        simpa using (MeasureTheory.Lp.coeFn_smul (μ := μ) r f))
++        simpa using! (MeasureTheory.Lp.coeFn_smul (μ := μ) r f))
+     filter_upwards
+@@ -110,8 +110,8 @@ noncomputable def changeMeasureₗ {c : ℝ≥0∞} (hc : c ≠ ∞) (hν : ν 
+           (r • changeMeasureFun (μ := μ) (ν := ν) (p := p) hc hν f) x := by
+-      simpa [Pi.smul_apply] using hsmul.symm
++      simpa [Pi.smul_apply] using! hsmul.symm
+     calc
+       changeMeasureFun (μ := μ) (ν := ν) (p := p) hc hν (r • f) x = (r • f) x := by
+-            simpa using hrf
++            simpa using! hrf
+       _ = r • f x := by
+-            simpa [Pi.smul_apply] using hsmulμ
++            simpa [Pi.smul_apply] using! hsmulμ
+       _ = r • (changeMeasureFun (μ := μ) (ν := ν) (p := p) hc hν f) x := by
+@@ -144,3 +144,3 @@ private lemma norm_changeMeasureFun_le {c : ℝ≥0∞} (hc : c ≠ ∞) (hν :
+           (c ^ (1 / p).toReal) * MeasureTheory.eLpNorm (fun x : α => f x) p μ := by
+-      simpa [ENNReal.smul_def, mul_assoc, mul_left_comm, mul_comm] using
++      simpa [ENNReal.smul_def, mul_assoc, mul_left_comm, mul_comm] using!
+         (MeasureTheory.eLpNorm_smul_measure_of_ne_top
+@@ -155,3 +155,3 @@ private lemma norm_changeMeasureFun_le {c : ℝ≥0∞} (hc : c ≠ ∞) (hν :
+       have hfμ : MeasureTheory.MemLp (fun x : α => f x) p μ := by
+-        simpa using (MeasureTheory.Lp.memLp f)
++        simpa using! (MeasureTheory.Lp.memLp f)
+       have hfμ_ne : MeasureTheory.eLpNorm (fun x : α => f x) p μ ≠ ∞ := hfμ.2.ne
+@@ -183,3 +183,3 @@ lemma changeMeasureL_coeFn_ae_eq {c : ℝ≥0∞} (hc : c ≠ ∞) (hν : ν ≤
+   -- `mkContinuous` does not change the underlying function.
+-  simpa [changeMeasureL, changeMeasureₗ, changeMeasureFun] using
++  simpa [changeMeasureL, changeMeasureₗ, changeMeasureFun] using!
+     (changeMeasureFun_coe (μ := μ) (ν := ν) (E := E) (p := p) (c := c) hc hν f)
+@@ -226,3 +226,3 @@ noncomputable def changeMeasureEquiv {c₁ c₂ : ℝ≥0∞} (hc₁ : c₁ ≠
+     have hbwdμ : (bwd g : α → E) =ᵐ[μ] g := by
+-      simpa [bwd, changeMeasureL, changeMeasureₗ] using
++      simpa [bwd, changeMeasureL, changeMeasureₗ] using!
+         (changeMeasureFun_coe (μ := ν) (ν := μ) (p := p) hc₂ hμ g)
+@@ -230,3 +230,3 @@ noncomputable def changeMeasureEquiv {c₁ c₂ : ℝ≥0∞} (hc₁ : c₁ ≠
+     have hfwd : (fwd (bwd g) : α → E) =ᵐ[ν] (bwd g) := by
+-      simpa [fwd, bwd, changeMeasureL, changeMeasureₗ] using
++      simpa [fwd, bwd, changeMeasureL, changeMeasureₗ] using!
+         (changeMeasureFun_coe (μ := μ) (ν := ν) (p := p) hc₁ hν (bwd g))
+@@ -239,6 +239,6 @@ noncomputable def changeMeasureEquiv {c₁ c₂ : ℝ≥0∞} (hc₁ : c₁ ≠
+     have hbwd : (bwd (fwd f) : α → E) =ᵐ[μ] (fwd f) := by
+-      simpa [fwd, bwd, changeMeasureL, changeMeasureₗ] using
++      simpa [fwd, bwd, changeMeasureL, changeMeasureₗ] using!
+         (changeMeasureFun_coe (μ := ν) (ν := μ) (p := p) hc₂ hμ (fwd f))
+     have hfwdν : (fwd f : α → E) =ᵐ[ν] f := by
+-      simpa [fwd, changeMeasureL, changeMeasureₗ] using
++      simpa [fwd, changeMeasureL, changeMeasureₗ] using!
+         (changeMeasureFun_coe (μ := μ) (ν := ν) (p := p) hc₁ hν f)
+@@ -274,5 +274,7 @@ lemma isCompactOperator_comp_continuousLinearEquiv_iff {F : Type*} [TopologicalS
+     -- `h'` is stated in terms of coercions, so rewrite it to recover compactness of `T`.
+-    simpa [hcomp] using h'
++    change IsCompactOperator ((⇑T ∘ ⇑e) ∘ ⇑e.symm) at h'
++    rw [hcomp] at h'
++    exact h'
+   · intro h
+-    simpa using h.comp_clm (e.toContinuousLinearMap)
++    simpa using! h.comp_clm (e.toContinuousLinearMap)
+ 
+diff --git a/RellichKondrachov/MeasureTheory/Function/LpSpace/Restrict.lean b/RellichKondrachov/MeasureTheory/Function/LpSpace/Restrict.lean
+index bb9c6e5..2937e46 100644
+--- a/RellichKondrachov/MeasureTheory/Function/LpSpace/Restrict.lean
++++ b/RellichKondrachov/MeasureTheory/Function/LpSpace/Restrict.lean
+@@ -65,3 +65,3 @@ noncomputable def extendByZeroₗ : Lp E p (μ.restrict s) →ₗ[ℝ] Lp E p μ
+         (fun x : α => (f + g) x) =ᵐ[μ.restrict s] fun x : α => f x + g x := by
+-      simpa using (Lp.coeFn_add (μ := μ.restrict s) f g)
++      simpa using! (Lp.coeFn_add (μ := μ.restrict s) f g)
+     have h_add_on :
+@@ -84,3 +84,3 @@ noncomputable def extendByZeroₗ : Lp E p (μ.restrict s) →ₗ[ℝ] Lp E p μ
+               extendByZeroFun (μ := μ) (p := p) (s := s) hs g) x := by
+-        simpa [Pi.add_apply] using hadd.symm
++        simpa [Pi.add_apply] using! hadd.symm
+       calc
+@@ -103,3 +103,3 @@ noncomputable def extendByZeroₗ : Lp E p (μ.restrict s) →ₗ[ℝ] Lp E p μ
+               extendByZeroFun (μ := μ) (p := p) (s := s) hs g) x := by
+-        simpa [Pi.add_apply] using hadd.symm
++        simpa [Pi.add_apply] using! hadd.symm
+       calc
+@@ -119,3 +119,3 @@ noncomputable def extendByZeroₗ : Lp E p (μ.restrict s) →ₗ[ℝ] Lp E p μ
+         (fun x : α => (c • f) x) =ᵐ[μ.restrict s] fun x : α => c • f x := by
+-      simpa using (Lp.coeFn_smul (μ := μ.restrict s) c f)
++      simpa using! (Lp.coeFn_smul (μ := μ.restrict s) c f)
+     have h_smul_on :
+@@ -134,3 +134,3 @@ noncomputable def extendByZeroₗ : Lp E p (μ.restrict s) →ₗ[ℝ] Lp E p μ
+             (c • extendByZeroFun (μ := μ) (p := p) (s := s) hs f) x := by
+-        simpa [Pi.smul_apply] using hsmul.symm
++        simpa [Pi.smul_apply] using! hsmul.symm
+       calc
+@@ -147,3 +147,3 @@ noncomputable def extendByZeroₗ : Lp E p (μ.restrict s) →ₗ[ℝ] Lp E p μ
+             (c • extendByZeroFun (μ := μ) (p := p) (s := s) hs f) x := by
+-        simpa [Pi.smul_apply] using hsmul.symm
++        simpa [Pi.smul_apply] using! hsmul.symm
+       calc
+@@ -155,3 +155,3 @@ noncomputable def extendByZeroₗ : Lp E p (μ.restrict s) →ₗ[ℝ] Lp E p μ
+                 extendByZeroFun (μ := μ) (p := p) (s := s) hs f x = 0 := by
+-              simpa [Set.indicator_of_notMem, hx] using hf
++              simpa [Set.indicator_of_notMem, hx] using! hf
+             have hcx :
+@@ -161,5 +161,5 @@ noncomputable def extendByZeroₗ : Lp E p (μ.restrict s) →ₗ[ℝ] Lp E p μ
+                     c • extendByZeroFun (μ := μ) (p := p) (s := s) hs f x := by
+-                      simpa [Pi.smul_apply] using hsmul
++                      simpa [Pi.smul_apply] using! hsmul
+                 _ = 0 := by simp [hf0]
+-            simpa using hcx.symm
++            simpa using! hcx.symm
+ 
+@@ -185,3 +185,3 @@ noncomputable def extendByZeroₗᵢ : Lp E p (μ.restrict s) →ₗᵢ[ℝ] Lp
+           eLpNorm (fun x : α => f x) p (μ.restrict s) := by
+-      simpa using (eLpNorm_indicator_eq_eLpNorm_restrict (μ := μ) (p := p) (s := s)
++      simpa using! (eLpNorm_indicator_eq_eLpNorm_restrict (μ := μ) (p := p) (s := s)
+         (f := fun x : α => f x) hs)
+@@ -194,3 +194,3 @@ lemma extendByZeroₗᵢ_ae_eq (f : Lp E p (μ.restrict s)) :
+   -- Unfold to the underlying `extendByZeroFun` and use the defining AE equality.
+-  simpa [extendByZeroₗᵢ, extendByZeroₗ] using
++  simpa [extendByZeroₗᵢ, extendByZeroₗ] using!
+     (extendByZeroFun_coe (μ := μ) (p := p) (s := s) hs f)
+diff --git a/RellichKondrachov/MeasureTheory/Measure/HausdorffVolume.lean b/RellichKondrachov/MeasureTheory/Measure/HausdorffVolume.lean
+index 39eae1e..c7957d7 100644
+--- a/RellichKondrachov/MeasureTheory/Measure/HausdorffVolume.lean
++++ b/RellichKondrachov/MeasureTheory/Measure/HausdorffVolume.lean
+@@ -50,3 +50,3 @@ theorem hausdorffMeasure_eq_smul_volume :
+         (μH[(Module.finrank ℝ E : ℝ)] : Measure E) K₀ • Measure.addHaarMeasure K₀ := by
+-    simpa using
++    simpa using!
+       (Measure.addHaarMeasure_unique (μ := (μH[(Module.finrank ℝ E : ℝ)] : Measure E)) K₀)
+@@ -54,3 +54,3 @@ theorem hausdorffMeasure_eq_smul_volume :
+       (volume : Measure E) = (volume : Measure E) K₀ • Measure.addHaarMeasure K₀ := by
+-    simpa using (Measure.addHaarMeasure_unique (μ := (volume : Measure E)) K₀)
++    simpa using! (Measure.addHaarMeasure_unique (μ := (volume : Measure E)) K₀)
+   have hv0 : (volume : Measure E) K₀ ≠ 0 := by
+@@ -62,3 +62,3 @@ theorem hausdorffMeasure_eq_smul_volume :
+   have hc : c * (volume : Measure E) K₀ = (1 : ℝ≥0∞) := by
+-    simpa [c] using (ENNReal.div_mul_cancel hv0 hvTop (b := (1 : ℝ≥0∞)))
++    simpa [c] using! (ENNReal.div_mul_cancel hv0 hvTop (b := (1 : ℝ≥0∞)))
+   have hhaar : Measure.addHaarMeasure K₀ = c • (volume : Measure E) := by
+@@ -69,3 +69,3 @@ theorem hausdorffMeasure_eq_smul_volume :
+               -- Rewrite only the measure `volume`, not the scalar `c`.
+-              simpa using congrArg (fun μ : Measure E => c • μ) hvol
++              simpa using! congrArg (fun μ : Measure E => c • μ) hvol
+         _ = (c * (volume : Measure E) K₀) • Measure.addHaarMeasure K₀ := by
+@@ -73,3 +73,3 @@ theorem hausdorffMeasure_eq_smul_volume :
+         _ = Measure.addHaarMeasure K₀ := by simp [hc]
+-    simpa [c] using this.symm
++    simpa [c] using! this.symm
+   have :
+@@ -87,3 +87,3 @@ theorem hausdorffMeasure_eq_smul_volume :
+             simp [c, smul_smul, div_eq_mul_inv]
+-  simpa [K₀] using this
++  simpa [K₀] using! this
+ 
+@@ -124,3 +124,3 @@ theorem volume_eq_smul_hausdorffMeasure :
+   have hab : (μH[(Module.finrank ℝ E : ℝ)] : Measure E) = (a / b) • (volume : Measure E) := by
+-    simpa [a, b, K] using (hausdorffMeasure_eq_smul_volume (E := E))
++    simpa [a, b, K] using! (hausdorffMeasure_eq_smul_volume (E := E))
+   have hba_mul_hab : (b / a) * (a / b) = 1 := by
+@@ -135,3 +135,3 @@ theorem volume_eq_smul_hausdorffMeasure :
+       _ = (1 : ℝ≥0∞) := by
+-            simpa using (ENNReal.mul_inv_cancel hv0 hvTop)
++            simpa using! (ENNReal.mul_inv_cancel hv0 hvTop)
+   have : (b / a) • (μH[(Module.finrank ℝ E : ℝ)] : Measure E) = (volume : Measure E) := by
+@@ -144,3 +144,3 @@ theorem volume_eq_smul_hausdorffMeasure :
+       _ = (volume : Measure E) := by simp [hba_mul_hab]
+-  simpa [a, b, K] using this.symm
++  simpa [a, b, K] using! this.symm
+ 
+diff --git a/lake-manifest.json b/lake-manifest.json
+index 61a4d4e..98a3c3c 100644
+--- a/lake-manifest.json
++++ b/lake-manifest.json
+@@ -1,2 +1,2 @@
+-{"version": "1.1.0",
++{"version": "1.2.0",
+  "packagesDir": ".lake/packages",
+@@ -6,7 +6,7 @@
+    "subDir": null,
+-   "scope": "",
+-   "rev": "5e932f97dd25535344f80f9dd8da3aab83df0fe6",
++   "scope": "leanprover-community",
++   "rev": "db584cd6d46c92f209a44c0f1c829460d327499d",
+    "name": "mathlib",
+    "manifestFile": "lake-manifest.json",
+-   "inputRev": "v4.29.1",
++   "inputRev": "db584cd6d46c92f209a44c0f1c829460d327499d",
+    "inherited": false,
+@@ -17,3 +17,3 @@
+    "scope": "leanprover-community",
+-   "rev": "83e90935a17ca19ebe4b7893c7f7066e266f50d3",
++   "rev": "b7eb3304aeae834b12dda98993a37f6a41f6f0bb",
+    "name": "plausible",
+@@ -27,3 +27,3 @@
+    "scope": "leanprover-community",
+-   "rev": "c5d5b8fe6e5158def25cd28eb94e4141ad97c843",
++   "rev": "5f4d51b81cbd3f6b32b156bfad9056621a040404",
+    "name": "LeanSearchClient",
+@@ -37,3 +37,3 @@
+    "scope": "leanprover-community",
+-   "rev": "48d5698bc464786347c1b0d859b18f938420f060",
++   "rev": "16f02aa7642864af59f1ff0e384a015994db9118",
+    "name": "importGraph",
+@@ -47,6 +47,6 @@
+    "scope": "leanprover-community",
+-   "rev": "4dd0959c44d1af0462bd604d0f87c5781307d709",
++   "rev": "4be2e3d5087eeb272cf5a8853b8f9dd025ef5957",
+    "name": "proofwidgets",
+    "manifestFile": "lake-manifest.json",
+-   "inputRev": "v0.0.95+lean-v4.29.1",
++   "inputRev": "main",
+    "inherited": true,
+@@ -57,3 +57,3 @@
+    "scope": "leanprover-community",
+-   "rev": "7152850e7b216a0d409701617721b6e469d34bf6",
++   "rev": "3448c0bcc5ce01b2d1546e483ec3620e32df3d0e",
+    "name": "aesop",
+@@ -67,3 +67,3 @@
+    "scope": "leanprover-community",
+-   "rev": "707efb56d0696634e9e965523a1bbe9ac6ce141d",
++   "rev": "92c15be17b7caf78c2ad767ec40f89052d908d81",
+    "name": "Qq",
+@@ -77,3 +77,3 @@
+    "scope": "leanprover-community",
+-   "rev": "756e3321fd3b02a85ffda19fef789916223e578c",
++   "rev": "4488d40d070b9700d4d5a6aa342f0d40c31b2a2d",
+    "name": "batteries",
+@@ -87,9 +87,10 @@
+    "scope": "leanprover",
+-   "rev": "7802da01beb530bf051ab657443f9cd9bc3e1a29",
++   "rev": "6130a47896ce867c6a4a55373441e59e565bad0f",
+    "name": "Cli",
+    "manifestFile": "lake-manifest.json",
+-   "inputRev": "v4.29.0",
++   "inputRev": "v4.33.0",
+    "inherited": true,
+    "configFile": "lakefile.toml"}],
+- "name": "«rellich-kondrachov»",
+- "lakeDir": ".lake"}
++ "name": "SchurRigidity",
++ "lakeDir": ".lake",
++ "fixedToolchain": false}
+diff --git a/lakefile.lean b/lakefile.lean
+index bb9c4aa..f1db32f 100644
+--- a/lakefile.lean
++++ b/lakefile.lean
+@@ -21,3 +21,3 @@ package «rellich-kondrachov» where
+ require mathlib from git
+-  "https://github.com/leanprover-community/mathlib4" @ "v4.29.1"
++  "https://github.com/leanprover-community/mathlib4" @ "db584cd6d46c92f209a44c0f1c829460d327499d"
+ 
+diff --git a/lean-toolchain b/lean-toolchain
+index 33e0c08..025e595 100644
+--- a/lean-toolchain
++++ b/lean-toolchain
+@@ -1 +1 @@
+-leanprover/lean4:v4.29.1
++leanprover/lean4:v4.33.0

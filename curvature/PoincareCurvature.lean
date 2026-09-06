@@ -11,6 +11,7 @@ import PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSectionSmoothA
 import PoincareCurvature.Geometry.Manifold.VectorBundle.SmoothApprox
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Sectional
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi
+import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.ContractedBianchi
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.DowngradeNormFree
 import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckCorrectionRegularity
@@ -23,3 +24,4 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.DeTurckRaisedGa
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.AutonomousResolventExp
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FrozenChartAffineEvolution
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SectionPointwiseDeriv
+import PoincareCurvature.Geometry.Manifold.RicciFlow.ResearchTheorems

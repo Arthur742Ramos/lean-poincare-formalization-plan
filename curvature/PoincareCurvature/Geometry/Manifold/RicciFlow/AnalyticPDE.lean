@@ -2,6 +2,7 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction
 public import Mathlib.Analysis.ODE.PicardLindelof
+public import Mathlib.Analysis.ODE.ExistUnique
 public import Mathlib.Analysis.ODE.Gronwall
 
 set_option linter.unusedSectionVars false
@@ -547,8 +548,10 @@ theorem fixedBy_continuousLinearMap_of_lipschitzOn
   have hEq := eqOn_Icc_of_lipschitzOn (F := F) (stateSet := stateSet)
     (t₀ := t₀) (u₀ := u₀) (K := K) hF sol mappedSol
   intro t ht
+  have hmappedTime : mappedSol.terminalTime = sol.terminalTime := by
+    rfl
   have ht' : t ∈ Icc t₀ (min sol.terminalTime mappedSol.terminalTime) := by
-    exact ⟨ht.1, le_min ht.2 (by simpa [mappedSol] using ht.2)⟩
+    exact ⟨ht.1, le_min ht.2 (by rw [hmappedTime]; exact ht.2)⟩
   exact (hEq ht').symm
 
 /-- Interval-scoped version of `fixedBy_continuousLinearMap_of_lipschitzOn`: it is enough for
@@ -571,8 +574,10 @@ theorem fixedBy_continuousLinearMap_of_lipschitzOn_Icc
   have hEq := eqOn_Icc_of_lipschitzOn_Icc (F := F) (stateSet := stateSet)
     (t₀ := t₀) (u₀ := u₀) (K := K) sol mappedSol hLipCommon
   intro t ht
+  have hmappedTime : mappedSol.terminalTime = sol.terminalTime := by
+    rfl
   have ht' : t ∈ Icc t₀ (min sol.terminalTime mappedSol.terminalTime) := by
-    exact ⟨ht.1, le_min ht.2 (by simpa [mappedSol] using ht.2)⟩
+    exact ⟨ht.1, le_min ht.2 (by rw [hmappedTime]; exact ht.2)⟩
   exact (hEq ht').symm
 
 /-- If a continuous linear defect functional annihilates the vector field on the state set and

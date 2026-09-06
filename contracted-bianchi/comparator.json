@@ -1,0 +1,21 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "ContractedBianchi.contractedSecondBianchi"
+  ],
+  "definition_names": [
+    "ContractedBianchi.along",
+    "ContractedBianchi.curvatureAux",
+    "ContractedBianchi.secondBianchiAux",
+    "ContractedBianchi.IsMetricCompatibleTangent",
+    "ContractedBianchi.curvatureCovariantDerivative",
+    "ContractedBianchi.curvatureCovariantDerivativeInner"
+  ],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
+  "enable_nanoda": true
+}

@@ -1,0 +1,158 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+project:
+  name: "Schur rigidity and geometric contracted Bianchi"
+  description: >-
+    Proves geometric contracted Bianchi for the actual Ricci and scalar fields,
+    the divergence-free Einstein tensor, constancy of a differentiable Einstein
+    factor on connected manifolds of dimension at least three, and the full
+    constant-curvature tensor formula in dimension three. The Mathlib-only
+    Challenge exposes the connection commutator, orthonormal contractions and
+    actual bilinear covariant derivative. Trace differentiation and extension
+    independence are proved rather than assumed.
+  authors:
+    - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
+  license: "Apache-2.0"
+  responsible_maintainers: ["Arthur Freitas Ramos"]
+classification:
+  arxiv: ["math.DG", "math.LO"]
+  msc2020: ["53B20", "53C25", "03B35"]
+sources:
+  - title: "Lecture Notes on General Relativity"
+    authors: ["Sean M. Carroll"]
+    id: "https://ned.ipac.caltech.edu/level5/March01/Carroll3/Carroll3.html"
+    type: "lecture notes"
+    location: "Section 3, equations (3.90)-(3.96)"
+    relationship: "adapts"
+    note: >-
+      Ricci/scalar contraction, geometric contracted Bianchi and Einstein
+      divergence, specialized to positive-definite Riemannian metrics with
+      the displayed commutator sign convention.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+  - title: "Riemannian Geometry, Spring 2024"
+    authors: ["Ross Ogilvie"]
+    id: "https://www.wim.uni-mannheim.de/media/Lehrstuehle/wim/schmidt/FSS2024/Riemannian_Geometry/Web/RGch5.html"
+    type: "lecture notes"
+    location: "Chapter 5, Theorems 5.12 and 5.23"
+    relationship: "adapts"
+    note: >-
+      Schur constancy for Einstein metrics and the constant-curvature tensor
+      convention. Our proof differentiates a metric trace in a local frame
+      rather than assuming a normal chart. The selected Einstein factor is
+      differentiable, not necessarily smooth.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+  - title: "Differential geometry lecture notes"
+    authors: ["Esther Cabezas-Rivas"]
+    id: "https://roderic.uv.es/bitstreams/99135e48-85cb-43b8-947d-0c0fbb028335/download"
+    type: "lecture notes"
+    location: "Proposition 11.20(b) and Theorem 11.22"
+    relationship: "adapts"
+    note: >-
+      Classical three-dimensional Einstein constant-curvature implication and
+      Schur constancy. Only the Einstein-to-constant-curvature direction is
+      selected here, with its full four-slot tensor formula.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/90d215d81d30a5f67922dce00dfa160b4878e1c5/contracted-bianchi"
+    relationship: "builds-on"
+    note: >-
+      Reuses the earlier contracted-bianchi formalization in repository
+      Arthur742Ramos/lean-poincare-formalization-plan at immutable commit
+      90d215d81d30a5f67922dce00dfa160b4878e1c5, project path contracted-bianchi.
+      Its twelve contracted-bianchi/PoincareCurvature/**/*.lean library files
+      are copied unchanged into schur-rigidity/PoincareCurvature/, retaining
+      their original contributor notices. This inherited library supplies
+      connection calculus, curvature tensoriality, metric symmetries and the
+      corrected differential Bianchi identity. The earlier selected
+      double-contracted curvature-derivative theorem is a dependency, not a
+      newly selected result. The new root-level Schur modules and Solution
+      prove actual Ricci/scalar differentiation, bilinear-derivative extension
+      independence, geometric contracted Bianchi, Einstein divergence,
+      connected Einstein-factor constancy and three-dimensional full-curvature
+      rigidity. See PROVENANCE.md for the matching source account.
+status:
+  scope: >-
+    Smooth Hausdorff real Riemannian manifolds with a finite-dimensional
+    complete model space; tangent-bundle regularity through order three,
+    connection regularity through order two and metric regularity through
+    order two, with explicit lower-order instances. The tangent connection
+    is torsion-free and metric-compatible. Supplied global C3 tangent-vector
+    extensions are anchored at every point; the conclusions hold for every
+    such family. Connectedness and dimension bounds occur only in rigidity
+    theorems. The Einstein factor is manifold-differentiable. No compactness,
+    geodesic completeness, sigma-compactness or globally orthonormal frame
+    is assumed. No Lorentzian, space-form classification, Ricci-flow or
+    Poincare theorem is claimed.
+  sorry_count: 4
+  sorry_in_definitions: 0
+  axioms: []
+automation:
+  methods:
+    - method: "agent"
+      models: ["Codex"]
+      framework: "Codex with Lean 4.33.0 and pinned Mathlib"
+      tool_setup: >-
+        Parallel proof work followed by coordinating integration, completion
+        of trace differentiation bridges, independent statement packaging,
+        Lean rebuilding and pinned Comparator/NanoDa checks. The inherited
+        curvature closure retains its original contributor notices.
+      prompting_notes: >-
+        Arthur requested actual geometric rigidity and preparation of a
+        distinct new entry, never a version update. No intake authorization
+        is inferred from preparation. See AGENT-CONTRIBUTION.md.
+  notes: >-
+    AI-assisted proofs and integration are disclosed in AGENT-CONTRIBUTION.md.
+    Independent human review by each project author is not recorded.
+fidelity:
+  divergences: >-
+    Definitions use explicit anchored smooth extensions of tangent vectors
+    and finite orthonormal contractions. Their equivalence to intrinsic
+    connection curvature and covariant differentiation is proved. The Ricci
+    and scalar derivative bridges are not hypotheses. Internal conditional
+    assembly lemmas are discharged in the selected final proofs. The
+    three-dimensional theorem gives one global constant for the full Riemann
+    tensor, but not an isometry classification. Only Mathlib is an external
+    Lean dependency; the earlier curvature closure is copied with provenance.
+review:
+  status: "self-assessed"
+  reviewers: ["none"]
+  notes: >-
+    Prepared as a new entry under schur-rigidity/comparator.json with blank
+    existing_id. This is a distinct differential-geometric rigidity package,
+    not a re-selection of the earlier double-contracted curvature-derivative
+    theorem. No editorial acceptance, mathematical originality
+    or first-Lean priority claim is made. See VERIFICATION.md for mechanical
+    evidence and SUBMISSION.md for the authorization gate.
+alignment:
+  namespace: "SchurEntry"
+  statements:
+    - source: "Geometric contracted Bianchi identity"
+      lean: "SchurEntry.geometricContractedBianchi"
+      module: "Solution.lean"
+      status: "proved"
+      note: "Actual Ricci divergence equals one half of the actual scalar differential."
+    - source: "Divergence-free Einstein tensor"
+      lean: "SchurEntry.divergenceEinstein"
+      module: "Solution.lean"
+      status: "proved"
+      note: "Actual covariant divergence, with both connection-slot corrections."
+    - source: "Schur constancy of the Einstein factor"
+      lean: "SchurEntry.schur"
+      module: "Solution.lean"
+      status: "proved"
+      note: "Connected manifold, dimension at least three, differentiable factor."
+    - source: "Three-dimensional Einstein constant-curvature rigidity"
+      lean: "SchurEntry.threeDimensionalEinstein_constantCurvature"
+      module: "Solution.lean"
+      status: "proved"
+      note: "One global constant in the full four-slot curvature formula."
+acknowledgements: >-
+  Mathlib contributors for manifold, bundle, derivative and linear-algebra
+  infrastructure; original repository curvature-library contributors; and
+  the classical mathematical sources. The four sorry placeholders are only
+  in Challenge theorem statements; Solution and its proof closure have none.

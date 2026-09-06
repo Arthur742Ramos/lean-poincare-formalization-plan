@@ -5,6 +5,7 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.LinearAlgebra.Matrix.Adjugate
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 import Mathlib.Geometry.Manifold.Algebra.LieGroup
+import Mathlib.Geometry.Manifold.Algebra.SMul
 
 /-!
 # Smoothness of the matrix determinant, adjugate, and nonsingular inverse
@@ -70,11 +71,12 @@ theorem contDiff_updateRow (i j : ι) :
   classical
   rw [contDiff_pi]
   intro k
+  change ContDiff ℝ n (fun A : ι → ι → ℝ => Function.update A j (Pi.single i (1 : ℝ)) k)
   by_cases hk : k = j
   · subst hk
-    simpa using
+    simpa [Function.update] using
       (contDiff_const : ContDiff ℝ n (fun _ : ι → ι → ℝ => (Pi.single i (1 : ℝ) : ι → ℝ)))
-  · simpa [Matrix.updateRow_apply, hk] using
+  · simpa [Function.update, hk] using
       (contDiff_apply (𝕜 := ℝ) (E := ι → ℝ) (n := n) (i := k))
 
 /-- The adjugate, as a function of the matrix entries, is `ContDiff ℝ n` for every order `n`
@@ -88,8 +90,15 @@ theorem contDiff_adjugate :
   intro i
   rw [contDiff_pi]
   intro j
-  simpa [Function.comp, Matrix.adjugate_apply] using
-    (contDiff_det (ι := ι) (n := n)).comp (contDiff_updateRow (ι := ι) (n := n) i j)
+  change ContDiff ℝ n (fun A : ι → ι → ℝ => Matrix.adjugate (Matrix.of A) i j)
+  have hEq :
+      (fun A : ι → ι → ℝ => Matrix.adjugate (Matrix.of A) i j) =
+        (fun A : ι → ι → ℝ => ((Matrix.of A).updateRow j (Pi.single i (1 : ℝ))).det) := by
+    funext A
+    exact Matrix.adjugate_apply (Matrix.of A) i j
+  rw [hEq]
+  convert (contDiff_det (ι := ι) (n := n)).comp
+    (contDiff_updateRow (ι := ι) (n := n) i j) using 1 <;> rfl
 
 section Manifold
 
@@ -132,9 +141,15 @@ theorem contMDiffOn_matrixInv {A : N → (ι → ι → ℝ)} {u : Set N}
     (hdet : ∀ x ∈ u, (show Matrix ι ι ℝ from A x).det ≠ 0) :
     ContMDiffOn J 𝓘(ℝ, ι → ι → ℝ) n
       (fun x => (show ι → ι → ℝ from ((show Matrix ι ι ℝ from A x)⁻¹ : Matrix ι ι ℝ))) u := by
-  simpa [Matrix.inv_def, Ring.inverse_eq_inv] using
-    (contMDiffOn_matrixDetInv (J := J) (n := n) hA hdet).smul
-      (contMDiffOn_matrixAdjugate (J := J) (n := n) hA)
+  refine ContMDiffOn.congr
+    (ContMDiffOn.smul
+      (contMDiffOn_matrixDetInv (J := J) (n := n) hA hdet)
+      (contMDiffOn_matrixAdjugate (J := J) (n := n) hA)) ?_
+  intro x hx
+  change (show Matrix ι ι ℝ from A x)⁻¹ =
+    ((show Matrix ι ι ℝ from A x).det)⁻¹ •
+      Matrix.adjugate (show Matrix ι ι ℝ from A x)
+  rw [Matrix.inv_def, Ring.inverse_eq_inv]
 
 omit [DecidableEq ι] in
 /-- The `(i, j)` entry of a `ContMDiffOn` family of matrices is a `ContMDiffOn` scalar function. -/
@@ -170,9 +185,11 @@ theorem contMDiffOn_mulVec {A : N → (ι → ι → ℝ)} {b : N → (ι → �
     · simpa using (contMDiffOn_const : ContMDiffOn J 𝓘(ℝ) n (fun _ : N => (0 : ℝ)) u)
     · intro j s hj hs
       have hfirst : ContMDiffOn J 𝓘(ℝ) n (fun x => A x i j * b x j) u := by
-        simpa [smul_eq_mul] using
-          (contMDiffOn_matrixEntry (J := J) (n := n) hA i j).smul
-            (contMDiffOn_vecEntry (J := J) (n := n) hb j)
+        refine ContMDiffOn.congr
+          (ContMDiffOn.smul (contMDiffOn_matrixEntry (J := J) (n := n) hA i j)
+            (contMDiffOn_vecEntry (J := J) (n := n) hb j)) ?_
+        intro x hx
+        simp [Pi.smul_apply', smul_eq_mul]
       refine ContMDiffOn.congr (hfirst.add hs) ?_
       intro x hx
       simp [Finset.sum_insert, hj]
@@ -205,7 +222,8 @@ theorem contMDiffOn_transpose {A : N → (ι → ι → ℝ)} {u : Set N}
   intro i
   rw [contMDiffOn_pi_space]
   intro j
-  simpa [Matrix.transpose_apply] using contMDiffOn_matrixEntry (J := J) (n := n) hA j i
+  change ContMDiffOn J 𝓘(ℝ) n (fun x => A x j i) u
+  exact contMDiffOn_matrixEntry (J := J) (n := n) hA j i
 
 /-- **Smoothness of the matrix–matrix product.**  If `A B : N → (ι → ι → ℝ)` are `ContMDiffOn`
 families of matrices over an arbitrary base, then `x ↦ (A x) * (B x)` is `ContMDiffOn` at the same
@@ -230,15 +248,18 @@ theorem contMDiffOn_matrix_mul {A B : N → (ι → ι → ℝ)} {u : Set N}
     · simpa using (contMDiffOn_const : ContMDiffOn J 𝓘(ℝ) n (fun _ : N => (0 : ℝ)) u)
     · intro j s hj hs
       have hfirst : ContMDiffOn J 𝓘(ℝ) n (fun x => A x i j * B x j k) u := by
-        simpa [smul_eq_mul] using
-          (contMDiffOn_matrixEntry (J := J) (n := n) hA i j).smul
-            (contMDiffOn_matrixEntry (J := J) (n := n) hB j k)
+        refine ContMDiffOn.congr
+          (ContMDiffOn.smul (contMDiffOn_matrixEntry (J := J) (n := n) hA i j)
+            (contMDiffOn_matrixEntry (J := J) (n := n) hB j k)) ?_
+        intro x hx
+        simp [Pi.smul_apply', smul_eq_mul]
       refine ContMDiffOn.congr (hfirst.add hs) ?_
       intro x hx
       simp [Finset.sum_insert, hj]
   refine ContMDiffOn.congr (hsum Finset.univ) ?_
   intro x hx
-  simp [Matrix.mul_apply]
+  change (∑ j, A x i j * B x j k) = ∑ j, A x i j * B x j k
+  rfl
 
 /-- **Smoothness of the dot product.**  If `a b : N → (ι → ℝ)` are `ContMDiffOn` families of vectors
 over an arbitrary base, then the scalar dot product `x ↦ (a x) ⬝ᵥ (b x)` is `ContMDiffOn`.  This is
@@ -256,9 +277,11 @@ theorem contMDiffOn_dotProduct {a b : N → (ι → ℝ)} {u : Set N}
     · simpa using (contMDiffOn_const : ContMDiffOn J 𝓘(ℝ) n (fun _ : N => (0 : ℝ)) u)
     · intro j s hj hs
       have hfirst : ContMDiffOn J 𝓘(ℝ) n (fun x => a x j * b x j) u := by
-        simpa [smul_eq_mul] using
-          (contMDiffOn_vecEntry (J := J) (n := n) ha j).smul
-            (contMDiffOn_vecEntry (J := J) (n := n) hb j)
+        refine ContMDiffOn.congr
+          (ContMDiffOn.smul (contMDiffOn_vecEntry (J := J) (n := n) ha j)
+            (contMDiffOn_vecEntry (J := J) (n := n) hb j)) ?_
+        intro x hx
+        simp [Pi.smul_apply', smul_eq_mul]
       refine ContMDiffOn.congr (hfirst.add hs) ?_
       intro x hx
       simp [Finset.sum_insert, hj]

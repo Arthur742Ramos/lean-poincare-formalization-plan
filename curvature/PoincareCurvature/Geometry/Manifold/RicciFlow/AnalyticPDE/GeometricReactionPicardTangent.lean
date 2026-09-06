@@ -73,13 +73,9 @@ theorem bilinearFormBundle_coord_eq_trivializationAt_readout_tangent
   have hx : (x : M) ∈ (trivializationAt BilF BilW (x0 i)).baseSet := hKc i x.2
   haveI hlin : (trivializationAt BilF BilW (x0 i)).IsLinear ℝ :=
     _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear (F := E) (W := TM) (x0 i)
-  simp [equivCompatibleCoordFamilySubmodule, toSubtype,
-    continuousSectionEquivCompatibleCoordFamilySubmodule,
-    continuousSectionEquivCompatibleCoordFamily, compatibleCoordFamilyEquivSubmodule,
-    compatibleCoordFamilyOfSection, coordFamilyOfSection, coordContinuousMap,
-    _root_.Bundle.Trivialization.linearMapAt_apply, hx,
-    _root_.Bundle.Trivialization.continuousLinearMapAt_apply,
-    _root_.Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
+  change (trivializationAt BilF BilW (x0 i)
+      (_root_.Bundle.TotalSpace.mk' BilF x.1 (s.toFun x.1))).2 = _
+  rfl
 
 /-- **The tangent-bundle DeTurck reaction operator's coordinate readout equals its `trivializationAt`
 fibre readout.**  For the concrete operator `deTurckReactionSectionMap … σ` (fiber-norm-free, formable
@@ -687,7 +683,7 @@ theorem deTurckReactionSectionMap_lipschitzOnWith_of_uniform_inCoordinates
       ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp)
     (stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
       (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)) :
-    LipschitzOnWith ⟨2 * Kp, mul_nonneg (by norm_num) hKp0⟩
+    LipschitzOnWith (NNReal.mk (2 * Kp) (mul_nonneg (by norm_num) hKp0))
       (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
         Kc hKc Ko hKo hKoEq hcover hP)
       stateSet := by
@@ -725,7 +721,7 @@ theorem deTurckReactionSectionMap_add_source_lipschitzOnWith_of_uniform_inCoordi
       (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)
     (stateSet : Set (ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
       (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover)) :
-    LipschitzOnWith ⟨2 * Kp, mul_nonneg (by norm_num) hKp0⟩
+    LipschitzOnWith (NNReal.mk (2 * Kp) (mul_nonneg (by norm_num) hKp0))
       (fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
         Kc hKc Ko hKo hKoEq hcover hP s + b)
       stateSet := by
@@ -757,7 +753,7 @@ theorem deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates
     (Kp : ℝ) (hKp0 : 0 ≤ Kp)
     (hKp : ∀ (i : κ) (x : Kc i),
       ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp) :
-    LipschitzWith ⟨2 * Kp, mul_nonneg (by norm_num) hKp0⟩
+    LipschitzWith (NNReal.mk (2 * Kp) (mul_nonneg (by norm_num) hKp0))
       (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
         Kc hKc Ko hKo hKoEq hcover hP) := by
   rw [← lipschitzOnWith_univ]
@@ -787,7 +783,7 @@ theorem deTurckReactionSectionMap_add_source_lipschitzWith_of_uniform_inCoordina
       ‖ContinuousLinearMap.inCoordinates E TM E TM (x0 i) x (x0 i) x (P x)‖ ≤ Kp)
     (b : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
       (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover) :
-    LipschitzWith ⟨2 * Kp, mul_nonneg (by norm_num) hKp0⟩
+    LipschitzWith (NNReal.mk (2 * Kp) (mul_nonneg (by norm_num) hKp0))
       (fun s => deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
         Kc hKc Ko hKo hKoEq hcover hP s + b) := by
   rw [← lipschitzOnWith_univ]
@@ -1548,6 +1544,8 @@ theorem deTurckReactionSectionMapL_opNorm_le
     ‖deTurckReactionSectionMapL x0 Kc hKc Ko hKo hKoEq hcover hP‖ ≤ 2 * Kp := by
   have hlip := deTurckReactionSectionMap_lipschitzWith_of_uniform_inCoordinates
     x0 Kc hKc Ko hKo hKoEq hcover hP Kp hKp0 hKp
+  let z : ContinuousSectionSpace (𝕜 := ℝ) (F := BilF) (V := BilW)
+      (fun i => trivializationAt BilF BilW (x0 i)) Kc hKc Ko hKo hKoEq hcover := 0
   refine ContinuousLinearMap.opNorm_le_bound _ (by positivity) (fun s => ?_)
   have h0 : deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
       Kc hKc Ko hKo hKoEq hcover hP 0 = 0 :=
@@ -1558,8 +1556,12 @@ theorem deTurckReactionSectionMapL_opNorm_le
       = dist (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
           Kc hKc Ko hKo hKoEq hcover hP s)
           (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
-          Kc hKc Ko hKo hKoEq hcover hP 0) := by rw [h0]; exact (dist_zero_right _).symm
-    _ ≤ 2 * Kp * dist s 0 := by simpa using hlip.dist_le_mul s 0
+          Kc hKc Ko hKo hKoEq hcover hP 0) := by
+        rw [h0]
+        exact (dist_zero_right
+          (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover hP s)).symm
+    _ ≤ 2 * Kp * dist s 0 := by simpa [z] using hlip.dist_le_mul s z
     _ = 2 * Kp * ‖s‖ := congrArg (fun t => 2 * Kp * t) (dist_zero_right s)
 
 /-- **Whole-section growth bound `‖A σ‖ ≤ 2·Kp·‖σ‖ + ‖b‖` for the affine frozen geometric DeTurck
@@ -1595,11 +1597,13 @@ theorem deTurckReactionSectionMap_add_source_norm_le
       Kc hKc Ko hKo hKoEq hcover hP σ‖ ≤ 2 * Kp * ‖σ‖ := by
     rw [← deTurckReactionSectionMapL_apply]
     exact (ContinuousLinearMap.le_opNorm _ _).trans
-      (mul_le_mul_of_nonneg_right hop (norm_nonneg _))
+      (mul_le_mul_of_nonneg_right hop (norm_nonneg σ))
   calc ‖deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
         Kc hKc Ko hKo hKoEq hcover hP σ + b‖
       ≤ ‖deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
-        Kc hKc Ko hKo hKoEq hcover hP σ‖ + ‖b‖ := norm_add_le _ _
+        Kc hKc Ko hKo hKoEq hcover hP σ‖ + ‖b‖ := norm_add_le
+          (deTurckReactionSectionMap (fun i => trivializationAt BilF BilW (x0 i))
+            Kc hKc Ko hKo hKoEq hcover hP σ) b
     _ ≤ 2 * Kp * ‖σ‖ + ‖b‖ := by linarith [hL]
 
 end PoincareCurvature.Bundle.Trivialization.ContinuousSectionSpace

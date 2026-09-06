@@ -13,6 +13,8 @@ style of the Annals of Formalized Mathematics.
 
 - `docs/roadmap.md`: the main roadmap, with AFM-scale project slices
 - `docs/dependencies.md`: dependency structure and a suggested execution order
+- `docs/palomar-submission-plan.md`: the proposed portfolio of focused Palomar
+  submission candidates
 - `curvature/`: Lean/mathlib subproject for the front-end connection and
   curvature layers of the roadmap
 
@@ -45,8 +47,29 @@ anticipated.
 
 ## Scope
 
-This is intentionally a research-program repository, not an implementation
-repository.
+This repository contains a research program and concrete Lean packages for
+parts of its differential-geometric infrastructure.
+
+## Research-facing submission
+
+The new standalone submission target is
+[`contracted-bianchi/`](contracted-bianchi/README.md). It proves the
+double-contracted second Bianchi identity for the actual curvature derivative
+of a torsion-free metric-compatible manifold connection. Its Challenge,
+Solution, Comparator, and metadata live in that directory. It does not claim
+a separate Ricci-field differentiation or Einstein-divergence theorem.
+
+The separate geometric connection-transport surface remains in `curvature/`.
+Its Comparator exposes bundled `C²`
+self-diffeomorphisms, their tangent pushforward/pullback, the explicit
+pullback of a covariant derivative, raw curvature and torsion transport, and
+preservation of metric compatibility and the Levi–Civita property under an
+explicit pullback-inner-product equation. The classical provenance and the
+distinction between standard formalization and original mathematics are
+recorded in `curvature/formalization.yaml`. The selected surface does not claim
+Ricci-flow PDE local existence, Schauder estimates, or completion of the
+Poincare Conjecture. Older coordinate, metric-cone, and frozen-affine packages
+remain supporting or historical material, not the selected result.
 
 The current exception is `curvature/`, which now contains a concrete Lean
 package for covariant derivatives along vector fields, the raw curvature

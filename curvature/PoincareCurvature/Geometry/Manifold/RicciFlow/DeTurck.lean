@@ -173,7 +173,7 @@ def intrinsicDeTurckOneForm
 
 /-- In a local frame, evaluating the intrinsic DeTurck one-form on a frame vector is the
 finite trace sum of the diagonal connection-difference coefficients. -/
-theorem intrinsicDeTurckOneForm_apply_localFrame_eq_sum_localFrame_coeff
+theorem intrinsicDeTurckOneForm_apply_localFrame_eq_sum_localFrameCoeff
     (g : MetricFamily (I := I) (M := M))
     (background : ConnectionFamily (I := I) (M := M))
     (t : ℝ)
@@ -183,19 +183,19 @@ theorem intrinsicDeTurckOneForm_apply_localFrame_eq_sum_localFrame_coeff
     {x : M} (hx : x ∈ e.baseSet) (i : ι) :
     intrinsicDeTurckOneForm (I := I) (M := M) g background t x
         (e.localFrame b i x) =
-      ∑ j, e.localFrame_coeff I b j x
+      ∑ j, e.localFrameCoeff I b j x
         ((CovariantDerivative.difference
           ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
           (e.localFrame b j x)) (e.localFrame b i x)) := by
   have hcoeff : ∀ (j : ι) (v : TM x),
-      e.localFrame_coeff I b j x v = (e.basisAt b hx).repr v j := by
+      e.localFrameCoeff I b j x v = (e.basisAt b hx).repr v j := by
     intro j v
     let he := e.isLocalFrameOn_localFrame_baseSet I 1 b
     have hbasis : e.basisAt b hx = he.toBasisAt hx := by
       ext k
       simp [IsLocalFrameOn.toBasisAt, Bundle.Trivialization.localFrame,
         Bundle.Trivialization.basisAt, hx]
-    simp [Bundle.Trivialization.localFrame_coeff, IsLocalFrameOn.coeff, hx, hbasis]
+    simp [Bundle.Trivialization.localFrameCoeff, IsLocalFrameOn.coeff, hx, hbasis]
   rw [intrinsicDeTurckOneForm_apply]
   rw [LinearMap.trace_eq_matrix_trace ℝ (e.basisAt b hx)]
   simp [Matrix.trace, LinearMap.toMatrix_apply,
@@ -250,7 +250,7 @@ theorem intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply
   have huStar : u ⊆ eStar.baseSet := by
     intro x hx
     simp [eStar, eLine, hu' hx]
-  refine (contMDiffOn_iff_localFrame_coeff
+  refine (contMDiffOn_iff_localFrameCoeff
     (I := I) (e := eStar) (b := CovariantDerivative.continuousDualBasis b)
     (s := intrinsicDeTurckOneForm (I := I) (M := M) g background t)
     (t := u) (k := (1 : WithTop ℕ∞)) hu huStar).2 ?_
@@ -260,11 +260,11 @@ theorem intrinsicDeTurckOneForm_contMDiffOn_of_localFrame_apply
   have hxE : x ∈ e.baseSet := hu' hx
   have hxStar : x ∈ eStar.baseSet := huStar hx
   rw [show ((LinearMap.piApply
-      (eStar.localFrame_coeff I (CovariantDerivative.continuousDualBasis b) i))
+      (eStar.localFrameCoeff I (CovariantDerivative.continuousDualBasis b) i))
       (intrinsicDeTurckOneForm (I := I) (M := M) g background t)) x =
-        eStar.localFrame_coeff I (CovariantDerivative.continuousDualBasis b) i x
+        eStar.localFrameCoeff I (CovariantDerivative.continuousDualBasis b) i x
           (intrinsicDeTurckOneForm (I := I) (M := M) g background t x) by rfl,
-    Bundle.Trivialization.localFrame_coeff_eq_coeff
+    Bundle.Trivialization.localFrameCoeff_eq_coeff
       (I := I) (e := eStar) (b := CovariantDerivative.continuousDualBasis b)
       (s := intrinsicDeTurckOneForm (I := I) (M := M) g background t)
       (hxe := hxStar) (i := i),
@@ -284,7 +284,7 @@ theorem intrinsicDeTurckOneForm_localFrame_apply_contMDiffOn_of_connectionDiffer
     {u : Set M} (hu' : u ⊆ e.baseSet)
     (hcoeff : ∀ i j,
       ContMDiffOn I 𝓘(ℝ) 1
-        (fun x ↦ e.localFrame_coeff I b j x
+        (fun x ↦ e.localFrameCoeff I b j x
           ((CovariantDerivative.difference
             ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
             (e.localFrame b j x)) (e.localFrame b i x))) u) :
@@ -295,7 +295,7 @@ theorem intrinsicDeTurckOneForm_localFrame_apply_contMDiffOn_of_connectionDiffer
   have hsum :
       ∀ s : Finset ι,
         ContMDiffOn I 𝓘(ℝ) 1
-          (fun x ↦ s.sum fun j ↦ e.localFrame_coeff I b j x
+          (fun x ↦ s.sum fun j ↦ e.localFrameCoeff I b j x
             ((CovariantDerivative.difference
               ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
               (e.localFrame b j x)) (e.localFrame b i x))) u := by
@@ -307,11 +307,11 @@ theorem intrinsicDeTurckOneForm_localFrame_apply_contMDiffOn_of_connectionDiffer
       have hadd :
           ContMDiffOn I 𝓘(ℝ) 1
             (fun x ↦
-              e.localFrame_coeff I b j x
+              e.localFrameCoeff I b j x
                 ((CovariantDerivative.difference
                   ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
                   (e.localFrame b j x)) (e.localFrame b i x)) +
-              s.sum (fun j' ↦ e.localFrame_coeff I b j' x
+              s.sum (fun j' ↦ e.localFrameCoeff I b j' x
                 ((CovariantDerivative.difference
                   ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
                   (e.localFrame b j' x)) (e.localFrame b i x)))) u :=
@@ -321,7 +321,7 @@ theorem intrinsicDeTurckOneForm_localFrame_apply_contMDiffOn_of_connectionDiffer
       simp [Finset.sum_insert, hj]
   refine ContMDiffOn.congr (hsum Finset.univ) ?_
   intro x hx
-  exact intrinsicDeTurckOneForm_apply_localFrame_eq_sum_localFrame_coeff
+  exact intrinsicDeTurckOneForm_apply_localFrame_eq_sum_localFrameCoeff
     (I := I) (M := M) g background t e b (hu' hx) i
 
 /-- Local diagonal connection-difference coefficient regularity packages into `C¹` regularity of the
@@ -336,7 +336,7 @@ theorem intrinsicDeTurckOneForm_contMDiffOn_of_connectionDifference_coeff
     {u : Set M} (hu : IsOpen u) (hu' : u ⊆ e.baseSet)
     (hcoeff : ∀ i j,
       ContMDiffOn I 𝓘(ℝ) 1
-        (fun x ↦ e.localFrame_coeff I b j x
+        (fun x ↦ e.localFrameCoeff I b j x
           ((CovariantDerivative.difference
             ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
             (e.localFrame b j x)) (e.localFrame b i x))) u) :
@@ -351,7 +351,7 @@ theorem intrinsicDeTurckOneForm_contMDiffOn_of_connectionDifference_coeff
 
 /-- If two tangent covariant derivatives are `C¹` on a local frame domain, then each local-frame
 coefficient of their difference tensor is `C¹`. -/
-theorem connectionDifference_localFrame_coeff_contMDiffOn
+theorem connectionDifference_localFrameCoeff_contMDiffOn
     (cov cov' : CovariantDerivative I E TM)
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
     [MemTrivializationAtlas e]
@@ -361,7 +361,7 @@ theorem connectionDifference_localFrame_coeff_contMDiffOn
     (hcov' : ContMDiffCovariantDerivativeOn E 1 cov'.toFun u)
     (a d c : ι) :
     ContMDiffOn I 𝓘(ℝ) 1
-      (fun x ↦ e.localFrame_coeff I b c x
+      (fun x ↦ e.localFrameCoeff I b c x
         ((CovariantDerivative.difference cov cov' x (e.localFrame b a x))
           (e.localFrame b d x))) u := by
   have hframeA₂ :
@@ -398,15 +398,15 @@ theorem connectionDifference_localFrame_coeff_contMDiffOn
     simpa using hcovA'.clm_bundle_apply hframeD₁
   have hcovCoeff :
       ContMDiffOn I 𝓘(ℝ) 1
-        (fun x ↦ e.localFrame_coeff I b c x
+        (fun x ↦ e.localFrameCoeff I b c x
           ((cov (e.localFrame b a) x) (e.localFrame b d x))) u :=
-    contMDiffOn_localFrame_coeff (I := I) (e := e) (b := b)
+    contMDiffOn_localFrameCoeff (I := I) (e := e) (b := b)
       hu hu' hcovApply c
   have hcovCoeff' :
       ContMDiffOn I 𝓘(ℝ) 1
-        (fun x ↦ e.localFrame_coeff I b c x
+        (fun x ↦ e.localFrameCoeff I b c x
           ((cov' (e.localFrame b a) x) (e.localFrame b d x))) u :=
-    contMDiffOn_localFrame_coeff (I := I) (e := e) (b := b)
+    contMDiffOn_localFrameCoeff (I := I) (e := e) (b := b)
       hu hu' hcovApply' c
   refine ContMDiffOn.congr (hcovCoeff.sub hcovCoeff') ?_
   intro x hx
@@ -424,7 +424,7 @@ theorem connectionDifference_localFrame_coeff_contMDiffOn
         (x := x) (s := Set.univ) (hx := by trivial)
         (σ := e.localFrame b a) (hσ := hframeAt))
   rw [hdiff]
-  exact (e.localFrame_coeff I b c x).map_sub
+  exact (e.localFrameCoeff I b c x).map_sub
     ((cov (e.localFrame b a) x) (e.localFrame b d x))
     ((cov' (e.localFrame b a) x) (e.localFrame b d x))
 
@@ -448,7 +448,7 @@ theorem intrinsicDeTurckOneForm_contMDiffOn_of_contMDiffCovariantDerivativeOn
   refine intrinsicDeTurckOneForm_contMDiffOn_of_connectionDifference_coeff
     (I := I) (M := M) g background t e b hu hu' ?_
   intro i j
-  exact connectionDifference_localFrame_coeff_contMDiffOn
+  exact connectionDifference_localFrameCoeff_contMDiffOn
     (I := I) (M := M)
     ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t)
     e b hu hu' hchosen hbackground j i j
@@ -652,7 +652,7 @@ theorem intrinsicDeTurckVectorField_mdiffAt_of_connectionDifference_coeff
     {u : Set M} (hu : IsOpen u) (hu' : u ⊆ e.baseSet)
     (hcoeff : ∀ i j,
       ContMDiffOn I 𝓘(ℝ) 1
-        (fun x ↦ e.localFrame_coeff I b j x
+        (fun x ↦ e.localFrameCoeff I b j x
           ((CovariantDerivative.difference
             ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
             (e.localFrame b j x)) (e.localFrame b i x))) u)
@@ -687,12 +687,12 @@ theorem intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivativeOn
       (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) x := by
   have hcoeff : ∀ i j,
       ContMDiffOn I 𝓘(ℝ) 1
-        (fun x ↦ e.localFrame_coeff I b j x
+        (fun x ↦ e.localFrameCoeff I b j x
           ((CovariantDerivative.difference
             ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
             (e.localFrame b j x)) (e.localFrame b i x))) u := by
     intro i j
-    exact connectionDifference_localFrame_coeff_contMDiffOn
+    exact connectionDifference_localFrameCoeff_contMDiffOn
       (I := I) (M := M)
       ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t)
       e b hu hu' hchosen hbackground j i j
@@ -762,7 +762,7 @@ theorem intrinsicDeTurckVectorField_contMDiffOn_of_connectionDifference_coeff
     {u : Set M} (hu : IsOpen u) (hu' : u ⊆ e.baseSet)
     (hcoeff : ∀ i j,
       ContMDiffOn I 𝓘(ℝ) 1
-        (fun x ↦ e.localFrame_coeff I b j x
+        (fun x ↦ e.localFrameCoeff I b j x
           ((CovariantDerivative.difference
             ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
             (e.localFrame b j x)) (e.localFrame b i x))) u) :
@@ -796,12 +796,12 @@ theorem intrinsicDeTurckVectorField_contMDiffOn_of_contMDiffCovariantDerivativeO
       (T% (intrinsicDeTurckVectorField (I := I) (M := M) g background t)) u := by
   have hcoeff : ∀ i j,
       ContMDiffOn I 𝓘(ℝ) 1
-        (fun x ↦ e.localFrame_coeff I b j x
+        (fun x ↦ e.localFrameCoeff I b j x
           ((CovariantDerivative.difference
             ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
             (e.localFrame b j x)) (e.localFrame b i x))) u := by
     intro i j
-    exact connectionDifference_localFrame_coeff_contMDiffOn
+    exact connectionDifference_localFrameCoeff_contMDiffOn
       (I := I) (M := M)
       ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t)
       e b hu hu' hchosen hbackground j i j
@@ -1179,8 +1179,8 @@ theorem intrinsicDeTurckVectorField_mdiffAt_of_isLeviCivita
       (intrinsicDeTurckVectorField_eq_zero_of_isLeviCivita
         (I := I) (M := M) g background hbackground)
   rw [hW]
-  simpa [Bundle.zeroSection] using
-    (mdifferentiableAt_zeroSection (𝕜 := ℝ) (F := E) (E := TM) (x := x))
+  change MDiffAt (Bundle.zeroSection (B := M) E (TangentSpace I : M → Type _)) x
+  exact mdifferentiableAt_zeroSection (𝕜 := ℝ) (F := E) (E := TM) (x := x)
 
 /-- Global version of
 `intrinsicDeTurckVectorField_mdiffAt_of_isLeviCivita`. -/
@@ -1871,9 +1871,10 @@ def IntrinsicLocalSolution.toIntrinsicDeTurckLocalSolution
   toIntrinsicDeTurckSolution := sol.toIntrinsicSolution.toIntrinsicDeTurckSolution background hbackground
   interval_subset := sol.interval_subset
   matchesInitialMetric := by
-    simpa [IntrinsicDeTurckMatchesInitialMetric, IntrinsicMatchesInitialMetric,
-      MatchesInitialMetric]
-      using sol.matchesInitialMetric
+    change ∀ x : M, ∀ u v : TM x,
+      metricTensor (I := I) (M := M) sol.toIntrinsicSolution.metric ivp.initialTime x u v =
+        ivp.initialMetric.inner x u v
+    exact sol.matchesInitialMetric
 
 /-- On zero-dimensional tangent fibers, an intrinsic Ricci-flow local solution can be rewritten as an
 intrinsic Ricci-DeTurck local solution for any background connection family. -/

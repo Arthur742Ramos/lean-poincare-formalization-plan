@@ -332,7 +332,8 @@ lemma isTimeDependentIntegralCurveOn_const_of_eq_zero
     rw [hX t ht]
     ext r
     simp
-  simpa [htarget] using hconst.hasMFDerivWithinAt
+  rw [htarget]
+  exact hconst.hasMFDerivWithinAt
 
 /-- A time-dependent bundled self-map family solves the gauge-flow equation on `s` if each
 pointwise time curve is an integral curve of the time-dependent vector field `X` on `s`. -/
@@ -820,7 +821,7 @@ def pullbackVectorField
     unfold SmoothSelfDiffeomorph.pushforwardVectorField
     simpa using
       (Function.LeftInverse.cast_eq
-        (γ := fun z : M => TM (φ z))
+        (γ := fun z : M => TM z)
         (f := φ) (g := φ.symm) (h := φ.symm_apply_apply)
         (C := fun z : M => φ.pushforwardTangent z (X z)) x)
   rw [SmoothSelfDiffeomorph.pullbackVectorField, hpush]
@@ -843,10 +844,9 @@ def pullbackVectorField
   have hcast :
       cast (congrArg (fun z : M => TM z) (φ.apply_symm_apply y))
         (X (φ (φ.symm y))) = X y := by
-    simpa using
-      (Function.LeftInverse.cast_eq
-        (γ := fun z : M => TM z)
-        (f := φ.symm) (g := φ) (h := φ.apply_symm_apply) (C := X) y)
+    exact Function.LeftInverse.cast_eq
+      (γ := fun z : M => TM z)
+      (f := φ.symm) (g := φ) (h := φ.apply_symm_apply) (C := X) y
   unfold SmoothSelfDiffeomorph.pushforwardVectorField SmoothSelfDiffeomorph.pullbackVectorField
   exact hcore.trans hcast
 
@@ -1362,27 +1362,31 @@ lemma pullbackRiemannianMetric_eq_of_eq_id
       g.inner x u v
   have hu1 :
       φid.pushforwardTangent x u =
-        (mfderiv I I (_root_.id : M → M) x) u := by
+        (mfderiv I I (φid : M → M) x) u := by
     simpa [SmoothSelfDiffeomorph2.pushforwardTangent, SmoothSelfDiffeomorph2.tangentMap] using
-      congrArg (fun f : TM x →L[ℝ] TM ((_root_.id : M → M) x) => f u)
+      congrArg (fun f : TM x →L[ℝ] TM (φid x) => f u)
         (Diffeomorph.mfderivToContinuousLinearEquiv_coe
-          (I := I) (J := I) (Φ := Diffeomorph.refl I M (2 : WithTop ℕ∞))
+          (I := I) (J := I) (Φ := φid)
           (x := x) (hn := by simp))
   have hv1 :
       φid.pushforwardTangent x v =
-        (mfderiv I I (_root_.id : M → M) x) v := by
+        (mfderiv I I (φid : M → M) x) v := by
     simpa [SmoothSelfDiffeomorph2.pushforwardTangent, SmoothSelfDiffeomorph2.tangentMap] using
-      congrArg (fun f : TM x →L[ℝ] TM ((_root_.id : M → M) x) => f v)
+      congrArg (fun f : TM x →L[ℝ] TM (φid x) => f v)
         (Diffeomorph.mfderivToContinuousLinearEquiv_coe
-          (I := I) (J := I) (Φ := Diffeomorph.refl I M (2 : WithTop ℕ∞))
+          (I := I) (J := I) (Φ := φid)
           (x := x) (hn := by simp))
   have hu0 :
-      (mfderiv I I (_root_.id : M → M) x) u =
+      (mfderiv I I (φid : M → M) x) u =
         (ContinuousLinearMap.id ℝ (TM x)) u := by
+    change (mfderiv I I (_root_.id : M → M) x) u =
+      (ContinuousLinearMap.id ℝ (TM x)) u
     exact congrArg (fun f : TM x →L[ℝ] TM x => f u) (mfderiv_id (I := I) (x := x))
   have hv0 :
-      (mfderiv I I (_root_.id : M → M) x) v =
+      (mfderiv I I (φid : M → M) x) v =
         (ContinuousLinearMap.id ℝ (TM x)) v := by
+    change (mfderiv I I (_root_.id : M → M) x) v =
+      (ContinuousLinearMap.id ℝ (TM x)) v
     exact congrArg (fun f : TM x →L[ℝ] TM x => f v) (mfderiv_id (I := I) (x := x))
   have hu : φid.pushforwardTangent x u = u := by
     simpa using hu1.trans hu0
@@ -1463,7 +1467,12 @@ theorem pushforwardVectorField_smul
 lemma mfderiv_isInvertible (x : M) :
     (mfderiv I I (φ : M → M) x).IsInvertible := by
   let e : TM x ≃L[ℝ] TM (φ x) := φ.mfderivToContinuousLinearEquiv (by simp) x
-  change ((e : TM x →L[ℝ] TM (φ x))).IsInvertible
+  have he :
+      (e : TM x →L[ℝ] TM (φ x)) = mfderiv I I (φ : M → M) x := by
+    simpa [e] using
+      (Diffeomorph.mfderivToContinuousLinearEquiv_coe
+        (I := I) (J := I) (Φ := φ) (x := x) (hn := by simp))
+  rw [← he]
   exact ContinuousLinearMap.isInvertible_equiv
 
 lemma pullbackVectorField_value_eq_inverse
@@ -1471,16 +1480,21 @@ lemma pullbackVectorField_value_eq_inverse
     (φ.mfderivToContinuousLinearEquiv (by simp) x).symm (X (φ x)) =
       (mfderiv I I (φ : M → M) x).inverse (X (φ x)) := by
   let e : TM x ≃L[ℝ] TM (φ x) := φ.mfderivToContinuousLinearEquiv (by simp) x
+  have he :
+      (e : TM x →L[ℝ] TM (φ x)) = mfderiv I I (φ : M → M) x := by
+    simpa [e] using
+      (Diffeomorph.mfderivToContinuousLinearEquiv_coe
+        (I := I) (J := I) (Φ := φ) (x := x) (hn := by simp))
   have hinv :
       (mfderiv I I (φ : M → M) x).inverse =
         (e : TM x ≃L[ℝ] TM (φ x)).symm := by
     apply ContinuousLinearMap.inverse_eq
     · ext u
-      change (e : TM x →L[ℝ] TM (φ x)) (e.symm u) = u
-      exact e.apply_symm_apply u
+      rw [← he]
+      simp
     · ext u
-      change e.symm ((e : TM x →L[ℝ] TM (φ x)) u) = u
-      exact e.symm_apply_apply u
+      rw [← he]
+      simp
   change e.symm (X (φ x)) = (mfderiv I I (φ : M → M) x).inverse (X (φ x))
   simpa [hinv]
 
@@ -1621,7 +1635,10 @@ theorem pushforwardVectorField_mlieBracket_eq
     ext y
     simp [Function.comp]
   rw [mfderiv_congr (I := I) (I' := I) (x := x) hfun] at hcomp
-  simpa [φ.pushforwardTangent_eq_mfderiv] using hcomp.symm
+  rw [φ.pushforwardTangent_eq_mfderiv]
+  exact hcomp.symm.trans <|
+    (congrArg (fun f : TM x →L[ℝ] TM x => f u) (mfderiv_id (I := I) (x := x))).trans
+      (by rfl)
 
 @[simp] lemma pushforwardTangent_mfderiv_symm_apply (x : M) (u : TM (φ x)) :
     φ.pushforwardTangent x ((mfderiv I I (φ.symm : M → M) (φ x)) u) = u := by
@@ -1641,8 +1658,12 @@ theorem pushforwardVectorField_mlieBracket_eq
   rw [mfderiv_congr (I := I) (I' := I) (x := φ x) hfun] at hcomp
   rw [mfderiv_congr_point (I := I) (I' := I) (f := (φ : M → M))
     (x := φ.symm (φ x)) (x' := x) (by simp)] at hcomp
-  simpa [φ.pushforwardTangent_eq_mfderiv] using hcomp.symm
+  rw [φ.pushforwardTangent_eq_mfderiv]
+  exact hcomp.symm.trans <|
+    (congrArg (fun f : TM (φ x) →L[ℝ] TM (φ x) => f u)
+      (mfderiv_id (I := I) (x := φ x))).trans (by rfl)
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma pushforwardVectorField_apply_image
     (X : Π x : M, TM x) (x : M) :
     φ.pushforwardVectorField X (φ x) = φ.pushforwardTangent x (X x) := by
@@ -1651,17 +1672,22 @@ theorem pushforwardVectorField_mlieBracket_eq
       (mfderiv I I (φ.symm : M → M) (φ x)).inverse = φ.pushforwardTangent x := by
     apply ContinuousLinearMap.inverse_eq
     · ext u
-      simpa [φ.pushforwardTangent_eq_mfderiv] using φ.mfderiv_symm_apply_pushforwardTangent x u
+      change (mfderiv I I (φ.symm : M → M) (φ x))
+          (φ.pushforwardTangent x u) = u
+      exact φ.mfderiv_symm_apply_pushforwardTangent x u
     · ext u
-      simpa [φ.pushforwardTangent_eq_mfderiv] using
-        φ.pushforwardTangent_mfderiv_symm_apply x u
+      convert φ.pushforwardTangent_mfderiv_symm_apply x u using 1 <;>
+        simp [ContinuousLinearMap.comp_apply]
+      have hmap : φ.tangentMap x = mfderiv I I (φ : M → M) x :=
+        φ.pushforwardTangent_eq_mfderiv x
+      exact congrArg (fun f => f ((mfderiv I I (φ.symm : M → M) (φ x)) u)) hmap
   calc
     (mfderiv I I (φ.symm : M → M) (φ x)).inverse (X (φ.symm (φ x)))
       = φ.pushforwardTangent x (X (φ.symm (φ x))) := by
           rw [hinv]
           rfl
     _ = φ.pushforwardTangent x (X x) := by
-          rw [show X (φ.symm (φ x)) = X x by simpa using congrArg X (φ.symm_apply_apply x)]
+          rw [φ.symm_apply_apply x]
 
 @[simp] lemma pullbackTangent_pushforwardVectorField_apply_image
     (X : Π x : M, TM x) (x : M) :
@@ -1671,8 +1697,8 @@ theorem pushforwardVectorField_mlieBracket_eq
 
 lemma extDerivFun_comp_symm_apply_pushforwardTangent
     {g : M → ℝ} {x : M} (hg : MDiffAt g x) (u : TM x) :
-    extDerivFun (I := I) (g ∘ (φ.symm : M → M)) (φ x) (φ.pushforwardTangent x u) =
-      extDerivFun (I := I) g x u := by
+    mvfderiv (I := I) (g ∘ (φ.symm : M → M)) (φ x) (φ.pushforwardTangent x u) =
+      mvfderiv (I := I) g x u := by
   have hg' : MDiffAt g (φ.symm (φ x)) := by simpa using hg
   have hφsymm : MDifferentiableAt I I (φ.symm : M → M) (φ x) :=
     φ.symm.contMDiff.mdifferentiableAt (by simp)
@@ -1682,7 +1708,7 @@ lemma extDerivFun_comp_symm_apply_pushforwardTangent
           ((mfderiv I I (φ.symm : M → M) (φ x)) (φ.pushforwardTangent x u)) :=
     mfderiv_comp_apply (I := I) (I' := I) (I'' := 𝓘(ℝ, ℝ))
       (f := (φ.symm : M → M)) (g := g) (x := φ x) hg' hφsymm (φ.pushforwardTangent x u)
-  rw [extDerivFun, extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
+  rw [mvfderiv, mvfderiv, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
     hcomp, φ.mfderiv_symm_apply_pushforwardTangent]
   rw [mfderiv_congr_point (I := I) (I' := 𝓘(ℝ, ℝ)) (f := g)
     (x := φ.symm (φ x)) (x' := x) (by simp)]
@@ -1691,8 +1717,8 @@ lemma extDerivFun_comp_symm_apply_pushforwardTangent
 
 lemma extDerivFun_comp_apply_pushforwardTangent
     {g : M → ℝ} {x : M} (hg : MDiffAt g (φ x)) (u : TM x) :
-    extDerivFun (I := I) (g ∘ (φ : M → M)) x u =
-      extDerivFun (I := I) g (φ x) (φ.pushforwardTangent x u) := by
+    mvfderiv (I := I) (g ∘ (φ : M → M)) x u =
+      mvfderiv (I := I) g (φ x) (φ.pushforwardTangent x u) := by
   have hφ : MDifferentiableAt I I (φ : M → M) x :=
     φ.contMDiff.mdifferentiableAt (by simp)
   have hcomp :
@@ -1701,7 +1727,7 @@ lemma extDerivFun_comp_apply_pushforwardTangent
           ((mfderiv I I (φ : M → M) x) u) :=
     mfderiv_comp_apply (I := I) (I' := I) (I'' := 𝓘(ℝ, ℝ))
       (f := (φ : M → M)) (g := g) (x := x) hg hφ u
-  rw [extDerivFun, extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
+  rw [mvfderiv, mvfderiv, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
     hcomp, φ.pushforwardTangent_apply]
   rfl
 
@@ -1754,7 +1780,7 @@ noncomputable def pullbackCovariantDerivative
       have hleib :
           cov (φ.pushforwardVectorField (g • σ)) (φ x) =
             (g ∘ (φ.symm : M → M)) (φ x) • cov (φ.pushforwardVectorField σ) (φ x) +
-              (extDerivFun (I := I) (g ∘ (φ.symm : M → M)) (φ x)).smulRight
+              (mvfderiv (I := I) (g ∘ (φ.symm : M → M)) (φ x)).smulRight
                 ((φ.pushforwardVectorField σ) (φ x)) := by
         simpa [φ.pushforwardVectorField_smul, Function.comp] using
           (cov.isCovariantDerivativeOn.leibniz
@@ -1764,7 +1790,7 @@ noncomputable def pullbackCovariantDerivative
       have hleib_u :
           cov (φ.pushforwardVectorField (g • σ)) (φ x) (φ.pushforwardTangent x u) =
             ((g ∘ (φ.symm : M → M)) (φ x) • cov (φ.pushforwardVectorField σ) (φ x) +
-              (extDerivFun (I := I) (g ∘ (φ.symm : M → M)) (φ x)).smulRight
+              (mvfderiv (I := I) (g ∘ (φ.symm : M → M)) (φ x)).smulRight
                 ((φ.pushforwardVectorField σ) (φ x))) (φ.pushforwardTangent x u) := by
         exact congrArg
           (fun A : TM (φ x) →L[ℝ] TM (φ x) => A (φ.pushforwardTangent x u))
@@ -1773,18 +1799,18 @@ noncomputable def pullbackCovariantDerivative
         φ.pullbackTangent x (cov (φ.pushforwardVectorField (g • σ)) (φ x) (φ.pushforwardTangent x u))
           = φ.pullbackTangent x
               (((g ∘ (φ.symm : M → M)) (φ x) • cov (φ.pushforwardVectorField σ) (φ x) +
-                (extDerivFun (I := I) (g ∘ (φ.symm : M → M)) (φ x)).smulRight
+                (mvfderiv (I := I) (g ∘ (φ.symm : M → M)) (φ x)).smulRight
                   ((φ.pushforwardVectorField σ) (φ x))) (φ.pushforwardTangent x u)) := by
                 rw [hleib_u]
         _ = g x • φ.pullbackTangent x
               (cov (φ.pushforwardVectorField σ) (φ x) (φ.pushforwardTangent x u)) +
-              extDerivFun (I := I) (g ∘ (φ.symm : M → M)) (φ x)
+              mvfderiv (I := I) (g ∘ (φ.symm : M → M)) (φ x)
                 (φ.pushforwardTangent x u) •
                 φ.pullbackTangent x (φ.pushforwardVectorField σ (φ x)) := by
                   simp [ContinuousLinearMap.smulRight_apply, Function.comp]
         _ = g x • φ.pullbackTangent x
               (cov (φ.pushforwardVectorField σ) (φ x) (φ.pushforwardTangent x u)) +
-              extDerivFun (I := I) g x u • σ x := by
+              mvfderiv (I := I) g x u • σ x := by
                   rw [φ.extDerivFun_comp_symm_apply_pushforwardTangent hg u,
                     φ.pullbackTangent_pushforwardVectorField_apply_image σ x]
 
@@ -1815,7 +1841,8 @@ lemma pullbackCovariantDerivative_eq_of_eq_id_apply
         mfderiv I I (_root_.id : M → M) y v = v := by
       rw [mfderiv_id]
       rfl
-    simpa [φid, Diffeomorph.coe_refl] using hid
+    change (mfderiv I I (_root_.id : M → M) y) v = v
+    exact hid
   have hpull : ∀ {y : M} (v : TM y), φid.pullbackTangent y v = v := by
     intro y v
     calc
@@ -1826,7 +1853,8 @@ lemma pullbackCovariantDerivative_eq_of_eq_id_apply
       φid.pushforwardVectorField X = X := by
     funext y
     rw [SmoothSelfDiffeomorph2.pushforwardVectorField_apply]
-    simpa [φid, Diffeomorph.coe_refl] using (hpull (y := y) (X y))
+    change φid.pullbackTangent y (X y) = X y
+    exact hpull (y := y) (X y)
   rw [hX]
   calc
     φid.pullbackTangent x (cov X x (φid.pushforwardTangent x u)) =
@@ -1851,7 +1879,12 @@ lemma pullbackCovariantDerivative_eq_of_eq_id
 @[simp] theorem pushforwardVectorField_pullbackVectorField
     (X : Π x : M, TM x) :
     φ.pushforwardVectorField (φ.pullbackVectorField X) = X := by
-  simpa [SmoothSelfDiffeomorph2.pushforwardVectorField] using
+  have hsymm :
+      ((φ.symm : SmoothSelfDiffeomorph2 (I := I) (M := M)).symm) = φ := by
+    apply Diffeomorph.ext
+    intro y
+    rfl
+  simpa [SmoothSelfDiffeomorph2.pushforwardVectorField, hsymm] using
     (SmoothSelfDiffeomorph2.pullbackVectorField_pushforwardVectorField
       (φ := (φ.symm : SmoothSelfDiffeomorph2 (I := I) (M := M))) (X := X))
 
@@ -1917,8 +1950,6 @@ lemma curvatureAux_pullbackCovariantDerivative
   funext x
   rw [CovariantDerivative.curvatureAux_apply, hXY, hYX, hBracketTerm]
   simp [CovariantDerivative.curvatureAux, SmoothSelfDiffeomorph2.pullbackVectorField]
-  rw [← map_sub, ← map_sub]
-  rfl
 
 @[simp] lemma curvatureAux_pullbackCovariantDerivative_apply
     (cov : CovariantDerivative I E TM)
@@ -2146,15 +2177,11 @@ lemma difference_pullbackCovariantDerivative
           φ.pullbackTangent x
             (cov' (φ.pushforwardVectorField X) (φ x) (φ.pushforwardTangent x u)) := by
               simp [φ.pullbackCovariantDerivative_apply]
-              rfl
     _ = φ.pullbackTangent x
           (((cov (φ.pushforwardVectorField X) (φ x) : TM (φ x) →L[ℝ] TM (φ x)) -
               (cov' (φ.pushforwardVectorField X) (φ x) : TM (φ x) →L[ℝ] TM (φ x)))
             (φ.pushforwardTangent x u)) := by
           simp
-          exact (map_sub (φ.pullbackTangent x)
-            (cov (φ.pushforwardVectorField X) (φ x) (φ.pushforwardTangent x u))
-            (cov' (φ.pushforwardVectorField X) (φ x) (φ.pushforwardTangent x u))).symm
     _ = ((φ.pullbackTangent x).comp
           (((cov (φ.pushforwardVectorField X) (φ x) : TM (φ x) →L[ℝ] TM (φ x)) -
               (cov' (φ.pushforwardVectorField X) (φ x) : TM (φ x) →L[ℝ] TM (φ x))).comp
@@ -2185,7 +2212,7 @@ lemma isMetricCompatibleTangent_pullbackCovariantDerivative_c1
   letI : Bundle.RiemannianBundle TM := ⟨g'.toRiemannianMetric⟩
   intro x σ τ hσ hτ u
   change
-    extDerivFun (I := I) (fun y ↦ g'.inner y (σ y) (τ y)) x u =
+    mvfderiv (I := I) (fun y ↦ g'.inner y (σ y) (τ y)) x u =
       g'.inner x ((φ.pullbackCovariantDerivative cov) σ x u) (τ x) +
         g'.inner x (σ x) ((φ.pullbackCovariantDerivative cov) τ x u)
   set σp : Π y : M, TM y := φ.pushforwardVectorField σ with hσpdef
@@ -2197,15 +2224,19 @@ lemma isMetricCompatibleTangent_pullbackCovariantDerivative_c1
     simpa [τp] using φ.mdifferentiableAt_pushforwardVectorField_image (X := τ) (x := x) hτ
   have hf : MDiffAt f (φ x) := by
     letI : Bundle.RiemannianBundle TM := ⟨g.toRiemannianMetric⟩
-    simpa [f] using
-      (CovariantDerivative.mdiffAt_inner_sections
-        (I := I) (E := E) (M := M) (x := φ x) (σ := σp) (τ := τp) hσpush hτpush)
+    change MDiffAt (fun y ↦ inner ℝ (σp y) (τp y)) (φ x)
+    exact CovariantDerivative.mdiffAt_inner_sections
+      (I := I) (E := E) (M := M) (x := φ x) (σ := σp) (τ := τp) hσpush hτpush
   have hcompat :
-      extDerivFun (I := I) f (φ x) (φ.pushforwardTangent x u) =
+      mvfderiv (I := I) f (φ x) (φ.pushforwardTangent x u) =
         g.inner (φ x) (cov σp (φ x) (φ.pushforwardTangent x u)) (τp (φ x)) +
           g.inner (φ x) (σp (φ x)) (cov τp (φ x) (φ.pushforwardTangent x u)) := by
     letI : Bundle.RiemannianBundle TM := ⟨g.toRiemannianMetric⟩
-    simpa [f] using hcov (σ := σp) (τ := τp) hσpush hτpush (φ.pushforwardTangent x u)
+    change mvfderiv (I := I) (fun y ↦ inner ℝ (σp y) (τp y)) (φ x)
+        (φ.pushforwardTangent x u) =
+      inner ℝ (cov σp (φ x) (φ.pushforwardTangent x u)) (τp (φ x)) +
+        inner ℝ (σp (φ x)) (cov τp (φ x) (φ.pushforwardTangent x u))
+    exact hcov (σ := σp) (τ := τp) hσpush hτpush (φ.pushforwardTangent x u)
   have hfun : (fun y ↦ g'.inner y (σ y) (τ y)) = f ∘ (φ : M → M) := by
     funext y
     rw [hinner y]
@@ -2230,9 +2261,9 @@ lemma isMetricCompatibleTangent_pullbackCovariantDerivative_c1
       (φ.pushforwardTangent_pullbackTangent x
         (cov τp (φ x) (φ.pushforwardTangent x u)))
   calc
-    extDerivFun (I := I) (fun y ↦ g'.inner y (σ y) (τ y)) x u
-      = extDerivFun (I := I) (f ∘ (φ : M → M)) x u := by rw [hfun]
-    _ = extDerivFun (I := I) f (φ x) (φ.pushforwardTangent x u) := by
+    mvfderiv (I := I) (fun y ↦ g'.inner y (σ y) (τ y)) x u
+      = mvfderiv (I := I) (f ∘ (φ : M → M)) x u := by rw [hfun]
+    _ = mvfderiv (I := I) f (φ x) (φ.pushforwardTangent x u) := by
           exact φ.extDerivFun_comp_apply_pushforwardTangent (hg := hf) u
     _ = g.inner (φ x) (cov σp (φ x) (φ.pushforwardTangent x u)) (τp (φ x)) +
           g.inner (φ x) (σp (φ x)) (cov τp (φ x) (φ.pushforwardTangent x u)) := hcompat
@@ -2461,6 +2492,14 @@ def toSmoothSelfDiffeomorph2 : SmoothSelfDiffeomorph2 (I := I) (M := M) :=
 @[simp] lemma toSmoothSelfDiffeomorph2_symm_apply (x : M) :
     φ.toSmoothSelfDiffeomorph2.symm x = φ.symm x := rfl
 
+lemma toSmoothSelfDiffeomorph2_of_symm_eq_symm :
+    SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2
+        (φ := (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M))) =
+      φ.toSmoothSelfDiffeomorph2.symm := by
+  apply Diffeomorph.ext
+  intro x
+  rfl
+
 /-- The tangent map of a bundled `C^3` self-diffeomorphism. -/
 noncomputable abbrev tangentMap (x : M) : TM x ≃L[ℝ] TM (φ x) :=
   (φ.toSmoothSelfDiffeomorph2).tangentMap x
@@ -2483,36 +2522,17 @@ abbrev pullbackTangent (x : M) : TM (φ x) →L[ℝ] TM x :=
 
 lemma pushforwardTangent_eq_mfderiv (x : M) :
     φ.pushforwardTangent x = mfderiv I I (φ : M → M) x := by
-  simpa [SmoothSelfDiffeomorph3.pushforwardTangent, SmoothSelfDiffeomorph3.tangentMap,
-    SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2] using
-    (SmoothSelfDiffeomorph2.pushforwardTangent_eq_mfderiv
-      (φ := φ.toSmoothSelfDiffeomorph2) x)
+  change φ.toSmoothSelfDiffeomorph2.pushforwardTangent x =
+    mfderiv I I (φ : M → M) x
+  have h := SmoothSelfDiffeomorph2.pushforwardTangent_eq_mfderiv
+    (φ := φ.toSmoothSelfDiffeomorph2) x
+  rw [show (φ.toSmoothSelfDiffeomorph2 : M → M) = (φ : M → M) by rfl] at h
+  exact h
 
 @[simp] lemma pushforwardTangent_apply (x : M) (u : TM x) :
     φ.pushforwardTangent x u = (mfderiv I I (φ : M → M) x) u := by
   simpa using congrArg (fun f : TM x →L[ℝ] TM (φ x) => f u)
     (φ.pushforwardTangent_eq_mfderiv x)
-
-@[simp] lemma symm_pushforwardTangent_pushforwardTangent (x : M) (u : TM x) :
-    SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
-        (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x)
-        (φ.pushforwardTangent x u) = u := by
-  simpa [SmoothSelfDiffeomorph3.pushforwardTangent,
-    SmoothSelfDiffeomorph3.tangentMap, SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2,
-    SmoothSelfDiffeomorph2.pushforwardTangent_eq_mfderiv] using
-    SmoothSelfDiffeomorph2.mfderiv_symm_apply_pushforwardTangent
-      (I := I) (M := M) (φ := φ.toSmoothSelfDiffeomorph2) x u
-
-@[simp] lemma pushforwardTangent_symm_pushforwardTangent (x : M) (u : TM (φ x)) :
-    φ.pushforwardTangent x
-        (SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
-          (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x) u) =
-      u := by
-  simpa [SmoothSelfDiffeomorph3.pushforwardTangent,
-    SmoothSelfDiffeomorph3.tangentMap, SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2,
-    SmoothSelfDiffeomorph2.pushforwardTangent_eq_mfderiv] using
-    SmoothSelfDiffeomorph2.pushforwardTangent_mfderiv_symm_apply
-      (I := I) (M := M) (φ := φ.toSmoothSelfDiffeomorph2) x u
 
 @[simp] lemma toSmoothSelfDiffeomorph2_pushforwardTangent_apply
     (x : M) (u : TM x) :
@@ -2522,6 +2542,53 @@ lemma pushforwardTangent_eq_mfderiv (x : M) :
     SmoothSelfDiffeomorph3.pushforwardTangent_apply]
   change (mfderiv I I (φ : M → M) x) u = (mfderiv I I (φ : M → M) x) u
   rfl
+
+set_option backward.isDefEq.respectTransparency false in
+@[simp] lemma symm_pushforwardTangent_pushforwardTangent (x : M) (u : TM x) :
+    SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
+        (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x)
+        (φ.pushforwardTangent x u) = u := by
+  have hfun : (φ.toSmoothSelfDiffeomorph2 : M → M) = (φ : M → M) := by rfl
+  have hinvfun :
+      (φ.toSmoothSelfDiffeomorph2.symm : M → M) = (φ.symm : M → M) := by rfl
+  have h := SmoothSelfDiffeomorph2.mfderiv_symm_apply_pushforwardTangent
+    (I := I) (M := M) (φ := φ.toSmoothSelfDiffeomorph2) x u
+  rw [SmoothSelfDiffeomorph2.pushforwardTangent_eq_mfderiv] at h
+  rw [show φ.toSmoothSelfDiffeomorph2 x = φ x by rfl] at h
+  rw [mfderiv_congr (I := I) (I' := I)
+    (f := (φ.toSmoothSelfDiffeomorph2 : M → M)) (f' := (φ : M → M))
+    (x := x) hfun] at h
+  rw [mfderiv_congr (I := I) (I' := I)
+    (f := (φ.toSmoothSelfDiffeomorph2.symm : M → M)) (f' := (φ.symm : M → M))
+    (x := φ x) hinvfun] at h
+  simpa [SmoothSelfDiffeomorph3.pushforwardTangent,
+    SmoothSelfDiffeomorph3.tangentMap,
+    SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2_of_symm_eq_symm,
+    SmoothSelfDiffeomorph2.pushforwardTangent_eq_mfderiv] using h
+
+set_option backward.isDefEq.respectTransparency false in
+@[simp] lemma pushforwardTangent_symm_pushforwardTangent (x : M) (u : TM (φ x)) :
+    φ.pushforwardTangent x
+        (SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
+          (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x) u) =
+      u := by
+  have hfun : (φ.toSmoothSelfDiffeomorph2 : M → M) = (φ : M → M) := by rfl
+  have hinvfun :
+      (φ.toSmoothSelfDiffeomorph2.symm : M → M) = (φ.symm : M → M) := by rfl
+  have h := SmoothSelfDiffeomorph2.pushforwardTangent_mfderiv_symm_apply
+    (I := I) (M := M) (φ := φ.toSmoothSelfDiffeomorph2) x u
+  rw [SmoothSelfDiffeomorph2.pushforwardTangent_eq_mfderiv] at h
+  rw [show φ.toSmoothSelfDiffeomorph2 x = φ x by rfl] at h
+  rw [mfderiv_congr (I := I) (I' := I)
+    (f := (φ.toSmoothSelfDiffeomorph2 : M → M)) (f' := (φ : M → M))
+    (x := x) hfun] at h
+  rw [mfderiv_congr (I := I) (I' := I)
+    (f := (φ.toSmoothSelfDiffeomorph2.symm : M → M)) (f' := (φ.symm : M → M))
+    (x := φ x) hinvfun] at h
+  simpa [SmoothSelfDiffeomorph3.pushforwardTangent,
+    SmoothSelfDiffeomorph3.tangentMap,
+    SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2_of_symm_eq_symm,
+    SmoothSelfDiffeomorph2.pushforwardTangent_eq_mfderiv] using h
 
 @[simp] lemma toSmoothSelfDiffeomorph2_pushforwardTangent
     (x : M) :
@@ -2608,7 +2675,7 @@ theorem contMDiff_two_pushforward_smoothExtend (x : M) (u : TM x) :
   φ.contMDiff_two_pushforwardVectorField
     (CovariantDerivative.smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x u)
 
-theorem contMDiff_two_localFrame_coeff_pushforward_smoothExtend_of_tsupport_subset
+theorem contMDiff_two_localFrameCoeff_pushforward_smoothExtend_of_tsupport_subset
     {ι : Type*} [Fintype ι] (b : Module.Basis ι ℝ E)
     {x : M} (u : TM x)
     (hsupp : ∀ ⦃z : M⦄,
@@ -2617,7 +2684,7 @@ theorem contMDiff_two_localFrame_coeff_pushforward_smoothExtend_of_tsupport_subs
     (i : ι) :
     ContMDiff I 𝓘(ℝ) 2
       (fun y ↦
-        (trivializationAt E TM (φ x)).localFrame_coeff I b i y
+        (trivializationAt E TM (φ x)).localFrameCoeff I b i y
           ((φ.pushforwardVectorField
             (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x u)) y)) := by
   letI := b.finiteDimensional_of_finite
@@ -2632,14 +2699,14 @@ theorem contMDiff_two_localFrame_coeff_pushforward_smoothExtend_of_tsupport_subs
     simpa [Z] using φ.contMDiff_two_pushforward_smoothExtend x u
   have hbase :
       ContMDiffOn I 𝓘(ℝ) 2
-        (fun y ↦ e.localFrame_coeff I b i y (Z y)) e.baseSet := by
+        (fun y ↦ e.localFrameCoeff I b i y (Z y)) e.baseSet := by
     exact
-      contMDiffOn_localFrame_coeff (I := I) (e := e) (b := b)
+      contMDiffOn_localFrameCoeff (I := I) (e := e) (b := b)
         (t := e.baseSet) (k := (2 : WithTop ℕ∞))
         e.open_baseSet (subset_refl _) hZ₂.contMDiffOn i
   have houtside :
       ContMDiffOn I 𝓘(ℝ) 2
-        (fun y ↦ e.localFrame_coeff I b i y (Z y)) outsideSupport := by
+        (fun y ↦ e.localFrameCoeff I b i y (Z y)) outsideSupport := by
     have hzero : ContMDiffOn I 𝓘(ℝ) 2 (fun _ : M ↦ (0 : ℝ)) outsideSupport :=
       contMDiff_const.contMDiffOn
     refine hzero.congr ?_
@@ -2652,8 +2719,8 @@ theorem contMDiff_two_localFrame_coeff_pushforward_smoothExtend_of_tsupport_subs
           (Diffeomorph.symm φ.toSmoothSelfDiffeomorph2) y)
             (0 : TangentSpace I ((Diffeomorph.symm φ) y)) = 0 := by
       exact ContinuousLinearMap.map_zero _
-    exact (congrArg (fun v ↦ e.localFrame_coeff I b i y v) hlinzero).trans
-      ((e.localFrame_coeff I b i y).map_zero)
+    exact (congrArg (fun v ↦ e.localFrameCoeff I b i y v) hlinzero).trans
+      ((e.localFrameCoeff I b i y).map_zero)
   have hcover : e.baseSet ∪ outsideSupport = Set.univ := by
     apply Set.eq_univ_iff_forall.mpr
     intro y
@@ -2669,7 +2736,7 @@ theorem contMDiff_two_localFrame_coeff_pushforward_smoothExtend_of_tsupport_subs
     contMDiff_of_contMDiffOn_union_of_isOpen hbase houtside hcover e.open_baseSet hopenOutside
   simpa [e, Z] using hglobal
 
-theorem contMDiff_two_localFrame_coeff_pushforward_smoothExtendWithBump_of_tsupport_subset
+theorem contMDiff_two_localFrameCoeff_pushforward_smoothExtendWithBump_of_tsupport_subset
     {ι : Type*} [Fintype ι] (b : Module.Basis ι ℝ E)
     {x : M} (η : SmoothBumpFunction I x) (u : TM x)
     (hηsource :
@@ -2679,7 +2746,7 @@ theorem contMDiff_two_localFrame_coeff_pushforward_smoothExtendWithBump_of_tsupp
     (i : ι) :
     ContMDiff I 𝓘(ℝ) 2
       (fun y ↦
-        (trivializationAt E TM (φ x)).localFrame_coeff I b i y
+        (trivializationAt E TM (φ x)).localFrameCoeff I b i y
           ((φ.pushforwardVectorField
             (CovariantDerivative.smoothExtendWithBump
               (I := I) (F := E) (V := TM) x η u)) y)) := by
@@ -2699,14 +2766,14 @@ theorem contMDiff_two_localFrame_coeff_pushforward_smoothExtendWithBump_of_tsupp
     simpa [Z] using φ.contMDiff_two_pushforwardVectorField hηsmooth
   have hbase :
       ContMDiffOn I 𝓘(ℝ) 2
-        (fun y ↦ e.localFrame_coeff I b i y (Z y)) e.baseSet := by
+        (fun y ↦ e.localFrameCoeff I b i y (Z y)) e.baseSet := by
     exact
-      contMDiffOn_localFrame_coeff (I := I) (e := e) (b := b)
+      contMDiffOn_localFrameCoeff (I := I) (e := e) (b := b)
         (t := e.baseSet) (k := (2 : WithTop ℕ∞))
         e.open_baseSet (subset_refl _) hZ₂.contMDiffOn i
   have houtside :
       ContMDiffOn I 𝓘(ℝ) 2
-        (fun y ↦ e.localFrame_coeff I b i y (Z y)) outsideSupport := by
+        (fun y ↦ e.localFrameCoeff I b i y (Z y)) outsideSupport := by
     have hzero : ContMDiffOn I 𝓘(ℝ) 2 (fun _ : M ↦ (0 : ℝ)) outsideSupport :=
       contMDiff_const.contMDiffOn
     refine hzero.congr ?_
@@ -2720,8 +2787,8 @@ theorem contMDiff_two_localFrame_coeff_pushforward_smoothExtendWithBump_of_tsupp
           (Diffeomorph.symm φ.toSmoothSelfDiffeomorph2) y)
             (0 : TangentSpace I ((Diffeomorph.symm φ) y)) = 0 := by
       exact ContinuousLinearMap.map_zero _
-    exact (congrArg (fun v ↦ e.localFrame_coeff I b i y v) hlinzero).trans
-      ((e.localFrame_coeff I b i y).map_zero)
+    exact (congrArg (fun v ↦ e.localFrameCoeff I b i y v) hlinzero).trans
+      ((e.localFrameCoeff I b i y).map_zero)
   have hcover : e.baseSet ∪ outsideSupport = Set.univ := by
     apply Set.eq_univ_iff_forall.mpr
     intro y
@@ -2740,9 +2807,12 @@ theorem contMDiff_two_localFrame_coeff_pushforward_smoothExtendWithBump_of_tsupp
 @[simp] lemma pushforwardVectorField_apply_image
     (X : Π x : M, TM x) (x : M) :
     φ.pushforwardVectorField X (φ x) = φ.pushforwardTangent x (X x) := by
-  simpa [SmoothSelfDiffeomorph3.pushforwardVectorField] using
-    (SmoothSelfDiffeomorph2.pushforwardVectorField_apply_image
-      (φ := φ.toSmoothSelfDiffeomorph2) X x)
+  change φ.toSmoothSelfDiffeomorph2.pushforwardVectorField X (φ x) =
+    φ.pushforwardTangent x (X x)
+  rw [← SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2_pushforwardTangent_apply
+    (φ := φ) (x := x) (u := X x)]
+  exact SmoothSelfDiffeomorph2.pushforwardVectorField_apply_image
+    (φ := φ.toSmoothSelfDiffeomorph2) X x
 
 @[simp] lemma pullbackTangent_pushforwardVectorField_apply_image
     (X : Π x : M, TM x) (x : M) :
@@ -2857,10 +2927,12 @@ lemma contMDiffAt_coord_pullbackBilinearForm
         Acoord x =
           ContinuousLinearMap.inCoordinates E TM E TM x0 x (φ x0) (φ x)
             (φ.pushforwardTangent x) := by
-      simpa [Acoord, SmoothSelfDiffeomorph3.pushforwardTangent,
-        SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2] using
-        (φ.toSmoothSelfDiffeomorph2.tangentCoord_eq_inCoordinates
-          (x0 := x0) (x := x) hx' hφx')
+      have h := φ.toSmoothSelfDiffeomorph2.tangentCoord_eq_inCoordinates
+        (x0 := x0) (x := x) hx' hφx'
+      rw [show (φ.toSmoothSelfDiffeomorph2 : M → M) = (φ : M → M) by rfl] at h
+      rw [SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2_pushforwardTangent
+        (φ := φ) x] at h
+      simpa [Acoord] using h
     rw [show expr x =
         (((Acoord x).precomp ℝ : OneF →L[ℝ] OneF)).comp
           ((Bcoord x).comp (Acoord x)) by rfl]
@@ -2905,6 +2977,7 @@ lemma pullbackRiemannianMetric_inner_eq_zero_of_subsingleton_tangent
   rw [hu]
   simp
 
+set_option backward.isDefEq.respectTransparency false in
 lemma pullbackRiemannianMetric_eq_of_eq_id
     (g : Bundle.ContMDiffRiemannianMetric I 2 E TM)
     (hφ : φ = Diffeomorph.refl I M (3 : WithTop ℕ∞)) :
@@ -2921,23 +2994,15 @@ lemma pullbackRiemannianMetric_eq_of_eq_id
   have hu1 :
       φid.pushforwardTangent x u =
         (mfderiv I I (_root_.id : M → M) x) u := by
-    simpa [SmoothSelfDiffeomorph3.pushforwardTangent,
-      SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2,
-      SmoothSelfDiffeomorph2.pushforwardTangent, SmoothSelfDiffeomorph2.tangentMap] using
-      congrArg (fun f : TM x →L[ℝ] TM ((_root_.id : M → M) x) => f u)
-        (Diffeomorph.mfderivToContinuousLinearEquiv_coe
-          (I := I) (J := I) (Φ := Diffeomorph.refl I M (3 : WithTop ℕ∞))
-          (x := x) (hn := by simp))
+    have h := φid.pushforwardTangent_eq_mfderiv x
+    rw [show (φid : M → M) = (_root_.id : M → M) by rfl] at h
+    exact congrArg (fun f : TM x →L[ℝ] TM x => f u) h
   have hv1 :
       φid.pushforwardTangent x v =
         (mfderiv I I (_root_.id : M → M) x) v := by
-    simpa [SmoothSelfDiffeomorph3.pushforwardTangent,
-      SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2,
-      SmoothSelfDiffeomorph2.pushforwardTangent, SmoothSelfDiffeomorph2.tangentMap] using
-      congrArg (fun f : TM x →L[ℝ] TM ((_root_.id : M → M) x) => f v)
-        (Diffeomorph.mfderivToContinuousLinearEquiv_coe
-          (I := I) (J := I) (Φ := Diffeomorph.refl I M (3 : WithTop ℕ∞))
-          (x := x) (hn := by simp))
+    have h := φid.pushforwardTangent_eq_mfderiv x
+    rw [show (φid : M → M) = (_root_.id : M → M) by rfl] at h
+    exact congrArg (fun f : TM x →L[ℝ] TM x => f v) h
   have hu0 :
       (mfderiv I I (_root_.id : M → M) x) u =
         (ContinuousLinearMap.id ℝ (TM x)) u := by
@@ -2987,7 +3052,12 @@ lemma pullbackRiemannianMetric_symm_pullbackRiemannianMetric
     SmoothSelfDiffeomorph3.pullbackRiemannianMetric (I := I) (M := M)
         (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M))
         (φ.pullbackRiemannianMetric g) = g := by
-  simpa using
+  have hsymm :
+      (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)).symm = φ := by
+    apply Diffeomorph.ext
+    intro y
+    rfl
+  simpa only [hsymm] using
     (SmoothSelfDiffeomorph3.pullbackRiemannianMetric_symm_pullbackRiemannianMetric
       (I := I) (M := M)
       (φ := (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M))) g)
@@ -3087,9 +3157,21 @@ lemma id_hasMFDerivWithinAt_of_eq_zero
         ((1 : ℝ →L[ℝ] ℝ).smulRight
           (X t ((SmoothSelfDiffeomorph3Family.id (I := I) (M := M) t) x))) := by
   intro t ht x
-  simpa using
-    (SmoothSelfDiffeomorph3Family.id_satisfiesGaugeFlowOn_of_eq_zero
-      (I := I) (M := M) (X := X) (s := s) hX).hasMFDerivWithinAt ht x
+  have hconst : HasMFDerivAt 𝓘(ℝ) I (fun _ : ℝ ↦ x) t
+      (0 : TangentSpace 𝓘(ℝ) t →L[ℝ] TM x) := by
+    simpa using (hasMFDerivAt_const (I := 𝓘(ℝ)) (I' := I) (x := t) (c := x))
+  have hzero :
+      ((1 : ℝ →L[ℝ] ℝ).smulRight
+        (X t ((SmoothSelfDiffeomorph3Family.id (I := I) (M := M) t) x))) =
+        (0 : ℝ →L[ℝ] TM x) := by
+    rw [show (SmoothSelfDiffeomorph3Family.id (I := I) (M := M) t) x = x by rfl,
+      hX t ht x]
+    ext r
+    simp
+  rw [hzero]
+  change HasMFDerivAt[s] (fun _ : ℝ ↦ x) t
+    (0 : TangentSpace 𝓘(ℝ) t →L[ℝ] TM x)
+  exact hconst.hasMFDerivWithinAt
 
 /-- A `C^3` diffeomorphism family is anchored at `t₀` if its time slice there is the identity
 diffeomorphism. -/
@@ -3271,8 +3353,15 @@ theorem const_pullbackMetricFamily_hasTimeDerivativeOn
       (fun t x u v ↦
         gdot t (φ x) (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)) s := by
   intro t ht x u v
-  simpa [metricTensor, SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using
-    hderiv ht (φ x) (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
+  change HasDerivAt
+    (fun s ↦ (g s).inner (φ x)
+      (φ.pushforwardTangent x u) (φ.pushforwardTangent x v))
+    (gdot t (φ x) (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)) t
+  rw [SmoothSelfDiffeomorph3.pushforwardTangent_apply (φ := φ) x u,
+    SmoothSelfDiffeomorph3.pushforwardTangent_apply (φ := φ) x v]
+  exact hderiv ht (φ x)
+    ((mfderiv I I (φ : M → M) x) u)
+    ((mfderiv I I (φ : M → M) x) v)
 
 lemma pullbackMetricFamily_eq_at_time_of_eq_id
     (g : MetricFamily (I := I) (M := M))
@@ -3304,6 +3393,7 @@ namespace SmoothSelfDiffeomorph2Family
 
 variable (Φ : SmoothSelfDiffeomorph2Family (I := I) (M := M))
 
+set_option backward.isDefEq.respectTransparency false in
 lemma AnchoredAt.pushforwardTangent
     {t₀ : ℝ}
     (hΦ : Φ.AnchoredAt t₀)
@@ -3311,13 +3401,14 @@ lemma AnchoredAt.pushforwardTangent
     (Φ t₀).pushforwardTangent x u = u := by
   rw [SmoothSelfDiffeomorph2Family.AnchoredAt] at hΦ
   rw [hΦ]
-  change (mfderiv I I (_root_.id : M → M) x) u = u
-  have hu0 :
-      (mfderiv I I (_root_.id : M → M) x) u =
-        (ContinuousLinearMap.id ℝ (TM x)) u := by
-    exact congrArg (fun f : TM x →L[ℝ] TM x => f u)
+  have h := SmoothSelfDiffeomorph2.pushforwardTangent_eq_mfderiv
+    (φ := Diffeomorph.refl I M (2 : WithTop ℕ∞)) x
+  rw [show (Diffeomorph.refl I M (2 : WithTop ℕ∞) : M → M) =
+      (_root_.id : M → M) by rfl] at h
+  have hid : (mfderiv I I (_root_.id : M → M) x) u = u := by
+    simpa using congrArg (fun f : TM x →L[ℝ] TM x => f u)
       (mfderiv_id (I := I) (x := x))
-  exact hu0.trans rfl
+  exact (congrArg (fun f : TM x →L[ℝ] TM x => f u) h).trans hid
 
 lemma AnchoredAt.pushforwardVectorField
     {t₀ : ℝ}
@@ -3862,15 +3953,22 @@ namespace SmoothSelfDiffeomorph3Family
 
 variable (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
 
+set_option backward.isDefEq.respectTransparency false in
 lemma AnchoredAt.pushforwardTangent
     {t₀ : ℝ}
-    (hΦ : Φ.AnchoredAt t₀)
+  (hΦ : Φ.AnchoredAt t₀)
     (x : M) (u : TM x) :
     (Φ t₀).pushforwardTangent x u = u := by
-  simpa [SmoothSelfDiffeomorph3.pushforwardTangent] using
-    SmoothSelfDiffeomorph2Family.AnchoredAt.pushforwardTangent
-      (Φ := Φ.toSmoothSelfDiffeomorph2Family)
-      hΦ.toSmoothSelfDiffeomorph2AnchoredAt x u
+  rw [SmoothSelfDiffeomorph3Family.AnchoredAt] at hΦ
+  rw [hΦ]
+  have h := SmoothSelfDiffeomorph3.pushforwardTangent_eq_mfderiv
+    (φ := Diffeomorph.refl I M (3 : WithTop ℕ∞)) x
+  rw [show (Diffeomorph.refl I M (3 : WithTop ℕ∞) : M → M) =
+      (_root_.id : M → M) by rfl] at h
+  have hid : (mfderiv I I (_root_.id : M → M) x) u = u := by
+    simpa using congrArg (fun f : TM x →L[ℝ] TM x => f u)
+      (mfderiv_id (I := I) (x := x))
+  exact (congrArg (fun f : TM x →L[ℝ] TM x => f u) h).trans hid
 
 lemma AnchoredAt.pushforwardVectorField
     {t₀ : ℝ}
@@ -3955,12 +4053,16 @@ lemma trace_connectionDifferenceTraceEndomorphism_pullbackConnectionFamily
       LinearMap.trace ℝ (TM ((Φ t) x))
         (connectionDifferenceTraceEndomorphism (I := I) (M := M) cov cov' t
           ((Φ t) x) ((Φ t).pushforwardTangent x w)).toLinearMap := by
-  simpa [SmoothSelfDiffeomorph3Family.pullbackConnectionFamily,
-    SmoothSelfDiffeomorph3Family.toSmoothSelfDiffeomorph2Family,
-    SmoothSelfDiffeomorph3.pushforwardTangent] using
+  have h :=
     SmoothSelfDiffeomorph2Family.trace_connectionDifferenceTraceEndomorphism_pullbackConnectionFamily
       (I := I) (M := M) (Φ := Φ.toSmoothSelfDiffeomorph2Family)
       (cov := cov) (cov' := cov') (t := t) (x := x) w
+  have htan :
+      (Φ.toSmoothSelfDiffeomorph2Family t).pushforwardTangent x w =
+        (Φ t).pushforwardTangent x w := by
+    exact (Φ t).toSmoothSelfDiffeomorph2_pushforwardTangent_apply x w
+  rw [htan] at h
+  exact h
 
 @[simp] lemma connectionDifferenceTraceOneForm_pullbackConnectionFamily_apply
     (cov cov' : ConnectionFamily (I := I) (M := M))
@@ -3969,12 +4071,17 @@ lemma trace_connectionDifferenceTraceEndomorphism_pullbackConnectionFamily
         (Φ.pullbackConnectionFamily cov) (Φ.pullbackConnectionFamily cov') t x w =
       connectionDifferenceTraceOneForm (I := I) (M := M)
         cov cov' t ((Φ t) x) ((Φ t).pushforwardTangent x w) := by
-  simpa [SmoothSelfDiffeomorph3Family.pullbackConnectionFamily,
-    SmoothSelfDiffeomorph3Family.toSmoothSelfDiffeomorph2Family,
-    SmoothSelfDiffeomorph3.pushforwardTangent] using
-    SmoothSelfDiffeomorph2Family.connectionDifferenceTraceOneForm_pullbackConnectionFamily_apply
+  rw [connectionDifferenceTraceOneForm_apply, connectionDifferenceTraceOneForm_apply]
+  have h :=
+    SmoothSelfDiffeomorph2Family.trace_connectionDifferenceTraceEndomorphism_pullbackConnectionFamily
       (I := I) (M := M) (Φ := Φ.toSmoothSelfDiffeomorph2Family)
       (cov := cov) (cov' := cov') (t := t) (x := x) w
+  have htan :
+      (Φ.toSmoothSelfDiffeomorph2Family t).pushforwardTangent x w =
+        (Φ t).pushforwardTangent x w := by
+    exact (Φ t).toSmoothSelfDiffeomorph2_pushforwardTangent_apply x w
+  rw [htan] at h
+  exact h
 
 lemma connectionDifferenceTraceOneForm_pullbackConnectionFamily
     (cov cov' : ConnectionFamily (I := I) (M := M))
@@ -4076,10 +4183,11 @@ lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_eventual
           (Φ.pullbackConnectionFamily cov t) 1)
     {t : ℝ} {x : M} (u v w : TM x)
     (hRightEq :
-      ((Φ t).pushforwardVectorField
-        (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w)) =ᶠ[nhds ((Φ t) x)]
-          (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM)
-            ((Φ t) x) ((Φ t).pushforwardTangent x w))) :
+      ∀ᶠ y' in nhds ((Φ t) x),
+        (Φ t).pushforwardVectorField
+            (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w) y' =
+          CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM)
+            ((Φ t) x) ((Φ t).pushforwardTangent x w) y') :
     (Φ t).pushforwardTangent x
         ((Φ.pullbackConnectionFamily cov t).curvatureTensor x u v w) =
       (cov t).curvatureTensor ((Φ t) x)
@@ -4129,7 +4237,8 @@ lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_eventual
       ∀ᶠ y' in nhds y, Zpush y' =
         CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) y
           ((Φ t).pushforwardTangent x w) y' := by
-    simpa [Zpush, y] using hRightEq
+    filter_upwards [hRightEq] with y' hy'
+    simpa [Zpush, y] using hy'
   calc
     (Φ t).pushforwardTangent x
         ((Φ.pullbackConnectionFamily cov t).curvatureTensor x u v w)
@@ -4171,16 +4280,18 @@ lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_sl
         ((Φ t).pushforwardTangent x v)
         ((Φ t).pushforwardTangent x w) := by
   have hRightEq :
-      ((Φ t).pushforwardVectorField
-        (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w)) =ᶠ[nhds ((Φ t) x)]
-          (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM)
-            ((Φ t) x) ((Φ t).pushforwardTangent x w)) := by
-    rw [hRight]
+      ∀ᶠ y' in nhds ((Φ t) x),
+        (Φ t).pushforwardVectorField
+            (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w) y' =
+          CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM)
+            ((Φ t) x) ((Φ t).pushforwardTangent x w) y' := by
+    filter_upwards [] with y'
+    simpa using congrFun hRight y'
   exact
     Φ.pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_eventuallyEq_right_slot
       (cov := cov) hcov hpull (t := t) (x := x) u v w hRightEq
 
-lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_slot_localFrame_coeff
+lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_slot_localFrameCoeff
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (b : Module.Basis ι ℝ E)
     (cov : ConnectionFamily (I := I) (M := M))
@@ -4193,7 +4304,7 @@ lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_sl
     (hZpushCoeff : ∀ i : ι,
       ContMDiff I 𝓘(ℝ) 2
         (fun y' ↦
-            (trivializationAt E TM ((Φ t) x)).localFrame_coeff I b i y'
+            (trivializationAt E TM ((Φ t) x)).localFrameCoeff I b i y'
               (((Φ t).pushforwardVectorField
               (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w)) y'))) :
     (Φ t).pushforwardTangent x
@@ -4251,12 +4362,12 @@ lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_sl
     rw [CovariantDerivative.smoothExtend_apply]
   have hZpushCoeff' : ∀ i : ι,
       ContMDiff I 𝓘(ℝ) 2
-        (fun y' ↦ (trivializationAt E TM y).localFrame_coeff I b i y' (Zpush y')) := by
+        (fun y' ↦ (trivializationAt E TM y).localFrameCoeff I b i y' (Zpush y')) := by
     intro i
     simpa [Zpush, y] using hZpushCoeff i
   have hcoeff_eq : ∀ i : ι,
-      (trivializationAt E TM y).localFrame_coeff I b i y (Zpush y) =
-        (trivializationAt E TM y).localFrame_coeff I b i y
+      (trivializationAt E TM y).localFrameCoeff I b i y (Zpush y) =
+        (trivializationAt E TM y).localFrameCoeff I b i y
           ((Φ t).pushforwardTangent x w) := by
     intro i
     rw [hZpush_at]
@@ -4272,7 +4383,7 @@ lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_sl
         ((Φ t).pushforwardTangent x v)
         ((Φ t).pushforwardTangent x w) := by
           exact
-            (cov t).curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right
+            (cov t).curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrameCoeff_right
               (b := b) (x := y) (X := Xpush) (Y := Ypush) (σ := Zpush)
               (hXpush₂.of_le (by norm_num)) (hYpush₂.of_le (by norm_num)) hZpush₂
               hXeq hYeq hZpushCoeff' hcoeff_eq
@@ -4301,10 +4412,10 @@ lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_sl
         ((Φ t).pushforwardTangent x u)
         ((Φ t).pushforwardTangent x v)
         ((Φ t).pushforwardTangent x w) :=
-  Φ.pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_slot_localFrame_coeff
+  Φ.pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_slot_localFrameCoeff
     (b := b) (cov := cov) hcov hpull (t := t) (x := x) u v w
     (fun i ↦
-      (Φ t).contMDiff_two_localFrame_coeff_pushforward_smoothExtend_of_tsupport_subset
+      (Φ t).contMDiff_two_localFrameCoeff_pushforward_smoothExtend_of_tsupport_subset
         (I := I) (b := b) w hZsupport i)
 
 lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_slot_tsupport_subset_finBasis
@@ -4411,15 +4522,15 @@ lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_sl
     rw [CovariantDerivative.smoothExtendWithBump_apply]
   have hZpushCoeff : ∀ i : Fin (Module.finrank ℝ E),
       ContMDiff I 𝓘(ℝ) 2
-        (fun y' ↦ (trivializationAt E TM y).localFrame_coeff I
+        (fun y' ↦ (trivializationAt E TM y).localFrameCoeff I
           (Module.finBasis ℝ E) i y' (Zpush y')) := by
     intro i
     simpa [Zpush, y] using
-      (Φ t).contMDiff_two_localFrame_coeff_pushforward_smoothExtendWithBump_of_tsupport_subset
+      (Φ t).contMDiff_two_localFrameCoeff_pushforward_smoothExtendWithBump_of_tsupport_subset
         (I := I) (b := Module.finBasis ℝ E) η w hηsource hηtarget i
   have hcoeff_eq : ∀ i : Fin (Module.finrank ℝ E),
-      (trivializationAt E TM y).localFrame_coeff I (Module.finBasis ℝ E) i y (Zpush y) =
-        (trivializationAt E TM y).localFrame_coeff I (Module.finBasis ℝ E) i y
+      (trivializationAt E TM y).localFrameCoeff I (Module.finBasis ℝ E) i y (Zpush y) =
+        (trivializationAt E TM y).localFrameCoeff I (Module.finBasis ℝ E) i y
           ((Φ t).pushforwardTangent x w) := by
     intro i
     rw [hZpush_at]
@@ -4455,7 +4566,7 @@ lemma pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_sl
         ((Φ t).pushforwardTangent x v)
         ((Φ t).pushforwardTangent x w) := by
           exact
-            (cov t).curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrame_coeff_right
+            (cov t).curvatureAux_eq_curvatureTensor_apply_of_eq_left_middle_localFrameCoeff_right
               (b := Module.finBasis ℝ E) (x := y) (X := Xpush) (Y := Ypush) (σ := Zpush)
               (hXpush₂.of_le (by norm_num)) (hYpush₂.of_le (by norm_num)) hZpush₂
               hXeq hYeq hZpushCoeff hcoeff_eq
@@ -4748,10 +4859,11 @@ lemma tangentMap_conj_ricciEndomorphism_pullbackConnectionFamily_eq_of_eventuall
           (Φ.pullbackConnectionFamily cov t) 1)
     {t : ℝ} {x : M} (u w : TM x)
     (hRightEq :
-      ((Φ t).pushforwardVectorField
-        (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w)) =ᶠ[nhds ((Φ t) x)]
-          (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM)
-            ((Φ t) x) ((Φ t).pushforwardTangent x w))) :
+      ∀ᶠ y' in nhds ((Φ t) x),
+        (Φ t).pushforwardVectorField
+            (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w) y' =
+          CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM)
+            ((Φ t) x) ((Φ t).pushforwardTangent x w) y') :
     ((((Φ t).tangentMap x).toLinearEquiv).conj
       ((Φ.pullbackConnectionFamily cov t).ricciEndomorphism x u w)) =
         (cov t).ricciEndomorphism ((Φ t) x)
@@ -4773,7 +4885,7 @@ lemma tangentMap_conj_ricciEndomorphism_pullbackConnectionFamily_eq_of_eventuall
     rw [SmoothSelfDiffeomorph3.pushforwardTangent_pullbackTangent]
     rw [CovariantDerivative.ricciEndomorphism_apply])
 
-lemma tangentMap_conj_ricciEndomorphism_pullbackConnectionFamily_eq_of_right_slot_localFrame_coeff
+lemma tangentMap_conj_ricciEndomorphism_pullbackConnectionFamily_eq_of_right_slot_localFrameCoeff
     [RiemannianBundle (TangentSpace I : M → Type _)]
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (b : Module.Basis ι ℝ E)
@@ -4787,7 +4899,7 @@ lemma tangentMap_conj_ricciEndomorphism_pullbackConnectionFamily_eq_of_right_slo
     (hZpushCoeff : ∀ i : ι,
       ContMDiff I 𝓘(ℝ) 2
         (fun y' ↦
-            (trivializationAt E TM ((Φ t) x)).localFrame_coeff I b i y'
+            (trivializationAt E TM ((Φ t) x)).localFrameCoeff I b i y'
               (((Φ t).pushforwardVectorField
               (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w)) y'))) :
     ((((Φ t).tangentMap x).toLinearEquiv).conj
@@ -4804,7 +4916,7 @@ lemma tangentMap_conj_ricciEndomorphism_pullbackConnectionFamily_eq_of_right_slo
         ((Φ t).pushforwardTangent x u) ((Φ t).pushforwardTangent x w)) z
   rw [CovariantDerivative.ricciEndomorphism_apply]
   have hcurv :=
-    Φ.pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_slot_localFrame_coeff
+    Φ.pushforwardTangent_curvatureTensor_pullbackConnectionFamily_eq_of_right_slot_localFrameCoeff
       (b := b) (cov := cov) hcov hpull (t := t) (x := x)
       ((Φ t).pullbackTangent x z) u w hZpushCoeff
   exact hcurv.trans (by
@@ -4916,7 +5028,9 @@ lemma tangentMap_conj_ricciEndomorphism_pullbackConnectionFamily_eq_of_right_slo
         (cov t).ricciEndomorphism ((Φ t) x)
           ((Φ t).pushforwardTangent x u) ((Φ t).pushforwardTangent x w) :=
   Φ.tangentMap_conj_ricciEndomorphism_pullbackConnectionFamily_eq_of_eventuallyEq_right_slot
-    (cov := cov) hcov hpull (t := t) (x := x) u w (by rw [hRightEq])
+    (cov := cov) hcov hpull (t := t) (x := x) u w (by
+      filter_upwards [] with y'
+      simpa using congrFun hRightEq y')
 
 lemma ricciCurvature_pullbackConnectionFamily_eq_trace_tangentMap_conj_ricciEndomorphism
     [RiemannianBundle (TangentSpace I : M → Type _)]
@@ -5031,10 +5145,11 @@ lemma ricciCurvature_pullbackConnectionFamily_eq_of_eventuallyEq_right_slot
           (Φ.pullbackConnectionFamily cov t) 1)
     {t : ℝ} {x : M} (u w : TM x)
     (hRightEq :
-      ((Φ t).pushforwardVectorField
-        (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w)) =ᶠ[nhds ((Φ t) x)]
-          (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM)
-            ((Φ t) x) ((Φ t).pushforwardTangent x w))) :
+      ∀ᶠ y' in nhds ((Φ t) x),
+        (Φ t).pushforwardVectorField
+            (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w) y' =
+          CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM)
+            ((Φ t) x) ((Φ t).pushforwardTangent x w) y') :
     (Φ.pullbackConnectionFamily cov t).ricciCurvature x u w =
       (cov t).ricciCurvature ((Φ t) x)
         ((Φ t).pushforwardTangent x u) ((Φ t).pushforwardTangent x w) :=
@@ -5043,7 +5158,7 @@ lemma ricciCurvature_pullbackConnectionFamily_eq_of_eventuallyEq_right_slot
     (Φ.tangentMap_conj_ricciEndomorphism_pullbackConnectionFamily_eq_of_eventuallyEq_right_slot
       (cov := cov) hcov hpull (t := t) (x := x) u w hRightEq)
 
-lemma ricciCurvature_pullbackConnectionFamily_eq_of_right_slot_localFrame_coeff
+lemma ricciCurvature_pullbackConnectionFamily_eq_of_right_slot_localFrameCoeff
     [RiemannianBundle (TangentSpace I : M → Type _)]
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (b : Module.Basis ι ℝ E)
@@ -5057,7 +5172,7 @@ lemma ricciCurvature_pullbackConnectionFamily_eq_of_right_slot_localFrame_coeff
     (hZpushCoeff : ∀ i : ι,
       ContMDiff I 𝓘(ℝ) 2
         (fun y' ↦
-            (trivializationAt E TM ((Φ t) x)).localFrame_coeff I b i y'
+            (trivializationAt E TM ((Φ t) x)).localFrameCoeff I b i y'
               (((Φ t).pushforwardVectorField
               (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w)) y'))) :
     (Φ.pullbackConnectionFamily cov t).ricciCurvature x u w =
@@ -5065,7 +5180,7 @@ lemma ricciCurvature_pullbackConnectionFamily_eq_of_right_slot_localFrame_coeff
         ((Φ t).pushforwardTangent x u) ((Φ t).pushforwardTangent x w) :=
   Φ.ricciCurvature_pullbackConnectionFamily_eq_of_tangentMap_conj_ricciEndomorphism
     (cov := cov) hcov hpull (t := t) (x := x) u w
-    (Φ.tangentMap_conj_ricciEndomorphism_pullbackConnectionFamily_eq_of_right_slot_localFrame_coeff
+    (Φ.tangentMap_conj_ricciEndomorphism_pullbackConnectionFamily_eq_of_right_slot_localFrameCoeff
       (b := b) (cov := cov) hcov hpull (t := t) (x := x) u w
       hZpushCoeff)
 
@@ -5148,7 +5263,9 @@ lemma ricciCurvature_pullbackConnectionFamily_eq_of_right_slot_section_eq
         ((Φ t).pushforwardTangent x u) ((Φ t).pushforwardTangent x w) :=
   Φ.ricciCurvature_pullbackConnectionFamily_eq_of_eventuallyEq_right_slot
     (cov := cov) hcov hpull (t := t) (x := x) u w
-    (by rw [hRightEq])
+    (by
+      filter_upwards [] with y'
+      simpa using congrFun hRightEq y')
 
 lemma ricciCurvature_pullbackConnectionFamily_eq_at_anchored_time
     [RiemannianBundle (TangentSpace I : M → Type _)]
@@ -5255,13 +5372,12 @@ theorem const_pullbackMetricFamily_satisfiesEquationAt
       ((Φ.pullbackConnectionFamily cov) t).ricciCurvature x u v =
         (cov t).ricciCurvature (φ x)
           (φ.pushforwardTangent x u) (φ.pushforwardTangent x v) := by
-    simpa [Φ] using
-      SmoothSelfDiffeomorph3Family.ricciCurvature_pullbackConnectionFamily
-        (I := I) (M := M) (Φ := Φ) (cov := cov) hcov
-        (by
-          intro τ
-          simpa [Φ] using hpull τ)
-        (t := t) (x := x) u v
+    exact SmoothSelfDiffeomorph3Family.ricciCurvature_pullbackConnectionFamily
+      (I := I) (M := M) (Φ := Φ) (cov := cov) hcov
+      (by
+        intro τ
+        simpa [Φ] using hpull τ)
+      (t := t) (x := x) u v
   calc
     gdot t (φ x) (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
         = ricciFlowRHS (I := I) (M := M) g cov hcov t (φ x)
@@ -5633,9 +5749,17 @@ noncomputable def pullbackByDiffeomorph3
     have hsrc := localSolution_metric_eq_initial
       (I := I) (M := M) sol (φ x)
       (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
-    simpa [MatchesInitialMetric, metricTensor, InitialValueProblem.pullbackByDiffeomorph3,
-      Solution.pullbackByDiffeomorph3,
-      SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using hsrc
+    have hφu : φ.pushforwardTangent x u =
+        (mfderiv I I (φ : M → M) x) u := φ.pushforwardTangent_apply x u
+    have hφv : φ.pushforwardTangent x v =
+        (mfderiv I I (φ : M → M) x) v := φ.pushforwardTangent_apply x v
+    change
+      (sol.toSolution.metric ivp.initialTime).inner (φ x)
+          (φ.pushforwardTangent x u) (φ.pushforwardTangent x v) =
+        ivp.initialMetric.inner (φ x)
+          (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
+    rw [hφu, hφv]
+    simpa [metricTensor] using hsrc
 
 @[simp] lemma pullbackByDiffeomorph3_terminalTime
     [SigmaCompactSpace M]
@@ -5735,9 +5859,17 @@ noncomputable def pullbackByDiffeomorph3
     have hsrc := intrinsicLocalSolution_metric_eq_initial
       (I := I) (M := M) sol (φ x)
       (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
-    simpa [IntrinsicMatchesInitialMetric, MatchesInitialMetric, metricTensor,
-      InitialValueProblem.pullbackByDiffeomorph3,
-      SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using hsrc
+    have hφu : φ.pushforwardTangent x u =
+        (mfderiv I I (φ : M → M) x) u := φ.pushforwardTangent_apply x u
+    have hφv : φ.pushforwardTangent x v =
+        (mfderiv I I (φ : M → M) x) v := φ.pushforwardTangent_apply x v
+    change
+      (sol.toIntrinsicSolution.metric ivp.initialTime).inner (φ x)
+          (φ.pushforwardTangent x u) (φ.pushforwardTangent x v) =
+        ivp.initialMetric.inner (φ x)
+          (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
+    rw [hφu, hφv]
+    simpa [metricTensor] using hsrc
 
 @[simp] lemma pullbackByDiffeomorph3_terminalTime
     [SigmaCompactSpace M]
@@ -5901,10 +6033,19 @@ theorem pullbackByDiffeomorph3_unique_metric
     metricTensor (I := I) (M := M) (sol₁.pullbackByDiffeomorph3 φ).toSolution.metric t x u v =
       metricTensor (I := I) (M := M) (sol₂.pullbackByDiffeomorph3 φ).toSolution.metric
         t x u v := by
-  simpa [metricTensor, LocalSolution.pullbackByDiffeomorph3, Solution.pullbackByDiffeomorph3,
-    SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using
+  have hφu : φ.pushforwardTangent x u =
+      (mfderiv I I (φ : M → M) x) u := φ.pushforwardTangent_apply x u
+  have hφv : φ.pushforwardTangent x v =
+      (mfderiv I I (φ : M → M) x) v := φ.pushforwardTangent_apply x v
+  change
+    (sol₁.toSolution.metric t).inner (φ x)
+        (φ.pushforwardTangent x u) (φ.pushforwardTangent x v) =
+      (sol₂.toSolution.metric t).inner (φ x)
+        (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
+  rw [hφu, hφv]
+  simpa [metricTensor] using
     pkg.unique_metric sol₁ sol₂ t ht (φ x)
-      (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
+      ((mfderiv I I (φ : M → M) x) u) ((mfderiv I I (φ : M → M) x) v)
 
 /-- Connection uniqueness in an ordinary local-existence/uniqueness package transports to the fixed
 `C³` pullbacks of any two source local solutions. -/
@@ -5969,10 +6110,15 @@ theorem pullbackByDiffeomorph3_unique_metric_of_target
     back₂Raw.reindexInitialValueProblem hTime hMetric
   have htBack :
       t ∈ Set.Icc ivp.initialTime (min back₁.terminalTime back₂.terminalTime) := by
-    simpa [back₁, back₂, back₁Raw, back₂Raw, ψ, InitialValueProblem.pullbackByDiffeomorph3] using ht
+    change t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime)
+    exact ht
   have huniq :=
     pkg.unique_metric back₁ back₂ t htBack (φ x)
       (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
+  have hφu : φ.pushforwardTangent x u =
+      (mfderiv I I (φ : M → M) x) u := φ.pushforwardTangent_apply x u
+  have hφv : φ.pushforwardTangent x v =
+      (mfderiv I I (φ : M → M) x) v := φ.pushforwardTangent_apply x v
   have hbase : (φ.symm : M → M) (φ x) = x := by
     simpa using φ.symm_apply_apply x
   have hu :
@@ -5989,23 +6135,26 @@ theorem pullbackByDiffeomorph3_unique_metric_of_target
       φ.symm_pushforwardTangent_pushforwardTangent x v
   have huniq' :
       (sol₁.toSolution.metric t).inner ((φ.symm : M → M) (φ x))
-          (SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
-            (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x)
-            ((mfderiv I I (φ : M → M) x) u))
-          (SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
-            (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x)
-            ((mfderiv I I (φ : M → M) x) v)) =
+          (SmoothSelfDiffeomorph3.pushforwardTangent
+            (φ := (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)))
+            (φ x) ((mfderiv I I (φ : M → M) x) u))
+          (SmoothSelfDiffeomorph3.pushforwardTangent
+            (φ := (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)))
+            (φ x) ((mfderiv I I (φ : M → M) x) v)) =
         (sol₂.toSolution.metric t).inner ((φ.symm : M → M) (φ x))
-          (SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
-            (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x)
-            ((mfderiv I I (φ : M → M) x) u))
-          (SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
-            (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x)
-            ((mfderiv I I (φ : M → M) x) v)) := by
-    simpa [back₁, back₂, back₁Raw, back₂Raw, ψ, metricTensor,
+          (SmoothSelfDiffeomorph3.pushforwardTangent
+            (φ := (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)))
+            (φ x) ((mfderiv I I (φ : M → M) x) u))
+          (SmoothSelfDiffeomorph3.pushforwardTangent
+            (φ := (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)))
+            (φ x) ((mfderiv I I (φ : M → M) x) v)) := by
+    convert huniq using 1 <;>
+      simp only [back₁, back₂, back₁Raw, back₂Raw, ψ, metricTensor,
       LocalSolution.reindexInitialValueProblem,
       LocalSolution.pullbackByDiffeomorph3, Solution.pullbackByDiffeomorph3,
-      SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using huniq
+      SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner,
+      SmoothSelfDiffeomorph3Family.const, SmoothSelfDiffeomorph3Family.const_apply,
+      hφu, hφv] <;> rfl
   rw [hu, hv] at huniq'
   rw [← hbase]
   simpa [metricTensor] using huniq'
@@ -6084,11 +6233,19 @@ theorem pullbackByDiffeomorph3_unique_metric
         (sol₁.pullbackByDiffeomorph3 φ).toIntrinsicSolution.metric t x u v =
       metricTensor (I := I) (M := M)
         (sol₂.pullbackByDiffeomorph3 φ).toIntrinsicSolution.metric t x u v := by
-  simpa [metricTensor, IntrinsicLocalSolution.pullbackByDiffeomorph3,
-    IntrinsicSolution.pullbackByDiffeomorph3,
-    SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using
+  have hφu : φ.pushforwardTangent x u =
+      (mfderiv I I (φ : M → M) x) u := φ.pushforwardTangent_apply x u
+  have hφv : φ.pushforwardTangent x v =
+      (mfderiv I I (φ : M → M) x) v := φ.pushforwardTangent_apply x v
+  change
+    (sol₁.toIntrinsicSolution.metric t).inner (φ x)
+        (φ.pushforwardTangent x u) (φ.pushforwardTangent x v) =
+      (sol₂.toIntrinsicSolution.metric t).inner (φ x)
+        (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
+  rw [hφu, hφv]
+  simpa [metricTensor] using
     pkg.unique_metric sol₁ sol₂ t ht (φ x)
-      (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
+      ((mfderiv I I (φ : M → M) x) u) ((mfderiv I I (φ : M → M) x) v)
 
 /-- Connection uniqueness in an intrinsic local-existence/uniqueness package transports to the fixed
 `C³` pullbacks of any two source intrinsic local solutions. -/
@@ -6153,10 +6310,15 @@ theorem pullbackByDiffeomorph3_unique_metric_of_target
     back₂Raw.reindexInitialValueProblem hTime hMetric
   have htBack :
       t ∈ Set.Icc ivp.initialTime (min back₁.terminalTime back₂.terminalTime) := by
-    simpa [back₁, back₂, back₁Raw, back₂Raw, ψ, InitialValueProblem.pullbackByDiffeomorph3] using ht
+    change t ∈ Set.Icc ivp.initialTime (min sol₁.terminalTime sol₂.terminalTime)
+    exact ht
   have huniq :=
     pkg.unique_metric back₁ back₂ t htBack (φ x)
       (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
+  have hφu : φ.pushforwardTangent x u =
+      (mfderiv I I (φ : M → M) x) u := φ.pushforwardTangent_apply x u
+  have hφv : φ.pushforwardTangent x v =
+      (mfderiv I I (φ : M → M) x) v := φ.pushforwardTangent_apply x v
   have hbase : (φ.symm : M → M) (φ x) = x := by
     simpa using φ.symm_apply_apply x
   have hu :
@@ -6173,23 +6335,26 @@ theorem pullbackByDiffeomorph3_unique_metric_of_target
       φ.symm_pushforwardTangent_pushforwardTangent x v
   have huniq' :
       (sol₁.toIntrinsicSolution.metric t).inner ((φ.symm : M → M) (φ x))
-          (SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
-            (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x)
-            ((mfderiv I I (φ : M → M) x) u))
-          (SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
-            (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x)
-            ((mfderiv I I (φ : M → M) x) v)) =
+          (SmoothSelfDiffeomorph3.pushforwardTangent
+            (φ := (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)))
+            (φ x) ((mfderiv I I (φ : M → M) x) u))
+          (SmoothSelfDiffeomorph3.pushforwardTangent
+            (φ := (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)))
+            (φ x) ((mfderiv I I (φ : M → M) x) v)) =
         (sol₂.toIntrinsicSolution.metric t).inner ((φ.symm : M → M) (φ x))
-          (SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
-            (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x)
-            ((mfderiv I I (φ : M → M) x) u))
-          (SmoothSelfDiffeomorph3.pushforwardTangent (I := I) (M := M)
-            (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)) (φ x)
-            ((mfderiv I I (φ : M → M) x) v)) := by
-    simpa [back₁, back₂, back₁Raw, back₂Raw, ψ, metricTensor,
+          (SmoothSelfDiffeomorph3.pushforwardTangent
+            (φ := (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)))
+            (φ x) ((mfderiv I I (φ : M → M) x) u))
+          (SmoothSelfDiffeomorph3.pushforwardTangent
+            (φ := (φ.symm : SmoothSelfDiffeomorph3 (I := I) (M := M)))
+            (φ x) ((mfderiv I I (φ : M → M) x) v)) := by
+    convert huniq using 1 <;>
+      simp only [back₁, back₂, back₁Raw, back₂Raw, ψ, metricTensor,
       IntrinsicLocalSolution.reindexInitialValueProblem,
       IntrinsicLocalSolution.pullbackByDiffeomorph3, IntrinsicSolution.pullbackByDiffeomorph3,
-      SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner] using huniq
+      SmoothSelfDiffeomorph3Family.pullbackMetricFamily_inner,
+      SmoothSelfDiffeomorph3Family.const, SmoothSelfDiffeomorph3Family.const_apply,
+      hφu, hφv] <;> rfl
   rw [hu, hv] at huniq'
   rw [← hbase]
   simpa [metricTensor] using huniq'

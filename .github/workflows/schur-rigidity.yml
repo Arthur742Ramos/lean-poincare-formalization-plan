@@ -1,0 +1,48 @@
+name: Schur rigidity verification
+
+on:
+  push:
+    paths:
+      - "schur-rigidity/**"
+      - ".github/workflows/schur-rigidity.yml"
+  pull_request:
+    paths:
+      - "schur-rigidity/**"
+      - ".github/workflows/schur-rigidity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  comparator:
+    name: Schur rigidity - Linux Comparator and NanoDa
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check structured provenance and negative controls
+        run: |
+          python3 -m pip install PyYAML==6.0.2
+          python3 schur-rigidity/scripts/check-provenance.py
+      - name: Install pinned Lean toolchain
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: schur-rigidity
+          build: false
+      - name: Install Go for Landrun
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: "1.24.0"
+          cache: false
+      - name: Verify using real Linux Landrun
+        run: bash schur-rigidity/scripts/verify-comparator.sh
+      - name: Check Challenge without candidate library imports
+        run: python3 schur-rigidity/scripts/check-challenge-boundary.py

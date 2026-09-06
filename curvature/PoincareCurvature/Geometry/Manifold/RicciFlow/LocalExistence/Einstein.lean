@@ -24,7 +24,7 @@ derivative (`extDerivFun_const_smul_apply`), the remaining calculus input.
 Note: assembling these into the full homothetic local-existence theorem additionally
 needs scale-invariance of metric compatibility, whose proof in this repository's
 `inner ℝ`-based `IsMetricCompatibleTangent` definition currently triggers a Lean
-kernel-defeq blowup (converting `inner ℝ` to the metric field under the `extDerivFun`
+kernel-defeq blowup (converting `inner ℝ` to the metric field under the `mvfderiv`
 binder in the heavy tangent-bundle instance context).  That step is left as future
 work.  Nothing here uses proof placeholders or unchecked assumptions; this
 strictly enlarges the proven metric-rescaling toolkit and does not by itself
@@ -123,13 +123,13 @@ theorem isMetricCompatibleTangent_of_inner_eq_const_smul (c : ℝ)
       (I := I) (E := E) (M := M) (x := x) (σ := σ) (τ := τ) hσ hτ
   -- The `g`-compatibility Leibniz identity.
   have hcompat :
-      extDerivFun (I := I) (fun y ↦ g.inner y (σ y) (τ y)) x u =
+      mvfderiv (I := I) (fun y ↦ g.inner y (σ y) (τ y)) x u =
         g.inner x (cov σ x u) (τ x) + g.inner x (σ x) (cov τ x u) := by
     letI : Bundle.RiemannianBundle TM := ⟨g.toRiemannianMetric⟩
     simpa using hcov (σ := σ) (τ := τ) hσ hτ u
   -- Convert the `g'` Leibniz goal to the `g'.inner` form (variable `g'`, cheap defeq).
   change
-    extDerivFun (I := I) (fun y ↦ g'.inner y (σ y) (τ y)) x u =
+    mvfderiv (I := I) (fun y ↦ g'.inner y (σ y) (τ y)) x u =
       g'.inner x (cov σ x u) (τ x) + g'.inner x (σ x) (cov τ x u)
   simp only [hinner]
   rw [extDerivFun_const_smul_apply c u hf, hcompat, mul_add]

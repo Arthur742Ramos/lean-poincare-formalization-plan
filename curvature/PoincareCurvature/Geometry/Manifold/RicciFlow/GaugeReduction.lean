@@ -186,8 +186,8 @@ theorem intrinsicDeTurckGaugeField_mdiffAt_of_isLeviCivita
       (intrinsicDeTurckGaugeField_eq_zero_of_isLeviCivita
         (I := I) (M := M) g background hbackground)
   rw [hX]
-  simpa [Bundle.zeroSection] using
-    (mdifferentiableAt_zeroSection (𝕜 := ℝ) (F := E) (E := TM) (x := x))
+  change MDiffAt (Bundle.zeroSection (B := M) E TM) x
+  exact mdifferentiableAt_zeroSection (𝕜 := ℝ) (F := E) (E := TM) (x := x)
 
 /-- Global version of
 `intrinsicDeTurckGaugeField_mdiffAt_of_isLeviCivita`. -/
@@ -229,7 +229,8 @@ theorem intrinsicDeTurckGaugeField_lieCorrection_eq_neg_intrinsicDeTurckCorrecti
   have hcov_neg :
       cov (intrinsicDeTurckGaugeField (I := I) (M := M) g background t) x =
         (-1 : ℝ) • cov W x := by
-    simpa [cov, W, intrinsicDeTurckGaugeField] using
+    change cov (-W) x = (-1 : ℝ) • cov W x
+    simpa [cov, W] using
       (IsCovariantDerivativeOn.smul_const
         (F := E) (V := TM)
         (hcov := cov.isCovariantDerivativeOnUniv)
@@ -585,7 +586,10 @@ def AnchoredIntrinsicDeTurckDiffeomorphGaugeOn.of_hasMFDerivWithinAt
       (X := intrinsicDeTurckGaugeField (I := I) (M := M) g background)
       (s := s)
       (fun t ht x ↦ by
-        simpa using hflow t ht x)
+        change HasMFDerivAt[s] (fun τ : ℝ ↦ (maps τ) x) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight
+            (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((maps t) x)))
+        exact hflow t ht x)
 
 def AnchoredIntrinsicDeTurckDiffeomorphGaugeOn.congr_gaugeField
     {g g' : MetricFamily (I := I) (M := M)}
@@ -695,7 +699,10 @@ def AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.of_hasMFDerivWithinAt
       (X := intrinsicDeTurckGaugeField (I := I) (M := M) g background)
       (s := s)
       (fun t ht x ↦ by
-        simpa using hflow t ht x))
+        change HasMFDerivAt[s] (fun τ : ℝ ↦ (maps τ) x) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight
+            (intrinsicDeTurckGaugeField (I := I) (M := M) g background t ((maps t) x)))
+        exact hflow t ht x))
 
 def AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.identity_of_intrinsicDeTurckGaugeField_eq_zero
     {g : MetricFamily (I := I) (M := M)}
@@ -838,7 +845,11 @@ theorem AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.hasMFDerivAt_apply
       ((1 : ℝ →L[ℝ] ℝ).smulRight
         (intrinsicDeTurckGaugeField (I := I) (M := M) g background t
           (gauge.maps t x))) := by
-  simpa using gauge.hasMFDerivAt ht x
+  change HasMFDerivAt[s] (fun τ : ℝ ↦ (gauge.maps τ) x) t
+    ((1 : ℝ →L[ℝ] ℝ).smulRight
+      (intrinsicDeTurckGaugeField (I := I) (M := M) g background t
+        ((gauge.maps t) x)))
+  exact gauge.hasMFDerivAt ht x
 
 theorem AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.pullbackMetricFamily_eq_initial
     {g : MetricFamily (I := I) (M := M)}
@@ -1218,7 +1229,7 @@ theorem IntrinsicDeTurckLocalSolution.pullbackBackgroundConnection_isLeviCivita_
     letI : Bundle.RiemannianBundle TM := ⟨gPull.toRiemannianMetric⟩;
     (sol.toIntrinsicDeTurckSolution.background ivp.initialTime).IsLeviCivita
   rw [hg]
-  simpa [g0] using hLevi
+  convert hLevi using 1 <;> rfl
 
 theorem IntrinsicDeTurckLocalSolution.pullbackBackgroundConnection_isLeviCivita_of_inner
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -1764,7 +1775,7 @@ theorem IntrinsicDeTurckLocalSolution.pushforward_riesz_pulledBackSourceDeTurckO
       intrinsicDeTurckVectorField (I := I) (M := M)
         source.toIntrinsicDeTurckSolution.metric
         source.toIntrinsicDeTurckSolution.background t ((gauge3.maps t) x) := by
-  have hpush :
+  have hpush2 :
       ((gauge3.maps t).toSmoothSelfDiffeomorph2).pushforwardTangent x
           (letI : Bundle.RiemannianBundle TM :=
             ⟨((gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
@@ -1788,7 +1799,23 @@ theorem IntrinsicDeTurckLocalSolution.pushforward_riesz_pulledBackSourceDeTurckO
         source.toIntrinsicDeTurckSolution.background t ((gauge3.maps t) x))
       (fun u =>
         source.pulledBackSourceDeTurckOneFormOfDiffeomorph3Gauge_eq_source gauge3 t x u)
-  simpa [intrinsicDeTurckVectorField] using hpush
+  have hpush :
+      (gauge3.maps t).pushforwardTangent x
+          (letI : Bundle.RiemannianBundle TM :=
+            ⟨((gauge3.maps.pullbackMetricFamily source.toIntrinsicDeTurckSolution.metric)
+              t).toRiemannianMetric⟩
+           CovariantDerivative.rieszMap (I := I) x
+            (source.pulledBackSourceDeTurckOneFormOfDiffeomorph3Gauge gauge3 t x)) =
+        (letI : Bundle.RiemannianBundle TM :=
+          ⟨(source.toIntrinsicDeTurckSolution.metric t).toRiemannianMetric⟩
+         CovariantDerivative.rieszMap (I := I) ((gauge3.maps t) x)
+          (intrinsicDeTurckOneForm (I := I) (M := M)
+            source.toIntrinsicDeTurckSolution.metric
+            source.toIntrinsicDeTurckSolution.background t ((gauge3.maps t) x))) := by
+    rw [← SmoothSelfDiffeomorph3.toSmoothSelfDiffeomorph2_pushforwardTangent]
+    exact hpush2
+  simpa [intrinsicDeTurckVectorField,
+    SmoothSelfDiffeomorph3.pushforwardTangent_apply] using hpush
 
 theorem IntrinsicDeTurckLocalSolution.pushforward_pulledBackSourceDeTurckVectorFieldOfDiffeomorph3Gauge
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -2422,7 +2449,7 @@ theorem IntrinsicDeTurckLocalSolution.sourceRicciTransport_of_eventuallyEq_right
       (cov := source.toIntrinsicDeTurckSolution.background)
       hsourceBackground hpull (t := t) (x := x) u v (hRightEq ht x v)
 
-theorem IntrinsicDeTurckLocalSolution.sourceRicciTransport_of_right_slot_localFrame_coeff
+theorem IntrinsicDeTurckLocalSolution.sourceRicciTransport_of_right_slot_localFrameCoeff
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (b : Module.Basis ι ℝ E)
@@ -2442,7 +2469,7 @@ theorem IntrinsicDeTurckLocalSolution.sourceRicciTransport_of_right_slot_localFr
       ∀ x : M, ∀ w : TM x, ∀ i : ι,
         ContMDiff I 𝓘(ℝ) 2
           (fun y' ↦
-            (trivializationAt E TM ((gauge3.maps t) x)).localFrame_coeff I b i y'
+            (trivializationAt E TM ((gauge3.maps t) x)).localFrameCoeff I b i y'
               (((gauge3.maps t).pushforwardVectorField
                 (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w)) y')))
     {t : ℝ} (ht : t ∈ source.toIntrinsicDeTurckSolution.timeSet)
@@ -2481,7 +2508,7 @@ theorem IntrinsicDeTurckLocalSolution.sourceRicciTransport_of_right_slot_localFr
     hpull t
   symm
   simpa using
-    SmoothSelfDiffeomorph3Family.ricciCurvature_pullbackConnectionFamily_eq_of_right_slot_localFrame_coeff
+    SmoothSelfDiffeomorph3Family.ricciCurvature_pullbackConnectionFamily_eq_of_right_slot_localFrameCoeff
       (I := I) (M := M) (Φ := gauge3.maps)
       (b := b) (cov := source.toIntrinsicDeTurckSolution.background)
       hsourceBackground hpull (t := t) (x := x) u v
@@ -3446,7 +3473,7 @@ theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorp
         exact source.sourceRicciTransport_of_right_slot_section_eq
           gauge3 hpull hsourceBackground hRightEq ht x u v)
 
-theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_satisfiesEquationAt_of_right_slot_localFrame_coeff
+theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_satisfiesEquationAt_of_right_slot_localFrameCoeff
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (b : Module.Basis ι ℝ E)
@@ -3469,7 +3496,7 @@ theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorp
       ∀ x : M, ∀ w : TM x, ∀ i : ι,
         ContMDiff I 𝓘(ℝ) 2
           (fun y' ↦
-            (trivializationAt E TM ((gauge3.maps t) x)).localFrame_coeff I b i y'
+            (trivializationAt E TM ((gauge3.maps t) x)).localFrameCoeff I b i y'
               (((gauge3.maps t).pushforwardVectorField
                 (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w)) y')))
     {t : ℝ} (ht : t ∈ source.toIntrinsicDeTurckSolution.timeSet) :
@@ -3484,7 +3511,7 @@ theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorp
       gauge3 hbackground hpull hsourceBackground ht
       (by
         intro x u v
-        exact source.sourceRicciTransport_of_right_slot_localFrame_coeff
+        exact source.sourceRicciTransport_of_right_slot_localFrameCoeff
           b gauge3 hpull hsourceBackground hZpushCoeff ht x u v)
 
 theorem IntrinsicDeTurckLocalSolution.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge_satisfiesEquationAt_of_right_slot_tsupport_subset
@@ -3918,7 +3945,7 @@ noncomputable def GaugeReducedIntrinsicDeTurckLocalSolution.ofDiffeomorph3GaugeC
       ∀ x : M, ∀ w : TM x, ∀ i : ι,
         ContMDiff I 𝓘(ℝ) 2
           (fun y' ↦
-            (trivializationAt E TM ((gauge3.maps t) x)).localFrame_coeff I b i y'
+            (trivializationAt E TM ((gauge3.maps t) x)).localFrameCoeff I b i y'
               (((gauge3.maps t).pushforwardVectorField
                 (CovariantDerivative.smoothExtend (I := I) (F := E) (V := TM) x w)) y'))) :
     GaugeReducedIntrinsicDeTurckLocalSolution (E := E) (H := H) (I := I) (M := M) ivp :=
@@ -3926,7 +3953,7 @@ noncomputable def GaugeReducedIntrinsicDeTurckLocalSolution.ofDiffeomorph3GaugeC
     source gauge3 hbackground hpull hderiv hsourceBackground
     (by
       intro t ht x u v
-      exact source.sourceRicciTransport_of_right_slot_localFrame_coeff
+      exact source.sourceRicciTransport_of_right_slot_localFrameCoeff
         b gauge3 hpull hsourceBackground hZpushCoeff ht x u v)
 
 /-- C³ gauge reduction with concrete corrected velocity, reducing pushed right-slot local-frame
@@ -4436,7 +4463,8 @@ theorem GaugeReducedIntrinsicDeTurckLocalSolution.pushforward_pulledBackSourceDe
       intrinsicDeTurckVectorField (I := I) (M := M)
         sol.source.toIntrinsicDeTurckSolution.metric
         sol.source.toIntrinsicDeTurckSolution.background t ((sol.gauge.maps t) x) := by
-  simpa [GaugeReducedIntrinsicDeTurckLocalSolution.pulledBackSourceDeTurckVectorField] using
+  simpa [GaugeReducedIntrinsicDeTurckLocalSolution.pulledBackSourceDeTurckVectorField,
+    GaugeReducedIntrinsicDeTurckLocalSolution.pulledBackSourceDeTurckOneForm] using
     sol.pushforward_riesz_pullbackSourceDeTurckOneForm t x
 
 theorem GaugeReducedIntrinsicDeTurckLocalSolution.pulledBackSourceDeTurckVectorField_eq_pullbackVectorField
@@ -5824,9 +5852,16 @@ theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_zero_velocity_iff_
       (∀ t ∈ Set.Icc ivp.initialTime sol.source.terminalTime,
         ∀ x : M, ∀ u v : TM x,
           intrinsicRicciTensor (I := I) (M := M) sol.transformedMetric t x u v = 0) := by
-  simpa [GaugeReducedIntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution] using
-    (intrinsicLocalSolution_zero_velocity_iff_ricciTensor_zero
-      (I := I) (M := M) sol.toIntrinsicLocalSolution)
+  change
+    (∀ t ∈ Set.Icc ivp.initialTime sol.toIntrinsicLocalSolution.terminalTime,
+      ∀ x : M, ∀ u v : TM x,
+        sol.toIntrinsicLocalSolution.toIntrinsicSolution.metricVelocity t x u v = 0) ↔
+      (∀ t ∈ Set.Icc ivp.initialTime sol.toIntrinsicLocalSolution.terminalTime,
+        ∀ x : M, ∀ u v : TM x,
+          intrinsicRicciTensor (I := I) (M := M)
+            sol.toIntrinsicLocalSolution.toIntrinsicSolution.metric t x u v = 0)
+  exact intrinsicLocalSolution_zero_velocity_iff_ricciTensor_zero
+    (I := I) (M := M) sol.toIntrinsicLocalSolution
 
 theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_metric_eq_initial_of_zero_velocity
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -5838,9 +5873,15 @@ theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_metric_eq_initial_
     (x : M) (u v : TM x) :
     metricTensor (I := I) (M := M) sol.transformedMetric t x u v =
       ivp.initialMetric.inner x u v := by
-  simpa [GaugeReducedIntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution] using
-    intrinsicLocalSolution_metric_eq_initial_of_zero_velocity
-      (I := I) (M := M) sol.toIntrinsicLocalSolution hzero ht x u v
+  change
+    metricTensor (I := I) (M := M)
+      sol.toIntrinsicLocalSolution.toIntrinsicSolution.metric t x u v =
+      ivp.initialMetric.inner x u v
+  change ∀ t ∈ Set.Icc ivp.initialTime sol.toIntrinsicLocalSolution.terminalTime,
+    ∀ x : M, ∀ u v : TM x,
+      sol.toIntrinsicLocalSolution.toIntrinsicSolution.metricVelocity t x u v = 0 at hzero
+  exact intrinsicLocalSolution_metric_eq_initial_of_zero_velocity
+    (I := I) (M := M) sol.toIntrinsicLocalSolution hzero ht x u v
 
 theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_metric_eq_initial_of_ricciTensor_zero
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -5853,9 +5894,16 @@ theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_metric_eq_initial_
     (x : M) (u v : TM x) :
     metricTensor (I := I) (M := M) sol.transformedMetric t x u v =
       ivp.initialMetric.inner x u v := by
-  simpa [GaugeReducedIntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution] using
-    intrinsicLocalSolution_metric_eq_initial_of_ricciTensor_zero
-      (I := I) (M := M) sol.toIntrinsicLocalSolution hRicciZero ht x u v
+  change
+    metricTensor (I := I) (M := M)
+      sol.toIntrinsicLocalSolution.toIntrinsicSolution.metric t x u v =
+      ivp.initialMetric.inner x u v
+  change ∀ t ∈ Set.Icc ivp.initialTime sol.toIntrinsicLocalSolution.terminalTime,
+    ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M)
+        sol.toIntrinsicLocalSolution.toIntrinsicSolution.metric t x u v = 0 at hRicciZero
+  exact intrinsicLocalSolution_metric_eq_initial_of_ricciTensor_zero
+    (I := I) (M := M) sol.toIntrinsicLocalSolution hRicciZero ht x u v
 
 theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_connection_eq_initial_of_zero_velocity
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -5867,10 +5915,14 @@ theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_connection_eq_init
     {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
     sol.toLocalSolution.toSolution.connection t σ x =
       sol.toLocalSolution.toSolution.connection ivp.initialTime σ x := by
-  simpa [GaugeReducedIntrinsicDeTurckLocalSolution.toLocalSolution,
-    GaugeReducedIntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution] using
-    intrinsicLocalSolution_connection_eq_initial_of_zero_velocity
-      (I := I) (M := M) sol.toIntrinsicLocalSolution hzero ht hσ
+  change
+    sol.toIntrinsicLocalSolution.toIntrinsicSolution.toSolution.connection t σ x =
+      sol.toIntrinsicLocalSolution.toIntrinsicSolution.toSolution.connection ivp.initialTime σ x
+  change ∀ t ∈ Set.Icc ivp.initialTime sol.toIntrinsicLocalSolution.terminalTime,
+    ∀ x : M, ∀ u v : TM x,
+      sol.toIntrinsicLocalSolution.toIntrinsicSolution.metricVelocity t x u v = 0 at hzero
+  exact intrinsicLocalSolution_connection_eq_initial_of_zero_velocity
+    (I := I) (M := M) sol.toIntrinsicLocalSolution hzero ht hσ
 
 theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_connection_eq_initial_of_ricciTensor_zero
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -5883,10 +5935,15 @@ theorem GaugeReducedIntrinsicDeTurckLocalSolution.transformed_connection_eq_init
     {x : M} {σ : Π y : M, TM y} (hσ : MDiffAt (T% σ) x) :
     sol.toLocalSolution.toSolution.connection t σ x =
       sol.toLocalSolution.toSolution.connection ivp.initialTime σ x := by
-  simpa [GaugeReducedIntrinsicDeTurckLocalSolution.toLocalSolution,
-    GaugeReducedIntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution] using
-    intrinsicLocalSolution_connection_eq_initial_of_ricciTensor_zero
-      (I := I) (M := M) sol.toIntrinsicLocalSolution hRicciZero ht hσ
+  change
+    sol.toIntrinsicLocalSolution.toIntrinsicSolution.toSolution.connection t σ x =
+      sol.toIntrinsicLocalSolution.toIntrinsicSolution.toSolution.connection ivp.initialTime σ x
+  change ∀ t ∈ Set.Icc ivp.initialTime sol.toIntrinsicLocalSolution.terminalTime,
+    ∀ x : M, ∀ u v : TM x,
+      intrinsicRicciTensor (I := I) (M := M)
+        sol.toIntrinsicLocalSolution.toIntrinsicSolution.metric t x u v = 0 at hRicciZero
+  exact intrinsicLocalSolution_connection_eq_initial_of_ricciTensor_zero
+    (I := I) (M := M) sol.toIntrinsicLocalSolution hRicciZero ht hσ
 
 /-- On zero-dimensional tangent fibers, the transformed metric has vanishing intrinsic Ricci tensor
 on the local interval. -/
@@ -7536,9 +7593,8 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_transformedVel
       ∀ x : M, ∀ u v : TM x,
         (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
           (I := I) (M := M) hRicciFlat).transformedVelocity t x u v = 0 := by
-  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat] using
-    stationaryRicciFlatIntrinsicLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
-      (I := I) (M := M) ivp hRicciFlat
+  convert stationaryRicciFlatIntrinsicLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
+      (I := I) (M := M) ivp hRicciFlat using 1 <;> rfl
 
 theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_sourceVelocity_eq_zero
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -7550,9 +7606,8 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_sourceVelocity
         (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
           (I := I) (M := M) hRicciFlat).source.toIntrinsicDeTurckSolution.metricVelocity
           t x u v = 0 := by
-  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat] using
-    stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
-      (I := I) (M := M) ivp hRicciFlat
+  convert stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metricVelocity_eq_zero
+      (I := I) (M := M) ivp hRicciFlat using 1 <;> rfl
 
 theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_transformed_intrinsicRicciTensor_eq_zero
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -7571,12 +7626,10 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_transformed_in
       ∀ t ∈ Set.Icc ivp.initialTime stat.toIntrinsicLocalSolution.terminalTime,
         ∀ x : M, ∀ u v : TM x,
           stat.toIntrinsicLocalSolution.toIntrinsicSolution.metricVelocity t x u v = 0 := by
-    simpa [stat, GaugeReducedIntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution] using
-      stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_transformedVelocity_eq_zero
-        (I := I) (M := M) hRicciFlat
-  simpa [stat, GaugeReducedIntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution_metric] using
-    (intrinsicLocalSolution_zero_velocity_iff_ricciTensor_zero
-      (I := I) (M := M) stat.toIntrinsicLocalSolution).1 hzero
+    convert stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_transformedVelocity_eq_zero
+        (I := I) (M := M) hRicciFlat using 1 <;> rfl
+  convert (intrinsicLocalSolution_zero_velocity_iff_ricciTensor_zero
+      (I := I) (M := M) stat.toIntrinsicLocalSolution).1 hzero using 1 <;> rfl
 
 theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_transformed_intrinsicRicciFlowRHS_eq_zero
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -7672,9 +7725,8 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_transformedMet
       (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
         (I := I) (M := M) hRicciFlat).transformedMetric t x u v =
       ivp.initialMetric.inner x u v := by
-  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat] using
-    stationaryRicciFlatIntrinsicLocalSolutionOfIsRicciFlat_metric_eq_initial
-      (I := I) (M := M) ivp hRicciFlat ht x u v
+  convert stationaryRicciFlatIntrinsicLocalSolutionOfIsRicciFlat_metric_eq_initial
+      (I := I) (M := M) ivp hRicciFlat ht x u v using 1 <;> rfl
 
 theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_sourceMetric_eq_initial
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -7688,9 +7740,8 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_sourceMetric_e
       (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
         (I := I) (M := M) hRicciFlat).source.toIntrinsicDeTurckSolution.metric t x u v =
       ivp.initialMetric.inner x u v := by
-  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat] using
-    stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metric_eq_initial
-      (I := I) (M := M) ivp hRicciFlat ht x u v
+  convert stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_metric_eq_initial
+      (I := I) (M := M) ivp hRicciFlat ht x u v using 1 <;> rfl
 
 theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_unique_transformedMetric_of_zero_velocity
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -7716,13 +7767,12 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_unique_transfo
   have hzero_stat :
       ∀ t ∈ Set.Icc ivp.initialTime stat.toLocalSolution.terminalTime,
         ∀ x : M, ∀ u v : TM x, stat.toLocalSolution.toSolution.metricVelocity t x u v = 0 := by
-    simpa [stat, stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat] using
-      stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_transformedVelocity_eq_zero
-        (I := I) (M := M) hRicciFlat
+    convert stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_transformedVelocity_eq_zero
+        (I := I) (M := M) hRicciFlat using 1 <;> rfl
   have hzero_sol :
       ∀ t ∈ Set.Icc ivp.initialTime sol.toLocalSolution.terminalTime,
         ∀ x : M, ∀ u v : TM x, sol.toLocalSolution.toSolution.metricVelocity t x u v = 0 := by
-    simpa [GaugeReducedIntrinsicDeTurckLocalSolution.toLocalSolution] using hzero
+    convert hzero using 1 <;> rfl
   simpa [stat, GaugeReducedIntrinsicDeTurckLocalSolution.toLocalSolution_metric] using
     localSolution_unique_metric_of_zero_velocity
       (I := I) (M := M) stat.toLocalSolution sol.toLocalSolution
@@ -7751,13 +7801,12 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_unique_transfo
   have hzero_stat :
       ∀ t ∈ Set.Icc ivp.initialTime stat.toLocalSolution.terminalTime,
         ∀ x : M, ∀ u v : TM x, stat.toLocalSolution.toSolution.metricVelocity t x u v = 0 := by
-    simpa [stat, stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat] using
-      stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_transformedVelocity_eq_zero
-        (I := I) (M := M) hRicciFlat
+    convert stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_transformedVelocity_eq_zero
+        (I := I) (M := M) hRicciFlat using 1 <;> rfl
   have hzero_sol :
       ∀ t ∈ Set.Icc ivp.initialTime sol.toLocalSolution.terminalTime,
         ∀ x : M, ∀ u v : TM x, sol.toLocalSolution.toSolution.metricVelocity t x u v = 0 := by
-    simpa [GaugeReducedIntrinsicDeTurckLocalSolution.toLocalSolution] using hzero
+    convert hzero using 1 <;> rfl
   simpa [stat] using
     localSolution_unique_connection_of_zero_velocity
       (I := I) (M := M) stat.toLocalSolution sol.toLocalSolution
@@ -7790,8 +7839,7 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_unique_transfo
         ∀ x : M, ∀ u v : TM x,
           intrinsicRicciTensor (I := I) (M := M)
             sol.toIntrinsicLocalSolution.toIntrinsicSolution.metric t x u v = 0 := by
-    simpa [GaugeReducedIntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution] using
-      hRicciZero
+    convert hRicciZero using 1 <;> rfl
   simpa [stat, GaugeReducedIntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution_metric] using
     stationaryRicciFlatIntrinsicLocalSolutionOfIsRicciFlat_unique_metric_of_ricciTensor_zero
       (I := I) (M := M) ivp hRicciFlat sol.toIntrinsicLocalSolution
@@ -7823,12 +7871,10 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_unique_transfo
         ∀ x : M, ∀ u v : TM x,
           intrinsicRicciTensor (I := I) (M := M)
             sol.toIntrinsicLocalSolution.toIntrinsicSolution.metric t x u v = 0 := by
-    simpa [GaugeReducedIntrinsicDeTurckLocalSolution.toIntrinsicLocalSolution] using
-      hRicciZero
-  simpa [stat] using
-    stationaryRicciFlatIntrinsicLocalSolutionOfIsRicciFlat_unique_connection_of_ricciTensor_zero
+    convert hRicciZero using 1 <;> rfl
+  convert stationaryRicciFlatIntrinsicLocalSolutionOfIsRicciFlat_unique_connection_of_ricciTensor_zero
       (I := I) (M := M) ivp hRicciFlat sol.toIntrinsicLocalSolution
-      hRicciZero_sol ht hσ
+      hRicciZero_sol ht hσ using 1 <;> rfl
 
 theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_unique_sourceMetric_of_zero_velocity
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -7849,7 +7895,11 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_unique_sourceM
       (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
         (I := I) (M := M) hRicciFlat).source.toIntrinsicDeTurckSolution.metric t x u v =
       metricTensor (I := I) (M := M) sol.source.toIntrinsicDeTurckSolution.metric t x u v := by
-  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat] using
+  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat,
+    stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat,
+    IntrinsicLocalSolution.toChosenIntrinsicDeTurckLocalSolution,
+    IntrinsicLocalSolution.toIntrinsicDeTurckLocalSolution,
+    IntrinsicSolution.toIntrinsicDeTurckSolution] using
     stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_unique_metric_of_zero_velocity
       (I := I) (M := M) ivp hRicciFlat sol.source sol.background_isLeviCivita
       hzero ht x u v
@@ -7874,7 +7924,11 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_unique_sourceM
       (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
         (I := I) (M := M) hRicciFlat).source.toIntrinsicDeTurckSolution.metric t x u v =
       metricTensor (I := I) (M := M) sol.source.toIntrinsicDeTurckSolution.metric t x u v := by
-  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat] using
+  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat,
+    stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat,
+    IntrinsicLocalSolution.toChosenIntrinsicDeTurckLocalSolution,
+    IntrinsicLocalSolution.toIntrinsicDeTurckLocalSolution,
+    IntrinsicSolution.toIntrinsicDeTurckSolution] using
     stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_unique_metric_of_ricciTensor_zero
       (I := I) (M := M) ivp hRicciFlat sol.source sol.background_isLeviCivita
       hRicciZero ht x u v
@@ -7897,10 +7951,14 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_unique_sourceC
     (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
       (I := I) (M := M) hRicciFlat).source.canonicalConnection
         (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
-          (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
+      (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
             (I := I) (M := M) hRicciFlat).source.toIntrinsicDeTurckSolution.metric) t σ x =
       sol.source.canonicalConnection sol.background_isLeviCivita t σ x := by
-  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat] using
+  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat,
+    stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat,
+    IntrinsicLocalSolution.toChosenIntrinsicDeTurckLocalSolution,
+    IntrinsicLocalSolution.toIntrinsicDeTurckLocalSolution,
+    IntrinsicSolution.toIntrinsicDeTurckSolution] using
     stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_unique_connection_of_zero_velocity
       (I := I) (M := M) ivp hRicciFlat sol.source sol.background_isLeviCivita
       hzero ht hσ
@@ -7924,10 +7982,14 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_unique_sourceC
     (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
       (I := I) (M := M) hRicciFlat).source.canonicalConnection
         (chosenLeviCivitaFamily_isLeviCivita (I := I) (M := M)
-          (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
+      (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
             (I := I) (M := M) hRicciFlat).source.toIntrinsicDeTurckSolution.metric) t σ x =
       sol.source.canonicalConnection sol.background_isLeviCivita t σ x := by
-  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat] using
+  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat,
+    stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat,
+    IntrinsicLocalSolution.toChosenIntrinsicDeTurckLocalSolution,
+    IntrinsicLocalSolution.toIntrinsicDeTurckLocalSolution,
+    IntrinsicSolution.toIntrinsicDeTurckSolution] using
     stationaryRicciFlatChosenIntrinsicDeTurckLocalSolutionOfIsRicciFlat_unique_connection_of_ricciTensor_zero
       (I := I) (M := M) ivp hRicciFlat sol.source sol.background_isLeviCivita
       hRicciZero ht hσ
@@ -8267,12 +8329,17 @@ theorem stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat_sourceBackgrou
     (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
       (I := I) (M := M) hRicciFlat).source.toIntrinsicDeTurckSolution.background
       t σ x =
-    (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
+      (stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat
       (I := I) (M := M) hRicciFlat).source.toIntrinsicDeTurckSolution.background
       ivp.initialTime σ x := by
-  simpa [stationaryRicciFlatGaugeReducedLocalSolutionOfIsRicciFlat] using
-    stationaryRicciFlatLeviCivitaBackgroundIntrinsicDeTurckLocalSolutionOfIsRicciFlat_background_eq_initial
-      (I := I) (M := M) hRicciFlat ht hσ
+  change
+    (stationaryRicciFlatLeviCivitaBackgroundIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+      (I := I) (M := M) hRicciFlat).toIntrinsicDeTurckLocalSolution.toIntrinsicDeTurckSolution.background t σ x =
+      (stationaryRicciFlatLeviCivitaBackgroundIntrinsicDeTurckLocalSolutionOfIsRicciFlat
+        (I := I) (M := M) hRicciFlat).toIntrinsicDeTurckLocalSolution.toIntrinsicDeTurckSolution.background
+        ivp.initialTime σ x
+  exact stationaryRicciFlatLeviCivitaBackgroundIntrinsicDeTurckLocalSolutionOfIsRicciFlat_background_eq_initial
+    (I := I) (M := M) hRicciFlat ht hσ
 
 theorem GaugeReducedIntrinsicDeTurckLocalSolution.pulledBackBackground_eq_canonicalConnection
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
@@ -8451,7 +8518,10 @@ noncomputable def LeviCivitaBackgroundIntrinsicDeTurckLocalExistenceUniqueness.t
       (sol₂.toLeviCivitaBackgroundIntrinsicDeTurckLocalSolution)
       t (by
         simpa [IntrinsicLocalSolution.toLeviCivitaBackgroundIntrinsicDeTurckLocalSolution,
-          ChosenIntrinsicDeTurckLocalSolution.toLeviCivitaBackground] using ht)
+          ChosenIntrinsicDeTurckLocalSolution.toLeviCivitaBackground,
+          IntrinsicLocalSolution.toChosenIntrinsicDeTurckLocalSolution,
+          IntrinsicLocalSolution.toIntrinsicDeTurckLocalSolution,
+          IntrinsicSolution.toIntrinsicDeTurckSolution] using ht)
       x u v
 
 noncomputable def LeviCivitaBackgroundIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaIdentityGauge
@@ -9800,7 +9870,14 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReduced_
           sol.1.toIntrinsicDeTurckSolution.metric
           sol.1.toIntrinsicDeTurckSolution.background)
         (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
-        (fun t ht x ↦ by simpa using hflowDeriv sol t ht x))
+        (fun t ht x ↦ by
+          change HasMFDerivAt[sol.1.toIntrinsicDeTurckSolution.timeSet]
+            (fun τ : ℝ ↦ (maps3 sol τ) x) t
+            ((1 : ℝ →L[ℝ] ℝ).smulRight
+              (intrinsicDeTurckGaugeField (I := I) (M := M)
+                sol.1.toIntrinsicDeTurckSolution.metric
+                sol.1.toIntrinsicDeTurckSolution.background t ((maps3 sol t) x)))
+          exact hflowDeriv sol t ht x))
     hderiv
 
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_viaDiffeomorph3GaugeFlowDerivativeInnerDerivative
@@ -11090,7 +11167,14 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toInnerDerivati
           sol.1.toIntrinsicDeTurckSolution.metric
           sol.1.toIntrinsicDeTurckSolution.background)
         (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
-        (fun t ht x ↦ by simpa using hflowDeriv sol t ht x))
+        (fun t ht x ↦ by
+          change HasMFDerivAt[sol.1.toIntrinsicDeTurckSolution.timeSet]
+            (fun τ : ℝ ↦ (maps3 sol τ) x) t
+            ((1 : ℝ →L[ℝ] ℝ).smulRight
+              (intrinsicDeTurckGaugeField (I := I) (M := M)
+                sol.1.toIntrinsicDeTurckSolution.metric
+                sol.1.toIntrinsicDeTurckSolution.background t ((maps3 sol t) x)))
+          exact hflowDeriv sol t ht x))
     hderiv
 
 noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toInnerDerivativeGaugeReducible_viaIdentityDiffeomorph3Gauge

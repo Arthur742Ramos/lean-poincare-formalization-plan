@@ -1,0 +1,36 @@
+name: Almost-Schur development checks
+
+on:
+  push:
+    paths:
+      - "almost-schur/**"
+      - ".github/workflows/almost-schur.yml"
+  pull_request:
+    paths:
+      - "almost-schur/**"
+      - ".github/workflows/almost-schur.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: almost-schur
+          build: true
+      - name: Check complete public axiom surface and negative controls
+        run: |
+          python3 almost-schur/scripts/check-vendored.py
+          python3 almost-schur/scripts/check-axioms.py

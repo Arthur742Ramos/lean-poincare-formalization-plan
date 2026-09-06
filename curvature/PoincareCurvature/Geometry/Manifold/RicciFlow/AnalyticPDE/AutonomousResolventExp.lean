@@ -47,8 +47,13 @@ theorem isIntegralCurve_exp_smul_const (A₀ : E →L[ℝ] E) (t₀ : ℝ) (x : 
     (hasDerivAt_id t).sub_const t₀
   have hcomp : HasDerivAt (fun t : ℝ => NormedSpace.exp ((t - t₀) • A₀))
       (A₀ * NormedSpace.exp ((t - t₀) • A₀)) t := by
-    have := HasDerivAt.scomp t hbase hshift
-    simpa using this
+    have hfun :
+        (fun t : ℝ => NormedSpace.exp ((t - t₀) • A₀)) =
+          (fun u : ℝ => NormedSpace.exp (u • A₀)) ∘ (fun t : ℝ => t - t₀) := by
+      funext s
+      rfl
+    rw [hfun]
+    simpa only [one_smul] using HasDerivAt.scomp t hbase hshift
   have hpt : HasDerivAt (fun t : ℝ => NormedSpace.exp ((t - t₀) • A₀) x)
       ((A₀ * NormedSpace.exp ((t - t₀) • A₀)) x) t := by
     have := HasDerivAt.clm_apply hcomp (hasDerivAt_const t x)
@@ -92,7 +97,12 @@ coordinate into the genuine `+ b` inhomogeneity. -/
 theorem affineAugment_snd_orbit_eq_one (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) (y₀ : E) (t : ℝ) :
     (NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, 1)).2 = 1 := by
   have hsnd : ∀ s : ℝ,
-      HasDerivAt (fun s => (NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1)).2) 0 s := by
+      @HasDerivAt ℝ DenselyNormedField.toNontriviallyNormedField ℝ
+        Real.normedAddCommGroup.toAddCommGroup
+        RCLike.toInnerProductSpaceReal.toModule
+        PseudoMetricSpace.toUniformSpace.toTopologicalSpace
+        (inferInstance : ContinuousSMul ℝ ℝ)
+        (fun s => (NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1)).2) 0 s := by
     intro s
     have hc :
         HasDerivAt (fun s => NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1))
@@ -100,7 +110,15 @@ theorem affineAugment_snd_orbit_eq_one (L : E →L[ℝ] E) (b : E) (t₀ : ℝ) 
       simpa [variationalFieldVec] using
         isIntegralCurve_exp_smul_const (affineAugment L b) t₀ (y₀, 1) s
     have hproj := (ContinuousLinearMap.snd ℝ E ℝ).hasFDerivAt.comp_hasDerivAt s hc
-    simpa [Function.comp, ContinuousLinearMap.coe_snd', affineAugment_apply] using hproj
+    have hfun :
+        (fun s : ℝ =>
+          (NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1)).2) =
+          Prod.snd ∘ (fun s : ℝ =>
+            NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1)) := by
+      funext u
+      rfl
+    rw [hfun]
+    exact hproj
   have hconst :=
     is_const_of_deriv_eq_zero
       (f := fun s => (NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1)).2)
@@ -135,7 +153,14 @@ theorem hasDerivAt_affineFundamentalSolution
   have hfst :
       HasDerivAt (affineFundamentalSolution L b t₀ y₀)
         ((affineAugment L b (NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, 1))).1) t := by
-    simpa [Function.comp, ContinuousLinearMap.coe_fst', affineFundamentalSolution] using hproj
+    have hfun :
+        affineFundamentalSolution L b t₀ y₀ =
+          Prod.fst ∘ (fun s : ℝ =>
+            NormedSpace.exp ((s - t₀) • affineAugment L b) (y₀, 1)) := by
+      funext s
+      rfl
+    rw [hfun]
+    exact hproj
   have hval :
       (affineAugment L b (NormedSpace.exp ((t - t₀) • affineAugment L b) (y₀, 1))).1
         = L (affineFundamentalSolution L b t₀ y₀ t) + b := by
@@ -159,7 +184,11 @@ theorem affineODE_unique (L : E →L[ℝ] E) (b : E) {y₁ y₂ : ℝ → E}
     have hd := (h1 t).sub (h2 t)
     have heq : (L (y₁ t) + b) - (L (y₂ t) + b) = L (y₁ t - y₂ t) := by
       rw [map_sub]; abel
-    simpa only [variationalFieldVec, heq] using hd
+    have hfun : (fun t : ℝ => y₁ t - y₂ t) = y₁ - y₂ := by
+      funext s
+      rfl
+    rw [hfun]
+    simpa [variationalFieldVec, heq] using hd
   have hu2 : IsIntegralCurve (fun _ : ℝ => (0 : E)) (variationalFieldVec (fun _ => L)) := by
     intro t
     simpa [variationalFieldVec] using hasDerivAt_const t (0 : E)

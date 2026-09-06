@@ -275,8 +275,8 @@ theorem contMDiffOn_raisedSection_of_coeff
       Bundle.Trivialization.linearEquivAt_symm_apply]
   have hlin : e.symm p.2 (∑ i, c p i • bas i) = ∑ i, c p i • e.symm p.2 (bas i) := by
     have h := map_sum (e.symmL ℝ p.2) (fun i => c p i • bas i) Finset.univ
-    simp only [map_smul, Bundle.Trivialization.symmL_apply] at h
-    exact h
+    simp only [map_smul] at h
+    simpa only [Bundle.Trivialization.symmL_apply e hp2] using h
   show TotalSpace.mk' F p.2 (∑ i, c p i • e.localFrame bas i p.2)
       = e.toOpenPartialHomeomorph.symm ((p.2, ∑ i, c p i • bas i))
   rw [← Bundle.Trivialization.mk_symm e hp2, hlin]

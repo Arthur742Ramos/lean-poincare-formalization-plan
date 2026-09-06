@@ -327,7 +327,7 @@ theorem exists_lipschitzWith_iteratedFDeriv_prodMk_left
     {n : ℕ} (hn : ((n + 1 : ℕ) : WithTop ℕ∞) ≤ N) :
     ∃ C : ℝ≥0, ∀ s : ℝ, LipschitzWith C (iteratedFDeriv ℝ n (fun y => F (s, y))) := by
   obtain ⟨C₀, hC₀⟩ := exists_bound_iteratedFDeriv_prodMk_left (n := n + 1) hF hcs hn
-  refine ⟨⟨max C₀ 0, le_max_right _ _⟩, fun s => ?_⟩
+  refine ⟨NNReal.mk (max C₀ 0) (le_max_right _ _), fun s => ?_⟩
   have hslice : ContDiff ℝ N (fun y => F (s, y)) :=
     hF.comp (contDiff_const.prodMk contDiff_id)
   have hle : (1 : WithTop ℕ∞) + (n : WithTop ℕ∞) ≤ N := by
@@ -355,7 +355,7 @@ theorem exists_lipschitzWith_prodMk_left
     ∃ C : ℝ≥0, ∀ s : ℝ, LipschitzWith C (fun y => F (s, y)) := by
   obtain ⟨C₀, hC₀⟩ := exists_bound_iteratedFDeriv_prodMk_left (n := 1) hF hcs (by exact_mod_cast hN)
   have hN0 : N ≠ 0 := by rintro rfl; exact absurd hN (by norm_num)
-  refine ⟨⟨max C₀ 0, le_max_right _ _⟩, fun s => ?_⟩
+  refine ⟨NNReal.mk (max C₀ 0) (le_max_right _ _), fun s => ?_⟩
   have hslice : ContDiff ℝ N (fun y => F (s, y)) :=
     hF.comp (contDiff_const.prodMk contDiff_id)
   refine lipschitzWith_of_nnnorm_fderiv_le (hslice.differentiable hN0) (fun x => ?_)
@@ -422,7 +422,8 @@ theorem exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport
     intro X Y
     rw [dist_eq_norm, dist_eq_norm, ← curry2_sub]
     simpa using norm_curry2_le (X - Y)
-  refine exists_diffeomorph3GaugeFlowOn_of_contDiff (K := K) (L := ⟨max C₂ 0, le_max_right _ _⟩)
+  refine exists_diffeomorph3GaugeFlowOn_of_contDiff
+    (K := K) (L := NNReal.mk (max C₂ 0) (le_max_right _ _))
     (M₂ := 1 * Nc) (N := Nc) (M₃ := M₃) s hF hN3
     ?hv ?hvc ?hDvlip ?hD2vclip ?hD2vmlip ?hD3vmlip ?hD3vlip
   case hv => intro σ; rw [← hsl σ]; exact hK σ
@@ -432,7 +433,8 @@ theorem exists_diffeomorph3GaugeFlowOn_of_contDiff_hasCompactSupport
   case hDvlip =>
     intro σ
     rw [← hsl σ]
-    refine lipschitzWith_of_nnnorm_fderiv_le (C := ⟨max C₂ 0, le_max_right _ _⟩)
+    refine lipschitzWith_of_nnnorm_fderiv_le
+      (C := NNReal.mk (max C₂ 0) (le_max_right _ _))
       (((hslc σ).fderiv_right (m := 1) hN2).differentiable one_ne_zero) (fun x => ?_)
     rw [fderiv_fderiv_eq_curry2_iteratedFDeriv_two, ← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_mk]
     calc ‖curry2 (iteratedFDeriv ℝ 2 (fun y => Function.uncurry v (σ, y)) x)‖
