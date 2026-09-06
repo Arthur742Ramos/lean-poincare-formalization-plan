@@ -35,6 +35,11 @@ research theorem.
 - `AlmostSchur.LocalEnergy`: energy identity, integrability, formal symmetry,
   nonpositive quadratic form, and zero energy iff the actual differential
   vanishes everywhere for a strictly positive cometric.
+- `AlmostSchur.ChartMetric`: positive-definite Gram matrices of the actual
+  tangent metric and their density transformation by the genuine derivative
+  of a manifold chart change.
+- `AlmostSchur.ChartIntegration`: measurable chart images and equality of
+  metric-density integrals in two charts on any measurable overlap.
 
 The new local analytic results use finite-dimensional coordinate spaces.
 They are not yet transported through `extChartAt` to the manifold connection.
@@ -70,16 +75,18 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-All 71 public declarations' transitive axioms
-are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
+The chart metric/integration extension passes a local build (3585 jobs),
+the vendored-source check, and an axiom audit of all 93 public declarations.
+Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
 evidence and must be checked at the exact source commit.
 The volume/chart modules retain non-fatal local-instance style warnings.
 
 ## Remaining work, in order
 
-1. Global metric-density measure and chart independence, or identification
-   with intrinsic Hausdorff volume. The local Jacobian law is proved;
+1. Global metric-density measure, or identification
+   with intrinsic Hausdorff volume. The actual tangent-metric Jacobian law
+   and chart independence of integrals on measurable overlaps are proved;
    finite positive intrinsic Hausdorff mass is also proved, separately.
 2. Transport the coordinate connection/metric compatibility and Green
    identities through manifold charts; assemble with a partition of unity.
