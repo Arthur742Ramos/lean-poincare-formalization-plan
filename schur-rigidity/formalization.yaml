@@ -57,7 +57,24 @@ sources:
       selected here, with its full four-slot tensor formula.
     license: "unknown"
     author_endorsement: "not-contacted"
-related_formalizations: []
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/90d215d81d30a5f67922dce00dfa160b4878e1c5/contracted-bianchi"
+    relationship: "builds-on"
+    note: >-
+      Reuses the earlier contracted-bianchi formalization in repository
+      Arthur742Ramos/lean-poincare-formalization-plan at immutable commit
+      90d215d81d30a5f67922dce00dfa160b4878e1c5, project path contracted-bianchi.
+      Its twelve contracted-bianchi/PoincareCurvature/**/*.lean library files
+      are copied unchanged into schur-rigidity/PoincareCurvature/, retaining
+      their original contributor notices. This inherited library supplies
+      connection calculus, curvature tensoriality, metric symmetries and the
+      corrected differential Bianchi identity. The earlier selected
+      double-contracted curvature-derivative theorem is a dependency, not a
+      newly selected result. The new root-level Schur modules and Solution
+      prove actual Ricci/scalar differentiation, bilinear-derivative extension
+      independence, geometric contracted Bianchi, Einstein divergence,
+      connected Einstein-factor constancy and three-dimensional full-curvature
+      rigidity. See PROVENANCE.md for the matching source account.
 status:
   scope: >-
     Smooth Hausdorff real Riemannian manifolds with a finite-dimensional
@@ -108,7 +125,7 @@ review:
     Prepared as a new entry under schur-rigidity/comparator.json with blank
     existing_id. This is a distinct differential-geometric rigidity package,
     not a re-selection of the earlier double-contracted curvature-derivative
-    theorem. No submission, editorial acceptance, mathematical originality
+    theorem. No editorial acceptance, mathematical originality
     or first-Lean priority claim is made. See VERIFICATION.md for mechanical
     evidence and SUBMISSION.md for the authorization gate.
 alignment:

@@ -28,6 +28,10 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+      - name: Check structured provenance and negative controls
+        run: |
+          python3 -m pip install PyYAML==6.0.2
+          python3 schur-rigidity/scripts/check-provenance.py
       - name: Install pinned Lean toolchain
         uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
         with:
