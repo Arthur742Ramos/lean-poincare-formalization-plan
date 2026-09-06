@@ -15,3 +15,4 @@ public import AlmostSchur.GlobalMeasure
 public import AlmostSchur.MetricRegularity
 public import AlmostSchur.NormalizedMeasure
 public import AlmostSchur.VolumeIntegration
+public import AlmostSchur.OpenDomainIntegration

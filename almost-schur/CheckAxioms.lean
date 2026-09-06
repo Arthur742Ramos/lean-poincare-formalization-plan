@@ -137,3 +137,10 @@ import AlmostSchur
 #print axioms AlmostSchur.setIntegral_metricDensityMeasure
 #print axioms AlmostSchur.setIntegral_riemannianVolume
 #print axioms AlmostSchur.integrableOn_riemannianVolume_chart_iff
+#print axioms AlmostSchur.contDiff_of_tsupport_subset
+#print axioms AlmostSchur.integral_mul_fderiv_openDomain
+#print axioms AlmostSchur.integrable_fderiv_products_openDomain
+#print axioms AlmostSchur.integral_mul_localDivergence_openDomain
+#print axioms AlmostSchur.setIntegral_localDensityMeasure_openDomain
+#print axioms AlmostSchur.setIntegral_mul_localDensityDivergence_openDomain
+#print axioms AlmostSchur.setIntegral_mul_localConnectionDivergence_openDomain
