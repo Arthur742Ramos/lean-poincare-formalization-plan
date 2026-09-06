@@ -117,3 +117,15 @@ import AlmostSchur
 #print axioms AlmostSchur.metricDensityMeasure_open_chart_pos
 #print axioms AlmostSchur.metricDensityMeasure_open_pos
 #print axioms AlmostSchur.metricDensityMeasure_univ_pos
+#print axioms AlmostSchur.coordinateDensity_map_basis
+#print axioms AlmostSchur.basis_addHaar_map_eq
+#print axioms AlmostSchur.coordinateDensityMeasure_map_basis
+#print axioms AlmostSchur.coordinateDensity_reindex
+#print axioms AlmostSchur.coordinateDensityMeasure_basis_independent
+#print axioms AlmostSchur.chartMetricMeasure_basis_independent
+#print axioms AlmostSchur.metricDensityMeasure_basis_independent
+#print axioms AlmostSchur.riemannianVolume
+#print axioms AlmostSchur.riemannianVolume_eq
+#print axioms AlmostSchur.riemannianVolume_apply
+#print axioms AlmostSchur.riemannianVolume_open_pos
+#print axioms AlmostSchur.riemannianVolume_finite_positive

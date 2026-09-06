@@ -50,6 +50,10 @@ research theorem.
   density, local finiteness, positive mass on nonempty open sets, and finite
   positive total density mass on nonempty compact Hausdorff manifolds with
   a continuous Riemannian metric.
+- `AlmostSchur.NormalizedMeasure`: pairs each coordinate basis with its
+  basis Lebesgue measure and proves cancellation of their determinant factors.
+  Defines normalized `riemannianVolume`, proves independence of the basis
+  and index type, and establishes its chart formula and finite positive mass.
 
 The new local analytic results use finite-dimensional coordinate spaces.
 They are not yet transported through `extChartAt` to the manifold connection.
@@ -85,9 +89,9 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-The chart metric/integration, global-measure, and regularity extension passes
-a local build (3587 jobs), the vendored-source check, and an axiom audit of all
-117 public declarations.
+The chart metric/integration, global-measure, regularity, and normalization
+extension passes a local build (3588 jobs), the vendored-source check, and an
+axiom audit of all 129 public declarations.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
 evidence and must be checked at the exact source commit.
@@ -95,19 +99,18 @@ The volume/chart modules retain non-fatal local-instance style warnings.
 
 ## Remaining work, in order
 
-1. Fix the density measure's canonical normalization, or identify it with
-   intrinsic Hausdorff volume. The density measure, its local characterization,
-   and finite positive total mass for continuous metrics on nonempty compact
-   Hausdorff manifolds are proved. Hausdorff-volume finiteness is also proved,
-   separately.
-2. Transport the coordinate connection/metric compatibility and Green
+1. Transport the coordinate connection/metric compatibility and Green
    identities through manifold charts; assemble with a partition of unity.
    Finish smooth manifold gradient/Hessian theory. Local energy is proved,
    but global integration by parts is not.
-3. Mean-zero coercivity, weak Poisson existence and smooth elliptic regularity.
-4. Integrated Bochner and the geometric almost-Schur inequality.
-5. Einstein equality rigidity, exact source/hypothesis audit.
-6. Only then: independent Challenge/Solution packaging and kernel replay.
+2. Mean-zero coercivity, weak Poisson existence and smooth elliptic regularity.
+3. Integrated Bochner and the geometric almost-Schur inequality.
+4. Einstein equality rigidity, exact source/hypothesis audit.
+5. Only then: independent Challenge/Solution packaging and kernel replay.
+
+The normalized density measure is now constructed, with finite positive total
+mass under the hypotheses above. Equality with intrinsic Hausdorff volume is
+not proved and is not used to justify the density measure's properties.
 
 The external compactness library was rebuilt and migrated experimentally;
 see [dependency evidence](dependencies/README.md). Four adapted volume/chart

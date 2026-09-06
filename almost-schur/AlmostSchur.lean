@@ -13,3 +13,4 @@ public import AlmostSchur.ChartMetric
 public import AlmostSchur.ChartIntegration
 public import AlmostSchur.GlobalMeasure
 public import AlmostSchur.MetricRegularity
+public import AlmostSchur.NormalizedMeasure
