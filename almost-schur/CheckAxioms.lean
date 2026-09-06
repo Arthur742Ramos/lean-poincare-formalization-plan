@@ -99,3 +99,11 @@ import AlmostSchur
 #print axioms AlmostSchur.chartMetricMeasure_apply
 #print axioms AlmostSchur.chartMetricMeasure_apply_eq
 #print axioms AlmostSchur.chartMetricMeasure_restrict_eq
+#print axioms AlmostSchur.chartFamilyMeasure
+#print axioms AlmostSchur.chartFamilyMeasure_restrict
+#print axioms AlmostSchur.chartFamilyMeasure_eq
+#print axioms AlmostSchur.exists_countable_chart_cover
+#print axioms AlmostSchur.metricDensityMeasure
+#print axioms AlmostSchur.metricDensityMeasure_restrict
+#print axioms AlmostSchur.metricDensityMeasure_apply
+#print axioms AlmostSchur.metricDensityMeasure_unique

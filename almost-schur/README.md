@@ -42,6 +42,10 @@ research theorem.
   metric-density integrals in two charts on any measurable overlap, including
   nonnegative integrals with infinite values. Constructs local density measures
   and proves equality of their restrictions to measurable chart overlaps.
+- `AlmostSchur.GlobalMeasure`: constructs the global density measure on a
+  nonempty Lindelöf manifold, proves its chartwise characterization, independence
+  of the countable chart cover, and uniqueness for the prescribed local density.
+  Coordinate Haar measure and basis remain explicit normalization parameters.
 
 The new local analytic results use finite-dimensional coordinate spaces.
 They are not yet transported through `extChartAt` to the manifold connection.
@@ -77,8 +81,8 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-The chart metric/integration extension passes a local build (3585 jobs),
-the vendored-source check, and an axiom audit of all 99 public declarations.
+The chart metric/integration and global-measure extension passes a local build
+(3586 jobs), the vendored-source check, and an axiom audit of all 107 public declarations.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
 evidence and must be checked at the exact source commit.
@@ -86,10 +90,11 @@ The volume/chart modules retain non-fatal local-instance style warnings.
 
 ## Remaining work, in order
 
-1. Global metric-density measure, or identification
-   with intrinsic Hausdorff volume. The actual tangent-metric Jacobian law
-   and chart independence of integrals on measurable overlaps are proved;
-   finite positive intrinsic Hausdorff mass is also proved, separately.
+1. Prove finite positive mass for the constructed global density measure
+   with a continuous metric and fix its canonical normalization, or identify it
+   with intrinsic Hausdorff volume. The density measure itself and its local
+   characterization are proved; finite positive intrinsic Hausdorff mass is
+   also proved, separately.
 2. Transport the coordinate connection/metric compatibility and Green
    identities through manifold charts; assemble with a partition of unity.
    Finish smooth manifold gradient/Hessian theory. Local energy is proved,

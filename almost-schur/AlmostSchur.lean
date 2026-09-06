@@ -11,3 +11,4 @@ public import AlmostSchur.LocalMetricDivergence
 public import AlmostSchur.LocalEnergy
 public import AlmostSchur.ChartMetric
 public import AlmostSchur.ChartIntegration
+public import AlmostSchur.GlobalMeasure
