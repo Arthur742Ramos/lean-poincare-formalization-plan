@@ -103,6 +103,15 @@ research theorem.
   on compact chart subsets and bounded derivatives of the fixed cutoffs.
 - `AlmostSchur.LocalizationGradient`: uniform pointwise control of localized
   coordinate gradients by the scalar function and its intrinsic gradient.
+- `AlmostSchur.GradientL2` and `AlmostSchur.LocalizationEnergy`: the scalar
+  gradient L2 norm equals the square root of intrinsic energy, and actual
+  energy plus the L2 function norm control the finite-chart H1 graph norm.
+- `AlmostSchur.ChartL2Pullback` and `AlmostSchur.ChartDerivativeBound`: bounded
+  pullback of actual-volume L2 classes, with an AE representative identity,
+  and unlocalized coordinate-derivative bounds without cutoff error terms.
+- `AlmostSchur.L2WeakLimit`: strong L2 limits preserve test pairings and
+  mean zero; integration-by-parts identities pass to the limit when the
+  derivative factor tends to zero in L2.
 - `AlmostSchur.WeakKernelGluing`: local almost-everywhere constants glue on
   preconnected Lindelöf domains, using a countable subcover; zero weak
   derivatives therefore imply constancy on open preconnected Euclidean domains.
@@ -143,8 +152,8 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-The integrated development passes a local build (3720 jobs), the 36-file
-vendored-source check, and an axiom audit of all 260 project declarations
+The integrated development passes a local build (3726 jobs), the 36-file
+vendored-source check, and an axiom audit of all 278 project declarations
 plus six selected vendored Sobolev/compactness endpoints.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
@@ -169,8 +178,9 @@ the generic chart Sobolev construction and Euclidean compactness proof. The
 Hausdorff-specialized manifold compactness theorem is not imported. Its
 chartwise transport argument has been generalized to finite measures with
 two-sided local density bounds and instantiated for our normalized volume.
-Passage to the weak limit, global kernel rigidity, and intrinsic-energy
-localization bounds still need integration before Poincaré can be claimed.
+The intrinsic-energy localization bound is proved. Passage to chartwise weak
+limits and manifold weak-kernel rigidity still need integration before
+Poincaré can be claimed.
 
 ## Sources and contribution
 

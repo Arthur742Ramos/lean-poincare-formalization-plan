@@ -37,6 +37,11 @@ public import AlmostSchur.ChartNormBounds
 public import AlmostSchur.SobolevCompactness
 public import AlmostSchur.WeakKernelGluing
 public import AlmostSchur.LocalizationGradient
+public import AlmostSchur.GradientL2
+public import AlmostSchur.L2WeakLimit
+public import AlmostSchur.ChartL2Pullback
+public import AlmostSchur.ChartDerivativeBound
+public import AlmostSchur.LocalizationEnergy
 public import RellichKondrachov.Geometry.Manifold.Sobolev.RellichKondrachov
 public import RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.Rellich
 public import RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.SupportedH1
