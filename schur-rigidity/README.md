@@ -1,7 +1,7 @@
 # Schur rigidity and geometric contracted Bianchi
 
 This is a **new Palomar entry**, separate from `contracted-bianchi/`. It must
-never be submitted as a version of the earlier entry. Its intended Comparator
+never be submitted as a version of the earlier entry. Its Comparator
 path is `schur-rigidity/comparator.json`; the submission's existing-ID field
 must be blank.
 
