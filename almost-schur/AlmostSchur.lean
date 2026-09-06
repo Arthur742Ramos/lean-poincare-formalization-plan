@@ -32,6 +32,11 @@ public import AlmostSchur.MeanZeroEnergy
 public import AlmostSchur.DensityComparison
 public import AlmostSchur.SobolevReconstruction
 public import AlmostSchur.WeakDerivativeMollification
+public import AlmostSchur.WeakKernelLocal
+public import AlmostSchur.ChartNormBounds
+public import AlmostSchur.SobolevCompactness
+public import AlmostSchur.WeakKernelGluing
+public import AlmostSchur.LocalizationGradient
 public import RellichKondrachov.Geometry.Manifold.Sobolev.RellichKondrachov
 public import RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.Rellich
 public import RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.SupportedH1

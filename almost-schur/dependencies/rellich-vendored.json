@@ -4,7 +4,7 @@
   "relationship": "adapts",
   "license": "Apache-2.0",
   "author": "Adam Benenson",
-  "changes": "Lean 4.33 elaboration and noncomputability fixes, public module conversion, and style cleanup in the four volume/chart files. The 29 generic Sobolev/Euclidean files additionally expose uniquely renamed private helpers required by public module elaboration. Their manifold atlas hypotheses are generalized from analytic omega to smooth infinity; all affected proofs are rebuilt. New metric-density and reconstruction bridges live in AlmostSchur/.",
+  "changes": "Lean 4.33 elaboration and noncomputability fixes, public module conversion, and style cleanup in the four volume/chart files. The 29 generic Sobolev/Euclidean files additionally expose uniquely renamed private helpers required by public module elaboration. Their manifold atlas hypotheses are generalized from analytic omega to smooth infinity; all affected proofs are rebuilt. New metric-density and reconstruction bridges live in AlmostSchur/. Three derived RellichKondrachovDensity modules generalize the source Riemannian transport proof to arbitrary finite measures satisfying two finite comparison bounds; source_path records each original Riemannian module. The bounds are proved for normalized Riemannian volume in AlmostSchur/SobolevCompactness.lean.",
   "files": [
     {
       "path": "RellichKondrachov/Analysis/Calculus/ContDiff/Support.lean",
@@ -170,6 +170,24 @@
       "path": "RellichKondrachov/MeasureTheory/Function/LpSpace/Restrict.lean",
       "source_sha256": "29a904809138432e4b29ad8ba385d1d993e3862432e5329a59445240bb2f5bee",
       "adapted_sha256": "b0d49e27fac5f2e26f6a49ceb69d110bc6548ccd92e8b5891373709c8a18da6a"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovDensity/Transport.lean",
+      "source_path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Transport.lean",
+      "source_sha256": "0281ccfc436f7feb05dbd4a795fc03b5ebb28f86122991d72bae4f71a448a5fc",
+      "adapted_sha256": "a3e833bc14cec5bf3b85d1cdb932caa2d5b6d7f8269d9bb338317ebc5f264853"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovDensity/Chartwise.lean",
+      "source_path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Chartwise.lean",
+      "source_sha256": "af6a6a84c9ab505649b157804b940adbe27886c487aab3215207a9183054db26",
+      "adapted_sha256": "a03d755cfbb42b82b31dddc0b5a2bec34d621b8bad362a515e9f31ff06662c73"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovDensity/Global.lean",
+      "source_path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Global.lean",
+      "source_sha256": "3760614ced20f480be00e4db88bbcc0e2315225961abdf3902e93bed4ef45bf1",
+      "adapted_sha256": "c83e3034f05be32d6076b6a8fef1a60c9f896a5923d15c698deae37f810b0664"
     }
   ]
 }

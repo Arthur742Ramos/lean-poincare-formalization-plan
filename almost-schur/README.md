@@ -95,8 +95,21 @@ research theorem.
   almost everywhere, via chart pullback and the partition-of-unity identity.
 - `AlmostSchur.WeakDerivativeMollification`: a locally integrable function
   annihilating derivatives of compact smooth tests has mollifications with
-  zero classical derivative on interior balls. Local almost-everywhere
-  constancy still requires the approximation-limit argument.
+  zero classical derivative on interior balls.
+- `AlmostSchur.WeakKernelLocal`: the approximation-limit argument gives
+  almost-everywhere constancy on each relatively compact interior ball,
+  without assuming classical differentiability of the weak function.
+- `AlmostSchur.ChartNormBounds`: uniform inverse-tangent-chart operator norms
+  on compact chart subsets and bounded derivatives of the fixed cutoffs.
+- `AlmostSchur.LocalizationGradient`: uniform pointwise control of localized
+  coordinate gradients by the scalar function and its intrinsic gradient.
+- `AlmostSchur.WeakKernelGluing`: local almost-everywhere constants glue on
+  preconnected Lindelöf domains, using a countable subcover; zero weak
+  derivatives therefore imply constancy on open preconnected Euclidean domains.
+- `AlmostSchur.SobolevCompactness`: compactness of the actual graph-closure
+  H1-to-L2 map for normalized Riemannian volume, including strongly convergent
+  subsequences of graph-norm-bounded sequences. All local measure comparison
+  hypotheses are discharged; no Hausdorff identification is assumed.
 
 The local analytic results use finite-dimensional coordinate spaces and are
 transported through `extChartAt` to the manifold connection. Coordinate metric
@@ -130,8 +143,8 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-The integrated development passes a local build (3710 jobs), the 33-file
-vendored-source check, and an axiom audit of all 245 project declarations
+The integrated development passes a local build (3720 jobs), the 36-file
+vendored-source check, and an axiom audit of all 260 project declarations
 plus six selected vendored Sobolev/compactness endpoints.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
@@ -150,13 +163,14 @@ mass under the hypotheses above. Equality with intrinsic Hausdorff volume is
 not proved and is not used to justify the density measure's properties.
 
 The external compactness library was rebuilt and migrated;
-see [dependency evidence](dependencies/README.md). Thirty-three attributed
+see [dependency evidence](dependencies/README.md). Thirty-six attributed
 modules are vendored with immutable provenance and checksum checks, including
 the generic chart Sobolev construction and Euclidean compactness proof. The
 Hausdorff-specialized manifold compactness theorem is not imported. Its
-chartwise transport argument still needs adaptation to our density measure.
-The weak-limit constancy and intrinsic-energy localization bounds needed for
-Poincaré remain unproved; the smooth energy-kernel theorem does not replace them.
+chartwise transport argument has been generalized to finite measures with
+two-sided local density bounds and instantiated for our normalized volume.
+Passage to the weak limit, global kernel rigidity, and intrinsic-energy
+localization bounds still need integration before Poincaré can be claimed.
 
 ## Sources and contribution
 
