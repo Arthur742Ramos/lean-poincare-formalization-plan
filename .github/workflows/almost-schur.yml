@@ -31,4 +31,6 @@ jobs:
           lake-package-directory: almost-schur
           build: true
       - name: Check complete public axiom surface and negative controls
-        run: python3 almost-schur/scripts/check-axioms.py
+        run: |
+          python3 almost-schur/scripts/check-vendored.py
+          python3 almost-schur/scripts/check-axioms.py

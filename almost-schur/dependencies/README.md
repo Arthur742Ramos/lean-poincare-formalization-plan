@@ -30,7 +30,17 @@ The upstream measure is dimensional Hausdorff measure for the Riemannian
 distance. Its finiteness and Sobolev compactness do not by themselves prove
 the volume density formula, integration by parts, or Poisson regularity.
 
-## Reproduce in an isolated checkout
+## Adopted volume subset
+
+Four chart/volume modules are now vendored in `RellichKondrachov/`, with the
+compatibility fixes and public `module` conversion. Their original source
+hashes, adapted hashes, author, license and immutable source identity are in
+`rellich-vendored.json`. `scripts/check-vendored.py` checks the complete inventory.
+The module conversion is additional to the standalone migration patch.
+The new neighborhood/total-volume positivity arguments are separately authored
+in `AlmostSchur/Volume.lean`; inherited finiteness is attributed to the source.
+
+## Reproduce the full-library experiment in an isolated checkout
 
 ```sh
 git clone https://github.com/abenenson/rellich-kondrachov.git rellich-test
@@ -42,6 +52,7 @@ lake build RellichKondrachov
 ```
 
 The patch and these results are evidence for future dependency selection.
-The almost-Schur project does not yet import this library. Before adoption,
-audit the relevant semantics, preserve these notices, and add structured
+The almost-Schur project imports only the four-file volume subset. Before
+adopting the full compactness library, audit the relevant semantics, preserve
+these notices, and add structured
 formalization provenance at the eventual submission boundary.

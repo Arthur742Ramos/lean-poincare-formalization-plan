@@ -23,3 +23,8 @@ import AlmostSchur
 #print axioms AlmostSchur.traceFreeHessianNormSq
 #print axioms AlmostSchur.hessianNormSq_eq_sum_sq
 #print axioms AlmostSchur.traceFreeHessianNormSq_eq
+#print axioms AlmostSchur.volumeMeasure
+#print axioms AlmostSchur.volumeMeasure_pos_of_mem_nhds
+#print axioms AlmostSchur.volumeMeasure_univ_pos
+#print axioms AlmostSchur.volumeMeasure_finite
+#print axioms AlmostSchur.totalVolume_pos

@@ -1,0 +1,30 @@
+{
+  "repository": "https://github.com/abenenson/rellich-kondrachov",
+  "commit": "70f85d4c1bf99c6e7d61e8be4daa6f3664d08d23",
+  "relationship": "adapts",
+  "license": "Apache-2.0",
+  "author": "Adam Benenson",
+  "changes": "Lean 4.33 elaboration and noncomputability fixes, then public module conversion. New volume positivity proofs live separately in AlmostSchur/Volume.lean. Style and deprecated-API cleanup in the copied modules.",
+  "files": [
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitz.lean",
+      "source_sha256": "10c2967011ce2ca507fcb4c2dd2ac61eb92fd59d80544d95ffea20275755f3c9",
+      "adapted_sha256": "a0a54949cd444a402d2509da40c05634a927dd7d41569d033f0eab67f860b570"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitzForward.lean",
+      "source_sha256": "cdd4a671f6478a8847b97422521c1a881c643b8d0ac7cd9ef64ec9911f3939d4",
+      "adapted_sha256": "36a1811121c417cdf60a19d4a6fea68914c0d1fcde5b0b2048d97eb8f1520fce"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Riemannian/VolumeMeasure.lean",
+      "source_sha256": "5861fd2867707ef6b42e124fce4587a8cdf18146c619db4d71bb894c73bf0e48",
+      "adapted_sha256": "b4931727d3a07cf9f56881c031b7002cfd25c1594cf373599ec7c3a1505a9cac"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Riemannian/VolumeMeasure/Finiteness.lean",
+      "source_sha256": "84254e115e810dca6221f67f14153b36b7ef476c95339aa9d80bec9084e3a8a4",
+      "adapted_sha256": "0a152c42c85a1a46bc06e757bb467ab7b63ae35baa1df3bbeb88afcbf89844e0"
+    }
+  ]
+}
