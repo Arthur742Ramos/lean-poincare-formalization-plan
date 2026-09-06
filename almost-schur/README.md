@@ -84,6 +84,19 @@ research theorem.
   by the coordinate mean-value theorem and constancy on connected manifolds.
   Together with `GlobalEnergy`'s everywhere-zero-gradient characterization,
   this identifies the energy kernel. It is not a uniform coercivity estimate.
+- `AlmostSchur.MeanZeroEnergy`: qualitative positivity on nonzero mean-zero
+  functions and uniqueness of C2 solutions with prescribed Laplacian and mean.
+- `AlmostSchur.DensityComparison`: exact chart pushforward of normalized
+  volume and finite two-sided comparison with Euclidean volume on compact
+  chart subsets. This uses the positive continuous density, not Hausdorff
+  measure identification.
+- `AlmostSchur.SobolevReconstruction`: the imported graph-closure Sobolev
+  construction's L2 projection of a C1 graph is the actual original function
+  almost everywhere, via chart pullback and the partition-of-unity identity.
+- `AlmostSchur.WeakDerivativeMollification`: a locally integrable function
+  annihilating derivatives of compact smooth tests has mollifications with
+  zero classical derivative on interior balls. Local almost-everywhere
+  constancy still requires the approximation-limit argument.
 
 The local analytic results use finite-dimensional coordinate spaces and are
 transported through `extChartAt` to the manifold connection. Coordinate metric
@@ -117,8 +130,9 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-The development passes a local build (3631 jobs), the vendored-source check,
-and an axiom audit of all 228 public declarations.
+The integrated development passes a local build (3710 jobs), the 33-file
+vendored-source check, and an axiom audit of all 245 project declarations
+plus six selected vendored Sobolev/compactness endpoints.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
 evidence and must be checked at the exact source commit.
@@ -135,11 +149,14 @@ The normalized density measure is now constructed, with finite positive total
 mass under the hypotheses above. Equality with intrinsic Hausdorff volume is
 not proved and is not used to justify the density measure's properties.
 
-The external compactness library was rebuilt and migrated experimentally;
-see [dependency evidence](dependencies/README.md). Four adapted volume/chart
-modules are now vendored with immutable provenance and checksum checks. The
-full compactness library is not yet imported. Nothing here assumes its theorems
-to obtain the target.
+The external compactness library was rebuilt and migrated;
+see [dependency evidence](dependencies/README.md). Thirty-three attributed
+modules are vendored with immutable provenance and checksum checks, including
+the generic chart Sobolev construction and Euclidean compactness proof. The
+Hausdorff-specialized manifold compactness theorem is not imported. Its
+chartwise transport argument still needs adaptation to our density measure.
+The weak-limit constancy and intrinsic-energy localization bounds needed for
+Poincaré remain unproved; the smooth energy-kernel theorem does not replace them.
 
 ## Sources and contribution
 
@@ -150,8 +167,8 @@ The pointwise trace decomposition is supporting linear algebra, not a
 standalone research-interest claim.
 
 The new modules were developed with Codex at the maintainer's request.
-The tensor and local analytic modules import only Mathlib; the volume module also imports the
-four attributed, adapted external chart/volume files.
+The tensor and local differential/integration modules import only Mathlib;
+the volume and Sobolev modules also import the attributed external subset.
 The existing `schur-rigidity/` proof library is planned integration material,
 not yet imported. Its immutable provenance must be recorded if reused.
 The separate migration patch preserves the external project's attribution and

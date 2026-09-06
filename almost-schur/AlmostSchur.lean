@@ -28,3 +28,11 @@ public import AlmostSchur.GradientRegularity
 public import AlmostSchur.GlobalEnergy
 public import AlmostSchur.HessianSymmetry
 public import AlmostSchur.EnergyKernel
+public import AlmostSchur.MeanZeroEnergy
+public import AlmostSchur.DensityComparison
+public import AlmostSchur.SobolevReconstruction
+public import AlmostSchur.WeakDerivativeMollification
+public import RellichKondrachov.Geometry.Manifold.Sobolev.RellichKondrachov
+public import RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.Rellich
+public import RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.SupportedH1
+public import RellichKondrachov.MeasureTheory.Function.LpSpace.ExtendByZeroRangeEquiv

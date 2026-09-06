@@ -30,15 +30,30 @@ The upstream measure is dimensional Hausdorff measure for the Riemannian
 distance. Its finiteness and Sobolev compactness do not by themselves prove
 the volume density formula, integration by parts, or Poisson regularity.
 
-## Adopted volume subset
+## Adopted volume and generic Sobolev subset
 
-Four chart/volume modules are now vendored in `RellichKondrachov/`, with the
-compatibility fixes and public `module` conversion. Their original source
+Thirty-three modules are now vendored in `RellichKondrachov/`: four chart/volume
+modules and twenty-nine generic Sobolev, measure transport, and Euclidean
+compactness modules. Their original source
 hashes, adapted hashes, author, license and immutable source identity are in
 `rellich-vendored.json`. `scripts/check-vendored.py` checks the complete inventory.
-The module conversion is additional to the standalone migration patch.
+Public module conversion is additional to the standalone migration patch.
+Private helpers used in public declarations are exposed under unique
+`vendor...` names so that this conversion preserves their defining expressions.
+The copied Sobolev atlas hypotheses are generalized from analytic `ω`
+(`⊤ : WithTop ℕ∞`) to smooth `∞` (`↑(⊤ : ℕ∞)`), with the proofs rebuilt under
+the weaker hypothesis. This distinction is necessary for the advertised
+smooth-manifold target and is not merely a notation change.
 The new neighborhood/total-volume positivity arguments are separately authored
 in `AlmostSchur/Volume.lean`; inherited finiteness is attributed to the source.
+
+`AlmostSchur.DensityComparison` proves the two finite comparison constants
+needed to transport the generic chart Sobolev construction to normalized
+Riemannian density volume. `AlmostSchur.SobolevReconstruction` proves that its
+assembled L2 projection represents the original C1 function. These are new
+bridges; neither assumes equality with Hausdorff volume. Generalized chartwise
+compactness, energy localization bounds, and weak-limit kernel rigidity remain
+separate proof obligations before Poincaré or Poisson existence can be claimed.
 
 ## Reproduce the full-library experiment in an isolated checkout
 
@@ -52,7 +67,7 @@ lake build RellichKondrachov
 ```
 
 The patch and these results are evidence for future dependency selection.
-The almost-Schur project imports only the four-file volume subset. Before
-adopting the full compactness library, audit the relevant semantics, preserve
-these notices, and add structured
+The almost-Schur project imports the recorded thirty-three-file subset, not
+the Hausdorff-specialized global compactness theorem. Preserve these notices
+and add structured
 formalization provenance at the eventual submission boundary.
