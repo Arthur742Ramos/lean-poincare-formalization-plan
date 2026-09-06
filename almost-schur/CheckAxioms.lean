@@ -144,3 +144,9 @@ import AlmostSchur
 #print axioms AlmostSchur.setIntegral_localDensityMeasure_openDomain
 #print axioms AlmostSchur.setIntegral_mul_localDensityDivergence_openDomain
 #print axioms AlmostSchur.setIntegral_mul_localConnectionDivergence_openDomain
+#print axioms AlmostSchur.covariantDerivative_sum
+#print axioms AlmostSchur.covariantDerivative_localFrame
+#print axioms AlmostSchur.frameConnectionCoefficients
+#print axioms AlmostSchur.frameConnectionCoefficients_apply
+#print axioms AlmostSchur.localFrame_coordinates
+#print axioms AlmostSchur.covariantDerivative_coordinates
