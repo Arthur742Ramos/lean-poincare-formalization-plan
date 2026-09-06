@@ -1,4 +1,20 @@
-# New-entry submission
+# Submission handoff and historical receipts
+
+## Current reviewed artifact
+
+- Source commit: `3955dd0b8d1eaeaa7d7dd7675864352dddcf0ffb`.
+- Intake: `58oc259e0tln` (identity supplied by the maintainer; private service
+  state has not been independently retrieved for this handoff).
+- This handoff supersedes the original preparation instructions below.
+  The old commit and intake identify historical evidence only.
+- Later documentation commits do not alter the source of this intake. They
+  are not automatically submitted artifacts and cannot repair its immutable
+  checkout in place.
+- Readiness: **not cleared for another intake**. The selected mathematical
+  package is classical; a distinct research-level mathematical contribution
+  has not been established. See `RESEARCH-GATE.md`.
+
+## Artifact fields
 
 Title: **Schur rigidity and geometric contracted Bianchi**
 
@@ -9,14 +25,13 @@ Title: **Schur rigidity and geometric contracted Bianchi**
 - Corrected artifact commit: `3955dd0b8d1eaeaa7d7dd7675864352dddcf0ffb`.
   Do not use a moving branch name or silently substitute a later commit.
 - Existing entry ID: **leave blank**. This is never a v2 of another entry.
-- Authorization: Arthur Freitas Ramos explicitly authorized this exact prepared
-  artifact's intake with "Let's submit it" on 2026-09-06. Relationship:
-  responsible author or maintainer. Public registration remains a separate
-  decision after the private review.
+- Relationship: maintainer. The earlier "Let's submit it" authorization
+  applied to the original artifact recorded below, not automatically to every
+  later commit. Public registration remains a separate decision after review.
 
 ## Intake receipt
 
-### Corrected artifact: intake blocked by cooldown
+### Historical agent attempt for the corrected artifact: cooldown
 
 On 2026-09-06 the corrected artifact above added the immutable inherited
 `contracted-bianchi` formalization to structured provenance. All Lean sources,
@@ -28,7 +43,9 @@ passed locally. CI for the corrected artifact was started separately.
 
 The authorized new intake omitted `existing_id`. After consuming the access
 proof, Palomar returned HTTP 429: "Please try again in 6 days."
-No corrected submission was admitted. The temporary verification tag and
+No corrected submission was admitted by that attempt. This is not a statement
+about the separate maintainer-reported intake `58oc259e0tln` above.
+The temporary verification tag and
 secret gist were deleted. Do not retry during that cooldown; a later authorized
 attempt must start a fresh intake and use a fresh proof. No registration was
 requested or performed.
@@ -48,7 +65,7 @@ requested or performed.
 The credential-bearing status link is deliberately not recorded in the
 repository. Do not create another intake merely because the review is pending.
 
-## Suggested description
+## Mathematical scope (not a submission-readiness claim)
 
 Formalizes geometric contracted Bianchi for actual Ricci/scalar fields, the
 divergence-free Einstein tensor, Schur constancy of a differentiable Einstein
@@ -74,8 +91,10 @@ is bound to that original commit. This handoff document may be updated later to
 record receipts without changing that immutable artifact identity.
 
 Independent Linux Comparator/NanoDa and isolated Challenge verification passed;
-the original receipt is recorded in `VERIFICATION.md`. Corrected intake is
-currently blocked by the cooldown described above. Show the private review and obtain
+the original receipt is recorded as historical in `VERIFICATION.md`. The
+current reviewed identity is the pair at the top of this document. Neither
+historical success nor a documentation correction clears the research gate.
+Show the private review and obtain
 explicit registration authorization before publishing it.
 If registry rules prevent a new independent entry, report the conflict
 instead of using an existing ID or submitting a version update.

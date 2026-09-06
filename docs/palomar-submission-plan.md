@@ -78,7 +78,7 @@ and authorization relationship have been explicitly confirmed.
 | 18 | Canonical neighborhoods and surgery | Neck/cap recognition and Ricci flow with surgery | Future; high-value differentiated target |
 | 19 | Topology, extinction, and Poincare corollaries | Topological surgery bookkeeping, finite-time extinction, and topological/smooth corollaries | Future; final endpoint family |
 | CB-01 | Double-contracted second Bianchi identity | Double contraction of the actual corrected curvature derivative; no separate Ricci/scalar differentiation or Einstein-divergence identity | Passed (user-confirmed 2026-09-06), submitted commit `90d215d81d30a5f67922dce00dfa160b4878e1c5`; public registration not independently checked |
-| SR-01 | Schur rigidity and geometric contracted Bianchi | Actual Ricci/scalar differentiation, divergence-free Einstein tensor, and global Einstein-factor constancy; three-dimensional full-curvature rigidity | Submitted as new intake `l20vtgq7gct2` at `4317d35a3cf3bbf02859fcd811e8dacc83f51739`; independent Linux checks passed, Palomar verification queued. Not registered; never CB-01 v2. See `schur-rigidity/SUBMISSION.md` |
+| SR-01 | Schur rigidity and geometric contracted Bianchi | Actual Ricci/scalar differentiation, divergence-free Einstein tensor, and global Einstein-factor constancy; three-dimensional full-curvature rigidity | Current reviewed pair (maintainer-reported): intake `58oc259e0tln`, commit `3955dd0b8d1eaeaa7d7dd7675864352dddcf0ffb`. Original intake `l20vtgq7gct2` at `4317d35a3cf3bbf02859fcd811e8dacc83f51739` is historical. Not cleared for another intake: substantive mathematical research gate unresolved. See `schur-rigidity/SUBMISSION.md` and `RESEARCH-GATE.md` there. |
 
 The table is a portfolio, not a promise that every row should be submitted as
 written. A row may be merged with a neighboring row when the dependency closure
@@ -106,9 +106,10 @@ library result has an independently defensible boundary.
    has been met.
 6. Preserve the passed `contracted-bianchi/` artifact. Its selected result is
    the double-contracted corrected curvature-derivative identity, not a
-   separate Einstein-divergence theorem. Prepare the actual geometric
-   Ricci/scalar identities and rigidity consequences under the distinct
-   `schur-rigidity/` path with a blank `existing_id`.
+   separate Einstein-divergence theorem. The geometric Ricci/scalar identities
+   and rigidity consequences now exist under `schur-rigidity/`; retain them
+   as infrastructure. Do not submit this same classical package again without
+   resolving its substantive mathematical research gate.
 
 ## What passed, and why the later candidate failed
 

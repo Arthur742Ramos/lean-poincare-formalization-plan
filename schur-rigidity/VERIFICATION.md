@@ -1,8 +1,19 @@
 # Verification record
 
-Verified artifact: `4317d35a3cf3bbf02859fcd811e8dacc83f51739`, 2026-09-06.
+## Current reviewed identity
+
+Source `3955dd0b8d1eaeaa7d7dd7675864352dddcf0ffb`, intake `58oc259e0tln`
+(maintainer-reported). These are not the identities of the original receipt
+below. No private service state for this intake has been independently
+retrieved here. See `SUBMISSION.md` for the current handoff and `RESEARCH-GATE.md`
+for the unresolved mathematical readiness gate.
+
+## Historical verification of the original artifact
+
+Historical verified artifact: `4317d35a3cf3bbf02859fcd811e8dacc83f51739`, 2026-09-06.
 This receipt was recorded after that immutable source commit; later receipt
-edits do not change the selected submission artifact.
+edits do not change which artifact these checks verified. This is not a
+prohibition on preparing a separately identified corrected artifact.
 
 - All new geometric modules and `Solution.lean` compile with Lean 4.33.0.
 - Challenge compiles with Mathlib-only paths. The negative control confirms
@@ -23,7 +34,7 @@ edits do not change the selected submission artifact.
   source commit. Metadata validates against the live formalization.yaml
   schema (v0.4).
 
-## Hosted receipt
+## Historical hosted receipt
 
 - [Run 34043491915](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34043491915)
 - [Job 101514321502](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34043491915/job/101514321502)
@@ -47,7 +58,8 @@ Builds retain non-fatal style, deprecated-API and unused-section-variable
 warnings. The four intentional Challenge theorem placeholders are separate
 from the verified Solution, whose axiom closure contains no `sorryAx`.
 
-The artifact passed these independent mechanical checks. Palomar intake
+The original artifact passed these independent mechanical checks. Historical intake
 `l20vtgq7gct2` was subsequently created on 2026-09-06 at 16:21:03 UTC and queued
-its own hosted verification. No Palomar editorial result or public registration
-is claimed; see `SUBMISSION.md` for the distinct intake receipt.
+its own hosted verification at that time. That queue status is historical,
+not the current state of either intake. No public registration is claimed;
+see `SUBMISSION.md` for the separate current identity.

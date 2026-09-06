@@ -32,6 +32,13 @@
 
 ## Submission-link handoff
 
+- Keep one explicit current artifact/intake pair. Label every older receipt
+  historical, including its verification logs and old authorization. A
+  documentation commit cannot change the checkout of an existing intake.
+- Never carry an old "do not substitute" instruction into a new artifact's
+  handoff without saying which historical artifact it protects. Mark
+  maintainer-reported intake identities as such until independently checked.
+
 - Treat the returned private status URL as a bearer credential. Keep it
   retrievable for the active session and give it directly to the requesting
   user with a warning that it can read the review and control registration.
@@ -41,6 +48,13 @@
   recover a link; use the current protocol's user-operated recovery flow.
 
 ## Proof and workspace discipline
+
+- Do not call a candidate submission-ready on mechanical checks alone.
+  Establish a substantive mathematical research-interest case from primary
+  literature and the exact selected theorem, not code volume or proof effort.
+- Do not repair a selection-level deficiency by promotional wording, routine
+  corollaries, or assumed analytic bridges. A replacement research theorem
+  requires an explicit scope decision, a proof, and renewed verification.
 
 - Prove the advertised geometric statements using actual manifold curvature,
   Ricci, scalar curvature, and covariant derivatives. Do not assume the target
