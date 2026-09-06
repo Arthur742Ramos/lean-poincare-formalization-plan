@@ -6,7 +6,7 @@ Title: **Schur rigidity and geometric contracted Bianchi**
 - Project directory: `schur-rigidity`
 - Comparator: `schur-rigidity/comparator.json`
 - Metadata: `schur-rigidity/formalization.yaml`
-- Prepared artifact commit: `4317d35a3cf3bbf02859fcd811e8dacc83f51739`.
+- Corrected artifact commit: `3955dd0b8d1eaeaa7d7dd7675864352dddcf0ffb`.
   Do not use a moving branch name or silently substitute a later commit.
 - Existing entry ID: **leave blank**. This is never a v2 of another entry.
 - Authorization: Arthur Freitas Ramos explicitly authorized this exact prepared
@@ -15,6 +15,25 @@ Title: **Schur rigidity and geometric contracted Bianchi**
   decision after the private review.
 
 ## Intake receipt
+
+### Corrected artifact: intake blocked by cooldown
+
+On 2026-09-06 the corrected artifact above added the immutable inherited
+`contracted-bianchi` formalization to structured provenance. All Lean sources,
+Comparator configuration and Lean dependency pins are unchanged from the
+original artifact. Metadata schema validation, the provenance regression check
+(including three negative controls), comparison of all twelve inherited files
+against their source commit, and the Mathlib-only Challenge dependency check
+passed locally. CI for the corrected artifact was started separately.
+
+The authorized new intake omitted `existing_id`. After consuming the access
+proof, Palomar returned HTTP 429: "Please try again in 6 days."
+No corrected submission was admitted. The temporary verification tag and
+secret gist were deleted. Do not retry during that cooldown; a later authorized
+attempt must start a fresh intake and use a fresh proof. No registration was
+requested or performed.
+
+### Original artifact receipt (historical)
 
 - Submission ID: `l20vtgq7gct2`
 - Created: 2026-09-06 at 16:21:03 UTC
@@ -49,14 +68,14 @@ or Poincare.
 
 ## Intake gate
 
-The exact [Comparator configuration](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/4317d35a3cf3bbf02859fcd811e8dacc83f51739/schur-rigidity/comparator.json)
-belongs to this prepared artifact. Its [Linux verification run](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34043491915)
-is bound to the same commit. This handoff document may be updated later to
+The original [Comparator configuration](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/4317d35a3cf3bbf02859fcd811e8dacc83f51739/schur-rigidity/comparator.json)
+belongs to the original artifact. Its [Linux verification run](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34043491915)
+is bound to that original commit. This handoff document may be updated later to
 record receipts without changing that immutable artifact identity.
 
 Independent Linux Comparator/NanoDa and isolated Challenge verification passed;
-the receipt is recorded in `VERIFICATION.md`. The authorized Palomar intake
-above is now pending its own hosted checks. Show the private review and obtain
+the original receipt is recorded in `VERIFICATION.md`. Corrected intake is
+currently blocked by the cooldown described above. Show the private review and obtain
 explicit registration authorization before publishing it.
 If registry rules prevent a new independent entry, report the conflict
 instead of using an existing ID or submitting a version update.
