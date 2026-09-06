@@ -107,3 +107,13 @@ import AlmostSchur
 #print axioms AlmostSchur.metricDensityMeasure_restrict
 #print axioms AlmostSchur.metricDensityMeasure_apply
 #print axioms AlmostSchur.metricDensityMeasure_unique
+#print axioms AlmostSchur.continuousOn_tangentTrivialization_section
+#print axioms AlmostSchur.continuousOn_tangentTrivializationGram
+#print axioms AlmostSchur.continuousOn_coordinateMetric
+#print axioms AlmostSchur.continuousOn_coordinateDensity
+#print axioms AlmostSchur.metricDensityMeasure_compact_chart_lt_top
+#print axioms AlmostSchur.metricDensityMeasure_locallyFinite
+#print axioms AlmostSchur.metricDensityMeasure_univ_lt_top
+#print axioms AlmostSchur.metricDensityMeasure_open_chart_pos
+#print axioms AlmostSchur.metricDensityMeasure_open_pos
+#print axioms AlmostSchur.metricDensityMeasure_univ_pos
