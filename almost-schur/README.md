@@ -54,6 +54,10 @@ research theorem.
   basis Lebesgue measure and proves cancellation of their determinant factors.
   Defines normalized `riemannianVolume`, proves independence of the basis
   and index type, and establishes its chart formula and finite positive mass.
+- `AlmostSchur.VolumeIntegration`: Bochner integration against normalized
+  volume equals chart-density integration on every measurable chart subset;
+  integrability on chart domains is equivalent to weighted coordinate
+  integrability. This includes the required measure pullback proof.
 
 The new local analytic results use finite-dimensional coordinate spaces.
 They are not yet transported through `extChartAt` to the manifold connection.
@@ -89,9 +93,9 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-The chart metric/integration, global-measure, regularity, and normalization
-extension passes a local build (3588 jobs), the vendored-source check, and an
-axiom audit of all 129 public declarations.
+The chart metric/integration, global-measure, regularity, normalization, and
+volume-integration extension passes a local build (3589 jobs), the
+vendored-source check, and an axiom audit of all 137 public declarations.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
 evidence and must be checked at the exact source commit.

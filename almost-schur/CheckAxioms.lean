@@ -129,3 +129,11 @@ import AlmostSchur
 #print axioms AlmostSchur.riemannianVolume_apply
 #print axioms AlmostSchur.riemannianVolume_open_pos
 #print axioms AlmostSchur.riemannianVolume_finite_positive
+#print axioms AlmostSchur.integral_chartMetricMeasure
+#print axioms AlmostSchur.integral_chartMetricMeasure_density
+#print axioms AlmostSchur.setIntegral_chartMetricMeasure
+#print axioms AlmostSchur.integrable_chartMetricMeasure_iff
+#print axioms AlmostSchur.chartMetricMeasure_restrict_source
+#print axioms AlmostSchur.setIntegral_metricDensityMeasure
+#print axioms AlmostSchur.setIntegral_riemannianVolume
+#print axioms AlmostSchur.integrableOn_riemannianVolume_chart_iff
