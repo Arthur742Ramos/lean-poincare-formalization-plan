@@ -78,6 +78,12 @@ and the global sphere isometry remain unproved.
 point. The theorem derives the needed energy identity from the Obata equation.
 It does not assume or yet prove that `r` is geodesic distance.
 
+`EikonalConnection.lean` proves radial regularity between the extrema and
+derives `∇_(grad r) grad r = 0` from the unit-gradient identity and symmetry
+of the actual Levi–Civita Hessian. The resulting radial gradient is unit and
+autoparallel on this open region; global flow existence, minimizing properties,
+and the polar-coordinate isometry are not supplied by this pointwise result.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical

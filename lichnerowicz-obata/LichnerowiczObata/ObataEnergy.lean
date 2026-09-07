@@ -56,14 +56,14 @@ theorem contMDiff_obataEnergy {f : M → ℝ}
   exact hi.add (contMDiff_const.mul (hf1.mul hf1))
 
 /-- Differentiating the actual gradient norm uses metric compatibility. -/
-theorem differential_gradient_norm_sq {f : M → ℝ}
-    (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) (x : M) (v : TM x) :
+theorem differential_gradient_norm_sq_at {f : M → ℝ} {x : M}
+    (hf : ContMDiffAt I 𝓘(ℝ, ℝ) 2 f x) (v : TM x) :
     mvfderiv I (fun y => inner ℝ (gradient (I := I) f y) (gradient (I := I) f y)) x v =
       2 * hessian LC f x v (gradient (I := I) f x) := by
   let e := trivializationAt E TM x
   let X := fun y => e.symmL ℝ y (e.continuousLinearMapAt ℝ x v)
   have hX : X x = v := e.symmL_continuousLinearMapAt (mem_chart_source H x) v
-  have hg := (contMDiff_gradient (I := I) 1 hf x).mdifferentiableAt (by norm_num)
+  have hg := mdifferentiableAt_gradient hf
   have hm := CovariantDerivative.IsMetricCompatible.mvfderiv_inner_eq
     leviCivitaConnection_metricCompatible X hg hg
   change mvfderiv I (fun y => inner ℝ (gradient (I := I) f y)
@@ -75,6 +75,12 @@ theorem differential_gradient_norm_sq {f : M → ℝ}
   rw [hm]
   have hs := real_inner_comm (gradient (I := I) f x) (LC (gradient (I := I) f) x v)
   linarith
+
+theorem differential_gradient_norm_sq {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) (x : M) (v : TM x) :
+    mvfderiv I (fun y => inner ℝ (gradient (I := I) f y) (gradient (I := I) f y)) x v =
+      2 * hessian LC f x v (gradient (I := I) f x) :=
+  differential_gradient_norm_sq_at (hf x) v
 
 /-- Obata's Hessian equation forces the differential of the conserved energy to vanish. -/
 theorem differential_obataEnergy_eq_zero {K : ℝ} {f : M → ℝ}
