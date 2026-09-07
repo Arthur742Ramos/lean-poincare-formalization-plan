@@ -39,19 +39,21 @@ nonzero compact positive symmetric Hilbert-space operator.
 attainment and minimality of the first positive **variational** eigenvalue, and
 existence of a nonzero mean-zero L² eigenfunction satisfying the actual
 Laplace--Beltrami eigen-equation against every C² test function.
-No smooth representative is claimed at this stage.
+`ReactionBootstrap.lean` adapts the elliptic induction to `div(A grad u) = F u`,
+where only the potential `F` is assumed smooth. `ManifoldReactionJets.lean`
+and `SmoothEigenfunction.lean` apply this to the eigen-equation and construct
+a global smooth representative satisfying the pointwise geometric equation.
+
+`ClassicalSpectrum.lean` proves attainment and minimality of the first positive
+classical smooth eigenvalue, and its sharp lower bound `λ₁ ≥ n K`. These results
+no longer assume spectral existence or smoothness of a weak eigenfunction.
 
 ## Remaining proof obligations
 
-1. Smooth elliptic bootstrapping for the attained variational eigenfunction,
-   whose forcing is proportional to itself and is initially only L². The
-   existing smooth-forcing Poisson theorem cannot be applied directly.
-   Identify the attained variational eigenvalue with the first classical
-   eigenvalue and apply the sharp Bochner estimate to that representative.
-2. Global Obata rigidity from the Hessian equation: complete geodesics and
+1. Global Obata rigidity from the Hessian equation: complete geodesics and
    minimizing segments, the polar description with unique extrema, and the
    smooth metric-preserving sphere identification, including both poles.
-3. The round-sphere converse, the independently auditable Mathlib-only
+2. The round-sphere converse, the independently auditable Mathlib-only
    Challenge, and final theorem/axiom/provenance verification.
 
 Do not replace any of these obligations by an assumed analytic or geometric
@@ -69,7 +71,9 @@ The local path dependency `../almost-schur` inherits the existing geometric
 and analytic formalization from this repository at commit
 `3faf25aefc27842a77c37ca178e8a40a20bb20c7`. Its original provenance and contributor
 notices remain authoritative. This project adds the sharp positive-Ricci
-eigenfunction estimate and its equality-to-Hessian argument. Structured
+eigenfunction estimate, its equality-to-Hessian argument, spectral attainment,
+and weak-eigenfunction regularity. The adapted bootstrap and chart assembly
+retain explicit immutable source attribution in their module headers. Structured
 submission metadata must disclose all inherited formalizations before any
 intake; no intake or registration has been requested by this project.
 
