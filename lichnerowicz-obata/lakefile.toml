@@ -1,0 +1,11 @@
+name = "LichnerowiczObata"
+version = "0.1.0"
+defaultTargets = ["LichnerowiczObata"]
+
+[[require]]
+name = "AlmostSchur"
+path = "../almost-schur"
+
+[[lean_lib]]
+name = "LichnerowiczObata"
+globs = ["LichnerowiczObata.+"]

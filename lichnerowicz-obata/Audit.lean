@@ -1,0 +1,4 @@
+import LichnerowiczObata.BochnerBound
+
+#print axioms LichnerowiczObata.eigenvalue_lower_bound
+#print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
