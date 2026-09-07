@@ -1,6 +1,7 @@
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
 import LichnerowiczObata.ClassicalSpectrum
+import LichnerowiczObata.ObataEnergy
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -10,3 +11,5 @@ import LichnerowiczObata.ClassicalSpectrum
 #print axioms LichnerowiczObata.Reaction.exists_reaction_jets_on_nested_compacts
 #print axioms LichnerowiczObata.exists_smooth_variational_eigenfunction
 #print axioms LichnerowiczObata.exists_first_smooth_eigenvalue_with_ricci_bound
+#print axioms LichnerowiczObata.differential_gradient_norm_sq
+#print axioms LichnerowiczObata.obataEnergy_constant

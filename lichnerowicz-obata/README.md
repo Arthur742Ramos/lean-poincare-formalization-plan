@@ -59,6 +59,13 @@ no longer assume spectral existence or smoothness of a weak eigenfunction.
 Do not replace any of these obligations by an assumed analytic or geometric
 bridge, and do not call the checked eigenfunction estimate the full theorem.
 
+## Checked rigidity step
+
+`ObataEnergy.lean` differentiates the squared gradient norm using the actual
+Levi–Civita connection's metric compatibility. From the Hessian equation it
+proves that `|grad f|² + K f²` is constant on a connected manifold. This is a
+local-to-global conserved-energy identity, not yet the sphere-isometry theorem.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical
