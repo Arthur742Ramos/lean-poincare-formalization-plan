@@ -119,6 +119,38 @@ research theorem.
   H1-to-L2 map for normalized Riemannian volume, including strongly convergent
   subsequences of graph-norm-bounded sequences. All local measure comparison
   hypotheses are discharged; no Hausdorff identification is assumed.
+- `AlmostSchur.EnergyAlgebra` and `EnergyCompactness`: linearity and scaling
+  of the intrinsic energy and strongly convergent L2 subsequences under
+  actual function-norm and energy bounds.
+- `AlmostSchur.ChartLpRegularity`, `WeakChartLimit`, and `ChartWeakKernel`:
+  chartwise local integrability of actual L2 classes, passage of coordinate
+  integration by parts to strong L2 limits with vanishing energy, and global
+  almost-everywhere constancy from the resulting weak derivative identities.
+- `AlmostSchur.PoincareCountersequence` and `Poincare`: the mean-zero
+  Poincaré inequality for the actual normalized Riemannian volume and gradient,
+  proved by compactness and weak-kernel rigidity.
+- `AlmostSchur.EnergySpace`, `EnergyL2`, and `EnergyL2Completion`: the genuine
+  mean-zero C1 energy inner product, its Hilbert completion, and the bounded
+  actual L2 realization derived from Poincaré.
+- `AlmostSchur.WeakPoisson`: actual L2 forcing and a unique completed
+  variational solution by Riesz, with a quantitative energy bound and the
+  forcing-integral identity on C1 mean-zero tests.
+- `AlmostSchur.EnergyMean` and `EnergyGreen`: the completed realization has
+  zero mean, and the actual global Green identity extends by density. For
+  mean-zero L2 forcing, the realized variational solution satisfies the
+  transposed Laplace equation on every C2 test. Smoothness remains unproved.
+- `AlmostSchur.EnergyChartDerivative`, `L2TestUniqueness`, and
+  `EnergyChartKernel`: bounded completed coordinate derivatives, their actual
+  weak integration-by-parts identities, and local AE vanishing of those
+  derivatives whenever the realized L2 function is zero.
+- `AlmostSchur.EnergyPairingCoefficients`, `EnergyPairingReconstruction`, and
+  `EnergyL2Injectivity`: continuous compactly supported coefficient functions,
+  finite-chart reconstruction of the completed energy pairing, and injectivity
+  of the actual L2 realization. Only the proved density of the C1 core is used.
+- `AlmostSchur.HilbertWeakLimit`: a bounded Hilbert-space family has a weak
+  cluster representative preserving every convergent pairing, with the same
+  norm bound. This is a preliminary ingredient for difference-quotient analysis,
+  not an elliptic regularity theorem.
 
 The local analytic results use finite-dimensional coordinate spaces and are
 transported through `extChartAt` to the manifold connection. Coordinate metric
@@ -152,8 +184,8 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-The integrated development passes a local build (3726 jobs), the 36-file
-vendored-source check, and an axiom audit of all 278 project declarations
+The integrated development passes a local build (3754 jobs), the 36-file
+vendored-source check, and an axiom audit of all 384 project declarations
 plus six selected vendored Sobolev/compactness endpoints.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
@@ -162,7 +194,7 @@ The volume/chart modules retain non-fatal local-instance style warnings.
 
 ## Remaining work, in order
 
-1. Mean-zero coercivity, weak Poisson existence and smooth elliptic regularity.
+1. Smooth elliptic regularity for the proved weak Poisson solution.
 2. Integrated Bochner and the geometric almost-Schur inequality.
 3. Einstein equality rigidity, exact source/hypothesis audit.
 4. Only then: independent Challenge/Solution packaging and kernel replay.
@@ -178,9 +210,11 @@ the generic chart Sobolev construction and Euclidean compactness proof. The
 Hausdorff-specialized manifold compactness theorem is not imported. Its
 chartwise transport argument has been generalized to finite measures with
 two-sided local density bounds and instantiated for our normalized volume.
-The intrinsic-energy localization bound is proved. Passage to chartwise weak
-limits and manifold weak-kernel rigidity still need integration before
-Poincaré can be claimed.
+The intrinsic-energy localization bound, passage to chartwise weak limits,
+manifold weak-kernel rigidity, and Poincaré inequality are proved. Completed
+variational solvability and the transposed Poisson equation are also proved;
+identifying the solution with a smooth function solving the classical equation
+remains separate work.
 
 ## Sources and contribution
 
