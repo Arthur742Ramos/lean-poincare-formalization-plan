@@ -151,6 +151,31 @@ research theorem.
   cluster representative preserving every convergent pairing, with the same
   norm bound. This is a preliminary ingredient for difference-quotient analysis,
   not an elliptic regularity theorem.
+- `AlmostSchur.CoordinateEllipticity`, `CoordinateCoefficientRegularity`,
+  `MatrixInverseRegularity`, and `MetricHigherRegularity`: the actual
+  density-weighted inverse metric has compact uniform ellipticity, coefficient
+  and derivative bounds, and the higher regularity supplied by the metric.
+- `AlmostSchur.ChartTestLift`, `CoordinateGradient`, `EnergyLocalVariational`,
+  `CoordinateForcing`, `CoordinateWeakPoisson`, and `ChartTestEnergy`: actual
+  compact chart tests, coordinate gradient reconstruction, local L2 forcing,
+  the divergence-form weak equation, and bounded lifting into energy completion.
+- `AlmostSchur.DifferenceQuotientAlgebra`, `DifferenceQuotientProduct`, and
+  `DifferenceQuotientWeakDerivative`: translation adjoints, the discrete product
+  rule and coefficient-error estimate, and extraction of a genuine L2 weak
+  derivative from uniformly bounded quotients.
+- `AlmostSchur.L2Multiplier`, `ChartCutoff`, `EnergyCutoffGraph`,
+  `TestGraphCutoff`, `TestGraphDifferenceQuotient`, `TestGraphUniformQuotient`,
+  and `TestGraphVariational`: actual supported C1 graph approximation, cutoff
+  and quotient admissibility, a step-independent quotient bound, and extension
+  of L2 variational pairings by continuity. The uniform bound reuses the
+  attributed vendored translation estimate. An H2 estimate is not yet proved.
+- `AlmostSchur.CovariantAlongRegularity`, `ThirdHessianCommutator`,
+  `ThirdHessianSymmetry`, `CovariantTraceDerivative`, `BochnerFluxRegularity`,
+  `RawBochnerFlux`, and `IntegratedRawBochner`: genuine covariant commutators,
+  moving-frame trace differentiation, flux regularity, and the integrated
+  Bochner identity for the explicit raw curvature contraction. Each separated
+  integrand is proved integrable. Bundled Ricci identification and the
+  Levi–Civita specialization remain separate obligations.
 
 The local analytic results use finite-dimensional coordinate spaces and are
 transported through `extChartAt` to the manifold connection. Coordinate metric
@@ -184,8 +209,8 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-The integrated development passes a local build (3754 jobs), the 36-file
-vendored-source check, and an axiom audit of all 384 project declarations
+The integrated development passes a local build (3782 jobs), the 36-file
+vendored-source check, and an axiom audit of all 511 project declarations
 plus six selected vendored Sobolev/compactness endpoints.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
@@ -195,7 +220,8 @@ The volume/chart modules retain non-fatal local-instance style warnings.
 ## Remaining work, in order
 
 1. Smooth elliptic regularity for the proved weak Poisson solution.
-2. Integrated Bochner and the geometric almost-Schur inequality.
+2. Levi–Civita/Ricci identification, contracted Bianchi, and the geometric
+   almost-Schur inequality (the raw integrated Bochner identity is proved).
 3. Einstein equality rigidity, exact source/hypothesis audit.
 4. Only then: independent Challenge/Solution packaging and kernel replay.
 
