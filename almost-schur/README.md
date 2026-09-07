@@ -168,14 +168,36 @@ research theorem.
   and `TestGraphVariational`: actual supported C1 graph approximation, cutoff
   and quotient admissibility, a step-independent quotient bound, and extension
   of L2 variational pairings by continuity. The uniform bound reuses the
-  attributed vendored translation estimate. An H2 estimate is not yet proved.
+  attributed vendored translation estimate.
+- `AlmostSchur.LocalWeakPoissonGraph`, `TestedDifferenceQuotient`,
+  `LocalTestedQuotient`, `CutoffPlateau`, `CutoffQuotientFields`,
+  `InteriorCoefficientMasks`, `L2MatrixForm`, `WeightedFluxTest`,
+  `LocalQuotientEnergyEstimate`, `LocalH2QuotientBound`, and
+  `WeakPoissonH2Bound`: the actual local weak Poisson equation on the graph
+  closure, support-safe plateau representatives, the four-term tested energy
+  expansion, and a step-independent weighted difference-quotient bound for
+  every coordinate first derivative. No regularity of a zero extension is
+  asserted. Extracting the weak second derivatives and completing elliptic
+  bootstrapping remain to be done.
+- `AlmostSchur.WeakDerivativeBootstrap`: genuine weak product rules and the
+  differentiated divergence equation for L2 weak derivatives, including its
+  coefficient commutator. This is an iterable identity, not by itself an
+  elliptic gain-of-derivatives theorem.
 - `AlmostSchur.CovariantAlongRegularity`, `ThirdHessianCommutator`,
   `ThirdHessianSymmetry`, `CovariantTraceDerivative`, `BochnerFluxRegularity`,
   `RawBochnerFlux`, and `IntegratedRawBochner`: genuine covariant commutators,
   moving-frame trace differentiation, flux regularity, and the integrated
   Bochner identity for the explicit raw curvature contraction. Each separated
-  integrand is proved integrable. Bundled Ricci identification and the
-  Levi–Civita specialization remain separate obligations.
+  integrand is proved integrable.
+- `AlmostSchur.MetricTorsionCorrection`, `PointwiseConnection`,
+  `LeviCivitaCorrection`, `LeviCivitaConnection`, `KoszulFormula`,
+  `MetricDualFrame`, `LeviCivitaRegularity`, `LeviCivitaBochner`, and
+  `LeviCivitaIntegratedBochner`: an explicitly constructed
+  metric-compatible torsion-free connection, Koszul uniqueness on
+  differentiable fields, a proved C1 connection instance reconstructed from
+  metric pairings, and the pointwise and integrated raw Bochner identities
+  specialized to that connection. Bundled Ricci identification and higher
+  connection regularity remain separate obligations.
 
 The local analytic results use finite-dimensional coordinate spaces and are
 transported through `extChartAt` to the manifold connection. Coordinate metric
@@ -209,8 +231,8 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-The integrated development passes a local build (3782 jobs), the 36-file
-vendored-source check, and an axiom audit of all 511 project declarations
+The integrated development passes a local build (3810 jobs), the 36-file
+vendored-source check, and an axiom audit of all 611 project declarations
 plus six selected vendored Sobolev/compactness endpoints.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
@@ -219,9 +241,12 @@ The volume/chart modules retain non-fatal local-instance style warnings.
 
 ## Remaining work, in order
 
-1. Smooth elliptic regularity for the proved weak Poisson solution.
-2. Levi–Civita/Ricci identification, contracted Bianchi, and the geometric
-   almost-Schur inequality (the raw integrated Bochner identity is proved).
+1. Extract weak second derivatives from the proved uniform local quotient
+   bound, then complete smooth elliptic bootstrapping for the weak Poisson
+   solution.
+2. Bundled Ricci identification, contracted Bianchi, and the geometric
+   almost-Schur inequality (the constructed Levi-Civita raw integrated
+   Bochner identity is proved).
 3. Einstein equality rigidity, exact source/hypothesis audit.
 4. Only then: independent Challenge/Solution packaging and kernel replay.
 

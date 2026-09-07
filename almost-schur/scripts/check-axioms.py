@@ -27,13 +27,39 @@ def validate(output, expected):
         raise ValueError("unapproved axiom in proof closure")
 
 
+def declaration_names(source):
+    """Resolve the explicit named namespaces used by project source files."""
+    namespaces = []
+    names = set()
+    for line in source.splitlines():
+        opened = re.match(r"^namespace ([\w.]+)\s*$", line)
+        closed = re.match(r"^end ([\w.]+)\s*$", line)
+        declaration = re.match(r"^(?:def|theorem) ([\w.]+)", line)
+        if opened:
+            namespaces.append(opened[1])
+        elif closed and namespaces and closed[1] == namespaces[-1]:
+            namespaces.pop()
+        elif declaration:
+            if not namespaces:
+                raise ValueError("declaration outside an explicit namespace")
+            names.add(".".join([*namespaces, declaration[1]]))
+    if namespaces:
+        raise ValueError("unclosed namespace in declaration inventory")
+    return names
+
+
+assert declaration_names("namespace AlmostSchur\nnamespace Local\ntheorem a : True := by trivial\n"
+                         "end Local\ndef b := 1\nend AlmostSchur\n") == {
+    "AlmostSchur.Local.a", "AlmostSchur.b"}
+assert declaration_names("namespace AlmostSchur.Local\ndef c := 1\nend AlmostSchur.Local\n") == {
+    "AlmostSchur.Local.c"}
+
 expected = set()
 for path in (ROOT / "AlmostSchur").rglob("*.lean"):
     source = path.read_text()
     if re.search(r"\b(sorry|admit|axiom)\b", source):
         raise ValueError("proof-hole token in " + str(path))
-    expected.update("AlmostSchur." + name for name in
-                    re.findall(r"^(?:def|theorem) (\w+)", source, re.MULTILINE))
+    expected.update(declaration_names(source))
 own_count = len(expected)
 expected |= VENDORED_ENDPOINTS
 run = subprocess.run(["lake", "env", "lean", "CheckAxioms.lean"], cwd=ROOT,
