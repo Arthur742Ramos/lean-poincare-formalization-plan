@@ -66,6 +66,12 @@ Levi–Civita connection's metric compatibility. From the Hessian equation it
 proves that `|grad f|² + K f²` is constant on a connected manifold. This is a
 local-to-global conserved-energy identity, not yet the sphere-isometry theorem.
 
+`ObataExtrema.lean` proves Fermat's theorem for the actual manifold gradient,
+obtains extrema by compactness, and shows that a nonconstant Obata function
+has maximum `a > 0`, minimum `-a`, and `|grad f|² = K (a² - f²)`.
+Its only critical values are `a` and `-a`. Uniqueness of the critical points
+and the global sphere isometry remain unproved.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical
