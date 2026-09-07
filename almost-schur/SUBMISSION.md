@@ -12,8 +12,8 @@ Title: **De Lellis--Topping almost-Schur inequality**
   of `contracted-bianchi` or `schur-rigidity`.
 - Relationship: maintainer of the substantive formalization.
 
-The exact source commit is filled in only after the final snapshot is
-committed and pushed. Do not submit a moving branch or a working tree.
+Exact source commit: `8c8c0194519cb189931ae29147d1927e351b32ce`. Do not submit
+a moving branch or a working tree.
 
 ## Delivery gates
 
@@ -31,11 +31,15 @@ public logs. The review remains private until an explicit registration action.
 
 ## Current record
 
-- Local source and package preparation: in progress until the final commit is
-  selected.
-- Pushed commit: not yet recorded.
-- Hosted verification: not yet recorded for this package.
-- Palomar intake: none for this package.
+- Local source and package preparation: complete; the local checks listed in
+  `VERIFICATION.md` passed at the exact commit above.
+- Pushed commit: `8c8c0194519cb189931ae29147d1927e351b32ce` on
+  `arthur742ramos-almost-schur-analysis`.
+- Pull request: [#8](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/pull/8).
+- Hosted verification: complete for this commit; see the two hosted workflow
+  records in `VERIFICATION.md`.
+- Palomar intake: none for this package; artifact-specific authorization is
+  still required before `/api/submit`.
 - Editorial review: none.
 - Registration: none.
 

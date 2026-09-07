@@ -2,8 +2,8 @@
 
 ## Local checks
 
-The final source commit and hosted run are recorded here after the package is
-committed and pushed. The local package checks are:
+The final source commit is
+`8c8c0194519cb189931ae29147d1927e351b32ce`. The local package checks are:
 
 - `lake build` for the complete `AlmostSchur` development;
 - `lake env lean --src-deps Challenge.lean`, with the Challenge imported only
@@ -16,6 +16,11 @@ committed and pushed. The local package checks are:
 - the pinned Linux Comparator/NanoDa replay, with the explicit unsandboxed
   fallback permitted only for local macOS development.
 
+The local checks passed at the exact source commit, including the complete
+`AlmostSchur` build, the `Challenge`/`Solution` build, the dependency-only
+Challenge boundary, the vendored-file and curvature-provenance checks, the
+formalization metadata validator, and the exhaustive public axiom audit.
+
 The Challenge intentionally contains two theorem `sorry` placeholders. They
 are statement-surface holes and are not included in the implementation axiom
 audit. The Solution and all implementation modules must contain no `sorry`,
@@ -27,6 +32,17 @@ Hosted Linux CI is the authoritative clean-environment check for the pushed
 snapshot. Record the exact workflow URL, run number, head SHA and completed
 jobs here. A green workflow is mechanical evidence only; it does not imply
 Palomar editorial review, registration or endorsement.
+
+- Head SHA: `8c8c0194519cb189931ae29147d1927e351b32ce`
+- [Almost-Schur development checks, run 34153158216](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34153158216):
+  `Almost-Schur package and Lean verification` passed in 11m49s, and
+  `Almost-Schur Linux Comparator and NanoDa` passed in 13m24s.
+- [Palomar Submission 01 audit, run 34153158227](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34153158227):
+  `Audit Submission 01 package and build Lean` passed in 54m8s, and
+  `Run pinned Comparator and NanoDa` passed in 17m39s.
+
+The earlier push-triggered runs were canceled duplicate attempts; they are
+not evidence for the current snapshot and are not part of this record.
 
 ## Palomar evidence
 
