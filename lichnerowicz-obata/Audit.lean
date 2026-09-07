@@ -3,6 +3,7 @@ import LichnerowiczObata.EnergySpectrum
 import LichnerowiczObata.ClassicalSpectrum
 import LichnerowiczObata.ObataEnergy
 import LichnerowiczObata.ObataExtrema
+import LichnerowiczObata.ObataRadial
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -17,3 +18,6 @@ import LichnerowiczObata.ObataExtrema
 #print axioms LichnerowiczObata.gradient_eq_zero_of_local_extremum
 #print axioms LichnerowiczObata.obata_extrema
 #print axioms LichnerowiczObata.obata_critical_values
+#print axioms LichnerowiczObata.gradient_comp_hasDerivAt
+#print axioms LichnerowiczObata.norm_gradient_obataRadial
+#print axioms LichnerowiczObata.exists_obata_radial_eikonal

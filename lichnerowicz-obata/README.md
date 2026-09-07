@@ -72,6 +72,12 @@ has maximum `a > 0`, minimum `-a`, and `|grad f|² = K (a² - f²)`.
 Its only critical values are `a` and `-a`. Uniqueness of the critical points
 and the global sphere isometry remain unproved.
 
+`ObataRadial.lean` constructs the radial candidate
+`r = arccos(f/a) / sqrt K`, proves its range and the reconstruction
+`f = a cos(sqrt K * r)`, and proves `|grad r| = 1` at every noncritical
+point. The theorem derives the needed energy identity from the Obata equation.
+It does not assume or yet prove that `r` is geodesic distance.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical
