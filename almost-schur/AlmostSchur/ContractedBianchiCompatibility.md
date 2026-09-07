@@ -85,3 +85,50 @@ A narrow attributed port of the extension/tensoriality and contraction core is
 plausible, but should first separate it from the sibling LC existence/uniqueness
 infrastructure and prove the local right-slot representative bridge. This avoids
 silently importing stronger regularity assumptions or a broader uniqueness API.
+
+## Follow-up implementation: local Ricci milestone (2026-09-06)
+
+The preceding no-port statement describes the initial audit. The subsequent
+user-authorized extraction is now in `AlmostSchur/CurvatureVendor/`, with eight
+Lean modules and `PROVENANCE.json`. It uses committed source only, pinned to
+`12cebb809524d0cd185c6cd7bcb5b73d3562bce1`, with exact source paths and Git blob
+identities. The sibling LC existence/uniqueness infrastructure is excluded.
+`Tensor` gets an explicit mathlib LocalFrame import, and `Contractions` gets a
+local finite-dimensional tangent-fibre instance; both replace transitive imports
+that were deliberately removed. All adaptations are hashed and described.
+
+New proofs:
+
+- `LocalCurvatureExtensions.exists_contMDiff_section_germ_with_coefficients`
+  (declaration namespace `AlmostSchur`) constructs globally Cⁿ cutoff sections
+  and globally Cⁿ totalized chart coefficients from a locally Cⁿ section, for
+  every finite natural n.
+- `LocalCurvatureTensor.curvatureAux_eq_curvatureTensor_of_contMDiffAt`
+  proves the raw-to-bundled evaluation rule for locally C² tangent fields.
+  The right-slot global coefficient hypothesis is fully discharged.
+- `BundledRicciBochner.rawRicciGradient_eq_ricciCurvature` identifies the actual
+  raw contraction with bundled Ricci on the gradient from local C³ scalar
+  regularity and C¹ connection regularity. No compatibility or torsion premise
+  is required for that identification. The ambient metric is C².
+- `BundledRicciBochner.leviCivita_divergence_bochnerFlux_ricci` specializes the
+  constructed LC flux identity to genuine bundled Ricci.
+
+The theorem names after the module names above are all in namespace
+`AlmostSchur`; the retained vendor declarations are in `CovariantDerivative`.
+All four geometry targets (local extensions, local tensor bridge, bundled Ricci
+bridge, and vendored contracted-Bianchi bridge) build. The checked new and
+vendored endpoints use only `propext`, `Classical.choice`, and `Quot.sound`.
+
+Run `python3 scripts/check-curvature-provenance.py` to verify exact coverage of
+all eight vendor Lean files, source commit/path/blob identities, recomputed Git
+blob identities, source/local SHA-256, and deterministic unified-diff SHA-256.
+It is read-only and network-free; `--source-repo PATH` can name another local
+clone containing the pinned Git objects. `--print-records` only prints computed
+records for an explicit manifest update, never changes files. The checker was
+tested for deterministic replay and rejection of six corruptions (four hash
+fields, missing coverage, and altered local bytes).
+
+At the requested audit pause, root imports and the shared axiom audit have not
+been edited by this work. Higher LC regularity and the Ricci/scalar
+trace-differentiation bridge remain pending. Vendoring a double-contraction
+theorem does not establish those missing geometric identifications.

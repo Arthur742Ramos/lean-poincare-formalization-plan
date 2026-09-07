@@ -107,6 +107,11 @@ public import AlmostSchur.InteriorCoefficientMasks
 public import AlmostSchur.WeakDerivativeBootstrap
 public import AlmostSchur.LocalH2QuotientBound
 public import AlmostSchur.WeakPoissonH2Bound
+public import AlmostSchur.LocalizedDerivativeExtraction
+public import AlmostSchur.WeakPoissonSecondDerivatives
+public import AlmostSchur.PostH2Bootstrap
+public import AlmostSchur.WeakPoissonH2Jet
+public import AlmostSchur.WeakJetRegularity
 public import AlmostSchur.MetricTorsionCorrection
 public import AlmostSchur.PointwiseConnection
 public import AlmostSchur.LeviCivitaCorrection
@@ -116,6 +121,10 @@ public import AlmostSchur.MetricDualFrame
 public import AlmostSchur.LeviCivitaRegularity
 public import AlmostSchur.LeviCivitaBochner
 public import AlmostSchur.LeviCivitaIntegratedBochner
+public import AlmostSchur.CurvatureVendor.ContractedBianchiBridge
+public import AlmostSchur.LocalCurvatureExtensions
+public import AlmostSchur.LocalCurvatureTensor
+public import AlmostSchur.BundledRicciBochner
 public import RellichKondrachov.Geometry.Manifold.Sobolev.RellichKondrachov
 public import RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.Rellich
 public import RellichKondrachov.Analysis.FunctionalSpaces.Sobolev.Euclidean.SupportedH1

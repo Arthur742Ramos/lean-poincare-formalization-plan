@@ -177,12 +177,23 @@ research theorem.
   closure, support-safe plateau representatives, the four-term tested energy
   expansion, and a step-independent weighted difference-quotient bound for
   every coordinate first derivative. No regularity of a zero extension is
-  asserted. Extracting the weak second derivatives and completing elliptic
-  bootstrapping remain to be done.
+  asserted.
+- `AlmostSchur.LocalizedDerivativeExtraction`,
+  `WeakPoissonSecondDerivatives`, and `WeakPoissonH2Jet`: extraction of genuine
+  local L2 weak second derivatives on every compact subset strictly inside a
+  convex coordinate patch, with a common finite bound, exact compactly
+  supported C1 test identities, and an explicit order-two local derivative
+  jet for the actual weak Poisson solution.
 - `AlmostSchur.WeakDerivativeBootstrap`: genuine weak product rules and the
   differentiated divergence equation for L2 weak derivatives, including its
   coefficient commutator. This is an iterable identity, not by itself an
   elliptic gain-of-derivatives theorem.
+- `AlmostSchur.PostH2Bootstrap` and `WeakJetRegularity`: finite-order weak-jet
+  bookkeeping, differentiated coefficient/forcing identities, interior
+  convolution regularity, and identification of every jet field with the
+  corresponding derivative of a smooth mollification. Shrinking mollifiers
+  recover the L2 fields almost everywhere; no classical or smooth
+  representative is inferred from that almost-everywhere convergence.
 - `AlmostSchur.CovariantAlongRegularity`, `ThirdHessianCommutator`,
   `ThirdHessianSymmetry`, `CovariantTraceDerivative`, `BochnerFluxRegularity`,
   `RawBochnerFlux`, and `IntegratedRawBochner`: genuine covariant commutators,
@@ -196,8 +207,16 @@ research theorem.
   metric-compatible torsion-free connection, Koszul uniqueness on
   differentiable fields, a proved C1 connection instance reconstructed from
   metric pairings, and the pointwise and integrated raw Bochner identities
-  specialized to that connection. Bundled Ricci identification and higher
-  connection regularity remain separate obligations.
+  specialized to that connection.
+- `AlmostSchur.CurvatureVendor`, `LocalCurvatureExtensions`,
+  `LocalCurvatureTensor`, and `BundledRicciBochner`: an attributed,
+  immutable-source-checked curvature/tensor/contraction core; globally regular
+  cutoff representatives of local section germs; an actual local
+  raw-to-bundled curvature bridge; and identification of the Levi-Civita raw
+  Bochner contraction with bundled Ricci. The vendored double-contraction
+  identity is proved, but applying it to derivatives of the actual Ricci and
+  scalar-curvature fields still requires higher connection regularity and a
+  trace-differentiation bridge.
 
 The local analytic results use finite-dimensional coordinate spaces and are
 transported through `extChartAt` to the manifold connection. Coordinate metric
@@ -219,6 +238,7 @@ lake exe cache get
 lake build
 python3 scripts/check-axioms.py
 python3 scripts/check-vendored.py
+python3 scripts/check-curvature-provenance.py
 ```
 
 Local development reused an ignored dependency-cache symlink; committed source
@@ -231,8 +251,9 @@ The volume extension passed a local build (3493 jobs) and
 [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
 The subsequent local integration/density/energy extension passed a local
 build (3536 jobs) and the vendored-source check.
-The integrated development passes a local build (3810 jobs), the 36-file
-vendored-source check, and an axiom audit of all 611 project declarations
+The integrated development passes a local build (3827 jobs), the 36-file
+vendored-source check, the curvature-vendor provenance check, and an axiom
+audit of all 756 externally nameable public project declarations
 plus six selected vendored Sobolev/compactness endpoints.
 Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
 missing reports and three classes of unapproved axioms. Hosted CI is separate
@@ -241,12 +262,14 @@ The volume/chart modules retain non-fatal local-instance style warnings.
 
 ## Remaining work, in order
 
-1. Extract weak second derivatives from the proved uniform local quotient
-   bound, then complete smooth elliptic bootstrapping for the weak Poisson
-   solution.
-2. Bundled Ricci identification, contracted Bianchi, and the geometric
-   almost-Schur inequality (the constructed Levi-Civita raw integrated
-   Bochner identity is proved).
+1. Upgrade the proved order-two local weak jet through quantitative iterative
+   elliptic estimates and a local Sobolev embedding to a classical smooth
+   representative of the weak Poisson solution.
+2. Prove higher regularity of the constructed Levi-Civita connection and the
+   Ricci/scalar trace-differentiation bridge needed to turn the vendored double
+   contraction into the actual contracted Bianchi identity, then derive the
+   geometric almost-Schur inequality. Bundled Ricci identification and the
+   Levi-Civita integrated Bochner identity are already proved.
 3. Einstein equality rigidity, exact source/hypothesis audit.
 4. Only then: independent Challenge/Solution packaging and kernel replay.
 
