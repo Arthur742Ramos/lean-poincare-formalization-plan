@@ -26,12 +26,28 @@ and volume are the existing constructed geometric objects. Bochner and Green
 identities are proved imports, not extra hypotheses. The intermediate estimates
 hold without assuming `K > 0`; positivity is required for the full sphere target.
 
+## Checked spectral step
+
+`CompactEnergy.lean` factors the completed mean-zero Dirichlet energy space
+through the actual chart H¹ graph and proves compactness of its L² realization.
+`NontrivialEnergy.lean` derives a nonzero element from positive dimension and
+smooth separation; no eigenfunction or nonzero test function is assumed.
+`CompactSpectral.lean` proves largest-positive-eigenvalue attainment for a
+nonzero compact positive symmetric Hilbert-space operator.
+
+`EnergySpectrum.lean` applies this to the actual energy Gram operator. It proves
+attainment and minimality of the first positive **variational** eigenvalue, and
+existence of a nonzero mean-zero L² eigenfunction satisfying the actual
+Laplace--Beltrami eigen-equation against every C² test function.
+No smooth representative is claimed at this stage.
+
 ## Remaining proof obligations
 
-1. Compactness of the completed mean-zero energy-space realization in L²,
-   a nonzero extremal eigenvector, and smooth elliptic bootstrapping. Existing
-   Rellich compactness and energy realization/injectivity provide ingredients,
-   but do not themselves prove spectral attainment.
+1. Smooth elliptic bootstrapping for the attained variational eigenfunction,
+   whose forcing is proportional to itself and is initially only L². The
+   existing smooth-forcing Poisson theorem cannot be applied directly.
+   Identify the attained variational eigenvalue with the first classical
+   eigenvalue and apply the sharp Bochner estimate to that representative.
 2. Global Obata rigidity from the Hessian equation: complete geodesics and
    minimizing segments, the polar description with unique extrema, and the
    smooth metric-preserving sphere identification, including both poles.
@@ -67,4 +83,4 @@ lake build
 lake env lean Audit.lean
 ```
 
-The audit prints transitive axioms for the two principal proved statements.
+The audit prints transitive axioms for the principal analytic and spectral statements.
