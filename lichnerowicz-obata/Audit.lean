@@ -5,6 +5,7 @@ import LichnerowiczObata.ObataEnergy
 import LichnerowiczObata.ObataExtrema
 import LichnerowiczObata.ObataRadial
 import LichnerowiczObata.EikonalConnection
+import LichnerowiczObata.RadialCurves
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -24,3 +25,5 @@ import LichnerowiczObata.EikonalConnection
 #print axioms LichnerowiczObata.exists_obata_radial_eikonal
 #print axioms LichnerowiczObata.cov_gradient_self_eq_zero
 #print axioms LichnerowiczObata.exists_obata_radial_autoparallel
+#print axioms LichnerowiczObata.hasDerivAt_comp_integralCurve
+#print axioms LichnerowiczObata.exists_obata_radial_local_curves

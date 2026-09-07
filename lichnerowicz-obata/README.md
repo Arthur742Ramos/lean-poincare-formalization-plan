@@ -84,6 +84,12 @@ of the actual Levi–Civita Hessian. The resulting radial gradient is unit and
 autoparallel on this open region; global flow existence, minimizing properties,
 and the polar-coordinate isometry are not supplied by this pointwise result.
 
+`RadialCurves.lean` constructs actual local integral curves of the radial
+gradient at every regular point and proves the exact local parameterization
+`r(γ(t)) = r(γ(0)) + t`. Its scalar chain rule is adapted from the inherited
+Almost-Schur proof with immutable attribution in the module header. Extending
+the curves to the full radial interval and proving global rigidity remain open.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical
