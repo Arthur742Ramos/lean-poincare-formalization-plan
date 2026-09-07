@@ -19,9 +19,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  foundations:
+  package:
+    name: Almost-Schur package and Lean verification
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: almost-schur
+          build: false
+      - name: Install metadata validator
+        run: python3 -m pip install PyYAML==6.0.2
+      - name: Check package metadata, provenance, and Challenge boundary
+        run: |
+          python3 almost-schur/scripts/validate-formalization.py
+          python3 almost-schur/scripts/check-vendored.py
+          python3 almost-schur/scripts/check-curvature-provenance.py
+          python3 almost-schur/scripts/check-challenge-boundary.py
+      - name: Build the complete development
+        run: lake build AlmostSchur
+        working-directory: almost-schur
+      - name: Check complete public axiom surface and negative controls
+        run: |
+          python3 almost-schur/scripts/check-axioms.py
+
+  comparator:
+    name: Almost-Schur Linux Comparator and NanoDa
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -29,8 +58,13 @@ jobs:
       - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
         with:
           lake-package-directory: almost-schur
-          build: true
-      - name: Check complete public axiom surface and negative controls
-        run: |
-          python3 almost-schur/scripts/check-vendored.py
-          python3 almost-schur/scripts/check-axioms.py
+          build: false
+      - name: Install Go for Landrun
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: "1.24.0"
+          cache: false
+      - name: Verify using real Linux Landrun
+        run: bash almost-schur/scripts/verify-comparator.sh
+      - name: Check Challenge without candidate library imports
+        run: python3 almost-schur/scripts/check-challenge-boundary.py

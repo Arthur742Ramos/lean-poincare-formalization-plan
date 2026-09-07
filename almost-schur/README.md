@@ -1,313 +1,85 @@
-# Almost-Schur: geometric-analysis development
+# De Lellis--Topping almost-Schur inequality
 
-Target: the De Lellis–Topping almost-Schur inequality and its Einstein equality
-case on nonempty connected closed smooth Riemannian manifolds of dimension at
-least three with nonnegative Ricci curvature.
+This project formalizes the sharp almost-Schur inequality for a nonempty
+connected closed smooth Riemannian manifold of dimension at least three with
+nonnegative Ricci curvature:
 
-**Incomplete development; not a Palomar submission artifact.** There is no
-Challenge, Solution or Comparator in this directory yet. The full inequality
-and equality rigidity are not proved. Do not submit these foundations as the
-research theorem.
+```text
+∫ (R - average R)^2 ≤ 4 n (n - 1) / (n - 2)^2
+  * ∫ |Ric - (R / n) g|^2.
+```
 
-## Proved foundations
+It also proves the equality characterization: equality holds exactly when
+the metric-raised trace-free Ricci operator vanishes everywhere, i.e. the
+metric is Einstein. This is a formalization of the classical theorem of
+Pierre De Lellis and Peter M. Topping, not a new mathematical result or a
+priority claim.
 
-- `AlmostSchur.Gradient`: actual differential-to-gradient Riesz duality,
-  uniqueness, zero-gradient characterization, and norm identities.
-- `AlmostSchur.Hessian`: connection Hessian and Laplacian, with an
-  orthonormal trace formula independent of basis/index type.
-- `AlmostSchur.HilbertSchmidt`: intrinsic squared tensor norm, its full
-  double-contraction formula, nonnegativity, and exact trace-free decomposition.
-- `AlmostSchur.HessianNorm`: the pointwise trace-free norm identity for the
-  actual covariant Hessian. This is not an integrated Bochner formula.
-- `AlmostSchur.Volume`: intrinsic Hausdorff volume is positive on neighborhoods
-  and has finite positive total mass on nonempty compact boundaryless manifolds.
-  Compatibility with the smooth Riemannian density remains unproved.
-- `AlmostSchur.LocalIntegration`: positive-density Green identity for C1
-  compactly supported vector fields, with the actual Fréchet divergence and
-  all integrability obligations discharged.
-- `AlmostSchur.MetricDensity`: `sqrt(det G)` transforms by the absolute
-  Jacobian, with both Bochner change of variables and integrability transport.
-- `AlmostSchur.DensityDerivative`: Jacobi's determinant derivative is proved
-  from multilinearity; metric compatibility then gives the density derivative.
-- `AlmostSchur.LocalMetricDivergence`: the trace of a metric-compatible,
-  torsion-free coordinate connection equals density divergence, yielding its
-  local geometric Green identity.
-- `AlmostSchur.LocalEnergy`: energy identity, integrability, formal symmetry,
-  nonpositive quadratic form, and zero energy iff the actual differential
-  vanishes everywhere for a strictly positive cometric.
-- `AlmostSchur.ChartMetric`: positive-definite Gram matrices of the actual
-  tangent metric and their density transformation by the genuine derivative
-  of a manifold chart change.
-- `AlmostSchur.ChartIntegration`: measurable chart images and equality of
-  metric-density integrals in two charts on any measurable overlap, including
-  nonnegative integrals with infinite values. Constructs local density measures
-  and proves equality of their restrictions to measurable chart overlaps.
-- `AlmostSchur.GlobalMeasure`: constructs the global density measure on a
-  nonempty Lindelöf manifold, proves its chartwise characterization, independence
-  of the countable chart cover, and uniqueness for the prescribed local density.
-  Coordinate Haar measure and basis remain explicit normalization parameters.
-- `AlmostSchur.MetricRegularity`: continuity of the actual Gram matrix and
-  density, local finiteness, positive mass on nonempty open sets, and finite
-  positive total density mass on nonempty compact Hausdorff manifolds with
-  a continuous Riemannian metric.
-- `AlmostSchur.NormalizedMeasure`: pairs each coordinate basis with its
-  basis Lebesgue measure and proves cancellation of their determinant factors.
-  Defines normalized `riemannianVolume`, proves independence of the basis
-  and index type, and establishes its chart formula and finite positive mass.
-- `AlmostSchur.VolumeIntegration`: Bochner integration against normalized
-  volume equals chart-density integration on every measurable chart subset;
-  integrability on chart domains is equivalent to weighted coordinate
-  integrability. This includes the required measure pullback proof.
-- `AlmostSchur.OpenDomainIntegration`: scalar, vector, weighted-density,
-  and metric-connection Green identities on open coordinate domains with
-  compactly supported flux. Regularity and metric positivity are required
-  only on the domain; no positive smooth extension outside a chart is assumed.
-- `AlmostSchur.ConnectionCoordinates`: derives the actual connection's local
-  frame expansion from additivity, Leibniz, and differentiable coefficient
-  reconstruction. Constructs bilinear frame-connection coefficients and proves
-  the coordinate formula with the actual chart Fréchet derivative.
-- `AlmostSchur.MetricConnectionCoordinates` and `TorsionCoordinates`:
-  derive coordinate metric compatibility and symmetry from the actual
-  metric-compatible, torsion-free manifold connection.
-- `AlmostSchur.DivergenceCoordinates`, `ChartFlux`, and `ChartGreen`:
-  identify intrinsic divergence with coordinate density divergence and prove
-  Green's identity for chart-supported fields.
-- `AlmostSchur.DivergenceRegularity` and `GlobalGreen`: continuity and
-  integrability of the relevant fields, a finite smooth chart partition of
-  unity, and global integration by parts against normalized Riemannian volume.
-- `AlmostSchur.GradientRegularity` and `HessianSymmetry`: regularity of the
-  actual Riesz gradient and symmetry of the C2 covariant Hessian, derived from
-  metric compatibility and vanishing torsion.
-- `AlmostSchur.GlobalEnergy`: the global Dirichlet form, nonnegative energy,
-  Green's identity for the actual Laplacian, and its zero integral.
-- `AlmostSchur.EnergyKernel`: a vanishing differential forces local constancy
-  by the coordinate mean-value theorem and constancy on connected manifolds.
-  Together with `GlobalEnergy`'s everywhere-zero-gradient characterization,
-  this identifies the energy kernel. It is not a uniform coercivity estimate.
-- `AlmostSchur.MeanZeroEnergy`: qualitative positivity on nonzero mean-zero
-  functions and uniqueness of C2 solutions with prescribed Laplacian and mean.
-- `AlmostSchur.DensityComparison`: exact chart pushforward of normalized
-  volume and finite two-sided comparison with Euclidean volume on compact
-  chart subsets. This uses the positive continuous density, not Hausdorff
-  measure identification.
-- `AlmostSchur.SobolevReconstruction`: the imported graph-closure Sobolev
-  construction's L2 projection of a C1 graph is the actual original function
-  almost everywhere, via chart pullback and the partition-of-unity identity.
-- `AlmostSchur.WeakDerivativeMollification`: a locally integrable function
-  annihilating derivatives of compact smooth tests has mollifications with
-  zero classical derivative on interior balls.
-- `AlmostSchur.WeakKernelLocal`: the approximation-limit argument gives
-  almost-everywhere constancy on each relatively compact interior ball,
-  without assuming classical differentiability of the weak function.
-- `AlmostSchur.ChartNormBounds`: uniform inverse-tangent-chart operator norms
-  on compact chart subsets and bounded derivatives of the fixed cutoffs.
-- `AlmostSchur.LocalizationGradient`: uniform pointwise control of localized
-  coordinate gradients by the scalar function and its intrinsic gradient.
-- `AlmostSchur.GradientL2` and `AlmostSchur.LocalizationEnergy`: the scalar
-  gradient L2 norm equals the square root of intrinsic energy, and actual
-  energy plus the L2 function norm control the finite-chart H1 graph norm.
-- `AlmostSchur.ChartL2Pullback` and `AlmostSchur.ChartDerivativeBound`: bounded
-  pullback of actual-volume L2 classes, with an AE representative identity,
-  and unlocalized coordinate-derivative bounds without cutoff error terms.
-- `AlmostSchur.L2WeakLimit`: strong L2 limits preserve test pairings and
-  mean zero; integration-by-parts identities pass to the limit when the
-  derivative factor tends to zero in L2.
-- `AlmostSchur.WeakKernelGluing`: local almost-everywhere constants glue on
-  preconnected Lindelöf domains, using a countable subcover; zero weak
-  derivatives therefore imply constancy on open preconnected Euclidean domains.
-- `AlmostSchur.SobolevCompactness`: compactness of the actual graph-closure
-  H1-to-L2 map for normalized Riemannian volume, including strongly convergent
-  subsequences of graph-norm-bounded sequences. All local measure comparison
-  hypotheses are discharged; no Hausdorff identification is assumed.
-- `AlmostSchur.EnergyAlgebra` and `EnergyCompactness`: linearity and scaling
-  of the intrinsic energy and strongly convergent L2 subsequences under
-  actual function-norm and energy bounds.
-- `AlmostSchur.ChartLpRegularity`, `WeakChartLimit`, and `ChartWeakKernel`:
-  chartwise local integrability of actual L2 classes, passage of coordinate
-  integration by parts to strong L2 limits with vanishing energy, and global
-  almost-everywhere constancy from the resulting weak derivative identities.
-- `AlmostSchur.PoincareCountersequence` and `Poincare`: the mean-zero
-  Poincaré inequality for the actual normalized Riemannian volume and gradient,
-  proved by compactness and weak-kernel rigidity.
-- `AlmostSchur.EnergySpace`, `EnergyL2`, and `EnergyL2Completion`: the genuine
-  mean-zero C1 energy inner product, its Hilbert completion, and the bounded
-  actual L2 realization derived from Poincaré.
-- `AlmostSchur.WeakPoisson`: actual L2 forcing and a unique completed
-  variational solution by Riesz, with a quantitative energy bound and the
-  forcing-integral identity on C1 mean-zero tests.
-- `AlmostSchur.EnergyMean` and `EnergyGreen`: the completed realization has
-  zero mean, and the actual global Green identity extends by density. For
-  mean-zero L2 forcing, the realized variational solution satisfies the
-  transposed Laplace equation on every C2 test. Smoothness remains unproved.
-- `AlmostSchur.EnergyChartDerivative`, `L2TestUniqueness`, and
-  `EnergyChartKernel`: bounded completed coordinate derivatives, their actual
-  weak integration-by-parts identities, and local AE vanishing of those
-  derivatives whenever the realized L2 function is zero.
-- `AlmostSchur.EnergyPairingCoefficients`, `EnergyPairingReconstruction`, and
-  `EnergyL2Injectivity`: continuous compactly supported coefficient functions,
-  finite-chart reconstruction of the completed energy pairing, and injectivity
-  of the actual L2 realization. Only the proved density of the C1 core is used.
-- `AlmostSchur.HilbertWeakLimit`: a bounded Hilbert-space family has a weak
-  cluster representative preserving every convergent pairing, with the same
-  norm bound. This is a preliminary ingredient for difference-quotient analysis,
-  not an elliptic regularity theorem.
-- `AlmostSchur.CoordinateEllipticity`, `CoordinateCoefficientRegularity`,
-  `MatrixInverseRegularity`, and `MetricHigherRegularity`: the actual
-  density-weighted inverse metric has compact uniform ellipticity, coefficient
-  and derivative bounds, and the higher regularity supplied by the metric.
-- `AlmostSchur.ChartTestLift`, `CoordinateGradient`, `EnergyLocalVariational`,
-  `CoordinateForcing`, `CoordinateWeakPoisson`, and `ChartTestEnergy`: actual
-  compact chart tests, coordinate gradient reconstruction, local L2 forcing,
-  the divergence-form weak equation, and bounded lifting into energy completion.
-- `AlmostSchur.DifferenceQuotientAlgebra`, `DifferenceQuotientProduct`, and
-  `DifferenceQuotientWeakDerivative`: translation adjoints, the discrete product
-  rule and coefficient-error estimate, and extraction of a genuine L2 weak
-  derivative from uniformly bounded quotients.
-- `AlmostSchur.L2Multiplier`, `ChartCutoff`, `EnergyCutoffGraph`,
-  `TestGraphCutoff`, `TestGraphDifferenceQuotient`, `TestGraphUniformQuotient`,
-  and `TestGraphVariational`: actual supported C1 graph approximation, cutoff
-  and quotient admissibility, a step-independent quotient bound, and extension
-  of L2 variational pairings by continuity. The uniform bound reuses the
-  attributed vendored translation estimate.
-- `AlmostSchur.LocalWeakPoissonGraph`, `TestedDifferenceQuotient`,
-  `LocalTestedQuotient`, `CutoffPlateau`, `CutoffQuotientFields`,
-  `InteriorCoefficientMasks`, `L2MatrixForm`, `WeightedFluxTest`,
-  `LocalQuotientEnergyEstimate`, `LocalH2QuotientBound`, and
-  `WeakPoissonH2Bound`: the actual local weak Poisson equation on the graph
-  closure, support-safe plateau representatives, the four-term tested energy
-  expansion, and a step-independent weighted difference-quotient bound for
-  every coordinate first derivative. No regularity of a zero extension is
-  asserted.
-- `AlmostSchur.LocalizedDerivativeExtraction`,
-  `WeakPoissonSecondDerivatives`, and `WeakPoissonH2Jet`: extraction of genuine
-  local L2 weak second derivatives on every compact subset strictly inside a
-  convex coordinate patch, with a common finite bound, exact compactly
-  supported C1 test identities, and an explicit order-two local derivative
-  jet for the actual weak Poisson solution.
-- `AlmostSchur.WeakDerivativeBootstrap`: genuine weak product rules and the
-  differentiated divergence equation for L2 weak derivatives, including its
-  coefficient commutator. This is an iterable identity, not by itself an
-  elliptic gain-of-derivatives theorem.
-- `AlmostSchur.PostH2Bootstrap` and `WeakJetRegularity`: finite-order weak-jet
-  bookkeeping, differentiated coefficient/forcing identities, interior
-  convolution regularity, and identification of every jet field with the
-  corresponding derivative of a smooth mollification. Shrinking mollifiers
-  recover the L2 fields almost everywhere; no classical or smooth
-  representative is inferred from that almost-everywhere convergence.
-- `AlmostSchur.CovariantAlongRegularity`, `ThirdHessianCommutator`,
-  `ThirdHessianSymmetry`, `CovariantTraceDerivative`, `BochnerFluxRegularity`,
-  `RawBochnerFlux`, and `IntegratedRawBochner`: genuine covariant commutators,
-  moving-frame trace differentiation, flux regularity, and the integrated
-  Bochner identity for the explicit raw curvature contraction. Each separated
-  integrand is proved integrable.
-- `AlmostSchur.MetricTorsionCorrection`, `PointwiseConnection`,
-  `LeviCivitaCorrection`, `LeviCivitaConnection`, `KoszulFormula`,
-  `MetricDualFrame`, `LeviCivitaRegularity`, `LeviCivitaBochner`, and
-  `LeviCivitaIntegratedBochner`: an explicitly constructed
-  metric-compatible torsion-free connection, Koszul uniqueness on
-  differentiable fields, a proved C1 connection instance reconstructed from
-  metric pairings, and the pointwise and integrated raw Bochner identities
-  specialized to that connection.
-- `AlmostSchur.CurvatureVendor`, `LocalCurvatureExtensions`,
-  `LocalCurvatureTensor`, and `BundledRicciBochner`: an attributed,
-  immutable-source-checked curvature/tensor/contraction core; globally regular
-  cutoff representatives of local section germs; an actual local
-  raw-to-bundled curvature bridge; and identification of the Levi-Civita raw
-  Bochner contraction with bundled Ricci. The vendored double-contraction
-  identity is proved, but applying it to derivatives of the actual Ricci and
-  scalar-curvature fields still requires higher connection regularity and a
-  trace-differentiation bridge.
+## Main results
 
-The local analytic results use finite-dimensional coordinate spaces and are
-transported through `extChartAt` to the manifold connection. Coordinate metric
-compatibility, torsion cancellation, and the global Green identity are proved,
-not assumed. No global Poisson solver or Bochner formula is assumed.
+- `AlmostSchur.almostSchur_bound_complete` in
+  `AlmostSchur/AlmostSchurFinal.lean` is the complete geometric inequality.
+- `AlmostSchur.almostSchur_equality_iff` in
+  `AlmostSchur/AlmostSchurEquality.lean` is the equality/rigidity theorem.
+- `AlmostSchurEntry.almostSchur_from_identities` and
+  `AlmostSchurEntry.almostSchur_equality_data` are the small,
+  Mathlib-only Comparator surface in `Challenge.lean` and `Solution.lean`.
 
-The Hessian is defined relative to a supplied connection; symmetry holds for
-metric-compatible torsion-free connections. The final result must use Levi–Civita.
-All definitions are total as in Mathlib; differentiability obligations must be
-discharged when interpreting or differentiating them.
+The implementation proves, rather than assumes, the normalized smooth
+metric-density volume, global integration by parts, Poincare and weak Poisson
+solvability, smooth local representatives of the Poisson solution, the
+integrated Bochner identity, the actual contracted-Bianchi bridge, the sharp
+finite-dimensional cancellation, and the equality rigidity argument.
+
+The project does not identify this normalized density measure with dimensional
+Hausdorff measure, prove optimality of the numerical constant, classify space
+forms, or formalize Ricci flow.
+
+## Submission surface
+
+`Challenge.lean` imports only Mathlib and states the sharp cancellation and
+equality-data endpoints. `Solution.lean` proves the same declarations from
+the completed local development and exposes the concrete geometric endpoints.
+`comparator.json` selects both Challenge/Solution declarations. The selected
+project is the repository-relative `almost-schur` directory;
+`formalization.yaml` records the source, attribution, adapted dependencies,
+scope and AI-assisted development disclosure.
+
+The result is source-based and distinct from the earlier `contracted-bianchi`
+and `schur-rigidity` entries. The inherited curvature core and adapted
+Rellich--Kondrachov files retain their immutable provenance and author notices.
+See [PROVENANCE.md](PROVENANCE.md) and [SUBMISSION.md](SUBMISSION.md).
 
 ## Reproduction
 
-Lean `v4.33.0`; Mathlib `db584cd6d46c92f209a44c0f1c829460d327499d`.
+Pinned Lean: **4.33.0**. Pinned Mathlib:
+`db584cd6d46c92f209a44c0f1c829460d327499d`.
 
 ```sh
-cd almost-schur
 lake exe cache get
 lake build
-python3 scripts/check-axioms.py
+lake env lean --src-deps Challenge.lean
 python3 scripts/check-vendored.py
 python3 scripts/check-curvature-provenance.py
+python3 scripts/check-axioms.py
+python3 scripts/validate-formalization.py
+bash scripts/verify-comparator.sh
 ```
 
-Local development reused an ignored dependency-cache symlink; committed source
-and manifest do not require a sibling project. The Linux workflow reconstructs
-dependencies from the pinned manifest.
+The local Comparator replay explicitly opts into the unsandboxed macOS
+fallback only when `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1` is set. Hosted Linux
+verification must use real Landrun. Local checks, hosted mechanical
+verification, editorial review and registry registration are separate states;
+see [VERIFICATION.md](VERIFICATION.md) and [SUBMISSION.md](SUBMISSION.md).
 
-The tensor-only milestone at `e9670df01f616070babfbfd5ddff6748ba2d4970`
-passed [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055014715).
-The volume extension passed a local build (3493 jobs) and
-[Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055430137).
-The subsequent local integration/density/energy extension passed a local
-build (3536 jobs) and the vendored-source check.
-The integrated development passes a local build (3827 jobs), the 36-file
-vendored-source check, the curvature-vendor provenance check, and an axiom
-audit of all 756 externally nameable public project declarations
-plus six selected vendored Sobolev/compactness endpoints.
-Their transitive axioms are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
-missing reports and three classes of unapproved axioms. Hosted CI is separate
-evidence and must be checked at the exact source commit.
-The volume/chart modules retain non-fatal local-instance style warnings.
+## Sources and attribution
 
-## Remaining work, in order
+The mathematical source is De Lellis and Topping, [*Almost-Schur
+lemma*](https://doi.org/10.1007/s00526-011-0413-z), Theorem 1.1. The
+development also uses the immutable contracted-Bianchi curvature snapshot and
+an adapted subset of Adam Benenson's Rellich--Kondrachov project. Neither
+dependency's contributors are presented as endorsing this formalization.
 
-1. Upgrade the proved order-two local weak jet through quantitative iterative
-   elliptic estimates and a local Sobolev embedding to a classical smooth
-   representative of the weak Poisson solution.
-2. Prove higher regularity of the constructed Levi-Civita connection and the
-   Ricci/scalar trace-differentiation bridge needed to turn the vendored double
-   contraction into the actual contracted Bianchi identity, then derive the
-   geometric almost-Schur inequality. Bundled Ricci identification and the
-   Levi-Civita integrated Bochner identity are already proved.
-3. Einstein equality rigidity, exact source/hypothesis audit.
-4. Only then: independent Challenge/Solution packaging and kernel replay.
-
-The normalized density measure is now constructed, with finite positive total
-mass under the hypotheses above. Equality with intrinsic Hausdorff volume is
-not proved and is not used to justify the density measure's properties.
-
-The external compactness library was rebuilt and migrated;
-see [dependency evidence](dependencies/README.md). Thirty-six attributed
-modules are vendored with immutable provenance and checksum checks, including
-the generic chart Sobolev construction and Euclidean compactness proof. The
-Hausdorff-specialized manifold compactness theorem is not imported. Its
-chartwise transport argument has been generalized to finite measures with
-two-sided local density bounds and instantiated for our normalized volume.
-The intrinsic-energy localization bound, passage to chartwise weak limits,
-manifold weak-kernel rigidity, and Poincaré inequality are proved. Completed
-variational solvability and the transposed Poisson equation are also proved;
-identifying the solution with a smooth function solving the classical equation
-remains separate work.
-
-## Sources and contribution
-
-Mathematical source: De Lellis and Topping,
-[Almost-Schur lemma](https://arxiv.org/abs/1003.3527v2), Theorem 0.1 (published
-Theorem 1.1). This is source-based work, not a new mathematical discovery.
-The pointwise trace decomposition is supporting linear algebra, not a
-standalone research-interest claim.
-
-The new modules were developed with Codex at the maintainer's request.
-The tensor and local differential/integration modules import only Mathlib;
-the volume and Sobolev modules also import the attributed external subset.
-The existing `schur-rigidity/` proof library is planned integration material,
-not yet imported. Its immutable provenance must be recorded if reused.
-The separate migration patch preserves the external project's attribution and
-license; it does not imply its author's endorsement or review.
-
-The local Green proof uses Mathlib's general Fréchet integration-by-parts
-theorem (Sébastien Gouëzel), and density transport uses Mathlib's Jacobian
-change-of-variables theorem (also Gouëzel). Jacobi's formula is derived here
-from Mathlib's continuous-multilinear derivative and Cramer/adjugate identities.
-These are classical supporting results, not separate research-interest claims.
+The new modules were developed with Codex under the direction of the named
+human authors. Automated Lean, Comparator, NanoDa and CI results are
+mechanical evidence, not independent expert review.
