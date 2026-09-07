@@ -1,4 +1,5 @@
 module
+public import AlmostSchur.GeometryComparison
 public import AlmostSchur.Gradient
 public import AlmostSchur.Hessian
 public import AlmostSchur.HilbertSchmidt

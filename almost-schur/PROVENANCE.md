@@ -4,8 +4,8 @@
 
 The selected result is the classical De Lellis--Topping almost-Schur lemma:
 
-> P. De Lellis and P. M. Topping, *Almost-Schur lemma*, Calc. Var. 42
-> (2011), Theorem 1.1, DOI [10.1007/s00526-011-0413-z](https://doi.org/10.1007/s00526-011-0413-z).
+> C. De Lellis and P. M. Topping, *Almost-Schur lemma*, Calc. Var. 43
+> (2012), 347–354, Theorem 1.1, DOI [10.1007/s00526-011-0413-z](https://doi.org/10.1007/s00526-011-0413-z).
 
 The Lean development is a source-based formalization of that theorem. It makes
 no claim of mathematical originality, priority, optimality beyond the cited
@@ -21,6 +21,13 @@ local hashes, adaptation hashes and permitted changes are recorded in
 `AlmostSchur/CurvatureVendor/PROVENANCE.json`; the local provenance script
 recomputes them. The inherited files retain their source notices and are
 supporting infrastructure, not the selected almost-Schur result.
+
+`AlmostSchur/GeometryStatements.lean` and the independent definitions in
+`Challenge.lean` adapt the same source's canonical smooth-extension construction
+to the tangent bundle. `AlmostSchurEntry.Geometry.curvature_eq` proves that the
+explicit commutator agrees with the inherited bundled curvature. The new
+Ricci contraction, tensor norm, volume and Einstein identifications connect
+the independently stated theorem to the complete implementation.
 
 `RellichKondrachov/` contains the 36-file adapted subset of Adam Benenson's
 Apache-2.0 project at immutable commit

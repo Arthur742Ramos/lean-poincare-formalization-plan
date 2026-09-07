@@ -2,10 +2,19 @@
   "challenge_module": "Challenge",
   "solution_module": "Solution",
   "theorem_names": [
-    "AlmostSchurEntry.almostSchur_from_identities",
-    "AlmostSchurEntry.almostSchur_equality_data"
+    "AlmostSchurEntry.Geometry.almostSchur"
   ],
-  "definition_names": [],
+  "definition_names": [
+    "AlmostSchurEntry.Geometry.extensionBump",
+    "AlmostSchurEntry.Geometry.extension",
+    "AlmostSchurEntry.Geometry.curvature",
+    "AlmostSchurEntry.Geometry.ricci",
+    "AlmostSchurEntry.Geometry.scalar",
+    "AlmostSchurEntry.Geometry.traceFreeRicciSq",
+    "AlmostSchurEntry.Geometry.isRiemannianVolume",
+    "AlmostSchurEntry.Geometry.average",
+    "AlmostSchurEntry.Geometry.geometricStatement"
+  ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": true
 }

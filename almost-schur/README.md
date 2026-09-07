@@ -12,7 +12,7 @@ nonnegative Ricci curvature:
 It also proves the equality characterization: equality holds exactly when
 the metric-raised trace-free Ricci operator vanishes everywhere, i.e. the
 metric is Einstein. This is a formalization of the classical theorem of
-Pierre De Lellis and Peter M. Topping, not a new mathematical result or a
+Camillo De Lellis and Peter M. Topping, not a new mathematical result or a
 priority claim.
 
 ## Main results
@@ -21,9 +21,10 @@ priority claim.
   `AlmostSchur/AlmostSchurFinal.lean` is the complete geometric inequality.
 - `AlmostSchur.almostSchur_equality_iff` in
   `AlmostSchur/AlmostSchurEquality.lean` is the equality/rigidity theorem.
-- `AlmostSchurEntry.almostSchur_from_identities` and
-  `AlmostSchurEntry.almostSchur_equality_data` are the small,
-  Mathlib-only Comparator surface in `Challenge.lean` and `Solution.lean`.
+- `AlmostSchurEntry.Geometry.almostSchur` is the independent Mathlib-only
+  geometric theorem in `Challenge.lean` and `Solution.lean`. It constructs
+  the connection and volume and proves both conclusions above. Comparator
+  checks the theorem and all nine definitions used to state it.
 
 The implementation proves, rather than assumes, the normalized smooth
 metric-density volume, global integration by parts, Poincare and weak Poisson
@@ -37,10 +38,18 @@ forms, or formalize Ricci flow.
 
 ## Submission surface
 
-`Challenge.lean` imports only Mathlib and states the sharp cancellation and
-equality-data endpoints. `Solution.lean` proves the same declarations from
-the completed local development and exposes the concrete geometric endpoints.
-`comparator.json` selects both Challenge/Solution declarations. The selected
+`Challenge.lean` imports only Mathlib. It defines curvature by the covariant
+derivative commutator, defines Ricci and scalar curvature by frame contractions,
+and characterizes volume by the metric Gram determinant in charts. Its theorem
+constructs a metric-compatible torsion-free connection and finite positive
+Riemannian volume; under nonnegative Ricci curvature and dimension greater
+than two, it proves the inequality and the Einstein equality characterization.
+Poisson solvability and the Bianchi/Bochner identities are not hypotheses.
+
+`Solution.lean` proves this statement from the complete development through
+the identifications in `AlmostSchur/GeometryComparison.lean`.
+`comparator.json` selects the geometric theorem and all nine definitions,
+including `geometricStatement` itself. The selected
 project is the repository-relative `almost-schur` directory;
 `formalization.yaml` records the source, attribution, adapted dependencies,
 scope and AI-assisted development disclosure.
@@ -49,6 +58,8 @@ The result is source-based and distinct from the earlier `contracted-bianchi`
 and `schur-rigidity` entries. The inherited curvature core and adapted
 Rellich--Kondrachov files retain their immutable provenance and author notices.
 See [PROVENANCE.md](PROVENANCE.md) and [SUBMISSION.md](SUBMISSION.md).
+The semantic audit and the repair of the earlier algebra-only selection are
+recorded in [SEMANTIC-AUDIT.md](SEMANTIC-AUDIT.md).
 
 ## Reproduction
 
@@ -59,15 +70,17 @@ Pinned Lean: **4.33.0**. Pinned Mathlib:
 lake exe cache get
 lake build
 lake env lean --src-deps Challenge.lean
+python3 scripts/check-challenge-boundary.py
 python3 scripts/check-vendored.py
 python3 scripts/check-curvature-provenance.py
 python3 scripts/check-axioms.py
 python3 scripts/validate-formalization.py
+python3 scripts/check-entry-regressions.py
 bash scripts/verify-comparator.sh
 ```
 
-The local Comparator replay explicitly opts into the unsandboxed macOS
-fallback only when `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1` is set. Hosted Linux
+On macOS, use `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh`
+to explicitly opt into the unsandboxed local fallback. Hosted Linux
 verification must use real Landrun. Local checks, hosted mechanical
 verification, editorial review and registry registration are separate states;
 see [VERIFICATION.md](VERIFICATION.md) and [SUBMISSION.md](SUBMISSION.md).

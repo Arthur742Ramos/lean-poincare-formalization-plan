@@ -37,11 +37,12 @@ jobs:
       - name: Check package metadata, provenance, and Challenge boundary
         run: |
           python3 almost-schur/scripts/validate-formalization.py
+          python3 almost-schur/scripts/check-entry-regressions.py
           python3 almost-schur/scripts/check-vendored.py
           python3 almost-schur/scripts/check-curvature-provenance.py
           python3 almost-schur/scripts/check-challenge-boundary.py
       - name: Build the complete development
-        run: lake build AlmostSchur
+        run: lake build AlmostSchur Challenge Solution
         working-directory: almost-schur
       - name: Check complete public axiom surface and negative controls
         run: |

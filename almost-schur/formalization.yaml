@@ -30,7 +30,7 @@ classification:
 sources:
   - title: "Almost-Schur lemma"
     authors:
-      - "Pierre De Lellis"
+      - "Camillo De Lellis"
       - "Peter M. Topping"
     id: "10.1007/s00526-011-0413-z"
     type: "paper"
@@ -49,12 +49,14 @@ related_formalizations:
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/12cebb809524d0cd185c6cd7bcb5b73d3562bce1/contracted-bianchi"
     relationship: "builds-on"
     note: >-
-      The seven files in AlmostSchur/CurvatureVendor/ adapt the immutable
+      The eight files in AlmostSchur/CurvatureVendor/ adapt the immutable
       contracted-bianchi curvature core at this repository commit. Their
       source identities and adaptations are recorded in
       AlmostSchur/CurvatureVendor/PROVENANCE.json. The inherited curvature
       lemmas are supporting infrastructure; the selected result here is the
-      almost-Schur inequality and equality package.
+      almost-Schur inequality and equality package. GeometryStatements.lean
+      and its independent copy in Challenge.lean also adapt the canonical
+      smooth-extension construction from that curvature core.
   - id: "https://github.com/abenenson/rellich-kondrachov/tree/70f85d4c1bf99c6e7d61e8be4daa6f3664d08d23"
     relationship: "adapts"
     note: >-
@@ -85,6 +87,15 @@ status:
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
   main_results:
+    - declaration: "AlmostSchurEntry.Geometry.almostSchur"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: >-
+        Comparator-selected geometric theorem: constructs the metric-compatible
+        torsion-free connection and finite positive chart-density volume,
+        then proves the almost-Schur inequality and Einstein equality case
+        under nonnegative Ricci curvature and dimension greater than two.
     - declaration: "AlmostSchur.almostSchur_bound_complete"
       file: "AlmostSchur/AlmostSchurFinal.lean"
       sorry_count: 0
@@ -99,7 +110,7 @@ status:
 automation:
   methods:
     - method: "agent"
-      models: ["GPT-5"]
+      models: ["GPT-5", "GPT-6"]
       framework: "Codex with Lean 4.33.0 and pinned Mathlib"
       tool_setup: >-
         AI-assisted proof engineering, modular integration, pinned local builds,
@@ -132,22 +143,37 @@ fidelity:
     identities for the constructed Levi--Civita connection instead of taking
     them as theorem hypotheses. The displayed equality characterization is
     the Einstein condition in metric-raised trace-free form; no optimality or
-    classification theorem is included.
+    classification theorem is included. The independent Challenge expresses
+    the result by constructing the connection and volume before stating the
+    conditional inequality and equality theorem. Its curvature is the actual
+    covariant-derivative commutator, Ricci and scalar curvature are explicit
+    orthonormal-frame contractions, and volume is characterized by its chart
+    Gram-determinant density. GeometryComparison.lean proves their agreement
+    with the implementation; no analytic bridge is assumed in the Challenge.
 
 review:
   status: "self-assessed"
-  reviewers: ["none"]
+  reviewers: []
   notes: >-
-    The selected Challenge declarations are the dependency-independent sharp
-    cancellation and equality-data endpoints. Solution.lean proves them from
-    the completed implementation and also exports the concrete manifold-level
-    inequality and equality theorem. The complete source-based theorem is
+    The selected Challenge theorem contains the complete manifold-level
+    inequality and Einstein equality characterization, together with the
+    construction of its connection and volume. Comparator selects that
+    theorem and all nine geometric definitions. The earlier algebra-only
+    selection was replaced during the semantic audit. The source-based theorem is
     classical; this project makes no originality, priority, endorsement or
     independent human-review claim.
 
 alignment:
   namespace: "AlmostSchurEntry Challenge/Solution surface; AlmostSchur implementation namespace"
   statements:
+    - source: "De Lellis--Topping, Theorem 1.1 and equality case"
+      lean: "AlmostSchurEntry.Geometry.almostSchur"
+      module: "Challenge.lean and Solution.lean"
+      status: "proved"
+      note: >-
+        Independent geometric statement, with constructed Levi-Civita connection
+        and chart-density volume, the sharp coefficient and Einstein equality.
+        All nine geometric definitions are selected for Comparator comparison.
     - source: "De Lellis--Topping, Theorem 1.1"
       lean: "AlmostSchur.almostSchur_bound_complete"
       module: "AlmostSchur/AlmostSchurFinal.lean"
@@ -159,18 +185,18 @@ alignment:
       status: "proved"
       note: "Equality is equivalent to vanishing metric-raised trace-free Ricci everywhere."
     - source: "De Lellis--Topping, sharp cancellation"
-      lean: "AlmostSchurEntry.almostSchur_from_identities"
-      module: "Challenge.lean and Solution.lean"
+      lean: "AlmostSchur.almostSchur_from_identities"
+      module: "AlmostSchur/AlmostSchurAlgebra.lean"
       status: "proved"
-      note: "Comparator-selected reduction from the contracted-Bianchi, Cauchy--Schwarz, Bochner and trace identities."
+      note: "Supporting algebraic reduction, not the selected geometric theorem."
     - source: "De Lellis--Topping, equality bookkeeping"
-      lean: "AlmostSchurEntry.almostSchur_equality_data"
-      module: "Challenge.lean and Solution.lean"
+      lean: "AlmostSchur.almostSchur_equality_data"
+      module: "AlmostSchur/AlmostSchurAlgebra.lean"
       status: "proved"
-      note: "Comparator-selected equality-data endpoint exposing equality in every intermediate estimate."
+      note: "Supporting equality bookkeeping, not the selected geometric theorem."
 
 acknowledgements: >-
-  Mathlib contributors; Pierre De Lellis and Peter M. Topping for the
+  Mathlib contributors; Camillo De Lellis and Peter M. Topping for the
   almost-Schur theorem; the contributors to the immutable contracted-bianchi
   curvature formalization; Adam Benenson for the adapted Rellich--Kondrachov
   source library; and the Palomar Registry project for the independent

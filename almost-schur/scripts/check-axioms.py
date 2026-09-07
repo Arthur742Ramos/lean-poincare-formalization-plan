@@ -1,5 +1,6 @@
 """Fail closed on missing declarations or unapproved transitive Lean axioms."""
 from pathlib import Path
+import json
 import re
 import subprocess
 import tempfile
@@ -137,11 +138,15 @@ for path in (ROOT / "AlmostSchur").rglob("*.lean"):
         raise ValueError("proof-hole token in " + str(path))
     expected.update(declaration_names(source))
 own_count = len(expected)
+config = json.loads((ROOT / "comparator.json").read_text())
+selected = set(config["theorem_names"]) | set(config.get("definition_names", []))
+selected_extra_count = len(selected - expected)
+expected |= selected
 expected |= VENDORED_ENDPOINTS
 with tempfile.TemporaryDirectory(prefix="almost-schur-axioms-") as temp_dir:
     audit_path = Path(temp_dir) / "CheckAllProjectAxioms.lean"
     audit_path.write_text(
-        "import AlmostSchur\n" +
+        "import Solution\n" +
         "\n".join(f"#print axioms {name}" for name in sorted(expected)) +
         "\n"
     )
@@ -159,4 +164,5 @@ for bad in ("", "'fixture' depends on axioms: [sorryAx]",
         continue
     raise AssertionError("negative control accepted")
 print(f"Checked all {own_count} public project declarations and "
+      f"{selected_extra_count} additional selected declarations and "
       f"{len(VENDORED_ENDPOINTS)} vendored endpoints; four negative controls rejected.")

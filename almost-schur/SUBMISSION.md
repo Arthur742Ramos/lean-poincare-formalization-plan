@@ -12,8 +12,17 @@ Title: **De Lellis--Topping almost-Schur inequality**
   of `contracted-bianchi` or `schur-rigidity`.
 - Relationship: maintainer of the substantive formalization.
 
-Exact source commit: `8c8c0194519cb189931ae29147d1927e351b32ce`. Do not submit
-a moving branch or a working tree.
+The earlier artifact `8c8c0194519cb189931ae29147d1927e351b32ce` and its
+documentation follow-up `539089aab6a9444ab401ef6136acd292f6490745` are
+**superseded**: they selected only algebraic reductions for Comparator and
+contained incorrect bibliographic metadata. Their successful builds do not
+establish readiness of this repaired geometric entry.
+
+The current revision selects `AlmostSchurEntry.Geometry.almostSchur` and all
+nine geometric definitions. After committing and pushing this revision,
+resolve `git rev-parse HEAD` and use that full 40-character SHA for intake.
+The final handoff must name it explicitly; never submit a moving branch or
+an uncommitted working tree. See [SEMANTIC-AUDIT.md](SEMANTIC-AUDIT.md).
 
 ## Delivery gates
 
@@ -31,15 +40,14 @@ public logs. The review remains private until an explicit registration action.
 
 ## Current record
 
-- Local source and package preparation: complete; the local checks listed in
-  `VERIFICATION.md` passed at the exact commit above.
-- Pushed commit: `8c8c0194519cb189931ae29147d1927e351b32ce` on
-  `arthur742ramos-almost-schur-analysis`.
+- Source: the repaired geometric statement and proof in this revision.
+- Verification evidence and exact scope: `VERIFICATION.md`.
+- Delivery branch: `arthur742ramos-almost-schur-analysis`.
 - Pull request: [#8](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/pull/8).
-- Hosted verification: complete for this commit; see the two hosted workflow
-  records in `VERIFICATION.md`.
+- Hosted verification: use the checks attached to the final pushed SHA;
+  earlier runs at the superseded artifacts do not verify this revision.
 - Palomar intake: none for this package; artifact-specific authorization is
-  still required before `/api/submit`.
+  still required before `/api/submit` under the repository's submission instructions.
 - Editorial review: none.
 - Registration: none.
 

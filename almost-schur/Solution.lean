@@ -2,51 +2,28 @@ module
 
 public import AlmostSchur
 
-public section
+@[expose] public noncomputable section
+open Bundle FiberBundle Set MeasureTheory
+open scoped Manifold ContDiff BigOperators
 
-/-!
-# Checked sharp almost-Schur solution
+namespace AlmostSchurEntry.Geometry
 
-The selected declarations are proved by the implementation's explicit
-finite-dimensional cancellation.  The same package also contains the full
-geometric theorem: the actual normalized Riemannian volume, constructed
-Levi--Civita connection, nonnegative Ricci hypothesis, smooth Poisson
-representative, integrated Bochner identity, and equality rigidity are all
-discharged in the imported development rather than supplied as assumptions.
--/
+/-- De Lellis--Topping almost-Schur inequality and Einstein equality case,
+with the connection and volume constructed from the smooth Riemannian metric. -/
+theorem almostSchur
+    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+    [FiniteDimensional ℝ E] [CompleteSpace E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] [I.Boundaryless] [T2Space M]
+    [RiemannianBundle (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I]
+    [IsContMDiffRiemannianBundle I ∞ E (TangentSpace I : M → Type _)]
+    [MeasurableSpace M] [BorelSpace M]
+    [Nonempty M] [LindelofSpace M] [CompactSpace M] [PreconnectedSpace M] :
+    geometricStatement (I := I) (M := M) := by
+  exact geometricStatement_proved
 
-namespace AlmostSchurEntry
-
-theorem almostSchur_from_identities {d A B Hess Ric H P : ℝ}
-    (hd : 2 < d) (hA : 0 ≤ A) (hB : 0 ≤ B) (hRic : 0 ≤ Ric)
-    (hcontracted : (d - 2) * A = 2 * d * P)
-    (hcauchy : P ^ 2 ≤ B * H)
-    (hbochner : Hess + Ric = A)
-    (htrace : d * H = d * Hess - A) :
-    A ≤ (4 * d * (d - 1) / (d - 2) ^ 2) * B := by
-  exact AlmostSchur.almostSchur_from_identities hd hA hB hRic hcontracted
-    hcauchy hbochner htrace
-
-theorem almostSchur_equality_data {d A B Hess Ric H P : ℝ}
-    (hd : 2 < d) (hA : 0 ≤ A) (hB : 0 ≤ B) (hRic : 0 ≤ Ric)
-    (hcontracted : (d - 2) * A = 2 * d * P)
-    (hcauchy : P ^ 2 ≤ B * H)
-    (hbochner : Hess + Ric = A)
-    (htrace : d * H = d * Hess - A)
-    (heq : A = (4 * d * (d - 1) / (d - 2) ^ 2) * B) :
-    B = 0 ∨
-      (0 < A ∧ 0 < B ∧ d * H = (d - 1) * A ∧ Ric = 0 ∧
-        P ^ 2 = B * H ∧ (d - 2) * P = 2 * (d - 1) * B) := by
-  exact AlmostSchur.almostSchur_equality_data hd hA hB hRic hcontracted
-    hcauchy hbochner htrace heq
-
-/-! These are the concrete manifold-level endpoints carried by the same
-development.  They are intentionally not restated as axiomatic Challenge
-surface declarations: their local volume and elliptic constructions remain
-auditable in the implementation modules. -/
-
-export AlmostSchur (almostSchur_bound_complete almostSchur_equality_iff)
-
-end AlmostSchurEntry
-
-end
+end AlmostSchurEntry.Geometry

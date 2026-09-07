@@ -16,11 +16,10 @@ absolutely continuous with respect to Euclidean volume.  Nested compact balls
 and a smooth plateau then produce a smooth representative on a neighborhood of
 each point; a countable Lindelöf subcover glues these representatives.
 
-The only regularity input left visible at this assembly boundary is the smooth
-coordinate representative of the forcing.  This is deliberately an explicit
-input: the existing curvature layer currently exposes scalar curvature at
-order one, while the arbitrary-order elliptic bootstrap consumes smooth
-forcing.
+The intermediate assembly takes smooth coordinate forcing explicitly.
+`smooth_coordinate_forcing` below derives that regularity from the smooth
+metric and scalar-curvature regularity theorem. Consequently
+`almostSchur_bound_complete` has no additional forcing-regularity hypothesis.
 -/
 
 @[expose] public noncomputable section
