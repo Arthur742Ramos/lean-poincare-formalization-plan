@@ -46,6 +46,30 @@ theorem hilbertSchmidtSq_nonneg (A : V →L[ℝ] V) : 0 ≤ hilbertSchmidtSq A :
   rw [hilbertSchmidtSq_eq_sum_norm_sq A (stdOrthonormalBasis ℝ V)]
   positivity
 
+theorem hilbertSchmidtSq_eq_zero_iff (A : V →L[ℝ] V) :
+    hilbertSchmidtSq A = 0 ↔ A = 0 := by
+  constructor
+  · intro h
+    let b := stdOrthonormalBasis ℝ V
+    have hsum : (∑ i, ‖A (b i)‖ ^ 2) = 0 := by
+      rw [← hilbertSchmidtSq_eq_sum_norm_sq A b, h]
+    have hi : ∀ i, ‖A (b i)‖ ^ 2 = 0 := by
+      intro i
+      have hle : ‖A (b i)‖ ^ 2 ≤ ∑ j, ‖A (b j)‖ ^ 2 := by
+        exact Finset.single_le_sum (fun j _ => sq_nonneg ‖A (b j)‖)
+          (Finset.mem_univ i)
+      rw [hsum] at hle
+      exact le_antisymm hle (sq_nonneg _)
+    apply ContinuousLinearMap.coe_injective
+    apply b.toBasis.ext
+    intro i
+    have hn : ‖A (b i)‖ = 0 := by
+      nlinarith [hi i, norm_nonneg (A (b i))]
+    change A (b i) = 0
+    exact norm_eq_zero.mp hn
+  · intro h
+    simp [h, hilbertSchmidtSq]
+
 /-- The trace-free part is defined only by intrinsic trace and dimension. -/
 def traceFree (A : V →L[ℝ] V) : V →L[ℝ] V :=
   A - (LinearMap.trace ℝ V A.toLinearMap / Module.finrank ℝ V) •

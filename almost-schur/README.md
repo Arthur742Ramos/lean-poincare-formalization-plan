@@ -1,85 +1,98 @@
-# Almost-Schur: geometric-analysis development
+# De Lellis--Topping almost-Schur inequality
 
-Target: the De Lellis–Topping almost-Schur inequality and its Einstein equality
-case on nonempty connected closed smooth Riemannian manifolds of dimension at
-least three with nonnegative Ricci curvature.
+This project formalizes the sharp almost-Schur inequality for a nonempty
+connected closed smooth Riemannian manifold of dimension at least three with
+nonnegative Ricci curvature:
 
-**Incomplete development; not a Palomar submission artifact.** There is no
-Challenge, Solution or Comparator in this directory yet. The full inequality
-and equality rigidity are not proved. Do not submit these foundations as the
-research theorem.
+```text
+∫ (R - average R)^2 ≤ 4 n (n - 1) / (n - 2)^2
+  * ∫ |Ric - (R / n) g|^2.
+```
 
-## Proved foundations
+It also proves the equality characterization: equality holds exactly when
+the metric-raised trace-free Ricci operator vanishes everywhere, i.e. the
+metric is Einstein. This is a formalization of the classical theorem of
+Camillo De Lellis and Peter M. Topping, not a new mathematical result or a
+priority claim.
 
-- `AlmostSchur.Gradient`: actual differential-to-gradient Riesz duality,
-  uniqueness, zero-gradient characterization, and norm identities.
-- `AlmostSchur.Hessian`: connection Hessian and Laplacian, with an
-  orthonormal trace formula independent of basis/index type.
-- `AlmostSchur.HilbertSchmidt`: intrinsic squared tensor norm, its full
-  double-contraction formula, nonnegativity, and exact trace-free decomposition.
-- `AlmostSchur.HessianNorm`: the pointwise trace-free norm identity for the
-  actual covariant Hessian. This is not an integrated Bochner formula.
-- `AlmostSchur.Volume`: intrinsic Hausdorff volume is positive on neighborhoods
-  and has finite positive total mass on nonempty compact boundaryless manifolds.
-  Compatibility with the smooth Riemannian density remains unproved.
+## Main results
 
-The Hessian is defined relative to a supplied connection; symmetry and smooth
-regularity are not yet proved here. The final result must use Levi–Civita.
-All definitions are total as in Mathlib; differentiability obligations must be
-discharged when interpreting or differentiating them.
+- `AlmostSchur.almostSchur_bound_complete` in
+  `AlmostSchur/AlmostSchurFinal.lean` is the complete geometric inequality.
+- `AlmostSchur.almostSchur_equality_iff` in
+  `AlmostSchur/AlmostSchurEquality.lean` is the equality/rigidity theorem.
+- `AlmostSchurEntry.Geometry.almostSchur` is the independent Mathlib-only
+  geometric theorem in `Challenge.lean` and `Solution.lean`. It constructs
+  the connection and volume and proves both conclusions above. Comparator
+  checks the theorem and all nine definitions used to state it.
+
+The implementation proves, rather than assumes, the normalized smooth
+metric-density volume, global integration by parts, Poincare and weak Poisson
+solvability, smooth local representatives of the Poisson solution, the
+integrated Bochner identity, the actual contracted-Bianchi bridge, the sharp
+finite-dimensional cancellation, and the equality rigidity argument.
+
+The project does not identify this normalized density measure with dimensional
+Hausdorff measure, prove optimality of the numerical constant, classify space
+forms, or formalize Ricci flow.
+
+## Submission surface
+
+`Challenge.lean` imports only Mathlib. It defines curvature by the covariant
+derivative commutator, defines Ricci and scalar curvature by frame contractions,
+and characterizes volume by the metric Gram determinant in charts. Its theorem
+constructs a metric-compatible torsion-free connection and finite positive
+Riemannian volume; under nonnegative Ricci curvature and dimension greater
+than two, it proves the inequality and the Einstein equality characterization.
+Poisson solvability and the Bianchi/Bochner identities are not hypotheses.
+
+`Solution.lean` proves this statement from the complete development through
+the identifications in `AlmostSchur/GeometryComparison.lean`.
+`comparator.json` selects the geometric theorem and all nine definitions,
+including `geometricStatement` itself. The selected
+project is the repository-relative `almost-schur` directory;
+`formalization.yaml` records the source, attribution, adapted dependencies,
+scope and AI-assisted development disclosure.
+
+The result is source-based and distinct from the earlier `contracted-bianchi`
+and `schur-rigidity` entries. The inherited curvature core and adapted
+Rellich--Kondrachov files retain their immutable provenance and author notices.
+See [PROVENANCE.md](PROVENANCE.md) and [SUBMISSION.md](SUBMISSION.md).
+The semantic audit and the repair of the earlier algebra-only selection are
+recorded in [SEMANTIC-AUDIT.md](SEMANTIC-AUDIT.md).
 
 ## Reproduction
 
-Lean `v4.33.0`; Mathlib `db584cd6d46c92f209a44c0f1c829460d327499d`.
+Pinned Lean: **4.33.0**. Pinned Mathlib:
+`db584cd6d46c92f209a44c0f1c829460d327499d`.
 
 ```sh
-cd almost-schur
 lake exe cache get
 lake build
-python3 scripts/check-axioms.py
+lake env lean --src-deps Challenge.lean
+python3 scripts/check-challenge-boundary.py
 python3 scripts/check-vendored.py
+python3 scripts/check-curvature-provenance.py
+python3 scripts/check-axioms.py
+python3 scripts/validate-formalization.py
+python3 scripts/check-entry-regressions.py
+bash scripts/verify-comparator.sh
 ```
 
-Local development reused an ignored dependency-cache symlink; committed source
-and manifest do not require a sibling project. The Linux workflow reconstructs
-dependencies from the pinned manifest.
+On macOS, use `PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh`
+to explicitly opt into the unsandboxed local fallback. Hosted Linux
+verification must use real Landrun. Local checks, hosted mechanical
+verification, editorial review and registry registration are separate states;
+see [VERIFICATION.md](VERIFICATION.md) and [SUBMISSION.md](SUBMISSION.md).
 
-The tensor-only milestone at `e9670df01f616070babfbfd5ddff6748ba2d4970`
-passed [Linux CI](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/34055014715).
-The volume extension passed a local build (3493 jobs) and the vendored-source
-check. All 28 public declarations' transitive axioms
-are confined to `propext`, `Classical.choice`, `Quot.sound`. The check rejects
-missing reports and three classes of unapproved axioms. Hosted CI is separate
-evidence and must be checked at the exact source commit.
-The volume/chart modules retain non-fatal local-instance style warnings.
+## Sources and attribution
 
-## Remaining work, in order
+The mathematical source is De Lellis and Topping, [*Almost-Schur
+lemma*](https://doi.org/10.1007/s00526-011-0413-z), Theorem 1.1. The
+development also uses the immutable contracted-Bianchi curvature snapshot and
+an adapted subset of Adam Benenson's Rellich--Kondrachov project. Neither
+dependency's contributors are presented as endorsing this formalization.
 
-1. Intrinsic volume-density compatibility (finite positive total mass is proved).
-2. Smooth gradient/Hessian theory, manifold integration by parts.
-3. Mean-zero coercivity, weak Poisson existence and smooth elliptic regularity.
-4. Integrated Bochner and the geometric almost-Schur inequality.
-5. Einstein equality rigidity, exact source/hypothesis audit.
-6. Only then: independent Challenge/Solution packaging and kernel replay.
-
-The external compactness library was rebuilt and migrated experimentally;
-see [dependency evidence](dependencies/README.md). Four adapted volume/chart
-modules are now vendored with immutable provenance and checksum checks. The
-full compactness library is not yet imported. Nothing here assumes its theorems
-to obtain the target.
-
-## Sources and contribution
-
-Mathematical source: De Lellis and Topping,
-[Almost-Schur lemma](https://arxiv.org/abs/1003.3527v2), Theorem 0.1 (published
-Theorem 1.1). This is source-based work, not a new mathematical discovery.
-The pointwise trace decomposition is supporting linear algebra, not a
-standalone research-interest claim.
-
-The new modules were developed with Codex at the maintainer's request.
-The tensor modules import only Mathlib; the volume module also imports the
-four attributed, adapted external chart/volume files.
-The existing `schur-rigidity/` proof library is planned integration material,
-not yet imported. Its immutable provenance must be recorded if reused.
-The separate migration patch preserves the external project's attribution and
-license; it does not imply its author's endorsement or review.
+The new modules were developed with Codex under the direction of the named
+human authors. Automated Lean, Comparator, NanoDa and CI results are
+mechanical evidence, not independent expert review.
