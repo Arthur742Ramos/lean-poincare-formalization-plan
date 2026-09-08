@@ -9,7 +9,7 @@ open Lean Elab Command
 
 private def candidateModule (name : Name) : Bool :=
   ["LichnerowiczObata", "AlmostSchur", "RellichKondrachov"].any
-    (fun prefix => name.toString.startsWith prefix)
+    (fun modulePrefix => name.toString.startsWith modulePrefix)
 
 run_elab do
   let env ← getEnv
@@ -18,7 +18,7 @@ run_elab do
     | throwError "missing independently compared definition"
   unless info.type == .sort .zero do
     throwError "selected definition must have the closed type Prop"
-  let mut proofs := 0
+  let mut proofs : Nat := 0
   for name in info.value.getUsedConstants do
     let some idx := env.getModuleIdxFor? name
       | throwError "missing defining module for {name}"
