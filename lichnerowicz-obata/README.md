@@ -523,3 +523,7 @@ trivialization identifies the coordinate metric with the intrinsic inner
 product, the chain rule transfers angular pairings to intrinsic parameters,
 and rescaling to unit directions cancels the radius-squared factor. These
 lemmas still need to be specialized in the complete spherical comparison.
+The actual normal-chart/radial-flow composite now has a proved differentiability
+theorem on its regular parameter domain. Its intrinsic angular-metric theorem
+uses that result and the actual tangent trivialization, eliminating separate
+differentiability and parameter-compatibility assumptions from this step.

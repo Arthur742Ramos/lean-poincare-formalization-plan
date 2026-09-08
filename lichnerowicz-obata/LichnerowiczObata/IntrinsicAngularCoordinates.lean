@@ -19,6 +19,31 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 
+omit [RiemannianBundle (TangentSpace I : M → Type _)] in
+/-- The actual normal-chart/radial-flow composite is differentiable at
+every parameter whose starting point and destination radius are regular. -/
+theorem mdifferentiableAt_normal_radial_composite
+    {f : M → ℝ} (hf : Continuous f) {a ℓ : ℝ} {η : M × ℝ → M}
+    (hη : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) I 1 η
+      ({x | -a < f x ∧ f x < a} ×ˢ Ioo 0 ℓ))
+    (c : M) {e : E → E} {u : E} (he : DifferentiableAt ℝ e u)
+    (hout : e u ∈ (extChartAt I c).target)
+    (hreg : -a < f ((extChartAt I c).symm (e u)) ∧
+      f ((extChartAt I c).symm (e u)) < a)
+    {r : ℝ} (hr : r ∈ Ioo 0 ℓ) :
+    MDifferentiableAt 𝓘(ℝ, E) I (fun y => η ((extChartAt I c).symm (e y), r)) u := by
+  have hi : MDifferentiableAt 𝓘(ℝ, E) I (extChartAt I c).symm (e u) := by
+    simpa only [I.range_eq_univ, mdifferentiableWithinAt_univ] using
+      (mdifferentiableWithinAt_extChartAt_symm (I := I) (x := c) hout)
+  have hψ := hi.comp u (mdifferentiableAt_iff_differentiableAt.mpr he)
+  have hU : IsOpen {x : M | -a < f x ∧ f x < a} :=
+    (isOpen_lt continuous_const hf).inter (isOpen_lt hf continuous_const)
+  have hpt : ((extChartAt I c).symm (e u), r) ∈
+      {x : M | -a < f x ∧ f x < a} ×ˢ Ioo 0 ℓ := ⟨hreg, hr⟩
+  have hd := ((hη _ hpt).contMDiffAt ((hU.prod isOpen_Ioo).mem_nhds hpt)).mdifferentiableAt
+    (by norm_num)
+  exact hd.comp u (hψ.prodMk mdifferentiableAt_const)
+
 omit [I.Boundaryless] in
 /-- The forward tangent trivialization identifies the coordinate metric
 with the intrinsic inner product at the chart base point. -/
@@ -101,5 +126,37 @@ theorem angular_metric_rescale_unit {Φ : P → M} {u w v : P} {R B : ℝ}
   have hc : R ^ 2 * inner ℝ w v / R ^ 2 = inner ℝ w v := by field_simp
   rw [hc] at he
   exact he
+
+/-- Intrinsic angular parameters for the actual normal-chart/radial-flow
+composite. Differentiability and compatibility of the parameter change are
+derived from the chart, flow, and tangent trivialization. -/
+theorem normal_radial_composite_intrinsic_angular_metric
+    {f : M → ℝ} (hf : Continuous f) {a ℓ B : ℝ} {η : M × ℝ → M}
+    (hη : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) I 1 η
+      ({x | -a < f x ∧ f x < a} ×ˢ Ioo 0 ℓ))
+    (c : M) {z : E} (hz : z ∈ (extChartAt I c).target)
+    {u w v : TM ((extChartAt I c).symm z)} {e : E → E}
+    (he : DifferentiableAt ℝ e
+      ((trivializationAt E TM c).continuousLinearMapAt ℝ ((extChartAt I c).symm z) u))
+    (hout : e ((trivializationAt E TM c).continuousLinearMapAt ℝ
+      ((extChartAt I c).symm z) u) ∈ (extChartAt I c).target)
+    (hreg : let x := (extChartAt I c).symm (e ((trivializationAt E TM c).continuousLinearMapAt ℝ
+      ((extChartAt I c).symm z) u)); -a < f x ∧ f x < a)
+    {r : ℝ} (hr : r ∈ Ioo 0 ℓ) (hw : inner ℝ u w = 0) (hv : inner ℝ u v = 0)
+    (hmetric : let L := (trivializationAt E TM c).continuousLinearMapAt ℝ ((extChartAt I c).symm z)
+      let g := coordinateMetricBilinear (I := I) c z
+      let ψ := fun y => η ((extChartAt I c).symm (e y), r)
+      ∀ j k : E, g (L u) j = 0 → g (L u) k = 0 →
+        inner ℝ (mfderiv 𝓘(ℝ, E) I ψ (L u) j) (mfderiv 𝓘(ℝ, E) I ψ (L u) k) =
+          B * (g j k / g (L u) (L u))) :
+    let L := (trivializationAt E TM c).continuousLinearMapAt ℝ ((extChartAt I c).symm z)
+    let Γ := fun y => η ((extChartAt I c).symm (e (L y)), r)
+    inner ℝ (mfderiv 𝓘(ℝ, TM ((extChartAt I c).symm z)) I Γ u w)
+      (mfderiv 𝓘(ℝ, TM ((extChartAt I c).symm z)) I Γ u v) =
+        B * (inner ℝ w v / ‖u‖ ^ 2) := by
+  let L := (trivializationAt E TM c).continuousLinearMapAt ℝ ((extChartAt I c).symm z)
+  have hψ := mdifferentiableAt_normal_radial_composite hf hη c he hout hreg hr
+  exact angular_metric_precompose_linear L (coordinateMetricBilinear (I := I) c z)
+    (coordinate_metric_trivialization_forward c hz) hψ hw hv hmetric
 
 end LichnerowiczObata

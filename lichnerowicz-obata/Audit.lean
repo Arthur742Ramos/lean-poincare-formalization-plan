@@ -362,3 +362,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.coordinate_metric_trivialization_forward
 #print axioms LichnerowiczObata.angular_metric_precompose_linear
 #print axioms LichnerowiczObata.angular_metric_rescale_unit
+#print axioms LichnerowiczObata.mdifferentiableAt_normal_radial_composite
+#print axioms LichnerowiczObata.normal_radial_composite_intrinsic_angular_metric
