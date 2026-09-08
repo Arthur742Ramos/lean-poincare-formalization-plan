@@ -639,3 +639,8 @@ constructed radial flow, rather than inferred from metric agreement.
 The round inverse radius is continuous on the whole ambient space, with
 values `0` and `π R` at its north and south poles, respectively; the angular
 inverse need not be continuous there.
+`RoundComparisonPoleLimits` now proves the inverse comparison's limits at
+both poles for arbitrary ambient approaches, not merely along fixed
+meridians. Its Obata specialization uses precisely the retained radial
+identity and distance bounds. These limits still need to be assembled into
+the global map, with smoothness and metric preservation at the poles.
