@@ -7,6 +7,7 @@ import LichnerowiczObata.ObataRadial
 import LichnerowiczObata.EikonalConnection
 import LichnerowiczObata.RadialCurves
 import LichnerowiczObata.GlobalGradientCurves
+import LichnerowiczObata.RegularGradientCurves
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -34,3 +35,5 @@ import LichnerowiczObata.GlobalGradientCurves
 #print axioms LichnerowiczObata.tendsto_obata_scalar_atTop
 #print axioms LichnerowiczObata.tendsto_obata_scalar_atBot
 #print axioms LichnerowiczObata.exists_global_obata_scalar_limits
+#print axioms LichnerowiczObata.gradient_ne_zero_along_curve
+#print axioms LichnerowiczObata.exists_obata_unique_level_curves

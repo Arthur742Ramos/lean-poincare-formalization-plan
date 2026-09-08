@@ -105,6 +105,12 @@ level. `GlobalGradientCurves.lean` applies these results to the constructed
 Obata curves starting at regular points. Convergence of scalar values is not
 yet convergence of the manifold-valued curves to unique poles.
 
+`RegularGradientCurves.lean` uses global ODE uniqueness to rule out reaching
+a critical point at finite time from a regular initial point. The function
+value is strictly increasing along such a curve, and every intermediate
+level has a unique crossing time. A smooth radial reparameterization and
+the global metric/isometry argument remain separate obligations.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical
