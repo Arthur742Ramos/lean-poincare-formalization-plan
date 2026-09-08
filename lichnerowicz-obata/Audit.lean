@@ -8,6 +8,7 @@ import LichnerowiczObata.SmoothIsometricInverse
 import LichnerowiczObata.SmoothObataPolar
 import LichnerowiczObata.SmoothPolarMetricComparison
 import LichnerowiczObata.RoundMetricDiffeomorph
+import LichnerowiczObata.ObataRoundDiffeomorph
 import LichnerowiczObata.IntrinsicNormalMetric
 import LichnerowiczObata.NormalAngularTangency
 import LichnerowiczObata.GlobalNormalAngularMetric
@@ -547,3 +548,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.obataRadial_integralCurve_eqOn
 #print axioms LichnerowiczObata.obata_normal_ray_eq_radial_curve
 #print axioms LichnerowiczObata.obata_metric_normal_ray_eq_radial_curve
+#print axioms LichnerowiczObata.obata_round_metric_diffeomorph
+#print axioms LichnerowiczObata.extremal_eigenfunction_round_metric_diffeomorph

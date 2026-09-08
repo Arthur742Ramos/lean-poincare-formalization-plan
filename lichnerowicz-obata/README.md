@@ -50,11 +50,11 @@ no longer assume spectral existence or smoothness of a weak eigenfunction.
 
 ## Remaining proof obligations
 
-1. Package the proved global smooth, metric-preserving sphere identification
-   as a smooth Riemannian isometry, with the inverse and the sphere's induced
-   metric made explicit, and connect it to the eigenvalue equality theorem.
-2. The round-sphere converse, the independently auditable Mathlib-only
-   Challenge, and final theorem/axiom/provenance verification.
+1. Prove the round-sphere converse and assemble the first-eigenvalue
+   equality characterization. The forward implication now gives a smooth
+   diffeomorphism with the radius-scaled induced round metric explicitly.
+2. The independently auditable Mathlib-only Challenge and final
+   theorem/axiom/provenance verification.
 
 Do not replace any of these obligations by an assumed analytic or geometric
 bridge, and do not call the checked eigenfunction estimate the full theorem.
@@ -782,5 +782,13 @@ homeomorphism onto a radius-`R` sphere to a genuine diffeomorphism with the
 standard unit-sphere manifold. Its inverse smoothness is proved from the
 injective derivative and equal dimensions. Scaling the resulting ambient
 inclusion by `R` recovers the original map exactly and preserves the induced
-radius-`R` metric. The final Obata and eigenvalue-equality interfaces still
-need to apply and package this result.
+radius-`R` metric.
+
+`obata_round_metric_diffeomorph` now applies this result to the actual Obata
+construction, proving the ambient dimension and smooth inverse rather than
+assuming either. `extremal_eigenfunction_round_metric_diffeomorph` derives
+the Hessian equation from the genuine Ricci bound and extremal eigenvalue,
+then obtains the same round-metric conclusion. The target is the unit sphere
+in an `(n+1)`-dimensional inner-product space, with its inclusion scaled by
+`1 / sqrt K`; the derivative identity specifies exactly the radius-`1 / sqrt K`
+round metric. This proves the forward rigidity implication, not the converse.
