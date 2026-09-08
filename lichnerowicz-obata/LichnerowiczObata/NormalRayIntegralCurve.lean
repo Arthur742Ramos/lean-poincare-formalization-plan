@@ -2,6 +2,7 @@ module
 
 public import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 public import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
+public import LichnerowiczObata.LocalIntegralCurveUniqueness
 
 /-! # Identifying normal coordinate rays with radial integral curves -/
 
@@ -58,6 +59,24 @@ theorem normal_ray_eq_integralCurve [CompleteSpace E] [IsManifold I 1 M]
     (hinit : ψ (r₀ • u) = γ r₀) :
     EqOn (fun r => ψ (r • u)) γ (Ioo a b) := by
   exact isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless hr₀ hV
+    (isMIntegralCurveOn_normal_ray ψ u V (Ioo a b)
+      (fun r hr => (lt_of_le_of_lt ha hr.1).ne') hψ hrad) hγ hinit
+
+/-- The ray comparison only needs field regularity along the ray, so it
+also applies to radial fields singular at omitted poles. -/
+theorem normal_ray_eq_integralCurve_of_local_field [CompleteSpace E] [IsManifold I 1 M]
+    [I.Boundaryless] [T2Space M]
+    (ψ : P → M) (u : P) (V : (x : M) → TangentSpace I x)
+    {a b r₀ : ℝ} (ha : 0 ≤ a) (hr₀ : r₀ ∈ Ioo a b)
+    (hV : ∀ r ∈ Ioo a b, ContMDiffAt I (I.prod 𝓘(ℝ, E)) 1
+      (fun x => (⟨x, V x⟩ : TangentBundle I M)) (ψ (r • u)))
+    (hψ : ∀ r ∈ Ioo a b, MDifferentiableAt 𝓘(ℝ, P) I ψ (r • u))
+    (hrad : ∀ r ∈ Ioo a b, mfderiv 𝓘(ℝ, P) I ψ (r • u) (r • u) =
+      r • V (ψ (r • u)))
+    (γ : ℝ → M) (hγ : IsMIntegralCurveOn γ V (Ioo a b))
+    (hinit : ψ (r₀ • u) = γ r₀) :
+    EqOn (fun r => ψ (r • u)) γ (Ioo a b) := by
+  exact integralCurve_eqOn_of_contMDiffAt_range hr₀ hV
     (isMIntegralCurveOn_normal_ray ψ u V (Ioo a b)
       (fun r hr => (lt_of_le_of_lt ha hr.1).ne') hψ hrad) hγ hinit
 

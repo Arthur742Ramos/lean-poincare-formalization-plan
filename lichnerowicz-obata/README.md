@@ -658,8 +658,12 @@ products. Identifying the Obata homeomorphism with these smooth local graphs
 is still required; the graph results alone do not establish its pole smoothness.
 `NormalRayIntegralCurve` turns a radial derivative identity into the integral
 curve equation along scaled normal rays and supplies a uniqueness comparison
-on positive intervals for a globally `C¹` vector field. The constructed
+on positive intervals. The constructed
 normal metric chart now retains its actual radial-gradient derivative,
 including after intrinsic lifting and in the spherical-product construction.
-Applying the ray uniqueness argument to the regular radial field and then
-identifying the pole charts with the global homeomorphism remains unfinished.
+`LocalIntegralCurveUniqueness` extends the uniqueness argument to fields
+smooth only along the first curve. `ObataNormalRay` applies it to the actual
+radial field, deriving local smoothness from regular levels, and handles the
+normal chart's quadratic-metric normalization. Identifying the retained
+normal-chart rays with the global comparison and proving its pole smoothness
+remain unfinished.

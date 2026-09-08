@@ -28,6 +28,7 @@ import LichnerowiczObata.RoundComparisonPoleLimits
 import LichnerowiczObata.ObataGlobalHomeomorph
 import LichnerowiczObata.RoundPoleGraph
 import LichnerowiczObata.NormalRayIntegralCurve
+import LichnerowiczObata.ObataNormalRay
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -471,3 +472,9 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.isMIntegralCurveOn_normal_ray
 #print axioms LichnerowiczObata.normal_ray_eq_integralCurve
 #print axioms LichnerowiczObata.coordinate_derivative_eq_intrinsic_chart_lift
+#print axioms LichnerowiczObata.integralCurve_eqOn_of_contMDiffAt_range
+#print axioms LichnerowiczObata.normal_ray_eq_integralCurve_of_local_field
+#print axioms LichnerowiczObata.contMDiffAt_obataRadial_gradient
+#print axioms LichnerowiczObata.obataRadial_integralCurve_eqOn
+#print axioms LichnerowiczObata.obata_normal_ray_eq_radial_curve
+#print axioms LichnerowiczObata.obata_metric_normal_ray_eq_radial_curve
