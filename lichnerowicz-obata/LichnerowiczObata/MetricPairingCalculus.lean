@@ -63,4 +63,22 @@ theorem hasFDerivAt_symmetric_metric_quadratic
   rw [hsym w v]
   ring
 
+/-- Longitudinal terms in the variation equation do not change an angular
+metric pairing. Orthogonality removes them explicitly. -/
+theorem hasDerivAt_metric_pairing_scaling_longitudinal
+    {g : ℝ → E →L[ℝ] E →L[ℝ] ℝ} {g' : E →L[ℝ] E →L[ℝ] ℝ}
+    {u w : ℝ → E} {u' w' N : E} {t c d e : ℝ} (A : E →L[ℝ] E)
+    (hg : HasDerivAt g g' t) (hu : HasDerivAt u u' t) (hw : HasDerivAt w w' t)
+    (hcompat : g' (u t) (w t) = g t (A (u t)) (w t) + g t (u t) (A (w t)))
+    (hshapeU : u' + A (u t) = c • u t + d • N)
+    (hshapeW : w' + A (w t) = c • w t + e • N)
+    (hNu : g t (u t) N = 0) (hNw : g t N (w t) = 0) :
+    HasDerivAt (fun s => g s (u s) (w s)) (2 * c * g t (u t) (w t)) t := by
+  have hd := hasDerivAt_metric_pairing_connection A hg hu hw hcompat
+  rw [hshapeU, hshapeW] at hd
+  convert hd using 1
+  simp only [map_add, add_apply, map_smul, smul_apply, smul_eq_mul, hNu, hNw,
+    mul_zero, add_zero]
+  ring
+
 end LichnerowiczObata

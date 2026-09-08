@@ -389,3 +389,7 @@ The variation equation now also covers initial-parameter-dependent speeds.
 Its derivative is derived from the actual flow equation and includes the
 longitudinal speed-variation term, which must be accounted for in angular
 metric evolution.
+`ScaledRadialMetric` proves the corresponding angular metric equation for C²
+scaled radial flows. Metric compatibility and the actual radial shape operator
+give the speed-scaled spherical coefficient; angular orthogonality cancels the
+longitudinal terms. Application to the normal-map rays remains pending.

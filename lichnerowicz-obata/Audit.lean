@@ -18,6 +18,7 @@ import LichnerowiczObata.GeodesicScaling
 import LichnerowiczObata.GeodesicNormalRadial
 import LichnerowiczObata.GeodesicGauss
 import LichnerowiczObata.NormalMetricLimit
+import LichnerowiczObata.ScaledRadialMetric
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -74,6 +75,9 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.fderiv_variation_equation_rhs
 #print axioms LichnerowiczObata.hasDerivAt_flow_variation_rhs
 #print axioms LichnerowiczObata.hasDerivAt_scaled_flow_variation
+#print axioms LichnerowiczObata.hasDerivAt_metric_pairing_scaling_longitudinal
+#print axioms LichnerowiczObata.hasDerivAt_coordinate_scaled_radial_metric
+#print axioms LichnerowiczObata.hasDerivAt_scaled_radial_flow_metric
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_field_pairing
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_gradient_pairing
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_obata_pairing
