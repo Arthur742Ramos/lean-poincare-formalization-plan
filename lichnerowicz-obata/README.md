@@ -50,8 +50,8 @@ no longer assume spectral existence or smoothness of a weak eigenfunction.
 
 ## Remaining proof obligations
 
-1. Global Obata rigidity from the Hessian equation: complete geodesics and
-   minimizing segments, the polar metric description, and the
+1. Global Obata rigidity from the Hessian equation: the angular/polar metric
+   description and the
    smooth metric-preserving sphere identification, including both poles.
 2. The round-sphere converse, the independently auditable Mathlib-only
    Challenge, and final theorem/axiom/provenance verification.
@@ -70,13 +70,14 @@ local-to-global conserved-energy identity, not yet the sphere-isometry theorem.
 obtains extrema by compactness, and shows that a nonconstant Obata function
 has maximum `a > 0`, minimum `-a`, and `|grad f|² = K (a² - f²)`.
 Its only critical values are `a` and `-a`. Uniqueness of the critical points
-and the global sphere isometry remain unproved.
+is supplied by `ObataUniquePoles.lean`; the global sphere isometry remains unproved.
 
 `ObataRadial.lean` constructs the radial candidate
 `r = arccos(f/a) / sqrt K`, proves its range and the reconstruction
 `f = a cos(sqrt K * r)`, and proves `|grad r| = 1` at every noncritical
 point. The theorem derives the needed energy identity from the Obata equation.
-It does not assume or yet prove that `r` is geodesic distance.
+It does not itself identify `r` with distance; `RadialDistance.lean` proves that
+identification without an assumed minimizing property.
 
 `EikonalConnection.lean` proves radial regularity between the extrema and
 derives `∇_(grad r) grad r = 0` from the unit-gradient identity and symmetry
@@ -133,6 +134,8 @@ by `ObataUniquePoles.lean`. The global round-sphere isometry remains unproved.
 endpoint limits. Every regular point has a maximum and minimum endpoint at
 distance at most `r` and `pi / sqrt K - r`, respectively. These are proved
 upper bounds, not an assertion that the radial curves minimize distance.
+The matching lower bounds and radial minimality are proved subsequently in
+`RadialDistance.lean`.
 
 `ObataCriticalIsolation.lean` derives the ordinary derivative of the coordinate
 gradient at a critical point from the covariant Hessian equation. It is the
@@ -163,6 +166,17 @@ maps, uniqueness of the maximum and minimum, and radial distance upper bounds
 at every point by density. It does not assume pole uniqueness or distance
 minimality. The global metric-preserving identification with a sphere is still
 required.
+
+`ScalarDistanceBound.lean` proves that a C1 scalar function with gradient norm
+at most one contracts intrinsic distances, directly from the infimum over C1
+path lengths. `RegularizedRadial.lean` applies this to the enlarged-amplitude
+arccosine coordinates and passes to the original amplitude by continuity.
+This proves global nonexpansion even at both nonsmooth radial endpoints.
+`RadialDistance.lean` then identifies the radial and complementary coordinates
+with the exact distances to the two poles and proves that radially parameterized
+gradient curves realize distance on every subsegment. The angular metric and
+smooth round-sphere isometry, including its extension over the poles, remain
+unproved.
 
 ## Sources and reuse
 
