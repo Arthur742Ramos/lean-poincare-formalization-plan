@@ -550,3 +550,9 @@ interval, its ambient parameter map is jointly differentiable there, and its
 metric is the sine-squared angular term plus the radial product, with no
 auxiliary-radius factor. The round-sphere identification and smooth extension
 through the two poles remain to be completed.
+`RoundPolarJointMetric` proves the full derivative of the explicit round polar
+map and evaluates its metric on that derivative. For sphere radius `1 / √K`,
+the coefficient is exactly `sin²(√K r) / K`, matching the unit-angular Obata
+product. Identifying the angular spaces and constructing the resulting
+Riemannian isometry are still required; coefficient agreement alone is not
+the global rigidity theorem.
