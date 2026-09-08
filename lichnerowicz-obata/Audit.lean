@@ -9,6 +9,7 @@ import LichnerowiczObata.CoordinateAngularVariation
 import LichnerowiczObata.ConstructedRadialMetric
 import LichnerowiczObata.IntrinsicFlowMetric
 import LichnerowiczObata.RadialMetricNormalization
+import LichnerowiczObata.SmoothConnectionCoordinates
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -34,6 +35,10 @@ import LichnerowiczObata.AngularMetricEvolution
 import LichnerowiczObata.SmoothPicardOperator
 
 #print axioms LichnerowiczObata.contDiffOn_bilinear_of_basis
+#print axioms LichnerowiczObata.contDiffAt_coordinateVectorField_of_order
+#print axioms LichnerowiczObata.contDiffOn_coordinateConnection_basis
+#print axioms LichnerowiczObata.contDiffOn_coordinateGeodesicSpray
+#print axioms LichnerowiczObata.exists_smooth_coordinate_geodesic_flow
 #print axioms LichnerowiczObata.radialVariationMetric_initial
 #print axioms LichnerowiczObata.radialVariationMetric_eq_sine_ratio
 #print axioms LichnerowiczObata.hasDerivAt_intrinsicFlowMetric

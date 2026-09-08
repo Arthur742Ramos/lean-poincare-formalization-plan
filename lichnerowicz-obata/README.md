@@ -319,3 +319,10 @@ starting level. Angular transport has exactly the initial inner product
 multiplied by the ratio of sine-squared radial factors, derived from the
 initial-point identity. This is an initial-level normalization, not yet the
 identification of the pole's angular metric with the round sphere.
+`SmoothConnectionCoordinates` derives finite-order smoothness of the actual
+metric torsion-free connection coefficients and the associated position–velocity
+geodesic equation. The existing smooth local-flow construction now supplies
+local geodesic solution families near any chart position and velocity, without
+an extra coefficient-regularity or bump-function assumption. Construction of
+the normal-coordinate map at a pole, and its use to identify the angular metric,
+remains pending.
