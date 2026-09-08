@@ -385,3 +385,7 @@ the endpoint's radial direction. The full angular metric formula remains pending
 value at zero initial velocity. For the actual geodesic endpoint map this limit
 is time squared times the base-point metric, derived from its checked derivative
 at zero. This supplies the pole normalization for the angular evolution argument.
+The variation equation now also covers initial-parameter-dependent speeds.
+Its derivative is derived from the actual flow equation and includes the
+longitudinal speed-variation term, which must be accounted for in angular
+metric evolution.
