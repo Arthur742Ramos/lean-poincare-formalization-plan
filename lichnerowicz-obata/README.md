@@ -345,6 +345,8 @@ with the round metric remains pending.
 zero derivative along a geodesic, hence is constant on each connected open
 time domain. The proof derives conservation from metric compatibility and
 the geodesic equation, without assuming a speed identity.
+It also proves that simultaneous time and velocity rescaling preserves the
+coordinate geodesic equation, using the bilinearity of its acceleration term.
 `GeodesicHessian` derives the value derivative and Hessian evolution along
 these geodesics. Under the Obata Hessian equation, the scalar restriction
 satisfies `f″ = -K · speed² · f`, with the constant speed evaluated at any

@@ -62,4 +62,27 @@ theorem coordinate_geodesic_energy_eq
     (fun s hs => (hd s hs).differentiableAt.differentiableWithinAt)
     (fun s hs => (hd s hs).deriv) hs ht
 
+omit [I.Boundaryless] [RiemannianBundle (TangentSpace I : M → Type _)]
+  [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+  [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)] in
+/-- Rescaling time and velocity preserves the actual coordinate geodesic
+equation, by bilinearity of the connection's acceleration term. -/
+theorem hasDerivAt_coordinate_geodesic_rescale
+    (cov : CovariantDerivative I E TM)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E) (c : M)
+    {α : ℝ → E × E} (r : ℝ) {t : ℝ}
+    (hα : HasDerivAt α (coordinateGeodesicSpray cov b c (α (r * t))) (r * t)) :
+    HasDerivAt (fun s => ((α (r * s)).1, r • (α (r * s)).2))
+      (coordinateGeodesicSpray cov b c ((α (r * t)).1, r • (α (r * t)).2)) t := by
+  have hp : HasDerivAt (fun s => (α s).1) (α (r * t)).2 (r * t) :=
+    (hasFDerivAt_fst (p := α (r * t))).comp_hasDerivAt (r * t) hα
+  have hv : HasDerivAt (fun s => (α s).2)
+      (-(coordinateConnection cov b c (α (r * t)).1 (α (r * t)).2 (α (r * t)).2))
+      (r * t) :=
+    (hasFDerivAt_snd (p := α (r * t))).comp_hasDerivAt (r * t) hα
+  have htime := (hasDerivAt_id t).const_mul r
+  have hd := (hp.scomp t htime).prodMk ((hv.scomp t htime).const_smul r)
+  convert hd using 1 <;> first | rfl |
+    simp [coordinateGeodesicSpray, coordinateConnection, map_smul, smul_smul]
+
 end LichnerowiczObata
