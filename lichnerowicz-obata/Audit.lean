@@ -327,3 +327,4 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.intrinsic_normal_endpoint_radius_at_zero_eventually
 #print axioms LichnerowiczObata.exists_intrinsic_radial_normal_chart
 #print axioms LichnerowiczObata.exists_obata_radial_normal_chart
+#print axioms LichnerowiczObata.exists_small_obata_sphere_levels

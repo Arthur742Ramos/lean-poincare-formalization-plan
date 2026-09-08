@@ -450,12 +450,10 @@ The global Riemannian comparison with the manifold remains pending.
 `SmallRadialLevels` proves that any neighborhood of the unique Obata maximum
 contains every sufficiently small radial level. Thus a normal-chart image
 containing the pole captures entire small levels, not only local pieces.
-The level identification and global metric comparison still need assembly.
 `NormalLevelHomeomorph` constructs whole-level homeomorphisms by restricting
 an actual chart and its inverse. For a radial chart with a scaled-norm identity,
 compactness supplies sphere-to-level homeomorphisms for every sufficiently
-small positive radius. Specializing that chart identity to the Obata normal
-map and assembling the global metric comparison remain pending.
+small positive radius.
 The actual Obata endpoint map now has the scaled-norm radial identity on a
 neighborhood including zero velocity, both in coordinate and intrinsic tangent
 variables.
@@ -463,5 +461,8 @@ variables.
 intrinsic tangent space to the manifold. It sends zero to the maximum and
 has the scaled-norm radial identity on its entire source. The geodesic family
 and positive endpoint time are constructed, not required as extra hypotheses.
-Applying this chart to the whole-level and global comparison results remains
-pending.
+Applying this chart to the whole-level construction now identifies every
+sufficiently small positive Obata radial level with an actual intrinsic
+tangent-space sphere. The scale, chart, and uniform range of small radii are
+constructed. Extending the level identification through global radial
+transport and proving the global Riemannian comparison remain pending.

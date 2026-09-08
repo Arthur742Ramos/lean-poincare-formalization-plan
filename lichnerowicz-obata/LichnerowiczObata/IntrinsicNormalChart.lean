@@ -116,4 +116,41 @@ theorem exists_obata_radial_normal_chart
     hV hzV hδ hα hsol hrest hcrit hmax htime ht
   exact ⟨δ / 2, ht, e, he0, hep, helevel⟩
 
+/-- Entire sufficiently small Obata radial levels are homeomorphic to
+spheres in the intrinsic tangent space at the unique maximum. -/
+theorem exists_small_obata_sphere_levels [CompactSpace M]
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) {K a : ℝ}
+    (hK : 0 < K) (ha : 0 < a) (hb : ∀ x, f x ≤ a)
+    (hH : ∀ (y : M) (u w : TM y), hessian LC f y u w = -K * f y * inner ℝ u w)
+    (c : M) {z : E} (hz : z ∈ (extChartAt I c).target)
+    (hcrit : gradient (I := I) f ((extChartAt I c).symm z) = 0)
+    (hmax : ∀ x, f x = a ↔ x = (extChartAt I c).symm z) :
+    let p := (extChartAt I c).symm z
+    ∃ t : ℝ, 0 < t ∧ ∃ ε : ℝ, 0 < ε ∧ ∀ r ∈ Ioo 0 ε,
+      Nonempty (Metric.sphere (0 : TM p) (r / t) ≃ₜ {x : M // obataRadial K a f x = r}) := by
+  let p := (extChartAt I c).symm z
+  obtain ⟨t, ht, e, he0, hep, hlevel⟩ := exists_obata_radial_normal_chart b hf hK ha hH c hz
+    hcrit ((hmax _).mpr rfl)
+  have hc : Continuous (obataRadial K a f) := by
+    have hfc := hf.continuous
+    unfold obataRadial
+    fun_prop
+  have hn : ∀ x, 0 ≤ obataRadial K a f x :=
+    fun x => div_nonneg (Real.arccos_nonneg _) (Real.sqrt_nonneg _)
+  have hzero : ∀ x, obataRadial K a f x = 0 ↔ x = e 0 := by
+    intro x
+    rw [hep]
+    constructor
+    · intro hx
+      have hsqrt : Real.sqrt K ≠ 0 := (Real.sqrt_pos.mpr hK).ne'
+      have hz := (div_eq_zero_iff.mp hx).resolve_right hsqrt
+      have hle := (le_div_iff₀ ha).mp (Real.arccos_eq_zero.mp hz)
+      exact (hmax x).mp (le_antisymm (hb x) (by simpa using hle))
+    · intro hx
+      have he := (hmax x).mpr hx
+      simp [obataRadial, he, ha.ne']
+  obtain ⟨ε, hε, hlevels⟩ := exists_small_sphere_level_homeomorph e he0 hc hn hzero ht hlevel
+  exact ⟨t, ht, ε, hε, hlevels⟩
+
 end LichnerowiczObata
