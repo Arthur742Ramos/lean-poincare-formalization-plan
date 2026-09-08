@@ -330,5 +330,7 @@ remains pending.
 velocity has derivative `(δposition, δvelocity) ↦ (δvelocity, 0)`. ODE
 uniqueness proves local stationarity of a solution starting at rest, and
 spatial derivatives of a smooth solution family satisfy the resulting linear
-system along it. The endpoint-map derivative and normal-coordinate inverse
+system along it. Integration of this linear system on a connected open time
+domain proves constant velocity variation and affine position variation.
+The endpoint-map derivative and normal-coordinate inverse
 still need to be constructed.

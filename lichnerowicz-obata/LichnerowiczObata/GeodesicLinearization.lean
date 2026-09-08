@@ -116,4 +116,32 @@ theorem hasDerivAt_geodesic_flow_variation_at_rest
   rw [hrest, fderiv_coordinateGeodesicSpray_zero_apply cov hm ht b c hz] at hd
   exact hd
 
+omit [FiniteDimensional ℝ E] in
+/-- Integration of the flat variational system on a connected open time domain.
+The velocity variation is constant and the position variation is affine. -/
+theorem flat_variation_eq_affine {J : ℝ → E × E} {T : Set ℝ}
+    (hT : IsOpen T) (hconn : IsPreconnected T) (hzero : (0 : ℝ) ∈ T)
+    (hJ : ∀ t ∈ T, HasDerivAt J ((J t).2, 0) t) {t : ℝ} (ht : t ∈ T) :
+    J t = ((J 0).1 + t • (J 0).2, (J 0).2) := by
+  have hsnd : ∀ x ∈ T, HasDerivAt (fun s => (J s).2) 0 x := fun x hx =>
+    (hasFDerivAt_snd (p := J x)).comp_hasDerivAt x (hJ x hx)
+  have hfst : ∀ x ∈ T, HasDerivAt (fun s => (J s).1) (J x).2 x := fun x hx =>
+    (hasFDerivAt_fst (p := J x)).comp_hasDerivAt x (hJ x hx)
+  have hv : ∀ s ∈ T, (J s).2 = (J 0).2 := by
+    intro s hs
+    exact hT.is_const_of_deriv_eq_zero hconn
+      (fun x hx => (hsnd x hx).differentiableAt.differentiableWithinAt)
+      (fun x hx => (hsnd x hx).deriv) hs hzero
+  have hp : ∀ s ∈ T,
+      HasDerivAt (fun x => (J x).1 - x • (J 0).2) 0 s := by
+    intro s hs
+    convert (hfst s hs).sub ((hasDerivAt_id s).smul_const (J 0).2) using 1 <;>
+      first | rfl | simp [hv s hs]
+  have he := hT.is_const_of_deriv_eq_zero hconn
+    (fun x hx => (hp x hx).differentiableAt.differentiableWithinAt)
+    (fun x hx => (hp x hx).deriv) ht hzero
+  apply Prod.ext
+  · simpa using (sub_eq_iff_eq_add.mp (by simpa using he))
+  · exact hv t ht
+
 end LichnerowiczObata

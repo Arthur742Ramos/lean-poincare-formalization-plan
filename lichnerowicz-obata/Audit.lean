@@ -41,6 +41,7 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.fderiv_coordinateGeodesicSpray_zero_apply
 #print axioms LichnerowiczObata.coordinate_geodesic_at_rest_eventually
 #print axioms LichnerowiczObata.hasDerivAt_geodesic_flow_variation_at_rest
+#print axioms LichnerowiczObata.flat_variation_eq_affine
 #print axioms LichnerowiczObata.contDiffAt_coordinateVectorField_of_order
 #print axioms LichnerowiczObata.contDiffOn_coordinateConnection_basis
 #print axioms LichnerowiczObata.contDiffOn_coordinateGeodesicSpray
