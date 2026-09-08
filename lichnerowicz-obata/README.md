@@ -141,6 +141,15 @@ then isolates each critical point; continuity and compactness prove that the
 critical set is finite. Proving that there is exactly one maximum and exactly
 one minimum remains open.
 
+`ContinuousGlobalFlow.lean` proves joint continuous dependence on initial
+point and time for complete C1 flows on compact manifolds. It uses the retained
+joint continuity of the local chart flow, uniqueness, a compactness-based
+uniform time interval, and iteration. `RadialFlowFamily.lean` applies this to
+the actual gradient and the explicit clock, giving one jointly continuous
+family of full unit radial curves through every regular point, with extremal
+endpoint limits. Independence of those endpoints from the starting point
+remains to be proved.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical

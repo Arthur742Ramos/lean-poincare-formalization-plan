@@ -24,12 +24,15 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
   [IsManifold I 1 M] [I.Boundaryless]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- A common existence interval for all initial points in a neighborhood. -/
-theorem exists_uniform_manifold_ode_contMDiff {v : Π x : M, TangentSpace I x} {x : M}
+/-- A jointly continuous manifold flow, with C1 integral curves, on a common
+interval for all initial points in a neighborhood. -/
+theorem exists_uniform_manifold_flow_contMDiff {v : Π x : M, TangentSpace I x} {x : M}
     (hv : ContMDiffAt I (I.prod 𝓘(ℝ, E)) 1 (fun y => (⟨y, v y⟩ : TangentBundle I M)) x) :
     ∃ V ∈ 𝓝 x, ∃ δ : ℝ, 0 < δ ∧
-      ∀ y ∈ V, ∃ γ : ℝ → M, γ 0 = y ∧ IsMIntegralCurveOn γ v (Metric.ball 0 δ) ∧
-        ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Metric.ball 0 δ) := by
+      ∃ α : M × ℝ → M, ContinuousOn α (V ×ˢ Metric.ball 0 δ) ∧
+        ∀ y ∈ V, α (y, 0) = y ∧
+          IsMIntegralCurveOn (fun t => α (y, t)) v (Metric.ball 0 δ) ∧
+          ContMDiffOn 𝓘(ℝ, ℝ) I 1 (fun t => α (y, t)) (Metric.ball 0 δ) := by
   let φ := extChartAt I x
   let w : E → E := fun z => tangentCoordChange I (φ.symm z) x (φ.symm z) (v (φ.symm z))
   rw [contMDiffAt_iff] at hv
@@ -38,16 +41,25 @@ theorem exists_uniform_manifold_ode_contMDiff {v : Π x : M, TangentSpace I x} {
   have htarget : φ.target ∈ 𝓝 (φ x) :=
     (isOpen_extChartAt_target (I := I) x).mem_nhds (φ.map_source (mem_extChartAt_source x))
   obtain ⟨U, hU, hwc⟩ := contDiffAt_zero.mp (hw.of_le (by norm_num : (0 : ℕ∞ω) ≤ 1))
-  obtain ⟨W, hW, δ, hδ, hsol⟩ := exists_uniform_chart_ode hw (Filter.inter_mem htarget hU)
+  obtain ⟨W, hW, δ, hδ, α, hαc, hsol⟩ := exists_uniform_chart_flow hw (Filter.inter_mem htarget hU)
   let V := φ.source ∩ φ ⁻¹' W
   have hV : V ∈ 𝓝 x :=
     Filter.inter_mem ((isOpen_extChartAt_source (I := I) x).mem_nhds (mem_extChartAt_source x))
       ((continuousAt_extChartAt (I := I) x) hW)
-  refine ⟨V, hV, δ, hδ, ?_⟩
+  refine ⟨V, hV, δ, hδ, fun z => φ.symm (α (φ z.1, z.2)), ?_, ?_⟩
+  · have hcoord : ContinuousOn (fun z : M × ℝ => (φ z.1, z.2)) (V ×ˢ Metric.ball 0 δ) :=
+      ((continuousOn_extChartAt (I := I) x).comp continuous_fst.continuousOn
+        (fun z hz => hz.1.1)).prodMk continuous_snd.continuousOn
+    have hα' := hαc.comp hcoord (fun z hz => ⟨hz.1.2, hz.2⟩)
+    exact (contMDiffOn_extChartAt_symm (I := I) (n := 1) x).continuousOn.comp hα'
+      (fun z hz => ((hsol (φ z.1) hz.1.2).2 z.2 hz.2).1.1)
   intro y hy
-  obtain ⟨f, hf0, hf⟩ := hsol (φ y) hy.2
-  refine ⟨φ.symm ∘ f, ?_, ?_, ?_⟩
-  · simp only [Function.comp_apply, hf0, φ.left_inv hy.1]
+  let f : ℝ → E := fun t => α (φ y, t)
+  obtain ⟨hf0, hf⟩ := hsol (φ y) hy.2
+  change φ.symm (f 0) = y ∧ IsMIntegralCurveOn (φ.symm ∘ f) v (Metric.ball 0 δ) ∧
+    ContMDiffOn 𝓘(ℝ, ℝ) I 1 (φ.symm ∘ f) (Metric.ball 0 δ)
+  refine ⟨?_, ?_, ?_⟩
+  · simp only [f, hf0, φ.left_inv hy.1]
   · intro t ht
     let z : M := φ.symm (f t)
     have h : HasDerivAt f (tangentCoordChange I z x z (v z)) t := (hf t ht).2
@@ -78,6 +90,15 @@ theorem exists_uniform_manifold_ode_contMDiff {v : Π x : M, TangentSpace I x} {
         by simp, contDiffOn_zero.mpr hdc⟩
     exact (contMDiffOn_extChartAt_symm x).comp hfd.contMDiffOn
       (fun t ht => (hf t ht).1.1)
+
+/-- The individual C1 curves supplied by the jointly continuous local flow. -/
+theorem exists_uniform_manifold_ode_contMDiff {v : Π x : M, TangentSpace I x} {x : M}
+    (hv : ContMDiffAt I (I.prod 𝓘(ℝ, E)) 1 (fun y => (⟨y, v y⟩ : TangentBundle I M)) x) :
+    ∃ V ∈ 𝓝 x, ∃ δ : ℝ, 0 < δ ∧
+      ∀ y ∈ V, ∃ γ : ℝ → M, γ 0 = y ∧ IsMIntegralCurveOn γ v (Metric.ball 0 δ) ∧
+        ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Metric.ball 0 δ) := by
+  obtain ⟨V, hV, δ, hδ, α, hc, hα⟩ := exists_uniform_manifold_flow_contMDiff hv
+  exact ⟨V, hV, δ, hδ, fun y hy => ⟨fun t => α (y, t), hα y hy⟩⟩
 
 /-- The existence-only interface for the local C1 curves. -/
 theorem exists_uniform_manifold_ode {v : Π x : M, TangentSpace I x} {x : M}

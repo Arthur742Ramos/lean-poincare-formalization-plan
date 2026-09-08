@@ -14,6 +14,7 @@ import LichnerowiczObata.UnitCurveDistance
 import LichnerowiczObata.RadialEndpoints
 import LichnerowiczObata.RadialEndpointDistance
 import LichnerowiczObata.ObataCriticalIsolation
+import LichnerowiczObata.RadialFlowFamily
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -66,3 +67,15 @@ import LichnerowiczObata.ObataCriticalIsolation
 #print axioms LichnerowiczObata.obata_critical_isolated
 #print axioms LichnerowiczObata.isDiscrete_obata_critical_set
 #print axioms LichnerowiczObata.finite_obata_critical_set
+#print axioms LichnerowiczObata.exists_uniform_chart_flow
+#print axioms LichnerowiczObata.exists_uniform_manifold_flow_contMDiff
+#print axioms LichnerowiczObata.exists_continuousOn_integralCurve_family
+#print axioms LichnerowiczObata.continuousAt_integralCurve_family_zero
+#print axioms LichnerowiczObata.exists_uniform_continuity_interval_integralCurve_family
+#print axioms LichnerowiczObata.integralCurve_family_add
+#print axioms LichnerowiczObata.continuous_integralCurve_family_time
+#print axioms LichnerowiczObata.continuous_integralCurve_family
+#print axioms LichnerowiczObata.exists_continuous_global_manifold_flow
+#print axioms LichnerowiczObata.continuousOn_obataRadialFamily
+#print axioms LichnerowiczObata.exists_continuous_global_gradient_flow
+#print axioms LichnerowiczObata.exists_continuous_obata_radial_family
