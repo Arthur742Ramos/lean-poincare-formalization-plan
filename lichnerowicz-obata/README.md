@@ -704,3 +704,9 @@ Both unit polar constructions now retain their actual radial integral-curve
 identities, with opposite field orientations. The north-oriented identity is
 also retained through the regular comparison and differentiable polar inverse,
 so subsequent angular matching can use the constructed maps themselves.
+`PolarEquatorMatching` constructs an angular homeomorphism from the common
+equatorial level of two complementary polar homeomorphisms.
+`obata_polar_coordinates_match` proves that this identification matches all
+oppositely oriented radial curves whenever the retained polar identities hold.
+Its extension to a linear isometry of the pole tangent spaces remains unproved;
+topological angular matching alone is insufficient for the south-pole derivative.

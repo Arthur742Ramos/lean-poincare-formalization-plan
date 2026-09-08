@@ -391,6 +391,8 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.obata_hessian_neg
 #print axioms LichnerowiczObata.obata_hessian_equation_neg
 #print axioms LichnerowiczObata.exists_obata_south_polar_model
+#print axioms LichnerowiczObata.exists_polar_equator_matching
+#print axioms LichnerowiczObata.obata_polar_coordinates_match
 #print axioms LichnerowiczObata.hasFDerivAt_roundPoleLog_zero
 #print axioms LichnerowiczObata.roundPoleLog_polar_projection
 #print axioms LichnerowiczObata.HasRadialPoleModel.exists_round_north_extension

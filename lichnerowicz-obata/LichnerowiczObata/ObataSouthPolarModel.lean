@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.ObataReflection
 public import LichnerowiczObata.ObataUnitSphericalProduct
+public import LichnerowiczObata.PolarEquatorMatching
 
 /-! # A south-centered metric polar model from the reflected Obata function -/
 
@@ -84,5 +85,45 @@ theorem exists_obata_south_polar_model
   have hh := hρ u r hr
   rw [obataRadial_neg] at hh
   linarith
+
+/-- The equatorial angular identification matches all opposite radial
+curves of two polar constructions, not just the equatorial points. -/
+theorem obata_polar_coordinates_match
+    {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
+    (N : X × Ioo 0 (Real.pi / Real.sqrt K) ≃ₜ {x : M // -a < f x ∧ f x < a})
+    (S : Y × Ioo 0 (Real.pi / Real.sqrt K) ≃ₜ {x : M // -a < f x ∧ f x < a})
+    (Φ : X × ℝ → M) (Ψ : Y × ℝ → M)
+    (hN : ∀ q, (N q : M) = Φ (q.1, q.2))
+    (hS : ∀ q, (S q : M) = Ψ (q.1, q.2))
+    (hρN : ∀ u r, r ∈ Ioo 0 (Real.pi / Real.sqrt K) → obataRadial K a f (Φ (u, r)) = r)
+    (hρS : ∀ u r, r ∈ Ioo 0 (Real.pi / Real.sqrt K) →
+      obataRadial K a f (Ψ (u, r)) = Real.pi / Real.sqrt K - r)
+    (hcN : ∀ u, IsMIntegralCurveOn (fun r => Φ (u, r))
+      (gradient (I := I) (obataRadial K a f)) (Ioo 0 (Real.pi / Real.sqrt K)))
+    (hcS : ∀ u, IsMIntegralCurveOn (fun r => Ψ (u, r))
+      (gradient (I := I) (obataRadial K a (fun y => -f y))) (Ioo 0 (Real.pi / Real.sqrt K))) :
+    ∃ A : X ≃ₜ Y, ∀ u r, r ∈ Ioo 0 (Real.pi / Real.sqrt K) →
+      Φ (u, Real.pi / Real.sqrt K - r) = Ψ (A u, r) := by
+  have hL : 0 < Real.pi / Real.sqrt K := div_pos Real.pi_pos (Real.sqrt_pos.mpr hK)
+  obtain ⟨A, hA⟩ := exists_polar_equator_matching hL N S
+    (fun x => obataRadial K a f (x : M))
+    (fun q => by rw [hN]; exact hρN q.1 q.2 q.2.property)
+    (fun q => by rw [hS]; exact hρS q.1 q.2 q.2.property)
+  refine ⟨A, ?_⟩
+  intro u
+  have hreg : ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
+      -a < f (Φ (u, r)) ∧ f (Φ (u, r)) < a := by
+    intro r hr
+    have hh := (N (u, ⟨r, hr⟩)).property
+    rwa [hN] at hh
+  have hmid : (Real.pi / Real.sqrt K) / 2 ∈ Ioo 0 (Real.pi / Real.sqrt K) := by
+    constructor <;> linarith
+  have hi : Φ (u, Real.pi / Real.sqrt K - (Real.pi / Real.sqrt K) / 2) =
+      Ψ (A u, (Real.pi / Real.sqrt K) / 2) := by
+    have hh := congrArg Subtype.val (hA u)
+    rw [hN, hS] at hh
+    convert hh using 1 <;> congr 1 <;> ring
+  exact fun r hr => obata_opposite_radial_curves_eqOn ha hf (hcN u) hreg (hcS (A u)) hmid hi hr
 
 end LichnerowiczObata
