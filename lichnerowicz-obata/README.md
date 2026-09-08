@@ -508,3 +508,8 @@ forward formula: the supplied normal chart followed by the supplied radial
 family. Whole-sphere source containment is retained, so the chart's metric
 formula applies at every angular parameter. This avoids losing the map
 identity when combining the local level chart with the global product.
+`IntrinsicChartLift` now performs this combination for a specified coordinate
+chart: it lifts that chart to the intrinsic tangent space and retains its exact
+source and forward formula. The resulting product uses an intrinsic tangent
+sphere, proves that its starting radial level is regular, and still has the
+explicit coordinate-chart/radial-flow composite as its forward map.

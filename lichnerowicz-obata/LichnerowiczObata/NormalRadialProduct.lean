@@ -25,7 +25,8 @@ theorem exists_normal_radial_product_map {E M : Type*} [NormedAddCommGroup E]
     (hlevel : ∀ x ∈ U, ∀ r ∈ Ioo 0 ℓ, ρ (η (x, r)) = r)
     (hinit : ∀ x ∈ U, η (x, ρ x) = x)
     (hreset : ∀ x ∈ U, ∀ r ∈ Ioo 0 ℓ, ∀ s ∈ Ioo 0 ℓ, η (η (x, r), s) = η (x, s)) :
-    ∃ R : ℝ, 0 < R ∧ (∀ v : Metric.sphere (0 : E) R, (v : E) ∈ e.source) ∧
+    ∃ R : ℝ, 0 < R ∧ t * R ∈ Ioo 0 ℓ ∧
+      (∀ v : Metric.sphere (0 : E) R, (v : E) ∈ e.source) ∧
       ∃ H : Metric.sphere (0 : E) R × Ioo 0 ℓ ≃ₜ U,
       ∀ z, (H z : M) = η (e z.1, z.2) := by
   obtain ⟨ε, hε, hsmall⟩ := exists_small_sphere_level_homeomorph_map e he0 hcρ hn hz ht helevel
@@ -55,9 +56,12 @@ theorem exists_normal_radial_product_map {E M : Type*} [NormedAddCommGroup E]
   let P := radialProductHomeomorph U (Ioo 0 ℓ) ρ η r ⟨hr, hrℓ⟩
     hρ hη hlevel hinit hreset hcρ.continuousOn hcη
   let H := (A.prodCongr (Homeomorph.refl (Ioo 0 ℓ))).trans P.symm
-  refine ⟨r / t, div_pos hr ht, hsource, H, ?_⟩
-  intro z
-  change η ((s z.1 : M), (z.2 : ℝ)) = η (e z.1, z.2)
-  rw [hs]
+  have htr : t * (r / t) = r := by field_simp
+  refine ⟨r / t, div_pos hr ht, ?_, hsource, H, ?_⟩
+  · rw [htr]
+    exact ⟨hr, hrℓ⟩
+  · intro z
+    change η ((s z.1 : M), (z.2 : ℝ)) = η (e z.1, z.2)
+    rw [hs]
 
 end LichnerowiczObata
