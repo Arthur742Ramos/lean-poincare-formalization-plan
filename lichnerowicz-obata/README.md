@@ -232,3 +232,9 @@ lake env lean Audit.lean
 ```
 
 The audit prints transitive axioms for the principal analytic and spectral statements.
+
+`ScaledFlowPaths` constructs continuous unit-interval paths from a continuous
+local ODE flow, derives their Picard equation by the fundamental theorem of
+calculus, and proves finite-order smooth path dependence at zero elapsed time
+for globally smooth vector fields. It does not yet localize chart vector fields
+or establish the global round-sphere isometry.

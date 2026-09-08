@@ -1,3 +1,4 @@
+import LichnerowiczObata.ScaledFlowPaths
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
 import LichnerowiczObata.ClassicalSpectrum
@@ -121,3 +122,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.norm_unitPathPrimitiveCLM_le
 #print axioms LichnerowiczObata.contDiff_picardPathOperator
 #print axioms LichnerowiczObata.contDiffAt_picard_solution_zero
+#print axioms LichnerowiczObata.scaledFlowPath_picard
+#print axioms LichnerowiczObata.contDiffAt_scaledFlowPath_zero
