@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.GeodesicNormalRadial
 public import LichnerowiczObata.NormalLevelHomeomorph
+public import LichnerowiczObata.RadialProduct
 
 /-! # A genuine intrinsic radial normal chart -/
 
@@ -152,5 +153,41 @@ theorem exists_small_obata_sphere_levels [CompactSpace M]
       simp [obataRadial, he, ha.ne']
   obtain ⟨ε, hε, hlevels⟩ := exists_small_sphere_level_homeomorph e he0 hc hn hzero ht hlevel
   exact ⟨t, ht, ε, hε, hlevels⟩
+
+/-- Normal coordinates at the unique maximum and complete radial transport
+identify the entire regular region with an intrinsic tangent sphere times
+the full radial interval. The sphere radius is constructed and positive. -/
+theorem exists_obata_tangent_sphere_product [CompactSpace M] [T2Space M] [Nonempty M]
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
+    {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
+    (hH : ∀ (y : M) (u w : TM y), hessian LC f y u w = -K * f y * inner ℝ u w)
+    (c : M) {z : E} (hz : z ∈ (extChartAt I c).target)
+    (hcrit : gradient (I := I) f ((extChartAt I c).symm z) = 0)
+    (hmax : ∀ x, f x = a ↔ x = (extChartAt I c).symm z) :
+    let p := (extChartAt I c).symm z
+    ∃ R : ℝ, 0 < R ∧ Nonempty ({x : M // -a < f x ∧ f x < a} ≃ₜ
+      Metric.sphere (0 : TM p) R × Ioo 0 (Real.pi / Real.sqrt K)) := by
+  obtain ⟨hb, hprod⟩ := obata_whole_level_product_at_positive_critical_value hK ha hf hnon hH
+    ((extChartAt I c).symm z) ((hmax _).mpr rfl) hcrit
+  have hf2 : ContMDiff I 𝓘(ℝ, ℝ) 2 f :=
+    hf.of_le (WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ ⊤))
+  obtain ⟨t, ht, ε, hε, hlevels⟩ := exists_small_obata_sphere_levels b hf2 hK ha
+    (fun x => (hb x).2) hH c hz hcrit hmax
+  have hL : 0 < Real.pi / Real.sqrt K := div_pos Real.pi_pos (Real.sqrt_pos.mpr hK)
+  let r := min ε (Real.pi / Real.sqrt K) / 2
+  have hr : 0 < r := div_pos (lt_min hε hL) (by norm_num)
+  have hre : r < ε := by
+    have := min_le_left ε (Real.pi / Real.sqrt K)
+    dsimp [r] at *
+    linarith
+  have hrL : r < Real.pi / Real.sqrt K := by
+    have := min_le_right ε (Real.pi / Real.sqrt K)
+    dsimp [r] at *
+    linarith
+  obtain ⟨e⟩ := hprod r ⟨hr, hrL⟩
+  obtain ⟨s⟩ := hlevels r ⟨hr, hre⟩
+  exact ⟨r / t, div_pos hr ht,
+    ⟨e.trans (s.symm.prodCongr (Homeomorph.refl _))⟩⟩
 
 end LichnerowiczObata

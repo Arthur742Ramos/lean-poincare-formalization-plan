@@ -466,6 +466,10 @@ sufficiently small positive Obata radial level with an actual intrinsic
 tangent-space sphere. The scale, chart, and uniform range of small radii are
 constructed. The global radial product now also uses a whole ambient level,
 with a proved homeomorphism removing the nested regular-region subtype; this
-allows direct composition with the normal-sphere identification. Matching
-the amplitude and angular factors and proving the global Riemannian
-comparison remain pending.
+allows direct composition with the normal-sphere identification. The retained
+energy identity now forces its amplitude to agree with any positive critical
+value. Combining these results at the unique maximum identifies the entire
+regular region with an actual intrinsic tangent sphere of constructed positive
+radius times the full open radial interval. This is a homeomorphism; comparison
+of the angular metric, smooth extension at the poles, and the global
+Riemannian isometry remain pending.

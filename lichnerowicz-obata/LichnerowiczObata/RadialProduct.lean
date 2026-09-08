@@ -90,11 +90,12 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 set_option backward.isDefEq.respectTransparency false in
 /-- The regular region of an actual Obata function is homeomorphic to any
 one of its radial levels times the full open radial interval. -/
-theorem exists_obata_radial_product {K : ℝ} (hK : 0 < K) {f : M → ℝ}
+theorem exists_obata_radial_product_with_energy {K : ℝ} (hK : 0 < K) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
     (hH : ∀ (x : M) (v w : TangentSpace I x),
       hessian (leviCivitaConnection (I := I)) f x v w = -K * f x * inner ℝ v w) :
     ∃ a : ℝ, 0 < a ∧ (∀ x, -a ≤ f x ∧ f x ≤ a) ∧
+      (∀ y, ‖gradient (I := I) f y‖ ^ 2 = K * (a ^ 2 - f y ^ 2)) ∧
       ∀ r₀ ∈ Ioo 0 (Real.pi / Real.sqrt K),
         Nonempty ({x : M // -a < f x ∧ f x < a} ≃ₜ
           {x : {x : M // -a < f x ∧ f x < a} // obataRadial K a f x = r₀} ×
@@ -121,11 +122,24 @@ theorem exists_obata_radial_product {K : ℝ} (hK : 0 < K) {f : M → ℝ}
     exact obata_cos_level_mem hK ha hrt
   have hfc := hf.continuous
   have hcρ : Continuous ρ := by unfold ρ obataRadial; fun_prop
-  refine ⟨a, ha, hb, ?_⟩
+  refine ⟨a, ha, hb, hn, ?_⟩
   intro r₀ hr₀
   exact ⟨radialProductHomeomorph U J ρ η r₀ hr₀ hρ hη hr
     (fun x hx => (hp x hx).1) (fun x hx r hrt s _ => (hp x hx).2.1 r hrt s)
     hcρ.continuousOn hηs.continuousOn⟩
+
+/-- Product coordinates without retaining the energy identity. -/
+theorem exists_obata_radial_product {K : ℝ} (hK : 0 < K) {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
+    (hH : ∀ (x : M) (v w : TangentSpace I x),
+      hessian (leviCivitaConnection (I := I)) f x v w = -K * f x * inner ℝ v w) :
+    ∃ a : ℝ, 0 < a ∧ (∀ x, -a ≤ f x ∧ f x ≤ a) ∧
+      ∀ r₀ ∈ Ioo 0 (Real.pi / Real.sqrt K),
+        Nonempty ({x : M // -a < f x ∧ f x < a} ≃ₜ
+          {x : {x : M // -a < f x ∧ f x < a} // obataRadial K a f x = r₀} ×
+            Ioo 0 (Real.pi / Real.sqrt K)) := by
+  obtain ⟨a, ha, hb, _, hp⟩ := exists_obata_radial_product_with_energy hK hf hnon hH
+  exact ⟨a, ha, hb, hp⟩
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The angular factor can be taken to be a whole ambient radial level.
@@ -146,6 +160,38 @@ theorem exists_obata_whole_level_product {K : ℝ} (hK : 0 < K) {f : M → ℝ}
   have hregular : ∀ x, obataRadial K a f x = r → -a < f x ∧ f x < a := by
     intro x hx
     have he := obataRadial_cos hK ha x (hb x)
+    rw [hx] at he
+    rw [← he]
+    exact obata_cos_level_mem hK ha hr
+  exact ⟨e.trans ((wholeLevelHomeomorph _ _ r hregular).prodCongr (Homeomorph.refl _))⟩
+
+set_option backward.isDefEq.respectTransparency false in
+/-- A positive critical value fixes the amplitude of the constructed radial
+product. No independent choice of normalization remains. -/
+theorem obata_whole_level_product_at_positive_critical_value
+    {K a : ℝ} (hK : 0 < K) (ha : 0 < a) {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
+    (hH : ∀ (x : M) (v w : TangentSpace I x),
+      hessian (leviCivitaConnection (I := I)) f x v w = -K * f x * inner ℝ v w)
+    (p : M) (hp : f p = a) (hcrit : gradient (I := I) f p = 0) :
+    (∀ x, -a ≤ f x ∧ f x ≤ a) ∧
+      ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
+        Nonempty ({x : M // -a < f x ∧ f x < a} ≃ₜ
+          {x : M // obataRadial K a f x = r} × Ioo 0 (Real.pi / Real.sqrt K)) := by
+  obtain ⟨b, hb, hbound, hn, hprod⟩ :=
+    exists_obata_radial_product_with_energy hK hf hnon hH
+  have he := hn p
+  rw [hcrit, hp, norm_zero, zero_pow (by decide : 2 ≠ 0)] at he
+  have hba : b = a := by
+    have hs : b ^ 2 - a ^ 2 = 0 := (mul_eq_zero.mp he.symm).resolve_left hK.ne'
+    nlinarith
+  subst b
+  refine ⟨hbound, ?_⟩
+  intro r hr
+  obtain ⟨e⟩ := hprod r hr
+  have hregular : ∀ x, obataRadial K a f x = r → -a < f x ∧ f x < a := by
+    intro x hx
+    have he := obataRadial_cos hK ha x (hbound x)
     rw [hx] at he
     rw [← he]
     exact obata_cos_level_mem hK ha hr
