@@ -274,6 +274,9 @@ zero ordinary coordinate derivative.
 The actual coordinate metric is now packaged as a continuous bilinear form.
 `MetricPairingCalculus` proves the three-term moving-pairing derivative rule
 and its algebraic conversion to covariant evolution. Applying that rule still
-requires regularity of the bilinear-valued coordinate metric and the geometric
-shape identities for the constructed variations; the generic calculus lemma
-does not discharge those obligations.
+requires the geometric shape identities for the constructed variations; the
+generic calculus lemma does not discharge those obligations.
+`MetricBilinearRegularity` supplies C1 operator-norm regularity of the actual
+bilinear-valued coordinate metric by reconstructing it from its smooth finite
+basis pairings. Its differentiability holds at every point of the open chart
+target. Combining its derivative with the actual variational ODE remains pending.

@@ -2,6 +2,8 @@ import LichnerowiczObata.RadialVariation
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
+import LichnerowiczObata.MetricBilinearRegularity
+
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
 import LichnerowiczObata.ClassicalSpectrum
@@ -25,6 +27,9 @@ import LichnerowiczObata.RadialDistance
 import LichnerowiczObata.AngularMetricEvolution
 import LichnerowiczObata.SmoothPicardOperator
 
+#print axioms LichnerowiczObata.contDiffOn_bilinear_of_basis
+#print axioms LichnerowiczObata.contDiffOn_coordinateMetricBilinear
+#print axioms LichnerowiczObata.differentiableAt_coordinateMetricBilinear
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
 #print axioms LichnerowiczObata.compact_energy_realization
