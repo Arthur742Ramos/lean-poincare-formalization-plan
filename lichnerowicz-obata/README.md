@@ -607,3 +607,9 @@ forward, and inverse formulas. Its polar specialization uses the open
 angular-radius cylinder and agrees with the specified parameter map there.
 This supplies the open-domain representation needed to apply the inverse
 theorem to the constructed polar map.
+`PolarInverseDifferentiability` now combines the open-domain construction,
+the sphere-restricted derivative equivalence, and the manifold local-inverse
+theorem. It produces one partial homeomorphism for the whole regular cylinder,
+agreeing with the given parameter map and having a differentiable inverse at
+every regular parameter value. The geometric Obata data still need to be
+instantiated in this combined theorem before the final isometry argument.
