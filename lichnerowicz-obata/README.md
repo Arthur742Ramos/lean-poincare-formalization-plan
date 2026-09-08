@@ -332,5 +332,8 @@ uniqueness proves local stationarity of a solution starting at rest, and
 spatial derivatives of a smooth solution family satisfy the resulting linear
 system along it. Integration of this linear system on a connected open time
 domain proves constant velocity variation and affine position variation.
+The initial-value identity determines the spatial derivative at time zero;
+along the stationary orbit the flow derivative is therefore
+`(u, v) ↦ (u + t • v, v)`.
 The endpoint-map derivative and normal-coordinate inverse
 still need to be constructed.

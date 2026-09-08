@@ -54,4 +54,19 @@ theorem hasDerivAt_flow_variation {φ : E × ℝ → F} {v : F → F}
   have hlin := fderiv_variation_equation hs hv (u, (0 : ℝ)) (0, (1 : ℝ)) he
   simpa only [Function.comp_def, hlin] using hd
 
+/-- The initial-value identity determines every spatial derivative at time zero. -/
+theorem fderiv_flow_initial_apply {φ : E × ℝ → E} {x : E}
+    (hφ : DifferentiableAt ℝ φ (x, 0))
+    (hinit : (fun y => φ (y, 0)) =ᶠ[𝓝 x] id) (u : E) :
+    fderiv ℝ φ (x, 0) (u, 0) = u := by
+  have hi : HasFDerivAt (fun y : E => (y, (0 : ℝ)))
+      ((ContinuousLinearMap.id ℝ E).prod (0 : E →L[ℝ] ℝ)) x :=
+    (hasFDerivAt_id x).prodMk (hasFDerivAt_const (0 : ℝ) x)
+  have hd := hφ.hasFDerivAt.comp x hi
+  have he := hinit.fderiv_eq (𝕜 := ℝ)
+  have hd' : HasFDerivAt (fun y => φ (y, 0))
+      ((fderiv ℝ φ (x, 0)).comp ((ContinuousLinearMap.id ℝ E).prod 0)) x := hd
+  rw [hd'.fderiv] at he
+  simpa using congrArg (fun L : E →L[ℝ] E => L u) he
+
 end LichnerowiczObata

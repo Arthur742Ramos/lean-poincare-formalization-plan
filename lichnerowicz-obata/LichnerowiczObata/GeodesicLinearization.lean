@@ -144,4 +144,28 @@ theorem flat_variation_eq_affine {J : ℝ → E × E} {T : Set ℝ}
   · simpa using (sub_eq_iff_eq_add.mp (by simpa using he))
   · exact hv t ht
 
+/-- The actual geodesic flow has the Euclidean spatial linearization along
+its stationary orbit, with initial derivative derived from the flow identity. -/
+theorem fderiv_geodesic_flow_at_rest_apply
+    (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov) (ht : cov.torsion = 0)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E) (c : M) {z : E}
+    (hz : z ∈ (extChartAt I c).target)
+    {α : (E × E) × ℝ → E × E} {U : Set ((E × E) × ℝ)}
+    (hU : IsOpen U) (hα : ContDiffOn ℝ 2 α U)
+    (hode : ∀ q ∈ U, HasDerivAt (fun s => α (q.1, s))
+      (coordinateGeodesicSpray cov b c (α q)) q.2)
+    (hinit : (fun q => α (q, 0)) =ᶠ[𝓝 (z, (0 : E))] id)
+    {T : Set ℝ} (hT : IsOpen T) (hconn : IsPreconnected T) (hzero : (0 : ℝ) ∈ T)
+    (hmem : ∀ s ∈ T, ((z, 0), s) ∈ U)
+    (hrest : ∀ s ∈ T, α ((z, 0), s) = (z, 0))
+    {t : ℝ} (htime : t ∈ T) (u v : E) :
+    fderiv ℝ α ((z, 0), t) ((u, v), 0) = (u + t • v, v) := by
+  have hi := fderiv_flow_initial_apply
+    ((hα.contDiffAt (hU.mem_nhds (hmem 0 hzero))).differentiableAt (by norm_num))
+    hinit (u, v)
+  have he := flat_variation_eq_affine hT hconn hzero
+    (fun s hs => hasDerivAt_geodesic_flow_variation_at_rest cov hm ht b c hz
+      hU hα hode (hmem s hs) (hrest s hs) (u, v)) htime
+  simpa only [hi] using he
+
 end LichnerowiczObata
