@@ -299,5 +299,10 @@ from the manifold integral-curve equation.
 level identity, then proves spherical metric evolution for the actual chart
 representation of a smooth manifold radial family. The theorem requires its
 integral-curve and level identities, but no separate angularity or variational
-ODE hypothesis. Instantiation with the constructed global family, chart-independent
-integration, and pole normalization remain to be completed.
+ODE hypothesis.
+`ConstructedRadialMetric` instantiates the metric equation with the same
+constructed global radial family. The strengthened existence theorem retains
+the original gradient-norm identity, smoothness, reset law, integral-curve
+equation, level identity, unit speed, and endpoint limits, and adds metric
+evolution in every valid chart pair. Chart-independent integration and pole
+normalization remain to be completed.

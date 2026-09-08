@@ -6,6 +6,7 @@ import LichnerowiczObata.MetricBilinearRegularity
 import LichnerowiczObata.CoordinateRadialShape
 import LichnerowiczObata.ManifoldFlowCoordinates
 import LichnerowiczObata.CoordinateAngularVariation
+import LichnerowiczObata.ConstructedRadialMetric
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -31,6 +32,8 @@ import LichnerowiczObata.AngularMetricEvolution
 import LichnerowiczObata.SmoothPicardOperator
 
 #print axioms LichnerowiczObata.contDiffOn_bilinear_of_basis
+#print axioms LichnerowiczObata.radialChartMetricEvolution_of_family
+#print axioms LichnerowiczObata.exists_smooth_obata_radial_family_metric
 #print axioms LichnerowiczObata.coordinate_variation_angular
 #print axioms LichnerowiczObata.coordinate_chartFlow_variation_angular
 #print axioms LichnerowiczObata.hasDerivAt_manifold_radial_chart_metric
