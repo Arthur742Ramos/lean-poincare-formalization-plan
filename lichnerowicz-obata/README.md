@@ -477,3 +477,8 @@ Riemannian isometry remain pending.
 from the smooth nonconstant Obata equation in dimension at least two. It also
 proves that the regular region is exactly the manifold minus those two poles,
 so the resulting tangent-sphere product omits no other manifold points.
+`NormalMetricChart` packages the actual coordinate endpoint map as one local
+homeomorphism with its radial identity, C2 forward regularity, C2 inverse at
+the pole, and full pole-normalized metric formula throughout its punctured
+source. The geodesic family, time, and domain restrictions are constructed
+together; the metric formula uses the derivative of that same chart.
