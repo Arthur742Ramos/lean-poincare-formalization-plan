@@ -679,6 +679,9 @@ Cartesian round logarithm with identity derivative at zero and exact recovery
 of short polar rays. `exists_obata_regular_round_north_extension` uses it to
 construct a differentiable ambient inverse at the north pole, agreeing with
 the regular comparison at every punctured-sphere point of sufficiently small
-radial coordinate. Combining this with the global metric comparison,
-establishing pole metric preservation, handling the south pole, and proving
+radial coordinate. `HasRoundNorthInverseExtension` attaches that fact to the
+specified comparison map through the regular metric construction. The global
+round homeomorphism now retains the same differentiable north-pole ambient
+extension, with agreement on a full sphere neighborhood including the pole.
+Establishing pole metric preservation, handling the south pole, and proving
 the final global isometry remain unfinished.

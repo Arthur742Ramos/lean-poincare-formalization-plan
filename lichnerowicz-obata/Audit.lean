@@ -384,6 +384,8 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.hasFDerivAt_roundPoleLog_zero
 #print axioms LichnerowiczObata.roundPoleLog_polar_projection
 #print axioms LichnerowiczObata.HasRadialPoleModel.exists_round_north_extension
+#print axioms LichnerowiczObata.HasRadialPoleModel.round_north_inverse_extension
+#print axioms LichnerowiczObata.round_north_eventuallyEq_of_punctured
 #print axioms LichnerowiczObata.exists_obata_regular_round_north_extension
 #print axioms LichnerowiczObata.coordinate_metric_trivialization_forward
 #print axioms LichnerowiczObata.angular_metric_precompose_linear

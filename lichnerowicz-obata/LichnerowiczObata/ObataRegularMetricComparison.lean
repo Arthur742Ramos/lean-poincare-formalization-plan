@@ -41,6 +41,7 @@ theorem obata_regular_metric_comparison
         riemannianEDist I x q ≤ ENNReal.ofReal (Real.pi / Real.sqrt K - obataRadial K a f x)) ∧
       ∃ F : {x : M // -a < f x ∧ f x < a} ≃ₜ
           RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
+        HasRoundNorthInverseExtension I K F p ∧
         ∃ T : M → RoundAmbient (TM p),
           (∀ y : {x : M // -a < f x ∧ f x < a},
             T (y : M) = ((F y).1 : RoundAmbient (TM p)) ∧

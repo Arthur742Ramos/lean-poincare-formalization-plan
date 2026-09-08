@@ -27,7 +27,8 @@ local notation "TM" => (TangentSpace I : M → Type _)
 /-- The Obata equation supplies a global homeomorphism from the round
 sphere, including both poles. The same map retains differentiable ambient
 extensions in both regular directions and the regular forward metric.
-Differentiability and metric preservation at the poles are not asserted. -/
+At the north pole it agrees locally with a differentiable ambient map.
+South-pole differentiability and pole metric preservation are not asserted. -/
 theorem obata_global_round_homeomorph
     (hdim : 1 < Module.rank ℝ E) {K : ℝ} (hK : 0 < K) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
@@ -38,6 +39,16 @@ theorem obata_global_round_homeomorph
       ∃ H : Metric.sphere (0 : RoundAmbient (TM p)) (1 / Real.sqrt K) ≃ₜ M,
         H (roundNorthPoint (one_div_pos.mpr (Real.sqrt_pos.mpr hK))) = p ∧
         H (roundSouthPoint (one_div_pos.mpr (Real.sqrt_pos.mpr hK))) = q ∧
+        (∃ N : RoundAmbient (TM p) → M,
+          N ((1 / Real.sqrt K) • roundNorth) = p ∧
+          MDifferentiableAt 𝓘(ℝ, RoundAmbient (TM p)) I N ((1 / Real.sqrt K) • roundNorth) ∧
+          ((fun x : Metric.sphere (0 : RoundAmbient (TM p)) (1 / Real.sqrt K) =>
+            N (x : RoundAmbient (TM p))) =ᶠ[𝓝 (roundNorthPoint
+              (one_div_pos.mpr (Real.sqrt_pos.mpr hK)))] H) ∧
+          ∃ δ : ℝ, 0 < δ ∧
+            ∀ x : RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
+              (intrinsicRoundInverseCoordinates (1 / Real.sqrt K) (x.1 : RoundAmbient (TM p))).2 < δ →
+                N (x.1 : RoundAmbient (TM p)) = H x.1) ∧
         ∃ T : M → RoundAmbient (TM p),
           (∀ y : {x : M // -a < f x ∧ f x < a},
             T (y : M) = (H.symm (y : M) : RoundAmbient (TM p)) ∧
@@ -49,7 +60,7 @@ theorem obata_global_round_homeomorph
             ∀ x : RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
               G (x.1 : RoundAmbient (TM p)) = H x.1 ∧
               MDifferentiableAt 𝓘(ℝ, RoundAmbient (TM p)) I G (x.1 : RoundAmbient (TM p)) := by
-  obtain ⟨a, ha, hb, p, q, hpq, hmax, hmin, hdist, F, T, hT, hρ, G, hG⟩ :=
+  obtain ⟨a, ha, hb, p, q, hpq, hmax, hmin, hdist, F, hNorth, T, hT, hρ, G, hG⟩ :=
     obata_regular_metric_comparison hdim hK hf hnon hH
   have hU : {x : M | -a < f x ∧ f x < a} = {x : M | x ≠ p ∧ x ≠ q} := by
     ext x
@@ -66,7 +77,15 @@ theorem obata_global_round_homeomorph
   obtain ⟨H, hHN, hHS, hHreg⟩ := exists_round_comparison_extension
     (one_div_pos.mpr (Real.sqrt_pos.mpr hK)) p q hpq hU F G
     (fun x => (hG x).1) (fun x => (hG x).2.continuousAt) hN hS
-  refine ⟨a, ha, hb, p, q, hpq, hmax, hmin, H, hHN, hHS, T, ?_, G, ?_⟩
+  refine ⟨a, ha, hb, p, q, hpq, hmax, hmin, H, hHN, hHS, ?_, T, ?_, G, ?_⟩
+  · obtain ⟨N, hN0, hNd, δ, hδ, hNreg⟩ := hNorth
+    have hreg : ∀ x : RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
+        (intrinsicRoundInverseCoordinates (1 / Real.sqrt K) (x.1 : RoundAmbient (TM p))).2 < δ →
+          N (x.1 : RoundAmbient (TM p)) = H x.1 :=
+      fun x hx => (hNreg x hx).trans (hHreg x).symm
+    exact ⟨N, hN0, hNd, round_north_eventuallyEq_of_punctured
+      (one_div_pos.mpr (Real.sqrt_pos.mpr hK)) H N (hN0.trans hHN.symm) hδ hreg,
+      δ, hδ, hreg⟩
   · intro y
     have hy : H.symm (y : M) = (F y).1 := by
       apply H.injective

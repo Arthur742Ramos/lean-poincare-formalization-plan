@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.RoundPoleGraph
 public import LichnerowiczObata.NormalChartRadialFlow
+public import LichnerowiczObata.IntrinsicRoundInverse
 public import Mathlib.Analysis.Calculus.DSlope
 public import Mathlib.Analysis.SpecialFunctions.Trigonometric.InverseDeriv
 
@@ -106,5 +107,50 @@ theorem HasRadialPoleModel.exists_round_north_extension
     rw [roundPoleLog_polar_projection hR (u : P) (mem_sphere_zero_iff_norm.mp u.2)
       ⟨hr.1, lt_of_lt_of_le hr.2 (min_le_right _ _)⟩]
     exact (hpolar u r ⟨hr.1, lt_of_lt_of_le hr.2 (min_le_left _ _)⟩).symm
+
+/-- A north-pole extension attached to one specified regular comparison. -/
+def HasRoundNorthInverseExtension
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    (K : ℝ) {U : Set M}
+    (F : U ≃ₜ RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient P))
+    (p : M) : Prop :=
+  ∃ N : RoundAmbient P → M,
+    N ((1 / Real.sqrt K) • roundNorth) = p ∧
+    MDifferentiableAt 𝓘(ℝ, RoundAmbient P) I N ((1 / Real.sqrt K) • roundNorth) ∧
+    ∃ δ : ℝ, 0 < δ ∧
+      ∀ x : RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient P),
+        (intrinsicRoundInverseCoordinates (1 / Real.sqrt K) (x.1 : RoundAmbient P)).2 < δ →
+          N (x.1 : RoundAmbient P) = (F.symm x : M)
+
+/-- The pole model belongs to the exact comparison obtained from its
+polar homeomorphism, so it can be carried with that map's metric properties. -/
+theorem HasRadialPoleModel.round_north_inverse_extension
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {Φ : P × ℝ → M} {p : M} (hmodel : HasRadialPoleModel I Φ p)
+    {K : ℝ} (hK : 0 < K) {U : Set M}
+    (Q : Metric.sphere (0 : P) 1 × Ioo 0 (Real.pi / Real.sqrt K) ≃ₜ U)
+    (hQ : ∀ q, (Q q : M) = Φ (q.1, q.2)) :
+    HasRoundNorthInverseExtension I K (Q.symm.trans (curvatureRoundPolarHomeomorph hK)) p := by
+  obtain ⟨N, hN0, hNd, δ, hδ, hN⟩ := hmodel.exists_round_north_extension
+    (one_div_pos.mpr (Real.sqrt_pos.mpr hK))
+  refine ⟨N, hN0, hNd, δ, hδ, ?_⟩
+  intro x hx
+  let q := (curvatureRoundPolarHomeomorph hK).symm x
+  have hpoint : (x.1 : RoundAmbient P) =
+      roundPolarCurve (1 / Real.sqrt K) roundNorth (roundAngularInclusion (q.1 : P)) q.2 := by
+    simpa only [q, Homeomorph.apply_symm_apply] using curvatureRoundPolarHomeomorph_apply hK q
+  have hcoords := intrinsicRoundInverseCoordinates_eq_inverse hK x
+  have hrδ : (q.2 : ℝ) < δ := by
+    have hh : (intrinsicRoundInverseCoordinates (1 / Real.sqrt K) (x.1 : RoundAmbient P)).2 =
+        (q.2 : ℝ) := congrArg Prod.snd hcoords
+    rw [← hh]
+    exact hx
+  change N (x.1 : RoundAmbient P) = (Q q : M)
+  rw [hpoint]
+  exact (hN q.1 q.2 ⟨q.2.property.1, hrδ⟩).trans (hQ q).symm
 
 end LichnerowiczObata

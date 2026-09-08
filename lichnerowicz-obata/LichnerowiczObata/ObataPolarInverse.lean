@@ -91,7 +91,8 @@ include hDimension in
 /-- A single regular comparison to the punctured round sphere has
 differentiable ambient extensions in both directions, and its forward
 derivative preserves the Riemannian inner product on every regular tangent
-space. No assertion is made here about the two critical levels. -/
+space. The same comparison retains its differentiable north-pole inverse
+extension; no south-pole or pole-metric assertion is made here. -/
 theorem exists_obata_regular_forward_differentiable
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
     {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
@@ -103,6 +104,7 @@ theorem exists_obata_regular_forward_differentiable
     let p := (extChartAt I c).symm z
     ∃ F : {x : M // -a < f x ∧ f x < a} ≃ₜ
         RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
+      HasRoundNorthInverseExtension I K F p ∧
       ∃ T : M → RoundAmbient (TM p),
         (∀ y : {x : M // -a < f x ∧ f x < a},
           T (y : M) = ((F y).1 : RoundAmbient (TM p)) ∧
@@ -126,7 +128,7 @@ theorem exists_obata_regular_forward_differentiable
   let Ψₛ := fun q : Metric.sphere (0 : TM p) 1 × ℝ => Ψ (q.1, q.2)
   let F := Q.symm.trans (curvatureRoundPolarHomeomorph hK)
   let T := Ψₛ ∘ e.symm
-  refine ⟨F, T, ?_, ?_, ?_⟩
+  refine ⟨F, hpole.round_north_inverse_extension hK Q hQ, T, ?_, ?_, ?_⟩
   · intro y
     refine ⟨?_, ?_⟩
     · change Ψₛ (e.symm (y : M)) = _

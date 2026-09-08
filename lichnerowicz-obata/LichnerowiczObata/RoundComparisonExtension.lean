@@ -95,4 +95,33 @@ theorem exists_round_comparison_extension [FiniteDimensional ℝ P]
   intro x
   exact hH (A.symm x)
 
+/-- Agreement on sufficiently small punctured radial levels, together
+with agreement at the pole, gives agreement on a full sphere neighborhood. -/
+theorem round_north_eventuallyEq_of_punctured
+    {M : Type*} {R : ℝ} (hR : 0 < R)
+    (H : Metric.sphere (0 : RoundAmbient P) R → M) (N : RoundAmbient P → M)
+    (hN : N (R • roundNorth) = H (roundNorthPoint hR))
+    {δ : ℝ} (hδ : 0 < δ)
+    (hreg : ∀ x : RoundPuncturedSphere R (roundNorth : RoundAmbient P),
+      (intrinsicRoundInverseCoordinates R (x.1 : RoundAmbient P)).2 < δ →
+        N (x.1 : RoundAmbient P) = H x.1) :
+    (fun x : Metric.sphere (0 : RoundAmbient P) R => N (x : RoundAmbient P)) =ᶠ[𝓝 (roundNorthPoint hR)] H := by
+  have hρ0 : (intrinsicRoundInverseCoordinates R
+      ((roundNorthPoint (P := P) hR).val)).2 = 0 := by
+    change (intrinsicRoundInverseCoordinates R (R • (roundNorth : RoundAmbient P))).2 = 0
+    exact intrinsicRoundInverse_radius_north (P := P) (R := R) hR
+  have hρ : Tendsto (fun x : Metric.sphere (0 : RoundAmbient P) R =>
+      (intrinsicRoundInverseCoordinates R (x : RoundAmbient P)).2)
+      (𝓝 (roundNorthPoint hR)) (𝓝 0) := by
+    rw [← hρ0]
+    exact ((continuous_intrinsicRoundInverse_radius R).comp continuous_subtype_val).continuousAt.tendsto
+  filter_upwards [hρ.eventually (gt_mem_nhds hδ),
+    eventually_ne_nhds (roundNorthPoint_ne_southPoint (P := P) hR)] with x hx hxS
+  by_cases hxN : x = roundNorthPoint hR
+  · subst x
+    exact hN
+  · let y : RoundPuncturedSphere R (roundNorth : RoundAmbient P) :=
+      ⟨x, fun he => hxN (Subtype.ext he), fun he => hxS (Subtype.ext he)⟩
+    exact hreg y hx
+
 end LichnerowiczObata
