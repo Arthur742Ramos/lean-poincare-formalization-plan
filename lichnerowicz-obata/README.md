@@ -776,3 +776,11 @@ by ODE uniqueness. The smooth polar inverse and matched two-pole comparison
 carry this evidence into `obata_global_round_metric_embedding`, which now
 asserts global smoothness as well as the everywhere metric identity. The
 round-sphere converse and final equality characterization are still open.
+
+`exists_round_metric_diffeomorph` upgrades any such smooth metric-preserving
+homeomorphism onto a radius-`R` sphere to a genuine diffeomorphism with the
+standard unit-sphere manifold. Its inverse smoothness is proved from the
+injective derivative and equal dimensions. Scaling the resulting ambient
+inclusion by `R` recovers the original map exactly and preserves the induced
+radius-`R` metric. The final Obata and eigenvalue-equality interfaces still
+need to apply and package this result.
