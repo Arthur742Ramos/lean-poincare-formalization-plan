@@ -348,5 +348,8 @@ the geodesic equation, without assuming a speed identity.
 `GeodesicHessian` derives the value derivative and Hessian evolution along
 these geodesics. Under the Obata Hessian equation, the scalar restriction
 satisfies `f″ = -K · speed² · f`, with the constant speed evaluated at any
-fixed reference time. The cosine solution from a pole and its identification
-with the existing radial curves remain to be proved.
+fixed reference time. `ScalarOscillator` proves the cosine solution by energy
+uniqueness, including zero frequency. Applied to geodesics from a critical
+point, this gives the cosine profile with frequency equal to the square root
+of curvature times initial squared metric speed. Identification with the
+existing radial curves and the round angular metric remains pending.

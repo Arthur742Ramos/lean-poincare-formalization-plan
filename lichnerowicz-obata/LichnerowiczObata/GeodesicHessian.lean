@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.GeodesicEnergy
 public import LichnerowiczObata.CoordinateRadialShape
+public import LichnerowiczObata.ScalarOscillator
 
 /-! # Hessian evolution along actual coordinate geodesics -/
 
@@ -178,5 +179,51 @@ theorem hasDerivAt_deriv_coordinate_geodesic_obata
     ((extChartAt I c).symm (α t).1) (hx t ht) (hp t ht) (hα t ht)
   rw [coordinate_geodesic_energy_eq cov hm b c hT hconn hz hα ht hs₀] at hd
   exact hd.congr_of_eventuallyEq he
+
+/-- From a critical point, the Obata function along an actual geodesic is
+the cosine of time times its curvature-scaled initial metric speed. -/
+theorem coordinate_geodesic_obata_eq_cos
+    (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) {K : ℝ} (hK : 0 ≤ K)
+    (hH : ∀ (y : M) (v w : TM y), hessian cov f y v w = -K * f y * inner ℝ v w)
+    (c : M) {α : ℝ → E × E} {T : Set ℝ}
+    (hT : IsOpen T) (hconn : IsPreconnected T) (hzero : (0 : ℝ) ∈ T)
+    (hz : ∀ s ∈ T, (α s).1 ∈ (extChartAt I c).target)
+    (hα : ∀ s ∈ T, HasDerivAt α (coordinateGeodesicSpray cov b c (α s)) s)
+    (hcrit : gradient (I := I) f ((extChartAt I c).symm (α 0).1) = 0)
+    {t : ℝ} (ht : t ∈ T) :
+    f ((extChartAt I c).symm (α t).1) =
+      f ((extChartAt I c).symm (α 0).1) *
+        Real.cos (Real.sqrt (K * coordinateMetricBilinear (I := I) c
+          (α 0).1 (α 0).2 (α 0).2) * t) := by
+  let F : ℝ → ℝ := fun s => f ((extChartAt I c).symm (α s).1)
+  let e : ℝ := coordinateMetricBilinear (I := I) c (α 0).1 (α 0).2 (α 0).2
+  have he : 0 ≤ e := by
+    exact real_inner_self_nonneg (x :=
+      (trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm (α 0).1) (α 0).2)
+  have hsq : (Real.sqrt (K * e)) ^ 2 = K * e := Real.sq_sqrt (mul_nonneg hK he)
+  have hx (s : ℝ) (hs : s ∈ T) :
+      (extChartAt I c).symm (α s).1 ∈ (chartAt H c).source := by
+    simpa using (extChartAt I c).map_target (hz s hs)
+  have hp (s : ℝ) (hs : s ∈ T) :
+      (α s).1 = extChartAt I c ((extChartAt I c).symm (α s).1) :=
+    ((extChartAt I c).right_inv (hz s hs)).symm
+  have hval (s : ℝ) (hs : s ∈ T) := hasDerivAt_coordinate_geodesic_value cov b
+    (hf.of_le (by norm_num)) c ((extChartAt I c).symm (α s).1) (hx s hs) (hp s hs) (hα s hs)
+  have hF : ∀ s ∈ T, HasDerivAt F (deriv F s) s :=
+    fun s hs => (hval s hs).differentiableAt.hasDerivAt
+  have hV : ∀ s ∈ T, HasDerivAt (deriv F) (-(Real.sqrt (K * e) ^ 2) * F s) s := by
+    intro s hs
+    have hd := hasDerivAt_deriv_coordinate_geodesic_obata cov hm b hf hH c
+      hT hconn hz hα hzero hs
+    convert hd using 1
+    rw [hsq]
+    dsimp [F, e]
+    ring
+  have hvzero : deriv F 0 = 0 := by
+    have hd := (hval 0 hzero).deriv
+    simpa only [F, coordinateVectorField, hcrit, map_zero, zero_apply] using hd
+  exact scalar_oscillator_eq_cos hT hconn hzero hF hV rfl hvzero ht
 
 end LichnerowiczObata

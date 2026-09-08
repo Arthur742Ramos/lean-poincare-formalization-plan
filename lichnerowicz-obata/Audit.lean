@@ -58,6 +58,8 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_obata_pairing
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_value
 #print axioms LichnerowiczObata.hasDerivAt_deriv_coordinate_geodesic_obata
+#print axioms LichnerowiczObata.scalar_oscillator_eq_cos
+#print axioms LichnerowiczObata.coordinate_geodesic_obata_eq_cos
 #print axioms LichnerowiczObata.contDiffAt_coordinateVectorField_of_order
 #print axioms LichnerowiczObata.contDiffOn_coordinateConnection_basis
 #print axioms LichnerowiczObata.contDiffOn_coordinateGeodesicSpray
