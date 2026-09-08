@@ -236,5 +236,10 @@ The audit prints transitive axioms for the principal analytic and spectral state
 `ScaledFlowPaths` constructs continuous unit-interval paths from a continuous
 local ODE flow, derives their Picard equation by the fundamental theorem of
 calculus, and proves finite-order smooth path dependence at zero elapsed time
-for globally smooth vector fields. It does not yet localize chart vector fields
-or establish the global round-sphere isometry.
+for globally smooth vector fields; endpoint evaluation recovers smoothness of
+the actual flow. `LocalVectorFieldExtension` constructs a smooth cutoff
+extension agreeing near the initial point. `SmoothLocalFlow` removes the
+global-field hypothesis and constructs a jointly finite-order smooth flow on
+a product neighborhood. `SmoothManifoldFlow` lifts this result to smooth
+boundaryless manifolds whose model space admits smooth bump functions.
+Global smooth dependence and the round-sphere isometry remain unfinished.

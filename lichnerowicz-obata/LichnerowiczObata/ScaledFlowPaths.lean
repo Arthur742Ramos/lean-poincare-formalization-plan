@@ -102,4 +102,22 @@ theorem contDiffAt_scaledFlowPath_zero (n : ℕ) (hn : n ≠ 0)
   · exact (continuousOn_scaledFlowPath hc _ (mem_of_mem_nhds hN)).continuousAt hN
   · exact Filter.eventually_of_mem hN (fun z hz => scaledFlowPath_picard v hc hzero hode hz)
 
+/-- Evaluation at the endpoint recovers smoothness of the actual local flow. -/
+theorem contDiffAt_flow_zero (n : ℕ) (hn : n ≠ 0)
+    (v : C(E, E)) (hv : ContDiff ℝ n v)
+    {α : E × ℝ → E} {V : Set E} {δ : ℝ} {x : E}
+    (hV : V ∈ 𝓝 x) (hδ : 0 < δ)
+    (hc : ContinuousOn α (V ×ˢ ball 0 δ))
+    (hzero : ∀ y ∈ V, α (y, 0) = y)
+    (hode : ∀ y ∈ V, ∀ t ∈ ball 0 δ,
+      HasDerivAt (fun s => α (y, s)) (v (α (y, t))) t) :
+    ContDiffAt ℝ n α (x, 0) := by
+  let e : C(Icc (0 : ℝ) 1, E) →L[ℝ] E := ContinuousMap.evalCLM ℝ ⟨1, by simp⟩
+  have he := e.contDiff.contDiffAt.comp (x, (0 : ℝ))
+    (contDiffAt_scaledFlowPath_zero n hn v hv hV hδ hc hzero hode)
+  apply he.congr_of_eventuallyEq
+  filter_upwards [prod_mem_nhds hV (ball_mem_nhds 0 hδ)] with z hz
+  change α z = scaledFlowPath α z ⟨1, by simp⟩
+  simp [scaledFlowPath_apply hc hz]
+
 end LichnerowiczObata

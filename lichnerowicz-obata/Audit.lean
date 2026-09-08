@@ -1,4 +1,4 @@
-import LichnerowiczObata.ScaledFlowPaths
+import LichnerowiczObata.SmoothManifoldFlow
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
 import LichnerowiczObata.ClassicalSpectrum
@@ -124,3 +124,7 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.contDiffAt_picard_solution_zero
 #print axioms LichnerowiczObata.scaledFlowPath_picard
 #print axioms LichnerowiczObata.contDiffAt_scaledFlowPath_zero
+#print axioms LichnerowiczObata.contDiffAt_flow_zero
+#print axioms LichnerowiczObata.exists_contDiff_extension
+#print axioms LichnerowiczObata.exists_smooth_local_flow
+#print axioms LichnerowiczObata.exists_smooth_local_manifold_flow
