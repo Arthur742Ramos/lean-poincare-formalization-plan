@@ -1,13 +1,13 @@
 module
 
-public import LichnerowiczObata.IsometricLocalInverse
+public import LichnerowiczObata.SmoothIsometricInverse
 public import LichnerowiczObata.RoundPoleGraph
 
 /-! # Forward metric derivatives at either round pole -/
 
 @[expose] public noncomputable section
 open Bundle Set
-open scoped Manifold Topology
+open scoped Manifold ContDiff Topology
 namespace LichnerowiczObata
 set_option backward.isDefEq.respectTransparency false
 
@@ -18,7 +18,7 @@ variable {P : Type*} [NormedAddCommGroup P] [InnerProductSpace ℝ P] [FiniteDim
   [RiemannianBundle (TangentSpace I : M → Type _)]
 
 /-- A tangent-isometric ambient inverse extension at a signed round pole
-implies differentiability and metric preservation of the actual forward
+implies smoothness and metric preservation of the actual forward
 comparison there. The comparison itself is used, not a replacement map. -/
 theorem round_pole_forward_metric
     (hDim : Module.finrank ℝ P = Module.finrank ℝ E)
@@ -27,13 +27,13 @@ theorem round_pole_forward_metric
     (hb : (b : RoundAmbient P) = (ε * R) • roundNorth)
     (Q : Metric.sphere (0 : RoundAmbient P) R ≃ₜ M) (N : RoundAmbient P → M)
     (hN0 : N (b : RoundAmbient P) = Q b)
-    (hNd : MDifferentiableAt 𝓘(ℝ, RoundAmbient P) I N (b : RoundAmbient P))
+    (hNd : ContMDiffAt 𝓘(ℝ, RoundAmbient P) I ∞ N (b : RoundAmbient P))
     (hNm : ∀ v w : P,
       inner ℝ (mfderiv 𝓘(ℝ, RoundAmbient P) I N (b : RoundAmbient P) (roundAngularInclusion v))
         (mfderiv 𝓘(ℝ, RoundAmbient P) I N (b : RoundAmbient P) (roundAngularInclusion w)) = inner ℝ v w)
     (hNeq : (fun z : Metric.sphere (0 : RoundAmbient P) R => N (z : RoundAmbient P)) =ᶠ[𝓝 b] Q) :
     let T := fun y : M => (Q.symm y : RoundAmbient P)
-    MDifferentiableAt I 𝓘(ℝ, RoundAmbient P) T (Q b) ∧
+    ContMDiffAt I 𝓘(ℝ, RoundAmbient P) ∞ T (Q b) ∧
       ∀ v w : TangentSpace I (Q b),
         inner ℝ (mvfderiv I T (Q b) v) (mvfderiv I T (Q b) w) = inner ℝ v w := by
   let χ := N ∘ roundPoleGraph ε R
@@ -53,8 +53,14 @@ theorem round_pole_forward_metric
     mdifferentiableAt_iff_differentiableAt.mpr hgraph.differentiableAt
   have hNgraph : MDifferentiableAt 𝓘(ℝ, RoundAmbient P) I N (roundPoleGraph ε R (0 : P)) := by
     rw [hgraph0]
+    exact hNd.mdifferentiableAt (by norm_num)
+  have hgraphSmooth : ContMDiffAt 𝓘(ℝ, P) 𝓘(ℝ, RoundAmbient P) ∞
+      (roundPoleGraph ε R) (0 : P) :=
+    contMDiffAt_iff_contDiffAt.mpr (contDiffAt_roundPoleGraph ε hR 0 (by simpa using hR))
+  have hNSmooth : ContMDiffAt 𝓘(ℝ, RoundAmbient P) I ∞ N (roundPoleGraph ε R (0 : P)) := by
+    rw [hgraph0]
     exact hNd
-  have hχd : MDifferentiableAt 𝓘(ℝ, P) I χ 0 := hNgraph.comp 0 hgraphd
+  have hχSmooth : ContMDiffAt 𝓘(ℝ, P) I ∞ χ 0 := hNSmooth.comp 0 hgraphSmooth
   have hχm : ∀ v w : P, inner ℝ (mfderiv 𝓘(ℝ, P) I χ 0 v)
       (mfderiv 𝓘(ℝ, P) I χ 0 w) = inner ℝ v w := by
     have hj (v : P) : mfderiv 𝓘(ℝ, P) 𝓘(ℝ, RoundAmbient P) (roundPoleGraph ε R) (0 : P) v =
@@ -91,14 +97,17 @@ theorem round_pole_forward_metric
     change N (roundPoleGraph ε R (g y)) = y
     rw [hy]
     exact he.trans (Q.apply_symm_apply y)
-  obtain ⟨hgd, hgm⟩ := local_inverse_of_metric_derivative χ g 0 hDim hχd hχm
+  obtain ⟨hgSmooth, hgm⟩ := smooth_local_inverse_of_metric_derivative χ g 0 hDim hχSmooth hχm
     hgc.continuousAt (by rw [hχ0]; exact hg0) hfg
-  rw [hχ0] at hgd hgm
+  rw [hχ0] at hgSmooth hgm
+  have hgd := hgSmooth.mdifferentiableAt (by norm_num)
   have hgraphg : MDifferentiableAt 𝓘(ℝ, P) 𝓘(ℝ, RoundAmbient P)
       (roundPoleGraph ε R) (g (Q b)) := by rw [hg0]; exact hgraphd
   have hlocal : (fun y : M => (Q.symm y : RoundAmbient P)) =ᶠ[𝓝 (Q b)]
       (roundPoleGraph ε R ∘ g) := hrecon.mono (fun _ hy => hy.symm)
-  refine ⟨(hgraphg.comp (Q b) hgd).congr_of_eventuallyEq hlocal, ?_⟩
+  have hgraphgSmooth : ContMDiffAt 𝓘(ℝ, P) 𝓘(ℝ, RoundAmbient P) ∞
+      (roundPoleGraph ε R) (g (Q b)) := by rw [hg0]; exact hgraphSmooth
+  refine ⟨(hgraphgSmooth.comp (Q b) hgSmooth).congr_of_eventuallyEq hlocal, ?_⟩
   intro v w
   have hd (v : TangentSpace I (Q b)) :
       mvfderiv I (fun y : M => (Q.symm y : RoundAmbient P)) (Q b) v =

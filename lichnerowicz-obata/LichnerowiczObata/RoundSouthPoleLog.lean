@@ -27,9 +27,9 @@ theorem roundPoleLog_south_polar_projection {R : ℝ} (hR : 0 < R)
   rw [he]
   exact roundPoleLog_polar_projection hR u hu hr
 
-/-- A Cartesian model gives a differentiable, tangent-isometric ambient
+/-- A smooth Cartesian model gives a smooth, tangent-isometric ambient
 extension at the south pole, agreeing with all sufficiently short south rays. -/
-theorem HasRadialPoleModel.exists_round_south_extension
+theorem HasRadialPoleModel.exists_round_south_extension [CompleteSpace P]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -38,7 +38,7 @@ theorem HasRadialPoleModel.exists_round_south_extension
     {R : ℝ} (hR : 0 < R) :
     ∃ G : RoundAmbient P → M,
       G (-(R • roundNorth)) = p ∧
-      MDifferentiableAt 𝓘(ℝ, RoundAmbient P) I G (-(R • roundNorth)) ∧
+      ContMDiffAt 𝓘(ℝ, RoundAmbient P) I ∞ G (-(R • roundNorth)) ∧
       (∀ v w : P,
         inner ℝ (mfderiv 𝓘(ℝ, RoundAmbient P) I G (-(R • roundNorth)) (roundAngularInclusion v))
           (mfderiv 𝓘(ℝ, RoundAmbient P) I G (-(R • roundNorth)) (roundAngularInclusion w)) = inner ℝ v w) ∧
@@ -52,16 +52,15 @@ theorem HasRadialPoleModel.exists_round_south_extension
     lt_min hδ (div_pos (mul_pos Real.pi_pos hR) (by norm_num)), ?_⟩
   · change χ (roundPoleLog R (A (-(R • roundNorth)))) = p
     rw [hA, roundPoleLog_zero, hχ0]
-  · have hlog : MDifferentiableAt 𝓘(ℝ, P) 𝓘(ℝ, P) (roundPoleLog R)
+  · have hlog : ContMDiffAt 𝓘(ℝ, P) 𝓘(ℝ, P) ∞ (roundPoleLog R)
         (A (-(R • roundNorth))) := by
       rw [hA]
-      exact mdifferentiableAt_iff_differentiableAt.mpr
-        (hasFDerivAt_roundPoleLog_zero R).differentiableAt
-    have hc : MDifferentiableAt 𝓘(ℝ, P) I χ (roundPoleLog R (A (-(R • roundNorth)))) := by
+      exact contMDiffAt_iff_contDiffAt.mpr (contDiffAt_roundPoleLog_zero hR)
+    have hc : ContMDiffAt 𝓘(ℝ, P) I ∞ χ (roundPoleLog R (A (-(R • roundNorth)))) := by
       rw [hA, roundPoleLog_zero]
-      exact hχ.mdifferentiableAt (by norm_num)
+      exact hχ
     exact hc.comp (f := roundPoleLog R ∘ A) (-(R • roundNorth))
-      (hlog.comp _ (mdifferentiableAt_iff_differentiableAt.mpr A.differentiableAt))
+      (hlog.comp _ (contMDiffAt_iff_contDiffAt.mpr A.contDiff.contDiffAt))
   · let B := roundPoleLog R ∘ A
     have hB0 : B (-(R • roundNorth)) = 0 := by
       change roundPoleLog R (A (-(R • roundNorth))) = 0
@@ -108,7 +107,7 @@ def HasRoundSouthInverseExtension
     (p : M) : Prop :=
   ∃ N : RoundAmbient P → M,
     N (-((1 / Real.sqrt K) • roundNorth)) = p ∧
-    MDifferentiableAt 𝓘(ℝ, RoundAmbient P) I N (-((1 / Real.sqrt K) • roundNorth)) ∧
+    ContMDiffAt 𝓘(ℝ, RoundAmbient P) I ∞ N (-((1 / Real.sqrt K) • roundNorth)) ∧
     (∀ v w : P,
       inner ℝ (mfderiv 𝓘(ℝ, RoundAmbient P) I N (-((1 / Real.sqrt K) • roundNorth)) (roundAngularInclusion v))
         (mfderiv 𝓘(ℝ, RoundAmbient P) I N (-((1 / Real.sqrt K) • roundNorth)) (roundAngularInclusion w)) = inner ℝ v w) ∧
@@ -120,7 +119,7 @@ def HasRoundSouthInverseExtension
 
 /-- Linear matching transports the south model to the exact regular
 comparison defined using the north polar coordinates. -/
-theorem HasRadialPoleModel.round_south_inverse_extension
+theorem HasRadialPoleModel.round_south_inverse_extension [CompleteSpace P]
     {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

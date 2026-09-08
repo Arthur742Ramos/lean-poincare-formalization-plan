@@ -131,6 +131,8 @@ theorem exists_obata_regular_forward_differentiable
   let Ψₛ := fun q : Metric.sphere (0 : TM p) 1 × ℝ => Ψ (q.1, q.2)
   let F := Q.symm.trans (curvatureRoundPolarHomeomorph hK)
   let T := Ψₛ ∘ e.symm
+  let : FiniteDimensional ℝ (TM p) := inferInstanceAs (FiniteDimensional ℝ E)
+  let : CompleteSpace (TM p) := FiniteDimensional.complete ℝ _
   refine ⟨F, hpole.round_north_inverse_extension hK Q hQ, T, ?_, ?_, ?_⟩
   · intro y
     refine ⟨?_, ?_⟩

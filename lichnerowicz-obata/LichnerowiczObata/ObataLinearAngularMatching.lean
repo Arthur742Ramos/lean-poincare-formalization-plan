@@ -74,6 +74,9 @@ theorem exists_obata_linearly_matched_polar_models
     intro u r hr
     rw [hL u]
     exact hmatch u r hr
+  let : FiniteDimensional ℝ (TM ((extChartAt I c).symm z)) :=
+    inferInstanceAs (FiniteDimensional ℝ E)
+  let : CompleteSpace (TM ((extChartAt I c).symm z)) := FiniteDimensional.complete ℝ _
   exact ⟨Φ, Ψ, hp, hq, hmN, hmS, N, S, hN, hS, hρN, hρS, L, hlinear,
     hp.round_north_inverse_extension hK N hN,
     hq.round_south_inverse_extension L hK N hN hlinear⟩

@@ -27,8 +27,8 @@ local notation "TM" => (TangentSpace I : M → Type _)
 
 /-- The actual inverse of the constructed global round homeomorphism,
 viewed in the Euclidean ambient space, is differentiable and preserves the
-Riemannian inner product everywhere, including both poles. This is a
-first-order statement; higher smoothness is not asserted here. -/
+Riemannian inner product everywhere. The actual map is smooth at both poles;
+the global higher-smoothness assertion is a separate step. -/
 theorem obata_global_round_metric_embedding
     (hdim : 1 < Module.rank ℝ E) {K : ℝ} (hK : 0 < K) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
@@ -36,6 +36,10 @@ theorem obata_global_round_metric_embedding
       hessian (leviCivitaConnection (I := I)) f x v w = -K * f x * inner ℝ v w) :
     ∃ p : M, ∃ Q : Metric.sphere (0 : RoundAmbient (TM p)) (1 / Real.sqrt K) ≃ₜ M,
       let T := fun y : M => (Q.symm y : RoundAmbient (TM p))
+      ContMDiffAt I 𝓘(ℝ, RoundAmbient (TM p)) ∞ T
+        (Q (roundNorthPoint (one_div_pos.mpr (Real.sqrt_pos.mpr hK)))) ∧
+      ContMDiffAt I 𝓘(ℝ, RoundAmbient (TM p)) ∞ T
+        (Q (roundSouthPoint (one_div_pos.mpr (Real.sqrt_pos.mpr hK)))) ∧
       MDifferentiable I 𝓘(ℝ, RoundAmbient (TM p)) T ∧
         ∀ (x : M) (v w : TM x),
           inner ℝ (mvfderiv I T x v) (mvfderiv I T x w) = inner ℝ v w := by
@@ -78,11 +82,15 @@ theorem obata_global_round_metric_embedding
     intro x
     by_cases hxp : x = p
     · subst x
-      exact hNorth
+      exact ⟨hNorth.1.mdifferentiableAt (by norm_num), hNorth.2⟩
     · by_cases hxq : x = q
       · subst x
-        exact hSouth
+        exact ⟨hSouth.1.mdifferentiableAt (by norm_num), hSouth.2⟩
       · exact hreg x hxp hxq
-  exact ⟨p, Q, fun x => (hall x).1, fun x => (hall x).2⟩
+  refine ⟨p, Q, ?_, ?_, fun x => (hall x).1, fun x => (hall x).2⟩
+  · rw [hQN]
+    exact hNorth.1
+  · rw [hQS]
+    exact hSouth.1
 
 end LichnerowiczObata

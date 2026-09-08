@@ -123,13 +123,16 @@ theorem exists_obata_regular_round_north_extension
         RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
       ∃ N : RoundAmbient (TM p) → M,
         N ((1 / Real.sqrt K) • roundNorth) = p ∧
-        MDifferentiableAt 𝓘(ℝ, RoundAmbient (TM p)) I N ((1 / Real.sqrt K) • roundNorth) ∧
+        ContMDiffAt 𝓘(ℝ, RoundAmbient (TM p)) I ∞ N ((1 / Real.sqrt K) • roundNorth) ∧
         ∃ δ : ℝ, 0 < δ ∧
           ∀ x : RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
             (intrinsicRoundInverseCoordinates (1 / Real.sqrt K) (x.1 : RoundAmbient (TM p))).2 < δ →
               N (x.1 : RoundAmbient (TM p)) = (F.symm x : M) := by
   obtain ⟨Φ, hpole, Q, F, G, hG, hQ, hradial, hcurves, hF, hjet⟩ :=
     exists_obata_regular_round_comparison hf hnon hK ha hH c hz hcrit hmax
+  let : FiniteDimensional ℝ (TM ((extChartAt I c).symm z)) :=
+    inferInstanceAs (FiniteDimensional ℝ E)
+  let : CompleteSpace (TM ((extChartAt I c).symm z)) := FiniteDimensional.complete ℝ _
   obtain ⟨N, hN0, hNd, hNm, δ, hδ, hN⟩ := hpole.exists_round_north_extension
     (one_div_pos.mpr (Real.sqrt_pos.mpr hK))
   refine ⟨F, N, hN0, hNd, δ, hδ, ?_⟩

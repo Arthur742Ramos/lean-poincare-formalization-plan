@@ -42,7 +42,7 @@ theorem obata_global_round_homeomorph
         H (roundSouthPoint (one_div_pos.mpr (Real.sqrt_pos.mpr hK))) = q ∧
         (∃ N : RoundAmbient (TM p) → M,
           N ((1 / Real.sqrt K) • roundNorth) = p ∧
-          MDifferentiableAt 𝓘(ℝ, RoundAmbient (TM p)) I N ((1 / Real.sqrt K) • roundNorth) ∧
+          ContMDiffAt 𝓘(ℝ, RoundAmbient (TM p)) I ∞ N ((1 / Real.sqrt K) • roundNorth) ∧
           (∀ v w : TM p,
             inner ℝ (mfderiv 𝓘(ℝ, RoundAmbient (TM p)) I N ((1 / Real.sqrt K) • roundNorth)
                 (roundAngularInclusion v))
@@ -57,7 +57,7 @@ theorem obata_global_round_homeomorph
                 N (x.1 : RoundAmbient (TM p)) = H x.1) ∧
         (∃ S : RoundAmbient (TM p) → M,
           S (-((1 / Real.sqrt K) • roundNorth)) = q ∧
-          MDifferentiableAt 𝓘(ℝ, RoundAmbient (TM p)) I S (-((1 / Real.sqrt K) • roundNorth)) ∧
+          ContMDiffAt 𝓘(ℝ, RoundAmbient (TM p)) I ∞ S (-((1 / Real.sqrt K) • roundNorth)) ∧
           (∀ v w : TM p,
             inner ℝ (mfderiv 𝓘(ℝ, RoundAmbient (TM p)) I S (-((1 / Real.sqrt K) • roundNorth))
                 (roundAngularInclusion v))

@@ -747,8 +747,9 @@ manifold-differentiable and preserves tangent inner products at every point.
 At either pole, `round_pole_forward_metric` uses the smooth hemisphere graph
 and a continuous local inverse of its isometric derivative. Away from the
 poles, it uses the existing regular metric comparison on an open neighborhood.
-This is an everywhere first-order metric statement, not yet a proof of the
-higher smoothness required for the final smooth Riemannian-isometry theorem.
+The theorem also retains full smoothness at both poles. Smoothness at all
+regular points and the final smooth Riemannian-isometry theorem remain to be
+assembled.
 
 `contDiffAt_coordinate_geodesic_endpoint_zero` now proves full smoothness at
 zero velocity for a fixed actual coordinate-geodesic endpoint. It compares
@@ -757,5 +758,13 @@ uniqueness. `exists_obata_normal_metric_chart_of_order` retains smoothness
 of the chosen chart and its inverse at the pole, together with its radial
 and metric identities. This evidence is carried through the spherical
 product construction: `HasRadialPoleModel` now requires a smooth Cartesian
-pole model. Smoothness of the round logarithmic reparametrization and its
-transfer to the global comparison are still separate remaining steps.
+pole model.
+
+`contDiffAt_roundPoleLog_zero` proves smoothness of the actual round
+logarithm. A convergent power series in squared radius first gives a smooth
+radial sine map; the explicit polar identity and inverse function theorem
+identify its smooth inverse with the existing logarithm. Both north and
+south ambient extensions now retain this smoothness. The smooth manifold
+inverse theorem then transfers it to the actual global comparison at both
+poles, together with its metric identities. This does not yet establish
+global smoothness or the final round-sphere equality characterization.
