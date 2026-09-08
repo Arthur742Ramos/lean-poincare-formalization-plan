@@ -1,6 +1,6 @@
 module
 
-public import LichnerowiczObata.ObataSphericalMetricProduct
+public import LichnerowiczObata.GlobalNormalAngularMetric
 
 /-! # Angular metric in intrinsic tangent-space parameters -/
 

@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.GlobalNormalAngularMetric
 public import LichnerowiczObata.IntrinsicChartLift
+public import LichnerowiczObata.IntrinsicAngularCoordinates
 
 /-! # One spherical product carrying the constructed angular metric -/
 
@@ -26,9 +27,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 
-/-- The global homeomorphism and angular metric use the same constructed
-chart and radial family. The flow's unit speed and endpoint limits are also
-retained for the remaining full-metric and pole-extension arguments. -/
+/-- The global homeomorphism and intrinsic angular metric on its whole
+parameter sphere use the same constructed chart and radial family. Starting
+point regularity is derived. Unit speed and endpoint limits are retained
+for the remaining full-metric and pole-extension arguments. -/
 theorem exists_obata_spherical_metric_product
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
     {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
@@ -60,19 +62,21 @@ theorem exists_obata_spherical_metric_product
         ∃ R : ℝ, 0 < R ∧ t * R ∈ Ioo 0 (Real.pi / Real.sqrt K) ∧
           (∀ v : Metric.sphere (0 : TM p) R,
             (trivializationAt E TM c).continuousLinearMapAt ℝ p v ∈ e.source) ∧
+          (∀ v : Metric.sphere (0 : TM p) R,
+            let x := (extChartAt I c).symm
+              (e ((trivializationAt E TM c).continuousLinearMapAt ℝ p v));
+            -a < f x ∧ f x < a) ∧
           ∃ Q : Metric.sphere (0 : TM p) R × Ioo 0 (Real.pi / Real.sqrt K) ≃ₜ
               {x : M // -a < f x ∧ f x < a},
             (∀ q, (Q q : M) = η ((extChartAt I c).symm
               (e ((trivializationAt E TM c).continuousLinearMapAt ℝ p q.1)), q.2)) ∧
-            ∀ u ∈ e.source, u ≠ 0 →
-              (-a < f ((extChartAt I c).symm (e u)) ∧ f ((extChartAt I c).symm (e u)) < a) →
-              ∀ w v : E, coordinateMetricBilinear (I := I) c z u w = 0 →
-                coordinateMetricBilinear (I := I) c z u v = 0 →
+            ∀ u : Metric.sphere (0 : TM p) R, ∀ w v : TM p,
+              inner ℝ (u : TM p) w = 0 → inner ℝ (u : TM p) v = 0 →
                 ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
-                  let Ψ := fun y => η ((extChartAt I c).symm (e y), r)
-                  let g := coordinateMetricBilinear (I := I) c z
-                  inner ℝ (mfderiv 𝓘(ℝ, E) I Ψ u w) (mfderiv 𝓘(ℝ, E) I Ψ u v) =
-                    (Real.sin (Real.sqrt K * r) ^ 2 / K) * (g w v / g u u) := by
+                  let Γ := fun y => η ((extChartAt I c).symm
+                    (e ((trivializationAt E TM c).continuousLinearMapAt ℝ p y)), r)
+                  inner ℝ (mfderiv 𝓘(ℝ, TM p) I Γ u w) (mfderiv 𝓘(ℝ, TM p) I Γ u v) =
+                    (Real.sin (Real.sqrt K * r) ^ 2 / K) * (inner ℝ w v / R ^ 2) := by
   obtain ⟨hb, η, hη, hcurves, t, ht, e, he0, hez, hsmooth, htarget, hrad, hmetric⟩ :=
     exists_obata_global_angular_metric hf hnon hK ha hH c hz hcrit ((hmax _).mpr rfl)
   have hcρ : Continuous (obataRadial K a f) := by
@@ -110,7 +114,38 @@ theorem exists_obata_spherical_metric_product
     (fun x hx r hr => ((hcurves x hx).2.2.2.1 r hr).1)
     (fun x hx => (hcurves x hx).1)
     (fun x hx r hr s _ => (hcurves x hx).2.1 r hr s)
-  exact ⟨η, hη, fun x hx => (hcurves x hx).2.2, t, ht, e, he0, hez, hsmooth, htarget, hrad,
-    R, hR, htR, hsource, Q, hQ, hmetric⟩
+  let p := (extChartAt I c).symm z
+  let L := (trivializationAt E TM c).continuousLinearMapAt ℝ p
+  have hp : p ∈ (chartAt H c).source := by simpa [p] using (extChartAt I c).map_target hz
+  have hcancel (v : TM p) : (trivializationAt E TM c).symmL ℝ p (L v) = v :=
+    (trivializationAt E TM c).symmL_continuousLinearMapAt hp v
+  have hnorm (u : Metric.sphere (0 : TM p) R) : ‖(u : TM p)‖ = R := by
+    simpa only [Metric.mem_sphere, dist_zero_right] using u.2
+  have hradius (u : Metric.sphere (0 : TM p) R) :
+      obataRadial K a f ((extChartAt I c).symm (e (L u))) = t * R := by
+    rw [hrad _ (hsource u)]
+    change t * ‖(trivializationAt E TM c).symmL ℝ p (L u)‖ = t * R
+    rw [hcancel, hnorm]
+  have hregular (u : Metric.sphere (0 : TM p) R) :
+      -a < f ((extChartAt I c).symm (e (L u))) ∧ f ((extChartAt I c).symm (e (L u))) < a := by
+    apply (hU _).mpr
+    rw [hradius]
+    exact htR
+  have hnonzero (u : Metric.sphere (0 : TM p) R) : L u ≠ 0 := by
+    intro he
+    have hh := hcancel u
+    rw [he, map_zero] at hh
+    have hn := hnorm u
+    rw [← hh, norm_zero] at hn
+    exact hR.ne' hn.symm
+  refine ⟨η, hη, fun x hx => (hcurves x hx).2.2, t, ht, e, he0, hez, hsmooth, htarget, hrad,
+    R, hR, htR, hsource, hregular, Q, hQ, ?_⟩
+  intro u w v hw hv r hr
+  have hone : (1 : ℕ∞ω) ≤ ∞ := WithTop.coe_le_coe.2 (le_top : (1 : ℕ∞) ≤ ⊤)
+  have he := normal_radial_composite_intrinsic_angular_metric hf.continuous (hη.of_le hone)
+    c hz ((hsmooth _ (hsource u)).differentiableAt (by norm_num))
+    (htarget _ (hsource u)) (hregular u) hr hw hv
+    (fun j k hj hk => hmetric _ (hsource u) (hnonzero u) (hregular u) j k hj hk r hr)
+  simpa only [hnorm u] using he
 
 end LichnerowiczObata

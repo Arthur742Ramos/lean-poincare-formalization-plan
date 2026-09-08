@@ -516,13 +516,17 @@ explicit coordinate-chart/radial-flow composite as its forward map.
 Obata family and chart. One theorem retains the global homeomorphism, its
 explicit forward formula, and the angular metric for that same composite,
 together with chart regularity, the radial identity, unit speed, and endpoint
-limits. Expressing the complete metric in intrinsic sphere parameters and
-extending the comparison through both poles remain outstanding.
+limits. The angular metric is now expressed in intrinsic tangent vectors at
+every point of the homeomorphism's entire parameter sphere. Regularity of
+each starting point is derived from its constructed radial level. Adding
+the radial and mixed metric terms and extending through both poles remain
+outstanding.
 `IntrinsicAngularCoordinates` proves the parameter-change steps: the tangent
 trivialization identifies the coordinate metric with the intrinsic inner
 product, the chain rule transfers angular pairings to intrinsic parameters,
-and rescaling to unit directions cancels the radius-squared factor. These
-lemmas still need to be specialized in the complete spherical comparison.
+and rescaling to unit directions cancels the radius-squared factor. The
+intrinsic parameter-change lemma is specialized in the product theorem;
+unit-direction normalization remains to be joined to the round comparison.
 The actual normal-chart/radial-flow composite now has a proved differentiability
 theorem on its regular parameter domain. Its intrinsic angular-metric theorem
 uses that result and the actual tangent trivialization, eliminating separate
