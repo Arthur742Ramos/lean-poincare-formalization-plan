@@ -408,7 +408,11 @@ the geodesic radius identity gives the explicit sine-square evolution
 coefficient. Its sine-square-normalized metric is now proved constant on every
 connected open positive-phase ray interval. This uses local integration and
 does not require one normal coordinate chart to cover the whole radial range.
-Identifying that constant from the pole limit remains pending.
 `SineMetricLimit` proves the scalar limit step: a quadratic center limit fixes
-a constant sine-square normalization on a short positive interval. Applying
-this step to the actual geodesic pullback metric remains pending.
+a constant sine-square normalization on a short positive interval.
+`NormalRayNormalization` applies this to the actual geodesic metric. The
+normalized angular pairing is the initial pairing divided by curvature times
+initial squared speed. Its constant is derived from the endpoint derivative
+at zero, with the endpoint-time factors cancelled. This result requires a
+valid short positive-phase ray interval; global sphere rigidity is not yet
+established.
