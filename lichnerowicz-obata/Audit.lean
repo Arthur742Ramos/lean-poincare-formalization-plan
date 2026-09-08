@@ -11,6 +11,7 @@ import LichnerowiczObata.RegularGradientCurves
 import LichnerowiczObata.RadialParameterization
 import LichnerowiczObata.RadialVelocity
 import LichnerowiczObata.UnitCurveDistance
+import LichnerowiczObata.RadialEndpoints
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -50,3 +51,7 @@ import LichnerowiczObata.UnitCurveDistance
 #print axioms LichnerowiczObata.riemannianEDist_le_of_unit_velocity
 #print axioms LichnerowiczObata.riemannianEDist_le_integralCurve
 #print axioms LichnerowiczObata.riemannianEDist_le_obataRadial_curve
+#print axioms LichnerowiczObata.exists_tendsto_of_riemannianEDist_le
+#print axioms LichnerowiczObata.exists_obataRadial_curve_endpoints
+#print axioms LichnerowiczObata.obataRadial_endpoint_values
+#print axioms LichnerowiczObata.exists_obata_radial_curves_with_endpoints

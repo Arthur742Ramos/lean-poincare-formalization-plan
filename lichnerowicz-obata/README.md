@@ -87,8 +87,8 @@ and the polar-coordinate isometry are not supplied by this pointwise result.
 `RadialCurves.lean` constructs actual local integral curves of the radial
 gradient at every regular point and proves the exact local parameterization
 `r(γ(t)) = r(γ(0)) + t`. Its scalar chain rule is adapted from the inherited
-Almost-Schur proof with immutable attribution in the module header. Extending
-the curves to the full radial interval and proving global rigidity remain open.
+Almost-Schur proof with immutable attribution in the module header. Full-interval
+existence and endpoint convergence are supplied by the later modules below.
 
 `UniformChartODE.lean` and `UniformManifoldODE.lean` prove uniform local
 existence in a chart, a finite-cover time bound on compact manifolds, and
@@ -108,16 +108,26 @@ yet convergence of the manifold-valued curves to unique poles.
 `RegularGradientCurves.lean` uses global ODE uniqueness to rule out reaching
 a critical point at finite time from a regular initial point. The function
 value is strictly increasing along such a curve, and every intermediate
-level has a unique crossing time. A smooth radial reparameterization and
-the global metric/isometry argument remain separate obligations.
+level has a unique crossing time. The following modules provide the radial
+reparameterization; the global metric/isometry argument remains open.
 
 `ObataClock.lean` proves the explicit logarithmic clock and its inverse-level
 identity. `RadialParameterization.lean` uses it to construct, through every
 regular point, a differentiable curve on the full open radial interval with
 `r(η(s)) = s`. `RadialVelocity.lean` proves that the same construction follows
 the actual radial gradient and has intrinsic velocity of norm one over the
-full open interval. Endpoint extension and the global sphere isometry remain
-unproved.
+full open interval.
+
+`UniformManifoldODE.lean` also proves C1 regularity of integral curves of C1
+fields. `UnitCurveDistance.lean` uses this to bound the canonical Riemannian
+extended distance by elapsed time along the actual unit radial gradient flow.
+`RadialEndpoints.lean` equips the compact manifold with the canonical
+Riemannian extended metric (preserving its original topology), proves Cauchy
+convergence at both radial endpoints, and identifies their eigenfunction
+values as `a` and `-a`. Its combined theorem constructs such a full unit-speed
+curve through every regular point directly from the Obata equation. It does
+not yet prove that different curves have the same poles. Pole uniqueness and
+the global round-sphere isometry remain unproved.
 
 ## Sources and reuse
 
@@ -136,11 +146,6 @@ and weak-eigenfunction regularity. The adapted bootstrap and chart assembly
 retain explicit immutable source attribution in their module headers. Structured
 submission metadata must disclose all inherited formalizations before any
 intake; no intake or registration has been requested by this project.
-
-`UniformManifoldODE.lean` also proves C1 regularity of integral curves of C1
-fields. `UnitCurveDistance.lean` uses this to bound the canonical Riemannian
-extended distance by elapsed time along the actual unit radial gradient flow.
-Endpoint convergence and the global round-sphere isometry remain unproved.
 
 ## Build
 
