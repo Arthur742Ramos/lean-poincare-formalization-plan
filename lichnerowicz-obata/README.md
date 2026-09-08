@@ -564,7 +564,7 @@ angular vectors as the Obata product.
 Obata region to the punctured round sphere of radius `1 / √K`. The same theorem
 proves that it intertwines the two explicit polar maps and that their full
 pullback metrics agree. Differentiability and metric preservation of the
-regular comparison are established below; pole extension remains required.
+regular comparison are established below; smooth pole extension remains required.
 `RoundPolarInverseSmooth` proves that the actual inverse round coordinates
 admit smooth ambient extensions at every punctured-sphere point. The proof
 derives the nonsingular arccosine heights from the exclusion of the poles
@@ -573,7 +573,7 @@ and retains equality with the already constructed inverse.
 angular variables. The regular comparison theorem now retains a single
 ambient map that agrees with the inverse comparison at every punctured-sphere
 point and is differentiable there. The forward derivative is treated below;
-the global Riemannian isometry statement and pole extension remain outstanding.
+the global Riemannian isometry statement and smooth pole extension remain outstanding.
 `PolarMetricNondegeneracy` proves positivity of the angular coefficient
 throughout the regular radial interval and injectivity of the actual round
 polar derivative on angular-tangent and radial directions. The regular Obata
@@ -626,7 +626,7 @@ angular-radial metric identities.
 `PolarComparisonMetric` transfers those identities through the nonsingular
 sphere-restricted parameter derivative to all tangent vectors. Applied to
 the actual Obata comparison, it proves that the forward ambient derivative
-preserves the Riemannian inner product at every regular point. Extension over
+preserves the Riemannian inner product at every regular point. Smoothness at
 the poles and the final global round-isometry theorem remain unfinished.
 `ObataRegularMetricComparison` derives this regular comparison directly from
 the nonconstant Obata Hessian equation in dimension at least two, without
@@ -642,5 +642,12 @@ inverse need not be continuous there.
 `RoundComparisonPoleLimits` now proves the inverse comparison's limits at
 both poles for arbitrary ambient approaches, not merely along fixed
 meridians. Its Obata specialization uses precisely the retained radial
-identity and distance bounds. These limits still need to be assembled into
-the global map, with smoothness and metric preservation at the poles.
+identity and distance bounds.
+`TwoPointExtension` and `RoundComparisonExtension` assemble those limits into
+a continuous bijection and use compactness to obtain a global homeomorphism.
+`ObataGlobalHomeomorph` applies this construction to the original Obata
+hypotheses, maps the two round poles to the unique extrema, and retains the
+regular differentiable extensions and tangent metric preservation for the
+same global map. Smoothness and metric preservation at the poles are not
+yet proved; the global homeomorphism is not claimed as a global Riemannian
+isometry.

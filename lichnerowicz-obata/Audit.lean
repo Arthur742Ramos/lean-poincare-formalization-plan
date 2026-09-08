@@ -25,6 +25,7 @@ import LichnerowiczObata.PolarInverseDifferentiability
 import LichnerowiczObata.ObataPolarInverse
 import LichnerowiczObata.ObataRegularMetricComparison
 import LichnerowiczObata.RoundComparisonPoleLimits
+import LichnerowiczObata.ObataGlobalHomeomorph
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -448,3 +449,12 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.round_comparison_inverse_tendsto_north
 #print axioms LichnerowiczObata.round_comparison_inverse_tendsto_south
 #print axioms LichnerowiczObata.obata_comparison_inverse_pole_limits
+#print axioms LichnerowiczObata.twoPointUpdate_first
+#print axioms LichnerowiczObata.twoPointUpdate_second
+#print axioms LichnerowiczObata.twoPointUpdate_of_ne
+#print axioms LichnerowiczObata.continuous_twoPointUpdate
+#print axioms LichnerowiczObata.bijective_twoPointUpdate
+#print axioms LichnerowiczObata.exists_twoPointExtension_homeomorph
+#print axioms LichnerowiczObata.roundNorthPoint_ne_southPoint
+#print axioms LichnerowiczObata.exists_round_comparison_extension
+#print axioms LichnerowiczObata.obata_global_round_homeomorph
