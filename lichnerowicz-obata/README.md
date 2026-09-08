@@ -708,8 +708,8 @@ so subsequent angular matching can use the constructed maps themselves.
 equatorial level of two complementary polar homeomorphisms.
 `obata_polar_coordinates_match` proves that this identification matches all
 oppositely oriented radial curves whenever the retained polar identities hold.
-Its extension to a linear isometry of the pole tangent spaces remains unproved;
-topological angular matching alone is insufficient for the south-pole derivative.
+Topological angular matching alone is insufficient for the south-pole derivative;
+the metric and linear extension results below supply the additional structure.
 `exists_obata_matched_polar_models` applies this to the constructed north and
 south models of one Obata function. One conclusion now retains both full polar
 metrics, both isometric Cartesian pole derivatives, both radial coordinate
@@ -721,4 +721,14 @@ uses the equatorial slice and the differentiable inverse coordinates supplied
 by the positive polar metric; no differentiability or tangent metric preservation
 of the matching is assumed. The equatorial derivative identity and cancellation
 of the positive warping coefficient prove the tangent metric assertion.
-The angular map is not yet proved to extend to a linear isometry.
+`exists_linearIsometryEquiv_of_sphere_tangent_metric` now extends such a sphere
+equivalence to a real linear isometry. Its radial extension preserves norms and
+has an inner-product-preserving Euclidean derivative away from zero. The mean
+value theorem controls segments avoiding zero, while the triangle inequality
+controls segments through zero. Applying this in both directions proves a
+Euclidean isometry, and Mathlib's Mazur–Ulam theorem supplies linearity.
+`exists_obata_linearly_matched_polar_models` applies this to the actual Obata
+angular matching, retaining both polar models, their full metrics, their
+isometric pole derivatives, and their regular coordinate homeomorphisms.
+The global comparison's south-pole regularity and the final global Riemannian
+isometry still need to be assembled from these data.
