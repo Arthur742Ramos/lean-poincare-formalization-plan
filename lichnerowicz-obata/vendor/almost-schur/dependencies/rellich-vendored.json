@@ -1,0 +1,193 @@
+{
+  "repository": "https://github.com/abenenson/rellich-kondrachov",
+  "commit": "70f85d4c1bf99c6e7d61e8be4daa6f3664d08d23",
+  "relationship": "adapts",
+  "license": "Apache-2.0",
+  "author": "Adam Benenson",
+  "changes": "Lean 4.33 elaboration and noncomputability fixes, public module conversion, and style cleanup in the four volume/chart files. The 29 generic Sobolev/Euclidean files additionally expose uniquely renamed private helpers required by public module elaboration. Their manifold atlas hypotheses are generalized from analytic omega to smooth infinity; all affected proofs are rebuilt. New metric-density and reconstruction bridges live in AlmostSchur/. Three derived RellichKondrachovDensity modules generalize the source Riemannian transport proof to arbitrary finite measures satisfying two finite comparison bounds; source_path records each original Riemannian module. The bounds are proved for normalized Riemannian volume in AlmostSchur/SobolevCompactness.lean.",
+  "files": [
+    {
+      "path": "RellichKondrachov/Analysis/Calculus/ContDiff/Support.lean",
+      "source_sha256": "e88395ffe3b0f1351253752bbb247ae4501f71c7fe9d0649c1c35faa9ae26900",
+      "adapted_sha256": "a7bc3a0e3f353966c9b0b9ba3db8e7d2c1048688631f63321bf3489314933233"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/H1.lean",
+      "source_sha256": "ee3947364efb12d300786f62e49324a58e893bbd1cd3acd3b5fc09019e84b0da",
+      "adapted_sha256": "6de51a3880a4e6f426273d9f00f4c119fc7fd4ec2dfe4da0972dd28a7087510a"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/H2.lean",
+      "source_sha256": "b488de0010f94842b5034454c7e2ab15023ab3d6e9c79fe8300e71060dd24487",
+      "adapted_sha256": "d98ce89fb432c020d0917805fe872dfff172bbf1695da012c7258d8f8af8960a"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Approximation.lean",
+      "source_sha256": "0e3b898176ee5633607e1a3d23bc812ecf841b1a14718f9b3ddce52e70e3351c",
+      "adapted_sha256": "d10dccba3427d609ea8df3b4af5f7af63c00235c4917be8dec701336df303286"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/ArzelaAscoli.lean",
+      "source_sha256": "c2115a4f81a7e03529a6642e2c0a06edc18884597e90a845b7951ff8090c32d0",
+      "adapted_sha256": "9f7f458ed983bafe5f8c516feedad8f2065a368b50d4445f7414b00f5aa85f93"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Compactness.lean",
+      "source_sha256": "2de58437e3e0fd6cd613533f414eeaf36a1e2e97c73176796e60ef4008c36ef5",
+      "adapted_sha256": "c1db7f29a1f05516c83209af4ce35832898bb6a4e914672b2b706930fc38ada7"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/FrechetKolmogorov.lean",
+      "source_sha256": "3a5b30eb10b6ba165ede5bf5b39b8b27ee86da2f0b0cc4a6eb7f7c13c056ce6b",
+      "adapted_sha256": "19393b12397e230e56f015f3a62fd4236feae551f923eb10747ef419e8604375"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Kernels.lean",
+      "source_sha256": "0bef517a870d2c6c5420975a24533900036eefaea321b432b85ab2a69bd3ecd0",
+      "adapted_sha256": "506846006475d27e182f13c79c75da43922f01daf7bc09ed3517713c2a8a4c60"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Smoothing.lean",
+      "source_sha256": "f45960682fd99fee8696ee53c728ef230be650bb0f170bc8c219df82be14d96d",
+      "adapted_sha256": "6ddb985bd974fd0f5d423d3531549f8d60cbe03a4749fc5a63916012d0c92f54"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/Transfer.lean",
+      "source_sha256": "1bc8a93b2edb28a6c5230e04cc2b3e95145ab3ad32f400d308299aad36c6b215",
+      "adapted_sha256": "5fc39629ac62e6fffee1dea753e4102c9ddac5c587bb01d035a813821a329f34"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/L2Compactness/TranslationIntegral.lean",
+      "source_sha256": "df0b0d20011ca3ea0fc8be5b0563334939456526bf57a4c5ae2a79f95b2a03eb",
+      "adapted_sha256": "19d698084226c6e8c72861bc3f6b72de3ff96aa5f5fabb9e6215340a24ca5b6a"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/Rellich.lean",
+      "source_sha256": "621f33e678287fb38207ce2f713a68124d84b92c4465e41b4177850194563854",
+      "adapted_sha256": "96487f80c6a3c08e29ae1f195efd070e9115b57c8f97b9d39e525aaf8a9f5531"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/SupportedH1.lean",
+      "source_sha256": "79e4341d06fa51265b3a4cd13a9a88386b29c53aa22d5f9a3868b129307719fd",
+      "adapted_sha256": "41a90c5518c273aebe13fdc97c1546aa5d5bea6f6294b0c07bac3c3a7f44eef6"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/Translation.lean",
+      "source_sha256": "41d04c2c2da0652c8e1ae17136b23e8bac75bde1ed70d30a9bd1f00e72b8ddc6",
+      "adapted_sha256": "71e7f4d911e13dd548cac89ba5f51a54d91c09ffb7c98428966924606d1d9205"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimate.lean",
+      "source_sha256": "73f5d42d54e24111474f6dc2dee006bc7036da64dd851d2c52eb52e9c67085ec",
+      "adapted_sha256": "c4d0f742984132a18b48c5d3170ab0ff8d4e92ef81c0ed46cdc0794ab8fe898f"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimateH1.lean",
+      "source_sha256": "36e4891989e3eb73b37a71a8800d761cce792f0484abe11e73b56e101bed7a28",
+      "adapted_sha256": "13674847ba410b6a93a59e8ab1862567eb1c75a360980bd4ccf672f57ce5e1c5"
+    },
+    {
+      "path": "RellichKondrachov/Analysis/FunctionalSpaces/Sobolev/Euclidean/TranslationEstimateL2.lean",
+      "source_sha256": "f649d2d2daa167e1514231812c8543f2f6c25039abd2bd1bc945ce6a1b7b1a92",
+      "adapted_sha256": "daf6af862a01b2ff558df38bc28bfb1f71a6a032e4f6bd08cbfce9a6022eb9a6"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitz.lean",
+      "source_sha256": "10c2967011ce2ca507fcb4c2dd2ac61eb92fd59d80544d95ffea20275755f3c9",
+      "adapted_sha256": "a0a54949cd444a402d2509da40c05634a927dd7d41569d033f0eab67f860b570"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Riemannian/ChartLocalLipschitzForward.lean",
+      "source_sha256": "cdd4a671f6478a8847b97422521c1a881c643b8d0ac7cd9ef64ec9911f3939d4",
+      "adapted_sha256": "36a1811121c417cdf60a19d4a6fea68914c0d1fcde5b0b2048d97eb8f1520fce"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Riemannian/VolumeMeasure.lean",
+      "source_sha256": "5861fd2867707ef6b42e124fce4587a8cdf18146c619db4d71bb894c73bf0e48",
+      "adapted_sha256": "b4931727d3a07cf9f56881c031b7002cfd25c1594cf373599ec7c3a1505a9cac"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Riemannian/VolumeMeasure/Finiteness.lean",
+      "source_sha256": "84254e115e810dca6221f67f14153b36b7ef476c95339aa9d80bec9084e3a8a4",
+      "adapted_sha256": "0a152c42c85a1a46bc06e757bb467ab7b63ae35baa1df3bbeb88afcbf89844e0"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/ChartData.lean",
+      "source_sha256": "cc478aae737a3bf6e6ff70a531f23bd29adc794030622287fb802ec4c75dd1e4",
+      "adapted_sha256": "4d33d1fed4afd37082755fe164f4d0a57780d356c0ea7415a3310b9aae3c9da2"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasure.lean",
+      "source_sha256": "c861ff362829864d4bb945706686c469a6fe5925b5bb9ed424d51329af193ecd",
+      "adapted_sha256": "a47a28dfd04c00282069ec2a5faaa01808583cdad502cc308aee6b0eea9aff07"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/ChartMeasureLp.lean",
+      "source_sha256": "e110478ea1142d3c45b7c1603e9a247dee79ddff571e3480d581af21021170d2",
+      "adapted_sha256": "4f15ac8d7c365bad46d258fcf73cfafaa878f6e5b1a2a62676ae6ee2ea89a9b0"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/EmbeddingL2.lean",
+      "source_sha256": "48653c6bc51c168e20aa974a5e4a80594a5e16dac10312f100d6010a06a66f2b",
+      "adapted_sha256": "30e73ce2dd00f3c17a1192aaefa901873b7b8a84ebec0ef2bfbbadc8d5a476bd"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/H1.lean",
+      "source_sha256": "df87dab242b9b1b6ef66c875674f66d17615ecad43391462c3780202e2d04952",
+      "adapted_sha256": "72339df4179349ca36b01e50dce2349ce23b36bfd8bd7e646df912bdbbe78f4e"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/H2.lean",
+      "source_sha256": "95ca9f3f9160218df82bf1640a5747b96fae4bfda9b72906b6477858999a49e2",
+      "adapted_sha256": "6c0f9f6655a989afdaf5773c436dea3790f79a0795dea593d13bc34dbe5aa102"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/Localization.lean",
+      "source_sha256": "1d771cc74b8ec5c5a02c8568e83f512b0e1e1e0aedb52dd4dfce1c57fd829530",
+      "adapted_sha256": "cf91926d06c925eb57dd3ba97e10adddba2af844c71463b6eac57f8af5193e3b"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/LocalizationH2.lean",
+      "source_sha256": "8fbf202943e85cf39f9148fb71fca33b7b9754b376ed9a70d314e35befe85302",
+      "adapted_sha256": "d0983c2ba58077f760d4811c95b6959dedb2d4ff65bdf548b24c778ce6ef6ad8"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachov.lean",
+      "source_sha256": "1e0bb1b8f8f38e2c44ad70c9d180085eef23e591629115c082432c3b33e2a95b",
+      "adapted_sha256": "2ecdaeeea504bef6c20343514b8480ac103b3f3ee4cdce878b716500d4d43341"
+    },
+    {
+      "path": "RellichKondrachov/MeasureTheory/Function/LpSpace/ChangeMeasureLeSmul.lean",
+      "source_sha256": "c99391c1120931e8ff42021870f0d104982b14b6e3e96d2e4d3119e0cf34e88b",
+      "adapted_sha256": "c68a6856cf23e7cb9a3ff2a1f31534a842059a163d5374f6ced0bacfb33a5f89"
+    },
+    {
+      "path": "RellichKondrachov/MeasureTheory/Function/LpSpace/ExtendByZeroRangeEquiv.lean",
+      "source_sha256": "25ddd1e2891f481e962a0bb591c600d3db22656cd31baafc23ab381f803ad5ea",
+      "adapted_sha256": "5a7ebea6899ffae7109d9197dc57c64be0e5108dad32736afb0b5af4df21c424"
+    },
+    {
+      "path": "RellichKondrachov/MeasureTheory/Function/LpSpace/Restrict.lean",
+      "source_sha256": "29a904809138432e4b29ad8ba385d1d993e3862432e5329a59445240bb2f5bee",
+      "adapted_sha256": "b0d49e27fac5f2e26f6a49ceb69d110bc6548ccd92e8b5891373709c8a18da6a"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovDensity/Transport.lean",
+      "source_path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Transport.lean",
+      "source_sha256": "0281ccfc436f7feb05dbd4a795fc03b5ebb28f86122991d72bae4f71a448a5fc",
+      "adapted_sha256": "a3e833bc14cec5bf3b85d1cdb932caa2d5b6d7f8269d9bb338317ebc5f264853"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovDensity/Chartwise.lean",
+      "source_path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Chartwise.lean",
+      "source_sha256": "af6a6a84c9ab505649b157804b940adbe27886c487aab3215207a9183054db26",
+      "adapted_sha256": "a03d755cfbb42b82b31dddc0b5a2bec34d621b8bad362a515e9f31ff06662c73"
+    },
+    {
+      "path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovDensity/Global.lean",
+      "source_path": "RellichKondrachov/Geometry/Manifold/Sobolev/RellichKondrachovRiemannian/Global.lean",
+      "source_sha256": "3760614ced20f480be00e4db88bbcc0e2315225961abdf3902e93bed4ef45bf1",
+      "adapted_sha256": "c83e3034f05be32d6076b6a8fef1a60c9f896a5923d15c698deae37f810b0664"
+    }
+  ]
+}

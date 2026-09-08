@@ -1,0 +1,102 @@
+{
+  "source_repository": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan",
+  "source_commit": "12cebb809524d0cd185c6cd7bcb5b73d3562bce1",
+  "relationship": "builds-on",
+  "attribution": "Arthur Freitas Ramos, committed contracted-bianchi formalization; see git history. No mathematical priority claim.",
+  "scope": "Standalone selected curvature core. Not copied from schur-rigidity or uncommitted sibling files.",
+  "hash_contract": "SHA-256 over exact source/local bytes; adaptation_sha256 is Python difflib.unified_diff(source UTF-8 lines, local UTF-8 lines, keepends=True, source_path/target labels, n=3) encoded UTF-8. Git SHA-1 blob is also independently recomputed.",
+  "files": [
+    {
+      "target": "AlmostSchur/CurvatureVendor/Along.lean",
+      "source_path": "contracted-bianchi/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Along.lean",
+      "source_blob": "2cb0c3d13e7d871936b06934ab0524bc4b729fcb",
+      "changes": [
+        "Redirected local imports to AlmostSchur.CurvatureVendor; provenance header added."
+      ],
+      "source_sha256": "68cef5bdf39e72ad12e1b61898a7adff522f3c6f46ca699244f3daf3b3ccdfac",
+      "local_sha256": "5b852874b6e4590b7eabab25738d2ffa9920da818e3d706a33a0648d543625c4",
+      "adaptation_sha256": "8c5bf18ffd7d8c5555909814c1dfbd18f78a983e3f38c6a5172dc4c8e4d526e2"
+    },
+    {
+      "target": "AlmostSchur/CurvatureVendor/Raw.lean",
+      "source_path": "contracted-bianchi/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Raw.lean",
+      "source_blob": "a9bbfe8933a38543c3568f185d219a7917032e26",
+      "changes": [
+        "Redirected local imports to AlmostSchur.CurvatureVendor; provenance header added."
+      ],
+      "source_sha256": "2f2fb93364159b6cce4fbdac62e502bab18d4f5cc1f053437a815447b67fd0e7",
+      "local_sha256": "d1798f3386bd7f7f8fd75f5ba3829e198b4d3ae2d103fc25848db1a0265134f4",
+      "adaptation_sha256": "463fae8f886b39d371931dfd35aaac7cc985565b91a9818564b8f79879343eee"
+    },
+    {
+      "target": "AlmostSchur/CurvatureVendor/Tensor.lean",
+      "source_path": "contracted-bianchi/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Tensor.lean",
+      "source_blob": "4b887b01c3d90ef1a2b645610f281829c12808a9",
+      "changes": [
+        "Redirected local imports to AlmostSchur.CurvatureVendor; provenance header added.",
+        "Omitted final LeviCivitaCurvatureTensor section and dependency on sibling LeviCivita existence/uniqueness.",
+        "Added explicit mathlib LocalFrame import formerly obtained transitively from sibling LeviCivita."
+      ],
+      "source_sha256": "518928ccf224355a1a755e2477710f1c26b0662e2675ccab2c6913b10ba9f61b",
+      "local_sha256": "f30518aa6cecceda2eea0be82d0c6cfb7d173fd7a4a5cc8c4f0251bd8757b1c7",
+      "adaptation_sha256": "5e2db54ce0ce5204a1a852499167dad3720e369ab06415ce69f1dbe464195025"
+    },
+    {
+      "target": "AlmostSchur/CurvatureVendor/Bianchi.lean",
+      "source_path": "contracted-bianchi/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Bianchi.lean",
+      "source_blob": "8a485f4e3d713afd12016d09201f9d57981421a4",
+      "changes": [
+        "Redirected local imports to AlmostSchur.CurvatureVendor; provenance header added."
+      ],
+      "source_sha256": "2c3045f782bfb6c7742eaf3160f6dfc7bc0a3778ce20216ffc1dfa148976aab4",
+      "local_sha256": "7167b3d9850a64d2aefabbfade29ac282dee36f8e98b9d70f84786672e9da424",
+      "adaptation_sha256": "3e026335367ca02b9797bdef2cc17d1685e6601b40310a405a7941bc15f5e0c2"
+    },
+    {
+      "target": "AlmostSchur/CurvatureVendor/Contractions.lean",
+      "source_path": "contracted-bianchi/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Contractions.lean",
+      "source_blob": "bdd0708ef3bd896028b000907c5c7e801f1f6834",
+      "changes": [
+        "Redirected local imports to AlmostSchur.CurvatureVendor; provenance header added.",
+        "Omitted convenience theorem using IsLeviCivita and final connection-independence section.",
+        "Added a local native VectorBundle.finiteDimensional instance formerly obtained transitively from sibling LeviCivita."
+      ],
+      "source_sha256": "3df47636448080a16a25cedb3f68e67434082fbcbf395b278fbd1fa42354e377",
+      "local_sha256": "da65e45c3180a7a2a760bcbb2fe11066b3f53892d2338d1c3d87e9c794b4cbf9",
+      "adaptation_sha256": "4f573459d791c78b845ea78dcdda83fa4a49f36ce156df106ffa47ce22ce0258"
+    },
+    {
+      "target": "AlmostSchur/CurvatureVendor/ContractedBianchi.lean",
+      "source_path": "contracted-bianchi/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/ContractedBianchi.lean",
+      "source_blob": "d0b2de8b9b209bbdf16cae3e839239a6ed7b8857",
+      "changes": [
+        "Redirected local imports to AlmostSchur.CurvatureVendor; provenance header added."
+      ],
+      "source_sha256": "9605a27d9ddcb7fc18b48658baa34d7b6aa0d8f09a304a93acc44542c952feee",
+      "local_sha256": "4c988ba7f3e21c620fff459a4824ba1a0eaf6759cb5b540001a56a2b99a7b72f",
+      "adaptation_sha256": "9e823fc6a0c865ffe309173b6c7f6b9e60e414d3f745b95e91d676236ed297bb"
+    },
+    {
+      "target": "AlmostSchur/CurvatureVendor/ContractedBianchiBridge.lean",
+      "source_path": "contracted-bianchi/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/ContractedBianchiBridge.lean",
+      "source_blob": "968ea4c969894783e152ee9c28629f629296d645",
+      "changes": [
+        "Redirected local imports to AlmostSchur.CurvatureVendor; provenance header added."
+      ],
+      "source_sha256": "d05a394c3bd3242f3d1e2767d1e0423213f95062e97df8ebc47852e147589b52",
+      "local_sha256": "e16a4a4854f5019edd130ebf44258e5058e48a4f6e9874a95f26da344347de90",
+      "adaptation_sha256": "81e58e336324a0bb82c1a552661d48429b6574c8f4a835352728ea14522e2609"
+    },
+    {
+      "target": "AlmostSchur/CurvatureVendor/MetricPredicate.lean",
+      "source_path": "contracted-bianchi/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean",
+      "source_blob": "31a79f8cc30b8dbed94396a2575274effbd83f54",
+      "changes": [
+        "Extracted IsMetricCompatibleTangent only (original lines 271-278); reduced surrounding context; all existence and uniqueness omitted."
+      ],
+      "source_sha256": "b9634295ebef0fa63020be132df7c1935db7cfee59d723d0e853899776c133ac",
+      "local_sha256": "644eb58b62713c9e334a0e71bcbd59c3e490a3cc7411b7d8ea8de9c66d17d79b",
+      "adaptation_sha256": "6f219d661d001e8ba824bc6a59aa0593372546c8a38d191438ca48a29f2f327a"
+    }
+  ]
+}

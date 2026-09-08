@@ -54,9 +54,11 @@ related_formalizations:
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/3faf25aefc27842a77c37ca178e8a40a20bb20c7/almost-schur"
     relationship: "builds-on"
     note: >-
-      The almost-schur Git subdirectory dependency is pinned to this immutable
-      snapshot, without source changes. Lake checks it out inside this project's
-      .lake/packages so sandboxed builds never write to a sibling project.
+      The almost-schur implementation and its RellichKondrachov sources are
+      vendored byte-for-byte from this immutable snapshot under vendor/almost-schur,
+      with the original license, notices, and provenance inventories preserved.
+      They compile as local libraries into the root .lake/build, avoiding both
+      sibling path dependencies and the registry's Git-subdirectory sandbox bug.
       It supplies geometric curvature and connection constructions,
       integration and Bochner identities, Sobolev compactness, variational
       PDE, and regularity infrastructure. Its authors are Arthur Freitas Ramos,
@@ -75,7 +77,7 @@ related_formalizations:
   - id: "https://github.com/abenenson/rellich-kondrachov/tree/70f85d4c1bf99c6e7d61e8be4daa6f3664d08d23"
     relationship: "builds-on"
     note: >-
-      The unchanged pinned Git dependency contains Adam Benenson's attributed
+      The unchanged vendored implementation contains Adam Benenson's attributed
       36-module Apache-2.0 adaptation, with its inventory and source notices.
       It supplies generic Sobolev compactness and measure transport, not
       spectral attainment, global sphere rigidity, or the selected theorem.
