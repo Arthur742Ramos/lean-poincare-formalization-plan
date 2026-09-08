@@ -6,6 +6,7 @@ import LichnerowiczObata.ObataExtrema
 import LichnerowiczObata.ObataRadial
 import LichnerowiczObata.EikonalConnection
 import LichnerowiczObata.RadialCurves
+import LichnerowiczObata.GlobalGradientCurves
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -27,3 +28,6 @@ import LichnerowiczObata.RadialCurves
 #print axioms LichnerowiczObata.exists_obata_radial_autoparallel
 #print axioms LichnerowiczObata.hasDerivAt_comp_integralCurve
 #print axioms LichnerowiczObata.exists_obata_radial_local_curves
+#print axioms LichnerowiczObata.exists_uniform_chart_ode
+#print axioms LichnerowiczObata.exists_global_integralCurve_compact
+#print axioms LichnerowiczObata.exists_global_obata_gradient_curves

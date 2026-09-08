@@ -90,6 +90,15 @@ gradient at every regular point and proves the exact local parameterization
 Almost-Schur proof with immutable attribution in the module header. Extending
 the curves to the full radial interval and proving global rigidity remain open.
 
+`UniformChartODE.lean` and `UniformManifoldODE.lean` prove uniform local
+existence in a chart, a finite-cover time bound on compact manifolds, and
+completeness of C1 vector fields on compact boundaryless Hausdorff manifolds.
+`GlobalGradientCurves.lean` applies this to the original Obata gradient:
+through every point there is a curve defined for all real times, and its
+scalar value satisfies `d(f ∘ γ)/dt = K (a² - (f ∘ γ)²)`.
+These are curves of `grad f`, not yet a complete radial coordinate system;
+the behavior at the poles and the global isometry still require proof.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical
