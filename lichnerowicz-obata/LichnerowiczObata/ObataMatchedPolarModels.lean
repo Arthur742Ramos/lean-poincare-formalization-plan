@@ -1,6 +1,8 @@
 module
 
 public import LichnerowiczObata.ObataSouthPolarModel
+public import LichnerowiczObata.PolarInverseDifferentiability
+public import LichnerowiczObata.PolarMetricNondegeneracy
 
 /-! # Matched north and south polar models constructed from one Obata function -/
 
@@ -24,6 +26,33 @@ def HasUnitPolarMetric {P : Type*} [NormedAddCommGroup P] [InnerProductSpace ℝ
       inner ℝ (mfderiv 𝓘(ℝ, P × ℝ) I Φ (u, r) (w, s))
         (mfderiv 𝓘(ℝ, P × ℝ) I Φ (u, r) (v, t)) =
           (Real.sin (Real.sqrt K * r) ^ 2 / K) * inner ℝ w v + s * t
+
+/-- The metric identity supplies nondegeneracy, so a polar coordinate
+homeomorphism has a differentiable inverse without an extra jet hypothesis. -/
+theorem HasUnitPolarMetric.exists_differentiable_inverse
+    {P : Type*} [NormedAddCommGroup P] [InnerProductSpace ℝ P]
+    {n : ℕ} [Fact (Module.finrank ℝ P = n + 1)]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [I.Boundaryless]
+    [RiemannianBundle (TangentSpace I : M → Type _)]
+    {K : ℝ} {Φ : P × ℝ → M} (hm : HasUnitPolarMetric I K Φ) (hK : 0 < K)
+    (U : TopologicalSpace.Opens M)
+    (Q : Metric.sphere (0 : P) 1 × Ioo 0 (Real.pi / Real.sqrt K) ≃ₜ U)
+    (q₀ : Metric.sphere (0 : P) 1 × Ioo 0 (Real.pi / Real.sqrt K))
+    (hQ : ∀ q, (Q q : M) = Φ (q.1, q.2))
+    (hDim : Module.finrank ℝ E = n + 1) :
+    ∃ e : OpenPartialHomeomorph (Metric.sphere (0 : P) 1 × ℝ) M,
+      e.source = {q | q.2 ∈ Ioo 0 (Real.pi / Real.sqrt K)} ∧ e.target = U ∧
+      (∀ q ∈ e.source, e q = Φ (q.1, q.2)) ∧
+      (∀ y : U, e.symm (y : M) = ((Q.symm y).1, ((Q.symm y).2 : ℝ))) ∧
+      ∀ y ∈ U, MDifferentiableAt I ((𝓡 n).prod 𝓘(ℝ, ℝ)) e.symm y := by
+  apply exists_differentiable_polar_inverse_on_target
+    ⟨Ioo 0 (Real.pi / Real.sqrt K), isOpen_Ioo⟩ U Q q₀ Φ hQ hDim
+  intro u r hr
+  refine ⟨(hm u r hr).1, polar_derivative_injOn _ (obata_polar_coefficient_pos hK hr) ?_⟩
+  intro v hv t
+  exact (hm u r hr).2 v v hv hv t t
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
