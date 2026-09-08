@@ -152,3 +152,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.hasDerivAt_flow_variation
 #print axioms LichnerowiczObata.contMDiffAt_coordinateConstant
 #print axioms LichnerowiczObata.fderiv_coordinateMetric_pairing
+#print axioms LichnerowiczObata.covariantDerivative_coordinateConstant
+#print axioms LichnerowiczObata.fderiv_coordinateMetric_pairing_coefficients

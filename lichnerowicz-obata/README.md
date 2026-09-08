@@ -268,3 +268,6 @@ evolution remains a separate step.
 `CoordinateMetricVariation` derives the chart derivative of the actual metric
 paired with arbitrary fixed coordinate vectors from metric compatibility.
 The varying-vector terms still need to be combined with the flow variational ODE.
+The fixed-vector derivative is also expressed through the actual frame
+connection coefficients, by proving that constant coordinate sections have
+zero ordinary coordinate derivative.
