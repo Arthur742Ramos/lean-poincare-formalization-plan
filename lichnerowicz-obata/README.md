@@ -620,4 +620,7 @@ region. The positive tangent dimension is recorded as `finrank E = n + 1`.
 The regular comparison also has a differentiable ambient forward extension,
 proved by composing these inverse coordinates with the explicit round polar
 map. This extension agrees with the comparison at every regular point.
+The same comparison now has a differentiable ambient inverse extension as
+well, and the polar chart theorem retains its parameter derivative and full
+angular-radial metric identities for the subsequent metric-preservation proof.
 Its Riemannian isometry proof and extension over the poles remain to be assembled.
