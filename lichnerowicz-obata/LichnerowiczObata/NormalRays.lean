@@ -89,4 +89,32 @@ theorem exists_positive_phase_ray_interval
   rw [hphase]
   exact ⟨mul_pos hfreq hr.1, hh.2⟩
 
+/-- A single initial-velocity ball supports positive phases for every
+nonzero direction and every ray parameter between zero and two. This gives
+a uniform neighborhood, rather than a radius chosen separately for each ray. -/
+theorem exists_uniform_positive_phase_ray_ball
+    (g : E →L[ℝ] E →L[ℝ] ℝ) (hg : ∀ u : E, u ≠ 0 → 0 < g u u)
+    {V : Set (E × E)} (hV : IsOpen V) {z : E} (hz : (z, (0 : E)) ∈ V)
+    {K t : ℝ} (hK : 0 < K) (ht : 0 < t) :
+    ∃ ε : ℝ, 0 < ε ∧ ∀ u : E, ‖u‖ < ε → u ≠ 0 →
+      ∀ r ∈ Set.Ioo (0 : ℝ) 2, (z, r • u) ∈ V ∧
+        Real.sqrt (K * g (r • u) (r • u)) * t ∈ Set.Ioo 0 Real.pi := by
+  have hnear : ∀ᶠ u in 𝓝 (0 : E), (z, u) ∈ V :=
+    (continuous_const.prodMk continuous_id).continuousAt.preimage_mem_nhds (hV.mem_nhds hz)
+  have hgc : Continuous (fun u : E => g u u) := g.continuous.clm_apply continuous_id
+  have hpc : Continuous (fun u : E => Real.sqrt (K * g u u) * t) :=
+    (Real.continuous_sqrt.comp (continuous_const.mul hgc)).mul continuous_const
+  have hupper : ∀ᶠ u in 𝓝 (0 : E), Real.sqrt (K * g u u) * t < Real.pi :=
+    hpc.continuousAt.preimage_mem_nhds (isOpen_Iio.mem_nhds (by simpa using Real.pi_pos))
+  obtain ⟨R, hR, he⟩ := Metric.eventually_nhds_iff.mp (hnear.and hupper)
+  refine ⟨R / 2, by positivity, ?_⟩
+  intro u hu hune r hr
+  have hn : ‖r • u‖ < R := by
+    rw [norm_smul, Real.norm_eq_abs, abs_of_pos hr.1]
+    nlinarith [norm_nonneg u, hr.1, hr.2]
+  have hd : dist (r • u) 0 < R := by simpa only [dist_zero_right] using hn
+  have hh := he hd
+  refine ⟨hh.1, ?_, hh.2⟩
+  exact mul_pos (Real.sqrt_pos.mpr (mul_pos hK (hg _ (smul_ne_zero hr.1.ne' hune)))) ht
+
 end LichnerowiczObata

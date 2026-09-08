@@ -220,4 +220,51 @@ theorem geodesic_normal_ray_full_metric
     nlinarith [he]
   exact bilinear_metric_of_radial_and_angular g B hg hB hu.ne' hrad hang w v
 
+/-- One punctured velocity ball supports the full normal-map metric formula
+simultaneously in all directions. Positive energy is derived from the chart
+metric, and the ray intervals are constructed uniformly. -/
+theorem exists_geodesic_normal_full_metric_ball
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) {K a : ℝ}
+    (hK : 0 < K) (ha : 0 < a) (hb : ∀ y, -a ≤ f y ∧ f y ≤ a)
+    (hH : ∀ (y : M) (v w : TM y), hessian LC f y v w = -K * f y * inner ℝ v w)
+    (c : M) {z : E} (hz : z ∈ (extChartAt I c).target)
+    {α : (E × E) × ℝ → E × E} {V : Set (E × E)} (hV : IsOpen V)
+    (hzV : (z, (0 : E)) ∈ V) {δ : ℝ} (hδ : 0 < δ)
+    (hα : ContDiffOn ℝ 2 α (V ×ˢ Metric.ball 0 δ))
+    (hsol : ∀ q ∈ V, α (q, 0) = q ∧
+      ∀ r ∈ Metric.ball 0 δ, (α (q, r)).1 ∈ (extChartAt I c).target ∧
+        HasDerivAt (fun t => α (q, t)) (coordinateGeodesicSpray LC b c (α (q, r))) r)
+    (hrest : ∀ r ∈ Metric.ball 0 δ, α ((z, 0), r) = (z, 0))
+    (hcrit : gradient (I := I) f ((extChartAt I c).symm z) = 0)
+    (hmax : f ((extChartAt I c).symm z) = a)
+    {t : ℝ} (htime : t ∈ Metric.ball 0 δ) (htpos : 0 < t) :
+    ∃ ε : ℝ, 0 < ε ∧ ∀ u : E, ‖u‖ < ε → u ≠ 0 → ∀ w v : E,
+      let F := fun y : E => (α ((z, y), t)).1
+      let g := coordinateMetricBilinear (I := I) c z
+      let freq := Real.sqrt K * (t * Real.sqrt (g u u))
+      let angular := Real.sin freq ^ 2 / (K * g u u)
+      coordinateMetricBilinear (I := I) c (F u)
+        (fderiv ℝ F u w) (fderiv ℝ F u v) =
+          angular * g w v + (t ^ 2 - angular) * (g u w * g u v / g u u) := by
+  let g := coordinateMetricBilinear (I := I) c z
+  have hg : ∀ u : E, u ≠ 0 → 0 < g u u := by
+    intro u hu
+    have hx : (extChartAt I c).symm z ∈ (chartAt H c).source := by
+      simpa using (extChartAt I c).map_target hz
+    have hn : (trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm z) u ≠ 0 := by
+      intro he
+      have hh := congrArg ((trivializationAt E TM c).continuousLinearMapAt ℝ
+        ((extChartAt I c).symm z)) he
+      rw [(trivializationAt E TM c).continuousLinearMapAt_symmL hx, map_zero] at hh
+      exact hu hh
+    exact real_inner_self_pos.mpr hn
+  obtain ⟨ε, hε, hdata⟩ := exists_uniform_positive_phase_ray_ball g hg hV hzV hK htpos
+  refine ⟨ε, hε, ?_⟩
+  intro u hu hune w v
+  have he := geodesic_normal_ray_full_metric b hf hK ha hb hH c hz hV hzV hδ hα hsol
+    hrest hcrit hmax htime htpos (hg u hune) (show (0 : ℝ) < 2 by norm_num)
+    (hdata u hu hune) (show (1 : ℝ) ∈ Ioo 0 2 by norm_num) w v
+  simpa only [one_smul, mul_one, one_pow, one_mul] using he
+
 end LichnerowiczObata

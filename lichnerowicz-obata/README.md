@@ -421,3 +421,7 @@ all angular vector pairs. Global sphere rigidity is not yet established.
 its radial and angular restrictions. Applying it to the actual geodesic map
 now gives the full local pullback metric for arbitrary vector pairs, including
 radial and mixed directions, using the Gauss lemma and pole normalization.
+The full formula now holds on one constructed punctured velocity ball for all
+directions and vector pairs simultaneously; its radius is not selected
+separately for each ray. Coordinate-metric positivity is derived from the
+invertible tangent trivialization.

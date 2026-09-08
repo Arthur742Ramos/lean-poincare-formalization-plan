@@ -281,3 +281,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.radial_projection_remainder_orthogonal
 #print axioms LichnerowiczObata.bilinear_metric_of_radial_and_angular
 #print axioms LichnerowiczObata.geodesic_normal_ray_full_metric
+#print axioms LichnerowiczObata.exists_uniform_positive_phase_ray_ball
+#print axioms LichnerowiczObata.exists_geodesic_normal_full_metric_ball
