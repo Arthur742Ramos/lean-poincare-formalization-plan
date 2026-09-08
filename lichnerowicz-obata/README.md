@@ -443,5 +443,7 @@ than the two poles: arccosine of its normalized height gives the angle, and
 the normalized perpendicular component gives the unit angular direction.
 Surjectivity away from the poles and exclusion of both poles from the open
 polar range are proved. The parametrization is packaged as a continuous
-bijection onto the punctured sphere. Inverse continuity and the global
-manifold comparison remain pending.
+bijection onto the punctured sphere. `RoundPolarHomeomorph` proves explicit
+inverse formulas and their continuity, upgrading this to a homeomorphism
+between the punctured sphere and angular directions times the radial interval.
+The global Riemannian comparison with the manifold remains pending.

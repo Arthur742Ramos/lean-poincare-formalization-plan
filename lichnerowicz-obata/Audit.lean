@@ -28,6 +28,7 @@ import LichnerowiczObata.RoundPolarCurves
 import LichnerowiczObata.RoundPolarMetric
 import LichnerowiczObata.RoundPolarCoordinates
 import LichnerowiczObata.RoundPolarInverse
+import LichnerowiczObata.RoundPolarHomeomorph
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -309,3 +310,8 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.roundPolarPuncturedMap_bijective
 #print axioms LichnerowiczObata.roundPolarEquiv
 #print axioms LichnerowiczObata.continuous_roundPolarPuncturedMap
+#print axioms LichnerowiczObata.roundPolarEquiv_inverse_radius
+#print axioms LichnerowiczObata.roundPolarEquiv_inverse_angular
+#print axioms LichnerowiczObata.roundPolar_inverse_sine_ne_zero
+#print axioms LichnerowiczObata.continuous_roundPolarEquiv_inverse
+#print axioms LichnerowiczObata.roundPolarHomeomorph
