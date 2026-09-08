@@ -22,6 +22,18 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
 
 local notation "TM" => (TangentSpace I : M → Type _)
 
+/-- The actual metric in a fixed tangent chart, bundled as a continuous
+bilinear form so it can be evaluated on moving coordinate vectors. -/
+def coordinateMetricBilinear (c : M) (z : E) : E →L[ℝ] E →L[ℝ] ℝ :=
+  let y := (extChartAt I c).symm z
+  let L := (trivializationAt E TM c).symmL ℝ y
+  (innerSL ℝ).bilinearComp L L
+
+theorem coordinateMetricBilinear_apply (c : M) (z u w : E) :
+    coordinateMetricBilinear (I := I) c z u w =
+      inner ℝ ((trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm z) u)
+        ((trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm z) w) := rfl
+
 /-- A fixed coordinate vector gives a smooth local tangent section. -/
 theorem contMDiffAt_coordinateConstant (c x : M) (hx : x ∈ (chartAt H c).source) (u : E) :
     ContMDiffAt I (I.prod 𝓘(ℝ, E)) 1

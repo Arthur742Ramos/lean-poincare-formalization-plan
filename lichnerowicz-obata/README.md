@@ -271,3 +271,9 @@ The varying-vector terms still need to be combined with the flow variational ODE
 The fixed-vector derivative is also expressed through the actual frame
 connection coefficients, by proving that constant coordinate sections have
 zero ordinary coordinate derivative.
+The actual coordinate metric is now packaged as a continuous bilinear form.
+`MetricPairingCalculus` proves the three-term moving-pairing derivative rule
+and its algebraic conversion to covariant evolution. Applying that rule still
+requires regularity of the bilinear-valued coordinate metric and the geometric
+shape identities for the constructed variations; the generic calculus lemma
+does not discharge those obligations.

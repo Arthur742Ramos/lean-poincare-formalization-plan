@@ -1,6 +1,7 @@
 import LichnerowiczObata.RadialVariation
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
+import LichnerowiczObata.MetricPairingCalculus
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
 import LichnerowiczObata.ClassicalSpectrum
@@ -154,3 +155,7 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.fderiv_coordinateMetric_pairing
 #print axioms LichnerowiczObata.covariantDerivative_coordinateConstant
 #print axioms LichnerowiczObata.fderiv_coordinateMetric_pairing_coefficients
+#print axioms LichnerowiczObata.coordinateMetricBilinear_apply
+#print axioms LichnerowiczObata.hasDerivAt_moving_metric_pairing
+#print axioms LichnerowiczObata.hasDerivAt_metric_pairing_connection
+#print axioms LichnerowiczObata.hasDerivAt_metric_pairing_scaling
