@@ -74,7 +74,7 @@ theorem obata_global_round_homeomorph
         ∃ T : M → RoundAmbient (TM p),
           (∀ y : {x : M // -a < f x ∧ f x < a},
             T (y : M) = (H.symm (y : M) : RoundAmbient (TM p)) ∧
-            MDifferentiableAt I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) ∧
+            ContMDiffAt I 𝓘(ℝ, RoundAmbient (TM p)) ∞ T (y : M) ∧
             ∀ v w : TM (y : M),
               inner ℝ (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) v)
                 (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) w) = inner ℝ v w) ∧

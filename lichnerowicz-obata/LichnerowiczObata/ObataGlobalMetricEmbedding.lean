@@ -3,7 +3,7 @@ module
 public import LichnerowiczObata.ObataGlobalHomeomorph
 public import LichnerowiczObata.RoundPoleForwardMetric
 
-/-! # An everywhere differentiable metric embedding onto the round sphere -/
+/-! # A globally smooth metric embedding onto the round sphere -/
 
 @[expose] public noncomputable section
 open Bundle Set AlmostSchur
@@ -26,9 +26,8 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 local notation "TM" => (TangentSpace I : M → Type _)
 
 /-- The actual inverse of the constructed global round homeomorphism,
-viewed in the Euclidean ambient space, is differentiable and preserves the
-Riemannian inner product everywhere. The actual map is smooth at both poles;
-the global higher-smoothness assertion is a separate step. -/
+viewed in the Euclidean ambient space, is smooth and preserves the
+Riemannian inner product everywhere, including both poles. -/
 theorem obata_global_round_metric_embedding
     (hdim : 1 < Module.rank ℝ E) {K : ℝ} (hK : 0 < K) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
@@ -40,7 +39,7 @@ theorem obata_global_round_metric_embedding
         (Q (roundNorthPoint (one_div_pos.mpr (Real.sqrt_pos.mpr hK)))) ∧
       ContMDiffAt I 𝓘(ℝ, RoundAmbient (TM p)) ∞ T
         (Q (roundSouthPoint (one_div_pos.mpr (Real.sqrt_pos.mpr hK)))) ∧
-      MDifferentiable I 𝓘(ℝ, RoundAmbient (TM p)) T ∧
+      ContMDiff I 𝓘(ℝ, RoundAmbient (TM p)) ∞ T ∧
         ∀ (x : M) (v w : TM x),
           inner ℝ (mvfderiv I T x v) (mvfderiv I T x w) = inner ℝ v w := by
   obtain ⟨a, ha, hb, p, q, hpq, hmax, hmin, Q, hQN, hQS,
@@ -59,7 +58,7 @@ theorem obata_global_round_metric_embedding
   rw [hQN] at hNorth
   rw [hQS] at hSouth
   have hreg : ∀ x : M, x ≠ p → x ≠ q →
-      MDifferentiableAt I 𝓘(ℝ, RoundAmbient (TM p)) F x ∧
+      ContMDiffAt I 𝓘(ℝ, RoundAmbient (TM p)) ∞ F x ∧
       ∀ v w : TM x, inner ℝ (mvfderiv I F x v) (mvfderiv I F x w) = inner ℝ v w := by
     intro x hxp hxq
     have hx : -a < f x ∧ f x < a :=
@@ -77,15 +76,15 @@ theorem obata_global_round_metric_embedding
     simp only [mvfderiv, hd]
     convert (hT y).2.2 v w using 1
     rfl
-  have hall : ∀ x : M, MDifferentiableAt I 𝓘(ℝ, RoundAmbient (TM p)) F x ∧
+  have hall : ∀ x : M, ContMDiffAt I 𝓘(ℝ, RoundAmbient (TM p)) ∞ F x ∧
       ∀ v w : TM x, inner ℝ (mvfderiv I F x v) (mvfderiv I F x w) = inner ℝ v w := by
     intro x
     by_cases hxp : x = p
     · subst x
-      exact ⟨hNorth.1.mdifferentiableAt (by norm_num), hNorth.2⟩
+      exact hNorth
     · by_cases hxq : x = q
       · subst x
-        exact ⟨hSouth.1.mdifferentiableAt (by norm_num), hSouth.2⟩
+        exact hSouth
       · exact hreg x hxp hxq
   refine ⟨p, Q, ?_, ?_, fun x => (hall x).1, fun x => (hall x).2⟩
   · rw [hQN]

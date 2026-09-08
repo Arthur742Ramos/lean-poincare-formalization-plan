@@ -45,7 +45,7 @@ theorem obata_regular_metric_comparison
         ∃ T : M → RoundAmbient (TM p),
           (∀ y : {x : M // -a < f x ∧ f x < a},
             T (y : M) = ((F y).1 : RoundAmbient (TM p)) ∧
-            MDifferentiableAt I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) ∧
+            ContMDiffAt I 𝓘(ℝ, RoundAmbient (TM p)) ∞ T (y : M) ∧
             ∀ v w : TM (y : M),
               inner ℝ (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) v)
                 (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) w) = inner ℝ v w) ∧

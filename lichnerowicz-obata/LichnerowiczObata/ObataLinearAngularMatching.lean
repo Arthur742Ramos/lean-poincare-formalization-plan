@@ -56,6 +56,9 @@ theorem exists_obata_linearly_matched_polar_models
           obataRadial K a f (Φ (u, r)) = r) ∧
         (∀ u : Metric.sphere (0 : TM q) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
           obataRadial K a f (Ψ (u, r)) = Real.pi / Real.sqrt K - r) ∧
+        (∀ u : Metric.sphere (0 : TM p) 1,
+          IsMIntegralCurveOn (fun r => Φ (u, r)) (gradient (I := I) (obataRadial K a f))
+            (Ioo 0 (Real.pi / Real.sqrt K))) ∧
         ∃ L : TM p ≃ₗᵢ[ℝ] TM q,
           (∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
             Φ (u, Real.pi / Real.sqrt K - r) = Ψ (L (u : TM p), r)) ∧
@@ -63,7 +66,7 @@ theorem exists_obata_linearly_matched_polar_models
             (N.symm.trans (curvatureRoundPolarHomeomorph hK)) p ∧
           HasRoundSouthInverseExtension I K
             (N.symm.trans (curvatureRoundPolarHomeomorph hK)) q := by
-  obtain ⟨Φ, Ψ, hp, hq, hmN, hmS, N, S, hN, hS, hρN, hρS, A, hmatch, hregular⟩ :=
+  obtain ⟨Φ, Ψ, hp, hq, hmN, hmS, N, S, hN, hS, hρN, hρS, hcN, A, hmatch, hregular⟩ :=
     exists_obata_matched_polar_models hf hnon hK ha hb hH c d hz hz' hmax hmin
   obtain ⟨hA, hAi, hmA, hmAi⟩ := hregular n Fact.out
   obtain ⟨L, hL⟩ := exists_linearIsometryEquiv_of_sphere_tangent_metric
@@ -77,7 +80,7 @@ theorem exists_obata_linearly_matched_polar_models
   let : FiniteDimensional ℝ (TM ((extChartAt I c).symm z)) :=
     inferInstanceAs (FiniteDimensional ℝ E)
   let : CompleteSpace (TM ((extChartAt I c).symm z)) := FiniteDimensional.complete ℝ _
-  exact ⟨Φ, Ψ, hp, hq, hmN, hmS, N, S, hN, hS, hρN, hρS, L, hlinear,
+  exact ⟨Φ, Ψ, hp, hq, hmN, hmS, N, S, hN, hS, hρN, hρS, hcN, L, hlinear,
     hp.round_north_inverse_extension hK N hN,
     hq.round_south_inverse_extension L hK N hN hlinear⟩
 

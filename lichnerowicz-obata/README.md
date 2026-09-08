@@ -50,9 +50,9 @@ no longer assume spectral existence or smoothness of a weak eigenfunction.
 
 ## Remaining proof obligations
 
-1. Global Obata rigidity from the Hessian equation: construct the polar map,
-   identify its angular metric with the unit round metric, and prove the
-   smooth metric-preserving sphere identification, including both poles.
+1. Package the proved global smooth, metric-preserving sphere identification
+   as a smooth Riemannian isometry, with the inverse and the sphere's induced
+   metric made explicit, and connect it to the eigenvalue equality theorem.
 2. The round-sphere converse, the independently auditable Mathlib-only
    Challenge, and final theorem/axiom/provenance verification.
 
@@ -743,13 +743,13 @@ the round-sphere converse.
 
 `obata_global_round_metric_embedding` now proves that the actual inverse of
 the global round homeomorphism, viewed in its Euclidean ambient space, is
-manifold-differentiable and preserves tangent inner products at every point.
+smooth and preserves tangent inner products at every point.
 At either pole, `round_pole_forward_metric` uses the smooth hemisphere graph
 and a continuous local inverse of its isometric derivative. Away from the
 poles, it uses the existing regular metric comparison on an open neighborhood.
-The theorem also retains full smoothness at both poles. Smoothness at all
-regular points and the final smooth Riemannian-isometry theorem remain to be
-assembled.
+The theorem retains full smoothness at all regular points and at both poles.
+The final intrinsic Riemannian-isometry and eigenvalue-equality statements
+remain to be assembled.
 
 `contDiffAt_coordinate_geodesic_endpoint_zero` now proves full smoothness at
 zero velocity for a fixed actual coordinate-geodesic endpoint. It compares
@@ -766,5 +766,13 @@ radial sine map; the explicit polar identity and inverse function theorem
 identify its smooth inverse with the existing logarithm. Both north and
 south ambient extensions now retain this smoothness. The smooth manifold
 inverse theorem then transfers it to the actual global comparison at both
-poles, together with its metric identities. This does not yet establish
-global smoothness or the final round-sphere equality characterization.
+poles, together with its metric identities.
+
+`contMDiffAt_of_smooth_pole_transport` propagates a smooth pole germ along a
+smooth radial transport. Each finite order may use a smaller seed radius;
+the polar map itself is fixed. `HasRadialPoleModel.contMDiffAt_obata_polar`
+constructs that transport from the actual gradient flow and proves agreement
+by ODE uniqueness. The smooth polar inverse and matched two-pole comparison
+carry this evidence into `obata_global_round_metric_embedding`, which now
+asserts global smoothness as well as the everywhere metric identity. The
+round-sphere converse and final equality characterization are still open.

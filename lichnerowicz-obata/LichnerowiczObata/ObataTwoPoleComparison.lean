@@ -1,5 +1,8 @@
 module
 
+public import LichnerowiczObata.SmoothPolarMetricComparison
+public import LichnerowiczObata.SmoothObataPolar
+
 public import LichnerowiczObata.ObataLinearAngularMatching
 public import LichnerowiczObata.PolarMetricComparison
 public import LichnerowiczObata.ObataUniquePoles
@@ -43,7 +46,7 @@ theorem obata_regular_metric_comparison_both_poles
         ∃ T : M → RoundAmbient (TM p),
           (∀ y : {x : M // -a < f x ∧ f x < a},
             T (y : M) = ((F y).1 : RoundAmbient (TM p)) ∧
-            MDifferentiableAt I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) ∧
+            ContMDiffAt I 𝓘(ℝ, RoundAmbient (TM p)) ∞ T (y : M) ∧
             ∀ v w : TM (y : M),
               inner ℝ (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) v)
                 (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) w) = inner ℝ v w) ∧
@@ -77,13 +80,25 @@ theorem obata_regular_metric_comparison_both_poles
   have hmodels := exists_obata_linearly_matched_polar_models
     (n := Module.finrank ℝ E - 1) hf hnon hK ha hb hH p q hz hz' hmax' hmin'
   rw [he, he'] at hmodels
-  obtain ⟨Φ, Ψ, hpmodel, hqmodel, hmN, hmS, N, S, hN, hS, hρN, hρS, L, hmatch, hNorth, hSouth⟩ := hmodels
+  obtain ⟨Φ, Ψ, hpmodel, hqmodel, hmN, hmS, N, S, hN, hS, hρN, hρS, hcN, L, hmatch, hNorth, hSouth⟩ := hmodels
   let U : TopologicalSpace.Opens M :=
     ⟨{x | -a < f x ∧ f x < a},
       (isOpen_lt continuous_const hf.continuous).inter
         (isOpen_lt hf.continuous continuous_const)⟩
-  obtain ⟨T, hT, G, hG⟩ := hmN.regular_comparison
-    (n := Module.finrank ℝ E - 1) hK U N hN Fact.out
+  have hpm : IsMaxOn f univ p := fun x _ => by rw [hp]; exact (hb x).2
+  have hcrit : gradient (I := I) f p = 0 := gradient_eq_zero_of_local_extremum
+    ((hf2 p).mdifferentiableAt (by norm_num)) (Or.inr (hpm.isLocalMax (by simp)))
+  have hSmooth : ∀ u : Metric.sphere (0 : TM p) 1,
+      ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
+      ContMDiffAt ((𝓡 (Module.finrank ℝ E - 1)).prod 𝓘(ℝ, ℝ)) I ∞
+        (fun q : Metric.sphere (0 : TM p) 1 × ℝ => Φ (q.1, q.2)) (u, r) := by
+    intro u r hr
+    apply hpmodel.contMDiffAt_obata_polar hf hnon hK ha hH hcrit hp ?_ hρN hcN u hr
+    intro v s hs
+    rw [← hN (v, ⟨s, hs⟩)]
+    exact (N (v, ⟨s, hs⟩)).property
+  obtain ⟨T, hT, G, hG⟩ := hmN.smooth_regular_comparison
+    (n := Module.finrank ℝ E - 1) hK U N hN Fact.out hSmooth
   refine ⟨a, ha, hb, p, q, hpq, hmax, hmin, hdist,
     N.symm.trans (curvatureRoundPolarHomeomorph hK), hNorth, hSouth, T, hT, ?_, G, hG⟩
   intro y

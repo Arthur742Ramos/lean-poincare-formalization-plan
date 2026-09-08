@@ -243,6 +243,9 @@ theorem exists_obata_matched_polar_models
           obataRadial K a f (Φ (u, r)) = r) ∧
         (∀ u : Metric.sphere (0 : TM q) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
           obataRadial K a f (Ψ (u, r)) = Real.pi / Real.sqrt K - r) ∧
+        (∀ u : Metric.sphere (0 : TM p) 1,
+          IsMIntegralCurveOn (fun r => Φ (u, r)) (gradient (I := I) (obataRadial K a f))
+            (Ioo 0 (Real.pi / Real.sqrt K))) ∧
         ∃ A : Metric.sphere (0 : TM p) 1 ≃ₜ Metric.sphere (0 : TM q) 1,
           (∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
             Φ (u, Real.pi / Real.sqrt K - r) = Ψ (A u, r)) ∧
@@ -269,7 +272,7 @@ theorem exists_obata_matched_polar_models
     (fun u : Metric.sphere (0 : TM ((extChartAt I c).symm z)) 1 × ℝ => Φ (u.1, u.2))
     (fun u : Metric.sphere (0 : TM ((extChartAt I d).symm z')) 1 × ℝ => Ψ (u.1, u.2))
     hN hS hρN hρS hcN hcS
-  refine ⟨Φ, Ψ, hpole, hspole, hmN, hmS, N, S, hN, hS, hρN, hρS, A, hA, ?_⟩
+  refine ⟨Φ, Ψ, hpole, hspole, hmN, hmS, N, S, hN, hS, hρN, hρS, hcN, A, hA, ?_⟩
   intro n hdim
   let : Fact (Module.finrank ℝ E = n + 1) := ⟨hdim⟩
   let U : TopologicalSpace.Opens M :=

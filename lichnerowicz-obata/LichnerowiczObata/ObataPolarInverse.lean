@@ -2,9 +2,11 @@ module
 
 public import LichnerowiczObata.ObataRegularRoundComparison
 public import LichnerowiczObata.PolarInverseDifferentiability
+public import LichnerowiczObata.SmoothObataPolar
+public import LichnerowiczObata.SmoothPolarInverse
 public import LichnerowiczObata.PolarComparisonMetric
 
-/-! # Differentiability of the constructed regular Obata coordinates -/
+/-! # Smoothness of the constructed regular Obata coordinates -/
 
 @[expose] public noncomputable section
 open Bundle FiberBundle Set AlmostSchur TopologicalSpace
@@ -32,7 +34,7 @@ local instance tangentFinrank (p : M) : Fact (Module.finrank ℝ (TM p) = n + 1)
   ⟨show Module.finrank ℝ E = n + 1 from Fact.out⟩
 
 /-- The Obata Hessian equation yields a single regular polar chart whose
-inverse is differentiable on the entire regular region. The coordinate
+inverse is smooth on the entire regular region. The coordinate
 homeomorphism in the conclusion is the one used to construct the chart. -/
 theorem exists_obata_differentiable_polar_inverse
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
@@ -60,7 +62,7 @@ theorem exists_obata_differentiable_polar_inverse
         (∀ y : {x : M // -a < f x ∧ f x < a},
           e.symm (y : M) = ((Q.symm y).1, ((Q.symm y).2 : ℝ))) ∧
         (∀ y, -a < f y ∧ f y < a →
-          MDifferentiableAt I ((𝓡 n).prod 𝓘(ℝ, ℝ)) e.symm y) ∧
+          ContMDiffAt I ((𝓡 n).prod 𝓘(ℝ, ℝ)) ∞ e.symm y) ∧
         ∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
           MDifferentiableAt 𝓘(ℝ, TM p × ℝ) I Φ (u, r) ∧
           Set.InjOn (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r))
@@ -85,14 +87,24 @@ theorem exists_obata_differentiable_polar_inverse
   obtain ⟨u, hu⟩ := NormedSpace.sphere_nonempty (E := TM p) |>.mpr (show (0 : ℝ) ≤ 1 by norm_num)
   have hL : 0 < Real.pi / Real.sqrt K := div_pos Real.pi_pos (Real.sqrt_pos.mpr hK)
   let r : J := ⟨(Real.pi / Real.sqrt K) / 2, by change 0 < _ ∧ _ < _; constructor <;> linarith⟩
-  obtain ⟨e, hs, ht, he, hi, hd⟩ := exists_differentiable_polar_inverse_on_target
-    (I := I) (n := n) J U Q (⟨u, hu⟩, r) Φ hQ hDim
+  have hSmooth : ∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ J,
+      ContMDiffAt ((𝓡 n).prod 𝓘(ℝ, ℝ)) I ∞
+        (fun q : Metric.sphere (0 : TM p) 1 × ℝ => Φ (q.1, q.2)) (u, r) := by
+    intro u r hr
+    apply hpole.contMDiffAt_obata_polar hf hnon hK ha hH hcrit
+      ((hmax _).mpr rfl) ?_ hradial hcurves u hr
+    intro v s hs
+    have he := hQ (v, ⟨s, hs⟩)
+    rw [← he]
+    exact (Q (v, ⟨s, hs⟩)).property
+  obtain ⟨e, hs, ht, he, hi, hd⟩ := exists_smooth_polar_inverse_on_target
+    (I := I) (n := n) J U Q (⟨u, hu⟩, r) Φ hQ hDim hSmooth
     (fun u r hr => ⟨(hjet u r hr).1, (hjet u r hr).2.1⟩)
   exact ⟨Φ, hpole, Q, e, hs, ht, hQ, hradial, hcurves, he, hi, hd, hjet⟩
 
 include hDimension in
-/-- A single regular comparison to the punctured round sphere has
-differentiable ambient extensions in both directions, and its forward
+/-- A single regular comparison to the punctured round sphere has a smooth
+forward ambient extension and a differentiable inverse extension. Its forward
 derivative preserves the Riemannian inner product on every regular tangent
 space. The same comparison retains its differentiable north-pole inverse
 extension and its north-pole tangent metric; no south-pole assertion is made here. -/
@@ -111,7 +123,7 @@ theorem exists_obata_regular_forward_differentiable
       ∃ T : M → RoundAmbient (TM p),
         (∀ y : {x : M // -a < f x ∧ f x < a},
           T (y : M) = ((F y).1 : RoundAmbient (TM p)) ∧
-          MDifferentiableAt I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) ∧
+          ContMDiffAt I 𝓘(ℝ, RoundAmbient (TM p)) ∞ T (y : M) ∧
           ∀ v w : TM (y : M),
             inner ℝ (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) v)
               (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) w) = inner ℝ v w) ∧
@@ -139,14 +151,24 @@ theorem exists_obata_regular_forward_differentiable
     · change Ψₛ (e.symm (y : M)) = _
       rw [hi y]
       exact (curvatureRoundPolarHomeomorph_apply hK (Q.symm y)).symm
-    · have hΨ : MDifferentiableAt 𝓘(ℝ, TM p × ℝ) 𝓘(ℝ, RoundAmbient (TM p))
+    · have hΨ : ContMDiffAt 𝓘(ℝ, TM p × ℝ) 𝓘(ℝ, RoundAmbient (TM p)) ∞
           Ψ ((e.symm (y : M)).1, (e.symm (y : M)).2) := by
-        apply mdifferentiableAt_iff_differentiableAt.mpr
+        apply contMDiffAt_iff_contDiffAt.mpr
         dsimp only [Ψ, roundPolarCurve]
         fun_prop
-      have hΨₛ : MDifferentiableAt ((𝓡 n).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, RoundAmbient (TM p))
-          Ψₛ (e.symm (y : M)) :=
-        mdifferentiableAt_sphere_polar_restriction _ _ hΨ
+      have hΨₛ : ContMDiffAt ((𝓡 n).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, RoundAmbient (TM p)) ∞
+          Ψₛ (e.symm (y : M)) := by
+        have hc : ContMDiff ((𝓡 n).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, TM p × ℝ) ∞
+            (fun q : Metric.sphere (0 : TM p) 1 × ℝ => ((q.1 : TM p), q.2)) := by
+          have hcoe : ContMDiff (𝓡 n) 𝓘(ℝ, TM p) ∞
+              (Subtype.val : Metric.sphere (0 : TM p) 1 → TM p) := contMDiff_coe_sphere
+          have hfst : ContMDiff ((𝓡 n).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, TM p) ∞
+              (fun q : Metric.sphere (0 : TM p) 1 × ℝ => (q.1 : TM p)) :=
+            hcoe.comp contMDiff_fst
+          exact hfst.prodMk_space (contMDiff_snd : ContMDiff ((𝓡 n).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+            (Prod.snd : Metric.sphere (0 : TM p) 1 × ℝ → ℝ))
+        exact hΨ.comp (f := fun q : Metric.sphere (0 : TM p) 1 × ℝ => ((q.1 : TM p), q.2))
+          (e.symm (y : M)) (hc _)
       have hTy := hΨₛ.comp (y : M) (hd y y.property)
       refine ⟨hTy, ?_⟩
       let q := Q.symm y
@@ -155,7 +177,9 @@ theorem exists_obata_regular_forward_differentiable
         exact congrArg (fun x : {x : M // -a < f x ∧ f x < a} => (x : M))
           (Q.apply_symm_apply y)
       have hTq : MDifferentiableAt I 𝓘(ℝ, RoundAmbient (TM p)) T
-          (Φ ((q.1 : TM p), (q.2 : ℝ))) := by rw [hqy]; exact hTy
+          (Φ ((q.1 : TM p), (q.2 : ℝ))) := by
+        rw [hqy]
+        exact hTy.mdifferentiableAt (by norm_num)
       have hΨq : MDifferentiableAt 𝓘(ℝ, TM p × ℝ) 𝓘(ℝ, RoundAmbient (TM p))
           Ψ ((q.1 : TM p), (q.2 : ℝ)) := by
         apply mdifferentiableAt_iff_differentiableAt.mpr
