@@ -396,5 +396,9 @@ longitudinal terms. Application to the normal-map rays remains pending.
 `NormalRays` supplies the chain-rule bridge for a family `F(s • u)`: its
 time derivative, spatial variations, the squared-parameter metric factor,
 and cancellation of a nonzero radial parameter to obtain the ray equation.
-These are general calculus lemmas; the geometric specialization and angular
-metric integration remain to be completed.
+`GeodesicNormalRays` specializes this to the actual geodesic endpoint map:
+positive-parameter rays satisfy the scaled radial gradient equation, and
+initial angular directions give spatial ray variations orthogonal to that
+gradient. Both facts follow from the geodesic family and the checked Gauss
+lemma, rather than being additional flow assumptions. Combining these with
+metric evolution and integrating the angular metric remain to be completed.
