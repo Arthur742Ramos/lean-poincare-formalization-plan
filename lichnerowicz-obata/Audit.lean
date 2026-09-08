@@ -18,6 +18,7 @@ import LichnerowiczObata.RadialFlowFamily
 import LichnerowiczObata.ContinuousPoleMaps
 import LichnerowiczObata.ObataUniquePoles
 import LichnerowiczObata.RadialDistance
+import LichnerowiczObata.AngularMetricEvolution
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -100,3 +101,10 @@ import LichnerowiczObata.RadialDistance
 #print axioms LichnerowiczObata.obataRadial_le_pole_distance
 #print axioms LichnerowiczObata.riemannianEDist_obataRadial_curve_eq_abs
 #print axioms LichnerowiczObata.exists_obata_pole_distance
+#print axioms LichnerowiczObata.cov_gradient_scalar_comp
+#print axioms LichnerowiczObata.obataRadial_hessian_scaled
+#print axioms LichnerowiczObata.obataRadial_hessian
+#print axioms LichnerowiczObata.cov_obataRadial_gradient
+#print axioms LichnerowiczObata.sine_squared_normalized_eq
+#print axioms LichnerowiczObata.obataRadial_angular_metric_derivative
+#print axioms LichnerowiczObata.obataRadial_angular_metric_scaling

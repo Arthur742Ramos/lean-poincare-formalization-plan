@@ -50,8 +50,8 @@ no longer assume spectral existence or smoothness of a weak eigenfunction.
 
 ## Remaining proof obligations
 
-1. Global Obata rigidity from the Hessian equation: the angular/polar metric
-   description and the
+1. Global Obata rigidity from the Hessian equation: construct the polar map,
+   identify its angular metric with the unit round metric, and prove the
    smooth metric-preserving sphere identification, including both poles.
 2. The round-sphere converse, the independently auditable Mathlib-only
    Challenge, and final theorem/axiom/provenance verification.
@@ -174,9 +174,20 @@ arccosine coordinates and passes to the original amplitude by continuity.
 This proves global nonexpansion even at both nonsmooth radial endpoints.
 `RadialDistance.lean` then identifies the radial and complementary coordinates
 with the exact distances to the two poles and proves that radially parameterized
-gradient curves realize distance on every subsegment. The angular metric and
-smooth round-sphere isometry, including its extension over the poles, remain
-unproved.
+gradient curves realize distance on every subsegment.
+
+`HessianChainRule.lean` derives the scalar covariant chain rule from the actual
+connection's Leibniz rule. `RadialShapeOperator.lean` applies the cosine
+reconstruction to prove the full radial Hessian and shape operator, with
+factor `sqrt K * cos(sqrt K * r) / sin(sqrt K * r)`. Thus directions tangent
+to a radial level have exactly the spherical infinitesimal scaling.
+`AngularMetricEvolution.lean` uses torsion freeness and metric compatibility
+to derive and integrate the metric evolution for commuting angular fields:
+their inner product divided by `sin(sqrt K * r)^2` is constant along a radial
+curve. This is conditional on the supplied differentiable, commuting angular
+fields; constructing them as polar coordinate directions and identifying the
+remaining angular metric with the round metric are not yet proved. The smooth
+round-sphere isometry and its extension over the poles remain unproved.
 
 ## Sources and reuse
 
