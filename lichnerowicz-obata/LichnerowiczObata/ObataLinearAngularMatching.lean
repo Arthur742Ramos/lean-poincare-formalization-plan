@@ -1,6 +1,7 @@
 module
 
 public import LichnerowiczObata.SphereAngularIsometry
+public import LichnerowiczObata.RoundSouthPoleLog
 
 /-! # Linear angular matching for the constructed Obata polar models -/
 
@@ -56,16 +57,25 @@ theorem exists_obata_linearly_matched_polar_models
         (∀ u : Metric.sphere (0 : TM q) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
           obataRadial K a f (Ψ (u, r)) = Real.pi / Real.sqrt K - r) ∧
         ∃ L : TM p ≃ₗᵢ[ℝ] TM q,
-          ∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
-            Φ (u, Real.pi / Real.sqrt K - r) = Ψ (L (u : TM p), r) := by
+          (∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
+            Φ (u, Real.pi / Real.sqrt K - r) = Ψ (L (u : TM p), r)) ∧
+          HasRoundNorthInverseExtension I K
+            (N.symm.trans (curvatureRoundPolarHomeomorph hK)) p ∧
+          HasRoundSouthInverseExtension I K
+            (N.symm.trans (curvatureRoundPolarHomeomorph hK)) q := by
   obtain ⟨Φ, Ψ, hp, hq, hmN, hmS, N, S, hN, hS, hρN, hρS, A, hmatch, hregular⟩ :=
     exists_obata_matched_polar_models hf hnon hK ha hb hH c d hz hz' hmax hmin
   obtain ⟨hA, hAi, hmA, hmAi⟩ := hregular n Fact.out
   obtain ⟨L, hL⟩ := exists_linearIsometryEquiv_of_sphere_tangent_metric
     (n := n) A.toEquiv hA hAi hmA hmAi
-  refine ⟨Φ, Ψ, hp, hq, hmN, hmS, N, S, hN, hS, hρN, hρS, L, ?_⟩
-  intro u r hr
-  rw [hL u]
-  exact hmatch u r hr
+  have hlinear : ∀ u : Metric.sphere (0 : TM ((extChartAt I c).symm z)) 1,
+      ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
+        Φ (u, Real.pi / Real.sqrt K - r) = Ψ (L (u : TM ((extChartAt I c).symm z)), r) := by
+    intro u r hr
+    rw [hL u]
+    exact hmatch u r hr
+  exact ⟨Φ, Ψ, hp, hq, hmN, hmS, N, S, hN, hS, hρN, hρS, L, hlinear,
+    hp.round_north_inverse_extension hK N hN,
+    hq.round_south_inverse_extension L hK N hN hlinear⟩
 
 end LichnerowiczObata

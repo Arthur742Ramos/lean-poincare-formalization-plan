@@ -124,4 +124,34 @@ theorem round_north_eventuallyEq_of_punctured
       ⟨x, fun he => hxN (Subtype.ext he), fun he => hxS (Subtype.ext he)⟩
     exact hreg y hx
 
+/-- The analogous neighborhood agreement at the south pole is controlled
+by the remaining polar radius, not by a fixed angular direction. -/
+theorem round_south_eventuallyEq_of_punctured
+    {M : Type*} {R : ℝ} (hR : 0 < R)
+    (H : Metric.sphere (0 : RoundAmbient P) R → M) (N : RoundAmbient P → M)
+    (hN : N (-(R • roundNorth)) = H (roundSouthPoint hR))
+    {δ : ℝ} (hδ : 0 < δ)
+    (hreg : ∀ x : RoundPuncturedSphere R (roundNorth : RoundAmbient P),
+      Real.pi * R - (intrinsicRoundInverseCoordinates R (x.1 : RoundAmbient P)).2 < δ →
+        N (x.1 : RoundAmbient P) = H x.1) :
+    (fun x : Metric.sphere (0 : RoundAmbient P) R => N (x : RoundAmbient P)) =ᶠ[𝓝 (roundSouthPoint hR)] H := by
+  have hρ0 : Real.pi * R - (intrinsicRoundInverseCoordinates R
+      ((roundSouthPoint (P := P) hR).val)).2 = 0 := by
+    change Real.pi * R - (intrinsicRoundInverseCoordinates R (-(R • (roundNorth : RoundAmbient P)))).2 = 0
+    rw [← neg_smul, intrinsicRoundInverse_radius_south hR, sub_self]
+  have hρ : Tendsto (fun x : Metric.sphere (0 : RoundAmbient P) R =>
+      Real.pi * R - (intrinsicRoundInverseCoordinates R (x : RoundAmbient P)).2)
+      (𝓝 (roundSouthPoint hR)) (𝓝 0) := by
+    rw [← hρ0]
+    exact (continuous_const.sub
+      ((continuous_intrinsicRoundInverse_radius R).comp continuous_subtype_val)).continuousAt.tendsto
+  filter_upwards [hρ.eventually (gt_mem_nhds hδ),
+    eventually_ne_nhds (roundNorthPoint_ne_southPoint (P := P) hR).symm] with x hx hxN
+  by_cases hxS : x = roundSouthPoint hR
+  · subst x
+    exact hN
+  · let y : RoundPuncturedSphere R (roundNorth : RoundAmbient P) :=
+      ⟨x, fun he => hxN (Subtype.ext he), fun he => hxS (Subtype.ext he)⟩
+    exact hreg y hx
+
 end LichnerowiczObata

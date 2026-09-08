@@ -688,8 +688,8 @@ The normal chart also retains its actual derivative `t • id` at zero.
 the Cartesian model's derivative is an intrinsic isometry. This metric identity
 passes through the round logarithm to the north-pole extension of the same
 global homeomorphism, on all tangent directions represented by the angular
-inclusion. Handling the south pole and proving the final global isometry
-remain unfinished.
+inclusion. The corresponding south-pole construction is described below;
+the final global Riemannian isometry remains unfinished.
 
 `ObataReflection` proves that replacing the Obata function by its negative
 preserves the Hessian equation, complements the radial coordinate, reverses
@@ -697,9 +697,9 @@ the regular radial gradient, and reverses actual radial integral curves.
 Oppositely oriented radial curves agreeing at one complementary pair of
 times agree at all complementary times. `ObataSouthPolarModel` constructs the
 south-centered metric polar homeomorphism and its isometric Cartesian model
-at the minimum pole. Matching its angular coordinates to those of the existing
-north-centered global homeomorphism is still required; the separate south
-model does not by itself prove regularity of that global map at the south pole.
+at the minimum pole. Its angular coordinates are matched to the north model
+by the linear-isometry construction below; the separate south model alone
+would not establish regularity of the same global comparison.
 Both unit polar constructions now retain their actual radial integral-curve
 identities, with opposite field orientations. The north-oriented identity is
 also retained through the regular comparison and differentiable polar inverse,
@@ -730,5 +730,13 @@ Euclidean isometry, and Mathlib's Mazur–Ulam theorem supplies linearity.
 `exists_obata_linearly_matched_polar_models` applies this to the actual Obata
 angular matching, retaining both polar models, their full metrics, their
 isometric pole derivatives, and their regular coordinate homeomorphisms.
-The global comparison's south-pole regularity and the final global Riemannian
-isometry still need to be assembled from these data.
+`RoundSouthPoleLog` transports the south Cartesian model through that linear
+isometry and uses the equatorial logarithm to construct its ambient extension.
+`obata_regular_metric_comparison_both_poles` derives one regular comparison
+with both pole extensions directly from the Obata equation. The strengthened
+`obata_global_round_homeomorph` retains both extensions, their first-order
+tangent metric identities, and agreement with the same global homeomorphism
+on full sphere neighborhoods of the poles. The checked regular forward metric
+and regular ambient inverse are retained as well.
+This does not yet establish the final smooth global Riemannian isometry or
+the round-sphere converse.
