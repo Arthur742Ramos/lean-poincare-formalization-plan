@@ -79,6 +79,23 @@ theorem contDiffOn_coordinateConnection_basis (n : ℕ)
   rw [hfun]
   exact hcoord.contDiffWithinAt
 
+omit [FiniteDimensional ℝ E] in
+/-- Finite-basis expansion of a continuous bilinear map on a repeated vector. -/
+theorem bilinear_diagonal_basis_expansion {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E) (B : E →L[ℝ] E →L[ℝ] F) (v : E) :
+    B v v = ∑ i, ∑ j, (b.repr v i * b.repr v j) • B (b i) (b j) := by
+  classical
+  calc
+    B v v = B (∑ i, b.repr v i • b i) (∑ j, b.repr v j • b j) := by rw [b.sum_repr]
+    _ = _ := by
+      simp only [map_sum, sum_apply, map_smul, smul_apply, Finset.smul_sum, smul_smul]
+      rw [Finset.sum_comm]
+      apply Finset.sum_congr rfl
+      intro i _
+      apply Finset.sum_congr rfl
+      intro j _
+      rw [mul_comm]
+
 /-- The coordinate geodesic vector field on position-velocity pairs, using
 the actual connection coefficients. -/
 def coordinateGeodesicSpray (cov : CovariantDerivative I E TM)
@@ -97,18 +114,8 @@ theorem contDiffOn_coordinateGeodesicSpray (n : ℕ)
   let Γ := fun z => frameConnectionCoefficients cov (trivializationAt E TM c)
     b ((extChartAt I c).symm z)
   have he (q : E × E) : Γ q.1 q.2 q.2 =
-      ∑ i, ∑ j, (b.repr q.2 i * b.repr q.2 j) • Γ q.1 (b i) (b j) := by
-    calc
-      Γ q.1 q.2 q.2 = Γ q.1 (∑ i, b.repr q.2 i • b i) (∑ j, b.repr q.2 j • b j) := by
-        rw [b.sum_repr]
-      _ = _ := by
-        simp only [map_sum, sum_apply, map_smul, smul_apply, Finset.smul_sum, smul_smul]
-        rw [Finset.sum_comm]
-        apply Finset.sum_congr rfl
-        intro i _
-        apply Finset.sum_congr rfl
-        intro j _
-        rw [mul_comm]
+      ∑ i, ∑ j, (b.repr q.2 i * b.repr q.2 j) • Γ q.1 (b i) (b j) :=
+    bilinear_diagonal_basis_expansion b (Γ q.1) q.2
   have ha : ContDiffOn ℝ n (fun q : E × E => Γ q.1 q.2 q.2)
       ((extChartAt I c).target ×ˢ (univ : Set E)) := by
     have hs : ContDiffOn ℝ n (fun q : E × E =>

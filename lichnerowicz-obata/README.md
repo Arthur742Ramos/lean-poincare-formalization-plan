@@ -326,3 +326,9 @@ local geodesic solution families near any chart position and velocity, without
 an extra coefficient-regularity or bump-function assumption. Construction of
 the normal-coordinate map at a pole, and its use to identify the angular metric,
 remains pending.
+`GeodesicLinearization` proves that the actual geodesic vector field at zero
+velocity has derivative `(δposition, δvelocity) ↦ (δvelocity, 0)`. ODE
+uniqueness proves local stationarity of a solution starting at rest, and
+spatial derivatives of a smooth solution family satisfy the resulting linear
+system along it. The endpoint-map derivative and normal-coordinate inverse
+still need to be constructed.
