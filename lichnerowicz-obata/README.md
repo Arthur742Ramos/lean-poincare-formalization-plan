@@ -286,5 +286,8 @@ formula for the actual metric along a differentiable coordinate curve.
 `CoordinateRadialShape` derives the coordinate radial shape identity from
 torsion freeness and the radial Hessian theorem. It gives spherical metric
 scaling for a radial coordinate solution and angular solutions of its
-linearized equation. Applying these local results to the constructed global
-radial flow, and establishing the pole normalization, remains pending.
+linearized equation. For C2 families of genuine radial coordinate solutions,
+`hasDerivAt_radial_flow_metric` derives the spatial variational equations and
+radial-field differentiability, leaving no separate linearized-ODE assumption.
+Applying these local results to the constructed global manifold radial flow,
+and establishing the pole normalization, remains pending.

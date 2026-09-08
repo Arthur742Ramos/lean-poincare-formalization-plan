@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.RadialShapeOperator
 public import LichnerowiczObata.MetricBilinearRegularity
+public import LichnerowiczObata.FlowVariationEquation
 public import AlmostSchur.DivergenceCoordinates
 public import AlmostSchur.TorsionCoordinates
 
@@ -9,7 +10,7 @@ public import AlmostSchur.TorsionCoordinates
 
 @[expose] public noncomputable section
 open Bundle FiberBundle Set AlmostSchur
-open scoped Manifold ContDiff Topology
+open scoped Manifold ContDiff Topology BigOperators
 
 namespace LichnerowiczObata
 set_option backward.isDefEq.respectTransparency false
@@ -25,6 +26,33 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "LC" => (leviCivitaConnection (I := I) (M := M))
+
+omit [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)] in
+/-- Differentiability of a section gives differentiability of its actual
+coordinate vector field at an interior chart point. -/
+theorem differentiableAt_coordinateVectorField (X : Π y : M, TM y)
+    (c x : M) (hx : x ∈ (chartAt H c).source) (hX : MDiffAt (T% X) x) :
+    DifferentiableAt ℝ (coordinateVectorField (I := I) c X) (extChartAt I c x) := by
+  classical
+  let e := trivializationAt E TM c
+  let b := (stdOrthonormalBasis ℝ E).toBasis
+  let a := fun i y => e.localFrameCoeff I b i y (X y)
+  have heq : coordinateVectorField (I := I) c X =
+      fun z => ∑ i, (a i ∘ (extChartAt I c).symm) z • b i := by
+    funext z
+    exact (localFrameCoeff_sum_coordinates e b X _).symm
+  have hx' : x ∈ (extChartAt I c).source := by simpa using hx
+  have hi : MDiffAt (extChartAt I c).symm (extChartAt I c x) := by
+    simpa only [I.range_eq_univ, mdifferentiableWithinAt_univ] using
+      (mdifferentiableWithinAt_extChartAt_symm (I := I) (x := c)
+        ((extChartAt I c).map_source hx'))
+  rw [heq]
+  apply DifferentiableAt.fun_sum
+  intro i _
+  have ha : MDiffAt (a i) x := mdifferentiableAt_localFrameCoeff b hx hX i
+  have hd := mdifferentiableAt_iff_differentiableAt.mp
+    (ha.comp_of_eq (extChartAt I c x) hi ((extChartAt I c).left_inv hx'))
+  exact hd.smul_const (b i)
 
 omit [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)] in
 /-- Torsion freeness converts the linearized vector field plus the flow-direction
@@ -109,5 +137,41 @@ theorem hasDerivAt_coordinate_radial_metric {K a : ℝ} (hK : 0 < K) (ha : 0 < a
   convert hpair using 1
   simp only [map_smul, smul_apply, smul_eq_mul]
   ring
+
+/-- Spatial derivatives of a C2 family of genuine radial solutions obey the
+metric evolution equation; their variational ODE is derived, not assumed. -/
+theorem hasDerivAt_radial_flow_metric {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f)
+    (hb : ∀ y, -a ≤ f y ∧ f y ≤ a)
+    (hH : ∀ (y : M) (v w : TM y), hessian LC f y v w = -K * f y * inner ℝ v w)
+    {ι : Type*} [Fintype ι] (b : Module.Basis ι ℝ E)
+    (c x : M) (hx : x ∈ (chartAt H c).source) (hreg : -a < f x ∧ f x < a)
+    {φ : E × ℝ → E} {U : Set (E × ℝ)} (hU : IsOpen U)
+    (hφ : ContDiffOn ℝ 2 φ U)
+    (hode : ∀ y ∈ U, HasDerivAt (fun s => φ (y.1, s))
+      (coordinateVectorField c (gradient (I := I) (obataRadial K a f)) (φ y)) y.2)
+    {p : E} {t : ℝ} (hpt : (p, t) ∈ U) (hpoint : φ (p, t) = extChartAt I c x)
+    (v w : E)
+    (hTv : inner ℝ (gradient (I := I) (obataRadial K a f) x)
+      ((trivializationAt E TM c).symmL ℝ x (fderiv ℝ φ (p, t) (v, 0))) = 0)
+    (hTw : inner ℝ (gradient (I := I) (obataRadial K a f) x)
+      ((trivializationAt E TM c).symmL ℝ x (fderiv ℝ φ (p, t) (w, 0))) = 0) :
+    HasDerivAt (fun s => coordinateMetricBilinear (I := I) c (φ (p, s))
+      (fderiv ℝ φ (p, s) (v, 0)) (fderiv ℝ φ (p, s) (w, 0)))
+      (2 * (Real.sqrt K * (Real.cos (Real.sqrt K * obataRadial K a f x) /
+        Real.sin (Real.sqrt K * obataRadial K a f x))) *
+          coordinateMetricBilinear (I := I) c (φ (p, t))
+            (fderiv ℝ φ (p, t) (v, 0)) (fderiv ℝ φ (p, t) (w, 0))) t := by
+  have hm : -1 < f x / a := (lt_div_iff₀ ha).2 (by nlinarith [hreg.1])
+  have hp : f x / a < 1 := (div_lt_iff₀ ha).2 (by simpa using hreg.2)
+  have hV : DifferentiableAt ℝ (coordinateVectorField c
+      (gradient (I := I) (obataRadial K a f))) (φ (p, t)) := by
+    rw [hpoint]
+    exact differentiableAt_coordinateVectorField _ c x hx
+      (mdifferentiableAt_gradient (contMDiffAt_obataRadial (K := K) (hf x) hm.ne' hp.ne))
+  exact hasDerivAt_coordinate_radial_metric hK ha hf hb hH b c x hx hreg hpoint
+    (hode (p, t) hpt)
+    (hasDerivAt_flow_variation hU hφ hode hpt hV v)
+    (hasDerivAt_flow_variation hU hφ hode hpt hV w) hTv hTw
 
 end LichnerowiczObata
