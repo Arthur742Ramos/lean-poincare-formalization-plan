@@ -580,3 +580,9 @@ polar derivative on angular-tangent and radial directions. The regular Obata
 comparison theorem now also retains injectivity of its constructed parameter
 map's derivative on these directions. Converting this into manifold local
 invertibility and forward differentiability remains required.
+`SpherePolarTangent` connects the orthogonal angular hyperplane to the
+standard sphere manifold tangent via the differential of sphere inclusion.
+It proves injectivity of this inclusion, transfers polar injectivity to the
+sphere tangent and radial space, and proves differentiability of the actual
+sphere-restricted parameter map. Identifying its full manifold derivative
+and applying inverse differentiability remain the next steps.
