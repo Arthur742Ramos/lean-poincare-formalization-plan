@@ -233,20 +233,21 @@ theorem exists_geodesic_endpoint_local_inverse
 
 /-- A constructed geodesic flow around zero velocity can be restricted to
 an open product neighborhood on which its zero-velocity orbit is stationary. -/
-theorem exists_stationary_coordinate_geodesic_flow
+theorem exists_stationary_coordinate_geodesic_flow_of_order
+    (n : ℕ) (hn : n ≠ 0)
     (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov) (ht : cov.torsion = 0)
     {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E) (c : M) {z : E}
     (hz : z ∈ (extChartAt I c).target) :
     ∃ V : Set (E × E), IsOpen V ∧ (z, (0 : E)) ∈ V ∧
       ∃ δ : ℝ, 0 < δ ∧ ∃ α : (E × E) × ℝ → E × E,
-        ContDiffOn ℝ 2 α (V ×ˢ Metric.ball 0 δ) ∧
+        ContDiffOn ℝ n α (V ×ˢ Metric.ball 0 δ) ∧
         (∀ q ∈ V, α (q, 0) = q ∧
           ∀ s ∈ Metric.ball 0 δ, (α (q, s)).1 ∈ (extChartAt I c).target ∧
             HasDerivAt (fun t => α (q, t))
               (coordinateGeodesicSpray cov b c (α (q, s))) s) ∧
         ∀ s ∈ Metric.ball 0 δ, α ((z, 0), s) = (z, 0) := by
   obtain ⟨W, hW, ε, hε, α, hα, hsol⟩ :=
-    exists_smooth_coordinate_geodesic_flow 2 (by norm_num) cov hm ht b c
+    exists_smooth_coordinate_geodesic_flow n hn cov hm ht b c
       (u := (0 : E)) hz
   have hzW : (z, (0 : E)) ∈ W := mem_of_mem_nhds hW
   have hode : ∀ᶠ s in 𝓝 (0 : ℝ),
@@ -267,6 +268,22 @@ theorem exists_stationary_coordinate_geodesic_flow
     exact (hsol q (interior_subset hq)).2 s (hball hs)
   · intro s hs
     exact (hsub hs).1
+
+/-- The second-order specialization used to construct normal coordinates. -/
+theorem exists_stationary_coordinate_geodesic_flow
+    (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov) (ht : cov.torsion = 0)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E) (c : M) {z : E}
+    (hz : z ∈ (extChartAt I c).target) :
+    ∃ V : Set (E × E), IsOpen V ∧ (z, (0 : E)) ∈ V ∧
+      ∃ δ : ℝ, 0 < δ ∧ ∃ α : (E × E) × ℝ → E × E,
+        ContDiffOn ℝ 2 α (V ×ˢ Metric.ball 0 δ) ∧
+        (∀ q ∈ V, α (q, 0) = q ∧
+          ∀ s ∈ Metric.ball 0 δ, (α (q, s)).1 ∈ (extChartAt I c).target ∧
+            HasDerivAt (fun t => α (q, t))
+              (coordinateGeodesicSpray cov b c (α (q, s))) s) ∧
+        ∀ s ∈ Metric.ball 0 δ, α ((z, 0), s) = (z, 0) := by
+  exact exists_stationary_coordinate_geodesic_flow_of_order 2 (by norm_num)
+    cov hm ht b c hz
 
 /-- Local normal coordinates are constructed from the actual geodesic flow.
 Both the flow and its endpoint inverse are conclusions, not extra hypotheses. -/
