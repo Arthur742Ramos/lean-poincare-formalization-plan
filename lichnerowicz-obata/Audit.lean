@@ -24,6 +24,7 @@ import LichnerowiczObata.GeodesicNormalRays
 import LichnerowiczObata.NormalRayMetric
 import LichnerowiczObata.SineMetricLimit
 import LichnerowiczObata.NormalRayNormalization
+import LichnerowiczObata.RoundPolarCurves
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -283,3 +284,9 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.geodesic_normal_ray_full_metric
 #print axioms LichnerowiczObata.exists_uniform_positive_phase_ray_ball
 #print axioms LichnerowiczObata.exists_geodesic_normal_full_metric_ball
+#print axioms LichnerowiczObata.norm_orthonormal_pair
+#print axioms LichnerowiczObata.roundPolarCurve_mem_sphere
+#print axioms LichnerowiczObata.hasDerivAt_roundPolarCurve
+#print axioms LichnerowiczObata.roundPolarCurve_velocity_norm
+#print axioms LichnerowiczObata.roundPolarCurve_zero
+#print axioms LichnerowiczObata.roundPolarCurve_antipode

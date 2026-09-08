@@ -425,3 +425,7 @@ The full formula now holds on one constructed punctured velocity ball for all
 directions and vector pairs simultaneously; its radius is not selected
 separately for each ray. Coordinate-metric positivity is derived from the
 invertible tangent trivialization.
+`RoundPolarCurves` begins the explicit round-sphere comparison: its meridians
+lie on the actual radius-R metric sphere, have unit speed, and join a common
+pole to its antipode at parameter `π R`. The sphere chart metric comparison
+and global Riemannian isometry are not yet established.
