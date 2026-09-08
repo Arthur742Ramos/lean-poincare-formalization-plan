@@ -664,6 +664,10 @@ including after intrinsic lifting and in the spherical-product construction.
 `LocalIntegralCurveUniqueness` extends the uniqueness argument to fields
 smooth only along the first curve. `ObataNormalRay` applies it to the actual
 radial field, deriving local smoothness from regular levels, and handles the
-normal chart's quadratic-metric normalization. Identifying the retained
+normal chart's quadratic-metric normalization. The spherical-product construction
+also retains containment of the intrinsic ball of radius `2 * R` in the normal
+chart source, where `R` is the seed-sphere radius, and the radial flow's
+initial-value identity. Thus the source guarantee covers short rays through
+the seed sphere, not only the sphere itself. Identifying the retained
 normal-chart rays with the global comparison and proving its pole smoothness
 remain unfinished.

@@ -54,6 +54,7 @@ theorem exists_obata_spherical_metric_product
           Filter.Tendsto (fun r => η (x, r))
             (𝓝[Ioo 0 (Real.pi / Real.sqrt K)] (Real.pi / Real.sqrt K)) (𝓝 q) ∧
           f p = a ∧ f q = -a) ∧
+      (∀ x, -a < f x ∧ f x < a → η (x, obataRadial K a f x) = x) ∧
       ∃ t : ℝ, 0 < t ∧ ∃ e : OpenPartialHomeomorph E E,
         0 ∈ e.source ∧ e 0 = z ∧
         (∀ u ∈ e.source, ContDiffAt ℝ 2 e u) ∧
@@ -66,6 +67,8 @@ theorem exists_obata_spherical_metric_product
             (t * Real.sqrt (coordinateMetricBilinear (I := I) c z u u)) •
               gradient (I := I) (obataRadial K a f) ((extChartAt I c).symm (e u))) ∧
         ∃ R : ℝ, 0 < R ∧ t * R ∈ Ioo 0 (Real.pi / Real.sqrt K) ∧
+          (∀ v ∈ Metric.ball (0 : TM p) (2 * R),
+            (trivializationAt E TM c).continuousLinearMapAt ℝ p v ∈ e.source) ∧
           (∀ v : Metric.sphere (0 : TM p) R,
             (trivializationAt E TM c).continuousLinearMapAt ℝ p v ∈ e.source) ∧
           (∀ v : Metric.sphere (0 : TM p) R,
@@ -115,7 +118,7 @@ theorem exists_obata_spherical_metric_product
       change -a < f x ∧ f x < a
       rw [← he]
       exact obata_cos_level_mem hK ha hx
-  obtain ⟨R, hR, htR, hsource, Q, hQ⟩ := exists_coordinate_normal_radial_product_map c hz e
+  obtain ⟨R, hR, htR, hball, hsource, Q, hQ⟩ := exists_coordinate_normal_radial_product_map c hz e
     he0 hez htarget hcρ hn hzero ht (div_pos Real.pi_pos (Real.sqrt_pos.mpr hK)) hrad
     {x : M | -a < f x ∧ f x < a} hU η hη.continuousOn
     (fun x hx r hr => ((hcurves x hx).2.2.2.1 r hr).1)
@@ -145,8 +148,9 @@ theorem exists_obata_spherical_metric_product
     have hn := hnorm u
     rw [← hh, norm_zero] at hn
     exact hR.ne' hn.symm
-  refine ⟨η, hη, fun x hx => (hcurves x hx).2.2, t, ht, e, he0, hez, hsmooth, htarget, hrad, hgradient,
-    R, hR, htR, hsource, hregular, Q, hQ, ?_⟩
+  refine ⟨η, hη, fun x hx => (hcurves x hx).2.2,
+    fun x hx => (hcurves x hx).1, t, ht, e, he0, hez, hsmooth, htarget, hrad, hgradient,
+    R, hR, htR, hball, hsource, hregular, Q, hQ, ?_⟩
   intro u w v hw hv r hr s τ
   have hone : (1 : ℕ∞ω) ≤ ∞ := WithTop.coe_le_coe.2 (le_top : (1 : ℕ∞) ≤ ⊤)
   have he := normal_radial_composite_intrinsic_angular_metric hf.continuous (hη.of_le hone)

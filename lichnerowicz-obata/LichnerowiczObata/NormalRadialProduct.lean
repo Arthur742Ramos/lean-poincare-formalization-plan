@@ -26,10 +26,11 @@ theorem exists_normal_radial_product_map {E M : Type*} [NormedAddCommGroup E]
     (hinit : ∀ x ∈ U, η (x, ρ x) = x)
     (hreset : ∀ x ∈ U, ∀ r ∈ Ioo 0 ℓ, ∀ s ∈ Ioo 0 ℓ, η (η (x, r), s) = η (x, s)) :
     ∃ R : ℝ, 0 < R ∧ t * R ∈ Ioo 0 ℓ ∧
+      Metric.ball (0 : E) (2 * R) ⊆ e.source ∧
       (∀ v : Metric.sphere (0 : E) R, (v : E) ∈ e.source) ∧
       ∃ H : Metric.sphere (0 : E) R × Ioo 0 ℓ ≃ₜ U,
       ∀ z, (H z : M) = η (e z.1, z.2) := by
-  obtain ⟨ε, hε, hsmall⟩ := exists_small_sphere_level_homeomorph_map e he0 hcρ hn hz ht helevel
+  obtain ⟨ε, hε, hball, hsmall⟩ := exists_small_sphere_level_homeomorph_map e he0 hcρ hn hz ht helevel
   let r := min ε ℓ / 2
   have hr : 0 < r := div_pos (lt_min hε hℓ) (by norm_num)
   have hre : r < ε := by
@@ -57,9 +58,16 @@ theorem exists_normal_radial_product_map {E M : Type*} [NormedAddCommGroup E]
     hρ hη hlevel hinit hreset hcρ.continuousOn hcη
   let H := (A.prodCongr (Homeomorph.refl (Ioo 0 ℓ))).trans P.symm
   have htr : t * (r / t) = r := by field_simp
-  refine ⟨r / t, div_pos hr ht, ?_, hsource, H, ?_⟩
+  refine ⟨r / t, div_pos hr ht, ?_, ?_, hsource, H, ?_⟩
   · rw [htr]
     exact ⟨hr, hrℓ⟩
+  · apply Set.Subset.trans (Metric.ball_subset_ball ?_) hball
+    have htwo : 2 * r ≤ ε := by
+      dsimp [r]
+      linarith [min_le_left ε ℓ]
+    calc
+      2 * (r / t) = (2 * r) / t := by ring
+      _ ≤ ε / t := div_le_div_of_nonneg_right htwo ht.le
   · intro z
     change η ((s z.1 : M), (z.2 : ℝ)) = η (e z.1, z.2)
     rw [hs]

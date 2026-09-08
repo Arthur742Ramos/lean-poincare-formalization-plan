@@ -90,6 +90,8 @@ theorem exists_coordinate_normal_radial_product_map [CompactSpace M]
     (hreset : ∀ x ∈ U, ∀ r ∈ Ioo 0 ℓ, ∀ s ∈ Ioo 0 ℓ, η (η (x, r), s) = η (x, s)) :
     let p := (extChartAt I c).symm z
     ∃ R : ℝ, 0 < R ∧ t * R ∈ Ioo 0 ℓ ∧
+      (∀ v ∈ Metric.ball (0 : TM p) (2 * R),
+        (trivializationAt E TM c).continuousLinearMapAt ℝ p v ∈ e.source) ∧
       (∀ v : Metric.sphere (0 : TM p) R,
         (trivializationAt E TM c).continuousLinearMapAt ℝ p v ∈ e.source) ∧
       ∃ H : Metric.sphere (0 : TM p) R × Ioo 0 ℓ ≃ₜ U,
@@ -100,9 +102,10 @@ theorem exists_coordinate_normal_radial_product_map [CompactSpace M]
   have hzF : ∀ x, ρ x = 0 ↔ x = F 0 := by
     rw [hFp]
     exact hzero
-  obtain ⟨R, hR, hlevelR, hRs, H, hH⟩ := exists_normal_radial_product_map F hF0 hcρ hn hzF ht hℓ
+  obtain ⟨R, hR, hlevelR, hball, hRs, H, hH⟩ := exists_normal_radial_product_map F hF0 hcρ hn hzF ht hℓ
     hradF U hU η hcη hlevel hinit hreset
-  refine ⟨R, hR, hlevelR, fun v => (hsource v).mp (hRs v), H, ?_⟩
+  refine ⟨R, hR, hlevelR, fun v hv => (hsource v).mp (hball hv),
+    fun v => (hsource v).mp (hRs v), H, ?_⟩
   intro q
   rw [hH, hmap]
 

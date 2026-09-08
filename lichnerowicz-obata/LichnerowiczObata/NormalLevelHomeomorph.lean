@@ -64,7 +64,7 @@ theorem exists_small_sphere_level_homeomorph_map {E M : Type*} [NormedAddCommGro
     (hzero : (0 : E) ∈ e.source) {ρ : M → ℝ} (hc : Continuous ρ)
     (hn : ∀ x, 0 ≤ ρ x) (hz : ∀ x, ρ x = 0 ↔ x = e 0)
     {t : ℝ} (ht : 0 < t) (hlevel : ∀ v ∈ e.source, ρ (e v) = t * ‖v‖) :
-    ∃ ε : ℝ, 0 < ε ∧ ∀ r ∈ Ioo 0 ε,
+    ∃ ε : ℝ, 0 < ε ∧ Metric.ball (0 : E) (ε / t) ⊆ e.source ∧ ∀ r ∈ Ioo 0 ε,
       ∃ H : Metric.sphere (0 : E) (r / t) ≃ₜ {x : M // ρ x = r},
         (∀ v : Metric.sphere (0 : E) (r / t), (v : E) ∈ e.source) ∧
         ∀ v, (H v : M) = e v := by
@@ -72,6 +72,10 @@ theorem exists_small_sphere_level_homeomorph_map {E M : Type*} [NormedAddCommGro
     e.open_target (e.map_source hzero)
   obtain ⟨b, hb, hsource⟩ := Metric.mem_nhds_iff.mp (e.open_source.mem_nhds hzero)
   refine ⟨min a (t * b), lt_min ha (mul_pos ht hb), ?_⟩
+  refine ⟨?_, ?_⟩
+  · apply Set.Subset.trans (Metric.ball_subset_ball ?_) hsource
+    apply (div_le_iff₀ ht).mpr
+    simpa [mul_comm] using min_le_right a (t * b)
   intro r hr
   have hsrc : ∀ v : E, ‖v‖ = r / t → v ∈ e.source := by
     intro v hv
@@ -99,7 +103,7 @@ theorem exists_small_sphere_level_homeomorph {E M : Type*} [NormedAddCommGroup E
     {t : ℝ} (ht : 0 < t) (hlevel : ∀ v ∈ e.source, ρ (e v) = t * ‖v‖) :
     ∃ ε : ℝ, 0 < ε ∧ ∀ r ∈ Ioo 0 ε,
       Nonempty (Metric.sphere (0 : E) (r / t) ≃ₜ {x : M // ρ x = r}) := by
-  obtain ⟨ε, hε, h⟩ := exists_small_sphere_level_homeomorph_map e hzero hc hn hz ht hlevel
+  obtain ⟨ε, hε, _, h⟩ := exists_small_sphere_level_homeomorph_map e hzero hc hn hz ht hlevel
   exact ⟨ε, hε, fun r hr => ⟨(h r hr).choose⟩⟩
 
 end LichnerowiczObata
