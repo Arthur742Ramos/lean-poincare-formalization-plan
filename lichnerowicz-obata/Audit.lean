@@ -7,6 +7,7 @@ import LichnerowiczObata.NormalAngularTangency
 import LichnerowiczObata.GlobalNormalAngularMetric
 import LichnerowiczObata.NormalRadialProduct
 import LichnerowiczObata.IntrinsicChartLift
+import LichnerowiczObata.ObataSphericalMetricProduct
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -356,3 +357,4 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_normal_radial_product_map
 #print axioms LichnerowiczObata.exists_intrinsic_chart_lift
 #print axioms LichnerowiczObata.exists_coordinate_normal_radial_product_map
+#print axioms LichnerowiczObata.exists_obata_spherical_metric_product

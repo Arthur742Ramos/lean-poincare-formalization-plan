@@ -470,8 +470,8 @@ allows direct composition with the normal-sphere identification. The retained
 energy identity now forces its amplitude to agree with any positive critical
 value. Combining these results at the unique maximum identifies the entire
 regular region with an actual intrinsic tangent sphere of constructed positive
-radius times the full open radial interval. This is a homeomorphism; comparison
-of the angular metric, smooth extension at the poles, and the global
+radius times the full open radial interval. This is a homeomorphism; the full
+round-metric comparison, smooth extension at the poles, and the global
 Riemannian isometry remain pending.
 `ObataRegularSphere` now derives the poles, coordinate basis, and sphere radius
 from the smooth nonconstant Obata equation in dimension at least two. It also
@@ -490,14 +490,13 @@ radial identity and chart regularity needed for global transport.
 kernel of the radial derivative. Its transport theorem combines that fact
 with radial metric evolution: a pairing normalized at one regular level
 propagates with the exact sine-squared coefficient throughout the regular
-interval. Specializing all of these identities to one global comparison map
-and extending it through the poles remain required.
+interval. The later product theorem retains this angular identity for the
+same map as the homeomorphism; extension through the poles remains required.
 `GlobalNormalAngularMetric` now specializes the transported pairing to a
 constructed normal chart and expresses it using derivatives of the actual
 composite map (normal chart followed by radial flow). The initial angular
 metric is no longer an extra hypothesis. The radial family must still carry
-its proved smoothness, metric evolution, and initial-value identities;
-combining this construction with the global bijection remains outstanding.
+its proved smoothness, metric evolution, and initial-value identities.
 The joint theorem `exists_obata_global_angular_metric` now constructs that
 radial family as well, using the energy identity to fix its amplitude to the
 chosen positive critical value. The same family retains its smoothness,
@@ -513,3 +512,9 @@ chart: it lifts that chart to the intrinsic tangent space and retains its exact
 source and forward formula. The resulting product uses an intrinsic tangent
 sphere, proves that its starting radial level is regular, and still has the
 explicit coordinate-chart/radial-flow composite as its forward map.
+`ObataSphericalMetricProduct` now specializes the construction to the actual
+Obata family and chart. One theorem retains the global homeomorphism, its
+explicit forward formula, and the angular metric for that same composite,
+together with chart regularity, the radial identity, unit speed, and endpoint
+limits. Expressing the complete metric in intrinsic sphere parameters and
+extending the comparison through both poles remain outstanding.
