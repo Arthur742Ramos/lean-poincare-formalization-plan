@@ -43,6 +43,12 @@ theorem exists_obata_normal_metric_chart
       (∀ u ∈ e.source, e u ∈ (extChartAt I c).target) ∧
       (∀ u ∈ e.source, obataRadial K a f ((extChartAt I c).symm (e u)) =
         t * ‖(trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm z) u‖) ∧
+      (∀ u ∈ e.source,
+        Real.sqrt (K * coordinateMetricBilinear (I := I) c z u u) * t ∈ Ioo 0 Real.pi →
+        (trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm (e u))
+          (fderiv ℝ e u u) =
+          (t * Real.sqrt (coordinateMetricBilinear (I := I) c z u u)) •
+            gradient (I := I) (obataRadial K a f) ((extChartAt I c).symm (e u))) ∧
       ∀ u ∈ e.source, u ≠ 0 → ∀ w v : E,
         let g := coordinateMetricBilinear (I := I) c z
         let angular := Real.sin (Real.sqrt K * (t * Real.sqrt (g u u))) ^ 2 / (K * g u u)
@@ -77,7 +83,7 @@ theorem exists_obata_normal_metric_chart
   have hS0 : (0 : E) ∈ S := ⟨Metric.mem_ball_self (lt_min hε hη), hzV⟩
   let d := e.restrOpen S hS
   have hd : (d : E → E) = (fun u => (α ((z, u), t)).1) := he
-  refine ⟨t, ht, d, ⟨he0, hS0⟩, hez, hinv, ?_, ?_, ?_, ?_⟩
+  refine ⟨t, ht, d, ⟨he0, hS0⟩, hez, hinv, ?_, ?_, ?_, ?_, ?_⟩
   · intro u hu
     rw [hd]
     have hi : ContDiffAt ℝ 2 (fun y : E => ((z, y), t)) u :=
@@ -91,6 +97,10 @@ theorem exists_obata_normal_metric_chart
   · intro u hu
     rw [hd]
     exact hrad (lt_of_lt_of_le hu.2.1 (min_le_right ε η))
+  · intro u hu hphase
+    rw [hd]
+    exact coordinate_normal_endpoint_radial_gradient b hf hK ha hH c hV
+      (hα.of_le (by norm_num)) hsol hu.2.2 hcrit hmax htime hphase
   · intro u hu hune w v
     rw [hd]
     apply hmetric u _ hune w v

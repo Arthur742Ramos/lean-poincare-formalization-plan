@@ -60,6 +60,11 @@ theorem exists_obata_spherical_metric_product
         (∀ u ∈ e.source, e u ∈ (extChartAt I c).target) ∧
         (∀ u ∈ e.source, obataRadial K a f ((extChartAt I c).symm (e u)) =
           t * ‖(trivializationAt E TM c).symmL ℝ p u‖) ∧
+        (∀ u ∈ e.source,
+          Real.sqrt (K * coordinateMetricBilinear (I := I) c z u u) * t ∈ Ioo 0 Real.pi →
+          mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ e) u u =
+            (t * Real.sqrt (coordinateMetricBilinear (I := I) c z u u)) •
+              gradient (I := I) (obataRadial K a f) ((extChartAt I c).symm (e u))) ∧
         ∃ R : ℝ, 0 < R ∧ t * R ∈ Ioo 0 (Real.pi / Real.sqrt K) ∧
           (∀ v : Metric.sphere (0 : TM p) R,
             (trivializationAt E TM c).continuousLinearMapAt ℝ p v ∈ e.source) ∧
@@ -79,7 +84,7 @@ theorem exists_obata_spherical_metric_product
                   inner ℝ (mfderiv 𝓘(ℝ, TM p × ℝ) I Γ (u, r) (w, s))
                     (mfderiv 𝓘(ℝ, TM p × ℝ) I Γ (u, r) (v, τ)) =
                     (Real.sin (Real.sqrt K * r) ^ 2 / K) * (inner ℝ w v / R ^ 2) + s * τ := by
-  obtain ⟨hb, η, hη, hcurves, t, ht, e, he0, hez, hsmooth, htarget, hrad, hmetric⟩ :=
+  obtain ⟨hb, η, hη, hcurves, t, ht, e, he0, hez, hsmooth, htarget, hrad, hgradient, hmetric⟩ :=
     exists_obata_global_angular_metric hf hnon hK ha hH c hz hcrit ((hmax _).mpr rfl)
   have hcρ : Continuous (obataRadial K a f) := by
     have hfc := hf.continuous
@@ -140,7 +145,7 @@ theorem exists_obata_spherical_metric_product
     have hn := hnorm u
     rw [← hh, norm_zero] at hn
     exact hR.ne' hn.symm
-  refine ⟨η, hη, fun x hx => (hcurves x hx).2.2, t, ht, e, he0, hez, hsmooth, htarget, hrad,
+  refine ⟨η, hη, fun x hx => (hcurves x hx).2.2, t, ht, e, he0, hez, hsmooth, htarget, hrad, hgradient,
     R, hR, htR, hsource, hregular, Q, hQ, ?_⟩
   intro u w v hw hv r hr s τ
   have hone : (1 : ℕ∞ω) ≤ ∞ := WithTop.coe_le_coe.2 (le_top : (1 : ℕ∞) ≤ ⊤)

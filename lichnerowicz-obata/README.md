@@ -656,3 +656,10 @@ with exact projection and hemisphere reconstruction formulas. Their
 derivative at the pole is the angular linear inclusion and preserves inner
 products. Identifying the Obata homeomorphism with these smooth local graphs
 is still required; the graph results alone do not establish its pole smoothness.
+`NormalRayIntegralCurve` turns a radial derivative identity into the integral
+curve equation along scaled normal rays and supplies a uniqueness comparison
+on positive intervals for a globally `C¹` vector field. The constructed
+normal metric chart now retains its actual radial-gradient derivative,
+including after intrinsic lifting and in the spherical-product construction.
+Applying the ray uniqueness argument to the regular radial field and then
+identifying the pole charts with the global homeomorphism remains unfinished.

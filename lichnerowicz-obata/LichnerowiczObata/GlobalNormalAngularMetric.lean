@@ -47,6 +47,11 @@ theorem exists_normal_chart_global_angular_metric
       (∀ u ∈ e.source, e u ∈ (extChartAt I c).target) ∧
       (∀ u ∈ e.source, obataRadial K a f ((extChartAt I c).symm (e u)) =
         t * ‖(trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm z) u‖) ∧
+      (∀ u ∈ e.source,
+        Real.sqrt (K * coordinateMetricBilinear (I := I) c z u u) * t ∈ Ioo 0 Real.pi →
+        mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ e) u u =
+          (t * Real.sqrt (coordinateMetricBilinear (I := I) c z u u)) •
+            gradient (I := I) (obataRadial K a f) ((extChartAt I c).symm (e u))) ∧
       ∀ u ∈ e.source, u ≠ 0 →
         (-a < f ((extChartAt I c).symm (e u)) ∧ f ((extChartAt I c).symm (e u)) < a) →
         ∀ w v : E, coordinateMetricBilinear (I := I) c z u w = 0 →
@@ -56,9 +61,9 @@ theorem exists_normal_chart_global_angular_metric
             let g := coordinateMetricBilinear (I := I) c z
             inner ℝ (mfderiv 𝓘(ℝ, E) I Ψ u w) (mfderiv 𝓘(ℝ, E) I Ψ u v) =
               (Real.sin (Real.sqrt K * r) ^ 2 / K) * (g w v / g u u) := by
-  obtain ⟨t, ht, e, he0, hez, _, hsmooth, htarget, hrad, hmetric⟩ :=
+  obtain ⟨t, ht, e, he0, hez, _, hsmooth, htarget, hrad, hgradient, hmetric⟩ :=
     exists_obata_intrinsic_angular_chart b hf hK ha hb hH c hz hcrit hmax
-  refine ⟨t, ht, e, he0, hez, hsmooth, htarget, hrad, ?_⟩
+  refine ⟨t, ht, e, he0, hez, hsmooth, htarget, hrad, hgradient, ?_⟩
   intro u hu hune hreg w v hw hv r hr
   let ψ := (extChartAt I c).symm ∘ e
   let L := (trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm z)
@@ -122,6 +127,11 @@ theorem exists_obata_global_angular_metric
         (∀ u ∈ e.source, e u ∈ (extChartAt I c).target) ∧
         (∀ u ∈ e.source, obataRadial K a f ((extChartAt I c).symm (e u)) =
           t * ‖(trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm z) u‖) ∧
+        (∀ u ∈ e.source,
+          Real.sqrt (K * coordinateMetricBilinear (I := I) c z u u) * t ∈ Ioo 0 Real.pi →
+          mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ e) u u =
+            (t * Real.sqrt (coordinateMetricBilinear (I := I) c z u u)) •
+              gradient (I := I) (obataRadial K a f) ((extChartAt I c).symm (e u))) ∧
         ∀ u ∈ e.source, u ≠ 0 →
           (-a < f ((extChartAt I c).symm (e u)) ∧ f ((extChartAt I c).symm (e u)) < a) →
           ∀ w v : E, coordinateMetricBilinear (I := I) c z u w = 0 →

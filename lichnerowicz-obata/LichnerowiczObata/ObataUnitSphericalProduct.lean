@@ -51,7 +51,7 @@ theorem exists_obata_unit_spherical_product
               inner ℝ (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (w, s))
                 (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (v, t)) =
                   (Real.sin (Real.sqrt K * r) ^ 2 / K) * inner ℝ w v + s * t := by
-  obtain ⟨η, hη, hcurves, t, ht, e, he0, hez, hsmooth, htarget, hrad,
+  obtain ⟨η, hη, hcurves, t, ht, e, he0, hez, hsmooth, htarget, hrad, hgradient,
     R, hR, htR, hsource, hregular, Q, hQ, hmetric⟩ :=
     exists_obata_spherical_metric_product hf hnon hK ha hH c hz hcrit hmax
   let p := (extChartAt I c).symm z
