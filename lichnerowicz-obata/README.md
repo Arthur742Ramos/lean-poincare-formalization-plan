@@ -458,5 +458,10 @@ small positive radius. Specializing that chart identity to the Obata normal
 map and assembling the global metric comparison remain pending.
 The actual Obata endpoint map now has the scaled-norm radial identity on a
 neighborhood including zero velocity, both in coordinate and intrinsic tangent
-variables. Restricting the constructed normal chart to this neighborhood and
-applying the whole-level homeomorphism construction remain pending.
+variables.
+`IntrinsicNormalChart` now constructs and restricts the actual chart from the
+intrinsic tangent space to the manifold. It sends zero to the maximum and
+has the scaled-norm radial identity on its entire source. The geodesic family
+and positive endpoint time are constructed, not required as extra hypotheses.
+Applying this chart to the whole-level and global comparison results remains
+pending.

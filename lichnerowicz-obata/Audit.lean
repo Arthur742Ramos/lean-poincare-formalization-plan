@@ -31,6 +31,7 @@ import LichnerowiczObata.RoundPolarInverse
 import LichnerowiczObata.RoundPolarHomeomorph
 import LichnerowiczObata.SmallRadialLevels
 import LichnerowiczObata.NormalLevelHomeomorph
+import LichnerowiczObata.IntrinsicNormalChart
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -324,3 +325,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_small_sphere_level_homeomorph
 #print axioms LichnerowiczObata.coordinate_normal_endpoint_radius_at_zero_eventually
 #print axioms LichnerowiczObata.intrinsic_normal_endpoint_radius_at_zero_eventually
+#print axioms LichnerowiczObata.exists_intrinsic_radial_normal_chart
+#print axioms LichnerowiczObata.exists_obata_radial_normal_chart
