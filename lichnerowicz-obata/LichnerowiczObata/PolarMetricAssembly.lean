@@ -83,4 +83,84 @@ theorem polar_map_full_pairing {Γ : P × ℝ → M} {ρ : M → ℝ} {u : P} {r
   exact polar_derivative_full_pairing _ w v s t A hunit (horth w) (horth v) hang
 
 end Manifold
+
+section Slices
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+
+/-- A spatial slice differentiates to the spatial part of the joint derivative. -/
+theorem polar_map_spatial_derivative {Γ : P × ℝ → M} {u : P} {r : ℝ}
+    (hΓ : MDifferentiableAt 𝓘(ℝ, P × ℝ) I Γ (u, r)) (w : P) :
+    mfderiv 𝓘(ℝ, P) I (fun y => Γ (y, r)) u w =
+      mfderiv 𝓘(ℝ, P × ℝ) I Γ (u, r) (w, 0) := by
+  have hi := hasFDerivAt_prodMk_left (𝕜 := ℝ) u r
+  have hd := mfderiv_comp_apply (f := fun y : P => (y, r)) (g := Γ) u hΓ
+    (mdifferentiableAt_iff_differentiableAt.mpr hi.differentiableAt) w
+  rw [mfderiv_eq_fderiv, hi.fderiv] at hd
+  exact hd
+
+/-- A radial slice differentiates to the radial part of the joint derivative. -/
+theorem polar_map_radial_derivative {Γ : P × ℝ → M} {u : P} {r : ℝ}
+    (hΓ : MDifferentiableAt 𝓘(ℝ, P × ℝ) I Γ (u, r)) (s : ℝ) :
+    mfderiv 𝓘(ℝ, ℝ) I (fun t => Γ (u, t)) r s =
+      mfderiv 𝓘(ℝ, P × ℝ) I Γ (u, r) (0, s) := by
+  have hi := hasFDerivAt_prodMk_right (𝕜 := ℝ) u r
+  have hd := mfderiv_comp_apply (f := fun t : ℝ => (u, t)) (g := Γ) r hΓ
+    (mdifferentiableAt_iff_differentiableAt.mpr hi.differentiableAt) s
+  rw [mfderiv_eq_fderiv, hi.fderiv] at hd
+  exact hd
+
+/-- Integral-curve velocity identifies the joint radial derivative on an
+open radial interval, without a separate derivative hypothesis. -/
+theorem polar_map_radial_derivative_of_integralCurve
+    {Γ : P × ℝ → M} {u : P} {r ℓ : ℝ}
+    {X : (x : M) → TangentSpace I x}
+    (hΓ : MDifferentiableAt 𝓘(ℝ, P × ℝ) I Γ (u, r))
+    (hcurve : IsMIntegralCurveOn (fun t => Γ (u, t)) X (Set.Ioo 0 ℓ))
+    (hr : r ∈ Set.Ioo 0 ℓ) :
+    mfderiv 𝓘(ℝ, P × ℝ) I Γ (u, r) (0, 1) = X (Γ (u, r)) := by
+  rw [← polar_map_radial_derivative hΓ 1]
+  rw [((hcurve r hr).hasMFDerivAt (isOpen_Ioo.mem_nhds hr)).mfderiv]
+  change (1 : ℝ) • X (Γ (u, r)) = X (Γ (u, r))
+  exact one_smul ℝ _
+
+end Slices
+
+section SliceAssembly
+open AlmostSchur Bundle
+set_option backward.isDefEq.respectTransparency false
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [FiniteDimensional ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
+  [RiemannianBundle (TangentSpace I : M → Type _)]
+
+/-- Assemble the full metric directly from the radial integral curve and
+the angular slice pairing, matching the data of the spherical product. -/
+theorem polar_map_full_pairing_of_slices {Γ : P × ℝ → M} {ρ : M → ℝ}
+    {u : P} {r ℓ : ℝ}
+    (hΓ : MDifferentiableAt 𝓘(ℝ, P × ℝ) I Γ (u, r))
+    (hρ : MDifferentiableAt I 𝓘(ℝ, ℝ) ρ (Γ (u, r)))
+    (hlevel : (ρ ∘ Γ) =ᶠ[𝓝 (u, r)] Prod.snd)
+    (hcurve : IsMIntegralCurveOn (fun t => Γ (u, t))
+      (gradient (I := I) ρ) (Set.Ioo 0 ℓ))
+    (hr : r ∈ Set.Ioo 0 ℓ)
+    (hunit : ‖mfderiv 𝓘(ℝ, ℝ) I (fun t => Γ (u, t)) r 1‖ = 1)
+    (w v : P) (s t A : ℝ)
+    (hang : inner ℝ (mfderiv 𝓘(ℝ, P) I (fun y => Γ (y, r)) u w)
+      (mfderiv 𝓘(ℝ, P) I (fun y => Γ (y, r)) u v) = A) :
+    inner ℝ (mfderiv 𝓘(ℝ, P × ℝ) I Γ (u, r) (w, s))
+      (mfderiv 𝓘(ℝ, P × ℝ) I Γ (u, r) (v, t)) = A + s * t := by
+  have hrad := polar_map_radial_derivative_of_integralCurve hΓ hcurve hr
+  have hu : ‖mfderiv 𝓘(ℝ, P × ℝ) I Γ (u, r) (0, 1)‖ = 1 := by
+    rw [← polar_map_radial_derivative hΓ 1]
+    exact hunit
+  have ha : inner ℝ (mfderiv 𝓘(ℝ, P × ℝ) I Γ (u, r) (w, 0))
+      (mfderiv 𝓘(ℝ, P × ℝ) I Γ (u, r) (v, 0)) = A := by
+    rw [← polar_map_spatial_derivative hΓ w, ← polar_map_spatial_derivative hΓ v]
+    exact hang
+  exact polar_map_full_pairing hΓ hρ hlevel hrad hu w v s t A ha
+
+end SliceAssembly
 end LichnerowiczObata

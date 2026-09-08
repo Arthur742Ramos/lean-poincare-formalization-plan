@@ -514,13 +514,13 @@ sphere, proves that its starting radial level is regular, and still has the
 explicit coordinate-chart/radial-flow composite as its forward map.
 `ObataSphericalMetricProduct` now specializes the construction to the actual
 Obata family and chart. One theorem retains the global homeomorphism, its
-explicit forward formula, and the angular metric for that same composite,
+explicit forward formula, and the full polar metric for that same composite,
 together with chart regularity, the radial identity, unit speed, and endpoint
 limits. The angular metric is now expressed in intrinsic tangent vectors at
 every point of the homeomorphism's entire parameter sphere. Regularity of
-each starting point is derived from its constructed radial level. Adding
-the radial and mixed metric terms and extending through both poles remain
-outstanding.
+each starting point is derived from its constructed radial level. The full
+pairing is the angular sine-squared coefficient plus the product of radial
+components; mixed terms vanish. Extending through both poles remains outstanding.
 `IntrinsicAngularCoordinates` proves the parameter-change steps: the tangent
 trivialization identifies the coordinate metric with the intrinsic inner
 product, the chain rule transfers angular pairings to intrinsic parameters,
@@ -533,11 +533,12 @@ uses that result and the actual tangent trivialization, eliminating separate
 differentiability and parameter-compatibility assumptions from this step.
 `PolarMetricAssembly` derives the complete polar pairing from the angular
 pairing, radial gradient velocity, and unit radial speed. Vanishing mixed
-terms follow from differentiating the radius identity. Applying this assembly
-to the jointly constructed spherical product remains required; it is not yet
-a global Riemannian isometry theorem.
+terms follow from differentiating the radius identity. This assembly is now
+applied to the jointly constructed spherical product; it is not yet a global
+Riemannian isometry theorem.
 The normal-chart flow map is now proved jointly differentiable in its linear
 angular parameters and radius. Its radius identity holds on a full parameter
 neighborhood, providing the local identity needed for the mixed-term argument.
-The radial derivative and the existing angular pairing still need to be
-assembled for the constructed spherical product.
+Slice derivative identities identify the joint map's spatial derivative with
+the proved angular derivative and its radial derivative with the integral-curve
+velocity. These complete the metric assembly on the regular spherical product.

@@ -3,8 +3,9 @@ module
 public import LichnerowiczObata.GlobalNormalAngularMetric
 public import LichnerowiczObata.IntrinsicChartLift
 public import LichnerowiczObata.IntrinsicAngularCoordinates
+public import LichnerowiczObata.PolarMetricAssembly
 
-/-! # One spherical product carrying the constructed angular metric -/
+/-! # One spherical product carrying the constructed full polar metric -/
 
 @[expose] public noncomputable section
 open Bundle FiberBundle Set AlmostSchur
@@ -27,10 +28,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 
-/-- The global homeomorphism and intrinsic angular metric on its whole
+/-- The global homeomorphism and full intrinsic polar metric on its whole
 parameter sphere use the same constructed chart and radial family. Starting
 point regularity is derived. Unit speed and endpoint limits are retained
-for the remaining full-metric and pole-extension arguments. -/
+for the remaining round comparison and pole-extension arguments. -/
 theorem exists_obata_spherical_metric_product
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
     {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
@@ -72,11 +73,12 @@ theorem exists_obata_spherical_metric_product
               (e ((trivializationAt E TM c).continuousLinearMapAt ℝ p q.1)), q.2)) ∧
             ∀ u : Metric.sphere (0 : TM p) R, ∀ w v : TM p,
               inner ℝ (u : TM p) w = 0 → inner ℝ (u : TM p) v = 0 →
-                ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
-                  let Γ := fun y => η ((extChartAt I c).symm
-                    (e ((trivializationAt E TM c).continuousLinearMapAt ℝ p y)), r)
-                  inner ℝ (mfderiv 𝓘(ℝ, TM p) I Γ u w) (mfderiv 𝓘(ℝ, TM p) I Γ u v) =
-                    (Real.sin (Real.sqrt K * r) ^ 2 / K) * (inner ℝ w v / R ^ 2) := by
+                ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K), ∀ s τ : ℝ,
+                  let Γ := fun q : TM p × ℝ => η ((extChartAt I c).symm
+                    (e ((trivializationAt E TM c).continuousLinearMapAt ℝ p q.1)), q.2)
+                  inner ℝ (mfderiv 𝓘(ℝ, TM p × ℝ) I Γ (u, r) (w, s))
+                    (mfderiv 𝓘(ℝ, TM p × ℝ) I Γ (u, r) (v, τ)) =
+                    (Real.sin (Real.sqrt K * r) ^ 2 / K) * (inner ℝ w v / R ^ 2) + s * τ := by
   obtain ⟨hb, η, hη, hcurves, t, ht, e, he0, hez, hsmooth, htarget, hrad, hmetric⟩ :=
     exists_obata_global_angular_metric hf hnon hK ha hH c hz hcrit ((hmax _).mpr rfl)
   have hcρ : Continuous (obataRadial K a f) := by
@@ -140,12 +142,34 @@ theorem exists_obata_spherical_metric_product
     exact hR.ne' hn.symm
   refine ⟨η, hη, fun x hx => (hcurves x hx).2.2, t, ht, e, he0, hez, hsmooth, htarget, hrad,
     R, hR, htR, hsource, hregular, Q, hQ, ?_⟩
-  intro u w v hw hv r hr
+  intro u w v hw hv r hr s τ
   have hone : (1 : ℕ∞ω) ≤ ∞ := WithTop.coe_le_coe.2 (le_top : (1 : ℕ∞) ≤ ⊤)
   have he := normal_radial_composite_intrinsic_angular_metric hf.continuous (hη.of_le hone)
     c hz ((hsmooth _ (hsource u)).differentiableAt (by norm_num))
     (htarget _ (hsource u)) (hregular u) hr hw hv
     (fun j k hj hk => hmetric _ (hsource u) (hnonzero u) (hregular u) j k hj hk r hr)
+  let Γ := fun q : TM p × ℝ => η ((extChartAt I c).symm (e (L q.1)), q.2)
+  have hΓ : MDifferentiableAt 𝓘(ℝ, TM p × ℝ) I Γ (u, r) :=
+    mdifferentiableAt_normal_radial_joint hf.continuous (hη.of_le hone) c L
+      ((hsmooth _ (hsource u)).differentiableAt (by norm_num))
+      (htarget _ (hsource u)) (hregular u) hr
+  have hlevel : (obataRadial K a f ∘ Γ) =ᶠ[𝓝 ((u : TM p), r)] Prod.snd :=
+    normal_radial_joint_level_eventually hf.continuous
+      (fun x hx r hr => ((hcurves x hx).2.2.2.1 r hr).1) c L
+      ((hsmooth _ (hsource u)).differentiableAt (by norm_num))
+      (htarget _ (hsource u)) (hregular u) hr
+  have hreg : -a < f (Γ (u, r)) ∧ f (Γ (u, r)) < a := by
+    have hh := (Q (u, ⟨r, hr⟩)).property
+    rw [hQ] at hh
+    exact hh
+  have hlo : -1 < f (Γ (u, r)) / a := (lt_div_iff₀ ha).mpr (by nlinarith [hreg.1])
+  have hhi : f (Γ (u, r)) / a < 1 := (div_lt_iff₀ ha).mpr (by simpa using hreg.2)
+  have hρ : MDifferentiableAt I 𝓘(ℝ, ℝ) (obataRadial K a f) (Γ (u, r)) :=
+    (contMDiffAt_obataRadial (K := K) (hf (Γ (u, r))) hlo.ne' hhi.ne).mdifferentiableAt
+      (by norm_num)
+  have hflow := (hcurves _ (hregular u)).2.2
+  apply polar_map_full_pairing_of_slices hΓ hρ hlevel hflow.1 hr
+    (hflow.2.1 r hr).2 w v s τ _
   simpa only [hnorm u] using he
 
 end LichnerowiczObata
