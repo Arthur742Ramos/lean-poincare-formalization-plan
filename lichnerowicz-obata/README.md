@@ -559,5 +559,9 @@ coefficient agreement alone is not the global rigidity theorem.
 with directions orthogonal to the north pole in the Euclidean product space
 `WithLp 2 (P × ℝ)`. It constructs the corresponding punctured-round-sphere
 homeomorphism and proves the full derivative metric using the same intrinsic
-angular vectors as the Obata product. The regular comparison map and its
-extension through the poles remain required.
+angular vectors as the Obata product.
+`ObataRegularRoundComparison` now constructs a homeomorphism from the regular
+Obata region to the punctured round sphere of radius `1 / √K`. The same theorem
+proves that it intertwines the two explicit polar maps and that their full
+pullback metrics agree. Smoothness of the comparison itself, its interpretation
+as a Riemannian isometry, and extension through the poles remain required.

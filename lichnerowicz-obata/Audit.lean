@@ -14,6 +14,7 @@ import LichnerowiczObata.UnitPolarCoordinates
 import LichnerowiczObata.ObataUnitSphericalProduct
 import LichnerowiczObata.RoundPolarJointMetric
 import LichnerowiczObata.RoundAmbientDirections
+import LichnerowiczObata.ObataRegularRoundComparison
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -395,3 +396,6 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.intrinsicRoundPolarHomeomorph
 #print axioms LichnerowiczObata.intrinsicRoundPolarHomeomorph_apply
 #print axioms LichnerowiczObata.intrinsicRoundPolar_metric
+#print axioms LichnerowiczObata.curvatureRoundPolarHomeomorph
+#print axioms LichnerowiczObata.curvatureRoundPolarHomeomorph_apply
+#print axioms LichnerowiczObata.exists_obata_regular_round_comparison

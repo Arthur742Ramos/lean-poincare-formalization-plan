@@ -117,4 +117,21 @@ theorem intrinsicRoundPolar_metric {K : ℝ} (hK : 0 < K)
   simpa only [A, Γ, ContinuousLinearMap.comp_apply, ContinuousLinearMap.coe_prodMap',
     Prod.map_apply, ContinuousLinearMap.id_apply, roundAngularInclusion_inner] using hh
 
+/-- Curvature-normalized polar coordinates use the identical radial interval
+as the Obata construction. -/
+def curvatureRoundPolarHomeomorph {K : ℝ} (hK : 0 < K) :
+    Metric.sphere (0 : P) 1 × Set.Ioo (0 : ℝ) (Real.pi / Real.sqrt K) ≃ₜ
+      RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient P) :=
+  ((Homeomorph.refl _).prodCongr (Homeomorph.setCongr
+    (show Set.Ioo (0 : ℝ) (Real.pi / Real.sqrt K) =
+      Set.Ioo (0 : ℝ) (Real.pi * (1 / Real.sqrt K)) by
+        simp [div_eq_mul_inv]))).trans
+    (intrinsicRoundPolarHomeomorph (one_div_pos.mpr (Real.sqrt_pos.mpr hK)))
+
+@[simp] theorem curvatureRoundPolarHomeomorph_apply {K : ℝ} (hK : 0 < K)
+    (q : Metric.sphere (0 : P) 1 × Set.Ioo (0 : ℝ) (Real.pi / Real.sqrt K)) :
+    (((curvatureRoundPolarHomeomorph hK q).1 :
+      Metric.sphere (0 : RoundAmbient P) (1 / Real.sqrt K)) : RoundAmbient P) =
+      roundPolarCurve (1 / Real.sqrt K) roundNorth (roundAngularInclusion (q.1 : P)) q.2 := rfl
+
 end LichnerowiczObata
