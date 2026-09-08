@@ -429,3 +429,8 @@ invertible tangent trivialization.
 lie on the actual radius-R metric sphere, have unit speed, and join a common
 pole to its antipode at parameter `π R`. The sphere chart metric comparison
 and global Riemannian isometry are not yet established.
+`RoundPolarMetric` computes actual angular derivatives of this parametrization,
+proves their tangency to the sphere and orthogonality to radial velocity, and
+derives the full polar pairing: unit radial coefficient and radius-squared
+sine-square angular coefficient. Constructing the global comparison map is
+still pending.

@@ -25,6 +25,7 @@ import LichnerowiczObata.NormalRayMetric
 import LichnerowiczObata.SineMetricLimit
 import LichnerowiczObata.NormalRayNormalization
 import LichnerowiczObata.RoundPolarCurves
+import LichnerowiczObata.RoundPolarMetric
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -290,3 +291,8 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.roundPolarCurve_velocity_norm
 #print axioms LichnerowiczObata.roundPolarCurve_zero
 #print axioms LichnerowiczObata.roundPolarCurve_antipode
+#print axioms LichnerowiczObata.hasFDerivAt_roundPolarCurve_angular
+#print axioms LichnerowiczObata.roundPolarCurve_angular_metric
+#print axioms LichnerowiczObata.roundPolarCurve_mixed_metric
+#print axioms LichnerowiczObata.roundPolarCurve_angular_tangent
+#print axioms LichnerowiczObata.roundPolarCurve_full_metric
