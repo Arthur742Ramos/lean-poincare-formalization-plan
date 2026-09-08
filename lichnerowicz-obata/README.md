@@ -668,6 +668,12 @@ normal chart's quadratic-metric normalization. The spherical-product constructio
 also retains containment of the intrinsic ball of radius `2 * R` in the normal
 chart source, where `R` is the seed-sphere radius, and the radial flow's
 initial-value identity. Thus the source guarantee covers short rays through
-the seed sphere, not only the sphere itself. Identifying the retained
-normal-chart rays with the global comparison and proving its pole smoothness
-remain unfinished.
+the seed sphere, not only the sphere itself. `NormalChartRadialFlow` now proves
+that these actual normal-chart rays equal the radial transport on a short
+positive interval containing the seed time. The unit spherical product retains
+a `HasRadialPoleModel`: a twice continuously differentiable Cartesian map at
+zero, taking zero to the maximum pole, whose value on `r • u` is the actual
+polar parametrization. This same model is retained in the regular round
+comparison and differentiable polar inverse. Converting it to smoothness of
+the global round comparison at the north pole, handling the south pole, and
+proving the final global isometry remain unfinished.

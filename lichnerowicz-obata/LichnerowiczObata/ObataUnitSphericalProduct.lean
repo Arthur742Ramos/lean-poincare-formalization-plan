@@ -39,6 +39,7 @@ theorem exists_obata_unit_spherical_product
     (hmax : ∀ x, f x = a ↔ x = (extChartAt I c).symm z) :
     let p := (extChartAt I c).symm z
     ∃ Φ : TM p × ℝ → M,
+      HasRadialPoleModel I Φ p ∧
       ∃ Q : Metric.sphere (0 : TM p) 1 × Ioo 0 (Real.pi / Real.sqrt K) ≃ₜ
           {x : M // -a < f x ∧ f x < a},
         (∀ q, (Q q : M) = Φ (q.1, q.2)) ∧
@@ -52,7 +53,7 @@ theorem exists_obata_unit_spherical_product
                 (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (v, t)) =
                   (Real.sin (Real.sqrt K * r) ^ 2 / K) * inner ℝ w v + s * t := by
   obtain ⟨η, hη, hcurves, hinit, t, ht, e, he0, hez, hsmooth, htarget, hrad, hgradient,
-    R, hR, htR, hball, hsource, hregular, Q, hQ, hmetric⟩ :=
+    R, hR, htR, hball, hsource, hregular, hrays, Q, hQ, hmetric⟩ :=
     exists_obata_spherical_metric_product hf hnon hK ha hH c hz hcrit hmax
   let p := (extChartAt I c).symm z
   let L := (trivializationAt E TM c).continuousLinearMapAt ℝ p
@@ -60,7 +61,38 @@ theorem exists_obata_unit_spherical_product
   let Φ := fun q : TM p × ℝ => Γ (R • q.1, q.2)
   let S := unitSphereScale (P := TM p) R hR
   let Q₁ := (S.prodCongr (Homeomorph.refl (Ioo 0 (Real.pi / Real.sqrt K)))).trans Q
-  refine ⟨Φ, Q₁, ?_, ?_, ?_⟩
+  refine ⟨Φ, ?_, Q₁, ?_, ?_, ?_⟩
+  · let A : TM p →L[ℝ] E := (1 / t) • L
+    let χ : TM p → M := (extChartAt I c).symm ∘ e ∘ A
+    have hA0 : A 0 = 0 := map_zero A
+    have heA0 : e (A 0) = z := by rw [hA0, hez]
+    have hi : ContMDiffAt 𝓘(ℝ, E) I 2 (extChartAt I c).symm z := by
+      simpa only [I.range_eq_univ, contMDiffWithinAt_univ] using
+        (contMDiffWithinAt_extChartAt_symm_range (I := I) (n := 2) c hz)
+    have heA : ContDiffAt ℝ 2 (e ∘ A) 0 := by
+      apply ContDiffAt.comp (g := e) (f := (A : TM p → E))
+      · rw [hA0]
+        exact hsmooth _ he0
+      · exact A.contDiff.contDiffAt
+    refine ⟨χ, ?_, ?_, min (2 * (t * R)) (Real.pi / Real.sqrt K),
+      lt_min (mul_pos (by norm_num) htR.1)
+        (div_pos Real.pi_pos (Real.sqrt_pos.mpr hK)), ?_⟩
+    · change (extChartAt I c).symm (e (A 0)) = p
+      rw [heA0]
+    · exact (heA0 ▸ hi).comp 0 (contMDiffAt_iff_contDiffAt.mpr heA)
+    · intro u r hr
+      have hh := (hrays (S u) r hr).symm
+      have he : (r / (t * R)) • (S u : TM p) = (r / t) • (u : TM p) := by
+        change (r / (t * R)) • (R • (u : TM p)) = _
+        rw [smul_smul]
+        congr 1
+        field_simp
+      rw [he] at hh
+      change Φ (u, r) = (extChartAt I c).symm (e (A (r • (u : TM p))))
+      have hA : A (r • (u : TM p)) = L ((r / t) • (u : TM p)) := by
+        simp [A, map_smul, smul_smul, div_eq_mul_inv, mul_comm]
+      rw [hA]
+      exact hh
   · intro q
     exact hQ (S q.1, q.2)
   · intro u r hr

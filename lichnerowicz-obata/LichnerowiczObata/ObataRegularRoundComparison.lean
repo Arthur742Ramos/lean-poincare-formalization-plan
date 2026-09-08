@@ -45,6 +45,7 @@ theorem exists_obata_regular_round_comparison
     let Ψ := fun q : TM p × ℝ => roundPolarCurve (1 / Real.sqrt K)
       roundNorth (roundAngularInclusion q.1) q.2
     ∃ Φ : TM p × ℝ → M,
+      HasRadialPoleModel I Φ p ∧
       ∃ Q : Metric.sphere (0 : TM p) 1 × Ioo 0 (Real.pi / Real.sqrt K) ≃ₜ
           {x : M // -a < f x ∧ f x < a},
         ∃ F : {x : M // -a < f x ∧ f x < a} ≃ₜ
@@ -66,11 +67,11 @@ theorem exists_obata_regular_round_comparison
                 inner ℝ (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (w, s))
                   (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (v, t)) =
                 inner ℝ (fderiv ℝ Ψ (u, r) (w, s)) (fderiv ℝ Ψ (u, r) (v, t)) := by
-  obtain ⟨Φ, Q, hQ, hradial, hmetric⟩ :=
+  obtain ⟨Φ, hpole, Q, hQ, hradial, hmetric⟩ :=
     exists_obata_unit_spherical_product hf hnon hK ha hH c hz hcrit hmax
   let F := Q.symm.trans (curvatureRoundPolarHomeomorph hK)
   let G := Φ ∘ intrinsicRoundInverseCoordinates (1 / Real.sqrt K)
-  refine ⟨Φ, Q, F, G, ?_, hQ, hradial, ?_, ?_⟩
+  refine ⟨Φ, hpole, Q, F, G, ?_, hQ, hradial, ?_, ?_⟩
   · intro x
     let q := (curvatureRoundPolarHomeomorph hK).symm x
     have hi := intrinsicRoundInverseCoordinates_eq_inverse hK x

@@ -44,6 +44,7 @@ theorem exists_obata_differentiable_polar_inverse
     (hmax : ∀ x, f x = a ↔ x = (extChartAt I c).symm z) :
     let p := (extChartAt I c).symm z
     ∃ Φ : TM p × ℝ → M,
+      HasRadialPoleModel I Φ p ∧
       ∃ Q : Metric.sphere (0 : TM p) 1 × Ioo 0 (Real.pi / Real.sqrt K) ≃ₜ
           {x : M // -a < f x ∧ f x < a},
       ∃ e : OpenPartialHomeomorph (Metric.sphere (0 : TM p) 1 × ℝ) M,
@@ -69,7 +70,7 @@ theorem exists_obata_differentiable_polar_inverse
                   roundNorth (roundAngularInclusion q.1) q.2) (u, r) (w, s))
                 (fderiv ℝ (fun q : TM p × ℝ => roundPolarCurve (1 / Real.sqrt K)
                   roundNorth (roundAngularInclusion q.1) q.2) (u, r) (v, t)) := by
-  obtain ⟨Φ, Q, F, G, hG, hQ, hradial, hF, hjet⟩ :=
+  obtain ⟨Φ, hpole, Q, F, G, hG, hQ, hradial, hF, hjet⟩ :=
     exists_obata_regular_round_comparison hf hnon hK ha hH c hz hcrit hmax
   let p := (extChartAt I c).symm z
   let J : Opens ℝ := ⟨Ioo 0 (Real.pi / Real.sqrt K), isOpen_Ioo⟩
@@ -84,7 +85,7 @@ theorem exists_obata_differentiable_polar_inverse
   obtain ⟨e, hs, ht, he, hi, hd⟩ := exists_differentiable_polar_inverse_on_target
     (I := I) (n := n) J U Q (⟨u, hu⟩, r) Φ hQ hDim
     (fun u r hr => ⟨(hjet u r hr).1, (hjet u r hr).2.1⟩)
-  exact ⟨Φ, Q, e, hs, ht, hQ, hradial, he, hi, hd, hjet⟩
+  exact ⟨Φ, hpole, Q, e, hs, ht, hQ, hradial, he, hi, hd, hjet⟩
 
 include hDimension in
 /-- A single regular comparison to the punctured round sphere has
@@ -117,7 +118,7 @@ theorem exists_obata_regular_forward_differentiable
           ∀ x : RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
             G (x.1 : RoundAmbient (TM p)) = (F.symm x : M) ∧
             MDifferentiableAt 𝓘(ℝ, RoundAmbient (TM p)) I G (x.1 : RoundAmbient (TM p)) := by
-  obtain ⟨Φ, Q, e, hs, ht, hQ, hradial, he, hi, hd, hjet⟩ :=
+  obtain ⟨Φ, hpole, Q, e, hs, ht, hQ, hradial, he, hi, hd, hjet⟩ :=
     exists_obata_differentiable_polar_inverse (n := n) hf hnon hK ha hH c hz hcrit hmax
   let p := (extChartAt I c).symm z
   let Ψ := fun q : TM p × ℝ => roundPolarCurve (1 / Real.sqrt K)

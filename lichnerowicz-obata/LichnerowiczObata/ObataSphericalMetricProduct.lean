@@ -4,6 +4,7 @@ public import LichnerowiczObata.GlobalNormalAngularMetric
 public import LichnerowiczObata.IntrinsicChartLift
 public import LichnerowiczObata.IntrinsicAngularCoordinates
 public import LichnerowiczObata.PolarMetricAssembly
+public import LichnerowiczObata.NormalChartRadialFlow
 
 /-! # One spherical product carrying the constructed full polar metric -/
 
@@ -75,6 +76,13 @@ theorem exists_obata_spherical_metric_product
             let x := (extChartAt I c).symm
               (e ((trivializationAt E TM c).continuousLinearMapAt ℝ p v));
             -a < f x ∧ f x < a) ∧
+          (∀ v : Metric.sphere (0 : TM p) R,
+            ∀ r ∈ Ioo 0 (min (2 * (t * R)) (Real.pi / Real.sqrt K)),
+              (extChartAt I c).symm (e
+                ((trivializationAt E TM c).continuousLinearMapAt ℝ p
+                  ((r / (t * R)) • (v : TM p)))) =
+                η ((extChartAt I c).symm
+                  (e ((trivializationAt E TM c).continuousLinearMapAt ℝ p v)), r)) ∧
           ∃ Q : Metric.sphere (0 : TM p) R × Ioo 0 (Real.pi / Real.sqrt K) ≃ₜ
               {x : M // -a < f x ∧ f x < a},
             (∀ q, (Q q : M) = η ((extChartAt I c).symm
@@ -150,7 +158,11 @@ theorem exists_obata_spherical_metric_product
     exact hR.ne' hn.symm
   refine ⟨η, hη, fun x hx => (hcurves x hx).2.2,
     fun x hx => (hcurves x hx).1, t, ht, e, he0, hez, hsmooth, htarget, hrad, hgradient,
-    R, hR, htR, hball, hsource, hregular, Q, hQ, ?_⟩
+    R, hR, htR, hball, hsource, hregular, ?_, Q, hQ, ?_⟩
+  · exact normal_chart_eq_radial_transport hK ha
+      (hf.of_le (WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ ⊤))) c hz e
+      ht hR htR hsmooth htarget hball hrad hgradient (fun x hx => (hU x).mpr hx)
+      η (fun x hx => (hcurves x hx).2.2.1) (fun x hx => (hcurves x hx).1)
   intro u w v hw hv r hr s τ
   have hone : (1 : ℕ∞ω) ≤ ∞ := WithTop.coe_le_coe.2 (le_top : (1 : ℕ∞) ≤ ⊤)
   have he := normal_radial_composite_intrinsic_angular_metric hf.continuous (hη.of_le hone)
