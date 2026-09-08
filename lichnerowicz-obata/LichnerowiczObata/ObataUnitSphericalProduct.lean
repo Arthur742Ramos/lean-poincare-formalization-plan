@@ -45,6 +45,9 @@ theorem exists_obata_unit_spherical_product
         (∀ q, (Q q : M) = Φ (q.1, q.2)) ∧
         (∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
           obataRadial K a f (Φ (u, r)) = r) ∧
+        (∀ u : Metric.sphere (0 : TM p) 1,
+          IsMIntegralCurveOn (fun r => Φ (u, r)) (gradient (I := I) (obataRadial K a f))
+            (Ioo 0 (Real.pi / Real.sqrt K))) ∧
         ∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
           MDifferentiableAt 𝓘(ℝ, TM p × ℝ) I Φ (u, r) ∧
           ∀ w v : TM p, inner ℝ (u : TM p) w = 0 → inner ℝ (u : TM p) v = 0 →
@@ -61,7 +64,7 @@ theorem exists_obata_unit_spherical_product
   let Φ := fun q : TM p × ℝ => Γ (R • q.1, q.2)
   let S := unitSphereScale (P := TM p) R hR
   let Q₁ := (S.prodCongr (Homeomorph.refl (Ioo 0 (Real.pi / Real.sqrt K)))).trans Q
-  refine ⟨Φ, ?_, Q₁, ?_, ?_, ?_⟩
+  refine ⟨Φ, ?_, Q₁, ?_, ?_, ?_, ?_⟩
   · let A : TM p →L[ℝ] E := (1 / t) • L
     let χ : TM p → M := (extChartAt I c).symm ∘ e ∘ A
     have hA0 : A 0 = 0 := map_zero A
@@ -98,6 +101,8 @@ theorem exists_obata_unit_spherical_product
     exact hQ (S q.1, q.2)
   · intro u r hr
     exact ((hcurves _ (hregular (S u))).2.1 r hr).1
+  · intro u
+    exact (hcurves _ (hregular (S u))).1
   intro u r hr
   have hone : (1 : ℕ∞ω) ≤ ∞ := WithTop.coe_le_coe.2 (le_top : (1 : ℕ∞) ≤ ⊤)
   have hΓ : MDifferentiableAt 𝓘(ℝ, TM p × ℝ) I Γ (R • (u : TM p), r) :=

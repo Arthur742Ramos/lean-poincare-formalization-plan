@@ -700,3 +700,7 @@ south-centered metric polar homeomorphism and its isometric Cartesian model
 at the minimum pole. Matching its angular coordinates to those of the existing
 north-centered global homeomorphism is still required; the separate south
 model does not by itself prove regularity of that global map at the south pole.
+Both unit polar constructions now retain their actual radial integral-curve
+identities, with opposite field orientations. The north-oriented identity is
+also retained through the regular comparison and differentiable polar inverse,
+so subsequent angular matching can use the constructed maps themselves.

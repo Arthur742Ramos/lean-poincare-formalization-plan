@@ -45,6 +45,10 @@ theorem exists_obata_south_polar_model
         (∀ q, (Q q : M) = Φ (q.1, q.2)) ∧
         (∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
           obataRadial K a f (Φ (u, r)) = Real.pi / Real.sqrt K - r) ∧
+        (∀ u : Metric.sphere (0 : TM p) 1,
+          IsMIntegralCurveOn (fun r => Φ (u, r))
+            (gradient (I := I) (obataRadial K a (fun y => -f y)))
+            (Ioo 0 (Real.pi / Real.sqrt K))) ∧
         ∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
           MDifferentiableAt 𝓘(ℝ, TM p × ℝ) I Φ (u, r) ∧
           ∀ w v : TM p, inner ℝ (u : TM p) w = 0 → inner ℝ (u : TM p) v = 0 →
@@ -69,13 +73,13 @@ theorem exists_obata_south_polar_model
   have hcrit : gradient (I := I) (fun x => -f x) ((extChartAt I c).symm z) = 0 :=
     gradient_eq_zero_of_local_extremum
       ((hf2.neg _).mdifferentiableAt (by norm_num)) (Or.inr (hpm.isLocalMax (by simp)))
-  obtain ⟨Φ, hmodel, Q, hQ, hρ, hmetric⟩ := exists_obata_unit_spherical_product hf.neg hn
+  obtain ⟨Φ, hmodel, Q, hQ, hρ, hcurves, hmetric⟩ := exists_obata_unit_spherical_product hf.neg hn
     hK ha (obata_hessian_equation_neg hf2 hH) c hz hcrit hmax
   have hU : {x : M | -a < -f x ∧ -f x < a} = {x : M | -a < f x ∧ f x < a} := by
     ext x
     change (-a < -f x ∧ -f x < a) ↔ (-a < f x ∧ f x < a)
     constructor <;> intro hx <;> constructor <;> linarith [hx.1, hx.2]
-  refine ⟨Φ, hmodel, Q.trans (Homeomorph.setCongr hU), hQ, ?_, hmetric⟩
+  refine ⟨Φ, hmodel, Q.trans (Homeomorph.setCongr hU), hQ, ?_, hcurves, hmetric⟩
   intro u r hr
   have hh := hρ u r hr
   rw [obataRadial_neg] at hh
