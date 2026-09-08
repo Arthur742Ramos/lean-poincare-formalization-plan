@@ -13,6 +13,7 @@ import LichnerowiczObata.PolarMetricAssembly
 import LichnerowiczObata.UnitPolarCoordinates
 import LichnerowiczObata.ObataUnitSphericalProduct
 import LichnerowiczObata.RoundPolarJointMetric
+import LichnerowiczObata.RoundAmbientDirections
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -385,3 +386,12 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.roundPolarCurve_joint_derivative
 #print axioms LichnerowiczObata.roundPolarCurve_joint_metric
 #print axioms LichnerowiczObata.roundPolarCurve_joint_metric_curvature
+#print axioms LichnerowiczObata.roundAngularInclusion_inner
+#print axioms LichnerowiczObata.roundAngularInclusion_norm
+#print axioms LichnerowiczObata.roundNorth_norm
+#print axioms LichnerowiczObata.roundNorth_inner
+#print axioms LichnerowiczObata.roundNorth_inner_angular
+#print axioms LichnerowiczObata.roundAngularHomeomorph
+#print axioms LichnerowiczObata.intrinsicRoundPolarHomeomorph
+#print axioms LichnerowiczObata.intrinsicRoundPolarHomeomorph_apply
+#print axioms LichnerowiczObata.intrinsicRoundPolar_metric

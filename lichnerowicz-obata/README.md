@@ -553,6 +553,11 @@ through the two poles remain to be completed.
 `RoundPolarJointMetric` proves the full derivative of the explicit round polar
 map and evaluates its metric on that derivative. For sphere radius `1 / √K`,
 the coefficient is exactly `sin²(√K r) / K`, matching the unit-angular Obata
-product. Identifying the angular spaces and constructing the resulting
-Riemannian isometry are still required; coefficient agreement alone is not
-the global rigidity theorem.
+product. The resulting Riemannian isometry still needs to be constructed;
+coefficient agreement alone is not the global rigidity theorem.
+`RoundAmbientDirections` now identifies the intrinsic unit angular sphere
+with directions orthogonal to the north pole in the Euclidean product space
+`WithLp 2 (P × ℝ)`. It constructs the corresponding punctured-round-sphere
+homeomorphism and proves the full derivative metric using the same intrinsic
+angular vectors as the Obata product. The regular comparison map and its
+extension through the poles remain required.
