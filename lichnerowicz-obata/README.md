@@ -258,3 +258,6 @@ This is a topological product theorem, not yet a round-metric identification.
 the actual initial-point derivatives are orthogonal to the radial gradient
 and satisfy the tangent-transport composition law. Metric evolution for these
 variations and normalization at a pole remain to be established.
+Differentiating the starting-point identity also gives the spatial/time
+derivative splitting. Transport at the starting level fixes angular vectors,
+and transport to any interior level has trivial kernel on angular vectors.

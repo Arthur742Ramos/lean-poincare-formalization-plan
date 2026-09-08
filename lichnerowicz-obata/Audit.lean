@@ -143,3 +143,6 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.radial_variation_orthogonal
 #print axioms LichnerowiczObata.obata_radial_variation_orthogonal
 #print axioms LichnerowiczObata.mfderiv_radial_reset
+#print axioms LichnerowiczObata.radial_initial_derivative
+#print axioms LichnerowiczObata.radial_initial_derivative_of_tangent
+#print axioms LichnerowiczObata.radial_transport_kernel_trivial
