@@ -1,4 +1,4 @@
-import LichnerowiczObata.SmoothManifoldFlow
+import LichnerowiczObata.SmoothRadialFlow
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
 import LichnerowiczObata.ClassicalSpectrum
@@ -128,3 +128,9 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_contDiff_extension
 #print axioms LichnerowiczObata.exists_smooth_local_flow
 #print axioms LichnerowiczObata.exists_smooth_local_manifold_flow
+#print axioms LichnerowiczObata.contMDiff_integralCurve_family
+#print axioms LichnerowiczObata.contMDiff_infty_integralCurve_family
+#print axioms LichnerowiczObata.exists_smooth_global_manifold_flow
+#print axioms LichnerowiczObata.contDiffAt_obataClock
+#print axioms LichnerowiczObata.contMDiffOn_obataRadialFamily
+#print axioms LichnerowiczObata.exists_smooth_global_gradient_flow

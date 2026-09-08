@@ -242,4 +242,9 @@ extension agreeing near the initial point. `SmoothLocalFlow` removes the
 global-field hypothesis and constructs a jointly finite-order smooth flow on
 a product neighborhood. `SmoothManifoldFlow` lifts this result to smooth
 boundaryless manifolds whose model space admits smooth bump functions.
-Global smooth dependence and the round-sphere isometry remain unfinished.
+`SmoothGlobalFlow` uses uniqueness, compactness, and the flow composition law
+to prove joint smooth dependence for complete flows, including infinite
+smoothness. `SmoothRadialFlow` constructs the smooth complete intrinsic
+gradient flow and proves smoothness of its explicit radial time change on
+the regular region. Constructing the angular variations and proving the
+global round-sphere isometry remain unfinished.
