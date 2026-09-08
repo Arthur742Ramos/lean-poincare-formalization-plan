@@ -251,3 +251,6 @@ global round-sphere isometry remain unfinished.
 The constructed smooth radial family now simultaneously satisfies the radial
 ODE, unit-speed and radial-coordinate identities, extremal endpoint limits,
 and a reset identity identifying curves started at intermediate points.
+`RadialProduct` uses these identities to construct a homeomorphism from the
+regular region to any one radial level times the full open radial interval.
+This is a topological product theorem, not yet a round-metric identification.

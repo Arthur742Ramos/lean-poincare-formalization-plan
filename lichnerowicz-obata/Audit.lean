@@ -1,4 +1,4 @@
-import LichnerowiczObata.SmoothRadialFlow
+import LichnerowiczObata.RadialProduct
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
 import LichnerowiczObata.ClassicalSpectrum
@@ -136,3 +136,6 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_smooth_global_gradient_flow
 #print axioms LichnerowiczObata.obataRadialFamily_reset
 #print axioms LichnerowiczObata.exists_smooth_obata_radial_family
+#print axioms LichnerowiczObata.radialProductEquiv
+#print axioms LichnerowiczObata.radialProductHomeomorph
+#print axioms LichnerowiczObata.exists_obata_radial_product
