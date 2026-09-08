@@ -486,3 +486,9 @@ together; the metric formula uses the derivative of that same chart.
 products of actual manifold derivatives. Applying this to the same constructed
 chart gives its spherical angular metric intrinsically, while retaining the
 radial identity and chart regularity needed for global transport.
+`NormalAngularTangency` deduces that normal angular derivatives lie in the
+kernel of the radial derivative. Its transport theorem combines that fact
+with radial metric evolution: a pairing normalized at one regular level
+propagates with the exact sine-squared coefficient throughout the regular
+interval. Specializing all of these identities to one global comparison map
+and extending it through the poles remain required.
