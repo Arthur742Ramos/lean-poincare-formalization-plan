@@ -526,7 +526,7 @@ trivialization identifies the coordinate metric with the intrinsic inner
 product, the chain rule transfers angular pairings to intrinsic parameters,
 and rescaling to unit directions cancels the radius-squared factor. The
 intrinsic parameter-change lemma is specialized in the product theorem;
-unit-direction normalization remains to be joined to the round comparison.
+unit-direction normalization is now specialized by `ObataUnitSphericalProduct`.
 The actual normal-chart/radial-flow composite now has a proved differentiability
 theorem on its regular parameter domain. Its intrinsic angular-metric theorem
 uses that result and the actual tangent trivialization, eliminating separate
@@ -542,3 +542,11 @@ neighborhood, providing the local identity needed for the mixed-term argument.
 Slice derivative identities identify the joint map's spatial derivative with
 the proved angular derivative and its radial derivative with the integral-curve
 velocity. These complete the metric assembly on the regular spherical product.
+`UnitPolarCoordinates` constructs the positive-radius sphere scaling
+homeomorphism and proves cancellation of the auxiliary radius in the full
+metric. `ObataUnitSphericalProduct` applies both to the actual constructed
+product: its domain is the unit tangent sphere times the regular radial
+interval, its ambient parameter map is jointly differentiable there, and its
+metric is the sine-squared angular term plus the radial product, with no
+auxiliary-radius factor. The round-sphere identification and smooth extension
+through the two poles remain to be completed.

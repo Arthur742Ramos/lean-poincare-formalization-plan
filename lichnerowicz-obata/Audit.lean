@@ -10,6 +10,8 @@ import LichnerowiczObata.IntrinsicChartLift
 import LichnerowiczObata.ObataSphericalMetricProduct
 import LichnerowiczObata.IntrinsicAngularCoordinates
 import LichnerowiczObata.PolarMetricAssembly
+import LichnerowiczObata.UnitPolarCoordinates
+import LichnerowiczObata.ObataUnitSphericalProduct
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -375,3 +377,7 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.polar_map_radial_derivative
 #print axioms LichnerowiczObata.polar_map_radial_derivative_of_integralCurve
 #print axioms LichnerowiczObata.polar_map_full_pairing_of_slices
+#print axioms LichnerowiczObata.unitSphereScale
+#print axioms LichnerowiczObata.unitSphereScale_apply
+#print axioms LichnerowiczObata.polar_metric_rescale_unit
+#print axioms LichnerowiczObata.exists_obata_unit_spherical_product
