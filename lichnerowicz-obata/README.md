@@ -417,3 +417,7 @@ at zero, with the endpoint-time factors cancelled. A valid short positive-phase
 ray interval is constructed from the open initial-data domain for every
 positive-energy initial ray. The resulting interval supports the formula for
 all angular vector pairs. Global sphere rigidity is not yet established.
+`RadialAngularDecomposition` reconstructs a symmetric bilinear metric from
+its radial and angular restrictions. Applying it to the actual geodesic map
+now gives the full local pullback metric for arbitrary vector pairs, including
+radial and mixed directions, using the Gauss lemma and pole normalization.

@@ -278,3 +278,6 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.geodesic_normal_ray_metric_pole_normalized
 #print axioms LichnerowiczObata.exists_positive_phase_ray_interval
 #print axioms LichnerowiczObata.exists_geodesic_normal_ray_metric_pole_normalized
+#print axioms LichnerowiczObata.radial_projection_remainder_orthogonal
+#print axioms LichnerowiczObata.bilinear_metric_of_radial_and_angular
+#print axioms LichnerowiczObata.geodesic_normal_ray_full_metric

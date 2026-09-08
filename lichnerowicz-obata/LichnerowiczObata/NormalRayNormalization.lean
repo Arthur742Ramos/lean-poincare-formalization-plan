@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.NormalRayMetric
 public import LichnerowiczObata.SineMetricLimit
+public import LichnerowiczObata.RadialAngularDecomposition
 
 /-! # Pole-normalized angular metric of the geodesic normal map -/
 
@@ -132,5 +133,91 @@ theorem exists_geodesic_normal_ray_metric_pole_normalized
   intro s hs w v hw hv
   exact geodesic_normal_ray_metric_pole_normalized b hf hK ha hb hH c hz hV hzV
     hδ hα hsol hrest hcrit hmax htime htpos hu hε hdata hw hv hs
+
+/-- The full local normal-map metric, including radial and mixed directions,
+is reconstructed from the Gauss lemma and the pole-normalized angular metric. -/
+theorem geodesic_normal_ray_full_metric
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) {K a : ℝ}
+    (hK : 0 < K) (ha : 0 < a) (hb : ∀ y, -a ≤ f y ∧ f y ≤ a)
+    (hH : ∀ (y : M) (v w : TM y), hessian LC f y v w = -K * f y * inner ℝ v w)
+    (c : M) {z : E} (hz : z ∈ (extChartAt I c).target)
+    {α : (E × E) × ℝ → E × E} {V : Set (E × E)} (hV : IsOpen V)
+    (hzV : (z, (0 : E)) ∈ V) {δ : ℝ} (hδ : 0 < δ)
+    (hα : ContDiffOn ℝ 2 α (V ×ˢ Metric.ball 0 δ))
+    (hsol : ∀ q ∈ V, α (q, 0) = q ∧
+      ∀ r ∈ Metric.ball 0 δ, (α (q, r)).1 ∈ (extChartAt I c).target ∧
+        HasDerivAt (fun t => α (q, t)) (coordinateGeodesicSpray LC b c (α (q, r))) r)
+    (hrest : ∀ r ∈ Metric.ball 0 δ, α ((z, 0), r) = (z, 0))
+    (hcrit : gradient (I := I) f ((extChartAt I c).symm z) = 0)
+    (hmax : f ((extChartAt I c).symm z) = a)
+    {t : ℝ} (htime : t ∈ Metric.ball 0 δ) (htpos : 0 < t) {u : E}
+    (hu : 0 < coordinateMetricBilinear (I := I) c z u u)
+    {ε : ℝ} (hε : 0 < ε)
+    (hdata : ∀ r ∈ Ioo 0 ε, (z, r • u) ∈ V ∧
+      Real.sqrt (K * coordinateMetricBilinear (I := I) c z (r • u) (r • u)) * t ∈ Ioo 0 Real.pi)
+    {s : ℝ} (hs : s ∈ Ioo 0 ε) (w v : E) :
+    let F := fun y : E => (α ((z, y), t)).1
+    let g := coordinateMetricBilinear (I := I) c z
+    let freq := Real.sqrt K * (t * Real.sqrt (g u u))
+    let angular := Real.sin (freq * s) ^ 2 / (s ^ 2 * (K * g u u))
+    coordinateMetricBilinear (I := I) c (F (s • u))
+      (fderiv ℝ F (s • u) w) (fderiv ℝ F (s • u) v) =
+        angular * g w v + (t ^ 2 - angular) * (g u w * g u v / g u u) := by
+  let F := fun y : E => (α ((z, y), t)).1
+  let g := coordinateMetricBilinear (I := I) c z
+  let D := fderiv ℝ F (s • u)
+  let B := (coordinateMetricBilinear (I := I) c (F (s • u))).bilinearComp D D
+  let freq := Real.sqrt K * (t * Real.sqrt (g u u))
+  let angular := Real.sin (freq * s) ^ 2 / (s ^ 2 * (K * g u u))
+  have hg : ∀ w v, g w v = g v w := by
+    intro w v
+    exact real_inner_comm
+      ((trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm z) v)
+      ((trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm z) w)
+  have hB : ∀ w v, B w v = B v w := by
+    intro w v
+    exact real_inner_comm
+      ((trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm (F (s • u))) (D v))
+      ((trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm (F (s • u))) (D w))
+  have hα1 := hα.of_le (show (1 : ℕ∞ω) ≤ 2 by norm_num)
+  have hrad : ∀ w, B u w = t ^ 2 * g u w := by
+    intro w
+    have he := coordinate_normal_endpoint_gauss b hf hK ha hH c hV hα1 hsol
+      (hdata s hs).1 hcrit hmax htime (hdata s hs).2 w
+    change (coordinateMetricBilinear (I := I) c (F (s • u))) (D (s • u)) (D w) =
+      t ^ 2 * g (s • u) w at he
+    simp only [map_smul, smul_apply, smul_eq_mul] at he
+    change s * B u w = t ^ 2 * (s * g u w) at he
+    nlinarith [he, hs.1]
+  have hi : ContDiffAt ℝ 2 (fun y : E => ((z, y), t)) (s • u) :=
+    (contDiffAt_const.prodMk contDiffAt_id).prodMk contDiffAt_const
+  have hF : DifferentiableAt ℝ F (s • u) :=
+    (((hα.contDiffAt ((hV.prod Metric.isOpen_ball).mem_nhds
+      ⟨(hdata s hs).1, htime⟩)).comp (s • u) hi).fst).differentiableAt (by norm_num)
+  have hang : ∀ w v, g u w = 0 → g u v = 0 → B w v = angular * g w v := by
+    intro w v hw hv
+    have he := geodesic_normal_ray_metric_pole_normalized b hf hK ha hb hH c hz hV hzV
+      hδ hα hsol hrest hcrit hmax htime htpos hu hε hdata hw hv hs
+    change _ / Real.sin (freq * s) ^ 2 = g w v / (K * g u u) at he
+    rw [normal_ray_spatial_metric (coordinateMetricBilinear (I := I) c) hF w v] at he
+    change s ^ 2 * B w v / Real.sin (freq * s) ^ 2 = g w v / (K * g u u) at he
+    have hphase : freq * s ∈ Ioo 0 Real.pi := by
+      have hquad : g (s • u) (s • u) = s ^ 2 * g u u := by
+        simp only [map_smul, smul_apply, smul_eq_mul]
+        ring
+      have hp := (hdata s hs).2
+      change Real.sqrt (K * g (s • u) (s • u)) * t ∈ Ioo 0 Real.pi at hp
+      rw [Real.sqrt_mul hK.le, hquad, Real.sqrt_mul (sq_nonneg s), Real.sqrt_sq hs.1.le] at hp
+      convert hp using 1
+      dsimp only [freq]
+      ring
+    have hsin := (Real.sin_pos_of_pos_of_lt_pi hphase.1 hphase.2).ne'
+    have hsinf : Real.sin (s * freq) ≠ 0 := by simpa only [mul_comm s freq] using hsin
+    have hgu : g u u ≠ 0 := hu.ne'
+    dsimp only [angular]
+    field_simp [hs.1.ne', hK.ne', hgu, hsin, hsinf] at he ⊢
+    nlinarith [he]
+  exact bilinear_metric_of_radial_and_angular g B hg hB hu.ne' hrad hang w v
 
 end LichnerowiczObata
