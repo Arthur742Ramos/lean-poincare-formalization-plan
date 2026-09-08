@@ -19,6 +19,7 @@ import LichnerowiczObata.ContinuousPoleMaps
 import LichnerowiczObata.ObataUniquePoles
 import LichnerowiczObata.RadialDistance
 import LichnerowiczObata.AngularMetricEvolution
+import LichnerowiczObata.SmoothPicardOperator
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -108,3 +109,15 @@ import LichnerowiczObata.AngularMetricEvolution
 #print axioms LichnerowiczObata.sine_squared_normalized_eq
 #print axioms LichnerowiczObata.obataRadial_angular_metric_derivative
 #print axioms LichnerowiczObata.obataRadial_angular_metric_scaling
+#print axioms LichnerowiczObata.isInvertible_id_sub_of_norm_lt_one
+#print axioms LichnerowiczObata.hasStrictFDerivAt_fixedPoint
+#print axioms LichnerowiczObata.contDiffAt_fixedPoint
+#print axioms LichnerowiczObata.norm_continuousMapApplyCLM_le
+#print axioms LichnerowiczObata.hasStrictFDerivAt_continuousMapSuperposition
+#print axioms LichnerowiczObata.contDiff_continuousMapSuperposition
+#print axioms LichnerowiczObata.contDiff_infty_continuousMapSuperposition
+#print axioms LichnerowiczObata.continuous_unitPathExtend
+#print axioms LichnerowiczObata.norm_unitPathPrimitive_le
+#print axioms LichnerowiczObata.norm_unitPathPrimitiveCLM_le
+#print axioms LichnerowiczObata.contDiff_picardPathOperator
+#print axioms LichnerowiczObata.contDiffAt_picard_solution_zero

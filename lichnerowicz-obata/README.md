@@ -189,6 +189,20 @@ fields; constructing them as polar coordinate directions and identifying the
 remaining angular metric with the round metric are not yet proved. The smooth
 round-sphere isometry and its extension over the poles remain unproved.
 
+To construct differentiable radial transport, `DifferentiableFixedPoint.lean`
+proves strict differentiability and higher regularity of a continuous selection
+of fixed points from the actual operator's derivative and smoothness.
+`ContinuousMapCalculus.lean` proves smooth superposition on compact-domain
+path spaces, deriving a uniform derivative remainder by compactness and the
+mean-value inequality. `PathPrimitive.lean` constructs integration on unit
+paths as a bounded linear operator of norm at most one.
+`SmoothPicardOperator.lean` combines them for the scaled Picard equation
+`alpha(s) = x + tau * integral(0..s, v(alpha(t)))`: any continuous local
+solution inherits the vector field's finite smoothness at time zero. This
+does not yet establish differentiable dependence for the previously constructed
+manifold flow: its ODE curves must be assembled into these continuous path-space
+solutions, localized in charts, and transported to nonzero times.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical
