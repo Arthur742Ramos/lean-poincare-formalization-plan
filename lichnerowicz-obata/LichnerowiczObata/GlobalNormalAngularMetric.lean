@@ -44,6 +44,7 @@ theorem exists_normal_chart_global_angular_metric
     ∃ t : ℝ, 0 < t ∧ ∃ e : OpenPartialHomeomorph E E,
       0 ∈ e.source ∧ e 0 = z ∧
       HasFDerivAt e (t • ContinuousLinearMap.id ℝ E) 0 ∧
+      ContDiffAt ℝ ∞ e 0 ∧
       (∀ u ∈ e.source, ContDiffAt ℝ 2 e u) ∧
       (∀ u ∈ e.source, e u ∈ (extChartAt I c).target) ∧
       (∀ u ∈ e.source, obataRadial K a f ((extChartAt I c).symm (e u)) =
@@ -62,9 +63,9 @@ theorem exists_normal_chart_global_angular_metric
             let g := coordinateMetricBilinear (I := I) c z
             inner ℝ (mfderiv 𝓘(ℝ, E) I Ψ u w) (mfderiv 𝓘(ℝ, E) I Ψ u v) =
               (Real.sin (Real.sqrt K * r) ^ 2 / K) * (g w v / g u u) := by
-  obtain ⟨t, ht, e, he0, hez, hderiv0, _, hsmooth, htarget, hrad, hgradient, hmetric⟩ :=
+  obtain ⟨t, ht, e, he0, hez, hderiv0, hpoleSmooth, _, hsmooth, htarget, hrad, hgradient, hmetric⟩ :=
     exists_obata_intrinsic_angular_chart b hf hK ha hb hH c hz hcrit hmax
-  refine ⟨t, ht, e, he0, hez, hderiv0, hsmooth, htarget, hrad, hgradient, ?_⟩
+  refine ⟨t, ht, e, he0, hez, hderiv0, hpoleSmooth, hsmooth, htarget, hrad, hgradient, ?_⟩
   intro u hu hune hreg w v hw hv r hr
   let ψ := (extChartAt I c).symm ∘ e
   let L := (trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm z)
@@ -125,6 +126,7 @@ theorem exists_obata_global_angular_metric
       ∃ t : ℝ, 0 < t ∧ ∃ e : OpenPartialHomeomorph E E,
         0 ∈ e.source ∧ e 0 = z ∧
         HasFDerivAt e (t • ContinuousLinearMap.id ℝ E) 0 ∧
+      ContDiffAt ℝ ∞ e 0 ∧
         (∀ u ∈ e.source, ContDiffAt ℝ 2 e u) ∧
         (∀ u ∈ e.source, e u ∈ (extChartAt I c).target) ∧
         (∀ u ∈ e.source, obataRadial K a f ((extChartAt I c).symm (e u)) =

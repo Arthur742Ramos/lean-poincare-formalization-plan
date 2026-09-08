@@ -2,6 +2,7 @@ import LichnerowiczObata.RadialVariation
 import LichnerowiczObata.RadialProduct
 import LichnerowiczObata.ObataRegularSphere
 import LichnerowiczObata.NormalMetricChart
+import LichnerowiczObata.HigherNormalChart
 import LichnerowiczObata.IntrinsicNormalMetric
 import LichnerowiczObata.NormalAngularTangency
 import LichnerowiczObata.GlobalNormalAngularMetric
@@ -105,6 +106,9 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_geodesic_endpoint_local_inverse
 #print axioms LichnerowiczObata.exists_stationary_coordinate_geodesic_flow
 #print axioms LichnerowiczObata.exists_stationary_coordinate_geodesic_flow_of_order
+#print axioms LichnerowiczObata.contDiffAt_coordinate_geodesic_endpoint_zero
+#print axioms LichnerowiczObata.exists_geodesic_endpoint_local_inverse_of_order
+#print axioms LichnerowiczObata.exists_obata_normal_metric_chart_of_order
 #print axioms LichnerowiczObata.exists_coordinate_geodesic_normal_map
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_energy
 #print axioms LichnerowiczObata.coordinate_geodesic_energy_eq

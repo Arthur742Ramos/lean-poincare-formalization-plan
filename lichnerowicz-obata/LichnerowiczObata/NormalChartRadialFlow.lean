@@ -12,7 +12,7 @@ namespace LichnerowiczObata
 set_option backward.isDefEq.respectTransparency false
 
 /-- A polar parametrization is represented near its pole by a genuine
-twice continuously differentiable map of Cartesian tangent vectors, with
+smooth map of Cartesian tangent vectors, with
 an inner-product-preserving derivative at zero. -/
 def HasRadialPoleModel {P : Type*} [NormedAddCommGroup P] [InnerProductSpace ℝ P]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -20,7 +20,7 @@ def HasRadialPoleModel {P : Type*} [NormedAddCommGroup P] [InnerProductSpace ℝ
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [RiemannianBundle (TangentSpace I : M → Type _)]
     (Φ : P × ℝ → M) (p : M) : Prop :=
-  ∃ χ : P → M, χ 0 = p ∧ ContMDiffAt 𝓘(ℝ, P) I 2 χ 0 ∧
+  ∃ χ : P → M, χ 0 = p ∧ ContMDiffAt 𝓘(ℝ, P) I ∞ χ 0 ∧
     (∀ v w : P, inner ℝ (mfderiv 𝓘(ℝ, P) I χ 0 v)
       (mfderiv 𝓘(ℝ, P) I χ 0 w) = inner ℝ v w) ∧
     ∃ δ : ℝ, 0 < δ ∧ ∀ u : Metric.sphere (0 : P) 1, ∀ r ∈ Ioo 0 δ,

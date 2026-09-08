@@ -55,7 +55,7 @@ theorem exists_obata_unit_spherical_product
               inner ℝ (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (w, s))
                 (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (v, t)) =
                   (Real.sin (Real.sqrt K * r) ^ 2 / K) * inner ℝ w v + s * t := by
-  obtain ⟨η, hη, hcurves, hinit, t, ht, e, he0, hez, hderiv0, hsmooth, htarget, hrad, hgradient,
+  obtain ⟨η, hη, hcurves, hinit, t, ht, e, he0, hez, hderiv0, hpoleSmooth, hsmooth, htarget, hrad, hgradient,
     R, hR, htR, hball, hsource, hregular, hrays, Q, hQ, hmetric⟩ :=
     exists_obata_spherical_metric_product hf hnon hK ha hH c hz hcrit hmax
   let p := (extChartAt I c).symm z
@@ -69,13 +69,13 @@ theorem exists_obata_unit_spherical_product
     let χ : TM p → M := (extChartAt I c).symm ∘ e ∘ A
     have hA0 : A 0 = 0 := map_zero A
     have heA0 : e (A 0) = z := by rw [hA0, hez]
-    have hi : ContMDiffAt 𝓘(ℝ, E) I 2 (extChartAt I c).symm z := by
+    have hi : ContMDiffAt 𝓘(ℝ, E) I ∞ (extChartAt I c).symm z := by
       simpa only [I.range_eq_univ, contMDiffWithinAt_univ] using
-        (contMDiffWithinAt_extChartAt_symm_range (I := I) (n := 2) c hz)
-    have heA : ContDiffAt ℝ 2 (e ∘ A) 0 := by
+        (contMDiffWithinAt_extChartAt_symm_range (I := I) (n := ∞) c hz)
+    have heA : ContDiffAt ℝ ∞ (e ∘ A) 0 := by
       apply ContDiffAt.comp (g := e) (f := (A : TM p → E))
       · rw [hA0]
-        exact hsmooth _ he0
+        exact hpoleSmooth
       · exact A.contDiff.contDiffAt
     refine ⟨χ, ?_, ?_, ?_, min (2 * (t * R)) (Real.pi / Real.sqrt K),
       lt_min (mul_pos (by norm_num) htR.1)

@@ -59,6 +59,7 @@ theorem exists_obata_spherical_metric_product
       ∃ t : ℝ, 0 < t ∧ ∃ e : OpenPartialHomeomorph E E,
         0 ∈ e.source ∧ e 0 = z ∧
         HasFDerivAt e (t • ContinuousLinearMap.id ℝ E) 0 ∧
+      ContDiffAt ℝ ∞ e 0 ∧
         (∀ u ∈ e.source, ContDiffAt ℝ 2 e u) ∧
         (∀ u ∈ e.source, e u ∈ (extChartAt I c).target) ∧
         (∀ u ∈ e.source, obataRadial K a f ((extChartAt I c).symm (e u)) =
@@ -96,7 +97,7 @@ theorem exists_obata_spherical_metric_product
                   inner ℝ (mfderiv 𝓘(ℝ, TM p × ℝ) I Γ (u, r) (w, s))
                     (mfderiv 𝓘(ℝ, TM p × ℝ) I Γ (u, r) (v, τ)) =
                     (Real.sin (Real.sqrt K * r) ^ 2 / K) * (inner ℝ w v / R ^ 2) + s * τ := by
-  obtain ⟨hb, η, hη, hcurves, t, ht, e, he0, hez, hderiv0, hsmooth, htarget, hrad, hgradient, hmetric⟩ :=
+  obtain ⟨hb, η, hη, hcurves, t, ht, e, he0, hez, hderiv0, hpoleSmooth, hsmooth, htarget, hrad, hgradient, hmetric⟩ :=
     exists_obata_global_angular_metric hf hnon hK ha hH c hz hcrit ((hmax _).mpr rfl)
   have hcρ : Continuous (obataRadial K a f) := by
     have hfc := hf.continuous
@@ -158,7 +159,7 @@ theorem exists_obata_spherical_metric_product
     rw [← hh, norm_zero] at hn
     exact hR.ne' hn.symm
   refine ⟨η, hη, fun x hx => (hcurves x hx).2.2,
-    fun x hx => (hcurves x hx).1, t, ht, e, he0, hez, hderiv0, hsmooth, htarget, hrad, hgradient,
+    fun x hx => (hcurves x hx).1, t, ht, e, he0, hez, hderiv0, hpoleSmooth, hsmooth, htarget, hrad, hgradient,
     R, hR, htR, hball, hsource, hregular, ?_, Q, hQ, ?_⟩
   · exact normal_chart_eq_radial_transport hK ha
       (hf.of_le (WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ ⊤))) c hz e

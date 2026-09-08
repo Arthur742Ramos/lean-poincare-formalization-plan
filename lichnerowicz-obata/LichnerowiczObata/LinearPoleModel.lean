@@ -24,8 +24,8 @@ theorem HasRadialPoleModel.precompose_linearIsometry
     (L : P ≃ₗᵢ[ℝ] V) :
     HasRadialPoleModel I (fun q : P × ℝ => Ψ (L q.1, q.2)) p := by
   obtain ⟨χ, hχ0, hχ, hm, δ, hδ, hpolar⟩ := hmodel
-  have hL : ContMDiff 𝓘(ℝ, P) 𝓘(ℝ, V) 2 L := L.contDiff.contMDiff
-  have hc : ContMDiffAt 𝓘(ℝ, V) I 2 χ (L 0) := by simpa only [map_zero] using hχ
+  have hL : ContMDiff 𝓘(ℝ, P) 𝓘(ℝ, V) ∞ L := L.contDiff.contMDiff
+  have hc : ContMDiffAt 𝓘(ℝ, V) I ∞ χ (L 0) := by simpa only [map_zero] using hχ
   refine ⟨χ ∘ L, by simpa only [Function.comp_apply, map_zero] using hχ0,
     hc.comp 0 (hL 0), ?_, δ, hδ, ?_⟩
   · intro v w

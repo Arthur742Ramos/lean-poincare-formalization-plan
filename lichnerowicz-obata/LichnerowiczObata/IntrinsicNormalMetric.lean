@@ -128,7 +128,8 @@ theorem exists_obata_intrinsic_angular_chart
     (hmax : f ((extChartAt I c).symm z) = a) :
     ∃ t : ℝ, 0 < t ∧ ∃ e : OpenPartialHomeomorph E E,
       0 ∈ e.source ∧ e 0 = z ∧
-      HasFDerivAt e (t • ContinuousLinearMap.id ℝ E) 0 ∧ ContDiffAt ℝ 2 e.symm z ∧
+      HasFDerivAt e (t • ContinuousLinearMap.id ℝ E) 0 ∧
+      ContDiffAt ℝ ∞ e 0 ∧ ContDiffAt ℝ 2 e.symm z ∧
       (∀ u ∈ e.source, ContDiffAt ℝ 2 e u) ∧
       (∀ u ∈ e.source, e u ∈ (extChartAt I c).target) ∧
       (∀ u ∈ e.source, obataRadial K a f ((extChartAt I c).symm (e u)) =
@@ -145,9 +146,9 @@ theorem exists_obata_intrinsic_angular_chart
         inner ℝ (mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ e) u w)
           (mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ e) u v) =
             (Real.sin (Real.sqrt K * (t * Real.sqrt (g u u))) ^ 2 / (K * g u u)) * g w v := by
-  obtain ⟨t, ht, e, he0, hez, hderiv0, hinv, hsmooth, htarget, hrad, hgradient, hmetric⟩ :=
+  obtain ⟨t, ht, e, he0, hez, hderiv0, hpoleSmooth, hinv, hsmooth, htarget, hrad, hgradient, hmetric⟩ :=
     exists_obata_normal_metric_chart b hf hK ha hb hH c hz hcrit hmax
-  refine ⟨t, ht, e, he0, hez, hderiv0, hinv, hsmooth, htarget, hrad, ?_, ?_⟩
+  refine ⟨t, ht, e, he0, hez, hderiv0, hpoleSmooth, hinv, hsmooth, htarget, hrad, ?_, ?_⟩
   · intro u hu hphase
     rw [← coordinate_derivative_eq_intrinsic_chart_lift c
       ((hsmooth u hu).differentiableAt (by norm_num)) (htarget u hu) u]

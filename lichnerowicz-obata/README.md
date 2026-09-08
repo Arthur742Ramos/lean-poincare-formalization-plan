@@ -749,3 +749,13 @@ and a continuous local inverse of its isometric derivative. Away from the
 poles, it uses the existing regular metric comparison on an open neighborhood.
 This is an everywhere first-order metric statement, not yet a proof of the
 higher smoothness required for the final smooth Riemannian-isometry theorem.
+
+`contDiffAt_coordinate_geodesic_endpoint_zero` now proves full smoothness at
+zero velocity for a fixed actual coordinate-geodesic endpoint. It compares
+that endpoint with arbitrary finite-order flows by time rescaling and ODE
+uniqueness. `exists_obata_normal_metric_chart_of_order` retains smoothness
+of the chosen chart and its inverse at the pole, together with its radial
+and metric identities. This evidence is carried through the spherical
+product construction: `HasRadialPoleModel` now requires a smooth Cartesian
+pole model. Smoothness of the round logarithmic reparametrization and its
+transfer to the global comparison are still separate remaining steps.
