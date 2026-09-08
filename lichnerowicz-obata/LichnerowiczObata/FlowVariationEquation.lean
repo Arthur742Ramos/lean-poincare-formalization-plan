@@ -69,4 +69,25 @@ theorem fderiv_flow_initial_apply {φ : E × ℝ → E} {x : E}
   rw [hd'.fderiv] at he
   simpa using congrArg (fun L : E →L[ℝ] E => L u) he
 
+/-- Restriction to initial velocities and projection to positions turns the
+flat flow derivative into a scalar multiple of the identity. -/
+theorem hasFDerivAt_position_endpoint {α : (E × E) × ℝ → E × E} {z : E} {t : ℝ}
+    (hα : DifferentiableAt ℝ α ((z, 0), t))
+    (hlin : ∀ v : E, fderiv ℝ α ((z, 0), t) ((0, v), 0) = (t • v, v)) :
+    HasFDerivAt (fun v => (α ((z, v), t)).1)
+      (t • ContinuousLinearMap.id ℝ E) 0 := by
+  let L : E →L[ℝ] (E × E) × ℝ :=
+    ((0 : E →L[ℝ] E).prod (ContinuousLinearMap.id ℝ E)).prod 0
+  have hi : HasFDerivAt (fun v : E => ((z, v), t)) L 0 :=
+    ((hasFDerivAt_const z 0).prodMk (hasFDerivAt_id 0)).prodMk
+      (hasFDerivAt_const t 0)
+  have hd : HasFDerivAt (fun v => α ((z, v), t))
+      ((fderiv ℝ α ((z, 0), t)).comp L) 0 := hα.hasFDerivAt.comp 0 hi
+  have hp : HasFDerivAt (fun v => (α ((z, v), t)).1)
+      ((ContinuousLinearMap.fst ℝ E E).comp ((fderiv ℝ α ((z, 0), t)).comp L)) 0 :=
+    (hasFDerivAt_fst (p := α ((z, 0), t))).comp 0 hd
+  convert hp using 1
+  ext v
+  simpa [L] using (congrArg Prod.fst (hlin v)).symm
+
 end LichnerowiczObata

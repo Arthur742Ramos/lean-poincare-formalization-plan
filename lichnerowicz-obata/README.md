@@ -335,5 +335,6 @@ domain proves constant velocity variation and affine position variation.
 The initial-value identity determines the spatial derivative at time zero;
 along the stationary orbit the flow derivative is therefore
 `(u, v) ↦ (u + t • v, v)`.
-The endpoint-map derivative and normal-coordinate inverse
-still need to be constructed.
+Restricting to initial velocities and projecting to position proves that the
+endpoint map `v ↦ (α ((z, v), t)).1` has derivative `t • id` at zero.
+The normal-coordinate inverse still needs to be constructed.

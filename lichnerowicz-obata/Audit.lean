@@ -44,6 +44,8 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.flat_variation_eq_affine
 #print axioms LichnerowiczObata.fderiv_flow_initial_apply
 #print axioms LichnerowiczObata.fderiv_geodesic_flow_at_rest_apply
+#print axioms LichnerowiczObata.hasFDerivAt_position_endpoint
+#print axioms LichnerowiczObata.hasFDerivAt_geodesic_endpoint_zero
 #print axioms LichnerowiczObata.contDiffAt_coordinateVectorField_of_order
 #print axioms LichnerowiczObata.contDiffOn_coordinateConnection_basis
 #print axioms LichnerowiczObata.contDiffOn_coordinateGeodesicSpray

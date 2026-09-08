@@ -168,4 +168,27 @@ theorem fderiv_geodesic_flow_at_rest_apply
       hU hα hode (hmem s hs) (hrest s hs) (u, v)) htime
   simpa only [hi] using he
 
+/-- The position endpoint of the geodesic flow has derivative `t • id` at
+zero initial velocity. This is the differential used for normal coordinates. -/
+theorem hasFDerivAt_geodesic_endpoint_zero
+    (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov) (ht : cov.torsion = 0)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E) (c : M) {z : E}
+    (hz : z ∈ (extChartAt I c).target)
+    {α : (E × E) × ℝ → E × E} {U : Set ((E × E) × ℝ)}
+    (hU : IsOpen U) (hα : ContDiffOn ℝ 2 α U)
+    (hode : ∀ q ∈ U, HasDerivAt (fun s => α (q.1, s))
+      (coordinateGeodesicSpray cov b c (α q)) q.2)
+    (hinit : (fun q => α (q, 0)) =ᶠ[𝓝 (z, (0 : E))] id)
+    {T : Set ℝ} (hT : IsOpen T) (hconn : IsPreconnected T) (hzero : (0 : ℝ) ∈ T)
+    (hmem : ∀ s ∈ T, ((z, 0), s) ∈ U)
+    (hrest : ∀ s ∈ T, α ((z, 0), s) = (z, 0))
+    {t : ℝ} (htime : t ∈ T) :
+    HasFDerivAt (fun v => (α ((z, v), t)).1)
+      (t • ContinuousLinearMap.id ℝ E) 0 := by
+  apply hasFDerivAt_position_endpoint
+    ((hα.contDiffAt (hU.mem_nhds (hmem t htime))).differentiableAt (by norm_num))
+  intro v
+  simpa using fderiv_geodesic_flow_at_rest_apply cov hm ht b c hz hU hα hode hinit
+    hT hconn hzero hmem hrest htime 0 v
+
 end LichnerowiczObata
