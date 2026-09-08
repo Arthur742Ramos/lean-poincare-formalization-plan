@@ -54,6 +54,49 @@ theorem HasUnitPolarMetric.exists_differentiable_inverse
   intro v hv t
   exact (hm u r hr).2 v v hv hv t t
 
+/-- Angular matching on any regular latitude is differentiable: it is the
+angular component of the inverse polar coordinates of the other model. -/
+theorem mdifferentiable_polar_angular_matching
+    {P V : Type*} [NormedAddCommGroup P] [InnerProductSpace ℝ P]
+    [NormedAddCommGroup V] [InnerProductSpace ℝ V]
+    {n : ℕ} [Fact (Module.finrank ℝ P = n + 1)]
+    [Fact (Module.finrank ℝ V = n + 1)]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [I.Boundaryless]
+    [RiemannianBundle (TangentSpace I : M → Type _)]
+    {K : ℝ} {Φ : P × ℝ → M} {Ψ : V × ℝ → M}
+    (hΦ : HasUnitPolarMetric I K Φ) (hΨ : HasUnitPolarMetric I K Ψ) (hK : 0 < K)
+    (U : TopologicalSpace.Opens M)
+    (Q : Metric.sphere (0 : V) 1 × Ioo 0 (Real.pi / Real.sqrt K) ≃ₜ U)
+    (hQ : ∀ q, (Q q : M) = Ψ (q.1, q.2))
+    (hDim : Module.finrank ℝ E = n + 1)
+    (A : Metric.sphere (0 : P) 1 → Metric.sphere (0 : V) 1)
+    {r s : ℝ} (hr : r ∈ Ioo 0 (Real.pi / Real.sqrt K))
+    (hs : s ∈ Ioo 0 (Real.pi / Real.sqrt K))
+    (hmatch : ∀ u : Metric.sphere (0 : P) 1, Φ (u, s) = Ψ (A u, r)) :
+    MDifferentiable (𝓡 n) (𝓡 n) A := by
+  intro u
+  obtain ⟨e, heS, heT, he, heinv, hed⟩ := hΨ.exists_differentiable_inverse hK U Q
+    (A u, ⟨r, hr⟩) hQ hDim
+  have hid (v : Metric.sphere (0 : P) 1) : e.symm (Φ (v, s)) = (A v, r) := by
+    have hh := heinv (Q (A v, ⟨r, hr⟩))
+    simpa only [hQ, Q.symm_apply_apply, hmatch] using hh
+  have hmem : Φ (u, s) ∈ U := by
+    rw [hmatch, ← hQ (A u, ⟨r, hr⟩)]
+    exact (Q (A u, ⟨r, hr⟩)).property
+  have hc : MDifferentiableAt (𝓡 n) 𝓘(ℝ, P)
+      (Subtype.val : Metric.sphere (0 : P) 1 → P) u :=
+    (contMDiff_coe_sphere u).mdifferentiableAt one_ne_zero
+  have hp : MDifferentiableAt (𝓡 n) I
+      (fun v : Metric.sphere (0 : P) 1 => Φ (v, s)) u :=
+    (hΦ u s hs).1.comp u (hc.prodMk_space mdifferentiableAt_const)
+  have hi := (hed _ hmem).comp u hp
+  have hf : MDifferentiableAt (𝓡 n) (𝓡 n)
+      (fun v : Metric.sphere (0 : P) 1 => (e.symm (Φ (v, s))).1) u :=
+    mdifferentiableAt_fst.comp u hi
+  simpa only [hid] using hf
+
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
   {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -67,6 +110,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [IsContMDiffRiemannianBundle I ∞ E (TangentSpace I : M → Type _)]
 
 local notation "TM" => (TangentSpace I : M → Type _)
+
+local instance matchedPolarTangentFinrank {n : ℕ} [Fact (Module.finrank ℝ E = n + 1)] (p : M) :
+    Fact (Module.finrank ℝ (TM p) = n + 1) :=
+  ⟨show Module.finrank ℝ E = n + 1 from Fact.out⟩
 
 /-- Both metric polar models, their isometric pole derivatives, and their
 angular matching are constructed together from the Obata equation and the
@@ -95,8 +142,11 @@ theorem exists_obata_matched_polar_models
         (∀ u : Metric.sphere (0 : TM q) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
           obataRadial K a f (Ψ (u, r)) = Real.pi / Real.sqrt K - r) ∧
         ∃ A : Metric.sphere (0 : TM p) 1 ≃ₜ Metric.sphere (0 : TM q) 1,
-          ∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
-            Φ (u, Real.pi / Real.sqrt K - r) = Ψ (A u, r) := by
+          (∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
+            Φ (u, Real.pi / Real.sqrt K - r) = Ψ (A u, r)) ∧
+          ∀ (n : ℕ) (hdim : Module.finrank ℝ E = n + 1),
+            letI : Fact (Module.finrank ℝ E = n + 1) := ⟨hdim⟩
+            MDifferentiable (𝓡 n) (𝓡 n) A ∧ MDifferentiable (𝓡 n) (𝓡 n) A.symm := by
   have hf2 : ContMDiff I 𝓘(ℝ, ℝ) 2 f :=
     hf.of_le (WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ ⊤))
   have hpm : IsMaxOn f univ ((extChartAt I c).symm z) := by
@@ -115,6 +165,25 @@ theorem exists_obata_matched_polar_models
     (fun u : Metric.sphere (0 : TM ((extChartAt I c).symm z)) 1 × ℝ => Φ (u.1, u.2))
     (fun u : Metric.sphere (0 : TM ((extChartAt I d).symm z')) 1 × ℝ => Ψ (u.1, u.2))
     hN hS hρN hρS hcN hcS
-  exact ⟨Φ, Ψ, hpole, hspole, hmN, hmS, N, S, hN, hS, hρN, hρS, A, hA⟩
+  refine ⟨Φ, Ψ, hpole, hspole, hmN, hmS, N, S, hN, hS, hρN, hρS, A, hA, ?_⟩
+  intro n hdim
+  let : Fact (Module.finrank ℝ E = n + 1) := ⟨hdim⟩
+  let U : TopologicalSpace.Opens M :=
+    ⟨{x | -a < f x ∧ f x < a},
+      (isOpen_lt continuous_const hf.continuous).inter
+        (isOpen_lt hf.continuous continuous_const)⟩
+  let m := (Real.pi / Real.sqrt K) / 2
+  have hm : m ∈ Ioo 0 (Real.pi / Real.sqrt K) := by
+    have hp := div_pos Real.pi_pos (Real.sqrt_pos.mpr hK)
+    dsimp [m]
+    constructor <;> linarith
+  have heq : Real.pi / Real.sqrt K - m = m := by dsimp [m]; ring
+  constructor
+  · apply mdifferentiable_polar_angular_matching (n := n) hmN hmS hK U S hS hdim A hm hm
+    intro u
+    simpa only [heq] using hA u m hm
+  · apply mdifferentiable_polar_angular_matching (n := n) hmS hmN hK U N hN hdim A.symm hm hm
+    intro v
+    simpa only [heq, A.apply_symm_apply] using (hA (A.symm v) m hm).symm
 
 end LichnerowiczObata

@@ -714,4 +714,8 @@ topological angular matching alone is insufficient for the south-pole derivative
 south models of one Obata function. One conclusion now retains both full polar
 metrics, both isometric Cartesian pole derivatives, both radial coordinate
 identities, and the angular homeomorphism matching all opposite radial curves.
+In every sphere-chart dimension `finrank E = n + 1`, this same angular
+homeomorphism and its inverse are now proved manifold-differentiable. The proof
+uses the equatorial slice and the differentiable inverse coordinates supplied
+by the positive polar metric; no differentiability of the matching is assumed.
 The angular map is not yet proved to extend to a linear isometry.
