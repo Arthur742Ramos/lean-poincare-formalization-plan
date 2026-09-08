@@ -601,3 +601,9 @@ homeomorphisms, with cancellation required only near the image point. This
 provides the form needed on the open regular polar domain without extending
 the homeomorphism outside that domain. Its application to the constructed
 polar comparison remains outstanding.
+`OpenRegionHomeomorph` constructs ambient partial homeomorphisms from
+homeomorphisms of nonempty open regions, retaining exact source, target,
+forward, and inverse formulas. Its polar specialization uses the open
+angular-radius cylinder and agrees with the specified parameter map there.
+This supplies the open-domain representation needed to apply the inverse
+theorem to the constructed polar map.
