@@ -10,6 +10,19 @@ open scoped Topology
 
 namespace LichnerowiczObata
 
+/-- A level contained in an open region is the same topological space whether
+it is formed in the ambient space or inside that region. -/
+def wholeLevelHomeomorph {X : Type*} [TopologicalSpace X]
+    (U : Set X) (ρ : X → ℝ) (r : ℝ)
+    (hU : ∀ x, ρ x = r → x ∈ U) :
+    {x : U // ρ x = r} ≃ₜ {x : X // ρ x = r} where
+  toFun x := ⟨x.1, x.2⟩
+  invFun x := ⟨⟨x.1, hU x x.2⟩, x.2⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+  continuous_toFun := (continuous_subtype_val.comp continuous_subtype_val).subtype_mk _
+  continuous_invFun := (continuous_subtype_val.subtype_mk _).subtype_mk _
+
 /-- A radial family with its proved coordinate and reset identities gives
 an actual bijective product parameterization, not merely a surjective map. -/
 def radialProductEquiv {X : Type*} (U : Set X) (J : Set ℝ) (ρ : X → ℝ)
@@ -113,5 +126,29 @@ theorem exists_obata_radial_product {K : ℝ} (hK : 0 < K) {f : M → ℝ}
   exact ⟨radialProductHomeomorph U J ρ η r₀ hr₀ hρ hη hr
     (fun x hx => (hp x hx).1) (fun x hx r hrt s _ => (hp x hx).2.1 r hrt s)
     hcρ.continuousOn hηs.continuousOn⟩
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The angular factor can be taken to be a whole ambient radial level.
+This is the form that composes directly with the normal-sphere chart. -/
+theorem exists_obata_whole_level_product {K : ℝ} (hK : 0 < K) {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
+    (hH : ∀ (x : M) (v w : TangentSpace I x),
+      hessian (leviCivitaConnection (I := I)) f x v w = -K * f x * inner ℝ v w) :
+    ∃ a : ℝ, 0 < a ∧ (∀ x, -a ≤ f x ∧ f x ≤ a) ∧
+      ∀ r₀ ∈ Ioo 0 (Real.pi / Real.sqrt K),
+        Nonempty ({x : M // -a < f x ∧ f x < a} ≃ₜ
+          {x : M // obataRadial K a f x = r₀} ×
+            Ioo 0 (Real.pi / Real.sqrt K)) := by
+  obtain ⟨a, ha, hb, hp⟩ := exists_obata_radial_product hK hf hnon hH
+  refine ⟨a, ha, hb, ?_⟩
+  intro r hr
+  obtain ⟨e⟩ := hp r hr
+  have hregular : ∀ x, obataRadial K a f x = r → -a < f x ∧ f x < a := by
+    intro x hx
+    have he := obataRadial_cos hK ha x (hb x)
+    rw [hx] at he
+    rw [← he]
+    exact obata_cos_level_mem hK ha hr
+  exact ⟨e.trans ((wholeLevelHomeomorph _ _ r hregular).prodCongr (Homeomorph.refl _))⟩
 
 end LichnerowiczObata

@@ -464,5 +464,8 @@ and positive endpoint time are constructed, not required as extra hypotheses.
 Applying this chart to the whole-level construction now identifies every
 sufficiently small positive Obata radial level with an actual intrinsic
 tangent-space sphere. The scale, chart, and uniform range of small radii are
-constructed. Extending the level identification through global radial
-transport and proving the global Riemannian comparison remain pending.
+constructed. The global radial product now also uses a whole ambient level,
+with a proved homeomorphism removing the nested regular-region subtype; this
+allows direct composition with the normal-sphere identification. Matching
+the amplitude and angular factors and proving the global Riemannian
+comparison remain pending.

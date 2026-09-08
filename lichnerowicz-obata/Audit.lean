@@ -1,4 +1,5 @@
 import LichnerowiczObata.RadialVariation
+import LichnerowiczObata.RadialProduct
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -328,3 +329,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_intrinsic_radial_normal_chart
 #print axioms LichnerowiczObata.exists_obata_radial_normal_chart
 #print axioms LichnerowiczObata.exists_small_obata_sphere_levels
+#print axioms LichnerowiczObata.wholeLevelHomeomorph
+#print axioms LichnerowiczObata.exists_obata_whole_level_product
