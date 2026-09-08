@@ -651,3 +651,8 @@ regular differentiable extensions and tangent metric preservation for the
 same global map. Smoothness and metric preservation at the poles are not
 yet proved; the global homeomorphism is not claimed as a global Riemannian
 isometry.
+`RoundPoleGraph` supplies smooth Cartesian graphs for both round poles,
+with exact projection and hemisphere reconstruction formulas. Their
+derivative at the pole is the angular linear inclusion and preserves inner
+products. Identifying the Obata homeomorphism with these smooth local graphs
+is still required; the graph results alone do not establish its pole smoothness.
