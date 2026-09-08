@@ -7,6 +7,7 @@ import LichnerowiczObata.CoordinateRadialShape
 import LichnerowiczObata.ManifoldFlowCoordinates
 import LichnerowiczObata.CoordinateAngularVariation
 import LichnerowiczObata.ConstructedRadialMetric
+import LichnerowiczObata.IntrinsicFlowMetric
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -32,6 +33,10 @@ import LichnerowiczObata.AngularMetricEvolution
 import LichnerowiczObata.SmoothPicardOperator
 
 #print axioms LichnerowiczObata.contDiffOn_bilinear_of_basis
+#print axioms LichnerowiczObata.symmL_fderiv_chart_map
+#print axioms LichnerowiczObata.fderiv_family_spatial
+#print axioms LichnerowiczObata.symmL_fderiv_chartFlow
+#print axioms LichnerowiczObata.coordinate_flow_metric_eq_intrinsic
 #print axioms LichnerowiczObata.radialChartMetricEvolution_of_family
 #print axioms LichnerowiczObata.exists_smooth_obata_radial_family_metric
 #print axioms LichnerowiczObata.coordinate_variation_angular

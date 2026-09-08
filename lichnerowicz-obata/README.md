@@ -306,3 +306,8 @@ the original gradient-norm identity, smoothness, reset law, integral-curve
 equation, level identity, unit speed, and endpoint limits, and adds metric
 evolution in every valid chart pair. Chart-independent integration and pole
 normalization remain to be completed.
+`IntrinsicFlowMetric` identifies coordinate spatial derivatives with the
+actual tangent maps of the fixed-time manifold slices. Their coordinate
+metric pairing equals the intrinsic inner product, independently of the
+output chart. Transferring the local ODE to this intrinsic pairing and
+integrating it over the full radial interval is the next step.
