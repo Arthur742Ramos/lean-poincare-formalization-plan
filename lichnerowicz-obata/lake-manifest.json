@@ -1,12 +1,16 @@
 {"version": "1.2.0",
  "packagesDir": ".lake/packages",
  "packages":
- [{"type": "path",
+ [{"url":
+   "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan.git",
+   "type": "git",
+   "subDir": "almost-schur",
    "scope": "",
+   "rev": "3faf25aefc27842a77c37ca178e8a40a20bb20c7",
    "name": "AlmostSchur",
    "manifestFile": "lake-manifest.json",
+   "inputRev": "3faf25aefc27842a77c37ca178e8a40a20bb20c7",
    "inherited": false,
-   "dir": "../almost-schur",
    "configFile": "lakefile.toml"},
   {"url": "https://github.com/leanprover-community/mathlib4",
    "type": "git",

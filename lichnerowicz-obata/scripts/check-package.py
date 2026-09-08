@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import tomllib
 import urllib.request
 
 import jsonschema
@@ -45,6 +46,19 @@ def require(condition, message):
 
 def git(*args):
     return subprocess.check_output(["git", *args], cwd=REPOSITORY)
+
+
+def check_dependency_layout(manifest, lakefile):
+    url = "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan.git"
+    require(all(p["type"] == "git" for p in manifest["packages"]),
+            "registry sandbox requires Git dependencies inside .lake/packages")
+    inherited = next(p for p in manifest["packages"] if p["name"] == "AlmostSchur")
+    require(all(inherited.get(k) == v for k, v in {
+        "url": url, "rev": BASE, "inputRev": BASE, "subDir": "almost-schur",
+    }.items()), "AlmostSchur must retain its exact Git source pin and subdirectory")
+    require(lakefile["require"] == [{"name": "AlmostSchur", "git": url,
+                                    "rev": BASE, "subDir": "almost-schur"}],
+            "Lakefile must use the same pinned Git dependency, not a sibling path")
 
 
 def main():
@@ -109,6 +123,7 @@ def main():
             "unexpected advertised axiom set")
     require(metadata["review"]["status"] == "self-assessed", "external review must not be invented")
     manifest = json.loads((ROOT / "lake-manifest.json").read_text())
+    check_dependency_layout(manifest, tomllib.loads((ROOT / "lakefile.toml").read_text()))
     mathlib = next(p for p in manifest["packages"] if p["name"] == "mathlib")
     require(mathlib["rev"] == MATHLIB, "Mathlib revision changed")
     require(not git("diff", BASE, "--", "almost-schur"), "inherited almost-schur sources changed")

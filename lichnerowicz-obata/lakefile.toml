@@ -4,7 +4,9 @@ defaultTargets = ["LichnerowiczObata", "LichnerowiczObataChallenge", "Lichnerowi
 
 [[require]]
 name = "AlmostSchur"
-path = "../almost-schur"
+git = "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan.git"
+rev = "3faf25aefc27842a77c37ca178e8a40a20bb20c7"
+subDir = "almost-schur"
 
 [[lean_lib]]
 name = "LichnerowiczObata"

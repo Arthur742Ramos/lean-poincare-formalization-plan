@@ -31,7 +31,7 @@ merely a homeomorphism and is not an assertion about ambient chordal distance.
 
 ## Reused formalizations
 
-1. The path dependency `../almost-schur` is inherited **without source changes**
+1. The Git subdirectory dependency `almost-schur` is inherited **without source changes**
    from this repository at
    [`3faf25aefc27842a77c37ca178e8a40a20bb20c7`](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/3faf25aefc27842a77c37ca178e8a40a20bb20c7/almost-schur).
    It supplies the actual Levi-Civita, curvature, Riemannian integration,
@@ -54,7 +54,10 @@ merely a homeomorphism and is not an assertion about ambient chordal distance.
 4. Mathlib is pinned to
    [`db584cd6d46c92f209a44c0f1c829460d327499d`](https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d).
    The new subproject resolves this same immutable dependency via the pinned
-   almost-Schur path dependency and its committed manifest.
+   almost-Schur Git dependency and its committed manifest. Lake checks it out
+   at `.lake/packages/AlmostSchur/almost-schur`, inside the selected project;
+   a cold Comparator build therefore needs no sibling-directory write access.
+   The inventory paths above refer to the identical repository source copy.
 
 `scripts/verify-comparator.sh`, `scripts/landrun-wrapper.sh`, and
 `scripts/fake-landrun.sh` are exact copies from the same almost-Schur snapshot.
@@ -66,7 +69,7 @@ real Linux Landrun and the unsandboxed macOS development fallback.
 The new source develops spectral attainment and smooth eigenfunctions,
 global Obata rigidity with both pole extensions, the round-sphere converse,
 and the assembled Lichnerowicz--Obata theorem. The source list and public
-declaration audit distinguish this code from the unchanged path dependency.
+declaration audit distinguish this code from the unchanged pinned Git dependency.
 
 `LichnerowiczObataChallenge.lean` imports only Mathlib. It constructs a
 metric-compatible torsion-free connection before stating the Ricci-conditional
