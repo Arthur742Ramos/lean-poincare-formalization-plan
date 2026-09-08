@@ -314,3 +314,8 @@ integrates over the entire open radial interval. The chart-free
 tangent-map metric divided by the spherical sine-square factor is constant,
 for arbitrary initial tangent vectors. Identification of the normalized
 metric at a pole with the round angular metric remains pending.
+`RadialMetricNormalization` fixes the integration constant at the actual
+starting level. Angular transport has exactly the initial inner product
+multiplied by the ratio of sine-squared radial factors, derived from the
+initial-point identity. This is an initial-level normalization, not yet the
+identification of the pole's angular metric with the round sphere.
