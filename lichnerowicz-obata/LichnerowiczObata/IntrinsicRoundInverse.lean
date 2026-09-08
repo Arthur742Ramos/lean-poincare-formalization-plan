@@ -16,6 +16,29 @@ def intrinsicRoundInverseCoordinates (R : ℝ) (x : RoundAmbient P) : P × ℝ :
   ((WithLp.ofLp (roundInverseCoordinates R roundNorth x).1).1,
     (roundInverseCoordinates R roundNorth x).2)
 
+/-- The radius remains continuous even where the angular coordinate is
+singular. This includes both poles of the round sphere. -/
+theorem continuous_intrinsicRoundInverse_radius (R : ℝ) :
+    Continuous (fun x : RoundAmbient P => (intrinsicRoundInverseCoordinates R x).2) := by
+  change Continuous (fun x : RoundAmbient P => R * Real.arccos (inner ℝ roundNorth x / R))
+  fun_prop
+
+theorem intrinsicRoundInverse_radius_north {R : ℝ} (hR : 0 < R) :
+    (intrinsicRoundInverseCoordinates R (R • (roundNorth : RoundAmbient P))).2 = 0 := by
+  have hh : inner ℝ (roundNorth : RoundAmbient P) (R • roundNorth) = R := by
+    rw [real_inner_smul_right, real_inner_self_eq_norm_sq, roundNorth_norm]
+    ring
+  change R * Real.arccos (inner ℝ roundNorth (R • (roundNorth : RoundAmbient P)) / R) = 0
+  rw [hh, div_self hR.ne', Real.arccos_one, mul_zero]
+
+theorem intrinsicRoundInverse_radius_south {R : ℝ} (hR : 0 < R) :
+    (intrinsicRoundInverseCoordinates R (-R • (roundNorth : RoundAmbient P))).2 = Real.pi * R := by
+  have hh : inner ℝ (roundNorth : RoundAmbient P) (-R • roundNorth) = -R := by
+    rw [real_inner_smul_right, real_inner_self_eq_norm_sq, roundNorth_norm]
+    ring
+  change R * Real.arccos (inner ℝ roundNorth (-R • (roundNorth : RoundAmbient P)) / R) = _
+  rw [hh, neg_div, div_self hR.ne', Real.arccos_neg_one, mul_comm]
+
 theorem intrinsicRoundInverseCoordinates_apply {K : ℝ} (hK : 0 < K)
     (q : Metric.sphere (0 : P) 1 × Set.Ioo (0 : ℝ) (Real.pi / Real.sqrt K)) :
     intrinsicRoundInverseCoordinates (1 / Real.sqrt K)

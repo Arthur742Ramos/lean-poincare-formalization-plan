@@ -48,6 +48,10 @@ theorem obata_regular_metric_comparison
             ∀ v w : TM (y : M),
               inner ℝ (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) v)
                 (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) w) = inner ℝ v w) ∧
+          (∀ y : {x : M // -a < f x ∧ f x < a},
+            obataRadial K a f (y : M) =
+              (intrinsicRoundInverseCoordinates (1 / Real.sqrt K)
+                ((F y).1 : RoundAmbient (TM p))).2) ∧
           ∃ G : RoundAmbient (TM p) → M,
             ∀ x : RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
               G (x.1 : RoundAmbient (TM p)) = (F.symm x : M) ∧

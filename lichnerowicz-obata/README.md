@@ -633,3 +633,9 @@ the nonconstant Obata Hessian equation in dimension at least two, without
 assuming a chosen maximum, chart, or successor-dimension instance. It packages
 the unique poles, both differentiable ambient maps, forward tangent metric
 preservation, and radial distance bounds to both poles in one theorem.
+The same comparison now retains the exact identity between the Obata radial
+function and the round inverse radius. This identity is propagated from the
+constructed radial flow, rather than inferred from metric agreement.
+The round inverse radius is continuous on the whole ambient space, with
+values `0` and `π R` at its north and south poles, respectively; the angular
+inverse need not be continuous there.

@@ -54,6 +54,8 @@ theorem exists_obata_regular_round_comparison
             G (x.1 : RoundAmbient (TM p)) = (F.symm x : M) ∧
             MDifferentiableAt 𝓘(ℝ, RoundAmbient (TM p)) I G (x.1 : RoundAmbient (TM p))) ∧
           (∀ q, (Q q : M) = Φ (q.1, q.2)) ∧
+          (∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
+            obataRadial K a f (Φ (u, r)) = r) ∧
           (∀ q, ((F (Q q)).1 : RoundAmbient (TM p)) = Ψ (q.1, q.2)) ∧
           ∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
             MDifferentiableAt 𝓘(ℝ, TM p × ℝ) I Φ (u, r) ∧
@@ -64,11 +66,11 @@ theorem exists_obata_regular_round_comparison
                 inner ℝ (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (w, s))
                   (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (v, t)) =
                 inner ℝ (fderiv ℝ Ψ (u, r) (w, s)) (fderiv ℝ Ψ (u, r) (v, t)) := by
-  obtain ⟨Φ, Q, hQ, hmetric⟩ :=
+  obtain ⟨Φ, Q, hQ, hradial, hmetric⟩ :=
     exists_obata_unit_spherical_product hf hnon hK ha hH c hz hcrit hmax
   let F := Q.symm.trans (curvatureRoundPolarHomeomorph hK)
   let G := Φ ∘ intrinsicRoundInverseCoordinates (1 / Real.sqrt K)
-  refine ⟨Φ, Q, F, G, ?_, hQ, ?_, ?_⟩
+  refine ⟨Φ, Q, F, G, ?_, hQ, hradial, ?_, ?_⟩
   · intro x
     let q := (curvatureRoundPolarHomeomorph hK).symm x
     have hi := intrinsicRoundInverseCoordinates_eq_inverse hK x

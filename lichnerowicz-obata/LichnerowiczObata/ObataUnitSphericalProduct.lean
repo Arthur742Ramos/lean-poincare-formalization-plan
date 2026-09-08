@@ -42,6 +42,8 @@ theorem exists_obata_unit_spherical_product
       ∃ Q : Metric.sphere (0 : TM p) 1 × Ioo 0 (Real.pi / Real.sqrt K) ≃ₜ
           {x : M // -a < f x ∧ f x < a},
         (∀ q, (Q q : M) = Φ (q.1, q.2)) ∧
+        (∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
+          obataRadial K a f (Φ (u, r)) = r) ∧
         ∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
           MDifferentiableAt 𝓘(ℝ, TM p × ℝ) I Φ (u, r) ∧
           ∀ w v : TM p, inner ℝ (u : TM p) w = 0 → inner ℝ (u : TM p) v = 0 →
@@ -58,9 +60,11 @@ theorem exists_obata_unit_spherical_product
   let Φ := fun q : TM p × ℝ => Γ (R • q.1, q.2)
   let S := unitSphereScale (P := TM p) R hR
   let Q₁ := (S.prodCongr (Homeomorph.refl (Ioo 0 (Real.pi / Real.sqrt K)))).trans Q
-  refine ⟨Φ, Q₁, ?_, ?_⟩
+  refine ⟨Φ, Q₁, ?_, ?_, ?_⟩
   · intro q
     exact hQ (S q.1, q.2)
+  · intro u r hr
+    exact ((hcurves _ (hregular (S u))).2.1 r hr).1
   intro u r hr
   have hone : (1 : ℕ∞ω) ≤ ∞ := WithTop.coe_le_coe.2 (le_top : (1 : ℕ∞) ≤ ⊤)
   have hΓ : MDifferentiableAt 𝓘(ℝ, TM p × ℝ) I Γ (R • (u : TM p), r) :=
