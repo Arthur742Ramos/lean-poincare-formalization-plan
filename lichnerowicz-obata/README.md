@@ -710,3 +710,8 @@ equatorial level of two complementary polar homeomorphisms.
 oppositely oriented radial curves whenever the retained polar identities hold.
 Its extension to a linear isometry of the pole tangent spaces remains unproved;
 topological angular matching alone is insufficient for the south-pole derivative.
+`exists_obata_matched_polar_models` applies this to the constructed north and
+south models of one Obata function. One conclusion now retains both full polar
+metrics, both isometric Cartesian pole derivatives, both radial coordinate
+identities, and the angular homeomorphism matching all opposite radial curves.
+The angular map is not yet proved to extend to a linear isometry.
