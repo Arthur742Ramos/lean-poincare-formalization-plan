@@ -451,3 +451,8 @@ The global Riemannian comparison with the manifold remains pending.
 contains every sufficiently small radial level. Thus a normal-chart image
 containing the pole captures entire small levels, not only local pieces.
 The level identification and global metric comparison still need assembly.
+`NormalLevelHomeomorph` constructs whole-level homeomorphisms by restricting
+an actual chart and its inverse. For a radial chart with a scaled-norm identity,
+compactness supplies sphere-to-level homeomorphisms for every sufficiently
+small positive radius. Specializing that chart identity to the Obata normal
+map and assembling the global metric comparison remain pending.
