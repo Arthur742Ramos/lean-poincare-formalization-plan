@@ -370,3 +370,6 @@ the existing Obata energy theorem supplies unit radial-gradient norm, which
 together with conserved speed proves that geodesic velocity equals the
 speed-scaled radial gradient. Identification of the angular metric with the
 round tangent-sphere metric remains pending.
+`GeodesicNormalRadial` combines the endpoint derivative and the proved
+geodesic-velocity identity: intrinsically, the endpoint map's radial derivative
+is the radial gradient multiplied by time and initial metric speed.
