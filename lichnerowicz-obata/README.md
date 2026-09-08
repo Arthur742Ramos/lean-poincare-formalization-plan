@@ -341,3 +341,7 @@ constructs its own C² geodesic flow on an open product neighborhood and proves
 stationarity by uniqueness; neither the flow nor stationarity is an extra
 hypothesis. Using this local normal map to identify the pole's angular metric
 with the round metric remains pending.
+`GeodesicEnergy` proves that the actual coordinate metric's squared speed has
+zero derivative along a geodesic, hence is constant on each connected open
+time domain. The proof derives conservation from metric compatibility and
+the geodesic equation, without assuming a speed identity.

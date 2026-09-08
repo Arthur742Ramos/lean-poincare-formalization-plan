@@ -11,6 +11,7 @@ import LichnerowiczObata.IntrinsicFlowMetric
 import LichnerowiczObata.RadialMetricNormalization
 import LichnerowiczObata.SmoothConnectionCoordinates
 import LichnerowiczObata.GeodesicLinearization
+import LichnerowiczObata.GeodesicEnergy
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -49,6 +50,8 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_geodesic_endpoint_local_inverse
 #print axioms LichnerowiczObata.exists_stationary_coordinate_geodesic_flow
 #print axioms LichnerowiczObata.exists_coordinate_geodesic_normal_map
+#print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_energy
+#print axioms LichnerowiczObata.coordinate_geodesic_energy_eq
 #print axioms LichnerowiczObata.contDiffAt_coordinateVectorField_of_order
 #print axioms LichnerowiczObata.contDiffOn_coordinateConnection_basis
 #print axioms LichnerowiczObata.contDiffOn_coordinateGeodesicSpray
