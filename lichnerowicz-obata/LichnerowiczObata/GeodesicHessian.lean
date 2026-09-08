@@ -1,0 +1,182 @@
+module
+
+public import LichnerowiczObata.GeodesicEnergy
+public import LichnerowiczObata.CoordinateRadialShape
+
+/-! # Hessian evolution along actual coordinate geodesics -/
+
+@[expose] public noncomputable section
+open Bundle FiberBundle Set AlmostSchur
+open scoped Manifold ContDiff Topology
+
+namespace LichnerowiczObata
+set_option backward.isDefEq.respectTransparency false
+
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [FiniteDimensional ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I ∞ M] [I.Boundaryless]
+  [RiemannianBundle (TangentSpace I : M → Type _)]
+  [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+  [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+
+local notation "TM" => (TangentSpace I : M → Type _)
+
+/-- Pairing a vector field with geodesic velocity differentiates to its
+covariant derivative, with the acceleration term cancelled by the geodesic
+equation. All pairings use the actual coordinate metric. -/
+theorem hasDerivAt_coordinate_geodesic_field_pairing
+    (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    (X : Π x : M, TM x) (c x : M) (hx : x ∈ (chartAt H c).source)
+    (hX : MDiffAt (T% X) x) {α : ℝ → E × E} {t : ℝ}
+    (hpos : (α t).1 = extChartAt I c x)
+    (hα : HasDerivAt α (coordinateGeodesicSpray cov b c (α t)) t) :
+    HasDerivAt (fun s => coordinateMetricBilinear (I := I) c (α s).1
+      (coordinateVectorField c X (α s).1) (α s).2)
+      (inner ℝ (cov X x ((trivializationAt E TM c).symmL ℝ x (α t).2))
+        ((trivializationAt E TM c).symmL ℝ x (α t).2)) t := by
+  have he : (extChartAt I c).symm (α t).1 = x := by
+    rw [hpos]
+    exact (extChartAt I c).left_inv (by simpa using hx)
+  have hp : HasDerivAt (fun s => (α s).1) (α t).2 t :=
+    (hasFDerivAt_fst (p := α t)).comp_hasDerivAt t hα
+  have hv : HasDerivAt (fun s => (α s).2)
+      (-(frameConnectionCoefficients cov (trivializationAt E TM c) b x
+        (α t).2 (α t).2)) t := by
+    have hv0 : HasDerivAt (fun s => (α s).2)
+        (-(frameConnectionCoefficients cov (trivializationAt E TM c) b
+          ((extChartAt I c).symm (α t).1) (α t).2 (α t).2)) t :=
+      (hasFDerivAt_snd (p := α t)).comp_hasDerivAt t hα
+    rwa [he] at hv0
+  have hDX : DifferentiableAt ℝ (coordinateVectorField (I := I) c X) (α t).1 := by
+    rw [hpos]
+    exact differentiableAt_coordinateVectorField X c x hx hX
+  have hu : HasDerivAt (fun s => coordinateVectorField (I := I) c X (α s).1)
+      (fderiv ℝ (coordinateVectorField (I := I) c X) (α t).1 (α t).2) t :=
+    HasFDerivAt.comp_hasDerivAt (𝕜 := ℝ) (F := E) (E := E)
+      (l := coordinateVectorField (I := I) c X) (f := fun s => (α s).1)
+      t hDX.hasFDerivAt hp
+  have hc := covariantDerivative_chart cov b X c x hx hX (α t).2
+  have hpair := hasDerivAt_coordinateMetric_pairing_connection cov hm b c x hx hpos hp hu hv
+  dsimp only at hc hpair
+  have hfield : coordinateVectorField (I := I) c X (α t).1 =
+      (trivializationAt E TM c).continuousLinearMapAt ℝ x (X x) := by
+    unfold coordinateVectorField
+    convert congrArg (fun y : M =>
+      (trivializationAt E TM c).continuousLinearMapAt ℝ y (X y)) he using 1
+  have hsum : fderiv ℝ (coordinateVectorField (I := I) c X) (α t).1 (α t).2 +
+      frameConnectionCoefficients cov (trivializationAt E TM c) b x (α t).2
+        (coordinateVectorField (I := I) c X (α t).1) =
+      (trivializationAt E TM c).continuousLinearMapAt ℝ x
+        (cov X x ((trivializationAt E TM c).symmL ℝ x (α t).2)) := by
+    rw [hfield, hpos]
+    exact (add_comm _ _).trans hc.symm
+  rw [hsum] at hpair
+  convert hpair using 1
+  simp only [neg_add_cancel, map_zero, add_zero, coordinateMetricBilinear_apply]
+  rw [he, (trivializationAt E TM c).symmL_continuousLinearMapAt hx]
+
+/-- Along a geodesic, the derivative of the gradient-velocity pairing is
+the genuine covariant Hessian evaluated twice on its velocity. -/
+theorem hasDerivAt_coordinate_geodesic_gradient_pairing
+    (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f)
+    (c x : M) (hx : x ∈ (chartAt H c).source)
+    {α : ℝ → E × E} {t : ℝ} (hpos : (α t).1 = extChartAt I c x)
+    (hα : HasDerivAt α (coordinateGeodesicSpray cov b c (α t)) t) :
+    HasDerivAt (fun s => coordinateMetricBilinear (I := I) c (α s).1
+      (coordinateVectorField c (gradient (I := I) f) (α s).1) (α s).2)
+      (hessian cov f x ((trivializationAt E TM c).symmL ℝ x (α t).2)
+        ((trivializationAt E TM c).symmL ℝ x (α t).2)) t :=
+  hasDerivAt_coordinate_geodesic_field_pairing cov hm b (gradient (I := I) f) c x hx
+    (mdifferentiableAt_gradient (hf x)) hpos hα
+
+/-- The Obata Hessian equation gives the oscillator acceleration along a
+coordinate geodesic, with its actual squared metric speed as coefficient. -/
+theorem hasDerivAt_coordinate_geodesic_obata_pairing
+    (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) {K : ℝ}
+    (hH : ∀ (y : M) (v w : TM y), hessian cov f y v w = -K * f y * inner ℝ v w)
+    (c x : M) (hx : x ∈ (chartAt H c).source)
+    {α : ℝ → E × E} {t : ℝ} (hpos : (α t).1 = extChartAt I c x)
+    (hα : HasDerivAt α (coordinateGeodesicSpray cov b c (α t)) t) :
+    HasDerivAt (fun s => coordinateMetricBilinear (I := I) c (α s).1
+      (coordinateVectorField c (gradient (I := I) f) (α s).1) (α s).2)
+      (-K * f x * coordinateMetricBilinear (I := I) c (α t).1 (α t).2 (α t).2) t := by
+  have hd := hasDerivAt_coordinate_geodesic_gradient_pairing cov hm b hf c x hx hpos hα
+  rw [hH] at hd
+  have he : (extChartAt I c).symm (α t).1 = x := by
+    rw [hpos]
+    exact (extChartAt I c).left_inv (by simpa using hx)
+  convert hd using 1
+  rw [coordinateMetricBilinear_apply, he]
+
+/-- The value of a function along an actual coordinate geodesic has
+derivative equal to its gradient paired with the velocity. -/
+theorem hasDerivAt_coordinate_geodesic_value
+    (cov : CovariantDerivative I E TM)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 1 f)
+    (c x : M) (hx : x ∈ (chartAt H c).source)
+    {α : ℝ → E × E} {t : ℝ} (hpos : (α t).1 = extChartAt I c x)
+    (hα : HasDerivAt α (coordinateGeodesicSpray cov b c (α t)) t) :
+    HasDerivAt (fun s => f ((extChartAt I c).symm (α s).1))
+      (coordinateMetricBilinear (I := I) c (α t).1
+        (coordinateVectorField c (gradient (I := I) f) (α t).1) (α t).2) t := by
+  have hz : (α t).1 ∈ (extChartAt I c).target := by
+    rw [hpos]
+    exact (extChartAt I c).map_source (by simpa using hx)
+  have he : (extChartAt I c).symm (α t).1 = x := by
+    rw [hpos]
+    exact (extChartAt I c).left_inv (by simpa using hx)
+  have hfc := contDiffOn_chart_comp (I := I) c f hf.contMDiffOn
+  have hfd := (hfc.contDiffAt ((isOpen_extChartAt_target c).mem_nhds hz)).differentiableAt
+    (show (1 : ℕ∞ω) ≠ 0 by norm_num)
+  have hp : HasDerivAt (fun s => (α s).1) (α t).2 t :=
+    (hasFDerivAt_fst (p := α t)).comp_hasDerivAt t hα
+  have hd := HasFDerivAt.comp_hasDerivAt (𝕜 := ℝ) (F := E) (E := ℝ)
+    (l := f ∘ (extChartAt I c).symm) (f := fun s => (α s).1) t hfd.hasFDerivAt hp
+  convert hd using 1 <;> try rfl
+  rw [hpos, fderiv_chart_comp f c x hx (hf.mdifferentiable (by norm_num) x)]
+  rw [coordinateMetricBilinear_apply, coordinateVectorField,
+    (extChartAt I c).left_inv (by simpa using hx),
+    (trivializationAt E TM c).symmL_continuousLinearMapAt hx, inner_gradient]
+
+/-- The restriction of an Obata function to an actual coordinate geodesic
+satisfies the scalar oscillator equation, with squared speed evaluated at
+any fixed reference time in the connected time domain. -/
+theorem hasDerivAt_deriv_coordinate_geodesic_obata
+    (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) {K : ℝ}
+    (hH : ∀ (y : M) (v w : TM y), hessian cov f y v w = -K * f y * inner ℝ v w)
+    (c : M) {α : ℝ → E × E} {T : Set ℝ}
+    (hT : IsOpen T) (hconn : IsPreconnected T)
+    (hz : ∀ s ∈ T, (α s).1 ∈ (extChartAt I c).target)
+    (hα : ∀ s ∈ T, HasDerivAt α (coordinateGeodesicSpray cov b c (α s)) s)
+    {s₀ t : ℝ} (hs₀ : s₀ ∈ T) (ht : t ∈ T) :
+    HasDerivAt (deriv (fun s => f ((extChartAt I c).symm (α s).1)))
+      (-K * f ((extChartAt I c).symm (α t).1) *
+        coordinateMetricBilinear (I := I) c (α s₀).1 (α s₀).2 (α s₀).2) t := by
+  have hx (s : ℝ) (hs : s ∈ T) :
+      (extChartAt I c).symm (α s).1 ∈ (chartAt H c).source := by
+    simpa using (extChartAt I c).map_target (hz s hs)
+  have hp (s : ℝ) (hs : s ∈ T) :
+      (α s).1 = extChartAt I c ((extChartAt I c).symm (α s).1) :=
+    ((extChartAt I c).right_inv (hz s hs)).symm
+  have he : deriv (fun s => f ((extChartAt I c).symm (α s).1)) =ᶠ[𝓝 t]
+      (fun s => coordinateMetricBilinear (I := I) c (α s).1
+        (coordinateVectorField c (gradient (I := I) f) (α s).1) (α s).2) := by
+    filter_upwards [hT.mem_nhds ht] with s hs
+    exact (hasDerivAt_coordinate_geodesic_value cov b (hf.of_le (by norm_num)) c
+      ((extChartAt I c).symm (α s).1) (hx s hs) (hp s hs) (hα s hs)).deriv
+  have hd := hasDerivAt_coordinate_geodesic_obata_pairing cov hm b hf hH c
+    ((extChartAt I c).symm (α t).1) (hx t ht) (hp t ht) (hα t ht)
+  rw [coordinate_geodesic_energy_eq cov hm b c hT hconn hz hα ht hs₀] at hd
+  exact hd.congr_of_eventuallyEq he
+
+end LichnerowiczObata

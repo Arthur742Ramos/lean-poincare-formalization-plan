@@ -345,3 +345,8 @@ with the round metric remains pending.
 zero derivative along a geodesic, hence is constant on each connected open
 time domain. The proof derives conservation from metric compatibility and
 the geodesic equation, without assuming a speed identity.
+`GeodesicHessian` derives the value derivative and Hessian evolution along
+these geodesics. Under the Obata Hessian equation, the scalar restriction
+satisfies `f″ = -K · speed² · f`, with the constant speed evaluated at any
+fixed reference time. The cosine solution from a pole and its identification
+with the existing radial curves remain to be proved.
