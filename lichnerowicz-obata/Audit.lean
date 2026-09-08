@@ -14,6 +14,7 @@ import LichnerowiczObata.GeodesicLinearization
 import LichnerowiczObata.GeodesicEnergy
 import LichnerowiczObata.GeodesicHessian
 import LichnerowiczObata.GeodesicRadial
+import LichnerowiczObata.GeodesicScaling
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -55,6 +56,9 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_energy
 #print axioms LichnerowiczObata.coordinate_geodesic_energy_eq
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_rescale
+#print axioms LichnerowiczObata.ode_eqOn_of_contDiffAt
+#print axioms LichnerowiczObata.coordinate_geodesic_rescale_eqOn
+#print axioms LichnerowiczObata.coordinate_geodesic_flow_scaling
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_field_pairing
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_gradient_pairing
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_obata_pairing

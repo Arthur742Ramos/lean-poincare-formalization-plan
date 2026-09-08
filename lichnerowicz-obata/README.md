@@ -347,6 +347,10 @@ time domain. The proof derives conservation from metric compatibility and
 the geodesic equation, without assuming a speed identity.
 It also proves that simultaneous time and velocity rescaling preserves the
 coordinate geodesic equation, using the bilinearity of its acceleration term.
+`SmoothODEUniqueness` derives uniqueness on connected open time domains from
+local C¹ regularity along a solution. `GeodesicScaling` uses it to prove the
+actual flow-scaling identity on common solution domains, not just invariance
+of the differential equation.
 `GeodesicHessian` derives the value derivative and Hessian evolution along
 these geodesics. Under the Obata Hessian equation, the scalar restriction
 satisfies `f″ = -K · speed² · f`, with the constant speed evaluated at any
