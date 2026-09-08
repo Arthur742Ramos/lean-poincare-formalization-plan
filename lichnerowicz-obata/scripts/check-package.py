@@ -5,6 +5,7 @@ from the immutable upstream revision below, not from a moving branch.
 """
 
 import json
+import hashlib
 from pathlib import Path
 import re
 import subprocess
@@ -49,16 +50,44 @@ def git(*args):
 
 
 def check_dependency_layout(manifest, lakefile):
-    url = "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan.git"
-    require(all(p["type"] == "git" for p in manifest["packages"]),
-            "registry sandbox requires Git dependencies inside .lake/packages")
-    inherited = next(p for p in manifest["packages"] if p["name"] == "AlmostSchur")
-    require(all(inherited.get(k) == v for k, v in {
-        "url": url, "rev": BASE, "inputRev": BASE, "subDir": "almost-schur",
-    }.items()), "AlmostSchur must retain its exact Git source pin and subdirectory")
-    require(lakefile["require"] == [{"name": "AlmostSchur", "git": url,
-                                    "rev": BASE, "subDir": "almost-schur"}],
-            "Lakefile must use the same pinned Git dependency, not a sibling path")
+    require(all(p["type"] == "git" and not p.get("subDir")
+                for p in manifest["packages"]),
+            "registry workaround requires root-level Git dependencies only")
+    require(not any(p["name"] == "AlmostSchur" for p in manifest["packages"]),
+            "AlmostSchur must compile as a local library, not a dependency")
+    require(lakefile["require"] == [{"name": "mathlib", "scope": "leanprover-community",
+                                    "rev": MATHLIB}], "only pinned Mathlib may be required")
+    libraries = {lib["name"]: lib for lib in lakefile["lean_lib"]}
+    for name in ("AlmostSchur", "RellichKondrachov"):
+        require(libraries[name].get("srcDir") == "vendor/almost-schur",
+                "inherited sources must build in the root package")
+        require(not any(key in libraries[name] for key in ("buildDir", "leanLibDir")),
+                "inherited build outputs must stay in the root .lake/build")
+
+
+def check_flat_vendor():
+    prefix = "almost-schur/"
+    paths = [prefix + part for part in (
+        "AlmostSchur", "AlmostSchur.lean", "RellichKondrachov",
+        "LICENSE", "PROVENANCE.md", "dependencies")]
+    expected = {}
+    for record in git("ls-tree", "-r", "-z", BASE, "--", *paths).split(b"\0"):
+        if not record:
+            continue
+        metadata, raw_path = record.split(b"\t", 1)
+        mode, kind, digest = metadata.decode().split()
+        require(kind == "blob" and mode == "100644", "unexpected vendor source mode")
+        expected[raw_path.decode().removeprefix(prefix)] = digest
+    vendor = ROOT / "vendor/almost-schur"
+    actual = {str(path.relative_to(vendor)): path for path in vendor.rglob("*")
+              if path.is_file() or path.is_symlink()}
+    require(set(actual) == set(expected), "vendor inventory differs from immutable source")
+    for name, path in actual.items():
+        require(not path.is_symlink(), "vendor symlink: " + name)
+        data = path.read_bytes()
+        digest = hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+        require(digest == expected[name], "vendor differs from immutable source: " + name)
+    print(f"All {len(expected)} vendored files match the immutable AlmostSchur source byte-for-byte.")
 
 
 def main():
@@ -124,6 +153,7 @@ def main():
     require(metadata["review"]["status"] == "self-assessed", "external review must not be invented")
     manifest = json.loads((ROOT / "lake-manifest.json").read_text())
     check_dependency_layout(manifest, tomllib.loads((ROOT / "lakefile.toml").read_text()))
+    check_flat_vendor()
     mathlib = next(p for p in manifest["packages"] if p["name"] == "mathlib")
     require(mathlib["rev"] == MATHLIB, "Mathlib revision changed")
     require(not git("diff", BASE, "--", "almost-schur"), "inherited almost-schur sources changed")

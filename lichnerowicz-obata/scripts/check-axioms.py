@@ -57,6 +57,8 @@ run_elab do
       | some idx =>
         let mod := moduleNames[idx.toNat]!
         mod.toString.startsWith "LichnerowiczObata." || mod == `LichnerowiczObataSolution
+          || mod == `AlmostSchur || mod.toString.startsWith "AlmostSchur."
+          || mod.toString.startsWith "RellichKondrachov."
       | none => name.toString.startsWith "LichnerowiczObata."
     if owned then some name else none
   let selected : List String := [SELECTED_NAMES]
@@ -100,12 +102,16 @@ def run_lean(source, temp, name):
 
 def main():
     files = sorted((ROOT / "LichnerowiczObata").rglob("*.lean"))
+    vendor_root = ROOT / "vendor/almost-schur"
+    vendor_files = sorted(vendor_root.rglob("*.lean"))
     if not files:
         raise SystemExit("no implementation sources")
-    for path in [*files, ROOT / "LichnerowiczObataSolution.lean"]:
+    for path in [*files, *vendor_files, ROOT / "LichnerowiczObataSolution.lean"]:
         if re.search(r"\b(sorry|admit|axiom)\b", without_comments(path.read_text())):
             raise SystemExit("proof-hole token outside comments in " + str(path))
     modules = [".".join(path.relative_to(ROOT).with_suffix("").parts) for path in files]
+    modules += [".".join(path.relative_to(vendor_root).with_suffix("").parts)
+                for path in vendor_files]
     config = json.loads((ROOT / "comparator.json").read_text())
     selected = set(config["theorem_names"]) | set(config["definition_names"])
     with tempfile.TemporaryDirectory(prefix="lichnerowicz-full-axioms-") as temp:

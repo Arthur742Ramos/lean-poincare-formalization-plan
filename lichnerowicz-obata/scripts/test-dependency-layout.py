@@ -32,14 +32,23 @@ class DependencyLayout(unittest.TestCase):
         with self.assertRaises(SystemExit):
             package.check_dependency_layout(self.manifest, self.config)
 
-    def test_source_pin_and_subdirectory_drift_are_rejected(self):
-        for field, value in (("rev", "master"), ("inputRev", "master"),
-                             ("subDir", "curvature"), ("url", "https://example.org")):
-            with self.subTest(field=field):
-                changed = copy.deepcopy(self.manifest)
-                changed["packages"][0][field] = value
-                with self.assertRaises(SystemExit):
-                    package.check_dependency_layout(changed, self.config)
+    def test_git_subdirectory_is_rejected(self):
+        self.manifest["packages"][0]["subDir"] = "almost-schur"
+        with self.assertRaises(SystemExit):
+            package.check_dependency_layout(self.manifest, self.config)
+
+    def test_old_git_dependency_is_rejected(self):
+        self.manifest["packages"].append({"type": "git", "name": "AlmostSchur"})
+        with self.assertRaises(SystemExit):
+            package.check_dependency_layout(self.manifest, self.config)
+
+    def test_vendor_inventory_matches_pin(self):
+        package.check_flat_vendor()
+
+    def test_library_output_override_is_rejected(self):
+        self.config["lean_lib"][0]["buildDir"] = "vendor/almost-schur/.lake"
+        with self.assertRaises(SystemExit):
+            package.check_dependency_layout(self.manifest, self.config)
 
 
 if __name__ == "__main__":

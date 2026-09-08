@@ -268,13 +268,15 @@ Riemannian manifold to be isometric with a sphere*, J. Math. Soc. Japan 14
 (1962), 333--340, especially Theorem A and section 2:
 <https://doi.org/10.2969/jmsj/01430333>.
 
-The pinned Git subdirectory dependency `almost-schur` inherits the existing geometric
+The local libraries in `vendor/almost-schur` inherit the existing geometric
 and analytic formalization from this repository at commit
 `3faf25aefc27842a77c37ca178e8a40a20bb20c7`. Its original provenance and contributor
-notices remain authoritative. Lake checks it out within
-`.lake/packages/AlmostSchur/almost-schur`, so a cold sandboxed build does not
-need write access to `../almost-schur`. CI intentionally runs Comparator
-without prebuilding the candidate to catch this packaging regression.
+notices remain authoritative and are preserved byte-for-byte. Both inherited
+libraries build into the root `.lake/build`. There are no sibling path or Git
+subdirectory dependencies; only the existing pinned Mathlib is external.
+The package check compares the full vendor inventory with the immutable Git
+source. CI also replays Palomar's pinned outer verifier, not only Comparator,
+without prebuilding the candidate, to catch this packaging regression.
 This project adds the sharp positive-Ricci
 eigenfunction estimate, its equality-to-Hessian argument, spectral attainment,
 and weak-eigenfunction regularity. The adapted bootstrap and chart assembly

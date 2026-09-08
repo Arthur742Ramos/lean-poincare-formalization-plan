@@ -31,7 +31,7 @@ merely a homeomorphism and is not an assertion about ambient chordal distance.
 
 ## Reused formalizations
 
-1. The Git subdirectory dependency `almost-schur` is inherited **without source changes**
+1. The local libraries in `vendor/almost-schur` are inherited **without source changes**
    from this repository at
    [`3faf25aefc27842a77c37ca178e8a40a20bb20c7`](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/3faf25aefc27842a77c37ca178e8a40a20bb20c7/almost-schur).
    It supplies the actual Levi-Civita, curvature, Riemannian integration,
@@ -39,10 +39,11 @@ merely a homeomorphism and is not an assertion about ambient chordal distance.
    Its selected almost-Schur theorem is not the new selected result here.
    Its named human authors are Arthur Freitas Ramos, David Barros Hulak, and
    Ruy J. G. B. de Queiroz. Existing notices and structured provenance remain
-   in that unchanged subproject.
+   in that unchanged subproject and its byte-for-byte vendored copy. The original
+   `LICENSE`, `PROVENANCE.md`, and dependency inventories are copied alongside it.
 2. The inherited curvature implementation adapts the contracted-Bianchi core
    at [`12cebb809524d0cd185c6cd7bcb5b73d3562bce1`](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/12cebb809524d0cd185c6cd7bcb5b73d3562bce1/contracted-bianchi).
-   Its inventory is `../almost-schur/AlmostSchur/CurvatureVendor/PROVENANCE.json`.
+   Its inventory is `vendor/almost-schur/AlmostSchur/CurvatureVendor/PROVENANCE.json`.
    The independent `extensionBump`, `extension`, and `curvature` definitions
    also adapt the explicitly attributed geometry vocabulary in the pinned
    almost-Schur source. The comparison theorems prove agreement with the
@@ -50,14 +51,14 @@ merely a homeomorphism and is not an assertion about ambient chordal distance.
 3. The inherited 36-file `RellichKondrachov/` adaptation originates from Adam
    Benenson's Apache-2.0 project at
    [`70f85d4c1bf99c6e7d61e8be4daa6f3664d08d23`](https://github.com/abenenson/rellich-kondrachov/tree/70f85d4c1bf99c6e7d61e8be4daa6f3664d08d23).
-   Its exact inventory is `../almost-schur/dependencies/rellich-vendored.json`.
+   Its exact inventory is `vendor/almost-schur/dependencies/rellich-vendored.json`.
 4. Mathlib is pinned to
    [`db584cd6d46c92f209a44c0f1c829460d327499d`](https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d).
-   The new subproject resolves this same immutable dependency via the pinned
-   almost-Schur Git dependency and its committed manifest. Lake checks it out
-   at `.lake/packages/AlmostSchur/almost-schur`, inside the selected project;
-   a cold Comparator build therefore needs no sibling-directory write access.
-   The inventory paths above refer to the identical repository source copy.
+   The new subproject requires Mathlib directly at this same immutable revision.
+   AlmostSchur and RellichKondrachov are local libraries, whose build files go
+   into the root `.lake/build`; there are no path or Git-subdirectory dependencies.
+   `scripts/check-package.py` compares every vendored file and the complete
+   inventory against the immutable source Git blobs, including all notices.
 
 `scripts/verify-comparator.sh`, `scripts/landrun-wrapper.sh`, and
 `scripts/fake-landrun.sh` are exact copies from the same almost-Schur snapshot.
@@ -69,7 +70,7 @@ real Linux Landrun and the unsandboxed macOS development fallback.
 The new source develops spectral attainment and smooth eigenfunctions,
 global Obata rigidity with both pole extensions, the round-sphere converse,
 and the assembled Lichnerowicz--Obata theorem. The source list and public
-declaration audit distinguish this code from the unchanged pinned Git dependency.
+declaration audit distinguish this code from the unchanged vendored sources.
 
 `LichnerowiczObataChallenge.lean` imports only Mathlib. It constructs a
 metric-compatible torsion-free connection before stating the Ricci-conditional

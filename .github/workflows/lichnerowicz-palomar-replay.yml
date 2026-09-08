@@ -1,0 +1,160 @@
+name: Lichnerowicz-Obata actual Palomar verifier replay
+
+# Adapted from PalomarRegistry/PalomarSubmission's submission.yml at
+# ef2fa1eadcb246c2346ddba39b52eaa53d4bb763, the failing registry run's revision.
+# This runs the UNMODIFIED outer verifier, canonical Challenge protection,
+# dependency preparation, and both kernels. It creates no registry intake.
+on:
+  push:
+    paths:
+      - "lichnerowicz-obata/**"
+      - ".github/workflows/lichnerowicz-palomar-replay.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  registry-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Record verification deadline origin
+        run: echo "PALOMAR_JOB_STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Checkout the exact registry pipeline from the rejected run
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: PalomarRegistry/PalomarSubmission
+          ref: ef2fa1eadcb246c2346ddba39b52eaa53d4bb763
+          path: pipeline
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.11.10"
+
+      - uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b
+        with:
+          ruby-version: "3.3.12"
+          bundler-cache: true
+          working-directory: pipeline
+
+      - name: Install verifier dependencies
+        run: python -m pip install --disable-pip-version-check --require-hashes --no-deps -r pipeline/requirements.txt
+
+      - name: Prepare an exact-SHA regression request without submitting it
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, pathlib
+          event = {"inputs": {
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "commit": os.environ["GITHUB_SHA"],
+              "request_id": hashlib.sha256(os.environ["GITHUB_RUN_ID"].encode()).hexdigest()[:12],
+              "mode": "full",
+              "options": json.dumps({
+                  "project_path": "lichnerowicz-obata",
+                  "comparator_config_path": "lichnerowicz-obata/comparator.json",
+                  "formalization_metadata_path": "lichnerowicz-obata/formalization.yaml",
+                  "authorization_relationship": "I am a responsible author or maintainer",
+              }),
+          }}
+          pathlib.Path(os.environ["RUNNER_TEMP"], "regression-event.json").write_text(json.dumps(event))
+          PY
+
+      - name: Parse and fetch immutable source using Palomar itself
+        id: prepare
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/pipeline/Gemfile
+        run: |
+          python pipeline/scripts/verify_submission.py prepare \
+            --event "$RUNNER_TEMP/regression-event.json" \
+            --work-dir "$RUNNER_TEMP/palomar" \
+            --output "$RUNNER_TEMP/mechanical-report.json" \
+            --licensee "$(command -v bundle)"
+
+      - name: Free disk space
+        if: steps.prepare.outputs.ready == 'true'
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: false
+
+      - name: Install pinned elan
+        if: steps.prepare.outputs.ready == 'true'
+        run: |
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/elan.tar.gz" \
+            https://github.com/leanprover/elan/releases/download/v4.2.3/elan-x86_64-unknown-linux-gnu.tar.gz
+          echo "df0b2b3a439961ffcbb3985214365ffe40f49bc871df04dff268c7d8e21ca8b2  $RUNNER_TEMP/elan.tar.gz" | sha256sum --check
+          mkdir "$RUNNER_TEMP/elan"
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP/elan"
+          "$RUNNER_TEMP/elan/elan-init" -y --no-modify-path --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        if: steps.prepare.outputs.ready == 'true'
+        with:
+          go-version: "1.24.0"
+
+      - name: Build the registry's exact pinned tools
+        if: steps.prepare.outputs.ready == 'true'
+        env:
+          LEAN4EXPORT_COMMIT: ${{ steps.prepare.outputs.lean4export_commit }}
+          SUBMISSION_TOOLCHAIN: ${{ steps.prepare.outputs.lean_toolchain }}
+        run: |
+          CGO_ENABLED=0 go install github.com/zouuup/landrun/cmd/landrun@811cfff51ceaf3d9843708aa6d22e9b84ccac8b4
+          git clone --filter=blob:none https://github.com/leanprover/comparator.git "$RUNNER_TEMP/comparator"
+          git -C "$RUNNER_TEMP/comparator" checkout 575674928e239f5bc452aab72d1dd7b0f1326494
+          (cd "$RUNNER_TEMP/comparator" && lake build comparator)
+          git clone --filter=blob:none https://github.com/robsimmons/nanoda_lib.git "$RUNNER_TEMP/nanoda"
+          git -C "$RUNNER_TEMP/nanoda" checkout 68d5ca9db226849b41a6fff59d796ff19d0a8840
+          cargo build --release --locked --manifest-path "$RUNNER_TEMP/nanoda/Cargo.toml"
+          git clone --filter=blob:none https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout "$LEAN4EXPORT_COMMIT"
+          LEAN4EXPORT_TOOLCHAIN="$(tr -d '\r\n' < "$RUNNER_TEMP/lean4export/lean-toolchain")"
+          python -c 'import sys; sys.path.insert(0, "pipeline"); from scripts.verify_submission import compatible_lean4export_toolchain; raise SystemExit(not compatible_lean4export_toolchain(sys.argv[1], sys.argv[2]))' "$SUBMISSION_TOOLCHAIN" "$LEAN4EXPORT_TOOLCHAIN"
+          (cd "$RUNNER_TEMP/lean4export" && ELAN_TOOLCHAIN="$SUBMISSION_TOOLCHAIN" lake build lean4export)
+
+      - name: Replay the unmodified outer sandbox and canonical Challenge verifier
+        if: steps.prepare.outputs.ready == 'true'
+        run: |
+          python pipeline/scripts/verify_submission.py execute \
+            --work-dir "$RUNNER_TEMP/palomar" \
+            --output "$RUNNER_TEMP/mechanical-report.json" \
+            --comparator "$RUNNER_TEMP/comparator/.lake/build/bin/comparator" \
+            --lean4export "$RUNNER_TEMP/lean4export/.lake/build/bin/lean4export" \
+            --landrun "$(go env GOPATH)/bin/landrun" \
+            --nanoda "$RUNNER_TEMP/nanoda/target/release/nanoda_bin" \
+            --comparator-commit 575674928e239f5bc452aab72d1dd7b0f1326494 \
+            --landrun-commit 811cfff51ceaf3d9843708aa6d22e9b84ccac8b4 \
+            --nanoda-commit 68d5ca9db226849b41a6fff59d796ff19d0a8840 \
+            --execution-budget-seconds 9900 \
+            --workflow-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Preserve the actual mechanical report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: lichnerowicz-palomar-replay
+          path: ${{ runner.temp }}/mechanical-report.json
+          if-no-files-found: error
+
+      - name: Require an actual complete pass
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+          report = json.loads(pathlib.Path(os.environ["RUNNER_TEMP"], "mechanical-report.json").read_text())
+          print(json.dumps({k: report.get(k) for k in ("status", "stage", "errors")}, indent=2))
+          raise SystemExit(0 if report.get("status") == "pass" and report.get("stage") == "complete" else 1)
+          PY
