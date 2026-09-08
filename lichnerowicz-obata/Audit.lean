@@ -434,3 +434,4 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.openCylinderHomeomorph
 #print axioms LichnerowiczObata.exists_polar_region_partialHomeomorph
 #print axioms LichnerowiczObata.exists_differentiable_polar_inverse
+#print axioms LichnerowiczObata.exists_differentiable_polar_inverse_on_target
