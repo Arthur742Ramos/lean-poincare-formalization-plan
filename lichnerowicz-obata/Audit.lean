@@ -438,3 +438,4 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_differentiable_polar_inverse_on_target
 #print axioms LichnerowiczObata.exists_obata_differentiable_polar_inverse
 #print axioms LichnerowiczObata.exists_obata_regular_forward_differentiable
+#print axioms LichnerowiczObata.polar_comparison_derivative_inner

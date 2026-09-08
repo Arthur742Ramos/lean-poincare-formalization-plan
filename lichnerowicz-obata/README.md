@@ -548,13 +548,13 @@ metric. `ObataUnitSphericalProduct` applies both to the actual constructed
 product: its domain is the unit tangent sphere times the regular radial
 interval, its ambient parameter map is jointly differentiable there, and its
 metric is the sine-squared angular term plus the radial product, with no
-auxiliary-radius factor. The round-sphere identification and smooth extension
-through the two poles remain to be completed.
+auxiliary-radius factor. The regular round-sphere comparison is constructed
+below; smooth extension through the two poles remains unfinished.
 `RoundPolarJointMetric` proves the full derivative of the explicit round polar
 map and evaluates its metric on that derivative. For sphere radius `1 / √K`,
 the coefficient is exactly `sin²(√K r) / K`, matching the unit-angular Obata
-product. The resulting Riemannian isometry still needs to be constructed;
-coefficient agreement alone is not the global rigidity theorem.
+product. Coefficient agreement alone is not the global rigidity theorem;
+the regular comparison derivative is treated below.
 `RoundAmbientDirections` now identifies the intrinsic unit angular sphere
 with directions orthogonal to the north pole in the Euclidean product space
 `WithLp 2 (P × ℝ)`. It constructs the corresponding punctured-round-sphere
@@ -563,8 +563,8 @@ angular vectors as the Obata product.
 `ObataRegularRoundComparison` now constructs a homeomorphism from the regular
 Obata region to the punctured round sphere of radius `1 / √K`. The same theorem
 proves that it intertwines the two explicit polar maps and that their full
-pullback metrics agree. Smoothness of the comparison itself, its interpretation
-as a Riemannian isometry, and extension through the poles remain required.
+pullback metrics agree. Differentiability and metric preservation of the
+regular comparison are established below; pole extension remains required.
 `RoundPolarInverseSmooth` proves that the actual inverse round coordinates
 admit smooth ambient extensions at every punctured-sphere point. The proof
 derives the nonsingular arccosine heights from the exclusion of the poles
@@ -572,8 +572,8 @@ and retains equality with the already constructed inverse.
 `IntrinsicRoundInverse` translates this smooth extension to the intrinsic
 angular variables. The regular comparison theorem now retains a single
 ambient map that agrees with the inverse comparison at every punctured-sphere
-point and is differentiable there. Differentiability of the forward comparison,
-the Riemannian isometry statement, and pole extension remain outstanding.
+point and is differentiable there. The forward derivative is treated below;
+the global Riemannian isometry statement and pole extension remain outstanding.
 `PolarMetricNondegeneracy` proves positivity of the angular coefficient
 throughout the regular radial interval and injectivity of the actual round
 polar derivative on angular-tangent and radial directions. The regular Obata
@@ -622,5 +622,9 @@ proved by composing these inverse coordinates with the explicit round polar
 map. This extension agrees with the comparison at every regular point.
 The same comparison now has a differentiable ambient inverse extension as
 well, and the polar chart theorem retains its parameter derivative and full
-angular-radial metric identities for the subsequent metric-preservation proof.
-Its Riemannian isometry proof and extension over the poles remain to be assembled.
+angular-radial metric identities.
+`PolarComparisonMetric` transfers those identities through the nonsingular
+sphere-restricted parameter derivative to all tangent vectors. Applied to
+the actual Obata comparison, it proves that the forward ambient derivative
+preserves the Riemannian inner product at every regular point. Extension over
+the poles and the final global round-isometry theorem remain unfinished.

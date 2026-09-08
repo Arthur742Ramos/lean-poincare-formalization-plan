@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.ObataRegularRoundComparison
 public import LichnerowiczObata.PolarInverseDifferentiability
+public import LichnerowiczObata.PolarComparisonMetric
 
 /-! # Differentiability of the constructed regular Obata coordinates -/
 
@@ -85,8 +86,9 @@ theorem exists_obata_differentiable_polar_inverse
 
 include hDimension in
 /-- A single regular comparison to the punctured round sphere has
-differentiable ambient extensions in both directions. No assertion is made
-here about these extensions at the two critical levels. -/
+differentiable ambient extensions in both directions, and its forward
+derivative preserves the Riemannian inner product on every regular tangent
+space. No assertion is made here about the two critical levels. -/
 theorem exists_obata_regular_forward_differentiable
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
     {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
@@ -101,7 +103,10 @@ theorem exists_obata_regular_forward_differentiable
       ∃ T : M → RoundAmbient (TM p),
         (∀ y : {x : M // -a < f x ∧ f x < a},
           T (y : M) = ((F y).1 : RoundAmbient (TM p)) ∧
-          MDifferentiableAt I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M)) ∧
+          MDifferentiableAt I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) ∧
+          ∀ v w : TM (y : M),
+            inner ℝ (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) v)
+              (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) w) = inner ℝ v w) ∧
         ∃ G : RoundAmbient (TM p) → M,
           ∀ x : RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
             G (x.1 : RoundAmbient (TM p)) = (F.symm x : M) ∧
@@ -128,7 +133,39 @@ theorem exists_obata_regular_forward_differentiable
       have hΨₛ : MDifferentiableAt ((𝓡 n).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, RoundAmbient (TM p))
           Ψₛ (e.symm (y : M)) :=
         mdifferentiableAt_sphere_polar_restriction _ _ hΨ
-      exact hΨₛ.comp (y : M) (hd y y.property)
+      have hTy := hΨₛ.comp (y : M) (hd y y.property)
+      refine ⟨hTy, ?_⟩
+      let q := Q.symm y
+      have hqy : Φ ((q.1 : TM p), (q.2 : ℝ)) = (y : M) := by
+        rw [← hQ q]
+        exact congrArg (fun x : {x : M // -a < f x ∧ f x < a} => (x : M))
+          (Q.apply_symm_apply y)
+      have hTq : MDifferentiableAt I 𝓘(ℝ, RoundAmbient (TM p)) T
+          (Φ ((q.1 : TM p), (q.2 : ℝ))) := by rw [hqy]; exact hTy
+      have hΨq : MDifferentiableAt 𝓘(ℝ, TM p × ℝ) 𝓘(ℝ, RoundAmbient (TM p))
+          Ψ ((q.1 : TM p), (q.2 : ℝ)) := by
+        apply mdifferentiableAt_iff_differentiableAt.mpr
+        dsimp only [Ψ, roundPolarCurve]
+        fun_prop
+      have hsource : (q.1, (q.2 : ℝ)) ∈ e.source := by rw [hs]; exact q.2.property
+      have hlocal : (fun b : Metric.sphere (0 : TM p) 1 × ℝ => T (Φ (b.1, b.2)))
+          =ᶠ[𝓝 (q.1, (q.2 : ℝ))] Ψₛ := by
+        filter_upwards [e.open_source.mem_nhds hsource] with b hb
+        change Ψₛ (e.symm (Φ (b.1, b.2))) = Ψₛ b
+        rw [← he b hb, e.left_inv hb]
+      have hmetricq := polar_comparison_derivative_inner q.1 (q.2 : ℝ)
+        (show Module.finrank ℝ E = n + 1 from Fact.out)
+        (hjet q.1 q.2 q.2.property).1 hΨq hTq (hjet q.1 q.2 q.2.property).2.1
+        (by
+          intro w v hw hv s t
+          rw [mfderiv_eq_fderiv]
+          exact (hjet q.1 q.2 q.2.property).2.2 w v hw hv s t) hlocal
+      change ∀ v w : TM (Φ ((q.1 : TM p), (q.2 : ℝ))),
+        inner ℝ (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (Φ ((q.1 : TM p), (q.2 : ℝ))) v)
+          (mfderiv I 𝓘(ℝ, RoundAmbient (TM p)) T (Φ ((q.1 : TM p), (q.2 : ℝ))) w) =
+          inner ℝ v w at hmetricq
+      rw [hqy] at hmetricq
+      exact hmetricq
   · let G := Φ ∘ intrinsicRoundInverseCoordinates (1 / Real.sqrt K)
     refine ⟨G, ?_⟩
     intro x
