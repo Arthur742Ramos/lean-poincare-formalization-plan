@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Analysis.Calculus.Deriv.Mul
+public import Mathlib.Analysis.Calculus.FDeriv.CompCLM
 public import Mathlib.Tactic
 
 /-! # Differentiation of a moving metric pairing -/
@@ -46,6 +47,20 @@ theorem hasDerivAt_metric_pairing_scaling
   convert hasDerivAt_metric_pairing_connection A hg hu hw hcompat using 1
   rw [hshapeU, hshapeW]
   simp only [map_smul, smul_apply, smul_eq_mul]
+  ring
+
+/-- The derivative of the quadratic form of a symmetric continuous
+bilinear metric is twice its pairing with the base vector. -/
+theorem hasFDerivAt_symmetric_metric_quadratic
+    (g : E →L[ℝ] E →L[ℝ] ℝ) (hsym : ∀ u w, g u w = g w u) (v : E) :
+    HasFDerivAt (fun w => g w w) ((2 : ℝ) • g v) v := by
+  have hd := (g.hasFDerivAt (x := v)).clm_apply (hasFDerivAt_id v)
+  convert hd using 1 <;> try rfl
+  ext w
+  simp only [smul_apply, add_apply, id_eq,
+    ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply,
+    ContinuousLinearMap.flip_apply, smul_eq_mul]
+  rw [hsym w v]
   ring
 
 end LichnerowiczObata

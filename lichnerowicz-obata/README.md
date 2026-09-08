@@ -373,3 +373,7 @@ round tangent-sphere metric remains pending.
 `GeodesicNormalRadial` combines the endpoint derivative and the proved
 geodesic-velocity identity: intrinsically, the endpoint map's radial derivative
 is the radial gradient multiplied by time and initial metric speed.
+On a neighborhood of a regular positive-phase initial velocity, it also
+proves that squared endpoint radius equals time squared times the initial
+quadratic metric energy. The symmetric quadratic-metric derivative is checked
+separately for the forthcoming radial–angular pairing calculation.
