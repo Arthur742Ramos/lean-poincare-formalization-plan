@@ -5,6 +5,7 @@ import LichnerowiczObata.MetricPairingCalculus
 import LichnerowiczObata.MetricBilinearRegularity
 import LichnerowiczObata.CoordinateRadialShape
 import LichnerowiczObata.ManifoldFlowCoordinates
+import LichnerowiczObata.CoordinateAngularVariation
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -30,6 +31,9 @@ import LichnerowiczObata.AngularMetricEvolution
 import LichnerowiczObata.SmoothPicardOperator
 
 #print axioms LichnerowiczObata.contDiffOn_bilinear_of_basis
+#print axioms LichnerowiczObata.coordinate_variation_angular
+#print axioms LichnerowiczObata.coordinate_chartFlow_variation_angular
+#print axioms LichnerowiczObata.hasDerivAt_manifold_radial_chart_metric
 #print axioms LichnerowiczObata.hasDerivAt_chart_integralCurve
 #print axioms LichnerowiczObata.isOpen_chartFlowDomain
 #print axioms LichnerowiczObata.contDiffOn_chartFlow

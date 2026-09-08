@@ -294,5 +294,10 @@ and establishing the pole normalization, remains pending.
 `ManifoldFlowCoordinates` expresses actual manifold families in fixed input
 and output charts. It constructs their natural open coordinate domain,
 transfers joint smoothness, and derives the coordinate time ODE directly
-from the manifold integral-curve equation. The radial metric theorem still
-needs to be assembled with this chart representation and its angular variations.
+from the manifold integral-curve equation.
+`CoordinateAngularVariation` derives angularity by differentiating the radial
+level identity, then proves spherical metric evolution for the actual chart
+representation of a smooth manifold radial family. The theorem requires its
+integral-curve and level identities, but no separate angularity or variational
+ODE hypothesis. Instantiation with the constructed global family, chart-independent
+integration, and pole normalization remain to be completed.
