@@ -5,6 +5,7 @@ import LichnerowiczObata.NormalMetricChart
 import LichnerowiczObata.IntrinsicNormalMetric
 import LichnerowiczObata.NormalAngularTangency
 import LichnerowiczObata.GlobalNormalAngularMetric
+import LichnerowiczObata.NormalRadialProduct
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -350,3 +351,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.normal_angular_composite_metric
 #print axioms LichnerowiczObata.exists_normal_chart_global_angular_metric
 #print axioms LichnerowiczObata.exists_obata_global_angular_metric
+#print axioms LichnerowiczObata.exists_small_sphere_level_homeomorph_map
+#print axioms LichnerowiczObata.exists_normal_radial_product_map

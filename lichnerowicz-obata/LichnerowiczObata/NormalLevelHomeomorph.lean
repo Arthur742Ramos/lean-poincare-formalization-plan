@@ -59,6 +59,39 @@ def normalSphereLevelHomeomorph {E M : Type*} [NormedAddCommGroup E]
 
 /-- Compactness and a genuine radial normal chart supply whole small sphere
 levels. Both source-sphere and target-level containment are conclusions. -/
+theorem exists_small_sphere_level_homeomorph_map {E M : Type*} [NormedAddCommGroup E]
+    [TopologicalSpace M] [CompactSpace M] (e : OpenPartialHomeomorph E M)
+    (hzero : (0 : E) ∈ e.source) {ρ : M → ℝ} (hc : Continuous ρ)
+    (hn : ∀ x, 0 ≤ ρ x) (hz : ∀ x, ρ x = 0 ↔ x = e 0)
+    {t : ℝ} (ht : 0 < t) (hlevel : ∀ v ∈ e.source, ρ (e v) = t * ‖v‖) :
+    ∃ ε : ℝ, 0 < ε ∧ ∀ r ∈ Ioo 0 ε,
+      ∃ H : Metric.sphere (0 : E) (r / t) ≃ₜ {x : M // ρ x = r},
+        (∀ v : Metric.sphere (0 : E) (r / t), (v : E) ∈ e.source) ∧
+        ∀ v, (H v : M) = e v := by
+  obtain ⟨a, ha, htarget⟩ := exists_small_sublevel_subset_of_unique_zero hc hn hz
+    e.open_target (e.map_source hzero)
+  obtain ⟨b, hb, hsource⟩ := Metric.mem_nhds_iff.mp (e.open_source.mem_nhds hzero)
+  refine ⟨min a (t * b), lt_min ha (mul_pos ht hb), ?_⟩
+  intro r hr
+  have hsrc : ∀ v : E, ‖v‖ = r / t → v ∈ e.source := by
+    intro v hv
+    apply hsource
+    have hrb : r / t < b := (div_lt_iff₀ ht).mpr (by
+      have := lt_of_lt_of_le hr.2 (min_le_right a (t * b))
+      nlinarith)
+    simpa only [Metric.mem_ball, dist_zero_right, hv] using hrb
+  have htgt : ∀ x : M, ρ x = r → x ∈ e.target := by
+    intro x hx
+    apply htarget x
+    rw [hx]
+    exact lt_of_lt_of_le hr.2 (min_le_left a (t * b))
+  refine ⟨normalSphereLevelHomeomorph e ρ ht.ne' r hsrc htgt hlevel, ?_, ?_⟩
+  · intro v
+    exact hsrc v (by simpa only [Metric.mem_sphere, dist_zero_right] using v.2)
+  · intro v
+    rfl
+
+/-- Existence-only form of the whole-level normal chart. -/
 theorem exists_small_sphere_level_homeomorph {E M : Type*} [NormedAddCommGroup E]
     [TopologicalSpace M] [CompactSpace M] (e : OpenPartialHomeomorph E M)
     (hzero : (0 : E) ∈ e.source) {ρ : M → ℝ} (hc : Continuous ρ)
@@ -66,21 +99,7 @@ theorem exists_small_sphere_level_homeomorph {E M : Type*} [NormedAddCommGroup E
     {t : ℝ} (ht : 0 < t) (hlevel : ∀ v ∈ e.source, ρ (e v) = t * ‖v‖) :
     ∃ ε : ℝ, 0 < ε ∧ ∀ r ∈ Ioo 0 ε,
       Nonempty (Metric.sphere (0 : E) (r / t) ≃ₜ {x : M // ρ x = r}) := by
-  obtain ⟨a, ha, htarget⟩ := exists_small_sublevel_subset_of_unique_zero hc hn hz
-    e.open_target (e.map_source hzero)
-  obtain ⟨b, hb, hsource⟩ := Metric.mem_nhds_iff.mp (e.open_source.mem_nhds hzero)
-  refine ⟨min a (t * b), lt_min ha (mul_pos ht hb), ?_⟩
-  intro r hr
-  refine ⟨normalSphereLevelHomeomorph e ρ ht.ne' r ?_ ?_ hlevel⟩
-  · intro v hv
-    apply hsource
-    have hrb : r / t < b := (div_lt_iff₀ ht).mpr (by
-      have := lt_of_lt_of_le hr.2 (min_le_right a (t * b))
-      nlinarith)
-    simpa only [Metric.mem_ball, dist_zero_right, hv] using hrb
-  · intro x hx
-    apply htarget x
-    rw [hx]
-    exact lt_of_lt_of_le hr.2 (min_le_left a (t * b))
+  obtain ⟨ε, hε, h⟩ := exists_small_sphere_level_homeomorph_map e hzero hc hn hz ht hlevel
+  exact ⟨ε, hε, fun r hr => ⟨(h r hr).choose⟩⟩
 
 end LichnerowiczObata

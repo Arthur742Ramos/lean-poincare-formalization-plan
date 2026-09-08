@@ -503,3 +503,8 @@ radial family as well, using the energy identity to fix its amplitude to the
 chosen positive critical value. The same family retains its smoothness,
 reset law, radial level identity, unit speed, and endpoint limits together
 with the constructed normal chart and composite angular metric formula.
+`NormalRadialProduct` constructs a product homeomorphism with the explicit
+forward formula: the supplied normal chart followed by the supplied radial
+family. Whole-sphere source containment is retained, so the chart's metric
+formula applies at every angular parameter. This avoids losing the map
+identity when combining the local level chart with the global product.
