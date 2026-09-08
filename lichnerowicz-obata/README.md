@@ -536,3 +536,8 @@ pairing, radial gradient velocity, and unit radial speed. Vanishing mixed
 terms follow from differentiating the radius identity. Applying this assembly
 to the jointly constructed spherical product remains required; it is not yet
 a global Riemannian isometry theorem.
+The normal-chart flow map is now proved jointly differentiable in its linear
+angular parameters and radius. Its radius identity holds on a full parameter
+neighborhood, providing the local identity needed for the mixed-term argument.
+The radial derivative and the existing angular pairing still need to be
+assembled for the constructed spherical product.

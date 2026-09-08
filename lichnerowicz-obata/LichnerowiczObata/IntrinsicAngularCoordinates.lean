@@ -68,6 +68,78 @@ theorem coordinate_metric_trivialization_forward (c : M) {z : E}
 
 variable {P : Type*} [NormedAddCommGroup P] [InnerProductSpace ℝ P]
 
+omit [RiemannianBundle (TangentSpace I : M → Type _)] in
+/-- Joint differentiability of the actual normal-chart flow map, including
+the radial parameter and a continuous linear angular parameter change. -/
+theorem mdifferentiableAt_normal_radial_joint
+    {f : M → ℝ} (hf : Continuous f) {a ℓ : ℝ} {η : M × ℝ → M}
+    (hη : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) I 1 η
+      ({x | -a < f x ∧ f x < a} ×ˢ Ioo 0 ℓ))
+    (c : M) (L : P →L[ℝ] E) {e : E → E} {u : P}
+    (he : DifferentiableAt ℝ e (L u))
+    (hout : e (L u) ∈ (extChartAt I c).target)
+    (hreg : -a < f ((extChartAt I c).symm (e (L u))) ∧
+      f ((extChartAt I c).symm (e (L u))) < a)
+    {r : ℝ} (hr : r ∈ Ioo 0 ℓ) :
+    MDifferentiableAt 𝓘(ℝ, P × ℝ) I
+      (fun q => η ((extChartAt I c).symm (e (L q.1)), q.2)) (u, r) := by
+  have hi : MDifferentiableAt 𝓘(ℝ, E) I (extChartAt I c).symm (e (L u)) := by
+    simpa only [I.range_eq_univ, mdifferentiableWithinAt_univ] using
+      (mdifferentiableWithinAt_extChartAt_symm (I := I) (x := c) hout)
+  have hL : MDifferentiableAt 𝓘(ℝ, P) 𝓘(ℝ, E) L u :=
+    mdifferentiableAt_iff_differentiableAt.mpr L.differentiableAt
+  have hψ : MDifferentiableAt 𝓘(ℝ, P) I
+      (fun y => (extChartAt I c).symm (e (L y))) u :=
+    (hi.comp (L u) (mdifferentiableAt_iff_differentiableAt.mpr he)).comp u hL
+  have hU : IsOpen {x : M | -a < f x ∧ f x < a} :=
+    (isOpen_lt continuous_const hf).inter (isOpen_lt hf continuous_const)
+  have hpt : ((extChartAt I c).symm (e (L u)), r) ∈
+      {x : M | -a < f x ∧ f x < a} ×ˢ Ioo 0 ℓ := ⟨hreg, hr⟩
+  have hd := ((hη _ hpt).contMDiffAt ((hU.prod isOpen_Ioo).mem_nhds hpt)).mdifferentiableAt
+    (by norm_num)
+  have hfirst : MDifferentiableAt 𝓘(ℝ, P × ℝ) I
+      (fun q => (extChartAt I c).symm (e (L q.1))) (u, r) :=
+    hψ.comp (f := Prod.fst) (g := fun y => (extChartAt I c).symm (e (L y)))
+      (u, r) (mdifferentiableAt_iff_differentiableAt.mpr differentiableAt_fst)
+  have hpair : MDifferentiableAt 𝓘(ℝ, P × ℝ) (I.prod 𝓘(ℝ, ℝ))
+      (fun q => ((extChartAt I c).symm (e (L q.1)), q.2)) (u, r) :=
+    hfirst.prodMk (mdifferentiableAt_iff_differentiableAt.mpr differentiableAt_snd)
+  exact hd.comp (u, r) hpair
+
+omit [RiemannianBundle (TangentSpace I : M → Type _)] in
+/-- The flow radius identity holds on a full neighborhood of each regular
+normal-chart parameter, so it may be differentiated in both parameters. -/
+theorem normal_radial_joint_level_eventually
+    {f ρ : M → ℝ} (hf : Continuous f) {a ℓ : ℝ} {η : M × ℝ → M}
+    (hlevel : ∀ x, -a < f x ∧ f x < a → ∀ r ∈ Ioo 0 ℓ, ρ (η (x, r)) = r)
+    (c : M) (L : P →L[ℝ] E) {e : E → E} {u : P}
+    (he : DifferentiableAt ℝ e (L u))
+    (hout : e (L u) ∈ (extChartAt I c).target)
+    (hreg : -a < f ((extChartAt I c).symm (e (L u))) ∧
+      f ((extChartAt I c).symm (e (L u))) < a)
+    {r : ℝ} (hr : r ∈ Ioo 0 ℓ) :
+    (fun q : P × ℝ => ρ (η ((extChartAt I c).symm (e (L q.1)), q.2)))
+      =ᶠ[𝓝 (u, r)] Prod.snd := by
+  have hi : MDifferentiableAt 𝓘(ℝ, E) I (extChartAt I c).symm (e (L u)) := by
+    simpa only [I.range_eq_univ, mdifferentiableWithinAt_univ] using
+      (mdifferentiableWithinAt_extChartAt_symm (I := I) (x := c) hout)
+  have hL : MDifferentiableAt 𝓘(ℝ, P) 𝓘(ℝ, E) L u :=
+    mdifferentiableAt_iff_differentiableAt.mpr L.differentiableAt
+  have hψ : MDifferentiableAt 𝓘(ℝ, P) I
+      (fun y => (extChartAt I c).symm (e (L y))) u :=
+    (hi.comp (L u) (mdifferentiableAt_iff_differentiableAt.mpr he)).comp u hL
+  have hfirst : ContinuousAt
+      (fun q : P × ℝ => (extChartAt I c).symm (e (L q.1))) (u, r) :=
+    hψ.continuousAt.comp (f := Prod.fst)
+      (g := fun y => (extChartAt I c).symm (e (L y))) continuousAt_fst
+  have hU : IsOpen {x : M | -a < f x ∧ f x < a} :=
+    (isOpen_lt continuous_const hf).inter (isOpen_lt hf continuous_const)
+  have hs := hfirst.preimage_mem_nhds (hU.mem_nhds hreg)
+  have ht : ∀ᶠ q : P × ℝ in 𝓝 (u, r), q.2 ∈ Ioo 0 ℓ :=
+    continuousAt_snd.preimage_mem_nhds (isOpen_Ioo.mem_nhds hr)
+  filter_upwards [hs, ht] with q hq hqr
+  exact hlevel _ hq _ hqr
+
 omit [IsManifold I ∞ M] [I.Boundaryless] in
 /-- A metric-compatible linear parameter change converts the coordinate
 angular formula into an intrinsic one for the actual composite derivative. -/

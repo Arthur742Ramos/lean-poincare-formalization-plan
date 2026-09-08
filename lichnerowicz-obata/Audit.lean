@@ -369,3 +369,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.polar_derivative_full_pairing
 #print axioms LichnerowiczObata.polar_map_spatial_orthogonal
 #print axioms LichnerowiczObata.polar_map_full_pairing
+#print axioms LichnerowiczObata.mdifferentiableAt_normal_radial_joint
+#print axioms LichnerowiczObata.normal_radial_joint_level_eventually
