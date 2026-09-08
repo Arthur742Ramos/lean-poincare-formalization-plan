@@ -291,3 +291,8 @@ linearized equation. For C2 families of genuine radial coordinate solutions,
 radial-field differentiability, leaving no separate linearized-ODE assumption.
 Applying these local results to the constructed global manifold radial flow,
 and establishing the pole normalization, remains pending.
+`ManifoldFlowCoordinates` expresses actual manifold families in fixed input
+and output charts. It constructs their natural open coordinate domain,
+transfers joint smoothness, and derives the coordinate time ODE directly
+from the manifold integral-curve equation. The radial metric theorem still
+needs to be assembled with this chart representation and its angular variations.
