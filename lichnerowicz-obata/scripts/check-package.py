@@ -25,10 +25,7 @@ SCHEMA_URL = (
     + SCHEMA_REV + "/schema/v0.4.schema.json"
 )
 PREFIX = "LichnerowiczObataEntry.Geometry."
-DEFINITIONS = [
-    "extensionBump", "extension", "curvature", "ricci", "gradient",
-    "laplacian", "isFirstPositiveEigenvalue", "isRoundSphere", "geometricStatement",
-]
+DEFINITIONS = ["completeStatement"]
 RELATED = {
     "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/"
     + BASE + "/almost-schur",
@@ -98,7 +95,7 @@ def main():
         require(path.is_file() and not path.is_symlink(), "missing regular file: " + name)
     challenge = (ROOT / required[0]).read_text(encoding="utf-8")
     solution = (ROOT / required[1]).read_text(encoding="utf-8")
-    implementation = (ROOT / "LichnerowiczObata/GeometryStatements.lean").read_text(encoding="utf-8")
+    implementation = (ROOT / "LichnerowiczObata/ClosedStatement.lean").read_text(encoding="utf-8")
     require(len(challenge.splitlines()) <= 1000 and len(challenge.encode()) <= 100 * 1024,
             "Challenge exceeds the independent size limit")
     require(challenge.startswith(implementation), "independent definition copies have diverged")
@@ -107,7 +104,7 @@ def main():
     require(len(re.findall(r"\bsorry\b", challenge)) == 1, "Challenge must have exactly one hole")
     require(len(re.findall(r"^theorem ", challenge, re.M)) == 1, "unexpected Challenge theorem surface")
     require(not re.search(r"\b(sorry|admit|axiom)\b", solution), "Solution contains a proof hole")
-    require("import LichnerowiczObata.GeometryComparison" in solution,
+    require("import LichnerowiczObata.StatementEquivalence" in solution,
             "Solution does not close the independent geometry")
     for path in (ROOT / "LichnerowiczObata").glob("*.lean"):
         require(not re.search(r"^(?:public )?import .*Challenge", path.read_text(), re.M),
@@ -163,7 +160,7 @@ def main():
                  "scripts/fake-landrun.sh"):
         require((ROOT / name).read_bytes() == git("show", BASE + ":almost-schur/" + name),
                 "copied source differs from its attributed pin: " + name)
-    print("Metadata schema, all nine definitions, exact source pins, and inherited provenance passed.")
+    print("Metadata schema, complete closed definition, exact source pins, and inherited provenance passed.")
 
 
 if __name__ == "__main__":

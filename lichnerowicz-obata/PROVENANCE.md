@@ -76,7 +76,12 @@ declaration audit distinguish this code from the unchanged vendored sources.
 metric-compatible torsion-free connection before stating the Ricci-conditional
 theorem. It independently specifies curvature, Ricci, gradient, Laplacian,
 first-eigenvalue minimality, and the global round metric. All nine definitions
-are selected for Comparator comparison. The only intentional proof hole is
+are inlined inside the closed `completeStatement` body selected for Comparator
+comparison. `StatementEquivalence.lean` proves its equivalence to the original
+quantified geometry by reflexivity. Closing the statement works around the
+registry renderer's loss of definitional equality when reconstructing imported
+dependent types as opaque axioms; no original proof or geometric content changes.
+The only intentional proof hole is
 the Challenge's selected theorem; neither the implementation nor the Solution
 imports that hole. Distinct Challenge/Solution module names avoid collisions
 with the inherited almost-Schur package.

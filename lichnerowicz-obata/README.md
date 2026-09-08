@@ -31,16 +31,21 @@ for the exact selected result and source-alignment limits.
 ## Verification
 
 Local checks include the complete Lean build, the isolated Mathlib-only
-Challenge with two rejected local-import controls, all 1,575 compiler-inventoried
-candidate constants from 163 implementation modules plus the Solution,
+Challenge with two rejected local-import controls, all compiler-inventoried
+candidate and vendored constants plus the Solution,
 four actual Lean axiom-audit negative controls, metadata schema validation,
 and unchanged inherited-source/provenance checks. The selected theorem uses
 only `propext`, `Classical.choice`, and `Quot.sound`.
 
-Comparator checks the complete geometric theorem and all nine independent
-definitions. Both NanoDa and Lean's default kernel accepted the solution in
-the local replay. That macOS replay uses the explicitly unsandboxed development
-fallback; it is not a claim of real Linux Landrun or hosted CI verification.
+Comparator checks the complete geometric theorem and the entire body of
+`completeStatement`, with all nine geometric definitions inlined as local lets.
+`StatementEquivalence.lean` proves by `rfl` that this closed proposition is
+equivalent to the original quantified theorem. This avoids Palomar's dependent
+type-proxy rendering bug without changing the mathematics or hiding definitions
+behind unchecked aliases. `scripts/check-closed-statement.lean` checks the
+compiled boundary. The actual Palomar verifier and renderer have separate
+pinned Linux replay workflows; local macOS verification uses an explicitly
+unsandboxed development fallback and is not evidence of Linux sandbox success.
 
 ```sh
 lake build
