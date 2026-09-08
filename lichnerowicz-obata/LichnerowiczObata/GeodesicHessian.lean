@@ -226,4 +226,26 @@ theorem coordinate_geodesic_obata_eq_cos
     simpa only [F, coordinateVectorField, hcrit, map_zero, zero_apply] using hd
   exact scalar_oscillator_eq_cos hT hconn hzero hF hV rfl hvzero ht
 
+/-- A local manifold derivative suffices to differentiate a scalar function
+along a coordinate curve. No global smoothness across critical points is used. -/
+theorem hasDerivAt_chart_curve_value
+    {f : M → ℝ} (c x : M) (hx : x ∈ (chartAt H c).source) (hf : MDiffAt f x)
+    {z : ℝ → E} {d : E} {t : ℝ} (hpos : z t = extChartAt I c x)
+    (hz : HasDerivAt z d t) :
+    HasDerivAt (fun s => f ((extChartAt I c).symm (z s)))
+      (inner ℝ (gradient (I := I) f x) ((trivializationAt E TM c).symmL ℝ x d)) t := by
+  have hx' : x ∈ (extChartAt I c).source := by simpa using hx
+  have hi : MDiffAt (extChartAt I c).symm (extChartAt I c x) := by
+    simpa only [I.range_eq_univ, mdifferentiableWithinAt_univ] using
+      mdifferentiableWithinAt_extChartAt_symm (I := I) (x := c)
+        ((extChartAt I c).map_source hx')
+  have hfd : DifferentiableAt ℝ (f ∘ (extChartAt I c).symm) (z t) := by
+    rw [hpos]
+    exact mdifferentiableAt_iff_differentiableAt.mp
+      (hf.comp_of_eq (extChartAt I c x) hi ((extChartAt I c).left_inv hx'))
+  have hd := HasFDerivAt.comp_hasDerivAt (𝕜 := ℝ) (F := E) (E := ℝ)
+    (l := f ∘ (extChartAt I c).symm) (f := z) t hfd.hasFDerivAt hz
+  convert hd using 1 <;> try rfl
+  rw [hpos, fderiv_chart_comp f c x hx hf, inner_gradient]
+
 end LichnerowiczObata

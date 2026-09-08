@@ -355,5 +355,9 @@ of curvature times initial squared metric speed. Identification with the
 existing radial curves and the round angular metric remains pending.
 `GeodesicRadial` recovers the radial parameter as initial metric speed times
 elapsed time before the antipodal phase, and proves that strictly intermediate
-positive phases lie in the regular region. Equality of the geodesic velocity
-with the speed-scaled radial vector field remains to be established.
+positive phases lie in the regular region. Differentiating this identity
+locally gives the radial-gradient/velocity pairing. On a connected manifold,
+the existing Obata energy theorem supplies unit radial-gradient norm, which
+together with conserved speed proves that geodesic velocity equals the
+speed-scaled radial gradient. Identification of the angular metric with the
+round tangent-sphere metric remains pending.
