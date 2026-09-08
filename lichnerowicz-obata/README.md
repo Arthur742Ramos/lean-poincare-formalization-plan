@@ -323,9 +323,7 @@ identification of the pole's angular metric with the round sphere.
 metric torsion-free connection coefficients and the associated position–velocity
 geodesic equation. The existing smooth local-flow construction now supplies
 local geodesic solution families near any chart position and velocity, without
-an extra coefficient-regularity or bump-function assumption. Construction of
-the normal-coordinate map at a pole, and its use to identify the angular metric,
-remains pending.
+an extra coefficient-regularity or bump-function assumption.
 `GeodesicLinearization` proves that the actual geodesic vector field at zero
 velocity has derivative `(δposition, δvelocity) ↦ (δvelocity, 0)`. ODE
 uniqueness proves local stationarity of a solution starting at rest, and
@@ -337,4 +335,9 @@ along the stationary orbit the flow derivative is therefore
 `(u, v) ↦ (u + t • v, v)`.
 Restricting to initial velocities and projecting to position proves that the
 endpoint map `v ↦ (α ((z, v), t)).1` has derivative `t • id` at zero.
-The normal-coordinate inverse still needs to be constructed.
+The inverse function theorem now constructs a local endpoint homeomorphism at
+a positive time, with a C² inverse at the base point. The existence theorem
+constructs its own C² geodesic flow on an open product neighborhood and proves
+stationarity by uniqueness; neither the flow nor stationarity is an extra
+hypothesis. Using this local normal map to identify the pole's angular metric
+with the round metric remains pending.

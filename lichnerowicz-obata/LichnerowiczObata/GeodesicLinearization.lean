@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.SmoothConnectionCoordinates
 public import LichnerowiczObata.FlowVariationEquation
+public import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 
 /-! # The geodesic equation at zero velocity -/
 
@@ -190,5 +191,113 @@ theorem hasFDerivAt_geodesic_endpoint_zero
   intro v
   simpa using fderiv_geodesic_flow_at_rest_apply cov hm ht b c hz hU hα hode hinit
     hT hconn hzero hmem hrest htime 0 v
+
+/-- At any nonzero time in its stationary time domain, the geodesic endpoint
+map is a local homeomorphism with a twice continuously differentiable inverse
+at the base point. The endpoint map itself is used as the forward function. -/
+theorem exists_geodesic_endpoint_local_inverse
+    (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov) (ht : cov.torsion = 0)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E) (c : M) {z : E}
+    (hz : z ∈ (extChartAt I c).target)
+    {α : (E × E) × ℝ → E × E} {U : Set ((E × E) × ℝ)}
+    (hU : IsOpen U) (hα : ContDiffOn ℝ 2 α U)
+    (hode : ∀ q ∈ U, HasDerivAt (fun s => α (q.1, s))
+      (coordinateGeodesicSpray cov b c (α q)) q.2)
+    (hinit : (fun q => α (q, 0)) =ᶠ[𝓝 (z, (0 : E))] id)
+    {T : Set ℝ} (hT : IsOpen T) (hconn : IsPreconnected T) (hzero : (0 : ℝ) ∈ T)
+    (hmem : ∀ s ∈ T, ((z, 0), s) ∈ U)
+    (hrest : ∀ s ∈ T, α ((z, 0), s) = (z, 0))
+    {t : ℝ} (htime : t ∈ T) (htne : t ≠ 0) :
+    ∃ e : OpenPartialHomeomorph E E,
+      (e : E → E) = (fun v => (α ((z, v), t)).1) ∧
+      0 ∈ e.source ∧ e 0 = z ∧ ContDiffAt ℝ 2 e.symm z := by
+  let f : E → E := fun v => (α ((z, v), t)).1
+  let A : E ≃L[ℝ] E := (Units.mk0 t htne) • ContinuousLinearEquiv.refl ℝ E
+  have hA : (A : E →L[ℝ] E) = t • ContinuousLinearMap.id ℝ E := by
+    ext v
+    rfl
+  have hi : ContDiffAt ℝ 2 (fun v : E => ((z, v), t)) 0 :=
+    (contDiffAt_const.prodMk contDiffAt_id).prodMk contDiffAt_const
+  have hf : ContDiffAt ℝ 2 f 0 :=
+    ((hα.contDiffAt (hU.mem_nhds (hmem t htime))).comp 0 hi).fst
+  have hd : HasFDerivAt f (A : E →L[ℝ] E) 0 := by
+    rw [hA]
+    exact hasFDerivAt_geodesic_endpoint_zero cov hm ht b c hz hU hα hode hinit
+      hT hconn hzero hmem hrest htime
+  have hfzero : f 0 = z := congrArg Prod.fst (hrest t htime)
+  refine ⟨hf.toOpenPartialHomeomorph f hd (by norm_num), rfl,
+    hf.mem_toOpenPartialHomeomorph_source hd (by norm_num), hfzero, ?_⟩
+  have hinv := hf.to_localInverse hd (by norm_num)
+  rw [hfzero] at hinv
+  exact hinv
+
+/-- A constructed geodesic flow around zero velocity can be restricted to
+an open product neighborhood on which its zero-velocity orbit is stationary. -/
+theorem exists_stationary_coordinate_geodesic_flow
+    (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov) (ht : cov.torsion = 0)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E) (c : M) {z : E}
+    (hz : z ∈ (extChartAt I c).target) :
+    ∃ V : Set (E × E), IsOpen V ∧ (z, (0 : E)) ∈ V ∧
+      ∃ δ : ℝ, 0 < δ ∧ ∃ α : (E × E) × ℝ → E × E,
+        ContDiffOn ℝ 2 α (V ×ˢ Metric.ball 0 δ) ∧
+        (∀ q ∈ V, α (q, 0) = q ∧
+          ∀ s ∈ Metric.ball 0 δ, (α (q, s)).1 ∈ (extChartAt I c).target ∧
+            HasDerivAt (fun t => α (q, t))
+              (coordinateGeodesicSpray cov b c (α (q, s))) s) ∧
+        ∀ s ∈ Metric.ball 0 δ, α ((z, 0), s) = (z, 0) := by
+  obtain ⟨W, hW, ε, hε, α, hα, hsol⟩ :=
+    exists_smooth_coordinate_geodesic_flow 2 (by norm_num) cov hm ht b c
+      (u := (0 : E)) hz
+  have hzW : (z, (0 : E)) ∈ W := mem_of_mem_nhds hW
+  have hode : ∀ᶠ s in 𝓝 (0 : ℝ),
+      HasDerivAt (fun t => α ((z, 0), t))
+        (coordinateGeodesicSpray cov b c (α ((z, 0), s))) s := by
+    filter_upwards [Metric.ball_mem_nhds (0 : ℝ) hε] with s hs
+    exact ((hsol (z, 0) hzW).2 s hs).2
+  have hrest := coordinate_geodesic_at_rest_eventually cov hm ht b c hz hode
+    (hsol (z, 0) hzW).1
+  obtain ⟨δ, hδ, hsub⟩ := Metric.mem_nhds_iff.mp
+    (hrest.and (Metric.ball_mem_nhds (0 : ℝ) hε))
+  have hball : Metric.ball (0 : ℝ) δ ⊆ Metric.ball 0 ε := fun s hs => (hsub hs).2
+  refine ⟨interior W, isOpen_interior, mem_interior_iff_mem_nhds.mpr hW,
+    δ, hδ, α, hα.mono (Set.prod_mono interior_subset hball), ?_, ?_⟩
+  · intro q hq
+    refine ⟨(hsol q (interior_subset hq)).1, ?_⟩
+    intro s hs
+    exact (hsol q (interior_subset hq)).2 s (hball hs)
+  · intro s hs
+    exact (hsub hs).1
+
+/-- Local normal coordinates are constructed from the actual geodesic flow.
+Both the flow and its endpoint inverse are conclusions, not extra hypotheses. -/
+theorem exists_coordinate_geodesic_normal_map
+    (cov : CovariantDerivative I E TM) (hm : tangentMetricCompatible cov) (ht : cov.torsion = 0)
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E) (c : M) {z : E}
+    (hz : z ∈ (extChartAt I c).target) :
+    ∃ V : Set (E × E), IsOpen V ∧ (z, (0 : E)) ∈ V ∧
+      ∃ δ : ℝ, 0 < δ ∧ ∃ α : (E × E) × ℝ → E × E,
+        ContDiffOn ℝ 2 α (V ×ˢ Metric.ball 0 δ) ∧
+        (∀ q ∈ V, α (q, 0) = q ∧
+          ∀ s ∈ Metric.ball 0 δ, (α (q, s)).1 ∈ (extChartAt I c).target ∧
+            HasDerivAt (fun t => α (q, t))
+              (coordinateGeodesicSpray cov b c (α (q, s))) s) ∧
+        (∀ s ∈ Metric.ball 0 δ, α ((z, 0), s) = (z, 0)) ∧
+        ∃ e : OpenPartialHomeomorph E E,
+          (e : E → E) = (fun v => (α ((z, v), δ / 2)).1) ∧
+          0 ∈ e.source ∧ e 0 = z ∧ ContDiffAt ℝ 2 e.symm z := by
+  obtain ⟨V, hV, hzV, δ, hδ, α, hα, hsol, hrest⟩ :=
+    exists_stationary_coordinate_geodesic_flow cov hm ht b c hz
+  refine ⟨V, hV, hzV, δ, hδ, α, hα, hsol, hrest, ?_⟩
+  have hinit : (fun q => α (q, 0)) =ᶠ[𝓝 (z, (0 : E))] id := by
+    filter_upwards [hV.mem_nhds hzV] with q hq
+    exact (hsol q hq).1
+  have htime : δ / 2 ∈ Metric.ball (0 : ℝ) δ := by
+    rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_pos (by positivity)]
+    linarith
+  exact exists_geodesic_endpoint_local_inverse cov hm ht b c hz
+    (hV.prod Metric.isOpen_ball) hα
+    (fun q hq => ((hsol q.1 hq.1).2 q.2 hq.2).2) hinit
+    Metric.isOpen_ball (convex_ball (0 : ℝ) δ).isPreconnected
+    (Metric.mem_ball_self hδ) (fun s hs => ⟨hzV, hs⟩) hrest htime (by positivity)
 
 end LichnerowiczObata
