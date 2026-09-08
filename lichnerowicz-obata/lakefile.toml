@@ -1,6 +1,6 @@
 name = "LichnerowiczObata"
 version = "0.1.0"
-defaultTargets = ["LichnerowiczObata"]
+defaultTargets = ["LichnerowiczObata", "LichnerowiczObataChallenge", "LichnerowiczObataSolution"]
 
 [[require]]
 name = "AlmostSchur"
@@ -9,3 +9,11 @@ path = "../almost-schur"
 [[lean_lib]]
 name = "LichnerowiczObata"
 globs = ["LichnerowiczObata.+"]
+
+[[lean_lib]]
+name = "LichnerowiczObataChallenge"
+roots = ["LichnerowiczObataChallenge"]
+
+[[lean_lib]]
+name = "LichnerowiczObataSolution"
+roots = ["LichnerowiczObataSolution"]

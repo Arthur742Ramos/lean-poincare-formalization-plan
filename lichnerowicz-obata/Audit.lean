@@ -10,6 +10,7 @@ import LichnerowiczObata.SmoothPolarMetricComparison
 import LichnerowiczObata.RoundMetricDiffeomorph
 import LichnerowiczObata.ObataRoundDiffeomorph
 import LichnerowiczObata.LichnerowiczObata
+import LichnerowiczObataSolution
 import LichnerowiczObata.IntrinsicNormalMetric
 import LichnerowiczObata.NormalAngularTangency
 import LichnerowiczObata.GlobalNormalAngularMetric
@@ -566,3 +567,9 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.sphereLinearIsometryDiffeomorph
 #print axioms LichnerowiczObata.exists_standard_round_metric_diffeomorph
 #print axioms LichnerowiczObata.lichnerowicz_obata
+#print axioms LichnerowiczObataEntry.Geometry.curvature_eq
+#print axioms LichnerowiczObataEntry.Geometry.ricci_eq
+#print axioms LichnerowiczObataEntry.Geometry.gradient_eq
+#print axioms LichnerowiczObataEntry.Geometry.laplacian_eq
+#print axioms LichnerowiczObataEntry.Geometry.geometricStatement_proved
+#print axioms LichnerowiczObataEntry.Geometry.lichnerowiczObata

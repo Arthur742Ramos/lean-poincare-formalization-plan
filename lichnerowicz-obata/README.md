@@ -6,10 +6,10 @@ positive Laplace eigenvalue, its bound `λ₁ ≥ n K`, and equality if and only
 the manifold is globally Riemannian-isometric to the round sphere of radius
 `1 / sqrt K`.
 
-**The full manifold-level theorem is proved in
-`LichnerowiczObata/LichnerowiczObata.lean`. The independent submission package
-and final provenance verification are still in progress; this is not yet
-submission-ready.**
+**The full manifold-level theorem and its independent Mathlib-only
+Challenge/Solution package are proved and locally verified. This is a new
+entry candidate, not a submitted or registered entry. Linux CI and external
+review have not been claimed.**
 
 `LichnerowiczObata.lichnerowicz_obata` produces a positive first eigenvalue,
 a smooth nonconstant eigenfunction, minimality among positive smooth
@@ -19,6 +19,46 @@ whose inclusion, scaled by `1 / sqrt K`, preserves the tangent inner products.
 Both directions of the diffeomorphism are smooth. The metric identity is
 exactly the induced round metric of radius `1 / sqrt K`, not a topological
 sphere identification or a chordal-distance isometry claim.
+
+The independently selected theorem is
+`LichnerowiczObataEntry.Geometry.lichnerowiczObata` in
+`LichnerowiczObataSolution.lean`. Its Mathlib-only specification is
+`LichnerowiczObataChallenge.lean`; distinct module names prevent collisions
+with the inherited almost-Schur package. See [PROVENANCE.md](PROVENANCE.md)
+for immutable source pins and [RESEARCH_INTEREST.md](RESEARCH_INTEREST.md)
+for the exact selected result and source-alignment limits.
+
+## Verification
+
+Local checks include the complete Lean build, the isolated Mathlib-only
+Challenge with two rejected local-import controls, all 1,575 compiler-inventoried
+candidate constants from 163 implementation modules plus the Solution,
+four actual Lean axiom-audit negative controls, metadata schema validation,
+and unchanged inherited-source/provenance checks. The selected theorem uses
+only `propext`, `Classical.choice`, and `Quot.sound`.
+
+Comparator checks the complete geometric theorem and all nine independent
+definitions. Both NanoDa and Lean's default kernel accepted the solution in
+the local replay. That macOS replay uses the explicitly unsandboxed development
+fallback; it is not a claim of real Linux Landrun or hosted CI verification.
+
+```sh
+lake build
+python3 scripts/check-axioms.py
+python3 scripts/check-challenge-boundary.py
+# With PyYAML==6.0.2 and jsonschema==4.25.1 installed:
+python3 scripts/check-package.py
+python3 ../almost-schur/scripts/check-vendored.py
+python3 ../almost-schur/scripts/check-curvature-provenance.py
+# Linux, with real Landrun:
+bash scripts/verify-comparator.sh
+# Explicit macOS development-only replay:
+PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh
+```
+
+The tracked workflow `.github/workflows/lichnerowicz-obata.yml` provides
+Linux package/axiom/boundary and Comparator/NanoDa jobs. A workflow file is
+not evidence that those hosted jobs have run.
 
 ## Checked analytic step
 
@@ -60,11 +100,12 @@ a global smooth representative satisfying the pointwise geometric equation.
 classical smooth eigenvalue, and its sharp lower bound `λ₁ ≥ n K`. These results
 no longer assume spectral existence or smoothness of a weak eigenfunction.
 
-## Remaining proof obligations
+## Remaining release gates
 
-1. The independently auditable Mathlib-only Challenge/Solution package and
-   complete Comparator definition selection.
-2. Final theorem/axiom/provenance verification and submission preflight.
+1. Real Linux/hosted verification and any independent review required by the
+   intended release or registry process.
+2. An artifact-specific publication/intake decision. Preparation does not
+   authorize a registry submission or reuse of an earlier entry identity.
 
 Do not replace any of these obligations by an assumed analytic or geometric
 bridge, and do not call the checked eigenfunction estimate the full theorem.

@@ -1,0 +1,74 @@
+name: Lichnerowicz-Obata development checks
+
+on:
+  push:
+    paths:
+      - "lichnerowicz-obata/**"
+      - "almost-schur/**"
+      - ".github/workflows/lichnerowicz-obata.yml"
+  pull_request:
+    paths:
+      - "lichnerowicz-obata/**"
+      - "almost-schur/**"
+      - ".github/workflows/lichnerowicz-obata.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: Complete geometric theorem, provenance, and axiom audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: lichnerowicz-obata
+          build: false
+      - name: Install metadata validators
+        run: python3 -m pip install PyYAML==6.0.2 jsonschema==4.25.1
+      - name: Check exact source pins and inherited attribution
+        run: |
+          python3 lichnerowicz-obata/scripts/check-package.py
+          python3 almost-schur/scripts/check-vendored.py
+          python3 almost-schur/scripts/check-curvature-provenance.py
+      - name: Build all implementation modules and the independent pair
+        run: lake build
+        working-directory: lichnerowicz-obata
+      - name: Audit every compiler-inventoried candidate constant
+        run: python3 scripts/check-axioms.py
+        working-directory: lichnerowicz-obata
+      - name: Check Mathlib-only boundary and rejected imports
+        run: python3 scripts/check-challenge-boundary.py
+        working-directory: lichnerowicz-obata
+
+  comparator:
+    name: Linux Comparator and NanoDa with real Landrun
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: lichnerowicz-obata
+          build: false
+      - name: Install Go for Landrun
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: "1.24.0"
+          cache: false
+      - name: Verify all selected definitions and the complete theorem
+        run: bash lichnerowicz-obata/scripts/verify-comparator.sh
+      - name: Recheck the isolated Challenge
+        run: python3 lichnerowicz-obata/scripts/check-challenge-boundary.py
