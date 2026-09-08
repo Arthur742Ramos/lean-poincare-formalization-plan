@@ -22,6 +22,7 @@ import LichnerowiczObata.ScaledRadialMetric
 import LichnerowiczObata.NormalRays
 import LichnerowiczObata.GeodesicNormalRays
 import LichnerowiczObata.NormalRayMetric
+import LichnerowiczObata.SineMetricLimit
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -271,3 +272,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.hasDerivAt_geodesic_normal_ray_metric
 #print axioms LichnerowiczObata.sine_squared_normalized_eq_on
 #print axioms LichnerowiczObata.geodesic_normal_ray_metric_sine_squared_normalized_eq
+#print axioms LichnerowiczObata.tendsto_sine_normalized_quadratic
+#print axioms LichnerowiczObata.sine_normalized_eq_of_pole_limit
