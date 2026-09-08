@@ -353,3 +353,7 @@ uniqueness, including zero frequency. Applied to geodesics from a critical
 point, this gives the cosine profile with frequency equal to the square root
 of curvature times initial squared metric speed. Identification with the
 existing radial curves and the round angular metric remains pending.
+`GeodesicRadial` recovers the radial parameter as initial metric speed times
+elapsed time before the antipodal phase, and proves that strictly intermediate
+positive phases lie in the regular region. Equality of the geodesic velocity
+with the speed-scaled radial vector field remains to be established.

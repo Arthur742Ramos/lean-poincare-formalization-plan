@@ -13,6 +13,7 @@ import LichnerowiczObata.SmoothConnectionCoordinates
 import LichnerowiczObata.GeodesicLinearization
 import LichnerowiczObata.GeodesicEnergy
 import LichnerowiczObata.GeodesicHessian
+import LichnerowiczObata.GeodesicRadial
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -60,6 +61,8 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.hasDerivAt_deriv_coordinate_geodesic_obata
 #print axioms LichnerowiczObata.scalar_oscillator_eq_cos
 #print axioms LichnerowiczObata.coordinate_geodesic_obata_eq_cos
+#print axioms LichnerowiczObata.coordinate_geodesic_obataRadial_eq
+#print axioms LichnerowiczObata.coordinate_geodesic_obata_regular
 #print axioms LichnerowiczObata.contDiffAt_coordinateVectorField_of_order
 #print axioms LichnerowiczObata.contDiffOn_coordinateConnection_basis
 #print axioms LichnerowiczObata.contDiffOn_coordinateGeodesicSpray
