@@ -518,3 +518,8 @@ explicit forward formula, and the angular metric for that same composite,
 together with chart regularity, the radial identity, unit speed, and endpoint
 limits. Expressing the complete metric in intrinsic sphere parameters and
 extending the comparison through both poles remain outstanding.
+`IntrinsicAngularCoordinates` proves the parameter-change steps: the tangent
+trivialization identifies the coordinate metric with the intrinsic inner
+product, the chain rule transfers angular pairings to intrinsic parameters,
+and rescaling to unit directions cancels the radius-squared factor. These
+lemmas still need to be specialized in the complete spherical comparison.
