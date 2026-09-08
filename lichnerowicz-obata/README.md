@@ -473,3 +473,7 @@ regular region with an actual intrinsic tangent sphere of constructed positive
 radius times the full open radial interval. This is a homeomorphism; comparison
 of the angular metric, smooth extension at the poles, and the global
 Riemannian isometry remain pending.
+`ObataRegularSphere` now derives the poles, coordinate basis, and sphere radius
+from the smooth nonconstant Obata equation in dimension at least two. It also
+proves that the regular region is exactly the manifold minus those two poles,
+so the resulting tangent-sphere product omits no other manifold points.
