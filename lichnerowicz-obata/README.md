@@ -114,8 +114,10 @@ the global metric/isometry argument remain separate obligations.
 `ObataClock.lean` proves the explicit logarithmic clock and its inverse-level
 identity. `RadialParameterization.lean` uses it to construct, through every
 regular point, a differentiable curve on the full open radial interval with
-`r(η(s)) = s`. This still does not prove endpoint extension, unit-speed
-parameterization, or the global sphere isometry.
+`r(η(s)) = s`. `RadialVelocity.lean` proves that the same construction follows
+the actual radial gradient and has intrinsic velocity of norm one over the
+full open interval. Endpoint extension and the global sphere isometry remain
+unproved.
 
 ## Sources and reuse
 

@@ -9,6 +9,7 @@ import LichnerowiczObata.RadialCurves
 import LichnerowiczObata.GlobalGradientCurves
 import LichnerowiczObata.RegularGradientCurves
 import LichnerowiczObata.RadialParameterization
+import LichnerowiczObata.RadialVelocity
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -41,3 +42,5 @@ import LichnerowiczObata.RadialParameterization
 #print axioms LichnerowiczObata.obataClock_along_solution
 #print axioms LichnerowiczObata.obataClock_inverse_level
 #print axioms LichnerowiczObata.exists_full_obata_radial_parameterization
+#print axioms LichnerowiczObata.hasMFDerivAt_integralCurve_timeChange
+#print axioms LichnerowiczObata.exists_full_unit_radial_curves
