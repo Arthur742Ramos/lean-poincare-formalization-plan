@@ -1,5 +1,6 @@
 import LichnerowiczObata.RadialVariation
 import LichnerowiczObata.FlowVariationEquation
+import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
 import LichnerowiczObata.ClassicalSpectrum
@@ -149,3 +150,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.radial_transport_kernel_trivial
 #print axioms LichnerowiczObata.fderiv_variation_equation
 #print axioms LichnerowiczObata.hasDerivAt_flow_variation
+#print axioms LichnerowiczObata.contMDiffAt_coordinateConstant
+#print axioms LichnerowiczObata.fderiv_coordinateMetric_pairing
