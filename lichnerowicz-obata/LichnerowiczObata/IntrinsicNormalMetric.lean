@@ -1,0 +1,99 @@
+module
+
+public import LichnerowiczObata.NormalMetricChart
+public import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
+
+/-! # Intrinsic tangent pairings of the normal chart -/
+
+@[expose] public noncomputable section
+open Bundle FiberBundle Set AlmostSchur
+open scoped Manifold ContDiff Topology
+
+namespace LichnerowiczObata
+set_option backward.isDefEq.respectTransparency false
+
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [FiniteDimensional ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I ∞ M] [I.Boundaryless]
+  [RiemannianBundle (TangentSpace I : M → Type _)]
+  [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+
+local notation "TM" => (TangentSpace I : M → Type _)
+
+omit [FiniteDimensional ℝ E] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+/-- Lifting a differentiable coordinate map through the inverse chart turns
+its coordinate metric exactly into the pairing of its manifold derivatives. -/
+theorem coordinate_metric_eq_intrinsic_chart_lift (c : M) {F : E → E} {u : E}
+    (hF : DifferentiableAt ℝ F u) (hout : F u ∈ (extChartAt I c).target) (w v : E) :
+    coordinateMetricBilinear (I := I) c (F u) (fderiv ℝ F u w) (fderiv ℝ F u v) =
+      inner ℝ (mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ F) u w)
+        (mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ F) u v) := by
+  let ψ := (extChartAt I c).symm ∘ F
+  have hi : MDifferentiableAt 𝓘(ℝ, E) I (extChartAt I c).symm (F u) := by
+    simpa only [I.range_eq_univ, mdifferentiableWithinAt_univ] using
+      (mdifferentiableWithinAt_extChartAt_symm (I := I) (x := c) hout)
+  have hψ : MDifferentiableAt 𝓘(ℝ, E) I ψ u :=
+    hi.comp u (mdifferentiableAt_iff_differentiableAt.mpr hF)
+  have hx : ψ u ∈ (chartAt H c).source := by
+    simpa [ψ] using (extChartAt I c).map_target hout
+  have ho := mdifferentiableAt_extChartAt (I := I) hx
+  have he : (extChartAt I c ∘ ψ) =ᶠ[𝓝 u] F := by
+    filter_upwards [hF.continuousAt.preimage_mem_nhds
+      ((isOpen_extChartAt_target (I := I) c).mem_nhds hout)] with y hy
+    exact (extChartAt I c).right_inv hy
+  have hd (j : E) : (trivializationAt E TM c).symmL ℝ (ψ u) (fderiv ℝ F u j) =
+      mfderiv 𝓘(ℝ, E) I ψ u j := by
+    have hc := mfderiv_comp_apply u ho hψ j
+    rw [mfderiv_eq_fderiv, he.fderiv_eq] at hc
+    rw [← TangentBundle.continuousLinearMapAt_trivializationAt hx] at hc
+    have hh := congrArg ((trivializationAt E TM c).symmL ℝ (ψ u)) hc
+    exact hh.trans ((trivializationAt E TM c).symmL_continuousLinearMapAt hx
+      (mfderiv 𝓘(ℝ, E) I ψ u j))
+  change inner ℝ ((trivializationAt E TM c).symmL ℝ (ψ u) (fderiv ℝ F u w))
+    ((trivializationAt E TM c).symmL ℝ (ψ u) (fderiv ℝ F u v)) = _
+  rw [hd, hd]
+
+variable [PreconnectedSpace M]
+  [ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I]
+  [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+  [IsContMDiffRiemannianBundle I ∞ E (TangentSpace I : M → Type _)]
+
+/-- The constructed normal chart carries the spherical angular metric as
+an equality of actual manifold tangent inner products, not just coordinate
+pairings. The chart and radial identity are retained with this conclusion. -/
+theorem exists_obata_intrinsic_angular_chart
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) {K a : ℝ}
+    (hK : 0 < K) (ha : 0 < a) (hb : ∀ y, -a ≤ f y ∧ f y ≤ a)
+    (hH : ∀ (y : M) (v w : TM y),
+      hessian (leviCivitaConnection (I := I)) f y v w = -K * f y * inner ℝ v w)
+    (c : M) {z : E} (hz : z ∈ (extChartAt I c).target)
+    (hcrit : gradient (I := I) f ((extChartAt I c).symm z) = 0)
+    (hmax : f ((extChartAt I c).symm z) = a) :
+    ∃ t : ℝ, 0 < t ∧ ∃ e : OpenPartialHomeomorph E E,
+      0 ∈ e.source ∧ e 0 = z ∧ ContDiffAt ℝ 2 e.symm z ∧
+      (∀ u ∈ e.source, ContDiffAt ℝ 2 e u) ∧
+      (∀ u ∈ e.source, e u ∈ (extChartAt I c).target) ∧
+      (∀ u ∈ e.source, obataRadial K a f ((extChartAt I c).symm (e u)) =
+        t * ‖(trivializationAt E TM c).symmL ℝ ((extChartAt I c).symm z) u‖) ∧
+      ∀ u ∈ e.source, u ≠ 0 → ∀ w v : E,
+        coordinateMetricBilinear (I := I) c z u w = 0 →
+        coordinateMetricBilinear (I := I) c z u v = 0 →
+        let g := coordinateMetricBilinear (I := I) c z
+        inner ℝ (mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ e) u w)
+          (mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ e) u v) =
+            (Real.sin (Real.sqrt K * (t * Real.sqrt (g u u))) ^ 2 / (K * g u u)) * g w v := by
+  obtain ⟨t, ht, e, he0, hez, hinv, hsmooth, htarget, hrad, hmetric⟩ :=
+    exists_obata_normal_metric_chart b hf hK ha hb hH c hz hcrit hmax
+  refine ⟨t, ht, e, he0, hez, hinv, hsmooth, htarget, hrad, ?_⟩
+  intro u hu hune w v hw hv
+  rw [← coordinate_metric_eq_intrinsic_chart_lift c
+    ((hsmooth u hu).differentiableAt (by norm_num)) (htarget u hu) w v]
+  have he := hmetric u hu hune w v
+  dsimp only at he ⊢
+  rw [hw, hv] at he
+  simpa only [zero_mul, zero_div, mul_zero, add_zero] using he
+
+end LichnerowiczObata

@@ -482,3 +482,7 @@ homeomorphism with its radial identity, C2 forward regularity, C2 inverse at
 the pole, and full pole-normalized metric formula throughout its punctured
 source. The geodesic family, time, and domain restrictions are constructed
 together; the metric formula uses the derivative of that same chart.
+`IntrinsicNormalMetric` identifies these coordinate pairings with the inner
+products of actual manifold derivatives. Applying this to the same constructed
+chart gives its spherical angular metric intrinsically, while retaining the
+radial identity and chart regularity needed for global transport.

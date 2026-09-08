@@ -2,6 +2,7 @@ import LichnerowiczObata.RadialVariation
 import LichnerowiczObata.RadialProduct
 import LichnerowiczObata.ObataRegularSphere
 import LichnerowiczObata.NormalMetricChart
+import LichnerowiczObata.IntrinsicNormalMetric
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -339,3 +340,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.obata_regular_tangent_sphere_product
 #print axioms LichnerowiczObata.obata_punctured_tangent_sphere_product
 #print axioms LichnerowiczObata.exists_obata_normal_metric_chart
+#print axioms LichnerowiczObata.coordinate_metric_eq_intrinsic_chart_lift
+#print axioms LichnerowiczObata.exists_obata_intrinsic_angular_chart
