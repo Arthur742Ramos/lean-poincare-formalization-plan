@@ -31,3 +31,6 @@ import LichnerowiczObata.GlobalGradientCurves
 #print axioms LichnerowiczObata.exists_uniform_chart_ode
 #print axioms LichnerowiczObata.exists_global_integralCurve_compact
 #print axioms LichnerowiczObata.exists_global_obata_gradient_curves
+#print axioms LichnerowiczObata.tendsto_obata_scalar_atTop
+#print axioms LichnerowiczObata.tendsto_obata_scalar_atBot
+#print axioms LichnerowiczObata.exists_global_obata_scalar_limits

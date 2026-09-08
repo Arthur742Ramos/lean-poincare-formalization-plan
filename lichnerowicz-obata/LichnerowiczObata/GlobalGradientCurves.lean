@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.UniformManifoldODE
 public import LichnerowiczObata.RadialCurves
+public import LichnerowiczObata.ObataScalarLimits
 
 /-! # Complete Obata gradient curves
 
@@ -56,5 +57,29 @@ theorem exists_global_obata_gradient_curves [Nonempty M] [PreconnectedSpace M]
     ((hf (γ t)).of_le (by norm_num : (1 : ℕ∞ω) ≤ 2)) (hγ.isMIntegralCurveAt t)
   rw [← inner_gradient, real_inner_self_eq_norm_sq, hn] at hd
   exact hd
+
+/-- The scalar values of complete regular gradient curves approach the two
+extrema in opposite time directions. This does not assert point convergence. -/
+theorem exists_global_obata_scalar_limits [Nonempty M] [PreconnectedSpace M]
+    {K : ℝ} (hK : 0 < K) {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) (hnon : ∃ x y, f x ≠ f y)
+    (hH : ∀ (x : M) (v w : TM x),
+      hessian (leviCivitaConnection (I := I)) f x v w = -K * f x * inner ℝ v w) :
+    ∃ a : ℝ, 0 < a ∧ ∀ x : M, -a < f x ∧ f x < a →
+      ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ (gradient (I := I) f) ∧
+        Monotone (f ∘ γ) ∧
+        Filter.Tendsto (f ∘ γ) Filter.atTop (𝓝 a) ∧
+        Filter.Tendsto (f ∘ γ) Filter.atBot (𝓝 (-a)) ∧
+        (∀ b : ℝ, -a < b ∧ b < a → ∃ t : ℝ, f (γ t) = b) := by
+  obtain ⟨a, ha, hsol⟩ := exists_global_obata_gradient_curves hK hf hnon hH
+  refine ⟨a, ha, ?_⟩
+  intro x hx
+  obtain ⟨γ, hγ0, hγ, hb, hd⟩ := hsol x
+  refine ⟨γ, hγ0, hγ, monotone_obata_scalar hK ha hb hd, ?_, ?_, ?_⟩
+  · exact tendsto_obata_scalar_atTop hK ha hb hd (by simpa only [Function.comp_apply, hγ0] using hx.1)
+  · exact tendsto_obata_scalar_atBot hK ha hb hd (by simpa only [Function.comp_apply, hγ0] using hx.2)
+  · intro b hba
+    exact exists_time_obata_scalar hK ha hb hd
+      (by simpa only [Function.comp_apply, hγ0] using hx) hba
 
 end LichnerowiczObata

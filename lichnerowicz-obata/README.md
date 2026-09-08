@@ -99,6 +99,12 @@ scalar value satisfies `d(f ∘ γ)/dt = K (a² - (f ∘ γ)²)`.
 These are curves of `grad f`, not yet a complete radial coordinate system;
 the behavior at the poles and the global isometry still require proof.
 
+`ObataScalarLimits.lean` proves monotonicity, convergence of the scalar values
+to `a` and `-a` in opposite time directions, and crossing of every intermediate
+level. `GlobalGradientCurves.lean` applies these results to the constructed
+Obata curves starting at regular points. Convergence of scalar values is not
+yet convergence of the manifold-valued curves to unique poles.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical
