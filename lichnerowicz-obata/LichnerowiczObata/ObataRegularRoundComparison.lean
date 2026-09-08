@@ -127,7 +127,7 @@ theorem exists_obata_regular_round_north_extension
               N (x.1 : RoundAmbient (TM p)) = (F.symm x : M) := by
   obtain ⟨Φ, hpole, Q, F, G, hG, hQ, hradial, hF, hjet⟩ :=
     exists_obata_regular_round_comparison hf hnon hK ha hH c hz hcrit hmax
-  obtain ⟨N, hN0, hNd, δ, hδ, hN⟩ := hpole.exists_round_north_extension
+  obtain ⟨N, hN0, hNd, hNm, δ, hδ, hN⟩ := hpole.exists_round_north_extension
     (one_div_pos.mpr (Real.sqrt_pos.mpr hK))
   refine ⟨F, N, hN0, hNd, δ, hδ, ?_⟩
   intro x hx

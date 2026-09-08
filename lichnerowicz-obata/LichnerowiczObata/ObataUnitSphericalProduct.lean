@@ -52,7 +52,7 @@ theorem exists_obata_unit_spherical_product
               inner ℝ (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (w, s))
                 (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (v, t)) =
                   (Real.sin (Real.sqrt K * r) ^ 2 / K) * inner ℝ w v + s * t := by
-  obtain ⟨η, hη, hcurves, hinit, t, ht, e, he0, hez, hsmooth, htarget, hrad, hgradient,
+  obtain ⟨η, hη, hcurves, hinit, t, ht, e, he0, hez, hderiv0, hsmooth, htarget, hrad, hgradient,
     R, hR, htR, hball, hsource, hregular, hrays, Q, hQ, hmetric⟩ :=
     exists_obata_spherical_metric_product hf hnon hK ha hH c hz hcrit hmax
   let p := (extChartAt I c).symm z
@@ -74,12 +74,13 @@ theorem exists_obata_unit_spherical_product
       · rw [hA0]
         exact hsmooth _ he0
       · exact A.contDiff.contDiffAt
-    refine ⟨χ, ?_, ?_, min (2 * (t * R)) (Real.pi / Real.sqrt K),
+    refine ⟨χ, ?_, ?_, ?_, min (2 * (t * R)) (Real.pi / Real.sqrt K),
       lt_min (mul_pos (by norm_num) htR.1)
         (div_pos Real.pi_pos (Real.sqrt_pos.mpr hK)), ?_⟩
     · change (extChartAt I c).symm (e (A 0)) = p
       rw [heA0]
     · exact (heA0 ▸ hi).comp 0 (contMDiffAt_iff_contDiffAt.mpr heA)
+    · exact normalized_normal_chart_derivative_inner c hz ht.ne' hez hderiv0
     · intro u r hr
       have hh := (hrays (S u) r hr).symm
       have he : (r / (t * R)) • (S u : TM p) = (r / t) • (u : TM p) := by

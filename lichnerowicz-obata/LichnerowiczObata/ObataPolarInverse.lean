@@ -92,7 +92,7 @@ include hDimension in
 differentiable ambient extensions in both directions, and its forward
 derivative preserves the Riemannian inner product on every regular tangent
 space. The same comparison retains its differentiable north-pole inverse
-extension; no south-pole or pole-metric assertion is made here. -/
+extension and its north-pole tangent metric; no south-pole assertion is made here. -/
 theorem exists_obata_regular_forward_differentiable
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
     {K a : ℝ} (hK : 0 < K) (ha : 0 < a)

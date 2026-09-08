@@ -38,7 +38,8 @@ theorem exists_obata_normal_metric_chart
     (hcrit : gradient (I := I) f ((extChartAt I c).symm z) = 0)
     (hmax : f ((extChartAt I c).symm z) = a) :
     ∃ t : ℝ, 0 < t ∧ ∃ e : OpenPartialHomeomorph E E,
-      0 ∈ e.source ∧ e 0 = z ∧ ContDiffAt ℝ 2 e.symm z ∧
+      0 ∈ e.source ∧ e 0 = z ∧
+      HasFDerivAt e (t • ContinuousLinearMap.id ℝ E) 0 ∧ ContDiffAt ℝ 2 e.symm z ∧
       (∀ u ∈ e.source, ContDiffAt ℝ 2 e u) ∧
       (∀ u ∈ e.source, e u ∈ (extChartAt I c).target) ∧
       (∀ u ∈ e.source, obataRadial K a f ((extChartAt I c).symm (e u)) =
@@ -83,7 +84,13 @@ theorem exists_obata_normal_metric_chart
   have hS0 : (0 : E) ∈ S := ⟨Metric.mem_ball_self (lt_min hε hη), hzV⟩
   let d := e.restrOpen S hS
   have hd : (d : E → E) = (fun u => (α ((z, u), t)).1) := he
-  refine ⟨t, ht, d, ⟨he0, hS0⟩, hez, hinv, ?_, ?_, ?_, ?_, ?_⟩
+  refine ⟨t, ht, d, ⟨he0, hS0⟩, hez, ?_, hinv, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [hd]
+    exact hasFDerivAt_geodesic_endpoint_zero LC leviCivitaConnection_metricCompatible
+      leviCivitaConnection_torsion b c hz (hV.prod Metric.isOpen_ball) hα
+      (fun q hq => ((hsol _ hq.1).2 _ hq.2).2) hinit Metric.isOpen_ball
+      (convex_ball (0 : ℝ) δ).isPreconnected (Metric.mem_ball_self hδ)
+      (fun s hs => ⟨hzV, hs⟩) hrest htime
   · intro u hu
     rw [hd]
     have hi : ContDiffAt ℝ 2 (fun y : E => ((z, y), t)) u :=

@@ -381,6 +381,7 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_coordinate_normal_radial_product_map
 #print axioms LichnerowiczObata.exists_obata_spherical_metric_product
 #print axioms LichnerowiczObata.normal_chart_eq_radial_transport
+#print axioms LichnerowiczObata.normalized_normal_chart_derivative_inner
 #print axioms LichnerowiczObata.hasFDerivAt_roundPoleLog_zero
 #print axioms LichnerowiczObata.roundPoleLog_polar_projection
 #print axioms LichnerowiczObata.HasRadialPoleModel.exists_round_north_extension

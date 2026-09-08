@@ -62,6 +62,53 @@ theorem coordinate_metric_eq_intrinsic_chart_lift (c : M) {F : E → E} {u : E}
   rw [coordinate_derivative_eq_intrinsic_chart_lift c hF hout w,
     coordinate_derivative_eq_intrinsic_chart_lift c hF hout v]
 
+omit [FiniteDimensional ℝ E] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
+/-- Dividing out the endpoint time makes the normal chart's derivative
+at the pole an intrinsic isometry. This uses its actual endpoint derivative,
+not an additional metric assumption at the pole. -/
+theorem normalized_normal_chart_derivative_inner (c : M) {z : E}
+    (hz : z ∈ (extChartAt I c).target) {e : E → E} {t : ℝ} (ht : t ≠ 0)
+    (hez : e 0 = z) (hd : HasFDerivAt e (t • ContinuousLinearMap.id ℝ E) 0)
+    (v w : TM ((extChartAt I c).symm z)) :
+    let χ := fun u : TM ((extChartAt I c).symm z) => (extChartAt I c).symm
+      (e ((1 / t) • (trivializationAt E TM c).continuousLinearMapAt ℝ
+        ((extChartAt I c).symm z) u))
+    inner ℝ (mfderiv 𝓘(ℝ, TM ((extChartAt I c).symm z)) I χ 0 v)
+      (mfderiv 𝓘(ℝ, TM ((extChartAt I c).symm z)) I χ 0 w) = inner ℝ v w := by
+  let p := (extChartAt I c).symm z
+  let L := (trivializationAt E TM c).continuousLinearMapAt ℝ p
+  let A : TM p →L[ℝ] E := (1 / t) • L
+  let ψ := (extChartAt I c).symm ∘ e
+  have hout : e 0 ∈ (extChartAt I c).target := hez ▸ hz
+  have hi : MDifferentiableAt 𝓘(ℝ, E) I (extChartAt I c).symm (e 0) := by
+    simpa only [I.range_eq_univ, mdifferentiableWithinAt_univ] using
+      (mdifferentiableWithinAt_extChartAt_symm (I := I) (x := c) hout)
+  have hψ : MDifferentiableAt 𝓘(ℝ, E) I ψ (A 0) := by
+    rw [map_zero]
+    exact hi.comp 0 (mdifferentiableAt_iff_differentiableAt.mpr hd.differentiableAt)
+  have hA : MDifferentiableAt 𝓘(ℝ, TM p) 𝓘(ℝ, E) A 0 :=
+    mdifferentiableAt_iff_differentiableAt.mpr A.differentiableAt
+  change inner ℝ (mfderiv 𝓘(ℝ, TM p) I (ψ ∘ A) 0 v)
+    (mfderiv 𝓘(ℝ, TM p) I (ψ ∘ A) 0 w) = inner ℝ v w
+  rw [mfderiv_comp_apply 0 hψ hA v, mfderiv_comp_apply 0 hψ hA w,
+    mfderiv_eq_fderiv, A.fderiv]
+  dsimp only [ψ]
+  have hF : DifferentiableAt ℝ e (A 0) := by simpa only [map_zero] using hd.differentiableAt
+  have houtA : e (A 0) ∈ (extChartAt I c).target := by simpa only [map_zero] using hout
+  change inner ℝ (mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ e) (A 0) (A v))
+    (mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ e) (A 0) (A w)) = inner ℝ v w
+  rw [← coordinate_metric_eq_intrinsic_chart_lift c hF houtA (A v) (A w),
+    map_zero, hd.fderiv, hez]
+  have hscale (j : TM p) : (t • ContinuousLinearMap.id ℝ E) (A j) = L j := by
+    simp [A, smul_smul, ht]
+  rw [hscale v, hscale w]
+  have hp : p ∈ (chartAt H c).source := by
+    simpa [p] using (extChartAt I c).map_target hz
+  change inner ℝ ((trivializationAt E TM c).symmL ℝ p (L v))
+    ((trivializationAt E TM c).symmL ℝ p (L w)) = inner ℝ v w
+  rw [(trivializationAt E TM c).symmL_continuousLinearMapAt hp v,
+    (trivializationAt E TM c).symmL_continuousLinearMapAt hp w]
+
 variable [PreconnectedSpace M]
   [ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I]
   [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
@@ -80,7 +127,8 @@ theorem exists_obata_intrinsic_angular_chart
     (hcrit : gradient (I := I) f ((extChartAt I c).symm z) = 0)
     (hmax : f ((extChartAt I c).symm z) = a) :
     ∃ t : ℝ, 0 < t ∧ ∃ e : OpenPartialHomeomorph E E,
-      0 ∈ e.source ∧ e 0 = z ∧ ContDiffAt ℝ 2 e.symm z ∧
+      0 ∈ e.source ∧ e 0 = z ∧
+      HasFDerivAt e (t • ContinuousLinearMap.id ℝ E) 0 ∧ ContDiffAt ℝ 2 e.symm z ∧
       (∀ u ∈ e.source, ContDiffAt ℝ 2 e u) ∧
       (∀ u ∈ e.source, e u ∈ (extChartAt I c).target) ∧
       (∀ u ∈ e.source, obataRadial K a f ((extChartAt I c).symm (e u)) =
@@ -97,9 +145,9 @@ theorem exists_obata_intrinsic_angular_chart
         inner ℝ (mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ e) u w)
           (mfderiv 𝓘(ℝ, E) I ((extChartAt I c).symm ∘ e) u v) =
             (Real.sin (Real.sqrt K * (t * Real.sqrt (g u u))) ^ 2 / (K * g u u)) * g w v := by
-  obtain ⟨t, ht, e, he0, hez, hinv, hsmooth, htarget, hrad, hgradient, hmetric⟩ :=
+  obtain ⟨t, ht, e, he0, hez, hderiv0, hinv, hsmooth, htarget, hrad, hgradient, hmetric⟩ :=
     exists_obata_normal_metric_chart b hf hK ha hb hH c hz hcrit hmax
-  refine ⟨t, ht, e, he0, hez, hinv, hsmooth, htarget, hrad, ?_, ?_⟩
+  refine ⟨t, ht, e, he0, hez, hderiv0, hinv, hsmooth, htarget, hrad, ?_, ?_⟩
   · intro u hu hphase
     rw [← coordinate_derivative_eq_intrinsic_chart_lift c
       ((hsmooth u hu).differentiableAt (by norm_num)) (htarget u hu) u]

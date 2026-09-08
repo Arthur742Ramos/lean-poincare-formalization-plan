@@ -683,5 +683,10 @@ radial coordinate. `HasRoundNorthInverseExtension` attaches that fact to the
 specified comparison map through the regular metric construction. The global
 round homeomorphism now retains the same differentiable north-pole ambient
 extension, with agreement on a full sphere neighborhood including the pole.
-Establishing pole metric preservation, handling the south pole, and proving
-the final global isometry remain unfinished.
+The normal chart also retains its actual derivative `t • id` at zero.
+`normalized_normal_chart_derivative_inner` removes that time factor and proves
+the Cartesian model's derivative is an intrinsic isometry. This metric identity
+passes through the round logarithm to the north-pole extension of the same
+global homeomorphism, on all tangent directions represented by the angular
+inclusion. Handling the south pole and proving the final global isometry
+remain unfinished.
