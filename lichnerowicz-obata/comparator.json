@@ -5,15 +5,7 @@
     "LichnerowiczObataEntry.Geometry.lichnerowiczObata"
   ],
   "definition_names": [
-    "LichnerowiczObataEntry.Geometry.extensionBump",
-    "LichnerowiczObataEntry.Geometry.extension",
-    "LichnerowiczObataEntry.Geometry.curvature",
-    "LichnerowiczObataEntry.Geometry.ricci",
-    "LichnerowiczObataEntry.Geometry.gradient",
-    "LichnerowiczObataEntry.Geometry.laplacian",
-    "LichnerowiczObataEntry.Geometry.isFirstPositiveEigenvalue",
-    "LichnerowiczObataEntry.Geometry.isRoundSphere",
-    "LichnerowiczObataEntry.Geometry.geometricStatement"
+    "LichnerowiczObataEntry.Geometry.completeStatement"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": true

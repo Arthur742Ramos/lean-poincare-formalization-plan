@@ -1,0 +1,142 @@
+name: Lichnerowicz-Obata actual Palomar renderer replay
+
+# Adapted from the failed registry run's render-challenge.yml. Runs the
+# UNMODIFIED pinned renderer including its notation audit and Linux sandbox.
+# This regression workflow does not submit, publish, or alter a registry entry.
+# Upstream MIT attribution: .github/third-party/PalomarSubmission-LICENSE.
+on:
+  push:
+    paths:
+      - "lichnerowicz-obata/**"
+      - ".github/workflows/lichnerowicz-palomar-render.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: false
+
+      - name: Checkout trusted renderer
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: PalomarRegistry/PalomarSubmission
+          ref: ef2fa1eadcb246c2346ddba39b52eaa53d4bb763
+          path: pipeline
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11.10"
+
+      - name: Install verifier dependencies
+        run: python -m pip install --disable-pip-version-check --require-hashes --no-deps -r pipeline/requirements.txt
+
+      - name: Checkout candidate to bind the exact Challenge hash
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: candidate
+          persist-credentials: false
+      - name: Record candidate Challenge hash
+        run: echo "CHALLENGE_SHA256=$(sha256sum candidate/lichnerowicz-obata/LichnerowiczObataChallenge.lean | cut -d ' ' -f 1)" >> "$GITHUB_ENV"
+
+      - name: Fetch and bind candidate source
+        id: prepare
+        working-directory: pipeline
+        env:
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          SOURCE_COMMIT: ${{ github.sha }}
+          CHALLENGE_SHA256: ${{ env.CHALLENGE_SHA256 }}
+          PROJECT_PATH: lichnerowicz-obata
+          CHALLENGE_PATH: lichnerowicz-obata/LichnerowiczObataChallenge.lean
+          SOLUTION_PATH: lichnerowicz-obata/LichnerowiczObataSolution.lean
+          COMPARATOR_CONFIG_PATH: lichnerowicz-obata/comparator.json
+          LAKEFILE_PATH: lichnerowicz-obata/lakefile.toml
+          LEAN_TOOLCHAIN_PATH: lichnerowicz-obata/lean-toolchain
+        run: |
+          python -m scripts.render_challenge prepare \
+            --repository "$SOURCE_REPOSITORY" \
+            --commit "$SOURCE_COMMIT" \
+            --challenge-sha256 "$CHALLENGE_SHA256" \
+            --project-path "$PROJECT_PATH" \
+            --challenge-path "$CHALLENGE_PATH" \
+            --solution-path "$SOLUTION_PATH" \
+            --comparator-config-path "$COMPARATOR_CONFIG_PATH" \
+            --lakefile-path "$LAKEFILE_PATH" \
+            --lean-toolchain-path "$LEAN_TOOLCHAIN_PATH" \
+            --work-dir "$RUNNER_TEMP/palomar-render" \
+            --output "$RUNNER_TEMP/palomar-render/report.json"
+
+      - name: Install pinned elan
+        if: steps.prepare.outputs.ready == 'true'
+        run: |
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/elan.tar.gz" \
+            https://github.com/leanprover/elan/releases/download/v4.2.3/elan-x86_64-unknown-linux-gnu.tar.gz
+          echo "df0b2b3a439961ffcbb3985214365ffe40f49bc871df04dff268c7d8e21ca8b2  $RUNNER_TEMP/elan.tar.gz" \
+            | sha256sum --check
+          mkdir "$RUNNER_TEMP/elan"
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP/elan"
+          "$RUNNER_TEMP/elan/elan-init" -y --no-modify-path --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Install accepted Lean toolchain
+        if: steps.prepare.outputs.ready == 'true'
+        env:
+          LEAN_TOOLCHAIN: ${{ steps.prepare.outputs.lean_toolchain }}
+        run: elan toolchain install "$LEAN_TOOLCHAIN"
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        if: steps.prepare.outputs.ready == 'true'
+        with:
+          go-version: "1.24.0"
+
+      - name: Build pinned Landrun
+        if: steps.prepare.outputs.ready == 'true'
+        run: |
+          CGO_ENABLED=0 go install github.com/zouuup/landrun/cmd/landrun@811cfff51ceaf3d9843708aa6d22e9b84ccac8b4
+
+      - name: Build, sanitize, and hash Challenge rendering under Landrun
+        if: steps.prepare.outputs.ready == 'true'
+        working-directory: pipeline
+        run: |
+          python -m scripts.render_challenge execute \
+            --work-dir "$RUNNER_TEMP/palomar-render" \
+            --output "$RUNNER_TEMP/palomar-render/report.json" \
+            --landrun "$(go env GOPATH)/bin/landrun" \
+            --renderer-commit ef2fa1eadcb246c2346ddba39b52eaa53d4bb763 \
+            --landrun-commit 811cfff51ceaf3d9843708aa6d22e9b84ccac8b4 \
+            --workflow-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Upload bounded render result
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: challenge-render-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/palomar-render/report.json
+            ${{ runner.temp }}/palomar-render/result
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Require a successful render
+        if: always()
+        run: |
+          python -c 'import json, os, pathlib, sys; p = pathlib.Path(os.environ["RUNNER_TEMP"]) / "palomar-render" / "report.json"; sys.exit(0 if json.loads(p.read_text())["status"] == "pass" else 1)'

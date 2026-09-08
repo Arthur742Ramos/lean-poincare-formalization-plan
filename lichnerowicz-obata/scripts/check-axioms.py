@@ -139,7 +139,7 @@ def main():
                 continue
             raise SystemExit("negative control was incorrectly accepted: " + name)
     print(f"Checked {count} compiler-inventoried constants from {len(modules)} implementation modules "
-          "plus the Solution; all ten Comparator selections covered; four actual Lean negative "
+          f"plus the Solution; all {len(selected)} Comparator selections covered; four actual Lean negative "
           "controls rejected.")
 
 

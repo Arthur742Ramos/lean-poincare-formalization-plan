@@ -100,14 +100,3 @@ def completeStatement : Prop :=
         (μ = (n : ℝ) * K ↔ isRoundSphere K)
 
 end LichnerowiczObataEntry.Geometry
-
-namespace LichnerowiczObataEntry.Geometry
-
-universe u v w
-
-/-- The full Lichnerowicz--Obata theorem, with the entire quantified statement
-and its geometric definitions explicitly compared through completeStatement. -/
-theorem lichnerowiczObata : completeStatement.{u,v,w} := by
-  sorry
-
-end LichnerowiczObataEntry.Geometry

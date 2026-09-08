@@ -155,7 +155,10 @@ fidelity:
     radius is expressed by scaling the standard unit-sphere inclusion; the
     exact derivative identity specifies its round Riemannian metric and the
     Diffeomorph type includes a smooth inverse. All nine geometric definitions
-    are compared independently. The one intentional Challenge theorem hole
+    are inlined inside the independently compared completeStatement body.
+    Its equivalence to the original quantified statement is proved by rfl;
+    closing the parameters avoids the registry renderer's dependent-type
+    proxy bug without changing the mathematics. The one intentional Challenge theorem hole
     is excluded from the zero-hole implementation/Solution status and is
     never imported into their proof closure.
 

@@ -48,6 +48,9 @@ jobs:
       - name: Audit every compiler-inventoried candidate constant
         run: python3 scripts/check-axioms.py
         working-directory: lichnerowicz-obata
+      - name: Check the compiled closed-statement boundary
+        run: lake env lean scripts/check-closed-statement.lean
+        working-directory: lichnerowicz-obata
       - name: Check Mathlib-only boundary and rejected imports
         run: python3 scripts/check-challenge-boundary.py
         working-directory: lichnerowicz-obata

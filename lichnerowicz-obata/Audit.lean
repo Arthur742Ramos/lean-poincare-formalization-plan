@@ -572,4 +572,6 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObataEntry.Geometry.gradient_eq
 #print axioms LichnerowiczObataEntry.Geometry.laplacian_eq
 #print axioms LichnerowiczObataEntry.Geometry.geometricStatement_proved
+#print axioms LichnerowiczObataEntry.Geometry.completeStatement_iff
+#print axioms LichnerowiczObataEntry.Geometry.completeStatement_proved
 #print axioms LichnerowiczObataEntry.Geometry.lichnerowiczObata
