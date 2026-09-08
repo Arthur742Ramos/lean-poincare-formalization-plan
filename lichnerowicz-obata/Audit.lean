@@ -423,3 +423,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.mfderiv_sphere_polar_restriction_injective
 #print axioms LichnerowiczObata.exists_sphere_polar_derivative_equiv
 #print axioms LichnerowiczObata.mdifferentiableAt_homeomorph_symm_of_equiv
+#print axioms LichnerowiczObata.mdifferentiableAt_local_inverse_of_equiv
+#print axioms LichnerowiczObata.mdifferentiableAt_partialHomeomorph_symm_of_equiv

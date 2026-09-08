@@ -596,3 +596,8 @@ between boundaryless manifolds, a homeomorphism with an invertible manifold
 derivative has a differentiable inverse at the corresponding point. Its proof
 uses the existing inverse and pointwise differentiability, with no additional
 C¹ assumption. Instantiation on the regular Obata comparison remains required.
+The inverse theorem now also covers continuous local inverses and open partial
+homeomorphisms, with cancellation required only near the image point. This
+provides the form needed on the open regular polar domain without extending
+the homeomorphism outside that domain. Its application to the constructed
+polar comparison remains outstanding.
