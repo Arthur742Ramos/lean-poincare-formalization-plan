@@ -349,3 +349,4 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.normal_angular_metric_transport
 #print axioms LichnerowiczObata.normal_angular_composite_metric
 #print axioms LichnerowiczObata.exists_normal_chart_global_angular_metric
+#print axioms LichnerowiczObata.exists_obata_global_angular_metric

@@ -498,3 +498,8 @@ composite map (normal chart followed by radial flow). The initial angular
 metric is no longer an extra hypothesis. The radial family must still carry
 its proved smoothness, metric evolution, and initial-value identities;
 combining this construction with the global bijection remains outstanding.
+The joint theorem `exists_obata_global_angular_metric` now constructs that
+radial family as well, using the energy identity to fix its amplitude to the
+chosen positive critical value. The same family retains its smoothness,
+reset law, radial level identity, unit speed, and endpoint limits together
+with the constructed normal chart and composite angular metric formula.
