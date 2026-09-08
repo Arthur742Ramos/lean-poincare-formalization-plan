@@ -434,3 +434,8 @@ proves their tangency to the sphere and orthogonality to radial velocity, and
 derives the full polar pairing: unit radial coefficient and radius-squared
 sine-square angular coefficient. Constructing the global comparison map is
 still pending.
+`RoundPolarCoordinates` constructs a continuous, injective map from unit
+directions perpendicular to a pole and the open radial interval into the
+actual sphere. Height determines the radial parameter, and the remaining
+component determines the angular direction. Surjectivity onto the sphere
+minus its poles and the global manifold comparison remain pending.
