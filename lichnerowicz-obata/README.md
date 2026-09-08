@@ -254,3 +254,7 @@ and a reset identity identifying curves started at intermediate points.
 `RadialProduct` uses these identities to construct a homeomorphism from the
 regular region to any one radial level times the full open radial interval.
 This is a topological product theorem, not yet a round-metric identification.
+`RadialVariation` differentiates the attained-level and reset identities:
+the actual initial-point derivatives are orthogonal to the radial gradient
+and satisfy the tangent-transport composition law. Metric evolution for these
+variations and normalization at a pole remain to be established.

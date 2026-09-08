@@ -1,4 +1,4 @@
-import LichnerowiczObata.RadialProduct
+import LichnerowiczObata.RadialVariation
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
 import LichnerowiczObata.ClassicalSpectrum
@@ -139,3 +139,7 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.radialProductEquiv
 #print axioms LichnerowiczObata.radialProductHomeomorph
 #print axioms LichnerowiczObata.exists_obata_radial_product
+#print axioms LichnerowiczObata.inner_gradient_mfderiv_eq_zero
+#print axioms LichnerowiczObata.radial_variation_orthogonal
+#print axioms LichnerowiczObata.obata_radial_variation_orthogonal
+#print axioms LichnerowiczObata.mfderiv_radial_reset
