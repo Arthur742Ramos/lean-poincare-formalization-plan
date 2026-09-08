@@ -584,5 +584,8 @@ invertibility and forward differentiability remains required.
 standard sphere manifold tangent via the differential of sphere inclusion.
 It proves injectivity of this inclusion, transfers polar injectivity to the
 sphere tangent and radial space, and proves differentiability of the actual
-sphere-restricted parameter map. Identifying its full manifold derivative
-and applying inverse differentiability remain the next steps.
+sphere-restricted parameter map. It now identifies the full manifold derivative
+as the ambient polar derivative composed with sphere tangent inclusion and
+proves that this actual manifold derivative is injective under the established
+polar nondegeneracy hypothesis. Establishing the equal-dimensional linear
+equivalence and applying inverse differentiability remain the next steps.

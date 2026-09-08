@@ -417,3 +417,6 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.spherePolarTangentInclusion_injective
 #print axioms LichnerowiczObata.polar_derivative_sphere_tangent_injective
 #print axioms LichnerowiczObata.mdifferentiableAt_sphere_polar_restriction
+#print axioms LichnerowiczObata.mvfderiv_sphere_polar_inclusion
+#print axioms LichnerowiczObata.mfderiv_sphere_polar_restriction
+#print axioms LichnerowiczObata.mfderiv_sphere_polar_restriction_injective
