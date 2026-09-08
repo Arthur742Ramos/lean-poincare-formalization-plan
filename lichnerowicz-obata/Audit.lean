@@ -29,6 +29,7 @@ import LichnerowiczObata.RoundPolarMetric
 import LichnerowiczObata.RoundPolarCoordinates
 import LichnerowiczObata.RoundPolarInverse
 import LichnerowiczObata.RoundPolarHomeomorph
+import LichnerowiczObata.SmallRadialLevels
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -315,3 +316,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.roundPolar_inverse_sine_ne_zero
 #print axioms LichnerowiczObata.continuous_roundPolarEquiv_inverse
 #print axioms LichnerowiczObata.roundPolarHomeomorph
+#print axioms LichnerowiczObata.exists_small_sublevel_subset_of_unique_zero
+#print axioms LichnerowiczObata.exists_small_obata_radial_sublevel_subset

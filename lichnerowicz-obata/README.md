@@ -447,3 +447,7 @@ bijection onto the punctured sphere. `RoundPolarHomeomorph` proves explicit
 inverse formulas and their continuity, upgrading this to a homeomorphism
 between the punctured sphere and angular directions times the radial interval.
 The global Riemannian comparison with the manifold remains pending.
+`SmallRadialLevels` proves that any neighborhood of the unique Obata maximum
+contains every sufficiently small radial level. Thus a normal-chart image
+containing the pole captures entire small levels, not only local pieces.
+The level identification and global metric comparison still need assembly.
