@@ -107,4 +107,106 @@ theorem coordinate_flow_metric_eq_intrinsic {η : M × ℝ → M} {S : Set (M ×
   rw [he, symmL_fderiv_chartFlow hS hη c₀ c₁ hpt v,
     symmL_fderiv_chartFlow hS hη c₀ c₁ hpt w]
 
+/-- Intrinsic metric pairing of fixed-time spatial variations, with initial
+vectors specified in one fixed source chart. No output chart occurs. -/
+def intrinsicFlowMetric (η : M × ℝ → M) (c : M) (p v w : E) (t : ℝ) : ℝ :=
+  let x := (extChartAt I c).symm p
+  inner ℝ (mfderiv I I (fun y => η (y, t)) x ((trivializationAt E TM c).symmL ℝ x v))
+    (mfderiv I I (fun y => η (y, t)) x ((trivializationAt E TM c).symmL ℝ x w))
+
+/-- The chart metric equation transfers to the intrinsic pairing at every
+interior radial time, choosing an output chart only locally for the proof. -/
+theorem hasDerivAt_intrinsicFlowMetric {K a : ℝ} {f : M → ℝ} {η : M × ℝ → M}
+    (hf : Continuous f)
+    (hη : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) I 1 η
+      ({x | -a < f x ∧ f x < a} ×ˢ Ioo 0 (Real.pi / Real.sqrt K)))
+    (hm : RadialChartMetricEvolution (I := I) K a f η)
+    (c : M) {p : E} (hp : p ∈ (extChartAt I c).target)
+    (hx : -a < f ((extChartAt I c).symm p) ∧ f ((extChartAt I c).symm p) < a)
+    (v w : E) {t : ℝ} (ht : t ∈ Ioo 0 (Real.pi / Real.sqrt K)) :
+    HasDerivAt (intrinsicFlowMetric (I := I) η c p v w)
+      (2 * (Real.sqrt K * (Real.cos (Real.sqrt K * t) / Real.sin (Real.sqrt K * t))) *
+        intrinsicFlowMetric (I := I) η c p v w t) t := by
+  let c₁ := η ((extChartAt I c).symm p, t)
+  let S := {x : M | -a < f x ∧ f x < a} ×ˢ Ioo 0 (Real.pi / Real.sqrt K)
+  have hS : IsOpen S :=
+    ((isOpen_lt continuous_const hf).inter (isOpen_lt hf continuous_const)).prod isOpen_Ioo
+  have hpt : (p, t) ∈ chartFlowDomain (I := I) η S c c₁ :=
+    ⟨⟨hp, hx, ht⟩, mem_chart_source H c₁⟩
+  have hD := isOpen_chartFlowDomain (I := I) hS hη.continuousOn c c₁
+  let q := fun s => coordinateMetricBilinear (I := I) c₁
+    (chartFlow (I := I) η c c₁ (p, s))
+    (fderiv ℝ (chartFlow (I := I) η c c₁) (p, s) (v, 0))
+    (fderiv ℝ (chartFlow (I := I) η c c₁) (p, s) (w, 0))
+  have he : q =ᶠ[𝓝 t] intrinsicFlowMetric (I := I) η c p v w := by
+    have hc : Continuous (fun s : ℝ => (p, s)) := continuous_const.prodMk continuous_id
+    filter_upwards [hc.continuousAt.preimage_mem_nhds (hD.mem_nhds hpt)] with s hs
+    exact coordinate_flow_metric_eq_intrinsic hS hη c c₁ hs v w
+  have hd := hm c c₁ p t hpt v w
+  change HasDerivAt q (_ * q t) t at hd
+  rw [he.eq_of_nhds] at hd
+  exact hd.congr_of_eventuallyEq he.symm
+
+/-- The intrinsic angular metric divided by the spherical sine-square factor
+is constant on the entire open radial interval, without a single-chart assumption. -/
+theorem intrinsicFlowMetric_sine_squared_normalized_eq {K a : ℝ} (hK : 0 < K)
+    {f : M → ℝ} {η : M × ℝ → M} (hf : Continuous f)
+    (hη : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) I 1 η
+      ({x | -a < f x ∧ f x < a} ×ˢ Ioo 0 (Real.pi / Real.sqrt K)))
+    (hm : RadialChartMetricEvolution (I := I) K a f η)
+    (c : M) {p : E} (hp : p ∈ (extChartAt I c).target)
+    (hx : -a < f ((extChartAt I c).symm p) ∧ f ((extChartAt I c).symm p) < a)
+    (v w : E) {r s : ℝ}
+    (hr : r ∈ Ioo 0 (Real.pi / Real.sqrt K)) (hs : s ∈ Ioo 0 (Real.pi / Real.sqrt K)) :
+    intrinsicFlowMetric (I := I) η c p v w r / Real.sin (Real.sqrt K * r) ^ 2 =
+      intrinsicFlowMetric (I := I) η c p v w s / Real.sin (Real.sqrt K * s) ^ 2 := by
+  exact sine_squared_normalized_eq (Real.sqrt_pos.mpr hK)
+    (fun t ht => hasDerivAt_intrinsicFlowMetric hf hη hm c hp hx v w ht) hr hs
+
+/-- The metric of actual spatial variations of a manifold family, with
+arbitrary initial tangent vectors and no chart parameters. -/
+def radialVariationMetric (η : M × ℝ → M) (x : M) (v w : TM x) (t : ℝ) : ℝ :=
+  inner ℝ (mfderiv I I (fun y => η (y, t)) x v)
+    (mfderiv I I (fun y => η (y, t)) x w)
+
+omit [FiniteDimensional ℝ E] [I.Boundaryless]
+  [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+  [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)] in
+/-- Specifying initial tangent vectors in a chart does not change their metric. -/
+theorem intrinsicFlowMetric_eq_radialVariationMetric (η : M × ℝ → M) (c x : M)
+    (hx : x ∈ (chartAt H c).source) (v w : TM x) (t : ℝ) :
+    intrinsicFlowMetric (I := I) η c (extChartAt I c x)
+      ((trivializationAt E TM c).continuousLinearMapAt ℝ x v)
+      ((trivializationAt E TM c).continuousLinearMapAt ℝ x w) t =
+      radialVariationMetric (I := I) η x v w t := by
+  have he : (extChartAt I c).symm (extChartAt I c x) = x :=
+    (extChartAt I c).left_inv (by simpa using hx)
+  simp only [intrinsicFlowMetric]
+  rw [he]
+  simp only [(trivializationAt E TM c).symmL_continuousLinearMapAt hx]
+  rfl
+
+/-- Chart-free sine-square scaling of the actual tangent-map metric on the
+full radial interval, for arbitrary initial tangent vectors. -/
+theorem radialVariationMetric_sine_squared_normalized_eq {K a : ℝ} (hK : 0 < K)
+    {f : M → ℝ} {η : M × ℝ → M} (hf : Continuous f)
+    (hη : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) I 1 η
+      ({x | -a < f x ∧ f x < a} ×ˢ Ioo 0 (Real.pi / Real.sqrt K)))
+    (hm : RadialChartMetricEvolution (I := I) K a f η)
+    (x : M) (hx : -a < f x ∧ f x < a) (v w : TM x) {r s : ℝ}
+    (hr : r ∈ Ioo 0 (Real.pi / Real.sqrt K)) (hs : s ∈ Ioo 0 (Real.pi / Real.sqrt K)) :
+    radialVariationMetric (I := I) η x v w r / Real.sin (Real.sqrt K * r) ^ 2 =
+      radialVariationMetric (I := I) η x v w s / Real.sin (Real.sqrt K * s) ^ 2 := by
+  have hxc : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hpx : extChartAt I x x ∈ (extChartAt I x).target :=
+    (extChartAt I x).map_source (mem_extChartAt_source x)
+  have he : (extChartAt I x).symm (extChartAt I x x) = x :=
+    (extChartAt I x).left_inv (mem_extChartAt_source x)
+  have hreg : -a < f ((extChartAt I x).symm (extChartAt I x x)) ∧
+      f ((extChartAt I x).symm (extChartAt I x x)) < a := by rwa [he]
+  have hh := intrinsicFlowMetric_sine_squared_normalized_eq hK hf hη hm x hpx hreg
+    ((trivializationAt E TM x).continuousLinearMapAt ℝ x v)
+    ((trivializationAt E TM x).continuousLinearMapAt ℝ x w) hr hs
+  simpa only [intrinsicFlowMetric_eq_radialVariationMetric η x x hxc] using hh
+
 end LichnerowiczObata

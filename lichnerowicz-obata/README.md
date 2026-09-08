@@ -304,10 +304,13 @@ ODE hypothesis.
 constructed global radial family. The strengthened existence theorem retains
 the original gradient-norm identity, smoothness, reset law, integral-curve
 equation, level identity, unit speed, and endpoint limits, and adds metric
-evolution in every valid chart pair. Chart-independent integration and pole
-normalization remain to be completed.
+evolution in every valid chart pair. Pole normalization remains to be completed.
 `IntrinsicFlowMetric` identifies coordinate spatial derivatives with the
 actual tangent maps of the fixed-time manifold slices. Their coordinate
 metric pairing equals the intrinsic inner product, independently of the
-output chart. Transferring the local ODE to this intrinsic pairing and
-integrating it over the full radial interval is the next step.
+output chart. The local ODE now transfers to this intrinsic pairing and
+integrates over the entire open radial interval. The chart-free
+`radialVariationMetric_sine_squared_normalized_eq` proves that the actual
+tangent-map metric divided by the spherical sine-square factor is constant,
+for arbitrary initial tangent vectors. Identification of the normalized
+metric at a pole with the round angular metric remains pending.

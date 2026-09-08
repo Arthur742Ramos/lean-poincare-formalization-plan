@@ -33,6 +33,10 @@ import LichnerowiczObata.AngularMetricEvolution
 import LichnerowiczObata.SmoothPicardOperator
 
 #print axioms LichnerowiczObata.contDiffOn_bilinear_of_basis
+#print axioms LichnerowiczObata.hasDerivAt_intrinsicFlowMetric
+#print axioms LichnerowiczObata.intrinsicFlowMetric_sine_squared_normalized_eq
+#print axioms LichnerowiczObata.intrinsicFlowMetric_eq_radialVariationMetric
+#print axioms LichnerowiczObata.radialVariationMetric_sine_squared_normalized_eq
 #print axioms LichnerowiczObata.symmL_fderiv_chart_map
 #print axioms LichnerowiczObata.fderiv_family_spatial
 #print axioms LichnerowiczObata.symmL_fderiv_chartFlow
