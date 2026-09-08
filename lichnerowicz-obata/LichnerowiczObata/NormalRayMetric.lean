@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.GeodesicNormalRays
 public import LichnerowiczObata.ScaledRadialMetric
+public import LichnerowiczObata.AngularMetricEvolution
 
 /-! # Angular metric evolution along actual geodesic normal rays -/
 
@@ -134,5 +135,50 @@ theorem hasDerivAt_geodesic_normal_ray_metric
   convert hd using 1
   dsimp only [σ, g]
   ring
+
+/-- The sine-square-normalized angular metric of the actual normal map
+is constant on each connected open positive-phase ray interval. -/
+theorem geodesic_normal_ray_metric_sine_squared_normalized_eq
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) {K a : ℝ}
+    (hK : 0 < K) (ha : 0 < a) (hb : ∀ y, -a ≤ f y ∧ f y ≤ a)
+    (hH : ∀ (y : M) (v w : TM y), hessian LC f y v w = -K * f y * inner ℝ v w)
+    (c : M) {α : (E × E) × ℝ → E × E} {V : Set (E × E)} (hV : IsOpen V) {δ : ℝ}
+    (hα : ContDiffOn ℝ 2 α (V ×ˢ Metric.ball 0 δ))
+    (hsol : ∀ q ∈ V, α (q, 0) = q ∧
+      ∀ r ∈ Metric.ball 0 δ, (α (q, r)).1 ∈ (extChartAt I c).target ∧
+        HasDerivAt (fun t => α (q, t)) (coordinateGeodesicSpray LC b c (α (q, r))) r)
+    {z : E} (hcrit : gradient (I := I) f ((extChartAt I c).symm z) = 0)
+    (hmax : f ((extChartAt I c).symm z) = a)
+    {t : ℝ} (htime : t ∈ Metric.ball 0 δ) {u : E}
+    {T : Set ℝ} (hT : IsOpen T) (hconn : IsPreconnected T)
+    (hdata : ∀ r ∈ T, 0 < r ∧ (z, r • u) ∈ V ∧
+      Real.sqrt (K * coordinateMetricBilinear (I := I) c z (r • u) (r • u)) * t ∈ Ioo 0 Real.pi)
+    {w v : E} (hw : coordinateMetricBilinear (I := I) c z u w = 0)
+    (hv : coordinateMetricBilinear (I := I) c z u v = 0)
+    {s₁ s₂ : ℝ} (hs₁ : s₁ ∈ T) (hs₂ : s₂ ∈ T) :
+    let φ := fun q : E × ℝ => (α ((z, q.2 • q.1), t)).1
+    let freq := Real.sqrt K * (t * Real.sqrt (coordinateMetricBilinear (I := I) c z u u))
+    let Q := fun r => coordinateMetricBilinear (I := I) c (φ (u, r))
+      (fderiv ℝ φ (u, r) (w, 0)) (fderiv ℝ φ (u, r) (v, 0))
+    Q s₁ / Real.sin (freq * s₁) ^ 2 = Q s₂ / Real.sin (freq * s₂) ^ 2 := by
+  let g := coordinateMetricBilinear (I := I) c z
+  let freq := Real.sqrt K * (t * Real.sqrt (g u u))
+  apply sine_squared_normalized_eq_on hT hconn (freq := freq) _ _ hs₁ hs₂
+  · intro r hr
+    have hs := (hdata r hr).1
+    have he : g (r • u) (r • u) = r ^ 2 * g u u := by
+      simp only [map_smul, smul_apply, smul_eq_mul]
+      ring
+    have hscale : Real.sqrt (g (r • u) (r • u)) = r * Real.sqrt (g u u) := by
+      rw [he, Real.sqrt_mul (sq_nonneg r), Real.sqrt_sq hs.le]
+    have harg : Real.sqrt (K * g (r • u) (r • u)) * t = freq * r := by
+      rw [Real.sqrt_mul hK.le, hscale]
+      dsimp only [freq]
+      ring
+    exact harg ▸ (hdata r hr).2.2
+  · intro r hr
+    exact hasDerivAt_geodesic_normal_ray_metric b hf hK ha hb hH c hV hα hsol
+      hcrit hmax htime (hdata r hr).1 (hdata r hr).2.1 (hdata r hr).2.2 hw hv
 
 end LichnerowiczObata

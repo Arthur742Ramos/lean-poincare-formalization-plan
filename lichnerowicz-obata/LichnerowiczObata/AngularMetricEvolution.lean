@@ -16,6 +16,27 @@ open scoped Manifold ContDiff Topology
 
 namespace LichnerowiczObata
 
+/-- Local integration of spherical metric evolution on a connected open
+domain. This does not require a coordinate chart on the entire radial interval. -/
+theorem sine_squared_normalized_eq_on {freq : ℝ} {T : Set ℝ}
+    (hT : IsOpen T) (hconn : IsPreconnected T)
+    (hphase : ∀ t ∈ T, freq * t ∈ Ioo 0 Real.pi) {q : ℝ → ℝ}
+    (hq : ∀ t ∈ T,
+      HasDerivAt q (2 * (freq * (Real.cos (freq * t) / Real.sin (freq * t))) * q t) t)
+    {u w : ℝ} (hu : u ∈ T) (hw : w ∈ T) :
+    q u / Real.sin (freq * u) ^ 2 = q w / Real.sin (freq * w) ^ 2 := by
+  have hd (t : ℝ) (ht : t ∈ T) :
+      HasDerivAt (fun z => q z / Real.sin (freq * z) ^ 2) 0 t := by
+    have hsin : 0 < Real.sin (freq * t) :=
+      Real.sin_pos_of_pos_of_lt_pi (hphase t ht).1 (hphase t ht).2
+    have hden := (((hasDerivAt_id t).const_mul freq).sin.pow 2)
+    have hdiv := (hq t ht).div hden (pow_ne_zero 2 hsin.ne')
+    convert hdiv using 1 <;> first | rfl |
+      (simp only [Pi.pow_apply, id_eq]; field_simp [hsin.ne']; ring)
+  exact hT.is_const_of_deriv_eq_zero hconn
+    (fun t ht => (hd t ht).differentiableAt.differentiableWithinAt)
+    (fun t ht => (hd t ht).deriv) hu hw
+
 /-- Integrating the spherical metric evolution equation gives its sine-square
 factor on the full open radial interval. -/
 theorem sine_squared_normalized_eq {s : ℝ} (hs : 0 < s) {q : ℝ → ℝ}
@@ -23,17 +44,10 @@ theorem sine_squared_normalized_eq {s : ℝ} (hs : 0 < s) {q : ℝ → ℝ}
       HasDerivAt q (2 * (s * (Real.cos (s * t) / Real.sin (s * t))) * q t) t)
     {u w : ℝ} (hu : u ∈ Ioo 0 (Real.pi / s)) (hw : w ∈ Ioo 0 (Real.pi / s)) :
     q u / Real.sin (s * u) ^ 2 = q w / Real.sin (s * w) ^ 2 := by
-  have hd (t : ℝ) (ht : t ∈ Ioo 0 (Real.pi / s)) :
-      HasDerivAt (fun z => q z / Real.sin (s * z) ^ 2) 0 t := by
-    have hsin : 0 < Real.sin (s * t) := Real.sin_pos_of_pos_of_lt_pi
-      (mul_pos hs ht.1) (by have := (lt_div_iff₀ hs).mp ht.2; nlinarith)
-    have hden := (((hasDerivAt_id t).const_mul s).sin.pow 2)
-    have hdiv := (hq t ht).div hden (pow_ne_zero 2 hsin.ne')
-    convert hdiv using 1 <;> first | rfl |
-      (simp only [Pi.pow_apply, id_eq]; field_simp [hsin.ne']; ring)
-  exact isOpen_Ioo.is_const_of_deriv_eq_zero (convex_Ioo 0 (Real.pi / s)).isPreconnected
-    (fun t ht => (hd t ht).differentiableAt.differentiableWithinAt)
-    (fun t ht => (hd t ht).deriv) hu hw
+  apply sine_squared_normalized_eq_on isOpen_Ioo
+    (convex_Ioo 0 (Real.pi / s)).isPreconnected _ hq hu hw
+  intro t ht
+  exact ⟨mul_pos hs ht.1, by nlinarith [(lt_div_iff₀ hs).mp ht.2]⟩
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]

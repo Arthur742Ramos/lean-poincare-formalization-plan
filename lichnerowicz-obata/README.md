@@ -405,4 +405,7 @@ lemma, rather than being additional flow assumptions.
 differential equation at every positive-phase ray point. Its open ray domain,
 smoothness, differentiable speed, and angular orthogonality are derived, and
 the geodesic radius identity gives the explicit sine-square evolution
-coefficient. Integration and pole normalization of this equation remain pending.
+coefficient. Its sine-square-normalized metric is now proved constant on every
+connected open positive-phase ray interval. This uses local integration and
+does not require one normal coordinate chart to cover the whole radial range.
+Identifying that constant from the pole limit remains pending.

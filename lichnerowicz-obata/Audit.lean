@@ -269,3 +269,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.hasDerivAt_geodesic_normal_ray
 #print axioms LichnerowiczObata.geodesic_normal_ray_spatial_orthogonal
 #print axioms LichnerowiczObata.hasDerivAt_geodesic_normal_ray_metric
+#print axioms LichnerowiczObata.sine_squared_normalized_eq_on
+#print axioms LichnerowiczObata.geodesic_normal_ray_metric_sine_squared_normalized_eq
