@@ -322,3 +322,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.chartLevelHomeomorph
 #print axioms LichnerowiczObata.normalSphereLevelHomeomorph
 #print axioms LichnerowiczObata.exists_small_sphere_level_homeomorph
+#print axioms LichnerowiczObata.coordinate_normal_endpoint_radius_at_zero_eventually
+#print axioms LichnerowiczObata.intrinsic_normal_endpoint_radius_at_zero_eventually

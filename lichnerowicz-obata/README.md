@@ -456,3 +456,7 @@ an actual chart and its inverse. For a radial chart with a scaled-norm identity,
 compactness supplies sphere-to-level homeomorphisms for every sufficiently
 small positive radius. Specializing that chart identity to the Obata normal
 map and assembling the global metric comparison remain pending.
+The actual Obata endpoint map now has the scaled-norm radial identity on a
+neighborhood including zero velocity, both in coordinate and intrinsic tangent
+variables. Restricting the constructed normal chart to this neighborhood and
+applying the whole-level homeomorphism construction remain pending.
