@@ -351,6 +351,9 @@ coordinate geodesic equation, using the bilinearity of its acceleration term.
 local C¹ regularity along a solution. `GeodesicScaling` uses it to prove the
 actual flow-scaling identity on common solution domains, not just invariance
 of the differential equation.
+For a C¹ family on an open product solution domain, nearby scalings stay in
+a common time domain. Differentiating their identity proves that the endpoint
+derivative in its initial-velocity direction is time times terminal velocity.
 `GeodesicHessian` derives the value derivative and Hessian evolution along
 these geodesics. Under the Obata Hessian equation, the scalar restriction
 satisfies `f″ = -K · speed² · f`, with the constant speed evaluated at any
