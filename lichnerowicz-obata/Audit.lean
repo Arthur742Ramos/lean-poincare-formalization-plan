@@ -12,6 +12,8 @@ import LichnerowiczObata.RadialParameterization
 import LichnerowiczObata.RadialVelocity
 import LichnerowiczObata.UnitCurveDistance
 import LichnerowiczObata.RadialEndpoints
+import LichnerowiczObata.RadialEndpointDistance
+import LichnerowiczObata.ObataCriticalIsolation
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -55,3 +57,12 @@ import LichnerowiczObata.RadialEndpoints
 #print axioms LichnerowiczObata.exists_obataRadial_curve_endpoints
 #print axioms LichnerowiczObata.obataRadial_endpoint_values
 #print axioms LichnerowiczObata.exists_obata_radial_curves_with_endpoints
+#print axioms LichnerowiczObata.riemannianEDist_obataRadial_curve_le_abs
+#print axioms LichnerowiczObata.riemannianEDist_le_of_curve_tendsto
+#print axioms LichnerowiczObata.obataRadial_endpoint_distance
+#print axioms LichnerowiczObata.exists_obata_extrema_distance_bounds
+#print axioms LichnerowiczObata.fderiv_obataGradientCoordinates
+#print axioms LichnerowiczObata.contDiffAt_obataGradientCoordinates
+#print axioms LichnerowiczObata.obata_critical_isolated
+#print axioms LichnerowiczObata.isDiscrete_obata_critical_set
+#print axioms LichnerowiczObata.finite_obata_critical_set

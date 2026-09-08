@@ -45,6 +45,27 @@ theorem exists_tendsto_of_riemannianEDist_le [CompactSpace M] [T2Space M]
     ((cauchy_nhds.mono nhdsWithin_le_nhds).map_of_le hl.uniformContinuousOn
       inf_le_right)
 
+/-- Two-sided intrinsic Lipschitz control of the full radial curve. -/
+theorem riemannianEDist_obataRadial_curve_le_abs [T2Space M]
+    {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f)
+    (hn : ∀ y, ‖gradient (I := I) f y‖ ^ 2 = K * (a ^ 2 - f y ^ 2))
+    {γ : ℝ → M}
+    (hγ : IsMIntegralCurveOn γ (gradient (I := I) (obataRadial K a f))
+      (Ioo 0 (Real.pi / Real.sqrt K)))
+    (hs : ∀ t ∈ Ioo 0 (Real.pi / Real.sqrt K), -a < f (γ t) ∧ f (γ t) < a) :
+    ∀ u ∈ Ioo 0 (Real.pi / Real.sqrt K),
+      ∀ w ∈ Ioo 0 (Real.pi / Real.sqrt K),
+      riemannianEDist I (γ u) (γ w) ≤ ENNReal.ofReal |u - w| := by
+    intro u hu w hw
+    rcases le_total u w with huw | hwu
+    · rw [abs_of_nonpos (sub_nonpos.mpr huw), neg_sub]
+      exact riemannianEDist_le_obataRadial_curve hK ha hf hn isOpen_Ioo hγ hs huw
+        (fun t ht => ⟨lt_of_lt_of_le hu.1 ht.1, lt_of_le_of_lt ht.2 hw.2⟩)
+    · rw [riemannianEDist_comm, abs_of_nonneg (sub_nonneg.mpr hwu)]
+      exact riemannianEDist_le_obataRadial_curve hK ha hf hn isOpen_Ioo hγ hs hwu
+        (fun t ht => ⟨lt_of_lt_of_le hw.1 ht.1, lt_of_le_of_lt ht.2 hu.2⟩)
+
 /-- Every regular radial gradient curve on the full finite radial interval
 converges at both endpoints on a compact manifold. -/
 theorem exists_obataRadial_curve_endpoints [CompactSpace M] [T2Space M]
@@ -59,17 +80,7 @@ theorem exists_obataRadial_curve_endpoints [CompactSpace M] [T2Space M]
       Tendsto γ (𝓝[Ioo 0 (Real.pi / Real.sqrt K)] 0) (𝓝 p) ∧
       Tendsto γ (𝓝[Ioo 0 (Real.pi / Real.sqrt K)] (Real.pi / Real.sqrt K)) (𝓝 q) := by
   have hL : 0 < Real.pi / Real.sqrt K := div_pos Real.pi_pos (Real.sqrt_pos.mpr hK)
-  have hb : ∀ u ∈ Ioo 0 (Real.pi / Real.sqrt K),
-      ∀ w ∈ Ioo 0 (Real.pi / Real.sqrt K),
-      riemannianEDist I (γ u) (γ w) ≤ ENNReal.ofReal |u - w| := by
-    intro u hu w hw
-    rcases le_total u w with huw | hwu
-    · rw [abs_of_nonpos (sub_nonpos.mpr huw), neg_sub]
-      exact riemannianEDist_le_obataRadial_curve hK ha hf hn isOpen_Ioo hγ hs huw
-        (fun t ht => ⟨lt_of_lt_of_le hu.1 ht.1, lt_of_le_of_lt ht.2 hw.2⟩)
-    · rw [riemannianEDist_comm, abs_of_nonneg (sub_nonneg.mpr hwu)]
-      exact riemannianEDist_le_obataRadial_curve hK ha hf hn isOpen_Ioo hγ hs hwu
-        (fun t ht => ⟨lt_of_lt_of_le hw.1 ht.1, lt_of_le_of_lt ht.2 hu.2⟩)
+  have hb := riemannianEDist_obataRadial_curve_le_abs hK ha hf hn hγ hs
   obtain ⟨p, hp⟩ := exists_tendsto_of_riemannianEDist_le hb
     (show (0 : ℝ) ∈ closure (Ioo 0 (Real.pi / Real.sqrt K)) by
       rw [closure_Ioo hL.ne]; exact ⟨le_rfl, hL.le⟩)
@@ -121,6 +132,7 @@ theorem exists_obata_radial_curves_with_endpoints [CompactSpace M] [Nonempty M]
     (hH : ∀ (x : M) (v w : TangentSpace I x),
       hessian (leviCivitaConnection (I := I)) f x v w = -K * f x * inner ℝ v w) :
     ∃ a : ℝ, 0 < a ∧ (∀ x, -a ≤ f x ∧ f x ≤ a) ∧
+      (∀ y, ‖gradient (I := I) f y‖ ^ 2 = K * (a ^ 2 - f y ^ 2)) ∧
       ∀ x : M, -a < f x ∧ f x < a → ∃ (η : ℝ → M) (p q : M),
         η (obataRadial K a f x) = x ∧
         IsMIntegralCurveOn η (gradient (I := I) (obataRadial K a f))
@@ -131,7 +143,7 @@ theorem exists_obata_radial_curves_with_endpoints [CompactSpace M] [Nonempty M]
         Tendsto η (𝓝[Ioo 0 (Real.pi / Real.sqrt K)] (Real.pi / Real.sqrt K)) (𝓝 q) ∧
         f p = a ∧ f q = -a := by
   obtain ⟨p₀, q₀, hp₀, hq₀, hgp₀, hgq₀, hb, hn⟩ := obata_extrema hK hf hnon hH
-  refine ⟨f p₀, hp₀, hb, ?_⟩
+  refine ⟨f p₀, hp₀, hb, hn, ?_⟩
   intro x hx
   obtain ⟨γ, hγ0, hγ⟩ := exists_global_gradient_curve hf x
   have h0 : gradient (I := I) f (γ 0) ≠ 0 := by

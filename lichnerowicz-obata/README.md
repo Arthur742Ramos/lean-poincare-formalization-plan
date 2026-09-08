@@ -129,6 +129,18 @@ curve through every regular point directly from the Obata equation. It does
 not yet prove that different curves have the same poles. Pole uniqueness and
 the global round-sphere isometry remain unproved.
 
+`RadialEndpointDistance.lean` passes the intrinsic Lipschitz estimates to the
+endpoint limits. Every regular point has a maximum and minimum endpoint at
+distance at most `r` and `pi / sqrt K - r`, respectively. These are proved
+upper bounds, not an assertion that the radial curves minimize distance.
+
+`ObataCriticalIsolation.lean` derives the ordinary derivative of the coordinate
+gradient at a critical point from the covariant Hessian equation. It is the
+nonzero scalar `-K * f(x)` times the identity. The inverse function theorem
+then isolates each critical point; continuity and compactness prove that the
+critical set is finite. Proving that there is exactly one maximum and exactly
+one minimum remains open.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical
