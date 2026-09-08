@@ -617,5 +617,7 @@ the open target.
 Obata data: the Hessian equation and the unique maximum hypotheses yield a
 single regular polar chart with differentiable inverse on the entire regular
 region. The positive tangent dimension is recorded as `finrank E = n + 1`.
-The regular comparison's forward differentiability, its Riemannian isometry
-proof, and extension over the poles remain to be assembled.
+The regular comparison also has a differentiable ambient forward extension,
+proved by composing these inverse coordinates with the explicit round polar
+map. This extension agrees with the comparison at every regular point.
+Its Riemannian isometry proof and extension over the poles remain to be assembled.

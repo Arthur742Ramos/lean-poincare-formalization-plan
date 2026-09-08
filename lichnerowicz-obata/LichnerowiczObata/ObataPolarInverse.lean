@@ -14,7 +14,7 @@ set_option backward.isDefEq.respectTransparency false
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
-  {n : ℕ} [Fact (Module.finrank ℝ E = n + 1)]
+  {n : ℕ} [hDimension : Fact (Module.finrank ℝ E = n + 1)]
   {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [I.Boundaryless] [PreconnectedSpace M]
@@ -70,5 +70,48 @@ theorem exists_obata_differentiable_polar_inverse
     (I := I) (n := n) J U Q (⟨u, hu⟩, r) Φ hQ hDim
     (fun u r hr => ⟨(hjet u r hr).1, (hjet u r hr).2.1⟩)
   exact ⟨Φ, Q, e, hs, ht, hQ, he, hi, hd⟩
+
+include hDimension in
+/-- The regular comparison to the punctured round sphere has an ambient
+extension differentiable at every regular point. No assertion is made here
+about this extension at the two critical levels. -/
+theorem exists_obata_regular_forward_differentiable
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
+    {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
+    (hH : ∀ (y : M) (v w : TM y),
+      hessian (leviCivitaConnection (I := I)) f y v w = -K * f y * inner ℝ v w)
+    (c : M) {z : E} (hz : z ∈ (extChartAt I c).target)
+    (hcrit : gradient (I := I) f ((extChartAt I c).symm z) = 0)
+    (hmax : ∀ x, f x = a ↔ x = (extChartAt I c).symm z) :
+    let p := (extChartAt I c).symm z
+    ∃ F : {x : M // -a < f x ∧ f x < a} ≃ₜ
+        RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
+      ∃ T : M → RoundAmbient (TM p),
+        ∀ y : {x : M // -a < f x ∧ f x < a},
+          T (y : M) = ((F y).1 : RoundAmbient (TM p)) ∧
+          MDifferentiableAt I 𝓘(ℝ, RoundAmbient (TM p)) T (y : M) := by
+  obtain ⟨Φ, Q, e, hs, ht, hQ, he, hi, hd⟩ :=
+    exists_obata_differentiable_polar_inverse (n := n) hf hnon hK ha hH c hz hcrit hmax
+  let p := (extChartAt I c).symm z
+  let Ψ := fun q : TM p × ℝ => roundPolarCurve (1 / Real.sqrt K)
+    roundNorth (roundAngularInclusion q.1) q.2
+  let Ψₛ := fun q : Metric.sphere (0 : TM p) 1 × ℝ => Ψ (q.1, q.2)
+  let F := Q.symm.trans (curvatureRoundPolarHomeomorph hK)
+  let T := Ψₛ ∘ e.symm
+  refine ⟨F, T, ?_⟩
+  intro y
+  refine ⟨?_, ?_⟩
+  · change Ψₛ (e.symm (y : M)) = _
+    rw [hi y]
+    exact (curvatureRoundPolarHomeomorph_apply hK (Q.symm y)).symm
+  · have hΨ : MDifferentiableAt 𝓘(ℝ, TM p × ℝ) 𝓘(ℝ, RoundAmbient (TM p))
+        Ψ ((e.symm (y : M)).1, (e.symm (y : M)).2) := by
+      apply mdifferentiableAt_iff_differentiableAt.mpr
+      dsimp only [Ψ, roundPolarCurve]
+      fun_prop
+    have hΨₛ : MDifferentiableAt ((𝓡 n).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, RoundAmbient (TM p))
+        Ψₛ (e.symm (y : M)) :=
+      mdifferentiableAt_sphere_polar_restriction _ _ hΨ
+    exact hΨₛ.comp (y : M) (hd y y.property)
 
 end LichnerowiczObata
