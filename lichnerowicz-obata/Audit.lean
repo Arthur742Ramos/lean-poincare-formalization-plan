@@ -30,6 +30,7 @@ import LichnerowiczObata.RoundPoleGraph
 import LichnerowiczObata.NormalRayIntegralCurve
 import LichnerowiczObata.ObataNormalRay
 import LichnerowiczObata.NormalChartRadialFlow
+import LichnerowiczObata.ObataSouthPolarModel
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -382,6 +383,14 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_obata_spherical_metric_product
 #print axioms LichnerowiczObata.normal_chart_eq_radial_transport
 #print axioms LichnerowiczObata.normalized_normal_chart_derivative_inner
+#print axioms LichnerowiczObata.obata_gradient_neg
+#print axioms LichnerowiczObata.obataRadial_neg
+#print axioms LichnerowiczObata.obata_radial_gradient_neg
+#print axioms LichnerowiczObata.obata_radial_curve_reflection
+#print axioms LichnerowiczObata.obata_opposite_radial_curves_eqOn
+#print axioms LichnerowiczObata.obata_hessian_neg
+#print axioms LichnerowiczObata.obata_hessian_equation_neg
+#print axioms LichnerowiczObata.exists_obata_south_polar_model
 #print axioms LichnerowiczObata.hasFDerivAt_roundPoleLog_zero
 #print axioms LichnerowiczObata.roundPoleLog_polar_projection
 #print axioms LichnerowiczObata.HasRadialPoleModel.exists_round_north_extension

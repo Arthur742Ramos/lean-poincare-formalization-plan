@@ -690,3 +690,13 @@ passes through the round logarithm to the north-pole extension of the same
 global homeomorphism, on all tangent directions represented by the angular
 inclusion. Handling the south pole and proving the final global isometry
 remain unfinished.
+
+`ObataReflection` proves that replacing the Obata function by its negative
+preserves the Hessian equation, complements the radial coordinate, reverses
+the regular radial gradient, and reverses actual radial integral curves.
+Oppositely oriented radial curves agreeing at one complementary pair of
+times agree at all complementary times. `ObataSouthPolarModel` constructs the
+south-centered metric polar homeomorphism and its isometric Cartesian model
+at the minimum pole. Matching its angular coordinates to those of the existing
+north-centered global homeomorphism is still required; the separate south
+model does not by itself prove regularity of that global map at the south pole.
