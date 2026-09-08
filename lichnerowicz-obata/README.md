@@ -51,7 +51,7 @@ no longer assume spectral existence or smoothness of a weak eigenfunction.
 ## Remaining proof obligations
 
 1. Global Obata rigidity from the Hessian equation: complete geodesics and
-   minimizing segments, the polar description with unique extrema, and the
+   minimizing segments, the polar metric description, and the
    smooth metric-preserving sphere identification, including both poles.
 2. The round-sphere converse, the independently auditable Mathlib-only
    Challenge, and final theorem/axiom/provenance verification.
@@ -126,8 +126,8 @@ Riemannian extended metric (preserving its original topology), proves Cauchy
 convergence at both radial endpoints, and identifies their eigenfunction
 values as `a` and `-a`. Its combined theorem constructs such a full unit-speed
 curve through every regular point directly from the Obata equation. It does
-not yet prove that different curves have the same poles. Pole uniqueness and
-the global round-sphere isometry remain unproved.
+not itself prove that different curves have the same poles; this is now proved
+by `ObataUniquePoles.lean`. The global round-sphere isometry remains unproved.
 
 `RadialEndpointDistance.lean` passes the intrinsic Lipschitz estimates to the
 endpoint limits. Every regular point has a maximum and minimum endpoint at
@@ -138,8 +138,7 @@ upper bounds, not an assertion that the radial curves minimize distance.
 gradient at a critical point from the covariant Hessian equation. It is the
 nonzero scalar `-K * f(x)` times the identity. The inverse function theorem
 then isolates each critical point; continuity and compactness prove that the
-critical set is finite. Proving that there is exactly one maximum and exactly
-one minimum remains open.
+critical set is finite. Uniqueness of both extrema is proved below.
 
 `ContinuousGlobalFlow.lean` proves joint continuous dependence on initial
 point and time for complete C1 flows on compact manifolds. It uses the retained
@@ -148,13 +147,22 @@ uniform time interval, and iteration. `RadialFlowFamily.lean` applies this to
 the actual gradient and the explicit clock, giving one jointly continuous
 family of full unit radial curves through every regular point, with extremal
 endpoint limits. Independence of those endpoints from the starting point
-remains to be proved.
+is established by the connectedness argument below.
 
 `ContinuousPoleMaps.lean` proves uniform convergence of radial slices to
 their endpoints using the intrinsic distance bounds. It constructs continuous
 maximum and minimum endpoint maps on the regular region, retaining both
-extremal values and the distance bounds. Constancy of these maps, and hence
-pole uniqueness, still requires the connectedness argument for that region.
+extremal values and the distance bounds.
+
+`DenseRegionConnected.lean` and `PuncturedManifoldConnected.lean` prove that
+removing a finite set from a connected boundaryless manifold of dimension at
+least two leaves a dense preconnected region. `ObataRegularConnected.lean`
+identifies the regular region with the complement of the finite critical set.
+`ObataUniquePoles.lean` consequently proves constancy of both continuous endpoint
+maps, uniqueness of the maximum and minimum, and radial distance upper bounds
+at every point by density. It does not assume pole uniqueness or distance
+minimality. The global metric-preserving identification with a sphere is still
+required.
 
 ## Sources and reuse
 

@@ -16,6 +16,7 @@ import LichnerowiczObata.RadialEndpointDistance
 import LichnerowiczObata.ObataCriticalIsolation
 import LichnerowiczObata.RadialFlowFamily
 import LichnerowiczObata.ContinuousPoleMaps
+import LichnerowiczObata.ObataUniquePoles
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -83,3 +84,10 @@ import LichnerowiczObata.ContinuousPoleMaps
 #print axioms LichnerowiczObata.continuousOn_of_uniform_edist_bound
 #print axioms LichnerowiczObata.continuousOn_radial_endpoint_maps
 #print axioms LichnerowiczObata.exists_continuous_obata_pole_maps
+#print axioms LichnerowiczObata.isPreconnected_of_dense_local_traces
+#print axioms LichnerowiczObata.exists_openEmbedding_model_neighborhood
+#print axioms LichnerowiczObata.finite_compl_local_traces
+#print axioms LichnerowiczObata.finite_compl_manifold_preconnected
+#print axioms LichnerowiczObata.obata_regular_eq_compl_critical
+#print axioms LichnerowiczObata.obata_regular_dense_preconnected
+#print axioms LichnerowiczObata.obata_unique_poles
