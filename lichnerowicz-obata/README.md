@@ -565,3 +565,8 @@ Obata region to the punctured round sphere of radius `1 / √K`. The same theore
 proves that it intertwines the two explicit polar maps and that their full
 pullback metrics agree. Smoothness of the comparison itself, its interpretation
 as a Riemannian isometry, and extension through the poles remain required.
+`RoundPolarInverseSmooth` proves that the actual inverse round coordinates
+admit smooth ambient extensions at every punctured-sphere point. The proof
+derives the nonsingular arccosine heights from the exclusion of the poles
+and retains equality with the already constructed inverse. Composing these
+coordinates with the Obata parameter map remains the next regularity step.
