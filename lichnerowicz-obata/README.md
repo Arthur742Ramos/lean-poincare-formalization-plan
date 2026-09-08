@@ -400,5 +400,9 @@ and cancellation of a nonzero radial parameter to obtain the ray equation.
 positive-parameter rays satisfy the scaled radial gradient equation, and
 initial angular directions give spatial ray variations orthogonal to that
 gradient. Both facts follow from the geodesic family and the checked Gauss
-lemma, rather than being additional flow assumptions. Combining these with
-metric evolution and integrating the angular metric remain to be completed.
+lemma, rather than being additional flow assumptions.
+`NormalRayMetric` combines these results to prove the actual angular metric
+differential equation at every positive-phase ray point. Its open ray domain,
+smoothness, differentiable speed, and angular orthogonality are derived, and
+the geodesic radius identity gives the explicit sine-square evolution
+coefficient. Integration and pole normalization of this equation remain pending.

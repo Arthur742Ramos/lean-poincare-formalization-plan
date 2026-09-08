@@ -21,6 +21,7 @@ import LichnerowiczObata.NormalMetricLimit
 import LichnerowiczObata.ScaledRadialMetric
 import LichnerowiczObata.NormalRays
 import LichnerowiczObata.GeodesicNormalRays
+import LichnerowiczObata.NormalRayMetric
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -267,3 +268,4 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.hasDerivAt_normal_ray_of_radial
 #print axioms LichnerowiczObata.hasDerivAt_geodesic_normal_ray
 #print axioms LichnerowiczObata.geodesic_normal_ray_spatial_orthogonal
+#print axioms LichnerowiczObata.hasDerivAt_geodesic_normal_ray_metric
