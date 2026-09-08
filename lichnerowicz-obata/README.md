@@ -1,4 +1,4 @@
-# Lichnerowicz--Obata (in progress)
+# Lichnerowicz--Obata
 
 Target: on a closed connected smooth Riemannian manifold of dimension
 `n ≥ 2`, with `Ric ≥ (n - 1) K g` and `K > 0`, prove attainment of the first
@@ -6,7 +6,19 @@ positive Laplace eigenvalue, its bound `λ₁ ≥ n K`, and equality if and only
 the manifold is globally Riemannian-isometric to the round sphere of radius
 `1 / sqrt K`.
 
-**The full target is not proved. This project is not submission-ready.**
+**The full manifold-level theorem is proved in
+`LichnerowiczObata/LichnerowiczObata.lean`. The independent submission package
+and final provenance verification are still in progress; this is not yet
+submission-ready.**
+
+`LichnerowiczObata.lichnerowicz_obata` produces a positive first eigenvalue,
+a smooth nonconstant eigenfunction, minimality among positive smooth
+eigenvalues, the bound `n K ≤ λ₁`, and the equivalence between equality and a
+smooth diffeomorphism to the standard unit sphere in Euclidean `(n+1)`-space
+whose inclusion, scaled by `1 / sqrt K`, preserves the tangent inner products.
+Both directions of the diffeomorphism are smooth. The metric identity is
+exactly the induced round metric of radius `1 / sqrt K`, not a topological
+sphere identification or a chordal-distance isometry claim.
 
 ## Checked analytic step
 
@@ -50,16 +62,20 @@ no longer assume spectral existence or smoothness of a weak eigenfunction.
 
 ## Remaining proof obligations
 
-1. Prove the round-sphere converse and assemble the first-eigenvalue
-   equality characterization. The forward implication now gives a smooth
-   diffeomorphism with the radius-scaled induced round metric explicitly.
-2. The independently auditable Mathlib-only Challenge and final
-   theorem/axiom/provenance verification.
+1. The independently auditable Mathlib-only Challenge/Solution package and
+   complete Comparator definition selection.
+2. Final theorem/axiom/provenance verification and submission preflight.
 
 Do not replace any of these obligations by an assumed analytic or geometric
 bridge, and do not call the checked eigenfunction estimate the full theorem.
 
-## Checked rigidity step
+## Development record
+
+The following module-by-module record describes the scope at each stage of
+development. Historical statements that a later step was still open are not
+the current overall status; the assembled theorem above is now proved.
+
+### Checked rigidity step
 
 `ObataEnergy.lean` differentiates the squared gradient norm using the actual
 Levi–Civita connection's metric compatibility. From the Hessian equation it
@@ -792,3 +808,22 @@ then obtains the same round-metric conclusion. The target is the unit sphere
 in an `(n+1)`-dimensional inner-product space, with its inclusion scaled by
 `1 / sqrt K`; the derivative identity specifies exactly the radius-`1 / sqrt K`
 round metric. This proves the forward rigidity implication, not the converse.
+
+## Checked converse and assembled theorem
+
+`SphereImmersionCalculus.lean` differentiates the actual constant-radius
+constraint. `SphereNormalDecomposition.lean` proves tangent/radial spanning
+and the algebraic metric-compatibility cancellation.
+`SphereImmersionSecondDerivative.lean` derives the sphere's normal second
+fundamental form. `HessianCoordinates.lean` proves the coordinate formula
+for the actual covariant Hessian. `SphereMetricImmersion.lean` discharges
+the connection identities using metric compatibility and torsion-freeness;
+`SphereHeightHessian.lean` then proves the intrinsic height Hessian equation.
+None of these differential identities is an assumption in the final theorem.
+
+`RoundSphereConverse.lean` constructs a nonconstant smooth height using an
+antipodal pair and traces its Hessian to obtain the eigenvalue `n K`.
+`StandardRoundDiffeomorph.lean` removes the auxiliary tangent-space ambient
+choice by an orthonormal-basis linear isometry, preserving both smoothness
+and the induced metric. `LichnerowiczObata.lean` joins the converse, global
+Obata rigidity, and first-eigenvalue attainment/minimality into the full result.
