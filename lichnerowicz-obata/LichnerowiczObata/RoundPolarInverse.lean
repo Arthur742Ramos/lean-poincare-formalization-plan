@@ -94,4 +94,61 @@ theorem roundPolarMap_surjective_off_poles {R : ℝ} (hR : 0 < R) (p : E)
   rw [roundPolarCurve, harg, ← he]
   exact hscale
 
+/-- The open radial interval omits both poles. -/
+theorem roundPolarCurve_ne_poles {R : ℝ} (hR : 0 < R) (p q : E)
+    (hp : ‖p‖ = 1) (hpq : inner ℝ p q = 0) {s : ℝ}
+    (hs : s ∈ Set.Ioo 0 (Real.pi * R)) :
+    roundPolarCurve R p q s ≠ R • p ∧ roundPolarCurve R p q s ≠ -(R • p) := by
+  have hθ : 0 < s / R ∧ s / R < Real.pi :=
+    ⟨div_pos hs.1 hR, (div_lt_iff₀ hR).mpr hs.2⟩
+  have hi := Real.arccos_cos hθ.1.le hθ.2.le
+  constructor
+  · intro he
+    have hh := congrArg (fun x => inner ℝ p x) he
+    rw [roundPolarCurve_height R s p q hp hpq] at hh
+    have hc : Real.cos (s / R) = 1 := by
+      have hp' : inner ℝ p p = 1 := by simp [hp]
+      rw [real_inner_smul_right, hp', mul_one] at hh
+      exact (mul_left_cancel₀ hR.ne') (hh.trans (mul_one R).symm)
+    rw [hc, Real.arccos_one] at hi
+    linarith [hθ.1]
+  · intro he
+    have hh := congrArg (fun x => inner ℝ p x) he
+    rw [roundPolarCurve_height R s p q hp hpq] at hh
+    have hc : Real.cos (s / R) = -1 := by
+      have hp' : inner ℝ p p = 1 := by simp [hp]
+      rw [inner_neg_right, real_inner_smul_right, hp', mul_one] at hh
+      apply (mul_left_cancel₀ hR.ne')
+      simpa using hh
+    rw [hc, Real.arccos_neg_one] at hi
+    linarith [hθ.2]
+
+/-- The sphere with its two polar points removed. -/
+abbrev RoundPuncturedSphere (R : ℝ) (p : E) :=
+  {x : Metric.sphere (0 : E) R // (x : E) ≠ R • p ∧ (x : E) ≠ -(R • p)}
+
+def roundPolarPuncturedMap {R : ℝ} (hR : 0 < R) (p : E) (hp : ‖p‖ = 1)
+    (a : RoundPolarDirections p × Set.Ioo (0 : ℝ) (Real.pi * R)) :
+    RoundPuncturedSphere R p :=
+  ⟨roundPolarMap hR p hp a,
+    roundPolarCurve_ne_poles hR p a.1.1 hp a.1.2.2 a.2.2⟩
+
+theorem roundPolarPuncturedMap_bijective {R : ℝ} (hR : 0 < R) (p : E) (hp : ‖p‖ = 1) :
+    Function.Bijective (roundPolarPuncturedMap hR p hp) := by
+  constructor
+  · intro a b he
+    exact roundPolarMap_injective hR p hp (congrArg Subtype.val he)
+  · intro x
+    obtain ⟨a, ha⟩ := roundPolarMap_surjective_off_poles hR p hp x.1 x.2.1 x.2.2
+    exact ⟨a, Subtype.ext ha⟩
+
+/-- Set-theoretic polar coordinates of the punctured sphere. -/
+def roundPolarEquiv {R : ℝ} (hR : 0 < R) (p : E) (hp : ‖p‖ = 1) :
+    (RoundPolarDirections p × Set.Ioo (0 : ℝ) (Real.pi * R)) ≃ RoundPuncturedSphere R p :=
+  Equiv.ofBijective (roundPolarPuncturedMap hR p hp) (roundPolarPuncturedMap_bijective hR p hp)
+
+theorem continuous_roundPolarPuncturedMap {R : ℝ} (hR : 0 < R) (p : E) (hp : ‖p‖ = 1) :
+    Continuous (roundPolarPuncturedMap hR p hp) :=
+  (continuous_roundPolarMap hR p hp).subtype_mk _
+
 end LichnerowiczObata

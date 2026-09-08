@@ -441,5 +441,7 @@ component determines the angular direction.
 `RoundPolarInverse` constructs polar coordinates for every sphere point other
 than the two poles: arccosine of its normalized height gives the angle, and
 the normalized perpendicular component gives the unit angular direction.
-Surjectivity away from the poles is proved; inverse continuity and the global
+Surjectivity away from the poles and exclusion of both poles from the open
+polar range are proved. The parametrization is packaged as a continuous
+bijection onto the punctured sphere. Inverse continuity and the global
 manifold comparison remain pending.

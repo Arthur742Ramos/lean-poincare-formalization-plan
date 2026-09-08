@@ -305,3 +305,7 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.unit_sphere_height_strict
 #print axioms LichnerowiczObata.unit_sphere_polar_decomposition
 #print axioms LichnerowiczObata.roundPolarMap_surjective_off_poles
+#print axioms LichnerowiczObata.roundPolarCurve_ne_poles
+#print axioms LichnerowiczObata.roundPolarPuncturedMap_bijective
+#print axioms LichnerowiczObata.roundPolarEquiv
+#print axioms LichnerowiczObata.continuous_roundPolarPuncturedMap
