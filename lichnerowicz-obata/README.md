@@ -591,3 +591,8 @@ polar nondegeneracy hypothesis. With matching dimensions, it now constructs
 a continuous linear equivalence equal to this derivative and retains the
 corresponding `HasMFDerivAt` statement. Applying inverse differentiability
 to the constructed comparison remains required.
+`ManifoldInverseDifferentiability` supplies the chart-level inverse theorem:
+between boundaryless manifolds, a homeomorphism with an invertible manifold
+derivative has a differentiable inverse at the corresponding point. Its proof
+uses the existing inverse and pointwise differentiability, with no additional
+C¹ assumption. Instantiation on the regular Obata comparison remains required.

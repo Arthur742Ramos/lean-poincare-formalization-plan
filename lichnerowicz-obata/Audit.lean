@@ -19,6 +19,7 @@ import LichnerowiczObata.RoundPolarInverseSmooth
 import LichnerowiczObata.IntrinsicRoundInverse
 import LichnerowiczObata.PolarMetricNondegeneracy
 import LichnerowiczObata.SpherePolarTangent
+import LichnerowiczObata.ManifoldInverseDifferentiability
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -421,3 +422,4 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.mfderiv_sphere_polar_restriction
 #print axioms LichnerowiczObata.mfderiv_sphere_polar_restriction_injective
 #print axioms LichnerowiczObata.exists_sphere_polar_derivative_equiv
+#print axioms LichnerowiczObata.mdifferentiableAt_homeomorph_symm_of_equiv
