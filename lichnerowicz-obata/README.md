@@ -574,3 +574,9 @@ angular variables. The regular comparison theorem now retains a single
 ambient map that agrees with the inverse comparison at every punctured-sphere
 point and is differentiable there. Differentiability of the forward comparison,
 the Riemannian isometry statement, and pole extension remain outstanding.
+`PolarMetricNondegeneracy` proves positivity of the angular coefficient
+throughout the regular radial interval and injectivity of the actual round
+polar derivative on angular-tangent and radial directions. The regular Obata
+comparison theorem now also retains injectivity of its constructed parameter
+map's derivative on these directions. Converting this into manifold local
+invertibility and forward differentiability remains required.

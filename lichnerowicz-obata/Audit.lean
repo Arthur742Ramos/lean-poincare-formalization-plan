@@ -17,6 +17,7 @@ import LichnerowiczObata.RoundAmbientDirections
 import LichnerowiczObata.ObataRegularRoundComparison
 import LichnerowiczObata.RoundPolarInverseSmooth
 import LichnerowiczObata.IntrinsicRoundInverse
+import LichnerowiczObata.PolarMetricNondegeneracy
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -407,3 +408,7 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.intrinsicRoundInverseCoordinates_apply
 #print axioms LichnerowiczObata.intrinsicRoundInverseCoordinates_eq_inverse
 #print axioms LichnerowiczObata.contDiffAt_intrinsicRoundInverseCoordinates
+#print axioms LichnerowiczObata.polar_derivative_eq_zero_iff
+#print axioms LichnerowiczObata.polar_derivative_injOn
+#print axioms LichnerowiczObata.obata_polar_coefficient_pos
+#print axioms LichnerowiczObata.intrinsicRoundPolar_derivative_injOn

@@ -3,6 +3,7 @@ module
 public import LichnerowiczObata.ObataUnitSphericalProduct
 public import LichnerowiczObata.RoundAmbientDirections
 public import LichnerowiczObata.IntrinsicRoundInverse
+public import LichnerowiczObata.PolarMetricNondegeneracy
 
 /-! # The regular Obata-to-round comparison and its polar pullback metric -/
 
@@ -56,6 +57,8 @@ theorem exists_obata_regular_round_comparison
           (∀ q, ((F (Q q)).1 : RoundAmbient (TM p)) = Ψ (q.1, q.2)) ∧
           ∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
             MDifferentiableAt 𝓘(ℝ, TM p × ℝ) I Φ (u, r) ∧
+            Set.InjOn (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r))
+              {q : TM p × ℝ | inner ℝ (u : TM p) q.1 = 0} ∧
             ∀ w v : TM p, inner ℝ (u : TM p) w = 0 → inner ℝ (u : TM p) v = 0 →
               ∀ s t : ℝ,
                 inner ℝ (mfderiv 𝓘(ℝ, TM p × ℝ) I Φ (u, r) (w, s))
@@ -88,7 +91,10 @@ theorem exists_obata_regular_round_comparison
     rw [Q.symm_apply_apply]
     exact curvatureRoundPolarHomeomorph_apply hK q
   intro u r hr
-  refine ⟨(hmetric u r hr).1, ?_⟩
+  refine ⟨(hmetric u r hr).1, ?_, ?_⟩
+  · apply polar_derivative_injOn _ (obata_polar_coefficient_pos hK hr)
+    intro v hv t
+    exact (hmetric u r hr).2 v v hv hv t t
   intro w v hw hv s t
   rw [(hmetric u r hr).2 w v hw hv s t]
   exact (intrinsicRoundPolar_metric hK (u : TM ((extChartAt I c).symm z)) w v
