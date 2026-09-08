@@ -134,3 +134,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.contDiffAt_obataClock
 #print axioms LichnerowiczObata.contMDiffOn_obataRadialFamily
 #print axioms LichnerowiczObata.exists_smooth_global_gradient_flow
+#print axioms LichnerowiczObata.obataRadialFamily_reset
+#print axioms LichnerowiczObata.exists_smooth_obata_radial_family

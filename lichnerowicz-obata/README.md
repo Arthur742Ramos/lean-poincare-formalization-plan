@@ -248,3 +248,6 @@ smoothness. `SmoothRadialFlow` constructs the smooth complete intrinsic
 gradient flow and proves smoothness of its explicit radial time change on
 the regular region. Constructing the angular variations and proving the
 global round-sphere isometry remain unfinished.
+The constructed smooth radial family now simultaneously satisfies the radial
+ODE, unit-speed and radial-coordinate identities, extremal endpoint limits,
+and a reset identity identifying curves started at intermediate points.
