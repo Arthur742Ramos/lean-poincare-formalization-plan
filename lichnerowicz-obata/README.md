@@ -283,5 +283,8 @@ target. The bundled derivative agrees with fixed-pair differentiation and
 satisfies the genuine connection-coefficient compatibility formula.
 `hasDerivAt_coordinateMetric_pairing_connection` now derives the moving-pairing
 formula for the actual metric along a differentiable coordinate curve.
-Combining the covariant variation terms with the actual variational ODE and
-radial shape identities remains pending.
+`CoordinateRadialShape` derives the coordinate radial shape identity from
+torsion freeness and the radial Hessian theorem. It gives spherical metric
+scaling for a radial coordinate solution and angular solutions of its
+linearized equation. Applying these local results to the constructed global
+radial flow, and establishing the pole normalization, remains pending.

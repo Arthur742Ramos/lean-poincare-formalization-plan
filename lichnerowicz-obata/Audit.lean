@@ -3,6 +3,7 @@ import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
 import LichnerowiczObata.MetricBilinearRegularity
+import LichnerowiczObata.CoordinateRadialShape
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -28,6 +29,9 @@ import LichnerowiczObata.AngularMetricEvolution
 import LichnerowiczObata.SmoothPicardOperator
 
 #print axioms LichnerowiczObata.contDiffOn_bilinear_of_basis
+#print axioms LichnerowiczObata.fderiv_coordinateVectorField_add_connection
+#print axioms LichnerowiczObata.coordinate_obataRadial_shape
+#print axioms LichnerowiczObata.hasDerivAt_coordinate_radial_metric
 #print axioms LichnerowiczObata.fderiv_coordinateMetricBilinear_apply
 #print axioms LichnerowiczObata.fderiv_coordinateMetricBilinear_coefficients
 #print axioms LichnerowiczObata.hasDerivAt_coordinateMetric_pairing_connection
