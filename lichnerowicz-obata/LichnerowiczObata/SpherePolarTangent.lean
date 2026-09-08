@@ -2,6 +2,8 @@ module
 
 public import Mathlib.Geometry.Manifold.Instances.Sphere
 public import LichnerowiczObata.PolarMetricNondegeneracy
+public import Mathlib.Topology.Algebra.Module.FiniteDimension
+public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 
 /-! # Manifold angular tangents in the polar derivative -/
 
@@ -131,4 +133,46 @@ theorem mfderiv_sphere_polar_restriction_injective {Φ : P × ℝ → M}
   exact polar_derivative_sphere_tangent_injective u _ hD
 
 end Restriction
+
+section Equivalence
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+
+/-- With matching dimensions, the actual sphere-restricted polar derivative
+is a continuous linear equivalence, not merely an injective map. -/
+theorem exists_sphere_polar_derivative_equiv {Φ : P × ℝ → M}
+    (u : Metric.sphere (0 : P) 1) (r : ℝ)
+    (hDim : Module.finrank ℝ E = n + 1)
+    (hΦ : MDifferentiableAt 𝓘(ℝ, P × ℝ) I Φ ((u : P), r))
+    (hD : Set.InjOn (mfderiv 𝓘(ℝ, P × ℝ) I Φ ((u : P), r))
+      {q : P × ℝ | inner ℝ (u : P) q.1 = 0}) :
+    ∃ e : TangentSpace ((𝓡 n).prod 𝓘(ℝ, ℝ)) (u, r) ≃L[ℝ]
+        TangentSpace I (Φ ((u : P), r)),
+      (e : _ →L[ℝ] _) = mfderiv ((𝓡 n).prod 𝓘(ℝ, ℝ)) I
+        (fun q : Metric.sphere (0 : P) 1 × ℝ => Φ (q.1, q.2)) (u, r) ∧
+      HasMFDerivAt ((𝓡 n).prod 𝓘(ℝ, ℝ)) I
+        (fun q : Metric.sphere (0 : P) 1 × ℝ => Φ (q.1, q.2)) (u, r) (e : _ →L[ℝ] _) := by
+  let : FiniteDimensional ℝ (TangentSpace I (Φ ((u : P), r))) :=
+    inferInstanceAs (FiniteDimensional ℝ E)
+  let : T2Space (TangentSpace I (Φ ((u : P), r))) := inferInstanceAs (T2Space E)
+  let : FiniteDimensional ℝ (TangentSpace ((𝓡 n).prod 𝓘(ℝ, ℝ)) (u, r)) :=
+    inferInstanceAs (FiniteDimensional ℝ (EuclideanSpace ℝ (Fin n) × ℝ))
+  let : T2Space (TangentSpace ((𝓡 n).prod 𝓘(ℝ, ℝ)) (u, r)) :=
+    inferInstanceAs (T2Space (EuclideanSpace ℝ (Fin n) × ℝ))
+  let D := mfderiv ((𝓡 n).prod 𝓘(ℝ, ℝ)) I
+    (fun q : Metric.sphere (0 : P) 1 × ℝ => Φ (q.1, q.2)) (u, r)
+  have hi : Function.Injective D := mfderiv_sphere_polar_restriction_injective u r hΦ hD
+  have hd : Module.finrank ℝ (TangentSpace ((𝓡 n).prod 𝓘(ℝ, ℝ)) (u, r)) =
+      Module.finrank ℝ (TangentSpace I (Φ ((u : P), r))) := by
+    change Module.finrank ℝ (EuclideanSpace ℝ (Fin n) × ℝ) = Module.finrank ℝ E
+    simp [Module.finrank_prod, hDim]
+  let e := (D.toLinearMap.linearEquivOfInjective hi hd).toContinuousLinearEquiv
+  have he : (e : _ →L[ℝ] _) = D := by ext v; rfl
+  refine ⟨e, he, ?_⟩
+  rw [he]
+  exact (mdifferentiableAt_sphere_polar_restriction u r hΦ).hasMFDerivAt
+
+end Equivalence
 end LichnerowiczObata

@@ -420,3 +420,4 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.mvfderiv_sphere_polar_inclusion
 #print axioms LichnerowiczObata.mfderiv_sphere_polar_restriction
 #print axioms LichnerowiczObata.mfderiv_sphere_polar_restriction_injective
+#print axioms LichnerowiczObata.exists_sphere_polar_derivative_equiv

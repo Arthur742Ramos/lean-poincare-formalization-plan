@@ -587,5 +587,7 @@ sphere tangent and radial space, and proves differentiability of the actual
 sphere-restricted parameter map. It now identifies the full manifold derivative
 as the ambient polar derivative composed with sphere tangent inclusion and
 proves that this actual manifold derivative is injective under the established
-polar nondegeneracy hypothesis. Establishing the equal-dimensional linear
-equivalence and applying inverse differentiability remain the next steps.
+polar nondegeneracy hypothesis. With matching dimensions, it now constructs
+a continuous linear equivalence equal to this derivative and retains the
+corresponding `HasMFDerivAt` statement. Applying inverse differentiability
+to the constructed comparison remains required.
