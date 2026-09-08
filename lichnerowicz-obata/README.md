@@ -381,3 +381,7 @@ the intrinsic radial derivative to prove the Gauss lemma: the pullback metric
 pairs a radial initial vector with any variation as time squared times the
 initial metric pairing. Thus angular initial directions remain orthogonal to
 the endpoint's radial direction. The full angular metric formula remains pending.
+`NormalMetricLimit` proves continuity of the pullback metric and its limiting
+value at zero initial velocity. For the actual geodesic endpoint map this limit
+is time squared times the base-point metric, derived from its checked derivative
+at zero. This supplies the pole normalization for the angular evolution argument.
