@@ -69,6 +69,13 @@ jobs:
           go-version: "1.24.0"
           cache: false
       - name: Verify all selected definitions and the complete theorem
-        run: bash lichnerowicz-obata/scripts/verify-comparator.sh
+        # Comparator only grants writes inside the selected project. Populate
+        # the pinned sibling path dependency's build cache before sandboxing;
+        # Comparator still exports and kernel-checks the complete proof.
+        # No sibling source or sandbox permissions are changed.
+        run: |
+          cd lichnerowicz-obata
+          lake build
+          bash scripts/verify-comparator.sh
       - name: Recheck the isolated Challenge
         run: python3 lichnerowicz-obata/scripts/check-challenge-boundary.py
