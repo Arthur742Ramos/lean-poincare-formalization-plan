@@ -397,6 +397,8 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_obata_matched_polar_models
 #print axioms LichnerowiczObata.HasUnitPolarMetric.exists_differentiable_inverse
 #print axioms LichnerowiczObata.mdifferentiable_polar_angular_matching
+#print axioms LichnerowiczObata.HasUnitPolarMetric.latitude_inner
+#print axioms LichnerowiczObata.polar_angular_matching_inner
 #print axioms LichnerowiczObata.hasFDerivAt_roundPoleLog_zero
 #print axioms LichnerowiczObata.roundPoleLog_polar_projection
 #print axioms LichnerowiczObata.HasRadialPoleModel.exists_round_north_extension

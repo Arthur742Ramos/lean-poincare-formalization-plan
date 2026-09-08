@@ -97,6 +97,108 @@ theorem mdifferentiable_polar_angular_matching
     mdifferentiableAt_fst.comp u hi
   simpa only [hid] using hf
 
+section AngularMetric
+variable {P : Type*} [NormedAddCommGroup P] [InnerProductSpace ℝ P]
+  {n : ℕ} [Fact (Module.finrank ℝ P = n + 1)]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [RiemannianBundle (TangentSpace I : M → Type _)]
+
+/-- Restricting the polar metric to a fixed latitude gives the angular
+metric scaled by the squared polar warping coefficient. -/
+theorem HasUnitPolarMetric.latitude_inner {K : ℝ} {Φ : P × ℝ → M}
+    (hm : HasUnitPolarMetric I K Φ) (u : Metric.sphere (0 : P) 1)
+    {r : ℝ} (hr : r ∈ Ioo 0 (Real.pi / Real.sqrt K))
+    (v w : TangentSpace (𝓡 n) u) :
+    inner ℝ (mfderiv (𝓡 n) I (fun a : Metric.sphere (0 : P) 1 => Φ (a, r)) u v)
+      (mfderiv (𝓡 n) I (fun a : Metric.sphere (0 : P) 1 => Φ (a, r)) u w) =
+      (Real.sin (Real.sqrt K * r) ^ 2 / K) *
+        inner ℝ (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : P) 1 → P) u v)
+          (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : P) 1 → P) u w) := by
+  let j := fun a : Metric.sphere (0 : P) 1 => ((a : P), r)
+  have hc : MDifferentiableAt (𝓡 n) 𝓘(ℝ, P)
+      (Subtype.val : Metric.sphere (0 : P) 1 → P) u :=
+    (contMDiff_coe_sphere u).mdifferentiableAt one_ne_zero
+  have hj : MDifferentiableAt (𝓡 n) 𝓘(ℝ, P × ℝ) j u :=
+    hc.prodMk_space mdifferentiableAt_const
+  have hd := mfderiv_comp (f := j) (g := Φ) u (hm u r hr).1 hj
+  have hjd : ∀ z : TangentSpace (𝓡 n) u,
+      mfderiv (𝓡 n) 𝓘(ℝ, P × ℝ) j u z =
+        (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : P) 1 → P) u z, 0) := by
+    intro z
+    have hconst : MDifferentiableAt (𝓡 n) 𝓘(ℝ, ℝ)
+        (fun _ : Metric.sphere (0 : P) 1 => r) u := mdifferentiableAt_const
+    have hh := mfderiv_prodMk hc hconst
+    rw [mfderiv_const] at hh
+    convert congrArg (fun D => D z) hh using 1 <;>
+      simp [j, mvfderiv, mfderiv, hc, hc.prodMk_space hconst, hc.prodMk hconst] <;> rfl
+  change inner ℝ (mfderiv (𝓡 n) I (Φ ∘ j) u v)
+    (mfderiv (𝓡 n) I (Φ ∘ j) u w) = _
+  rw [hd]
+  change inner ℝ (mfderiv 𝓘(ℝ, P × ℝ) I Φ (u, r) (mfderiv (𝓡 n) 𝓘(ℝ, P × ℝ) j u v))
+    (mfderiv 𝓘(ℝ, P × ℝ) I Φ (u, r) (mfderiv (𝓡 n) 𝓘(ℝ, P × ℝ) j u w)) = _
+  rw [hjd, hjd]
+  have hv := spherePolarTangentInclusion_orthogonal (n := n) u (v, 0)
+  have hw := spherePolarTangentInclusion_orthogonal (n := n) u (w, 0)
+  simpa [spherePolarTangentInclusion] using (hm u r hr).2 _ _ hv hw 0 0
+
+/-- Preservation of the intrinsic unit-sphere metric, expressed through the
+differential of its Euclidean inclusion. -/
+def PreservesSphereTangentMetric
+    {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
+    [Fact (Module.finrank ℝ V = n + 1)]
+    (A : Metric.sphere (0 : P) 1 → Metric.sphere (0 : V) 1) : Prop :=
+  ∀ (u : Metric.sphere (0 : P) 1) (v w : TangentSpace (𝓡 n) u),
+    inner ℝ
+      (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : V) 1 → V) (A u)
+        (mfderiv (𝓡 n) (𝓡 n) A u v))
+      (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : V) 1 → V) (A u)
+        (mfderiv (𝓡 n) (𝓡 n) A u w)) =
+    inner ℝ (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : P) 1 → P) u v)
+      (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : P) 1 → P) u w)
+
+/-- Matching latitude maps with the same positive polar coefficient forces
+the angular differential to preserve the induced sphere inner product. -/
+theorem polar_angular_matching_inner
+    {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V]
+    [Fact (Module.finrank ℝ V = n + 1)]
+    {K : ℝ} {Φ : P × ℝ → M} {Ψ : V × ℝ → M}
+    (hΦ : HasUnitPolarMetric I K Φ) (hΨ : HasUnitPolarMetric I K Ψ) (hK : 0 < K)
+    (A : Metric.sphere (0 : P) 1 → Metric.sphere (0 : V) 1)
+    (hA : MDifferentiable (𝓡 n) (𝓡 n) A)
+    {r : ℝ} (hr : r ∈ Ioo 0 (Real.pi / Real.sqrt K))
+    (hmatch : ∀ u : Metric.sphere (0 : P) 1, Φ (u, r) = Ψ (A u, r))
+    (u : Metric.sphere (0 : P) 1) (v w : TangentSpace (𝓡 n) u) :
+    inner ℝ
+      (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : V) 1 → V) (A u)
+        (mfderiv (𝓡 n) (𝓡 n) A u v))
+      (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : V) 1 → V) (A u)
+        (mfderiv (𝓡 n) (𝓡 n) A u w)) =
+    inner ℝ (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : P) 1 → P) u v)
+      (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : P) 1 → P) u w) := by
+  let L := fun a : Metric.sphere (0 : V) 1 => Ψ (a, r)
+  have hc : MDifferentiableAt (𝓡 n) 𝓘(ℝ, V)
+      (Subtype.val : Metric.sphere (0 : V) 1 → V) (A u) :=
+    (contMDiff_coe_sphere (A u)).mdifferentiableAt one_ne_zero
+  have hL : MDifferentiableAt (𝓡 n) I L (A u) :=
+    (hΨ (A u) r hr).1.comp (A u) (hc.prodMk_space mdifferentiableAt_const)
+  have heq : (fun a : Metric.sphere (0 : P) 1 => Φ (a, r)) = L ∘ A := funext hmatch
+  have hh := hΦ.latitude_inner u hr v w
+  rw [heq, mfderiv_comp u hL (hA u)] at hh
+  rw [hmatch u] at hh
+  have hs := hΨ.latitude_inner (A u) hr
+    (mfderiv (𝓡 n) (𝓡 n) A u v) (mfderiv (𝓡 n) (𝓡 n) A u w)
+  have hh' : (Real.sin (Real.sqrt K * r) ^ 2 / K) *
+      inner ℝ
+        (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : V) 1 → V) (A u)
+          (mfderiv (𝓡 n) (𝓡 n) A u v))
+        (mvfderiv (𝓡 n) (Subtype.val : Metric.sphere (0 : V) 1 → V) (A u)
+          (mfderiv (𝓡 n) (𝓡 n) A u w)) = _ := hs.symm.trans hh
+  exact mul_left_cancel₀ (ne_of_gt (obata_polar_coefficient_pos hK hr)) hh'
+
+end AngularMetric
+
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
   {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -146,7 +248,9 @@ theorem exists_obata_matched_polar_models
             Φ (u, Real.pi / Real.sqrt K - r) = Ψ (A u, r)) ∧
           ∀ (n : ℕ) (hdim : Module.finrank ℝ E = n + 1),
             letI : Fact (Module.finrank ℝ E = n + 1) := ⟨hdim⟩
-            MDifferentiable (𝓡 n) (𝓡 n) A ∧ MDifferentiable (𝓡 n) (𝓡 n) A.symm := by
+            MDifferentiable (𝓡 n) (𝓡 n) A ∧ MDifferentiable (𝓡 n) (𝓡 n) A.symm ∧
+              PreservesSphereTangentMetric (n := n) A ∧
+              PreservesSphereTangentMetric (n := n) A.symm := by
   have hf2 : ContMDiff I 𝓘(ℝ, ℝ) 2 f :=
     hf.of_le (WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ ⊤))
   have hpm : IsMaxOn f univ ((extChartAt I c).symm z) := by
@@ -178,12 +282,22 @@ theorem exists_obata_matched_polar_models
     dsimp [m]
     constructor <;> linarith
   have heq : Real.pi / Real.sqrt K - m = m := by dsimp [m]; ring
-  constructor
-  · apply mdifferentiable_polar_angular_matching (n := n) hmN hmS hK U S hS hdim A hm hm
+  have hforward : MDifferentiable (𝓡 n) (𝓡 n) A := by
+    apply mdifferentiable_polar_angular_matching (n := n) hmN hmS hK U S hS hdim A hm hm
     intro u
     simpa only [heq] using hA u m hm
-  · apply mdifferentiable_polar_angular_matching (n := n) hmS hmN hK U N hN hdim A.symm hm hm
+  have hbackward : MDifferentiable (𝓡 n) (𝓡 n) A.symm := by
+    apply mdifferentiable_polar_angular_matching (n := n) hmS hmN hK U N hN hdim A.symm hm hm
     intro v
     simpa only [heq, A.apply_symm_apply] using (hA (A.symm v) m hm).symm
+  refine ⟨hforward, hbackward, ?_, ?_⟩
+  · intro u v w
+    apply polar_angular_matching_inner hmN hmS hK A hforward hm _ u v w
+    intro a
+    simpa only [heq] using hA a m hm
+  · intro u v w
+    apply polar_angular_matching_inner hmS hmN hK A.symm hbackward hm _ u v w
+    intro a
+    simpa only [heq, A.apply_symm_apply] using (hA (A.symm a) m hm).symm
 
 end LichnerowiczObata

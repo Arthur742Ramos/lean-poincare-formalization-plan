@@ -715,7 +715,10 @@ south models of one Obata function. One conclusion now retains both full polar
 metrics, both isometric Cartesian pole derivatives, both radial coordinate
 identities, and the angular homeomorphism matching all opposite radial curves.
 In every sphere-chart dimension `finrank E = n + 1`, this same angular
-homeomorphism and its inverse are now proved manifold-differentiable. The proof
+homeomorphism and its inverse are now proved manifold-differentiable and to
+preserve the unit-sphere tangent inner product. The proof
 uses the equatorial slice and the differentiable inverse coordinates supplied
-by the positive polar metric; no differentiability of the matching is assumed.
+by the positive polar metric; no differentiability or tangent metric preservation
+of the matching is assumed. The equatorial derivative identity and cancellation
+of the positive warping coefficient prove the tangent metric assertion.
 The angular map is not yet proved to extend to a linear isometry.
