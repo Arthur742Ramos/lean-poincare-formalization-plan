@@ -531,3 +531,8 @@ The actual normal-chart/radial-flow composite now has a proved differentiability
 theorem on its regular parameter domain. Its intrinsic angular-metric theorem
 uses that result and the actual tangent trivialization, eliminating separate
 differentiability and parameter-compatibility assumptions from this step.
+`PolarMetricAssembly` derives the complete polar pairing from the angular
+pairing, radial gradient velocity, and unit radial speed. Vanishing mixed
+terms follow from differentiating the radius identity. Applying this assembly
+to the jointly constructed spherical product remains required; it is not yet
+a global Riemannian isometry theorem.
