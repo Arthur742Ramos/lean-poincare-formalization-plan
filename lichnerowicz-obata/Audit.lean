@@ -28,6 +28,9 @@ import LichnerowiczObata.AngularMetricEvolution
 import LichnerowiczObata.SmoothPicardOperator
 
 #print axioms LichnerowiczObata.contDiffOn_bilinear_of_basis
+#print axioms LichnerowiczObata.fderiv_coordinateMetricBilinear_apply
+#print axioms LichnerowiczObata.fderiv_coordinateMetricBilinear_coefficients
+#print axioms LichnerowiczObata.hasDerivAt_coordinateMetric_pairing_connection
 #print axioms LichnerowiczObata.contDiffOn_coordinateMetricBilinear
 #print axioms LichnerowiczObata.differentiableAt_coordinateMetricBilinear
 #print axioms LichnerowiczObata.eigenvalue_lower_bound

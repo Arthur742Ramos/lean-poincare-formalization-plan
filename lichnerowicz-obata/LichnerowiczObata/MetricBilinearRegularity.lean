@@ -1,7 +1,9 @@
 module
 
 public import LichnerowiczObata.CoordinateMetricVariation
+public import LichnerowiczObata.MetricPairingCalculus
 public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.FDeriv.CompCLM
 
 /-! # Smoothness of the bilinear-valued coordinate metric -/
 
@@ -67,5 +69,63 @@ theorem differentiableAt_coordinateMetricBilinear (c : M) {z : E}
     DifferentiableAt ℝ (coordinateMetricBilinear (I := I) c) z := by
   exact ((contDiffOn_coordinateMetricBilinear (I := I) c).contDiffAt
     ((isOpen_extChartAt_target c).mem_nhds hz)).differentiableAt (by simp)
+
+/-- Evaluating the bundled derivative agrees with differentiating a fixed pairing. -/
+theorem fderiv_coordinateMetricBilinear_apply (c : M) {z : E}
+    (hz : z ∈ (extChartAt I c).target) (d u w : E) :
+    fderiv ℝ (coordinateMetricBilinear (I := I) c) z d u w =
+      fderiv ℝ (fun y => coordinateMetricBilinear (I := I) c y u w) z d := by
+  have hg := differentiableAt_coordinateMetricBilinear (I := I) c hz
+  rw [fderiv_clm_apply (hg.clm_apply (differentiableAt_const u))
+    (differentiableAt_const w), fderiv_clm_apply hg (differentiableAt_const u)]
+  simp
+
+/-- Bundled metric compatibility, derived from the genuine metric connection. -/
+theorem fderiv_coordinateMetricBilinear_coefficients
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : tangentMetricCompatible cov) {ι : Type*} [Fintype ι]
+    (b : Module.Basis ι ℝ E) (c x : M) (hx : x ∈ (chartAt H c).source)
+    (d u w : E) :
+    let A := frameConnectionCoefficients cov
+      (trivializationAt E (TangentSpace I : M → Type _) c) b x d
+    fderiv ℝ (coordinateMetricBilinear (I := I) c) (extChartAt I c x) d u w =
+      coordinateMetricBilinear (I := I) c (extChartAt I c x) (A u) w +
+        coordinateMetricBilinear (I := I) c (extChartAt I c x) u (A w) := by
+  dsimp only
+  have hx' : x ∈ (extChartAt I c).source := by simpa using hx
+  rw [fderiv_coordinateMetricBilinear_apply c ((extChartAt I c).map_source hx')]
+  have he : (extChartAt I c).symm (extChartAt I c x) = x :=
+    (extChartAt I c).left_inv hx'
+  simp only [coordinateMetricBilinear_apply]
+  rw [he]
+  simpa only [coordinateMetricBilinear_apply, he, Function.comp_def] using
+    fderiv_coordinateMetric_pairing_coefficients cov hcov b c x hx d u w
+
+/-- Along a differentiable coordinate curve, the actual metric pairing evolves
+by the two covariant variation terms. -/
+theorem hasDerivAt_coordinateMetric_pairing_connection
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : tangentMetricCompatible cov) {ι : Type*} [Fintype ι]
+    (b : Module.Basis ι ℝ E) (c x : M) (hx : x ∈ (chartAt H c).source)
+    {z u w : ℝ → E} {d u' w' : E} {t : ℝ}
+    (hz : z t = extChartAt I c x) (hd : HasDerivAt z d t)
+    (hu : HasDerivAt u u' t) (hw : HasDerivAt w w' t) :
+    let g := coordinateMetricBilinear (I := I) c
+    let A := frameConnectionCoefficients cov
+      (trivializationAt E (TangentSpace I : M → Type _) c) b x d
+    HasDerivAt (fun s => g (z s) (u s) (w s))
+      (g (z t) (u' + A (u t)) (w t) + g (z t) (u t) (w' + A (w t))) t := by
+  dsimp only
+  have hzt : z t ∈ (extChartAt I c).target := by
+    rw [hz]
+    exact (extChartAt I c).map_source (by simpa using hx)
+  have hg : HasDerivAt (fun s => coordinateMetricBilinear (I := I) c (z s))
+      (fderiv ℝ (coordinateMetricBilinear (I := I) c) (z t) d) t := by
+    exact HasFDerivAt.comp_hasDerivAt (𝕜 := ℝ) (F := E)
+      (E := E →L[ℝ] E →L[ℝ] ℝ) t
+      (differentiableAt_coordinateMetricBilinear (I := I) c hzt).hasFDerivAt hd
+  apply hasDerivAt_metric_pairing_connection _ hg hu hw
+  rw [hz]
+  exact fderiv_coordinateMetricBilinear_coefficients cov hcov b c x hx d (u t) (w t)
 
 end LichnerowiczObata

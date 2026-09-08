@@ -279,4 +279,9 @@ generic calculus lemma does not discharge those obligations.
 `MetricBilinearRegularity` supplies C1 operator-norm regularity of the actual
 bilinear-valued coordinate metric by reconstructing it from its smooth finite
 basis pairings. Its differentiability holds at every point of the open chart
-target. Combining its derivative with the actual variational ODE remains pending.
+target. The bundled derivative agrees with fixed-pair differentiation and
+satisfies the genuine connection-coefficient compatibility formula.
+`hasDerivAt_coordinateMetric_pairing_connection` now derives the moving-pairing
+formula for the actual metric along a differentiable coordinate curve.
+Combining the covariant variation terms with the actual variational ODE and
+radial shape identities remains pending.
