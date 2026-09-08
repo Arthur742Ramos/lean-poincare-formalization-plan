@@ -261,3 +261,7 @@ variations and normalization at a pole remain to be established.
 Differentiating the starting-point identity also gives the spatial/time
 derivative splitting. Transport at the starting level fixes angular vectors,
 and transport to any interior level has trivial kernel on angular vectors.
+`FlowVariationEquation` derives the linearized ODE for initial-point
+derivatives of a jointly C2 Euclidean flow from its actual ODE and symmetry
+of second derivatives. Connecting this equation to the manifold metric
+evolution remains a separate step.

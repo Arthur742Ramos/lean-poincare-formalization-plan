@@ -1,4 +1,5 @@
 import LichnerowiczObata.RadialVariation
+import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
 import LichnerowiczObata.ClassicalSpectrum
@@ -146,3 +147,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.radial_initial_derivative
 #print axioms LichnerowiczObata.radial_initial_derivative_of_tangent
 #print axioms LichnerowiczObata.radial_transport_kernel_trivial
+#print axioms LichnerowiczObata.fderiv_variation_equation
+#print axioms LichnerowiczObata.hasDerivAt_flow_variation
