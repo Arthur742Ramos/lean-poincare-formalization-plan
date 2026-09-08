@@ -23,6 +23,7 @@ import LichnerowiczObata.ManifoldInverseDifferentiability
 import LichnerowiczObata.OpenRegionHomeomorph
 import LichnerowiczObata.PolarInverseDifferentiability
 import LichnerowiczObata.ObataPolarInverse
+import LichnerowiczObata.ObataRegularMetricComparison
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -439,3 +440,4 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_obata_differentiable_polar_inverse
 #print axioms LichnerowiczObata.exists_obata_regular_forward_differentiable
 #print axioms LichnerowiczObata.polar_comparison_derivative_inner
+#print axioms LichnerowiczObata.obata_regular_metric_comparison

@@ -628,3 +628,8 @@ sphere-restricted parameter derivative to all tangent vectors. Applied to
 the actual Obata comparison, it proves that the forward ambient derivative
 preserves the Riemannian inner product at every regular point. Extension over
 the poles and the final global round-isometry theorem remain unfinished.
+`ObataRegularMetricComparison` derives this regular comparison directly from
+the nonconstant Obata Hessian equation in dimension at least two, without
+assuming a chosen maximum, chart, or successor-dimension instance. It packages
+the unique poles, both differentiable ambient maps, forward tangent metric
+preservation, and radial distance bounds to both poles in one theorem.
