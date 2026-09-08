@@ -5,6 +5,7 @@ public import LichnerowiczObata.NormalMetricLimit
 /-! # Chain rules for rays in a normal coordinate map -/
 
 @[expose] public noncomputable section
+open scoped Topology
 
 namespace LichnerowiczObata
 set_option backward.isDefEq.respectTransparency false
@@ -53,5 +54,39 @@ theorem hasDerivAt_normal_ray_of_radial {F : E → E} {u N : E} {s σ : ℝ}
     apply (smul_right_injective E hs)
     simpa only [map_smul, mul_smul] using hrad
   simpa only [he] using hasDerivAt_normal_ray hF
+
+/-- An open initial-data neighborhood contains a short positive-phase ray
+interval whenever curvature, endpoint time, and initial energy are positive. -/
+theorem exists_positive_phase_ray_interval
+    (g : E →L[ℝ] E →L[ℝ] ℝ) {V : Set (E × E)} (hV : IsOpen V)
+    {z u : E} (hz : (z, (0 : E)) ∈ V) {K t : ℝ}
+    (hK : 0 < K) (ht : 0 < t) (hu : 0 < g u u) :
+    ∃ ε : ℝ, 0 < ε ∧ ∀ r ∈ Set.Ioo 0 ε, (z, r • u) ∈ V ∧
+      Real.sqrt (K * g (r • u) (r • u)) * t ∈ Set.Ioo 0 Real.pi := by
+  have hc : Continuous (fun r : ℝ => (z, r • u)) :=
+    continuous_const.prodMk (continuous_id.smul continuous_const)
+  have hnear : ∀ᶠ r in 𝓝 (0 : ℝ), (z, r • u) ∈ V := by
+    exact hc.continuousAt.preimage_mem_nhds (by simpa using hV.mem_nhds hz)
+  let freq := Real.sqrt K * (t * Real.sqrt (g u u))
+  have hfreq : 0 < freq := mul_pos (Real.sqrt_pos.mpr hK)
+    (mul_pos ht (Real.sqrt_pos.mpr hu))
+  have hupper : ∀ᶠ r in 𝓝 (0 : ℝ), freq * r < Real.pi := by
+    exact (continuous_const.mul continuous_id).continuousAt.preimage_mem_nhds
+      (isOpen_Iio.mem_nhds (by simpa using Real.pi_pos))
+  obtain ⟨ε, hε, he⟩ := Metric.eventually_nhds_iff.mp (hnear.and hupper)
+  refine ⟨ε, hε, ?_⟩
+  intro r hr
+  have hd : dist r 0 < ε := by simpa [Real.dist_eq, abs_of_pos hr.1] using hr.2
+  have hh := he hd
+  refine ⟨hh.1, ?_⟩
+  have hquad : g (r • u) (r • u) = r ^ 2 * g u u := by
+    simp only [map_smul, smul_apply, smul_eq_mul]
+    ring
+  have hphase : Real.sqrt (K * g (r • u) (r • u)) * t = freq * r := by
+    rw [Real.sqrt_mul hK.le, hquad, Real.sqrt_mul (sq_nonneg r), Real.sqrt_sq hr.1.le]
+    dsimp only [freq]
+    ring
+  rw [hphase]
+  exact ⟨mul_pos hfreq hr.1, hh.2⟩
 
 end LichnerowiczObata

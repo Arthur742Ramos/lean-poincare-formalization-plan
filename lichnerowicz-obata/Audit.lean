@@ -276,3 +276,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.tendsto_sine_normalized_quadratic
 #print axioms LichnerowiczObata.sine_normalized_eq_of_pole_limit
 #print axioms LichnerowiczObata.geodesic_normal_ray_metric_pole_normalized
+#print axioms LichnerowiczObata.exists_positive_phase_ray_interval
+#print axioms LichnerowiczObata.exists_geodesic_normal_ray_metric_pole_normalized

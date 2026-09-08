@@ -97,4 +97,40 @@ theorem geodesic_normal_ray_metric_pole_normalized
   rw [hfreqsq]
   field_simp [htpos.ne', hK.ne', hu.ne']
 
+/-- A pole-normalized angular metric interval exists for every positive-energy
+initial ray. Its size is constructed from the open geodesic domain. -/
+theorem exists_geodesic_normal_ray_metric_pole_normalized
+    {ι : Type} [Fintype ι] (b : Module.Basis ι ℝ E)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f) {K a : ℝ}
+    (hK : 0 < K) (ha : 0 < a) (hb : ∀ y, -a ≤ f y ∧ f y ≤ a)
+    (hH : ∀ (y : M) (v w : TM y), hessian LC f y v w = -K * f y * inner ℝ v w)
+    (c : M) {z : E} (hz : z ∈ (extChartAt I c).target)
+    {α : (E × E) × ℝ → E × E} {V : Set (E × E)} (hV : IsOpen V)
+    (hzV : (z, (0 : E)) ∈ V) {δ : ℝ} (hδ : 0 < δ)
+    (hα : ContDiffOn ℝ 2 α (V ×ˢ Metric.ball 0 δ))
+    (hsol : ∀ q ∈ V, α (q, 0) = q ∧
+      ∀ r ∈ Metric.ball 0 δ, (α (q, r)).1 ∈ (extChartAt I c).target ∧
+        HasDerivAt (fun t => α (q, t)) (coordinateGeodesicSpray LC b c (α (q, r))) r)
+    (hrest : ∀ r ∈ Metric.ball 0 δ, α ((z, 0), r) = (z, 0))
+    (hcrit : gradient (I := I) f ((extChartAt I c).symm z) = 0)
+    (hmax : f ((extChartAt I c).symm z) = a)
+    {t : ℝ} (htime : t ∈ Metric.ball 0 δ) (htpos : 0 < t) {u : E}
+    (hu : 0 < coordinateMetricBilinear (I := I) c z u u) :
+    ∃ ε > 0, ∀ (s : ℝ), s ∈ Ioo 0 ε → ∀ (w v : E),
+      coordinateMetricBilinear (I := I) c z u w = 0 →
+      coordinateMetricBilinear (I := I) c z u v = 0 →
+      let φ := fun q : E × ℝ => (α ((z, q.2 • q.1), t)).1
+      let freq := Real.sqrt K * (t * Real.sqrt (coordinateMetricBilinear (I := I) c z u u))
+      coordinateMetricBilinear (I := I) c (φ (u, s))
+        (fderiv ℝ φ (u, s) (w, 0)) (fderiv ℝ φ (u, s) (v, 0)) /
+          Real.sin (freq * s) ^ 2 =
+        coordinateMetricBilinear (I := I) c z w v /
+          (K * coordinateMetricBilinear (I := I) c z u u) := by
+  obtain ⟨ε, hε, hdata⟩ := exists_positive_phase_ray_interval
+    (coordinateMetricBilinear (I := I) c z) hV hzV hK htpos hu
+  refine ⟨ε, hε, ?_⟩
+  intro s hs w v hw hv
+  exact geodesic_normal_ray_metric_pole_normalized b hf hK ha hb hH c hz hV hzV
+    hδ hα hsol hrest hcrit hmax htime htpos hu hε hdata hw hv hs
+
 end LichnerowiczObata

@@ -413,6 +413,7 @@ a constant sine-square normalization on a short positive interval.
 `NormalRayNormalization` applies this to the actual geodesic metric. The
 normalized angular pairing is the initial pairing divided by curvature times
 initial squared speed. Its constant is derived from the endpoint derivative
-at zero, with the endpoint-time factors cancelled. This result requires a
-valid short positive-phase ray interval; global sphere rigidity is not yet
-established.
+at zero, with the endpoint-time factors cancelled. A valid short positive-phase
+ray interval is constructed from the open initial-data domain for every
+positive-energy initial ray. The resulting interval supports the formula for
+all angular vector pairs. Global sphere rigidity is not yet established.
