@@ -1,0 +1,20 @@
+{
+  "challenge_module": "LichnerowiczObataChallenge",
+  "solution_module": "LichnerowiczObataSolution",
+  "theorem_names": [
+    "LichnerowiczObataEntry.Geometry.lichnerowiczObata"
+  ],
+  "definition_names": [
+    "LichnerowiczObataEntry.Geometry.extensionBump",
+    "LichnerowiczObataEntry.Geometry.extension",
+    "LichnerowiczObataEntry.Geometry.curvature",
+    "LichnerowiczObataEntry.Geometry.ricci",
+    "LichnerowiczObataEntry.Geometry.gradient",
+    "LichnerowiczObataEntry.Geometry.laplacian",
+    "LichnerowiczObataEntry.Geometry.isFirstPositiveEigenvalue",
+    "LichnerowiczObataEntry.Geometry.isRoundSphere",
+    "LichnerowiczObataEntry.Geometry.geometricStatement"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}

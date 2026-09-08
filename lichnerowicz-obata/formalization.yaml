@@ -1,0 +1,191 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Lichnerowicz--Obata first eigenvalue and round-sphere rigidity"
+  description: >-
+    Formalizes attainment of the first positive smooth Laplace eigenvalue
+    on closed connected smooth Riemannian manifolds of dimension n >= 2,
+    its sharp lower bound n*K under Ric >= (n-1)*K with K > 0, and equality
+    if and only if the manifold is smoothly Riemannian-isometric to the
+    round sphere of radius 1/sqrt K. The independent statement constructs
+    the metric-compatible torsion-free connection and explicitly defines
+    Ricci curvature, the Riesz gradient, the div-grad Laplacian, eigenvalue
+    minimality, and the radius-scaled induced round metric.
+  authors: ["Arthur Freitas Ramos"]
+  license: "Apache-2.0"
+  responsible_maintainers: ["Arthur Freitas Ramos"]
+
+repository:
+  role: "substantive-development"
+
+classification:
+  arxiv: ["math.DG", "math.SP", "math.LO"]
+  msc2020: ["53C21", "58J50", "03B35"]
+
+sources:
+  - title: "Géométrie des groupes de transformations"
+    authors: ["André Lichnerowicz"]
+    id: "oclc:1212521"
+    type: "book"
+    location: "https://search.worldcat.org/title/1212521"
+    relationship: "formalizes"
+    note: >-
+      Dunod, Paris, 1958. Historical source of the sharp first-eigenvalue
+      lower bound, also cited as reference [2] by Obata (1962).
+    license: "unknown"
+    author_endorsement: "not-contacted"
+  - title: "Certain conditions for a Riemannian manifold to be isometric with a sphere"
+    authors: ["Morio Obata"]
+    id: "10.2969/jmsj/01430333"
+    type: "paper"
+    location: "https://doi.org/10.2969/jmsj/01430333"
+    relationship: "formalizes"
+    note: >-
+      Journal of the Mathematical Society of Japan 14(3) (1962), 333-340.
+      Theorem A, Theorems 1-2, and Section 2 are the source of the Hessian
+      rigidity and eigenfunction equality characterization. The selected
+      result here is restricted to closed manifolds; no noncompact complete
+      version of Theorem A or new mathematical priority is claimed.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/3faf25aefc27842a77c37ca178e8a40a20bb20c7/almost-schur"
+    relationship: "builds-on"
+    note: >-
+      The ../almost-schur path dependency is unchanged from this immutable
+      snapshot. It supplies geometric curvature and connection constructions,
+      integration and Bochner identities, Sobolev compactness, variational
+      PDE, and regularity infrastructure. Its authors are Arthur Freitas Ramos,
+      David Barros Hulak, and Ruy J. G. B. de Queiroz. The new selected result
+      is Lichnerowicz-Obata, not the inherited almost-Schur theorem. The
+      independent geometry vocabulary is adapted from that source, and the
+      three Comparator/Landrun shell scripts are exact copies.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/12cebb809524d0cd185c6cd7bcb5b73d3562bce1/contracted-bianchi"
+    relationship: "builds-on"
+    note: >-
+      The inherited almost-Schur CurvatureVendor adaptation and its provenance
+      inventory credit this immutable curvature core. The independent smooth
+      tangent-extension commutator also descends from this construction.
+      GeometryComparison proofs are implementation identifications, not
+      assumed differential identities or a new selected curvature result.
+  - id: "https://github.com/abenenson/rellich-kondrachov/tree/70f85d4c1bf99c6e7d61e8be4daa6f3664d08d23"
+    relationship: "builds-on"
+    note: >-
+      The unchanged path dependency contains Adam Benenson's attributed
+      36-module Apache-2.0 adaptation, with its inventory and source notices.
+      It supplies generic Sobolev compactness and measure transport, not
+      spectral attainment, global sphere rigidity, or the selected theorem.
+  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d"
+    relationship: "builds-on"
+    note: >-
+      Pinned Mathlib infrastructure for manifolds, sphere charts, analysis,
+      measure theory, linear algebra, topology, and ordinary differential
+      equations. The exact revision is recorded in lake-manifest.json.
+
+status:
+  scope: >-
+    Nonempty compact preconnected Hausdorff boundaryless smooth real
+    Riemannian manifolds with finite-dimensional complete inner-product model
+    space and the displayed smooth tangent-bundle and metric instances.
+    The statement includes the Lindelof hypothesis, dimension n >= 2,
+    positive K, and the actual pointwise Ricci lower bound. The first positive
+    eigenvalue is characterized by a smooth nonconstant eigenfunction and
+    minimality among all positive smooth eigenvalues. The round metric is
+    explicit through the radius-scaled ambient inclusion of a diffeomorphism
+    to the standard Euclidean unit sphere.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  main_results:
+    - declaration: "LichnerowiczObataEntry.Geometry.lichnerowiczObata"
+      file: "LichnerowiczObataSolution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: "Independent geometric theorem, including constructed connection and complete rigidity."
+    - declaration: "LichnerowiczObata.lichnerowicz_obata"
+      file: "LichnerowiczObata/LichnerowiczObata.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: "Complete implementation-level attainment, bound, and equality characterization."
+    - declaration: "LichnerowiczObata.obata_round_metric_diffeomorph"
+      file: "LichnerowiczObata/ObataRoundDiffeomorph.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: "Global smooth round-metric rigidity from the actual Obata Hessian equation."
+    - declaration: "LichnerowiczObata.round_metric_diffeomorph_exists_extremal_eigenfunction"
+      file: "LichnerowiczObata/RoundSphereConverse.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: "Sphere converse with nonconstant height, intrinsic Hessian, and Laplacian equations."
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["GPT-5"]
+      framework: "Codex with Lean 4.33.0 and pinned Mathlib"
+      tool_setup: >-
+        AI-assisted proof engineering, source integration, local Lean builds,
+        transitive axiom audits, and independent Challenge/Solution verification.
+      prompting_notes: >-
+        Proofs, package code, and verification artifacts were generated and
+        revised under the maintainer's full geometric theorem scope.
+    - method: "manual"
+      models: []
+      framework: "Maintainer-directed theorem selection and delivery"
+      tool_setup: "Human scope selection, responsibility, and external release authorization."
+      prompting_notes: "No independent human mathematical review is claimed."
+  notes: >-
+    AI assistance is disclosed without attributing human authorship to the
+    agent. Kernel and Comparator evidence do not constitute expert review
+    or endorsement by the mathematical source authors.
+
+fidelity:
+  divergences: >-
+    The Laplacian uses the div-grad sign convention, so eigenfunctions satisfy
+    laplacian f = -lambda*f. The source's nonnegative Laplacian has the opposite
+    sign. The statement covers closed manifolds, not the full noncompact
+    complete Hessian-rigidity theorem. It asserts attainment and minimality,
+    not the entire spectral decomposition or multiplicities. The sphere's
+    radius is expressed by scaling the standard unit-sphere inclusion; the
+    exact derivative identity specifies its round Riemannian metric and the
+    Diffeomorph type includes a smooth inverse. All nine geometric definitions
+    are compared independently. The one intentional Challenge theorem hole
+    is excluded from the zero-hole implementation/Solution status and is
+    never imported into their proof closure.
+
+review:
+  status: "self-assessed"
+  reviewers: []
+  notes: >-
+    Mechanical verification and source alignment are distinct from independent
+    human review and registry acceptance. This is a new entry candidate, not
+    a version update to any earlier submission. No intake or public registration
+    is authorized by package preparation alone.
+
+alignment:
+  namespace: "LichnerowiczObataEntry.Geometry independent surface; LichnerowiczObata implementation"
+  statements:
+    - source: "Lichnerowicz lower bound and Obata Theorems A, 1-2 (closed-manifold case)"
+      lean: "LichnerowiczObataEntry.Geometry.lichnerowiczObata"
+      module: "LichnerowiczObataChallenge.lean and LichnerowiczObataSolution.lean"
+      status: "proved"
+      note: "Independent complete eigenvalue and smooth round-metric equality theorem."
+    - source: "Obata, Section 2, Hessian rigidity"
+      lean: "LichnerowiczObata.obata_round_metric_diffeomorph"
+      module: "LichnerowiczObata/ObataRoundDiffeomorph.lean"
+      status: "proved"
+      note: "Actual global map, smooth pole extensions, smooth inverse, and induced metric."
+    - source: "Obata, Section 2, sphere height sufficiency"
+      lean: "LichnerowiczObata.round_metric_diffeomorph_exists_extremal_eigenfunction"
+      module: "LichnerowiczObata/RoundSphereConverse.lean"
+      status: "proved"
+      note: "Derives the height Hessian and eigenvalue from the actual source metric."
+
+acknowledgements: >-
+  André Lichnerowicz and Morio Obata for the classical mathematical results;
+  the Mathlib community; David Barros Hulak and Ruy J. G. B. de Queiroz for
+  their credited earlier formalization; the contracted-Bianchi contributors;
+  Adam Benenson for the inherited Rellich-Kondrachov library; and the
+  Comparator/NanoDa and Palomar projects for independent verification tools.
