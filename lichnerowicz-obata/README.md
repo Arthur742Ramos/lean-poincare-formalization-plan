@@ -111,6 +111,12 @@ value is strictly increasing along such a curve, and every intermediate
 level has a unique crossing time. A smooth radial reparameterization and
 the global metric/isometry argument remain separate obligations.
 
+`ObataClock.lean` proves the explicit logarithmic clock and its inverse-level
+identity. `RadialParameterization.lean` uses it to construct, through every
+regular point, a differentiable curve on the full open radial interval with
+`r(η(s)) = s`. This still does not prove endpoint extension, unit-speed
+parameterization, or the global sphere isometry.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical
