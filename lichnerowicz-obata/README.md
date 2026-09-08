@@ -437,5 +437,9 @@ still pending.
 `RoundPolarCoordinates` constructs a continuous, injective map from unit
 directions perpendicular to a pole and the open radial interval into the
 actual sphere. Height determines the radial parameter, and the remaining
-component determines the angular direction. Surjectivity onto the sphere
-minus its poles and the global manifold comparison remain pending.
+component determines the angular direction.
+`RoundPolarInverse` constructs polar coordinates for every sphere point other
+than the two poles: arccosine of its normalized height gives the angle, and
+the normalized perpendicular component gives the unit angular direction.
+Surjectivity away from the poles is proved; inverse continuity and the global
+manifold comparison remain pending.

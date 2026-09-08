@@ -27,6 +27,7 @@ import LichnerowiczObata.NormalRayNormalization
 import LichnerowiczObata.RoundPolarCurves
 import LichnerowiczObata.RoundPolarMetric
 import LichnerowiczObata.RoundPolarCoordinates
+import LichnerowiczObata.RoundPolarInverse
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -301,3 +302,6 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.roundPolarCurve_coordinates_unique
 #print axioms LichnerowiczObata.roundPolarMap_injective
 #print axioms LichnerowiczObata.continuous_roundPolarMap
+#print axioms LichnerowiczObata.unit_sphere_height_strict
+#print axioms LichnerowiczObata.unit_sphere_polar_decomposition
+#print axioms LichnerowiczObata.roundPolarMap_surjective_off_poles
