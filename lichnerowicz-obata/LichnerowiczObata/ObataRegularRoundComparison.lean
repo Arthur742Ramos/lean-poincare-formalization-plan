@@ -4,6 +4,7 @@ public import LichnerowiczObata.ObataUnitSphericalProduct
 public import LichnerowiczObata.RoundAmbientDirections
 public import LichnerowiczObata.IntrinsicRoundInverse
 public import LichnerowiczObata.PolarMetricNondegeneracy
+public import LichnerowiczObata.RoundPoleLog
 
 /-! # The regular Obata-to-round comparison and its polar pullback metric -/
 
@@ -102,5 +103,52 @@ theorem exists_obata_regular_round_comparison
   rw [(hmetric u r hr).2 w v hw hv s t]
   exact (intrinsicRoundPolar_metric hK (u : TM ((extChartAt I c).symm z)) w v
     (mem_sphere_zero_iff_norm.mp u.property) hw hv r s t).symm
+
+/-- The constructed regular comparison has a differentiable ambient inverse
+at its north pole. Agreement holds for every punctured-sphere point of
+sufficiently small radial coordinate, not only along an individual ray. -/
+theorem exists_obata_regular_round_north_extension
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
+    {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
+    (hH : ∀ (y : M) (v w : TM y),
+      hessian (leviCivitaConnection (I := I)) f y v w = -K * f y * inner ℝ v w)
+    (c : M) {z : E} (hz : z ∈ (extChartAt I c).target)
+    (hcrit : gradient (I := I) f ((extChartAt I c).symm z) = 0)
+    (hmax : ∀ x, f x = a ↔ x = (extChartAt I c).symm z) :
+    let p := (extChartAt I c).symm z
+    ∃ F : {x : M // -a < f x ∧ f x < a} ≃ₜ
+        RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
+      ∃ N : RoundAmbient (TM p) → M,
+        N ((1 / Real.sqrt K) • roundNorth) = p ∧
+        MDifferentiableAt 𝓘(ℝ, RoundAmbient (TM p)) I N ((1 / Real.sqrt K) • roundNorth) ∧
+        ∃ δ : ℝ, 0 < δ ∧
+          ∀ x : RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
+            (intrinsicRoundInverseCoordinates (1 / Real.sqrt K) (x.1 : RoundAmbient (TM p))).2 < δ →
+              N (x.1 : RoundAmbient (TM p)) = (F.symm x : M) := by
+  obtain ⟨Φ, hpole, Q, F, G, hG, hQ, hradial, hF, hjet⟩ :=
+    exists_obata_regular_round_comparison hf hnon hK ha hH c hz hcrit hmax
+  obtain ⟨N, hN0, hNd, δ, hδ, hN⟩ := hpole.exists_round_north_extension
+    (one_div_pos.mpr (Real.sqrt_pos.mpr hK))
+  refine ⟨F, N, hN0, hNd, δ, hδ, ?_⟩
+  intro x hx
+  let q := Q.symm (F.symm x)
+  have hpoint : (x.1 : RoundAmbient (TM ((extChartAt I c).symm z))) =
+      roundPolarCurve (1 / Real.sqrt K) roundNorth
+        (roundAngularInclusion (q.1 : TM ((extChartAt I c).symm z))) q.2 := by
+    simpa only [q, Homeomorph.apply_symm_apply] using hF q
+  have hround : ((curvatureRoundPolarHomeomorph hK q).1 :
+      RoundAmbient (TM ((extChartAt I c).symm z))) = (x.1 : RoundAmbient _) :=
+    (curvatureRoundPolarHomeomorph_apply hK q).trans hpoint.symm
+  have hcoords := intrinsicRoundInverseCoordinates_apply hK q
+  rw [hround] at hcoords
+  have hrδ : (q.2 : ℝ) < δ := by
+    have hh : (intrinsicRoundInverseCoordinates (1 / Real.sqrt K)
+        (x.1 : RoundAmbient (TM ((extChartAt I c).symm z)))).2 = (q.2 : ℝ) :=
+      congrArg Prod.snd hcoords
+    rw [← hh]
+    exact hx
+  rw [hpoint]
+  have hh := (hN q.1 q.2 ⟨q.2.property.1, hrδ⟩).trans (hQ q).symm
+  simpa only [q, Homeomorph.apply_symm_apply] using hh
 
 end LichnerowiczObata

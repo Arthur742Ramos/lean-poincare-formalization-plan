@@ -674,6 +674,11 @@ positive interval containing the seed time. The unit spherical product retains
 a `HasRadialPoleModel`: a twice continuously differentiable Cartesian map at
 zero, taking zero to the maximum pole, whose value on `r • u` is the actual
 polar parametrization. This same model is retained in the regular round
-comparison and differentiable polar inverse. Converting it to smoothness of
-the global round comparison at the north pole, handling the south pole, and
-proving the final global isometry remain unfinished.
+comparison and differentiable polar inverse. `RoundPoleLog` constructs a
+Cartesian round logarithm with identity derivative at zero and exact recovery
+of short polar rays. `exists_obata_regular_round_north_extension` uses it to
+construct a differentiable ambient inverse at the north pole, agreeing with
+the regular comparison at every punctured-sphere point of sufficiently small
+radial coordinate. Combining this with the global metric comparison,
+establishing pole metric preservation, handling the south pole, and proving
+the final global isometry remain unfinished.
