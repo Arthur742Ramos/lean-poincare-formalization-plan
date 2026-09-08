@@ -137,6 +137,11 @@ retain explicit immutable source attribution in their module headers. Structured
 submission metadata must disclose all inherited formalizations before any
 intake; no intake or registration has been requested by this project.
 
+`UniformManifoldODE.lean` also proves C1 regularity of integral curves of C1
+fields. `UnitCurveDistance.lean` uses this to bound the canonical Riemannian
+extended distance by elapsed time along the actual unit radial gradient flow.
+Endpoint convergence and the global round-sphere isometry remain unproved.
+
 ## Build
 
 Lean `v4.33.0`, Mathlib `db584cd6d46c92f209a44c0f1c829460d327499d`.
