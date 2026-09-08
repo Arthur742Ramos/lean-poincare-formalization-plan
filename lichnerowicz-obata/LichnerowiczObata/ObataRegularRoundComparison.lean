@@ -2,6 +2,7 @@ module
 
 public import LichnerowiczObata.ObataUnitSphericalProduct
 public import LichnerowiczObata.RoundAmbientDirections
+public import LichnerowiczObata.IntrinsicRoundInverse
 
 /-! # The regular Obata-to-round comparison and its polar pullback metric -/
 
@@ -28,8 +29,9 @@ local notation "TM" => (TangentSpace I : M → Type _)
 
 /-- A single regular comparison homeomorphism intertwines the constructed
 Obata coordinates and the explicit round coordinates. Their pullback metrics
-agree on every angular tangent and radial direction. Smoothness of the
-comparison itself and extension over the poles are separate remaining steps. -/
+agree on every angular tangent and radial direction. Its inverse has a
+differentiable ambient extension. Smoothness of the forward comparison and
+extension over the poles are separate remaining steps. -/
 theorem exists_obata_regular_round_comparison
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hnon : ∃ x y, f x ≠ f y)
     {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
@@ -46,6 +48,10 @@ theorem exists_obata_regular_round_comparison
           {x : M // -a < f x ∧ f x < a},
         ∃ F : {x : M // -a < f x ∧ f x < a} ≃ₜ
             RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
+        ∃ G : RoundAmbient (TM p) → M,
+          (∀ x : RoundPuncturedSphere (1 / Real.sqrt K) (roundNorth : RoundAmbient (TM p)),
+            G (x.1 : RoundAmbient (TM p)) = (F.symm x : M) ∧
+            MDifferentiableAt 𝓘(ℝ, RoundAmbient (TM p)) I G (x.1 : RoundAmbient (TM p))) ∧
           (∀ q, (Q q : M) = Φ (q.1, q.2)) ∧
           (∀ q, ((F (Q q)).1 : RoundAmbient (TM p)) = Ψ (q.1, q.2)) ∧
           ∀ u : Metric.sphere (0 : TM p) 1, ∀ r ∈ Ioo 0 (Real.pi / Real.sqrt K),
@@ -58,7 +64,24 @@ theorem exists_obata_regular_round_comparison
   obtain ⟨Φ, Q, hQ, hmetric⟩ :=
     exists_obata_unit_spherical_product hf hnon hK ha hH c hz hcrit hmax
   let F := Q.symm.trans (curvatureRoundPolarHomeomorph hK)
-  refine ⟨Φ, Q, F, hQ, ?_, ?_⟩
+  let G := Φ ∘ intrinsicRoundInverseCoordinates (1 / Real.sqrt K)
+  refine ⟨Φ, Q, F, G, ?_, hQ, ?_, ?_⟩
+  · intro x
+    let q := (curvatureRoundPolarHomeomorph hK).symm x
+    have hi := intrinsicRoundInverseCoordinates_eq_inverse hK x
+    have hΦ := (hmetric q.1 q.2 q.2.property).1
+    have hD := (contDiffAt_intrinsicRoundInverseCoordinates hK x).differentiableAt (by norm_num)
+    have hΦ' : MDifferentiableAt 𝓘(ℝ, TM ((extChartAt I c).symm z) × ℝ) I Φ
+        (intrinsicRoundInverseCoordinates (1 / Real.sqrt K)
+          (x.1 : RoundAmbient (TM ((extChartAt I c).symm z)))) := by
+      rw [hi]
+      exact hΦ
+    refine ⟨?_, hΦ'.comp (x.1 : RoundAmbient (TM ((extChartAt I c).symm z)))
+      (mdifferentiableAt_iff_differentiableAt.mpr hD)⟩
+    change Φ (intrinsicRoundInverseCoordinates (1 / Real.sqrt K)
+      (x.1 : RoundAmbient (TM ((extChartAt I c).symm z)))) = (Q q : M)
+    rw [hi]
+    exact (hQ q).symm
   · intro q
     change (((curvatureRoundPolarHomeomorph hK) (Q.symm (Q q))).1 :
       RoundAmbient (TM ((extChartAt I c).symm z))) = _

@@ -568,5 +568,9 @@ as a Riemannian isometry, and extension through the poles remain required.
 `RoundPolarInverseSmooth` proves that the actual inverse round coordinates
 admit smooth ambient extensions at every punctured-sphere point. The proof
 derives the nonsingular arccosine heights from the exclusion of the poles
-and retains equality with the already constructed inverse. Composing these
-coordinates with the Obata parameter map remains the next regularity step.
+and retains equality with the already constructed inverse.
+`IntrinsicRoundInverse` translates this smooth extension to the intrinsic
+angular variables. The regular comparison theorem now retains a single
+ambient map that agrees with the inverse comparison at every punctured-sphere
+point and is differentiable there. Differentiability of the forward comparison,
+the Riemannian isometry statement, and pole extension remain outstanding.
