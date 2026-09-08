@@ -599,8 +599,7 @@ C¹ assumption. Instantiation on the regular Obata comparison remains required.
 The inverse theorem now also covers continuous local inverses and open partial
 homeomorphisms, with cancellation required only near the image point. This
 provides the form needed on the open regular polar domain without extending
-the homeomorphism outside that domain. Its application to the constructed
-polar comparison remains outstanding.
+the homeomorphism outside that domain.
 `OpenRegionHomeomorph` constructs ambient partial homeomorphisms from
 homeomorphisms of nonempty open regions, retaining exact source, target,
 forward, and inverse formulas. Its polar specialization uses the open
@@ -611,5 +610,12 @@ theorem to the constructed polar map.
 the sphere-restricted derivative equivalence, and the manifold local-inverse
 theorem. It produces one partial homeomorphism for the whole regular cylinder,
 agreeing with the given parameter map and having a differentiable inverse at
-every regular parameter value. The geometric Obata data still need to be
-instantiated in this combined theorem before the final isometry argument.
+every regular parameter value. It also identifies this inverse with the
+original coordinate homeomorphism and proves differentiability throughout
+the open target.
+`ObataPolarInverse` instantiates this result with the constructed geometric
+Obata data: the Hessian equation and the unique maximum hypotheses yield a
+single regular polar chart with differentiable inverse on the entire regular
+region. The positive tangent dimension is recorded as `finrank E = n + 1`.
+The regular comparison's forward differentiability, its Riemannian isometry
+proof, and extension over the poles remain to be assembled.

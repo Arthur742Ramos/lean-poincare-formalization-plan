@@ -22,6 +22,7 @@ import LichnerowiczObata.SpherePolarTangent
 import LichnerowiczObata.ManifoldInverseDifferentiability
 import LichnerowiczObata.OpenRegionHomeomorph
 import LichnerowiczObata.PolarInverseDifferentiability
+import LichnerowiczObata.ObataPolarInverse
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -435,3 +436,4 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.exists_polar_region_partialHomeomorph
 #print axioms LichnerowiczObata.exists_differentiable_polar_inverse
 #print axioms LichnerowiczObata.exists_differentiable_polar_inverse_on_target
+#print axioms LichnerowiczObata.exists_obata_differentiable_polar_inverse
