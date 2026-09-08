@@ -16,6 +16,7 @@ import LichnerowiczObata.GeodesicHessian
 import LichnerowiczObata.GeodesicRadial
 import LichnerowiczObata.GeodesicScaling
 import LichnerowiczObata.GeodesicNormalRadial
+import LichnerowiczObata.GeodesicGauss
 
 import LichnerowiczObata.BochnerBound
 import LichnerowiczObata.EnergySpectrum
@@ -65,6 +66,7 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.coordinate_normal_endpoint_radial_gradient
 #print axioms LichnerowiczObata.coordinate_normal_endpoint_radius_sq_eventually
 #print axioms LichnerowiczObata.hasFDerivAt_symmetric_metric_quadratic
+#print axioms LichnerowiczObata.coordinate_normal_endpoint_gauss
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_field_pairing
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_gradient_pairing
 #print axioms LichnerowiczObata.hasDerivAt_coordinate_geodesic_obata_pairing

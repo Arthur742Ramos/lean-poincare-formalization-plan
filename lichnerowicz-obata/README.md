@@ -376,4 +376,8 @@ is the radial gradient multiplied by time and initial metric speed.
 On a neighborhood of a regular positive-phase initial velocity, it also
 proves that squared endpoint radius equals time squared times the initial
 quadratic metric energy. The symmetric quadratic-metric derivative is checked
-separately for the forthcoming radial–angular pairing calculation.
+separately. `GeodesicGauss` differentiates this identity and combines it with
+the intrinsic radial derivative to prove the Gauss lemma: the pullback metric
+pairs a radial initial vector with any variation as time squared times the
+initial metric pairing. Thus angular initial directions remain orthogonal to
+the endpoint's radial direction. The full angular metric formula remains pending.
