@@ -15,6 +15,7 @@ import LichnerowiczObata.RadialEndpoints
 import LichnerowiczObata.RadialEndpointDistance
 import LichnerowiczObata.ObataCriticalIsolation
 import LichnerowiczObata.RadialFlowFamily
+import LichnerowiczObata.ContinuousPoleMaps
 
 #print axioms LichnerowiczObata.eigenvalue_lower_bound
 #print axioms LichnerowiczObata.hessian_equation_of_extremal_eigenfunction
@@ -79,3 +80,6 @@ import LichnerowiczObata.RadialFlowFamily
 #print axioms LichnerowiczObata.continuousOn_obataRadialFamily
 #print axioms LichnerowiczObata.exists_continuous_global_gradient_flow
 #print axioms LichnerowiczObata.exists_continuous_obata_radial_family
+#print axioms LichnerowiczObata.continuousOn_of_uniform_edist_bound
+#print axioms LichnerowiczObata.continuousOn_radial_endpoint_maps
+#print axioms LichnerowiczObata.exists_continuous_obata_pole_maps

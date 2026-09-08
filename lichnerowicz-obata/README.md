@@ -150,6 +150,12 @@ family of full unit radial curves through every regular point, with extremal
 endpoint limits. Independence of those endpoints from the starting point
 remains to be proved.
 
+`ContinuousPoleMaps.lean` proves uniform convergence of radial slices to
+their endpoints using the intrinsic distance bounds. It constructs continuous
+maximum and minimum endpoint maps on the regular region, retaining both
+extremal values and the distance bounds. Constancy of these maps, and hence
+pole uniqueness, still requires the connectedness argument for that region.
+
 ## Sources and reuse
 
 The classical argument is due to Lichnerowicz and Obata, not a new mathematical
