@@ -4,6 +4,7 @@ import LichnerowiczObata.ObataRegularSphere
 import LichnerowiczObata.NormalMetricChart
 import LichnerowiczObata.IntrinsicNormalMetric
 import LichnerowiczObata.NormalAngularTangency
+import LichnerowiczObata.GlobalNormalAngularMetric
 import LichnerowiczObata.FlowVariationEquation
 import LichnerowiczObata.CoordinateMetricVariation
 import LichnerowiczObata.MetricPairingCalculus
@@ -346,3 +347,5 @@ import LichnerowiczObata.SmoothPicardOperator
 #print axioms LichnerowiczObata.fderiv_eq_zero_of_scaled_norm_identity
 #print axioms LichnerowiczObata.mfderiv_normal_angular_eq_zero
 #print axioms LichnerowiczObata.normal_angular_metric_transport
+#print axioms LichnerowiczObata.normal_angular_composite_metric
+#print axioms LichnerowiczObata.exists_normal_chart_global_angular_metric

@@ -112,5 +112,40 @@ theorem normal_angular_metric_transport {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
   rw [he, hbase]
   field_simp [hsin, hK.ne']
 
+/-- The propagated pairing is the metric of the actual composite map from
+normal parameters to the chosen radial level. -/
+theorem normal_angular_composite_metric {K a : ℝ} (hK : 0 < K) (ha : 0 < a)
+    {f : M → ℝ} {η : M × ℝ → M} (hf : ContMDiff I 𝓘(ℝ, ℝ) 2 f)
+    (hη : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) I 1 η
+      ({x | -a < f x ∧ f x < a} ×ˢ Ioo 0 (Real.pi / Real.sqrt K)))
+    (hm : RadialChartMetricEvolution (I := I) K a f η)
+    (hinit : ∀ x, -a < f x ∧ f x < a → η (x, obataRadial K a f x) = x)
+    {ψ : P → M} {u w v : P} {t B : ℝ} (L : P →L[ℝ] V)
+    (hψ : MDifferentiableAt 𝓘(ℝ, P) I ψ u)
+    (hreg : -a < f (ψ u) ∧ f (ψ u) < a)
+    (hrad : (obataRadial K a f ∘ ψ) =ᶠ[𝓝 u] (fun y => t * ‖L y‖))
+    (hw : inner ℝ (L u) (L w) = 0) (hv : inner ℝ (L u) (L v) = 0)
+    (hbase : inner ℝ (mfderiv 𝓘(ℝ, P) I ψ u w) (mfderiv 𝓘(ℝ, P) I ψ u v) =
+      (Real.sin (Real.sqrt K * obataRadial K a f (ψ u)) ^ 2 / K) * B)
+    {r : ℝ} (hr : r ∈ Ioo 0 (Real.pi / Real.sqrt K)) :
+    inner ℝ (mfderiv 𝓘(ℝ, P) I (fun y => η (ψ y, r)) u w)
+      (mfderiv 𝓘(ℝ, P) I (fun y => η (ψ y, r)) u v) =
+        (Real.sin (Real.sqrt K * r) ^ 2 / K) * B := by
+  have hU : IsOpen {x : M | -a < f x ∧ f x < a} :=
+    (isOpen_lt continuous_const hf.continuous).inter (isOpen_lt hf.continuous continuous_const)
+  have hpt : (ψ u, r) ∈ {x : M | -a < f x ∧ f x < a} ×ˢ
+      Ioo 0 (Real.pi / Real.sqrt K) := ⟨hreg, hr⟩
+  have hηpt := ((hη _ hpt).contMDiffAt ((hU.prod isOpen_Ioo).mem_nhds hpt)).mdifferentiableAt
+    (by norm_num)
+  have hs : MDifferentiableAt I I (fun x => η (x, r)) (ψ u) :=
+    hηpt.comp (ψ u) (mdifferentiableAt_id.prodMk mdifferentiableAt_const)
+  have he := normal_angular_metric_transport hK ha hf hη hm hinit L hψ hreg hrad hw hv hbase hr
+  have hwc := mfderiv_comp_apply u hs hψ w
+  have hvc := mfderiv_comp_apply u hs hψ v
+  change mfderiv 𝓘(ℝ, P) I (fun y => η (ψ y, r)) u w = _ at hwc
+  change mfderiv 𝓘(ℝ, P) I (fun y => η (ψ y, r)) u v = _ at hvc
+  rw [hwc, hvc]
+  exact he
+
 end Transport
 end LichnerowiczObata

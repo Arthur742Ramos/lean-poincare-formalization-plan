@@ -492,3 +492,9 @@ with radial metric evolution: a pairing normalized at one regular level
 propagates with the exact sine-squared coefficient throughout the regular
 interval. Specializing all of these identities to one global comparison map
 and extending it through the poles remain required.
+`GlobalNormalAngularMetric` now specializes the transported pairing to a
+constructed normal chart and expresses it using derivatives of the actual
+composite map (normal chart followed by radial flow). The initial angular
+metric is no longer an extra hypothesis. The radial family must still carry
+its proved smoothness, metric evolution, and initial-value identities;
+combining this construction with the global bijection remains outstanding.
