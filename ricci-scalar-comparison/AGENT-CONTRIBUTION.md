@@ -2,7 +2,8 @@
 
 ## Agent role
 
-GPT-6 Codex performed material proof engineering and package preparation under
+An OpenAI GPT-5-based Codex agent performed material proof engineering and
+package preparation under
 the maintainer's direction.  This included auditing Mathlib, the repository's
 intrinsic Ricci-flow infrastructure, and the overlapping
 `qinz1yang/differential-geometry` formalization; selecting the nonduplicative

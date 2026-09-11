@@ -25,18 +25,34 @@ classification:
   msc2020: ["53E20", "53C25", "03B35"]
 
 sources:
+  - title: "Lectures on the Ricci Flow"
+    authors:
+      - "Peter Topping"
+    id: "10.1017/CBO9780511721465"
+    type: "book"
+    location: "https://doi.org/10.1017/CBO9780511721465"
+    relationship: "adapts"
+    note: >-
+      Section 1.2.1 gives the Einstein homothetic solution
+      g(t) = (1 - 2*lambda*t)g0 and its finite collapse time for positive
+      lambda. This project formalizes that equality model with an arbitrary
+      initial time and adds the explicit scalar-curvature barrier identity,
+      exact positive-factor time set, and endpoint Riemannian-metric
+      obstruction. It does not claim novelty, priority, or source-author
+      endorsement.
+    license: "unknown"
+    author_endorsement: "not-contacted"
   - title: "Three-manifolds with positive Ricci curvature"
     authors:
       - "Richard S. Hamilton"
     id: "10.4310/jdg/1214436922"
     type: "paper"
     location: "https://doi.org/10.4310/jdg/1214436922"
-    relationship: "formalizes"
+    relationship: "background"
     note: >-
-      Hamilton introduced Ricci flow and its curvature evolution framework.
-      This project formalizes the classical positive-Einstein homothetic
-      solution as the exact equality model for scalar comparison. It does not
-      claim novelty, priority, or source-author endorsement.
+      Hamilton introduced Ricci flow and its curvature-evolution framework.
+      This paper is historical background rather than the direct source for
+      the arbitrary-dimensional Einstein equality statement selected here.
     license: "unknown"
     author_endorsement: "not-contacted"
 
@@ -112,7 +128,7 @@ status:
 automation:
   methods:
     - method: "agent"
-      models: ["GPT-6 Codex"]
+      models: ["OpenAI GPT-5"]
       framework: "Codex with Lean 4.33.0 and pinned Mathlib"
       tool_setup: >-
         AI-assisted literature and overlap audit, theorem design, proof
@@ -184,10 +200,11 @@ alignment:
       note: "Supporting bundled scalar-curvature computation with the exact dimensional constant."
 
 acknowledgements: >-
-  Richard S. Hamilton for the Ricci-flow framework; Mathlib contributors; the
-  contributors to this repository's curvature and intrinsic Ricci-flow
-  infrastructure; Bennett Chow, Yuan Liao and Ziyang Qin for the independent
-  overlapping formalization and its public provenance; Arthur Freitas Ramos,
-  David Barros Hulak and Ruy J. G. B. de Queiroz for human authorship; and the
-  Palomar, Comparator, Lean4Export and NanoDa projects for the verification
-  workflow.
+  Peter Topping for the direct textbook account of the Einstein homothetic
+  solution; Richard S. Hamilton for the Ricci-flow framework; Mathlib
+  contributors; the contributors to this repository's curvature and intrinsic
+  Ricci-flow infrastructure; Bennett Chow, Yuan Liao and Ziyang Qin for the
+  independent overlapping formalization and its public provenance; Arthur
+  Freitas Ramos, David Barros Hulak and Ruy J. G. B. de Queiroz for human
+  authorship; and the Palomar, Comparator, Lean4Export and NanoDa projects for
+  the verification workflow.
