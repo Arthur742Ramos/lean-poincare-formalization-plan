@@ -1,0 +1,10 @@
+import BonnetMyers.StatementProof
+
+namespace BonnetMyersEntry
+universe u v w
+
+/-- The constructed Levi-Civita curvature satisfies the full independent
+Bonnet--Myers statement. No Challenge declaration is imported by this proof. -/
+theorem bonnet_myers : completeStatement.{u,v,w} := completeStatement_proved
+
+end BonnetMyersEntry

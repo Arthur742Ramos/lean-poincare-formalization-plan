@@ -1,0 +1,74 @@
+name: Bonnet-Myers proof and Palomar checks
+
+on:
+  push:
+    paths:
+      - "bonnet-myers/**"
+      - ".github/workflows/bonnet-myers.yml"
+  pull_request:
+    paths:
+      - "bonnet-myers/**"
+      - ".github/workflows/bonnet-myers.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: Complete theorem, package boundary, provenance, and axioms
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: bonnet-myers
+          build: false
+      - name: Install metadata validators
+        run: python3 -m pip install PyYAML==6.0.2 jsonschema==4.25.1
+      - name: Check package shape, immutable source, and metadata
+        run: python3 bonnet-myers/scripts/check-package.py
+      - name: Build every proof library and the independent pair
+        run: lake build
+        working-directory: bonnet-myers
+      - name: Audit all active declarations and trust assumptions
+        run: python3 scripts/check-axioms.py
+        working-directory: bonnet-myers
+      - name: Check Challenge source dependencies
+        run: lake env lean --src-deps Challenge.lean
+        working-directory: bonnet-myers
+      - name: Check the isolated Mathlib-only Challenge boundary
+        run: python3 scripts/check-challenge-boundary.py
+        working-directory: bonnet-myers
+
+  comparator:
+    name: Linux Comparator and NanoDa with real Landrun
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: bonnet-myers
+          build: false
+      - name: Install Go for Landrun
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: "1.24.0"
+          cache: false
+      - name: Verify selected definitions and theorem
+        # Deliberately do not prebuild: exercise a cold candidate build inside
+        # the project-scoped sandbox used by the registry.
+        run: bash bonnet-myers/scripts/verify-comparator.sh
+      - name: Recheck the isolated Challenge
+        run: python3 bonnet-myers/scripts/check-challenge-boundary.py
