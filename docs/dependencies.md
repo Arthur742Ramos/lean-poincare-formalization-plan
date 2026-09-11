@@ -1,116 +1,88 @@
-# Dependencies and Suggested Order
+# Dependencies and execution order
 
-This file turns the roadmap into a rough dependency graph.
+The roadmap is organized into six mathematical layers above Mathlib's existing
+smooth-manifold baseline. A later layer may be explored early, but it cannot be
+reported complete until its stated dependencies are proved or explicitly
+replaced by another formal route.
 
-## Completion standard
+For detailed milestone statements, see [the roadmap](roadmap.md). For verified
+completion state, see [current status](status.md).
 
-In this repository, a layer counts as landed only when the target mathematics is
-actually proved in Lean. Interfaces, axioms, `sorry`, or preparatory theorem
-boundaries do not count as completion.
+## Critical path
 
-## Layer 0: existing manifold baseline
+```text
+Mathlib manifold baseline
+  ↓
+Layer 1: foundational geometry (milestones 1–3) — PROVED
+  ↓
+Layer 2: Ricci-flow foundations (milestones 4–5) — OPEN AT 4
+  ↓
+Layer 3: singularity analysis (milestones 6–8)
+  ↓
+Layer 4: ancient solutions and canonical neighborhoods (9–10)
+  ↓
+Layer 5: surgery, topology, and extinction (11–13)
+  ↓
+Layer 6: topological and smooth Poincaré corollaries (14–15)
+```
 
-Assume the ambient Lean environment already has enough support for:
+## Layer 0: Mathlib baseline
 
-- smooth manifolds
-- tangent bundles and sections
-- Riemannian metrics
-- covariant derivatives and related manifold abstractions
-
-This layer is not the project, but it is the substrate.
+The project builds on smooth manifolds, tangent bundles and sections,
+Riemannian metrics, differentiation, integration, topology, and functional
+analysis from Mathlib. Missing API at this level should normally become
+reusable library infrastructure rather than a one-off local encoding.
 
 ## Layer 1: foundational geometry
 
-These are the first major projects to land:
+Milestones 1–3 provide static curvature, curvature identities and Levi–Civita
+existence, and time-dependent geometric structures. They are proved in the
+`curvature/` project and form the current reusable foundation.
 
-1. Riemannian curvature package
-2. curvature identities and existence package
-3. time-dependent geometric structures
+## Layer 2: Ricci-flow foundations
 
-The first three projects should be designed as library infrastructure, not as
-one-off theorem proofs.
+Milestone 4 must produce genuine short-time existence and uniqueness on compact
+manifolds. Milestone 5 then develops evolution equations and maximum principles
+on those solutions.
 
-Current repo status:
-points 1 through 3 now live in `curvature/` as actual Lean formalization. Point
-4 has some preparatory scaffolding in the same package, but it is not yet
-proved, so the next dependency frontier is still the first theorem in Layer 2:
-actual Ricci-flow local existence and uniqueness.
+This is the current frontier. Conditional Ricci–DeTurck bridges and special-case
+solutions do not unlock the layer by themselves. See the
+[Point-4 plan](point4/README.md).
 
-## Layer 2: first Ricci-flow theorems
+## Layer 3: singularity analysis
 
-Once Layer 1 exists:
-
-4. Ricci-flow local existence and uniqueness
-5. evolution equations and parabolic maximum principles
-
-These unlock the first serious Ricci-flow API.
-
-Current repo status:
-Layer 2 has been started but not landed: `curvature/` contains a
-solution/IVP/local-solution boundary, intrinsic metric-only wrappers for that
-boundary, and bundled compact-manifold `LocalExistenceUniqueness` /
-`IntrinsicLocalExistenceUniqueness` interfaces, together with section-space
-metric regularity plus the “open metrics inside closed symmetric bilinear
-sections” prerequisite layer, but not the proof of the general theorem. The
-boundary now does contain proof-bearing stationary theorem packages for
-subsingleton tangent/model spaces and rank-one tangent/model spaces
-(`Module.finrank ℝ E ≤ 1`), and the `LocalExistence.RankOne` extension proves
-zero velocity, stationarity, metric uniqueness, and Levi-Civita connection
-uniqueness for all rank-one local solutions. Point 4 remains open in arbitrary
-dimension, and point 5 should not be treated as complete or unlocked by the
-current scaffolding alone.
-
-## Layer 3: singularity-analysis toolkit
-
-Once Layer 2 exists:
-
-6. distance distortion, comparison, and compactness toolkit
-7. Perelman's `L`-geometry
-8. non-collapsing theorems
-
-This is where the program stops looking like generic differential geometry and
-starts looking specifically like Perelman's proof.
+Milestones 6–8 combine distance distortion and compactness, Perelman's reduced
+geometry, and non-collapsing. Definitions and isolated estimates can proceed in
+parallel, while the main theorems consume the solution and evolution APIs from
+Layer 2.
 
 ## Layer 4: classification and surgery preparation
 
-Once Layer 3 exists:
-
-9. ancient-solution theory in dimension 3
-10. canonical-neighborhood and neck-detection machinery
-
-These results should prepare the exact hypotheses needed by surgery.
+Milestones 9–10 classify relevant noncollapsed ancient solutions in dimension
+three and derive canonical-neighborhood and neck-detection results. This layer
+consumes blow-up compactness and non-collapsing.
 
 ## Layer 5: surgery and extinction
 
-Once Layer 4 exists:
-
-11. Ricci flow with surgery
-12. topological control of surgery
-13. finite-time extinction
-
-At this point, the hard analytic core is effectively complete.
+Milestones 11–13 construct Ricci flow with surgery, control its topological
+effect, and prove finite-time extinction. Analytic surgery construction and
+topological bookkeeping are separate workstreams that meet at extinction.
 
 ## Layer 6: final corollaries
 
-Once Layer 5 exists:
+Milestone 14 extracts the topological Poincaré statement. Milestone 15 supplies
+the distinct three-dimensional bridge to the smooth statement.
 
-14. topological Poincare corollary
-15. smooth Poincare corollary
+## Parallelization guidance
 
-These are the final endpoints of the roadmap.
+Useful parallel work that does not overstate dependency completion includes:
 
-## Suggested project strategy
+- general-purpose parabolic analysis and maximum-principle infrastructure;
+- compactness, metric-comparison, and three-manifold topology APIs;
+- exact definitions and elementary properties for reduced geometry;
+- packaging proved intermediate theorem clusters as independent library or
+  publication artifacts.
 
-- Treat Layers 1 and 2 as reusable mathlib-facing library work.
-- Treat Layers 3 through 5 as theorem-package papers.
-- Keep the topological and smooth endpoints separate unless a later design
-  review shows they genuinely collapse into one formalization artifact.
-
-## Rough scaling intuition
-
-This roadmap is not a one-paper project.
-
-A realistic first-pass estimate is that a complete public Lean formalization of
-the 3D Poincare Conjecture would decompose into roughly 11 to 16 substantial
-projects, many of which would already be natural AFM submissions even before the
-final theorem is reached.
+Every such contribution should name the theorem it proves and the assumptions
+it retains. It should not claim to close a downstream milestone merely because
+its interface has been designed.
