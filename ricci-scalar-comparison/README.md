@@ -65,9 +65,11 @@ precisely that a Riemannian metric cannot equal the collapsed homothetic tensor.
 
 ## Relationship to existing work
 
-Hamilton's 1982 paper introduced Ricci flow and its curvature evolution
-equations.  The exact Einstein homothety is classical; no mathematical novelty
-or priority claim is made.
+Topping's *Lectures on the Ricci Flow*, §1.2.1, is the direct source for the
+Einstein homothetic solution and positive finite collapse time formalized here.
+Hamilton's 1982 paper introduced Ricci flow and supplies the historical
+curvature-evolution framework.  The exact Einstein homothety is classical; no
+mathematical novelty or priority claim is made.
 
 The independent `qinz1yang/differential-geometry` project already formalizes
 the general scalar-curvature evolution and maximum-principle infrastructure.

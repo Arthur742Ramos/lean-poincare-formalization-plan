@@ -1,14 +1,24 @@
 # Provenance and attribution
 
-## Mathematical source
+## Direct mathematical source
+
+Peter Topping, *Lectures on the Ricci Flow*, London Mathematical Society
+Lecture Note Series 325, Cambridge University Press (2006), §1.2.1,
+<https://doi.org/10.1017/CBO9780511721465>, explicitly gives the Einstein
+homothetic solution `g(t) = (1 - 2 λ t) g₀` and its finite collapse time when
+`λ > 0`.  This project adapts that classical equality model to an arbitrary
+initial time and adds the explicit scalar-curvature barrier identity, exact
+positive-factor time set, and endpoint Riemannian-metric obstruction.
+
+## Historical background
 
 Richard S. Hamilton, “Three-manifolds with positive Ricci curvature,”
 *Journal of Differential Geometry* 17(2) (1982), 255--306,
-<https://doi.org/10.4310/jdg/1214436922>, is the primary source for the Ricci
-flow and its curvature-evolution framework.  The positive-Einstein homothetic
-solution and its scalar law are classical direct consequences of
-`∂ₜg = -2 Ric(g)`.  This project formalizes that exact model and makes no claim
-of mathematical novelty, first formalization, or source-author endorsement.
+<https://doi.org/10.4310/jdg/1214436922>, is the historical source for Ricci
+flow and its curvature-evolution framework.  It is not presented here as the
+direct source for the arbitrary-dimensional Einstein equality statement.
+This project makes no claim of mathematical novelty, first formalization, or
+source-author endorsement.
 
 ## Same-repository implementation source
 
