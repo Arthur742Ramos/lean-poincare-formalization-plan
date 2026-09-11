@@ -2,17 +2,9 @@ name: Documentation
 
 on:
   pull_request:
-    paths:
-      - "**/*.md"
-      - "scripts/check-doc-links.py"
-      - ".github/workflows/docs.yml"
   push:
     branches:
       - master
-    paths:
-      - "**/*.md"
-      - "scripts/check-doc-links.py"
-      - ".github/workflows/docs.yml"
 
 permissions:
   contents: read
@@ -21,6 +13,9 @@ jobs:
   local-links:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
       - name: Check local documentation links
         run: python3 scripts/check-doc-links.py

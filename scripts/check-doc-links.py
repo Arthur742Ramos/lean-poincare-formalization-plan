@@ -18,6 +18,7 @@ CURRENT_DOCS = (
     Path("docs/dependencies.md"),
     Path("docs/point4/README.md"),
     Path("docs/palomar-submission-plan.md"),
+    Path("docs/history/README.md"),
     Path("curvature/README.md"),
     Path("curvature/docs/curvature-package.md"),
 )

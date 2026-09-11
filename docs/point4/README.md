@@ -81,7 +81,7 @@ For the time-dependent DeTurck vector field, construct a short-time family of
 self-diffeomorphisms satisfying
 
 ```text
-∂_t Φ_t(x) = X_t(Φ_t(x)),    Φ_0 = id,
+∂_t Φ_t(x) = X_t(Φ_t(x)),    Φ_{t₀} = id,
 ```
 
 with the spatial and temporal regularity required by gauge transport. The
