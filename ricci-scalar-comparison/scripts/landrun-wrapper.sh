@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+landrun_binary=${PALOMAR_LANDRUN_BIN:?PALOMAR_LANDRUN_BIN must name the Landrun binary}
+landrun_options=()
+
+# Comparator supplies Landrun flags before the command. Reject every unknown or
+# sandbox-disabling flag and insert the current CLI's explicit separator.
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -unrestricted-*|--unrestricted-*)
+      echo "error: refusing sandbox-disabling Landrun option $1" >&2
+      exit 2
+      ;;
+    --best-effort|-ldd|--ldd|-add-exec|--add-exec|--ignore-missing|--log-disable-originating|--log-enable-subprocesses|--log-disable-subdomains)
+      landrun_options+=("$1")
+      shift
+      ;;
+    --log-level|--ro|--rox|--rw|--rwx|--unix|--bind-tcp|--connect-tcp|--env)
+      [ "$#" -ge 2 ] || { echo "error: Landrun option $1 is missing its value" >&2; exit 2; }
+      landrun_options+=("$1" "$2")
+      shift 2
+      ;;
+    -*)
+      echo "error: unrecognized Landrun option $1; update landrun-wrapper.sh" >&2
+      exit 2
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+[ "$#" -gt 0 ] || { echo "error: Comparator supplied no sandboxed command" >&2; exit 2; }
+exec "$landrun_binary" "${landrun_options[@]}" -- "$@"
