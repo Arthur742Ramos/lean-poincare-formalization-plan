@@ -8,7 +8,9 @@ Lecture Note Series 325, Cambridge University Press (2006), §1.2.1,
 homothetic solution `g(t) = (1 - 2 λ t) g₀` and its finite collapse time when
 `λ > 0`.  This project adapts that classical equality model to an arbitrary
 initial time and adds the explicit scalar-curvature barrier identity, exact
-positive-factor time set, and endpoint Riemannian-metric obstruction.
+reciprocal Type-I-rate scalar profile, one-sided divergence to positive infinity, lifespan
+identity in terms of initial scalar curvature, positive-factor time set, and
+endpoint Riemannian-metric obstruction.
 
 ## Historical background
 

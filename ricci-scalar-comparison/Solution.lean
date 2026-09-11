@@ -15,13 +15,15 @@ public import Mathlib.Analysis.Calculus.Deriv.Basic
 The Challenge states every geometric object explicitly using Mathlib only.
 Curvature is the corrected connection commutator, Ricci and scalar curvature are
 orthonormal contractions, and the Ricci-flow equation is a componentwise time
-derivative. No evolution equation, maximum principle, or lifespan bound is an
-input hypothesis.
+derivative. The conclusion includes the exact reciprocal Type-I-rate scalar profile and
+one-sided scalar blow-up at extinction. No evolution equation, maximum
+principle, singularity profile, or lifespan bound is an input hypothesis.
 -/
 
 @[expose] public noncomputable section
 
 open Bundle
+open Filter Topology
 open scoped Manifold ContDiff BigOperators
 
 namespace EinsteinComparisonEntry
@@ -89,8 +91,9 @@ def quadraticScalarBarrier (n r₀ t₀ t : ℝ) : ℝ :=
   r₀ / (1 - (2 / n) * r₀ * (t - t₀))
 
 /-- Positive Einstein data generates an exact Ricci flow up to its singular
-time. Its scalar curvature attains the quadratic comparison barrier, and the
-homothetic metric cannot remain positive definite at that time. -/
+time. Its scalar curvature attains the quadratic comparison barrier, equals the
+reciprocal Type-I-rate scalar profile and tends to positive infinity, while the homothetic
+metric cannot remain positive definite at that time. -/
 def completeStatement : Prop :=
   ∀ {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [CompleteSpace E] [Nontrivial E]
@@ -121,6 +124,15 @@ def completeStatement : Prop :=
           scalar (g t) cov₀ extension x =
             quadraticScalarBarrier (Module.finrank ℝ E : ℝ)
               ((Module.finrank ℝ E : ℝ) * lam) t₀ t) ∧
+        (∀ {t : ℝ}, t < extinctionTime lam t₀ → ∀ x : M,
+          scalar (g t) cov₀ extension x =
+            (Module.finrank ℝ E : ℝ) /
+              (2 * (extinctionTime lam t₀ - t))) ∧
+        (∀ x : M, Tendsto (fun t : ℝ => scalar (g t) cov₀ extension x)
+          (𝓝[<] extinctionTime lam t₀) atTop) ∧
+        (extinctionTime lam t₀ - t₀ =
+          (Module.finrank ℝ E : ℝ) /
+            (2 * ((Module.finrank ℝ E : ℝ) * lam))) ∧
         ({t : ℝ | 0 < homotheticFactor lam t₀ t} =
           Set.Iio (extinctionTime lam t₀)) ∧
         ¬ ∃ gstar : ContMDiffRiemannianMetric I 2 E (TangentSpace I : M → Type _),
@@ -215,7 +227,7 @@ theorem einsteinScalarComparisonAndSharpLifespan : completeStatement := by
     exact hEinstein x u v
   let g := RicciFlow.homotheticMetricFamily
     (I := I) (M := M) lam t₀ g₀
-  refine ⟨g, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  refine ⟨g, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · intro t ht x u v
     have hpos : 0 < RicciFlow.homotheticFactor lam t₀ t :=
       (RicciScalarComparison.homotheticFactor_pos_iff_lt_extinctionTime
@@ -254,6 +266,24 @@ theorem einsteinScalarComparisonAndSharpLifespan : completeStatement := by
         (Module.finrank ℝ E : ℝ) ((Module.finrank ℝ E : ℝ) * lam) t₀ t
     exact RicciScalarComparison.scalarCurvature_eq_quadraticScalarBarrier
       (I := I) (M := M) lam t₀ g₀ cov₀ hLevi' hEinstein' t hpos x
+  · intro t ht x
+    letI : RiemannianBundle (TangentSpace I : M → Type _) :=
+      ⟨(g t).toRiemannianMetric⟩
+    rw [scalar_eq (g t) cov₀ extension hvalue hext x]
+    change CovariantDerivative.scalarCurvature (cov := cov₀) x =
+      (Module.finrank ℝ E : ℝ) /
+        (2 * (RicciScalarComparison.extinctionTime lam t₀ - t))
+    exact RicciScalarComparison.scalarCurvature_eq_reciprocalTimeToExtinction
+      (I := I) (M := M) lam t₀ g₀ cov₀ hLevi' hEinstein' hlam t ht x
+  · intro x
+    have h := RicciScalarComparison.scalarCurvature_tendsto_at_extinction
+      (I := I) (M := M) lam t₀ g₀ cov₀ hLevi' hEinstein' hlam x
+    apply h.congr'
+    filter_upwards with t
+    exact (scalar_eq (g t) cov₀ extension hvalue hext x).symm
+  · exact
+      RicciScalarComparison.extinctionTime_sub_initialTime_eq_dim_div_two_initialScalar
+        (E := E) lam t₀ hlam
   · ext t
     change 0 < RicciFlow.homotheticFactor lam t₀ t ↔
       t < RicciScalarComparison.extinctionTime lam t₀

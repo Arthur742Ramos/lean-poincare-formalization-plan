@@ -159,9 +159,19 @@ def main() -> None:
             "known overlapping formalization is missing")
     results = {entry["declaration"]: entry["file"]
                for entry in metadata["status"]["main_results"]}
-    require(results.get(THEOREM) == "Solution.lean" and
-            results.get("RicciScalarComparison.scalarCurvature_eq_quadraticScalarBarrier") ==
-            "RicciScalarComparison/EinsteinScalar.lean",
+    expected_results = {
+        THEOREM,
+        "RicciScalarComparison.scalarCurvature_eq_quadraticScalarBarrier",
+        "RicciScalarComparison.scalarCurvature_eq_reciprocalTimeToExtinction",
+        "RicciScalarComparison.scalarCurvature_tendsto_at_extinction",
+        "RicciScalarComparison.extinctionTime_sub_initialTime_eq_dim_div_two_initialScalar",
+        "RicciScalarComparison.maximalEinsteinHomotheticIntrinsicSolution_timeSet",
+        "RicciScalarComparison.no_riemannian_metric_agrees_at_extinction",
+    }
+    require(set(results) == expected_results and
+            results[THEOREM] == "Solution.lean" and
+            all(results[name] == "RicciScalarComparison/EinsteinScalar.lean"
+                for name in expected_results - {THEOREM}),
             "main-result metadata changed")
     require(metadata["status"]["sorry_count"] == 0 and
             metadata["status"]["sorry_in_definitions"] == 0 and

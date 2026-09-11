@@ -15,6 +15,7 @@ set_option linter.unusedSectionVars false
 set_option maxHeartbeats 1000000
 
 open Bundle
+open Filter Topology
 open scoped Manifold ContDiff
 
 namespace RicciScalarComparison
@@ -147,6 +148,113 @@ theorem scalarCurvature_eq_quadraticScalarBarrier
   have hf : homotheticFactor lam t₀ t ≠ 0 := ne_of_gt ht
   unfold quadraticScalarBarrier homotheticFactor
   field_simp
+
+/-- The time remaining to extinction is exactly `n / (2 R₀)`, where the
+Einstein initial scalar curvature is `R₀ = n λ`. -/
+theorem extinctionTime_sub_initialTime_eq_dim_div_two_initialScalar
+    [Nontrivial E] (lam t₀ : ℝ) (hlam : 0 < lam) :
+    extinctionTime lam t₀ - t₀ =
+      (Module.finrank ℝ E : ℝ) /
+        (2 * ((Module.finrank ℝ E : ℝ) * lam)) := by
+  have hnNat : 0 < Module.finrank ℝ E := Module.finrank_pos
+  have hn : (Module.finrank ℝ E : ℝ) ≠ 0 := by exact_mod_cast hnNat.ne'
+  have hlam0 : lam ≠ 0 := ne_of_gt hlam
+  rw [extinctionTime]
+  field_simp
+  ring
+
+/-- The quadratic comparison equality can be written as the exact reciprocal
+singularity profile `R(t) = n / (2 (T - t))`. -/
+theorem quadraticScalarBarrier_eq_reciprocalTimeToExtinction
+    [Nontrivial E]
+    (lam t₀ t : ℝ) (hlam : 0 < lam)
+    (ht : t < extinctionTime lam t₀) :
+    quadraticScalarBarrier
+        (Module.finrank ℝ E : ℝ) ((Module.finrank ℝ E : ℝ) * lam) t₀ t =
+      (Module.finrank ℝ E : ℝ) / (2 * (extinctionTime lam t₀ - t)) := by
+  have hnNat : 0 < Module.finrank ℝ E := Module.finrank_pos
+  have hn : (Module.finrank ℝ E : ℝ) ≠ 0 := by exact_mod_cast hnNat.ne'
+  have hlam0 : lam ≠ 0 := ne_of_gt hlam
+  have htime : extinctionTime lam t₀ - t ≠ 0 := ne_of_gt (sub_pos.mpr ht)
+  unfold quadraticScalarBarrier extinctionTime
+  field_simp
+  ring
+
+/-- The exact reciprocal singularity profile tends to positive infinity as
+time approaches `T` from below. -/
+theorem tendsto_reciprocalTimeToExtinction
+    [Nontrivial E] (T : ℝ) :
+    Tendsto (fun t : ℝ => (Module.finrank ℝ E : ℝ) / (2 * (T - t)))
+      (𝓝[<] T) atTop := by
+  have hnNat : 0 < Module.finrank ℝ E := Module.finrank_pos
+  have hn : 0 < (Module.finrank ℝ E : ℝ) := by exact_mod_cast hnNat
+  have hto_zero : Tendsto (fun t : ℝ => T - t) (𝓝[<] T) (𝓝 0) := by
+    have hc : Tendsto (fun _ : ℝ => T) (𝓝[<] T) (𝓝 T) := tendsto_const_nhds
+    have ht : Tendsto (fun t : ℝ => t) (𝓝[<] T) (𝓝 T) :=
+      tendsto_id.mono_left inf_le_left
+    simpa using hc.sub ht
+  have hpos : ∀ᶠ t : ℝ in 𝓝[<] T, 0 < T - t := by
+    filter_upwards [self_mem_nhdsWithin] with t ht
+    exact sub_pos.mpr ht
+  have hdiff : Tendsto (fun t : ℝ => T - t) (𝓝[<] T) (𝓝[>] 0) :=
+    tendsto_nhdsWithin_iff.mpr ⟨hto_zero, hpos⟩
+  have hinv : Tendsto (fun t : ℝ => (T - t)⁻¹) (𝓝[<] T) atTop :=
+    tendsto_inv_nhdsGT_zero.comp hdiff
+  have hmul := hinv.const_mul_atTop
+    (by positivity : 0 < (Module.finrank ℝ E : ℝ) / 2)
+  convert hmul using 1
+  funext t
+  simp only [div_eq_mul_inv, mul_inv_rev]
+  ring
+
+/-- Along the positive Einstein homothetic flow, scalar curvature has the exact
+Type-I-rate reciprocal scalar profile in the remaining time to extinction. -/
+theorem scalarCurvature_eq_reciprocalTimeToExtinction
+    [Nontrivial E]
+    (lam t₀ : ℝ) (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
+    (cov₀ : CovariantDerivative I E TM)
+    [hcov₀ : CovariantDerivative.ContMDiffCovariantDerivative cov₀ 1]
+    (hLevi : letI : Bundle.RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩;
+      cov₀.IsLeviCivita)
+    (hEinstein : ∀ (x : M) (u v : TM x),
+      (letI : Bundle.RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩;
+       CovariantDerivative.ricciCurvature (cov := cov₀) x u v) =
+        lam * g₀.inner x u v)
+    (hlam : 0 < lam) (t : ℝ) (ht : t < extinctionTime lam t₀) (x : M) :
+    (letI : Bundle.RiemannianBundle TM :=
+      ⟨(homotheticMetricFamily (I := I) (M := M) lam t₀ g₀ t).toRiemannianMetric⟩
+     CovariantDerivative.scalarCurvature (cov := cov₀) x) =
+      (Module.finrank ℝ E : ℝ) / (2 * (extinctionTime lam t₀ - t)) := by
+  have hpos : 0 < homotheticFactor lam t₀ t :=
+    (homotheticFactor_pos_iff_lt_extinctionTime lam t₀ t hlam).2 ht
+  rw [scalarCurvature_eq_quadraticScalarBarrier
+    (I := I) (M := M) lam t₀ g₀ cov₀ hLevi hEinstein t hpos x]
+  exact quadraticScalarBarrier_eq_reciprocalTimeToExtinction lam t₀ t hlam ht
+
+/-- Scalar curvature diverges to positive infinity at the exact singular time
+of the positive Einstein homothetic flow. -/
+theorem scalarCurvature_tendsto_at_extinction
+    [Nontrivial E]
+    (lam t₀ : ℝ) (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
+    (cov₀ : CovariantDerivative I E TM)
+    [hcov₀ : CovariantDerivative.ContMDiffCovariantDerivative cov₀ 1]
+    (hLevi : letI : Bundle.RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩;
+      cov₀.IsLeviCivita)
+    (hEinstein : ∀ (x : M) (u v : TM x),
+      (letI : Bundle.RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩;
+       CovariantDerivative.ricciCurvature (cov := cov₀) x u v) =
+        lam * g₀.inner x u v)
+    (hlam : 0 < lam) (x : M) :
+    Tendsto (fun t : ℝ =>
+      letI : Bundle.RiemannianBundle TM :=
+        ⟨(homotheticMetricFamily (I := I) (M := M) lam t₀ g₀ t).toRiemannianMetric⟩
+      CovariantDerivative.scalarCurvature (cov := cov₀) x)
+      (𝓝[<] extinctionTime lam t₀) atTop := by
+  apply (tendsto_reciprocalTimeToExtinction
+    (E := E) (extinctionTime lam t₀)).congr'
+  filter_upwards [self_mem_nhdsWithin] with t ht
+  exact (scalarCurvature_eq_reciprocalTimeToExtinction
+    (I := I) (M := M) lam t₀ g₀ cov₀ hLevi hEinstein hlam t ht x).symm
 
 /-- The homothetic Einstein family is an intrinsic Ricci-flow solution on its
 entire positive-definite time set. -/

@@ -8,10 +8,13 @@ project:
     initial data on a nonempty compact smooth manifold. The selected theorem
     proves the homothetic metric formula, the componentwise Ricci-flow
     equation, equality with the quadratic scalar-curvature comparison
-    profile, the exact positive-definite time interval ending at
-    t0 + 1/(2*lambda), and the obstruction to realizing the collapsed endpoint
-    tensor as a Riemannian metric. Curvature, Ricci, scalar curvature and the
-    Levi-Civita conditions are explicit in the Mathlib-only Challenge.
+    profile, the reciprocal Type-I-rate scalar law R(t) = n/(2(T-t)),
+    divergence of scalar curvature to positive infinity as t approaches T from
+    below, the lifetime identity T-t0 = n/(2*R0), the exact positive-definite
+    time interval ending at t0 + 1/(2*lambda), and the obstruction to realizing
+    the collapsed endpoint tensor as a Riemannian metric. Curvature, Ricci,
+    scalar curvature and the Levi-Civita conditions are explicit in the
+    Mathlib-only Challenge.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -37,9 +40,11 @@ sources:
       g(t) = (1 - 2*lambda*t)g0 and its finite collapse time for positive
       lambda. This project formalizes that equality model with an arbitrary
       initial time and adds the explicit scalar-curvature barrier identity,
-      exact positive-factor time set, and endpoint Riemannian-metric
-      obstruction. It does not claim novelty, priority, or source-author
-      endorsement.
+      exact reciprocal Type-I-rate scalar profile, one-sided divergence to
+      positive infinity, lifetime identity in terms of initial scalar
+      curvature, exact positive-factor time set, and endpoint
+      Riemannian-metric obstruction. It does not claim novelty, priority, or
+      source-author endorsement.
     license: "unknown"
     author_endorsement: "not-contacted"
   - title: "Three-manifolds with positive Ricci curvature"
@@ -91,9 +96,12 @@ status:
     Ric(g0) = lambda*g0. The conclusion constructs a Riemannian metric family
     satisfying the componentwise Ricci-flow equation before the exact
     extinction time, computes scalar curvature as the quadratic barrier,
-    identifies the positive homothetic-factor set, and rules out a Riemannian
-    metric equal to the zero endpoint tensor. It does not prove general scalar
-    evolution, a maximum principle for arbitrary flows, flow uniqueness, or
+    rewrites it as the reciprocal Type-I-rate scalar profile n/(2(T-t)), proves
+    that it tends to positive infinity at T from below, computes the exact
+    lifetime as n/(2*R0), identifies the positive homothetic-factor set, and
+    rules out a Riemannian metric equal to the zero endpoint tensor. It does not
+    prove general scalar evolution, a maximum principle for arbitrary flows,
+    flow uniqueness, the standard full-curvature-norm Type-I condition, or
     nonhomothetic inextendibility.
   sorry_count: 0
   sorry_in_definitions: 0
@@ -105,7 +113,8 @@ status:
       axioms: ["propext", "Classical.choice", "Quot.sound"]
       note: >-
         Comparator-selected Mathlib-facing theorem combining the actual
-        Ricci-flow equation, sharp scalar equality profile, exact positivity
+        Ricci-flow equation, sharp scalar equality and reciprocal Type-I-rate
+        scalar profiles, one-sided scalar blow-up, exact lifetime, positivity
         interval and endpoint Riemannian-metric obstruction.
     - declaration: "RicciScalarComparison.scalarCurvature_eq_quadraticScalarBarrier"
       file: "RicciScalarComparison/EinsteinScalar.lean"
@@ -114,6 +123,25 @@ status:
       note: >-
         Computes the bundled scalar curvature of the homothetic Einstein slice
         and proves equality with the standard quadratic comparison profile.
+    - declaration: "RicciScalarComparison.scalarCurvature_eq_reciprocalTimeToExtinction"
+      file: "RicciScalarComparison/EinsteinScalar.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: >-
+        Rewrites the scalar curvature of every pre-extinction slice as the
+        exact Type-I-rate profile n/(2(T-t)).
+    - declaration: "RicciScalarComparison.scalarCurvature_tendsto_at_extinction"
+      file: "RicciScalarComparison/EinsteinScalar.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: >-
+        Proves that scalar curvature tends to positive infinity as time tends
+        to the exact extinction time from below.
+    - declaration: "RicciScalarComparison.extinctionTime_sub_initialTime_eq_dim_div_two_initialScalar"
+      file: "RicciScalarComparison/EinsteinScalar.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: "Computes the exact lifetime T-t0 = n/(2*R0), with R0 = n*lambda."
     - declaration: "RicciScalarComparison.maximalEinsteinHomotheticIntrinsicSolution_timeSet"
       file: "RicciScalarComparison/EinsteinScalar.lean"
       sorry_count: 0
@@ -169,9 +197,12 @@ fidelity:
     sigma-compact infrastructure, although the Einstein computation is
     pointwise. The family is a genuine Riemannian metric for every real time by
     a fallback definition, while all flow and homothetic-equality conclusions
-    are restricted to times before extinction. The endpoint theorem rules out
-    equality with the collapsed homothetic tensor; it does not establish
-    uniqueness or exclude every nonhomothetic continuation.
+    are restricted to times before extinction. The reciprocal profile and
+    one-sided divergence describe scalar curvature only for this explicit
+    equality model and do not establish the standard full-curvature-norm Type-I
+    condition. The endpoint theorem rules out equality with the collapsed
+    homothetic tensor; it does not establish uniqueness or exclude every
+    nonhomothetic continuation.
 
 review:
   status: "self-assessed"
@@ -191,20 +222,29 @@ alignment:
       status: "proved"
       note: >-
         Constructs the solution and proves the actual componentwise flow
-        equation, the sharp scalar comparison equality, exact positive time
-        set, and endpoint metric obstruction.
+        equation, the sharp scalar comparison and reciprocal Type-I-rate scalar
+        equalities, one-sided scalar blow-up, exact lifetime, positive time set,
+        and endpoint metric obstruction.
     - source: "Quadratic scalar-curvature reaction profile in the Einstein equality case"
       lean: "RicciScalarComparison.scalarCurvature_eq_quadraticScalarBarrier"
       module: "RicciScalarComparison/EinsteinScalar.lean"
       status: "proved"
       note: "Supporting bundled scalar-curvature computation with the exact dimensional constant."
+    - source: "Positive-Einstein Type-I-rate scalar profile and exact lifetime"
+      lean: "RicciScalarComparison.scalarCurvature_eq_reciprocalTimeToExtinction; RicciScalarComparison.scalarCurvature_tendsto_at_extinction; RicciScalarComparison.extinctionTime_sub_initialTime_eq_dim_div_two_initialScalar"
+      module: "RicciScalarComparison/EinsteinScalar.lean"
+      status: "proved"
+      note: >-
+        Establishes R(t) = n/(2(T-t)), its one-sided divergence to positive
+        infinity, and T-t0 = n/(2*R0) for the explicit equality model.
 
 acknowledgements: >-
   Peter Topping for the direct textbook account of the Einstein homothetic
-  solution; Richard S. Hamilton for the Ricci-flow framework; Mathlib
-  contributors; the contributors to this repository's curvature and intrinsic
-  Ricci-flow infrastructure; Bennett Chow, Yuan Liao and Ziyang Qin for the
-  independent overlapping formalization and its public provenance; Arthur
-  Freitas Ramos, David Barros Hulak and Ruy J. G. B. de Queiroz for human
-  authorship; and the Palomar, Comparator, Lean4Export and NanoDa projects for
-  the verification workflow.
+  solution underlying the exact equality and singularity certificate; Richard
+  S. Hamilton for the Ricci-flow framework; Mathlib contributors; the
+  contributors to this repository's curvature and intrinsic Ricci-flow
+  infrastructure; Bennett Chow, Yuan Liao and Ziyang Qin for the independent
+  overlapping formalization and its public provenance; Arthur Freitas Ramos,
+  David Barros Hulak and Ruy J. G. B. de Queiroz for human authorship; and the
+  Palomar, Comparator, Lean4Export and NanoDa projects for the verification
+  workflow.
