@@ -5,9 +5,11 @@ Selected theorem:
 
 Local preparation replay on 2026-09-11 passed the full `lake build` (3,030
 jobs), dependency-only Challenge compile, package/schema validation, vendored
-source verification, selected axiom audit, Comparator theorem-and-definition
-comparison, NanoDa kernel replay, and Lean default-kernel replay.  The
-Comparator run used the explicit macOS fallback described below.
+source verification, seven-result axiom audit, Comparator
+theorem-and-definition comparison, NanoDa kernel replay, and Lean
+default-kernel replay.  This replay covers the strengthened selected theorem,
+including its reciprocal scalar profile, one-sided blow-up limit, and lifetime
+identity.  The Comparator run used the explicit macOS fallback described below.
 
 The reproducible checks are:
 
@@ -23,7 +25,7 @@ PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh  # macOS
 ```
 
 The Challenge has exactly one intentional `sorry`; active implementation and
-Solution sources have none.  The selected theorem and the principal
+Solution sources have none.  The selected theorem and all six principal
 implementation theorems use exactly `propext`, `Classical.choice`, and
 `Quot.sound`.  The Challenge boundary check removes all candidate build paths,
 proves that a local `PoincareCurvature` import is unavailable, and then compiles

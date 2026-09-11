@@ -16,6 +16,10 @@ derivatives.  The proof then establishes one coherent certificate:
 
 - the homothetic family solves the actual Ricci-flow equation;
 - its scalar curvature equals the sharp quadratic comparison barrier;
+- equivalently, its scalar curvature is exactly `n / (2(T-t))` and tends to
+  positive infinity as `t → T⁻`;
+- the lifetime is exactly `T-t₀ = n/(2R₀)` in terms of initial scalar
+  curvature `R₀ = nλ`;
 - the positive-definite factor set is exactly the half-line before
   `t₀ + 1/(2λ)`; and
 - the collapsed endpoint tensor cannot be a Riemannian metric.
@@ -24,8 +28,8 @@ The result is deliberately narrower than a general compact-flow comparison
 theorem.  The latter, including scalar evolution and maximum-principle
 infrastructure, already exists in the independent
 `qinz1yang/differential-geometry` development.  The value here is the
-fully linked equality benchmark and reusable bridge from an explicit
-Mathlib-only geometric statement to the repository's intrinsic Ricci-flow
-objects.  It advances the local Poincare formalization roadmap without making
-a novelty or priority claim.  Palomar editorial interest remains for editors
-to assess.
+fully linked equality-and-singularity benchmark and reusable bridge from an
+explicit Mathlib-only geometric statement to the repository's intrinsic
+Ricci-flow objects.  It advances the local Poincare formalization roadmap
+without making a novelty or priority claim.  Palomar editorial interest
+remains for editors to assess.

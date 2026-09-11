@@ -11,6 +11,9 @@ ALLOWED = {"propext", "Classical.choice", "Quot.sound"}
 DECLARATIONS = [
     "EinsteinComparisonEntry.einsteinScalarComparisonAndSharpLifespan",
     "RicciScalarComparison.scalarCurvature_eq_quadraticScalarBarrier",
+    "RicciScalarComparison.scalarCurvature_eq_reciprocalTimeToExtinction",
+    "RicciScalarComparison.scalarCurvature_tendsto_at_extinction",
+    "RicciScalarComparison.extinctionTime_sub_initialTime_eq_dim_div_two_initialScalar",
     "RicciScalarComparison.maximalEinsteinHomotheticIntrinsicSolution_timeSet",
     "RicciScalarComparison.no_riemannian_metric_agrees_at_extinction",
 ]
@@ -53,7 +56,7 @@ def main() -> None:
     control_found = reports(control.stdout + control.stderr)
     if control.returncode or control_found.get("RicciScalarNegativeControl") != {"RicciScalarForbidden"}:
         raise SystemExit("axiom negative control failed:\n" + control.stdout + control.stderr)
-    print("Selected theorem and three principal results use exactly the permitted axioms; negative control passed.")
+    print("Selected theorem and six principal results use exactly the permitted axioms; negative control passed.")
 
 
 if __name__ == "__main__":

@@ -22,10 +22,17 @@ R(t) = n λ / (1 - 2 λ (t - t₀))
      = R₀ / (1 - (2/n) R₀ (t - t₀)),    R₀ = n λ.
 ```
 
-The positive-definite time set is exactly
-`(-∞, t₀ + 1/(2λ))`, and at the endpoint the homothetic tensor is zero, so no
-Riemannian metric can agree with it on a positive-dimensional nonempty
-manifold.
+Writing `T = t₀ + 1/(2λ)`, the formalization further proves the exact
+Type-I-rate scalar singularity law
+
+```text
+R(t) = n / (2 (T - t)),       R(t) → +∞ as t → T⁻,
+T - t₀ = n / (2 R₀).
+```
+
+The positive-definite time set is exactly `(-∞, T)`, and at the endpoint the
+homothetic tensor is zero, so no Riemannian metric can agree with it on a
+positive-dimensional nonempty manifold.
 
 The Comparator-selected declaration is
 `EinsteinComparisonEntry.einsteinScalarComparisonAndSharpLifespan` in
@@ -58,7 +65,9 @@ sigma-compact infrastructure used by the intrinsic Ricci-flow library; the
 Einstein calculation itself is pointwise.
 
 This result is the sharp positive-Einstein equality model for scalar
-comparison.  It does **not** prove the general scalar evolution equation, a
+comparison.  It proves the exact reciprocal Type-I-rate scalar profile and
+scalar divergence for this model.  It does **not** establish the standard
+full-curvature-norm Type-I condition, the general scalar evolution equation, a
 maximum principle for arbitrary compact Ricci flows, uniqueness of Ricci flow,
 or impossibility of a nonhomothetic continuation.  The endpoint conclusion is
 precisely that a Riemannian metric cannot equal the collapsed homothetic tensor.
@@ -75,9 +84,10 @@ The independent `qinz1yang/differential-geometry` project already formalizes
 the general scalar-curvature evolution and maximum-principle infrastructure.
 This package deliberately does not duplicate that development.  Its narrower
 contribution is an independently checkable equality case joining the actual
-Ricci-flow equation, the scalar comparison profile, the exact positivity
-interval, and the endpoint metric obstruction in one selected theorem.  See
-`PROVENANCE.md` and `RESEARCH_INTEREST.md`.
+Ricci-flow equation, the scalar comparison profile, the reciprocal Type-I-rate
+scalar blow-up law, the exact positivity interval, and the endpoint metric
+obstruction in one selected theorem.  See `PROVENANCE.md` and
+`RESEARCH_INTEREST.md`.
 
 ## Reproduction
 
