@@ -14,6 +14,8 @@ project:
     metric-compactness bridges rather than assuming them.
   authors:
     - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
   license: "Apache-2.0"
   responsible_maintainers:
     - "Arthur Freitas Ramos"
@@ -171,6 +173,8 @@ alignment:
 
 acknowledgements: >-
   Sumner Byron Myers for the classical theorem; Mathlib contributors; Arthur
-  Freitas Ramos for authorship, scope, oversight, and maintenance; contributors
-  to the immutable same-repository curvature infrastructure; and the Palomar,
-  Comparator, Lean4Export, and NanoDa projects for the verification workflow.
+  Freitas Ramos, David Barros Hulak, and Ruy J. G. B. de Queiroz for human
+  authorship, with Arthur Freitas Ramos responsible for scope, oversight, and
+  maintenance; contributors to the immutable same-repository curvature
+  infrastructure; and the Palomar, Comparator, Lean4Export, and NanoDa projects
+  for the verification workflow.
