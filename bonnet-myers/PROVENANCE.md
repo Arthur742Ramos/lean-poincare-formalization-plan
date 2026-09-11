@@ -63,7 +63,8 @@ repository and are kernel checked.
 
 Codex materially assisted with proof engineering, modular integration,
 packaging, and verification under the maintainer's direction. Arthur Freitas
-Ramos is the human author and responsible maintainer. AI assistance is not
-listed as authorship or mathematical priority. Kernel, Comparator, and NanoDa
-checks are mechanical evidence rather than independent expert review or source
-author endorsement.
+Ramos, David Barros Hulak, and Ruy J. G. B. de Queiroz are the human authors;
+Arthur Freitas Ramos is the responsible maintainer. AI assistance is not listed
+as authorship or mathematical priority. Kernel, Comparator, and NanoDa checks
+are mechanical evidence rather than independent expert review or source-author
+endorsement.

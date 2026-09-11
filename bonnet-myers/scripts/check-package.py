@@ -131,7 +131,11 @@ def main() -> None:
     require(metadata["version"] == "v0.4", "metadata version is not v0.4")
     require("repository" not in metadata, "ordinary substantive project must omit repository mapping")
     require(metadata["project"]["license"] == "Apache-2.0", "metadata licence mismatch")
-    require(metadata["project"]["authors"] == ["Arthur Freitas Ramos"] and
+    require(metadata["project"]["authors"] == [
+                "Arthur Freitas Ramos",
+                "David Barros Hulak",
+                "Ruy J. G. B. de Queiroz",
+            ] and
             metadata["project"]["responsible_maintainers"] == ["Arthur Freitas Ramos"],
             "human authorship or maintenance metadata changed")
     require(any(source.get("relationship") == "independently-proves"
