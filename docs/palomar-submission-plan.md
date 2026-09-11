@@ -6,6 +6,11 @@ source monorepo and research record; each Palomar submission must eventually be
 an independently reproducible artifact with its own exact commit, statement
 surface, dependency closure, and scope description.
 
+This file tracks artifact and publication workflow state. It is not the
+authority for completion of the mathematical roadmap; use
+[`status.md`](status.md) for that. A focused accepted result can advance useful
+infrastructure without closing a larger roadmap milestone.
+
 The portfolio is deliberately broader than the final Poincare theorem. A
 formalized geometric-analysis library can produce several meaningful results
 before the Ricci-flow-with-surgery endpoint is reached.
