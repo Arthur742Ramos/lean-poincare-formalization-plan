@@ -1,0 +1,20 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "EinsteinComparisonEntry.einsteinScalarComparisonAndSharpLifespan"
+  ],
+  "definition_names": [
+    "EinsteinComparisonEntry.curvature",
+    "EinsteinComparisonEntry.ricci",
+    "EinsteinComparisonEntry.scalar",
+    "EinsteinComparisonEntry.metricCompatible",
+    "EinsteinComparisonEntry.leviCivita",
+    "EinsteinComparisonEntry.homotheticFactor",
+    "EinsteinComparisonEntry.extinctionTime",
+    "EinsteinComparisonEntry.quadraticScalarBarrier",
+    "EinsteinComparisonEntry.completeStatement"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}
