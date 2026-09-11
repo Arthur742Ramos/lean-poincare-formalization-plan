@@ -58,6 +58,23 @@ PY
 
 mkdir -p "$cache_root" "$bin_dir"
 
+retry() {
+  local attempts=$1
+  shift
+  local delay=2
+  local attempt=1
+  until "$@"; do
+    if [ "$attempt" -ge "$attempts" ]; then
+      echo "error: command failed after $attempt attempts: $*" >&2
+      return 1
+    fi
+    echo "warning: command failed (attempt $attempt/$attempts); retrying in ${delay}s: $*" >&2
+    sleep "$delay"
+    attempt=$((attempt + 1))
+    delay=$((delay * 2))
+  done
+}
+
 checkout_exact() {
   local repository=$1
   local destination=$2
@@ -81,7 +98,7 @@ if [ "$project_toolchain" != "$export_toolchain" ]; then
 fi
 
 comparator_toolchain=$(tr -d '[:space:]' < "$comparator_dir/lean-toolchain")
-GOBIN="$bin_dir" go install "github.com/zouuup/landrun/cmd/landrun@$landrun_commit"
+retry 5 env GOBIN="$bin_dir" go install "github.com/zouuup/landrun/cmd/landrun@$landrun_commit"
 (cd "$comparator_dir" && lake "+$comparator_toolchain" build comparator)
 (cd "$lean4export_dir" && lake "+$export_toolchain" build lean4export)
 (cd "$nanoda_dir" && cargo build --release --locked)
