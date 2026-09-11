@@ -17,6 +17,8 @@ style of the Annals of Formalized Mathematics.
   submission candidates
 - `curvature/`: Lean/mathlib subproject for the front-end connection and
   curvature layers of the roadmap
+- `bonnet-myers/`: independent complete Bonnet--Myers proof and focused
+  Challenge/Solution package
 
 ## Current framing
 
@@ -51,6 +53,14 @@ This repository contains a research program and concrete Lean packages for
 parts of its differential-geometric infrastructure.
 
 ## Research-facing submission
+
+The new `bonnet-myers/` candidate proves the classical complete-manifold
+Bonnet--Myers theorem from an actual Levi--Civita Ricci lower bound. It
+constructs the connection and curvature, develops the minimizing-geodesic and
+second-variation argument locally, and concludes compactness together with the
+sharp diameter bound. Its Mathlib-only Challenge, independent Solution,
+Comparator configuration, source provenance, and reproducibility checks live
+in that directory. Preparing the package does not authorize registry intake.
 
 The new standalone submission target is
 [`contracted-bianchi/`](contracted-bianchi/README.md). It proves the

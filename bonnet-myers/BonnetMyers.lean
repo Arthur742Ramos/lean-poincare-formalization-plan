@@ -1,0 +1,73 @@
+import BonnetMyers.Statement
+import BonnetMyers.Construction
+import BonnetMyers.Algebra
+import BonnetMyers.IndexForm
+import BonnetMyers.Comparison
+import BonnetMyers.SecondVariation
+import BonnetMyers.MetricConsequences
+import BonnetMyers.ODE
+import BonnetMyers.Geodesic
+import BonnetMyers.Parallel
+import BonnetMyers.Transport
+import BonnetMyers.IntrinsicGeodesic
+import BonnetMyers.IntrinsicAcceleration
+import BonnetMyers.CurveConnection
+import BonnetMyers.ChartGluing
+import BonnetMyers.MetricParallel
+import BonnetMyers.MetricVariable
+import BonnetMyers.LocalEnergy
+import BonnetMyers.GeodesicFlow
+import BonnetMyers.GeodesicCutoff
+import BonnetMyers.GeodesicFlowRegularity
+import BonnetMyers.StrongNormalNeighborhood
+import BonnetMyers.NormalNeighborhood
+import BonnetMyers.GaussLemma
+import BonnetMyers.GeodesicLength
+import BonnetMyers.GlobalDistance
+import BonnetMyers.MetricBridge
+import BonnetMyers.LocalDistanceRealization
+import BonnetMyers.LocalCompactness
+import BonnetMyers.RiemannianHopfRinow
+import BonnetMyers.RiemannianMinimizer
+import BonnetMyers.SecondVariationGeometry
+import BonnetMyers.CoordinateCurvature
+import BonnetMyers.CoordinateSecondVariation
+import BonnetMyers.BrokenVariation
+import BonnetMyers.VariationIntegral
+import BonnetMyers.BrokenVariationIntegral
+import BonnetMyers.MetricSegmentRegularity
+import BonnetMyers.MetricSegmentLog
+import BonnetMyers.DistanceRegularity
+import BonnetMyers.CornerRigidity
+import BonnetMyers.NormalCornerRigidity
+import BonnetMyers.MetricSegmentCorner
+import BonnetMyers.MetricSegmentGluing
+import BonnetMyers.MetricSegmentTwoSided
+import BonnetMyers.MetricSegmentDense
+import BonnetMyers.MetricSegmentSmooth
+import BonnetMyers.LocalParallelNorm
+import BonnetMyers.ParallelConnection
+import BonnetMyers.GlobalParallel
+import BonnetMyers.ParallelReflection
+import BonnetMyers.TransportContinuation
+import BonnetMyers.ParallelFieldContinuation
+import BonnetMyers.GlobalParallelTransport
+import BonnetMyers.ManifoldSineTest
+import BonnetMyers.GeometricComparison
+import BonnetMyers.CurvatureRegularity
+import BonnetMyers.GeometricIndex
+import BonnetMyers.GlobalIntrinsicGeodesic
+import BonnetMyers.FiniteGeodesicCover
+import BonnetMyers.GlobalParallelField
+import BonnetMyers.MinimizingGeodesic
+import BonnetMyers.GlobalSecondVariation
+import BonnetMyers.GlobalIndexNonnegative
+import BonnetMyers.Complete
+
+/-!
+# Independent Bonnet--Myers theorem
+
+The target `BonnetMyersEntry.completeStatement` is proved by
+`BonnetMyersEntry.completeStatement_proved`. The former upstream wrappers are
+superseded.
+-/

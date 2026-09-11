@@ -1,0 +1,32 @@
+name = "BonnetMyers"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["PoincareCurvature", "BonnetMyers", "Challenge", "Solution"]
+
+[leanOptions]
+pp.unicode.fun = true
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "db584cd6d46c92f209a44c0f1c829460d327499d"
+
+[[lean_lib]]
+name = "BonnetMyers"
+globs = ["BonnetMyers", "BonnetMyers.+"]
+
+# Compile the audited same-repository connection layer with this package's
+# pinned Mathlib/toolchain.  The Bonnet--Myers argument itself remains in this
+# package; no external project proof implementation is imported.
+[[lean_lib]]
+name = "PoincareCurvature"
+srcDir = "vendor/curvature"
+globs = ["PoincareCurvature.+"]
+
+[[lean_lib]]
+name = "Challenge"
+roots = ["Challenge"]
+
+[[lean_lib]]
+name = "Solution"
+roots = ["Solution"]

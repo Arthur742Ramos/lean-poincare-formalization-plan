@@ -1,0 +1,41 @@
+import BonnetMyers.Statement
+import BonnetMyers.Basic
+
+noncomputable section
+open Bundle Manifold Set
+open scoped Manifold ContDiff ENNReal Topology
+open DifferentialGeometry DifferentialGeometry.Geometry
+open DifferentialGeometry.Geometry.Connection DifferentialGeometry.Geometry.Curvature
+
+namespace BonnetMyersEntry
+universe u v w
+
+attribute [-instance] DifferentialGeometry.Tensor0SBundle.tangentSpaceNormedAddCommGroup
+  DifferentialGeometry.Tensor0SBundle.tangentSpaceNormedSpace in
+theorem completeStatement_proved : completeStatement.{u,v,w} := by
+  intro E _ _ _ _ H _ I _ M _ _ _ _ _ _ _ g
+  let : IsManifold I 1 M := IsManifold.of_le (I := I) (M := M)
+    (n := (∞ : WithTop ℕ∞)) (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+  let : TopologicalSpace.MetrizableSpace M := Manifold.metrizableSpace I M
+  let : T3Space M := inferInstance
+  let : RiemannianBundle (TangentSpace I : M → Type _) := ⟨g.toRiemannianMetric⟩
+  let : IsContinuousRiemannianBundle E (TangentSpace I : M → Type _) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro x a b; rfl⟩⟩
+  let : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  refine ⟨LeviCivita (I := I) g, LeviCivita_torsion_eq_zero g, ?_,
+    riemannOp (LeviCivita (I := I) g), ?_, ?_⟩
+  · intro Y Z x hY hZ a
+    exact LeviCivita_isMetricCompatible g hY hZ (Set.mem_univ x) a
+  · intro X Y Z hX hY hZ x
+    exact riemannOp_apply_smooth (LeviCivita (I := I) g) hX hY hZ
+  · intro K hK hdim hcomplete hRic
+    let : CompleteSpace M := hcomplete
+    have hc : BonnetMyers.CompleteMetric (I := I) g := ⟨hcomplete⟩
+    have hr : BonnetMyers.RicciLowerBound (I := I) g
+        (((Module.finrank ℝ E : ℝ) - 1) * K) := by
+      intro x a
+      rw [ricciTensor_apply]
+      exact hRic x a
+    exact BonnetMyers.bonnet_myers g hc hdim hK hr
+
+end BonnetMyersEntry

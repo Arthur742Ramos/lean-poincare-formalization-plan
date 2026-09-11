@@ -79,6 +79,7 @@ and authorization relationship have been explicitly confirmed.
 | 19 | Topology, extinction, and Poincare corollaries | Topological surgery bookkeeping, finite-time extinction, and topological/smooth corollaries | Future; final endpoint family |
 | CB-01 | Double-contracted second Bianchi identity | Double contraction of the actual corrected curvature derivative; no separate Ricci/scalar differentiation or Einstein-divergence identity | Passed (user-confirmed 2026-09-06), submitted commit `90d215d81d30a5f67922dce00dfa160b4878e1c5`; public registration not independently checked |
 | SR-01 | Schur rigidity and geometric contracted Bianchi | Actual Ricci/scalar differentiation, divergence-free Einstein tensor, and global Einstein-factor constancy; three-dimensional full-curvature rigidity | Current reviewed pair (maintainer-reported): intake `58oc259e0tln`, commit `3955dd0b8d1eaeaa7d7dd7675864352dddcf0ffb`. Original intake `l20vtgq7gct2` at `4317d35a3cf3bbf02859fcd811e8dacc83f51739` is historical. Not cleared for another intake: substantive mathematical research gate unresolved. See `schur-rigidity/SUBMISSION.md` and `RESEARCH-GATE.md` there. |
+| BM-01 | Bonnet--Myers diameter and compactness | Actual Levi--Civita Ricci lower bound implies compactness and the sharp `pi / sqrt K` diameter bound on a complete connected Riemannian manifold | Complete independent Lean proof and focused Palomar package under `bonnet-myers/`; no registry intake is authorized |
 
 The table is a portfolio, not a promise that every row should be submitted as
 written. A row may be merged with a neighboring row when the dependency closure
@@ -150,6 +151,22 @@ must have:
   research note for an identified audience.
 
 At present, none of the unreviewed rows 06–18 has been cleared by this gate.
+
+## Bonnet--Myers candidate
+
+The `bonnet-myers/` package selects
+`BonnetMyersEntry.bonnet_myers`. Its short Mathlib-only Challenge states the
+classical complete-manifold result with a constructed Levi--Civita connection,
+the actual curvature commutator and Ricci trace, compactness, and the sharp
+diameter bound. The independent Solution develops the local-to-global
+geodesic, Hopf--Rinow minimizer, parallel-frame, broken second-variation,
+index-form, and metric-compactness bridges inside this repository.
+
+The package pins Lean and Mathlib, vendors only an exact audited
+same-repository curvature-support closure, and includes fail-closed provenance,
+Challenge-boundary, axiom, Comparator, and NanoDa checks. Its preparation and
+repository merge do not authorize Palomar intake, editorial submission, or
+public registration.
 
 ## Submission 01: raw Bianchi curvature identities
 

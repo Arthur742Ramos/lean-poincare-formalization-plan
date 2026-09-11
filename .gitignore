@@ -1,3 +1,4 @@
 # Common local noise
 .DS_Store
 Thumbs.db
+.lake/

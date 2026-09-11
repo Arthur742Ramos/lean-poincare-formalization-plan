@@ -1,0 +1,176 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Independent Bonnet--Myers diameter and compactness theorem"
+  description: >-
+    Formalizes the classical Bonnet--Myers theorem for complete connected
+    smooth boundaryless finite-dimensional real Riemannian manifolds. From
+    dimension n >= 2, K > 0, and the pointwise lower bound
+    Ric(a,a) >= (n-1) K g(a,a), the selected theorem constructs the
+    Levi--Civita connection and actual curvature, proves compactness, and gives
+    the sharp induced extended-diameter bound pi/sqrt K. The development proves
+    minimizing-geodesic, parallel-transport, second-variation, index-form, and
+    metric-compactness bridges rather than assuming them.
+  authors:
+    - "Arthur Freitas Ramos"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arthur Freitas Ramos"
+
+classification:
+  arxiv: ["math.DG", "math.LO"]
+  msc2020: ["53C20", "53C21", "03B35"]
+
+sources:
+  - title: "Riemannian manifolds with positive mean curvature"
+    authors:
+      - "Sumner Byron Myers"
+    id: "10.1215/S0012-7094-41-00832-3"
+    type: "paper"
+    location: "https://doi.org/10.1215/S0012-7094-41-00832-3"
+    relationship: "independently-proves"
+    note: >-
+      Duke Mathematical Journal 8(2) (1941), 401-404. This project gives an
+      independent Lean proof of the complete-manifold Ricci lower-bound theorem
+      with the sharp diameter constant and compactness. It does not claim new
+      mathematical priority or source-author endorsement.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/5db025e6d20d8aad714c3d116714545d1823fd8e/curvature"
+    relationship: "builds-on"
+    note: >-
+      Nineteen unchanged files are vendored from this immutable
+      same-repository snapshot. They provide general covariant-derivative,
+      curvature, bundle-section, and smooth ODE infrastructure, not the
+      Bonnet--Myers minimizing-geodesic, second-variation, comparison,
+      diameter, or compactness proof. Their exact inventory and Git blob
+      identities are checked by scripts/check-vendored.py.
+  - id: "https://github.com/qinz1yang/differential-geometry/tree/1b535dd102b94cc42b107cca27059687888f08b3"
+    relationship: "independent"
+    note: >-
+      A superseded noncompiled wrapper in this repository formerly depended on
+      this separate Bonnet--Myers implementation. The active proof has no such
+      dependency and does not copy, translate, vendor, or adapt that proof.
+  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d"
+    relationship: "builds-on"
+    note: >-
+      Pinned Mathlib foundations for manifolds, Riemannian metrics, calculus,
+      ordinary differential equations, integration, linear algebra, topology,
+      and extended metric spaces.
+
+status:
+  scope: >-
+    Complete connected smooth boundaryless finite-dimensional real manifolds
+    modeled on a nonzero complete normed vector space, with Hausdorff manifold
+    and tangent bundle, sigma-compact topology, a smooth Riemannian metric,
+    dimension at least two, and positive K. Completeness and diameter use the
+    metric induced by that Riemannian metric. Ricci is the ordinary trace of the
+    actual Levi--Civita curvature endomorphism. The theorem concludes
+    CompactSpace and extended diameter at most ENNReal.ofReal (pi/sqrt K). It
+    does not prove equality rigidity, sphere classification, conjugate-point
+    language, or finiteness of the fundamental group.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  main_results:
+    - declaration: "BonnetMyersEntry.bonnet_myers"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: >-
+        Comparator-selected complete geometric theorem, including constructed
+        Levi--Civita connection and curvature, compactness, and sharp diameter.
+    - declaration: "BonnetMyersEntry.completeStatement_proved"
+      file: "BonnetMyers/Complete.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: "Implementation-level proof of the exact independent statement."
+    - declaration: "BonnetMyersEntry.IntrinsicGeodesic.GlobalGeodesic.GlobalParallelField.globalIndexForm_sine_nonnegative_of_endpoint_minimizing"
+      file: "BonnetMyers/GlobalIndexNonnegative.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: >-
+        Endpoint-minimizing geodesics have nonnegative global sine index form,
+        proved through finite chart subdivision and broken second variation.
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["GPT-5"]
+      framework: "Codex with Lean 4.33.0 and pinned Mathlib"
+      tool_setup: >-
+        AI-assisted API auditing, modular proof engineering, compilation,
+        Challenge/Solution packaging, provenance checks, and Comparator/NanoDa
+        preparation under maintainer direction.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "subscription-based"
+        hardware: "local Apple silicon machine"
+      prompting_notes: >-
+        The maintainer required a complete independent geometric proof, exact
+        statement scope, no external Bonnet--Myers implementation, Palomar
+        readiness, and repository delivery.
+    - method: "manual"
+      models: []
+      framework: "Lean, Git, and mathematical review"
+      tool_setup: >-
+        Human-directed theorem selection, attribution, scope, repository
+        ownership, and publication decisions.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "not tracked"
+        hardware: "local machine"
+      prompting_notes: "Human authorship and final release responsibility."
+  spend_usd: "subscription-based"
+  notes: >-
+    The AI-assisted development is disclosed without treating the agent as an
+    author. Lean, Comparator, and NanoDa checks are mechanical evidence and do
+    not constitute independent expert review.
+
+fidelity:
+  divergences: >-
+    The formal statement uses Mathlib's induced extended Riemannian distance
+    and reports the diameter as an ENNReal bound. It assumes an explicitly
+    sigma-compact Hausdorff smooth manifold and Hausdorff tangent bundle to make
+    the underlying manifold and ODE infrastructure available. Ricci is written
+    as the ordinary linear trace of z |-> R(z,a)a, with the curvature sign
+    convention fixed by the displayed covariant-derivative commutator. The
+    result includes compactness and the sharp diameter bound from Myers' theorem
+    but omits fundamental-group finiteness and equality rigidity.
+
+review:
+  status: "self-assessed"
+  reviewers:
+    - "none"
+  notes: >-
+    The statement, geometric dependency chain, Challenge isolation, exact
+    vendored provenance, proof-hole count, and axiom surface are checked by the
+    repository verification scripts. No independent human mathematical review,
+    Palomar editorial acceptance, intake, or registration is claimed.
+
+alignment:
+  namespace: "BonnetMyersEntry"
+  statements:
+    - source: "Myers (1941), complete positive-Ricci diameter and compactness theorem"
+      lean: "BonnetMyersEntry.bonnet_myers"
+      module: "Challenge.lean and Solution.lean"
+      status: "proved"
+      note: >-
+        Independent complete geometric statement with constructed
+        Levi--Civita connection and actual curvature trace.
+    - source: "Index-form comparison step in Myers' proof"
+      lean: "BonnetMyersEntry.IntrinsicGeodesic.GlobalGeodesic.no_long_global_geodesic_of_ricci_and_sine_index_nonnegative"
+      module: "BonnetMyers/GeometricIndex.lean"
+      status: "proved"
+      note: >-
+        The Ricci lower bound and transverse sine test fields exclude an
+        endpoint-minimizing unit geodesic longer than pi/sqrt K.
+
+acknowledgements: >-
+  Sumner Byron Myers for the classical theorem; Mathlib contributors; Arthur
+  Freitas Ramos for authorship, scope, oversight, and maintenance; contributors
+  to the immutable same-repository curvature infrastructure; and the Palomar,
+  Comparator, Lean4Export, and NanoDa projects for the verification workflow.
