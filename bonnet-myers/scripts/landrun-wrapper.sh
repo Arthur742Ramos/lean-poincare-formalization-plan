@@ -6,6 +6,10 @@ landrun_options=()
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
+    --)
+      shift
+      break
+      ;;
     -unrestricted-*|--unrestricted-*)
       echo "error: refusing sandbox-disabling Landrun option $1" >&2
       exit 2
