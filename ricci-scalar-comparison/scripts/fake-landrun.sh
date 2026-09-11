@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Development-only macOS fallback. CI and hosted verification must use real
-# Landrun; this shim is accepted only when the caller explicitly opts in.
+# Development-only macOS fallback. Linux verification must use real Landrun;
+# this shim is accepted only when the caller explicitly opts in.
 value_flags=(--ro --rox --rw --rwx --bind-tcp --connect-tcp --log-level --env)
 
 is_value_flag() {

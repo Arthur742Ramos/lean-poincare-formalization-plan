@@ -43,6 +43,7 @@ Comparator pins:
 - Landrun: `811cfff51ceaf3d9843708aa6d22e9b84ccac8b4`
 
 The macOS replay explicitly substitutes an unsandboxed compatibility wrapper
-because Landlock is Linux-only.  The GitHub workflow performs the corresponding
-replay with real Landrun.  Passing local checks does not imply a hosted pass,
+because Landlock is Linux-only.  No automatic hosted build is configured for
+this package; a Linux reviewer can run the same command without the local opt-in
+to replay with real Landrun.  Passing local checks does not imply a hosted pass,
 editorial acceptance, intake, or registration.

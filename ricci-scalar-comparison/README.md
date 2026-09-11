@@ -93,7 +93,9 @@ python3 scripts/check-axioms.py
 PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh  # macOS
 ```
 
-The macOS Comparator command is an explicit unsandboxed development replay;
-the GitHub workflow uses real Linux Landlock.  Local verification, hosted
-mechanical verification, editorial review, intake, and public registration are
-separate states.  Preparing this package does not authorize submission.
+The macOS Comparator command is an explicit unsandboxed development replay.
+The package intentionally has no automatic hosted build: its full pinned build
+and audit suite is run from a populated local Mathlib cache.  A reviewer on
+Linux can run `bash scripts/verify-comparator.sh` to replay Comparator with real
+Landrun.  Local verification, editorial review, intake, and public registration
+are separate states.  Preparing this package does not authorize submission.

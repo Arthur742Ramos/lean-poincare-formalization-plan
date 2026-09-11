@@ -2,7 +2,11 @@ name: Palomar Submission 01
 
 on:
   push:
+    paths:
+      - "curvature/**"
   pull_request:
+    paths:
+      - "curvature/**"
   workflow_dispatch:
 
 permissions:
