@@ -16,14 +16,6 @@ SCHEMA = "https://raw.githubusercontent.com/mathlib-initiative/formalization.yam
 MATHLIB = "db584cd6d46c92f209a44c0f1c829460d327499d"
 THEOREM = "EinsteinComparisonEntry.einsteinScalarComparisonAndSharpLifespan"
 DEFINITIONS = [
-    "EinsteinComparisonEntry.curvature",
-    "EinsteinComparisonEntry.ricci",
-    "EinsteinComparisonEntry.scalar",
-    "EinsteinComparisonEntry.metricCompatible",
-    "EinsteinComparisonEntry.leviCivita",
-    "EinsteinComparisonEntry.homotheticFactor",
-    "EinsteinComparisonEntry.extinctionTime",
-    "EinsteinComparisonEntry.quadraticScalarBarrier",
     "EinsteinComparisonEntry.completeStatement",
 ]
 ALLOWED_AXIOMS = ["propext", "Quot.sound", "Classical.choice"]
@@ -68,7 +60,7 @@ def main() -> None:
         "formalization.yaml", "lakefile.toml", "lake-manifest.json",
         "lean-toolchain", "LICENSE", "README.md", "PROVENANCE.md",
         "RESEARCH_INTEREST.md", "AGENT-CONTRIBUTION.md", "VERIFICATION.md",
-        "VENDORED-SOURCES.md",
+        "VENDORED-SOURCES.md", "scripts/check-closed-statement.lean",
     ]
     for relative in required:
         path = ROOT / relative

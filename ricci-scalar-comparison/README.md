@@ -37,7 +37,9 @@ positive-dimensional nonempty manifold.
 The Comparator-selected declaration is
 `EinsteinComparisonEntry.einsteinScalarComparisonAndSharpLifespan` in
 `Solution.lean`.  Its exact statement is
-`EinsteinComparisonEntry.completeStatement` in `Challenge.lean`.
+`EinsteinComparisonEntry.completeStatement` in `Challenge.lean`.  That
+definition inlines the geometric operations below, so the renderer needs to
+copy only one closed proposition across its trusted notation boundary.
 
 ## Auditable geometric surface
 
@@ -102,12 +104,15 @@ python3 scripts/check-challenge-boundary.py
 python3 scripts/check-vendored.py
 python3 scripts/check-package.py
 python3 scripts/check-axioms.py
+lake env lean scripts/check-closed-statement.lean
 PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh  # macOS
 ```
 
 The macOS Comparator command is an explicit unsandboxed development replay.
-The package intentionally has no automatic hosted build: its full pinned build
-and audit suite is run from a populated local Mathlib cache.  A reviewer on
-Linux can run `bash scripts/verify-comparator.sh` to replay Comparator with real
-Landrun.  Local verification, editorial review, intake, and public registration
-are separate states.  Preparing this package does not authorize submission.
+The repository also runs the actual pinned Palomar renderer under Landrun for
+changes to this subproject; this includes the trusted core-notation audit that
+previously exposed dependent helper signatures. A reviewer on Linux can run
+`bash scripts/verify-comparator.sh` to replay Comparator with real Landrun.
+Local verification, hosted rendering, editorial review, intake, and public
+registration are separate states. Preparing this package does not authorize
+submission.
