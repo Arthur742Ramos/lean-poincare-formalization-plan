@@ -62,6 +62,24 @@ def matrixHeatMildParabolicSecondJetND
     exact heatMildParabolicSecondJetND (t₀ := t₀) hr0 (u₀ i j) (hq i j) hH
       (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j)
 
+@[simp] theorem matrixHeatMildParabolicSecondJetND_entryJet
+    {n d : ℕ} {t₀ r : ℝ} (hr0 : 0 < r)
+    (u₀ : Matrix (Fin d) (Fin d)
+      (BoundedContinuousFunction (Fin n → ℝ) ℝ))
+    {q : ℝ → Matrix (Fin d) (Fin d)
+      (BoundedContinuousFunction (Fin n → ℝ) ℝ)}
+    (hq : ∀ i j, Continuous (fun s ↦ q s i j))
+    {C H : ℝ} (hH : 0 ≤ H)
+    (hqb : ∀ s y i j, ‖q s i j y‖ ≤ C)
+    (hqholder : ∀ s x y i j, |q s i j y - q s i j x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (i j : Fin d) :
+    (matrixHeatMildParabolicSecondJetND (t₀ := t₀) hr0 u₀ hq hH hqb
+      hqholder).entryJet i j =
+      heatMildParabolicSecondJetND (t₀ := t₀) hr0 (u₀ i j) (hq i j) hH
+        (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j) := by
+  rfl
+
 /-- Entrywise PDE readout for the matrix second jet. -/
 theorem matrixHeatMildParabolicSecondJetND_timeDeriv
     {n d : ℕ} {t₀ t r : ℝ} (ht : t₀ < t) (hr0 : 0 < r)

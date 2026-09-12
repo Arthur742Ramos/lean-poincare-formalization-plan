@@ -2,6 +2,8 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatSecondJet
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialC2
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatParabolicHolder
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessianHolder
 
 /-!
 # Quantitative Hessian control for the Euclidean mild heat solution
@@ -284,6 +286,58 @@ theorem abs_heatMildTimeDerivND_le_of_boundedC2
   exact add_le_add
     (hLap.trans (mul_le_mul_of_nonneg_left hHess (Nat.cast_nonneg n)))
     (by simpa only [Real.norm_eq_abs] using hqb t x)
+
+/-- Spatial Holder constant for the full Hessian of the mild solution. -/
+def heatMildHessianSpatialHolderConstant
+    (n : ℕ) (r H₀ H : ℝ) : ℝ :=
+  heatInitialHessianSpatialHolderConstant n H₀ +
+    heatDuhamelHessianSpatialHolderConstant n r H
+
+/-- **Spatial `r`-Holder estimate for the genuine full Frechet Hessian of the
+Euclidean mild solution.**  The constant is uniform down to the initial time:
+the homogeneous part uses the actual Holder initial Hessian and the Duhamel
+part uses the heat-time split estimate. -/
+theorem norm_heatMildSpatialHessianCLM_sub_le_holder
+    {n : ℕ} {t₀ t r : ℝ} (ht : t₀ < t) (hr0 : 0 < r) (hr1 : r < 1)
+    (D : EuclideanBoundedC2Data n) {H₀ : ℝ} (hH₀ : 0 ≤ H₀)
+    (hsecondHolder : ∀ j k x y,
+      |D.second j k x - D.second j k y| ≤
+        H₀ * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    (hq : Continuous q) {C H : ℝ} (hH : 0 ≤ H)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x y : Fin n → ℝ) :
+    ‖heatMildSpatialHessianCLM ht.le hr0 D.value hq hH hqb hqholder x -
+        heatMildSpatialHessianCLM ht.le hr0 D.value hq hH hqb hqholder y‖ ≤
+      heatMildHessianSpatialHolderConstant n r H₀ H * ‖x - y‖ ^ r := by
+  have heq :
+      heatMildSpatialHessianCLM ht.le hr0 D.value hq hH hqb hqholder x -
+        heatMildSpatialHessianCLM ht.le hr0 D.value hq hH hqb hqholder y =
+      (heatSemigroupHessianCLM (t - t₀) D.value x -
+        heatSemigroupHessianCLM (t - t₀) D.value y) +
+      (heatDuhamelHessianCLM ht.le hr0 hq hH hqb hqholder x -
+        heatDuhamelHessianCLM ht.le hr0 hq hH hqb hqholder y) := by
+    unfold heatMildSpatialHessianCLM
+    abel
+  rw [heq]
+  refine (norm_add_le _ _).trans ?_
+  have hhom := norm_heatSemigroupHessianCLM_sub_le_dist_rpow
+    D (sub_pos.mpr ht) hr0.le hH₀ hsecondHolder x y
+  have hduh := norm_heatDuhamelHessianCLM_sub_le_holder
+    ht.le hr0 hr1 hq hH hqb hqholder x y
+  calc
+    ‖heatSemigroupHessianCLM (t - t₀) D.value x -
+          heatSemigroupHessianCLM (t - t₀) D.value y‖ +
+        ‖heatDuhamelHessianCLM ht.le hr0 hq hH hqb hqholder x -
+          heatDuhamelHessianCLM ht.le hr0 hq hH hqb hqholder y‖ ≤
+      heatInitialHessianSpatialHolderConstant n H₀ * ‖x - y‖ ^ r +
+        heatDuhamelHessianSpatialHolderConstant n r H * ‖x - y‖ ^ r :=
+      add_le_add hhom hduh
+    _ = heatMildHessianSpatialHolderConstant n r H₀ H * ‖x - y‖ ^ r := by
+      unfold heatMildHessianSpatialHolderConstant
+      ring
 
 end HessianNorms
 

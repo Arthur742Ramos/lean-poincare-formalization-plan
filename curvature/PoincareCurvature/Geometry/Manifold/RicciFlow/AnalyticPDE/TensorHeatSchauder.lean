@@ -75,5 +75,52 @@ theorem norm_matrixHeatMildParabolicSecondJetND_entry_spaceSecondDeriv_le_of_bou
       (hq i j) hH (fun s y ↦ hqb s y i j)
       (fun s y z ↦ hqholder s y z i j) x)
 
+/-- Every tensor coefficient of the genuine parabolic second jet has a
+spatially Holder full Frechet Hessian, uniformly in positive final time. -/
+theorem norm_matrixHeatMildParabolicSecondJetND_entry_spaceSecondDeriv_sub_le_holder
+    {n d : ℕ} {t₀ t r : ℝ} (ht : t₀ < t) (hr0 : 0 < r) (hr1 : r < 1)
+    (D : Matrix (Fin d) (Fin d) (EuclideanBoundedC2Data n))
+    {H₀ : ℝ} (hH₀ : 0 ≤ H₀)
+    (hsecondHolder : ∀ i j a b x y,
+      |(D i j).second a b x - (D i j).second a b y| ≤
+        H₀ * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    {q : ℝ → Matrix (Fin d) (Fin d)
+      (BoundedContinuousFunction (Fin n → ℝ) ℝ)}
+    (hq : ∀ i j, Continuous (fun s ↦ q s i j))
+    {C H : ℝ} (hH : 0 ≤ H)
+    (hqb : ∀ s y i j, ‖q s i j y‖ ≤ C)
+    (hqholder : ∀ s x y i j, |q s i j y - q s i j x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x y : Fin n → ℝ) (i j : Fin d) :
+    ‖((matrixHeatMildParabolicSecondJetND (t₀ := t₀) hr0
+        (fun i j ↦ (D i j).value) hq hH hqb hqholder).entryJet i j).spaceSecondDeriv
+          (t, x) -
+      ((matrixHeatMildParabolicSecondJetND (t₀ := t₀) hr0
+        (fun i j ↦ (D i j).value) hq hH hqb hqholder).entryJet i j).spaceSecondDeriv
+          (t, y)‖ ≤
+      heatMildHessianSpatialHolderConstant n r H₀ H * ‖x - y‖ ^ r := by
+  have hx :
+      ((matrixHeatMildParabolicSecondJetND (t₀ := t₀) hr0
+        (fun i j ↦ (D i j).value) hq hH hqb hqholder).entryJet i j).spaceSecondDeriv
+          (t, x) =
+      heatMildSpatialHessianCLM ht.le hr0 (D i j).value (hq i j) hH
+        (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j) x := by
+    change heatMildSpaceHessianND t₀ hr0 (D i j).value (hq i j) hH
+        (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j) (t, x) = _
+    simp [heatMildSpaceHessianND, ht]
+  have hy :
+      ((matrixHeatMildParabolicSecondJetND (t₀ := t₀) hr0
+        (fun i j ↦ (D i j).value) hq hH hqb hqholder).entryJet i j).spaceSecondDeriv
+          (t, y) =
+      heatMildSpatialHessianCLM ht.le hr0 (D i j).value (hq i j) hH
+        (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j) y := by
+    change heatMildSpaceHessianND t₀ hr0 (D i j).value (hq i j) hH
+        (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j) (t, y) = _
+    simp [heatMildSpaceHessianND, ht]
+  rw [hx, hy]
+  exact norm_heatMildSpatialHessianCLM_sub_le_holder ht hr0 hr1 (D i j) hH₀
+    (fun a b x y ↦ hsecondHolder i j a b x y) (hq i j) hH
+    (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j) x y
+
 end AnalyticPDE
 end RicciFlow

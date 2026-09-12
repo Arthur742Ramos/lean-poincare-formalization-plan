@@ -42,6 +42,35 @@ lemma heatInitialHessianTimeHolderConstant_nonneg
     mul_nonneg (mul_nonneg hH₂ (Nat.cast_nonneg n))
       (gaussianAbsMoment_nonneg r)
 
+/-- Distance-form spatial Holder estimate for the homogeneous heat Hessian. -/
+theorem norm_heatSemigroupHessianCLM_sub_le_dist_rpow
+    {n : ℕ} (D : EuclideanBoundedC2Data n) {t r H₂ : ℝ}
+    (ht : 0 < t) (hr : 0 ≤ r) (hH₂ : 0 ≤ H₂)
+    (hsecondHolder : ∀ j k x y,
+      |D.second j k x - D.second j k y| ≤
+        H₂ * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x y : Fin n → ℝ) :
+    ‖heatSemigroupHessianCLM t D.value x -
+        heatSemigroupHessianCLM t D.value y‖ ≤
+      heatInitialHessianSpatialHolderConstant n H₂ * ‖x - y‖ ^ r := by
+  have hmain := D.norm_heatSemigroupHessianCLM_sub_le
+    ht hH₂ hsecondHolder x y
+  refine hmain.trans ?_
+  have hcoord : ∀ ell : Fin n, |(x - y) ell| ≤ ‖x - y‖ := by
+    intro ell
+    simpa only [Real.norm_eq_abs] using norm_le_pi_norm (x - y) ell
+  calc
+    (∑ _j : Fin n, ∑ _k : Fin n,
+        H₂ * ∑ ell : Fin n, |(x - y) ell| ^ r) ≤
+        ∑ _j : Fin n, ∑ _k : Fin n,
+          H₂ * ∑ _ell : Fin n, ‖x - y‖ ^ r := by
+      gcongr with j k ell
+      exact hcoord ell
+    _ = heatInitialHessianSpatialHolderConstant n H₂ * ‖x - y‖ ^ r := by
+      simp only [heatInitialHessianSpatialHolderConstant, Finset.sum_const,
+        nsmul_eq_mul, Finset.card_univ, Fintype.card_fin]
+      ring
+
 /-- The full homogeneous heat Hessian is parabolically r-Holder on positive
 times, with constants determined by the Holder modulus of the actual initial
 Hessian. -/
