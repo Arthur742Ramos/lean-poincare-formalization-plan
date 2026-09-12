@@ -26,5 +26,6 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.AutonomousResol
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FrozenChartAffineEvolution
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatEuclidean
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.HeatKernelSchauder
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelClassical
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SectionPointwiseDeriv
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ResearchTheorems
