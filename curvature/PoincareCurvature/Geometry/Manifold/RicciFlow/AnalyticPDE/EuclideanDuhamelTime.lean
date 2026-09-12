@@ -1001,5 +1001,49 @@ theorem hasDerivAt_heatDuhamelND_time_eq_source_add_laplacian
       hu.le hr0 hq hH hqb hqholder x
   simpa only [F] using hFTC.congr_of_eventuallyEq heq
 
+/-- The complete scalar Euclidean mild heat solution, recorded here so its
+time equation is proved in the same calculus environment as both summands. -/
+def heatMildClassicalND {n : ℕ} (t₀ t : ℝ)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (x : Fin n → ℝ) : ℝ :=
+  heatSemigroupND (t - t₀) u₀ x +
+    ∫ s in t₀..t, heatSemigroupND (t - s) (q s) x
+
+/-- **Classical scalar Euclidean heat equation.**  The full mild solution has
+time derivative equal to the homogeneous and Duhamel spatial Laplacians plus
+the source at every positive elapsed time. -/
+theorem hasDerivAt_heatMildClassicalND_time
+    {n : ℕ} {t₀ t r : ℝ} (ht : t₀ < t) (hr0 : 0 < r)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x : Fin n → ℝ) :
+    @HasDerivAt ℝ _ ℝ NormedAddCommGroup.toAddCommGroup
+      RCLike.toInnerProductSpaceReal.toModule _ _
+      (fun u => heatMildClassicalND t₀ u u₀ q x)
+      (heatSemigroupLaplacianND (t - t₀) u₀ x +
+        heatDuhamelLaplacianND t₀ t q x + q t x) t := by
+  have hshift : HasDerivAt (fun u : ℝ => u - t₀) 1 t := by
+    simpa using (hasDerivAt_id t).sub_const t₀
+  have hhom := (hasDerivAt_heatSemigroupND_time_eq_laplacian
+    (sub_pos.mpr ht) u₀ x).comp t hshift
+  have hduh := hasDerivAt_heatDuhamelND_time_eq_source_add_laplacian
+    ht hr0 hq hH hqb hqholder x
+  have hsum := hhom.add hduh
+  have hfun : Filter.Eventually (fun u =>
+      heatMildClassicalND t₀ u u₀ q x =
+        (((fun s => heatSemigroupND s (⇑u₀) x) ∘ fun v => v - t₀) +
+          fun v => ∫ s in t₀..v,
+            heatSemigroupND (v - s) (⇑(q s)) x) u) (nhds t) := by
+    filter_upwards with u
+    rfl
+  have hout := hsum.congr_of_eventuallyEq hfun
+  apply hout.congr_deriv
+  simp only [mul_one]
+  ring
+
 end AnalyticPDE
 end RicciFlow
