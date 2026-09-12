@@ -3,13 +3,15 @@
 Selected theorem:
 `EinsteinComparisonEntry.einsteinScalarComparisonAndSharpLifespan`.
 
-Local preparation replay on 2026-09-11 passed the full `lake build` (3,030
-jobs), dependency-only Challenge compile, package/schema validation, vendored
-source verification, seven-result axiom audit, Comparator
-theorem-and-definition comparison, NanoDa kernel replay, and Lean
-default-kernel replay.  This replay covers the strengthened selected theorem,
-including its reciprocal scalar profile, one-sided blow-up limit, and lifetime
-identity.  The Comparator run used the explicit macOS fallback described below.
+Local renderability-repair replay on 2026-09-12 passed the full `lake build`
+(3,030 jobs), dependency-only Challenge compile, package/schema validation,
+vendored source verification, seven-result axiom audit, compiled closed-body
+audit, Comparator theorem-and-definition comparison, NanoDa kernel replay, and
+Lean default-kernel replay. The failed registry renderer's pinned
+core-notation audit also accepted both selected signatures. This replay covers
+the strengthened selected theorem, including its reciprocal scalar profile,
+one-sided blow-up limit, and lifetime identity. The Comparator run used the
+explicit macOS fallback described below.
 
 The reproducible checks are:
 
@@ -20,6 +22,7 @@ python3 scripts/check-challenge-boundary.py
 python3 scripts/check-vendored.py
 python3 scripts/check-package.py
 python3 scripts/check-axioms.py
+lake env lean scripts/check-closed-statement.lean
 bash scripts/verify-comparator.sh                 # Linux
 PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh  # macOS
 ```
@@ -44,8 +47,10 @@ Comparator pins:
 - NanoDa: `68d5ca9db226849b41a6fff59d796ff19d0a8840`
 - Landrun: `811cfff51ceaf3d9843708aa6d22e9b84ccac8b4`
 
-The macOS replay explicitly substitutes an unsandboxed compatibility wrapper
-because Landlock is Linux-only.  No automatic hosted build is configured for
-this package; a Linux reviewer can run the same command without the local opt-in
-to replay with real Landrun.  Passing local checks does not imply a hosted pass,
-editorial acceptance, intake, or registration.
+The compiled closed-statement audit rejects any candidate-defined mathematical
+data reachable from the selected definition body; proposition-valued compiler
+proof helpers are the only permitted candidate constants. The actual pinned
+Palomar renderer is replayed under Landrun by the dedicated hosted workflow.
+The macOS Comparator replay explicitly substitutes an unsandboxed compatibility
+wrapper because Landlock is Linux-only. Passing local checks does not imply a
+hosted pass, editorial acceptance, intake, or registration.

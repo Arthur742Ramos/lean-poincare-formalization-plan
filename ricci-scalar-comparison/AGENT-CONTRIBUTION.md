@@ -27,9 +27,10 @@ claimed.
 
 ## Verification boundary
 
-Lean checks the proof term.  Comparator checks the selected theorem and all
-Challenge definitions against the independent Challenge module, and NanoDa
-replays the exported proof in a second kernel.  Additional scripts check the
-Mathlib-only Challenge boundary, source inventory, immutable or reviewed blob
-identity, metadata, proof-hole policy, and transitive axiom surface.  These are
-mechanical safeguards, not mathematical peer review or editorial acceptance.
+Lean checks the proof term.  Comparator checks the selected theorem and its
+closed, self-contained statement definition against the independent Challenge
+module, and NanoDa replays the exported proof in a second kernel. Additional
+scripts check the Mathlib-only Challenge boundary, source inventory, immutable
+or reviewed blob identity, metadata, proof-hole policy, and transitive axiom
+surface. These are mechanical safeguards, not mathematical peer review or
+editorial acceptance.

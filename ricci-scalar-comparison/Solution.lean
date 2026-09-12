@@ -92,8 +92,10 @@ def quadraticScalarBarrier (n r₀ t₀ t : ℝ) : ℝ :=
 
 /-- Positive Einstein data generates an exact Ricci flow up to its singular
 time. Its scalar curvature attains the quadratic comparison barrier, equals the
-reciprocal Type-I-rate scalar profile and tends to positive infinity, while the homothetic
-metric cannot remain positive definite at that time. -/
+reciprocal Type-I-rate scalar profile and tends to positive infinity, while the
+homothetic metric cannot remain positive definite at that time. Every geometric
+operation is inlined so Comparator can check one closed proposition without
+asking the renderer to reconstruct dependent helper signatures. -/
 def completeStatement : Prop :=
   ∀ {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [CompleteSpace E] [Nontrivial E]
@@ -108,9 +110,54 @@ def completeStatement : Prop :=
     (_hvalue : ∀ (x : M) (v : TangentSpace I x), extension x v x = v)
     (_hext : ∀ (x : M) (v : TangentSpace I x),
       ContMDiff I (I.prod 𝓘(ℝ, E)) 3 (T% (extension x v)))
-    (lam t₀ : ℝ), 0 < lam → leviCivita g₀ cov₀ →
+    (lam t₀ : ℝ),
+    let curvature
+        (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+        (X Y Z : ∀ x : M, TangentSpace I x) : ∀ x : M, TangentSpace I x :=
+      (fun x ↦ cov (fun y ↦ cov Z y (Y y)) x (X x)) -
+      (fun x ↦ cov (fun y ↦ cov Z y (X y)) x (Y x)) -
+      (fun x ↦ cov Z x (VectorField.mlieBracket I X Y x))
+    let ricci
+        (g : ContMDiffRiemannianMetric I 2 E (TangentSpace I : M → Type _))
+        (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+        (x : M) (u v : TangentSpace I x) : ℝ := by
+      letI : RiemannianBundle (TangentSpace I : M → Type _) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : FiniteDimensional ℝ (TangentSpace I x) :=
+        VectorBundle.finiteDimensional ℝ E (TangentSpace I : M → Type _) x
+      let b := stdOrthonormalBasis ℝ (TangentSpace I x)
+      exact ∑ i, inner ℝ
+        (curvature cov (extension x (b i)) (extension x u) (extension x v) x) (b i)
+    let scalar
+        (g : ContMDiffRiemannianMetric I 2 E (TangentSpace I : M → Type _))
+        (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+        (x : M) : ℝ := by
+      letI : RiemannianBundle (TangentSpace I : M → Type _) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : FiniteDimensional ℝ (TangentSpace I x) :=
+        VectorBundle.finiteDimensional ℝ E (TangentSpace I : M → Type _) x
+      let b := stdOrthonormalBasis ℝ (TangentSpace I x)
+      exact ∑ i, ricci g cov x (b i) (b i)
+    let metricCompatible
+        (g : ContMDiffRiemannianMetric I 2 E (TangentSpace I : M → Type _))
+        (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) : Prop :=
+      letI : RiemannianBundle (TangentSpace I : M → Type _) :=
+        ⟨g.toRiemannianMetric⟩
+      ∀ {x : M} {U V : ∀ y : M, TangentSpace I y},
+        MDiffAt (T% U) x → MDiffAt (T% V) x → ∀ w : TangentSpace I x,
+          mvfderiv (I := I) (fun y ↦ inner ℝ (U y) (V y)) x w =
+            inner ℝ (cov U x w) (V x) + inner ℝ (U x) (cov V x w)
+    let leviCivita
+        (g : ContMDiffRiemannianMetric I 2 E (TangentSpace I : M → Type _))
+        (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) : Prop :=
+      cov.torsion = 0 ∧ metricCompatible g cov
+    let homotheticFactor (lam t₀ t : ℝ) : ℝ := 1 - 2 * lam * (t - t₀)
+    let extinctionTime (lam t₀ : ℝ) : ℝ := t₀ + 1 / (2 * lam)
+    let quadraticScalarBarrier (n r₀ t₀ t : ℝ) : ℝ :=
+      r₀ / (1 - (2 / n) * r₀ * (t - t₀))
+    0 < lam → leviCivita g₀ cov₀ →
       (∀ (x : M) (u v : TangentSpace I x),
-        ricci g₀ cov₀ extension x u v = lam * g₀.inner x u v) →
+        ricci g₀ cov₀ x u v = lam * g₀.inner x u v) →
       ∃ g : ℝ → ContMDiffRiemannianMetric I 2 E (TangentSpace I : M → Type _),
         (∀ {t : ℝ}, t < extinctionTime lam t₀ →
           ∀ (x : M) (u v : TangentSpace I x),
@@ -119,16 +166,16 @@ def completeStatement : Prop :=
         (∀ {t : ℝ}, t < extinctionTime lam t₀ →
           ∀ (x : M) (u v : TangentSpace I x),
             HasDerivAt (fun s ↦ (g s).inner x u v)
-              ((-2 : ℝ) * ricci (g t) cov₀ extension x u v) t) ∧
+              ((-2 : ℝ) * ricci (g t) cov₀ x u v) t) ∧
         (∀ {t : ℝ}, t < extinctionTime lam t₀ → ∀ x : M,
-          scalar (g t) cov₀ extension x =
+          scalar (g t) cov₀ x =
             quadraticScalarBarrier (Module.finrank ℝ E : ℝ)
               ((Module.finrank ℝ E : ℝ) * lam) t₀ t) ∧
         (∀ {t : ℝ}, t < extinctionTime lam t₀ → ∀ x : M,
-          scalar (g t) cov₀ extension x =
+          scalar (g t) cov₀ x =
             (Module.finrank ℝ E : ℝ) /
               (2 * (extinctionTime lam t₀ - t))) ∧
-        (∀ x : M, Tendsto (fun t : ℝ => scalar (g t) cov₀ extension x)
+        (∀ x : M, Tendsto (fun t : ℝ => scalar (g t) cov₀ x)
           (𝓝[<] extinctionTime lam t₀) atTop) ∧
         (extinctionTime lam t₀ - t₀ =
           (Module.finrank ℝ E : ℝ) /
@@ -212,7 +259,9 @@ private theorem leviCivita_iff
 theorem einsteinScalarComparisonAndSharpLifespan : completeStatement := by
   unfold completeStatement
   intro E _ _ _ _ _ H _ I M _ _ _ _ _ _ _ g₀ cov₀ _
-    extension hvalue hext lam t₀ hlam hLevi hEinstein
+    extension hvalue hext lam t₀
+  dsimp only
+  intro hlam hLevi hEinstein
   have hLevi' :
       letI : RiemannianBundle (TangentSpace I : M → Type _) :=
         ⟨g₀.toRiemannianMetric⟩
@@ -252,6 +301,8 @@ theorem einsteinScalarComparisonAndSharpLifespan : completeStatement := by
         (I := I) (M := M) (g t) g₀ cov₀ x u v]
       exact hEinstein' x u v
     apply hd.congr_deriv
+    change -(2 * lam) * g₀.inner x u v =
+      (-2 : ℝ) * ricci (g t) cov₀ extension x u v
     rw [hr]
     ring
   · intro t ht x
@@ -260,6 +311,9 @@ theorem einsteinScalarComparisonAndSharpLifespan : completeStatement := by
         lam t₀ t hlam).2 ht
     letI : RiemannianBundle (TangentSpace I : M → Type _) :=
       ⟨(g t).toRiemannianMetric⟩
+    change scalar (g t) cov₀ extension x =
+      RicciScalarComparison.quadraticScalarBarrier
+        (Module.finrank ℝ E : ℝ) ((Module.finrank ℝ E : ℝ) * lam) t₀ t
     rw [scalar_eq (g t) cov₀ extension hvalue hext x]
     change CovariantDerivative.scalarCurvature (cov := cov₀) x =
       RicciScalarComparison.quadraticScalarBarrier
@@ -269,6 +323,9 @@ theorem einsteinScalarComparisonAndSharpLifespan : completeStatement := by
   · intro t ht x
     letI : RiemannianBundle (TangentSpace I : M → Type _) :=
       ⟨(g t).toRiemannianMetric⟩
+    change scalar (g t) cov₀ extension x =
+      (Module.finrank ℝ E : ℝ) /
+        (2 * (RicciScalarComparison.extinctionTime lam t₀ - t))
     rw [scalar_eq (g t) cov₀ extension hvalue hext x]
     change CovariantDerivative.scalarCurvature (cov := cov₀) x =
       (Module.finrank ℝ E : ℝ) /
