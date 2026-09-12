@@ -30,6 +30,37 @@
 - Run the subproject's provenance regression check when provided; verify the
   metadata at the exact submitted SHA, not merely the working tree.
 
+## Palomar renderer preflight
+
+- Treat renderability as a separate release gate from the Lean build,
+  Comparator, NanoDa, and Palomar mechanical verification. Before every
+  intake, replay the exact pinned Palomar `render_challenge` pipeline on Linux
+  under the pinned Landrun commit, including its core-notation audit, against
+  the exact candidate SHA. A local signature probe is useful diagnosis but is
+  not a substitute for the complete hosted renderer replay.
+- Keep the Comparator-selected rendering surface minimal and closed. When the
+  theorem statement uses candidate-defined operations with dependent
+  signatures, inline their mathematical bodies as local `let` bindings inside
+  one selected `completeStatement : Prop`, and select the theorem plus that
+  definition rather than each helper definition separately. Do not weaken the
+  statement, replace geometric content with assumptions, or omit the complete
+  definition value from Comparator merely to make rendering pass.
+- Add a compiled-body regression audit for every such closed statement. It
+  must reject reachable candidate-defined mathematical data and may allow only
+  compiler-generated proposition proofs after checking that they are theorem
+  declarations. Text searches for helper names are not an adequate boundary
+  check.
+- The renderer's core-notation audit reconstructs selected declaration types
+  as trusted proxies without loading submitted environment extensions. A
+  complex dependent helper signature can therefore pass ordinary compilation
+  and Comparator yet fail kernel checking during proxy reconstruction. Diagnose
+  that failure from the pinned audit itself; do not misreport it as a theorem
+  or proof failure.
+- A new commit cannot repair an immutable intake checkout. Keep the failed
+  artifact/intake pair historical, verify the replacement commit independently,
+  and obtain fresh authorization before using the current Palomar recovery or
+  intake flow. Never assume a renderer retry will pick up repository HEAD.
+
 ## Submission-link handoff
 
 - Keep one explicit current artifact/intake pair. Label every older receipt
