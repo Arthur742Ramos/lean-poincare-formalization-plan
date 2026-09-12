@@ -35,6 +35,38 @@ local instance mildSchauderCoordinateBilinearContinuousAdd {n : ℕ} :
     ContinuousAdd ((Fin n → ℝ) →L[ℝ] ((Fin n → ℝ) →L[ℝ] ℝ)) :=
   IsTopologicalAddGroup.toContinuousAdd
 
+/-- The trace over the standard coordinate directions is bounded by the
+dimension times the operator norm of a curried bilinear form. -/
+lemma abs_sum_standardBasis_diag_le {n : ℕ}
+    (A : (Fin n → ℝ) →L[ℝ] ((Fin n → ℝ) →L[ℝ] ℝ)) :
+    |∑ k : Fin n, A (Pi.single k 1) (Pi.single k 1)| ≤ (n : ℝ) * ‖A‖ := by
+  rw [← Real.norm_eq_abs]
+  calc
+    ‖∑ k : Fin n, A (Pi.single k 1) (Pi.single k 1)‖ ≤
+        ∑ k : Fin n, ‖A (Pi.single k 1) (Pi.single k 1)‖ :=
+      norm_sum_le _ _
+    _ ≤ ∑ _k : Fin n, ‖A‖ := by
+      gcongr with k
+      have he : ‖(Pi.single k (1 : ℝ) : Fin n → ℝ)‖ ≤ 1 := by
+        apply (pi_norm_le_iff_of_nonneg zero_le_one).2
+        intro ell
+        by_cases h : ell = k
+        · subst ell
+          simp
+        · simp [h]
+      calc
+        ‖A (Pi.single k 1) (Pi.single k 1)‖ ≤
+            ‖A (Pi.single k 1)‖ * ‖(Pi.single k (1 : ℝ) : Fin n → ℝ)‖ :=
+          (A (Pi.single k 1)).le_opNorm _
+        _ ≤ (‖A‖ * ‖(Pi.single k (1 : ℝ) : Fin n → ℝ)‖) *
+            ‖(Pi.single k (1 : ℝ) : Fin n → ℝ)‖ := by
+          gcongr
+          exact A.le_opNorm _
+        _ ≤ ‖A‖ * 1 * 1 := by gcongr
+        _ = ‖A‖ := by ring
+    _ = (n : ℝ) * ‖A‖ := by
+      simp [Finset.sum_const, nsmul_eq_mul]
+
 /-- Full operator-norm form of the homogeneous spatial Hessian Schauder
 estimate.  Every mixed Hessian entry is controlled, then the finite entries
 are summed to bound the curried bilinear operator norm. -/
@@ -140,6 +172,54 @@ theorem norm_heatMildSpatialHessianCLM_le_explicit
     hq hH hqb hqholder x).trans ?_
   gcongr with j k
   exact norm_heatDuhamelHessianEntryNDbcf_le ht.le hr0 hq hH hqb hqholder j k
+
+/-- The actual mild Laplacian is bounded by dimension times the norm of the
+genuine full Frechet Hessian. -/
+theorem abs_heatMildSpatialLaplacianND_le
+    {n : ℕ} {t₀ t r : ℝ} (ht : t₀ < t) (hr0 : 0 < r)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    (hq : Continuous q) {C H : ℝ} (hH : 0 ≤ H)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x : Fin n → ℝ) :
+    |heatMildSpatialLaplacianND t₀ t u₀ q x| ≤
+      (n : ℝ) *
+        ‖heatMildSpatialHessianCLM ht.le hr0 u₀ hq hH hqb hqholder x‖ := by
+  rw [← sum_heatMildSpatialHessianCLM_diag_eq_laplacian
+    ht hr0 u₀ hq hH hqb hqholder x]
+  exact abs_sum_standardBasis_diag_le _
+
+/-- Explicit sup estimate for the actual time derivative `∂ₜu = Δu + q`
+at a positive-time point. -/
+theorem abs_heatMildTimeDerivND_le_explicit
+    {n : ℕ} {t₀ t r : ℝ} (ht : t₀ < t) (hr0 : 0 < r)
+    (u₀ : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {H₀ : ℝ} (hH₀ : 0 ≤ H₀)
+    (hu₀holder : ∀ x y, |u₀ y - u₀ x| ≤
+      H₀ * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    (hq : Continuous q) {C H : ℝ} (hH : 0 ≤ H)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x : Fin n → ℝ) :
+    |heatMildTimeDerivND t₀ u₀ q (t, x)| ≤
+      (n : ℝ) *
+        ((∑ j : Fin n, ∑ k : Fin n,
+          H₀ * (t - t₀) ^ (-1 + r / 2) *
+            heatHessianEntryHolderMoment n r j k) +
+        ∑ j : Fin n, ∑ k : Fin n,
+          H * heatHessianEntryHolderMoment n r j k *
+            ((t - t₀) ^ (r / 2) / (r / 2))) + C := by
+  rw [heatMildTimeDerivND, if_pos ht]
+  refine (abs_add_le _ _).trans ?_
+  have hLap := abs_heatMildSpatialLaplacianND_le ht hr0 u₀ hq hH hqb hqholder x
+  have hHess := norm_heatMildSpatialHessianCLM_le_explicit ht hr0 u₀ hH₀
+    hu₀holder hq hH hqb hqholder x
+  exact add_le_add (hLap.trans (mul_le_mul_of_nonneg_left hHess (Nat.cast_nonneg n)))
+    (by simpa only [Real.norm_eq_abs] using hqb t x)
 
 end HessianNorms
 
