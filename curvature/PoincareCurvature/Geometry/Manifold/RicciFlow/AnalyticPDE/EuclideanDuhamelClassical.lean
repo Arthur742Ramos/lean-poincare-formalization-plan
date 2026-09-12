@@ -378,7 +378,7 @@ global coordinatewise `r`-Hölder modulus.  Unlike the earlier Lipschitz-only
 estimate, this has the exact `t^(r/2)` scale needed at a Schauder endpoint. -/
 theorem abs_heatSemigroupND_sub_self_le_of_coordHolder
     {n : ℕ} {t r : ℝ} (ht : 0 < t) (hr : 0 ≤ r)
-    {w : (Fin n → ℝ) → ℝ} {C H : ℝ} (hH : 0 ≤ H)
+    {w : (Fin n → ℝ) → ℝ} {C H : ℝ} (_hH : 0 ≤ H)
     (hwm : AEStronglyMeasurable w) (hwb : ∀ y, ‖w y‖ ≤ C)
     (hholder : ∀ a b, |w a - w b| ≤
       H * ∑ j : Fin n, |(a - b) j| ^ r)
@@ -475,6 +475,46 @@ theorem norm_heatSemigroupNDbcf_sub_self_le_of_coordHolder
   rw [BoundedContinuousFunction.sub_apply, heatSemigroupNDbcf_apply,
     Real.norm_eq_abs]
   exact hb x
+
+/-- Strong right-continuity at heat-time zero for globally coordinatewise
+Hölder bounded data. -/
+theorem continuousWithinAt_heatFlowPathBcf_zero_of_coordHolder
+    {n : ℕ} {r : ℝ} (hr : 0 < r)
+    (w : BoundedContinuousFunction (Fin n → ℝ) ℝ) {H : ℝ} (hH : 0 ≤ H)
+    (hholder : ∀ a b, |w a - w b| ≤
+      H * ∑ j : Fin n, |(a - b) j| ^ r) :
+    ContinuousWithinAt (heatFlowPathBcf w) (Set.Ici 0) 0 := by
+  have hzero : heatFlowPathBcf w 0 = w := dif_neg (lt_irrefl 0)
+  let g : ℝ → ℝ := fun s =>
+    H * ∑ _j : Fin n, (Real.sqrt s) ^ r * gaussianAbsMoment r
+  have hbound : ∀ s : ℝ, 0 ≤ s → dist (heatFlowPathBcf w s) w ≤ g s := by
+    intro s hs
+    rcases eq_or_lt_of_le hs with rfl | hspos
+    · rw [hzero, dist_self]
+      simp only [g, Real.sqrt_zero, Real.zero_rpow hr.ne', zero_mul,
+        Finset.sum_const_zero, mul_zero]
+      exact le_rfl
+    · rw [heatFlowPathBcf_of_pos w hspos, dist_eq_norm]
+      exact norm_heatSemigroupNDbcf_sub_self_le_of_coordHolder
+        hspos hr.le w hH hholder
+  have hg : Filter.Tendsto g (nhdsWithin 0 (Set.Ici 0)) (nhds 0) := by
+    have hpow : Continuous (fun s : ℝ => (Real.sqrt s) ^ r) :=
+      Real.continuous_sqrt.rpow_const (fun _ => Or.inr hr.le)
+    have hcont : ContinuousAt g 0 :=
+      (continuous_const.mul
+        (continuous_finsetSum Finset.univ
+          (fun _j _ => hpow.mul continuous_const))).continuousAt
+    have hlim : Filter.Tendsto g (nhdsWithin 0 (Set.Ici 0)) (nhds (g 0)) :=
+      hcont.tendsto.mono_left nhdsWithin_le_nhds
+    simpa only [g, Real.sqrt_zero, Real.zero_rpow hr.ne', zero_mul,
+      Finset.sum_const_zero, mul_zero] using hlim
+  show Filter.Tendsto (heatFlowPathBcf w) (nhdsWithin 0 (Set.Ici 0))
+    (nhds (heatFlowPathBcf w 0))
+  rw [hzero, tendsto_iff_dist_tendsto_zero]
+  have hev : ∀ᶠ s in nhdsWithin (0 : ℝ) (Set.Ici 0),
+      dist (heatFlowPathBcf w s) w ≤ g s := by
+    filter_upwards [self_mem_nhdsWithin] with s hs using hbound s hs
+  exact squeeze_zero' (Filter.Eventually.of_forall (fun _ => dist_nonneg)) hev hg
 
 end AnalyticPDE
 end RicciFlow
