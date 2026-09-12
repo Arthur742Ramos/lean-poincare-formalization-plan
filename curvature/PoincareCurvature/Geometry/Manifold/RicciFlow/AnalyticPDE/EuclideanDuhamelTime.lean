@@ -151,6 +151,32 @@ theorem hasDerivAt_heatSemigroupND_time_eq_laplacian
       filter_upwards with y
       simp only [Finset.mul_sum, Finset.sum_mul]
 
+/-- A single coordinate heat Hessian is integrable from heat time zero for
+globally coordinatewise Hölder data. -/
+theorem intervalIntegrable_heatHessianCoordConvolutionND_zero
+    {n : ℕ} {T r : ℝ} (hT : 0 ≤ T) (hr0 : 0 < r)
+    (w : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {H : ℝ} (hH : 0 ≤ H)
+    (hholder : ∀ a b, |w a - w b| ≤
+      H * ∑ j : Fin n, |(a - b) j| ^ r)
+    (k : Fin n) (x : Fin n → ℝ) :
+    IntervalIntegrable (fun u => heatHessianCoordConvolutionND u w k x)
+      volume 0 T := by
+  have hi := intervalIntegrable_hessian_heatKernelND_convolution
+    (n := n) (t₀ := 0) (t := T) (r := r) hT hr0
+    (q := fun _ => w) continuous_const hH
+    (fun _ y => w.norm_coe_le_norm y) (fun _ a b => by
+      calc
+        |w b - w a| ≤ H * ∑ j : Fin n, |(b - a) j| ^ r := hholder b a
+        _ = H * ∑ j : Fin n, |(a - b) j| ^ r := by
+          congr 1
+          apply Finset.sum_congr rfl
+          intro j _
+          simp only [Pi.sub_apply, abs_sub_comm]) x k
+  have hc := hi.comp_sub_left T
+  simpa only [sub_zero, sub_self, sub_sub_cancel,
+    heatHessianCoordConvolutionND] using hc.symm
+
 /-- For globally coordinatewise Hölder data, the positive-time heat
 Laplacian is integrable all the way down to heat time zero. -/
 theorem intervalIntegrable_heatSemigroupLaplacianND
@@ -165,20 +191,8 @@ theorem intervalIntegrable_heatSemigroupLaplacianND
   have hk : ∀ k : Fin n, IntervalIntegrable
       (fun u => heatHessianCoordConvolutionND u w k x) volume 0 T := by
     intro k
-    have hi := intervalIntegrable_hessian_heatKernelND_convolution
-      (n := n) (t₀ := 0) (t := T) (r := r) hT hr0
-      (q := fun _ => w) continuous_const hH
-      (fun _ y => w.norm_coe_le_norm y) (fun _ a b => by
-        calc
-          |w b - w a| ≤ H * ∑ j : Fin n, |(b - a) j| ^ r := hholder b a
-          _ = H * ∑ j : Fin n, |(a - b) j| ^ r := by
-            congr 1
-            apply Finset.sum_congr rfl
-            intro j _
-            simp only [Pi.sub_apply, abs_sub_comm]) x k
-    have hc := hi.comp_sub_left T
-    simpa only [sub_zero, sub_self, sub_sub_cancel,
-      heatHessianCoordConvolutionND] using hc.symm
+    exact intervalIntegrable_heatHessianCoordConvolutionND_zero
+      hT hr0 w hH hholder k x
   have hsum : IntervalIntegrable
       (∑ k : Fin n, fun u => heatHessianCoordConvolutionND u w k x)
       volume 0 T := IntervalIntegrable.sum Finset.univ (fun k _ => hk k)
@@ -395,6 +409,597 @@ theorem continuousAt_heatDuhamelLaplacianND_time
         ((fun t => heatDuhamelHessianCoordND t₀ t q k x) +
           fun t => ∑ i ∈ s, heatDuhamelHessianCoordND t₀ t q i x) t₁
       exact hadd
+
+/-! ## Triangular Fubini for the generator kernel -/
+
+/-- The open time triangle `a < s < v < b`, ordered as `(v,s)`.  Removing
+its boundary is harmless for Lebesgue integration and makes the heat time
+`v-s` strictly positive everywhere on the set. -/
+def heatTimeTriangle (a b : ℝ) : Set (ℝ × ℝ) :=
+  {z | a < z.1 ∧ z.1 < b ∧ a < z.2 ∧ z.2 < z.1}
+
+theorem measurableSet_heatTimeTriangle (a b : ℝ) :
+    MeasurableSet (heatTimeTriangle a b) := by
+  simp only [heatTimeTriangle]
+  measurability
+
+/-- A vertical section of the open time-triangle indicator is the interval
+integral over the earlier source times. -/
+theorem integral_indicator_heatTimeTriangle_left
+    {a b v : ℝ} (hv : v ∈ Set.Ioo a b) (G : ℝ × ℝ → ℝ) :
+    (∫ s, Set.indicator (heatTimeTriangle a b) G (v, s)) =
+      ∫ s in a..v, G (v, s) := by
+  have heq : (fun s => Set.indicator (heatTimeTriangle a b) G (v, s)) =
+      Set.indicator (Set.Ioo a v) (fun s => G (v, s)) := by
+    funext s
+    by_cases hs : s ∈ Set.Ioo a v
+    · have htri : (v, s) ∈ heatTimeTriangle a b :=
+        ⟨hv.1, hv.2, hs.1, hs.2⟩
+      rw [Set.indicator_of_mem hs, Set.indicator_of_mem htri]
+    · have hn : (v, s) ∉ heatTimeTriangle a b := by
+        intro htri
+        exact hs ⟨htri.2.2.1, htri.2.2.2⟩
+      rw [Set.indicator_of_notMem hs, Set.indicator_of_notMem hn]
+  rw [heq, MeasureTheory.integral_indicator measurableSet_Ioo,
+    MeasureTheory.setIntegral_congr_set Ioo_ae_eq_Ioc,
+    ← intervalIntegral.integral_of_le hv.1.le]
+
+/-- A horizontal section of the open time-triangle indicator is the interval
+integral over the later final times. -/
+theorem integral_indicator_heatTimeTriangle_right
+    {a b s : ℝ} (hs : s ∈ Set.Ioo a b) (G : ℝ × ℝ → ℝ) :
+    (∫ v, Set.indicator (heatTimeTriangle a b) G (v, s)) =
+      ∫ v in s..b, G (v, s) := by
+  have heq : (fun v => Set.indicator (heatTimeTriangle a b) G (v, s)) =
+      Set.indicator (Set.Ioo s b) (fun v => G (v, s)) := by
+    funext v
+    by_cases hv : v ∈ Set.Ioo s b
+    · have htri : (v, s) ∈ heatTimeTriangle a b :=
+        ⟨hs.1.trans hv.1, hv.2, hs.1, hv.1⟩
+      rw [Set.indicator_of_mem hv, Set.indicator_of_mem htri]
+    · have hn : (v, s) ∉ heatTimeTriangle a b := by
+        intro htri
+        exact hv ⟨htri.2.2.2, htri.2.1⟩
+      rw [Set.indicator_of_notMem hv, Set.indicator_of_notMem hn]
+  rw [heq, MeasureTheory.integral_indicator measurableSet_Ioo,
+    MeasureTheory.setIntegral_congr_set Ioo_ae_eq_Ioc,
+    ← intervalIntegral.integral_of_le hs.2.le]
+
+/-- Joint measurability in final time and source time of a coordinate heat
+Hessian convolution. -/
+theorem aestronglyMeasurable_heatHessianCoordConvolutionND_twoTime
+    {n : ℕ}
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (k : Fin n) (x : Fin n → ℝ) :
+    AEStronglyMeasurable (fun z : ℝ × ℝ =>
+      heatHessianCoordConvolutionND (z.1 - z.2) (q z.2) k x)
+      ((volume : Measure ℝ).prod volume) := by
+  have hK : Measurable (fun z : (ℝ × ℝ) × (Fin n → ℝ) =>
+      heatKernelND (z.1.1 - z.1.2) (x - z.2)) := by
+    exact measurable_uncurry_heatKernelND.comp
+      (((measurable_fst.comp measurable_fst).sub
+          (measurable_snd.comp measurable_fst)).prodMk
+        (measurable_const.sub measurable_snd))
+  have hc : Measurable (fun z : (ℝ × ℝ) × (Fin n → ℝ) =>
+      (x - z.2) k ^ 2 / (4 * (z.1.1 - z.1.2) ^ 2) -
+        1 / (2 * (z.1.1 - z.1.2))) := by
+    fun_prop
+  have hQ : Measurable (fun z : (ℝ × ℝ) × (Fin n → ℝ) =>
+      (q z.1.2) z.2) := by
+    exact (ContinuousEval.continuous_eval.comp
+      ((hq.comp (continuous_snd.comp continuous_fst)).prodMk continuous_snd)).measurable
+  have hG : Measurable (fun z : (ℝ × ℝ) × (Fin n → ℝ) =>
+      (heatKernelND (z.1.1 - z.1.2) (x - z.2) *
+        ((x - z.2) k ^ 2 / (4 * (z.1.1 - z.1.2) ^ 2) -
+          1 / (2 * (z.1.1 - z.1.2)))) * (q z.1.2) z.2) :=
+    (hK.mul hc).mul hQ
+  simpa only [heatHessianCoordConvolutionND] using
+    (hG.aestronglyMeasurable
+      (μ := ((volume : Measure ℝ).prod volume).prod
+        (volume : Measure (Fin n → ℝ)))).integral_prod_right'
+
+/-- The coordinate Hessian kernel is integrable on a finite open time
+triangle.  This is the two-time integrability needed for Fubini: the spatial
+Hölder cancellation bounds the kernel by `(v-s)^(-1+r/2)`, and integrating
+first in `s` gives the finite outer majorant `(v-a)^(r/2)`. -/
+theorem integrable_heatHessianCoordConvolutionND_timeTriangle
+    {n : ℕ} {a b r : ℝ} (hab : a ≤ b) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ j : Fin n, |(x - y) j| ^ r)
+    (k : Fin n) (x : Fin n → ℝ) :
+    Integrable (Set.indicator (heatTimeTriangle a b)
+      (fun z : ℝ × ℝ =>
+        heatHessianCoordConvolutionND (z.1 - z.2) (q z.2) k x))
+      ((volume : Measure ℝ).prod volume) := by
+  let G : ℝ × ℝ → ℝ := fun z =>
+    heatHessianCoordConvolutionND (z.1 - z.2) (q z.2) k x
+  let F : ℝ × ℝ → ℝ := Set.indicator (heatTimeTriangle a b) G
+  let A : ℝ := H * heatHessianHolderMoment n r k
+  let p : ℝ := -1 + r / 2
+  let R : ℝ → ℝ := fun v =>
+    Set.indicator (Set.Ioo a b)
+      (fun v => A * (v - a) ^ (r / 2) / (r / 2)) v
+  have hA : 0 ≤ A := mul_nonneg hH (heatHessianHolderMoment_nonneg n r k)
+  have hp : (-1 : ℝ) < p := by simp only [p]; linarith
+  have hFm : AEStronglyMeasurable F ((volume : Measure ℝ).prod volume) := by
+    exact (aestronglyMeasurable_heatHessianCoordConvolutionND_twoTime
+      hq k x).indicator (measurableSet_heatTimeTriangle a b)
+  have hsection : ∀ v : ℝ, Integrable (fun s => F (v, s)) := by
+    intro v
+    by_cases hv : v ∈ Set.Ioo a b
+    · have hi := intervalIntegrable_hessian_heatKernelND_convolution
+        (n := n) (t₀ := a) (t := v) (r := r) hv.1.le hr0 hq hH hqb
+        hqholder x k
+      have hiOn : IntegrableOn
+          (fun s => heatHessianCoordConvolutionND (v - s) (q s) k x)
+          (Set.Ioo a v) := by
+        have hiIoc := (intervalIntegrable_iff_integrableOn_Ioc_of_le hv.1.le).mp hi
+        exact hiIoc.congr_set_ae Ioo_ae_eq_Ioc
+      have hind := hiOn.integrable_indicator measurableSet_Ioo
+      have heq : (fun s => F (v, s)) = Set.indicator (Set.Ioo a v)
+          (fun s => heatHessianCoordConvolutionND (v - s) (q s) k x) := by
+        funext s
+        by_cases hs : s ∈ Set.Ioo a v
+        · have htri : (v, s) ∈ heatTimeTriangle a b :=
+            ⟨hv.1, hv.2, hs.1, hs.2⟩
+          rw [Set.indicator_of_mem hs]
+          simpa only [F] using Set.indicator_of_mem htri G
+        · have hn : (v, s) ∉ heatTimeTriangle a b := by
+            intro htri
+            exact hs ⟨htri.2.2.1, htri.2.2.2⟩
+          rw [Set.indicator_of_notMem hs]
+          simpa only [F] using Set.indicator_of_notMem hn G
+      rw [heq]
+      exact hind
+    · have hzero : (fun s => F (v, s)) = fun _ => (0 : ℝ) := by
+        funext s
+        have hn : ¬(a < v ∧ v < b ∧ a < s ∧ s < v) := by
+          intro h
+          exact hv ⟨h.1, h.2.1⟩
+        have hn' : (v, s) ∉ heatTimeTriangle a b := by
+          simpa only [heatTimeTriangle, Set.mem_ofPred_eq] using hn
+        simpa only [F] using Set.indicator_of_notMem hn' G
+      rw [hzero]
+      exact MeasureTheory.integrable_zero ℝ ℝ volume
+  have hR : Integrable R := by
+    have hbase : IntervalIntegrable (fun z : ℝ => z ^ (r / 2))
+        volume 0 (b - a) :=
+      intervalIntegral.intervalIntegrable_rpow' (by linarith)
+    have hshift := hbase.comp_sub_right a
+    have hw : IntervalIntegrable (fun v : ℝ => (v - a) ^ (r / 2))
+        volume a b := by simpa only [zero_add, sub_add_cancel] using hshift
+    have hscaled : IntervalIntegrable
+        (fun v : ℝ => A * (v - a) ^ (r / 2) / (r / 2)) volume a b :=
+      (hw.const_mul A).div_const (r / 2)
+    have hIoc := (intervalIntegrable_iff_integrableOn_Ioc_of_le hab).mp hscaled
+    have hIoo : IntegrableOn
+        (fun v : ℝ => A * (v - a) ^ (r / 2) / (r / 2)) (Set.Ioo a b) :=
+      hIoc.congr_set_ae Ioo_ae_eq_Ioc
+    exact hIoo.integrable_indicator measurableSet_Ioo
+  have hJm : AEStronglyMeasurable (fun v => ∫ s, ‖F (v, s)‖) :=
+    hFm.norm.integral_prod_right'
+  have hJbound : ∀ v : ℝ, (∫ s, ‖F (v, s)‖) ≤ R v := by
+    intro v
+    by_cases hv : v ∈ Set.Ioo a b
+    · have hwbase : IntervalIntegrable (fun z : ℝ => z ^ p)
+          volume 0 (v - a) := intervalIntegral.intervalIntegrable_rpow' hp
+      have hwcomp := hwbase.comp_sub_left v
+      have hw : IntervalIntegrable (fun s : ℝ => (v - s) ^ p)
+          volume a v := by
+        simpa only [sub_zero, sub_sub_cancel] using hwcomp.symm
+      have hmajorI : Integrable
+          (Set.indicator (Set.Ioo a v) (fun s => A * (v - s) ^ p)) := by
+        have hwIoc := (intervalIntegrable_iff_integrableOn_Ioc_of_le hv.1.le).mp
+          (hw.const_mul A)
+        have hwIoo := hwIoc.congr_set_ae Ioo_ae_eq_Ioc
+        exact hwIoo.integrable_indicator measurableSet_Ioo
+      have hpoint : ∀ s, ‖F (v, s)‖ ≤
+          Set.indicator (Set.Ioo a v) (fun s => A * (v - s) ^ p) s := by
+        intro s
+        by_cases hs : s ∈ Set.Ioo a v
+        · rw [Set.indicator_of_mem hs]
+          have htri : (v, s) ∈ heatTimeTriangle a b :=
+            ⟨hv.1, hv.2, hs.1, hs.2⟩
+          rw [show F (v, s) = G (v, s) by
+            simpa only [F] using Set.indicator_of_mem htri G]
+          rw [Real.norm_eq_abs]
+          have hbnd := abs_secondDeriv_heatKernelND_convolution_le_of_coordHolder_scale
+            (sub_pos.mpr hs.2) hr0.le hH x k
+            (q s).continuous.aestronglyMeasurable (hqb s) (hqholder s x)
+          calc
+            |G (v, s)| ≤ H * (v - s) ^ (-1 + r / 2) *
+                heatHessianHolderMoment n r k := by
+              simpa only [G, heatHessianCoordConvolutionND] using hbnd
+            _ = A * (v - s) ^ p := by simp only [A, p]; ring
+        · rw [Set.indicator_of_notMem hs]
+          have hn : (v, s) ∉ heatTimeTriangle a b := by
+            intro htri
+            exact hs ⟨htri.2.2.1, htri.2.2.2⟩
+          rw [show F (v, s) = 0 by
+            simpa only [F] using Set.indicator_of_notMem hn G, norm_zero]
+      calc
+        (∫ s, ‖F (v, s)‖) ≤
+            ∫ s, Set.indicator (Set.Ioo a v)
+              (fun s => A * (v - s) ^ p) s := by
+          exact integral_mono_of_nonneg
+            (Filter.Eventually.of_forall (fun _ => norm_nonneg _))
+            hmajorI (Filter.Eventually.of_forall hpoint)
+        _ = A * (v - a) ^ (r / 2) / (r / 2) := by
+          rw [MeasureTheory.integral_indicator measurableSet_Ioo,
+            MeasureTheory.setIntegral_congr_set Ioo_ae_eq_Ioc,
+            ← intervalIntegral.integral_of_le hv.1.le,
+            intervalIntegral.integral_const_mul,
+            integral_rpow_sub a v hp]
+          rw [show p + 1 = r / 2 by simp only [p]; ring]
+          ring
+        _ = R v := by simp only [R, Set.indicator_of_mem hv]
+    · have hz : (fun s => F (v, s)) = fun _ => (0 : ℝ) := by
+        funext s
+        have hn : (v, s) ∉ heatTimeTriangle a b := by
+          intro htri
+          exact hv ⟨htri.1, htri.2.1⟩
+        simpa only [F] using Set.indicator_of_notMem hn G
+      have hRv : R v = 0 := by
+        simpa only [R] using Set.indicator_of_notMem hv
+          (fun v => A * (v - a) ^ (r / 2) / (r / 2))
+      rw [hRv]
+      have hnormzero : (fun s => ‖F (v, s)‖) = fun _ => (0 : ℝ) := by
+        funext s
+        rw [show F (v, s) = 0 by exact congrFun hz s, norm_zero]
+      rw [hnormzero]
+      simp
+  have hJ : Integrable (fun v => ∫ s, ‖F (v, s)‖) :=
+    hR.mono' hJm (Filter.Eventually.of_forall (fun v => by
+      have hJn : 0 ≤ ∫ s : ℝ, ‖F (v, s)‖ :=
+        integral_nonneg (fun s : ℝ => norm_nonneg (F (v, s)))
+      rw [Real.norm_eq_abs, abs_of_nonneg hJn]
+      exact hJbound v))
+  have hprod : Integrable F ((volume : Measure ℝ).prod volume) :=
+    (integrable_prod_iff hFm).mpr
+      ⟨Filter.Eventually.of_forall (fun v => hsection v),
+        hJ⟩
+  simpa only [F, G] using hprod
+
+/-- The time path of a coordinate Duhamel Hessian is interval-integrable on
+every finite interval beginning at the initial time. -/
+theorem intervalIntegrable_heatDuhamelHessianCoordND_time
+    {n : ℕ} {a b r : ℝ} (hab : a ≤ b) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ j : Fin n, |(x - y) j| ^ r)
+    (k : Fin n) (x : Fin n → ℝ) :
+    IntervalIntegrable
+      (fun v => heatDuhamelHessianCoordND a v q k x) volume a b := by
+  let G : ℝ × ℝ → ℝ := fun z =>
+    heatHessianCoordConvolutionND (z.1 - z.2) (q z.2) k x
+  let F : ℝ × ℝ → ℝ := Set.indicator (heatTimeTriangle a b) G
+  have hF : Integrable F ((volume : Measure ℝ).prod volume) := by
+    simpa only [F, G] using
+      integrable_heatHessianCoordConvolutionND_timeTriangle
+        hab hr0 hq hH hqb hqholder k x
+  have hout : Integrable (fun v => ∫ s, F (v, s)) := hF.integral_prod_left
+  have heq : (fun v => ∫ s, F (v, s)) =
+      Set.indicator (Set.Ioo a b)
+        (fun v => heatDuhamelHessianCoordND a v q k x) := by
+    funext v
+    by_cases hv : v ∈ Set.Ioo a b
+    · rw [Set.indicator_of_mem hv]
+      simpa only [F, G, heatDuhamelHessianCoordND] using
+        integral_indicator_heatTimeTriangle_left hv G
+    · rw [Set.indicator_of_notMem hv]
+      apply integral_eq_zero_of_ae
+      filter_upwards with s
+      have hn : (v, s) ∉ heatTimeTriangle a b := by
+        intro htri
+        exact hv ⟨htri.1, htri.2.1⟩
+      change F (v, s) = 0
+      simpa only [F] using Set.indicator_of_notMem hn G
+  rw [heq] at hout
+  have hIoo : IntegrableOn (fun v => heatDuhamelHessianCoordND a v q k x)
+      (Set.Ioo a b) := (integrable_indicator_iff measurableSet_Ioo).mp hout
+  have hIoc : IntegrableOn (fun v => heatDuhamelHessianCoordND a v q k x)
+      (Set.Ioc a b) := hIoo.congr_set_ae Ioo_ae_eq_Ioc.symm
+  exact (intervalIntegrable_iff_integrableOn_Ioc_of_le hab).mpr hIoc
+
+/-- The horizontal time-triangle section—integrating a fixed source time
+through all later final times—is itself interval-integrable in the source
+time. -/
+theorem intervalIntegrable_integral_heatHessianCoordConvolutionND_laterTime
+    {n : ℕ} {a b r : ℝ} (hab : a ≤ b) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ j : Fin n, |(x - y) j| ^ r)
+    (k : Fin n) (x : Fin n → ℝ) :
+    IntervalIntegrable (fun s => ∫ v in s..b,
+      heatHessianCoordConvolutionND (v - s) (q s) k x) volume a b := by
+  let G : ℝ × ℝ → ℝ := fun z =>
+    heatHessianCoordConvolutionND (z.1 - z.2) (q z.2) k x
+  let F : ℝ × ℝ → ℝ := Set.indicator (heatTimeTriangle a b) G
+  have hF : Integrable F ((volume : Measure ℝ).prod volume) := by
+    simpa only [F, G] using
+      integrable_heatHessianCoordConvolutionND_timeTriangle
+        hab hr0 hq hH hqb hqholder k x
+  have hout : Integrable (fun s => ∫ v, F (v, s)) := hF.integral_prod_right
+  have heq : (fun s => ∫ v, F (v, s)) =
+      Set.indicator (Set.Ioo a b) (fun s => ∫ v in s..b,
+        heatHessianCoordConvolutionND (v - s) (q s) k x) := by
+    funext s
+    by_cases hs : s ∈ Set.Ioo a b
+    · rw [Set.indicator_of_mem hs]
+      simpa only [F, G] using integral_indicator_heatTimeTriangle_right hs G
+    · rw [Set.indicator_of_notMem hs]
+      apply integral_eq_zero_of_ae
+      filter_upwards with v
+      have hn : (v, s) ∉ heatTimeTriangle a b := by
+        intro htri
+        exact hs ⟨htri.2.2.1, htri.2.2.2.trans htri.2.1⟩
+      change F (v, s) = 0
+      simpa only [F] using Set.indicator_of_notMem hn G
+  rw [heq] at hout
+  have hIoo : IntegrableOn (fun s => ∫ v in s..b,
+      heatHessianCoordConvolutionND (v - s) (q s) k x) (Set.Ioo a b) :=
+    (integrable_indicator_iff measurableSet_Ioo).mp hout
+  have hIoc : IntegrableOn (fun s => ∫ v in s..b,
+      heatHessianCoordConvolutionND (v - s) (q s) k x) (Set.Ioc a b) :=
+    hIoo.congr_set_ae Ioo_ae_eq_Ioc.symm
+  exact (intervalIntegrable_iff_integrableOn_Ioc_of_le hab).mpr hIoc
+
+/-- Fubini on the heat-time triangle, specialized to one coordinate Hessian.
+The open-boundary representation is converted back to interval integrals on
+both sides. -/
+theorem integral_heatHessianCoordConvolutionND_timeTriangle_swap
+    {n : ℕ} {a b r : ℝ} (hab : a ≤ b) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ j : Fin n, |(x - y) j| ^ r)
+    (k : Fin n) (x : Fin n → ℝ) :
+    (∫ v in a..b, ∫ s in a..v,
+      heatHessianCoordConvolutionND (v - s) (q s) k x) =
+      ∫ s in a..b, ∫ v in s..b,
+        heatHessianCoordConvolutionND (v - s) (q s) k x := by
+  let G : ℝ × ℝ → ℝ := fun z =>
+    heatHessianCoordConvolutionND (z.1 - z.2) (q z.2) k x
+  let F : ℝ × ℝ → ℝ := Set.indicator (heatTimeTriangle a b) G
+  have hF : Integrable F ((volume : Measure ℝ).prod volume) := by
+    simpa only [F, G] using
+      integrable_heatHessianCoordConvolutionND_timeTriangle
+        hab hr0 hq hH hqb hqholder k x
+  have hleftSection : (fun v => ∫ s, F (v, s)) =
+      Set.indicator (Set.Ioo a b) (fun v => ∫ s in a..v, G (v, s)) := by
+    funext v
+    by_cases hv : v ∈ Set.Ioo a b
+    · rw [Set.indicator_of_mem hv]
+      have heq : (fun s => F (v, s)) =
+          Set.indicator (Set.Ioo a v) (fun s => G (v, s)) := by
+        funext s
+        by_cases hs : s ∈ Set.Ioo a v
+        · have htri : (v, s) ∈ heatTimeTriangle a b :=
+            ⟨hv.1, hv.2, hs.1, hs.2⟩
+          rw [Set.indicator_of_mem hs]
+          simpa only [F] using Set.indicator_of_mem htri G
+        · have hn : (v, s) ∉ heatTimeTriangle a b := by
+            intro htri
+            exact hs ⟨htri.2.2.1, htri.2.2.2⟩
+          rw [Set.indicator_of_notMem hs]
+          simpa only [F] using Set.indicator_of_notMem hn G
+      rw [heq, MeasureTheory.integral_indicator measurableSet_Ioo,
+        MeasureTheory.setIntegral_congr_set Ioo_ae_eq_Ioc,
+        ← intervalIntegral.integral_of_le hv.1.le]
+    · rw [Set.indicator_of_notMem hv]
+      apply integral_eq_zero_of_ae
+      filter_upwards with s
+      have hn : (v, s) ∉ heatTimeTriangle a b := by
+        intro htri
+        exact hv ⟨htri.1, htri.2.1⟩
+      change F (v, s) = 0
+      simpa only [F] using Set.indicator_of_notMem hn G
+  have hrightSection : (fun s => ∫ v, F (v, s)) =
+      Set.indicator (Set.Ioo a b) (fun s => ∫ v in s..b, G (v, s)) := by
+    funext s
+    by_cases hs : s ∈ Set.Ioo a b
+    · rw [Set.indicator_of_mem hs]
+      have heq : (fun v => F (v, s)) =
+          Set.indicator (Set.Ioo s b) (fun v => G (v, s)) := by
+        funext v
+        by_cases hv : v ∈ Set.Ioo s b
+        · have htri : (v, s) ∈ heatTimeTriangle a b :=
+            ⟨hs.1.trans hv.1, hv.2, hs.1, hv.1⟩
+          rw [Set.indicator_of_mem hv]
+          simpa only [F] using Set.indicator_of_mem htri G
+        · have hn : (v, s) ∉ heatTimeTriangle a b := by
+            intro htri
+            exact hv ⟨htri.2.2.2, htri.2.1⟩
+          rw [Set.indicator_of_notMem hv]
+          simpa only [F] using Set.indicator_of_notMem hn G
+      rw [heq, MeasureTheory.integral_indicator measurableSet_Ioo,
+        MeasureTheory.setIntegral_congr_set Ioo_ae_eq_Ioc,
+        ← intervalIntegral.integral_of_le hs.2.le]
+    · rw [Set.indicator_of_notMem hs]
+      apply integral_eq_zero_of_ae
+      filter_upwards with v
+      have hn : (v, s) ∉ heatTimeTriangle a b := by
+        intro htri
+        exact hs ⟨htri.2.2.1, htri.2.2.2.trans htri.2.1⟩
+      change F (v, s) = 0
+      simpa only [F] using Set.indicator_of_notMem hn G
+  have hF' : Integrable (Function.uncurry (fun v s => F (v, s)))
+      ((volume : Measure ℝ).prod volume) := by
+    change Integrable F ((volume : Measure ℝ).prod volume)
+    exact hF
+  have hswap := integral_integral_swap hF'
+  rw [hleftSection, hrightSection] at hswap
+  rw [MeasureTheory.integral_indicator measurableSet_Ioo,
+    MeasureTheory.setIntegral_congr_set Ioo_ae_eq_Ioc,
+    ← intervalIntegral.integral_of_le hab] at hswap
+  rw [MeasureTheory.integral_indicator measurableSet_Ioo,
+    MeasureTheory.setIntegral_congr_set Ioo_ae_eq_Ioc,
+    ← intervalIntegral.integral_of_le hab] at hswap
+  simpa only [G] using hswap
+
+/-! ## The Duhamel time derivative -/
+
+/-- Integrating the heat Laplacian of one frozen source from its source time
+to a later final time recovers the corresponding heat-flow increment. -/
+theorem integral_heatSemigroupLaplacianND_sub_source
+    {n : ℕ} {s t r : ℝ} (hst : s < t) (hr0 : 0 < r)
+    (w : BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    {H : ℝ} (hH : 0 ≤ H)
+    (hholder : ∀ a b, |w a - w b| ≤
+      H * ∑ j : Fin n, |(a - b) j| ^ r)
+    (x : Fin n → ℝ) :
+    (∫ v in s..t, heatSemigroupLaplacianND (v - s) w x) =
+      heatSemigroupND (t - s) (⇑w) x - w x := by
+  rw [intervalIntegral.integral_comp_sub_right
+    (fun u => heatSemigroupLaplacianND u w x) s]
+  simpa only [sub_self] using
+    (heatSemigroupND_sub_self_eq_integral_laplacian
+      (sub_pos.mpr hst) hr0 w hH hholder x).symm
+
+/-- The time integral of the Duhamel Laplacian is the integral of the
+heat-flow increment of each frozen source.  This is the Fubini step behind
+the classical inhomogeneous heat equation. -/
+theorem integral_heatDuhamelLaplacianND_eq_integral_heat_sub
+    {n : ℕ} {a b r : ℝ} (hab : a ≤ b) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ j : Fin n, |(x - y) j| ^ r)
+    (x : Fin n → ℝ) :
+    (∫ v in a..b, heatDuhamelLaplacianND a v q x) =
+      ∫ s in a..b, (heatSemigroupND (b - s) (⇑(q s)) x - q s x) := by
+  have houter : ∀ k : Fin n, IntervalIntegrable
+      (fun v => heatDuhamelHessianCoordND a v q k x) volume a b := by
+    intro k
+    exact intervalIntegrable_heatDuhamelHessianCoordND_time
+      hab hr0 hq hH hqb hqholder k x
+  calc
+    (∫ v in a..b, heatDuhamelLaplacianND a v q x) =
+        ∑ k : Fin n, ∫ v in a..b,
+          heatDuhamelHessianCoordND a v q k x := by
+      change (∫ v in a..b, ∑ k : Fin n,
+        heatDuhamelHessianCoordND a v q k x) = _
+      rw [intervalIntegral.integral_finsetSum (fun k _ => houter k)]
+    _ = ∑ k : Fin n, ∫ s in a..b, ∫ v in s..b,
+          heatHessianCoordConvolutionND (v - s) (q s) k x := by
+      apply Finset.sum_congr rfl
+      intro k _
+      exact integral_heatHessianCoordConvolutionND_timeTriangle_swap
+        hab hr0 hq hH hqb hqholder k x
+    _ = ∫ s in a..b, ∑ k : Fin n, ∫ v in s..b,
+          heatHessianCoordConvolutionND (v - s) (q s) k x := by
+      rw [intervalIntegral.integral_finsetSum]
+      intro k _
+      exact intervalIntegrable_integral_heatHessianCoordConvolutionND_laterTime
+        hab hr0 hq hH hqb hqholder k x
+    _ = ∫ s in a..b,
+          (heatSemigroupND (b - s) (⇑(q s)) x - q s x) := by
+      apply intervalIntegral.integral_congr_uIoo
+      intro s hs
+      rw [uIoo_of_le hab] at hs
+      have hholderS : ∀ y z, |q s y - q s z| ≤
+          H * ∑ j : Fin n, |(y - z) j| ^ r := by
+        intro y z
+        simpa only [abs_sub_comm] using hqholder s y z
+      have hcoord : ∀ k : Fin n, IntervalIntegrable
+          (fun v => heatHessianCoordConvolutionND (v - s) (q s) k x)
+          volume s b := by
+        intro k
+        have hzero := intervalIntegrable_heatHessianCoordConvolutionND_zero
+          (sub_nonneg.mpr hs.2.le) hr0 (q s) hH hholderS k x
+        simpa only [zero_add, sub_add_cancel] using hzero.comp_sub_right s
+      change (∑ k : Fin n, ∫ v in s..b,
+        heatHessianCoordConvolutionND (v - s) (q s) k x) = _
+      rw [← intervalIntegral.integral_finsetSum (fun k _ => hcoord k)]
+      change (∫ v in s..b,
+        heatSemigroupLaplacianND (v - s) (q s) x) = _
+      exact integral_heatSemigroupLaplacianND_sub_source
+        hs.2 hr0 (q s) hH hholderS x
+
+/-- The Duhamel Laplacian is interval-integrable in final time. -/
+theorem intervalIntegrable_heatDuhamelLaplacianND_time
+    {n : ℕ} {a b r : ℝ} (hab : a ≤ b) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ j : Fin n, |(x - y) j| ^ r)
+    (x : Fin n → ℝ) :
+    IntervalIntegrable (fun v => heatDuhamelLaplacianND a v q x)
+      volume a b := by
+  have hsum : IntervalIntegrable
+      (∑ k : Fin n, fun v => heatDuhamelHessianCoordND a v q k x)
+      volume a b :=
+    IntervalIntegrable.sum Finset.univ (fun k _ =>
+      intervalIntegrable_heatDuhamelHessianCoordND_time
+        hab hr0 hq hH hqb hqholder k x)
+  convert hsum using 1
+  ext v
+  rw [heatDuhamelLaplacianND, Finset.sum_apply]
+
+/-- **Duhamel integral equation.**  The mild inhomogeneous heat potential
+satisfies the time integral of its classical right-hand side: source plus
+its actual spatial Laplacian. -/
+theorem heatDuhamelND_eq_integral_source_add_laplacian
+    {n : ℕ} {a b r : ℝ} (hab : a ≤ b) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ j : Fin n, |(x - y) j| ^ r)
+    (x : Fin n → ℝ) :
+    (∫ s in a..b, heatSemigroupND (b - s) (⇑(q s)) x) =
+      ∫ v in a..b, (q v x + heatDuhamelLaplacianND a v q x) := by
+  have hsource : IntervalIntegrable (fun v => q v x) volume a b :=
+    ((continuous_eval_const x).comp hq).intervalIntegrable a b
+  have hheat : IntervalIntegrable
+      (fun s => heatSemigroupND (b - s) (⇑(q s)) x) volume a b :=
+    intervalIntegrable_heatSemigroupND_duhamel hab hq hqb x
+  have hlap := intervalIntegrable_heatDuhamelLaplacianND_time
+    hab hr0 hq hH hqb hqholder x
+  rw [intervalIntegral.integral_add hsource hlap,
+    integral_heatDuhamelLaplacianND_eq_integral_heat_sub
+      hab hr0 hq hH hqb hqholder x,
+    intervalIntegral.integral_sub hheat hsource]
+  ring
+
+/-- **Classical time equation for the Duhamel potential.**  At every time
+strictly after the initial time, the Duhamel integral has time derivative
+equal to its source plus its actual spatial Laplacian. -/
+theorem hasDerivAt_heatDuhamelND_time_eq_source_add_laplacian
+    {n : ℕ} {a t r : ℝ} (hat : a < t) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ j : Fin n, |(x - y) j| ^ r)
+    (x : Fin n → ℝ) :
+    HasDerivAt
+      (fun u => ∫ s in a..u, heatSemigroupND (u - s) (⇑(q s)) x)
+      (q t x + heatDuhamelLaplacianND a t q x) t := by
+  let F : ℝ → ℝ := fun v => q v x + heatDuhamelLaplacianND a v q x
+  have hFint : IntervalIntegrable F volume a t := by
+    apply IntervalIntegrable.add
+    · exact ((continuous_eval_const x).comp hq).intervalIntegrable a t
+    · exact intervalIntegrable_heatDuhamelLaplacianND_time
+        hat.le hr0 hq hH hqb hqholder x
+  have hFcont : ∀ u ∈ Set.Ioi a, ContinuousAt F u := by
+    intro u hu
+    exact ((continuous_eval_const x).comp hq).continuousAt.add
+      (continuousAt_heatDuhamelLaplacianND_time
+        hu hr0 hq hH hqb hqholder x)
+  have hFmeas : StronglyMeasurableAtFilter F (nhds t) volume :=
+    ContinuousAt.stronglyMeasurableAtFilter isOpen_Ioi hFcont t hat
+  have hFTC : HasDerivAt (fun u => ∫ v in a..u, F v) (F t) t :=
+    intervalIntegral.integral_hasDerivAt_right hFint hFmeas (hFcont t hat)
+  have heq : Filter.Eventually (fun u =>
+      (∫ s in a..u, heatSemigroupND (u - s) (⇑(q s)) x) =
+        ∫ v in a..u, F v) (nhds t) := by
+    filter_upwards [Ioi_mem_nhds hat] with u hu
+    exact heatDuhamelND_eq_integral_source_add_laplacian
+      hu.le hr0 hq hH hqb hqholder x
+  simpa only [F] using hFTC.congr_of_eventuallyEq heq
 
 end AnalyticPDE
 end RicciFlow
