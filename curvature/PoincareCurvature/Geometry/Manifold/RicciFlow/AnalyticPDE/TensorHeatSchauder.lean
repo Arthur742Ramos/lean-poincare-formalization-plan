@@ -49,5 +49,31 @@ theorem norm_matrixHeatMildParabolicSecondJetND_entry_spaceSecondDeriv_le
       (fun y z ↦ hu₀holder y z i j) (hq i j) hH
       (fun s y ↦ hqb s y i j) (fun s y z ↦ hqholder s y z i j) x)
 
+/-- Entrywise tensor form of the non-singular C2 initial-data endpoint.  Each
+matrix coefficient carries its actual bounded first and second derivatives,
+so the homogeneous Hessian is controlled uniformly down to the initial time. -/
+theorem norm_matrixHeatMildParabolicSecondJetND_entry_spaceSecondDeriv_le_of_boundedC2
+    {n d : ℕ} {t₀ t r : ℝ} (ht : t₀ < t) (hr0 : 0 < r)
+    (D : Matrix (Fin d) (Fin d) (EuclideanBoundedC2Data n))
+    {q : ℝ → Matrix (Fin d) (Fin d)
+      (BoundedContinuousFunction (Fin n → ℝ) ℝ)}
+    (hq : ∀ i j, Continuous (fun s ↦ q s i j))
+    {C H : ℝ} (hH : 0 ≤ H)
+    (hqb : ∀ s y i j, ‖q s i j y‖ ≤ C)
+    (hqholder : ∀ s x y i j, |q s i j y - q s i j x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x : Fin n → ℝ) (i j : Fin d) :
+    ‖(heatMildParabolicSecondJetND (t₀ := t₀) hr0 (D i j).value
+      (hq i j) hH (fun s y ↦ hqb s y i j)
+      (fun s y z ↦ hqholder s y z i j)).spaceSecondDeriv (t, x)‖ ≤
+      (∑ a : Fin n, ∑ b : Fin n, ‖(D i j).second a b‖) +
+      ∑ a : Fin n, ∑ b : Fin n,
+        H * heatHessianEntryHolderMoment n r a b *
+          ((t - t₀) ^ (r / 2) / (r / 2)) := by
+  simpa [heatMildParabolicSecondJetND, heatMildSpaceHessianND, ht] using
+    (norm_heatMildSpatialHessianCLM_le_of_boundedC2 ht hr0 (D i j)
+      (hq i j) hH (fun s y ↦ hqb s y i j)
+      (fun s y z ↦ hqholder s y z i j) x)
+
 end AnalyticPDE
 end RicciFlow

@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatSecondJet
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialC2
 
 /-!
 # Quantitative Hessian control for the Euclidean mild heat solution
@@ -173,6 +174,42 @@ theorem norm_heatMildSpatialHessianCLM_le_explicit
   gcongr with j k
   exact norm_heatDuhamelHessianEntryNDbcf_le ht.le hr0 hq hH hqb hqholder j k
 
+/-- **Uniform homogeneous endpoint of the full Hessian estimate.**  With
+bounded actual C2 initial data, the homogeneous contribution is controlled by
+the initial Hessian itself instead of the singular positive-time smoothing
+factor. -/
+theorem norm_heatMildSpatialHessianCLM_le_of_boundedC2
+    {n : ℕ} {t₀ t r : ℝ} (ht : t₀ < t) (hr0 : 0 < r)
+    (D : EuclideanBoundedC2Data n)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    (hq : Continuous q) {C H : ℝ} (hH : 0 ≤ H)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x : Fin n → ℝ) :
+    ‖heatMildSpatialHessianCLM ht.le hr0 D.value hq hH hqb hqholder x‖ ≤
+      (∑ j : Fin n, ∑ k : Fin n, ‖D.second j k‖) +
+      ∑ j : Fin n, ∑ k : Fin n,
+        H * heatHessianEntryHolderMoment n r j k *
+          ((t - t₀) ^ (r / 2) / (r / 2)) := by
+  unfold heatMildSpatialHessianCLM
+  calc
+    ‖heatSemigroupHessianCLM (t - t₀) D.value x +
+        heatDuhamelHessianCLM ht.le hr0 hq hH hqb hqholder x‖ ≤
+        ‖heatSemigroupHessianCLM (t - t₀) D.value x‖ +
+          ‖heatDuhamelHessianCLM ht.le hr0 hq hH hqb hqholder x‖ :=
+      norm_add_le _ _
+    _ ≤ (∑ j : Fin n, ∑ k : Fin n, ‖D.second j k‖) +
+        ∑ j : Fin n, ∑ k : Fin n,
+          H * heatHessianEntryHolderMoment n r j k *
+            ((t - t₀) ^ (r / 2) / (r / 2)) :=
+      add_le_add (D.norm_heatSemigroupHessianCLM_le (sub_pos.mpr ht) x)
+        ((norm_heatDuhamelHessianCLM_le ht.le hr0 hq hH hqb hqholder x).trans
+          (by
+            gcongr with j k
+            exact norm_heatDuhamelHessianEntryNDbcf_le
+              ht.le hr0 hq hH hqb hqholder j k))
+
 /-- The actual mild Laplacian is bounded by dimension times the norm of the
 genuine full Frechet Hessian. -/
 theorem abs_heatMildSpatialLaplacianND_le
@@ -219,6 +256,33 @@ theorem abs_heatMildTimeDerivND_le_explicit
   have hHess := norm_heatMildSpatialHessianCLM_le_explicit ht hr0 u₀ hH₀
     hu₀holder hq hH hqb hqholder x
   exact add_le_add (hLap.trans (mul_le_mul_of_nonneg_left hHess (Nat.cast_nonneg n)))
+    (by simpa only [Real.norm_eq_abs] using hqb t x)
+
+/-- Uniform positive-time bound for the actual time derivative when the
+initial datum is bounded C2. -/
+theorem abs_heatMildTimeDerivND_le_of_boundedC2
+    {n : ℕ} {t₀ t r : ℝ} (ht : t₀ < t) (hr0 : 0 < r)
+    (D : EuclideanBoundedC2Data n)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    (hq : Continuous q) {C H : ℝ} (hH : 0 ≤ H)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x : Fin n → ℝ) :
+    |heatMildTimeDerivND t₀ D.value q (t, x)| ≤
+      (n : ℝ) *
+        ((∑ j : Fin n, ∑ k : Fin n, ‖D.second j k‖) +
+        ∑ j : Fin n, ∑ k : Fin n,
+          H * heatHessianEntryHolderMoment n r j k *
+            ((t - t₀) ^ (r / 2) / (r / 2))) + C := by
+  rw [heatMildTimeDerivND, if_pos ht]
+  refine (abs_add_le _ _).trans ?_
+  have hLap := abs_heatMildSpatialLaplacianND_le
+    ht hr0 D.value hq hH hqb hqholder x
+  have hHess := norm_heatMildSpatialHessianCLM_le_of_boundedC2
+    ht hr0 D hq hH hqb hqholder x
+  exact add_le_add
+    (hLap.trans (mul_le_mul_of_nonneg_left hHess (Nat.cast_nonneg n)))
     (by simpa only [Real.norm_eq_abs] using hqb t x)
 
 end HessianNorms
