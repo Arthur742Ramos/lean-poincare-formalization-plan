@@ -36,5 +36,6 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanMildFr
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanMildClassical
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatMildEuclidean
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatInitialValue
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanMildSecondJet
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SectionPointwiseDeriv
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ResearchTheorems
