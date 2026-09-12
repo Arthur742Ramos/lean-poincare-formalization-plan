@@ -369,6 +369,24 @@ theorem hasFDerivAt_heatDuhamelGradientCLM
     simpa [heatDuhamelHessianCLM, coordinateHessianCLM, coordinateRankOne,
       coordinateLinearFunctional, Pi.single_apply] using h
 
+/-- At every fixed final time, the Euclidean Duhamel potential is genuinely
+twice continuously Frechet differentiable in space. -/
+theorem contDiff_two_heatDuhamelND
+    {n : ℕ} {t₀ t r : ℝ} (hT : t₀ ≤ t) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r) :
+    ContDiff ℝ 2 (fun z : Fin n → ℝ => ∫ s in t₀..t,
+      heatSemigroupND (t - s) (q s) z) := by
+  apply (contDiff_succ_iff_hasFDerivAt (n := 1)).mpr
+  refine ⟨heatDuhamelGradientCLM t₀ t q, ?_,
+    hasFDerivAt_heatDuhamelND hT hr0 hq hH hqb hqholder⟩
+  exact contDiff_one_iff_hasFDerivAt.mpr
+    ⟨heatDuhamelHessianCLM hT hr0 hq hH hqb hqholder,
+      continuous_heatDuhamelHessianCLM hT hr0 hq hH hqb hqholder,
+      hasFDerivAt_heatDuhamelGradientCLM hT hr0 hq hH hqb hqholder⟩
+
 section RemainingOperatorPackaging
 
 local instance remainingCoordinateDualNormedAddCommGroup {n : ℕ} :

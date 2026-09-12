@@ -190,5 +190,19 @@ theorem hasFDerivAt_heatSemigroupGradientCLM
     simpa [heatSemigroupHessianCLM, coordinateHessianCLM, coordinateRankOne,
       coordinateLinearFunctional, Pi.single_apply] using h
 
+/-- At every positive time, the Euclidean heat semigroup is genuinely twice
+continuously Frechet differentiable in space. -/
+theorem contDiff_two_heatSemigroupND
+    {n : ℕ} {t : ℝ} (ht : 0 < t)
+    (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    ContDiff ℝ 2 (heatSemigroupND t f) := by
+  apply (contDiff_succ_iff_hasFDerivAt (n := 1)).mpr
+  refine ⟨heatSemigroupGradientCLM t f, ?_,
+    hasFDerivAt_heatSemigroupND ht f⟩
+  exact contDiff_one_iff_hasFDerivAt.mpr
+    ⟨heatSemigroupHessianCLM t f,
+      continuous_heatSemigroupHessianCLM ht f,
+      hasFDerivAt_heatSemigroupGradientCLM ht f⟩
+
 end AnalyticPDE
 end RicciFlow
