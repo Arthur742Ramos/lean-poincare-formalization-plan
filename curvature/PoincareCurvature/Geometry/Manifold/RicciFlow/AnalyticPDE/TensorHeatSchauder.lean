@@ -1,6 +1,6 @@
 module
 
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanMildSchauder
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanMildParabolicSchauder
 
 /-!
 # Quantitative Hessian control for Euclidean tensor heat flow
@@ -121,6 +121,70 @@ theorem norm_matrixHeatMildParabolicSecondJetND_entry_spaceSecondDeriv_sub_le_ho
   exact norm_heatMildSpatialHessianCLM_sub_le_holder ht hr0 hr1 (D i j) hH₀
     (fun a b x y ↦ hsecondHolder i j a b x y) (hq i j) hH
     (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j) x y
+
+/-- Matrix-valued field of genuine mild Hessians, represented entrywise. -/
+def matrixHeatMildHessianFieldND
+    {n d : ℕ} {r : ℝ} (t₀ : ℝ) (hr0 : 0 < r)
+    (D : Matrix (Fin d) (Fin d) (EuclideanBoundedC2Data n))
+    {q : ℝ → Matrix (Fin d) (Fin d)
+      (BoundedContinuousFunction (Fin n → ℝ) ℝ)}
+    (hq : ∀ i j, Continuous (fun s ↦ q s i j))
+    {C H : ℝ} (hH : 0 ≤ H)
+    (hqb : ∀ s y i j, ‖q s i j y‖ ≤ C)
+    (hqholder : ∀ s x y i j, |q s i j y - q s i j x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r) :
+    ℝ × (Fin n → ℝ) → Matrix (Fin d) (Fin d)
+      ((Fin n → ℝ) →L[ℝ] ((Fin n → ℝ) →L[ℝ] ℝ)) :=
+  fun z i j ↦ heatMildHessianFieldND t₀ hr0 (D i j) (hq i j) hH
+    (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j) z
+
+/-- **Every tensor coefficient of the genuine mild Hessian is parabolically
+`r`-Holder with one uniform constant.** -/
+theorem parabolicHolderWith_matrixHeatMildHessianFieldND_entry
+    {n d : ℕ} (t₀ : ℝ) {r : ℝ} (hr0 : 0 < r) (hr1 : r < 1)
+    (D : Matrix (Fin d) (Fin d) (EuclideanBoundedC2Data n))
+    {H₀ : ℝ} (hH₀ : 0 ≤ H₀)
+    (hsecondHolder : ∀ i j a b x y,
+      |(D i j).second a b x - (D i j).second a b y| ≤
+        H₀ * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    {q : ℝ → Matrix (Fin d) (Fin d)
+      (BoundedContinuousFunction (Fin n → ℝ) ℝ)}
+    (hq : ∀ i j, Continuous (fun s ↦ q s i j))
+    {C H : ℝ} (hH : 0 ≤ H)
+    (hqb : ∀ s y i j, ‖q s i j y‖ ≤ C)
+    (hqholder : ∀ s x y i j, |q s i j y - q s i j x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (i j : Fin d) :
+    ParabolicHolderWith (heatMildHessianParabolicHolderConstant n r H₀ H) r
+      (fun z ↦ matrixHeatMildHessianFieldND t₀ hr0 D hq hH hqb hqholder z i j)
+      {p : ℝ × (Fin n → ℝ) | t₀ < p.1} := by
+  simpa only [matrixHeatMildHessianFieldND] using
+    (parabolicHolderWith_heatMildHessianFieldND t₀ hr0 hr1 (D i j) hH₀
+      (fun a b x y ↦ hsecondHolder i j a b x y) (hq i j) hH
+      (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j))
+
+/-- On the positive-time cylinder, the matrix Hessian field is exactly the
+space-second-derivative component of the constructed parabolic jet. -/
+theorem matrixHeatMildHessianFieldND_eq_entryJet_spaceSecondDeriv
+    {n d : ℕ} {t₀ t r : ℝ} (ht : t₀ < t) (hr0 : 0 < r)
+    (D : Matrix (Fin d) (Fin d) (EuclideanBoundedC2Data n))
+    {q : ℝ → Matrix (Fin d) (Fin d)
+      (BoundedContinuousFunction (Fin n → ℝ) ℝ)}
+    (hq : ∀ i j, Continuous (fun s ↦ q s i j))
+    {C H : ℝ} (hH : 0 ≤ H)
+    (hqb : ∀ s y i j, ‖q s i j y‖ ≤ C)
+    (hqholder : ∀ s x y i j, |q s i j y - q s i j x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x : Fin n → ℝ) (i j : Fin d) :
+    matrixHeatMildHessianFieldND t₀ hr0 D hq hH hqb hqholder (t, x) i j =
+      ((matrixHeatMildParabolicSecondJetND (t₀ := t₀) hr0
+        (fun i j ↦ (D i j).value) hq hH hqb hqholder).entryJet i j).spaceSecondDeriv
+          (t, x) := by
+  change heatMildHessianFieldND t₀ hr0 (D i j) (hq i j) hH
+      (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j) (t, x) =
+    heatMildSpaceHessianND t₀ hr0 (D i j).value (hq i j) hH
+      (fun s y ↦ hqb s y i j) (fun s x y ↦ hqholder s x y i j) (t, x)
+  simp only [heatMildHessianFieldND, heatMildSpaceHessianND, dif_pos ht]
 
 end AnalyticPDE
 end RicciFlow
