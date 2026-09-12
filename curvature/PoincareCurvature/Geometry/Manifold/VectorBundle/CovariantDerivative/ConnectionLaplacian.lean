@@ -66,6 +66,78 @@ def covariantTwoTensorCovariantDerivative (cov : CovariantDerivative I E TM) :
     (F₂ := E →L[ℝ] ℝ) (V₁ := TM) (V₂ := T₁)
     cov (covectorCovariantDerivative cov)
 
+/-- Expanded evaluation formula for the induced connection on covariant
+two-tensors.  It is the intrinsic identity
+`(∇_X h)(u,v) = X(h(u,v)) - h(∇_X u,v) - h(u,∇_X v)`, with the fibre vectors
+extended by the canonical smooth extensions. -/
+theorem covariantTwoTensorCovariantDerivative_apply_of_mdifferentiableAt
+    (cov : CovariantDerivative I E TM) {h : ∀ x : M, T₂ x} {x : M}
+    (hh : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) y (h y)) x)
+    (X u v : TM x) :
+    covariantTwoTensorCovariantDerivative cov h x X u v =
+      mvfderiv (I := I) (fun y =>
+        h y (smoothExtend (I := I) (F := E) (V := TM) x u y)
+          (smoothExtend (I := I) (F := E) (V := TM) x v y)) x X
+      - h x (cov (smoothExtend (I := I) (F := E) (V := TM) x u) x X) v
+      - h x u (cov (smoothExtend (I := I) (F := E) (V := TM) x v) x X) := by
+  have hu : MDiffAt
+      (T% (smoothExtend (I := I) (F := E) (V := TM) x u)) x :=
+    ((smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x u).of_le
+      (by simp) x).mdifferentiableAt one_ne_zero
+  have hv : MDiffAt
+      (T% (smoothExtend (I := I) (F := E) (V := TM) x v)) x :=
+    ((smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x v).of_le
+      (by simp) x).mdifferentiableAt one_ne_zero
+  have hhu : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (h y (smoothExtend (I := I) (F := E) (V := TM) x u y))) x :=
+    hh.clm_bundle_apply hu
+  simp only [covariantTwoTensorCovariantDerivative, covectorCovariantDerivative,
+    inducedHomCovariantDerivative, dif_pos hh, dif_pos hhu,
+    inducedHomAtOfMDiff_apply]
+  change
+    (mvfderiv (I := I) (fun y =>
+        h y (smoothExtend (I := I) (F := E) (V := TM) x u y)
+          (smoothExtend (I := I) (F := E) (V := TM) x v y)) x X -
+      h x (smoothExtend (I := I) (F := E) (V := TM) x u x)
+        (cov (smoothExtend (I := I) (F := E) (V := TM) x v) x X)) -
+      h x (cov (smoothExtend (I := I) (F := E) (V := TM) x u) x X) v = _
+  rw [smoothExtend_apply]
+  ring
+
+/-- The induced tensor connection preserves symmetry in the final two
+covariant slots. -/
+theorem covariantTwoTensorCovariantDerivative_swap
+    (cov : CovariantDerivative I E TM) {h : ∀ x : M, T₂ x}
+    (hsymm : ∀ x u v, h x u v = h x v u)
+    (x : M) (X u v : TM x) :
+    covariantTwoTensorCovariantDerivative cov h x X u v =
+      covariantTwoTensorCovariantDerivative cov h x X v u := by
+  classical
+  by_cases hh : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) y (h y)) x
+  · rw [covariantTwoTensorCovariantDerivative_apply_of_mdifferentiableAt
+      cov hh X u v,
+      covariantTwoTensorCovariantDerivative_apply_of_mdifferentiableAt
+        cov hh X v u]
+    have hfun :
+        (fun y => h y
+          (smoothExtend (I := I) (F := E) (V := TM) x u y)
+          (smoothExtend (I := I) (F := E) (V := TM) x v y)) =
+        (fun y => h y
+          (smoothExtend (I := I) (F := E) (V := TM) x v y)
+          (smoothExtend (I := I) (F := E) (V := TM) x u y)) := by
+      funext y
+      exact hsymm y _ _
+    rw [hfun, hsymm x
+      (cov (smoothExtend (I := I) (F := E) (V := TM) x u) x X) v,
+      hsymm x u
+        (cov (smoothExtend (I := I) (F := E) (V := TM) x v) x X)]
+    ring
+  · simp [covariantTwoTensorCovariantDerivative,
+      inducedHomCovariantDerivative, hh]
+
 -- Naming the depth-two operator-space instances prevents typeclass search
 -- from looping when it constructs the next hom bundle.
 local instance covariantTwoModelNormedAddCommGroup :
@@ -91,6 +163,83 @@ def covariantHessianTwoTensor (cov : CovariantDerivative I E TM)
     (h : ∀ x : M, T₂ x) (x : M) : TM x →L[ℝ] TM x →L[ℝ] T₂ x :=
   covariantThreeTensorCovariantDerivative cov
     (covariantTwoTensorCovariantDerivative cov h) x
+
+/-- Expanded intrinsic formula for the covariant Hessian of a covariant
+two-tensor.  The correction term in each of the three covariant slots is
+visible explicitly. -/
+theorem covariantHessianTwoTensor_apply_of_mdifferentiableAt
+    (cov : CovariantDerivative I E TM) (h : ∀ x : M, T₂ x) {x : M}
+    (hfirst : MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) y
+        (covariantTwoTensorCovariantDerivative cov h y)) x)
+    (X₁ X₂ u v : TM x) :
+    covariantHessianTwoTensor cov h x X₁ X₂ u v =
+      mvfderiv (I := I) (fun y =>
+        covariantTwoTensorCovariantDerivative cov h y
+          (smoothExtend (I := I) (F := E) (V := TM) x X₂ y)
+          (smoothExtend (I := I) (F := E) (V := TM) x u y)
+          (smoothExtend (I := I) (F := E) (V := TM) x v y)) x X₁
+      - covariantTwoTensorCovariantDerivative cov h x
+          (cov (smoothExtend (I := I) (F := E) (V := TM) x X₂) x X₁) u v
+      - covariantTwoTensorCovariantDerivative cov h x X₂
+          (cov (smoothExtend (I := I) (F := E) (V := TM) x u) x X₁) v
+      - covariantTwoTensorCovariantDerivative cov h x X₂ u
+          (cov (smoothExtend (I := I) (F := E) (V := TM) x v) x X₁) := by
+  have hX₂ : MDiffAt
+      (T% (smoothExtend (I := I) (F := E) (V := TM) x X₂)) x :=
+    ((smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x X₂).of_le
+      (by simp) x).mdifferentiableAt one_ne_zero
+  have hsection : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) y
+        (covariantTwoTensorCovariantDerivative cov h y
+          (smoothExtend (I := I) (F := E) (V := TM) x X₂ y))) x :=
+    hfirst.clm_bundle_apply hX₂
+  simp only [covariantHessianTwoTensor, covariantThreeTensorCovariantDerivative,
+    inducedHomCovariantDerivative, dif_pos hfirst, inducedHomAtOfMDiff_apply]
+  rw [sub_apply, sub_apply,
+    covariantTwoTensorCovariantDerivative_apply_of_mdifferentiableAt
+      cov hsection X₁ u v, smoothExtend_apply]
+  ring
+
+/-- The covariant Hessian of a symmetric covariant two-tensor remains
+symmetric in the two tensor slots that are not traced. -/
+theorem covariantHessianTwoTensor_swap
+    (cov : CovariantDerivative I E TM) {h : ∀ x : M, T₂ x}
+    (hsymm : ∀ x u v, h x u v = h x v u)
+    (x : M) (X₁ X₂ u v : TM x) :
+    covariantHessianTwoTensor cov h x X₁ X₂ u v =
+      covariantHessianTwoTensor cov h x X₁ X₂ v u := by
+  classical
+  by_cases hfirst : MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) y
+        (covariantTwoTensorCovariantDerivative cov h y)) x
+  · rw [covariantHessianTwoTensor_apply_of_mdifferentiableAt
+      cov h hfirst X₁ X₂ u v,
+      covariantHessianTwoTensor_apply_of_mdifferentiableAt
+        cov h hfirst X₁ X₂ v u]
+    have hfun :
+        (fun y => covariantTwoTensorCovariantDerivative cov h y
+          (smoothExtend (I := I) (F := E) (V := TM) x X₂ y)
+          (smoothExtend (I := I) (F := E) (V := TM) x u y)
+          (smoothExtend (I := I) (F := E) (V := TM) x v y)) =
+        (fun y => covariantTwoTensorCovariantDerivative cov h y
+          (smoothExtend (I := I) (F := E) (V := TM) x X₂ y)
+          (smoothExtend (I := I) (F := E) (V := TM) x v y)
+          (smoothExtend (I := I) (F := E) (V := TM) x u y)) := by
+      funext y
+      exact covariantTwoTensorCovariantDerivative_swap cov hsymm y _ _ _
+    rw [hfun,
+      covariantTwoTensorCovariantDerivative_swap cov hsymm x
+        (cov (smoothExtend (I := I) (F := E) (V := TM) x X₂) x X₁) u v,
+      covariantTwoTensorCovariantDerivative_swap cov hsymm x X₂
+        (cov (smoothExtend (I := I) (F := E) (V := TM) x u) x X₁) v,
+      covariantTwoTensorCovariantDerivative_swap cov hsymm x X₂ u
+        (cov (smoothExtend (I := I) (F := E) (V := TM) x v) x X₁)]
+    ring
+  · simp [covariantHessianTwoTensor, covariantThreeTensorCovariantDerivative,
+      inducedHomCovariantDerivative, hfirst]
 
 /-- The intrinsic connection Laplacian `tr_g(∇²h)`, with the `+∑ᵢ ∇²_{eᵢ,eᵢ}`
 sign convention.  The contraction is defined from the basis-independent
@@ -139,6 +288,17 @@ theorem connectionLaplacian_apply (cov : CovariantDerivative I E TM)
   rw [connectionLaplacian_eq_sum_orthonormalBasis cov h x
     (stdOrthonormalBasis ℝ (TM x))]
   simp
+
+/-- The intrinsic connection Laplacian preserves symmetric covariant
+two-tensors. -/
+theorem connectionLaplacian_swap (cov : CovariantDerivative I E TM)
+    {h : ∀ x : M, T₂ x} (hsymm : ∀ x u v, h x u v = h x v u)
+    (x : M) (u v : TM x) :
+    connectionLaplacian cov h x u v = connectionLaplacian cov h x v u := by
+  rw [connectionLaplacian_apply, connectionLaplacian_apply]
+  apply Finset.sum_congr rfl
+  intro i _
+  exact covariantHessianTwoTensor_swap cov hsymm x _ _ u v
 
 /-- The covariant derivative of a covariant two-tensor, evaluated on global
 vector fields.  The argument order is direction, first tensor slot, second
