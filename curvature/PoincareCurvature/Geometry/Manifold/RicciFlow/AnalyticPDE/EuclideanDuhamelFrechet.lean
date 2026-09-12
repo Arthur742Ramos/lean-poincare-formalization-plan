@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FiniteCoordinateFrechet
 public import Mathlib.Analysis.Normed.Operator.NormedSpace
 public import Mathlib.Analysis.Normed.Operator.Prod
 
@@ -23,6 +24,8 @@ open scoped Real BigOperators Interval Topology
 
 namespace RicciFlow
 namespace AnalyticPDE
+
+section OperatorPackaging
 
 -- These more-specific instances prevent typeclass search from getting stuck
 -- while recursively constructing the normed structure on a curried bilinear
@@ -49,6 +52,16 @@ def coordinateLinearFunctional {n : ℕ} (a : Fin n → ℝ) :
     (a v : Fin n → ℝ) :
     coordinateLinearFunctional a v = ∑ k : Fin n, a k * v k := by
   simp [coordinateLinearFunctional]
+
+@[simp] theorem coordinateLinearFunctional_single {n : ℕ}
+    (a : Fin n → ℝ) (j : Fin n) :
+    coordinateLinearFunctional a (Pi.single j 1) = a j := by
+  classical
+  rw [coordinateLinearFunctional_apply, Finset.sum_eq_single j]
+  · simp
+  · intro i _ hij
+    simp [hij]
+  · simp
 
 /-- A coordinate projection has operator norm at most one for the sup norm. -/
 lemma norm_coordinateProjection_le {n : ℕ} (k : Fin n) :
@@ -245,6 +258,131 @@ theorem continuous_heatDuhamelHessianCLM
   exact (heatDuhamelHessianEntryNDbcf hT hr0 hq hH hqb hqholder j k).continuous.smul
     continuous_const
 
+end OperatorPackaging
+
+/-- A fixed output coordinate of the Duhamel gradient has the corresponding
+column of the Hessian as its genuine Frechet derivative. -/
+theorem hasFDerivAt_heatDuhamelGradientCoordND
+    {n : ℕ} {t₀ t r : ℝ} (hT : t₀ ≤ t) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (k : Fin n) (x : Fin n → ℝ) :
+    HasFDerivAt (heatDuhamelGradientCoordND t₀ t q k)
+      (coordinateLinearFunctional (fun j =>
+        heatDuhamelHessianEntryNDbcf hT hr0 hq hH hqb hqholder j k x)) x := by
+  classical
+  refine hasFDerivAt_of_continuous_coordinate_derivatives
+    (heatDuhamelGradientCoordND t₀ t q k)
+    (fun z => coordinateLinearFunctional (fun j =>
+      heatDuhamelHessianEntryNDbcf hT hr0 hq hH hqb hqholder j k z)) ?_ ?_ x
+  · unfold coordinateLinearFunctional
+    apply continuous_finsetSum
+    intro j _
+    exact (heatDuhamelHessianEntryNDbcf
+      hT hr0 hq hH hqb hqholder j k).continuous.smul continuous_const
+  · intro z j
+    have h := (hasDerivAt_heatDuhamelGradientCoordND_entry
+      hT hr0 hq hH hqb hqholder z j k).hasFDerivAt
+    have hval : coordinateLinearFunctional (fun i =>
+        heatDuhamelHessianEntryNDbcf hT hr0 hq hH hqb hqholder i k z)
+        (Pi.single j 1) = heatDuhamelHessianEntryND t₀ t q j k z := by
+      exact coordinateLinearFunctional_single _ j
+    rw [hval]
+    exact h
+
+/-- The operator-valued Duhamel gradient is continuous in space. -/
+theorem continuous_heatDuhamelGradientCLM
+    {n : ℕ} {t₀ t r : ℝ} (hT : t₀ ≤ t) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r) :
+    Continuous (heatDuhamelGradientCLM t₀ t q) := by
+  unfold heatDuhamelGradientCLM coordinateLinearFunctional
+  apply continuous_finsetSum
+  intro k _
+  exact (continuous_iff_continuousAt.mpr fun x =>
+    (hasFDerivAt_heatDuhamelGradientCoordND
+      hT hr0 hq hH hqb hqholder k x).continuousAt).smul continuous_const
+
+/-- The Duhamel potential has the packaged spatial gradient as its genuine
+Frechet derivative. -/
+theorem hasFDerivAt_heatDuhamelND
+    {n : ℕ} {t₀ t r : ℝ} (hT : t₀ ≤ t) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x : Fin n → ℝ) :
+    HasFDerivAt (fun z : Fin n → ℝ => ∫ s in t₀..t,
+      heatSemigroupND (t - s) (q s) z)
+      (heatDuhamelGradientCLM t₀ t q x) x := by
+  classical
+  apply hasFDerivAt_of_continuous_coordinate_derivatives
+  · exact continuous_heatDuhamelGradientCLM
+      hT hr0 hq hH hqb hqholder
+  · intro z k
+    have h := (hasDerivAt_heatDuhamelND_coord hT hq hqb z k).hasFDerivAt
+    have hval : heatDuhamelGradientCLM t₀ t q z (Pi.single k 1) =
+        heatDuhamelGradientCoordND t₀ t q k z := by
+      exact coordinateLinearFunctional_single _ k
+    rw [hval]
+    simpa only [heatDuhamelGradientCoordND] using h
+
+/-- The operator-valued spatial gradient has the packaged Hessian as its
+genuine Frechet derivative. -/
+theorem hasFDerivAt_heatDuhamelGradientCLM
+    {n : ℕ} {t₀ t r : ℝ} (hT : t₀ ≤ t) (hr0 : 0 < r)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    {C H : ℝ} (hH : 0 ≤ H) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s x y, |q s y - q s x| ≤
+      H * ∑ ell : Fin n, |(x - y) ell| ^ r)
+    (x : Fin n → ℝ) :
+    HasFDerivAt (heatDuhamelGradientCLM t₀ t q)
+      (heatDuhamelHessianCLM hT hr0 hq hH hqb hqholder x) x := by
+  classical
+  apply hasFDerivAt_of_continuous_coordinate_derivatives
+  · exact continuous_heatDuhamelHessianCLM
+      hT hr0 hq hH hqb hqholder
+  · intro z j
+    have hderiv : HasDerivAt
+        (fun a => heatDuhamelGradientCLM t₀ t q (Function.update z j a))
+        (∑ k : Fin n, heatDuhamelHessianEntryND t₀ t q j k z •
+          (ContinuousLinearMap.proj k : (Fin n → ℝ) →L[ℝ] ℝ)) (z j) := by
+      unfold heatDuhamelGradientCLM coordinateLinearFunctional
+      have hfun : (fun a => ∑ k : Fin n,
+          heatDuhamelGradientCoordND t₀ t q k (Function.update z j a) •
+            (ContinuousLinearMap.proj k : (Fin n → ℝ) →L[ℝ] ℝ)) =
+          ∑ k : Fin n, fun a => heatDuhamelGradientCoordND t₀ t q k
+            (Function.update z j a) •
+              (ContinuousLinearMap.proj k : (Fin n → ℝ) →L[ℝ] ℝ) := by
+        funext a
+        simp only [Finset.sum_apply]
+      rw [hfun]
+      exact HasDerivAt.sum (u := Finset.univ) fun k _ =>
+        (hasDerivAt_heatDuhamelGradientCoordND_entry
+          hT hr0 hq hH hqb hqholder z j k).smul_const
+            (ContinuousLinearMap.proj k : (Fin n → ℝ) →L[ℝ] ℝ)
+    have h := hderiv.hasFDerivAt
+    simpa [heatDuhamelHessianCLM, coordinateHessianCLM, coordinateRankOne,
+      coordinateLinearFunctional, Pi.single_apply] using h
+
+section RemainingOperatorPackaging
+
+local instance remainingCoordinateDualNormedAddCommGroup {n : ℕ} :
+    NormedAddCommGroup ((Fin n → ℝ) →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+local instance remainingCoordinateBilinearNormedAddCommGroup {n : ℕ} :
+    NormedAddCommGroup ((Fin n → ℝ) →L[ℝ] ((Fin n → ℝ) →L[ℝ] ℝ)) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+local instance remainingCoordinateBilinearContinuousAdd {n : ℕ} :
+    ContinuousAdd ((Fin n → ℝ) →L[ℝ] ((Fin n → ℝ) →L[ℝ] ℝ)) :=
+  IsTopologicalAddGroup.toContinuousAdd
+
 /-- Global operator-norm bound by the finite sum of the bundled entry norms. -/
 theorem norm_heatDuhamelHessianCLM_le
     {n : ℕ} {t₀ t r : ℝ} (hT : t₀ ≤ t) (hr0 : 0 < r)
@@ -294,6 +432,8 @@ theorem hasDerivAt_partial_heatDuhamelND_coord_eq_hessianCLM
     simp [ha]
   · intro hj
     exact (hj (Finset.mem_univ j)).elim
+
+end RemainingOperatorPackaging
 
 end AnalyticPDE
 end RicciFlow
