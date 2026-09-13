@@ -220,6 +220,52 @@ theorem localTensorCoordinates_normalized_reconstruction
     (I := I) (trivializationAt E TM (i : M)) b _ hxFrame]
   exact A.normalizedLocalSolution_value cov i q _ hz c a
 
+/-- Reading the actual cutoff atlas summand in its chart frame multiplies the
+stored coordinate solution by exactly the subordinate scalar cutoff. -/
+theorem localTensorCoordinates_cutoffLocalSummand
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index)
+    (q : ParabolicC0AlphaBanach E W₂ α
+      (parabolicFiniteCylinder E t₀ T))
+    (s : ℝ) (hs : s ∈ Ioc t₀ T) {x : M}
+    (hx : x ∈ actualLocalTensorHeatPatch (I := I)
+      (i : M) (A.radius (i : M))) :
+    localTensorCoordinates (I := I) (i : M)
+        (trivializationAt E TM (i : M)) b
+        (cutoffLocalTensorOfMatrix (I := I)
+          (trivializationAt E TM (i : M)) b (A.cover.partition i)
+          (normalizedTensorHeatCoefficientSlice (I := I)
+            (i : M) (A.radius (i : M))
+            (A.normalizedLocalSolution cov i q) s))
+        ((extChartAt I (i : M)) x) =
+      A.cover.partition i x •
+        FiniteParabolicC2AlphaBanach.value
+          (A.localInverse (i : M) q)
+          (s, normalizedTensorHeatCoordinate (I := I)
+            (i : M) (A.radius (i : M)) x) := by
+  funext out
+  rcases out with ⟨a, c⟩
+  have hxFrame : x ∈ (trivializationAt E TM (i : M)).baseSet :=
+    A.patch_subset_trivialization (i : M) hx
+  have hxChart : x ∈ (extChartAt I (i : M)).source := hx.1
+  have hz : (s, normalizedTensorHeatCoordinate (I := I)
+      (i : M) (A.radius (i : M)) x) ∈
+      parabolicFiniteCylinder E t₀ T := by
+    simpa using hs
+  simp [localTensorCoordinates, localTwoTensorComponentInChart,
+    writtenInExtChartAt]
+  simp_all only [mfld_simps, chartAt_self_eq,
+    OpenPartialHomeomorph.refl_apply]
+  rw [localTwoTensorComponent_apply_of_mem
+    (I := I) (trivializationAt E TM (i : M)) b _ hxFrame]
+  rw [cutoffLocalTensorOfMatrix_localFrame
+    (I := I) (trivializationAt E TM (i : M)) b _ _ hxFrame]
+  rw [normalizedTensorHeatCoefficientSlice,
+    A.normalizedLocalSolution_value cov i q _ hz c a]
+
 /-- The intrinsic connection Laplacian of a cutoff-reconstructed atlas
 summand is exactly the canonical coordinate second-order operator applied to
 that genuine global tensor field.  Every differentiability premise is
