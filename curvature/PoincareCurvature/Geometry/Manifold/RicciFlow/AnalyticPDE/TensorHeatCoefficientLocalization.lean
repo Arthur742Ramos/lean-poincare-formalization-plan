@@ -120,6 +120,36 @@ theorem exists_of_contDiffOn
   exact ⟨rfl, Aext.eventuallyEq_original, Bext.eventuallyEq_original,
     Cext.eventuallyEq_original, hχone⟩
 
+/-- Assemble localized coefficient data with the two logically distinct
+localizations separated: the coefficient extensions agree with the original
+fields near the unscaled compact core `K`, while the normalized cutoff is one
+on the closed unit ball in the rescaled variable.  This is the form needed to
+identify the localized operator with the genuine chart operator. -/
+theorem exists_of_contDiffOn_unitCutoff
+    {A₀ : X → ((X →L[ℝ] X →L[ℝ] W) →L[ℝ] W)}
+    {B₀ : X → ((X →L[ℝ] W) →L[ℝ] W)}
+    {C₀ : X → (W →L[ℝ] W)}
+    {K U : Set X}
+    (hK : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
+    (hA : ContDiffOn ℝ 1 A₀ U)
+    (hB : ContDiffOn ℝ 1 B₀ U)
+    (hC : ContDiffOn ℝ 1 C₀ U)
+    (center : X) :
+    ∃ D : TensorHeatLocalizedCoefficientData X W,
+      D.center = center ∧
+      (∀ᶠ x in nhdsSet K, D.principal x = A₀ x) ∧
+      (∀ᶠ x in nhdsSet K, D.first x = B₀ x) ∧
+      (∀ᶠ x in nhdsSet K, D.zero x = C₀ x) ∧
+      (∀ x ∈ Metric.closedBall (0 : X) 1, D.cutoff x = 1) := by
+  obtain ⟨χ, hχone, _hχsupp⟩ :=
+    exists_normalizedCutoffControl_one_on_closedBall (X := X)
+  obtain ⟨Aext⟩ := exists_compactCoefficientExtension_of_contDiffOn hK hU hKU hA
+  obtain ⟨Bext⟩ := exists_compactCoefficientExtension_of_contDiffOn hK hU hKU hB
+  obtain ⟨Cext⟩ := exists_compactCoefficientExtension_of_contDiffOn hK hU hKU hC
+  refine ⟨ofExtensions χ Aext Bext Cext center, ?_⟩
+  exact ⟨rfl, Aext.eventuallyEq_original, Bext.eventuallyEq_original,
+    Cext.eventuallyEq_original, hχone⟩
+
 /-- If the chosen chart center belongs to the compact core, the localized
 principal field has exactly the original principal coefficient there. -/
 theorem principal_center_eq_of_mem

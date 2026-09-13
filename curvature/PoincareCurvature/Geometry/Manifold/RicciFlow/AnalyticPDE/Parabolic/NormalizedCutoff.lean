@@ -83,5 +83,30 @@ theorem exists_normalizedCutoffControl_one_nhdsSet_of_isCompact
       support_norm_le := hRsupp }
   exact ⟨χ, hfsupp, hfOne, hfIcc⟩
 
+/-- A normalized cutoff adapted to the unit ball.  This is the cutoff needed
+after centering and parabolically rescaling a local coordinate operator: it
+is identically one on the normalized closed unit ball, independently of the
+unscaled chart center. -/
+theorem exists_normalizedCutoffControl_one_on_closedBall
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [FiniteDimensional ℝ X] :
+    ∃ χ : NormalizedCutoffControl X,
+      (∀ x ∈ Metric.closedBall (0 : X) 1, χ.cutoff x = 1) ∧
+      tsupport χ.cutoff ⊆ Metric.ball (0 : X) 2 := by
+  have hcompact : IsCompact (Metric.closedBall (0 : X) 1) :=
+    isCompact_closedBall (0 : X) 1
+  have hopen : IsOpen (Metric.ball (0 : X) 2) := Metric.isOpen_ball
+  have hsub : Metric.closedBall (0 : X) 1 ⊆ Metric.ball (0 : X) 2 := by
+    intro x hx
+    rw [Metric.mem_closedBall] at hx
+    rw [Metric.mem_ball]
+    exact lt_of_le_of_lt hx (by norm_num)
+  obtain ⟨χ, hχsupp, hχone, _⟩ :=
+    exists_normalizedCutoffControl_one_nhdsSet_of_isCompact
+      hcompact hopen hsub
+  refine ⟨χ, ?_, hχsupp⟩
+  intro x hx
+  exact hχone.self_of_nhdsSet x hx
+
 end AnalyticPDE
 end RicciFlow

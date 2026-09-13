@@ -123,6 +123,36 @@ def zeroField {t₀ T α : ℝ} (hα : 0 < α) (hα1 : α < 1) (r : ℝ) :=
     hα hα1.le D.cutoff D.zero D.center r
     D.norm_cutoff_le D.cutoff_lipschitz D.norm_zero_le D.zero_lipschitz
 
+/-- On the region where the normalized cutoff is one, the localized
+principal coefficient is exactly the centered-rescaled coefficient. -/
+theorem toFun_principalField_of_cutoff_eq_one
+    {t₀ T α : ℝ} (hα : 0 < α) (hα1 : α < 1) (r : ℝ)
+    (z : ℝ × X) (hcut : D.cutoff z.2 = 1) :
+    ParabolicC0AlphaSpace.toFun
+        (D.principalField (t₀ := t₀) (T := T) hα hα1 r) z =
+      D.principal (D.center + r • z.2) := by
+  simp [principalField, hcut]
+
+/-- On the cutoff-one region, the localized first-order coefficient is
+exactly the parabolically weighted centered-rescaled coefficient. -/
+theorem toFun_firstField_of_cutoff_eq_one
+    {t₀ T α : ℝ} (hα : 0 < α) (hα1 : α < 1) (r : ℝ)
+    (z : ℝ × X) (hcut : D.cutoff z.2 = 1) :
+    ParabolicC0AlphaSpace.toFun
+        (D.firstField (t₀ := t₀) (T := T) hα hα1 r) z =
+      r • D.first (D.center + r • z.2) := by
+  simp [firstField, hcut]
+
+/-- On the cutoff-one region, the localized zeroth-order coefficient is
+exactly the parabolically weighted centered-rescaled coefficient. -/
+theorem toFun_zeroField_of_cutoff_eq_one
+    {t₀ T α : ℝ} (hα : 0 < α) (hα1 : α < 1) (r : ℝ)
+    (z : ℝ × X) (hcut : D.cutoff z.2 = 1) :
+    ParabolicC0AlphaSpace.toFun
+        (D.zeroField (t₀ := t₀) (T := T) hα hα1 r) z =
+      r ^ 2 • D.zero (D.center + r • z.2) := by
+  simp [zeroField, hcut]
+
 /-- Explicit scalar majorant for the post-frozen coordinate error. -/
 def errorMajorant {t₀ T α : ℝ}
     (Q : ParabolicC0AlphaBanach X W α
