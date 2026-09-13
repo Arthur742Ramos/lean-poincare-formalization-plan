@@ -1,4 +1,6 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteLowerOrder
+import Mathlib.Analysis.Calculus.ContDiff.Comp
+import Mathlib.Analysis.Calculus.ContDiff.Operations
 
 /-!
 # Lower-order coefficients produced by a scalar cutoff
@@ -22,6 +24,33 @@ namespace AnalyticPDE
 variable {X W : Type*}
   [NormedAddCommGroup X] [NormedSpace ℝ X]
   [NormedAddCommGroup W] [NormedSpace ℝ W]
+
+@[reducible] local instance secondOrderCutoffFirstNormedAddCommGroup :
+    NormedAddCommGroup (X →L[ℝ] W) := ContinuousLinearMap.toNormedAddCommGroup
+@[reducible] local instance secondOrderCutoffFirstNormedSpace :
+    NormedSpace ℝ (X →L[ℝ] W) := ContinuousLinearMap.toNormedSpace
+@[reducible] local instance secondOrderCutoffSecondNormedAddCommGroup :
+    NormedAddCommGroup (X →L[ℝ] X →L[ℝ] W) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+@[reducible] local instance secondOrderCutoffSecondNormedSpace :
+    NormedSpace ℝ (X →L[ℝ] X →L[ℝ] W) :=
+  ContinuousLinearMap.toNormedSpace
+@[reducible] local instance secondOrderCutoffPrincipalNormedAddCommGroup :
+    NormedAddCommGroup ((X →L[ℝ] X →L[ℝ] W) →L[ℝ] W) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+@[reducible] local instance secondOrderCutoffPrincipalNormedSpace :
+    NormedSpace ℝ ((X →L[ℝ] X →L[ℝ] W) →L[ℝ] W) :=
+  ContinuousLinearMap.toNormedSpace
+@[reducible] local instance secondOrderCutoffFirstCoeffNormedAddCommGroup :
+    NormedAddCommGroup ((X →L[ℝ] W) →L[ℝ] W) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+@[reducible] local instance secondOrderCutoffFirstCoeffNormedSpace :
+    NormedSpace ℝ ((X →L[ℝ] W) →L[ℝ] W) :=
+  ContinuousLinearMap.toNormedSpace
+@[reducible] local instance secondOrderCutoffZeroCoeffNormedAddCommGroup :
+    NormedAddCommGroup (W →L[ℝ] W) := ContinuousLinearMap.toNormedAddCommGroup
+@[reducible] local instance secondOrderCutoffZeroCoeffNormedSpace :
+    NormedSpace ℝ (W →L[ℝ] W) := ContinuousLinearMap.toNormedSpace
 
 /-- The first-jet contribution `v ↦ dχ(v) u`. -/
 def cutoffGradientValueL (dχ : X →L[ℝ] ℝ) :
@@ -90,6 +119,50 @@ def secondOrderCutoffZeroCoefficient
       P (cutoffHessianValueL ddχ u) +
         B (cutoffGradientValueL dχ u) := by
   rfl
+
+/-- Smooth dependence of the first-order cutoff coefficient on the principal
+coefficient and the cutoff gradient. -/
+theorem contDiffOn_secondOrderCutoffFirstCoefficient
+    {n : WithTop ℕ∞} {s : Set X}
+    {P : X → (X →L[ℝ] X →L[ℝ] W) →L[ℝ] W}
+    {dχ : X → X →L[ℝ] ℝ}
+    (hP : ContDiffOn ℝ n P s) (hdχ : ContDiffOn ℝ n dχ s) :
+    ContDiffOn ℝ n
+      (fun z => secondOrderCutoffFirstCoefficient (P z) (dχ z)) s := by
+  let S := ContinuousLinearMap.smulRightL ℝ X (X →L[ℝ] W)
+  let R :=
+    (ContinuousLinearMap.flipₗᵢ ℝ X X W).toContinuousLinearEquiv.toContinuousLinearMap
+  have hA : ContDiffOn ℝ n (fun z => S (dχ z)) s :=
+    contDiffOn_const.clm_apply hdχ
+  have hRA : ContDiffOn ℝ n (fun z => R.comp (S (dχ z))) s :=
+    contDiffOn_const.clm_comp hA
+  simpa only [secondOrderCutoffFirstCoefficient, cutoffGradientCrossL,
+    S, R] using hP.clm_comp (hA.add hRA)
+
+/-- Smooth dependence of the zeroth-order cutoff coefficient on the
+principal and first coefficients and on the first two cutoff derivatives. -/
+theorem contDiffOn_secondOrderCutoffZeroCoefficient
+    {n : WithTop ℕ∞} {s : Set X}
+    {P : X → (X →L[ℝ] X →L[ℝ] W) →L[ℝ] W}
+    {B : X → (X →L[ℝ] W) →L[ℝ] W}
+    {dχ : X → X →L[ℝ] ℝ} {ddχ : X → X →L[ℝ] X →L[ℝ] ℝ}
+    (hP : ContDiffOn ℝ n P s) (hB : ContDiffOn ℝ n B s)
+    (hdχ : ContDiffOn ℝ n dχ s) (hddχ : ContDiffOn ℝ n ddχ s) :
+    ContDiffOn ℝ n
+      (fun z => secondOrderCutoffZeroCoefficient
+        (P z) (B z) (dχ z) (ddχ z)) s := by
+  let S := ContinuousLinearMap.smulRightL ℝ X W
+  let R :=
+    (ContinuousLinearMap.flipₗᵢ ℝ X W (X →L[ℝ] W)).toContinuousLinearEquiv.toContinuousLinearMap
+  have hgrad : ContDiffOn ℝ n (fun z => S (dχ z)) s :=
+    contDiffOn_const.clm_apply hdχ
+  have hcomp : ContDiffOn ℝ n (fun z => S.comp (ddχ z)) s :=
+    contDiffOn_const.clm_comp hddχ
+  have hhess : ContDiffOn ℝ n (fun z => R (S.comp (ddχ z))) s :=
+    contDiffOn_const.clm_apply hcomp
+  simpa only [secondOrderCutoffZeroCoefficient, cutoffHessianValueL,
+    cutoffGradientValueL, S, R] using
+      (hP.clm_comp hhess).add (hB.clm_comp hgrad)
 
 /-- Pure operator identity showing cancellation of every second derivative
 of the unknown in a cutoff commutator. -/
@@ -174,6 +247,91 @@ theorem secondOrder_cutoff_product_jet
       exact hterm1.add hterm2
     have hactual := hF.congr' hEq hx
     rw [hactual.fderivWithin (hs x hx)]
+    ext v w
+    simp [S, cutoffGradientCrossL, cutoffHessianValueL]
+    abel
+
+/-- Unrestricted-point version of `secondOrder_cutoff_product_jet`.  This is
+the convenient form on the interior of a manifold chart, where all within
+derivatives agree with ordinary Fréchet derivatives. -/
+theorem secondOrder_cutoff_product_jet_at
+    {χ : X → ℝ} {u : X → W} {x : X}
+    (hχ : ContDiffAt ℝ 2 χ x) (hu : ContDiffAt ℝ 2 u x) :
+    let dχ := fderiv ℝ χ x
+    let Du := fderiv ℝ u x
+    let ddχ := fderiv ℝ (fderiv ℝ χ) x
+    let D2u := fderiv ℝ (fderiv ℝ u) x
+    fderiv ℝ (fun y => χ y • u y) x =
+        χ x • Du + cutoffGradientValueL dχ (u x) ∧
+      fderiv ℝ
+          (fun y => fderiv ℝ (fun z => χ z • u z) y) x =
+        χ x • D2u + cutoffGradientCrossL dχ Du +
+          cutoffHessianValueL ddχ (u x) := by
+  dsimp only
+  let dχ := fderiv ℝ χ x
+  let Du := fderiv ℝ u x
+  let ddχ := fderiv ℝ (fderiv ℝ χ) x
+  let D2u := fderiv ℝ (fderiv ℝ u) x
+  have hχdiff : DifferentiableAt ℝ χ x :=
+    hχ.differentiableAt (by norm_num)
+  have hudiff : DifferentiableAt ℝ u x :=
+    hu.differentiableAt (by norm_num)
+  have hχx : HasFDerivAt χ dχ x := hχdiff.hasFDerivAt
+  have hux : HasFDerivAt u Du x := hudiff.hasFDerivAt
+  have hdχ : HasFDerivAt (fderiv ℝ χ) ddχ x :=
+    ((hχ.fderiv_right (m := (1 : WithTop ℕ∞)) (by norm_num)).differentiableAt
+      (by norm_num)).hasFDerivAt
+  have hDu : HasFDerivAt (fderiv ℝ u) D2u x :=
+    ((hu.fderiv_right (m := (1 : WithTop ℕ∞)) (by norm_num)).differentiableAt
+      (by norm_num)).hasFDerivAt
+  have hfirst : HasFDerivAt (fun y => χ y • u y)
+      (χ x • Du + cutoffGradientValueL dχ (u x)) x := by
+    change HasFDerivAt (χ • u)
+      (χ x • Du + dχ.smulRight (u x)) x
+    exact hχx.smul hux
+  constructor
+  · exact hfirst.fderiv
+  · let S := ContinuousLinearMap.smulRightL ℝ X W
+    let F : X → X →L[ℝ] W := fun y =>
+      χ y • fderiv ℝ u y +
+        cutoffGradientValueL (fderiv ℝ χ y) (u y)
+    have hEq : (fun y => fderiv ℝ (fun z => χ z • u z) y) =ᶠ[nhds x] F := by
+      filter_upwards [hχ.eventually (by norm_num),
+        hu.eventually (by norm_num)] with y hχy huy
+      exact fderiv_fun_smul
+        (hχy.differentiableAt (by norm_num))
+        (huy.differentiableAt (by norm_num))
+    have hterm1 : HasFDerivAt
+        (fun y => χ y • fderiv ℝ u y)
+        (χ x • D2u + dχ.smulRight Du) x := hχx.smul hDu
+    have hS : HasFDerivAt (fun L => S L) S (fderiv ℝ χ x) :=
+      S.hasFDerivAt
+    have hcWithin := hS.comp_hasFDerivWithinAt
+      (f := fun y => fderiv ℝ χ y) (g := fun L => S L)
+      (f' := ddχ) (g' := S) (s := Set.univ) x
+      (hdχ.hasFDerivWithinAt (s := Set.univ))
+    have hterm2rawWithin := hcWithin.clm_apply
+      (hux.hasFDerivWithinAt (s := Set.univ))
+    have hterm2raw : HasFDerivAt
+        (fun y => S (fderiv ℝ χ y) (u y))
+        ((S (fderiv ℝ χ x)).comp (fderiv ℝ u x) +
+          (S.comp ddχ).flip (u x)) x := by
+      simpa only [hasFDerivWithinAt_univ, Function.comp_apply] using
+        hterm2rawWithin
+    have hterm2 : HasFDerivAt
+        (fun y => cutoffGradientValueL (fderiv ℝ χ y) (u y))
+        ((S dχ).comp Du + (S.comp ddχ).flip (u x)) x := by
+      simpa only [S, cutoffGradientValueL, Function.comp_apply] using
+        hterm2raw
+    have hF : HasFDerivAt F
+        ((χ x • D2u + dχ.smulRight Du) +
+          ((S dχ).comp Du + (S.comp ddχ).flip (u x))) x := by
+      change HasFDerivAt
+        ((fun y => χ y • fderiv ℝ u y) +
+          fun y => cutoffGradientValueL (fderiv ℝ χ y) (u y)) _ x
+      exact hterm1.add hterm2
+    have hactual := hF.congr_of_eventuallyEq hEq
+    rw [hactual.fderiv]
     ext v w
     simp [S, cutoffGradientCrossL, cutoffHessianValueL]
     abel

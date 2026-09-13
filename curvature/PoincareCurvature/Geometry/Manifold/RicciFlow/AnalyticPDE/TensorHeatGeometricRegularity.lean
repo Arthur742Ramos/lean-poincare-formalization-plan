@@ -213,6 +213,22 @@ theorem contDiffOn_fderivWithin_range
     (s := Set.range I) (x := z)
     (mem_of_superset (hs.mem_nhds hz) hsrange)
 
+/-- General-order form of `contDiffOn_fderivWithin_range`: on an open chart
+domain contained in the model-with-corners range, taking the within derivative
+loses exactly one order of ordinary differentiability. -/
+theorem contDiffOn_fderivWithin_range_succ
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {n : WithTop ℕ∞} {f : E → F} {s : Set E}
+    (hs : IsOpen s) (hsrange : s ⊆ Set.range I)
+    (hf : ContDiffOn ℝ (n + 1) f s) :
+    ContDiffOn ℝ n (fun z => fderivWithin ℝ f (Set.range I) z) s := by
+  have hderiv : ContDiffOn ℝ n (fderiv ℝ f) s :=
+    hf.fderiv_of_isOpen hs (by rfl)
+  refine hderiv.congr fun z hz => ?_
+  exact fderivWithin_of_mem_nhds (𝕜 := ℝ) (f := f)
+    (s := Set.range I) (x := z)
+    (mem_of_superset (hs.mem_nhds hz) hsrange)
+
 set_option backward.isDefEq.respectTransparency true in
 theorem contMDiffOn_localTwoTensorConnectionCoefficient
     (cov : CovariantDerivative I E TM)
