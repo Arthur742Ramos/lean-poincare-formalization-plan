@@ -238,8 +238,46 @@ theorem commonTerminalTime_le [Nonempty M]
   simpa [add_comm] using add_le_add_left
     (mul_le_mul_of_nonneg_right hsq (sub_nonneg.mpr A.time_lt.le)) t₀
 
+/-- Pair-indexed tensor coordinates use the convention `(second, first)`,
+because `localTwoTensorComponent ... (q,p)` evaluates a tensor on frame
+vectors `(p,q)`.  This equivalence performs exactly that swap while passing
+to the curried matrices consumed by geometric reconstruction. -/
+def tensorCoordinateReconstructionLinearEquiv (d : ℕ) :
+    (Fin d × Fin d → ℝ) ≃ₗ[ℝ] (Fin d → Fin d → ℝ) where
+  toFun q i j := q (j, i)
+  invFun u ij := u ij.2 ij.1
+  left_inv q := by
+    funext ij
+    rcases ij with ⟨i, j⟩
+    rfl
+  right_inv u := by
+    funext i j
+    rfl
+  map_add' q r := by
+    funext i j
+    rfl
+  map_smul' c q := by
+    funext i j
+    rfl
+
+/-- Continuous form of the coordinate-to-reconstruction index equivalence. -/
+def tensorCoordinateReconstructionEquiv (d : ℕ) :
+    (Fin d × Fin d → ℝ) ≃L[ℝ] (Fin d → Fin d → ℝ) :=
+  (tensorCoordinateReconstructionLinearEquiv d).toContinuousLinearEquiv
+
+@[simp] theorem tensorCoordinateReconstructionEquiv_apply
+    (d : ℕ) (q : Fin d × Fin d → ℝ) (i j : Fin d) :
+    tensorCoordinateReconstructionEquiv d q i j = q (j, i) :=
+  rfl
+
+@[simp] theorem tensorCoordinateReconstructionEquiv_symm_apply
+    (d : ℕ) (u : Fin d → Fin d → ℝ) (ij : Fin d × Fin d) :
+    (tensorCoordinateReconstructionEquiv d).symm u ij = u ij.2 ij.1 :=
+  rfl
+
 /-- Curry the pair-indexed output of one selected local inverse into the
-matrix convention used by geometric tensor reconstruction. -/
+matrix convention used by geometric tensor reconstruction, including the
+index swap forced by the intrinsic component convention. -/
 def normalizedLocalSolution
     (cov : CovariantDerivative I E TM)
     (A : FiniteTensorHeatParametrixAtlas
@@ -249,7 +287,7 @@ def normalizedLocalSolution
       (parabolicFiniteCylinder E t₀ T)) :
     FiniteParabolicC2AlphaBanach E (Fin d → Fin d → ℝ) t₀ T α :=
   FiniteParabolicC2AlphaBanach.fiberPostcompL
-    (tensorCoordinateCurryEquiv d).toContinuousLinearMap
+    (tensorCoordinateReconstructionEquiv d).toContinuousLinearMap
     (A.localInverse (i : M) q)
 
 /-- Reconstruct one local inverse output as a genuine tensor field, rescale
