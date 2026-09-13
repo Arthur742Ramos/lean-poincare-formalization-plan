@@ -1,6 +1,6 @@
 module
 
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatLocalInverse
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatInitialTrace
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteCylinderCauchyOperator
 
 /-!
@@ -438,6 +438,54 @@ theorem exists_localTensorHeatSolutionL_of_coordinate_bound_lt_one
   exact comp_localTensorHeatSolutionL
     (I := I) p e b hxFrame hxChart hT hα hα1
       (FiniteParabolicC2AlphaBanach.coordinateCauchyL A B C) hpert
+
+/-- The selected coordinate right inverse also has zero canonical initial
+trace.  The two operator identities are returned together so the Cauchy
+condition cannot be lost when this result is propagated through localization. -/
+theorem exists_localTensorHeatSolutionL_of_coordinate_bound_lt_one_zeroTrace
+    (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    (b : Module.Basis (Fin d) ℝ E) {x : M}
+    (hxFrame : x ∈ e.baseSet)
+    (hxChart : x ∈ (extChartAt I p).source)
+    {t₀ T α : ℝ} (hT : t₀ < T) (hα : 0 < α) (hα1 : α < 1)
+    (A : FiniteParabolicC2AlphaBanach.PrincipalCoefficientSpace
+      (X := E) (E := W) (t₀ := t₀) (T := T) (α := α))
+    (B : FiniteParabolicC2AlphaBanach.FirstCoefficientSpace
+      (X := E) (E := W) (t₀ := t₀) (T := T) (α := α))
+    (C : FiniteParabolicC2AlphaBanach.ZeroCoefficientSpace
+      (X := E) (E := W) (t₀ := t₀) (T := T) (α := α))
+    (hsmall : tensorHeatCoordinatePostErrorBound A
+      (frozenTensorHeatPrincipalField
+        (I := I) p e b x t₀ T α) B C
+      (frozenTensorHeatFiniteZeroInitialInverseL
+        (I := I) p x hxChart d hT hα hα1) < 1) :
+    ∃ Q : ParabolicC0AlphaBanach E W α
+          (parabolicFiniteCylinder E t₀ T) →L[ℝ]
+        FiniteParabolicC2AlphaBanach E W t₀ T α,
+      (FiniteParabolicC2AlphaBanach.coordinateCauchyL A B C).comp Q =
+          ContinuousLinearMap.id ℝ
+            (ParabolicC0AlphaBanach E W α
+              (parabolicFiniteCylinder E t₀ T)) ∧
+      (FiniteParabolicC2AlphaBanach.initialTraceL
+        (X := E) (E := W) hT hα).comp Q = 0 := by
+  have hpert : ‖frozenTensorHeatPerturbationL
+      (I := I) p e b x hxChart hT hα hα1
+      (FiniteParabolicC2AlphaBanach.coordinateCauchyL A B C)‖ < 1 :=
+    lt_of_le_of_lt
+      (norm_frozenTensorHeatPerturbationL_coordinateCauchyL_le
+        (I := I) p e b hxChart hT hα hα1 A B C) hsmall
+  let Q := localTensorHeatSolutionL
+    (I := I) p e b hxFrame hxChart hT hα hα1
+      (FiniteParabolicC2AlphaBanach.coordinateCauchyL A B C) hpert
+  refine ⟨Q, ?_, ?_⟩
+  · exact comp_localTensorHeatSolutionL
+      (I := I) p e b hxFrame hxChart hT hα hα1
+        (FiniteParabolicC2AlphaBanach.coordinateCauchyL A B C) hpert
+  · exact initialTraceL_comp_localTensorHeatSolutionL
+      (I := I) p e b hxFrame hxChart hT hα hα1
+        (FiniteParabolicC2AlphaBanach.coordinateCauchyL A B C) hpert
 
 end AnalyticPDE
 end RicciFlow

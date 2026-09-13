@@ -267,6 +267,45 @@ theorem exists_localizedTensorHeatSolutionL
   exact lt_of_le_of_lt
     (localizedCoordinatePostErrorBound_le_errorMajorant hα hα1 r D _) hsmall
 
+/-- Localized solvability with the Cauchy condition retained: the selected
+right inverse is annihilated by the canonical initial-trace operator. -/
+theorem exists_localizedTensorHeatSolutionL_zeroTrace
+    (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    (b : Module.Basis (Fin d) ℝ E) {x : M}
+    (hxFrame : x ∈ e.baseSet)
+    (hxChart : x ∈ (extChartAt I p).source)
+    {t₀ T α : ℝ} (hT : t₀ < T) (hα : 0 < α) (hα1 : α < 1)
+    (D : TensorHeatLocalizedCoefficientData E W₂)
+    (hcenter : D.principal D.center =
+      frozenLocalTensorHeatPrincipalCoefficient (I := I) p e b x)
+    (r : ℝ)
+    (hsmall : D.errorMajorant
+      (frozenTensorHeatFiniteZeroInitialInverseL
+        (I := I) p x hxChart d hT hα hα1) r < 1) :
+    ∃ Q : ParabolicC0AlphaBanach E W₂ α
+          (parabolicFiniteCylinder E t₀ T) →L[ℝ]
+        FiniteParabolicC2AlphaBanach E W₂ t₀ T α,
+      (FiniteParabolicC2AlphaBanach.coordinateCauchyL
+        (D.principalField hα hα1 r) (D.firstField hα hα1 r)
+        (D.zeroField hα hα1 r)).comp Q =
+          ContinuousLinearMap.id ℝ
+            (ParabolicC0AlphaBanach E W₂ α
+              (parabolicFiniteCylinder E t₀ T)) ∧
+      (FiniteParabolicC2AlphaBanach.initialTraceL
+        (X := E) (E := W₂) hT hα).comp Q = 0 := by
+  have hfreeze : ParabolicC0AlphaSpace.constL
+      (X := E) (α := α) (s := parabolicFiniteCylinder E t₀ T)
+      (D.principal D.center) =
+      frozenTensorHeatPrincipalField (I := I) p e b x t₀ T α := by
+    simp [frozenTensorHeatPrincipalField, hcenter]
+  apply exists_localTensorHeatSolutionL_of_coordinate_bound_lt_one_zeroTrace
+    (I := I) p e b hxFrame hxChart hT hα hα1
+  rw [← hfreeze]
+  exact lt_of_le_of_lt
+    (localizedCoordinatePostErrorBound_le_errorMajorant hα hα1 r D _) hsmall
+
 /-- **Small-radius local tensor-heat solvability.**  Every sufficiently small
 positive rescaling radius yields an exact bounded local solution operator. -/
 theorem exists_radius_localizedTensorHeatSolutionL
@@ -298,6 +337,94 @@ theorem exists_radius_localizedTensorHeatSolutionL
   apply exists_localizedTensorHeatSolutionL
     (I := I) p e b hxFrame hxChart hT hα hα1 D hcenter r
   exact hsmall r (by simpa [abs_of_pos hr] using hrδ)
+
+/-- Small-radius localized solvability with both the equation and zero
+canonical initial trace returned as operator identities. -/
+theorem exists_radius_localizedTensorHeatSolutionL_zeroTrace
+    (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    (b : Module.Basis (Fin d) ℝ E) {x : M}
+    (hxFrame : x ∈ e.baseSet)
+    (hxChart : x ∈ (extChartAt I p).source)
+    {t₀ T α : ℝ} (hT : t₀ < T) (hα : 0 < α) (hα1 : α < 1)
+    (D : TensorHeatLocalizedCoefficientData E W₂)
+    (hcenter : D.principal D.center =
+      frozenLocalTensorHeatPrincipalCoefficient (I := I) p e b x) :
+    ∃ δ > 0, ∀ r : ℝ, 0 < r → r < δ →
+      ∃ Q : ParabolicC0AlphaBanach E W₂ α
+            (parabolicFiniteCylinder E t₀ T) →L[ℝ]
+          FiniteParabolicC2AlphaBanach E W₂ t₀ T α,
+        (FiniteParabolicC2AlphaBanach.coordinateCauchyL
+          (D.principalField hα hα1 r) (D.firstField hα hα1 r)
+          (D.zeroField hα hα1 r)).comp Q =
+            ContinuousLinearMap.id ℝ
+              (ParabolicC0AlphaBanach E W₂ α
+                (parabolicFiniteCylinder E t₀ T)) ∧
+        (FiniteParabolicC2AlphaBanach.initialTraceL
+          (X := E) (E := W₂) hT hα).comp Q = 0 := by
+  obtain ⟨δ, hδ, hsmall⟩ := D.exists_radius_errorMajorant_lt_one
+    (frozenTensorHeatFiniteZeroInitialInverseL
+      (I := I) p x hxChart d hT hα hα1)
+  refine ⟨δ, hδ, ?_⟩
+  intro r hr hrδ
+  apply exists_localizedTensorHeatSolutionL_zeroTrace
+    (I := I) p e b hxFrame hxChart hT hα hα1 D hcenter r
+  exact hsmall r (by simpa [abs_of_pos hr] using hrδ)
+
+/-- Small-radius localized solvability for arbitrary initial data represented
+by a higher-parabolic extension.  The solution has the requested forcing,
+retains the extension's canonical trace, and obeys the direct affine
+Schauder estimate. -/
+theorem exists_radius_localizedTensorHeatSolution_with_initialTrace
+    (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    (b : Module.Basis (Fin d) ℝ E) {x : M}
+    (hxFrame : x ∈ e.baseSet)
+    (hxChart : x ∈ (extChartAt I p).source)
+    {t₀ T α : ℝ} (hT : t₀ < T) (hα : 0 < α) (hα1 : α < 1)
+    (D : TensorHeatLocalizedCoefficientData E W₂)
+    (hcenter : D.principal D.center =
+      frozenLocalTensorHeatPrincipalCoefficient (I := I) p e b x) :
+    ∃ δ > 0, ∀ r : ℝ, 0 < r → r < δ →
+      ∃ Q : ParabolicC0AlphaBanach E W₂ α
+            (parabolicFiniteCylinder E t₀ T) →L[ℝ]
+          FiniteParabolicC2AlphaBanach E W₂ t₀ T α,
+        (FiniteParabolicC2AlphaBanach.coordinateCauchyL
+          (D.principalField hα hα1 r) (D.firstField hα hα1 r)
+          (D.zeroField hα hα1 r)).comp Q =
+            ContinuousLinearMap.id ℝ
+              (ParabolicC0AlphaBanach E W₂ α
+                (parabolicFiniteCylinder E t₀ T)) ∧
+        (FiniteParabolicC2AlphaBanach.initialTraceL
+          (X := E) (E := W₂) hT hα).comp Q = 0 ∧
+        ∀ (h : FiniteParabolicC2AlphaBanach E W₂ t₀ T α)
+          (q : ParabolicC0AlphaBanach E W₂ α
+            (parabolicFiniteCylinder E t₀ T)),
+          ∃ u : FiniteParabolicC2AlphaBanach E W₂ t₀ T α,
+            FiniteParabolicC2AlphaBanach.coordinateCauchyL
+                (D.principalField hα hα1 r) (D.firstField hα hα1 r)
+                (D.zeroField hα hα1 r) u = q ∧
+            FiniteParabolicC2AlphaBanach.initialTraceL hT hα u =
+              FiniteParabolicC2AlphaBanach.initialTraceL hT hα h ∧
+            ‖u‖ ≤ ‖h‖ + ‖Q‖ *
+              ‖q - FiniteParabolicC2AlphaBanach.coordinateCauchyL
+                (D.principalField hα hα1 r) (D.firstField hα hα1 r)
+                (D.zeroField hα hα1 r) h‖ := by
+  obtain ⟨δ, hδ, hsolve⟩ :=
+    exists_radius_localizedTensorHeatSolutionL_zeroTrace
+      (I := I) p e b hxFrame hxChart hT hα hα1 D hcenter
+  refine ⟨δ, hδ, ?_⟩
+  intro r hr hrδ
+  obtain ⟨Q, hPQ, htrace⟩ := hsolve r hr hrδ
+  refine ⟨Q, hPQ, htrace, ?_⟩
+  intro h q
+  exact LinearParabolicParametrix.exists_solution_with_trace_of_rightInverse_zeroTrace
+    (FiniteParabolicC2AlphaBanach.initialTraceL hT hα)
+    (FiniteParabolicC2AlphaBanach.coordinateCauchyL
+      (D.principalField hα hα1 r) (D.firstField hα hα1 r)
+      (D.zeroField hα hα1 r)) Q hPQ htrace h q
 
 end AnalyticPDE
 end RicciFlow

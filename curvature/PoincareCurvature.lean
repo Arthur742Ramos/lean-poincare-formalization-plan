@@ -52,6 +52,7 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatC2Alp
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatFiniteBanach
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.MatrixZeroInitialOperator
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.MatrixAffineInitialOperator
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ZeroInitialTrace
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.LinearSecondOrder
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FrameSecondOrder
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.Parametrix
@@ -69,6 +70,9 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatCoord
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatEllipticity
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiberLinearChange
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteSourceExtension
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteInitialTrace
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.AffineCauchyCorrection
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.SpatialInitialExtension
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteParabolicScaling
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteParabolicScalingOperator
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.TimeIndependentHolder
@@ -78,6 +82,7 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.Norma
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.CompactCoefficientExtension
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatFrozenInverse
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatLocalInverse
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatInitialTrace
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatCoordinatePerturbation
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatLocalizedInverse
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatCoefficientLocalization
