@@ -1,4 +1,5 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasResidual
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasShortTime
 
 /-!
 # Neumann correction of the geometric tensor-heat atlas

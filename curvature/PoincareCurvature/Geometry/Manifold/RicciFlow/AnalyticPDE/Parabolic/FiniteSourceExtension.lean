@@ -685,6 +685,63 @@ theorem restrictL_comp_finiteSourceExtensionL
   ext q
   exact restrict_finiteSourceExtension hT hα q
 
+/-- Extend data from a shorter finite cylinder to a longer one by the
+canonical clamped extension, then restrict the global extension to the longer
+cylinder.  The construction costs at most the universal factor three and is
+independent of the length of the longer interval. -/
+noncomputable def extendTerminalL
+    {S T : ℝ} (hS : t₀ < S) (hST : S ≤ T) (hα : 0 < α) :
+    ParabolicC0AlphaBanach X E α (parabolicFiniteCylinder X t₀ S) →L[ℝ]
+      ParabolicC0AlphaBanach X E α (parabolicFiniteCylinder X t₀ T) :=
+  (restrictL (X := X) (E := E) (α := α)
+    (s := (Set.univ : Set (ℝ × X)))
+    (t := parabolicFiniteCylinder X t₀ T) (Set.subset_univ _)).comp
+      (finiteSourceExtensionL hS hα)
+
+theorem norm_extendTerminalL_le
+    {S T : ℝ} (hS : t₀ < S) (hST : S ≤ T) (hα : 0 < α) :
+    ‖extendTerminalL (X := X) (E := E) hS hST hα‖ ≤ 3 := by
+  calc
+    ‖extendTerminalL (X := X) (E := E) hS hST hα‖ ≤
+        ‖restrictL (X := X) (E := E) (α := α)
+          (s := (Set.univ : Set (ℝ × X)))
+          (t := parabolicFiniteCylinder X t₀ T) (Set.subset_univ _)‖ *
+          ‖finiteSourceExtensionL hS hα‖ := ContinuousLinearMap.opNorm_comp_le _ _
+    _ ≤ 1 * 3 := mul_le_mul
+      (norm_restrictL_le (Set.subset_univ _))
+      (norm_finiteSourceExtensionL_le hS hα)
+      (norm_nonneg _) zero_le_one
+    _ = 3 := one_mul 3
+
+/-- Restricting the canonical short-to-long extension back to the short
+cylinder is exactly the original datum. -/
+theorem restrict_extendTerminalL
+    {S T : ℝ} (hS : t₀ < S) (hST : S ≤ T) (hα : 0 < α)
+    (q : ParabolicC0AlphaBanach X E α
+      (parabolicFiniteCylinder X t₀ S)) :
+    restrictL (parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST)
+      (extendTerminalL hS hST hα q) = q := by
+  apply eq_of_eval_eq
+  intro z hz
+  rw [evalCLM_restrictL_apply]
+  change evalCLM z _
+      (restrictL (Set.subset_univ _)
+        (finiteSourceExtension hS hα q)) = evalCLM z hz q
+  rw [evalCLM_restrictL_apply]
+  exact eval_finiteSourceExtension_of_mem hS hα q z hz
+
+/-- Operator form of the short-cylinder retraction identity. -/
+theorem restrictL_comp_extendTerminalL
+    {S T : ℝ} (hS : t₀ < S) (hST : S ≤ T) (hα : 0 < α) :
+    (restrictL (X := X) (E := E) (α := α)
+      (parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST)).comp
+        (extendTerminalL hS hST hα) =
+      ContinuousLinearMap.id ℝ
+        (ParabolicC0AlphaBanach X E α
+          (parabolicFiniteCylinder X t₀ S)) := by
+  ext q
+  exact restrict_extendTerminalL hS hST hα q
+
 end ParabolicC0AlphaBanach
 
 end AnalyticPDE

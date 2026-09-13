@@ -1,0 +1,216 @@
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatFiniteAtlas
+
+/-!
+# Uniform short-time restriction of the tensor-heat atlas inverse
+
+The local atlas inverse is constructed once on `(t₀,T]`.  This file shows
+that it can be reused on every shorter cylinder `(t₀,S]`: extend the short
+forcing by the canonical clamped extension, apply the original inverse, and
+restrict the resulting genuine second jet back to `S`.
+
+The resulting inverse remains an exact zero-trace right inverse for the
+restricted coordinate operator.  Its norm is bounded by three times the
+original inverse norm, independently of `S`.  This removes the circularity
+that would arise from rebuilding the local inverse after choosing a thin
+time horizon.
+-/
+
+@[expose] public noncomputable section
+
+set_option autoImplicit false
+set_option linter.unusedSectionVars false
+set_option synthInstance.maxHeartbeats 400000
+set_option maxHeartbeats 4000000
+
+open Bundle FiberBundle Set
+open scoped Manifold ContDiff Topology
+
+namespace RicciFlow
+namespace AnalyticPDE
+namespace FiniteTensorHeatParametrixAtlas
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+  [RiemannianBundle (TangentSpace I : M → Type _)]
+  [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+  [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+  [CompactSpace M] [SigmaCompactSpace M] [I.Boundaryless]
+
+variable {d : ℕ} {t₀ S T α : ℝ}
+
+local notation "TM" => (TangentSpace I : M → Type _)
+local notation "W₂" => (Fin d × Fin d → ℝ)
+
+@[reducible] local instance shortAtlasFirstNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] W₂) := ContinuousLinearMap.toNormedAddCommGroup
+@[reducible] local instance shortAtlasFirstNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] W₂) := ContinuousLinearMap.toNormedSpace
+@[reducible] local instance shortAtlasHessianNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] W₂) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+@[reducible] local instance shortAtlasHessianNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] W₂) := ContinuousLinearMap.toNormedSpace
+@[reducible] local instance shortAtlasPrincipalNormedAddCommGroup :
+    NormedAddCommGroup ((E →L[ℝ] E →L[ℝ] W₂) →L[ℝ] W₂) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+@[reducible] local instance shortAtlasPrincipalNormedSpace :
+    NormedSpace ℝ ((E →L[ℝ] E →L[ℝ] W₂) →L[ℝ] W₂) :=
+  ContinuousLinearMap.toNormedSpace
+@[reducible] local instance shortAtlasFirstCoeffNormedAddCommGroup :
+    NormedAddCommGroup ((E →L[ℝ] W₂) →L[ℝ] W₂) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+@[reducible] local instance shortAtlasFirstCoeffNormedSpace :
+    NormedSpace ℝ ((E →L[ℝ] W₂) →L[ℝ] W₂) :=
+  ContinuousLinearMap.toNormedSpace
+
+/-- The original long-cylinder coordinate Cauchy operator in one chart. -/
+def atlasLocalCauchyL
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index) :
+    FiniteParabolicC2AlphaBanach E W₂ t₀ T α →L[ℝ]
+      ParabolicC0AlphaBanach E W₂ α
+        (parabolicFiniteCylinder E t₀ T) :=
+  FiniteParabolicC2AlphaBanach.coordinateCauchyL
+    ((A.coefficients (i : M)).principalField A.alpha_pos
+      A.alpha_lt_one (A.radius (i : M)))
+    ((A.coefficients (i : M)).firstField A.alpha_pos
+      A.alpha_lt_one (A.radius (i : M)))
+    ((A.coefficients (i : M)).zeroField A.alpha_pos
+      A.alpha_lt_one (A.radius (i : M)))
+
+/-- The coordinate Cauchy operator on a shortened cylinder, obtained by
+restricting all three localized coefficient fields. -/
+def shortLocalCauchyL
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index) (hST : S ≤ T) :
+    FiniteParabolicC2AlphaBanach E W₂ t₀ S α →L[ℝ]
+      ParabolicC0AlphaBanach E W₂ α
+        (parabolicFiniteCylinder E t₀ S) :=
+  FiniteParabolicC2AlphaBanach.coordinateCauchyL
+    (ParabolicC0AlphaSpace.restrictL
+      (parabolicFiniteCylinder_mono (X := E) (t₀ := t₀) hST)
+      ((A.coefficients (i : M)).principalField A.alpha_pos
+        A.alpha_lt_one (A.radius (i : M))))
+    (ParabolicC0AlphaSpace.restrictL
+      (parabolicFiniteCylinder_mono (X := E) (t₀ := t₀) hST)
+      ((A.coefficients (i : M)).firstField A.alpha_pos
+        A.alpha_lt_one (A.radius (i : M))))
+    (ParabolicC0AlphaSpace.restrictL
+      (parabolicFiniteCylinder_mono (X := E) (t₀ := t₀) hST)
+      ((A.coefficients (i : M)).zeroField A.alpha_pos
+        A.alpha_lt_one (A.radius (i : M))))
+
+/-- Reuse the fixed long-cylinder inverse on `(t₀,S]`. -/
+def shortLocalInverse
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index) (hS : t₀ < S) (hST : S ≤ T) :
+    ParabolicC0AlphaBanach E W₂ α
+        (parabolicFiniteCylinder E t₀ S) →L[ℝ]
+      FiniteParabolicC2AlphaBanach E W₂ t₀ S α :=
+  (FiniteParabolicC2AlphaBanach.restrictTerminalL hST).comp
+    ((A.localInverse (i : M)).comp
+      (ParabolicC0AlphaBanach.extendTerminalL hS hST A.alpha_pos))
+
+/-- The shortened solver remains an exact right inverse of the shortened
+coordinate Cauchy operator. -/
+theorem shortLocalCauchyL_comp_shortLocalInverse
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index) (hS : t₀ < S) (hST : S ≤ T) :
+    (shortLocalCauchyL cov A i hST).comp
+        (shortLocalInverse cov A i hS hST) =
+      ContinuousLinearMap.id ℝ
+        (ParabolicC0AlphaBanach E W₂ α
+          (parabolicFiniteCylinder E t₀ S)) := by
+  ext q
+  let e := ParabolicC0AlphaBanach.extendTerminalL hS hST A.alpha_pos q
+  have hright := congrArg
+    (fun L : ParabolicC0AlphaBanach E W₂ α
+          (parabolicFiniteCylinder E t₀ T) →L[ℝ]
+        ParabolicC0AlphaBanach E W₂ α
+          (parabolicFiniteCylinder E t₀ T) => L e)
+    (A.right_inverse (i : M))
+  change shortLocalCauchyL cov A i hST
+      (FiniteParabolicC2AlphaBanach.restrictTerminal hST
+        (A.localInverse (i : M) e)) = q
+  rw [show shortLocalCauchyL cov A i hST
+      (FiniteParabolicC2AlphaBanach.restrictTerminal hST
+        (A.localInverse (i : M) e)) =
+      ParabolicC0AlphaBanach.restrictL
+        (parabolicFiniteCylinder_mono (X := E) (t₀ := t₀) hST)
+        (atlasLocalCauchyL cov A i (A.localInverse (i : M) e)) by
+        exact FiniteParabolicC2AlphaBanach.coordinateCauchyL_restrictTerminal
+          hST _ _ _ _]
+  rw [show atlasLocalCauchyL cov A i (A.localInverse (i : M) e) = e by
+    simpa [atlasLocalCauchyL] using hright]
+  exact ParabolicC0AlphaBanach.restrict_extendTerminalL
+    hS hST A.alpha_pos q
+
+/-- The shortened inverse retains the canonical zero initial trace. -/
+theorem initialTraceL_shortLocalInverse_apply
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index) (hS : t₀ < S) (hST : S ≤ T)
+    (q : ParabolicC0AlphaBanach E W₂ α
+      (parabolicFiniteCylinder E t₀ S)) :
+    FiniteParabolicC2AlphaBanach.initialTraceL hS A.alpha_pos
+      (shortLocalInverse cov A i hS hST q) = 0 := by
+  let e := ParabolicC0AlphaBanach.extendTerminalL hS hST A.alpha_pos q
+  change FiniteParabolicC2AlphaBanach.initialTraceL hS A.alpha_pos
+    (FiniteParabolicC2AlphaBanach.restrictTerminal hST
+      (A.localInverse (i : M) e)) = 0
+  rw [FiniteParabolicC2AlphaBanach.initialTraceL_restrictTerminal]
+  have hzero := congrArg
+    (fun L : ParabolicC0AlphaBanach E W₂ α
+          (parabolicFiniteCylinder E t₀ T) →L[ℝ]
+        BoundedContinuousFunction E W₂ => L e)
+    (A.zero_trace (i : M))
+  simpa using hzero
+
+/-- Uniform pointwise operator estimate for the shortened inverse.  The
+constant does not deteriorate as `S ↓ t₀`. -/
+theorem norm_shortLocalInverse_apply_le
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index) (hS : t₀ < S) (hST : S ≤ T)
+    (q : ParabolicC0AlphaBanach E W₂ α
+      (parabolicFiniteCylinder E t₀ S)) :
+    ‖shortLocalInverse cov A i hS hST q‖ ≤
+      3 * ‖A.localInverse (i : M)‖ * ‖q‖ := by
+  let e := ParabolicC0AlphaBanach.extendTerminalL hS hST A.alpha_pos q
+  calc
+    ‖shortLocalInverse cov A i hS hST q‖ ≤
+        ‖A.localInverse (i : M) e‖ :=
+      FiniteParabolicC2AlphaBanach.norm_restrictTerminal_le hST _
+    _ ≤ ‖A.localInverse (i : M)‖ * ‖e‖ :=
+      (A.localInverse (i : M)).le_opNorm e
+    _ ≤ ‖A.localInverse (i : M)‖ * (3 * ‖q‖) := by
+      have he : ‖e‖ ≤ 3 * ‖q‖ :=
+        ((ParabolicC0AlphaBanach.extendTerminalL hS hST A.alpha_pos).le_opNorm q).trans
+          (mul_le_mul_of_nonneg_right
+            (ParabolicC0AlphaBanach.norm_extendTerminalL_le hS hST A.alpha_pos)
+            (norm_nonneg q))
+      exact mul_le_mul_of_nonneg_left he
+        (norm_nonneg (A.localInverse (i : M)))
+    _ = 3 * ‖A.localInverse (i : M)‖ * ‖q‖ := by ring
+
+end FiniteTensorHeatParametrixAtlas
+end AnalyticPDE
+end RicciFlow

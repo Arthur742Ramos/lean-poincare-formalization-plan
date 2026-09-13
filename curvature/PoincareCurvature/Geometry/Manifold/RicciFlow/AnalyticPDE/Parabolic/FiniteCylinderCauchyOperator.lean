@@ -125,6 +125,37 @@ theorem evalCLM_coordinateCauchyL
   rw [coordinateCauchyL, ContinuousLinearMap.sub_apply, map_sub,
     evalCLM_coordinateSecondOrderL, evalCLM_timeDerivComponentL]
 
+/-- The finite-cylinder Cauchy operator commutes exactly with terminal-time
+restriction, provided its three coefficient fields are restricted to the same
+shorter cylinder. -/
+theorem coordinateCauchyL_restrictTerminal
+    {S : ℝ} (hST : S ≤ T)
+    (A : PrincipalCoefficientSpace (X := X) (E := E) (t₀ := t₀) (T := T) (α := α))
+    (B : FirstCoefficientSpace (X := X) (E := E) (t₀ := t₀) (T := T) (α := α))
+    (C : ZeroCoefficientSpace (X := X) (E := E) (t₀ := t₀) (T := T) (α := α))
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α) :
+    coordinateCauchyL
+        (ParabolicC0AlphaSpace.restrictL
+          (parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST) A)
+        (ParabolicC0AlphaSpace.restrictL
+          (parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST) B)
+        (ParabolicC0AlphaSpace.restrictL
+          (parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST) C)
+        (restrictTerminal hST u) =
+      ParabolicC0AlphaBanach.restrictL
+        (parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST)
+        (coordinateCauchyL A B C u) := by
+  apply ParabolicC0AlphaBanach.eq_of_eval_eq
+  intro z hz
+  rw [evalCLM_coordinateCauchyL,
+    ParabolicC0AlphaBanach.evalCLM_restrictL_apply,
+    evalCLM_coordinateCauchyL]
+  rw [timeDeriv_restrictTerminal hST u hz,
+    spaceSecondDeriv_restrictTerminal hST u hz,
+    spaceDeriv_restrictTerminal hST u hz,
+    value_restrictTerminal hST u hz]
+  simp only [ParabolicC0AlphaSpace.toFun_restrictL]
+
 end FiniteParabolicC2AlphaBanach
 
 end AnalyticPDE

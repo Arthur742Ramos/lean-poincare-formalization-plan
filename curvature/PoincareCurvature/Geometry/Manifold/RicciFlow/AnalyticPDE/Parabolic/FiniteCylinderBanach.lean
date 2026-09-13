@@ -50,6 +50,13 @@ def parabolicFiniteCylinder (X : Type*) (t₀ T : ℝ) : Set (ℝ × X) :=
     z ∈ parabolicFiniteCylinder X t₀ T ↔ t₀ < z.1 ∧ z.1 ≤ T := by
   simp [parabolicFiniteCylinder]
 
+omit [NormedAddCommGroup X] [NormedSpace ℝ X] in
+/-- Monotonicity of finite cylinders in their terminal time. -/
+theorem parabolicFiniteCylinder_mono {t₀ S T : ℝ} (hST : S ≤ T) :
+    parabolicFiniteCylinder X t₀ S ⊆ parabolicFiniteCylinder X t₀ T := by
+  intro z hz
+  exact ⟨⟨hz.1.1, hz.1.2.trans hST⟩, hz.2⟩
+
 /-- Time slices of the finite cylinder have unique derivatives. -/
 theorem uniqueDiffWithinAt_timeSlice_parabolicFiniteCylinder
     {t₀ T : ℝ} {z : ℝ × X} (hz : z ∈ parabolicFiniteCylinder X t₀ T) :
@@ -778,6 +785,205 @@ def timeDerivComponentL :
     ParabolicC0AlphaBanach.evalCLM z hz (timeDerivComponentL u) = timeDeriv u z := by
   rw [ParabolicC0AlphaBanach.evalCLM_eq_representative]
   rfl
+
+/-- Restrict a genuine finite-cylinder second jet to an earlier terminal
+time.  All four Hölder components are restricted by the norm-nonincreasing
+Banach restriction operator, while derivative compatibility is inherited
+from the original jet. -/
+noncomputable def restrictTerminal {S : ℝ} (hST : S ≤ T)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α) :
+    FiniteParabolicC2AlphaBanach X E t₀ S α := by
+  let hsub := parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST
+  let q : FiniteParabolicC2AlphaAmbient X E t₀ S α :=
+    (ParabolicC0AlphaBanach.restrictL hsub u.1.1,
+      ParabolicC0AlphaBanach.restrictL hsub u.1.2.1,
+      ParabolicC0AlphaBanach.restrictL hsub u.1.2.2.1,
+      ParabolicC0AlphaBanach.restrictL hsub u.1.2.2.2)
+  refine ⟨q, ?_⟩
+  have hval : ∀ z ∈ parabolicFiniteCylinder X t₀ S,
+      FiniteParabolicC2AlphaAmbient.value q z = value u z := by
+    intro z hz
+    change ParabolicC0AlphaBanach.representative
+      (ParabolicC0AlphaBanach.restrictL hsub u.1.1) z =
+        ParabolicC0AlphaBanach.representative u.1.1 z
+    rw [← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z hz,
+      ← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z (hsub hz)]
+    exact ParabolicC0AlphaBanach.evalCLM_restrictL_apply hsub z hz u.1.1
+  have hfirst : ∀ z ∈ parabolicFiniteCylinder X t₀ S,
+      FiniteParabolicC2AlphaAmbient.spaceDeriv q z = spaceDeriv u z := by
+    intro z hz
+    change ParabolicC0AlphaBanach.representative
+      (ParabolicC0AlphaBanach.restrictL hsub u.1.2.1) z =
+        ParabolicC0AlphaBanach.representative u.1.2.1 z
+    rw [← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z hz,
+      ← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z (hsub hz)]
+    exact ParabolicC0AlphaBanach.evalCLM_restrictL_apply hsub z hz u.1.2.1
+  have hsecond : ∀ z ∈ parabolicFiniteCylinder X t₀ S,
+      FiniteParabolicC2AlphaAmbient.spaceSecondDeriv q z = spaceSecondDeriv u z := by
+    intro z hz
+    change ParabolicC0AlphaBanach.representative
+      (ParabolicC0AlphaBanach.restrictL hsub u.1.2.2.1) z =
+        ParabolicC0AlphaBanach.representative u.1.2.2.1 z
+    rw [← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z hz,
+      ← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z (hsub hz)]
+    exact ParabolicC0AlphaBanach.evalCLM_restrictL_apply hsub z hz u.1.2.2.1
+  have htime : ∀ z ∈ parabolicFiniteCylinder X t₀ S,
+      FiniteParabolicC2AlphaAmbient.timeDeriv q z = timeDeriv u z := by
+    intro z hz
+    change ParabolicC0AlphaBanach.representative
+      (ParabolicC0AlphaBanach.restrictL hsub u.1.2.2.2) z =
+        ParabolicC0AlphaBanach.representative u.1.2.2.2 z
+    rw [← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z hz,
+      ← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z (hsub hz)]
+    exact ParabolicC0AlphaBanach.evalCLM_restrictL_apply hsub z hz u.1.2.2.2
+  constructor
+  · intro t ht x
+    have ht' : t ∈ Set.Ioc t₀ T := ⟨ht.1, ht.2.trans hST⟩
+    convert (u.2.hasSpaceDeriv t ht' x) using 1
+    · funext y
+      exact hval (t, y) (by simp [parabolicFiniteCylinder, ht])
+    · exact hfirst (t, x) (by simp [parabolicFiniteCylinder, ht])
+  · intro t ht x
+    have ht' : t ∈ Set.Ioc t₀ T := ⟨ht.1, ht.2.trans hST⟩
+    convert (u.2.hasSpaceSecondDeriv t ht' x) using 1
+    · funext y
+      exact hfirst (t, y) (by simp [parabolicFiniteCylinder, ht])
+    · exact hsecond (t, x) (by simp [parabolicFiniteCylinder, ht])
+  · intro t ht x
+    have ht' : t ∈ Set.Ioo t₀ T := ⟨ht.1, ht.2.trans_le hST⟩
+    have hd := u.2.hasTimeDeriv t ht' x
+    have hmem : Set.Ioc t₀ S ∈ 𝓝 t :=
+      Filter.mem_of_superset (isOpen_Ioo.mem_nhds ht) Set.Ioo_subset_Ioc_self
+    have hev : (fun s => FiniteParabolicC2AlphaAmbient.value q (s, x)) =ᶠ[𝓝 t]
+        (fun s => value u (s, x)) := by
+      filter_upwards [hmem] with s hs
+      exact hval (s, x) (by simp [parabolicFiniteCylinder, hs])
+    rw [htime (t, x) (by simp [parabolicFiniteCylinder, ht.1, ht.2.le])]
+    exact hd.congr_of_eventuallyEq hev
+
+@[simp] theorem value_restrictTerminal {S : ℝ} (hST : S ≤ T)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    {z : ℝ × X} (hz : z ∈ parabolicFiniteCylinder X t₀ S) :
+    value (restrictTerminal hST u) z = value u z := by
+  let hsub := parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST
+  change ParabolicC0AlphaBanach.representative
+    (ParabolicC0AlphaBanach.restrictL hsub u.1.1) z =
+      ParabolicC0AlphaBanach.representative u.1.1 z
+  rw [← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z hz,
+    ← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z (hsub hz)]
+  exact ParabolicC0AlphaBanach.evalCLM_restrictL_apply hsub z hz u.1.1
+
+@[simp] theorem spaceDeriv_restrictTerminal {S : ℝ} (hST : S ≤ T)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    {z : ℝ × X} (hz : z ∈ parabolicFiniteCylinder X t₀ S) :
+    spaceDeriv (restrictTerminal hST u) z = spaceDeriv u z := by
+  let hsub := parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST
+  change ParabolicC0AlphaBanach.representative
+    (ParabolicC0AlphaBanach.restrictL hsub u.1.2.1) z =
+      ParabolicC0AlphaBanach.representative u.1.2.1 z
+  rw [← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z hz,
+    ← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z (hsub hz)]
+  exact ParabolicC0AlphaBanach.evalCLM_restrictL_apply hsub z hz u.1.2.1
+
+@[simp] theorem spaceSecondDeriv_restrictTerminal {S : ℝ} (hST : S ≤ T)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    {z : ℝ × X} (hz : z ∈ parabolicFiniteCylinder X t₀ S) :
+    spaceSecondDeriv (restrictTerminal hST u) z = spaceSecondDeriv u z := by
+  let hsub := parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST
+  change ParabolicC0AlphaBanach.representative
+    (ParabolicC0AlphaBanach.restrictL hsub u.1.2.2.1) z =
+      ParabolicC0AlphaBanach.representative u.1.2.2.1 z
+  rw [← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z hz,
+    ← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z (hsub hz)]
+  exact ParabolicC0AlphaBanach.evalCLM_restrictL_apply hsub z hz u.1.2.2.1
+
+@[simp] theorem timeDeriv_restrictTerminal {S : ℝ} (hST : S ≤ T)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    {z : ℝ × X} (hz : z ∈ parabolicFiniteCylinder X t₀ S) :
+    timeDeriv (restrictTerminal hST u) z = timeDeriv u z := by
+  let hsub := parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST
+  change ParabolicC0AlphaBanach.representative
+    (ParabolicC0AlphaBanach.restrictL hsub u.1.2.2.2) z =
+      ParabolicC0AlphaBanach.representative u.1.2.2.2 z
+  rw [← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z hz,
+    ← ParabolicC0AlphaBanach.evalCLM_eq_representative _ z (hsub hz)]
+  exact ParabolicC0AlphaBanach.evalCLM_restrictL_apply hsub z hz u.1.2.2.2
+
+@[simp] theorem restrictTerminal_zero {S : ℝ} (hST : S ≤ T) :
+    restrictTerminal (X := X) (E := E) (t₀ := t₀) (α := α) hST 0 = 0 := by
+  apply Subtype.ext
+  simp [restrictTerminal]
+
+@[simp] theorem restrictTerminal_add {S : ℝ} (hST : S ≤ T)
+    (u v : FiniteParabolicC2AlphaBanach X E t₀ T α) :
+    restrictTerminal hST (u + v) = restrictTerminal hST u + restrictTerminal hST v := by
+  apply Subtype.ext
+  simp [restrictTerminal]
+
+@[simp] theorem restrictTerminal_smul {S : ℝ} (hST : S ≤ T) (c : ℝ)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α) :
+    restrictTerminal hST (c • u) = c • restrictTerminal hST u := by
+  apply Subtype.ext
+  simp [restrictTerminal]
+
+/-- Terminal restriction is norm-nonincreasing in the full four-component
+`C^{2+α,1+α/2}` norm. -/
+theorem norm_restrictTerminal_le {S : ℝ} (hST : S ≤ T)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α) :
+    ‖restrictTerminal hST u‖ ≤ ‖u‖ := by
+  let hsub := parabolicFiniteCylinder_mono (X := X) (t₀ := t₀) hST
+  change max ‖ParabolicC0AlphaBanach.restrictL hsub u.1.1‖
+      (max ‖ParabolicC0AlphaBanach.restrictL hsub u.1.2.1‖
+        (max ‖ParabolicC0AlphaBanach.restrictL hsub u.1.2.2.1‖
+          ‖ParabolicC0AlphaBanach.restrictL hsub u.1.2.2.2‖)) ≤
+    max ‖u.1.1‖ (max ‖u.1.2.1‖ (max ‖u.1.2.2.1‖ ‖u.1.2.2.2‖))
+  apply max_le
+  · exact ((ParabolicC0AlphaBanach.restrictL hsub).le_opNorm _).trans
+      (by
+        calc _ ≤ 1 * ‖u.1.1‖ := mul_le_mul_of_nonneg_right
+              (ParabolicC0AlphaBanach.norm_restrictL_le hsub) (norm_nonneg _)
+          _ = ‖u.1.1‖ := one_mul _
+          _ ≤ _ := le_max_left _ _)
+  · apply max_le
+    · exact ((ParabolicC0AlphaBanach.restrictL hsub).le_opNorm _).trans
+        (by
+          calc _ ≤ 1 * ‖u.1.2.1‖ := mul_le_mul_of_nonneg_right
+                (ParabolicC0AlphaBanach.norm_restrictL_le hsub) (norm_nonneg _)
+            _ = ‖u.1.2.1‖ := one_mul _
+            _ ≤ max ‖u.1.2.1‖ (max ‖u.1.2.2.1‖ ‖u.1.2.2.2‖) := le_max_left _ _
+            _ ≤ _ := le_max_right _ _)
+    · apply max_le
+      · exact ((ParabolicC0AlphaBanach.restrictL hsub).le_opNorm _).trans
+          (by
+            calc _ ≤ 1 * ‖u.1.2.2.1‖ := mul_le_mul_of_nonneg_right
+                  (ParabolicC0AlphaBanach.norm_restrictL_le hsub) (norm_nonneg _)
+              _ = ‖u.1.2.2.1‖ := one_mul _
+              _ ≤ max ‖u.1.2.2.1‖ ‖u.1.2.2.2‖ := le_max_left _ _
+              _ ≤ max ‖u.1.2.1‖ (max ‖u.1.2.2.1‖ ‖u.1.2.2.2‖) := le_max_right _ _
+              _ ≤ _ := le_max_right _ _)
+      · exact ((ParabolicC0AlphaBanach.restrictL hsub).le_opNorm _).trans
+          (by
+            calc _ ≤ 1 * ‖u.1.2.2.2‖ := mul_le_mul_of_nonneg_right
+                  (ParabolicC0AlphaBanach.norm_restrictL_le hsub) (norm_nonneg _)
+              _ = ‖u.1.2.2.2‖ := one_mul _
+              _ ≤ max ‖u.1.2.2.1‖ ‖u.1.2.2.2‖ := le_max_right _ _
+              _ ≤ max ‖u.1.2.1‖ (max ‖u.1.2.2.1‖ ‖u.1.2.2.2‖) := le_max_right _ _
+              _ ≤ _ := le_max_right _ _)
+
+/-- Bounded terminal restriction of genuine finite-cylinder second jets. -/
+noncomputable def restrictTerminalL {S : ℝ} (hST : S ≤ T) :
+    FiniteParabolicC2AlphaBanach X E t₀ T α →L[ℝ]
+      FiniteParabolicC2AlphaBanach X E t₀ S α :=
+  LinearMap.mkContinuous
+    { toFun := restrictTerminal hST
+      map_add' := restrictTerminal_add hST
+      map_smul' := restrictTerminal_smul hST }
+    1 (by simpa using (norm_restrictTerminal_le (X := X) (E := E) (t₀ := t₀)
+      (α := α) hST))
+
+theorem norm_restrictTerminalL_le {S : ℝ} (hST : S ≤ T) :
+    ‖restrictTerminalL (X := X) (E := E) (t₀ := t₀) (α := α) hST‖ ≤ 1 :=
+  LinearMap.mkContinuous_norm_le _ zero_le_one _
 
 /-- On a nondegenerate finite cylinder, a compatible parabolic second jet is
 determined by its value component.  The spatial derivatives are unique on the
