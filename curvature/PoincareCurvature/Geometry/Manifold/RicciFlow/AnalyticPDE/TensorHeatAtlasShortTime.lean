@@ -1,5 +1,5 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatFiniteAtlas
-import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteCylinderInterpolation
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteLowerOrder
 
 /-!
 # Uniform short-time restriction of the tensor-heat atlas inverse
@@ -280,6 +280,46 @@ theorem norm_spaceDerivComponentL_shortLocalInverse_le
           (sub_nonneg.mpr hS.le))
     _ = FiniteParabolicC2AlphaBanach.gradientShortTimeFactor (S - t₀) α *
         (3 * ‖A.localInverse (i : M)‖) * ‖q‖ := by ring
+
+/-- Any fixed first-plus-zeroth-order coordinate residual composed with the
+shortened local inverse has an explicit operator norm tending to zero with
+the cylinder thickness.  This is the analytic estimate used for cutoff and
+frame-transition commutators. -/
+theorem norm_lowerOrderL_comp_shortLocalInverse_le
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index) (hS : t₀ < S) (hST : S ≤ T)
+    (hthin : S - t₀ ≤ 1)
+    (G : FiniteFirstCoefficientSpace (X := E) (W := W₂)
+      (t₀ := t₀) (T := S) (α := α))
+    (D : FiniteZeroCoefficientSpace (X := E) (W := W₂)
+      (t₀ := t₀) (T := S) (α := α)) :
+    ‖(FiniteParabolicC2AlphaBanach.lowerOrderL G D).comp
+        (shortLocalInverse cov A i hS hST)‖ ≤
+      FiniteParabolicC2AlphaBanach.lowerOrderShortTimeFactor
+          (X := E) (W := W₂) ‖G‖ ‖D‖ (S - t₀) α *
+        (3 * ‖A.localInverse (i : M)‖) := by
+  let F := FiniteParabolicC2AlphaBanach.lowerOrderShortTimeFactor
+    (X := E) (W := W₂) ‖G‖ ‖D‖ (S - t₀) α
+  have hF : 0 ≤ F :=
+    FiniteParabolicC2AlphaBanach.lowerOrderShortTimeFactor_nonneg
+      (norm_nonneg G) (norm_nonneg D) (sub_nonneg.mpr hS.le)
+  refine ContinuousLinearMap.opNorm_le_bound _
+    (mul_nonneg hF (by positivity)) (fun q => ?_)
+  calc
+    ‖((FiniteParabolicC2AlphaBanach.lowerOrderL G D).comp
+        (shortLocalInverse cov A i hS hST)) q‖ ≤
+      F * ‖shortLocalInverse cov A i hS hST q‖ :=
+        FiniteParabolicC2AlphaBanach.norm_lowerOrderL_apply_le_shortTimeFactor
+          hS A.alpha_pos A.alpha_lt_one hthin G D
+          (shortLocalInverse cov A i hS hST q)
+          (initialTraceL_shortLocalInverse_apply cov A i hS hST q)
+    _ ≤ F * (3 * ‖A.localInverse (i : M)‖ * ‖q‖) :=
+      mul_le_mul_of_nonneg_left
+        (norm_shortLocalInverse_apply_le cov A i hS hST q) hF
+    _ = F * (3 * ‖A.localInverse (i : M)‖) * ‖q‖ := by ring
 
 end FiniteTensorHeatParametrixAtlas
 end AnalyticPDE
