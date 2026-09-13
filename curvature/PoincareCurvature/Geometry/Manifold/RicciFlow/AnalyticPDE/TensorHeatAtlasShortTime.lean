@@ -1,4 +1,5 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatFiniteAtlas
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteCylinderInterpolation
 
 /-!
 # Uniform short-time restriction of the tensor-heat atlas inverse
@@ -210,6 +211,75 @@ theorem norm_shortLocalInverse_apply_le
       exact mul_le_mul_of_nonneg_left he
         (norm_nonneg (A.localInverse (i : M)))
     _ = 3 * ‖A.localInverse (i : M)‖ * ‖q‖ := by ring
+
+/-- The value component of the shortened zero-trace local solution is small
+in the full source Hölder norm, with an explicit factor tending to zero with
+the cylinder thickness. -/
+theorem norm_valueComponentL_shortLocalInverse_le
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index) (hS : t₀ < S) (hST : S ≤ T)
+    (hthin : S - t₀ ≤ 1)
+    (q : ParabolicC0AlphaBanach E W₂ α
+      (parabolicFiniteCylinder E t₀ S)) :
+    ‖FiniteParabolicC2AlphaBanach.valueComponentL
+        (shortLocalInverse cov A i hS hST q)‖ ≤
+      FiniteParabolicC2AlphaBanach.valueShortTimeFactor (S - t₀) α *
+        (3 * ‖A.localInverse (i : M)‖) * ‖q‖ := by
+  have hmain :=
+    FiniteParabolicC2AlphaBanach.norm_valueComponentL_le_valueShortTimeFactor
+      hS A.alpha_pos A.alpha_lt_one hthin
+      (shortLocalInverse cov A i hS hST q)
+      (initialTraceL_shortLocalInverse_apply cov A i hS hST q)
+  calc
+    ‖FiniteParabolicC2AlphaBanach.valueComponentL
+        (shortLocalInverse cov A i hS hST q)‖ ≤
+      FiniteParabolicC2AlphaBanach.valueShortTimeFactor (S - t₀) α *
+        ‖shortLocalInverse cov A i hS hST q‖ := hmain
+    _ ≤ FiniteParabolicC2AlphaBanach.valueShortTimeFactor (S - t₀) α *
+        (3 * ‖A.localInverse (i : M)‖ * ‖q‖) :=
+      mul_le_mul_of_nonneg_left
+        (norm_shortLocalInverse_apply_le cov A i hS hST q)
+        (FiniteParabolicC2AlphaBanach.valueShortTimeFactor_nonneg
+          (sub_nonneg.mpr hS.le))
+    _ = FiniteParabolicC2AlphaBanach.valueShortTimeFactor (S - t₀) α *
+        (3 * ‖A.localInverse (i : M)‖) * ‖q‖ := by ring
+
+/-- The first spatial derivative of the shortened zero-trace local solution
+is small in the full source Hölder norm. This is the load-bearing
+short-time estimate for the first-order cutoff commutator. -/
+theorem norm_spaceDerivComponentL_shortLocalInverse_le
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index) (hS : t₀ < S) (hST : S ≤ T)
+    (q : ParabolicC0AlphaBanach E W₂ α
+      (parabolicFiniteCylinder E t₀ S)) :
+    ‖FiniteParabolicC2AlphaBanach.spaceDerivComponentL
+        (shortLocalInverse cov A i hS hST q)‖ ≤
+      FiniteParabolicC2AlphaBanach.gradientShortTimeFactor (S - t₀) α *
+        (3 * ‖A.localInverse (i : M)‖) * ‖q‖ := by
+  have hmain :=
+    FiniteParabolicC2AlphaBanach.norm_spaceDerivComponentL_le_gradientShortTimeFactor
+      hS A.alpha_pos A.alpha_lt_one
+      (shortLocalInverse cov A i hS hST q)
+      (initialTraceL_shortLocalInverse_apply cov A i hS hST q)
+  calc
+    ‖FiniteParabolicC2AlphaBanach.spaceDerivComponentL
+        (shortLocalInverse cov A i hS hST q)‖ ≤
+      FiniteParabolicC2AlphaBanach.gradientShortTimeFactor (S - t₀) α *
+        ‖shortLocalInverse cov A i hS hST q‖ := hmain
+    _ ≤ FiniteParabolicC2AlphaBanach.gradientShortTimeFactor (S - t₀) α *
+        (3 * ‖A.localInverse (i : M)‖ * ‖q‖) :=
+      mul_le_mul_of_nonneg_left
+        (norm_shortLocalInverse_apply_le cov A i hS hST q)
+        (FiniteParabolicC2AlphaBanach.gradientShortTimeFactor_nonneg
+          (sub_nonneg.mpr hS.le))
+    _ = FiniteParabolicC2AlphaBanach.gradientShortTimeFactor (S - t₀) α *
+        (3 * ‖A.localInverse (i : M)‖) * ‖q‖ := by ring
 
 end FiniteTensorHeatParametrixAtlas
 end AnalyticPDE
