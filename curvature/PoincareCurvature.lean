@@ -106,5 +106,6 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlas
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasInitial
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasAffineCorrection
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatClosedExistence
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatUniqueness
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SectionPointwiseDeriv
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ResearchTheorems
