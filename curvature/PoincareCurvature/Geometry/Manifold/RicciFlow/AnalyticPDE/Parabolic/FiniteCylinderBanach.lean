@@ -2,6 +2,7 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.HigherBanachSpace
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.HigherFunctionSpaceCore
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
 
 /-!
 # The parabolic `C^{2+α,1+α/2}` Banach space on a finite cylinder
@@ -463,6 +464,52 @@ theorem hasDerivAt_time (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
     {t : ℝ} (ht : t ∈ Set.Ioo t₀ T) (x : X) :
     HasDerivAt (fun s : ℝ => value u (s, x)) (timeDeriv u (t, x)) t :=
   u.2.hasTimeDeriv t ht x
+
+/-- Every fixed positive-time spatial slice represented by a finite-cylinder
+`C^{2+α,1+α/2}` element is genuinely twice continuously Fréchet
+differentiable. -/
+theorem contDiff_two_space (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    {t : ℝ} (ht : t ∈ Set.Ioc t₀ T) :
+    ContDiff ℝ 2 (fun x : X => value u (t, x)) := by
+  have hDcont : Continuous (fun x : X => spaceDeriv u (t, x)) := by
+    have hc : ContinuousOn
+        (ParabolicC0AlphaBanach.representative u.1.2.1)
+        (parabolicFiniteCylinder X t₀ T) :=
+      (ParabolicC0AlphaBanach.outL u.1.2.1).2.continuousOn hα
+    have hcomp := hc.comp_continuous
+      ((continuous_const : Continuous (fun _ : X => t)).prodMk continuous_id)
+      (fun x : X => by simpa [parabolicFiniteCylinder] using ht)
+    simpa [Function.comp_def, spaceDeriv,
+      FiniteParabolicC2AlphaAmbient.spaceDeriv] using hcomp
+  have hD2cont : Continuous (fun x : X => spaceSecondDeriv u (t, x)) := by
+    have hc : ContinuousOn
+        (ParabolicC0AlphaBanach.representative u.1.2.2.1)
+        (parabolicFiniteCylinder X t₀ T) :=
+      (ParabolicC0AlphaBanach.outL u.1.2.2.1).2.continuousOn hα
+    have hcomp := hc.comp_continuous
+      ((continuous_const : Continuous (fun _ : X => t)).prodMk continuous_id)
+      (fun x : X => by simpa [parabolicFiniteCylinder] using ht)
+    simpa [Function.comp_def, spaceSecondDeriv,
+      FiniteParabolicC2AlphaAmbient.spaceSecondDeriv] using hcomp
+  have hD1 : ContDiff ℝ 1 (fun x : X => spaceDeriv u (t, x)) := by
+    rw [contDiff_one_iff_fderiv]
+    refine ⟨fun x => (hasFDerivAt_spaceDeriv u ht x).differentiableAt, ?_⟩
+    have heq : fderiv ℝ (fun x : X => spaceDeriv u (t, x)) =
+        fun x => spaceSecondDeriv u (t, x) := by
+      funext x
+      exact (hasFDerivAt_spaceDeriv u ht x).fderiv
+    rw [heq]
+    exact hD2cont
+  rw [show (2 : WithTop ℕ∞) = 1 + 1 from rfl, contDiff_succ_iff_fderiv]
+  refine ⟨fun x => (hasFDerivAt_space u ht x).differentiableAt,
+    by rintro ⟨⟩, ?_⟩
+  have heq : fderiv ℝ (fun x : X => value u (t, x)) =
+      fun x => spaceDeriv u (t, x) := by
+    funext x
+    exact (hasFDerivAt_space u ht x).fderiv
+  rw [heq]
+  exact hD1
 
 /-- Package a genuine second jet whose four components are parabolically
 Hölder on the finite cylinder into the complete finite-cylinder Banach

@@ -255,6 +255,24 @@ theorem contMDiffOn_localTensorOfMatrix (p : M)
   exact hq.congr fun x hx =>
     covariantTwoTensorTrivialization_localTensorOfMatrix p e b q hx
 
+/-- Open-subset form of local reconstruction regularity. -/
+theorem contMDiffOn_localTensorOfMatrix_of_isOpen (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (q : M → ι → ι → ℝ) {u : Set M} (hu : IsOpen u)
+    (hue : u ⊆ e.baseSet)
+    (hq : ContMDiffOn I 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) 2
+      (fun x => matrixBilinearCLM b (q x)) u) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 2
+      (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) x
+        (localTensorOfMatrix e b q x)) u := by
+  apply (Bundle.Trivialization.contMDiffOn_section_iff
+    (IB := I) (n := 2) (s := localTensorOfMatrix e b q)
+      (covariantTwoTensorTrivialization p e) hu ?_).mpr
+  · exact hq.congr fun x hx =>
+      covariantTwoTensorTrivialization_localTensorOfMatrix p e b q (hue hx)
+  · simpa only [covariantTwoTensorTrivialization_baseSet] using hue
+
 /-- Evaluation on the genuine local tangent frame exactly recovers the input
 coefficient matrix. -/
 @[simp]
@@ -348,6 +366,26 @@ theorem contMDiff_cutoffLocalTensorOfMatrix (p : M)
     (contMDiffOn_localTensorOfMatrix p e b q hq)
   simpa [cutoffLocalTensorOfMatrix] using h
 
+/-- Open-subset form of cutoff reconstruction: only regularity on an open
+neighbourhood of the cutoff support is needed. -/
+theorem contMDiff_cutoffLocalTensorOfMatrix_of_isOpen (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (ψ : M → ℝ) (q : M → ι → ι → ℝ) {u : Set M}
+    (hu : IsOpen u) (hue : u ⊆ e.baseSet)
+    (hψ : ContMDiff I 𝓘(ℝ) 2 ψ) (hψsupp : tsupport ψ ⊆ u)
+    (hq : ContMDiffOn I 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) 2
+      (fun x => matrixBilinearCLM b (q x)) u) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 2
+      (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) x
+        (cutoffLocalTensorOfMatrix e b ψ q x)) := by
+  have h := ContMDiffOn.smul_section_of_tsupport
+    (I := I) (F := E →L[ℝ] E →L[ℝ] ℝ) (V := T₂)
+    (u := u) (n := (2 : ℕ∞ω)) (ψ := ψ)
+    hψ.contMDiffOn hu hψsupp
+    (contMDiffOn_localTensorOfMatrix_of_isOpen p e b q hu hue hq)
+  simpa [cutoffLocalTensorOfMatrix] using h
+
 /-- Coefficient-level form of `contMDiff_cutoffLocalTensorOfMatrix`: globally
 `C²` matrix coefficients may be fed directly into cutoff reconstruction. -/
 theorem contMDiff_cutoffLocalTensorOfMatrix_of_coefficients (p : M)
@@ -361,6 +399,21 @@ theorem contMDiff_cutoffLocalTensorOfMatrix_of_coefficients (p : M)
       (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) x
         (cutoffLocalTensorOfMatrix e b ψ q x)) :=
   contMDiff_cutoffLocalTensorOfMatrix p e b ψ q hψ hψsupp
+    (ContMDiffOn.matrixBilinearCLM b hq)
+
+/-- Coefficient-level open-subset form of cutoff reconstruction. -/
+theorem contMDiff_cutoffLocalTensorOfMatrix_of_coefficients_of_isOpen
+    (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (ψ : M → ℝ) (q : M → ι → ι → ℝ) {u : Set M}
+    (hu : IsOpen u) (hue : u ⊆ e.baseSet)
+    (hψ : ContMDiff I 𝓘(ℝ) 2 ψ) (hψsupp : tsupport ψ ⊆ u)
+    (hq : ContMDiffOn I 𝓘(ℝ, ι → ι → ℝ) 2 q u) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 2
+      (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) x
+        (cutoffLocalTensorOfMatrix e b ψ q x)) :=
+  contMDiff_cutoffLocalTensorOfMatrix_of_isOpen p e b ψ q hu hue hψ hψsupp
     (ContMDiffOn.matrixBilinearCLM b hq)
 
 /-- A globally `C²` covariant two-tensor belongs to the genuine second-order
@@ -413,6 +466,26 @@ theorem cutoffLocalTensorOfMatrix_mem_connectionLaplacianDomain
     (contMDiff_cutoffLocalTensorOfMatrix_of_coefficients
       p e b ψ q hψ hψsupp hq)
 
+/-- Open-subset form of domain membership for a cutoff-reconstructed local
+summand. -/
+theorem cutoffLocalTensorOfMatrix_mem_connectionLaplacianDomain_of_isOpen
+    (cov : CovariantDerivative I E TM)
+    [CovariantDerivative.ContMDiffCovariantDerivative
+      (CovariantDerivative.covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (ψ : M → ℝ) (q : M → ι → ι → ℝ)
+    {u : Set M} (hu : IsOpen u) (hue : u ⊆ e.baseSet)
+    (hψ : ContMDiff I 𝓘(ℝ) 2 ψ) (hψsupp : tsupport ψ ⊆ u)
+    (hq : ContMDiffOn I 𝓘(ℝ, ι → ι → ℝ) 2 q u) :
+    cutoffLocalTensorOfMatrix e b ψ q ∈
+      CovariantDerivative.ConnectionLaplacianDomain cov :=
+  connectionLaplacianDomain_of_contMDiff_two cov
+    (contMDiff_cutoffLocalTensorOfMatrix_of_coefficients_of_isOpen
+      p e b ψ q hu hue hψ hψsupp hq)
+
 /-- Reconstruction is additive in the coefficient matrix. -/
 theorem localTensorOfMatrix_add
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
@@ -451,6 +524,117 @@ theorem localTensorOfMatrix_smul
   apply Finset.sum_congr rfl
   intro i hi
   ring
+
+/-- Cutoff reconstruction is additive in the coefficient matrix. -/
+theorem cutoffLocalTensorOfMatrix_add
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (ψ : M → ℝ) (q r : M → ι → ι → ℝ) :
+    cutoffLocalTensorOfMatrix e b ψ (q + r) =
+      cutoffLocalTensorOfMatrix e b ψ q +
+        cutoffLocalTensorOfMatrix e b ψ r := by
+  funext x
+  simp only [cutoffLocalTensorOfMatrix, Pi.add_apply,
+    localTensorOfMatrix_add, smul_add]
+
+/-- Cutoff reconstruction commutes with scalar multiplication of the
+coefficient matrix. -/
+theorem cutoffLocalTensorOfMatrix_smul
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (ψ : M → ℝ) (c : ℝ) (q : M → ι → ι → ℝ) :
+    cutoffLocalTensorOfMatrix e b ψ (c • q) =
+      c • cutoffLocalTensorOfMatrix e b ψ q := by
+  funext x
+  simp only [cutoffLocalTensorOfMatrix, Pi.smul_apply,
+    localTensorOfMatrix_smul, smul_smul]
+  rw [mul_comm]
+
+/-- At a fixed manifold point, cutoff reconstruction is a continuous linear
+map from coefficient matrices to the genuine tensor fibre.  This is the
+temporal chain-rule bridge used by finite-cylinder reconstruction. -/
+def cutoffLocalTensorSynthesisAt
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (ψ : M → ℝ) (x : M) :
+    letI : AddCommMonoid (ι → ι → ℝ) :=
+      Pi.normedAddCommGroup.toAddCommMonoid
+    letI : AddCommGroup (ι → ι → ℝ) :=
+      Pi.normedAddCommGroup.toAddCommGroup
+    letI : Module ℝ (ι → ι → ℝ) :=
+      Pi.normedSpace.toModule
+    letI : TopologicalSpace (ι → ι → ℝ) :=
+      Pi.normedAddCommGroup.toPseudoMetricSpace.toUniformSpace.toTopologicalSpace
+    (ι → ι → ℝ) →L[ℝ] T₂ x := by
+  letI : AddCommMonoid (ι → ι → ℝ) :=
+    Pi.normedAddCommGroup.toAddCommMonoid
+  letI : AddCommGroup (ι → ι → ℝ) :=
+    Pi.normedAddCommGroup.toAddCommGroup
+  letI : Module ℝ (ι → ι → ℝ) :=
+    Pi.normedSpace.toModule
+  letI : TopologicalSpace (ι → ι → ℝ) :=
+    Pi.normedAddCommGroup.toPseudoMetricSpace.toUniformSpace.toTopologicalSpace
+  exact LinearMap.toContinuousLinearMap
+    { toFun := fun q => cutoffLocalTensorOfMatrix e b ψ (fun _ => q) x
+      map_add' := by
+        intro q r
+        exact congrFun (cutoffLocalTensorOfMatrix_add
+          e b ψ (fun _ => q) (fun _ => r)) x
+      map_smul' := by
+        intro c q
+        exact congrFun (cutoffLocalTensorOfMatrix_smul
+          e b ψ c (fun _ => q)) x }
+
+@[simp] theorem cutoffLocalTensorSynthesisAt_apply
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (ψ : M → ℝ) (x : M) (q : ι → ι → ℝ) :
+    cutoffLocalTensorSynthesisAt e b ψ x q =
+      cutoffLocalTensorOfMatrix e b ψ (fun _ => q) x :=
+  rfl
+
+/-- Fixed-fibre evaluation of cutoff reconstruction is a continuous linear
+functional of the finite coefficient matrix, using the norm topology carried
+by the parabolic Banach space. -/
+def cutoffLocalTensorEvaluationSynthesisAt
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (ψ : M → ℝ) (x : M) (v w : TM x) :
+    letI : AddCommMonoid (ι → ι → ℝ) :=
+      Pi.normedAddCommGroup.toAddCommMonoid
+    letI : AddCommGroup (ι → ι → ℝ) :=
+      Pi.normedAddCommGroup.toAddCommGroup
+    letI : Module ℝ (ι → ι → ℝ) := Pi.normedSpace.toModule
+    letI : TopologicalSpace (ι → ι → ℝ) :=
+      Pi.normedAddCommGroup.toPseudoMetricSpace.toUniformSpace.toTopologicalSpace
+    (ι → ι → ℝ) →L[ℝ] ℝ := by
+  letI : AddCommMonoid (ι → ι → ℝ) :=
+    Pi.normedAddCommGroup.toAddCommMonoid
+  letI : AddCommGroup (ι → ι → ℝ) :=
+    Pi.normedAddCommGroup.toAddCommGroup
+  letI : Module ℝ (ι → ι → ℝ) := Pi.normedSpace.toModule
+  letI : TopologicalSpace (ι → ι → ℝ) :=
+    Pi.normedAddCommGroup.toPseudoMetricSpace.toUniformSpace.toTopologicalSpace
+  exact LinearMap.toContinuousLinearMap
+    { toFun := fun q => cutoffLocalTensorOfMatrix e b ψ (fun _ => q) x v w
+      map_add' := by
+        intro q r
+        exact congrArg (fun h : T₂ x => h v w)
+          (congrFun (cutoffLocalTensorOfMatrix_add
+            e b ψ (fun _ => q) (fun _ => r)) x)
+      map_smul' := by
+        intro c q
+        exact congrArg (fun h : T₂ x => h v w)
+          (congrFun (cutoffLocalTensorOfMatrix_smul
+            e b ψ c (fun _ => q)) x) }
+
+@[simp] theorem cutoffLocalTensorEvaluationSynthesisAt_apply
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (ψ : M → ℝ) (x : M) (v w : TM x) (q : ι → ι → ℝ) :
+    cutoffLocalTensorEvaluationSynthesisAt e b ψ x v w q =
+      cutoffLocalTensorOfMatrix e b ψ (fun _ => q) x v w :=
+  rfl
 
 end AnalyticPDE
 end RicciFlow
