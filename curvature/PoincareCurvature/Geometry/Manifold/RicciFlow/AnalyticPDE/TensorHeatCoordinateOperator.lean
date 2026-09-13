@@ -500,7 +500,7 @@ theorem connectionLaplacian_apply_eq_localTensorHeatSecondOrder
       MDiffAt
         (fun z => TotalSpace.mk'
           (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) z (h z)) y)
-    (hregChart : ∀ y ∈ (extChartAt I chartCenter).source,
+    (hregChart : ∀ y ∈ e.baseSet,
       ∀ out : ι × ι,
         MDiffAt (localTwoTensorComponent (I := I) e b h out) y)
     {y : M} (hyFrame : y ∈ e.baseSet)

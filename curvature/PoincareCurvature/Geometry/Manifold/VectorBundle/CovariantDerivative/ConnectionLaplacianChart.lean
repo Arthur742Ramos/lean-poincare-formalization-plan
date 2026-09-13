@@ -234,15 +234,27 @@ theorem writtenInExtChartAt_localFirstCovariantComponent_eventuallyEq
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
     [MemTrivializationAtlas e]
     (b : Module.Basis ι ℝ E) {h : ∀ x : M, T₂ x}
-    (hreg : ∀ y ∈ (extChartAt I p).source, ∀ out : ι × ι,
+    (hreg : ∀ y ∈ e.baseSet, ∀ out : ι × ι,
       MDiffAt (localTwoTensorComponent (I := I) e b h out) y)
-    {y : M} (hyChart : y ∈ (extChartAt I p).source)
+    {y : M} (hyFrame : y ∈ e.baseSet)
+    (hyChart : y ∈ (extChartAt I p).source)
     (out : ι × ι) (j : ι) :
     writtenInExtChartAt I 𝓘(ℝ) p
         (localFirstCovariantComponent (I := I) cov e b h out j)
       =ᶠ[nhdsWithin ((extChartAt I p) y) (Set.range I)]
         localFirstCovariantComponentInChart (I := I) cov p e b h out j := by
-  filter_upwards [extChartAt_target_mem_nhdsWithin' hyChart] with z hz
+  have hzTarget : (extChartAt I p) y ∈ (extChartAt I p).target :=
+    (extChartAt I p).map_source hyChart
+  have hySymm : (extChartAt I p).symm ((extChartAt I p) y) ∈
+      e.baseSet := by
+    rw [(extChartAt I p).left_inv hyChart]
+    exact hyFrame
+  have hframeNear : (extChartAt I p).symm ⁻¹' e.baseSet ∈
+      nhds ((extChartAt I p) y) :=
+    (continuousAt_extChartAt_symm'' hzTarget).preimage_mem_nhds
+      (e.open_baseSet.mem_nhds hySymm)
+  filter_upwards [extChartAt_target_mem_nhdsWithin' hyChart,
+    mem_nhdsWithin_of_mem_nhds hframeNear] with z hz hzFrame
   let y' := (extChartAt I p).symm z
   have hy' : y' ∈ (extChartAt I p).source :=
     (extChartAt I p).map_target hz
@@ -256,7 +268,7 @@ theorem writtenInExtChartAt_localFirstCovariantComponent_eventuallyEq
     _ = localFirstCovariantComponentInChart (I := I)
           cov p e b h out j ((extChartAt I p) y') :=
         localFirstCovariantComponent_eq_inChart
-          (I := I) cov p e b out j hy' (hreg y' hy' out)
+          (I := I) cov p e b out j hy' (hreg y' hzFrame out)
     _ = localFirstCovariantComponentInChart (I := I)
           cov p e b h out j z := by rw [hzy]
 
@@ -268,9 +280,10 @@ theorem localSecondCovariantComponent_eq_inChart
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
     [MemTrivializationAtlas e]
     (b : Module.Basis ι ℝ E) {h : ∀ x : M, T₂ x}
-    (hreg : ∀ y ∈ (extChartAt I p).source, ∀ out : ι × ι,
+    (hreg : ∀ y ∈ e.baseSet, ∀ out : ι × ι,
       MDiffAt (localTwoTensorComponent (I := I) e b h out) y)
-    {y : M} (hyChart : y ∈ (extChartAt I p).source)
+    {y : M} (hyFrame : y ∈ e.baseSet)
+    (hyChart : y ∈ (extChartAt I p).source)
     (out : ι × ι) (j i : ι)
     (hfirst : MDiffAt
       (localFirstCovariantComponent (I := I) cov e b h out j) y) :
@@ -290,14 +303,14 @@ theorem localSecondCovariantComponent_eq_inChart
           localFirstCovariantComponentInChart (I := I) cov p e b h out j := by
     simpa [z] using
       (writtenInExtChartAt_localFirstCovariantComponent_eventuallyEq
-        (I := I) cov p e b hreg hyChart out j)
+        (I := I) cov p e b hreg hyFrame hyChart out j)
   rw [heqz.fderivWithin_eq_of_mem hz]
   congr 1
   apply Finset.sum_congr rfl
   intro input hinput
   rw [localFirstCovariantComponent_eq_inChart
     (I := I) cov p e b input.1 input.2 hyChart
-      (hreg y hyChart input.1)]
+      (hreg y hyFrame input.1)]
   simp [localThreeTensorConnectionCoefficientInChart,
     writtenInExtChartAt]
   simp_all only [mfld_simps]
@@ -337,9 +350,10 @@ theorem localConnectionLaplacianComponent_eq_inChart
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
     [MemTrivializationAtlas e]
     (b : Module.Basis ι ℝ E) {h : ∀ x : M, T₂ x}
-    (hreg : ∀ y ∈ (extChartAt I p).source, ∀ out : ι × ι,
+    (hreg : ∀ y ∈ e.baseSet, ∀ out : ι × ι,
       MDiffAt (localTwoTensorComponent (I := I) e b h out) y)
-    {y : M} (hyChart : y ∈ (extChartAt I p).source)
+    {y : M} (hyFrame : y ∈ e.baseSet)
+    (hyChart : y ∈ (extChartAt I p).source)
     (hfirst : ∀ out : ι × ι, ∀ j : ι,
       MDiffAt (localFirstCovariantComponent (I := I) cov e b h out j) y)
     (out : ι × ι) :
@@ -353,7 +367,7 @@ theorem localConnectionLaplacianComponent_eq_inChart
   apply Finset.sum_congr rfl
   intro j hj
   rw [localSecondCovariantComponent_eq_inChart
-    (I := I) cov p e b hreg hyChart out j i (hfirst out j)]
+    (I := I) cov p e b hreg hyFrame hyChart out j i (hfirst out j)]
   simp [localFrameInverseGramMatrixInChart, writtenInExtChartAt]
   simp_all only [mfld_simps]
 
@@ -371,7 +385,7 @@ theorem connectionLaplacian_apply_eq_inChart
       MDiffAt
         (fun z => TotalSpace.mk'
           (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) z (h z)) y)
-    (hregChart : ∀ y ∈ (extChartAt I chartCenter).source,
+    (hregChart : ∀ y ∈ e.baseSet,
       ∀ out : ι × ι,
         MDiffAt (localTwoTensorComponent (I := I) e b h out) y)
     {y : M} (hyFrame : y ∈ e.baseSet)
@@ -390,6 +404,6 @@ theorem connectionLaplacian_apply_eq_inChart
   rw [connectionLaplacian_apply_eq_localConnectionLaplacianComponent
     (I := I) cov e b hregFrame hyFrame hcovFirst p q]
   exact localConnectionLaplacianComponent_eq_inChart
-    (I := I) cov chartCenter e b hregChart hyChart hlocalFirst (q, p)
+    (I := I) cov chartCenter e b hregChart hyFrame hyChart hlocalFirst (q, p)
 
 end CovariantDerivative
