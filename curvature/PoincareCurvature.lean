@@ -5,6 +5,8 @@ import PoincareCurvature.Analysis.MatrixSmoothness
 import PoincareCurvature.Analysis.ParametrizedInner
 import PoincareCurvature.Analysis.TimeDependentGram
 import PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection
+import PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteTrivializingCover
+import PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteSmoothTrivializingCover
 import PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp
 import PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection
 import PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSectionSmoothApprox
@@ -65,6 +67,7 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.Spati
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLinear
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLeibniz
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatOperator
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatFiniteSum
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianChart
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatCoordinateOperator
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatEllipticity
