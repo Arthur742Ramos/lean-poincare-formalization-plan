@@ -1142,6 +1142,70 @@ section LevelDowngrade
 variable [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [CompleteSpace F]
   [T2Space M] [IsManifold I ∞ M] [ContMDiffVectorBundle 2 F V I]
 
+/-- **General-bundle class-to-set restriction of a `C²` covariant derivative.**
+A globally `C²` covariant derivative restricts to a `C²` covariant
+derivative on every open set.  The proof localizes a `C³` section with a
+smooth bump, applies the global regularity class, and uses locality of the
+covariant derivative on the region where the bump is one. -/
+theorem contMDiffCovariantDerivativeOn_two_of_contMDiffCovariantDerivative_two
+    [ContMDiffVectorBundle 3 F V I]
+    {cov : CovariantDerivative I F V} [ContMDiffCovariantDerivative cov 2]
+    {u : Set M} (hu : IsOpen u) :
+    ContMDiffCovariantDerivativeOn F 2 cov.toFun u := by
+  refine { contMDiff := ?_ }
+  intro σ hσ
+  apply contMDiffOn_of_locally_contMDiffOn
+  intro x hx
+  have hux : u ∈ nhds x := hu.mem_nhds hx
+  obtain ⟨ψ, hψtsupp, hψsupp⟩ :=
+    (SmoothBumpFunction.nhds_basis_support (I := I) (c := x) hux).mem_iff.mp hux
+  have hψ : ContMDiff I 𝓘(ℝ) 3 ψ :=
+    ψ.contMDiff.of_le (show (3 : WithTop ℕ∞) ≤ ∞ by decide)
+  let τ : Π y : M, V y := fun y ↦ ψ y • σ y
+  have hτ : ContMDiff I (I.prod 𝓘(ℝ, F)) 3 (T% τ) := by
+    simpa [τ] using
+      (ContMDiffOn.smul_section_of_tsupport (I := I) (F := F) (V := V) (u := u)
+        (n := (3 : WithTop ℕ∞)) (ψ := ψ) hψ.contMDiffOn hu hψtsupp hσ)
+  have hcovτ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] F)) 2
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] F) (E := THom) y (cov τ y)) := by
+    have hτOn : ContMDiffOn I (I.prod 𝓘(ℝ, F)) 3 (T% τ) Set.univ := by
+      simpa [contMDiffOn_univ] using hτ
+    simpa [contMDiffOn_univ] using
+      ((inferInstance : ContMDiffCovariantDerivative cov 2).contMDiff.contMDiff hτOn)
+  have hψeq1 : {y : M | ψ y = 1} ∈ nhds x := by
+    filter_upwards [ψ.eventuallyEq_one] with y hy
+    simpa using hy
+  rcases mem_nhds_iff.mp hψeq1 with ⟨w, hwsub, hwopen, hxw⟩
+  have hwu : w ⊆ u := by
+    intro y hy
+    have hy1 : ψ y = 1 := hwsub hy
+    have hysupp : y ∈ Function.support ψ := by
+      simpa [Function.support] using show ψ y ≠ 0 by rw [hy1]; norm_num
+    exact hψsupp hysupp
+  have hEq : ∀ y ∈ w, cov σ y = cov τ y := by
+    intro y hy
+    have hyu : y ∈ u := hwu hy
+    have hσy : MDiffAt (T% σ) y :=
+      (((hσ y hyu).contMDiffAt (hu.mem_nhds hyu)).of_le
+        (by simp : (1 : WithTop ℕ∞) ≤ 3)).mdifferentiableAt one_ne_zero
+    have hτy : MDiffAt (T% τ) y :=
+      (hτ.contMDiffAt.of_le
+        (by simp : (1 : WithTop ℕ∞) ≤ 3)).mdifferentiableAt one_ne_zero
+    exact (cov.isCovariantDerivativeOn (s := w)).congr_of_eqOn hσy hτy
+      (hwopen.mem_nhds hy) (fun z hz ↦ by
+        have hz1 : ψ z = 1 := hwsub hz
+        calc
+          σ z = 1 • σ z := by simpa using (one_smul ℝ (σ z)).symm
+          _ = ψ z • σ z := by simpa [hz1])
+  have hcovσw : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] F)) 2
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] F) (E := THom) y (cov σ y)) w := by
+    refine ContMDiffOn.congr hcovτ.contMDiffOn ?_
+    intro y hy
+    exact congrArg (fun A ↦ TotalSpace.mk' (E := THom) (E →L[ℝ] F) y A)
+      (hEq y hy)
+  refine ⟨w, hwopen, hxw, ?_⟩
+  simpa [Set.inter_eq_right.mpr hwu] using hcovσw
+
 /-- **General-bundle class-to-set restriction of a `C¹` covariant derivative.**  A globally `C¹`
 covariant derivative (`ContMDiffCovariantDerivative cov 1`) restricts to a `C¹` covariant derivative
 on every open set.  Proved by a smooth-bump localization: multiplying a `C²` section by a bump equal
