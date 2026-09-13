@@ -129,6 +129,49 @@ def HasInitialTrace (cov : CovariantDerivative I E TM)
   ∀ x : M, Tendsto (fun t : ℝ => u.toFun t x)
     (nhdsWithin t₀ (Ioc t₀ T)) (nhds (u₀ x))
 
+/-! ## Restriction to a shorter terminal time -/
+
+/-- Restrict a finite-interval field to any no-later terminal time.  The
+underlying totalized representative is unchanged; only the interval on which
+its spatial and temporal regularity is asserted becomes smaller. -/
+def restrictTerminal (cov : CovariantDerivative I E TM)
+    (u : FiniteClassicalTensorHeatField
+      (E := E) (I := I) (M := M) cov t₀ T)
+    (T' : ℝ) (hT' : T' ≤ T) :
+    FiniteClassicalTensorHeatField
+      (E := E) (I := I) (M := M) cov t₀ T' where
+  toFun := u.toFun
+  slice_mem t ht := u.slice_mem t ⟨ht.1, ht.2.trans hT'⟩
+  timeDerivative := u.timeDerivative
+  hasTimeDerivative t ht :=
+    u.hasTimeDerivative t ⟨ht.1, ht.2.trans_le hT'⟩
+
+@[simp] theorem restrictTerminal_toFun (cov : CovariantDerivative I E TM)
+    (u : FiniteClassicalTensorHeatField
+      (E := E) (I := I) (M := M) cov t₀ T)
+    (T' : ℝ) (hT' : T' ≤ T) :
+    (restrictTerminal cov u T' hT').toFun = u.toFun :=
+  rfl
+
+@[simp] theorem restrictTerminal_timeDerivative
+    (cov : CovariantDerivative I E TM)
+    (u : FiniteClassicalTensorHeatField
+      (E := E) (I := I) (M := M) cov t₀ T)
+    (T' : ℝ) (hT' : T' ≤ T) :
+    (restrictTerminal cov u T' hT').timeDerivative = u.timeDerivative :=
+  rfl
+
+theorem hasInitialTrace_restrictTerminal
+    (cov : CovariantDerivative I E TM)
+    (u : FiniteClassicalTensorHeatField
+      (E := E) (I := I) (M := M) cov t₀ T)
+    (u₀ : ∀ x : M, T₂ x) (T' : ℝ) (hT' : T' ≤ T)
+    (hu : HasInitialTrace cov u u₀) :
+    HasInitialTrace cov (restrictTerminal cov u T' hT') u₀ := by
+  intro x
+  exact (hu x).mono_left (nhdsWithin_mono t₀ fun _ ht =>
+    ⟨ht.1, ht.2.trans hT'⟩)
+
 /-! ## Finite synthesis on a common interval -/
 
 /-- Finite sum of finite-interval classical tensor fields. -/
@@ -196,6 +239,54 @@ theorem isSymmetric_finsetSum (cov : CovariantDerivative I E TM)
   apply Finset.sum_congr rfl
   intro i hi
   exact hu i hi t x a b
+
+/-- The genuine finite-interval connection heat operator distributes over a
+finite sum. -/
+theorem tensorHeatOperator_finsetSum (cov : CovariantDerivative I E TM)
+    {ι : Type*} (s : Finset ι)
+    (u : ι → FiniteClassicalTensorHeatField
+      (E := E) (I := I) (M := M) cov t₀ T)
+    (t : ℝ) (ht : t ∈ Ioo t₀ T) (x : M) :
+    (finsetSum cov s u).tensorHeatOperator cov t ht x =
+      ∑ i ∈ s, (u i).tensorHeatOperator cov t ht x := by
+  change
+    (∑ i ∈ s, (u i).timeDerivative t x) -
+        connectionLaplacian cov (fun y => ∑ i ∈ s, (u i).toFun t y) x =
+      ∑ i ∈ s,
+        ((u i).timeDerivative t x -
+          connectionLaplacian cov ((u i).toFun t) x)
+  have hsection : (fun y => ∑ i ∈ s, (u i).toFun t y) =
+      ∑ i ∈ s, (u i).toFun t := by
+    funext y
+    exact (Finset.sum_apply y s (fun i => (u i).toFun t)).symm
+  rw [hsection]
+  have hLap :
+      connectionLaplacian cov (∑ i ∈ s, (u i).toFun t) x =
+        ∑ i ∈ s, connectionLaplacian cov ((u i).toFun t) x := by
+    have hLap' :
+        connectionLaplacian cov
+            (↑(∑ i ∈ s, (u i).slice cov t ⟨ht.1, ht.2.le⟩)) x =
+          ∑ i ∈ s, connectionLaplacian cov
+            (↑((u i).slice cov t ⟨ht.1, ht.2.le⟩)) x := by
+      change connectionLaplacianLinearMapAt cov x
+          (∑ i ∈ s, (u i).slice cov t ⟨ht.1, ht.2.le⟩) =
+        ∑ i ∈ s, connectionLaplacianLinearMapAt cov x
+          ((u i).slice cov t ⟨ht.1, ht.2.le⟩)
+      exact map_sum (connectionLaplacianLinearMapAt cov x) _ _
+    simpa only [Submodule.coe_sum, slice] using hLap'
+  rw [hLap, Finset.sum_sub_distrib]
+
+/-- Initial traces add under finite summation on a common interval. -/
+theorem hasInitialTrace_finsetSum (cov : CovariantDerivative I E TM)
+    {ι : Type*} (s : Finset ι)
+    (u : ι → FiniteClassicalTensorHeatField
+      (E := E) (I := I) (M := M) cov t₀ T)
+    (u₀ : ι → ∀ x : M, T₂ x)
+    (hu : ∀ i ∈ s, HasInitialTrace cov (u i) (u₀ i)) :
+    HasInitialTrace cov (finsetSum cov s u)
+      (fun x => ∑ i ∈ s, u₀ i x) := by
+  intro x
+  exact tendsto_finsetSum s fun i hi => hu i hi x
 
 /-! ## Parabolic time rescaling -/
 
