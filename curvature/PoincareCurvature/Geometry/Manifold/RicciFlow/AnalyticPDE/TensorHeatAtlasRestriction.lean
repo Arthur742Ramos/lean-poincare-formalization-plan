@@ -161,7 +161,7 @@ theorem initialTraceL_restrictedLocalInverseAt
 /-- Restrict a fixed parametrix atlas to a shorter normalized terminal
 time.  Its cover, radii, localized spatial coefficients, and partition of
 unity are unchanged. -/
-@[reducible] def restrictTerminalAtlas
+def restrictTerminalAtlas
     (cov : CovariantDerivative I E TM)
     {b : Module.Basis (Fin d) ℝ E}
     (A : FiniteTensorHeatParametrixAtlas

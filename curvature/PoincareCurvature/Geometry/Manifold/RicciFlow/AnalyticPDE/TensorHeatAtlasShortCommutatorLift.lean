@@ -243,6 +243,47 @@ def shortSupportedPairResidualTransportL
     (shortPairBufferedCutoffField cov A j i hST)).comp
       (shortPairResidualTransportL cov A j i hS hST)
 
+/-- One ordered-pair entry of the fixed finite short commutator matrix. -/
+def shortAtlasCommutatorEntryL
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 2]
+    [ContMDiffCovariantDerivative
+      (covariantThreeTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (j i : A.cover.Index) (hS : t₀ < S) (hST : S ≤ T) :
+    ((i : A.cover.Index) →
+        ParabolicC0AlphaBanach E W₂ α
+          (parabolicFiniteCylinder E t₀ S)) →L[ℝ]
+      ParabolicC0AlphaBanach E W₂ α
+        (parabolicFiniteCylinder E t₀ S) :=
+  (shortSupportedPairResidualTransportL cov A j i hS hST).comp
+    (ContinuousLinearMap.proj i)
+
+/-- One target row of the fixed finite short commutator matrix. -/
+def shortAtlasCommutatorRowL
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 2]
+    [ContMDiffCovariantDerivative
+      (covariantThreeTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (j : A.cover.Index) (hS : t₀ < S) (hST : S ≤ T) :
+    ((i : A.cover.Index) →
+        ParabolicC0AlphaBanach E W₂ α
+          (parabolicFiniteCylinder E t₀ S)) →L[ℝ]
+      ParabolicC0AlphaBanach E W₂ α
+        (parabolicFiniteCylinder E t₀ S) :=
+  ∑ i : A.cover.Index, shortAtlasCommutatorEntryL cov A j i hS hST
+
 /-- The fixed finite matrix on the short product source space. -/
 def shortAtlasCommutatorLiftL
     (cov : CovariantDerivative I E TM)
@@ -256,12 +297,13 @@ def shortAtlasCommutatorLiftL
     (A : FiniteTensorHeatParametrixAtlas
       (E := E) (I := I) (M := M) cov b t₀ T α)
     (hS : t₀ < S) (hST : S ≤ T) :
-    SourceSpace cov (A.restrictTerminalAtlas cov hS hST) →L[ℝ]
-      SourceSpace cov (A.restrictTerminalAtlas cov hS hST) :=
-  ContinuousLinearMap.pi fun j =>
-    ∑ i : A.cover.Index,
-      (shortSupportedPairResidualTransportL cov A j i hS hST).comp
-        (ContinuousLinearMap.proj i)
+    ((i : A.cover.Index) →
+        ParabolicC0AlphaBanach E W₂ α
+          (parabolicFiniteCylinder E t₀ S)) →L[ℝ]
+      ((i : A.cover.Index) →
+        ParabolicC0AlphaBanach E W₂ α
+          (parabolicFiniteCylinder E t₀ S)) :=
+  ContinuousLinearMap.pi fun j => shortAtlasCommutatorRowL cov A j hS hST
 
 /-- The restricted atlas solution has the same point value as the fixed
 parent solution fed by the canonical short-to-long extension. -/
@@ -751,7 +793,8 @@ theorem eval_shortSupportedPairResidualTransportL_at_physical_point
   change (∀ _ : A.cover.Index,
     ParabolicC0AlphaBanach E W₂ α
       (parabolicFiniteCylinder E t₀ S)) at q
-  unfold shortAtlasCommutatorLiftL
+  unfold shortAtlasCommutatorLiftL shortAtlasCommutatorRowL
+    shortAtlasCommutatorEntryL
   rw [ContinuousLinearMap.pi_apply, ContinuousLinearMap.sum_apply]
   apply Finset.sum_congr rfl
   intro i hi
@@ -810,8 +853,11 @@ theorem eval_shortAtlasCommutatorLiftL_at_physical_point [Nonempty M]
   congr 1
   unfold atlasCommutatorSlice intrinsicTensorPairCoordinates
   ext out
-  simp only [restrictTerminalAtlas_cover, restrictTerminalAtlas_radius]
-  simp
+  simp only [restrictTerminalAtlas_cover, restrictTerminalAtlas_radius,
+    ContinuousLinearMap.sum_apply, Finset.sum_apply]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rfl
 
 /-- One short target chart reconstructs its partition function times the
 complete intrinsic commutator. -/
