@@ -161,7 +161,7 @@ theorem initialTraceL_restrictedLocalInverseAt
 /-- Restrict a fixed parametrix atlas to a shorter normalized terminal
 time.  Its cover, radii, localized spatial coefficients, and partition of
 unity are unchanged. -/
-def restrictTerminalAtlas
+@[reducible] def restrictTerminalAtlas
     (cov : CovariantDerivative I E TM)
     {b : Module.Basis (Fin d) ℝ E}
     (A : FiniteTensorHeatParametrixAtlas
@@ -197,6 +197,17 @@ def restrictTerminalAtlas
       (E := E) (I := I) (M := M) cov b t₀ T α)
     (hS : t₀ < S) (hST : S ≤ T) (p : M) :
     (A.restrictTerminalAtlas cov hS hST).radius p = A.radius p := rfl
+
+/-- Time restriction leaves the finite spatial cover definitionally
+unchanged.  Exposing this projection avoids unfolding the proof fields of
+the restricted atlas in downstream dependent-index calculations. -/
+@[simp] theorem restrictTerminalAtlas_cover
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (hS : t₀ < S) (hST : S ≤ T) :
+    (A.restrictTerminalAtlas cov hS hST).cover = A.cover := rfl
 
 @[simp] theorem restrictTerminalAtlas_localInverse
     (cov : CovariantDerivative I E TM)
