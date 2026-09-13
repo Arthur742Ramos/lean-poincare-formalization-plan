@@ -481,4 +481,210 @@ theorem contDiffOn_actualTensorHeatCoefficients
     contDiffOn_localTensorHeatZeroCoefficient
       (I := I) cov p e b hgInv1 hV1 hgamma2_1 hDgamma2 hgamma3⟩
 
+/-- The fixed-chart matrix of a globally `C²` covariant two-tensor is `C²`
+on the overlap of the chart and tensor-frame domains.  This packages the
+induced tensor trivialization, so later operator identities do not need
+coordinate regularity as a separate hypothesis. -/
+theorem contDiffOn_localTensorCoordinates_of_contMDiff_two
+    (chartCenter : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    (b : Module.Basis ι ℝ E) {h : ∀ x : M, T₂ x}
+    (hh : ContMDiff I
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 2
+      (fun x => TotalSpace.mk'
+        (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) x (h x))) :
+    ContDiffOn ℝ 2
+      (localTensorCoordinates (I := I) chartCenter e b h)
+      ((extChartAt I chartCenter).target ∩
+        (extChartAt I chartCenter).symm ⁻¹' e.baseSet) := by
+  let e₂ := localTwoTensorTrivialization (I := I) e
+  let b₂ := continuousTwoTensorBasis b
+  have he₂ : e₂.baseSet = e.baseSet := by
+    ext x
+    simp [e₂, localTwoTensorTrivialization,
+      localCovectorTrivialization, localRealLineTrivialization]
+  have hhOn : ContMDiffOn I
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 2
+      (fun x => TotalSpace.mk'
+        (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) x (h x)) e₂.baseSet :=
+    hh.contMDiffOn.mono (fun _ _ => Set.mem_univ _)
+  have hcoeff : ∀ out : ι × ι, ContMDiffOn I 𝓘(ℝ) 2
+      (localTwoTensorComponent (I := I) e b h out) e.baseSet := by
+    intro out
+    have hc := contMDiffOn_baseSet_localFrameCoeff
+      (I := I) (e := e₂) (b := b₂) hhOn out
+    rw [he₂] at hc
+    convert hc using 1 <;> rfl
+  rw [contDiffOn_pi]
+  intro out
+  apply CovariantDerivative.contDiffOn_writtenInExtChartAt_of_contMDiffOn
+    (I := I) (p := chartCenter) (hcoeff out)
+  · exact Set.inter_subset_left
+  intro z hz
+  exact hz.2
+
+/-- **Automatic intrinsic-to-coordinate bridge for `C²` tensor fields.**
+For a globally `C²` covariant two-tensor, all differentiability hypotheses
+in the chart formula for the genuine connection Laplacian follow from the
+geometric regularity classes.  Thus the right-hand side below is the actual
+connection Laplacian, not a separately postulated coordinate operator. -/
+theorem connectionLaplacian_apply_eq_localTensorHeatSecondOrder_of_contMDiff_two
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 2]
+    [ContMDiffCovariantDerivative
+      (covariantThreeTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    (chartCenter : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    (b : Module.Basis ι ℝ E) {h : ∀ x : M, T₂ x}
+    (hh : ContMDiff I
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 2
+      (fun x => TotalSpace.mk'
+        (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) x (h x)))
+    {y : M} (hyFrame : y ∈ e.baseSet)
+    (hyChart : y ∈ (extChartAt I chartCenter).source)
+    (p q : ι) :
+    connectionLaplacian cov h y
+        (e.localFrame b p y) (e.localFrame b q y) =
+      (localTensorHeatPrincipalCoefficient (I := I) chartCenter e b
+            ((extChartAt I chartCenter) y)
+            (localTensorCoordinateSecondDerivative (I := I)
+              chartCenter e b h ((extChartAt I chartCenter) y)) +
+        localTensorHeatFirstCoefficient (I := I) cov chartCenter e b
+            ((extChartAt I chartCenter) y)
+            (localTensorCoordinateDerivative (I := I)
+              chartCenter e b h ((extChartAt I chartCenter) y)) +
+        localTensorHeatZeroCoefficient (I := I) cov chartCenter e b
+            ((extChartAt I chartCenter) y)
+            (localTensorCoordinates (I := I)
+              chartCenter e b h ((extChartAt I chartCenter) y))) (q, p) := by
+  let e₂ := localTwoTensorTrivialization (I := I) e
+  let b₂ := continuousTwoTensorBasis b
+  let e₃ := localThreeTensorTrivialization (I := I) e
+  let b₃ := continuousThreeTensorBasis b
+  have he₂ : e₂.baseSet = e.baseSet := by
+    ext x
+    simp [e₂, localTwoTensorTrivialization,
+      localCovectorTrivialization, localRealLineTrivialization]
+  have he₃ : e₃.baseSet = e.baseSet := by
+    ext x
+    simp [e₃, localThreeTensorTrivialization,
+      localTwoTensorTrivialization, localCovectorTrivialization,
+      localRealLineTrivialization]
+  have hregFrame : ∀ z ∈ e.baseSet,
+      MDiffAt
+        (fun w => TotalSpace.mk'
+          (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) w (h w)) z := by
+    intro z hz
+    exact (hh.contMDiffAt.of_le
+      (by norm_num : (1 : WithTop ℕ∞) ≤ 2)).mdifferentiableAt one_ne_zero
+  have hregChart : ∀ z ∈ e.baseSet, ∀ out : ι × ι,
+      MDiffAt (localTwoTensorComponent (I := I) e b h out) z := by
+    intro z hz out
+    have hz₂ : z ∈ e₂.baseSet := by simpa [he₂] using hz
+    have hc := mdifferentiableAt_localFrameCoeff
+      (I := I) (e := e₂) (b := b₂) (s := h)
+      hz₂ (hregFrame z hz) out
+    convert hc using 1 <;> rfl
+  have hhOn : ContMDiffOn I
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) (1 + 1)
+      (fun x => TotalSpace.mk'
+        (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) x (h x)) Set.univ := by
+    have hone : (1 : WithTop ℕ∞) + 1 = 2 := by norm_num
+    simpa only [hone] using hh.contMDiffOn
+  have hcovOn :=
+    ((inferInstance : ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1).contMDiff.contMDiff hhOn)
+  have hcovFirst : MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) (E := T₃) z
+        (covariantTwoTensorCovariantDerivative cov h z)) y :=
+    ((hcovOn y (Set.mem_univ y)).contMDiffAt
+      (isOpen_univ.mem_nhds (Set.mem_univ y))).mdifferentiableAt one_ne_zero
+  have hlocalFirst : ∀ out : ι × ι, ∀ j : ι,
+      MDiffAt (localFirstCovariantComponent (I := I) cov e b h out j) y := by
+    intro out j
+    have hy₃ : y ∈ e₃.baseSet := by simpa [he₃] using hyFrame
+    have hc := mdifferentiableAt_localFrameCoeff
+      (I := I) (e := e₃) (b := b₃)
+      (s := covariantTwoTensorCovariantDerivative cov h)
+      hy₃ hcovFirst (out, j)
+    have hevent :
+        localThreeTensorComponent (I := I) e b
+            (covariantTwoTensorCovariantDerivative cov h) (out, j) =ᶠ[nhds y]
+          localFirstCovariantComponent (I := I) cov e b h out j := by
+      filter_upwards [e.open_baseSet.mem_nhds hyFrame] with z hz
+      exact localThreeTensorComponent_covariantTwoTensorDerivative_eq_first
+        (I := I) cov e b hz (hregFrame z hz) out j
+    exact hc.congr_of_eventuallyEq hevent.symm
+  let s := (extChartAt I chartCenter).target ∩
+    (extChartAt I chartCenter).symm ⁻¹' e.baseSet
+  let z := (extChartAt I chartCenter) y
+  have hz : z ∈ s := by
+    refine ⟨(extChartAt I chartCenter).map_source hyChart, ?_⟩
+    change (extChartAt I chartCenter).symm
+      ((extChartAt I chartCenter) y) ∈ e.baseSet
+    rw [(extChartAt I chartCenter).left_inv hyChart]
+    exact hyFrame
+  have hs : IsOpen s :=
+    (continuousOn_extChartAt_symm (I := I) chartCenter).isOpen_inter_preimage
+      (isOpen_extChartAt_target chartCenter) e.open_baseSet
+  have hsrange : s ⊆ Set.range I :=
+    Set.Subset.trans Set.inter_subset_left
+      (extChartAt_target_subset_range chartCenter)
+  have hU₂ : ContDiffOn ℝ 2
+      (localTensorCoordinates (I := I) chartCenter e b h) s := by
+    simpa [s] using contDiffOn_localTensorCoordinates_of_contMDiff_two
+      (I := I) chartCenter e b hh
+  have hUAt : ContDiffAt ℝ 2
+      (localTensorCoordinates (I := I) chartCenter e b h) z :=
+    (hU₂ z hz).contDiffAt (hs.mem_nhds hz)
+  have huAt : DifferentiableWithinAt ℝ
+      (localTensorCoordinates (I := I) chartCenter e b h)
+      (Set.range I) z :=
+    (hUAt.differentiableAt (by norm_num)).differentiableWithinAt
+  have huNear : ∀ᶠ w in nhdsWithin z (Set.range I), DifferentiableWithinAt ℝ
+      (localTensorCoordinates (I := I) chartCenter e b h)
+      (Set.range I) w := by
+    filter_upwards [mem_nhdsWithin_of_mem_nhds (hs.mem_nhds hz)] with w hw
+    exact (((hU₂ w hw).contDiffAt (hs.mem_nhds hw)).differentiableAt
+      (by norm_num)).differentiableWithinAt
+  have hDU₁ : ContDiffOn ℝ 1
+      (localTensorCoordinateDerivative (I := I) chartCenter e b h) s := by
+    exact CovariantDerivative.contDiffOn_fderivWithin_range
+      (I := I) hs hsrange hU₂
+  have hDu : DifferentiableWithinAt ℝ
+      (localTensorCoordinateDerivative (I := I) chartCenter e b h)
+      (Set.range I) z :=
+    (((hDU₁ z hz).contDiffAt (hs.mem_nhds hz)).differentiableAt
+      (by norm_num)).differentiableWithinAt
+  have hV : ∀ i : ι, DifferentiableWithinAt ℝ
+      (localFrameInChart (I := I) chartCenter e b i)
+      (Set.range I) z := by
+    intro i
+    have hV₂ := CovariantDerivative.contDiffOn_localFrameInChart
+      (I := I) chartCenter e b i
+    exact ((((hV₂.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)) z hz).contDiffAt
+      (hs.mem_nhds hz)).differentiableAt (by norm_num)).differentiableWithinAt
+  have hgamma₂ : ∀ out input : ι × ι, ∀ j : ι,
+      DifferentiableWithinAt ℝ
+        (localTwoTensorConnectionCoefficientInChart (I := I)
+          cov chartCenter e b out input j) (Set.range I) z := by
+    intro out input j
+    have hg := CovariantDerivative.contDiffOn_localTwoTensorConnectionCoefficientInChart
+      (I := I) cov chartCenter e b out input j
+    exact ((((hg.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)) z hz).contDiffAt
+      (hs.mem_nhds hz)).differentiableAt (by norm_num)).differentiableWithinAt
+  exact connectionLaplacian_apply_eq_localTensorHeatSecondOrder
+    (I := I) cov chartCenter e b hregFrame hregChart hyFrame hyChart
+      hcovFirst hlocalFirst huAt huNear hDu hV hgamma₂ p q
+
 end RicciFlow.AnalyticPDE

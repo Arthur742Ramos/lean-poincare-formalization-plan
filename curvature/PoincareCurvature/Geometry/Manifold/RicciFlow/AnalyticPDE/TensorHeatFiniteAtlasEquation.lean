@@ -41,6 +41,33 @@ variable {d : ℕ} {t₀ T α : ℝ}
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "W₂" => (Fin d × Fin d → ℝ)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
+local notation "T₃" => (fun x : M => TM x →L[ℝ] T₂ x)
+
+@[reducible] local instance finiteAtlasEquationThreeModelNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) :=
+  CovariantDerivative.coordinateThreeModelNormedAddCommGroup
+@[reducible] local instance finiteAtlasEquationThreeModelNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) :=
+  CovariantDerivative.coordinateThreeModelNormedSpace
+@[reducible] local instance finiteAtlasEquationThreeFiberNormedAddCommGroup
+    (x : M) : NormedAddCommGroup (T₃ x) :=
+  CovariantDerivative.coordinateThreeFiberNormedAddCommGroup x
+@[reducible] local instance finiteAtlasEquationThreeFiberNormedSpace
+    (x : M) : NormedSpace ℝ (T₃ x) :=
+  CovariantDerivative.coordinateThreeFiberNormedSpace x
+local instance finiteAtlasEquationThreeTotalSpaceTopology :
+    TopologicalSpace (TotalSpace
+      (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃) :=
+  Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
+    (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
+local instance finiteAtlasEquationThreeFiberBundle :
+    FiberBundle (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃ :=
+  Bundle.ContinuousLinearMap.fiberBundle
+    (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
+local instance finiteAtlasEquationThreeVectorBundle :
+    VectorBundle ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃ :=
+  Bundle.ContinuousLinearMap.vectorBundle
+    (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
 
 /-- Applying the stored normalized coordinate operator to one atlas inverse
 returns its source exactly. -/
@@ -192,6 +219,86 @@ theorem localTensorCoordinates_normalized_reconstruction
   rw [localTensorOfMatrix_localFrame
     (I := I) (trivializationAt E TM (i : M)) b _ hxFrame]
   exact A.normalizedLocalSolution_value cov i q _ hz c a
+
+/-- The intrinsic connection Laplacian of a cutoff-reconstructed atlas
+summand is exactly the canonical coordinate second-order operator applied to
+that genuine global tensor field.  Every differentiability premise is
+discharged from the `C²` finite-cylinder slice and smooth subordinate cutoff. -/
+theorem connectionLaplacian_cutoffLocalSummand_apply_eq_secondOrder
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 2]
+    [ContMDiffCovariantDerivative
+      (covariantThreeTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index)
+    (q : ParabolicC0AlphaBanach E W₂ α
+      (parabolicFiniteCylinder E t₀ T))
+    (s : ℝ) (hs : s ∈ Ioc t₀ T) {x : M}
+    (hx : x ∈ actualLocalTensorHeatPatch (I := I)
+      (i : M) (A.radius (i : M)))
+    (p r : Fin d) :
+    let h : ∀ y : M, T₂ y := cutoffLocalTensorOfMatrix (I := I)
+      (trivializationAt E TM (i : M)) b (A.cover.partition i)
+      (normalizedTensorHeatCoefficientSlice (I := I)
+        (i : M) (A.radius (i : M))
+        (A.normalizedLocalSolution cov i q) s)
+    connectionLaplacian cov h x
+        ((trivializationAt E TM (i : M)).localFrame b p x)
+        ((trivializationAt E TM (i : M)).localFrame b r x) =
+      (localTensorHeatPrincipalCoefficient (I := I) (i : M)
+            (trivializationAt E TM (i : M)) b
+            ((extChartAt I (i : M)) x)
+            (localTensorCoordinateSecondDerivative (I := I) (i : M)
+              (trivializationAt E TM (i : M)) b h
+              ((extChartAt I (i : M)) x)) +
+        localTensorHeatFirstCoefficient (I := I) cov (i : M)
+            (trivializationAt E TM (i : M)) b
+            ((extChartAt I (i : M)) x)
+            (localTensorCoordinateDerivative (I := I) (i : M)
+              (trivializationAt E TM (i : M)) b h
+              ((extChartAt I (i : M)) x)) +
+        localTensorHeatZeroCoefficient (I := I) cov (i : M)
+            (trivializationAt E TM (i : M)) b
+            ((extChartAt I (i : M)) x)
+            (localTensorCoordinates (I := I) (i : M)
+              (trivializationAt E TM (i : M)) b h
+              ((extChartAt I (i : M)) x))) (r, p) := by
+  dsimp only
+  let h : ∀ y : M, T₂ y := cutoffLocalTensorOfMatrix (I := I)
+    (trivializationAt E TM (i : M)) b (A.cover.partition i)
+    (normalizedTensorHeatCoefficientSlice (I := I)
+      (i : M) (A.radius (i : M))
+      (A.normalizedLocalSolution cov i q) s)
+  have hh : ContMDiff I
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 2
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) y (h y)) := by
+    apply contMDiff_cutoffLocalTensorOfMatrix_of_coefficients_of_isOpen
+      (I := I) (i : M) (trivializationAt E TM (i : M)) b
+      (A.cover.partition i)
+      (normalizedTensorHeatCoefficientSlice (I := I)
+        (i : M) (A.radius (i : M))
+        (A.normalizedLocalSolution cov i q) s)
+      (isOpen_actualLocalTensorHeatPatch (I := I)
+        (i : M) (A.radius (i : M)))
+      (A.patch_subset_trivialization (i : M))
+    · exact (A.cover.partition i).contMDiff.of_le
+        (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+    · exact A.cover.pieces_subset_domain i
+    · exact contMDiffOn_normalizedTensorHeatCoefficientSlice
+        (I := I) (i : M) (A.radius (i : M))
+          (A.normalizedLocalSolution cov i q) A.alpha_pos hs
+  exact connectionLaplacian_apply_eq_localTensorHeatSecondOrder_of_contMDiff_two
+    (I := I) cov (i : M) (trivializationAt E TM (i : M)) b hh
+      (A.patch_subset_trivialization (i : M) hx) hx.1 p r
 
 end FiniteTensorHeatParametrixAtlas
 end AnalyticPDE
