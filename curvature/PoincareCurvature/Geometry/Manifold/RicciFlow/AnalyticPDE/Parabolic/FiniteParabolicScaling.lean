@@ -307,6 +307,57 @@ def finiteAffineTimeDerivativeL (r : ℝ) : E →L[ℝ] E :=
     finiteAffineTimeDerivativeL r v = r ^ 2 • v := by
   simp [finiteAffineTimeDerivativeL]
 
+namespace FiniteParabolicC2AlphaBanach
+
+variable {t₀ T α : ℝ}
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Spatial differentiation of a fixed-time finite-cylinder solution after
+the inverse affine map `x ↦ r⁻¹ (x - c)`. -/
+theorem hasFDerivAt_spatialInvAffineValue
+    (q : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    {t : ℝ} (ht : t ∈ Set.Ioc t₀ T) (c : X) (r : ℝ) (x : X) :
+    HasFDerivAt
+      (fun y : X => value q (t, r⁻¹ • (y - c)))
+      ((spaceDeriv q (t, r⁻¹ • (x - c))).comp
+        (r⁻¹ • ContinuousLinearMap.id ℝ X)) x := by
+  let L : X →L[ℝ] X := r⁻¹ • ContinuousLinearMap.id ℝ X
+  have hmap : HasFDerivAt (fun y : X => r⁻¹ • (y - c)) L x := by
+    have h := ((hasFDerivAt_id (𝕜 := ℝ) x).sub_const c).const_smul r⁻¹
+    convert h using 1
+    funext y
+    rfl
+  have h := (hasFDerivAt_space q ht (r⁻¹ • (x - c))).comp x hmap
+  simpa only [Function.comp_def, L] using h
+
+set_option backward.isDefEq.respectTransparency false in
+/-- A second spatial differentiation of the inverse-affine fixed-time slice
+produces the exact two inverse-radius factors. -/
+theorem hasFDerivAt_spatialInvAffineSpaceDeriv
+    (q : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    {t : ℝ} (ht : t ∈ Set.Ioc t₀ T) (c : X) (r : ℝ) (x : X) :
+    HasFDerivAt
+      (fun y : X => ((ContinuousLinearMap.compL ℝ X X E).flip
+          (r⁻¹ • ContinuousLinearMap.id ℝ X))
+        (spaceDeriv q (t, r⁻¹ • (y - c))))
+      (((ContinuousLinearMap.compL ℝ X X E).flip
+          (r⁻¹ • ContinuousLinearMap.id ℝ X)).comp
+        ((spaceSecondDeriv q (t, r⁻¹ • (x - c))).comp
+          (r⁻¹ • ContinuousLinearMap.id ℝ X))) x := by
+  let L : X →L[ℝ] X := r⁻¹ • ContinuousLinearMap.id ℝ X
+  let K := (ContinuousLinearMap.compL ℝ X X E).flip L
+  have hmap : HasFDerivAt (fun y : X => r⁻¹ • (y - c)) L x := by
+    have h := ((hasFDerivAt_id (𝕜 := ℝ) x).sub_const c).const_smul r⁻¹
+    convert h using 1
+    funext y
+    rfl
+  have hcomp := (hasFDerivAt_spaceDeriv q ht
+    (r⁻¹ • (x - c))).comp x hmap
+  have h := K.hasFDerivAt.comp x hcomp
+  simpa only [Function.comp_def, K, L] using h
+
+end FiniteParabolicC2AlphaBanach
+
 namespace FiniteParabolicC2AlphaAmbient
 
 variable {α S : ℝ}

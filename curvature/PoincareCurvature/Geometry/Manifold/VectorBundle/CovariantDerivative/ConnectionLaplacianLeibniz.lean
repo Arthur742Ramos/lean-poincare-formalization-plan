@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLinear
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Existence
 
 /-!
 # Leibniz and cutoff-commutator identities for the connection Laplacian
@@ -199,5 +200,53 @@ theorem connectionLaplacian_smul_function
     VectorBundle.finiteDimensional ℝ E TM x
   exact connectionLaplacian_smul_function_withBasis cov hh hg hfirst hremainder
     (stdOrthonormalBasis ℝ (TM x))
+
+/-- **Automatic smooth cutoff identity.**  If the scalar cutoff and the
+covariant two-tensor are globally `C²`, the regularity assumptions in
+`connectionLaplacian_smul_function` follow from the `C¹` regularity of the
+induced connection on two-tensors.  In particular, the commutator formula can
+be applied to geometrically constructed cutoff fields without separately
+postulating differentiability of either lower-order term. -/
+theorem connectionLaplacian_smul_function_of_contMDiff_two
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {g : M → ℝ} {h : ∀ x : M, T₂ x}
+    (hg : ContMDiff I 𝓘(ℝ) 2 g)
+    (hh : ContMDiff I
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 2
+      (fun x => TotalSpace.mk'
+        (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) x (h x)))
+    (x : M) :
+    connectionLaplacian cov (g • h) x =
+      g x • connectionLaplacian cov h x +
+        connectionLaplacianCutoffCommutator cov g h x := by
+  apply connectionLaplacian_smul_function cov
+  · intro y
+    exact (hh.contMDiffAt.of_le
+      (by norm_num : (1 : WithTop ℕ∞) ≤ 2)).mdifferentiableAt one_ne_zero
+  · intro y
+    exact (hg.contMDiffAt.of_le
+      (by norm_num : (1 : WithTop ℕ∞) ≤ 2)).mdifferentiableAt one_ne_zero
+  · have hhOn : ContMDiffOn I
+        (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) (1 + 1)
+        (fun y => TotalSpace.mk'
+          (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) y (h y)) Set.univ := by
+      have hone : (1 : WithTop ℕ∞) + 1 = 2 := by norm_num
+      simpa only [hone] using hh.contMDiffOn
+    have hcovOn :=
+      ((inferInstance : ContMDiffCovariantDerivative
+        (covariantTwoTensorCovariantDerivative
+          (E := E) (I := I) (M := M) cov) 1).contMDiff.contMDiff hhOn)
+    exact (((hcovOn x (Set.mem_univ x)).contMDiffAt
+      (isOpen_univ.mem_nhds (Set.mem_univ x))).of_le
+        (by norm_num : (1 : WithTop ℕ∞) ≤ 1)).mdifferentiableAt one_ne_zero
+  · have hdg := hg.extDerivSection
+        (I := I) (E := E)
+        (by norm_num : (1 : WithTop ℕ∞) + 1 ≤ 2)
+    have hhOne := hh.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
+    exact (hdg.contMDiffAt.smulRightSection_of_level hhOne.contMDiffAt).mdifferentiableAt
+      one_ne_zero
 
 end CovariantDerivative
