@@ -149,6 +149,22 @@ theorem bufferedCutoff_eq_one_of_mem_piece
     (A.bufferedCutoff cov i).cutoff x = 1 :=
   (A.bufferedCutoff cov i).one_nhds.self_of_nhdsSet x hx
 
+/-- Every partition piece lies in the topological support of its buffered
+cutoff. -/
+theorem piece_subset_bufferedCutoff_tsupport
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index) :
+    (A.cover.pieces i : Set M) ⊆
+      tsupport (A.bufferedCutoff cov i).cutoff := by
+  intro x hx
+  apply subset_closure
+  rw [Function.mem_support]
+  rw [A.bufferedCutoff_eq_one_of_mem_piece cov i hx]
+  norm_num
+
 /-- The normalized local solution, extended to a globally `C²` tensor by
 the buffered cutoff. -/
 def bufferedLocalSolutionSlice

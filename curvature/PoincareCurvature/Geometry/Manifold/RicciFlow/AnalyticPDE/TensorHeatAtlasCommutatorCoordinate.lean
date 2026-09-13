@@ -118,15 +118,17 @@ def cutoffCommutatorCoordinateDomain
     (extChartAt I (i : M)).symm ⁻¹'
       (trivializationAt E TM (i : M)).baseSet
 
-/-- The compact image of the support of one partition function in its own
-preferred chart. -/
+/-- The compact image of the buffered support surrounding one partition
+piece.  Extending the commutator coefficients on this larger core is what
+allows pairwise chart transport to be cut off without losing exactness. -/
 def cutoffCommutatorCoordinateCore
     (cov : CovariantDerivative I E TM)
     {b : Module.Basis (Fin d) ℝ E}
     (A : FiniteTensorHeatParametrixAtlas
       (E := E) (I := I) (M := M) cov b t₀ T α)
     (i : A.cover.Index) : Set E :=
-  extChartAt I (i : M) '' (A.cover.pieces i : Set M)
+  extChartAt I (i : M) ''
+    tsupport (A.bufferedCutoff cov i).cutoff
 
 /-- The `i`-th partition function transported to its preferred chart. -/
 def cutoffCommutatorChartFunction
@@ -216,7 +218,8 @@ theorem cutoffCommutatorCoordinateCore_subset_domain
       cutoffCommutatorCoordinateDomain cov A i := by
   rintro z ⟨x, hx, rfl⟩
   have hxPatch : x ∈ actualLocalTensorHeatPatch (I := I)
-      (i : M) (A.radius (i : M)) := A.cover.pieces_subset_domain i hx
+      (i : M) (A.radius (i : M)) :=
+    (A.bufferedCutoff cov i).support_subset hx
   constructor
   · exact (extChartAt I (i : M)).map_source hxPatch.1
   · change (extChartAt I (i : M)).symm
@@ -232,9 +235,97 @@ theorem isCompact_cutoffCommutatorCoordinateCore
       (E := E) (I := I) (M := M) cov b t₀ T α)
     (i : A.cover.Index) :
     IsCompact (cutoffCommutatorCoordinateCore cov A i) := by
-  exact (A.cover.pieces i).isCompact.image_of_continuousOn
+  exact (A.bufferedCutoff cov i).compactSupport.image_of_continuousOn
     ((continuousOn_extChartAt (I := I) (i : M)).mono
-      (fun x hx => (A.cover.pieces_subset_domain i hx).1))
+      (fun x hx => ((A.bufferedCutoff cov i).support_subset hx).1))
+
+/-- Away from the topological support of the partition function, both raw
+coordinate coefficients of its cutoff commutator vanish. -/
+theorem cutoffCommutatorCoefficients_eq_zero_of_not_mem_piece
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index) {x : M}
+    (hxPatch : x ∈ actualLocalTensorHeatPatch (I := I)
+      (i : M) (A.radius (i : M)))
+    (hx : x ∉ (A.cover.pieces i : Set M)) :
+    cutoffCommutatorFirstCoefficient cov A i
+          ((extChartAt I (i : M)) x) = 0 ∧
+      cutoffCommutatorZeroCoefficient cov A i
+          ((extChartAt I (i : M)) x) = 0 := by
+  let z := (extChartAt I (i : M)) x
+  let χ := cutoffCommutatorChartFunction cov A i
+  have hsymm : Tendsto (extChartAt I (i : M)).symm
+      (nhds z) (nhds x) := by
+    have h := continuousAt_extChartAt_symm' hxPatch.1
+    change Tendsto (extChartAt I (i : M)).symm
+      (nhds ((extChartAt I (i : M)) x))
+      (nhds ((extChartAt I (i : M)).symm
+        ((extChartAt I (i : M)) x))) at h
+    rw [(extChartAt I (i : M)).left_inv hxPatch.1] at h
+    exact h
+  have hg0 : (A.cover.partition i : M → ℝ) =ᶠ[nhds x] 0 := by
+    exact notMem_tsupport_iff_eventuallyEq.mp hx
+  have hpull :
+      (fun w => (A.cover.partition i)
+        ((extChartAt I (i : M)).symm w)) =ᶠ[nhds z] 0 := by
+    exact hsymm.eventually hg0
+  have hχ0 : χ =ᶠ[nhds z] 0 := by
+    simpa [χ, cutoffCommutatorChartFunction, writtenInExtChartAt,
+      extChartAt_model_space_eq_id, Function.comp_def, PartialEquiv.refl_coe,
+      modelWithCornersSelf_coe, modelWithCornersSelf_coe_symm,
+      chartAt_self_eq, OpenPartialHomeomorph.refl_apply,
+      OpenPartialHomeomorph.coe_toPartialEquiv] using hpull
+  have hzTarget : z ∈ (extChartAt I (i : M)).target :=
+    (extChartAt I (i : M)).map_source hxPatch.1
+  have hrange : Set.range I ∈ nhds z :=
+    mem_of_superset
+      ((isOpen_extChartAt_target (i : M)).mem_nhds hzTarget)
+      (extChartAt_target_subset_range (i : M))
+  have hdχ : cutoffCommutatorChartGradient cov A i z = 0 := by
+    unfold cutoffCommutatorChartGradient
+    rw [show cutoffCommutatorChartFunction cov A i = χ by rfl]
+    rw [fderivWithin_of_mem_nhds hrange]
+    rw [hχ0.fderiv_eq]
+    simp
+  have hdχev : cutoffCommutatorChartGradient cov A i =ᶠ[nhds z] 0 := by
+    have htarget : (extChartAt I (i : M)).target ∈ nhds z :=
+      (isOpen_extChartAt_target (i : M)).mem_nhds hzTarget
+    have hdf := hχ0.fderiv (𝕜 := ℝ)
+    filter_upwards [htarget, hdf] with w hw hfw
+    unfold cutoffCommutatorChartGradient
+    rw [fderivWithin_of_mem_nhds
+      (mem_of_superset
+        ((isOpen_extChartAt_target (i : M)).mem_nhds hw)
+        (extChartAt_target_subset_range (i : M)))]
+    rw [show fderiv ℝ (cutoffCommutatorChartFunction cov A i) w = 0 by
+      simpa [χ] using hfw]
+    rfl
+  have hddχ : cutoffCommutatorChartHessian cov A i z = 0 := by
+    unfold cutoffCommutatorChartHessian
+    rw [fderivWithin_of_mem_nhds hrange]
+    rw [hdχev.fderiv_eq]
+    simp
+  constructor
+  · change secondOrderCutoffFirstCoefficient
+      (localTensorHeatPrincipalCoefficient (I := I) (i : M)
+        (trivializationAt E TM (i : M)) b z)
+      (cutoffCommutatorChartGradient cov A i z) = 0
+    rw [hdχ]
+    ext Du out
+    simp [secondOrderCutoffFirstCoefficient, cutoffGradientCrossL]
+  · change secondOrderCutoffZeroCoefficient
+      (localTensorHeatPrincipalCoefficient (I := I) (i : M)
+        (trivializationAt E TM (i : M)) b z)
+      (localTensorHeatFirstCoefficient (I := I) cov (i : M)
+        (trivializationAt E TM (i : M)) b z)
+      (cutoffCommutatorChartGradient cov A i z)
+      (cutoffCommutatorChartHessian cov A i z) = 0
+    rw [hdχ, hddχ]
+    ext u out
+    simp [secondOrderCutoffZeroCoefficient, cutoffHessianValueL,
+      cutoffGradientValueL]
 
 /-- Both genuine cutoff-commutator coefficient fields are `C¹` on the
 preferred coordinate domain. -/
@@ -562,7 +653,7 @@ theorem connectionLaplacianCutoffCommutator_apply_eq_extendedCoefficients
     have hv := hev.self_of_nhds
     simpa [h, z, u, normalizedTensorHeatCoordinate] using hv
   have hzCore : z ∈ cutoffCommutatorCoordinateCore cov A i :=
-    ⟨x, hx, rfl⟩
+    ⟨x, A.piece_subset_bufferedCutoff_tsupport cov i hx, rfl⟩
   have hG := (cutoffCommutatorCoefficientExtensions cov A i).first
     |>.eventuallyEq_original.self_of_nhdsSet z hzCore
   have hD := (cutoffCommutatorCoefficientExtensions cov A i).zero
@@ -674,6 +765,75 @@ theorem eval_normalizedCutoffCommutatorLocalResidualL
     simp [finiteAffineFirstDerivativeL_apply]
   rw [hscale, map_smul]
   rfl
+
+/-- On the buffered support but outside the partition piece, the normalized
+local commutator residual is exactly zero. -/
+theorem eval_normalizedCutoffCommutatorLocalResidualL_eq_zero
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 2]
+    [ContMDiffCovariantDerivative
+      (covariantThreeTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index)
+    (q : ParabolicC0AlphaBanach E W₂ α
+      (parabolicFiniteCylinder E t₀ T))
+    (s : ℝ) (hs : s ∈ Ioc t₀ T) {x : M}
+    (hxBuffer : x ∈ tsupport (A.bufferedCutoff cov i).cutoff)
+    (hx : x ∉ (A.cover.pieces i : Set M)) :
+    ParabolicC0AlphaBanach.evalCLM
+        (s, normalizedTensorHeatCoordinate (I := I)
+          (i : M) (A.radius (i : M)) x)
+        (by simpa using hs)
+        (normalizedCutoffCommutatorLocalResidualL cov A i q) = 0 := by
+  let ξ : E := normalizedTensorHeatCoordinate (I := I)
+    (i : M) (A.radius (i : M)) x
+  let z : E := (extChartAt I (i : M)) x
+  have hxPatch : x ∈ actualLocalTensorHeatPatch (I := I)
+      (i : M) (A.radius (i : M)) :=
+    (A.bufferedCutoff cov i).support_subset hxBuffer
+  have hraw : (extChartAt I (i : M)) (i : M) +
+      A.radius (i : M) • ξ = z := by
+    dsimp [ξ, z, normalizedTensorHeatCoordinate]
+    rw [smul_smul,
+      mul_inv_cancel₀ (ne_of_gt (A.radius_pos (i : M))),
+      one_smul, add_sub_cancel]
+  have hzCore : z ∈ cutoffCommutatorCoordinateCore cov A i :=
+    ⟨x, hxBuffer, rfl⟩
+  have hG := (cutoffCommutatorCoefficientExtensions cov A i).first
+    |>.eventuallyEq_original.self_of_nhdsSet z hzCore
+  have hD := (cutoffCommutatorCoefficientExtensions cov A i).zero
+    |>.eventuallyEq_original.self_of_nhdsSet z hzCore
+  have hzero := cutoffCommutatorCoefficients_eq_zero_of_not_mem_piece
+    cov A i hxPatch hx
+  rw [normalizedCutoffCommutatorLocalResidualL,
+    ContinuousLinearMap.comp_apply,
+    FiniteParabolicC2AlphaBanach.evalCLM_lowerOrderL]
+  simp only [toFun_normalizedCutoffCommutatorFirstField,
+    toFun_normalizedCutoffCommutatorZeroField]
+  change
+    normalizedCutoffCommutatorFirstCoefficient cov A i ξ
+          (FiniteParabolicC2AlphaBanach.spaceDeriv
+            (A.localInverse (i : M) q) (s, ξ)) +
+      normalizedCutoffCommutatorZeroCoefficient cov A i ξ
+          (FiniteParabolicC2AlphaBanach.value
+            (A.localInverse (i : M) q) (s, ξ)) = 0
+  rw [normalizedCutoffCommutatorFirstCoefficient,
+    normalizedCutoffCommutatorZeroCoefficient, hraw]
+  change
+    ((A.radius (i : M))⁻¹ •
+        (cutoffCommutatorCoefficientExtensions cov A i).first.extension z)
+          (FiniteParabolicC2AlphaBanach.spaceDeriv
+            (A.localInverse (i : M) q) (s, ξ)) +
+      (cutoffCommutatorCoefficientExtensions cov A i).zero.extension z
+          (FiniteParabolicC2AlphaBanach.value
+            (A.localInverse (i : M) q) (s, ξ)) = 0
+  rw [hG, hD, hzero.1, hzero.2]
+  simp
 
 end FiniteTensorHeatParametrixAtlas
 end AnalyticPDE

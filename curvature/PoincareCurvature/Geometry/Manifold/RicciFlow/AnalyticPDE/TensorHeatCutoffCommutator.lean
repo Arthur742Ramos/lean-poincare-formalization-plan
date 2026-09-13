@@ -282,5 +282,102 @@ theorem connectionLaplacianCutoffCommutator_apply_eq_secondOrderCutoff
   simp only [Pi.smul_apply, Pi.add_apply, smul_eq_mul] at hexpComponent hcommComponent ⊢
   linear_combination hexpComponent - hcommComponent
 
+/-- The cutoff commutator vanishes off the topological support of the
+cutoff.  This is the germ-local support statement needed to glue its chart
+representatives without artifacts. -/
+theorem connectionLaplacianCutoffCommutator_eq_zero_of_notMem_tsupport
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 2]
+    [ContMDiffCovariantDerivative
+      (covariantThreeTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    (b : Module.Basis ι ℝ E) {g : M → ℝ} {h : ∀ x : M, T₂ x}
+    (hg : ContMDiff I 𝓘(ℝ) 2 g)
+    (hh : ContMDiff I
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 2
+      (fun x => TotalSpace.mk'
+        (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) x (h x)))
+    {x : M} (hx : x ∉ tsupport g) :
+    connectionLaplacianCutoffCommutator cov g h x = 0 := by
+  let e := trivializationAt E TM x
+  let z := (extChartAt I x) x
+  let χ := writtenInExtChartAt I 𝓘(ℝ) x g
+  have hxFrame : x ∈ e.baseSet := by
+    exact FiberBundle.mem_baseSet_trivializationAt' x
+  have hxChart : x ∈ (extChartAt I x).source := mem_extChartAt_source x
+  have hg0 : g =ᶠ[nhds x] 0 :=
+    notMem_tsupport_iff_eventuallyEq.mp hx
+  have hsymm : Tendsto (extChartAt I x).symm (nhds z) (nhds x) := by
+    have ht := continuousAt_extChartAt_symm' hxChart
+    change Tendsto (extChartAt I x).symm
+      (nhds ((extChartAt I x) x))
+      (nhds ((extChartAt I x).symm ((extChartAt I x) x))) at ht
+    rw [(extChartAt I x).left_inv hxChart] at ht
+    exact ht
+  have hpull : (fun w => g ((extChartAt I x).symm w)) =ᶠ[nhds z] 0 :=
+    hsymm.eventually hg0
+  have hχ0 : χ =ᶠ[nhds z] 0 := by
+    simpa [χ, writtenInExtChartAt, extChartAt_model_space_eq_id,
+      Function.comp_def, PartialEquiv.refl_coe, modelWithCornersSelf_coe,
+      modelWithCornersSelf_coe_symm, chartAt_self_eq,
+      OpenPartialHomeomorph.refl_apply,
+      OpenPartialHomeomorph.coe_toPartialEquiv] using hpull
+  have hzTarget : z ∈ (extChartAt I x).target :=
+    (extChartAt I x).map_source hxChart
+  have hrange : Set.range I ∈ nhds z :=
+    mem_of_superset ((isOpen_extChartAt_target x).mem_nhds hzTarget)
+      (extChartAt_target_subset_range x)
+  have hdχ : fderivWithin ℝ χ (Set.range I) z = 0 := by
+    rw [fderivWithin_of_mem_nhds hrange, hχ0.fderiv_eq]
+    simp
+  have hdχev :
+      (fun w => fderivWithin ℝ χ (Set.range I) w) =ᶠ[nhds z] 0 := by
+    have htarget : (extChartAt I x).target ∈ nhds z :=
+      (isOpen_extChartAt_target x).mem_nhds hzTarget
+    have hdf := hχ0.fderiv (𝕜 := ℝ)
+    filter_upwards [htarget, hdf] with w hw hfw
+    rw [fderivWithin_of_mem_nhds
+      (mem_of_superset ((isOpen_extChartAt_target x).mem_nhds hw)
+        (extChartAt_target_subset_range x))]
+    simpa using hfw
+  have hddχ : fderivWithin ℝ
+      (fun w => fderivWithin ℝ χ (Set.range I) w)
+        (Set.range I) z = 0 := by
+    rw [fderivWithin_of_mem_nhds hrange, hdχev.fderiv_eq]
+    simp
+  apply ContinuousLinearMap.coe_injective
+  refine (e.basisAt b hxFrame).ext (fun p => ?_)
+  apply ContinuousLinearMap.coe_injective
+  refine (e.basisAt b hxFrame).ext (fun q => ?_)
+  rw [← Bundle.Trivialization.localFrame_apply_of_mem_baseSet
+      (e := e) (b := b) hxFrame,
+    ← Bundle.Trivialization.localFrame_apply_of_mem_baseSet
+      (e := e) (b := b) hxFrame]
+  change connectionLaplacianCutoffCommutator cov g h x
+      (e.localFrame b p x) (e.localFrame b q x) = 0
+  rw [connectionLaplacianCutoffCommutator_apply_eq_secondOrderCutoff
+    cov x e b hg hh hxFrame hxChart p q]
+  change
+    (secondOrderCutoffFirstCoefficient
+        (localTensorHeatPrincipalCoefficient (I := I) x e b z)
+        (fderivWithin ℝ χ (Set.range I) z)
+        (localTensorCoordinateDerivative (I := I) x e b h z) +
+      secondOrderCutoffZeroCoefficient
+        (localTensorHeatPrincipalCoefficient (I := I) x e b z)
+        (localTensorHeatFirstCoefficient (I := I) cov x e b z)
+        (fderivWithin ℝ χ (Set.range I) z)
+        (fderivWithin ℝ
+          (fun w => fderivWithin ℝ χ (Set.range I) w)
+          (Set.range I) z)
+        (localTensorCoordinates (I := I) x e b h z)) (q, p) = 0
+  rw [hdχ, hddχ]
+  simp [secondOrderCutoffFirstCoefficient, secondOrderCutoffZeroCoefficient,
+    cutoffGradientCrossL, cutoffHessianValueL, cutoffGradientValueL]
+
 end AnalyticPDE
 end RicciFlow
