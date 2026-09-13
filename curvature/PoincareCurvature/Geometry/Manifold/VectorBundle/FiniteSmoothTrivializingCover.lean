@@ -49,6 +49,74 @@ theorem mem_preferredAnalysisDomain (p : M) :
     p ∈ preferredAnalysisDomain I (F := F) (V := V) p :=
   ⟨mem_extChartAt_source p, mem_baseSet_trivializationAt F V p⟩
 
+/-- A finite smooth partition of unity subordinate to an arbitrary
+point-indexed family of domains.  Keeping the family as a type parameter
+lets later analytic constructions choose a radius separately at every point
+before compactness extracts the finite subcover. -/
+structure FiniteSmoothPointwiseSubordinateCover (domains : M → Set M) where
+  centers : Finset M
+  partition : SmoothPartitionOfUnity centers I M Set.univ
+  subordinate : partition.IsSubordinate
+    (fun i : centers => domains (i : M))
+
+namespace FiniteSmoothPointwiseSubordinateCover
+
+variable {I} {domains : M → Set M}
+
+abbrev Index
+    (C : FiniteSmoothPointwiseSubordinateCover I domains) :=
+  C.centers
+
+/-- Compact support of one member of the subordinate partition. -/
+def pieces (C : FiniteSmoothPointwiseSubordinateCover I domains)
+    (i : C.Index) : TopologicalSpace.Compacts M :=
+  ⟨tsupport (C.partition i), isClosed_closure.isCompact⟩
+
+@[simp]
+theorem coe_pieces (C : FiniteSmoothPointwiseSubordinateCover I domains)
+    (i : C.Index) :
+    (C.pieces i : Set M) = tsupport (C.partition i) :=
+  rfl
+
+theorem pieces_subset_domain
+    (C : FiniteSmoothPointwiseSubordinateCover I domains) (i : C.Index) :
+    (C.pieces i : Set M) ⊆ domains (i : M) :=
+  C.subordinate i
+
+theorem iUnion_pieces
+    (C : FiniteSmoothPointwiseSubordinateCover I domains) :
+    (⋃ i : C.Index, (C.pieces i : Set M)) = Set.univ := by
+  apply Set.eq_univ_of_forall
+  intro x
+  obtain ⟨i, hi⟩ := C.partition.exists_pos_of_mem (Set.mem_univ x)
+  exact Set.mem_iUnion.2
+    ⟨i, subset_closure (Function.mem_support.2 (ne_of_gt hi))⟩
+
+/-- Compactness and smooth partitions of unity turn any point-indexed open
+family with `p ∈ domains p` into a finite subordinate smooth cover. -/
+theorem exists_of_isOpen_mem
+    (domains : M → Set M)
+    (hopen : ∀ p : M, IsOpen (domains p))
+    (hmem : ∀ p : M, p ∈ domains p) :
+    Nonempty (FiniteSmoothPointwiseSubordinateCover I domains) := by
+  classical
+  have hcover : Set.univ ⊆ ⋃ p : M, domains p := by
+    intro p _
+    exact Set.mem_iUnion.2 ⟨p, hmem p⟩
+  obtain ⟨s, hs⟩ :=
+    isCompact_univ.elim_finite_subcover domains hopen hcover
+  let U : s → Set M := fun i => domains (i : M)
+  have hUopen : ∀ i : s, IsOpen (U i) := fun i => hopen (i : M)
+  have hUcover : Set.univ ⊆ ⋃ i : s, U i := by
+    intro x hx
+    have hx' : x ∈ ⋃ p ∈ s, domains p := hs hx
+    simpa [U] using hx'
+  obtain ⟨ρ, hρ⟩ := SmoothPartitionOfUnity.exists_isSubordinate
+    I isClosed_univ U hUopen hUcover
+  exact ⟨{ centers := s, partition := ρ, subordinate := hρ }⟩
+
+end FiniteSmoothPointwiseSubordinateCover
+
 /-- A finite smooth partition of unity subordinate simultaneously to the
 preferred manifold chart and preferred bundle trivialization at every
 center. -/
