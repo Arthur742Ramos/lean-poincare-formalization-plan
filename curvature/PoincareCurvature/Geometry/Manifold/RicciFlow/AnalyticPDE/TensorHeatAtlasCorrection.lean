@@ -120,6 +120,24 @@ theorem localSolutionFamilyL_apply
     (q : SourceSpace cov A) (i : A.cover.Index) :
     localSolutionFamilyL cov A q i = A.localInverse (i : M) (q i) := rfl
 
+/-- Every member of the atlas solution family has the canonical zero initial
+trace supplied by the local finite-cylinder inverse. -/
+theorem initialTrace_localSolutionFamilyL_apply
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (q : SourceSpace cov A) (i : A.cover.Index) :
+    FiniteParabolicC2AlphaBanach.initialTraceL
+        (X := E) (E := W₂) A.time_lt A.alpha_pos
+        (localSolutionFamilyL cov A q i) = 0 := by
+  have h := congrArg
+    (fun L : ParabolicC0AlphaBanach E W₂ α
+          (parabolicFiniteCylinder E t₀ T) →L[ℝ]
+        BoundedContinuousFunction E W₂ => L (q i))
+    (A.zero_trace (i : M))
+  simpa using h
+
 /-- Physical reconstruction is additive in one chart's normalized source. -/
 theorem physicalLocalSourceSlice_add
     (cov : CovariantDerivative I E TM)
