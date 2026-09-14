@@ -132,6 +132,23 @@ theorem matrixBilinearCLM_apply_basis
   classical
   simp [matrixBilinearCLM, basisCoordinateCLM, Finsupp.single_apply]
 
+/-- Matrix transposition is exactly slot-flip for the synthesized bilinear
+form. -/
+theorem matrixBilinearCLM_transpose_apply
+    (b : Module.Basis ι ℝ E) (q : ι → ι → ℝ) (v w : E) :
+    matrixBilinearCLM b (fun i j => q j i) v w =
+      matrixBilinearCLM b q w v := by
+  classical
+  simp only [matrixBilinearCLM, _root_.sum_apply,
+    ContinuousLinearMap.smulRight_apply, smul_eq_mul, _root_.smul_apply]
+  simp_rw [Finset.mul_sum]
+  rw [Finset.sum_comm]
+  apply Finset.sum_congr rfl
+  intro i _hi
+  apply Finset.sum_congr rfl
+  intro j _hj
+  ring
+
 /-- The tangent-fibre coordinate isomorphism as a continuous linear map. -/
 def tangentCoordCLM
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
@@ -287,6 +304,20 @@ theorem localTensorOfMatrix_localFrame
     tangentCoordCLM_localFrame e b hx j]
   exact matrixBilinearCLM_apply_basis b (q x) i j
 
+/-- Transposing the coefficient matrix flips the two covariant tensor slots. -/
+theorem localTensorOfMatrix_transpose_apply
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (q : M → ι → ι → ℝ) (x : M) (v w : TM x) :
+    localTensorOfMatrix e b (fun y i j => q y j i) x v w =
+      localTensorOfMatrix e b q x w v := by
+  classical
+  by_cases hx : x ∈ e.baseSet
+  · simp only [localTensorOfMatrix, dif_pos hx,
+      ContinuousLinearMap.bilinearComp_apply]
+    exact matrixBilinearCLM_transpose_apply b (q x) _ _
+  · simp [localTensorOfMatrix, hx]
+
 /-- Symmetric coefficient matrices reconstruct symmetric covariant tensors. -/
 theorem localTensorOfMatrix_isSymmetric
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
@@ -318,6 +349,18 @@ def cutoffLocalTensorOfMatrix
     [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
     (ψ : M → ℝ) (q : M → ι → ι → ℝ) : ∀ x : M, T₂ x :=
   fun x => ψ x • localTensorOfMatrix e b q x
+
+/-- Transposing coefficients also flips the slots after multiplication by a
+scalar cutoff. -/
+theorem cutoffLocalTensorOfMatrix_transpose_apply
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (psi : M → ℝ) (q : M → ι → ι → ℝ)
+    (x : M) (v w : TM x) :
+    cutoffLocalTensorOfMatrix e b psi (fun y i j => q y j i) x v w =
+      cutoffLocalTensorOfMatrix e b psi q x w v := by
+  simp only [cutoffLocalTensorOfMatrix, _root_.smul_apply, smul_eq_mul]
+  rw [localTensorOfMatrix_transpose_apply]
 
 /-- On the genuine local frame, cutoff reconstruction is exactly scalar
 multiplication of the input matrix. -/
