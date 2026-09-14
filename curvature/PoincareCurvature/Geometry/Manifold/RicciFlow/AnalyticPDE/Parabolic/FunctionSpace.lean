@@ -917,15 +917,16 @@ def parabolicC0AlphaSubmodule
     (α : ℝ) (s : Set (ℝ × X)) : Submodule ℝ ((ℝ × X) → E) where
   carrier := {u | ParabolicC0AlphaOn α u s}
   zero_mem' := by
-    simpa using (ParabolicC0AlphaOn.const (X := X) (α := α) (s := s) (0 : E))
+    change ParabolicC0AlphaOn α (fun _ : ℝ × X => (0 : E)) s
+    exact ParabolicC0AlphaOn.const (X := X) (α := α) (s := s) (0 : E)
   add_mem' := by
     intro u v hu hv
-    simpa [Pi.add_apply] using
-      (ParabolicC0AlphaOn.add (X := X) (α := α) (s := s) hu hv)
+    change ParabolicC0AlphaOn α (fun z => u z + v z) s
+    exact ParabolicC0AlphaOn.add (X := X) (α := α) (s := s) hu hv
   smul_mem' := by
     intro c u hu
-    simpa [Pi.smul_apply] using
-      (ParabolicC0AlphaOn.smul (X := X) (α := α) (s := s) (𝕜 := ℝ) c hu)
+    change ParabolicC0AlphaOn α (fun z => c • u z) s
+    exact ParabolicC0AlphaOn.smul (X := X) (α := α) (s := s) (𝕜 := ℝ) c hu
 
 namespace parabolicC0AlphaSubmodule
 
@@ -2391,12 +2392,16 @@ noncomputable def addGroupSeminorm (α : ℝ) (s : Set (ℝ × X)) :
     AddGroupSeminorm (parabolicC0AlphaSubmodule X E α s) where
   toFun u := parabolicC0AlphaNorm α u.1 s
   map_zero' := by
-    simp only [Submodule.coe_zero]
+    change parabolicC0AlphaNorm α (fun _ : ℝ × X => (0 : E)) s = 0
     exact parabolicC0AlphaNorm_zero α s
   add_le' u v := by
-    simpa only [Submodule.coe_add] using parabolicC0AlphaNorm_add_le u.2 v.2
+    change parabolicC0AlphaNorm α (fun z => u.1 z + v.1 z) s ≤
+      parabolicC0AlphaNorm α u.1 s + parabolicC0AlphaNorm α v.1 s
+    exact parabolicC0AlphaNorm_add_le u.2 v.2
   neg' u := by
-    simpa only [Submodule.coe_neg] using parabolicC0AlphaNorm_neg α u.1 s
+    change parabolicC0AlphaNorm α (fun z => -u.1 z) s =
+      parabolicC0AlphaNorm α u.1 s
+    exact parabolicC0AlphaNorm_neg α u.1 s
 
 /-- The bundled parabolic `C^{0,α}` `AddGroupSeminorm` evaluates to the parabolic `C^{0,α}` norm
 of the underlying function. -/
@@ -2414,7 +2419,9 @@ noncomputable def seminorm (α : ℝ) (s : Set (ℝ × X)) :
     Seminorm ℝ (parabolicC0AlphaSubmodule X E α s) :=
   { addGroupSeminorm α s with
     smul' := fun c u => by
-      simpa only [Submodule.coe_smul] using parabolicC0AlphaNorm_const_smul c u.2 }
+      change parabolicC0AlphaNorm α (fun z => c • u.1 z) s =
+        ‖c‖ * parabolicC0AlphaNorm α u.1 s
+      exact parabolicC0AlphaNorm_const_smul c u.2 }
 
 /-- The bundled parabolic `C^{0,α}` `Seminorm` evaluates to the parabolic `C^{0,α}` norm of the
 underlying function. -/
@@ -2449,11 +2456,8 @@ theorem seminormedAddCommGroup_dist (α : ℝ) (s : Set (ℝ × X))
     dist u v = parabolicC0AlphaNorm α (fun z => u.1 z - v.1 z) s := by
   letI := seminormedAddCommGroup (X := X) (E := E) α s
   rw [dist_eq_norm]
-  have hfun : ((u - v : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E)
-      = fun z => u.1 z - v.1 z := by
-    ext z; simp
-  show parabolicC0AlphaNorm α ((u - v : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E) s = _
-  rw [hfun]
+  change parabolicC0AlphaNorm α (fun z => u.1 z - v.1 z) s = _
+  rfl
 
 /-- **Completeness of the parabolic `C^{0,α}` seminormed space.**  Under the bundled parabolic
 `C^{0,α}` seminormed structure, every `C^{0,α}`-norm-Cauchy sequence of parabolic `C^{0,α}` functions
@@ -2503,12 +2507,8 @@ noncomputable def normedSpace (α : ℝ) (s : Set (ℝ × X)) :
     norm_smul_le := fun c u => by
       have hbound := parabolicC0AlphaNorm_const_smul_le
         (X := X) (E := E) (𝕜 := ℝ) (α := α) (s := s) c u.2
-      have hsmul : ((c • u : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E)
-          = fun z => c • u.1 z := by ext z; simp
-      show parabolicC0AlphaNorm α
-          ((c • u : parabolicC0AlphaSubmodule X E α s) : ℝ × X → E) s
-          ≤ ‖c‖ * parabolicC0AlphaNorm α u.1 s
-      rw [hsmul]
+      change parabolicC0AlphaNorm α (fun z => c • u.1 z) s ≤
+        ‖c‖ * parabolicC0AlphaNorm α u.1 s
       exact hbound }
 
 end parabolicC0AlphaSubmodule

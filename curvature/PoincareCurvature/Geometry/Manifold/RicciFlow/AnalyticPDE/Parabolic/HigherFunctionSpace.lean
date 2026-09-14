@@ -1,6 +1,6 @@
 module
 
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FunctionSpace
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.HigherFunctionSpaceCore
 public import Mathlib.Analysis.Calculus.Deriv.Basic
 public import Mathlib.Analysis.Calculus.Deriv.Add
 public import Mathlib.Analysis.Calculus.Deriv.Mul
@@ -27,24 +27,6 @@ open scoped Topology NNReal
 namespace RicciFlow
 namespace AnalyticPDE
 
-/-- Time slice of a time-space set at a fixed spatial point. -/
-def timeSliceDomain {X : Type*} (s : Set (ℝ × X)) (x : X) : Set ℝ :=
-  {t | (t, x) ∈ s}
-
-/-- Spatial slice of a time-space set at a fixed time. -/
-def spaceSliceDomain {X : Type*} (s : Set (ℝ × X)) (t : ℝ) : Set X :=
-  {x | (t, x) ∈ s}
-
-@[simp]
-theorem mem_timeSliceDomain {X : Type*} {s : Set (ℝ × X)} {x : X} {t : ℝ} :
-    t ∈ timeSliceDomain s x ↔ (t, x) ∈ s :=
-  Iff.rfl
-
-@[simp]
-theorem mem_spaceSliceDomain {X : Type*} {s : Set (ℝ × X)} {t : ℝ} {x : X} :
-    x ∈ spaceSliceDomain s t ↔ (t, x) ∈ s :=
-  Iff.rfl
-
 variable {X E : Type*}
 variable [NormedAddCommGroup X] [NormedSpace ℝ X]
 variable [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -59,25 +41,6 @@ def firstDerivativeProdLinearMap (X E F : Type*)
   ((ContinuousLinearMap.prodₗᵢ ℝ :
     ((X →L[ℝ] E) × (X →L[ℝ] F)) ≃ₗᵢ[ℝ] (X →L[ℝ] E × F)) :
       ((X →L[ℝ] E) × (X →L[ℝ] F)) →L[ℝ] (X →L[ℝ] E × F))
-
-/-- A coordinate parabolic second jet for a time-space function on a domain.
-
-The fields are genuine derivative witnesses on the natural time and spatial
-slices of the domain.  The second spatial derivative is the derivative of the
-first spatial derivative as a `ContinuousLinearMap`-valued function. -/
-structure ParabolicSecondJet (u : ℝ × X → E) (s : Set (ℝ × X)) where
-  timeDeriv : ℝ × X → E
-  spaceDeriv : ℝ × X → X →L[ℝ] E
-  spaceSecondDeriv : ℝ × X → X →L[ℝ] (X →L[ℝ] E)
-  hasTimeDeriv : ∀ ⦃z : ℝ × X⦄, z ∈ s →
-    HasDerivWithinAt (fun t : ℝ => u (t, z.2)) (timeDeriv z)
-      (timeSliceDomain s z.2) z.1
-  hasSpaceDeriv : ∀ ⦃z : ℝ × X⦄, z ∈ s →
-    HasFDerivWithinAt (fun x : X => u (z.1, x)) (spaceDeriv z)
-      (spaceSliceDomain s z.1) z.2
-  hasSpaceSecondDeriv : ∀ ⦃z : ℝ × X⦄, z ∈ s →
-    HasFDerivWithinAt (fun x : X => spaceDeriv (z.1, x)) (spaceSecondDeriv z)
-      (spaceSliceDomain s z.1) z.2
 
 namespace ParabolicSecondJet
 
@@ -183,13 +146,13 @@ def add {v : ℝ × X → E} (Ju : ParabolicSecondJet u s) (Jv : ParabolicSecond
   spaceSecondDeriv := fun z => Ju.spaceSecondDeriv z + Jv.spaceSecondDeriv z
   hasTimeDeriv := by
     intro z hz
-    simpa using (Ju.hasTimeDeriv hz).add (Jv.hasTimeDeriv hz)
+    convert (Ju.hasTimeDeriv hz).add (Jv.hasTimeDeriv hz) using 1 <;> rfl
   hasSpaceDeriv := by
     intro z hz
-    simpa using (Ju.hasSpaceDeriv hz).add (Jv.hasSpaceDeriv hz)
+    convert (Ju.hasSpaceDeriv hz).add (Jv.hasSpaceDeriv hz) using 1 <;> rfl
   hasSpaceSecondDeriv := by
     intro z hz
-    simpa [Pi.add_apply] using (Ju.hasSpaceSecondDeriv hz).add (Jv.hasSpaceSecondDeriv hz)
+    convert (Ju.hasSpaceSecondDeriv hz).add (Jv.hasSpaceSecondDeriv hz) using 1 <;> rfl
 
 /-- Negation of a parabolic second jet. -/
 def neg (J : ParabolicSecondJet u s) :
@@ -232,13 +195,13 @@ def sub {v : ℝ × X → E} (Ju : ParabolicSecondJet u s) (Jv : ParabolicSecond
   spaceSecondDeriv := fun z => Ju.spaceSecondDeriv z - Jv.spaceSecondDeriv z
   hasTimeDeriv := by
     intro z hz
-    simpa using (Ju.hasTimeDeriv hz).sub (Jv.hasTimeDeriv hz)
+    convert (Ju.hasTimeDeriv hz).sub (Jv.hasTimeDeriv hz) using 1 <;> rfl
   hasSpaceDeriv := by
     intro z hz
-    simpa using (Ju.hasSpaceDeriv hz).sub (Jv.hasSpaceDeriv hz)
+    convert (Ju.hasSpaceDeriv hz).sub (Jv.hasSpaceDeriv hz) using 1 <;> rfl
   hasSpaceSecondDeriv := by
     intro z hz
-    simpa [Pi.sub_apply] using (Ju.hasSpaceSecondDeriv hz).sub (Jv.hasSpaceSecondDeriv hz)
+    convert (Ju.hasSpaceSecondDeriv hz).sub (Jv.hasSpaceSecondDeriv hz) using 1 <;> rfl
 
 /-- Product of two parabolic second jets, with derivative witnesses paired componentwise. -/
 def prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] {v : ℝ × X → F}
@@ -255,8 +218,8 @@ def prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] {v : ℝ × X �
     exact HasDerivWithinAt.prodMk (Ju.hasTimeDeriv hz) (Jv.hasTimeDeriv hz)
   hasSpaceDeriv := by
     intro z hz
-    simpa [firstDerivativeProdLinearMap] using
-      (Ju.hasSpaceDeriv hz).prodMk (Jv.hasSpaceDeriv hz)
+    convert (Ju.hasSpaceDeriv hz).prodMk (Jv.hasSpaceDeriv hz) using 1
+    all_goals try rfl
   hasSpaceSecondDeriv := by
     intro z hz
     let Lprod : ((X →L[ℝ] E) × (X →L[ℝ] F)) →L[ℝ] (X →L[ℝ] E × F) :=
@@ -268,7 +231,7 @@ def prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] {v : ℝ × X �
           (spaceSliceDomain s z.1) z.2 := by
       exact (Ju.hasSpaceSecondDeriv hz).prodMk (Jv.hasSpaceSecondDeriv hz)
     have hcomp := Lprod.hasFDerivAt.comp_hasFDerivWithinAt z.2 hpair
-    simpa [Function.comp, Lprod, firstDerivativeProdLinearMap] using hcomp
+    convert hcomp using 1 <;> rfl
 
 /-- Compose a parabolic second jet with a continuous linear value map. -/
 def continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -283,73 +246,25 @@ def continuousLinearMap {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     intro z hz
     have hcomp :=
       L.hasFDerivAt.comp_hasFDerivWithinAt z.1 (J.hasTimeDeriv hz).hasFDerivWithinAt
-    simpa [Function.comp] using hcomp.hasDerivWithinAt
+    convert hcomp.hasDerivWithinAt using 1
+    all_goals try rfl
+    simp
   hasSpaceDeriv := by
     intro z hz
     have hcomp := L.hasFDerivAt.comp_hasFDerivWithinAt z.2 (J.hasSpaceDeriv hz)
-    simpa [Function.comp] using hcomp
+    convert hcomp using 1 <;> rfl
   hasSpaceSecondDeriv := by
     intro z hz
     let A : (X →L[ℝ] E) →L[ℝ] (X →L[ℝ] F) :=
       ContinuousLinearMap.compL ℝ X E F L
     have hcomp := A.hasFDerivAt.comp_hasFDerivWithinAt z.2 (J.hasSpaceSecondDeriv hz)
-    simpa [Function.comp, A] using hcomp
-
-/-- Restrict a parabolic second jet to a smaller time-space domain. -/
-def restrict {t : Set (ℝ × X)} (J : ParabolicSecondJet u s) (hst : t ⊆ s) :
-    ParabolicSecondJet u t where
-  timeDeriv := J.timeDeriv
-  spaceDeriv := J.spaceDeriv
-  spaceSecondDeriv := J.spaceSecondDeriv
-  hasTimeDeriv := by
-    intro z hz
-    refine (J.hasTimeDeriv (hst hz)).mono ?_
-    intro τ hτ
-    exact hst hτ
-  hasSpaceDeriv := by
-    intro z hz
-    refine (J.hasSpaceDeriv (hst hz)).mono ?_
-    intro x hx
-    exact hst hx
-  hasSpaceSecondDeriv := by
-    intro z hz
-    refine (J.hasSpaceSecondDeriv (hst hz)).mono ?_
-    intro x hx
-    exact hst hx
+    convert hcomp using 1 <;> rfl
 
 end ParabolicSecondJet
-
-/-- Coordinate parabolic `C^{2+α,1+α/2}` single-radius control.
-
-The radius dominates the sum of four `C^{0,α}` norm-ball radii: the value, the
-spatial derivative, the second spatial derivative, and the time derivative of a
-chosen parabolic second jet. -/
-def ParabolicC2AlphaNormLe (N α : ℝ) (u : ℝ × X → E) (s : Set (ℝ × X)) : Prop :=
-  ∃ J : ParabolicSecondJet u s,
-    ∃ Nu ≥ 0, ∃ Nx ≥ 0, ∃ Nxx ≥ 0, ∃ Nt ≥ 0,
-      Nu + Nx + Nxx + Nt ≤ N ∧
-        ParabolicC0AlphaNormLe Nu α u s ∧
-        ParabolicC0AlphaNormLe Nx α J.spaceDeriv s ∧
-        ParabolicC0AlphaNormLe Nxx α J.spaceSecondDeriv s ∧
-        ParabolicC0AlphaNormLe Nt α J.timeDeriv s
 
 namespace ParabolicC2AlphaNormLe
 
 variable {N N' α : ℝ} {u : ℝ × X → E} {s : Set (ℝ × X)}
-
-theorem nonneg (h : ParabolicC2AlphaNormLe N α u s) : 0 ≤ N := by
-  rcases h with
-    ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum, _hu, _hx, _hxx, _ht⟩
-  exact (add_nonneg (add_nonneg (add_nonneg hNu hNx) hNxx) hNt).trans hsum
-
-theorem of_secondJet {J : ParabolicSecondJet u s} {Nu Nx Nxx Nt : ℝ}
-    (hNu : 0 ≤ Nu) (hNx : 0 ≤ Nx) (hNxx : 0 ≤ Nxx) (hNt : 0 ≤ Nt)
-    (hu : ParabolicC0AlphaNormLe Nu α u s)
-    (hx : ParabolicC0AlphaNormLe Nx α J.spaceDeriv s)
-    (hxx : ParabolicC0AlphaNormLe Nxx α J.spaceSecondDeriv s)
-    (ht : ParabolicC0AlphaNormLe Nt α J.timeDeriv s) :
-    ParabolicC2AlphaNormLe (Nu + Nx + Nxx + Nt) α u s := by
-  exact ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, le_rfl, hu, hx, hxx, ht⟩
 
 theorem const (c : E) :
     ParabolicC2AlphaNormLe ‖c‖ α (fun _ : ℝ × X => c) s := by
@@ -366,12 +281,6 @@ theorem const (c : E) :
 theorem zero :
     ParabolicC2AlphaNormLe 0 α (fun _ : ℝ × X => (0 : E)) s := by
   simpa using (const (X := X) (E := E) (α := α) (s := s) (0 : E))
-
-theorem mono_const (h : ParabolicC2AlphaNormLe N α u s) (hNN : N ≤ N') :
-    ParabolicC2AlphaNormLe N' α u s := by
-  rcases h with
-    ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum, hu, hx, hxx, ht⟩
-  exact ⟨J, Nu, hNu, Nx, hNx, Nxx, hNxx, Nt, hNt, hsum.trans hNN, hu, hx, hxx, ht⟩
 
 theorem mono_set {t : Set (ℝ × X)} (h : ParabolicC2AlphaNormLe N α u s) (hst : t ⊆ s) :
     ParabolicC2AlphaNormLe N α u t := by
@@ -546,7 +455,8 @@ theorem prod {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
             _ ≤ ‖Lx‖ * (Hxx * (parabolicDistance p q) ^ α) :=
               mul_le_mul_of_nonneg_left (hxx_ctrl.2 hp hq) (norm_nonneg Lx)
             _ = (‖Lx‖ * Hxx) * (parabolicDistance p q) ^ α := by ring
-    simpa [ParabolicSecondJet.prod, firstDerivativeProdLinearMap, Lx, LxxIso] using hxx_prod
+    convert hxx_prod using 1
+    all_goals try rfl
   · simpa [ParabolicSecondJet.prod] using
       ParabolicC0AlphaNormLe.prod (X := X) (E := E) (F := F) htu htv
 
@@ -1259,15 +1169,16 @@ def parabolicC2AlphaSubmodule
     (α : ℝ) (s : Set (ℝ × X)) : Submodule ℝ ((ℝ × X) → E) where
   carrier := {u | ParabolicC2AlphaOn α u s}
   zero_mem' := by
-    simpa using (ParabolicC2AlphaOn.zero (X := X) (E := E) (α := α) (s := s))
+    change ParabolicC2AlphaOn α (fun _ : ℝ × X => (0 : E)) s
+    exact ParabolicC2AlphaOn.zero (X := X) (E := E) (α := α) (s := s)
   add_mem' := by
     intro u v hu hv
-    simpa [Pi.add_apply] using
-      (ParabolicC2AlphaOn.add (X := X) (E := E) (α := α) (s := s) hu hv)
+    change ParabolicC2AlphaOn α (fun z : ℝ × X => u z + v z) s
+    exact ParabolicC2AlphaOn.add (X := X) (E := E) (α := α) (s := s) hu hv
   smul_mem' := by
     intro c u hu
-    simpa [Pi.smul_apply] using
-      (ParabolicC2AlphaOn.smul (X := X) (E := E) (α := α) (s := s) c hu)
+    change ParabolicC2AlphaOn α (fun z : ℝ × X => c • u z) s
+    exact ParabolicC2AlphaOn.smul (X := X) (E := E) (α := α) (s := s) c hu
 
 namespace parabolicC2AlphaSubmodule
 
@@ -1596,7 +1507,7 @@ noncomputable def chosenSpaceDerivToCompactCoordFamilyLinearMap {κ : Type*}
         ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).add
           (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v))
         hz (hspace hz)
-    simpa using hEq
+    convert hEq using 1 <;> rfl
   map_smul' := by
     intro c u
     apply funext
@@ -1614,7 +1525,7 @@ noncomputable def chosenSpaceDerivToCompactCoordFamilyLinearMap {κ : Type*}
         (ParabolicSecondJet.smul c
           (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u))
         hz (hspace hz)
-    simpa using hEq
+    convert hEq using 1 <;> rfl
 
 @[simp]
 theorem chosenSpaceDerivToCompactCoordFamilyLinearMap_apply {κ : Type*}
@@ -1666,7 +1577,7 @@ noncomputable def chosenSpaceSecondDerivToCompactCoordFamilyLinearMap {κ : Type
         ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).add
           (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v))
         hz (fun {x} hx => hspace (z := (z.1.1, x)) hx)
-    simpa using hEq
+    convert hEq using 1 <;> rfl
   map_smul' := by
     intro c u
     apply funext
@@ -1685,7 +1596,7 @@ noncomputable def chosenSpaceSecondDerivToCompactCoordFamilyLinearMap {κ : Type
         (ParabolicSecondJet.smul c
           (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u))
         hz (fun {x} hx => hspace (z := (z.1.1, x)) hx)
-    simpa using hEq
+    convert hEq using 1 <;> rfl
 
 @[simp]
 theorem chosenSpaceSecondDerivToCompactCoordFamilyLinearMap_apply {κ : Type*}
@@ -1727,7 +1638,7 @@ noncomputable def chosenTimeDerivToCompactCoordFamilyLinearMap {κ : Type*}
         ((chosenSecondJet (X := X) (E := E) (α := α) (s := s) u).add
           (chosenSecondJet (X := X) (E := E) (α := α) (s := s) v))
         hz (htime hz)
-    simpa using hEq
+    convert hEq using 1 <;> rfl
   map_smul' := by
     intro c u
     apply funext
@@ -1745,7 +1656,7 @@ noncomputable def chosenTimeDerivToCompactCoordFamilyLinearMap {κ : Type*}
         (ParabolicSecondJet.smul c
           (chosenSecondJet (X := X) (E := E) (α := α) (s := s) u))
         hz (htime hz)
-    simpa using hEq
+    convert hEq using 1 <;> rfl
 
 @[simp]
 theorem chosenTimeDerivToCompactCoordFamilyLinearMap_apply {κ : Type*}

@@ -49,15 +49,6 @@ namespace AnalyticPDE
 variable {X E : Type*} [PseudoMetricSpace X] [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {α : ℝ} {s : Set (ℝ × X)}
 
-/-- **Domain monotonicity of the parabolic `C^{0,α}` norm.**  Restricting a parabolic `C^{0,α}`
-function to a subset can only decrease its `C^{0,α}` norm (both the sup part and the Hölder-seminorm
-part are monotone in the domain). -/
-theorem parabolicC0AlphaNorm_mono_domain {u : ℝ × X → E} {s t : Set (ℝ × X)}
-    (hts : t ⊆ s) (hu : ParabolicC0AlphaOn α u s) :
-    parabolicC0AlphaNorm α u t ≤ parabolicC0AlphaNorm α u s :=
-  add_le_add (parabolicSupNorm_mono_domain hts hu.boundedOn)
-    (parabolicHolderSeminorm_mono_domain hts hu.holderOn)
-
 /-! ### Precomposition (change-of-variables) norm bounds
 
 The operator underlying gluing across overlapping charts, the DeTurck gauge-diffeomorphism action,
@@ -509,6 +500,59 @@ theorem norm_evalCLM_le (z : ℝ × X) (hz : z ∈ s) :
   rw [one_mul, evalCLM_mk, norm_mk]
   exact ParabolicC0AlphaSpace.norm_evalCLM_apply_le z hz u
 
+/-- The Banach norm is a simultaneous Hölder constant for the canonical
+point-evaluation representative on the defining domain. -/
+theorem eval_parabolicHolderWith
+    (q : ParabolicC0AlphaBanach X E α s) :
+    ParabolicHolderWith ‖q‖ α
+      (ParabolicC0AlphaSpace.toFun (outL q)) s := by
+  intro p hp z hz
+  have h := norm_sub_le_parabolicC0AlphaNorm_mul
+    (ParabolicC0AlphaSpace.toSubmodule (outL q)).2.holderOn hp hz
+  have hn : parabolicC0AlphaNorm α
+      (↑(ParabolicC0AlphaSpace.toSubmodule (outL q)) : (ℝ × X) → E) s = ‖q‖ := by
+    change parabolicC0AlphaNorm α
+      (ParabolicC0AlphaSpace.toFun (outL q)) s = ‖q‖
+    exact (ParabolicC0AlphaSpace.norm_def (outL q)).symm.trans (norm_outL q)
+  rw [hn] at h
+  exact h
+
+/-- Pointwise form of `eval_parabolicHolderWith`, avoiding the junk value
+outside the defining domain. -/
+theorem norm_eval_sub_eval_le
+    (q : ParabolicC0AlphaBanach X E α s)
+    {p z : ℝ × X} (hp : p ∈ s) (hz : z ∈ s) :
+    ‖evalCLM p hp q - evalCLM z hz q‖ ≤
+      ‖q‖ * parabolicDistance p z ^ α := by
+  have hpval : evalCLM p hp q =
+      ParabolicC0AlphaSpace.toFun (outL q) p := by
+    calc
+      evalCLM p hp q = evalCLM p hp (mk (outL q)) := by rw [mk_outL]
+      _ = _ := evalCLM_mk_apply p hp (outL q)
+  have hzval : evalCLM z hz q =
+      ParabolicC0AlphaSpace.toFun (outL q) z := by
+    calc
+      evalCLM z hz q = evalCLM z hz (mk (outL q)) := by rw [mk_outL]
+      _ = _ := evalCLM_mk_apply z hz (outL q)
+  rw [hpval, hzval]
+  exact q.eval_parabolicHolderWith hp hz
+
+/-- Two Banach classes are equal when their canonical point evaluations agree
+throughout the defining domain. -/
+theorem eq_of_eval_eq (q r : ParabolicC0AlphaBanach X E α s)
+    (h : ∀ (z : ℝ × X) (hz : z ∈ s), evalCLM z hz q = evalCLM z hz r) :
+    q = r := by
+  obtain ⟨u, rfl⟩ := mk_surjective q
+  obtain ⟨v, rfl⟩ := mk_surjective r
+  apply (mk_eq_mk_iff u v).2
+  apply (parabolicC0AlphaNorm_sub_eq_zero_iff_eqOn
+    (ParabolicC0AlphaSpace.toSubmodule u).2
+    (ParabolicC0AlphaSpace.toSubmodule v).2).2
+  intro z hz
+  change ParabolicC0AlphaSpace.toFun u z =
+    ParabolicC0AlphaSpace.toFun v z
+  simpa only [evalCLM_mk_apply] using h z hz
+
 /-- **Point evaluation is compatible with restriction (cone coherence, pointwise) on the Banach
 space.**  The parabolic `C^{0,α}` Banach point-evaluation functionals are a compatible cone over the
 restriction projective system — the coherence that keeps the point-values of glued Ricci–DeTurck
@@ -549,25 +593,6 @@ theorem eq_iff_forall_evalCLM (x y : ParabolicC0AlphaBanach X E α s) :
     exact le_antisymm hle (parabolicC0AlphaNorm_nonneg α w s)
 
 end ParabolicC0AlphaBanach
-
-/-- **Operator bound for fiberwise post-composition.**  Post-composing a parabolic `C^{0,α}`
-function `u` with a continuous linear value map `L : E →L[ℝ] F` scales the parabolic `C^{0,α}` norm by
-at most `‖L‖`: `‖L ∘ u‖_{C^{0,α}} ≤ ‖L‖ · ‖u‖_{C^{0,α}}`.  Both the sup part and the Hölder-seminorm
-part scale by `‖L‖` (the operator-application closure `ParabolicC0AlphaWith.continuousLinearMap`), and
-the parabolic `C^{0,α}` norm is their sum. -/
-theorem parabolicC0AlphaNorm_continuousLinearMap_le {F : Type*} [NormedAddCommGroup F]
-    [NormedSpace ℝ F] (L : E →L[ℝ] F) {u : ℝ × X → E} (hu : ParabolicC0AlphaOn α u s) :
-    parabolicC0AlphaNorm α (fun z => L (u z)) s ≤ ‖L‖ * parabolicC0AlphaNorm α u s := by
-  have hself : ParabolicC0AlphaWith (parabolicSupNorm u s) (parabolicHolderSeminorm α u s) α u s :=
-    parabolicC0AlphaWith_parabolicSupNorm_parabolicHolderSeminorm hu
-  have hL : ParabolicC0AlphaWith (‖L‖ * parabolicSupNorm u s)
-      (‖L‖ * parabolicHolderSeminorm α u s) α (fun z => L (u z)) s :=
-    hself.continuousLinearMap L
-  have hbound := parabolicC0AlphaNorm_le
-    (mul_nonneg (norm_nonneg L) (parabolicSupNorm_nonneg u s))
-    (mul_nonneg (norm_nonneg L) (parabolicHolderSeminorm_nonneg α u s)) hL
-  refine hbound.trans (le_of_eq ?_)
-  rw [parabolicC0AlphaNorm]; ring
 
 namespace ParabolicC0AlphaSpace
 
@@ -826,7 +851,12 @@ theorem norm_mulCoeffL_le {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ 
   rw [mulCoeffL_mk, norm_mk, norm_mk, ParabolicC0AlphaSpace.toFun_mulCoeffL]
   have := parabolicC0AlphaNorm_continuousLinearMap₂_le L
     (ParabolicC0AlphaSpace.toSubmodule a).2 (ParabolicC0AlphaSpace.toSubmodule v).2
-  simpa only [ParabolicC0AlphaSpace.norm_def, mul_assoc] using this
+  change parabolicC0AlphaNorm α
+      (fun z => L ((ParabolicC0AlphaSpace.toSubmodule a) z)
+        ((ParabolicC0AlphaSpace.toSubmodule v) z)) s ≤
+    ‖L‖ * parabolicC0AlphaNorm α (ParabolicC0AlphaSpace.toSubmodule a) s *
+      parabolicC0AlphaNorm α (ParabolicC0AlphaSpace.toSubmodule v) s
+  simpa only [mul_assoc] using this
 
 /-- **Point evaluation of a frozen-coefficient product is the bilinear map applied to the point
 values.**  Reading off the space-time value of `L(a, ·)` applied to a chart solution `x` at `z` is
@@ -2134,4 +2164,3 @@ end ParabolicC0AlphaBanach
 
 end AnalyticPDE
 end RicciFlow
-
