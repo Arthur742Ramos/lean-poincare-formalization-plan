@@ -8,6 +8,7 @@ The reproducible checks are:
 ```sh
 lake build
 lake env lean --src-deps TensorHeatChallenge.lean
+lake env lean scripts/check-nonvacuity.lean
 python3 scripts/check-challenge-boundary.py
 python3 scripts/check-provenance.py
 uv run scripts/check-package.py
@@ -25,9 +26,9 @@ import the Challenge and active proof sources contain no `sorry`, `admit`, or
 The closure audit checks the compiled `completeStatement` body and rejects
 candidate proof-development references. Its only candidate-local dependencies
 may be the statement's explicitly enumerated Mathlib-facing semantic helpers,
-their structural bundle instances, and generated proposition proofs. All nine
-semantic helper definitions are independently selected by Comparator in
-addition to `completeStatement` itself.
+their structural bundle instances, and generated proposition proofs. All
+thirteen semantic helper definitions are independently selected by Comparator
+in addition to `completeStatement` itself.
 
 Comparator pins:
 
@@ -40,7 +41,14 @@ Comparator pins:
 The macOS Comparator replay explicitly substitutes an unsandboxed compatibility
 wrapper because Landlock is Linux-only. The hosted GitHub workflow exercises
 the pinned renderer and real Landrun. Passing these checks does not imply
-Palomar editorial acceptance, intake, or registration.
+Palomar editorial acceptance, intake, or registration. The full verifier now
+runs a bounded preflight that checks the package and provenance, restores the
+official Mathlib cache, and compiles both the selected Challenge and the
+anti-vacuity regression before starting the production replay. Exact tool
+builds are cached by commit tuple. The production verifier still performs a
+cold candidate build inside Landrun, so a successful full replay can remain
+long; the preflight is intended to reject statement or package defects before
+that expensive stage, not to bypass it.
 
 ## Historical intake and repaired topology
 
@@ -57,10 +65,19 @@ with zero path dependencies and putting all generated outputs beneath the one
 root `.lake/build` directory Palomar permits. It requires a fresh intake
 authorization after the exact replacement commit passes hosted verification.
 
-## Recorded local result
+## Historical mechanical result and editorial rejection
 
-On 2026-09-14, the repaired source passed every package-local command above
-through the compiled closure audit. In particular:
+On 2026-09-14, merge commit
+`a210bc382e4f1e34f8e7de2384cf3b86cf561938` passed the complete hosted Palomar
+mechanical verifier and renderer after the package-topology repair. Its
+selected proposition was nevertheless editorially rejected: it existentially
+introduced coefficient carriers, readouts, norms, and `coordinateClass`
+without constraining those objects enough to exclude singleton/all-zero
+witnesses or to put the claimed Hölder/Schauder content into the statement of
+record. That is a substantive statement defect; the mechanical pass does not
+cure it.
+
+The historical local evidence for that commit included:
 
 - the repaired root-library topology completed a cold build of
   `TensorHeatSolution` with all 3,238 jobs successful;
@@ -73,11 +90,36 @@ through the compiled closure audit. In particular:
 - the compiled closure audit found 191 constants, no proof-development
   references, 11 canonical structural helpers, and 42 generated proofs.
 
-The prior package topology passed a local replay with the older Comparator pin,
-but that is historical evidence, not validation of this replacement. On this
-macOS host, the production Comparator revision's Lean 4.34.0-rc1 dependency
-build terminates with `SIGTRAP` before reading the candidate, including from a
-fresh checkout. Therefore no local current-Comparator pass is claimed. The
-exact candidate commit must pass both hosted Linux workflows—the complete
-Palomar verifier and the renderer—with real Landrun before the replacement is
-described as mechanically ready.
+Those counts and hashes apply only to the rejected historical statement.
+
+## Strengthened replacement gate
+
+The replacement proposition explicitly carries the finite nonempty atlas,
+partition-of-unity weights, spanning frames, local-to-global data/solution/
+time-derivative reconstruction equations, local-frame coefficient equations,
+positive parabolic source rescaling, injective coefficient readouts, arbitrary
+atlas-wide constant matrix families for all three carriers, genuine spatial
+and parabolic derivative identities, explicit Hölder bounds, and the same norm
+control used in the Schauder estimate. `scripts/check-nonvacuity.lean` proves
+that the required constant-family contract cannot be implemented by a
+singleton carrier, while `scripts/check-package.py` fails closed if any of the
+semantic clauses disappear from the selected statement.
+
+On 2026-09-14, this strengthened working tree passed every package-local gate
+listed above. The complete default build finished all 3,240 jobs; the
+dependency-only Challenge compile and local-import negative control passed;
+the anti-vacuity regression compiled both generically and for the exact matrix
+fiber used by the selected statement; and the selected theorem used exactly
+`propext`, `Classical.choice`, and `Quot.sound`. The compiled closure audit
+found 234 constants, 3 directly referenced selected semantic helpers, 11
+canonical structural helpers, 46 generated proposition proofs, and no
+proof-development references. These are working-tree results until attached
+to an immutable commit and independently repeated by hosted Linux.
+
+On this macOS host, the production Comparator revision's Lean 4.34.0-rc1
+dependency build terminates with `SIGTRAP` before reading the candidate,
+including from a fresh checkout. Therefore no local current-Comparator pass is
+claimed. The exact strengthened candidate commit must pass all local gates and
+both hosted Linux workflows—the complete Palomar verifier and the renderer
+with real Landrun—before it is described as mechanically ready. A passing
+replay still does not authorize intake or registration.

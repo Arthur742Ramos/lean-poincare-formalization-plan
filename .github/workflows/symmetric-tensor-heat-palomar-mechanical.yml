@@ -21,7 +21,52 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  candidate-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: candidate
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11.10"
+
+      - name: Install fail-fast checker dependencies
+        run: python -m pip install --disable-pip-version-check jsonschema==4.26.0 PyYAML==6.0.3
+
+      - name: Reject statement, package, or provenance regressions before the heavy replay
+        working-directory: candidate/symmetric-tensor-heat
+        run: |
+          python scripts/check-package.py
+          python scripts/check-provenance.py
+
+      - name: Install pinned elan for the Mathlib-only statement check
+        run: |
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/elan.tar.gz" \
+            https://github.com/leanprover/elan/releases/download/v4.2.3/elan-x86_64-unknown-linux-gnu.tar.gz
+          echo "df0b2b3a439961ffcbb3985214365ffe40f49bc871df04dff268c7d8e21ca8b2  $RUNNER_TEMP/elan.tar.gz" | sha256sum --check
+          mkdir "$RUNNER_TEMP/elan"
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP/elan"
+          "$RUNNER_TEMP/elan/elan-init" -y --no-modify-path --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Compile the selected statement and anti-vacuity regression
+        working-directory: candidate/symmetric-tensor-heat
+        run: |
+          lake exe cache get
+          lake build TensorHeatChallenge
+          lake env lean scripts/check-nonvacuity.lean
+
   mechanical-replay:
+    needs: candidate-preflight
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:
@@ -111,35 +156,56 @@ jobs:
         with:
           go-version: "1.24.0"
 
+      - name: Restore exact pinned verifier tools
+        if: steps.prepare.outputs.ready == 'true'
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/.cache/symmetric-tensor-heat-palomar-tools
+            ~/.elan/toolchains
+          key: palomar-tools-linux-575674928e239f5b-15f6055e299ad5b8-68d5ca9db226849b4-811cfff51ceaf3d9
+
       - name: Build Palomar's pinned tools
         if: steps.prepare.outputs.ready == 'true'
         env:
           LEAN4EXPORT_COMMIT: ${{ steps.prepare.outputs.lean4export_commit }}
           SUBMISSION_TOOLCHAIN: ${{ steps.prepare.outputs.lean_toolchain }}
         run: |
-          CGO_ENABLED=0 go install github.com/zouuup/landrun/cmd/landrun@811cfff51ceaf3d9843708aa6d22e9b84ccac8b4
-          git clone --filter=blob:none https://github.com/leanprover/comparator.git "$RUNNER_TEMP/comparator"
-          git -C "$RUNNER_TEMP/comparator" checkout 575674928e239f5bc452aab72d1dd7b0f1326494
-          (cd "$RUNNER_TEMP/comparator" && lake build comparator)
-          git clone --filter=blob:none https://github.com/robsimmons/nanoda_lib.git "$RUNNER_TEMP/nanoda"
-          git -C "$RUNNER_TEMP/nanoda" checkout 68d5ca9db226849b41a6fff59d796ff19d0a8840
-          cargo build --release --locked --manifest-path "$RUNNER_TEMP/nanoda/Cargo.toml"
-          git clone --filter=blob:none https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
-          git -C "$RUNNER_TEMP/lean4export" checkout "$LEAN4EXPORT_COMMIT"
-          LEAN4EXPORT_TOOLCHAIN="$(tr -d '\r\n' < "$RUNNER_TEMP/lean4export/lean-toolchain")"
+          PALOMAR_TOOLS="$HOME/.cache/symmetric-tensor-heat-palomar-tools"
+          mkdir -p "$PALOMAR_TOOLS/bin"
+          CGO_ENABLED=0 GOBIN="$PALOMAR_TOOLS/bin" go install github.com/zouuup/landrun/cmd/landrun@811cfff51ceaf3d9843708aa6d22e9b84ccac8b4
+          if [ ! -d "$PALOMAR_TOOLS/comparator/.git" ]; then
+            git clone --filter=blob:none https://github.com/leanprover/comparator.git "$PALOMAR_TOOLS/comparator"
+            git -C "$PALOMAR_TOOLS/comparator" checkout 575674928e239f5bc452aab72d1dd7b0f1326494
+          fi
+          test "$(git -C "$PALOMAR_TOOLS/comparator" rev-parse HEAD)" = 575674928e239f5bc452aab72d1dd7b0f1326494
+          (cd "$PALOMAR_TOOLS/comparator" && lake build comparator)
+          if [ ! -d "$PALOMAR_TOOLS/nanoda/.git" ]; then
+            git clone --filter=blob:none https://github.com/robsimmons/nanoda_lib.git "$PALOMAR_TOOLS/nanoda"
+            git -C "$PALOMAR_TOOLS/nanoda" checkout 68d5ca9db226849b41a6fff59d796ff19d0a8840
+          fi
+          test "$(git -C "$PALOMAR_TOOLS/nanoda" rev-parse HEAD)" = 68d5ca9db226849b41a6fff59d796ff19d0a8840
+          cargo build --release --locked --manifest-path "$PALOMAR_TOOLS/nanoda/Cargo.toml"
+          if [ ! -d "$PALOMAR_TOOLS/lean4export/.git" ]; then
+            git clone --filter=blob:none https://github.com/leanprover/lean4export.git "$PALOMAR_TOOLS/lean4export"
+            git -C "$PALOMAR_TOOLS/lean4export" checkout "$LEAN4EXPORT_COMMIT"
+          fi
+          LEAN4EXPORT_TOOLCHAIN="$(tr -d '\r\n' < "$PALOMAR_TOOLS/lean4export/lean-toolchain")"
+          test "$(git -C "$PALOMAR_TOOLS/lean4export" rev-parse HEAD)" = "$LEAN4EXPORT_COMMIT"
           python -c 'import sys; sys.path.insert(0, "pipeline"); from scripts.verify_submission import compatible_lean4export_toolchain; raise SystemExit(not compatible_lean4export_toolchain(sys.argv[1], sys.argv[2]))' "$SUBMISSION_TOOLCHAIN" "$LEAN4EXPORT_TOOLCHAIN"
-          (cd "$RUNNER_TEMP/lean4export" && ELAN_TOOLCHAIN="$SUBMISSION_TOOLCHAIN" lake build lean4export)
+          (cd "$PALOMAR_TOOLS/lean4export" && ELAN_TOOLCHAIN="$SUBMISSION_TOOLCHAIN" lake build lean4export)
 
       - name: Execute the unmodified Palomar verifier under Landrun
         if: steps.prepare.outputs.ready == 'true'
         run: |
+          PALOMAR_TOOLS="$HOME/.cache/symmetric-tensor-heat-palomar-tools"
           python pipeline/scripts/verify_submission.py execute \
             --work-dir "$RUNNER_TEMP/palomar" \
             --output "$RUNNER_TEMP/mechanical-report.json" \
-            --comparator "$RUNNER_TEMP/comparator/.lake/build/bin/comparator" \
-            --lean4export "$RUNNER_TEMP/lean4export/.lake/build/bin/lean4export" \
-            --landrun "$(go env GOPATH)/bin/landrun" \
-            --nanoda "$RUNNER_TEMP/nanoda/target/release/nanoda_bin" \
+            --comparator "$PALOMAR_TOOLS/comparator/.lake/build/bin/comparator" \
+            --lean4export "$PALOMAR_TOOLS/lean4export/.lake/build/bin/lean4export" \
+            --landrun "$PALOMAR_TOOLS/bin/landrun" \
+            --nanoda "$PALOMAR_TOOLS/nanoda/target/release/nanoda_bin" \
             --comparator-commit 575674928e239f5bc452aab72d1dd7b0f1326494 \
             --landrun-commit 811cfff51ceaf3d9843708aa6d22e9b84ccac8b4 \
             --nanoda-commit 68d5ca9db226849b41a6fff59d796ff19d0a8840 \

@@ -12,8 +12,13 @@ Neumann correction, initial-trace control, and symmetry preservation.
 The selected theorem connects those layers in one certificate. Its
 Mathlib-only surface states the actual geometric equation: the supplied
 two- and three-tensor connections obey their Leibniz formulas, and the rough
-Laplacian is the orthonormal trace of the second covariant derivative. The
-conclusion constructs the finite-atlas coefficient spaces and proves:
+Laplacian is the orthonormal trace of the second covariant derivative. It also
+puts the finite-atlas analysis into the compared statement: a genuine
+partition of unity and spanning frames, exact local-to-global reconstruction
+of data, solution, and time derivative, faithful and nontrivial coefficient
+representations, actual first/second/time derivatives, explicit Hölder
+inequalities, and the norms used by the estimate.
+The conclusion proves:
 
 - existence for every symmetric represented spatial datum and source;
 - uniqueness of the higher-coefficient witness in the constructed classical
@@ -36,3 +41,9 @@ constructed coefficient class, and the endpoint is existentially short. No
 surjectivity theorem for arbitrary intrinsic Holder sections, arbitrary-time
 continuation, nonlinear Ricci-flow theorem, or mathematical novelty is
 claimed. Palomar editors remain responsible for assessing research interest.
+
+The earlier mechanically passing statement at merge commit `a210bc38` did not
+expose these analytic constraints and was editorially rejected as potentially
+singleton/zero-vacuous. This research-interest case applies only to the
+strengthened statement. It does not treat stronger prose or a mechanical pass
+as a substitute for the selected theorem carrying the mathematics itself.

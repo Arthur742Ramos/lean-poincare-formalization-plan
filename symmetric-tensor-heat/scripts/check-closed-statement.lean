@@ -10,12 +10,17 @@ open Lean Elab Command
 private def semanticHelpers : Array Name := #[
   `SymmetricTensorHeatEntry.IsInducedTwoTensorConnection,
   `SymmetricTensorHeatEntry.IsInducedThreeTensorConnection,
+  `SymmetricTensorHeatEntry.connectionLaplacianApply,
   `SymmetricTensorHeatEntry.IsSymmetricSection,
   `SymmetricTensorHeatEntry.HasInitialTrace,
   `SymmetricTensorHeatEntry.HasTimeDerivative,
   `SymmetricTensorHeatEntry.SolvesTensorHeat,
   `SymmetricTensorHeatEntry.IsMetricCompatibleTangent,
-  `SymmetricTensorHeatEntry.IsLeviCivita
+  `SymmetricTensorHeatEntry.IsLeviCivita,
+  `SymmetricTensorHeatEntry.parabolicDistance,
+  `SymmetricTensorHeatEntry.HasParabolicC0AlphaNormLe,
+  `SymmetricTensorHeatEntry.HasSpatialC2AlphaNormLe,
+  `SymmetricTensorHeatEntry.HasParabolicC2AlphaNormLe
 ]
 
 private def structuralHelpers : Array Name := #[
