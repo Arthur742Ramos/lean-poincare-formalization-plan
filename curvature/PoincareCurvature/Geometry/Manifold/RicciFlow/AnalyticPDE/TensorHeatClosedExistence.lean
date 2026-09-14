@@ -1,5 +1,6 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasAffineCorrection
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasLocalUniqueness
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasStrongWellPosedness
 
 /-!
 # Closed-manifold tensor-heat existence without atlas assumptions
@@ -122,6 +123,64 @@ theorem exists_short_affine_tensorHeat_solver
   · intro t ht x
     exact affineCorrectedField_tensorHeatOperator cov A K h f t ht x
   · exact norm_affineCorrectedSolutionFamily_le cov K h f
+
+/-- **Short-time existence, uniqueness, and global finite-atlas Schauder
+estimate for the intrinsic covariant two-tensor heat equation on a closed
+Riemannian manifold, with no atlas or parametrix hypothesis.**
+
+The theorem constructs the positive time interval, finite atlas, and strict
+commutator correction from the geometric background.  It then quantifies over
+arbitrary initial extensions in the atlas `C^{2+α}` trace class and arbitrary
+atlas `C^{α,α/2}` sources.  The unique higher family reconstructs to an actual
+classical covariant two-tensor field, has the prescribed geometric initial
+trace, satisfies `∂ₜu - Δu = f` intrinsically at every point, and obeys the
+displayed global finite-atlas Schauder bound. -/
+theorem exists_short_tensorHeat_wellPosed
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 2]
+    [ContMDiffCovariantDerivative
+      (covariantThreeTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    (b : Module.Basis (Fin d) ℝ E)
+    (hT : t₀ < T) (hα : 0 < α) (hα1 : α < 1) :
+    ∃ (S : ℝ) (_hS : t₀ < S) (_hST : S ≤ T)
+      (A : FiniteTensorHeatParametrixAtlas
+        (E := E) (I := I) (M := M) cov b t₀ S α)
+      (Hlift : StrongCommutatorLift cov A),
+      HasLocalZeroTraceUniqueness cov A ∧
+        ∀ (h : HigherCoefficientSpace cov A) (f : SourceSpace cov A),
+          (∃! u : HigherCoefficientSpace cov A,
+            StrongAtlasClassicalSolution cov Hlift h f u) ∧
+          ∀ u : HigherCoefficientSpace cov A,
+            StrongAtlasClassicalSolution cov Hlift h f u →
+              ‖u‖ ≤
+                ‖h‖ + ‖localSolutionFamilyL cov A‖ *
+                  (1 - ‖Hlift.sourceLift.toContinuousLinearMap‖)⁻¹ *
+                    ‖f - localCoordinateCauchyFamilyL cov A h +
+                      Hlift.higherMap h‖ := by
+  obtain ⟨A₀, hmargin⟩ :=
+    exists_atlas_with_frozen_margin cov b hT hα hα1
+  obtain ⟨S, hS, hST, ⟨Hlift⟩⟩ :=
+    exists_restrictedTerminalAtlas_strongCommutatorLift cov A₀
+  let A := A₀.restrictTerminalAtlas cov hS hST
+  have hunique : HasLocalZeroTraceUniqueness cov A :=
+    hasLocalZeroTraceUniqueness_restrictTerminalAtlas
+      cov A₀ hmargin hS hST
+  refine ⟨S, hS, hST, A, Hlift, hunique, ?_⟩
+  intro h f
+  refine ⟨existsUnique_strongAtlasClassicalSolution
+    cov hunique Hlift h f, ?_⟩
+  intro u hu
+  have hueq : u = strongSolutionFamily cov Hlift h f :=
+    strongAtlasSolutionEquation_unique cov hunique Hlift h f
+      hu.1 (strongSolutionFamily_solves cov Hlift h f)
+  rw [hueq]
+  exact norm_strongSolutionFamily_le cov Hlift h f
 
 end FiniteTensorHeatParametrixAtlas
 end AnalyticPDE
