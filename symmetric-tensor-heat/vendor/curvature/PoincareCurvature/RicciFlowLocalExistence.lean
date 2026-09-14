@@ -1,0 +1,29 @@
+-- Optional aggregate for the Ricci-flow local-existence scaffold.
+-- Keep this out of the root target so routine `lake build PoincareCurvature`
+-- iterations do not rebuild the heaviest research modules.
+import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence
+import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ModelGaugeFlowODE
+import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowTimeDerivative
+import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowSubsingleton
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.HeatKernel1D
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FunctionSpace
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.HigherFunctionSpace
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.HigherMatrix
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.HigherLocalFrameGram
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.MatrixC0Alpha
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.LocalFrameGram
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothRealization
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothRealizationGaugeRoutes
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothRealizationMetricCone
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothApproxClosure
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricGaugeFlow
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.IsEmptyChartClosure
+import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.RankOne
+import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.RankOneDeTurck
+import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.RankOneGaugeReduced
+import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.RicciFlatClosure
+import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.RicciFlatClosureGaugeReduced
+import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.IsEmptyDeTurckFamily
+import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.EinsteinAux
+import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence.Einstein
