@@ -3,7 +3,6 @@
 from pathlib import Path
 import hashlib
 import subprocess
-import tomllib
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
@@ -13,7 +12,6 @@ TREE = "a448a1d7d62c04a5ab85ba0d943b67db293e77c2"
 SOURCE = Path("curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/") / \
     "TensorHeatAtlasSymmetricWellPosedness.lean"
 SOURCE_SHA256 = "beadeb28c37b72ffc0700756ba506e213f97c351fb1ee3125de41667314012a7"
-MATHLIB = "db584cd6d46c92f209a44c0f1c829460d327499d"
 VENDOR = PACKAGE / "vendor/curvature"
 VENDORED_PATHS = (
     "PoincareCurvature",
@@ -56,7 +54,7 @@ def main() -> None:
         for path in VENDOR.rglob("*")
         if path.is_file() and ".lake" not in path.relative_to(VENDOR).parts
     }
-    generated = {".gitignore", "LICENSE", "lakefile.toml"}
+    generated = {"LICENSE"}
     if actual != expected | generated:
         missing = sorted((expected | generated) - actual)
         extra = sorted(actual - (expected | generated))
@@ -66,20 +64,11 @@ def main() -> None:
             raise SystemExit("vendored file differs from disclosed source: " + relative)
     if (VENDOR / "LICENSE").read_bytes() != git_bytes(f"{BASE}:LICENSE"):
         raise SystemExit("vendored repository license differs from disclosed source")
-    wrapper = tomllib.loads((VENDOR / "lakefile.toml").read_text(encoding="utf-8"))
-    if wrapper.get("defaultTargets") != ["PoincareCurvature"]:
-        raise SystemExit("vendored Lake wrapper exposes the wrong default target")
-    if wrapper.get("lean_lib") != [{"name": "PoincareCurvature"}]:
-        raise SystemExit("vendored Lake wrapper must expose only PoincareCurvature")
-    if wrapper.get("require") != [{
-        "name": "mathlib", "scope": "leanprover-community", "rev": MATHLIB,
-    }]:
-        raise SystemExit("vendored Lake wrapper changed the inherited Mathlib pin")
     metadata = (PACKAGE / "formalization.yaml").read_text(encoding="utf-8")
     for required in (BASE, str(SOURCE), "vendor/curvature", "relationship: \"builds-on\""):
         if required not in metadata:
             raise SystemExit("structured provenance is incomplete: " + required)
-    print("Immutable source, exact vendored snapshot, notices, wrapper, and structured provenance passed.")
+    print("Immutable source, exact vendored snapshot, notices, and structured provenance passed.")
 
 
 if __name__ == "__main__":
