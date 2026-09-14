@@ -212,7 +212,7 @@ def main() -> None:
         "candidate-preflight:", "needs: candidate-preflight",
         "fetch-depth: 0",
         "python scripts/check-package.py", "python scripts/check-provenance.py",
-        "lake env lean TensorHeatChallenge.lean",
+        "lake build TensorHeatChallenge",
         "lake env lean scripts/check-nonvacuity.lean",
         '"project_path": "symmetric-tensor-heat"',
         '"comparator_config_path": "symmetric-tensor-heat/comparator.json"',

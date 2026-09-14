@@ -62,7 +62,7 @@ jobs:
         working-directory: candidate/symmetric-tensor-heat
         run: |
           lake exe cache get
-          lake env lean TensorHeatChallenge.lean
+          lake build TensorHeatChallenge
           lake env lean scripts/check-nonvacuity.lean
 
   mechanical-replay:
