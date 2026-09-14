@@ -1,4 +1,5 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasAffineCorrection
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasLocalUniqueness
 
 /-!
 # Closed-manifold tensor-heat existence without atlas assumptions
@@ -96,23 +97,26 @@ theorem exists_short_affine_tensorHeat_solver
       (A : FiniteTensorHeatParametrixAtlas
         (E := E) (I := I) (M := M) cov b t₀ S α)
       (K : CommutatorLift cov A),
-      ∀ (h : HigherCoefficientSpace cov A) (f : SourceSpace cov A),
-        FiniteClassicalTensorHeatField.HasInitialTrace cov
-            (affineCorrectedField cov A K h f) (atlasInitialTrace cov A h) ∧
-          (∀ (t : ℝ) (ht : t ∈ Ioo t₀ A.commonTerminalTime) (x : M),
-            (affineCorrectedField cov A K h f).tensorHeatOperator cov t ht x =
-              A.physicalAtlasSourceSlice cov f t x) ∧
-          ‖affineLocalSolutionFamily cov A h
-              (affineCorrectedCoordinateSource cov K h f)‖ ≤
-            ‖h‖ + ‖localSolutionFamilyL cov A‖ *
-              (1 - ‖K.toContinuousLinearMap‖)⁻¹ *
-                ‖f - localCoordinateCauchyFamilyL cov A h +
-                  higherAtlasCommutatorLiftL cov A h‖ := by
-  obtain ⟨A₀⟩ := exists_atlas cov b hT hα hα1
+      HasLocalZeroTraceUniqueness cov A ∧
+        ∀ (h : HigherCoefficientSpace cov A) (f : SourceSpace cov A),
+          FiniteClassicalTensorHeatField.HasInitialTrace cov
+              (affineCorrectedField cov A K h f) (atlasInitialTrace cov A h) ∧
+            (∀ (t : ℝ) (ht : t ∈ Ioo t₀ A.commonTerminalTime) (x : M),
+              (affineCorrectedField cov A K h f).tensorHeatOperator cov t ht x =
+                A.physicalAtlasSourceSlice cov f t x) ∧
+            ‖affineLocalSolutionFamily cov A h
+                (affineCorrectedCoordinateSource cov K h f)‖ ≤
+              ‖h‖ + ‖localSolutionFamilyL cov A‖ *
+                (1 - ‖K.toContinuousLinearMap‖)⁻¹ *
+                  ‖f - localCoordinateCauchyFamilyL cov A h +
+                    higherAtlasCommutatorLiftL cov A h‖ := by
+  obtain ⟨A₀, hmargin⟩ := exists_atlas_with_frozen_margin cov b hT hα hα1
   obtain ⟨S, hS, hST, ⟨K⟩⟩ :=
     exists_restrictedTerminalAtlas_commutatorLift cov A₀
   let A := A₀.restrictTerminalAtlas cov hS hST
-  refine ⟨S, hS, A, K, ?_⟩
+  refine ⟨S, hS, A, K,
+    hasLocalZeroTraceUniqueness_restrictTerminalAtlas
+      cov A₀ hmargin hS hST, ?_⟩
   intro h f
   refine ⟨hasInitialTrace_affineCorrectedField cov A K h f, ?_, ?_⟩
   · intro t ht x

@@ -352,6 +352,71 @@ theorem initialTraceL_frozenTensorHeatFiniteZeroInitialInverseL
 the zero-initial-trace subspace.  The proof first represents a candidate by
 the frozen inverse using frozen uniqueness, then applies the already available
 post-error contraction to its frozen source. -/
+theorem eq_zero_of_postFrozenError_norm_lt_one
+    (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    (b : Module.Basis (Fin d) ℝ E) {x : M}
+    (hxFrame : x ∈ e.baseSet)
+    (hxChart : x ∈ (extChartAt I p).source)
+    {t₀ T α : ℝ} (hT : t₀ < T) (hα : 0 < α)
+    (P : FiniteParabolicC2AlphaBanach E (Fin d × Fin d → ℝ) t₀ T α →L[ℝ]
+      ParabolicC0AlphaBanach E (Fin d × Fin d → ℝ) α
+        (parabolicFiniteCylinder E t₀ T))
+    (Q : ParabolicC0AlphaBanach E (Fin d × Fin d → ℝ) α
+        (parabolicFiniteCylinder E t₀ T) →L[ℝ]
+      FiniteParabolicC2AlphaBanach E (Fin d × Fin d → ℝ) t₀ T α)
+    (hright : (frozenTensorHeatCauchyL
+      (I := I) p e b x t₀ T α).comp Q = ContinuousLinearMap.id ℝ _)
+    (hQ0 : (FiniteParabolicC2AlphaBanach.initialTraceL
+      (X := E) (E := Fin d × Fin d → ℝ) hT hα).comp Q = 0)
+    (hsmall : ‖(P - frozenTensorHeatCauchyL
+      (I := I) p e b x t₀ T α).comp Q‖ < 1)
+    (u : FiniteParabolicC2AlphaBanach E (Fin d × Fin d → ℝ) t₀ T α)
+    (hu : P u = 0)
+    (hu0 : FiniteParabolicC2AlphaBanach.initialTraceL hT hα u = 0) :
+    u = 0 := by
+  let P₀ := frozenTensorHeatCauchyL (I := I) p e b x t₀ T α
+  let q := P₀ u
+  have hP₀Q : P₀ (Q q) = q := by
+    have hrightq := congrArg (fun L => L q) hright
+    simpa [P₀] using hrightq
+  have hQq0 : FiniteParabolicC2AlphaBanach.initialTraceL hT hα (Q q) = 0 := by
+    have htraceq := congrArg (fun L => L q) hQ0
+    simpa using htraceq
+  have hdiffP : P₀ (u - Q q) = 0 := by
+    rw [map_sub, hP₀Q]
+    exact sub_self q
+  have hdiff0 :
+      FiniteParabolicC2AlphaBanach.initialTraceL hT hα (u - Q q) = 0 := by
+    rw [map_sub, hu0, hQq0, sub_zero]
+  have hdiff :=
+    eq_zero_of_frozenTensorHeatCauchy_eq_zero_of_initialTrace_eq_zero
+      (I := I) p e b hxFrame hxChart hT hα (u - Q q) hdiffP hdiff0
+  have huQ : u = Q q := sub_eq_zero.mp hdiff
+  let R := (P - P₀).comp Q
+  have hRq : R q = -q := by
+    dsimp only [R]
+    rw [ContinuousLinearMap.comp_apply]
+    rw [← huQ]
+    rw [sub_apply, hu]
+    change 0 - q = -q
+    exact zero_sub q
+  have hq0 : q = 0 := by
+    by_contra hq
+    have hqpos : 0 < ‖q‖ := norm_pos_iff.mpr hq
+    have hle : ‖R q‖ ≤ ‖R‖ * ‖q‖ := R.le_opNorm q
+    have hlt : ‖R‖ * ‖q‖ < 1 * ‖q‖ := by
+      exact mul_lt_mul_of_pos_right (by simpa [R, P₀] using hsmall) hqpos
+    have : ‖q‖ < ‖q‖ := by
+      calc
+        ‖q‖ = ‖R q‖ := by rw [hRq, norm_neg]
+        _ ≤ ‖R‖ * ‖q‖ := hle
+        _ < 1 * ‖q‖ := hlt
+        _ = ‖q‖ := one_mul _
+    exact lt_irrefl _ this
+  rw [huQ, hq0, map_zero]
+
 theorem eq_zero_of_frozenTensorHeatPerturbation_norm_lt_one
     (p : M)
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
@@ -486,6 +551,32 @@ theorem eq_zero_of_localizedTensorHeatCauchy_eq_zero_of_initialTrace_eq_zero
       (localizedCoordinatePostErrorBound_le_errorMajorant hα hα1 r D _) hsmall
   · exact hu
   · exact hu0
+
+/-- The localized post-error majorant tends to zero with the radius, with an
+arbitrary positive target margin. -/
+theorem TensorHeatLocalizedCoefficientData.exists_radius_errorMajorant_lt
+    {X W : Type*}
+    [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup W] [NormedSpace ℝ W]
+    (D : TensorHeatLocalizedCoefficientData X W)
+    {t₀ T α : ℝ}
+    (Q : ParabolicC0AlphaBanach X W α
+        (parabolicFiniteCylinder X t₀ T) →L[ℝ]
+      FiniteParabolicC2AlphaBanach X W t₀ T α)
+    {c : ℝ} (hc : 0 < c) :
+    ∃ δ > 0, ∀ r : ℝ, |r| < δ → D.errorMajorant Q r < c := by
+  have hevent : ∀ᶠ r in nhds (0 : ℝ), D.errorMajorant Q r < c := by
+    have hlim : Filter.Tendsto (D.errorMajorant Q) (nhds (0 : ℝ))
+        (nhds (D.errorMajorant Q 0)) :=
+      (D.continuous_errorMajorant Q).continuousAt
+    have hiio : Set.Iio c ∈ nhds (D.errorMajorant Q 0) := by
+      rw [D.errorMajorant_zero Q]
+      exact (isOpen_Iio : IsOpen (Set.Iio c)).mem_nhds hc
+    exact hlim hiio
+  rw [Metric.eventually_nhds_iff] at hevent
+  obtain ⟨δ, hδ, hball⟩ := hevent
+  refine ⟨δ, hδ, fun r hr => hball ?_⟩
+  simpa [Real.dist_eq] using hr
 
 end AnalyticPDE
 end RicciFlow
