@@ -36,6 +36,10 @@ DEFINITIONS = [
     "SymmetricTensorHeatEntry.SolvesTensorHeat",
     "SymmetricTensorHeatEntry.IsMetricCompatibleTangent",
     "SymmetricTensorHeatEntry.IsLeviCivita",
+    "SymmetricTensorHeatEntry.parabolicDistance",
+    "SymmetricTensorHeatEntry.HasParabolicC0AlphaNormLe",
+    "SymmetricTensorHeatEntry.HasSpatialC2AlphaNormLe",
+    "SymmetricTensorHeatEntry.HasParabolicC2AlphaNormLe",
     "SymmetricTensorHeatEntry.completeStatement",
 ]
 ALLOWED_AXIOMS = ["propext", "Quot.sound", "Classical.choice"]
@@ -43,6 +47,7 @@ PALOMAR = "a013555a88a0fc9ec910a09ea833dc9cc338db35"
 COMPARATOR = "575674928e239f5bc452aab72d1dd7b0f1326494"
 NANODA = "68d5ca9db226849b41a6fff59d796ff19d0a8840"
 LANDRUN = "811cfff51ceaf3d9843708aa6d22e9b84ccac8b4"
+CACHE_ACTION = "0400d5f644dc74513175e3cd8d07132dd4860809"
 
 
 def require(condition: bool, message: str) -> None:
@@ -91,6 +96,7 @@ def main() -> None:
         "AGENT-CONTRIBUTION.md", "VERIFICATION.md",
         "scripts/check-closed-statement.lean", "scripts/check-provenance.py",
         "scripts/check-challenge-boundary.py", "scripts/check-axioms.py",
+        "scripts/check-nonvacuity.lean",
         "scripts/verify-comparator.sh",
         "vendor/curvature/PoincareCurvature.lean",
         "vendor/curvature/lake-manifest.json",
@@ -123,6 +129,31 @@ def main() -> None:
             "proof-hole token in Solution")
     require(statement_block(challenge) == statement_block(solution),
             "Challenge and Solution completeStatement source differs")
+    statement = statement_block(challenge)
+    for semantic_guard in (
+        "(∀ x, ∑ᶠ i, atlasWeight i x = 1)",
+        "atlasWeight i x ≠ 0 → ∀ v,",
+        "initialTensor D x = ∑ᶠ i, initialLocalTensor D i x",
+        "sourceTensor f t x = ∑ᶠ i, sourceLocalTensor f i t x",
+        "∑ᶠ i, solutionLocalTensor q i t x a b",
+        "∑ᶠ i, solutionLocalTimeDerivative q i t x a b",
+        "initialLocalTensor D i x (atlasFrame i p x)",
+        "sourceLocalTensor f i t x (atlasFrame i p x)",
+        "solutionLocalTensor q i t x (atlasFrame i p x)",
+        "solutionLocalTimeDerivative q i t x",
+        "Function.Injective (fun D =>",
+        "Function.Injective sourceValue",
+        "Function.Injective (fun q =>",
+        "∀ c : Index →",
+        "∃ D, ∀ i x",
+        "∃ f, ∀ i z",
+        "∃ q, ∀ i z",
+        "HasSpatialC2AlphaNormLe",
+        "HasParabolicC0AlphaNormLe",
+        "HasParabolicC2AlphaNormLe",
+    ):
+        require(semantic_guard in statement,
+                "anti-vacuity statement guard missing: " + semantic_guard)
     require(instance_block(challenge) == instance_block(solution),
             "Challenge and Solution structural instance blocks differ")
     for inherited_source in (ROOT / "vendor/curvature").rglob("*.lean"):
@@ -176,8 +207,12 @@ def main() -> None:
         require(path.is_file() and not path.is_symlink(), f"missing regular {name} workflow")
     mechanical = workflows["mechanical"].read_text(encoding="utf-8")
     for required_text in (
-        PALOMAR, COMPARATOR, NANODA, LANDRUN,
+        PALOMAR, COMPARATOR, NANODA, LANDRUN, CACHE_ACTION,
         "verify_submission.py prepare", "verify_submission.py execute",
+        "candidate-preflight:", "needs: candidate-preflight",
+        "python scripts/check-package.py", "python scripts/check-provenance.py",
+        "lake env lean TensorHeatChallenge.lean",
+        "lake env lean scripts/check-nonvacuity.lean",
         '"project_path": "symmetric-tensor-heat"',
         '"comparator_config_path": "symmetric-tensor-heat/comparator.json"',
         '"formalization_metadata_path": "symmetric-tensor-heat/formalization.yaml"',

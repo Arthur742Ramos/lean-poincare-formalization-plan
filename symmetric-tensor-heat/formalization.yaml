@@ -9,12 +9,16 @@ project:
     two-tensors over a nonempty closed smooth Riemannian manifold. The equation
     uses the actual Levi-Civita rough Laplacian tr_g(nabla^2 u), expanded in the
     Mathlib-only Challenge through induced tensor connections and an
-    orthonormal trace. For every represented symmetric C^{2+alpha} initial
-    datum and represented symmetric C^{alpha,alpha/2} source, the theorem
-    constructs a positive time interval and a unique atlas coefficient witness
-    whose geometric readout is symmetric, has the correct initial trace,
-    solves the tensor heat equation, and obeys a global finite-atlas
-    C^{2+alpha,1+alpha/2} estimate.
+    orthonormal trace. The selected statement exposes its finite nonempty
+    atlas, partition weights and spanning frames, exact local-to-global data,
+    solution and time-derivative reconstruction, faithful nontrivial
+    coefficient representatives, genuine derivative and Holder bounds, and
+    the norms used by the estimate. For every
+    represented symmetric C^{2+alpha} initial datum and represented symmetric
+    C^{alpha,alpha/2} source, the theorem constructs a positive time interval
+    and a unique atlas coefficient witness whose geometric readout is
+    symmetric, has the correct initial trace, solves the tensor heat equation,
+    and obeys a global finite-atlas C^{2+alpha,1+alpha/2} estimate.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -105,15 +109,22 @@ status:
     C3 vector-bundle structure and a C1 Levi-Civita connection. Supplied C1/C2
     induced connections on covariant two- and three-tensors define the actual
     orthonormal-trace rough Laplacian. For each 0 < alpha < 1, the conclusion
-    constructs a positive short interval, finite-atlas initial/source/solution
-    coefficient types, geometric readouts, existence and uniqueness of the
-    solution coefficient witness in the constructed classical class,
-    fiberwise symmetry, initial trace, the componentwise inhomogeneous tensor
-    heat equation, and a nonnegative-constant estimate of solution norm by
-    initial size plus source norm. It does not prove that every bare intrinsic
-    tensor section admits the constructed atlas representation, uniqueness
-    outside the represented coefficient class, a prescribed arbitrary final
-    time, nonlinear Ricci-DeTurck well-posedness, or mathematical novelty.
+    constructs a positive short interval and a finite nonempty atlas. The
+    compared proposition requires nonnegative weights summing to one, spanning
+    local frames, normalized coordinates and time, positive source rescaling,
+    exact local-to-global initial/source/solution/time-derivative reconstruction
+    and local-frame coefficient identities. Initial/source/solution readouts
+    are injective and realize every atlas-wide constant matrix family. Their
+    displayed norms
+    control genuine spatial C2-alpha and parabolic C-alpha/C2-alpha derivative
+    and Holder bounds. It then proves existence and uniqueness of the solution
+    coefficient witness in the constructed classical class, fiberwise
+    symmetry, initial trace, the componentwise inhomogeneous tensor heat
+    equation, and an estimate of solution norm by initial size plus source
+    norm. It does not prove that every bare intrinsic tensor section admits the
+    constructed atlas representation, uniqueness outside the represented
+    coefficient class, a prescribed arbitrary final time, nonlinear
+    Ricci-DeTurck well-posedness, or mathematical novelty.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
@@ -126,7 +137,11 @@ status:
         Comparator-selected Mathlib-facing theorem for short-time existence,
         coefficient-class uniqueness, symmetry, initial trace, the genuine
         connection-rough-Laplacian equation and the global finite-atlas
-        Schauder estimate.
+        Schauder estimate. Unlike the historical rejected statement, this
+        selected proposition itself constrains the atlas reconstruction of
+        data, solution and time derivative, coefficient representations,
+        derivative fields, Holder bounds and norm control enough to exclude
+        singleton/all-zero carriers.
 
 automation:
   methods:
@@ -168,12 +183,18 @@ fidelity:
     constructed finite-atlas coefficient spaces. Initial data and sources are
     quantified through those representations, and uniqueness is for the
     higher-coefficient witness satisfying the constructed classical-solution
-    predicate. The Challenge exposes geometric readouts, symmetry, the initial
-    trace and actual rough-Laplacian PDE, but it does not assert surjectivity of
-    the coefficient encoders onto every intrinsic Holder section. The theorem
+    predicate. The Challenge now exposes exact atlas reconstruction of data,
+    solution and time derivative, active
+    spanning frames, nontrivial injective coefficient readouts, derivative
+    identities, Holder bounds, geometric readouts, symmetry, the initial trace
+    and actual rough-Laplacian PDE. It still does not assert surjectivity of the
+    coefficient encoders onto every intrinsic Holder section. The theorem
     selects an existential short endpoint rather than Huang's arbitrary fixed
-    finite interval. These boundaries avoid hiding missing representation or
-    continuation theorems in informal wording.
+    finite interval. Merge commit a210bc382e4f1e34f8e7de2384cf3b86cf561938
+    had a mechanically passing but underconstrained selected statement and was
+    editorially rejected; its evidence is historical and is not used to claim
+    adequacy of this replacement. These boundaries avoid hiding missing
+    representation or continuation theorems in informal wording.
 
 review:
   status: "self-assessed"
@@ -181,9 +202,11 @@ review:
   notes: >-
     The statement, Mathlib-only Challenge boundary, bridge to the inherited
     geometric theorem, structured provenance, proof-hole policy, axiom surface,
-    Comparator identity and renderer workflow are mechanically checked. No
-    independent human line-by-line proof review, Palomar editorial acceptance,
-    intake or registration is claimed.
+    Comparator identity, anti-vacuity regression and renderer workflow are
+    mechanically checked. The historical candidate's editorial rejection is
+    acknowledged rather than treated as fixed by metadata. No independent
+    human line-by-line proof review, Palomar editorial acceptance, fresh intake
+    or registration is claimed.
 
 alignment:
   namespace: "SymmetricTensorHeatEntry Challenge/Solution surface; RicciFlow.AnalyticPDE implementation"

@@ -37,7 +37,7 @@ open scoped Manifold ContDiff Topology BigOperators
 
 namespace SymmetricTensorHeatEntry
 
-universe u
+universe u v
 
 variable {E : Type u} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {H : Type u} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -173,6 +173,57 @@ def IsMetricCompatibleTangent (cov : CovariantDerivative I E TM) : Prop :=
 def IsLeviCivita (cov : CovariantDerivative I E TM) : Prop :=
   cov.torsion = 0 ∧ IsMetricCompatibleTangent cov
 
+/-- The parabolic metric used by the finite-atlas Hölder norms: time has
+weight two and space has weight one. -/
+def parabolicDistance {X : Type u} [PseudoMetricSpace X]
+    (p q : ℝ × X) : ℝ :=
+  max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2)
+
+/-- An explicit, single-radius parabolic `C⁰ᵃ` certificate.  The displayed
+radius simultaneously dominates a sup bound and a Hölder seminorm bound. -/
+def HasParabolicC0AlphaNormLe {X : Type u} {V : Type v} [PseudoMetricSpace X]
+    [NormedAddCommGroup V] (t₀ S α N : ℝ) (f : ℝ × X → V) : Prop :=
+  ∃ B ≥ 0, ∃ H ≥ 0, B + H ≤ N ∧
+    (∀ z, z.1 ∈ Ioc t₀ S → ‖f z‖ ≤ B) ∧
+    ∀ p, p.1 ∈ Ioc t₀ S → ∀ q, q.1 ∈ Ioc t₀ S →
+      ‖f p - f q‖ ≤ H * parabolicDistance p q ^ α
+
+/-- A concrete bounded spatial `C²ᵃ` jet with its genuine first and second
+Fréchet derivatives and one displayed norm radius. -/
+def HasSpatialC2AlphaNormLe {X : Type u} {V : Type v}
+    [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup V] [NormedSpace ℝ V]
+    (α N : ℝ) (f : X → V) (df : X → X →L[ℝ] V)
+    (d2f : X → X →L[ℝ] X →L[ℝ] V) : Prop :=
+  0 ≤ N ∧
+    (∀ x, ‖f x‖ ≤ N) ∧ (∀ x, ‖df x‖ ≤ N) ∧
+    (∀ x, ‖d2f x‖ ≤ N) ∧
+    (∀ x y, ‖f x - f y‖ ≤ N * dist x y ^ α) ∧
+    (∀ x y, ‖df x - df y‖ ≤ N * dist x y ^ α) ∧
+    (∀ x y, ‖d2f x - d2f y‖ ≤ N * dist x y ^ α) ∧
+    (∀ x, HasFDerivAt f (df x) x) ∧
+    ∀ x, HasFDerivAt df (d2f x) x
+
+/-- A concrete finite-cylinder `C²⁺ᵃ,¹⁺ᵃ/²` jet.  All four
+components have genuine parabolic Hölder bounds controlled by the displayed
+Schauder norm, and the derivative fields are the actual derivatives. -/
+def HasParabolicC2AlphaNormLe {X : Type u} {V : Type v}
+    [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup V] [NormedSpace ℝ V]
+    (t₀ S α N : ℝ) (f : ℝ × X → V)
+    (df : ℝ × X → X →L[ℝ] V)
+    (d2f : ℝ × X → X →L[ℝ] X →L[ℝ] V)
+    (dtf : ℝ × X → V) : Prop :=
+  HasParabolicC0AlphaNormLe t₀ S α N f ∧
+    HasParabolicC0AlphaNormLe t₀ S α N df ∧
+    HasParabolicC0AlphaNormLe t₀ S α N d2f ∧
+    HasParabolicC0AlphaNormLe t₀ S α N dtf ∧
+    (∀ t, t ∈ Ioc t₀ S → ∀ x, HasFDerivAt (fun y => f (t, y)) (df (t, x)) x) ∧
+    (∀ t, t ∈ Ioc t₀ S → ∀ x,
+      HasFDerivAt (fun y => df (t, y)) (d2f (t, x)) x) ∧
+    ∀ t, t ∈ Ioo t₀ S → ∀ x,
+      HasDerivAt (fun s => f (s, x)) (dtf (t, x)) t
+
 /-- The complete Mathlib-facing statement.  The existential types are the
 finite-atlas initial, source, and higher-coefficient spaces constructed by the
 proof.  Their readout maps expose every geometric conclusion, while
@@ -271,7 +322,9 @@ def completeStatement : Prop :=
     leviCivita → inducedTwo → inducedThree →
     0 < α → α < 1 →
     ∃ (S : ℝ), t₀ < S ∧
-      ∃ (Initial Source Solution : Type u)
+      ∃ (Tcoord : ℝ), t₀ < Tcoord ∧
+      ∃ (Index Initial Source Solution : Type u)
+        (_indexFinite : Finite Index) (_indexNonempty : Nonempty Index)
         (initialTensor : Initial →
           ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
         (sourceTensor : Source → ℝ →
@@ -280,11 +333,111 @@ def completeStatement : Prop :=
           ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
         (solutionTimeDerivative : Solution → ℝ →
           ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+        (initialLocalTensor : Initial → Index →
+          ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+        (sourceLocalTensor : Source → Index → ℝ →
+          ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+        (solutionLocalTensor : Solution → Index → ℝ →
+          ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+        (solutionLocalTimeDerivative : Solution → Index → ℝ →
+          ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+        (atlasCoordinate : Index → M → E)
+        (atlasFrame : Index → Fin (Module.finrank ℝ E) →
+          ∀ x : M, TangentSpace I x)
+        (atlasWeight : Index → M → ℝ)
+        (normalizedTimeCoordinate : Index → ℝ → ℝ)
+        (sourceRescale : Index → ℝ)
+        (initialValue : Initial → Index → E →
+          (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ))
+        (initialSpaceDeriv : Initial → Index → E →
+          E →L[ℝ] (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ))
+        (initialSpaceSecondDeriv : Initial → Index → E →
+          E →L[ℝ] E →L[ℝ]
+            (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ))
+        (initialHolderConstant : Initial → Index → ℝ)
+        (sourceValue : Source → Index → ℝ × E →
+          (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ))
+        (solutionValue : Solution → Index → ℝ × E →
+          (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ))
+        (solutionSpaceDeriv : Solution → Index → ℝ × E →
+          E →L[ℝ] (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ))
+        (solutionSpaceSecondDeriv : Solution → Index → ℝ × E →
+          E →L[ℝ] E →L[ℝ]
+            (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ))
+        (solutionTimeDerivCoordinate : Solution → Index → ℝ × E →
+          (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ))
         (initialSize : Initial → ℝ) (sourceNorm : Source → ℝ)
         (solutionNorm : Solution → ℝ)
         (coordinateClass : Initial → Source → Solution → Prop)
         (C : ℝ),
         Nonempty Initial ∧ Nonempty Source ∧ Nonempty Solution ∧ 0 ≤ C ∧
+        (∀ x, ∑ᶠ i, atlasWeight i x = 1) ∧
+        (∀ i x, 0 ≤ atlasWeight i x) ∧
+        (∀ i, 0 < sourceRescale i) ∧
+        (∀ i t, t ∈ Ioo t₀ S →
+          normalizedTimeCoordinate i t ∈ Ioc t₀ Tcoord) ∧
+        (∀ i x, atlasWeight i x ≠ 0 → ∀ v,
+          ∃ a : Fin (Module.finrank ℝ E) → ℝ,
+          v = ∑ p, a p • atlasFrame i p x) ∧
+        (∀ D x, initialTensor D x = ∑ᶠ i, initialLocalTensor D i x) ∧
+        (∀ f t x, sourceTensor f t x = ∑ᶠ i, sourceLocalTensor f i t x) ∧
+        (∀ q t, t ∈ Ioc t₀ S → ∀ x a b,
+          solutionTensor q t x a b =
+            ((∑ᶠ i, solutionLocalTensor q i t x a b) +
+              ∑ᶠ i, solutionLocalTensor q i t x b a) / 2) ∧
+        (∀ q t, t ∈ Ioo t₀ S → ∀ x a b,
+          solutionTimeDerivative q t x a b =
+            ((∑ᶠ i, solutionLocalTimeDerivative q i t x a b) +
+              ∑ᶠ i, solutionLocalTimeDerivative q i t x b a) / 2) ∧
+        (∀ D i x, atlasWeight i x = 0 → initialLocalTensor D i x = 0) ∧
+        (∀ f i t x, atlasWeight i x = 0 → sourceLocalTensor f i t x = 0) ∧
+        (∀ q i t x, atlasWeight i x = 0 → solutionLocalTensor q i t x = 0) ∧
+        (∀ q i t x, atlasWeight i x = 0 →
+          solutionLocalTimeDerivative q i t x = 0) ∧
+        (∀ D i x p k,
+          initialLocalTensor D i x (atlasFrame i p x) (atlasFrame i k x) =
+            atlasWeight i x * initialValue D i (atlasCoordinate i x) (k, p)) ∧
+        (∀ f i t x p k,
+          sourceLocalTensor f i t x (atlasFrame i p x) (atlasFrame i k x) =
+            atlasWeight i x * (sourceRescale i *
+              sourceValue f i (normalizedTimeCoordinate i t,
+                atlasCoordinate i x) (k, p))) ∧
+        (∀ q i t, t ∈ Ioc t₀ S → ∀ x p k,
+          solutionLocalTensor q i t x (atlasFrame i p x) (atlasFrame i k x) =
+            atlasWeight i x *
+              solutionValue q i (normalizedTimeCoordinate i t,
+                atlasCoordinate i x) (k, p)) ∧
+        (∀ q i t, t ∈ Ioo t₀ S → ∀ x p k,
+          solutionLocalTimeDerivative q i t x
+              (atlasFrame i p x) (atlasFrame i k x) =
+            atlasWeight i x * (sourceRescale i *
+              solutionTimeDerivCoordinate q i (normalizedTimeCoordinate i t,
+                atlasCoordinate i x) (k, p))) ∧
+        Function.Injective (fun D =>
+          (initialValue D, initialSpaceDeriv D,
+            initialSpaceSecondDeriv D, initialHolderConstant D)) ∧
+        Function.Injective sourceValue ∧
+        Function.Injective (fun q =>
+          (solutionValue q, solutionSpaceDeriv q,
+            solutionSpaceSecondDeriv q, solutionTimeDerivCoordinate q)) ∧
+        (∀ c : Index →
+            (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ),
+          ∃ D, ∀ i x, initialValue D i x = c i) ∧
+        (∀ c : Index →
+            (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ),
+          ∃ f, ∀ i z, z.1 ∈ Ioc t₀ Tcoord → sourceValue f i z = c i) ∧
+        (∀ c : Index →
+            (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ),
+          ∃ q, ∀ i z, z.1 ∈ Ioc t₀ Tcoord → solutionValue q i z = c i) ∧
+        (∀ D i, HasSpatialC2AlphaNormLe (X := E)
+          (V := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ)
+          α (initialSize D)
+          (initialValue D i) (initialSpaceDeriv D i)
+          (initialSpaceSecondDeriv D i)) ∧
+        (∀ f i, HasParabolicC0AlphaNormLe (X := E)
+          (V := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ)
+          t₀ Tcoord α (sourceNorm f)
+          (sourceValue f i)) ∧
         (∀ D, 0 ≤ initialSize D) ∧ (∀ f, 0 ≤ sourceNorm f) ∧
         (∀ D f,
           symmetric (initialTensor D) →
@@ -297,6 +450,11 @@ def completeStatement : Prop :=
               symmetric (solutionTensor q t)) ∧
             solves S (solutionTensor q) (solutionTimeDerivative q) (sourceTensor f)) ∧
         (∀ D f q, coordinateClass D f q →
+          (∀ i, HasParabolicC2AlphaNormLe (X := E)
+            (V := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ)
+            t₀ Tcoord α (solutionNorm q)
+            (solutionValue q i) (solutionSpaceDeriv q i)
+            (solutionSpaceSecondDeriv q i) (solutionTimeDerivCoordinate q i)) ∧
           solutionNorm q ≤ C * (initialSize D + sourceNorm f))
 
 theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
