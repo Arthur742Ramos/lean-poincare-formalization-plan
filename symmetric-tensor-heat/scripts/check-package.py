@@ -210,6 +210,7 @@ def main() -> None:
         PALOMAR, COMPARATOR, NANODA, LANDRUN, CACHE_ACTION,
         "verify_submission.py prepare", "verify_submission.py execute",
         "candidate-preflight:", "needs: candidate-preflight",
+        "fetch-depth: 0",
         "python scripts/check-package.py", "python scripts/check-provenance.py",
         "lake env lean TensorHeatChallenge.lean",
         "lake env lean scripts/check-nonvacuity.lean",
