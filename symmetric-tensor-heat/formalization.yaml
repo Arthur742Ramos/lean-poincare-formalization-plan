@@ -1,0 +1,206 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Short-time well-posedness for the symmetric tensor heat equation"
+  description: >-
+    Formalizes a finite-atlas Schauder-class existence, uniqueness and a priori
+    estimate theorem for the inhomogeneous heat equation on symmetric covariant
+    two-tensors over a nonempty closed smooth Riemannian manifold. The equation
+    uses the actual Levi-Civita rough Laplacian tr_g(nabla^2 u), expanded in the
+    Mathlib-only Challenge through induced tensor connections and an
+    orthonormal trace. For every represented symmetric C^{2+alpha} initial
+    datum and represented symmetric C^{alpha,alpha/2} source, the theorem
+    constructs a positive time interval and a unique atlas coefficient witness
+    whose geometric readout is symmetric, has the correct initial trace,
+    solves the tensor heat equation, and obeys a global finite-atlas
+    C^{2+alpha,1+alpha/2} estimate.
+  authors:
+    - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arthur Freitas Ramos"
+
+classification:
+  arxiv: ["math.DG", "math.AP", "math.LO"]
+  msc2020: ["53E20", "35K51", "35B45", "03B35"]
+
+sources:
+  - title: "The Cauchy problem for fully nonlinear parabolic systems on manifolds"
+    authors:
+      - "Hong Huang"
+    id: "arXiv:1506.05030"
+    type: "paper"
+    location: "https://arxiv.org/abs/1506.05030"
+    relationship: "adapts"
+    note: >-
+      Section 2 states global Schauder estimates and existence and uniqueness
+      for linear strongly parabolic systems on vector bundles over closed
+      manifolds. This project formalizes the second-order connection-rough-
+      Laplacian specialization for symmetric covariant two-tensors using an
+      explicit finite atlas. It does not claim mathematical novelty, priority,
+      source-author endorsement, or the full generality of Huang's theorem.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+  - title: "Three-manifolds with positive Ricci curvature"
+    authors:
+      - "Richard S. Hamilton"
+    id: "10.4310/jdg/1214436922"
+    type: "paper"
+    location: "https://doi.org/10.4310/jdg/1214436922"
+    relationship: "background"
+    note: >-
+      Hamilton's foundational Ricci-flow paper develops short-time existence,
+      weakly parabolic systems, tensor interpolation and curvature evolution.
+      It motivates the geometric parabolic infrastructure formalized here but
+      is not presented as the direct source of this exact coefficient-space
+      theorem.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+  - title: "Deforming metrics in the direction of their Ricci tensors"
+    authors:
+      - "Dennis M. DeTurck"
+    id: "10.4310/jdg/1214509286"
+    type: "paper"
+    location: "https://doi.org/10.4310/jdg/1214509286"
+    relationship: "background"
+    note: >-
+      DeTurck reduces Ricci-flow local existence to classical strictly
+      parabolic systems. The present linear tensor-heat theorem supplies a
+      formally verified analytic building block for that strategy; it does not
+      formalize the nonlinear gauge argument in this entry.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/d6ef7f253bb95fa44d1fe61c9b1a52e061ca0951/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository source subproject reused through an exact
+      mechanically extracted snapshot under vendor/curvature because the
+      trusted renderer confines path dependencies to the selected project.
+      All vendored implementation sources and contributor notices are checked
+      byte-for-byte against this commit. The selected implementation theorem is
+      curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.
+      The curvature tree at this
+      commit is preserved byte-for-byte; this new entry contributes a focused
+      Mathlib-only Challenge, matching Solution bridge, Comparator identity and
+      Palomar metadata, rather than claiming the inherited tensor-heat
+      development as new work.
+  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d"
+    relationship: "builds-on"
+    note: >-
+      Pinned Mathlib foundations for manifolds, Riemannian bundles, covariant
+      derivatives, continuous linear maps, finite-dimensional orthonormal
+      bases, topology and real calculus.
+
+status:
+  scope: >-
+    Nonzero finite-dimensional complete real model spaces and nonempty compact
+    Hausdorff boundaryless smooth manifolds with a C2 Riemannian tangent bundle,
+    C3 vector-bundle structure and a C1 Levi-Civita connection. Supplied C1/C2
+    induced connections on covariant two- and three-tensors define the actual
+    orthonormal-trace rough Laplacian. For each 0 < alpha < 1, the conclusion
+    constructs a positive short interval, finite-atlas initial/source/solution
+    coefficient types, geometric readouts, existence and uniqueness of the
+    solution coefficient witness in the constructed classical class,
+    fiberwise symmetry, initial trace, the componentwise inhomogeneous tensor
+    heat equation, and a nonnegative-constant estimate of solution norm by
+    initial size plus source norm. It does not prove that every bare intrinsic
+    tensor section admits the constructed atlas representation, uniqueness
+    outside the represented coefficient class, a prescribed arbitrary final
+    time, nonlinear Ricci-DeTurck well-posedness, or mathematical novelty.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  main_results:
+    - declaration: "SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed"
+      file: "TensorHeatSolution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: >-
+        Comparator-selected Mathlib-facing theorem for short-time existence,
+        coefficient-class uniqueness, symmetry, initial trace, the genuine
+        connection-rough-Laplacian equation and the global finite-atlas
+        Schauder estimate.
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["OpenAI GPT-5"]
+      framework: "Codex with Lean 4.33.0 and pinned Mathlib"
+      tool_setup: >-
+        AI-assisted theorem design, proof engineering, literature and registry
+        overlap audit, Challenge/Solution bridging, provenance packaging,
+        local builds, axiom auditing, Comparator/NanoDa replay and hosted
+        renderer preparation under maintainer direction.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "subscription-based"
+        hardware: "local Apple silicon machine"
+      prompting_notes: >-
+        The maintainer first requested the geometric tensor-heat theorem and
+        subsequently requested preparation of a distinct new Palomar entry.
+    - method: "manual"
+      models: []
+      framework: "Lean, Git and mathematical review"
+      tool_setup: >-
+        Human-directed scope, authorship, repository maintenance, attribution
+        responsibility and any future publication decision.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "not tracked"
+        hardware: "local machine"
+      prompting_notes: "Human authors retain responsibility for any external submission."
+  spend_usd: "subscription-based"
+  notes: >-
+    Agent assistance is disclosed without treating the agent as an author.
+    Lean, Comparator and NanoDa provide mechanical evidence rather than expert
+    peer review, source-author endorsement or editorial acceptance.
+
+fidelity:
+  divergences: >-
+    The classical vector-bundle theorem is represented through explicitly
+    constructed finite-atlas coefficient spaces. Initial data and sources are
+    quantified through those representations, and uniqueness is for the
+    higher-coefficient witness satisfying the constructed classical-solution
+    predicate. The Challenge exposes geometric readouts, symmetry, the initial
+    trace and actual rough-Laplacian PDE, but it does not assert surjectivity of
+    the coefficient encoders onto every intrinsic Holder section. The theorem
+    selects an existential short endpoint rather than Huang's arbitrary fixed
+    finite interval. These boundaries avoid hiding missing representation or
+    continuation theorems in informal wording.
+
+review:
+  status: "self-assessed"
+  reviewers: []
+  notes: >-
+    The statement, Mathlib-only Challenge boundary, bridge to the inherited
+    geometric theorem, structured provenance, proof-hole policy, axiom surface,
+    Comparator identity and renderer workflow are mechanically checked. No
+    independent human line-by-line proof review, Palomar editorial acceptance,
+    intake or registration is claimed.
+
+alignment:
+  namespace: "SymmetricTensorHeatEntry Challenge/Solution surface; RicciFlow.AnalyticPDE implementation"
+  statements:
+    - source: "Linear strongly parabolic systems on vector bundles over closed manifolds"
+      lean: "SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed"
+      module: "TensorHeatChallenge.lean and TensorHeatSolution.lean"
+      status: "proved"
+      note: >-
+        Specializes the classical theory to the Levi-Civita rough Laplacian on
+        symmetric covariant two-tensors, with represented finite-atlas data,
+        actual geometric readouts, short-time existence, coefficient-class
+        uniqueness and a Schauder estimate.
+
+acknowledgements: >-
+  Hong Huang for a direct closed-manifold vector-bundle formulation of linear
+  parabolic Schauder theory; Richard Hamilton and Dennis DeTurck for the
+  geometric-flow context; Mathlib contributors; contributors to this
+  repository's manifold, connection and parabolic infrastructure; Arthur
+  Freitas Ramos, David Barros Hulak and Ruy J. G. B. de Queiroz for human
+  authorship; and the Palomar, Comparator, Lean4Export and NanoDa projects for
+  the verification workflow.

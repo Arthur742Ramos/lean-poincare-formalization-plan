@@ -1,0 +1,19 @@
+name = "SymmetricTensorHeat"
+version = "0.1.0"
+keywords = ["math", "geometry", "parabolic-pde", "ricci-flow"]
+defaultTargets = ["TensorHeatChallenge", "TensorHeatSolution"]
+
+[leanOptions]
+pp.unicode.fun = true
+
+[[require]]
+name = "PoincareCurvature"
+path = "vendor/curvature"
+
+[[lean_lib]]
+name = "TensorHeatChallenge"
+roots = ["TensorHeatChallenge"]
+
+[[lean_lib]]
+name = "TensorHeatSolution"
+roots = ["TensorHeatSolution"]

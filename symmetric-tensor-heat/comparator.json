@@ -1,0 +1,21 @@
+{
+  "challenge_module": "TensorHeatChallenge",
+  "solution_module": "TensorHeatSolution",
+  "theorem_names": [
+    "SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed"
+  ],
+  "definition_names": [
+    "SymmetricTensorHeatEntry.IsInducedTwoTensorConnection",
+    "SymmetricTensorHeatEntry.IsInducedThreeTensorConnection",
+    "SymmetricTensorHeatEntry.connectionLaplacianApply",
+    "SymmetricTensorHeatEntry.IsSymmetricSection",
+    "SymmetricTensorHeatEntry.HasInitialTrace",
+    "SymmetricTensorHeatEntry.HasTimeDerivative",
+    "SymmetricTensorHeatEntry.SolvesTensorHeat",
+    "SymmetricTensorHeatEntry.IsMetricCompatibleTangent",
+    "SymmetricTensorHeatEntry.IsLeviCivita",
+    "SymmetricTensorHeatEntry.completeStatement"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}
