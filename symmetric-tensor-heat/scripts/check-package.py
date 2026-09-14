@@ -39,6 +39,10 @@ DEFINITIONS = [
     "SymmetricTensorHeatEntry.completeStatement",
 ]
 ALLOWED_AXIOMS = ["propext", "Quot.sound", "Classical.choice"]
+PALOMAR = "a013555a88a0fc9ec910a09ea833dc9cc338db35"
+COMPARATOR = "575674928e239f5bc452aab72d1dd7b0f1326494"
+NANODA = "68d5ca9db226849b41a6fff59d796ff19d0a8840"
+LANDRUN = "811cfff51ceaf3d9843708aa6d22e9b84ccac8b4"
 
 
 def require(condition: bool, message: str) -> None:
@@ -89,7 +93,6 @@ def main() -> None:
         "scripts/check-challenge-boundary.py", "scripts/check-axioms.py",
         "scripts/verify-comparator.sh",
         "vendor/curvature/PoincareCurvature.lean",
-        "vendor/curvature/lakefile.toml",
         "vendor/curvature/lake-manifest.json",
         "vendor/curvature/lean-toolchain",
         "vendor/curvature/LICENSE",
@@ -141,9 +144,12 @@ def main() -> None:
 
     lakefile = tomllib.loads((ROOT / "lakefile.toml").read_text(encoding="utf-8"))
     require(lakefile["require"] == [{
-        "name": "PoincareCurvature", "path": "vendor/curvature"
-    }], "Lake dependency must be the disclosed contained curvature snapshot")
+        "name": "mathlib", "scope": "leanprover-community", "rev": MATHLIB,
+    }], "Lake must depend directly on the pinned Mathlib revision")
     libraries = {entry["name"]: entry for entry in lakefile["lean_lib"]}
+    require(libraries["PoincareCurvature"].get("srcDir") == "vendor/curvature" and
+            set(libraries["PoincareCurvature"]) == {"name", "srcDir"},
+            "vendored curvature must be a root library, not a nested Lake package")
     require(libraries["TensorHeatChallenge"].get("roots") == ["TensorHeatChallenge"] and
             libraries["TensorHeatSolution"].get("roots") == ["TensorHeatSolution"],
             "Challenge/Solution Lake roots changed")
@@ -152,17 +158,36 @@ def main() -> None:
 
     manifest = json.loads((ROOT / "lake-manifest.json").read_text(encoding="utf-8"))
     path_deps = [p for p in manifest["packages"] if p["type"] == "path"]
-    require(path_deps == [{
-        "type": "path", "scope": "", "name": "PoincareCurvature",
-        "manifestFile": "lake-manifest.json", "inherited": False,
-        "dir": "vendor/curvature", "configFile": "lakefile.toml",
-    }], "manifest path dependency changed")
+    require(path_deps == [],
+            "manifest must have no path packages (Palomar grants one writable build root)")
     mathlib = next(p for p in manifest["packages"] if p["name"] == "mathlib")
     require(mathlib["type"] == "git" and
             mathlib["url"] == "https://github.com/leanprover-community/mathlib4" and
-            mathlib["rev"] == MATHLIB, "Mathlib manifest pin changed")
+            mathlib["rev"] == MATHLIB and not mathlib["inherited"],
+            "direct Mathlib manifest pin changed")
     require((ROOT / "lean-toolchain").read_text().strip() == "leanprover/lean4:v4.33.0",
             "unsupported Lean toolchain")
+
+    workflows = {
+        "mechanical": ROOT.parent / ".github/workflows/symmetric-tensor-heat-palomar-mechanical.yml",
+        "renderer": ROOT.parent / ".github/workflows/symmetric-tensor-heat-palomar-render.yml",
+    }
+    for name, path in workflows.items():
+        require(path.is_file() and not path.is_symlink(), f"missing regular {name} workflow")
+    mechanical = workflows["mechanical"].read_text(encoding="utf-8")
+    for required_text in (
+        PALOMAR, COMPARATOR, NANODA, LANDRUN,
+        "verify_submission.py prepare", "verify_submission.py execute",
+        '"project_path": "symmetric-tensor-heat"',
+        '"comparator_config_path": "symmetric-tensor-heat/comparator.json"',
+        '"formalization_metadata_path": "symmetric-tensor-heat/formalization.yaml"',
+    ):
+        require(required_text in mechanical,
+                "complete hosted Palomar verifier workflow changed: " + required_text)
+    renderer = workflows["renderer"].read_text(encoding="utf-8")
+    for required_text in (PALOMAR, LANDRUN, "render_challenge prepare", "render_challenge execute"):
+        require(required_text in renderer,
+                "hosted Palomar renderer workflow changed: " + required_text)
 
     metadata_text = (ROOT / "formalization.yaml").read_text(encoding="utf-8")
     require(len(metadata_text.encode()) <= 256 * 1024, "formalization.yaml too large")

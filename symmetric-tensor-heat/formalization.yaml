@@ -79,8 +79,10 @@ related_formalizations:
     relationship: "builds-on"
     note: >-
       Immutable same-repository source subproject reused through an exact
-      mechanically extracted snapshot under vendor/curvature because the
-      trusted renderer confines path dependencies to the selected project.
+      mechanically extracted snapshot under vendor/curvature so the focused
+      project is self-contained. The snapshot is compiled as a root library,
+      with no nested Lake path dependency, so every generated file remains
+      beneath the single writable package build root used by Palomar.
       All vendored implementation sources and contributor notices are checked
       byte-for-byte against this commit. The selected implementation theorem is
       curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.

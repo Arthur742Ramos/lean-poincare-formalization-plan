@@ -46,7 +46,10 @@ lake env lean scripts/check-closed-statement.lean
 PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh  # macOS
 ```
 
-The hosted workflow runs the pinned Palomar renderer with real Linux Landrun.
+The hosted workflows run both the pinned renderer and the complete unmodified
+Palomar mechanical verifier with real Linux Landrun. The package has no Lake
+path dependencies: its unchanged vendored proof development is a library in
+the root project, so all sandbox writes stay under the root build directory.
 Preparation and verification do not authorize Palomar intake or registration.
 
 See [PROVENANCE.md](PROVENANCE.md),

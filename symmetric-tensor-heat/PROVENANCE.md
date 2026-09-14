@@ -17,16 +17,18 @@ The proof development is reused, unchanged, from:
 - selected source SHA-256:
   `beadeb28c37b72ffc0700756ba506e213f97c351fb1ee3125de41667314012a7`
 
-The renderer does not accept a path dependency that traverses to a sibling
-directory. The package therefore carries a mechanically extracted snapshot in
-`vendor/curvature/`. Every vendored implementation source, README, and
-contributor notice is byte-for-byte identical to the disclosed commit. The
-vendored Lakefile is a minimal wrapper that exposes only the inherited
-`PoincareCurvature` library; its manifest and toolchain are copied unchanged.
+The package carries a mechanically extracted snapshot in `vendor/curvature/`
+so the selected project is self-contained. Every vendored implementation
+source, README, contributor notice, inherited manifest, and toolchain is
+byte-for-byte identical to the disclosed commit. The package's root Lakefile
+exposes those sources as a `PoincareCurvature` library with
+`srcDir = "vendor/curvature"`; it deliberately has no nested path dependency,
+so Palomar's single writable package build root contains every build output.
 The repository's Apache-2.0 license is preserved beside the snapshot.
 `scripts/check-provenance.py` verifies the baseline curvature tree object, the
 selected source hash, the complete vendored file inventory, every vendored
-byte, the wrapper's restricted shape, and the structured metadata.
+byte, and the structured metadata. `scripts/check-package.py` separately
+rejects any path package or change to the root-library topology.
 
 The new work in this package is the focused Mathlib-only Challenge surface,
 matching independent Solution bridge, Comparator configuration, metadata,
