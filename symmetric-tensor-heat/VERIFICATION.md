@@ -35,7 +35,7 @@ Comparator pins:
 - Lean4Export: `15f6055e299ad5b89345e533cc2192f4cc00f659`
 - NanoDa: `68d5ca9db226849b41a6fff59d796ff19d0a8840`
 - Landrun: `811cfff51ceaf3d9843708aa6d22e9b84ccac8b4`
-- hosted renderer: `ef2fa1eadcb246c2346ddba39b52eaa53d4bb763`
+- hosted renderer: `a013555a88a0fc9ec910a09ea833dc9cc338db35`
 
 The macOS Comparator replay explicitly substitutes an unsandboxed compatibility
 wrapper because Landlock is Linux-only. The hosted GitHub workflow exercises
