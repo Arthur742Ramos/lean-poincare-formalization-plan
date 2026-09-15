@@ -2,6 +2,7 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.RaisedRicci
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent
+public import PoincareCurvature.Analysis.LeastEigenvalue
 
 /-!
 # Three-dimensional curvature spectrum along a metric family
@@ -32,6 +33,22 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [IsManifold I ((2 : ℕ∞) + 1) M]
 
 local notation "TM" => (TangentSpace I : M → Type _)
+
+/-- Evaluation of the actual Ricci-complement curvature endomorphism at a
+time slice.  Packaging only its value avoids exposing the definitionally
+distinct tangent-fibre norm instance used to construct the continuous linear
+map. -/
+def curvatureEndomorphismApply
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (t : ℝ) (x : M) (v : TM x) : TM x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  haveI : ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+  exact CovariantDerivative.ricciComplementEndomorphism (cov t) x v
 
 /-- The ordered triple of actual curvature-operator eigenvalues at a spacetime
 point, in the normalization where each is twice a sectional curvature. -/
@@ -87,6 +104,118 @@ def curvatureNu
     (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
     (t : ℝ) (x : M) : ℝ :=
   g.curvatureEigenvalues cov hcov hLevi hdim t x 2
+
+/-- A unit eigenvector for the least curvature eigenvalue at a spacetime
+point.  This is the contact vector used by the tensor maximum principle. -/
+def curvatureNuEigenvector
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) : TM x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+  exact CovariantDerivative.ricciComplementEigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 2
+
+@[simp] theorem inner_curvatureNuEigenvector_self
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    (g t).inner x
+        (g.curvatureNuEigenvector cov hcov hLevi hdim t x)
+        (g.curvatureNuEigenvector cov hcov hLevi hdim t x) = 1 := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+  change Inner.inner ℝ
+      ((CovariantDerivative.ricciComplementEigenbasis
+        (I := I) (M := M) (E := E)
+        (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)) 2)
+      ((CovariantDerivative.ricciComplementEigenbasis
+        (I := I) (M := M) (E := E)
+        (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)) 2) = 1
+  simpa using (CovariantDerivative.ricciComplementEigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)).orthonormal
+      (i := (2 : Fin 3)) (j := (2 : Fin 3))
+
+/-- The selected least eigenvector realizes the least curvature eigenvalue
+as the quadratic form of the actual Ricci-complement endomorphism. -/
+theorem curvatureNu_eq_inner_ricciComplement_eigenvector
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    g.curvatureNu cov hcov hLevi hdim t x =
+      (g t).inner x
+        (g.curvatureEndomorphismApply cov hcov t x
+          (g.curvatureNuEigenvector cov hcov hLevi hdim t x))
+        (g.curvatureNuEigenvector cov hcov hLevi hdim t x) := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+  change CovariantDerivative.ricciComplementEigenvalues
+      (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 2 = Inner.inner ℝ
+    (CovariantDerivative.ricciComplementEndomorphism (cov t) x
+      (CovariantDerivative.ricciComplementEigenbasis
+        (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 2))
+    (CovariantDerivative.ricciComplementEigenbasis
+      (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 2)
+  let b := CovariantDerivative.ricciComplementEigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)
+  have happ := CovariantDerivative.ricciComplementEndomorphism_apply_eigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 2
+  have hinner := congrArg (fun z : TM x => Inner.inner ℝ z (b 2)) happ
+  simpa [b, real_inner_smul_left] using hinner.symm
+
+/-- Every unit vector gives an upper support for the least genuine curvature
+eigenvalue. -/
+theorem curvatureNu_le_inner_ricciComplement_of_norm_eq_one
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) {v : TM x} (hv : (g t).inner x v v = 1) :
+    g.curvatureNu cov hcov hLevi hdim t x ≤
+      (g t).inner x v
+        (g.curvatureEndomorphismApply cov hcov t x v) := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+  change g.curvatureNu cov hcov hLevi hdim t x ≤ Inner.inner ℝ v
+    (CovariantDerivative.ricciComplementEndomorphism (cov t) x v)
+  have hvnorm : ‖v‖ = 1 := by
+    have hnormsq := real_inner_self_eq_norm_sq v
+    change Inner.inner ℝ v v = 1 at hv
+    nlinarith [norm_nonneg v]
+  exact (CovariantDerivative.ricciComplementEndomorphism_isSymmetric
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x).eigenvalue_two_le_inner_apply_of_norm_eq_one
+      (hdim x) hvnorm
 
 /-- The three curvature eigenvalues are decreasingly ordered at every
 spacetime point. -/
