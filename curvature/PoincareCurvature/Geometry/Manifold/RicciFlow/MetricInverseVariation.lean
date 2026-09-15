@@ -193,6 +193,28 @@ def HasIntrinsicRicciTimeDerivativeAt
       (fun τ => intrinsicRicciTensor (I := I) (M := M) g τ x u v)
       (ricciVelocity x u v) t
 
+/-- The intrinsic Ricci tensor with its bilinear structure retained.  The
+older time-family API stores the same tensor only through its evaluations. -/
+def intrinsicRicciBilinearAt
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (x : M) :
+    TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : CovariantDerivative.ContMDiffCovariantDerivative
+      (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+        (I := I) (M := M) g t) 1 :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g t
+  exact CovariantDerivative.ricciCurvature
+    (cov :=
+      CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+        (I := I) (M := M) g t) x
+
+@[simp] theorem intrinsicRicciBilinearAt_apply
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciBilinearAt (I := I) (M := M) g t x u v =
+      intrinsicRicciTensor (I := I) (M := M) g t x u v := by
+  simp [intrinsicRicciBilinearAt, intrinsicRicciTensor, ricciTensor]
+
 /-- The local-frame contraction is exactly the coordinate-free scalar
 curvature of the chosen intrinsic Levi-Civita slice.  Thus the presentation
 used below is not an abstract coefficient surrogate. -/
@@ -228,6 +250,41 @@ theorem localFrameScalarCurvaturePresentation_eq_scalarCurvature
     localFrameIntrinsicRicciMatrix,
     CovariantDerivative.localFrameInverseGramMatrix,
     intrinsicRicciTensor, ricciTensor, cov, hcov] using hframe.symm
+
+/-- Scalar curvature is intrinsically the metric trace of the actual Ricci
+bilinear form. -/
+theorem metricTraceAt_intrinsicRicciBilinearAt_eq_scalarCurvature
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (x : M) :
+    metricTraceAt (I := I) (M := M) g t x
+        (intrinsicRicciBilinearAt (I := I) (M := M) g t x) =
+      g.scalarCurvature
+        (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+          (I := I) (M := M) g)
+        (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+          (I := I) (M := M) g) t x := by
+  let e : Trivialization E (π E TM) := trivializationAt E TM x
+  let bas : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E
+  have hx : x ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt E TM x
+  calc
+    metricTraceAt (I := I) (M := M) g t x
+        (intrinsicRicciBilinearAt (I := I) (M := M) g t x) =
+        PoincareCurvature.matrixContraction
+          (localFrameMetricMatrix (I := I) (M := M) g e bas t x)⁻¹
+          (fun i j => intrinsicRicciBilinearAt (I := I) (M := M) g t x
+            (e.localFrame bas i x) (e.localFrame bas j x)) :=
+      (matrixContraction_localFrameTensor_eq_metricTraceAt
+        (I := I) (M := M) g t
+        (intrinsicRicciBilinearAt (I := I) (M := M) g t x) e bas hx).symm
+    _ = localFrameScalarCurvaturePresentation
+          (I := I) (M := M) g e bas t x := by
+      unfold localFrameScalarCurvaturePresentation
+      apply congrArg (PoincareCurvature.matrixContraction
+        (localFrameMetricMatrix (I := I) (M := M) g e bas t x)⁻¹)
+      ext i j
+      exact intrinsicRicciBilinearAt_apply
+        (I := I) (M := M) g t x (e.localFrame bas i x) (e.localFrame bas j x)
+    _ = _ := localFrameScalarCurvaturePresentation_eq_scalarCurvature
+      (I := I) (M := M) g e bas t hx
 
 /-- The double inverse-metric local-frame contraction is exactly the actual
 Hilbert--Schmidt square of intrinsic Ricci. -/
