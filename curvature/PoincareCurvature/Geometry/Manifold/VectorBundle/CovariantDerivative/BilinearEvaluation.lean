@@ -33,22 +33,22 @@ local notation "T₀" => (Bundle.Trivial M ℝ)
 local notation "T₁" => (fun x : M => TM x →L[ℝ] ℝ)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
 
-/-- Intrinsic Leibniz rule for evaluating a covariant two-tensor on the same
-moving tangent field in both slots. -/
-theorem realLineCovariantDerivative_bilinear_self
+/-- Intrinsic Leibniz rule for evaluating a covariant two-tensor on two
+independently moving tangent fields. -/
+theorem realLineCovariantDerivative_bilinear
     (cov : CovariantDerivative I E TM)
-    {h : ∀ x : M, T₂ x} {V : ∀ x : M, TM x} {x : M}
+    {h : ∀ x : M, T₂ x} {U V : ∀ x : M, TM x} {x : M}
     (hh : MDiffAt
       (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) y (h y)) x)
-    (hV : MDiffAt (T% V) x) (u : TM x) :
+    (hU : MDiffAt (T% U) x) (hV : MDiffAt (T% V) x) (u : TM x) :
     realLineCovariantDerivative (I := I) (M := M)
-        (fun y => h y (V y) (V y)) x u =
-      covariantTwoTensorCovariantDerivative cov h x u (V x) (V x) +
-        h x (cov V x u) (V x) + h x (V x) (cov V x u) := by
-  let φ : ∀ y : M, T₁ y := fun y => h y (V y)
+        (fun y => h y (U y) (V y)) x u =
+      covariantTwoTensorCovariantDerivative cov h x u (U x) (V x) +
+        h x (cov U x u) (V x) + h x (U x) (cov V x u) := by
+  let φ : ∀ y : M, T₁ y := fun y => h y (U y)
   have hφ : MDiffAt
       (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y (φ y)) x :=
-    hh.clm_bundle_apply hV
+    hh.clm_bundle_apply hU
   have houter :=
     @inducedHomCovariantDerivative_apply_section_general
       E _ _ H _ I M _ _ _ _ _ _
@@ -58,7 +58,7 @@ theorem realLineCovariantDerivative_bilinear_self
       (fun y => (inferInstance : NormedSpace ℝ (TM y)))
       (fun y => (inferInstance : FiniteDimensional ℝ (TM y)))
       _ _ _ _ _ _ _ _
-      cov (covectorCovariantDerivative cov) h V x hh hV u
+      cov (covectorCovariantDerivative cov) h U x hh hU u
   have houterV := congrArg (fun q : T₁ x => q (V x)) houter
   have hinner :=
     @inducedHomCovariantDerivative_apply_section_general
@@ -70,14 +70,28 @@ theorem realLineCovariantDerivative_bilinear_self
       (fun y => (inferInstance : FiniteDimensional ℝ (TM y)))
       _ _ _ _ _ _ _ _
       cov (realLineCovariantDerivative (I := I) (M := M)) φ V x hφ hV u
-  change covariantTwoTensorCovariantDerivative cov h x u (V x) (V x) = _ at houterV
+  change covariantTwoTensorCovariantDerivative cov h x u (U x) (V x) = _ at houterV
   change covectorCovariantDerivative cov φ x u (V x) = _ at hinner
   change realLineCovariantDerivative (I := I) (M := M)
-      (fun y => h y (V y) (V y)) x u = _
+      (fun y => h y (U y) (V y)) x u = _
   dsimp [φ] at houterV hinner
   simp only [sub_apply] at houterV
   rw [hinner] at houterV
   linarith
+
+/-- Intrinsic Leibniz rule when the same moving tangent field is used in both
+slots. -/
+theorem realLineCovariantDerivative_bilinear_self
+    (cov : CovariantDerivative I E TM)
+    {h : ∀ x : M, T₂ x} {V : ∀ x : M, TM x} {x : M}
+    (hh : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) y (h y)) x)
+    (hV : MDiffAt (T% V) x) (u : TM x) :
+    realLineCovariantDerivative (I := I) (M := M)
+        (fun y => h y (V y) (V y)) x u =
+      covariantTwoTensorCovariantDerivative cov h x u (V x) (V x) +
+        h x (cov V x u) (V x) + h x (V x) (cov V x u) := by
+  exact realLineCovariantDerivative_bilinear cov hh hV hV u
 
 /-- If the moving field is covariantly stationary at the evaluation point,
 only the covariant derivative of the tensor contributes. -/
