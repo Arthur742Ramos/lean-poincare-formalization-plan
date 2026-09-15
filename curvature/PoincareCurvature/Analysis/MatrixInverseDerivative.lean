@@ -81,4 +81,46 @@ theorem nonsing_inv_derivative
     exact Matrix.mul_nonsing_inv (A s) (isUnit_iff_ne_zero.mpr (hdet s))
   · exact Matrix.nonsing_inv_mul (A t) (isUnit_iff_ne_zero.mpr (hdet t))
 
+/-- Double entrywise contraction of two finite matrices. -/
+def matrixContraction (A S : Matrix ι ι ℝ) : ℝ :=
+  ∑ i, ∑ j, A i j * S i j
+
+omit [DecidableEq ι] in
+/-- Product rule for a double finite matrix contraction. -/
+theorem hasDerivAt_matrixContraction
+    {A S : ℝ → Matrix ι ι ℝ} {Adot Sdot : Matrix ι ι ℝ} {t : ℝ}
+    (hA : ∀ i j, HasDerivAt (fun s => A s i j) (Adot i j) t)
+    (hS : ∀ i j, HasDerivAt (fun s => S s i j) (Sdot i j) t) :
+    HasDerivAt (fun s => matrixContraction (A s) (S s))
+      (matrixContraction Adot (S t) + matrixContraction (A t) Sdot) t := by
+  have hsum := HasDerivAt.sum (u := Finset.univ) fun i (_hi : i ∈ Finset.univ) =>
+    HasDerivAt.sum (u := Finset.univ) fun j (_hj : j ∈ Finset.univ) =>
+      (hA i j).mul (hS i j)
+  convert! hsum using 1
+  · funext s
+    simp [matrixContraction]
+  · simp [matrixContraction, Finset.sum_add_distrib]
+
+/-- Derivative of the contraction `tr(A⁻¹ S)` along differentiable finite
+matrix curves.  The inverse derivative is eliminated in favor of the metric
+velocity `Adot`. -/
+theorem hasDerivAt_nonsing_inv_matrixContraction
+    {A S : ℝ → Matrix ι ι ℝ} {Adot Sdot : Matrix ι ι ℝ} {t : ℝ}
+    (hA : ∀ i j, HasDerivAt (fun s => A s i j) (Adot i j) t)
+    (hInvDiff : ∀ i j, DifferentiableAt ℝ (fun s => (A s)⁻¹ i j) t)
+    (hS : ∀ i j, HasDerivAt (fun s => S s i j) (Sdot i j) t)
+    (hdet : ∀ s, (A s).det ≠ 0) :
+    HasDerivAt
+      (fun s => matrixContraction (A s)⁻¹ (S s))
+      (matrixContraction (-((A t)⁻¹ * Adot * (A t)⁻¹)) (S t) +
+        matrixContraction (A t)⁻¹ Sdot) t := by
+  let Bdot : Matrix ι ι ℝ := fun i j => deriv (fun s => (A s)⁻¹ i j) t
+  have hInv : ∀ i j, HasDerivAt (fun s => (A s)⁻¹ i j) (Bdot i j) t := by
+    intro i j
+    exact (hInvDiff i j).hasDerivAt
+  have hBdot : Bdot = -((A t)⁻¹ * Adot * (A t)⁻¹) :=
+    nonsing_inv_derivative hA hInv hdet
+  have hcontract := hasDerivAt_matrixContraction hInv hS
+  simpa only [hBdot] using hcontract
+
 end PoincareCurvature
