@@ -1,7 +1,7 @@
 module
 
 public import HamiltonIveyReaction.Reaction
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveySupportEvolution
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveySupportLaplacian
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyScalarBarrier
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarParabolicInvariant
 
