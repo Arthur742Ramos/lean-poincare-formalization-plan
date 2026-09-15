@@ -178,7 +178,8 @@ theorem hasDerivAt_curvatureNuContactMetricSquare
       (-2 * g.ricciCurvature cov hcov t₀ x₀
         (g.curvatureNuEigenvector cov hcov hLevi hdim t₀ x₀)
         (g.curvatureNuEigenvector cov hcov hLevi hdim t₀ x₀)) t₀ := by
-  simpa [curvatureNuContactVectorField, smoothExtend_apply] using
+  simpa [curvatureNuContactVectorField,
+    firstOrderParallelSmoothExtend_apply_center] using
     g.hasDerivAt_inner_self_of_isRicciFlowOn cov hcov gdot s hflow ht₀ x₀
       (g.curvatureNuEigenvector cov hcov hLevi hdim t₀ x₀)
 
@@ -220,7 +221,8 @@ theorem hasDerivAt_curvatureNuSpacetimeSupport_time_of_isRicciFlowOn
   let R : ℝ → ℝ := fun τ => g.scalarCurvature cov hcov τ x₀
   let r : ℝ → ℝ := fun τ => g.ricciCurvature cov hcov τ x₀ V V
   have hV : V = g.curvatureNuEigenvector cov hcov hLevi hdim t₀ x₀ := by
-    simp [V, curvatureNuContactVectorField, smoothExtend_apply]
+    simp [V, curvatureNuContactVectorField,
+      firstOrderParallelSmoothExtend_apply_center]
   have hd0 : d t₀ = 1 := by
     simp only [d, hV]
     exact g.inner_curvatureNuEigenvector_self cov hcov hLevi hdim t₀ x₀

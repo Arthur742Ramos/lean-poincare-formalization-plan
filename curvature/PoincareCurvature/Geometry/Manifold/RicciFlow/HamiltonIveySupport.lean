@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveySpectrum
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.FirstOrderParallelExtension
 
 /-!
 # Spacetime support for the least curvature eigenvalue
@@ -35,7 +36,8 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 local notation "TM" => (TangentSpace I : M → Type _)
 
 /-- The fixed-in-time smooth spatial extension of the least eigenvector
-selected at `(t₀,x₀)`. -/
+selected at `(t₀,x₀)`.  Its first covariant derivative for the contact-time
+Levi-Civita connection vanishes at `x₀`. -/
 def curvatureNuContactVectorField
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
@@ -45,8 +47,74 @@ def curvatureNuContactVectorField
     (hLevi : g.IsLeviCivita cov)
     (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
     (t₀ : ℝ) (x₀ : M) : ∀ y : M, TM y :=
-  smoothExtend (I := I) (F := E) (V := TM) x₀
-    (g.curvatureNuEigenvector cov hcov hLevi hdim t₀ x₀)
+  by
+    exact firstOrderParallelSmoothExtend
+      (I := I) (F := E) (V := TM) (cov t₀) x₀
+      (g.curvatureNuEigenvector cov hcov hLevi hdim t₀ x₀)
+
+/-- The contact vector field is covariantly stationary to first order at its
+spatial contact point. -/
+theorem covariantDerivative_curvatureNuContactVectorField_eq_zero
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t₀ : ℝ) (x₀ : M) :
+    cov t₀ (g.curvatureNuContactVectorField
+      cov hcov hLevi hdim t₀ x₀) x₀ = 0 := by
+  unfold curvatureNuContactVectorField
+  exact covariantDerivative_firstOrderParallelSmoothExtend_eq_zero
+    (I := I) (F := E) (V := TM) (cov t₀) x₀
+      (g.curvatureNuEigenvector cov hcov hLevi hdim t₀ x₀)
+
+/-- The contact vector field is differentiable at its spatial contact point. -/
+theorem curvatureNuContactVectorField_mdifferentiableAt
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t₀ : ℝ) (x₀ : M) :
+    MDiffAt (T% (g.curvatureNuContactVectorField
+      cov hcov hLevi hdim t₀ x₀)) x₀ := by
+  unfold curvatureNuContactVectorField
+  exact firstOrderParallelSmoothExtend_mdifferentiableAt
+    (I := I) (F := E) (V := TM) (cov t₀) x₀
+      (g.curvatureNuEigenvector cov hcov hLevi hdim t₀ x₀)
+
+/-- Metric compatibility and the first-order parallel construction force the
+spatial differential of the contact vector's metric square to vanish. -/
+theorem mvfderiv_curvatureNuContactMetricSquare_eq_zero
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t₀ : ℝ) (x₀ : M) (u : TM x₀) :
+    mvfderiv (I := I)
+      (fun y => (g t₀).inner y
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t₀ x₀ y)
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t₀ x₀ y))
+      x₀ u = 0 := by
+  letI : RiemannianBundle TM := ⟨(g t₀).toRiemannianMetric⟩
+  let V := g.curvatureNuContactVectorField cov hcov hLevi hdim t₀ x₀
+  have hV : MDiffAt (T% V) x₀ := by
+    exact g.curvatureNuContactVectorField_mdifferentiableAt
+      cov hcov hLevi hdim t₀ x₀
+  have hmetric := (hLevi t₀).2 hV hV u
+  have hparallel := g.covariantDerivative_curvatureNuContactVectorField_eq_zero
+    cov hcov hLevi hdim t₀ x₀
+  change mvfderiv (I := I) (fun y => Inner.inner ℝ (V y) (V y)) x₀ u = 0
+  rw [hmetric]
+  rw [hparallel]
+  simp
 
 /-- The spacetime Rayleigh quotient obtained from the contact vector field. -/
 def curvatureNuSpacetimeSupport
@@ -75,7 +143,7 @@ theorem curvatureNuSpacetimeSupport_eq_at_contact
     g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ (t₀, x₀) =
       g.curvatureNu cov hcov hLevi hdim t₀ x₀ := by
   rw [curvatureNuSpacetimeSupport, curvatureNuContactVectorField,
-    smoothExtend_apply]
+    firstOrderParallelSmoothExtend_apply_center]
   exact g.curvatureRayleighQuotient_curvatureNuEigenvector
     cov hcov hLevi hdim t₀ x₀
 
@@ -101,7 +169,8 @@ theorem curvatureNu_le_spacetimeSupport_eventually
   have hbase : (g t₀).inner x₀
       (g.curvatureNuContactVectorField cov hcov hLevi hdim t₀ x₀ x₀)
       (g.curvatureNuContactVectorField cov hcov hLevi hdim t₀ x₀ x₀) = 1 := by
-    rw [curvatureNuContactVectorField, smoothExtend_apply]
+    rw [curvatureNuContactVectorField,
+      firstOrderParallelSmoothExtend_apply_center]
     exact g.inner_curvatureNuEigenvector_self cov hcov hLevi hdim t₀ x₀
   have hpositive : ∀ᶠ p in nhds (t₀, x₀),
       0 < (g p.1).inner p.2
