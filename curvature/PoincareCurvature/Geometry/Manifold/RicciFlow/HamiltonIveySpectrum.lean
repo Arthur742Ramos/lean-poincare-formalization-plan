@@ -307,6 +307,78 @@ theorem curvatureRayleighQuotient_curvatureNuEigenvector
   exact (g.curvatureNu_eq_inner_ricciComplement_eigenvector
     cov hcov hLevi hdim t x).symm
 
+/-- Spatial Rayleigh support obtained by smoothly extending the least
+curvature eigenvector from a chosen contact point. -/
+def curvatureNuSpatialSupport
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x₀ y : M) : ℝ :=
+  g.curvatureRayleighQuotient cov hcov t y
+    (smoothExtend (I := I) (F := E) (V := TM) x₀
+      (g.curvatureNuEigenvector cov hcov hLevi hdim t x₀) y)
+
+/-- The spatial Rayleigh support touches the least curvature eigenvalue at
+its base point. -/
+theorem curvatureNuSpatialSupport_eq_at_base
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x₀ : M) :
+    g.curvatureNuSpatialSupport cov hcov hLevi hdim t x₀ x₀ =
+      g.curvatureNu cov hcov hLevi hdim t x₀ := by
+  rw [curvatureNuSpatialSupport, smoothExtend_apply]
+  exact g.curvatureRayleighQuotient_curvatureNuEigenvector
+    cov hcov hLevi hdim t x₀
+
+/-- Near the contact point, the smoothly extended eigenvector has positive
+metric square and its Rayleigh quotient is an upper support for the least
+curvature eigenvalue. -/
+theorem curvatureNu_le_spatialSupport_eventually
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x₀ : M) :
+    ∀ᶠ y in nhds x₀,
+      g.curvatureNu cov hcov hLevi hdim t y ≤
+        g.curvatureNuSpatialSupport cov hcov hLevi hdim t x₀ y := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  let V : ∀ y : M, TM y :=
+    smoothExtend (I := I) (F := E) (V := TM) x₀
+      (g.curvatureNuEigenvector cov hcov hLevi hdim t x₀)
+  have hV : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (T% V) := by
+    simpa [V] using smoothExtend_contMDiff_one
+      (I := I) (F := E) (V := TM) x₀
+        (g.curvatureNuEigenvector cov hcov hLevi hdim t x₀)
+  have hinner : ContMDiff I 𝓘(ℝ) 1
+      (fun y => Inner.inner ℝ (V y) (V y)) :=
+    ContMDiff.inner_bundle (IM := I) (IB := I) (F := E) (E := TM) hV hV
+  have hbase : Inner.inner ℝ (V x₀) (V x₀) = 1 := by
+    dsimp only [V]
+    rw [smoothExtend_apply]
+    exact g.inner_curvatureNuEigenvector_self cov hcov hLevi hdim t x₀
+  have hevent : ∀ᶠ y in nhds x₀, 0 < Inner.inner ℝ (V y) (V y) := by
+    have hopen : IsOpen {r : ℝ | 0 < r} := isOpen_Ioi
+    have hmem : Inner.inner ℝ (V x₀) (V x₀) ∈ {r : ℝ | 0 < r} := by
+      rw [hbase]
+      norm_num
+    exact hinner.continuous.continuousAt (hopen.mem_nhds hmem)
+  filter_upwards [hevent] with y hy
+  exact g.curvatureNu_le_curvatureRayleighQuotient cov hcov hLevi hdim t y hy
+
 /-- The three curvature eigenvalues are decreasingly ordered at every
 spacetime point. -/
 theorem curvatureEigenvalues_antitone
