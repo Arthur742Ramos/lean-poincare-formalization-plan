@@ -26,6 +26,7 @@ import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Scal
 import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckCorrectionRegularity
 import PoincareCurvature.Geometry.Manifold.RicciFlow.MetricInverseVariation
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarEvolution
+import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarParabolicBarrier
 import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckReactionAssembly
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReactionPicard
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReactionCoordBounds
