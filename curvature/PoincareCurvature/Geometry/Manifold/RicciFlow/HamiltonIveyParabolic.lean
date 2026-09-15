@@ -217,6 +217,59 @@ theorem hamiltonIveySupportedDefect_isLocalMin
   exact hpmin.trans (g.hamiltonIveyDefect_le_supportedDefect
     cov hcov hLevi hdim K t₀ x₀ p hpnu hpneg hppos)
 
+/-- At a negative-defect contact, ordinary continuity supplies all open
+sign neighborhoods, while metric-square continuity supplies the genuine
+least-eigenvalue upper support.  Thus the local-minimum transfer requires no
+independent sign or comparison assumptions. -/
+theorem hamiltonIveySupportedDefect_isLocalMin_at_bad_contact
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    {K t₀ : ℝ} (hK : 0 < K) (ht₀ : 0 ≤ t₀) (x₀ : M)
+    (hnu : g.curvatureNu cov hcov hLevi hdim t₀ x₀ < 0)
+    (hscalar : -3 * (K / (1 + K * t₀)) ≤
+      g.scalarCurvature cov hcov t₀ x₀)
+    (hdefect : g.hamiltonIveyDefect cov hcov hLevi hdim K t₀ x₀ < 0)
+    (hmin : IsLocalMin
+      (fun p : ℝ × M =>
+        g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2) (t₀, x₀))
+    (hnormContinuous : ContinuousAt
+      (fun p : ℝ × M => (g p.1).inner p.2
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t₀ x₀ p.2)
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t₀ x₀ p.2))
+      (t₀, x₀))
+    (hScalarContinuous : ContinuousAt
+      (fun p : ℝ × M => g.scalarCurvature cov hcov p.1 p.2) (t₀, x₀))
+    (hSupportContinuous : ContinuousAt
+      (g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀) (t₀, x₀)) :
+    IsLocalMin
+      (g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t₀ x₀)
+      (t₀, x₀) := by
+  have hnuSupport := g.curvatureNu_le_spacetimeSupport_eventually
+    cov hcov hLevi hdim t₀ x₀ hnormContinuous
+  have hSupportNegAt :
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ (t₀, x₀) < 0 := by
+    rw [g.curvatureNuSpacetimeSupport_eq_at_contact
+      cov hcov hLevi hdim t₀ x₀]
+    exact hnu
+  have hSupportNeg : ∀ᶠ p in nhds (t₀, x₀),
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p < 0 :=
+    hSupportContinuous.eventually (isOpen_Iio.mem_nhds hSupportNegAt)
+  have hScalarSubSupportAt :=
+    g.scalarCurvature_sub_spacetimeSupport_pos_at_bad_contact
+      cov hcov hLevi hdim hK ht₀ x₀ hnu hscalar hdefect
+  have hScalarSubSupport : ∀ᶠ p in nhds (t₀, x₀),
+      0 < g.scalarCurvature cov hcov p.1 p.2 -
+        g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p :=
+    (hScalarContinuous.sub hSupportContinuous).eventually
+      (isOpen_Ioi.mem_nhds hScalarSubSupportAt)
+  exact g.hamiltonIveySupportedDefect_isLocalMin cov hcov hLevi hdim
+    K t₀ x₀ hmin hnuSupport hSupportNeg hScalarSubSupport
+
 /-- Hamilton--Ivey pinching for the genuine geometric curvature spectrum,
 from the scalar lower barrier and the parabolic defect inequality supplied by
 curvature evolution and the least-eigenvalue support construction. -/
