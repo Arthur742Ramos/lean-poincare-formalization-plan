@@ -127,6 +127,11 @@ def matrixContraction (A S : Matrix ι ι ℝ) : ℝ :=
   ∑ i, ∑ j, A i j * S i j
 
 omit [DecidableEq ι] in
+@[simp] theorem matrixContraction_smul_left (c : ℝ) (A S : Matrix ι ι ℝ) :
+    matrixContraction (c • A) S = c * matrixContraction A S := by
+  simp [matrixContraction, Finset.mul_sum, mul_assoc]
+
+omit [DecidableEq ι] in
 /-- Product rule for a double finite matrix contraction. -/
 theorem hasDerivAt_matrixContraction
     {A S : ℝ → Matrix ι ι ℝ} {Adot Sdot : Matrix ι ι ℝ} {t : ℝ}

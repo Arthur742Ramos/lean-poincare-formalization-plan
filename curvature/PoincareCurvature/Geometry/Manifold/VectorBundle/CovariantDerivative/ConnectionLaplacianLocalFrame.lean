@@ -2,6 +2,7 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacian
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions
 public import Mathlib.LinearAlgebra.TensorProduct.Basis
 
 /-!
@@ -241,5 +242,72 @@ theorem connectionLaplacian_eq_sum_localFrame_inverseGram
   simp only [TensorProduct.lift.tmul, LinearMap.coe_mk, AddHom.coe_mk,
     LinearMapClass.map_smul]
   rfl
+
+/-- Contraction of any covariant two-tensor with the canonical inverse metric,
+expressed in an arbitrary genuine local frame. -/
+theorem bilinearContraction_eq_sum_localFrame_inverseGram
+    {x : M} (B : TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (b : Module.Basis ι ℝ E) (hx : x ∈ e.baseSet) :
+    TensorProduct.lift B (InnerProductSpace.canonicalCovariantTensor (TM x)) =
+      ∑ i : ι, ∑ j : ι,
+        localFrameInverseGramMatrix (I := I) e b x i j *
+          B (e.localFrame b i x) (e.localFrame b j x) := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  rw [canonicalCovariantTensor_eq_sum_localFrame_inverseGram
+    (I := I) (E := E) e b hx, map_sum]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rw [map_sum]
+  apply Finset.sum_congr rfl
+  intro j hj
+  simp only [TensorProduct.lift.tmul, LinearMapClass.map_smul, smul_eq_mul]
+
+/-- Scalar curvature in an arbitrary genuine local frame is the contraction
+of the actual Ricci tensor with the inverse Gram matrix. -/
+theorem scalarCurvature_eq_sum_localFrame_inverseGram
+    (cov : CovariantDerivative I E TM)
+    [cov.ContMDiffCovariantDerivative 1]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (b : Module.Basis ι ℝ E) {x : M} (hx : x ∈ e.baseSet) :
+    scalarCurvature (cov := cov) x =
+      ∑ i : ι, ∑ j : ι,
+        localFrameInverseGramMatrix (I := I) e b x i j *
+          ricciCurvature (cov := cov) x
+            (e.localFrame b i x) (e.localFrame b j x) := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let B : TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ := ricciCurvature (cov := cov) x
+  have hON :
+      TensorProduct.lift B (InnerProductSpace.canonicalCovariantTensor (TM x)) =
+        ∑ i : Fin (Module.finrank ℝ (TM x)),
+          B ((stdOrthonormalBasis ℝ (TM x)) i)
+            ((stdOrthonormalBasis ℝ (TM x)) i) := by
+    rw [InnerProductSpace.canonicalCovariantTensor_eq_sum
+      (TM x) (stdOrthonormalBasis ℝ (TM x)), map_sum]
+    apply Finset.sum_congr rfl
+    intro i hi
+    rfl
+  calc
+    scalarCurvature (cov := cov) x =
+        ∑ i : Fin (Module.finrank ℝ (TM x)),
+          B ((stdOrthonormalBasis ℝ (TM x)) i)
+            ((stdOrthonormalBasis ℝ (TM x)) i) := by
+              rw [scalarCurvature_eq_sum]
+    _ = TensorProduct.lift B (InnerProductSpace.canonicalCovariantTensor (TM x)) := hON.symm
+    _ = ∑ i : ι, ∑ j : ι,
+        localFrameInverseGramMatrix (I := I) e b x i j *
+          B (e.localFrame b i x) (e.localFrame b j x) := by
+            exact bilinearContraction_eq_sum_localFrame_inverseGram
+              (I := I) (E := E) B e b hx
+    _ = ∑ i : ι, ∑ j : ι,
+        localFrameInverseGramMatrix (I := I) e b x i j *
+          ricciCurvature (cov := cov) x
+            (e.localFrame b i x) (e.localFrame b j x) := rfl
 
 end CovariantDerivative
