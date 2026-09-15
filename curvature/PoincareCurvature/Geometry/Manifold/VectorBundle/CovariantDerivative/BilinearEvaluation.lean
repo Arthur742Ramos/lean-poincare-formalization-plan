@@ -209,4 +209,149 @@ theorem realLineCovariantDerivative_bilinear_self_of_covariantDerivative_eq_zero
   rw [realLineCovariantDerivative_bilinear_self cov hh hV u, hparallel]
   simp
 
+/-- At a first-order parallel contact field, the scalar Hessian of an
+evaluated two-tensor equals the covariant Hessian of the tensor, provided the
+two-tensor annihilates the contact vector in both slots.  The kernel
+hypotheses are exactly what removes the second jet of the chosen extension. -/
+theorem scalarHessian_bilinear_self_eq_covariantHessian_of_contactKernel
+    (cov : CovariantDerivative I E TM)
+    (h : ∀ x : M, T₂ x) (V : ∀ x : M, TM x) (x : M)
+    (hh : ∀ y, MDiffAt
+      (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) z (h z)) y)
+    (hV : ∀ y, MDiffAt (T% V) y)
+    (hfirst : MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) y
+        (covariantTwoTensorCovariantDerivative cov h y)) x)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) (fun z => h z (V z) (V z)) y)) x)
+    (hsecondV : ∀ z : TM x, MDiffAt
+      (T% (fun y => cov V y
+        (smoothExtend (I := I) (F := E) (V := TM) x z y))) x)
+    (hparallel : cov V x = 0)
+    (hkernelLeft : ∀ w : TM x, h x w (V x) = 0)
+    (hkernelRight : ∀ w : TM x, h x (V x) w = 0)
+    (u z : TM x) :
+    scalarHessian cov (fun y => h y (V y) (V y)) x u z =
+      covariantHessianTwoTensor cov h x u z (V x) (V x) := by
+  let f : M → ℝ := fun y => h y (V y) (V y)
+  let A : ∀ y : M, T₃ y :=
+    covariantTwoTensorCovariantDerivative cov h
+  let W : ∀ y : M, TM y :=
+    smoothExtend (I := I) (F := E) (V := TM) x z
+  let D : ∀ y : M, TM y := fun y => cov V y (W y)
+  let q₁ : M → ℝ := fun y => A y (W y) (V y) (V y)
+  let q₂ : M → ℝ := fun y => h y (D y) (V y)
+  let q₃ : M → ℝ := fun y => h y (V y) (D y)
+  have hW : ∀ y, MDiffAt (T% W) y := by
+    intro y
+    exact ((smoothExtend_contMDiff_two
+      (I := I) (F := E) (V := TM) x z).of_le (by simp) y).mdifferentiableAt one_ne_zero
+  have hDx : MDiffAt (T% D) x := by
+    simpa [D, W] using hsecondV z
+  have hDzero : D x = 0 := by
+    simp [D, W, hparallel]
+  have heval : (fun y => scalarDifferential (I := I) f y (W y)) =
+      q₁ + q₂ + q₃ := by
+    funext y
+    have hy := realLineCovariantDerivative_bilinear_self
+      cov (hh y) (hV y) (W y)
+    change scalarDifferential (I := I) f y (W y) = _ at hy
+    simpa [f, A, D, q₁, q₂, q₃] using hy
+  have htermOne : MDiffAt q₁ x := by
+    have hAW := hfirst.clm_bundle_apply (hW x)
+    have hAWV := hAW.clm_bundle_apply (hV x)
+    have htotal := hAWV.clm_bundle_apply (hV x)
+    have ht :=
+      ((trivializationAt ℝ (Bundle.Trivial M ℝ) x).mdifferentiableAt_section_iff
+        I q₁ (FiberBundle.mem_baseSet_trivializationAt' x)).mp htotal
+    simpa [Bundle.Trivial.eq_trivialization M ℝ, q₁, A] using ht
+  have htermTwo : MDiffAt q₂ x := by
+    have hhD := (hh x).clm_bundle_apply hDx
+    have htotal := hhD.clm_bundle_apply (hV x)
+    have ht :=
+      ((trivializationAt ℝ (Bundle.Trivial M ℝ) x).mdifferentiableAt_section_iff
+        I q₂ (FiberBundle.mem_baseSet_trivializationAt' x)).mp htotal
+    simpa [Bundle.Trivial.eq_trivialization M ℝ, q₂] using ht
+  have htermThree : MDiffAt q₃ x := by
+    have hhV := (hh x).clm_bundle_apply (hV x)
+    have htotal := hhV.clm_bundle_apply hDx
+    have ht :=
+      ((trivializationAt ℝ (Bundle.Trivial M ℝ) x).mdifferentiableAt_section_iff
+        I q₃ (FiberBundle.mem_baseSet_trivializationAt' x)).mp htotal
+    simpa [Bundle.Trivial.eq_trivialization M ℝ, q₃] using ht
+  have hOne := realLineCovariantDerivative_trilinear
+    cov hfirst (hW x) (hV x) (hV x) u
+  have hTwo := realLineCovariantDerivative_bilinear
+    cov (hh x) hDx (hV x) u
+  have hThree := realLineCovariantDerivative_bilinear
+    cov (hh x) (hV x) hDx u
+  have hCorrection :=
+    realLineCovariantDerivative_bilinear_self_of_covariantDerivative_eq_zero
+      cov (hh x) (hV x) hparallel (cov W x u)
+  have hCorrection' : scalarDifferential (I := I) f x (cov W x u) =
+      A x (cov W x u) (V x) (V x) := by
+    simpa [f, A, scalarDifferential, realLineCovariantDerivative] using hCorrection
+  have hCorrection'' : mvfderiv (I := I) f x (cov W x u) =
+      A x (cov W x u) (V x) (V x) := by
+    simpa only [scalarDifferential_apply] using hCorrection'
+  rw [scalarHessian_apply_of_mdifferentiableAt cov f hdf u z]
+  change mvfderiv (I := I)
+      (fun y => scalarDifferential (I := I) f y (W y)) x u -
+      scalarDifferential (I := I) f x (cov W x u) = _
+  rw [heval]
+  rw [mvfderiv_add (I := I) (htermOne.add htermTwo) htermThree,
+    mvfderiv_add (I := I) htermOne htermTwo]
+  change realLineCovariantDerivative (I := I) (M := M)
+      q₁ x u +
+      realLineCovariantDerivative (I := I) (M := M)
+        q₂ x u +
+      realLineCovariantDerivative (I := I) (M := M)
+        q₃ x u -
+      scalarDifferential (I := I) f x (cov W x u) = _
+  dsimp [q₁, q₂, q₃]
+  rw [hOne, hTwo, hThree, hCorrection'']
+  rw [hDzero, hparallel]
+  simp only [zero_apply, map_zero, zero_add]
+  rw [hkernelLeft, hkernelRight]
+  simp [A, W, covariantHessianTwoTensor, smoothExtend_apply]
+
+/-- Metric trace of the contact-Hessian identity: the scalar Laplacian of the
+evaluated quadratic form is the connection Laplacian of the underlying
+two-tensor evaluated on the contact vector. -/
+theorem scalarLaplacian_bilinear_self_eq_connectionLaplacian_of_contactKernel
+    (cov : CovariantDerivative I E TM)
+    (h : ∀ x : M, T₂ x) (V : ∀ x : M, TM x) (x : M)
+    (hh : ∀ y, MDiffAt
+      (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) z (h z)) y)
+    (hV : ∀ y, MDiffAt (T% V) y)
+    (hfirst : MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) y
+        (covariantTwoTensorCovariantDerivative cov h y)) x)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) (fun z => h z (V z) (V z)) y)) x)
+    (hsecondV : ∀ z : TM x, MDiffAt
+      (T% (fun y => cov V y
+        (smoothExtend (I := I) (F := E) (V := TM) x z y))) x)
+    (hparallel : cov V x = 0)
+    (hkernelLeft : ∀ w : TM x, h x w (V x) = 0)
+    (hkernelRight : ∀ w : TM x, h x (V x) w = 0) :
+    scalarLaplacian cov (fun y => h y (V y) (V y)) x =
+      connectionLaplacian cov h x (V x) (V x) := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  rw [scalarLaplacian_eq_sum_orthonormalBasis cov
+      (fun y => h y (V y) (V y)) x b,
+    connectionLaplacian_eq_sum_orthonormalBasis cov h x b]
+  simp only [sum_apply]
+  apply Finset.sum_congr rfl
+  intro i _
+  exact scalarHessian_bilinear_self_eq_covariantHessian_of_contactKernel
+    cov h V x hh hV hfirst hdf hsecondV hparallel
+      hkernelLeft hkernelRight (b i) (b i)
+
 end CovariantDerivative
