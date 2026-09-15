@@ -188,6 +188,35 @@ theorem curvatureNu_eq_inner_ricciComplement_eigenvector
   have hinner := congrArg (fun z : TM x => Inner.inner ℝ z (b 2)) happ
   simpa [b, real_inner_smul_left] using hinner.symm
 
+/-- The selected least-curvature vector satisfies the full eigenvector
+equation, not merely the corresponding Rayleigh-quotient identity. -/
+theorem curvatureEndomorphismApply_curvatureNuEigenvector
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    g.curvatureEndomorphismApply cov hcov t x
+        (g.curvatureNuEigenvector cov hcov hLevi hdim t x) =
+      g.curvatureNu cov hcov hLevi hdim t x •
+        g.curvatureNuEigenvector cov hcov hLevi hdim t x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+  change CovariantDerivative.ricciComplementEndomorphism (cov t) x
+      (CovariantDerivative.ricciComplementEigenbasis
+        (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 2) =
+    CovariantDerivative.ricciComplementEigenvalues
+      (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 2 •
+      CovariantDerivative.ricciComplementEigenbasis
+        (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 2
+  exact CovariantDerivative.ricciComplementEndomorphism_apply_eigenbasis
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 2
+
 /-- Every unit vector gives an upper support for the least genuine curvature
 eigenvalue. -/
 theorem curvatureNu_le_inner_ricciComplement_of_norm_eq_one

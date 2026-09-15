@@ -123,6 +123,29 @@ theorem scalarDifferential_curvatureNuContactMetricSquare_eq_zero
   exact g.mvfderiv_curvatureNuContactMetricSquare_eq_zero
     cov hcov hLevi hdim t₀ x₀ u
 
+/-- The curvature quadratic form shifted by `ν` times the metric annihilates
+the contact eigenvector in every tested direction.  This is the algebraic
+fact that cancels the second spatial jet of the extended vector field. -/
+theorem curvatureNu_shiftedContactKernel
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t₀ : ℝ) (x₀ : M) (w : TM x₀) :
+    (g t₀).inner x₀ w
+        (g.curvatureEndomorphismApply cov hcov t₀ x₀
+          (g.curvatureNuEigenvector cov hcov hLevi hdim t₀ x₀)) -
+      g.curvatureNu cov hcov hLevi hdim t₀ x₀ *
+        (g t₀).inner x₀ w
+          (g.curvatureNuEigenvector cov hcov hLevi hdim t₀ x₀) = 0 := by
+  rw [g.curvatureEndomorphismApply_curvatureNuEigenvector
+    cov hcov hLevi hdim t₀ x₀]
+  rw [map_smul]
+  ring
+
 /-- **Contact quotient-Laplacian identity.**  The assumptions are only the
 second-order regularity needed to form the three scalar Laplacians and an open
 neighborhood on which the contact vector remains nonzero.  The quotient
