@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.ContractedBianchi
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.RaisedRicci
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorDivergence
 
 /-!
@@ -355,6 +356,22 @@ theorem curvatureCovariantDerivativeScalarTrace_eq_two_mul_ricciDivergenceTrace
   exact curvatureCovariantDerivativeInner_doubleContraction cov x hT hmetric
     (stdOrthonormalBasis ℝ (TangentSpace I x)) w
 
+/-- The scalar trace/differentiation bridge follows from the general theorem
+that trace commutes with the induced endomorphism connection, once the
+covariant derivative of raised Ricci is identified with the corresponding
+double contraction of the differentiated curvature tensor. -/
+theorem scalarDifferential_scalarCurvature_eq_curvatureTrace_of_raisedRicciTrace
+    [IsManifold I 1 M]
+    (x : M) (hRicci : raisedRicciEndomorphismMDiffAt cov x)
+    (hRaisedTrace : ∀ w : TangentSpace I x,
+      raisedRicciTraceCovariantDerivative cov x w =
+        curvatureCovariantDerivativeScalarTrace cov x w)
+    (w : TangentSpace I x) :
+    scalarDifferential (I := I) (scalarCurvature (cov := cov)) x w =
+      curvatureCovariantDerivativeScalarTrace cov x w := by
+  rw [scalarDifferential_scalarCurvature_eq_raisedRicciTrace cov x hRicci w]
+  exact hRaisedTrace w
+
 /-- Once differentiation is identified with the two canonical curvature
 traces, the numerical double contraction above is exactly the contracted
 second Bianchi identity `div Ric = (1/2) dR`.  The remaining hypotheses name
@@ -382,5 +399,28 @@ theorem ricciDivergence_eq_half_scalarDifferential_of_trace_bridges
     (1 / 2 : ℝ) * scalarDifferential (I := I)
       (scalarCurvature (cov := cov)) x w
   linarith
+
+/-- Contracted Bianchi with the scalar differential no longer postulated as
+a primitive trace bridge.  Its scalar side is discharged by the proved
+trace/connection theorem; the two remaining hypotheses are the explicit
+curvature-to-Ricci covariant-derivative contractions. -/
+theorem ricciDivergence_eq_half_scalarDifferential_of_curvature_contractions
+    [IsManifold I 1 M]
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+    (x : M) (hT : cov.torsion = 0) (hmetric : cov.IsMetricCompatibleTangent)
+    (hRicci : raisedRicciEndomorphismMDiffAt cov x)
+    (hRaisedTrace : ∀ w : TangentSpace I x,
+      raisedRicciTraceCovariantDerivative cov x w =
+        curvatureCovariantDerivativeScalarTrace cov x w)
+    (hRicciTrace : ∀ w : TangentSpace I x,
+      ricciDivergence cov x w =
+        curvatureCovariantDerivativeRicciDivergenceTrace cov x w) :
+    ricciDivergence cov x =
+      (1 / 2 : ℝ) • scalarDifferential (I := I)
+        (scalarCurvature (cov := cov)) x := by
+  exact ricciDivergence_eq_half_scalarDifferential_of_trace_bridges cov x hT hmetric
+    (scalarDifferential_scalarCurvature_eq_curvatureTrace_of_raisedRicciTrace
+      cov x hRicci hRaisedTrace) hRicciTrace
 
 end CovariantDerivative
