@@ -24,6 +24,7 @@ import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Conn
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ScalarLaplacian
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ScalarLaplacianMaximum
 import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckCorrectionRegularity
+import PoincareCurvature.Geometry.Manifold.RicciFlow.MetricInverseVariation
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarEvolution
 import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckReactionAssembly
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricReactionPicard
