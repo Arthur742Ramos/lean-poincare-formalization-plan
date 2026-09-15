@@ -1,7 +1,8 @@
 module
 
-public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacian
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLeibniz
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ScalarLaplacian
 
 /-!
 # Intrinsic divergence of covariant tensors
@@ -35,6 +36,51 @@ namespace CovariantDerivative
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "T₁" => (fun x : M => TM x →L[ℝ] ℝ)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
+
+/-- The Riemannian metric as a covariant two-tensor section. -/
+def riemannianMetricCovariantTwoTensor : ∀ x : M, T₂ x :=
+  fun x => (InnerProductSpace.toDual ℝ (TM x)).toContinuousLinearMap
+
+@[simp] theorem riemannianMetricCovariantTwoTensor_apply
+    (x : M) (u v : TM x) :
+    riemannianMetricCovariantTwoTensor (I := I) (M := M) x u v = inner ℝ u v :=
+  rfl
+
+private theorem riemannianMetricCovariantTwoTensor_mdifferentiableAt
+    [IsContMDiffRiemannianBundle I 1 E TM] (x : M) :
+    MDiffAt (fun y => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) y
+      (riemannianMetricCovariantTwoTensor (I := I) (M := M) y)) x := by
+  rcases (show IsContMDiffRiemannianBundle I 1 E TM from inferInstance).exists_contMDiff with
+    ⟨g, hg, hinner⟩
+  have heq : g = riemannianMetricCovariantTwoTensor (I := I) (M := M) := by
+    funext y
+    ext u v
+    exact (hinner y u v).symm
+  rw [← heq]
+  exact (hg x).mdifferentiableAt one_ne_zero
+
+/-- Metric compatibility is exactly the statement that the induced
+connection annihilates the Riemannian metric tensor. -/
+theorem covariantTwoTensorCovariantDerivative_riemannianMetric_eq_zero
+    [IsContMDiffRiemannianBundle I 1 E TM]
+    (cov : CovariantDerivative I E TM) (hmetric : cov.IsMetricCompatibleTangent)
+    (x : M) (X u v : TM x) :
+    covariantTwoTensorCovariantDerivative cov
+        (riemannianMetricCovariantTwoTensor (I := I) (M := M)) x X u v = 0 := by
+  rw [covariantTwoTensorCovariantDerivative_apply_of_mdifferentiableAt cov
+    (riemannianMetricCovariantTwoTensor_mdifferentiableAt (I := I) (E := E) x)]
+  have h := hmetric
+    (x := x)
+    (σ := smoothExtend (I := I) (F := E) (V := TM) x u)
+    (τ := smoothExtend (I := I) (F := E) (V := TM) x v)
+    (by
+      exact ((smoothExtend_contMDiff_one (I := I) (F := E) (V := TM) x u) x).mdifferentiableAt
+        one_ne_zero)
+    (by
+      exact ((smoothExtend_contMDiff_one (I := I) (F := E) (V := TM) x v) x).mdifferentiableAt
+        one_ne_zero) X
+  simp only [riemannianMetricCovariantTwoTensor_apply, smoothExtend_apply] at h ⊢
+  linarith
 
 /-- The metric trace of a covariant two-tensor, defined by contraction with
 the canonical inverse metric tensor. -/
@@ -159,6 +205,56 @@ theorem covariantTwoTensorDivergence_eq_sum_orthonormalBasis
   rw [covariantTwoTensorDivergence_eq_sum_orthonormalBasis cov h x
     (stdOrthonormalBasis ℝ (TM x))]
   simp
+
+/-- A metric-compatible connection has divergence-free metric tensor. -/
+theorem covariantTwoTensorDivergence_riemannianMetric_eq_zero
+    [IsContMDiffRiemannianBundle I 1 E TM]
+    (cov : CovariantDerivative I E TM) (hmetric : cov.IsMetricCompatibleTangent)
+    (x : M) :
+    covariantTwoTensorDivergence cov
+        (riemannianMetricCovariantTwoTensor (I := I) (M := M)) x = 0 := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  rw [covariantTwoTensorDivergence_eq_sum_orthonormalBasis cov
+    (riemannianMetricCovariantTwoTensor (I := I) (M := M)) x
+    (stdOrthonormalBasis ℝ (TM x))]
+  apply Finset.sum_eq_zero
+  intro i hi
+  ext v
+  exact covariantTwoTensorCovariantDerivative_riemannianMetric_eq_zero
+    cov hmetric x _ _ v
+
+/-- For a metric-compatible connection, `div(f g) = df`.  This is the
+geometric Leibniz identity used to pass from contracted Bianchi to the
+divergence-free Einstein tensor. -/
+theorem covariantTwoTensorDivergence_smul_riemannianMetric
+    [IsContMDiffRiemannianBundle I 1 E TM]
+    (cov : CovariantDerivative I E TM) (hmetric : cov.IsMetricCompatibleTangent)
+    (f : M → ℝ) (x : M) (hf : MDiffAt f x) :
+    covariantTwoTensorDivergence cov
+        (f • riemannianMetricCovariantTwoTensor (I := I) (M := M)) x =
+      scalarDifferential (I := I) f x := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  rw [covariantTwoTensorDivergence_eq_sum_orthonormalBasis cov
+    (f • riemannianMetricCovariantTwoTensor (I := I) (M := M)) x b]
+  rw [covariantTwoTensorCovariantDerivative_smul_function cov
+    (riemannianMetricCovariantTwoTensor_mdifferentiableAt (I := I) (E := E) x) hf]
+  ext v
+  simp only [sum_apply, add_apply, smul_apply, scalarTensorLeibnizTerm,
+    ContinuousLinearMap.smulRight_apply, riemannianMetricCovariantTwoTensor_apply,
+    covariantTwoTensorCovariantDerivative_riemannianMetric_eq_zero cov hmetric,
+    smul_zero, zero_add, scalarDifferential_apply]
+  calc
+    (∑ i, scalarDifferential (I := I) f x (b i) • inner ℝ (b i) v) =
+        ∑ i, inner ℝ (b i) v • scalarDifferential (I := I) f x (b i) := by
+      apply Finset.sum_congr rfl
+      intro i hi
+      simp [smul_eq_mul, mul_comm]
+    _ = scalarDifferential (I := I) f x
+          (∑ i, inner ℝ (b i) v • b i) := by simp
+    _ = scalarDifferential (I := I) f x v := by rw [b.sum_repr' v]
 
 /-- The double divergence `div(div h)` of a covariant two-tensor. -/
 def covariantTwoTensorDoubleDivergence
