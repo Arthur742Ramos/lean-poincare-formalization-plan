@@ -26,7 +26,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
   [IsManifold I ∞ M]
-  [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
+  [hContTangent : ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
   [RiemannianBundle (TangentSpace I : M → Type _)]
 
 local notation "TM" => (TangentSpace I : M → Type _)
@@ -84,6 +84,109 @@ theorem scalarCurvature_eq_sum_ricci_orthonormalBasis
       real_inner_comm _ _
     _ = ricciCurvature (cov := cov) x (b i) (b i) :=
       inner_raisedRicciEndomorphism cov x (b i) (b i)
+
+/-! ## Differentiating the Ricci trace
+
+The tangent bundle carries both its model-space norm and the norm induced by
+the Riemannian metric.  They induce the same finite-dimensional topology but
+are not definitionally equal in Lean.  The next two definitions keep the
+model-space choice internal, so the mathematical statement does not expose an
+implementation-dependent norm instance. -/
+
+section DifferentiatedTrace
+
+variable [IsManifold I 1 M]
+
+/-- The fibre trace of the covariant derivative of raised Ricci. -/
+def raisedRicciTraceCovariantDerivative
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (x : M) (u : TM x) : ℝ := by
+  letI nTM : ∀ y : M, NormedAddCommGroup (TM y) := fun y =>
+    PoincareCurvature.instNormedAddCommGroupTangentSpace I y
+  letI sTM : ∀ y : M, NormedSpace ℝ (TM y) := fun _ =>
+    PoincareCurvature.instNormedSpaceTangentSpace I _
+  letI fTM : ∀ y : M, FiniteDimensional ℝ (TM y) := fun _ =>
+    inferInstanceAs (FiniteDimensional ℝ E)
+  let A : ∀ y : M, TM y →L[ℝ] TM y := fun y => @raisedRicciEndomorphism
+    E _ _ _ _ H _ I M _ _ _ _ hContTangent _ cov _ y
+  let hContOne : ContMDiffVectorBundle 1 E TM I :=
+    @ContMDiffVectorBundle.of_le
+      ℝ M E TM _ E _ _ H _ I _ _ _ _ _ _ _ _
+      TangentSpace.fiberBundle TangentSpace.vectorBundle
+      1 2 one_le_two hContTangent
+  let d := @inducedHomCovariantDerivative
+    E _ _ H _ I M _ _ _ _ _ _
+    E E _ _ _ _ _
+    TM TM _ _ nTM sTM fTM nTM sTM
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    hContTangent hContOne cov cov
+  exact LinearMap.trace ℝ (TM x) ((d A x u).toLinearMap)
+
+/-- Regularity of the genuine metric-raised Ricci endomorphism at a point. -/
+def raisedRicciEndomorphismMDiffAt
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (x : M) : Prop := by
+  letI nTM : ∀ y : M, NormedAddCommGroup (TM y) := fun y =>
+    PoincareCurvature.instNormedAddCommGroupTangentSpace I y
+  letI sTM : ∀ y : M, NormedSpace ℝ (TM y) := fun _ =>
+    PoincareCurvature.instNormedSpaceTangentSpace I _
+  letI fTM : ∀ y : M, FiniteDimensional ℝ (TM y) := fun _ =>
+    inferInstanceAs (FiniteDimensional ℝ E)
+  let A : ∀ y : M, TM y →L[ℝ] TM y := fun y => @raisedRicciEndomorphism
+    E _ _ _ _ H _ I M _ _ _ _ hContTangent _ cov _ y
+  exact MDiffAt
+    (fun y => TotalSpace.mk' (E →L[ℝ] E)
+      (E := fun z : M => TM z →L[ℝ] TM z) y (A y)) x
+
+/-- Differentiating the geometric identity `tr Ric♯ = R` shows that the
+scalar differential is the trace of the induced covariant derivative of
+raised Ricci. -/
+theorem scalarDifferential_scalarCurvature_eq_raisedRicciTrace
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (x : M) (hRicci : raisedRicciEndomorphismMDiffAt cov x) (u : TM x) :
+    scalarDifferential (I := I) (scalarCurvature (cov := cov)) x u =
+      raisedRicciTraceCovariantDerivative cov x u := by
+  letI nTM : ∀ y : M, NormedAddCommGroup (TM y) := fun y =>
+    PoincareCurvature.instNormedAddCommGroupTangentSpace I y
+  letI sTM : ∀ y : M, NormedSpace ℝ (TM y) := fun _ =>
+    PoincareCurvature.instNormedSpaceTangentSpace I _
+  letI fTM : ∀ y : M, FiniteDimensional ℝ (TM y) := fun _ =>
+    inferInstanceAs (FiniteDimensional ℝ E)
+  let A : ∀ y : M, TM y →L[ℝ] TM y := fun y => @raisedRicciEndomorphism
+    E _ _ _ _ H _ I M _ _ _ _ hContTangent _ cov _ y
+  let hContOne : ContMDiffVectorBundle 1 E TM I :=
+    @ContMDiffVectorBundle.of_le
+      ℝ M E TM _ E _ _ H _ I _ _ _ _ _ _ _ _
+      TangentSpace.fiberBundle TangentSpace.vectorBundle
+      1 2 one_le_two hContTangent
+  let d := @inducedHomCovariantDerivative
+    E _ _ H _ I M _ _ _ _ _ _
+    E E _ _ _ _ _
+    TM TM _ _ nTM sTM fTM nTM sTM
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    hContTangent hContOne cov cov
+  let trA : M → ℝ := @endomorphismTrace
+    E _ _ M _ _ TM nTM sTM _
+    TangentSpace.fiberBundle TangentSpace.vectorBundle A
+  change MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TM z →L[ℝ] TM z) y (A y)) x at hRicci
+  change scalarDifferential (I := I) (scalarCurvature (cov := cov)) x u =
+    LinearMap.trace ℝ (TM x) ((d A x u).toLinearMap)
+  have heq : scalarCurvature (cov := cov) = trA := by
+    funext y
+    exact (endomorphismTrace_raisedRicciEndomorphism_eq_scalarCurvature
+      cov y).symm
+  change mvfderiv (I := I) (scalarCurvature (cov := cov)) x u = _
+  rw [heq]
+  exact @mvfderiv_endomorphismTrace_eq_trace_inducedHom
+    E E _ _ _ _ H _ I M _ _ _ _ _ _ _ _
+    TM nTM sTM _ TangentSpace.fiberBundle TangentSpace.vectorBundle
+    hContTangent _ fTM cov A x hRicci u
+
+end DifferentiatedTrace
 
 /-- Ricci curvature is the first/output trace of the actual curvature tensor
 in every orthonormal basis. -/
