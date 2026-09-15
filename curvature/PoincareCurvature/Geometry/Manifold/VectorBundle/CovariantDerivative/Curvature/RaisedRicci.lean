@@ -204,6 +204,115 @@ def raisedRicciEndomorphismMDiffAt
     (fun y => TotalSpace.mk' (E →L[ℝ] E)
       (E := fun z : M => TM z →L[ℝ] TM z) y (A y)) x
 
+/-- Evaluation of the induced covariant derivative of raised Ricci obeys the
+intrinsic endomorphism product rule. -/
+theorem raisedRicciCovariantDerivativeApply_eq
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (x : M) (hRicci : raisedRicciEndomorphismMDiffAt cov x)
+    (X u : TM x) :
+    raisedRicciCovariantDerivativeApply cov x X u =
+      cov (fun y => raisedRicciEndomorphism cov y
+        (smoothExtend (I := I) (F := E) (V := TM) x u y)) x X -
+      raisedRicciEndomorphism cov x
+        (cov (smoothExtend (I := I) (F := E) (V := TM) x u) x X) := by
+  unfold raisedRicciCovariantDerivativeApply
+  unfold raisedRicciEndomorphismMDiffAt at hRicci
+  dsimp only
+  dsimp only [inducedHomCovariantDerivative]
+  split
+  next _ => rfl
+  next h => exact (h hRicci).elim
+
+/-- Raising the second Ricci index commutes with covariant differentiation
+for a metric-compatible connection.  Both sides use the genuine induced
+connections; no differentiated-curvature identity is assumed here. -/
+theorem inner_raisedRicciCovariantDerivativeApply
+    [IsContMDiffRiemannianBundle I 1 E TM]
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (x : M) (hRicci : raisedRicciEndomorphismMDiffAt cov x)
+    (hRicciTwo : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := fun z : M => TM z →L[ℝ] TM z →L[ℝ] ℝ) y
+        (ricciCovariantTwoTensor cov y)) x)
+    (X u v : TM x) :
+    inner ℝ (raisedRicciCovariantDerivativeApply cov x X u) v =
+      covariantTwoTensorCovariantDerivative cov
+        (ricciCovariantTwoTensor cov) x X u v := by
+  let σ : ∀ y : M, TM y := smoothExtend (I := I) (F := E) (V := TM) x u
+  let τ : ∀ y : M, TM y := smoothExtend (I := I) (F := E) (V := TM) x v
+  let A : ∀ y : M, TM y →L[ℝ] TM y := raisedRicciEndomorphism cov
+  have hσ : MDiffAt (T% σ) x :=
+    ((smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x u).of_le
+      (by simp) x).mdifferentiableAt one_ne_zero
+  have hτ : MDiffAt (T% τ) x :=
+    ((smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x v).of_le
+      (by simp) x).mdifferentiableAt one_ne_zero
+  have hA : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TM z →L[ℝ] TM z) y (A y)) x := by
+    unfold raisedRicciEndomorphismMDiffAt at hRicci
+    simpa [A] using hRicci
+  have hAσ : MDiffAt (T% (fun y => A y (σ y))) x := hA.clm_bundle_apply hσ
+  have hmetricEq := hmetric hAσ hτ X
+  have hmetricEq' :
+      mvfderiv (I := I) (fun y => inner ℝ (A y (σ y)) (τ y)) x X =
+        inner ℝ (cov (fun y => A y (σ y)) x X) v +
+          inner ℝ (A x u) (cov τ x X) := by
+    simpa [σ, τ, smoothExtend_apply] using hmetricEq
+  have htwo := covariantTwoTensorCovariantDerivative_apply_of_mdifferentiableAt
+    cov hRicciTwo X u v
+  have hfun : (fun y => ricciCovariantTwoTensor cov y (σ y) (τ y)) =
+      (fun y => inner ℝ (A y (σ y)) (τ y)) := by
+    funext y
+    exact (inner_raisedRicciEndomorphism cov y (σ y) (τ y)).symm
+  change covariantTwoTensorCovariantDerivative cov
+      (ricciCovariantTwoTensor cov) x X u v =
+    mvfderiv (I := I) (fun y => ricciCovariantTwoTensor cov y (σ y) (τ y)) x X -
+      ricciCovariantTwoTensor cov x (cov σ x X) v -
+      ricciCovariantTwoTensor cov x u (cov τ x X) at htwo
+  rw [hfun] at htwo
+  rw [ricciCovariantTwoTensor_apply, ricciCovariantTwoTensor_apply] at htwo
+  rw [← inner_raisedRicciEndomorphism cov x (cov σ x X) v,
+    ← inner_raisedRicciEndomorphism cov x u (cov τ x X)] at htwo
+  have hprod := raisedRicciCovariantDerivativeApply_eq cov x hRicci X u
+  have hprodInner := congrArg (fun z : TM x => inner ℝ z v) hprod
+  simp only [inner_sub_left] at hprodInner
+  change inner ℝ (raisedRicciCovariantDerivativeApply cov x X u) v =
+    inner ℝ (cov (fun y => A y (σ y)) x X) v -
+      inner ℝ (A x (cov σ x X)) v at hprodInner
+  rw [htwo, hmetricEq']
+  linarith
+
+/-- The trace of the covariant derivative of raised Ricci is the metric trace
+of the covariant derivative of the genuine Ricci two-tensor. -/
+theorem raisedRicciTraceCovariantDerivative_eq_sum_ricciDerivative
+    [IsContMDiffRiemannianBundle I 1 E TM]
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (x : M) (hRicci : raisedRicciEndomorphismMDiffAt cov x)
+    (hRicciTwo : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := fun z : M => TM z →L[ℝ] TM z →L[ℝ] ℝ) y
+        (ricciCovariantTwoTensor cov y)) x)
+    (X : TM x) {ι : Type*} [Fintype ι]
+    (b : OrthonormalBasis ι ℝ (TM x)) :
+    raisedRicciTraceCovariantDerivative cov x X =
+      ∑ i, covariantTwoTensorCovariantDerivative cov
+        (ricciCovariantTwoTensor cov) x X (b i) (b i) := by
+  rw [raisedRicciTraceCovariantDerivative_eq_sum_basis cov x X b.toBasis]
+  apply Finset.sum_congr rfl
+  intro i hi
+  change b.toBasis.repr
+      (raisedRicciCovariantDerivativeApply cov x X (b i)) i = _
+  rw [show b.toBasis.repr
+      (raisedRicciCovariantDerivativeApply cov x X (b i)) i =
+      inner ℝ (b i) (raisedRicciCovariantDerivativeApply cov x X (b i)) by
+        exact b.repr_apply_apply _ _]
+  rw [real_inner_comm]
+  exact inner_raisedRicciCovariantDerivativeApply cov hmetric x hRicci hRicciTwo
+    X (b i) (b i)
+
 /-- Differentiating the geometric identity `tr Ric♯ = R` shows that the
 scalar differential is the trace of the induced covariant derivative of
 raised Ricci. -/
