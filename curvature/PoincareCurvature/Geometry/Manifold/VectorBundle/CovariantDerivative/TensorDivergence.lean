@@ -127,6 +127,29 @@ theorem covariantTwoTensorTrace_ricciCurvature_eq_scalarCurvature
     (ricciCurvature (cov := cov)) x (stdOrthonormalBasis ℝ (TM x)),
     scalarCurvature_eq_sum]
 
+/-- The Ricci tensor packaged in the continuous-bilinear tensor bundle.
+Finite dimensionality makes the existing fibrewise linear Ricci maps
+continuous; no projection or symmetrization is used. -/
+def ricciCovariantTwoTensor
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1] :
+    ∀ x : M, T₂ x := fun x =>
+  LinearMap.toContinuousLinearMap
+    { toFun := fun u => LinearMap.toContinuousLinearMap (ricciCurvature (cov := cov) x u)
+      map_add' := by
+        intro u v
+        ext w
+        simp
+      map_smul' := by
+        intro c u
+        ext w
+        simp }
+
+@[simp] theorem ricciCovariantTwoTensor_apply
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (x : M) (u v : TM x) :
+    ricciCovariantTwoTensor cov x u v = ricciCurvature (cov := cov) x u v :=
+  rfl
+
 /-- The divergence of a covector is the metric trace of its induced
 covariant derivative. -/
 def covectorDivergence (cov : CovariantDerivative I E TM)
@@ -255,6 +278,23 @@ theorem covariantTwoTensorDivergence_smul_riemannianMetric
     _ = scalarDifferential (I := I) f x
           (∑ i, inner ℝ (b i) v • b i) := by simp
     _ = scalarDifferential (I := I) f x v := by rw [b.sum_repr' v]
+
+/-- The genuine divergence of the Ricci tensor, formed using the induced
+connection and metric contraction. -/
+def ricciDivergence
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (x : M) : T₁ x :=
+  covariantTwoTensorDivergence cov (ricciCovariantTwoTensor cov) x
+
+/-- Orthonormal-basis evaluation of the genuine Ricci divergence. -/
+theorem ricciDivergence_eq_sum_orthonormalBasis
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (x : M) {ι : Type*} [Fintype ι] (b : OrthonormalBasis ι ℝ (TM x)) :
+    ricciDivergence cov x =
+      ∑ i, covariantTwoTensorCovariantDerivative cov
+        (ricciCovariantTwoTensor cov) x (b i) (b i) := by
+  exact covariantTwoTensorDivergence_eq_sum_orthonormalBasis cov
+    (ricciCovariantTwoTensor cov) x b
 
 /-- The double divergence `div(div h)` of a covariant two-tensor. -/
 def covariantTwoTensorDoubleDivergence
