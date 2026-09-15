@@ -110,6 +110,27 @@ theorem nuProfile_mono_of_le_of_neg_of_scalar_sub_pos
       exact div_pos hRz (sq_pos_of_ne_zero hzneg.ne)
   exact (hmono (Set.left_mem_Icc.mpr hab) (Set.right_mem_Icc.mpr hab) hab').le
 
+/-- The Hamilton--Ivey defect is the least-eigenvalue profile of scalar
+curvature plus its time-dependent normalization. -/
+theorem defect_eq_nuProfile (K t lambda mu nu : ℝ) :
+    defect K t lambda mu nu =
+      nuProfile (scalar lambda mu nu) nu + 3 +
+        Real.log (K / (1 + K * t)) := by
+  rfl
+
+/-- Replacing the least eigenvalue by an upper support increases the defect
+whenever the scalar-minus-support sign is positive. -/
+theorem defect_le_nuProfile_of_upper_support
+    {K t lambda mu nu q : ℝ}
+    (hnuq : nu ≤ q) (hqneg : q < 0)
+    (hscalarq : 0 < scalar lambda mu nu - q) :
+    defect K t lambda mu nu ≤
+      nuProfile (scalar lambda mu nu) q + 3 +
+        Real.log (K / (1 + K * t)) := by
+  rw [defect_eq_nuProfile]
+  gcongr
+  exact nuProfile_mono_of_le_of_neg_of_scalar_sub_pos hnuq hqneg hscalarq
+
 /-- The zeroth-order term in `(partial_t - Delta) defect` at a least-eigenvector. -/
 def reaction (K t lambda mu nu : ℝ) : ℝ :=
   -2 * nu - K / (1 + K * t) +

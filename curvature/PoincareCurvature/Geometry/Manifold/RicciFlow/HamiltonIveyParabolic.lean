@@ -1,6 +1,7 @@
 module
 
 public import HamiltonIveyReaction.Reaction
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveySupportEvolution
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyScalarBarrier
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarParabolicInvariant
 
@@ -73,6 +74,148 @@ def hamiltonIveyReactionTerm
     (g.curvatureLambda cov hcov hLevi hdim t x)
     (g.curvatureMu cov hcov hLevi hdim t x)
     (g.curvatureNu cov hcov hLevi hdim t x)
+
+/-- The smooth test defect obtained by replacing the least eigenvalue with
+its genuine spacetime Rayleigh support while retaining actual scalar
+curvature. -/
+def hamiltonIveySupportedDefect
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (K t₀ : ℝ) (x₀ : M) (p : ℝ × M) : ℝ :=
+  HamiltonIveyReaction.nuProfile
+      (g.scalarCurvature cov hcov p.1 p.2)
+      (g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p) +
+    3 + Real.log (K / (1 + K * p.1))
+
+/-- The supported defect touches the actual Hamilton--Ivey defect at the
+chosen spacetime contact point. -/
+theorem hamiltonIveySupportedDefect_eq_at_contact
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (K t₀ : ℝ) (x₀ : M) :
+    g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t₀ x₀ (t₀, x₀) =
+      g.hamiltonIveyDefect cov hcov hLevi hdim K t₀ x₀ := by
+  rw [hamiltonIveySupportedDefect,
+    g.curvatureNuSpacetimeSupport_eq_at_contact cov hcov hLevi hdim t₀ x₀,
+    hamiltonIveyDefect, HamiltonIveyReaction.defect_eq_nuProfile]
+  simp only [Prod.fst, Prod.snd]
+  rw [HamiltonIveyReaction.scalar]
+  rw [g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim t₀ x₀]
+
+/-- Wherever the Rayleigh support is negative and `R - support` is positive,
+the actual defect lies below its smooth supported representative. -/
+theorem hamiltonIveyDefect_le_supportedDefect
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (K t₀ : ℝ) (x₀ : M) (p : ℝ × M)
+    (hnuSupport : g.curvatureNu cov hcov hLevi hdim p.1 p.2 ≤
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p)
+    (hSupportNeg :
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p < 0)
+    (hScalarSubSupport : 0 < g.scalarCurvature cov hcov p.1 p.2 -
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p) :
+    g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2 ≤
+      g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t₀ x₀ p := by
+  have h := HamiltonIveyReaction.defect_le_nuProfile_of_upper_support
+    (K := K) (t := p.1)
+    (lambda := g.curvatureLambda cov hcov hLevi hdim p.1 p.2)
+    (mu := g.curvatureMu cov hcov hLevi hdim p.1 p.2)
+    (nu := g.curvatureNu cov hcov hLevi hdim p.1 p.2)
+    (q := g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p)
+    hnuSupport hSupportNeg
+  have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim p.1 p.2
+  have hcond : 0 <
+      HamiltonIveyReaction.scalar
+          (g.curvatureLambda cov hcov hLevi hdim p.1 p.2)
+          (g.curvatureMu cov hcov hLevi hdim p.1 p.2)
+          (g.curvatureNu cov hcov hLevi hdim p.1 p.2) -
+        g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p := by
+    rw [HamiltonIveyReaction.scalar, hsum]
+    exact hScalarSubSupport
+  have hout := h hcond
+  simpa [hamiltonIveyDefect, hamiltonIveySupportedDefect,
+    HamiltonIveyReaction.scalar, hsum] using hout
+
+/-- At a bad contact point, the scalar-minus-support sign required for the
+preceding comparison follows from the scalar barrier and the negative defect;
+it is not an additional geometric assumption. -/
+theorem scalarCurvature_sub_spacetimeSupport_pos_at_bad_contact
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    {K t₀ : ℝ} (hK : 0 < K) (ht₀ : 0 ≤ t₀) (x₀ : M)
+    (hnu : g.curvatureNu cov hcov hLevi hdim t₀ x₀ < 0)
+    (hscalar : -3 * (K / (1 + K * t₀)) ≤
+      g.scalarCurvature cov hcov t₀ x₀)
+    (hdefect : g.hamiltonIveyDefect cov hcov hLevi hdim K t₀ x₀ < 0) :
+    0 < g.scalarCurvature cov hcov t₀ x₀ -
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ (t₀, x₀) := by
+  have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim t₀ x₀
+  have hpos := HamiltonIveyReaction.lambda_add_mu_pos_of_defect_neg hK ht₀
+    (g.curvatureLambda_ge_mu cov hcov hLevi hdim t₀ x₀)
+    (g.curvatureMu_ge_nu cov hcov hLevi hdim t₀ x₀) hnu
+    (by simpa [HamiltonIveyReaction.scalar, hsum] using hscalar)
+    (by simpa [hamiltonIveyDefect] using hdefect)
+  rw [g.curvatureNuSpacetimeSupport_eq_at_contact
+    cov hcov hLevi hdim t₀ x₀]
+  linarith
+
+/-- Once the three open sign/support conditions hold near a bad contact, a
+local minimum of the nonsmooth eigenvalue defect transfers to the smooth
+Rayleigh-supported defect.  The contact equality and comparison are both
+geometric theorems proved above. -/
+theorem hamiltonIveySupportedDefect_isLocalMin
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (K t₀ : ℝ) (x₀ : M)
+    (hmin : IsLocalMin
+      (fun p : ℝ × M =>
+        g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2) (t₀, x₀))
+    (hnuSupport : ∀ᶠ p in nhds (t₀, x₀),
+      g.curvatureNu cov hcov hLevi hdim p.1 p.2 ≤
+        g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p)
+    (hSupportNeg : ∀ᶠ p in nhds (t₀, x₀),
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p < 0)
+    (hScalarSubSupport : ∀ᶠ p in nhds (t₀, x₀),
+      0 < g.scalarCurvature cov hcov p.1 p.2 -
+        g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p) :
+    IsLocalMin
+      (g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t₀ x₀)
+      (t₀, x₀) := by
+  rw [IsLocalMin, IsMinFilter] at hmin ⊢
+  filter_upwards [hmin, hnuSupport, hSupportNeg, hScalarSubSupport] with
+      p hpmin hpnu hpneg hppos
+  rw [g.hamiltonIveySupportedDefect_eq_at_contact
+    cov hcov hLevi hdim K t₀ x₀]
+  exact hpmin.trans (g.hamiltonIveyDefect_le_supportedDefect
+    cov hcov hLevi hdim K t₀ x₀ p hpnu hpneg hppos)
 
 /-- Hamilton--Ivey pinching for the genuine geometric curvature spectrum,
 from the scalar lower barrier and the parabolic defect inequality supplied by
