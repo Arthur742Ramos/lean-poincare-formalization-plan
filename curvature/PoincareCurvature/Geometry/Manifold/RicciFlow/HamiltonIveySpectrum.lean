@@ -217,6 +217,96 @@ theorem curvatureNu_le_inner_ricciComplement_of_norm_eq_one
     (cov t) (hLevi t).1 (hLevi t).2 x).eigenvalue_two_le_inner_apply_of_norm_eq_one
       (hdim x) hvnorm
 
+/-- Homogeneous geometric Rayleigh support for the least curvature
+eigenvalue.  This is the form used for a smooth local extension of a contact
+eigenvector: the extension need not remain normalized away from the contact
+point. -/
+theorem curvatureNu_mul_inner_self_le_inner_ricciComplement
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) (v : TM x) :
+    g.curvatureNu cov hcov hLevi hdim t x * (g t).inner x v v ≤
+      (g t).inner x v (g.curvatureEndomorphismApply cov hcov t x v) := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+  change CovariantDerivative.ricciComplementEigenvalues
+      (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 2 * Inner.inner ℝ v v ≤
+    Inner.inner ℝ v
+      (CovariantDerivative.ricciComplementEndomorphism (cov t) x v)
+  rw [real_inner_self_eq_norm_sq]
+  exact (CovariantDerivative.ricciComplementEndomorphism_isSymmetric
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x).eigenvalue_two_mul_norm_sq_le_inner_apply
+      (hdim x) v
+
+/-- The Rayleigh quotient of the actual Ricci-complement curvature
+endomorphism at a time slice. -/
+def curvatureRayleighQuotient
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (t : ℝ) (x : M) (v : TM x) : ℝ :=
+  (g t).inner x v (g.curvatureEndomorphismApply cov hcov t x v) /
+    (g t).inner x v v
+
+/-- The geometric least curvature eigenvalue lies below every defined
+Rayleigh quotient. -/
+theorem curvatureNu_le_curvatureRayleighQuotient
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) {v : TM x} (hv : 0 < (g t).inner x v v) :
+    g.curvatureNu cov hcov hLevi hdim t x ≤
+      g.curvatureRayleighQuotient cov hcov t x v := by
+  rw [curvatureRayleighQuotient, le_div_iff₀ hv]
+  exact g.curvatureNu_mul_inner_self_le_inner_ricciComplement
+    cov hcov hLevi hdim t x v
+
+/-- At the selected least eigenvector, the Rayleigh support touches the
+least curvature eigenvalue exactly. -/
+theorem curvatureRayleighQuotient_curvatureNuEigenvector
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    g.curvatureRayleighQuotient cov hcov t x
+        (g.curvatureNuEigenvector cov hcov hLevi hdim t x) =
+      g.curvatureNu cov hcov hLevi hdim t x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  rw [curvatureRayleighQuotient,
+    g.inner_curvatureNuEigenvector_self cov hcov hLevi hdim t x, div_one]
+  rw [show (g t).inner x
+      (g.curvatureNuEigenvector cov hcov hLevi hdim t x)
+      (g.curvatureEndomorphismApply cov hcov t x
+        (g.curvatureNuEigenvector cov hcov hLevi hdim t x)) =
+      (g t).inner x
+      (g.curvatureEndomorphismApply cov hcov t x
+        (g.curvatureNuEigenvector cov hcov hLevi hdim t x))
+      (g.curvatureNuEigenvector cov hcov hLevi hdim t x) by
+        exact real_inner_comm
+          (g.curvatureEndomorphismApply cov hcov t x
+            (g.curvatureNuEigenvector cov hcov hLevi hdim t x))
+          (g.curvatureNuEigenvector cov hcov hLevi hdim t x)]
+  exact (g.curvatureNu_eq_inner_ricciComplement_eigenvector
+    cov hcov hLevi hdim t x).symm
+
 /-- The three curvature eigenvalues are decreasingly ordered at every
 spacetime point. -/
 theorem curvatureEigenvalues_antitone

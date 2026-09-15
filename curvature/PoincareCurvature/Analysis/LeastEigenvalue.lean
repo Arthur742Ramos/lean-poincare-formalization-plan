@@ -66,4 +66,29 @@ theorem eigenvalue_two_le_inner_apply_of_norm_eq_one
           (inner ℝ (b i) v) ^ 2 * hA.eigenvalues hdim i := hweighted
     _ = inner ℝ v (A v) := hformula.symm
 
+/-- Homogeneous Rayleigh support: the least eigenvalue times the squared norm
+is bounded by the quadratic form.  This form is suited to local extensions of
+a contact eigenvector, since no pointwise renormalization is required. -/
+theorem eigenvalue_two_mul_norm_sq_le_inner_apply
+    {A : V →ₗ[ℝ] V} (hA : A.IsSymmetric)
+    (hdim : Module.finrank ℝ V = 3) (v : V) :
+    hA.eigenvalues hdim (2 : Fin 3) * ‖v‖ ^ 2 ≤ inner ℝ v (A v) := by
+  by_cases hv : v = 0
+  · subst v
+    simp
+  · have hvpos : 0 < ‖v‖ := norm_pos_iff.mpr hv
+    let u : V := ‖v‖⁻¹ • v
+    have hu : ‖u‖ = 1 := by
+      dsimp [u]
+      rw [norm_smul, Real.norm_eq_abs, abs_inv, abs_of_pos hvpos]
+      exact inv_mul_cancel₀ hvpos.ne'
+    have hunit := hA.eigenvalue_two_le_inner_apply_of_norm_eq_one hdim hu
+    have hnormne : ‖v‖ ≠ 0 := hvpos.ne'
+    have hinneru : inner ℝ u (A u) = inner ℝ v (A v) / ‖v‖ ^ 2 := by
+      dsimp [u]
+      simp only [map_smul, real_inner_smul_left, real_inner_smul_right]
+      field_simp [hnormne]
+    rw [hinneru] at hunit
+    exact (le_div_iff₀ (sq_pos_of_pos hvpos)).mp hunit
+
 end LinearMap.IsSymmetric
