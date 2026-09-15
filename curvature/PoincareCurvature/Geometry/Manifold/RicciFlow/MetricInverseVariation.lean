@@ -151,6 +151,22 @@ def metricTraceAt
   letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
   exact TensorProduct.lift B (InnerProductSpace.canonicalCovariantTensor (TM x))
 
+/-- Metric trace is linear under scalar multiplication of covariant
+two-tensors. -/
+theorem metricTraceAt_smul
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (x : M) (c : ℝ)
+    (B : TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ) :
+    metricTraceAt (I := I) (M := M) g t x (c • B) =
+      c * metricTraceAt (I := I) (M := M) g t x B := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let o := stdOrthonormalBasis ℝ (TM x)
+  unfold metricTraceAt
+  rw [InnerProductSpace.canonicalCovariantTensor_eq_sum (TM x) o,
+    map_sum, map_sum]
+  simp [Finset.mul_sum]
+
 /-- The intrinsic metric trace agrees with the inverse-Gram contraction in
 every genuine local frame. -/
 theorem matrixContraction_localFrameTensor_eq_metricTraceAt
@@ -285,6 +301,33 @@ theorem metricTraceAt_intrinsicRicciBilinearAt_eq_scalarCurvature
         (I := I) (M := M) g t x (e.localFrame bas i x) (e.localFrame bas j x)
     _ = _ := localFrameScalarCurvaturePresentation_eq_scalarCurvature
       (I := I) (M := M) g e bas t hx
+
+/-- The intrinsic Ricci-flow velocity is the genuine bilinear tensor
+`-2 Ric`, with no coefficient presentation. -/
+def intrinsicRicciFlowVelocityBilinearAt
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (x : M) :
+    TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ :=
+  (-2 : ℝ) • intrinsicRicciBilinearAt (I := I) (M := M) g t x
+
+@[simp] theorem intrinsicRicciFlowVelocityBilinearAt_apply
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (x : M) (u v : TM x) :
+    intrinsicRicciFlowVelocityBilinearAt (I := I) (M := M) g t x u v =
+      intrinsicRicciFlowRHS (I := I) (M := M) g t x u v := by
+  simp [intrinsicRicciFlowVelocityBilinearAt, intrinsicRicciFlowRHS,
+    ricciFlowRHS]
+
+/-- The metric trace of the intrinsic Ricci-flow velocity is `-2 R`. -/
+theorem metricTraceAt_intrinsicRicciFlowVelocityBilinearAt
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (x : M) :
+    metricTraceAt (I := I) (M := M) g t x
+        (intrinsicRicciFlowVelocityBilinearAt (I := I) (M := M) g t x) =
+      -2 * g.scalarCurvature
+        (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+          (I := I) (M := M) g)
+        (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+          (I := I) (M := M) g) t x := by
+  rw [intrinsicRicciFlowVelocityBilinearAt, metricTraceAt_smul,
+    metricTraceAt_intrinsicRicciBilinearAt_eq_scalarCurvature]
 
 /-- The double inverse-metric local-frame contraction is exactly the actual
 Hilbert--Schmidt square of intrinsic Ricci. -/
