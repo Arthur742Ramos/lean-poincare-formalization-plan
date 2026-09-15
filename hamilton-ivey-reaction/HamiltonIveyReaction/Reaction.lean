@@ -67,6 +67,49 @@ def scalar (lambda mu nu : ℝ) : ℝ := lambda + mu + nu
 def defect (K t lambda mu nu : ℝ) : ℝ :=
   scalar lambda mu nu / (-nu) - Real.log (-nu) + 3 + Real.log (K / (1 + K * t))
 
+/-- The part of the Hamilton--Ivey defect that depends on the least
+eigenvalue once scalar curvature is held fixed. -/
+def nuProfile (R nu : ℝ) : ℝ := R / (-nu) - Real.log (-nu)
+
+/-- Derivative of the least-eigenvalue profile.  Its sign is controlled by
+`R - nu`, which geometrically equals `lambda + mu`. -/
+theorem hasDerivAt_nuProfile {R nu : ℝ} (hnu : nu ≠ 0) :
+    HasDerivAt (nuProfile R) ((R - nu) / nu ^ 2) nu := by
+  have hquot := (hasDerivAt_const nu R).div (hasDerivAt_id nu).neg
+    (neg_ne_zero.mpr hnu)
+  have hlog := (hasDerivAt_id nu).neg.log (neg_ne_zero.mpr hnu)
+  have h := hquot.sub hlog
+  change HasDerivAt
+    ((fun _ : ℝ => R) / -id - fun y => Real.log ((-id) y))
+    ((R - nu) / nu ^ 2) nu
+  apply h.congr_deriv
+  change (0 * (-nu) - R * (-1)) / (-nu) ^ 2 - (-1) / (-nu) =
+    (R - nu) / nu ^ 2
+  field_simp [hnu]
+  ring
+
+/-- On a negative interval where `R - nu` stays positive, the
+least-eigenvalue profile is monotone increasing. -/
+theorem nuProfile_mono_of_le_of_neg_of_scalar_sub_pos
+    {R a b : ℝ} (hab : a ≤ b) (hb : b < 0) (hRb : 0 < R - b) :
+    nuProfile R a ≤ nuProfile R b := by
+  by_cases heq : a = b
+  · subst b
+    exact le_rfl
+  have hab' : a < b := lt_of_le_of_ne hab heq
+  have hmono : StrictMonoOn (nuProfile R) (Set.Icc a b) := by
+    apply strictMonoOn_of_deriv_pos (convex_Icc a b)
+    · intro z hz
+      have hzneg : z < 0 := lt_of_le_of_lt hz.2 hb
+      exact (hasDerivAt_nuProfile hzneg.ne).continuousAt.continuousWithinAt
+    · intro z hz
+      have hzmem : z ∈ Set.Icc a b := interior_subset hz
+      have hzneg : z < 0 := lt_of_le_of_lt hzmem.2 hb
+      have hRz : 0 < R - z := by linarith [hRb, hzmem.2]
+      rw [(hasDerivAt_nuProfile hzneg.ne).deriv]
+      exact div_pos hRz (sq_pos_of_ne_zero hzneg.ne)
+  exact (hmono (Set.left_mem_Icc.mpr hab) (Set.right_mem_Icc.mpr hab) hab').le
+
 /-- The zeroth-order term in `(partial_t - Delta) defect` at a least-eigenvector. -/
 def reaction (K t lambda mu nu : ℝ) : ℝ :=
   -2 * nu - K / (1 + K * t) +
@@ -512,5 +555,54 @@ theorem hamiltonIvey_ode_pinching
     hlm hmn hnuNeg hscalar
   exact defect_zero_nonneg_of_least_eigenvalue_lower_bound hK
     (hlm 0 hzero) (hmn 0 hzero) (hnuNeg 0 hzero) hnuLower
+
+/-- In the bad region where the Hamilton--Ivey defect is negative, the sum
+of the two larger curvature eigenvalues is strictly positive.  This is the
+sign needed to compose the defect with an upper support for the least
+eigenvalue in the geometric maximum-principle argument. -/
+theorem lambda_add_mu_pos_of_defect_neg
+    {K t lambda mu nu : ℝ}
+    (hK : 0 < K) (ht : 0 ≤ t)
+    (hlm : mu ≤ lambda) (hmn : nu ≤ mu) (hnu : nu < 0)
+    (hscalar : -3 * (K / (1 + K * t)) ≤ scalar lambda mu nu)
+    (hdefect : defect K t lambda mu nu < 0) :
+    0 < lambda + mu := by
+  let A : ℝ := K / (1 + K * t)
+  let v : ℝ := -nu
+  let R : ℝ := scalar lambda mu nu
+  have hden : 0 < 1 + K * t := by positivity
+  have hA : 0 < A := div_pos hK hden
+  have hv : 0 < v := by simp [v, hnu]
+  have hcrossRaw := (hamiltonIvey_reaction_coercive hK ht hlm hmn hnu
+    hscalar hdefect).1
+  have hcross : A < v := by simpa [A, v] using hcrossRaw
+  by_contra hnot
+  have hlmsum : lambda + mu ≤ 0 := le_of_not_gt hnot
+  have hRle : R ≤ -v := by
+    dsimp [R, scalar, v]
+    linarith
+  have hscalar' : -3 * A ≤ R := by simpa [A, R] using hscalar
+  have hvle : v ≤ 3 * A := by linarith
+  have hpoly : 0 ≤ 4 - 3 * A / v - v / A := by
+    have hprod : 0 ≤ (3 * A - v) * (v - A) :=
+      mul_nonneg (sub_nonneg.mpr hvle) (sub_nonneg.mpr hcross.le)
+    rw [show 4 - 3 * A / v - v / A =
+        ((3 * A - v) * (v - A)) / (A * v) by
+      field_simp [hA.ne', hv.ne']
+      ring]
+    exact div_nonneg hprod (mul_nonneg hA.le hv.le)
+  have hRdiv : -3 * A / v ≤ R / v := by
+    exact (div_le_div_iff_of_pos_right hv).2 hscalar'
+  have hlogRatio := Real.log_le_sub_one_of_pos (div_pos hv hA)
+  have hlogs : Real.log v - Real.log A ≤ v / A - 1 := by
+    rw [← Real.log_div hv.ne' hA.ne']
+    exact hlogRatio
+  have hdefect' : R / v - Real.log v + 3 + Real.log A < 0 := by
+    simpa [R, v, A, defect] using hdefect
+  have hbase : 0 ≤ -3 * A / v - (v / A - 1) + 3 := by
+    convert hpoly using 1 <;> ring
+  have hnonneg : 0 ≤ R / v - Real.log v + 3 + Real.log A := by
+    linarith [hbase, hRdiv, hlogs]
+  exact (not_lt_of_ge hnonneg) hdefect'
 
 end HamiltonIveyReaction
