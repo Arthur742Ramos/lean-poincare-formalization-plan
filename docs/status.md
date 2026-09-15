@@ -30,7 +30,7 @@ in [the Palomar portfolio](palomar-submission-plan.md).
 | 2 | Curvature identities and existence | **Proved** | The package exposes Levi–Civita existence, sectional curvature, and Bianchi identities. |
 | 3 | Time-dependent geometry | **Proved** | Time-indexed sections, metrics, connections, curvature quantities, and slice-wise Levi–Civita constructions are implemented. |
 | 4 | Ricci-flow local existence and uniqueness | **Open** | Special cases and conditional bridges are proved, but `intrinsicLocalExistenceUniquenessFamily_pointFour` is absent and the audit does not close. |
-| 5 | Evolution equations and maximum principles | **Future** | Depends on a genuine Ricci-flow solution theory. |
+| 5 | Evolution equations and maximum principles | **Future** | Depends on a genuine Ricci-flow solution theory. Hamilton–Ivey pinching, including the scalar lower barrier, is proved for the ordered curvature ODE, but the geometric curvature evolution and tensor maximum principle remain missing. |
 | 6 | Distance distortion and compactness | **Future** | Depends on milestones 4–5. |
 | 7 | Perelman reduced geometry | **Future** | Depends on the evolving-metric analytic toolkit. |
 | 8 | Non-collapsing | **Future** | Depends on reduced geometry and Ricci-flow estimates. |
@@ -89,6 +89,13 @@ repository contains proof-bearing work including:
 
 These results should be cited by their actual theorem statements. They must not
 be summarized as general compact-manifold Ricci-flow local existence.
+
+Separately, `hamilton-ivey-reaction/` proves Hamilton--Ivey defect preservation
+for ordered solutions of the three-dimensional curvature ODE, including the
+scalar lower barrier, exact logarithmic-defect reaction identity, and strict
+`(-nu)/9` coercivity estimate. It closes the ODE stage of milestone 5, but it
+does not yet connect that calculation to an intrinsic Ricci flow or prove a
+geometric parabolic maximum principle.
 
 ## Updating this page
 

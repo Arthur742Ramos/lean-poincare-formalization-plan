@@ -54,8 +54,10 @@ call that milestone complete unless a full run prints
 
 The main implementation is the nested Lean project under `curvature/`. The
 repository also contains focused theorem projects and submission artifacts,
-including Contracted Bianchi, Lichnerowicz–Obata, Schur rigidity, and
-Bonnet–Myers. Their publication or intake state is tracked separately from the
+including Contracted Bianchi, Lichnerowicz–Obata, Schur rigidity,
+Bonnet–Myers, and the independently developed
+[Hamilton–Ivey curvature-ODE pinching](hamilton-ivey-reaction/README.md)
+foundation. Their publication or intake state is tracked separately from the
 mathematical roadmap in
 [`docs/palomar-submission-plan.md`](docs/palomar-submission-plan.md).
 

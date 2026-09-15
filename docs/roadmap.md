@@ -60,6 +60,14 @@ curvature operator, and other natural quantities. Develop the parabolic maximum
 principles needed for preservation, pinching, and monotonicity arguments.
 
 **Current state:** future milestone; not unlocked by Point-4 scaffolding alone.
+The standalone `hamilton-ivey-reaction/` project proves Hamilton–Ivey pinching
+for differentiable ordered solutions of the three-dimensional curvature ODE,
+deriving the scalar lower barrier from the initial least-eigenvalue bound. It
+includes the exact logarithmic reaction identity, the analytic
+`exp(2) * (log s)^2 <= 4s` estimate, the strict `(-nu)/9` inward-pointing bound,
+and an invariant-region argument. This closes the ODE stage only; the
+curvature-evolution bridge and geometric parabolic maximum principles remain
+open.
 
 ## Layer 3: singularity analysis
 
