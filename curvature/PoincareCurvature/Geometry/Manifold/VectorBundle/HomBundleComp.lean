@@ -106,6 +106,36 @@ theorem ContMDiffAt.clm_bundle_comp
   rw [← contMDiffWithinAt_univ] at hϕ hψ ⊢
   exact hϕ.clm_bundle_comp hψ
 
+/-- The fiberwise composition of two differentiable hom-bundle sections is
+differentiable.  This is the first-order companion of
+`ContMDiffAt.clm_bundle_comp`; it is useful when regularity is naturally
+available only as `MDiffAt`, as for curvature contractions. -/
+theorem MDifferentiableAt.clm_bundle_comp
+    {ϕ : ∀ x, E₂ x →L[𝕜] E₃ x} {ψ : ∀ x, E₁ x →L[𝕜] E₂ x} {x₀ : B}
+    (hϕ : MDiffAt
+      (fun x ↦ TotalSpace.mk' (F₂ →L[𝕜] F₃)
+        (E := fun x ↦ E₂ x →L[𝕜] E₃ x) x (ϕ x)) x₀)
+    (hψ : MDiffAt
+      (fun x ↦ TotalSpace.mk' (F₁ →L[𝕜] F₂)
+        (E := fun x ↦ E₁ x →L[𝕜] E₂ x) x (ψ x)) x₀) :
+    MDiffAt
+      (fun x ↦ TotalSpace.mk' (F₁ →L[𝕜] F₃)
+        (E := fun x ↦ E₁ x →L[𝕜] E₃ x) x ((ϕ x).comp (ψ x))) x₀ := by
+  rw [mdifferentiableAt_hom_bundle] at hϕ hψ ⊢
+  refine ⟨hϕ.1, ?_⟩
+  have hcomp := hϕ.2.clm_comp hψ.2
+  have hmem : (trivializationAt F₂ E₂ x₀).baseSet ∈ 𝓝 x₀ :=
+    (trivializationAt F₂ E₂ x₀).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt' x₀)
+  have hev :
+      (fun x ↦ ContinuousLinearMap.inCoordinates F₁ E₁ F₃ E₃ x₀ x x₀ x
+        ((ϕ x).comp (ψ x))) =ᶠ[𝓝 x₀]
+      (fun x ↦ (ContinuousLinearMap.inCoordinates F₂ E₂ F₃ E₃ x₀ x x₀ x (ϕ x)).comp
+        (ContinuousLinearMap.inCoordinates F₁ E₁ F₂ E₂ x₀ x x₀ x (ψ x))) := by
+    filter_upwards [hmem] with x hx
+    exact inCoordinates_comp_eq hx (ϕ x) (ψ x)
+  exact hcomp.congr_of_eventuallyEq hev
+
 /-- The fiberwise composition of two `C^n` hom-bundle sections is a `C^n` hom-bundle section
 (on-a-set version). -/
 theorem ContMDiffOn.clm_bundle_comp

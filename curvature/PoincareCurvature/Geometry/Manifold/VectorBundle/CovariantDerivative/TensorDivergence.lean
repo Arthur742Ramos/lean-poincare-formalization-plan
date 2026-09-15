@@ -3,6 +3,7 @@ module
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLeibniz
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ScalarLaplacian
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp
 
 /-!
 # Intrinsic divergence of covariant tensors
@@ -46,7 +47,9 @@ def riemannianMetricCovariantTwoTensor : ∀ x : M, T₂ x :=
     riemannianMetricCovariantTwoTensor (I := I) (M := M) x u v = inner ℝ u v :=
   rfl
 
-private theorem riemannianMetricCovariantTwoTensor_mdifferentiableAt
+/-- The metric, regarded as a hom-bundle section from the tangent bundle to
+the cotangent bundle, is differentiable at every point. -/
+theorem riemannianMetricCovariantTwoTensor_mdifferentiableAt
     [IsContMDiffRiemannianBundle I 1 E TM] (x : M) :
     MDiffAt (fun y => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) y
       (riemannianMetricCovariantTwoTensor (I := I) (M := M) y)) x := by

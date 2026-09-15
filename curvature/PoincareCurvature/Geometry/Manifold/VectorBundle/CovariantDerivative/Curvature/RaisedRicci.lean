@@ -204,6 +204,43 @@ def raisedRicciEndomorphismMDiffAt
     (fun y => TotalSpace.mk' (E →L[ℝ] E)
       (E := fun z : M => TM z →L[ℝ] TM z) y (A y)) x
 
+/-- Differentiability of raised Ricci implies differentiability of the genuine
+covariant Ricci two-tensor.  The proof lowers the output index by composing
+with the Riemannian metric hom-bundle section; no coordinate tensor or
+symmetrization is introduced. -/
+theorem ricciCovariantTwoTensorMDiffAt_of_raisedRicciEndomorphismMDiffAt
+    [IsContMDiffRiemannianBundle I 1 E TM]
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (x : M) (hRicci : raisedRicciEndomorphismMDiffAt cov x) :
+    MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := fun z : M => TM z →L[ℝ] TM z →L[ℝ] ℝ) y
+        (ricciCovariantTwoTensor cov y)) x := by
+  let gflat : ∀ y : M, TM y →L[ℝ] (TM y →L[ℝ] ℝ) :=
+    riemannianMetricCovariantTwoTensor (I := I) (M := M)
+  let A : ∀ y : M, TM y →L[ℝ] TM y := raisedRicciEndomorphism cov
+  have hg : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := fun z : M => TM z →L[ℝ] TM z →L[ℝ] ℝ) y (gflat y)) x := by
+    simpa [gflat] using
+      (riemannianMetricCovariantTwoTensor_mdifferentiableAt
+        (I := I) (E := E) (M := M) x)
+  have hA : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TM z →L[ℝ] TM z) y (A y)) x := by
+    unfold raisedRicciEndomorphismMDiffAt at hRicci
+    simpa [A] using hRicci
+  have hcomp := hg.clm_bundle_comp hA
+  convert hcomp using 1
+  funext y
+  apply congrArg (fun B => TotalSpace.mk'
+    (E →L[ℝ] (E →L[ℝ] ℝ))
+    (E := fun z : M => TM z →L[ℝ] TM z →L[ℝ] ℝ) y B)
+  ext u v
+  change ricciCurvature (cov := cov) y u v =
+    inner ℝ (raisedRicciEndomorphism cov y u) v
+  exact (inner_raisedRicciEndomorphism cov y u v).symm
+
 /-- Evaluation of the induced covariant derivative of raised Ricci obeys the
 intrinsic endomorphism product rule. -/
 theorem raisedRicciCovariantDerivativeApply_eq
@@ -312,6 +349,24 @@ theorem raisedRicciTraceCovariantDerivative_eq_sum_ricciDerivative
   rw [real_inner_comm]
   exact inner_raisedRicciCovariantDerivativeApply cov hmetric x hRicci hRicciTwo
     X (b i) (b i)
+
+/-- The trace comparison needs no independent regularity hypothesis for the
+covariant Ricci tensor: lowering the index of differentiable raised Ricci
+supplies it canonically. -/
+theorem raisedRicciTraceCovariantDerivative_eq_sum_ricciDerivative_of_raisedRicci
+    [IsContMDiffRiemannianBundle I 1 E TM]
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (x : M) (hRicci : raisedRicciEndomorphismMDiffAt cov x)
+    (X : TM x) {ι : Type*} [Fintype ι]
+    (b : OrthonormalBasis ι ℝ (TM x)) :
+    raisedRicciTraceCovariantDerivative cov x X =
+      ∑ i, covariantTwoTensorCovariantDerivative cov
+        (ricciCovariantTwoTensor cov) x X (b i) (b i) := by
+  exact raisedRicciTraceCovariantDerivative_eq_sum_ricciDerivative
+    cov hmetric x hRicci
+      (ricciCovariantTwoTensorMDiffAt_of_raisedRicciEndomorphismMDiffAt
+        cov x hRicci) X b
 
 /-- Differentiating the geometric identity `tr Ric♯ = R` shows that the
 scalar differential is the trace of the induced covariant derivative of
