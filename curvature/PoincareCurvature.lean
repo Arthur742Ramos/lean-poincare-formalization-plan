@@ -24,6 +24,7 @@ import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Conn
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorDivergence
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.EndomorphismTrace
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.RaisedRicci
+import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveySpectrum
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ScalarLaplacian
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ScalarLaplacianMaximum
 import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckCorrectionRegularity
