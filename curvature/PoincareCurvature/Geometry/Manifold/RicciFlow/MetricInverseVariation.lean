@@ -1,5 +1,6 @@
 import PoincareCurvature.Analysis.MatrixInverseDerivative
 import PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence
+import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarEvolution
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLocalFrame
 
 /-!
@@ -181,6 +182,41 @@ theorem localFrameScalarCurvaturePresentation_eq_scalarCurvature
     CovariantDerivative.localFrameInverseGramMatrix,
     intrinsicRicciTensor, ricciTensor, cov, hcov] using hframe.symm
 
+/-- The double inverse-metric local-frame contraction is exactly the actual
+Hilbert--Schmidt square of intrinsic Ricci. -/
+theorem localFrameRicciNormSqPresentation_eq_ricciNormSq
+    (g : MetricFamily (I := I) (M := M))
+    (e : Trivialization E (π E TM)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (bas : Module.Basis ι ℝ E)
+    (t : ℝ) {x : M} (hx : x ∈ e.baseSet) :
+    localFrameRicciNormSqPresentation (I := I) (M := M) g e bas t x =
+      g.ricciNormSq
+        (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+          (I := I) (M := M) g)
+        (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+          (I := I) (M := M) g) t x := by
+  let cov :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+      (I := I) (M := M) g
+  let hcov :=
+    CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+      (I := I) (M := M) g
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : CovariantDerivative.ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  have hnorm := CovariantDerivative.bilinearNormSq_eq_sum_localFrame_inverseGram
+    (I := I) (E := E) (CovariantDerivative.ricciCurvature (cov := cov t) x) e bas hx
+  have hmatrix :
+      localFrameMetricMatrix (I := I) (M := M) g e bas t x =
+        CovariantDerivative.localFrameGramMatrix (I := I) e bas x := by
+    ext i j
+    rfl
+  unfold localFrameRicciNormSqPresentation
+  rw [hmatrix, PoincareCurvature.matrixContraction_mul_mul_eq_nested_sum]
+  simpa [localFrameIntrinsicRicciMatrix, intrinsicRicciTensor, ricciTensor,
+    CovariantDerivative.TimeDependentRiemannianMetric.ricciNormSq,
+    CovariantDerivative.ricciNormSq,
+    CovariantDerivative.localFrameInverseGramMatrix, cov, hcov] using hnorm.symm
+
 /-- Along an intrinsic Ricci flow, the inverse metric evolves by twice the
 fully raised intrinsic Ricci tensor, expressed here in a genuine local frame. -/
 theorem IsIntrinsicRicciFlowOn.hasDerivAt_localFrameMetricMatrix_inv
@@ -265,10 +301,9 @@ theorem IsIntrinsicRicciFlowOn.hasDerivAt_localFrameScalarCurvaturePresentation
   simpa only [localFrameScalarCurvaturePresentation, localFrameRicciNormSqPresentation,
     PoincareCurvature.matrixContraction_smul_left] using hcontract
 
-/-- Actual scalar-curvature variation along an intrinsic Ricci flow, with the
-Ricci-tensor variation term kept explicit.  This is the coordinate-free scalar
-on the left; the local frame appears only as a proved formula for its two
-contraction terms. -/
+/-- Actual scalar-curvature variation along an intrinsic Ricci flow.  Both the
+scalar curvature and the quadratic `2 |Ric|²` term are coordinate-free; only
+the still-open Ricci-tensor variation trace is displayed in a local frame. -/
 theorem IsIntrinsicRicciFlowOn.hasDerivAt_scalarCurvature_of_localFrameRicciDerivative
     {g : MetricFamily (I := I) (M := M)}
     {gdot : MetricTensorFamily (I := I) (M := M)} {s : Set ℝ}
@@ -288,8 +323,11 @@ theorem IsIntrinsicRicciFlowOn.hasDerivAt_scalarCurvature_of_localFrameRicciDeri
           (I := I) (M := M) g)
         (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
           (I := I) (M := M) g) τ x)
-      (2 * localFrameRicciNormSqPresentation
-          (I := I) (M := M) g e bas t x +
+      (2 * g.ricciNormSq
+          (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+            (I := I) (M := M) g)
+          (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+            (I := I) (M := M) g) t x +
         PoincareCurvature.matrixContraction
           (localFrameMetricMatrix (I := I) (M := M) g e bas t x)⁻¹ ricciVelocity) t := by
   have hpresentation :=
@@ -306,6 +344,7 @@ theorem IsIntrinsicRicciFlowOn.hasDerivAt_scalarCurvature_of_localFrameRicciDeri
     funext τ
     exact localFrameScalarCurvaturePresentation_eq_scalarCurvature g e bas τ hx
   rw [hreadout] at hpresentation
+  rw [localFrameRicciNormSqPresentation_eq_ricciNormSq g e bas t hx] at hpresentation
   exact hpresentation
 
 end IntrinsicFlow

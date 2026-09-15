@@ -132,6 +132,42 @@ omit [DecidableEq ι] in
   simp [matrixContraction, Finset.mul_sum, mul_assoc]
 
 omit [DecidableEq ι] in
+/-- Expanding a contraction with a matrix on both sides gives its natural
+four-index formula. -/
+theorem matrixContraction_mul_mul_eq_four_sum (A S : Matrix ι ι ℝ) :
+    matrixContraction (A * S * A) S =
+      ∑ i : ι, ∑ j : ι, ∑ k : ι, ∑ l : ι,
+        A i l * S l k * A k j * S i j := by
+  simp [matrixContraction, Matrix.mul_apply, Finset.sum_mul, mul_assoc]
+
+omit [DecidableEq ι] in
+/-- The same four-index contraction grouped as two inverse-metric traces.
+This ordering is the one arising from the Hilbert--Schmidt norm of a
+covariant two-tensor in a nonorthonormal frame. -/
+theorem matrixContraction_mul_mul_eq_nested_sum (A S : Matrix ι ι ℝ) :
+    matrixContraction (A * S * A) S =
+      ∑ i : ι, ∑ j : ι, A i j *
+        (∑ k : ι, ∑ l : ι, A k l * S j k * S i l) := by
+  rw [matrixContraction_mul_mul_eq_four_sum]
+  apply Finset.sum_congr rfl
+  intro i hi
+  calc
+    (∑ j : ι, ∑ k : ι, ∑ l : ι,
+        A i l * S l k * A k j * S i j) =
+        ∑ k : ι, ∑ j : ι, ∑ l : ι,
+          A i l * S l k * A k j * S i j := Finset.sum_comm
+    _ = ∑ k : ι, ∑ l : ι, ∑ j : ι,
+          A i l * S l k * A k j * S i j := by
+            apply Finset.sum_congr rfl
+            intro k hk
+            exact Finset.sum_comm
+    _ = ∑ l : ι, ∑ k : ι, ∑ j : ι,
+          A i l * S l k * A k j * S i j := Finset.sum_comm
+    _ = ∑ j : ι, A i j *
+          (∑ k : ι, ∑ l : ι, A k l * S j k * S i l) := by
+            simp [Finset.mul_sum, mul_comm, mul_left_comm]
+
+omit [DecidableEq ι] in
 /-- Product rule for a double finite matrix contraction. -/
 theorem hasDerivAt_matrixContraction
     {A S : ℝ → Matrix ι ι ℝ} {Adot Sdot : Matrix ι ι ℝ} {t : ℝ}
