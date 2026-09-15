@@ -136,6 +136,35 @@ theorem MDifferentiableAt.clm_bundle_comp
     exact inCoordinates_comp_eq hx (ϕ x) (ψ x)
   exact hcomp.congr_of_eventuallyEq hev
 
+/-- A map into continuous linear maps between finite-dimensional spaces is
+`C^n` at a point when all of its values on a fixed basis are `C^n` there.
+This is the differentiable reconstruction analogue of extensionality for
+linear maps and is useful for assembling tensor-bundle coordinate fields from
+their frame components. -/
+theorem contMDiffAt_clm_of_forall_apply_basis
+    [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂]
+    {ι : Type*} [Fintype ι] (b : Module.Basis ι 𝕜 F₁)
+    {f : B → F₁ →L[𝕜] F₂} {x : B}
+    (h : ∀ i, ContMDiffAt IB 𝓘(𝕜, F₂) n (fun y ↦ f y (b i)) x) :
+    ContMDiffAt IB 𝓘(𝕜, F₁ →L[𝕜] F₂) n f x := by
+  classical
+  let recon : (ι → F₂) →L[𝕜] (F₁ →L[𝕜] F₂) :=
+    LinearMap.toContinuousLinearMap <|
+      (LinearMap.toContinuousLinearMap :
+        (F₁ →ₗ[𝕜] F₂) ≃ₗ[𝕜] (F₁ →L[𝕜] F₂)).toLinearMap.comp
+        (b.constr 𝕜 : (ι → F₂) ≃ₗ[𝕜] (F₁ →ₗ[𝕜] F₂)).toLinearMap
+  have hg : ContMDiffAt IB 𝓘(𝕜, ι → F₂) n
+      (fun y ↦ (fun i ↦ f y (b i))) x :=
+    contMDiffAt_pi_space.mpr h
+  have hr : ContMDiff 𝓘(𝕜, ι → F₂) 𝓘(𝕜, F₁ →L[𝕜] F₂) n recon :=
+    recon.contDiff.contMDiff
+  have hc := hr.contMDiffAt.comp x hg
+  convert hc using 1
+  funext y
+  apply ContinuousLinearMap.coe_injective
+  refine b.ext fun i ↦ ?_
+  simp [recon]
+
 /-- The fiberwise composition of two `C^n` hom-bundle sections is a `C^n` hom-bundle section
 (on-a-set version). -/
 theorem ContMDiffOn.clm_bundle_comp

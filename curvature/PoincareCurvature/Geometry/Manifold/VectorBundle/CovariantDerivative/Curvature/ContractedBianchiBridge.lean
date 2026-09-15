@@ -2,6 +2,7 @@ module
 
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.ContractedBianchi
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.RaisedRicci
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.DowngradeNormFree
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorDivergence
 
 /-!
@@ -54,6 +55,54 @@ private theorem curvatureAux_contMDiff_one
       (m := (1 : ℕ∞)) (n := (2 : ℕ∞)) hY hZ (by norm_num))
   have hbrW := cov.contMDiff_along (n := 1) hbr hW₂
   exact (hYZW.sub_section hZYW).sub_section hbrW
+
+/-- Local `C¹` regularity of the raw curvature commutator for a `C²` tangent connection. -/
+theorem curvatureAux_contMDiffOn_one
+    {Y Z W : Π x : M, TangentSpace I x} {u : Set M} (hu : IsOpen u)
+    (hY : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (T% Y) u)
+    (hZ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (T% Z) u)
+    (hW : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 3 (T% W) u) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1 (T% (cov.curvatureAux Y Z W)) u := by
+  have hcov₂ : ContMDiffCovariantDerivativeOn E 2 cov.toFun u :=
+    TangentFrame.contMDiffCovariantDerivativeOn_two_of_contMDiffCovariantDerivative_two hu
+  have hcov₁ : ContMDiffCovariantDerivativeOn E 1 cov.toFun u :=
+    TangentFrame.contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one hu
+  have hY₁ := hY.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
+  have hZ₁ := hZ.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
+  have hW₂ := hW.of_le (by norm_num : (2 : WithTop ℕ∞) ≤ 3)
+  have hZW₂ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (T% (cov.along Z W)) u := by
+    simpa [CovariantDerivative.along] using (hcov₂.contMDiff hW).clm_bundle_apply hZ
+  have hYW₂ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (T% (cov.along Y W)) u := by
+    simpa [CovariantDerivative.along] using (hcov₂.contMDiff hW).clm_bundle_apply hY
+  have hYZW₁ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (cov.along Y (cov.along Z W))) u := by
+    simpa [CovariantDerivative.along] using (hcov₁.contMDiff hZW₂).clm_bundle_apply hY₁
+  have hZYW₁ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (cov.along Z (cov.along Y W))) u := by
+    simpa [CovariantDerivative.along] using (hcov₁.contMDiff hYW₂).clm_bundle_apply hZ₁
+  have hbrWithin : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (VectorField.mlieBracketWithin I Y Z u)) u := by
+    simpa using hY.mlieBracketWithin_vectorField (I := I) (m := (1 : ℕ∞)) hZ
+      hu.uniqueMDiffOn (by norm_num)
+  have hbr : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (VectorField.mlieBracket I Y Z)) u := by
+    refine ContMDiffOn.congr hbrWithin ?_
+    intro y hy
+    have hYy : MDiffAt (T% Y) y :=
+      (((hY y hy).contMDiffAt (hu.mem_nhds hy)).of_le
+        (by norm_num : (1 : WithTop ℕ∞) ≤ 2)).mdifferentiableAt one_ne_zero
+    have hZy : MDiffAt (T% Z) y :=
+      (((hZ y hy).contMDiffAt (hu.mem_nhds hy)).of_le
+        (by norm_num : (1 : WithTop ℕ∞) ≤ 2)).mdifferentiableAt one_ne_zero
+    congr 1
+    simpa using
+      (VectorField.mlieBracketWithin_eq_mlieBracket (I := I) (s := u) (x := y)
+        (hu.uniqueMDiffWithinAt hy) hYy hZy).symm
+  have hbrW₁ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (cov.along (VectorField.mlieBracket I Y Z) W)) u := by
+    simpa [CovariantDerivative.along] using (hcov₁.contMDiff hW₂).clm_bundle_apply hbr
+  have hcomb := (hYZW₁.sub_section hZYW₁).sub_section hbrW₁
+  simpa only [CovariantDerivative.curvatureAux] using hcomb
 
 private theorem curvatureAux_mdifferentiableAt
     {Y Z W : Π x : M, TangentSpace I x} (x : M)

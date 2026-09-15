@@ -38,6 +38,47 @@ local notation "TM" => (TangentSpace I : M → Type _)
 local notation "T₁" => (fun x : M => TM x →L[ℝ] ℝ)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
 
+/-- A covariant two-tensor section is `C¹` at a point when all of its
+components in one genuine local frame are `C¹` there.  The proof reads the
+section in the preferred bilinear-form trivialization and reconstructs each
+of its two continuous-linear-map slots from a finite basis. -/
+theorem contMDiffAt_one_covariantTwoTensor_of_localFrame
+    (s : ∀ x : M, T₂ x) (x : M)
+    {ι : Type*} [Fintype ι] (b : Module.Basis ι ℝ E)
+    (hcomp : ∀ i j, ContMDiffAt I 𝓘(ℝ) 1
+      (fun y ↦ s y
+        ((trivializationAt E TM x).localFrame b i y)
+        ((trivializationAt E TM x).localFrame b j y)) x) :
+    ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 1
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) y (s y)) x := by
+  classical
+  rw [Bundle.contMDiffAt_section
+    (IB := I) (F := E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) (s := s) x]
+  let e := trivializationAt E TM x
+  let BilF := E →L[ℝ] E →L[ℝ] ℝ
+  let coord : M → BilF := fun y ↦
+    (trivializationAt BilF T₂ x (TotalSpace.mk' BilF y (s y))).2
+  change ContMDiffAt I 𝓘(ℝ, BilF) 1 coord x
+  apply contMDiffAt_clm_of_forall_apply_basis b
+  intro i
+  apply contMDiffAt_clm_of_forall_apply_basis b
+  intro j
+  have hx : x ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt E TM x
+  have hev : (fun y ↦ coord y (b i) (b j)) =ᶠ[nhds x]
+      (fun y ↦ s y (e.localFrame b i y) (e.localFrame b j y)) := by
+    filter_upwards [e.open_baseSet.mem_nhds hx] with y hy
+    rw [show coord y =
+      (trivializationAt BilF T₂ x (TotalSpace.mk' BilF y (s y))).2 by rfl]
+    rw [trivializationAt_bilinearFormBundle_apply_eq
+      (F := E) (W := TM) x y hy (s y) (b i) (b j)]
+    have hli : ∀ k, ((e.continuousLinearEquivAt ℝ y hy).symm (b k)) =
+        e.localFrame b k y := by
+      intro k
+      rw [e.localFrame_apply_of_mem_baseSet b hy]
+      rfl
+    rw [hli i, hli j]
+  exact (hcomp i j).congr_of_eventuallyEq hev
+
 /-- The Riemannian metric as a covariant two-tensor section. -/
 def riemannianMetricCovariantTwoTensor : ∀ x : M, T₂ x :=
   fun x => (InnerProductSpace.toDual ℝ (TM x)).toContinuousLinearMap
