@@ -315,4 +315,43 @@ theorem curvatureCovariantDerivativeInner_doubleContraction
     linarith
   linarith
 
+/-! ### Canonical metric traces -/
+
+/-- The full metric trace of the covariant derivative of curvature in its
+four curvature slots, leaving the derivative direction free.  This is the
+contraction which becomes `dR` once differentiation is proved to commute with
+the metric trace. -/
+noncomputable def curvatureCovariantDerivativeScalarTrace
+    (x : M) (w : TangentSpace I x) : ℝ := by
+  letI : FiniteDimensional ℝ (TangentSpace I x) :=
+    VectorBundle.finiteDimensional ℝ E (TangentSpace I : M → Type _) x
+  let b := stdOrthonormalBasis ℝ (TangentSpace I x)
+  exact ∑ i, ∑ k,
+    curvatureCovariantDerivativeInner cov x w (b k) (b i) (b i) (b k)
+
+/-- The metric trace of the covariant derivative of curvature which becomes
+the divergence of Ricci after the Ricci trace/differentiation bridge. -/
+noncomputable def curvatureCovariantDerivativeRicciDivergenceTrace
+    (x : M) (w : TangentSpace I x) : ℝ := by
+  letI : FiniteDimensional ℝ (TangentSpace I x) :=
+    VectorBundle.finiteDimensional ℝ E (TangentSpace I : M → Type _) x
+  let b := stdOrthonormalBasis ℝ (TangentSpace I x)
+  exact ∑ i, ∑ k,
+    curvatureCovariantDerivativeInner cov x (b i) (b k) (b i) w (b k)
+
+/-- The canonical metric contractions of the actual differentiated curvature
+tensor satisfy the numerical core of the contracted second Bianchi identity.
+No coordinate components or assumed differential identity occur here. -/
+theorem curvatureCovariantDerivativeScalarTrace_eq_two_mul_ricciDivergenceTrace
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+    (x : M) (hT : cov.torsion = 0) (hmetric : cov.IsMetricCompatibleTangent)
+    (w : TangentSpace I x) :
+    curvatureCovariantDerivativeScalarTrace cov x w =
+      2 * curvatureCovariantDerivativeRicciDivergenceTrace cov x w := by
+  letI : FiniteDimensional ℝ (TangentSpace I x) :=
+    VectorBundle.finiteDimensional ℝ E (TangentSpace I : M → Type _) x
+  exact curvatureCovariantDerivativeInner_doubleContraction cov x hT hmetric
+    (stdOrthonormalBasis ℝ (TangentSpace I x)) w
+
 end CovariantDerivative
