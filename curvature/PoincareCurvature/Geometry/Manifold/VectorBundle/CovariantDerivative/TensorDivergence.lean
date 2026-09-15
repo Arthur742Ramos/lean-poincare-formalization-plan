@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacian
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions
 
 /-!
 # Intrinsic divergence of covariant tensors
@@ -34,6 +35,51 @@ namespace CovariantDerivative
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "T₁" => (fun x : M => TM x →L[ℝ] ℝ)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
+
+/-- The metric trace of a covariant two-tensor, defined by contraction with
+the canonical inverse metric tensor. -/
+def covariantTwoTensorTrace
+    (h : ∀ x : M, TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ) (x : M) : ℝ :=
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let L : TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ :=
+    { toFun := fun u => h x u
+      map_add' := by
+        intro u v
+        ext w
+        simp
+      map_smul' := by
+        intro c u
+        ext w
+        simp }
+  TensorProduct.lift L (InnerProductSpace.canonicalCovariantTensor (TM x))
+
+/-- Evaluation of the metric trace in any orthonormal basis. -/
+theorem covariantTwoTensorTrace_eq_sum_orthonormalBasis
+    (h : ∀ x : M, TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ) (x : M)
+    {ι : Type*} [Fintype ι] (b : OrthonormalBasis ι ℝ (TM x)) :
+    covariantTwoTensorTrace h x = ∑ i, h x (b i) (b i) := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  rw [covariantTwoTensorTrace,
+    InnerProductSpace.canonicalCovariantTensor_eq_sum (TM x) b, map_sum]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rfl
+
+/-- The existing scalar curvature is exactly the intrinsic metric trace of
+the Ricci tensor. -/
+theorem covariantTwoTensorTrace_ricciCurvature_eq_scalarCurvature
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (x : M) :
+    covariantTwoTensorTrace (I := I) (E := E) (M := M)
+        (ricciCurvature (cov := cov)) x =
+      scalarCurvature (cov := cov) x := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  rw [covariantTwoTensorTrace_eq_sum_orthonormalBasis (I := I) (E := E) (M := M)
+    (ricciCurvature (cov := cov)) x (stdOrthonormalBasis ℝ (TM x)),
+    scalarCurvature_eq_sum]
 
 /-- The divergence of a covector is the metric trace of its induced
 covariant derivative. -/
