@@ -2,6 +2,7 @@
 -- Import modules here that should be built as part of the library.
 import PoincareCurvature.Basic
 import PoincareCurvature.Analysis.MatrixSmoothness
+import PoincareCurvature.Analysis.MatrixInverseDerivative
 import PoincareCurvature.Analysis.ParametrizedInner
 import PoincareCurvature.Analysis.TimeDependentGram
 import PoincareCurvature.Analysis.LocalExtremaSecondDerivative
