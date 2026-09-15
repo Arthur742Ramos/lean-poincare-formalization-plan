@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.ContractedBianchi
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorDivergence
 
 /-!
 # Contraction of the actual connection curvature derivative
@@ -353,5 +354,33 @@ theorem curvatureCovariantDerivativeScalarTrace_eq_two_mul_ricciDivergenceTrace
     VectorBundle.finiteDimensional ℝ E (TangentSpace I : M → Type _) x
   exact curvatureCovariantDerivativeInner_doubleContraction cov x hT hmetric
     (stdOrthonormalBasis ℝ (TangentSpace I x)) w
+
+/-- Once differentiation is identified with the two canonical curvature
+traces, the numerical double contraction above is exactly the contracted
+second Bianchi identity `div Ric = (1/2) dR`.  The remaining hypotheses name
+only those two trace/differentiation commutation bridges. -/
+theorem ricciDivergence_eq_half_scalarDifferential_of_trace_bridges
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+    (x : M) (hT : cov.torsion = 0) (hmetric : cov.IsMetricCompatibleTangent)
+    (hScalarTrace : ∀ w : TangentSpace I x,
+      scalarDifferential (I := I) (scalarCurvature (cov := cov)) x w =
+        curvatureCovariantDerivativeScalarTrace cov x w)
+    (hRicciTrace : ∀ w : TangentSpace I x,
+      ricciDivergence cov x w =
+        curvatureCovariantDerivativeRicciDivergenceTrace cov x w) :
+    ricciDivergence cov x =
+      (1 / 2 : ℝ) • scalarDifferential (I := I)
+        (scalarCurvature (cov := cov)) x := by
+  ext w
+  have hcore :=
+    curvatureCovariantDerivativeScalarTrace_eq_two_mul_ricciDivergenceTrace
+      cov x hT hmetric w
+  rw [← hScalarTrace w, ← hRicciTrace w] at hcore
+  simp only [smul_apply]
+  change ricciDivergence cov x w =
+    (1 / 2 : ℝ) * scalarDifferential (I := I)
+      (scalarCurvature (cov := cov)) x w
+  linarith
 
 end CovariantDerivative

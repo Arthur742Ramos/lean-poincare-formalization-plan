@@ -183,6 +183,35 @@ theorem covectorDivergence_eq_sum_orthonormalBasis
   intro i hi
   rfl
 
+/-- Divergence of the scalar differential is exactly the intrinsic scalar
+Laplacian. -/
+theorem covectorDivergence_scalarDifferential
+    (cov : CovariantDerivative I E TM) (f : M → ℝ) (x : M) :
+    covectorDivergence cov (scalarDifferential (I := I) f) x =
+      scalarLaplacian cov f x := by
+  rfl
+
+/-- Covector divergence is homogeneous under a constant scalar, provided
+the covector section is differentiable at the evaluation point. -/
+theorem covectorDivergence_smul_const
+    (cov : CovariantDerivative I E TM) (c : ℝ)
+    (alpha : ∀ x : M, T₁ x) (x : M)
+    (halpha : MDiffAt (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+      (alpha y)) x) :
+    covectorDivergence cov (c • alpha) x =
+      c * covectorDivergence cov alpha x := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  have hderiv : covectorCovariantDerivative cov (c • alpha) x =
+      c • covectorCovariantDerivative cov alpha x := by
+    exact (covectorCovariantDerivative cov).isCovariantDerivativeOn.smul_const
+      c halpha
+  rw [covectorDivergence_eq_sum_orthonormalBasis cov (c • alpha) x b,
+    covectorDivergence_eq_sum_orthonormalBasis cov alpha x b]
+  simp_rw [hderiv, smul_apply]
+  exact (Finset.mul_sum _ _ _).symm
+
 /-- The divergence of a covariant two-tensor, tracing the derivative
 direction against its first tensor slot and retaining the second slot. -/
 def covariantTwoTensorDivergence (cov : CovariantDerivative I E TM)
@@ -311,5 +340,26 @@ theorem covariantTwoTensorDoubleDivergence_eq_sum_orthonormalBasis
         (covariantTwoTensorDivergence cov h) x (b i) (b i) := by
   exact covectorDivergence_eq_sum_orthonormalBasis cov
     (covariantTwoTensorDivergence cov h) x b
+
+/-- The contracted Bianchi identity converts the double divergence of Ricci
+into one half of the scalar Laplacian.  This theorem performs the operator
+contraction once the first contracted identity is available as an equality
+of genuine covector sections. -/
+theorem covariantTwoTensorDoubleDivergence_ricci_eq_half_scalarLaplacian
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (R : M → ℝ) (x : M)
+    (hcontracted : ricciDivergence cov =
+      (1 / 2 : ℝ) • scalarDifferential (I := I) R)
+    (hR : MDiffAt (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+      (scalarDifferential (I := I) R y)) x) :
+    covariantTwoTensorDoubleDivergence cov
+        (ricciCovariantTwoTensor cov) x =
+      (1 / 2 : ℝ) * scalarLaplacian cov R x := by
+  unfold covariantTwoTensorDoubleDivergence
+  change covectorDivergence cov (ricciDivergence cov) x = _
+  rw [hcontracted]
+  rw [covectorDivergence_smul_const cov (1 / 2 : ℝ)
+    (scalarDifferential (I := I) R) x hR]
+  rw [covectorDivergence_scalarDifferential]
 
 end CovariantDerivative
