@@ -33,6 +33,33 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 
+/-- Bilinear form of the Ricci-complement curvature endomorphism.  This is
+the unspecialized identity behind the Rayleigh numerator. -/
+theorem inner_curvatureEndomorphismApply_bilinear
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (t : ℝ) (x : M) (u v : TM x) :
+    (g t).inner x u (g.curvatureEndomorphismApply cov hcov t x v) =
+      g.scalarCurvature cov hcov t x * (g t).inner x u v -
+        2 * g.ricciCurvature cov hcov t x v u := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+  change Inner.inner ℝ u
+      (CovariantDerivative.ricciComplementEndomorphism (cov t) x v) = _
+  have hraised : Inner.inner ℝ u
+      (CovariantDerivative.raisedRicciEndomorphism (cov t) x v) =
+      CovariantDerivative.ricciCurvature (cov := cov t) x v u := by
+    rw [real_inner_comm]
+    exact CovariantDerivative.inner_raisedRicciEndomorphism (cov t) x v u
+  rw [CovariantDerivative.ricciComplementEndomorphism_apply]
+  rw [inner_sub_right, real_inner_smul_right, real_inner_smul_right]
+  rw [hraised]
+  rfl
+
 /-- The numerator of the curvature Rayleigh quotient is the scalar-curvature
 term minus twice the genuine Ricci quadratic form. -/
 theorem inner_curvatureEndomorphismApply_eq_scalarCurvature_mul_inner_sub_ricci

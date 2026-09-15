@@ -133,4 +133,119 @@ theorem scalarLaplacian_apply
   rw [scalarLaplacian_eq_sum_orthonormalBasis cov f x
     (stdOrthonormalBasis ℝ (TM x))]
 
+/-- The scalar differential is additive on differentiable functions. -/
+theorem scalarDifferential_add {f k : M → ℝ}
+    (hf : ∀ y, MDiffAt f y) (hk : ∀ y, MDiffAt k y) :
+    scalarDifferential (I := I) (f + k) =
+      scalarDifferential (I := I) f + scalarDifferential (I := I) k := by
+  funext y
+  ext u
+  simp only [scalarDifferential_apply, Pi.add_apply, add_apply]
+  rw [mvfderiv_add (I := I) (hf y) (hk y)]
+  rfl
+
+/-- The scalar differential commutes with multiplication by a constant. -/
+theorem scalarDifferential_smul_const (c : ℝ) {f : M → ℝ}
+    (hf : ∀ y, MDiffAt f y) :
+    scalarDifferential (I := I) (c • f) =
+      c • scalarDifferential (I := I) f := by
+  funext y
+  ext u
+  simp only [scalarDifferential_apply, Pi.smul_apply, smul_apply]
+  change mvfderiv (I := I) ((fun _ : M => c) * f) y u =
+    c * mvfderiv (I := I) f y u
+  have hc : MDiffAt (fun _ : M => c) y := mdifferentiableAt_const
+  rw [mvfderiv_mul (I := I) hc (hf y)]
+  rw [mvfderiv_const]
+  simp
+
+/-- The scalar Hessian is additive under the regularity needed by its
+covariant-derivative definition. -/
+theorem scalarHessian_add
+    (cov : CovariantDerivative I E TM) {f k : M → ℝ} {x : M}
+    (hf : ∀ y, MDiffAt f y) (hk : ∀ y, MDiffAt k y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) f y)) x)
+    (hdk : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) k y)) x) :
+    scalarHessian cov (f + k) x =
+      scalarHessian cov f x + scalarHessian cov k x := by
+  unfold scalarHessian
+  rw [scalarDifferential_add hf hk]
+  exact (covectorCovariantDerivative cov).isCovariantDerivativeOn.add hdf hdk
+
+/-- The scalar Hessian is homogeneous under multiplication by a constant. -/
+theorem scalarHessian_smul_const
+    (cov : CovariantDerivative I E TM) (c : ℝ) {f : M → ℝ} {x : M}
+    (hf : ∀ y, MDiffAt f y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) f y)) x) :
+    scalarHessian cov (c • f) x = c • scalarHessian cov f x := by
+  unfold scalarHessian
+  rw [scalarDifferential_smul_const c hf]
+  exact (covectorCovariantDerivative cov).isCovariantDerivativeOn.smul_const c hdf
+
+/-- Additivity of the scalar Laplacian. -/
+theorem scalarLaplacian_add
+    (cov : CovariantDerivative I E TM) {f k : M → ℝ} {x : M}
+    (hf : ∀ y, MDiffAt f y) (hk : ∀ y, MDiffAt k y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) f y)) x)
+    (hdk : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) k y)) x) :
+    scalarLaplacian cov (f + k) x =
+      scalarLaplacian cov f x + scalarLaplacian cov k x := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  rw [scalarLaplacian_eq_sum_orthonormalBasis cov (f + k) x b,
+    scalarLaplacian_eq_sum_orthonormalBasis cov f x b,
+    scalarLaplacian_eq_sum_orthonormalBasis cov k x b]
+  simp_rw [scalarHessian_add cov hf hk hdf hdk, add_apply]
+  exact Finset.sum_add_distrib
+
+/-- Homogeneity of the scalar Laplacian under multiplication by a constant. -/
+theorem scalarLaplacian_smul_const
+    (cov : CovariantDerivative I E TM) (c : ℝ) {f : M → ℝ} {x : M}
+    (hf : ∀ y, MDiffAt f y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) f y)) x) :
+    scalarLaplacian cov (c • f) x = c * scalarLaplacian cov f x := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  rw [scalarLaplacian_eq_sum_orthonormalBasis cov (c • f) x b,
+    scalarLaplacian_eq_sum_orthonormalBasis cov f x b]
+  simp_rw [scalarHessian_smul_const cov c hf hdf, smul_apply]
+  exact (Finset.mul_sum _ _ _).symm
+
+/-- Combined affine linearity form used for geometric support functions. -/
+theorem scalarLaplacian_add_smul_const
+    (cov : CovariantDerivative I E TM) (c : ℝ) {f k : M → ℝ} {x : M}
+    (hf : ∀ y, MDiffAt f y) (hk : ∀ y, MDiffAt k y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) f y)) x)
+    (hdk : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) k y)) x) :
+    scalarLaplacian cov (f + c • k) x =
+      scalarLaplacian cov f x + c * scalarLaplacian cov k x := by
+  have hck : ∀ y, MDiffAt (c • k) y := by
+    intro y
+    exact (mdifferentiableAt_const : MDiffAt (fun _ : M => c) y).smul (hk y)
+  have hdck : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) (c • k) y)) x := by
+    rw [scalarDifferential_smul_const c hk]
+    exact (mdifferentiableAt_const : MDiffAt (fun _ : M => c) x).smul_section hdk
+  rw [scalarLaplacian_add cov hf hck hdf hdck]
+  rw [scalarLaplacian_smul_const cov c hk hdk]
+
 end CovariantDerivative
