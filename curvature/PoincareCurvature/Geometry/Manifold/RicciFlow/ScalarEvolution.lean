@@ -18,7 +18,7 @@ variation in the subsequent layer.
 
 set_option linter.unusedSectionVars false
 
-open Bundle
+open Bundle Filter Topology
 open scoped Manifold ContDiff
 
 namespace CovariantDerivative
@@ -31,6 +31,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
 
 local notation "TM" => (TangentSpace I : M → Type _)
+local notation "T₁" => (fun x : M => TM x →L[ℝ] ℝ)
 
 namespace TimeDependentRiemannianMetric
 
@@ -52,6 +53,25 @@ def scalarLaplacian
     g.scalarLaplacian cov f t x = (by
       letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
       exact CovariantDerivative.scalarLaplacian (cov t) (f t) x) := rfl
+
+/-- The time-slice scalar Laplacian is nonnegative at a local spatial
+minimum.  This is the intrinsic manifold statement, specialized to the
+actual Riemannian metric at time `t`. -/
+theorem scalarLaplacian_nonneg_of_isLocalMin [I.Boundaryless]
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (f : ℝ → M → ℝ) (t : ℝ) {x : M}
+    (hmin : IsLocalMin (f t) x)
+    (hfNear : ∀ᶠ y in 𝓝 x, MDiffAt (f t) y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (CovariantDerivative.scalarDifferential (I := I) (f t) y)) x) :
+    0 ≤ g.scalarLaplacian cov f t x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 1 E TM :=
+    g.slice_isContMDiffRiemannianBundle t
+  exact CovariantDerivative.scalarLaplacian_nonneg_of_isLocalMin
+    (cov t) hmin hfNear hdf
 
 /-- The squared Hilbert--Schmidt norm of the Ricci tensor at time `t`. -/
 def ricciNormSq
@@ -86,6 +106,20 @@ theorem scalarCurvature_sq_le_three_mul_ricciNormSq
       3 * g.ricciNormSq cov hcov t x := by
   simpa [hdim x] using
     g.scalarCurvature_sq_le_finrank_mul_ricciNormSq cov hcov t x
+
+/-- In dimension three, the Ricci-flow scalar reaction dominates the sharp
+Riccati reaction `(2/3) R²`. -/
+theorem two_thirds_scalarCurvature_sq_le_two_mul_ricciNormSq
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative (cov t) 1)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    (2 / 3 : ℝ) * (g.scalarCurvature cov hcov t x) ^ 2 ≤
+      2 * g.ricciNormSq cov hcov t x := by
+  have h := g.scalarCurvature_sq_le_three_mul_ricciNormSq
+    cov hcov hdim t x
+  nlinarith
 
 end TimeDependentRiemannianMetric
 end CovariantDerivative
