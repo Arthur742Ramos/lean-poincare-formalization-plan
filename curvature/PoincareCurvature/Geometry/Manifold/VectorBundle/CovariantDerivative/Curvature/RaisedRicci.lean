@@ -97,6 +97,34 @@ section DifferentiatedTrace
 
 variable [IsManifold I 1 M]
 
+/-- The covariant derivative of raised Ricci, evaluated on its derivative and
+endomorphism arguments.  The model-space tangent norm is kept internal to
+avoid exposing the equivalent Riemannian/model norm implementations. -/
+def raisedRicciCovariantDerivativeApply
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (x : M) (u v : TM x) : TM x := by
+  letI nTM : ∀ y : M, NormedAddCommGroup (TM y) := fun y =>
+    PoincareCurvature.instNormedAddCommGroupTangentSpace I y
+  letI sTM : ∀ y : M, NormedSpace ℝ (TM y) := fun _ =>
+    PoincareCurvature.instNormedSpaceTangentSpace I _
+  letI fTM : ∀ y : M, FiniteDimensional ℝ (TM y) := fun _ =>
+    inferInstanceAs (FiniteDimensional ℝ E)
+  let A : ∀ y : M, TM y →L[ℝ] TM y := fun y => @raisedRicciEndomorphism
+    E _ _ _ _ H _ I M _ _ _ _ hContTangent _ cov _ y
+  let hContOne : ContMDiffVectorBundle 1 E TM I :=
+    @ContMDiffVectorBundle.of_le
+      ℝ M E TM _ E _ _ H _ I _ _ _ _ _ _ _ _
+      TangentSpace.fiberBundle TangentSpace.vectorBundle
+      1 2 one_le_two hContTangent
+  let d := @inducedHomCovariantDerivative
+    E _ _ H _ I M _ _ _ _ _ _
+    E E _ _ _ _ _
+    TM TM _ _ nTM sTM fTM nTM sTM
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    hContTangent hContOne cov cov
+  exact d A x u v
+
 /-- The fibre trace of the covariant derivative of raised Ricci. -/
 def raisedRicciTraceCovariantDerivative
     (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
@@ -122,6 +150,43 @@ def raisedRicciTraceCovariantDerivative
     TangentSpace.fiberBundle TangentSpace.vectorBundle
     hContTangent hContOne cov cov
   exact LinearMap.trace ℝ (TM x) ((d A x u).toLinearMap)
+
+/-- In every finite basis, the trace of the covariant derivative of raised
+Ricci is the sum of its diagonal coefficients. -/
+theorem raisedRicciTraceCovariantDerivative_eq_sum_basis
+    (cov : CovariantDerivative I E TM) [cov.ContMDiffCovariantDerivative 1]
+    (x : M) (u : TM x) {ι : Type*} [Fintype ι]
+    (b : Module.Basis ι ℝ (TM x)) :
+    raisedRicciTraceCovariantDerivative cov x u =
+      ∑ i, b.repr (raisedRicciCovariantDerivativeApply cov x u (b i)) i := by
+  classical
+  letI nTM : ∀ y : M, NormedAddCommGroup (TM y) := fun y =>
+    PoincareCurvature.instNormedAddCommGroupTangentSpace I y
+  letI sTM : ∀ y : M, NormedSpace ℝ (TM y) := fun _ =>
+    PoincareCurvature.instNormedSpaceTangentSpace I _
+  letI fTM : ∀ y : M, FiniteDimensional ℝ (TM y) := fun _ =>
+    inferInstanceAs (FiniteDimensional ℝ E)
+  let A : ∀ y : M, TM y →L[ℝ] TM y := fun y => @raisedRicciEndomorphism
+    E _ _ _ _ H _ I M _ _ _ _ hContTangent _ cov _ y
+  let hContOne : ContMDiffVectorBundle 1 E TM I :=
+    @ContMDiffVectorBundle.of_le
+      ℝ M E TM _ E _ _ H _ I _ _ _ _ _ _ _ _
+      TangentSpace.fiberBundle TangentSpace.vectorBundle
+      1 2 one_le_two hContTangent
+  let d := @inducedHomCovariantDerivative
+    E _ _ H _ I M _ _ _ _ _ _
+    E E _ _ _ _ _
+    TM TM _ _ nTM sTM fTM nTM sTM
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    hContTangent hContOne cov cov
+  let L : TM x →ₗ[ℝ] TM x := (d A x u).toLinearMap
+  change LinearMap.trace ℝ (TM x) L = ∑ i, b.repr (L (b i)) i
+  rw [LinearMap.trace_eq_matrix_trace ℝ b]
+  apply Finset.sum_congr rfl
+  intro i hi
+  change LinearMap.toMatrix b b L i i = _
+  rw [LinearMap.toMatrix_apply]
 
 /-- Regularity of the genuine metric-raised Ricci endomorphism at a point. -/
 def raisedRicciEndomorphismMDiffAt
