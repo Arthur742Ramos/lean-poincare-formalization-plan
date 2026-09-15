@@ -142,9 +142,56 @@ theorem HasTimeDerivativeAt.hasDerivAt_localFrameMetricMatrix_inv
   · intro s
     exact localFrameMetricMatrix_det_ne_zero g e bas s hx
 
+/-- The trace of a genuine covariant two-tensor with respect to the metric at
+time `t`.  This is defined intrinsically by pairing with the canonical inverse
+metric tensor, rather than by choosing a frame. -/
+def metricTraceAt
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) (x : M)
+    (B : TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ) : ℝ := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  exact TensorProduct.lift B (InnerProductSpace.canonicalCovariantTensor (TM x))
+
+/-- The intrinsic metric trace agrees with the inverse-Gram contraction in
+every genuine local frame. -/
+theorem matrixContraction_localFrameTensor_eq_metricTraceAt
+    (g : MetricFamily (I := I) (M := M)) (t : ℝ) {x : M}
+    (B : TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ)
+    (e : Trivialization E (π E TM)) [MemTrivializationAtlas e]
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (bas : Module.Basis ι ℝ E) (hx : x ∈ e.baseSet) :
+    PoincareCurvature.matrixContraction
+        (localFrameMetricMatrix (I := I) (M := M) g e bas t x)⁻¹
+        (fun i j => B (e.localFrame bas i x) (e.localFrame bas j x)) =
+      metricTraceAt (I := I) (M := M) g t x B := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  have hframe := CovariantDerivative.bilinearContraction_eq_sum_localFrame_inverseGram
+    (I := I) (E := E) B e bas hx
+  have hmatrix :
+      localFrameMetricMatrix (I := I) (M := M) g e bas t x =
+        CovariantDerivative.localFrameGramMatrix (I := I) e bas x := by
+    ext i j
+    rfl
+  unfold metricTraceAt
+  rw [hmatrix]
+  simpa [PoincareCurvature.matrixContraction,
+    CovariantDerivative.localFrameInverseGramMatrix] using hframe.symm
+
 section IntrinsicFlow
 
 variable [SigmaCompactSpace M]
+
+/-- `ricciVelocity` is the intrinsic time derivative of the Ricci tensor at
+`t` when every evaluation on fixed tangent vectors has the corresponding
+ordinary real derivative.  Requiring a bilinear map on each tangent fiber
+rules out arbitrary coordinate coefficient data. -/
+def HasIntrinsicRicciTimeDerivativeAt
+    (g : MetricFamily (I := I) (M := M))
+    (ricciVelocity : ∀ x : M, TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ)
+    (t : ℝ) : Prop :=
+  ∀ (x : M) (u v : TM x),
+    HasDerivAt
+      (fun τ => intrinsicRicciTensor (I := I) (M := M) g τ x u v)
+      (ricciVelocity x u v) t
 
 /-- The local-frame contraction is exactly the coordinate-free scalar
 curvature of the chosen intrinsic Levi-Civita slice.  Thus the presentation
@@ -346,6 +393,53 @@ theorem IsIntrinsicRicciFlowOn.hasDerivAt_scalarCurvature_of_localFrameRicciDeri
   rw [hreadout] at hpresentation
   rw [localFrameRicciNormSqPresentation_eq_ricciNormSq g e bas t hx] at hpresentation
   exact hpresentation
+
+/-- Coordinate-free scalar-curvature variation from a genuine intrinsic
+Ricci-tensor time derivative.  The auxiliary local frame used in the proof is
+eliminated from both the hypotheses and the conclusion. -/
+theorem IsIntrinsicRicciFlowOn.hasDerivAt_scalarCurvature_of_intrinsicRicciTimeDerivative
+    {g : MetricFamily (I := I) (M := M)}
+    {gdot : MetricTensorFamily (I := I) (M := M)} {s : Set ℝ}
+    (hflow : IsIntrinsicRicciFlowOn (I := I) (M := M) g gdot s)
+    {t : ℝ} (ht : t ∈ s) {x : M}
+    (ricciVelocity : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] ℝ)
+    (hRicci : HasIntrinsicRicciTimeDerivativeAt
+      (I := I) (M := M) g ricciVelocity t) :
+    HasDerivAt
+      (fun τ => g.scalarCurvature
+        (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+          (I := I) (M := M) g)
+        (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+          (I := I) (M := M) g) τ x)
+      (2 * g.ricciNormSq
+          (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection
+            (I := I) (M := M) g)
+          (CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_contMDiff
+            (I := I) (M := M) g) t x +
+        metricTraceAt (I := I) (M := M) g t x (ricciVelocity x)) t := by
+  let e : Trivialization E (π E TM) := trivializationAt E TM x
+  let bas : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E
+  have hx : x ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt E TM x
+  let V : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+    fun i j => ricciVelocity x (e.localFrame bas i x) (e.localFrame bas j x)
+  have hcomponents : ∀ i j,
+      HasDerivAt
+        (fun τ => localFrameIntrinsicRicciMatrix
+          (I := I) (M := M) g e bas τ x i j)
+        (V i j) t := by
+    intro i j
+    exact hRicci x (e.localFrame bas i x) (e.localFrame bas j x)
+  have hlocal :=
+    hflow.hasDerivAt_scalarCurvature_of_localFrameRicciDerivative
+      ht e bas hx V hcomponents
+  have htrace :
+      PoincareCurvature.matrixContraction
+          (localFrameMetricMatrix (I := I) (M := M) g e bas t x)⁻¹ V =
+        metricTraceAt (I := I) (M := M) g t x (ricciVelocity x) := by
+    exact matrixContraction_localFrameTensor_eq_metricTraceAt
+      (I := I) (M := M) g t (ricciVelocity x) e bas hx
+  rw [htrace] at hlocal
+  exact hlocal
 
 end IntrinsicFlow
 
