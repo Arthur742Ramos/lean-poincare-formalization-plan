@@ -26,6 +26,7 @@ import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Endo
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.RaisedRicci
 import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveySpectrum
 import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyScalarBarrier
+import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyParabolic
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarParabolicInvariant
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ScalarLaplacian
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ScalarLaplacianMaximum
