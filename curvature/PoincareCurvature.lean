@@ -5,6 +5,7 @@ import PoincareCurvature.Analysis.MatrixSmoothness
 import PoincareCurvature.Analysis.ParametrizedInner
 import PoincareCurvature.Analysis.TimeDependentGram
 import PoincareCurvature.Analysis.LocalExtremaSecondDerivative
+import PoincareCurvature.Analysis.RiccatiBarrier
 import PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection
 import PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteTrivializingCover
 import PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteSmoothTrivializingCover
