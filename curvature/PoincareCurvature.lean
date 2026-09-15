@@ -26,6 +26,7 @@ import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Tens
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.EndomorphismTrace
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.RaisedRicci
 import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveySpectrum
+import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveySupport
 import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyScalarBarrier
 import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyParabolic
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarParabolicInvariant
