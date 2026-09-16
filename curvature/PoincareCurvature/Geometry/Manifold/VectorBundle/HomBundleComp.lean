@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Geometry.Manifold.VectorBundle.Hom
+public import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 
 /-!
 # Fiberwise composition of smooth hom-bundle sections
@@ -164,6 +165,37 @@ theorem contMDiffAt_clm_of_forall_apply_basis
   apply ContinuousLinearMap.coe_injective
   refine b.ext fun i ↦ ?_
   simp [recon]
+
+/-- A hom-bundle section is `C^n` at a point when its values on one genuine local frame are
+`C^n` sections at that point. -/
+theorem contMDiffAt_homBundle_of_forall_apply_localFrame
+    [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂]
+    {s : ∀ x, E₁ x →L[𝕜] E₂ x} (x₀ : B)
+    {ι : Type*} [Fintype ι] (b : Module.Basis ι 𝕜 F₁)
+    (h : ∀ i, ContMDiffAt IB (IB.prod 𝓘(𝕜, F₂)) n
+      (fun x ↦ TotalSpace.mk' F₂ x
+        (s x ((trivializationAt F₁ E₁ x₀).localFrame b i x))) x₀) :
+    ContMDiffAt IB (IB.prod 𝓘(𝕜, F₁ →L[𝕜] F₂)) n
+      (fun x ↦ TotalSpace.mk' (F₁ →L[𝕜] F₂)
+        (E := fun x ↦ E₁ x →L[𝕜] E₂ x) x (s x)) x₀ := by
+  classical
+  rw [contMDiffAt_hom_bundle]
+  refine ⟨contMDiffAt_id, ?_⟩
+  apply contMDiffAt_clm_of_forall_apply_basis b
+  intro i
+  have hi := h i
+  rw [Bundle.contMDiffAt_section] at hi
+  refine hi.congr_of_eventuallyEq ?_
+  have hsrc : (trivializationAt F₁ E₁ x₀).baseSet ∈ 𝓝 x₀ :=
+    (trivializationAt F₁ E₁ x₀).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt' x₀)
+  have hout : (trivializationAt F₂ E₂ x₀).baseSet ∈ 𝓝 x₀ :=
+    (trivializationAt F₂ E₂ x₀).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt' x₀)
+  filter_upwards [hsrc, hout] with x hxsrc hxout
+  rw [ContinuousLinearMap.inCoordinates_eq hxsrc hxout]
+  rw [(trivializationAt F₁ E₁ x₀).localFrame_apply_of_mem_baseSet b hxsrc]
+  rfl
 
 /-- The fiberwise composition of two `C^n` hom-bundle sections is a `C^n` hom-bundle section
 (on-a-set version). -/

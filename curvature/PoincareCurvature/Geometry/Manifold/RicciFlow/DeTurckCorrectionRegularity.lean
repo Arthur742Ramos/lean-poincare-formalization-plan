@@ -897,6 +897,80 @@ theorem ricciBilinearFormSection_contMDiff_one
   rw [ricciBilinearFormSection_apply,
     ricciCurvature_eq_sum_localFrameCoeff b x0 hx]
 
+/-- Pointwise differentiability of the canonical covariant Ricci tensor, with no independent Ricci
+regularity assumption. -/
+theorem ricciCovariantTwoTensor_mdifferentiableAt
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] [cov.ContMDiffCovariantDerivative 2]
+    (x : M) :
+    MDiffAt
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun z : M ↦ TangentSpace I z →L[ℝ] TangentSpace I z →L[ℝ] ℝ) y
+        (CovariantDerivative.ricciCovariantTwoTensor cov y)) x := by
+  have h := ricciBilinearFormSection_contMDiff_one (I := I) (M := M) cov
+    (Module.finBasis ℝ E)
+  refine ((h x).mdifferentiableAt one_ne_zero).congr_of_eventuallyEq ?_
+  filter_upwards [] with y
+  apply congrArg (fun B ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+    (E := fun z : M ↦ TangentSpace I z →L[ℝ] TangentSpace I z →L[ℝ] ℝ) y B)
+  ext u v
+  rfl
+
+/-- Pointwise differentiability of the genuine metric-raised Ricci endomorphism, derived from the
+`C¹` covariant Ricci tensor and the regularity of the Riemannian Riesz map. -/
+theorem raisedRicciEndomorphism_mdifferentiableAt
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] [cov.ContMDiffCovariantDerivative 2]
+    (x₀ : M) :
+    MDiffAt
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M ↦ TangentSpace I z →L[ℝ] TangentSpace I z) y
+        (CovariantDerivative.raisedRicciEndomorphism cov y)) x₀ := by
+  classical
+  let e := trivializationAt E (TangentSpace I : M → Type _) x₀
+  let b := Module.finBasis ℝ E
+  have hRicci := ricciBilinearFormSection_contMDiff_one (I := I) (M := M) cov b
+  have hframe : ∀ i, ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (fun y ↦ TotalSpace.mk' E y (e.localFrame b i y)) e.baseSet :=
+    fun i ↦ e.contMDiffOn_localFrame_baseSet (I := I) (n := 1) b i
+  refine (contMDiffAt_homBundle_of_forall_apply_localFrame
+    (IB := I) (E₁ := TangentSpace I) (E₂ := TangentSpace I) x₀ b ?_).mdifferentiableAt
+      one_ne_zero
+  intro i
+  let omega : ∀ y : M, TangentSpace I y →L[ℝ] ℝ := fun y ↦
+    CovariantDerivative.ricciCovariantTwoTensor cov y (e.localFrame b i y)
+  have homega : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+        (E := fun z : M ↦ TangentSpace I z →L[ℝ] ℝ) y (omega y)) e.baseSet := by
+    have happ := hRicci.contMDiffOn.clm_bundle_apply (hframe i)
+    simpa [omega, ricciBilinearFormSection,
+      CovariantDerivative.ricciCovariantTwoTensor] using happ
+  have hraised := CovariantDerivative.contMDiffOn_rieszMap_section
+    (I := I) (E := E) e b e.open_baseSet (Set.Subset.rfl) homega
+  have hat := hraised.contMDiffAt
+    (e.open_baseSet.mem_nhds (FiberBundle.mem_baseSet_trivializationAt E _ x₀))
+  refine hat.congr_of_eventuallyEq ?_
+  filter_upwards [] with y
+  apply congrArg (TotalSpace.mk' E y)
+  rfl
+
+/-- The regularity predicate used by the differentiated Ricci-trace API follows from curvature
+regularity; it is not an additional hypothesis on Ricci. -/
+theorem raisedRicciEndomorphismMDiffAt_of_curvature
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] [cov.ContMDiffCovariantDerivative 2]
+    (x : M) : CovariantDerivative.raisedRicciEndomorphismMDiffAt cov x := by
+  unfold CovariantDerivative.raisedRicciEndomorphismMDiffAt
+  exact raisedRicciEndomorphism_mdifferentiableAt (I := I) (M := M) cov x
+
 /-- **The intrinsic Ricci–DeTurck right-hand side is a continuous `BilinearFormBundle` section,
 unconditionally** (for a `C¹` background connection slice).  This removes the last hypothesis of
 `exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection` by *supplying* its Ricci
