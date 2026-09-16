@@ -308,6 +308,136 @@ theorem curvatureNu_eq_two_sectionalCurvatureNumerator_complement
         hsection
   simpa [b] using hmain
 
+theorem curvatureLambda_eq_two_sectionalCurvatureNumerator_complement
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    (letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+     letI : ContMDiffCovariantDerivative
+       (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+     g.curvatureLambda cov hcov hLevi hdim t x =
+       2 * CovariantDerivative.sectionalCurvatureNumerator (cov := cov t) x
+         ((CovariantDerivative.ricciComplementEigenbasis
+           (I := I) (M := M) (E := E)
+           (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)) 1)
+         ((CovariantDerivative.ricciComplementEigenbasis
+           (I := I) (M := M) (E := E)
+           (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)) 2)) := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+  let b := CovariantDerivative.ricciComplementEigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)
+  have heig := CovariantDerivative.ricciComplementEndomorphism_apply_eigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 0
+  have hinner := congrArg (fun z : TM x => Inner.inner ℝ z (b 0)) heig
+  have hsection := CovariantDerivative.inner_ricciComplementEndomorphism_basis_zero_finrank_three
+    (I := I) (M := M) (E := E) (cov t) (hLevi t).2 x b
+  change CovariantDerivative.ricciComplementEigenvalues
+      (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 0 = _
+  have hnorm : Inner.inner ℝ (b 0) (b 0) = 1 := by
+    simpa using b.orthonormal (i := (0 : Fin 3)) (j := (0 : Fin 3))
+  have hinner' :
+      Inner.inner ℝ
+          (CovariantDerivative.ricciComplementEndomorphism (cov t) x (b 0)) (b 0) =
+        CovariantDerivative.ricciComplementEigenvalues
+          (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 0 := by
+    calc
+      Inner.inner ℝ
+          (CovariantDerivative.ricciComplementEndomorphism (cov t) x (b 0)) (b 0) =
+          Inner.inner ℝ
+            (CovariantDerivative.ricciComplementEigenvalues
+              (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 0 • b 0) (b 0) := hinner
+      _ = CovariantDerivative.ricciComplementEigenvalues
+          (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 0 := by
+        rw [real_inner_smul_left, hnorm, mul_one]
+  have hmain :
+      CovariantDerivative.ricciComplementEigenvalues
+          (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 0 =
+        2 * CovariantDerivative.sectionalCurvatureNumerator (cov := cov t) x (b 1) (b 2) := by
+    calc
+      CovariantDerivative.ricciComplementEigenvalues
+          (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 0 =
+          Inner.inner ℝ
+            (CovariantDerivative.ricciComplementEndomorphism (cov t) x (b 0)) (b 0) :=
+        hinner'.symm
+      _ = 2 * CovariantDerivative.sectionalCurvatureNumerator (cov := cov t) x (b 1) (b 2) :=
+        hsection
+  simpa [b] using hmain
+
+theorem curvatureMu_eq_two_sectionalCurvatureNumerator_complement
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    (letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+     letI : ContMDiffCovariantDerivative
+       (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+     g.curvatureMu cov hcov hLevi hdim t x =
+       2 * CovariantDerivative.sectionalCurvatureNumerator (cov := cov t) x
+         ((CovariantDerivative.ricciComplementEigenbasis
+           (I := I) (M := M) (E := E)
+           (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)) 0)
+         ((CovariantDerivative.ricciComplementEigenbasis
+           (I := I) (M := M) (E := E)
+           (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)) 2)) := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+  let b := CovariantDerivative.ricciComplementEigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)
+  have heig := CovariantDerivative.ricciComplementEndomorphism_apply_eigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 1
+  have hinner := congrArg (fun z : TM x => Inner.inner ℝ z (b 1)) heig
+  have hsection := CovariantDerivative.inner_ricciComplementEndomorphism_basis_one_finrank_three
+    (I := I) (M := M) (E := E) (cov t) (hLevi t).2 x b
+  change CovariantDerivative.ricciComplementEigenvalues
+      (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 1 = _
+  have hnorm : Inner.inner ℝ (b 1) (b 1) = 1 := by
+    simpa using b.orthonormal (i := (1 : Fin 3)) (j := (1 : Fin 3))
+  have hinner' :
+      Inner.inner ℝ
+          (CovariantDerivative.ricciComplementEndomorphism (cov t) x (b 1)) (b 1) =
+        CovariantDerivative.ricciComplementEigenvalues
+          (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 1 := by
+    calc
+      Inner.inner ℝ
+          (CovariantDerivative.ricciComplementEndomorphism (cov t) x (b 1)) (b 1) =
+          Inner.inner ℝ
+            (CovariantDerivative.ricciComplementEigenvalues
+              (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 1 • b 1) (b 1) := hinner
+      _ = CovariantDerivative.ricciComplementEigenvalues
+          (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 1 := by
+        rw [real_inner_smul_left, hnorm, mul_one]
+  have hmain :
+      CovariantDerivative.ricciComplementEigenvalues
+          (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 1 =
+        2 * CovariantDerivative.sectionalCurvatureNumerator (cov := cov t) x (b 0) (b 2) := by
+    calc
+      CovariantDerivative.ricciComplementEigenvalues
+          (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) 1 =
+          Inner.inner ℝ
+            (CovariantDerivative.ricciComplementEndomorphism (cov t) x (b 1)) (b 1) :=
+        hinner'.symm
+      _ = 2 * CovariantDerivative.sectionalCurvatureNumerator (cov := cov t) x (b 0) (b 2) :=
+        hsection
+  simpa [b] using hmain
+
 /-- Every unit vector gives an upper support for the least genuine curvature
 eigenvalue. -/
 theorem curvatureNu_le_inner_ricciComplement_of_norm_eq_one
