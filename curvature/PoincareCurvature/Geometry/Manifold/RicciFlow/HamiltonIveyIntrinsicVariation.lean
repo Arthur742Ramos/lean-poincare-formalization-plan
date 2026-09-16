@@ -380,6 +380,109 @@ theorem curvatureOperatorReaction_apply_contact
   rw [← hsum]
   ring_nf
 
+/-! The reaction at the least curvature direction is the product of the two
+spectral gaps.  The Ricci contraction used here is recovered from the
+eigenvector equation for the genuine Ricci-complement endomorphism; it is not
+an independently supplied coefficient identity. -/
+
+theorem curvatureOperatorReaction_apply_contact_eq_gap_product
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    curvatureOperatorReaction g cov hcov hLevi hdim t x
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x) =
+      (g.curvatureLambda cov hcov hLevi hdim t x -
+          g.curvatureNu cov hcov hLevi hdim t x) *
+        (g.curvatureMu cov hcov hLevi hdim t x -
+          g.curvatureNu cov hcov hLevi hdim t x) := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  let V : TM x := g.curvatureNuContactVectorField cov hcov hLevi hdim t x x
+  have hV : V = g.curvatureNuEigenvector cov hcov hLevi hdim t x := by
+    simp [V, curvatureNuContactVectorField,
+      firstOrderParallelSmoothExtend_apply_center]
+  have hA : g.curvatureEndomorphismApply cov hcov t x V =
+      (g.curvatureNu cov hcov hLevi hdim t x) • V := by
+    rw [hV]
+    exact g.curvatureEndomorphismApply_curvatureNuEigenvector
+      cov hcov hLevi hdim t x
+  have hA' : (CovariantDerivative.ricciComplementEndomorphism (cov t) x) V =
+      (g.curvatureNu cov hcov hLevi hdim t x) • V := by
+    simpa [curvatureEndomorphismApply] using hA
+  have hinner : (g t).inner x V V = 1 := by
+    rw [hV]
+    exact g.inner_curvatureNuEigenvector_self cov hcov hLevi hdim t x
+  have hinner' : Inner.inner ℝ V V = 1 := by
+    change (g t).inner x V V = 1
+    exact hinner
+  have hnorm : ‖V‖ ^ 2 = 1 := by
+    rw [← real_inner_self_eq_norm_sq]
+    exact hinner'
+  have hquad := CovariantDerivative.inner_ricciComplementEndomorphism
+    (cov t) x V
+  have hRic : 2 * g.ricciCurvature cov hcov t x V V =
+      g.curvatureLambda cov hcov hLevi hdim t x +
+        g.curvatureMu cov hcov hLevi hdim t x := by
+    have hAinner := congrArg (fun z : TM x => Inner.inner ℝ z V) hA'
+    have hAinner' :
+        Inner.inner ℝ
+            (CovariantDerivative.ricciComplementEndomorphism (cov t) x V) V =
+          g.curvatureNu cov hcov hLevi hdim t x := by
+      calc
+        Inner.inner ℝ
+            (CovariantDerivative.ricciComplementEndomorphism (cov t) x V) V =
+            Inner.inner ℝ
+              ((g.curvatureNu cov hcov hLevi hdim t x) • V) V := hAinner
+        _ = g.curvatureNu cov hcov hLevi hdim t x * ‖V‖ ^ 2 := by
+          rw [real_inner_smul_left, real_inner_self_eq_norm_sq]
+        _ = g.curvatureNu cov hcov hLevi hdim t x := by rw [hnorm, mul_one]
+    have hquad' :
+        Inner.inner ℝ
+            (CovariantDerivative.ricciComplementEndomorphism (cov t) x V) V =
+          g.scalarCurvature cov hcov t x -
+            2 * g.ricciCurvature cov hcov t x V V := by
+      simpa [CovariantDerivative.TimeDependentRiemannianMetric.scalarCurvature,
+        CovariantDerivative.TimeDependentRiemannianMetric.ricciCurvature,
+        curvatureEndomorphismApply, hnorm] using hquad
+    have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+      cov hcov hLevi hdim t x
+    rw [hAinner'] at hquad'
+    rw [← hsum] at hquad'
+    linarith
+  have hreaction :
+      curvatureOperatorReaction g cov hcov hLevi hdim t x V V =
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+          g.curvatureLambda cov hcov hLevi hdim t x *
+            g.curvatureMu cov hcov hLevi hdim t x -
+          2 * g.curvatureNu cov hcov hLevi hdim t x *
+            g.ricciCurvature cov hcov t x V V := by
+    simpa [V] using g.curvatureOperatorReaction_apply_contact
+      cov hcov hLevi hdim t x
+  change curvatureOperatorReaction g cov hcov hLevi hdim t x V V = _
+  rw [hreaction]
+  calc
+    (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+          g.curvatureLambda cov hcov hLevi hdim t x *
+            g.curvatureMu cov hcov hLevi hdim t x -
+          2 * g.curvatureNu cov hcov hLevi hdim t x *
+            g.ricciCurvature cov hcov t x V V =
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+          g.curvatureLambda cov hcov hLevi hdim t x *
+            g.curvatureMu cov hcov hLevi hdim t x -
+          g.curvatureNu cov hcov hLevi hdim t x *
+            (2 * g.ricciCurvature cov hcov t x V V) := by ring
+    _ = (g.curvatureLambda cov hcov hLevi hdim t x -
+          g.curvatureNu cov hcov hLevi hdim t x) *
+        (g.curvatureMu cov hcov hLevi hdim t x -
+          g.curvatureNu cov hcov hLevi hdim t x) := by
+      rw [hRic]
+      ring
+
 /-! In dimension three the Ricci norm in the intrinsic metric-variation
 formula is exactly Hamilton--Ivey's scalar curvature reaction polynomial.
 This is an algebraic identity for the genuine raised Ricci endomorphism, not
