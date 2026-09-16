@@ -133,6 +133,38 @@ theorem scalarLaplacian_apply
   rw [scalarLaplacian_eq_sum_orthonormalBasis cov f x
     (stdOrthonormalBasis ℝ (TM x))]
 
+/-- A spatially constant scalar has zero Laplace--Beltrami operator. -/
+@[simp] theorem scalarLaplacian_const
+    (cov : CovariantDerivative I E TM) (c : ℝ) (x : M) :
+    scalarLaplacian cov (fun _ : M => c) x = 0 := by
+  have hzero (y : M) :
+      scalarDifferential (I := I) (fun _ : M => c) y = 0 := by
+    ext u
+    simp only [scalarDifferential_apply]
+    rw [mvfderiv_const]
+  have hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) (fun _ : M => c) y)) x := by
+    have hz :
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (scalarDifferential (I := I) (fun _ : M => c) y)) =
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y 0) := by
+      funext y
+      congr 1
+      exact hzero y
+    rw [hz]
+    exact mdifferentiableAt_zeroSection (𝕜 := ℝ)
+      (F := E →L[ℝ] ℝ) (E := T₁) (x := x)
+  rw [scalarLaplacian_eq_sum_orthonormalBasis cov (fun _ : M => c) x
+    (stdOrthonormalBasis ℝ (TM x))]
+  apply Finset.sum_eq_zero
+  intro i hi
+  rw [scalarHessian_apply_of_mdifferentiableAt_of_differential_eq_zero
+    cov (fun _ : M => c) hdf (hzero x)]
+  simp [hzero]
+  rw [mvfderiv_const]
+  simp
+
 /-- The scalar differential is additive on differentiable functions. -/
 theorem scalarDifferential_add {f k : M → ℝ}
     (hf : ∀ y, MDiffAt f y) (hk : ∀ y, MDiffAt k y) :

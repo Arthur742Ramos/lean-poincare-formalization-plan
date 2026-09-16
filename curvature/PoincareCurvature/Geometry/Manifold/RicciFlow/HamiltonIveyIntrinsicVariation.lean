@@ -1,6 +1,9 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyParabolic
+import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyConnectionVariation
+import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyKoszulVariation
 import PoincareCurvature.Geometry.Manifold.RicciFlow.MetricInverseVariation
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.ThreeDimensionalRicciNorm
+import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TraceLaplacian
 
 /-!
 # Intrinsic time variation for the Hamilton--Ivey support
@@ -126,6 +129,104 @@ remaining definitionally tied to the repository's intrinsic API. -/
 section IntrinsicTransport
 
 variable [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+
+set_option maxHeartbeats 1000000 in
+/-- Ricci-flow specialization of the metric-to-connection variation formula.
+The metric velocity is obtained from the actual Ricci-flow equation and the
+intrinsic Ricci tensor is identified with the chosen Levi-Civita representative.
+The three mixed time/space derivative hypotheses remain explicit: they are
+the regularity needed to differentiate the spatial metric derivatives. -/
+theorem metricVelocityCovariantDerivative_connectionVariation_formula_intrinsicRicci
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ τ : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov τ) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s)
+    (A : ∀ x : M, TM x → TM x → TM x)
+    (hvariation : TimeDependentCovariantDerivative.HasConnectionTimeVariationAt
+      (I := I) (M := M) cov A t)
+    {X Y Z : Π x : M, TM x} {x : M}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (fun y ↦ TotalSpace.mk' E y (X y)))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (fun y ↦ TotalSpace.mk' E y (Y y)))
+    (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      (fun y ↦ TotalSpace.mk' E y (Z y)))
+    (hRicciYZ : MDiffAt
+      (fun y ↦ RicciFlow.intrinsicRicciBilinearAt
+        (I := I) (M := M) g t y (Y y) (Z y)) x)
+    (hRicciXZ : MDiffAt
+      (fun y ↦ RicciFlow.intrinsicRicciBilinearAt
+        (I := I) (M := M) g t y (X y) (Z y)) x)
+    (hRicciXY : MDiffAt
+      (fun y ↦ RicciFlow.intrinsicRicciBilinearAt
+        (I := I) (M := M) g t y (X y) (Y y)) x)
+    (hmixedXYZ : HasDerivAt
+      (fun τ : ℝ =>
+        mvfderiv (I := I) (fun y ↦ (g τ).inner y (Y y) (Z y)) x (X x))
+      (mvfderiv (I := I)
+        (fun y ↦ ((-2 : ℝ) • RicciFlow.intrinsicRicciBilinearAt
+          (I := I) (M := M) g t y) (Y y) (Z y)) x (X x)) t)
+    (hmixedYXZ : HasDerivAt
+      (fun τ : ℝ =>
+        mvfderiv (I := I) (fun y ↦ (g τ).inner y (X y) (Z y)) x (Y x))
+      (mvfderiv (I := I)
+        (fun y ↦ ((-2 : ℝ) • RicciFlow.intrinsicRicciBilinearAt
+          (I := I) (M := M) g t y) (X y) (Z y)) x (Y x)) t)
+    (hmixedZXY : HasDerivAt
+      (fun τ : ℝ =>
+        mvfderiv (I := I) (fun y ↦ (g τ).inner y (X y) (Y y)) x (Z x))
+      (mvfderiv (I := I)
+        (fun y ↦ ((-2 : ℝ) • RicciFlow.intrinsicRicciBilinearAt
+          (I := I) (M := M) g t y) (X y) (Y y)) x (Z x)) t) :
+    2 * (g t).inner x (A x (X x) (Y x)) (Z x) =
+      -2 * (metricVelocityCovariantDerivativeAlong
+          (I := I) (M := M) cov
+          (RicciFlow.intrinsicRicciBilinearAt (I := I) (M := M) g t)
+          t X Y Z x +
+        metricVelocityCovariantDerivativeAlong
+          (I := I) (M := M) cov
+          (RicciFlow.intrinsicRicciBilinearAt (I := I) (M := M) g t)
+          t Y X Z x -
+        metricVelocityCovariantDerivativeAlong
+          (I := I) (M := M) cov
+          (RicciFlow.intrinsicRicciBilinearAt (I := I) (M := M) g t)
+          t Z X Y x) := by
+  let ricci : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] ℝ :=
+    RicciFlow.intrinsicRicciBilinearAt (I := I) (M := M) g t
+  let hdot : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] ℝ :=
+    fun y => (-2 : ℝ) • ricci y
+  have hRicciTensor : RicciFlow.intrinsicRicciTensor (I := I) (M := M) g =
+      RicciFlow.ricciTensor (I := I) (M := M) g cov hcov :=
+    RicciFlow.intrinsicRicciTensor_eq_ricciTensor_of_isLeviCivita
+      (I := I) (M := M) g hcov hLevi
+  have hricciEq (y : M) (u v : TM y) :
+      ricci y u v = g.ricciCurvature cov hcov t y u v := by
+    have hpoint := congrArg (fun q => q t y u v) hRicciTensor
+    simpa [ricci, RicciFlow.intrinsicRicciBilinearAt_apply,
+      RicciFlow.ricciTensor] using hpoint
+  have hmetric : ∀ (y : M) (u v : TM y),
+      HasDerivAt (fun τ : ℝ => (g τ).inner y u v) (hdot y u v) t := by
+    intro y u v
+    have hmetric₀ := hflow.2.1 ht y u v
+    have hmetricEq := hflow.2.2 ht y u v
+    change HasDerivAt (fun τ => (g τ).inner y u v) (gdot t y u v) t at hmetric₀
+    rw [hmetricEq] at hmetric₀
+    have hmetricRicci : HasDerivAt (fun τ => (g τ).inner y u v)
+        ((-2 : ℝ) * g.ricciCurvature cov hcov t y u v) t := by
+      simpa [RicciFlow.ricciFlowRHS, RicciFlow.ricciTensor] using hmetric₀
+    simpa [hdot, ricci, hricciEq y u v, smul_eq_mul] using hmetricRicci
+  have hformula := metricVelocityCovariantDerivative_connectionVariation_formula_smul
+    (I := I) (M := M) g cov hcov hLevi A ricci (-2) (t := t)
+    hvariation hmetric hX hY hZ hRicciYZ hRicciXZ hRicciXY
+    hmixedXYZ hmixedYXZ hmixedZXY
+  simpa [ricci] using hformula
 
 theorem hasDerivAt_scalarCurvature_of_intrinsicRicciTimeDerivative
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
@@ -1300,6 +1401,143 @@ theorem curvatureOperatorReactionEndomorphism_trace_eq_scalarReaction
   simp only [mul_one]
   dsimp [HamiltonIveyReaction.scalarReaction]
 
+/-! The trace of the actual lowered curvature reaction is the scalar reaction
+that appears in the Ricci-flow scalar equation, with the metric-variation
+correction kept visible. This is the algebraic part of recovering the scalar
+trace evolution from a full tensor evolution identity. -/
+
+set_option maxHeartbeats 1000000 in
+theorem curvatureOperatorReaction_trace_eq_sixRicciNormSq_sub_twoScalarSq
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+    let b := CovariantDerivative.ricciComplementEigenbasis
+      (I := I) (M := M) (E := E) (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)
+    (∑ i : Fin 3,
+      curvatureOperatorReaction g cov hcov hLevi hdim t x (b i) (b i)) =
+      6 * g.ricciNormSq cov hcov t x -
+        2 * (g.scalarCurvature cov hcov t x) ^ 2 := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  let b := CovariantDerivative.ricciComplementEigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)
+  let eig : Fin 3 → ℝ := fun i =>
+    g.curvatureEigenvalues cov hcov hLevi hdim t x i
+  let lam : ℝ := g.curvatureLambda cov hcov hLevi hdim t x
+  let mu : ℝ := g.curvatureMu cov hcov hLevi hdim t x
+  let nu : ℝ := g.curvatureNu cov hcov hLevi hdim t x
+  let R : ℝ := g.scalarCurvature cov hcov t x
+  let e₂ : ℝ :=
+    lam * mu + lam * nu + mu * nu
+  have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim t x
+  have hnorm (i : Fin 3) : Inner.inner ℝ (b i) (b i) = 1 := by
+    rw [real_inner_self_eq_norm_sq, b.orthonormal.1]
+    norm_num
+  have hnormSq (i : Fin 3) : ‖b i‖ ^ 2 = 1 := by
+    rw [b.orthonormal.1]
+    norm_num
+  have hA (i : Fin 3) :
+      g.curvatureEndomorphismApply cov hcov t x (b i) = eig i • b i := by
+    have h := CovariantDerivative.ricciComplementEndomorphism_apply_eigenbasis
+      (I := I) (M := M) (E := E) (cov t)
+      (hLevi t).1 (hLevi t).2 x (hdim x) i
+    simpa [curvatureEndomorphismApply, eig, b, curvatureEigenvalues] using h
+  have hQ (i : Fin 3) :
+      curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t x (b i) =
+        (2 * eig i ^ 2 - R * eig i + e₂) • b i := by
+    have h := g.curvatureOperatorReactionEndomorphism_apply_curvatureEigenbasis
+      cov hcov hLevi hdim t x i
+    simpa [b, eig, R, e₂, lam, mu, nu, curvatureEigenbasisVector] using h
+  have hinnerQ (i : Fin 3) :
+      (g t).inner x (b i)
+          (curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t x (b i)) =
+        2 * eig i ^ 2 - R * eig i + e₂ := by
+    rw [hQ i]
+    change Inner.inner ℝ (b i)
+        ((2 * eig i ^ 2 - R * eig i + e₂) • b i) = _
+    simp [real_inner_smul_right, hnorm i]
+  have hRicciDiag (i : Fin 3) :
+      g.ricciCurvature cov hcov t x (b i) (b i) = (R - eig i) / 2 := by
+    have hinner :
+        Inner.inner ℝ
+          (g.curvatureEndomorphismApply cov hcov t x (b i)) (b i) = eig i := by
+      rw [hA i, real_inner_smul_left, hnorm i]
+      ring
+    have hquadratic :=
+      CovariantDerivative.inner_ricciComplementEndomorphism (cov t) x (b i)
+    have hidentity : eig i = R -
+        2 * g.ricciCurvature cov hcov t x (b i) (b i) := by
+      calc
+        eig i = Inner.inner ℝ
+            (g.curvatureEndomorphismApply cov hcov t x (b i)) (b i) := hinner.symm
+        _ = R * ‖b i‖ ^ 2 -
+            2 * g.ricciCurvature cov hcov t x (b i) (b i) := by
+          simpa [curvatureEndomorphismApply, R, hnormSq i] using hquadratic
+        _ = R - 2 * g.ricciCurvature cov hcov t x (b i) (b i) := by
+          rw [hnormSq i]
+          ring
+    nlinarith [hidentity]
+  have hRicciA (i : Fin 3) :
+      g.ricciCurvature cov hcov t x (b i)
+          (g.curvatureEndomorphismApply cov hcov t x (b i)) =
+        eig i * g.ricciCurvature cov hcov t x (b i) (b i) := by
+    rw [hA i]
+    simp
+  have hterm (i : Fin 3) :
+      curvatureOperatorReaction g cov hcov hLevi hdim t x (b i) (b i) =
+        (2 * eig i ^ 2 - R * eig i + e₂) -
+          2 * ((R - eig i) / 2) * eig i := by
+    rw [curvatureOperatorReaction_eq_inner_endomorphism_sub_ricci,
+      hinnerQ i, hRicciA i, hRicciDiag i]
+    ring
+  have hterm0 := hterm 0
+  have hterm1 := hterm 1
+  have hterm2 := hterm 2
+  have heig0 : eig 0 = lam := by
+    rfl
+  have heig1 : eig 1 = mu := by
+    rfl
+  have heig2 : eig 2 = nu := by
+    rfl
+  have hsumLambda : lam + mu + nu = R := by
+    simpa [lam, mu, nu, R] using hsum
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  have hnormReaction' :=
+    CovariantDerivative.two_mul_ricciNormSq_eq_threeDimensionalCurvatureReaction
+      (I := I) (M := M) (E := E) (cov t)
+      (hLevi t).1 (hLevi t).2 x (hdim x)
+  have hnormReaction :
+      2 * g.ricciNormSq cov hcov t x =
+        HamiltonIveyReaction.scalarReaction
+          (g.curvatureLambda cov hcov hLevi hdim t x)
+          (g.curvatureMu cov hcov hLevi hdim t x)
+          (g.curvatureNu cov hcov hLevi hdim t x) := by
+    dsimp [HamiltonIveyReaction.scalarReaction]
+    convert hnormReaction' using 1
+    · rfl
+    · simp [CovariantDerivative.TimeDependentRiemannianMetric.ricciNormSq,
+        curvatureLambda, curvatureMu, curvatureNu, curvatureEigenvalues,
+        CovariantDerivative.threeDimensionalCurvatureLambda,
+        CovariantDerivative.threeDimensionalCurvatureMu,
+        CovariantDerivative.threeDimensionalCurvatureNu]
+      ring
+  dsimp only
+  rw [Fin.sum_univ_three, hterm0, hterm1, hterm2,
+    heig0, heig1, heig2, ← hsumLambda]
+  rw [← hsum]
+  dsimp [R, e₂, HamiltonIveyReaction.scalarReaction] at hnormReaction ⊢
+  nlinarith [hnormReaction]
+
 theorem curvatureOperatorReaction_apply_contact
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
@@ -2047,6 +2285,966 @@ structure HamiltonIveyCurvatureEvolutionCertificate
               cov hcov hLevi hdim t x) x u v +
           curvatureOperatorReaction g cov hcov hLevi hdim t x u v) t
 
+/-! The full lowered-curvature evolution certificate implies the contact
+velocity identity needed by the Hamilton--Ivey reduction.  This is only a
+transport step: the certificate still carries the actual connection
+Laplacian-plus-reaction evolution for the geometric curvature tensor. -/
+
+theorem HamiltonIveyCurvatureEvolutionCertificate.contactOperatorVelocity
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) (x : M)
+    (c : HamiltonIveyCurvatureEvolutionCertificate
+      g cov hcov hLevi hdim t x) :
+    curvatureOperatorTwoTensorVelocity g cov hcov t
+        (curvatureTensorVelocityRicci c.curvatureVelocity) x
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x) =
+      g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+        g.curvatureLambda cov hcov hLevi hdim t x *
+          g.curvatureMu cov hcov hLevi hdim t x -
+        2 * g.curvatureNu cov hcov hLevi hdim t x *
+          g.ricciCurvature cov hcov t x
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x) := by
+  let V : TM x := g.curvatureNuContactVectorField cov hcov hLevi hdim t x x
+  have hRicci := hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
+    g cov hcov hLevi c.curvatureVelocity c.hCurvature
+  have hEvolutionContact :
+      HasDerivAt (fun τ => g.curvatureOperatorTwoTensor cov hcov τ x V V)
+        (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          curvatureOperatorReaction g cov hcov hLevi hdim t x V V) t := by
+    letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+    letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+      ContinuousLinearMap.toNormedSpace
+    letI : ∀ y : M, NormedAddCommGroup (T₂ y) := fun _ =>
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI : ∀ y : M, NormedSpace ℝ (T₂ y) := fun _ =>
+      inferInstance
+    simpa [V, hamiltonIveyContactCurvatureLaplacian] using c.hEvolution V V
+  exact g.curvatureOperatorTwoTensorVelocity_eq_of_curvatureOperatorReactionEvolution
+    cov hcov hLevi hdim gdot s hflow ht x
+    (curvatureTensorVelocityRicci c.curvatureVelocity) hRicci hEvolutionContact
+
+/-! Taking the actual metric trace of the full curvature evolution recovers
+the scalar Ricci-variation trace.  The remaining input here is stated
+explicitly: trace must commute with the connection Laplacian on the shifted
+curvature tensor.  This isolates that differential-geometric lemma from the
+finite-dimensional reaction-trace calculation above. -/
+
+/-- The trace/Laplacian commutation identity for the shifted curvature
+operator, evaluated in its genuine Ricci-complement orthonormal eigenbasis.
+The basis is only an evaluation device; it is the metric trace of the actual
+connection Laplacian. -/
+def HamiltonIveyTraceLaplacianAt
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) : Prop := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedSpace
+  letI : ∀ y : M, NormedAddCommGroup (T₂ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₂ y) := fun _ => inferInstance
+  let b := CovariantDerivative.ricciComplementEigenbasis
+    (I := I) (M := M) (E := E) (cov t)
+    (hLevi t).1 (hLevi t).2 x (hdim x)
+  exact
+    (∑ i : Fin 3,
+      connectionLaplacian (cov t)
+        (g.curvatureNuShiftedContactTwoTensor cov hcov hLevi hdim t x)
+        x (b i) (b i)) =
+      g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x
+
+set_option maxHeartbeats 2000000
+set_option synthInstance.maxHeartbeats 200000
+/-- The pointwise regularity data needed to form the shifted-tensor trace
+Laplacian identity.  This packages only differentiability statements for the
+actual shifted curvature tensor and its covariant derivatives; it does not
+contain the target trace identity. -/
+def HamiltonIveyShiftedTensorTraceRegularity
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) : Prop := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 1 E TM :=
+    g.slice_isContMDiffRiemannianBundle t
+  letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedSpace
+  letI : ∀ y : M, NormedAddCommGroup (T₂ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₂ y) := fun _ => inferInstance
+  letI : ∀ y : M, NormedAddCommGroup (T₃ y) := fun _ => inferInstance
+  letI : ∀ y : M, NormedSpace ℝ (T₃ y) := fun _ => inferInstance
+  letI : NormedAddCommGroup (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+  letI : NormedSpace ℝ (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+  letI : NormedAddCommGroup
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+  letI : NormedSpace ℝ
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+  letI : FiberBundle (E →L[ℝ] ℝ) T₁ := inferInstance
+  letI : VectorBundle ℝ (E →L[ℝ] ℝ) T₁ := inferInstance
+  letI : FiberBundle (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ := inferInstance
+  letI : VectorBundle ℝ (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ := inferInstance
+  letI : FiberBundle
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ := inferInstance
+  letI : VectorBundle ℝ
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ := inferInstance
+  letI : ContMDiffVectorBundle 2 (E →L[ℝ] ℝ) T₁ I := by infer_instance
+  letI : ContMDiffVectorBundle 2 (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ I :=
+    by infer_instance
+  letI : ContMDiffVectorBundle 2
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ I := by infer_instance
+  let H : ∀ y : M, T₂ y :=
+    g.curvatureNuShiftedContactTwoTensor cov hcov hLevi hdim t x
+  exact
+    (∀ y : M,
+      MDiffAt
+        (fun z => TotalSpace.mk' (E →L[ℝ] E)
+          (E := fun w : M => TM w →L[ℝ] TM w) z
+          (raisedCovariantTwoTensor (I := I) (E := E) H z)) y) ∧
+    MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) y
+        (covariantTwoTensorCovariantDerivative (cov t) H y)) x ∧
+    MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I)
+          (covariantTwoTensorTraceFunction (I := I) (E := E) H) y)) x ∧
+    (∀ Y : TM x,
+      MDiffAt
+        (fun z => TotalSpace.mk' (E →L[ℝ] E)
+          (E := fun w : M => TM w →L[ℝ] TM w) z
+          (raisedCovariantTwoTensor (I := I) (E := E)
+            (covariantTwoTensorDerivativeAlong (cov t) H
+              (smoothExtend (I := I) (F := E) (V := TM) x Y)) z)) x)
+
+/-- The trace components of the shifted-curvature regularity certificate
+already supply first- and second-order spatial regularity of scalar curvature:
+the trace of the contact-shifted curvature tensor is `R - 3 nu_contact`, and
+the contact eigenvalue is constant in the spatial variable. -/
+theorem scalarRegularity_of_shiftedTensorRegularity
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M)
+    (hregular : g.HamiltonIveyShiftedTensorTraceRegularity
+      cov hcov hLevi hdim t x) :
+    MDiffAt (g.scalarCurvature cov hcov t) x ∧
+    MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (CovariantDerivative.scalarDifferential (I := I)
+          (g.scalarCurvature cov hcov t) y)) x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 1 E TM :=
+    g.slice_isContMDiffRiemannianBundle t
+  letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedSpace
+  letI : ∀ y : M, NormedAddCommGroup (T₂ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₂ y) := fun _ => inferInstance
+  letI : ∀ y : M, NormedAddCommGroup (T₃ y) := fun _ => inferInstance
+  letI : ∀ y : M, NormedSpace ℝ (T₃ y) := fun _ => inferInstance
+  letI : NormedAddCommGroup (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+  letI : NormedSpace ℝ (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+  letI : NormedAddCommGroup
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+  letI : NormedSpace ℝ
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+  letI : FiberBundle (E →L[ℝ] ℝ) T₁ := inferInstance
+  letI : VectorBundle ℝ (E →L[ℝ] ℝ) T₁ := inferInstance
+  letI : FiberBundle (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ := inferInstance
+  letI : VectorBundle ℝ (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ := inferInstance
+  letI : FiberBundle
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ := inferInstance
+  letI : VectorBundle ℝ (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ := inferInstance
+  letI : ContMDiffVectorBundle 2 (E →L[ℝ] ℝ) T₁ I := by infer_instance
+  letI : ContMDiffVectorBundle 2 (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ I := by infer_instance
+  letI : ContMDiffVectorBundle 2
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ I := by infer_instance
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  letI : ∀ y : M, FiniteDimensional ℝ (TM y) := fun y =>
+    VectorBundle.finiteDimensional ℝ E TM y
+  let H : ∀ y : M, T₂ y :=
+    g.curvatureNuShiftedContactTwoTensor cov hcov hLevi hdim t x
+  rcases hregular with ⟨hHraised, _hHfirst, htraceDifferential,
+    _hHsecondRaised⟩
+  have htraceH (y : M) :
+      covariantTwoTensorTraceFunction (I := I) (E := E) H y =
+        g.scalarCurvature cov hcov t y -
+          3 * g.curvatureNu cov hcov hLevi hdim t x := by
+    let b' : OrthonormalBasis (Fin 3) ℝ (TM y) :=
+      CovariantDerivative.ricciComplementEigenbasis
+        (I := I) (M := M) (E := E) (cov t)
+        (hLevi t).1 (hLevi t).2 y (hdim y)
+    have hinner' (i : Fin 3) : (g t).inner y (b' i) (b' i) = 1 := by
+      change Inner.inner ℝ (b' i) (b' i) = 1
+      rw [real_inner_self_eq_norm_sq, b'.orthonormal.1]
+      norm_num
+    have hsumRicci' :
+        (∑ i : Fin 3, g.ricciCurvature cov hcov t y (b' i) (b' i)) =
+          g.scalarCurvature cov hcov t y := by
+      have h := CovariantDerivative.scalarCurvature_eq_sum_ricci_orthonormalBasis
+        (cov := cov t) y b'
+      simpa [TimeDependentRiemannianMetric.scalarCurvature,
+        TimeDependentRiemannianMetric.ricciCurvature] using h.symm
+    have hterm (i : Fin 3) :
+        H y (b' i) (b' i) =
+          g.scalarCurvature cov hcov t y -
+            2 * g.ricciCurvature cov hcov t y (b' i) (b' i) -
+              g.curvatureNu cov hcov hLevi hdim t x := by
+      simp [H, hinner' i]
+    calc
+      _ = ∑ i : Fin 3, H y (b' i) (b' i) := by
+        exact covariantTwoTensorTrace_eq_sum_orthonormalBasis
+          (covariantTwoTensorLinear (I := I) (M := M) H) y b'
+      _ = ∑ i : Fin 3,
+          (g.scalarCurvature cov hcov t y -
+            2 * g.ricciCurvature cov hcov t y (b' i) (b' i) -
+              g.curvatureNu cov hcov hLevi hdim t x) := by
+        apply Finset.sum_congr rfl
+        intro i hi
+        exact hterm i
+      _ = g.scalarCurvature cov hcov t y -
+          3 * g.curvatureNu cov hcov hLevi hdim t x := by
+        rw [Fin.sum_univ_three]
+        have hsumRicci'' := hsumRicci'
+        rw [Fin.sum_univ_three] at hsumRicci''
+        rw [← hsumRicci'']
+        ring
+  have htraceMDiff :
+      ∀ y : M, MDiffAt (covariantTwoTensorTraceFunction
+        (I := I) (E := E) H) y := by
+    intro y
+    rw [covariantTwoTensorTraceFunction_eq_endomorphismTrace_raised
+      (I := I) (E := E) (M := M) H]
+    exact mdifferentiableAt_endomorphismTrace
+      (F := E) (V := TM) (hHraised y)
+  let scalar : M → ℝ := g.scalarCurvature cov hcov t
+  let traceOffset : ℝ := 3 * g.curvatureNu cov hcov hLevi hdim t x
+  have hscalarAdd :
+      scalar = covariantTwoTensorTraceFunction (I := I) (E := E) H +
+        (fun _ : M => traceOffset) := by
+    funext y
+    change g.scalarCurvature cov hcov t y =
+      covariantTwoTensorTraceFunction (I := I) (E := E) H y +
+        3 * g.curvatureNu cov hcov hLevi hdim t x
+    rw [htraceH y]
+    ring
+  have hoffsetMDiff : ∀ y : M, MDiffAt (fun _ : M => traceOffset) y := by
+    intro y
+    exact mdifferentiableAt_const
+  have hoffsetDifferential :
+      scalarDifferential (I := I) (fun _ : M => traceOffset) = 0 := by
+    funext y
+    have hzero (y : M) :
+        scalarDifferential (I := I) (fun _ : M => traceOffset) y = 0 := by
+      ext u
+      simp only [scalarDifferential_apply]
+      rw [mvfderiv_const]
+    exact hzero y
+  have hscalarDifferentialEq :
+      scalarDifferential (I := I) scalar =
+        scalarDifferential (I := I)
+          (covariantTwoTensorTraceFunction (I := I) (E := E) H) := by
+    calc
+      _ = scalarDifferential (I := I)
+          (covariantTwoTensorTraceFunction (I := I) (E := E) H +
+            (fun _ : M => traceOffset)) := by rw [hscalarAdd]
+      _ = scalarDifferential (I := I)
+          (covariantTwoTensorTraceFunction (I := I) (E := E) H) +
+            scalarDifferential (I := I) (fun _ : M => traceOffset) :=
+        scalarDifferential_add htraceMDiff hoffsetMDiff
+      _ = _ := by rw [hoffsetDifferential]; simp
+  have hscalarAt : MDiffAt (g.scalarCurvature cov hcov t) x := by
+    change MDiffAt scalar x
+    rw [hscalarAdd]
+    exact (htraceMDiff x).add mdifferentiableAt_const
+  have hscalarDifferentialAt : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (CovariantDerivative.scalarDifferential (I := I)
+          (g.scalarCurvature cov hcov t) y)) x := by
+    have h := htraceDifferential
+    rw [← hscalarDifferentialEq] at h
+    exact h
+  exact ⟨hscalarAt, hscalarDifferentialAt⟩
+
+/-- The scalar-gradient part of the shifted-tensor regularity bridge. -/
+theorem scalarDifferential_mdifferentiableAt_of_shiftedTensorRegularity
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M)
+    (hregular : g.HamiltonIveyShiftedTensorTraceRegularity
+      cov hcov hLevi hdim t x) :
+    MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (CovariantDerivative.scalarDifferential (I := I)
+          (g.scalarCurvature cov hcov t) y)) x := by
+  exact (g.scalarRegularity_of_shiftedTensorRegularity
+    cov hcov hLevi hdim t x hregular).2
+
+/-- The Hamilton--Ivey trace/Laplacian bridge follows from the proved
+second-order metric-trace commutation theorem, provided the actual shifted
+ curvature tensor has the differentiability needed to form its genuine
+ connection Laplacian.  The regularity package is deliberately explicit: it
+ is not implied by the current `C¹` connection input alone. -/
+theorem HamiltonIveyTraceLaplacianAt_of_shiftedTensorRegularity
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M)
+    (hregular : g.HamiltonIveyShiftedTensorTraceRegularity
+      cov hcov hLevi hdim t x) :
+    g.HamiltonIveyTraceLaplacianAt cov hcov hLevi hdim t x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 1 E TM :=
+    g.slice_isContMDiffRiemannianBundle t
+  letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedSpace
+  letI : ∀ y : M, NormedAddCommGroup (T₂ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₂ y) := fun _ => inferInstance
+  letI : ∀ y : M, NormedAddCommGroup (T₃ y) := fun _ => inferInstance
+  letI : ∀ y : M, NormedSpace ℝ (T₃ y) := fun _ => inferInstance
+  letI : NormedAddCommGroup (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+  letI : NormedSpace ℝ (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+  letI : NormedAddCommGroup
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+  letI : NormedSpace ℝ
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+  letI : FiberBundle (E →L[ℝ] ℝ) T₁ := inferInstance
+  letI : VectorBundle ℝ (E →L[ℝ] ℝ) T₁ := inferInstance
+  letI : FiberBundle (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ := inferInstance
+  letI : VectorBundle ℝ (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ := inferInstance
+  letI : FiberBundle
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ := inferInstance
+  letI : VectorBundle ℝ
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ := inferInstance
+  letI : ContMDiffVectorBundle 2 (E →L[ℝ] ℝ) T₁ I := by infer_instance
+  letI : ContMDiffVectorBundle 2 (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ I :=
+    by infer_instance
+  letI : ContMDiffVectorBundle 2
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ I := by infer_instance
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  letI : ∀ y : M, FiniteDimensional ℝ (TM y) := fun y =>
+    VectorBundle.finiteDimensional ℝ E TM y
+  let H : ∀ y : M, T₂ y :=
+    g.curvatureNuShiftedContactTwoTensor cov hcov hLevi hdim t x
+  rcases hregular with ⟨hHraised, hHfirst, htraceDifferential, hHsecondRaised⟩
+  let b : OrthonormalBasis (Fin 3) ℝ (TM x) :=
+    CovariantDerivative.ricciComplementEigenbasis
+      (I := I) (M := M) (E := E) (cov t)
+      (hLevi t).1 (hLevi t).2 x (hdim x)
+  have hinner (i : Fin 3) : (g t).inner x (b i) (b i) = 1 := by
+    change Inner.inner ℝ (b i) (b i) = 1
+    rw [real_inner_self_eq_norm_sq, b.orthonormal.1]
+    norm_num
+  have hsumRicci :
+      (∑ i : Fin 3, g.ricciCurvature cov hcov t x (b i) (b i)) =
+        g.scalarCurvature cov hcov t x := by
+    have h := CovariantDerivative.scalarCurvature_eq_sum_ricci_orthonormalBasis
+      (cov := cov t) x b
+    simpa [TimeDependentRiemannianMetric.scalarCurvature,
+      TimeDependentRiemannianMetric.ricciCurvature] using h.symm
+  have htraceH (y : M) :
+      covariantTwoTensorTraceFunction (I := I) (E := E) H y =
+        g.scalarCurvature cov hcov t y -
+          3 * g.curvatureNu cov hcov hLevi hdim t x := by
+    let b' : OrthonormalBasis (Fin 3) ℝ (TM y) :=
+      CovariantDerivative.ricciComplementEigenbasis
+        (I := I) (M := M) (E := E) (cov t)
+        (hLevi t).1 (hLevi t).2 y (hdim y)
+    have hinner' (i : Fin 3) : (g t).inner y (b' i) (b' i) = 1 := by
+      change Inner.inner ℝ (b' i) (b' i) = 1
+      rw [real_inner_self_eq_norm_sq, b'.orthonormal.1]
+      norm_num
+    have hsumRicci' :
+        (∑ i : Fin 3, g.ricciCurvature cov hcov t y (b' i) (b' i)) =
+          g.scalarCurvature cov hcov t y := by
+      have h := CovariantDerivative.scalarCurvature_eq_sum_ricci_orthonormalBasis
+        (cov := cov t) y b'
+      simpa [TimeDependentRiemannianMetric.scalarCurvature,
+        TimeDependentRiemannianMetric.ricciCurvature] using h.symm
+    have hterm (i : Fin 3) :
+        H y (b' i) (b' i) =
+          g.scalarCurvature cov hcov t y -
+            2 * g.ricciCurvature cov hcov t y (b' i) (b' i) -
+              g.curvatureNu cov hcov hLevi hdim t x := by
+      simp [H, hinner' i]
+    calc
+      _ = ∑ i : Fin 3, H y (b' i) (b' i) := by
+        exact covariantTwoTensorTrace_eq_sum_orthonormalBasis
+          (covariantTwoTensorLinear (I := I) (M := M) H) y b'
+      _ = ∑ i : Fin 3,
+          (g.scalarCurvature cov hcov t y -
+            2 * g.ricciCurvature cov hcov t y (b' i) (b' i) -
+              g.curvatureNu cov hcov hLevi hdim t x) := by
+        apply Finset.sum_congr rfl
+        intro i hi
+        exact hterm i
+      _ = g.scalarCurvature cov hcov t y -
+          3 * g.curvatureNu cov hcov hLevi hdim t x := by
+        rw [Fin.sum_univ_three]
+        have hsumRicci'' := hsumRicci'
+        rw [Fin.sum_univ_three] at hsumRicci''
+        rw [← hsumRicci'']
+        ring
+  have htraceMDiff :
+      ∀ y : M, MDiffAt (covariantTwoTensorTraceFunction (I := I) (E := E) H) y := by
+    intro y
+    rw [covariantTwoTensorTraceFunction_eq_endomorphismTrace_raised
+      (I := I) (E := E) (M := M) H]
+    exact mdifferentiableAt_endomorphismTrace
+      (F := E) (V := TM) (hHraised y)
+  let scalar : M → ℝ := g.scalarCurvature cov hcov t
+  let traceOffset : ℝ := 3 * g.curvatureNu cov hcov hLevi hdim t x
+  have hscalarAdd :
+      scalar = covariantTwoTensorTraceFunction (I := I) (E := E) H +
+        (fun _ : M => traceOffset) := by
+    funext y
+    change g.scalarCurvature cov hcov t y =
+      covariantTwoTensorTraceFunction (I := I) (E := E) H y +
+        3 * g.curvatureNu cov hcov hLevi hdim t x
+    rw [htraceH y]
+    ring
+  have hscalarMDiff : ∀ y : M, MDiffAt scalar y := by
+    intro y
+    rw [hscalarAdd]
+    exact (htraceMDiff y).add mdifferentiableAt_const
+  have hoffsetMDiff : ∀ y : M, MDiffAt (fun _ : M => traceOffset) y := by
+    intro y
+    exact mdifferentiableAt_const
+  have hoffsetDifferential :
+      scalarDifferential (I := I) (fun _ : M => traceOffset) = 0 := by
+    funext y
+    have hzero (y : M) :
+        scalarDifferential (I := I) (fun _ : M => traceOffset) y = 0 := by
+      ext u
+      simp only [scalarDifferential_apply]
+      rw [mvfderiv_const]
+    exact hzero y
+  have hscalarDifferentialEq :
+      scalarDifferential (I := I) scalar =
+        scalarDifferential (I := I)
+          (covariantTwoTensorTraceFunction (I := I) (E := E) H) := by
+    calc
+      _ = scalarDifferential (I := I)
+          (covariantTwoTensorTraceFunction (I := I) (E := E) H +
+            (fun _ : M => traceOffset)) := by rw [hscalarAdd]
+      _ = scalarDifferential (I := I)
+          (covariantTwoTensorTraceFunction (I := I) (E := E) H) +
+            scalarDifferential (I := I) (fun _ : M => traceOffset) :=
+          scalarDifferential_add htraceMDiff hoffsetMDiff
+      _ = _ := by rw [hoffsetDifferential]; simp
+  have hscalarDifferential :
+      MDiffAt
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (scalarDifferential (I := I) scalar y)) x := by
+    have h := htraceDifferential
+    rw [← hscalarDifferentialEq] at h
+    exact h
+  let offsetFunction : M → ℝ := fun _ => -traceOffset
+  have hoffsetFunctionMDiff : ∀ y : M, MDiffAt offsetFunction y := by
+    intro y
+    exact mdifferentiableAt_const
+  have hoffsetFunctionDifferential :
+      MDiffAt
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (scalarDifferential (I := I) offsetFunction y)) x := by
+    have hzero :
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (scalarDifferential (I := I) offsetFunction y)) =
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y 0) := by
+      have hconstant (y : M) :
+          scalarDifferential (I := I) offsetFunction y = 0 := by
+        ext u
+        simp only [scalarDifferential_apply]
+        rw [mvfderiv_const]
+      funext y
+      congr 1
+      exact hconstant y
+    rw [hzero]
+    exact mdifferentiableAt_zeroSection
+      (𝕜 := ℝ) (F := E →L[ℝ] ℝ) (E := T₁) (x := x)
+  have htraceOffsetLap :
+      CovariantDerivative.scalarLaplacian (cov t)
+          (covariantTwoTensorTraceFunction (I := I) (E := E) H) x =
+        CovariantDerivative.scalarLaplacian (cov t) scalar x := by
+    have hsum :
+      covariantTwoTensorTraceFunction (I := I) (E := E) H =
+          scalar + offsetFunction := by
+      funext y
+      change covariantTwoTensorTraceFunction (I := I) (E := E) H y =
+        g.scalarCurvature cov hcov t y -
+          3 * g.curvatureNu cov hcov hLevi hdim t x
+      exact htraceH y
+    calc
+      _ = CovariantDerivative.scalarLaplacian (cov t)
+          (scalar + offsetFunction) x := by
+        rw [hsum]
+      _ = CovariantDerivative.scalarLaplacian (cov t) scalar x +
+          CovariantDerivative.scalarLaplacian (cov t) offsetFunction x :=
+        CovariantDerivative.scalarLaplacian_add (cov t) hscalarMDiff hoffsetFunctionMDiff
+          hscalarDifferential hoffsetFunctionDifferential
+      _ = CovariantDerivative.scalarLaplacian (cov t) scalar x := by
+        rw [CovariantDerivative.scalarLaplacian_const]
+        ring
+  let HtraceLaplacian :
+      CovariantDerivative.scalarLaplacian (cov t)
+          (covariantTwoTensorTraceFunction (I := I) (E := E) H) x =
+        covariantTwoTensorTrace (I := I) (E := E) (M := M)
+        (covariantTwoTensorLinear (I := I) (M := M)
+          (fun y => connectionLaplacian (cov t) H y)) x := by
+    exact
+      scalarLaplacian_covariantTwoTensorTraceFunction_eq_covariantTwoTensorTrace_connectionLaplacian
+        (I := I) (E := E) (M := M) (cov t) (hLevi t).2 H hHraised
+        hHfirst htraceDifferential hHsecondRaised b
+  have htraceBasis :
+      covariantTwoTensorTrace (I := I) (E := E) (M := M)
+          (covariantTwoTensorLinear (I := I) (M := M)
+            (fun y => connectionLaplacian (cov t) H y)) x =
+        ∑ i : Fin 3, connectionLaplacian (cov t) H x (b i) (b i) := by
+    rw [covariantTwoTensorTrace_eq_sum_orthonormalBasis
+      (I := I) (E := E) (M := M)
+      (covariantTwoTensorLinear (I := I) (M := M)
+        (fun y => connectionLaplacian (cov t) H y)) x b]
+    simp [covariantTwoTensorLinear_apply]
+  have hscalarTrace :
+      CovariantDerivative.scalarLaplacian (cov t) scalar x =
+        ∑ i : Fin 3, connectionLaplacian (cov t) H x (b i) (b i) := by
+    calc
+      _ = covariantTwoTensorTrace (I := I) (E := E) (M := M)
+          (covariantTwoTensorLinear (I := I) (M := M)
+            (fun y => connectionLaplacian (cov t) H y)) x := by
+              rw [← htraceOffsetLap]
+              exact HtraceLaplacian
+      _ = _ := htraceBasis
+  change (∑ i : Fin 3,
+      connectionLaplacian (cov t)
+        (g.curvatureNuShiftedContactTwoTensor cov hcov hLevi hdim t x)
+        x (b i) (b i)) = CovariantDerivative.scalarLaplacian (cov t) scalar x
+  exact hscalarTrace.symm
+
+/-- In dimension three, the genuine metric trace of the lowered
+Ricci-complement curvature tensor is scalar curvature.  This is the trace
+identity needed to read scalar evolution directly from the lowered-operator
+evolution, without first differentiating the Ricci tensor. -/
+theorem metricTraceAt_curvatureOperatorTwoTensor_eq_scalarCurvature
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    RicciFlow.metricTraceAt (I := I) (M := M) g t x
+      (covariantTwoTensorLinear (I := I) (M := M)
+        (fun y => g.curvatureOperatorTwoTensor cov hcov t y) x) =
+      g.scalarCurvature cov hcov t x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  let b := stdOrthonormalBasis ℝ (TM x)
+  have hinner (i : Fin (Module.finrank ℝ (TM x))) :
+      (g t).inner x (b i) (b i) = 1 := by
+    change Inner.inner ℝ (b i) (b i) = 1
+    rw [real_inner_self_eq_norm_sq, b.orthonormal.1]
+    norm_num
+  have hsumRicci :
+      (∑ i : Fin (Module.finrank ℝ (TM x)),
+        g.ricciCurvature cov hcov t x (b i) (b i)) =
+        g.scalarCurvature cov hcov t x := by
+    have h := CovariantDerivative.scalarCurvature_eq_sum_ricci_orthonormalBasis
+      (cov := cov t) x b
+    simpa [TimeDependentRiemannianMetric.scalarCurvature,
+      TimeDependentRiemannianMetric.ricciCurvature] using h.symm
+  have htrace :
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x
+        (covariantTwoTensorLinear (I := I) (M := M)
+          (fun y => g.curvatureOperatorTwoTensor cov hcov t y) x) =
+      ∑ i : Fin (Module.finrank ℝ (TM x)),
+        g.curvatureOperatorTwoTensor cov hcov t x (b i) (b i) := by
+    unfold RicciFlow.metricTraceAt
+    rw [InnerProductSpace.canonicalCovariantTensor_eq_sum (TM x) b, map_sum]
+    simp [covariantTwoTensorLinear_apply]
+  have hsumScalar :
+      (∑ i : Fin (Module.finrank ℝ (TM x)),
+        g.scalarCurvature cov hcov t x) =
+        (Module.finrank ℝ (TM x) : ℝ) *
+          g.scalarCurvature cov hcov t x := by
+    simp
+  calc
+    _ = ∑ i : Fin (Module.finrank ℝ (TM x)),
+        (g.scalarCurvature cov hcov t x -
+          2 * g.ricciCurvature cov hcov t x (b i) (b i)) := by
+      rw [htrace]
+      apply Finset.sum_congr rfl
+      intro i hi
+      rw [g.curvatureOperatorTwoTensor_apply, hinner i]
+      ring
+    _ = (∑ i : Fin (Module.finrank ℝ (TM x)),
+          g.scalarCurvature cov hcov t x) -
+        2 * (∑ i : Fin (Module.finrank ℝ (TM x)),
+          g.ricciCurvature cov hcov t x (b i) (b i)) := by
+      simp [Finset.sum_sub_distrib, Finset.mul_sum]
+    _ = g.scalarCurvature cov hcov t x := by
+      rw [hsumScalar, hsumRicci, hdim x]
+      ring
+
+/-- The scalar-curvature evolution follows from the genuine lowered
+curvature-operator evolution by differentiating its metric trace.  This
+calculation includes the inverse-metric variation under Ricci flow; it does
+not assume or request a separate time derivative of the Ricci tensor. -/
+theorem hasDerivAt_scalarCurvature_of_curvatureOperatorEvolution
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) (x : M)
+    (hEvolution :
+      letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+      letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+        ContinuousLinearMap.toNormedAddCommGroup
+      letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+        ContinuousLinearMap.toNormedSpace
+      letI : ∀ y : M, NormedAddCommGroup (T₂ y) := fun _ =>
+        ContinuousLinearMap.toNormedAddCommGroup
+      letI : ∀ y : M, NormedSpace ℝ (T₂ y) := fun _ =>
+        inferInstance
+      ∀ u v : TM x,
+        HasDerivAt
+          (fun τ => g.curvatureOperatorTwoTensor cov hcov τ x u v)
+          (connectionLaplacian (cov t)
+              (g.curvatureNuShiftedContactTwoTensor
+                cov hcov hLevi hdim t x) x u v +
+            curvatureOperatorReaction g cov hcov hLevi hdim t x u v) t)
+    (hTraceLaplacian :
+      g.HamiltonIveyTraceLaplacianAt cov hcov hLevi hdim t x) :
+    HasDerivAt
+      (fun τ => g.scalarCurvature cov hcov τ x)
+      (g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x +
+        2 * g.ricciNormSq cov hcov t x) t := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedSpace
+  letI : ∀ y : M, NormedAddCommGroup (T₂ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₂ y) := fun _ => inferInstance
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  let b := CovariantDerivative.ricciComplementEigenbasis
+    (I := I) (M := M) (E := E) (cov t)
+    (hLevi t).1 (hLevi t).2 x (hdim x)
+  let e : Trivialization E (π E TM) := trivializationAt E TM x
+  have hx : x ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt E TM x
+  let bas : Module.Basis (Fin 3) ℝ E :=
+    b.toBasis.map (e.linearEquivAt (R := ℝ) x hx)
+  have hframe (i : Fin 3) : e.localFrame bas i x = b i := by
+    rw [Bundle.Trivialization.localFrame_apply_of_mem_baseSet
+      (e := e) (b := bas) hx]
+    simp only [Bundle.Trivialization.basisAt, Module.Basis.map_apply]
+    rw [Bundle.Trivialization.linearEquivAt_symm_apply]
+    exact e.symm_apply_apply_mk hx (b i)
+  let G : ℝ → Matrix (Fin 3) (Fin 3) ℝ := fun τ =>
+    RicciFlow.localFrameMetricMatrix (I := I) (M := M) g e bas τ x
+  let Q : ℝ → Matrix (Fin 3) (Fin 3) ℝ := fun τ i j =>
+    g.curvatureOperatorTwoTensor cov hcov τ x
+      (e.localFrame bas i x) (e.localFrame bas j x)
+  let Gdot : Matrix (Fin 3) (Fin 3) ℝ :=
+    RicciFlow.localFrameTensorMatrix (I := I) (M := M) gdot e bas t x
+  let RicciMat : Matrix (Fin 3) (Fin 3) ℝ := fun i j =>
+    g.ricciCurvature cov hcov t x (b i) (b j)
+  let H : ∀ y : M, T₂ y :=
+    g.curvatureNuShiftedContactTwoTensor cov hcov hLevi hdim t x
+  let Qdot : Matrix (Fin 3) (Fin 3) ℝ := fun i j =>
+    connectionLaplacian (cov t) H x (b i) (b j) +
+      curvatureOperatorReaction g cov hcov hLevi hdim t x (b i) (b j)
+  have hG : ∀ i j : Fin 3,
+      HasDerivAt (fun τ => G τ i j) (Gdot i j) t := by
+    intro i j
+    exact (hflow.2.1 ht).hasDerivAt_localFrameMetricMatrix e bas x i j
+  have hQ : ∀ i j : Fin 3,
+      HasDerivAt (fun τ => Q τ i j) (Qdot i j) t := by
+    intro i j
+    simpa [Q, Qdot, H, hframe] using hEvolution (b i) (b j)
+  have hcontract := PoincareCurvature.hasDerivAt_nonsing_inv_matrixContraction
+    (A := G) (S := Q) (Adot := Gdot) (Sdot := Qdot) (t := t)
+    hG hQ (fun τ => RicciFlow.localFrameMetricMatrix_det_ne_zero
+      (I := I) (M := M) g e bas τ hx)
+  have hreadout :
+      (fun τ => PoincareCurvature.matrixContraction (G τ)⁻¹ (Q τ)) =
+        (fun τ => g.scalarCurvature cov hcov τ x) := by
+    funext τ
+    have hlocal := RicciFlow.matrixContraction_localFrameTensor_eq_metricTraceAt
+      (I := I) (M := M) g τ
+      (covariantTwoTensorLinear (I := I) (M := M)
+        (fun y => g.curvatureOperatorTwoTensor cov hcov τ y) x) e bas hx
+    calc
+      PoincareCurvature.matrixContraction (G τ)⁻¹ (Q τ) =
+          RicciFlow.metricTraceAt (I := I) (M := M) g τ x
+            (covariantTwoTensorLinear (I := I) (M := M)
+              (fun y => g.curvatureOperatorTwoTensor cov hcov τ y) x) := by
+        simpa [G, Q, covariantTwoTensorLinear_apply, hframe] using hlocal
+      _ = g.scalarCurvature cov hcov τ x :=
+        metricTraceAt_curvatureOperatorTwoTensor_eq_scalarCurvature
+          g cov hcov hdim τ x
+  rw [hreadout] at hcontract
+  let R : ℝ := g.scalarCurvature cov hcov t x
+  let eig : Fin 3 → ℝ := g.curvatureEigenvalues cov hcov hLevi hdim t x
+  let lam : ℝ := g.curvatureLambda cov hcov hLevi hdim t x
+  let mu : ℝ := g.curvatureMu cov hcov hLevi hdim t x
+  let nu : ℝ := g.curvatureNu cov hcov hLevi hdim t x
+  have hinner (i j : Fin 3) :
+      (g t).inner x (b i) (b j) = if i = j then 1 else 0 := by
+    change Inner.inner ℝ (b i) (b j) = if i = j then 1 else 0
+    exact orthonormal_iff_ite.mp b.orthonormal i j
+  have hGAt : G t = 1 := by
+    ext i j
+    change (g t).inner x (e.localFrame bas i x) (e.localFrame bas j x) = _
+    rw [hframe i, hframe j]
+    exact hinner i j
+  have hGdot : Gdot = (-2 : ℝ) • RicciMat := by
+    ext i j
+    change gdot t x (e.localFrame bas i x) (e.localFrame bas j x) =
+      ((-2 : ℝ) • RicciMat) i j
+    rw [hframe i, hframe j]
+    change gdot t x (b i) (b j) = (-2 : ℝ) * RicciMat i j
+    have heq := hflow.2.2 ht x (b i) (b j)
+    simpa [RicciMat,
+      RicciFlow.ricciFlowRHS, RicciFlow.ricciTensor,
+      TimeDependentRiemannianMetric.ricciCurvature] using heq
+  have hA (i : Fin 3) :
+      g.curvatureEndomorphismApply cov hcov t x (b i) = eig i • b i := by
+    have h := CovariantDerivative.ricciComplementEndomorphism_apply_eigenbasis
+      (I := I) (M := M) (E := E) (cov t)
+      (hLevi t).1 (hLevi t).2 x (hdim x) i
+    simpa [curvatureEndomorphismApply, eig, b, curvatureEigenvalues] using h
+  have hQAt : Q t = fun i j => if i = j then eig i else 0 := by
+    ext i j
+    change g.curvatureOperatorTwoTensor cov hcov t x
+      (e.localFrame bas i x) (e.localFrame bas j x) = _
+    rw [hframe i, hframe j,
+      g.curvatureOperatorTwoTensor_eq_inner_curvatureEndomorphismApply
+        cov hcov hLevi t x (b i) (b j), hA j]
+    by_cases hij : i = j
+    · subst j
+      simp [real_inner_smul_right, hinner]
+    · simp [real_inner_smul_right, hinner, hij]
+  have hQdiag (i : Fin 3) :
+      g.curvatureOperatorTwoTensor cov hcov t x (b i) (b i) = eig i := by
+    simpa [Q, hframe] using congrFun (congrFun hQAt i) i
+  have hRicciDiag (i : Fin 3) :
+      g.ricciCurvature cov hcov t x (b i) (b i) = (R - eig i) / 2 := by
+    have hformula := g.curvatureOperatorTwoTensor_apply
+      cov hcov t x (b i) (b i)
+    rw [show (g t).inner x (b i) (b i) = 1 from by
+      simpa using hinner i i] at hformula
+    have hformula' : R - 2 * g.ricciCurvature cov hcov t x (b i) (b i) =
+        eig i := by
+      calc
+        R - 2 * g.ricciCurvature cov hcov t x (b i) (b i) =
+            g.curvatureOperatorTwoTensor cov hcov t x (b i) (b i) := by
+          simpa [R] using hformula.symm
+        _ = eig i := hQdiag i
+    linarith
+  have hsumLambda : lam + mu + nu = R := by
+    have h := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+      cov hcov hLevi hdim t x
+    simpa [lam, mu, nu, R] using h
+  have heig0 : eig 0 = lam := rfl
+  have heig1 : eig 1 = mu := rfl
+  have heig2 : eig 2 = nu := rfl
+  have hsumEig : (∑ i : Fin 3, eig i) = R := by
+    rw [Fin.sum_univ_three, heig0, heig1, heig2]
+    exact hsumLambda
+  have hCorrection :
+    PoincareCurvature.matrixContraction
+          (-((G t)⁻¹ * Gdot * (G t)⁻¹)) (Q t) =
+        R ^ 2 - ∑ i : Fin 3, eig i ^ 2 := by
+    rw [hGAt, hGdot, hQAt]
+    simp only [inv_one, one_mul, mul_one, neg_smul, neg_neg]
+    have hdiagContract (C : Matrix (Fin 3) (Fin 3) ℝ) (a : Fin 3 → ℝ) :
+        PoincareCurvature.matrixContraction C
+            (fun i j => if i = j then a i else 0) =
+          ∑ i : Fin 3, C i i * a i := by
+      classical
+      unfold PoincareCurvature.matrixContraction
+      simp [Fin.sum_univ_three]
+    calc
+      PoincareCurvature.matrixContraction
+          ((2 : ℝ) • RicciMat)
+          (fun i j => if i = j then eig i else 0) =
+        ∑ i : Fin 3, (2 * RicciMat i i) * eig i := by
+          rw [hdiagContract]
+          simp [Matrix.smul_apply, mul_assoc]
+      _ = ∑ i : Fin 3, (R - eig i) * eig i := by
+          apply Finset.sum_congr rfl
+          intro i hi
+          simp only [RicciMat]
+          rw [hRicciDiag i]
+          ring
+      _ = R ^ 2 - ∑ i : Fin 3, eig i ^ 2 := by
+          calc
+            _ = ∑ i : Fin 3, (eig i * R - eig i ^ 2) := by
+              apply Finset.sum_congr rfl
+              intro i hi
+              ring
+            _ = (∑ i : Fin 3, eig i) * R -
+                ∑ i : Fin 3, eig i ^ 2 := by
+              rw [Finset.sum_sub_distrib, ← Finset.sum_mul]
+            _ = _ := by rw [hsumEig]; ring
+  have hsumLaplacian :
+      (∑ i : Fin 3,
+        connectionLaplacian (cov t) H x (b i) (b i)) =
+        g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x := by
+    simpa [HamiltonIveyTraceLaplacianAt, H, b] using hTraceLaplacian
+  have hsumReaction :
+      (∑ i : Fin 3,
+        curvatureOperatorReaction g cov hcov hLevi hdim t x (b i) (b i)) =
+        6 * g.ricciNormSq cov hcov t x - 2 * R ^ 2 := by
+    simpa [R, b] using
+      (curvatureOperatorReaction_trace_eq_sixRicciNormSq_sub_twoScalarSq
+        g cov hcov hLevi hdim t x)
+  have hsumQdot :
+      (∑ i : Fin 3, Qdot i i) =
+        g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x +
+          (6 * g.ricciNormSq cov hcov t x - 2 * R ^ 2) := by
+    calc
+      _ = (∑ i : Fin 3,
+          connectionLaplacian (cov t) H x (b i) (b i)) +
+          ∑ i : Fin 3,
+            curvatureOperatorReaction g cov hcov hLevi hdim t x (b i) (b i) := by
+        simp [Qdot, Finset.sum_add_distrib]
+      _ = _ := by rw [hsumLaplacian, hsumReaction]
+  have hsecond :
+      PoincareCurvature.matrixContraction (G t)⁻¹ Qdot =
+        g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x +
+          (6 * g.ricciNormSq cov hcov t x - 2 * R ^ 2) := by
+    rw [hGAt]
+    simp only [inv_one]
+    calc
+      PoincareCurvature.matrixContraction (1 : Matrix (Fin 3) (Fin 3) ℝ) Qdot =
+          ∑ i : Fin 3, Qdot i i := by
+        simp [PoincareCurvature.matrixContraction, Matrix.one_apply]
+      _ = _ := hsumQdot
+  have hnormReaction :=
+    two_mul_ricciNormSq_eq_hamiltonIveyScalarReaction
+      g cov hcov hLevi hdim t x
+  have hsumEigenSquares :
+      R ^ 2 + (∑ i : Fin 3, eig i ^ 2) =
+        2 * HamiltonIveyReaction.scalarReaction lam mu nu := by
+    rw [Fin.sum_univ_three, heig0, heig1, heig2, ← hsumLambda]
+    dsimp [HamiltonIveyReaction.scalarReaction]
+    ring
+  have hderivativeValue :
+      PoincareCurvature.matrixContraction
+          (-((G t)⁻¹ * Gdot * (G t)⁻¹)) (Q t) +
+        PoincareCurvature.matrixContraction (G t)⁻¹ Qdot =
+      g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x +
+        2 * g.ricciNormSq cov hcov t x := by
+    rw [hCorrection, hsecond]
+    have hreaction := hnormReaction
+    dsimp [HamiltonIveyReaction.scalarReaction] at hreaction
+    nlinarith [hsumEigenSquares]
+  rw [hderivativeValue] at hcontract
+  exact hcontract
+
+theorem HamiltonIveyCurvatureEvolutionCertificate.scalarTraceVelocity_of_traceLaplacian
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) (x : M)
+    (c : HamiltonIveyCurvatureEvolutionCertificate
+      g cov hcov hLevi hdim t x)
+    (hTraceLaplacian :
+      g.HamiltonIveyTraceLaplacianAt cov hcov hLevi hdim t x) :
+    RicciFlow.metricTraceAt (I := I) (M := M) g t x
+        (curvatureTensorVelocityRicci c.curvatureVelocity x) =
+      g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  let ricciVelocity := curvatureTensorVelocityRicci c.curvatureVelocity
+  have hRicci := hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
+    g cov hcov hLevi c.curvatureVelocity c.hCurvature
+  have hscalarFromRicci := g.hasDerivAt_scalarCurvature_of_intrinsicRicciTimeDerivative
+    cov hcov hLevi gdot s hflow ht (x := x) ricciVelocity hRicci
+  have hscalarFromOperator := hasDerivAt_scalarCurvature_of_curvatureOperatorEvolution
+    g cov hcov hLevi hdim gdot s hflow ht x c.hEvolution hTraceLaplacian
+  have hderivativesAgree := hscalarFromRicci.unique hscalarFromOperator
+  have hderivativesAgree' :
+      2 * g.ricciNormSq cov hcov t x +
+          RicciFlow.metricTraceAt (I := I) (M := M) g t x
+            (curvatureTensorVelocityRicci c.curvatureVelocity x) =
+        (cov t).scalarLaplacian (g.scalarCurvature cov hcov t) x +
+          2 * g.ricciNormSq cov hcov t x := by
+    simpa [ricciVelocity, TimeDependentRiemannianMetric.scalarLaplacian]
+      using hderivativesAgree
+  have htrace :
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x
+          (curvatureTensorVelocityRicci c.curvatureVelocity x) =
+        (cov t).scalarLaplacian (g.scalarCurvature cov hcov t) x := by
+    linarith [hderivativesAgree']
+  simpa [TimeDependentRiemannianMetric.scalarLaplacian] using htrace
+
 /-! A bundled curvature-evolution certificate feeds the pointwise support
 derivative directly.  This is deliberately a reduction theorem: the
 certificate still records the genuine curvature-evolution equation that a
@@ -2302,6 +3500,71 @@ theorem scalarCurvature_hamiltonIvey_lowerBarrier_of_intrinsicRicciTimeDerivativ
         nlinarith [mul_nonneg (sq_nonneg K) ht.1]
   exact hcompare.trans (hScalarStrong t ht x)
 
+/-- The scalar lower-barrier argument needs only the scalar PDE itself.  This
+interface is useful when that PDE has been derived directly by tracing the
+actual curvature-operator evolution, with no separate Ricci-velocity
+certificate. -/
+theorem scalarCurvature_hamiltonIvey_lowerBarrier_of_scalarEvolution
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    {K T : ℝ} (hK : 0 ≤ K)
+    (hnuLower : ∀ x : M,
+      -K ≤ g.curvatureNu cov hcov hLevi hdim 0 x)
+    (hScalarCont : ContinuousOn
+      (fun p : ℝ × M => g.scalarCurvature cov hcov p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hScalarNear : ∀ t ∈ Icc 0 T, ∀ x : M,
+      ∀ᶠ y in 𝓝 x, MDiffAt (g.scalarCurvature cov hcov t) y)
+    (hScalarDifferential : ∀ t ∈ Icc 0 T, ∀ x : M,
+      MDiffAt
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (CovariantDerivative.scalarDifferential
+            (I := I) (g.scalarCurvature cov hcov t) y)) x)
+    (hScalarTime : ∀ t ∈ Icc 0 T, ∀ x : M,
+      HasDerivAt (fun s => g.scalarCurvature cov hcov s x)
+        (g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x +
+          2 * g.ricciNormSq cov hcov t x) t) :
+    ∀ t ∈ Icc 0 T, ∀ x : M,
+      -3 * (K / (1 + K * t)) ≤ g.scalarCurvature cov hcov t x := by
+  have hScalarInitial : ∀ x : M,
+      -(3 : ℝ) * K ≤ g.scalarCurvature cov hcov 0 x := by
+    intro x
+    have horder₁ := g.curvatureLambda_ge_mu cov hcov hLevi hdim 0 x
+    have horder₂ := g.curvatureMu_ge_nu cov hcov hLevi hdim 0 x
+    have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+      cov hcov hLevi hdim 0 x
+    have hthreeNu :
+        3 * g.curvatureNu cov hcov hLevi hdim 0 x ≤
+          g.curvatureLambda cov hcov hLevi hdim 0 x +
+            g.curvatureMu cov hcov hLevi hdim 0 x +
+            g.curvatureNu cov hcov hLevi hdim 0 x := by
+      linarith
+    rw [hsum] at hthreeNu
+    linarith [hnuLower x]
+  have hScalarStrong := g.scalarCurvature_lowerBarrier_of_evolution
+    cov hcov hdim hK hScalarCont hScalarTime hScalarNear
+      hScalarDifferential hScalarInitial
+  intro t ht x
+  have hden₁ : 0 < 1 + (K : ℝ) * t := by
+    nlinarith [mul_nonneg hK ht.1]
+  have hden₂ : 0 < 1 + 2 * (K : ℝ) * t := by
+    nlinarith [mul_nonneg hK ht.1]
+  have hcompare :
+      -3 * (K / (1 + K * t)) ≤
+        -(3 : ℝ) * K / (1 + 2 * K * t) := by
+    calc
+      -3 * (K / (1 + K * t)) =
+          (-(3 : ℝ) * K) / (1 + K * t) := by ring
+      _ ≤ (-(3 : ℝ) * K) / (1 + 2 * K * t) := by
+        rw [div_le_div_iff₀ hden₁ hden₂]
+        nlinarith [mul_nonneg (sq_nonneg K) ht.1]
+  exact hcompare.trans (hScalarStrong t ht x)
+
 /-! A single capstone now combines the intrinsic scalar barrier, the
 intrinsic contact derivative, and the support maximum principle. -/
 
@@ -2379,6 +3642,129 @@ theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_trace_certificate
       hScalarDifferential ricciVelocity hRicci htrace
   exact g.hamiltonIveyPinching_of_intrinsicRicciFlow_support_certificate
     cov hcov hLevi hdim gdot hK hT hflow hnuNeg hnuLower hscalar hcont hcontact
+
+/-! This capstone no longer asks for the Ricci time-derivative field or its
+scalar trace identity as independent inputs.  They are constructed pointwise
+from the full curvature-evolution certificates.  The trace/Laplacian bridge
+is now derived from explicit differentiability data for the genuine shifted
+curvature tensor, rather than supplied as the target equality. -/
+
+theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_curvatureEvolutionCertificates
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    {K T : ℝ} (hK : 0 < K) (hT : 0 ≤ T)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot (Icc 0 T))
+    (evolution : ∀ t : ℝ, t ∈ Icc 0 T → ∀ x : M,
+      HamiltonIveyCurvatureEvolutionCertificate
+        g cov hcov hLevi hdim t x)
+    (hShiftedTensorRegularity : ∀ t : ℝ, ∀ ht : t ∈ Icc 0 T, ∀ x : M,
+      g.HamiltonIveyShiftedTensorTraceRegularity
+        cov hcov hLevi hdim t x)
+    (hnuNeg : ∀ t ∈ Icc 0 T, ∀ x : M,
+      g.curvatureNu cov hcov hLevi hdim t x < 0)
+    (hnuLower : ∀ x : M,
+      -K ≤ g.curvatureNu cov hcov hLevi hdim 0 x)
+    (hScalarCont : ContinuousOn
+      (fun p : ℝ × M => g.scalarCurvature cov hcov p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hcont : ContinuousOn
+      (fun p : ℝ × M =>
+        g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hcontact : ∀ {t : ℝ} {x : M}, t ∈ Icc 0 T →
+      g.hamiltonIveyDefect cov hcov hLevi hdim K t x < 0 →
+      ∃ ricciVelocity' : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] ℝ,
+        RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+          (I := I) (M := M) g ricciVelocity' t ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          g.curvatureNu cov hcov hLevi hdim p.1 p.2 ≤
+            g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p) ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p < 0) ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          0 < g.scalarCurvature cov hcov p.1 p.2 -
+            g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p) ∧
+        (∀ᶠ y in 𝓝 x,
+          MDiffAt
+            (fun z : M =>
+              g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y) ∧
+        MDiffAt
+          (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+            (CovariantDerivative.scalarDifferential (I := I)
+              (fun z : M =>
+                g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y)) x ∧
+        g.scalarLaplacian cov
+            (fun _ y =>
+              g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, y)) t x +
+          g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤
+        g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
+          ricciVelocity') :
+    ∀ t ∈ Icc 0 T, ∀ x : M,
+      0 ≤ g.hamiltonIveyDefect cov hcov hLevi hdim K t x := by
+  have hScalarNear : ∀ t ∈ Icc 0 T, ∀ x : M,
+      ∀ᶠ y in 𝓝 x, MDiffAt (g.scalarCurvature cov hcov t) y := by
+    intro t ht x
+    exact Filter.Eventually.of_forall (fun y =>
+      (g.scalarRegularity_of_shiftedTensorRegularity cov hcov hLevi hdim t y
+        (hShiftedTensorRegularity t ht y)).1)
+  have hScalarDifferential : ∀ t ∈ Icc 0 T, ∀ x : M,
+      MDiffAt
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (CovariantDerivative.scalarDifferential
+            (I := I) (g.scalarCurvature cov hcov t) y)) x := by
+    intro t ht x
+    exact g.scalarDifferential_mdifferentiableAt_of_shiftedTensorRegularity
+      cov hcov hLevi hdim t x (hShiftedTensorRegularity t ht x)
+  let ricciVelocity : ∀ t : ℝ, ∀ x : M,
+      TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ := fun t x =>
+    if ht : t ∈ Icc 0 T then
+      curvatureTensorVelocityRicci (evolution t ht x).curvatureVelocity x
+    else 0
+  have hRicci : ∀ {t : ℝ}, t ∈ Icc 0 T →
+      RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+        (I := I) (M := M) g (ricciVelocity t) t := by
+    intro t ht
+    change ∀ y : M, ∀ u v : TM y,
+      HasDerivAt
+        (fun τ => RicciFlow.intrinsicRicciTensor
+          (I := I) (M := M) g τ y u v)
+        ((ricciVelocity t y) u v) t
+    intro y u v
+    have h := hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
+      g cov hcov hLevi (evolution t ht y).curvatureVelocity
+      (evolution t ht y).hCurvature
+    dsimp only [ricciVelocity]
+    rw [dif_pos ht]
+    exact h y u v
+  have htrace : ∀ t ∈ Icc 0 T, ∀ x : M,
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x
+          (ricciVelocity t x) =
+        g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x := by
+    intro t ht x
+    have hTraceLaplacian :=
+      g.HamiltonIveyTraceLaplacianAt_of_shiftedTensorRegularity
+        cov hcov hLevi hdim t x (hShiftedTensorRegularity t ht x)
+    have h :=
+      HamiltonIveyCurvatureEvolutionCertificate.scalarTraceVelocity_of_traceLaplacian
+        g cov hcov hLevi hdim gdot (Icc 0 T) hflow ht x
+        (evolution t ht x) hTraceLaplacian
+    change RicciFlow.metricTraceAt (I := I) (M := M) g t x
+      (if hmem : t ∈ Icc 0 T then
+        curvatureTensorVelocityRicci
+          (evolution t hmem x).curvatureVelocity x else 0) =
+      g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x
+    rw [dif_pos ht]
+    exact h
+  exact g.hamiltonIveyPinching_of_intrinsicRicciFlow_and_trace_certificate
+    cov hcov hLevi hdim gdot hK hT hflow hnuNeg hnuLower hScalarCont
+    hScalarNear hScalarDifferential ricciVelocity hRicci htrace hcont hcontact
 
 /-! The next interface exposes the spatial contact inequality through the
 actual shifted curvature tensor.  In particular, the certificate no longer
@@ -2504,26 +3890,556 @@ structure HamiltonIveyCurvatureContactCertificateAtSpatialMinimum
           g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y)) x
   hSupport : HamiltonIveySupportLaplacianCertificate
     g cov hcov hLevi hdim t x
-  /-- The curvature-evolution contact estimate, expressed through the
-  genuine connection Laplacian of the shifted curvature two-tensor. -/
-  hCurvatureEvolution :
-    g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
-        g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤
-      g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
-        ricciVelocity
-  /-- The scalar supported-defect inequality, required only when the support
-  is at a local spatial minimum.  Deriving this from `hCurvatureEvolution`
-  remains the nonlinear tensor/eigenvalue bridge. -/
-  hEvolutionAtSpatialMinimum :
-    ∀ hmin : IsLocalMin
+  /-- The actual contact evaluation of the curvature-operator evolution
+  equation.  Unlike the scalar defect inequality below, this is a geometric
+  evolution identity for the genuine raised curvature tensor. -/
+  hCurvatureOperatorEvolution :
+    curvatureOperatorTwoTensorVelocity g cov hcov t ricciVelocity x
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x) =
+      g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+        g.curvatureLambda cov hcov hLevi hdim t x *
+          g.curvatureMu cov hcov hLevi hdim t x -
+        2 * g.curvatureNu cov hcov hLevi hdim t x *
+          g.ricciCurvature cov hcov t x
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+
+/-- Assemble minimum-contact data from an actual full curvature-evolution
+certificate and the independent support regularity/bounds.  No scalar
+supported-defect inequality is an input; the contact velocity is derived from
+the geometric curvature evolution above. -/
+def HamiltonIveyCurvatureContactCertificateAtSpatialMinimum.of_curvatureEvolutionCertificate
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) {K : ℝ} {x : M}
+    (hupper : ∀ᶠ p in 𝓝 (t, x),
+      g.curvatureNu cov hcov hLevi hdim p.1 p.2 ≤
+        g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p)
+    (hneg : ∀ᶠ p in 𝓝 (t, x),
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p < 0)
+    (hscalarSupport : ∀ᶠ p in 𝓝 (t, x),
+      0 < g.scalarCurvature cov hcov p.1 p.2 -
+        g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p)
+    (hnear : ∀ᶠ y in 𝓝 x,
+      MDiffAt
+        (fun z : M =>
+          g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y)
+    (hdiff : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (CovariantDerivative.scalarDifferential (I := I)
+          (fun z : M =>
+            g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y)) x)
+    (hSupport : HamiltonIveySupportLaplacianCertificate
+      g cov hcov hLevi hdim t x)
+    (evolution : HamiltonIveyCurvatureEvolutionCertificate
+      g cov hcov hLevi hdim t x) :
+    HamiltonIveyCurvatureContactCertificateAtSpatialMinimum
+      g cov hcov hLevi hdim K t x := by
+  refine ⟨curvatureTensorVelocityRicci evolution.curvatureVelocity,
+    hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
+      g cov hcov hLevi evolution.curvatureVelocity evolution.hCurvature,
+    hupper, hneg, hscalarSupport, hnear, hdiff, hSupport, ?_⟩
+  exact HamiltonIveyCurvatureEvolutionCertificate.contactOperatorVelocity
+    g cov hcov hLevi hdim gdot s hflow ht x evolution
+
+/-- Contact-local analytic data for the smooth Rayleigh support and its
+supported defect.  Curvature evolution and the induced Ricci time derivative
+are intentionally absent: those are constructed from the full evolution
+certificate by the capstone below. -/
+structure HamiltonIveySupportContactData
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (K t : ℝ) (x : M) where
+  hupper : ∀ᶠ p in 𝓝 (t, x),
+    g.curvatureNu cov hcov hLevi hdim p.1 p.2 ≤
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p
+  hneg : ∀ᶠ p in 𝓝 (t, x),
+    g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p < 0
+  hscalarSupport : ∀ᶠ p in 𝓝 (t, x),
+    0 < g.scalarCurvature cov hcov p.1 p.2 -
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p
+  hnear : ∀ᶠ y in 𝓝 x,
+    MDiffAt (fun z : M =>
+      g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y
+  hdiff : MDiffAt
+    (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+      (CovariantDerivative.scalarDifferential (I := I)
+        (fun z : M =>
+          g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y)) x
+  hSupport : HamiltonIveySupportLaplacianCertificate
+    g cov hcov hLevi hdim t x
+
+/-- Build the local support/sign portion of a contact certificate from the
+actual Rayleigh quotient and continuity.  The upper support is the least
+eigenvalue comparison proved for positive metric square, negativity follows
+from contact equality, and scalar-minus-support positivity follows from the
+scalar barrier and negative Hamilton--Ivey defect.  Thus none of these three
+neighborhood statements is an independent premise of the capstone. -/
+def HamiltonIveySupportContactData.of_bad_contact_and_continuity
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    {K t : ℝ} (hK : 0 < K) (ht : 0 ≤ t) (x : M)
+    (hnu : g.curvatureNu cov hcov hLevi hdim t x < 0)
+    (hdefect : g.hamiltonIveyDefect cov hcov hLevi hdim K t x < 0)
+    (hscalar : -3 * (K / (1 + K * t)) ≤
+      g.scalarCurvature cov hcov t x)
+    (hnormContinuous : ContinuousAt
+      (fun p : ℝ × M => (g p.1).inner p.2
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x p.2)
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x p.2))
+      (t, x))
+    (hScalarContinuous : ContinuousAt
+      (fun p : ℝ × M => g.scalarCurvature cov hcov p.1 p.2) (t, x))
+    (hSupportContinuous : ContinuousAt
+      (g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x) (t, x))
+    (hScalarNear : ∀ᶠ y in 𝓝 x,
+      MDiffAt (g.scalarCurvature cov hcov t) y)
+    (hScalarDifferential : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (CovariantDerivative.scalarDifferential (I := I)
+          (g.scalarCurvature cov hcov t) y)) x)
+    (hSupport : HamiltonIveySupportLaplacianCertificate
+      g cov hcov hLevi hdim t x) :
+    HamiltonIveySupportContactData g cov hcov hLevi hdim K t x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 1 E TM :=
+    g.slice_isContMDiffRiemannianBundle t
+  letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedSpace
+  let R : M → ℝ := g.scalarCurvature cov hcov t
+  let q : M → ℝ := fun y =>
+    g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x (t, y)
+  let a : M → ℝ := fun y => 1 / (-q y)
+  let b : M → ℝ := fun y => (R y - q y) / q y ^ 2
+  let dR : ∀ y : M, T₁ y :=
+    fun y => CovariantDerivative.scalarDifferential (I := I) R y
+  let dq : ∀ y : M, T₁ y :=
+    fun y => CovariantDerivative.scalarDifferential (I := I) q y
+  let profile : M → ℝ := fun y => HamiltonIveyReaction.nuProfile (R y) (q y)
+  let offset : ℝ := 3 + Real.log (K / (1 + K * t))
+  let defectSlice : M → ℝ := fun y =>
+    g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, y)
+  have hq : ∀ y : M, MDiffAt q y := by
+    intro y
+    simpa [q] using hSupport.hq y
+  have hqAt : q x = g.curvatureNu cov hcov hLevi hdim t x := by
+    simpa [q] using
+      g.curvatureNuSpacetimeSupport_eq_at_contact cov hcov hLevi hdim t x
+  have hq0 : q x ≠ 0 := by
+    rw [hqAt]
+    exact hnu.ne
+  have hq0near : ∀ᶠ y in 𝓝 x, q y ≠ 0 :=
+    (hq x).continuousAt.eventually_ne hq0
+  have hRnear : ∀ᶠ y in 𝓝 x, MDiffAt R y := by
+    simpa [R] using hScalarNear
+  have hprofileNear : ∀ᶠ y in 𝓝 x, MDiffAt profile y := by
+    filter_upwards [hRnear, hq0near] with y hRy hq0y
+    exact mdifferentiableAt_nuProfile hRy (hq y) hq0y
+  have hprofilePlus : defectSlice = profile + (fun _ : M => offset) := by
+    funext y
+    simp [defectSlice, profile, offset, R, q,
+      hamiltonIveySupportedDefect, HamiltonIveyReaction.nuProfile]
+    ring
+  have hnear : ∀ᶠ y in 𝓝 x, MDiffAt defectSlice y := by
+    filter_upwards [hprofileNear] with y hpy
+    rw [hprofilePlus]
+    exact hpy.add mdifferentiableAt_const
+  have hR : MDiffAt R x := hRnear.self_of_nhds
+  have ha : MDiffAt a x := by
+    dsimp [a]
+    exact (mdifferentiableAt_const : MDiffAt (fun _ : M => (1 : ℝ)) x).div
+      (hq x).neg (neg_ne_zero.mpr hq0)
+  have hb : MDiffAt b x := by
+    dsimp [b]
+    exact (hR.sub (hq x)).div ((hq x).pow 2) (pow_ne_zero 2 hq0)
+  have hdR : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y (dR y)) x := by
+    simpa [dR, R] using hScalarDifferential
+  have hdq : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y (dq y)) x := by
+    simpa [dq, q] using hSupport.hDq
+  have hcombo : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (a y • dR y + b y • dq y)) x := by
+    exact mdifferentiableAt_add_section
+      (ha.smul_section hdR) (hb.smul_section hdq)
+  have hdiffFormula : ∀ᶠ y in 𝓝 x,
+      CovariantDerivative.scalarDifferential (I := I) defectSlice y =
+        a y • dR y + b y • dq y := by
+    filter_upwards [hRnear, hq0near] with y hRy hq0y
+    have hprof : MDiffAt profile y :=
+      mdifferentiableAt_nuProfile hRy (hq y) hq0y
+    have hconst : MDiffAt (fun _ : M => offset) y := mdifferentiableAt_const
+    have hconstDifferential :
+        CovariantDerivative.scalarDifferential (I := I)
+          (fun _ : M => offset) y = 0 := by
+      ext u
+      simp only [CovariantDerivative.scalarDifferential_apply]
+      rw [mvfderiv_const]
+    calc
+      CovariantDerivative.scalarDifferential (I := I) defectSlice y =
+          CovariantDerivative.scalarDifferential (I := I) profile y +
+            CovariantDerivative.scalarDifferential (I := I)
+              (fun _ : M => offset) y := by
+        rw [hprofilePlus]
+        ext u
+        simp only [CovariantDerivative.scalarDifferential_apply]
+        rw [mvfderiv_add hprof hconst]
+        simp [mvfderiv_const]
+      _ = a y • dR y + b y • dq y := by
+        rw [hconstDifferential,
+          scalarDifferential_nuProfile hRy (hq y) hq0y]
+        simp [a, b, dR, dq, R, q]
+  have hdiffSections :
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (CovariantDerivative.scalarDifferential (I := I) defectSlice y)) =ᶠ[𝓝 x]
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (a y • dR y + b y • dq y)) := by
+    filter_upwards [hdiffFormula] with y hy
+    rw [hy]
+  have hdiff := hcombo.congr_of_eventuallyEq hdiffSections
+  have hupper := g.curvatureNu_le_spacetimeSupport_eventually
+    cov hcov hLevi hdim t x hnormContinuous
+  have hSupportNegAt :
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x (t, x) < 0 := by
+    rw [g.curvatureNuSpacetimeSupport_eq_at_contact
+      cov hcov hLevi hdim t x]
+    exact hnu
+  have hneg : ∀ᶠ p in 𝓝 (t, x),
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p < 0 :=
+    hSupportContinuous.eventually (isOpen_Iio.mem_nhds hSupportNegAt)
+  have hScalarSupportAt :=
+    g.scalarCurvature_sub_spacetimeSupport_pos_at_bad_contact
+      cov hcov hLevi hdim hK ht x hnu hscalar hdefect
+  have hscalarSupport : ∀ᶠ p in 𝓝 (t, x),
+      0 < g.scalarCurvature cov hcov p.1 p.2 -
+        g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p :=
+    (hScalarContinuous.sub hSupportContinuous).eventually
+      (isOpen_Ioi.mem_nhds hScalarSupportAt)
+  exact ⟨hupper, hneg, hscalarSupport,
+    (by
+      filter_upwards [hnear] with y hy
+      simpa [defectSlice] using hy),
+    (by
+      simpa [defectSlice] using hdiff), hSupport⟩
+
+/-- The irreducible contact-local regularity input for the Hamilton--Ivey
+support argument.  The eigenvalue comparison, sign neighborhoods, supported
+defect differentiability, and scalar-minus-support positivity are derived by
+`HamiltonIveySupportContactData.of_bad_contact_and_continuity`; only genuine
+continuity and the second-order Rayleigh-support certificate remain here. -/
+structure HamiltonIveySupportContactRegularityData
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) where
+  hnormContinuous : ContinuousAt
+    (fun p : ℝ × M => (g p.1).inner p.2
+      (g.curvatureNuContactVectorField cov hcov hLevi hdim t x p.2)
+      (g.curvatureNuContactVectorField cov hcov hLevi hdim t x p.2)) (t, x)
+  hScalarContinuous : ContinuousAt
+    (fun p : ℝ × M => g.scalarCurvature cov hcov p.1 p.2) (t, x)
+  hSupportContinuous : ContinuousAt
+    (g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x) (t, x)
+  hSupport : HamiltonIveySupportLaplacianCertificate
+    g cov hcov hLevi hdim t x
+
+/-- At a spatial minimum of the supported defect, the scalar-curvature and
+Rayleigh-support differentials satisfy the exact Hamilton--Ivey profile
+relation.  The support is the genuine smooth Rayleigh quotient from the
+certificate; the only extra regularity passed here is that of actual scalar
+curvature. -/
+theorem HamiltonIveyCurvatureContactCertificateAtSpatialMinimum.scalarGradient_relation
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    {K t : ℝ} {x : M}
+    (c : HamiltonIveyCurvatureContactCertificateAtSpatialMinimum
+      g cov hcov hLevi hdim K t x)
+    (hScalar : MDiffAt (g.scalarCurvature cov hcov t) x)
+    (hmin : IsLocalMin
       (fun y : M => g.hamiltonIveySupportedDefect
-        cov hcov hLevi hdim K t x (t, y)) x,
-      g.scalarLaplacian cov
-          (fun _ y => g.hamiltonIveySupportedDefect
-            cov hcov hLevi hdim K t x (t, y)) t x +
+        cov hcov hLevi hdim K t x (t, y)) x) :
+    CovariantDerivative.scalarDifferential (I := I)
+        (g.scalarCurvature cov hcov t) x =
+      ((g.scalarCurvature cov hcov t x -
+          g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x (t, x)) /
+        g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x (t, x)) •
+        CovariantDerivative.scalarDifferential (I := I)
+          (fun y => g.curvatureNuSpacetimeSupport
+            cov hcov hLevi hdim t x (t, y)) x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 1 E TM :=
+    g.slice_isContMDiffRiemannianBundle t
+  let R : M → ℝ := g.scalarCurvature cov hcov t
+  let q : M → ℝ := fun y => g.curvatureNuSpacetimeSupport
+    cov hcov hLevi hdim t x (t, y)
+  let C : ℝ := 3 + Real.log (K / (1 + K * t))
+  have hq : MDiffAt q x := by
+    simpa [q] using c.hSupport.hq x
+  have hqneg : q x < 0 := by
+    simpa [q] using c.hneg.self_of_nhds
+  have hminProfile : IsLocalMin
+      (fun y => HamiltonIveyReaction.nuProfile (R y) (q y) + C) x := by
+    rw [IsLocalMin, IsMinFilter] at hmin ⊢
+    filter_upwards [hmin] with y hy
+    dsimp [hamiltonIveySupportedDefect, R, q, C] at hy ⊢
+    linarith
+  have hgradient :=
+    scalarDifferential_scalar_eq_of_isLocalMin_nuProfile_add_const
+      (R := R) (q := q) hScalar hq hqneg.ne hminProfile
+  simpa [R, q] using hgradient
+
+/-- Derive the scalar supported-defect inequality at a spatial minimum from
+the actual contact curvature-operator evolution equation.  The profile
+Laplacian chain rule and critical-point gradient relation are used explicitly;
+the nonpositive gradient correction is not assumed. -/
+theorem HamiltonIveyCurvatureContactCertificateAtSpatialMinimum.evolution_at_spatial_minimum_of_curvatureOperatorEvolution
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    {K t : ℝ} {x : M}
+    (c : HamiltonIveyCurvatureContactCertificateAtSpatialMinimum
+      g cov hcov hLevi hdim K t x)
+    (hScalarNear : ∀ᶠ y in 𝓝 x,
+      MDiffAt (g.scalarCurvature cov hcov t) y)
+    (hScalarDifferential : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (CovariantDerivative.scalarDifferential
+          (I := I) (g.scalarCurvature cov hcov t) y)) x)
+    (htrace : RicciFlow.metricTraceAt (I := I) (M := M) g t x
+        (c.ricciVelocity x) =
+      g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x)
+    (hmin : IsLocalMin
+      (fun y : M => g.hamiltonIveySupportedDefect
+        cov hcov hLevi hdim K t x (t, y)) x) :
+    g.scalarLaplacian cov
+        (fun _ y => g.hamiltonIveySupportedDefect
+          cov hcov hLevi hdim K t x (t, y)) t x +
+      g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤
+    g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
+      c.ricciVelocity := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 1 E TM :=
+    g.slice_isContMDiffRiemannianBundle t
+  let R : M → ℝ := g.scalarCurvature cov hcov t
+  let q : M → ℝ := fun y =>
+    g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x (t, y)
+  let profile : M → ℝ := fun y => HamiltonIveyReaction.nuProfile (R y) (q y)
+  let defectSlice : M → ℝ := fun y =>
+    g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, y)
+  let C : ℝ := 3 + Real.log (K / (1 + K * t))
+  let lam : ℝ := g.curvatureLambda cov hcov hLevi hdim t x
+  let mu : ℝ := g.curvatureMu cov hcov hLevi hdim t x
+  let nu : ℝ := g.curvatureNu cov hcov hLevi hdim t x
+  let v : TM x := g.curvatureNuContactVectorField cov hcov hLevi hdim t x x
+  let L : ℝ := g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x
+  let scalarVelocity : ℝ :=
+    2 * g.ricciNormSq cov hcov t x +
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x (c.ricciVelocity x)
+  let contactRicciVelocity : ℝ := c.ricciVelocity x v v
+  have hR : MDiffAt R x := hScalarNear.self_of_nhds
+  have hq : MDiffAt q x := c.hSupport.hq x
+  have hqneg : q x < 0 := by
+    simpa [q] using c.hneg.self_of_nhds
+  have hq0 : q x ≠ 0 := hqneg.ne
+  have hqContact : q x = nu := by
+    simpa [q, nu] using
+      g.curvatureNuSpacetimeSupport_eq_at_contact
+        cov hcov hLevi hdim t x
+  have hnu0 : nu ≠ 0 := by
+    rw [← hqContact]
+    exact hq0
+  have hnu0' : g.curvatureNu cov hcov hLevi hdim t x ≠ 0 := by
+    simpa [nu] using hnu0
+  have hq0near : ∀ᶠ y in 𝓝 x, q y ≠ 0 :=
+    hq.continuousAt.eventually_ne hq0
+  have hqnear : ∀ᶠ y in 𝓝 x, MDiffAt q y :=
+    Filter.Eventually.of_forall c.hSupport.hq
+  have hprofileNear : ∀ᶠ y in 𝓝 x, MDiffAt (profile) y := by
+    filter_upwards [hScalarNear, hqnear, hq0near] with y hRy hqy hq0y
+    exact mdifferentiableAt_nuProfile hRy hqy hq0y
+  have hprofilePlus : defectSlice = profile + (fun _ : M => C) := by
+    funext y
+    dsimp [defectSlice, profile, R, q, C, hamiltonIveySupportedDefect]
+    ring
+  have hminProfile : IsLocalMin profile x := by
+    rw [IsLocalMin, IsMinFilter] at hmin ⊢
+    filter_upwards [hmin] with y hy
+    dsimp [defectSlice, profile, R, q, C,
+      hamiltonIveySupportedDefect] at hy ⊢
+    linarith
+  have hprofileDiffEq : ∀ᶠ y in 𝓝 x,
+      CovariantDerivative.scalarDifferential (I := I) defectSlice y =
+        CovariantDerivative.scalarDifferential (I := I) profile y := by
+    filter_upwards [hprofileNear] with y hpy
+    ext u
+    change mvfderiv (I := I) defectSlice y u =
+      mvfderiv (I := I) profile y u
+    rw [hprofilePlus]
+    rw [mvfderiv_add (I := I) hpy mdifferentiableAt_const]
+    rw [mvfderiv_const]
+    simp
+  have hprofileSections :
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (CovariantDerivative.scalarDifferential (I := I) profile y)) =ᶠ[𝓝 x]
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (CovariantDerivative.scalarDifferential (I := I) defectSlice y)) := by
+    filter_upwards [hprofileDiffEq] with y hy
+    rw [hy.symm]
+  have hprofileDiff : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (CovariantDerivative.scalarDifferential (I := I) profile y)) x :=
+    c.hdiff.congr_of_eventuallyEq hprofileSections
+  have hLapDefect :
+      CovariantDerivative.scalarLaplacian (cov t) defectSlice x =
+        CovariantDerivative.scalarLaplacian (cov t) profile x := by
+    rw [hprofilePlus]
+    exact CovariantDerivative.scalarLaplacian_add_const_of_eventually_mdifferentiableAt
+      (cov t) C hprofileNear hprofileDiff
+  have hprofileLap :=
+    scalarLaplacian_nuProfile_eq_of_isLocalMin
+      (I := I) (M := M) (cov t) hScalarNear hqnear hScalarDifferential
+      c.hSupport.hDq hR hq hq0 hq0near hminProfile
+  have hsupportLap :
+      CovariantDerivative.scalarLaplacian (cov t) q x = L := by
+    simpa [q, L] using
+      HamiltonIveySupportLaplacianCertificate.eq_connectionLaplacian
+        g cov hcov hLevi hdim K t x c.hSupport
+  have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim t x
+  have hRic := g.two_mul_ricci_curvatureNuEigenvector_eq_lambda_add_mu
+    cov hcov hLevi hdim t x
+  have hv : v = g.curvatureNuEigenvector cov hcov hLevi hdim t x := by
+    simp [v, curvatureNuContactVectorField,
+      firstOrderParallelSmoothExtend_apply_center]
+  have hinner : (g t).inner x v v = 1 := by
+    rw [hv]
+    exact g.inner_curvatureNuEigenvector_self cov hcov hLevi hdim t x
+  have hRic' :
+      2 * g.ricciCurvature cov hcov t x v v = lam + mu := by
+    simpa [v, curvatureNuContactVectorField,
+      firstOrderParallelSmoothExtend_apply_center] using hRic
+  have hsum' : lam + mu + nu = R x := by
+    simpa [R, lam, mu, nu] using hsum
+  have hRminus : R x - nu = lam + mu := by
+    linarith [hsum']
+  have hprod :
+      2 * (R x - nu) * g.ricciCurvature cov hcov t x v v = (lam + mu) ^ 2 := by
+    calc
+      2 * (R x - nu) * g.ricciCurvature cov hcov t x v v =
+          (R x - nu) * (2 * g.ricciCurvature cov hcov t x v v) := by ring
+      _ = (lam + mu) ^ 2 := by rw [hRic', hRminus]; ring
+  have hrel :
+      scalarVelocity - 2 * contactRicciVelocity - (lam + mu) ^ 2 =
+        curvatureOperatorTwoTensorVelocity g cov hcov t c.ricciVelocity x v v +
+          2 * nu * g.ricciCurvature cov hcov t x v v := by
+    simp only [scalarVelocity, contactRicciVelocity,
+      curvatureOperatorTwoTensorVelocity]
+    rw [hinner]
+    ring_nf
+    linarith [hprod]
+  have hspeed :
+      g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
+          c.ricciVelocity =
+        scalarVelocity / (-nu) + (R x - nu) / nu ^ 2 *
+          (L + nu ^ 2 + lam * mu) - K / (1 + K * t) := by
+    change scalarVelocity / (-nu) + (R x - nu) / nu ^ 2 *
+        (scalarVelocity - 2 * contactRicciVelocity - (lam + mu) ^ 2) -
+          K / (1 + K * t) = _
+    rw [hrel, c.hCurvatureOperatorEvolution]
+    dsimp [L, nu, lam, mu, v]
+    ring
+  have htrace' : RicciFlow.metricTraceAt (I := I) (M := M) g t x
+        (c.ricciVelocity x) =
+      CovariantDerivative.scalarLaplacian (cov t) R x := by
+    simpa [R] using htrace
+  have hscalarVelocity : scalarVelocity =
+      2 * g.ricciNormSq cov hcov t x +
+        CovariantDerivative.scalarLaplacian (cov t) R x := by
+    dsimp [scalarVelocity]
+    rw [htrace']
+  have hreaction :
+      2 * g.ricciNormSq cov hcov t x / (-nu) +
+        (R x - nu) / nu ^ 2 * (nu ^ 2 + lam * mu) -
+          K / (1 + K * t) =
+        g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x := by
+    rw [g.two_mul_ricciNormSq_eq_hamiltonIveyScalarReaction
+      cov hcov hLevi hdim t x]
+    rw [← hsum']
+    simp only [hamiltonIveyReactionTerm, HamiltonIveyReaction.reaction,
+      HamiltonIveyReaction.scalarReaction, HamiltonIveyReaction.scalar]
+    dsimp [lam, mu, nu]
+    field_simp [hnu0']
+    ring
+  let gradSq : ℝ := ∑ i : Fin (Module.finrank ℝ (TM x)),
+    (CovariantDerivative.scalarDifferential (I := I) q x
+      (stdOrthonormalBasis ℝ (TM x) i)) ^ 2
+  have hprofileLap' :
+      CovariantDerivative.scalarLaplacian (cov t) profile x =
+        (1 / (-q x)) *
+            CovariantDerivative.scalarLaplacian (cov t) R x +
+          ((R x - q x) / q x ^ 2) *
+            CovariantDerivative.scalarLaplacian (cov t) q x -
+          (1 / q x ^ 2) * gradSq := by
+    simpa [profile, gradSq, R, q] using hprofileLap
+  have hprofileSpeed :
+      CovariantDerivative.scalarLaplacian (cov t) defectSlice x +
+        g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x +
+        (1 / nu ^ 2) * gradSq =
+      g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
+        c.ricciVelocity := by
+    rw [hLapDefect, hprofileLap', hsupportLap, hspeed, hscalarVelocity,
+      hqContact, ← hreaction]
+    field_simp [hnu0]
+    ring
+  have hgradSq : 0 ≤ gradSq := by
+    dsimp [gradSq]
+    exact Finset.sum_nonneg fun i hi => sq_nonneg _
+  have hcorrection : 0 ≤ (1 / nu ^ 2) * gradSq :=
+    mul_nonneg (div_nonneg (by norm_num) (sq_nonneg nu)) hgradSq
+  have hineq :
+      CovariantDerivative.scalarLaplacian (cov t) defectSlice x +
         g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤
       g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
-        ricciVelocity
+        c.ricciVelocity := by
+    linarith [hprofileSpeed, hcorrection]
+  simpa [defectSlice] using hineq
 
 /-! The structured certificate is directly consumable by the capstone above.
 This is the exact reduction from the geometric connection-Laplacian contact
@@ -2642,6 +4558,11 @@ theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_curvature_contact_certifi
     cov hcov hLevi hdim hK hT hnuNeg hnuLower hscalar hcont
   intro t x ht hdefect
   let c := hcontact ht hdefect
+  have hvelocityEq : c.ricciVelocity x = ricciVelocity t x := by
+    ext u v
+    exact (c.hRicci x u v).unique (hRicci ht x u v)
+  have htraceC := htrace t ht x
+  rw [← hvelocityEq] at htraceC
   let v : TM x := g.curvatureNuContactVectorField
     cov hcov hLevi hdim t x x
   let scalarVelocity : ℝ :=
@@ -2673,7 +4594,337 @@ theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_curvature_contact_certifi
   · exact c.hnear
   · exact c.hdiff
   · intro hmin
-    exact c.hEvolutionAtSpatialMinimum hmin
+    exact HamiltonIveyCurvatureContactCertificateAtSpatialMinimum.evolution_at_spatial_minimum_of_curvatureOperatorEvolution
+      g cov hcov hLevi hdim c (hScalarNear t ht x)
+      (hScalarDifferential t ht x) htraceC hmin
+
+/-! This is the minimum-scoped capstone with the remaining contact inputs
+separated cleanly: the full curvature evolution supplies both the Ricci
+velocity/trace identity and contact curvature evolution, while the contact
+certificate carries only Rayleigh-support regularity and sign data.  Neither
+the trace/Laplacian equality nor the scalar supported-defect PDE inequality is
+an input to this theorem. -/
+
+theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_curvatureEvolution_contactData_at_spatial_minimum
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    {K T : ℝ} (hK : 0 < K) (hT : 0 ≤ T)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot (Icc 0 T))
+    (evolution : ∀ t : ℝ, t ∈ Icc 0 T → ∀ x : M,
+      HamiltonIveyCurvatureEvolutionCertificate
+        g cov hcov hLevi hdim t x)
+    (hShiftedTensorRegularity : ∀ t : ℝ, ∀ ht : t ∈ Icc 0 T, ∀ x : M,
+      g.HamiltonIveyShiftedTensorTraceRegularity
+        cov hcov hLevi hdim t x)
+    (hnuNeg : ∀ t ∈ Icc 0 T, ∀ x : M,
+      g.curvatureNu cov hcov hLevi hdim t x < 0)
+    (hnuLower : ∀ x : M,
+      -K ≤ g.curvatureNu cov hcov hLevi hdim 0 x)
+    (hScalarCont : ContinuousOn
+      (fun p : ℝ × M => g.scalarCurvature cov hcov p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hScalarNear : ∀ t ∈ Icc 0 T, ∀ x : M,
+      ∀ᶠ y in 𝓝 x, MDiffAt (g.scalarCurvature cov hcov t) y)
+    (hScalarDifferential : ∀ t ∈ Icc 0 T, ∀ x : M,
+      MDiffAt
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (CovariantDerivative.scalarDifferential
+            (I := I) (g.scalarCurvature cov hcov t) y)) x)
+    (hcont : ContinuousOn
+      (fun p : ℝ × M =>
+        g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hcontact : ∀ {t : ℝ} {x : M}, t ∈ Icc 0 T →
+      g.hamiltonIveyDefect cov hcov hLevi hdim K t x < 0 →
+      HamiltonIveySupportContactRegularityData g cov hcov hLevi hdim t x) :
+    ∀ t ∈ Icc 0 T, ∀ x : M,
+      0 ≤ g.hamiltonIveyDefect cov hcov hLevi hdim K t x := by
+  let ricciVelocity : ∀ t : ℝ, ∀ x : M,
+      TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ := fun t x =>
+    if ht : t ∈ Icc 0 T then
+      curvatureTensorVelocityRicci (evolution t ht x).curvatureVelocity x
+    else 0
+  have hRicci : ∀ {t : ℝ}, t ∈ Icc 0 T →
+      RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+        (I := I) (M := M) g (ricciVelocity t) t := by
+    intro t ht
+    change ∀ y : M, ∀ u v : TM y,
+      HasDerivAt
+        (fun τ => RicciFlow.intrinsicRicciTensor
+          (I := I) (M := M) g τ y u v)
+        ((ricciVelocity t y) u v) t
+    intro y u v
+    have h := hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
+      g cov hcov hLevi (evolution t ht y).curvatureVelocity
+      (evolution t ht y).hCurvature
+    dsimp only [ricciVelocity]
+    rw [dif_pos ht]
+    exact h y u v
+  have htrace : ∀ t ∈ Icc 0 T, ∀ x : M,
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x
+          (ricciVelocity t x) =
+        g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x := by
+    intro t ht x
+    have hTraceLaplacian :=
+      g.HamiltonIveyTraceLaplacianAt_of_shiftedTensorRegularity
+        cov hcov hLevi hdim t x (hShiftedTensorRegularity t ht x)
+    have h :=
+      HamiltonIveyCurvatureEvolutionCertificate.scalarTraceVelocity_of_traceLaplacian
+        g cov hcov hLevi hdim gdot (Icc 0 T) hflow ht x
+        (evolution t ht x) hTraceLaplacian
+    change RicciFlow.metricTraceAt (I := I) (M := M) g t x
+      (if hmem : t ∈ Icc 0 T then
+        curvatureTensorVelocityRicci
+          (evolution t hmem x).curvatureVelocity x else 0) =
+      g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x
+    rw [dif_pos ht]
+    exact h
+  have hScalarTime : ∀ t ∈ Icc 0 T, ∀ x : M,
+      HasDerivAt (fun s => g.scalarCurvature cov hcov s x)
+        (g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x +
+          2 * g.ricciNormSq cov hcov t x) t := by
+    intro t ht x
+    have hTraceLaplacian :=
+      g.HamiltonIveyTraceLaplacianAt_of_shiftedTensorRegularity
+        cov hcov hLevi hdim t x (hShiftedTensorRegularity t ht x)
+    exact hasDerivAt_scalarCurvature_of_curvatureOperatorEvolution
+      g cov hcov hLevi hdim gdot (Icc 0 T) hflow ht x
+        (evolution t ht x).hEvolution hTraceLaplacian
+  have hscalarLower := g.scalarCurvature_hamiltonIvey_lowerBarrier_of_scalarEvolution
+    cov hcov hLevi hdim hK.le hnuLower hScalarCont hScalarNear
+      hScalarDifferential hScalarTime
+  have hcontactCertificate : ∀ {t : ℝ} {x : M}, t ∈ Icc 0 T →
+      g.hamiltonIveyDefect cov hcov hLevi hdim K t x < 0 →
+      HamiltonIveyCurvatureContactCertificateAtSpatialMinimum
+        g cov hcov hLevi hdim K t x := by
+    intro t x ht hdefect
+    let regularity := hcontact ht hdefect
+    let d := HamiltonIveySupportContactData.of_bad_contact_and_continuity
+      g cov hcov hLevi hdim hK ht.1 x (hnuNeg t ht x) hdefect
+      (hscalarLower t ht x) regularity.hnormContinuous
+      regularity.hScalarContinuous regularity.hSupportContinuous
+      (hScalarNear t ht x) (hScalarDifferential t ht x) regularity.hSupport
+    exact HamiltonIveyCurvatureContactCertificateAtSpatialMinimum.of_curvatureEvolutionCertificate
+      g cov hcov hLevi hdim gdot (Icc 0 T) hflow ht
+      d.hupper d.hneg d.hscalarSupport d.hnear d.hdiff d.hSupport
+      (evolution t ht x)
+  exact g.hamiltonIveyPinching_of_intrinsicRicciFlow_and_curvature_contact_certificate_at_spatial_minimum
+    cov hcov hLevi hdim gdot hK hT hflow hnuNeg hnuLower hScalarCont
+    hScalarNear hScalarDifferential ricciVelocity hRicci htrace hcont
+    hcontactCertificate
+
+/-! This version states the pinching estimate only where its logarithmic
+profile is geometrically defined (`nu < 0`).  A capped defect is used for
+spacetime compactness, so no global negative-curvature-operator hypothesis is
+needed.  The contact calculation itself remains on the genuine negative
+least-eigenvalue region and uses the same curvature-evolution and support
+certificates as the everywhere-negative variant above. -/
+
+theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_curvatureEvolution_contactData_on_negative_spectrum
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hcov₂ : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 2)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    {K T : ℝ} (hK : 0 < K) (hT : 0 ≤ T)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot (Icc 0 T))
+    (evolution : ∀ t : ℝ, t ∈ Icc 0 T → ∀ x : M,
+      HamiltonIveyCurvatureEvolutionCertificate
+        g cov hcov hLevi hdim t x)
+    (hShiftedTensorRegularity : ∀ t : ℝ, ∀ ht : t ∈ Icc 0 T, ∀ x : M,
+      g.HamiltonIveyShiftedTensorTraceRegularity
+        cov hcov hLevi hdim t x)
+    (hnuLower : ∀ x : M,
+      -K ≤ g.curvatureNu cov hcov hLevi hdim 0 x)
+    (hScalarCont : ContinuousOn
+      (fun p : ℝ × M => g.scalarCurvature cov hcov p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hNuCont : ContinuousOn
+      (fun p : ℝ × M =>
+        g.curvatureNu cov hcov hLevi hdim p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hcontact : ∀ {t : ℝ} {x : M}, t ∈ Icc 0 T →
+      g.curvatureNu cov hcov hLevi hdim t x < 0 →
+      g.hamiltonIveyDefect cov hcov hLevi hdim K t x < 0 →
+      HamiltonIveySupportContactRegularityData g cov hcov hLevi hdim t x) :
+    ∀ t ∈ Icc 0 T, ∀ x : M,
+      g.curvatureNu cov hcov hLevi hdim t x < 0 →
+        0 ≤ g.hamiltonIveyDefect cov hcov hLevi hdim K t x := by
+  have hTruncatedDefectContinuous :=
+    g.hamiltonIveyTruncatedDefect_continuousOn_of_scalarCurvature_and_curvatureNu
+      cov hcov hLevi hdim hK hT hScalarCont hNuCont
+  have hScalarNear : ∀ t ∈ Icc 0 T, ∀ x : M,
+      ∀ᶠ y in 𝓝 x, MDiffAt (g.scalarCurvature cov hcov t) y := by
+    intro t ht x
+    exact g.eventually_mdifferentiableAt_scalarCurvature_of_curvature
+      cov hcov hcov₂ t x
+  have hScalarDifferential : ∀ t ∈ Icc 0 T, ∀ x : M,
+      MDiffAt
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (CovariantDerivative.scalarDifferential
+            (I := I) (g.scalarCurvature cov hcov t) y)) x := by
+    intro t ht x
+    exact g.scalarDifferential_mdifferentiableAt_of_shiftedTensorRegularity
+      cov hcov hLevi hdim t x (hShiftedTensorRegularity t ht x)
+  let ricciVelocity : ∀ t : ℝ, ∀ x : M,
+      TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ := fun t x =>
+    if ht : t ∈ Icc 0 T then
+      curvatureTensorVelocityRicci (evolution t ht x).curvatureVelocity x
+    else 0
+  have hRicci : ∀ {t : ℝ}, t ∈ Icc 0 T →
+      RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+        (I := I) (M := M) g (ricciVelocity t) t := by
+    intro t ht
+    change ∀ y : M, ∀ u v : TM y,
+      HasDerivAt
+        (fun τ => RicciFlow.intrinsicRicciTensor
+          (I := I) (M := M) g τ y u v)
+        ((ricciVelocity t y) u v) t
+    intro y u v
+    have h := hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
+      g cov hcov hLevi (evolution t ht y).curvatureVelocity
+      (evolution t ht y).hCurvature
+    dsimp only [ricciVelocity]
+    rw [dif_pos ht]
+    exact h y u v
+  have htrace : ∀ t ∈ Icc 0 T, ∀ x : M,
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x
+          (ricciVelocity t x) =
+        g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x := by
+    intro t ht x
+    have hTraceLaplacian :=
+      g.HamiltonIveyTraceLaplacianAt_of_shiftedTensorRegularity
+        cov hcov hLevi hdim t x (hShiftedTensorRegularity t ht x)
+    have h :=
+      HamiltonIveyCurvatureEvolutionCertificate.scalarTraceVelocity_of_traceLaplacian
+        g cov hcov hLevi hdim gdot (Icc 0 T) hflow ht x
+        (evolution t ht x) hTraceLaplacian
+    change RicciFlow.metricTraceAt (I := I) (M := M) g t x
+      (if hmem : t ∈ Icc 0 T then
+        curvatureTensorVelocityRicci
+          (evolution t hmem x).curvatureVelocity x else 0) =
+      g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x
+    rw [dif_pos ht]
+    exact h
+  have hScalarTime : ∀ t ∈ Icc 0 T, ∀ x : M,
+      HasDerivAt (fun s => g.scalarCurvature cov hcov s x)
+        (g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x +
+          2 * g.ricciNormSq cov hcov t x) t := by
+    intro t ht x
+    have hTraceLaplacian :=
+      g.HamiltonIveyTraceLaplacianAt_of_shiftedTensorRegularity
+        cov hcov hLevi hdim t x (hShiftedTensorRegularity t ht x)
+    exact hasDerivAt_scalarCurvature_of_curvatureOperatorEvolution
+      g cov hcov hLevi hdim gdot (Icc 0 T) hflow ht x
+        (evolution t ht x).hEvolution hTraceLaplacian
+  have hscalarLower := g.scalarCurvature_hamiltonIvey_lowerBarrier_of_scalarEvolution
+    cov hcov hLevi hdim hK.le hnuLower hScalarCont hScalarNear
+      hScalarDifferential hScalarTime
+  have hcontactSupport : ∀ {t : ℝ} {x : M}, t ∈ Icc 0 T →
+      g.curvatureNu cov hcov hLevi hdim t x < 0 →
+      g.hamiltonIveyDefect cov hcov hLevi hdim K t x < 0 →
+      ∃ (s : ℝ × M → ℝ) (sdot : ℝ),
+        s (t, x) = g.hamiltonIveyDefect cov hcov hLevi hdim K t x ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          g.curvatureNu cov hcov hLevi hdim p.1 p.2 < 0) ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2 ≤ s p) ∧
+        HasDerivAt (fun τ : ℝ => s (τ, x)) sdot t ∧
+        (∀ᶠ y in 𝓝 x, MDiffAt (fun z : M => s (t, z)) y) ∧
+        MDiffAt
+          (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+            (CovariantDerivative.scalarDifferential (I := I)
+              (fun z : M => s (t, z)) y)) x ∧
+        (∀ hmin : IsLocalMin (fun y : M => s (t, y)) x,
+          g.scalarLaplacian cov (fun _ y => s (t, y)) t x +
+              g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤ sdot) := by
+    intro t x ht hnu hdefect
+    let regularity := hcontact ht hnu hdefect
+    let d := HamiltonIveySupportContactData.of_bad_contact_and_continuity
+      g cov hcov hLevi hdim hK ht.1 x hnu hdefect
+      (hscalarLower t ht x) regularity.hnormContinuous
+      regularity.hScalarContinuous regularity.hSupportContinuous
+      (hScalarNear t ht x) (hScalarDifferential t ht x) regularity.hSupport
+    let c := HamiltonIveyCurvatureContactCertificateAtSpatialMinimum.of_curvatureEvolutionCertificate
+      g cov hcov hLevi hdim gdot (Icc 0 T) hflow ht
+      d.hupper d.hneg d.hscalarSupport d.hnear d.hdiff d.hSupport
+      (evolution t ht x)
+    let s : ℝ × M → ℝ := fun p =>
+      g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x p
+    have hsTouch : s (t, x) =
+        g.hamiltonIveyDefect cov hcov hLevi hdim K t x := by
+      simpa [s] using
+        g.hamiltonIveySupportedDefect_eq_at_contact
+          cov hcov hLevi hdim K t x
+    have hnuNear : ∀ᶠ p in 𝓝 (t, x),
+        g.curvatureNu cov hcov hLevi hdim p.1 p.2 < 0 := by
+      filter_upwards [d.hupper, d.hneg] with p hpupper hpneg
+      exact hpupper.trans_lt hpneg
+    have hsUpper : ∀ᶠ p in 𝓝 (t, x),
+        g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2 ≤ s p := by
+      filter_upwards [d.hupper, d.hneg, d.hscalarSupport] with
+          p hpupper hpneg hscalarSupport
+      simpa [s] using g.hamiltonIveyDefect_le_supportedDefect
+        cov hcov hLevi hdim K t x p hpupper hpneg hscalarSupport
+    let v : TM x := g.curvatureNuContactVectorField
+      cov hcov hLevi hdim t x x
+    let scalarVelocity : ℝ :=
+      2 * g.ricciNormSq cov hcov t x +
+        RicciFlow.metricTraceAt (I := I) (M := M) g t x
+          (c.ricciVelocity x)
+    let contactRicciVelocity : ℝ := c.ricciVelocity x v v
+    let sdot : ℝ :=
+      scalarVelocity /
+          (-g.curvatureNu cov hcov hLevi hdim t x) +
+        (g.scalarCurvature cov hcov t x -
+            g.curvatureNu cov hcov hLevi hdim t x) /
+          (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 *
+          (scalarVelocity - 2 * contactRicciVelocity -
+            (g.curvatureLambda cov hcov hLevi hdim t x +
+              g.curvatureMu cov hcov hLevi hdim t x) ^ 2) -
+        K / (1 + K * t)
+    have hscalarTime :=
+      g.hasDerivAt_scalarCurvature_of_intrinsicRicciTimeDerivative
+        cov hcov hLevi gdot (Icc 0 T) hflow ht (x := x)
+        c.ricciVelocity c.hRicci
+    have hricciTime :=
+      g.hasDerivAt_ricciCurvature_of_intrinsicRicciTimeDerivative
+        cov hcov hLevi x v v c.ricciVelocity c.hRicci
+    have hsTime :=
+      g.hasDerivAt_hamiltonIveySupportedDefect_time_of_isRicciFlowOn
+        cov hcov hLevi hdim gdot (Icc 0 T) hflow hK ht ht.1 hnu
+        scalarVelocity contactRicciVelocity hscalarTime hricciTime
+    have hsTime' : HasDerivAt (fun τ : ℝ => s (τ, x)) sdot t := by
+      simpa [s, sdot, scalarVelocity, contactRicciVelocity, v] using hsTime
+    have hvelocityEq : c.ricciVelocity x = ricciVelocity t x := by
+      ext u v
+      exact (c.hRicci x u v).unique (hRicci ht x u v)
+    have htraceC := htrace t ht x
+    rw [← hvelocityEq] at htraceC
+    refine ⟨s, sdot, ?_, hnuNear, hsUpper, hsTime', d.hnear,
+      d.hdiff, ?_⟩
+    · exact hsTouch
+    · intro hmin
+      exact HamiltonIveyCurvatureContactCertificateAtSpatialMinimum.evolution_at_spatial_minimum_of_curvatureOperatorEvolution
+        g cov hcov hLevi hdim c (hScalarNear t ht x)
+        (hScalarDifferential t ht x) htraceC hmin
+  exact g.hamiltonIveyPinching_of_truncatedDefect_support_certificate_at_spatial_minimum
+    cov hcov hLevi hdim hK hT hnuLower hscalarLower
+    hTruncatedDefectContinuous hcontactSupport
 
 end IntrinsicTransport
 

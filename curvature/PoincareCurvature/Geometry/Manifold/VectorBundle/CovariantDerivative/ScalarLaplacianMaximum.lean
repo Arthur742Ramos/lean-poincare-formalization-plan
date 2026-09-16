@@ -72,6 +72,211 @@ theorem deriv_comp_of_hasMFDerivAt_velocity
   congr 1
   norm_num
 
+/-- Intrinsic first-order chain rule for scalar functions.  The tangent
+direction is realized by the local integral curve of its canonical smooth
+extension, so the identity does not depend on a coordinate representation. -/
+theorem scalarDifferential_comp_of_hasDerivAt
+    {F : ℝ → ℝ} {f : M → ℝ} {x : M} {d : ℝ}
+    (hF : HasDerivAt F d (f x)) (hf : MDiffAt f x) (u : TM x) :
+    scalarDifferential (I := I) (F ∘ f) x u =
+      d * scalarDifferential (I := I) f x u := by
+  let X : ∀ y : M, TM y :=
+    smoothExtend (I := I) (F := E) (V := TM) x u
+  have hXone : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (T% X) := by
+    simpa [X] using smoothExtend_contMDiff_one
+      (I := I) (F := E) (V := TM) x u
+  obtain ⟨γ, hγzero, hγ⟩ :
+      ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurveAt γ X 0 :=
+    exists_isMIntegralCurveAt_of_contMDiffAt_boundaryless
+      (I := I) (v := X) (t₀ := 0) (x₀ := x) hXone.contMDiffAt
+  have hfzero : MDiffAt f (γ 0) := by
+    simpa only [hγzero] using hf
+  have hcurve := HasMFDerivAt.comp 0 hfzero.hasMFDerivAt hγ.hasMFDerivAt
+  have hcurveDeriv := hcurve.hasFDerivAt.hasDerivAt
+  have hfcurveEq : deriv (f ∘ γ) 0 =
+      scalarDifferential (I := I) f x u := by
+    have h := deriv_comp_of_hasMFDerivAt_velocity
+      (I := I) hfzero hγ.hasMFDerivAt
+    rw [hγzero] at h
+    simpa [X, smoothExtend_apply] using h
+  have hfcurve : HasDerivAt (f ∘ γ)
+      (scalarDifferential (I := I) f x u) 0 :=
+    hcurveDeriv.congr_deriv (by
+      rw [← hcurveDeriv.deriv]
+      exact hfcurveEq)
+  have hcomp : MDiffAt (F ∘ f) x :=
+    hF.differentiableAt.comp_mdifferentiableAt hf
+  have hcomp0 : MDiffAt (F ∘ f) (γ 0) := by
+    simpa only [hγzero] using hcomp
+  have hA := deriv_comp_of_hasMFDerivAt_velocity
+    (I := I) hcomp0 hγ.hasMFDerivAt
+  rw [hγzero] at hA
+  have hA2 : deriv ((F ∘ f) ∘ γ) 0 =
+      scalarDifferential (I := I) (F ∘ f) x u := by
+    simpa [X, smoothExtend_apply] using hA
+  have hF0 : HasDerivAt F d ((f ∘ γ) 0) := by
+    simpa [Function.comp_apply, hγzero] using hF
+  have hB0 := HasDerivAt.comp 0 hF0 hfcurve
+  have hB : HasDerivAt ((F ∘ f) ∘ γ)
+      (d * scalarDifferential (I := I) f x u) 0 := by
+    simpa [Function.comp_assoc] using hB0
+  calc
+    scalarDifferential (I := I) (F ∘ f) x u =
+        deriv ((F ∘ f) ∘ γ) 0 := hA2.symm
+    _ = d * scalarDifferential (I := I) f x u := hB.deriv
+
+/-- The intrinsic scalar-Hessian chain rule.  It is stated with local
+regularity at the base point: the outer function is differentiable along the
+inner function near `x`, and its first derivative is differentiable at
+`f x`. -/
+theorem scalarHessian_comp_apply_of_hasDerivAt_deriv
+    (cov : CovariantDerivative I E TM) {F : ℝ → ℝ} {f : M → ℝ}
+    {x : M} {d₂ : ℝ}
+    (hFnear : ∀ᶠ y in 𝓝 x,
+      HasDerivAt F (deriv F (f y)) (f y))
+    (hfnear : ∀ᶠ y in 𝓝 x, MDiffAt f y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) f y)) x)
+    (hF₂ : HasDerivAt (deriv F) d₂ (f x))
+    (hdfcomp : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) (F ∘ f) y)) x)
+    (u v : TM x) :
+    scalarHessian cov (F ∘ f) x u v =
+      deriv F (f x) * scalarHessian cov f x u v +
+        d₂ * scalarDifferential (I := I) f x u *
+          scalarDifferential (I := I) f x v := by
+  have hf₀ : MDiffAt f x := hfnear.self_of_nhds
+  let a : M → ℝ := deriv F ∘ f
+  have ha : MDiffAt a x := hF₂.differentiableAt.comp_mdifferentiableAt hf₀
+  have hchain : ∀ᶠ y in 𝓝 x,
+      scalarDifferential (I := I) (F ∘ f) y =
+        a y • scalarDifferential (I := I) f y := by
+    filter_upwards [hFnear, hfnear] with y hFy hfy
+    ext w
+    simpa [a, Function.comp_apply, smul_eq_mul] using
+      scalarDifferential_comp_of_hasDerivAt (I := I) hFy hfy w
+  have hprod : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        ((a • scalarDifferential (I := I) f) y)) x := by
+    simpa [a] using ha.smul_section hdf
+  have hconn := IsCovariantDerivativeOn.congr_of_eventuallyEq
+    (hcov := (covectorCovariantDerivative cov).isCovariantDerivativeOnUniv)
+    hdfcomp hprod Filter.univ_mem hchain
+  have hleibniz :=
+    (covectorCovariantDerivative cov).isCovariantDerivativeOn.leibniz
+      hdf ha (x := x)
+  have hconnUV := congrArg (fun A : TM x →L[ℝ] T₁ x => A u v) hconn
+  have hleibUV := congrArg (fun A : TM x →L[ℝ] T₁ x => A u v) hleibniz
+  have hleibUV' :
+      covectorCovariantDerivative cov (a • scalarDifferential (I := I) f) x u v =
+        a x * scalarHessian cov f x u v +
+          scalarDifferential (I := I) a x u *
+            scalarDifferential (I := I) f x v := by
+    simpa [scalarHessian, add_apply, smul_apply,
+      ContinuousLinearMap.smulRight_apply, smul_eq_mul] using hleibUV
+  have haValue : a x = deriv F (f x) := rfl
+  have haDiff : scalarDifferential (I := I) a x u =
+      d₂ * scalarDifferential (I := I) f x u := by
+    simpa [a] using
+      scalarDifferential_comp_of_hasDerivAt (I := I) hF₂ hf₀ u
+  change covectorCovariantDerivative cov
+      (scalarDifferential (I := I) (F ∘ f)) x u v = _
+  rw [hconnUV, hleibUV', haValue, haDiff]
+
+/-- The cotangent section of a scalar composition is differentiable at the
+base point whenever the inner differential section is.  This is the
+regularity bridge that lets the Hessian chain rule be applied without
+postulating regularity of the composite differential as a separate input. -/
+theorem mdifferentiableAt_scalarDifferential_comp_of_hasDerivAt_deriv
+    {F : ℝ → ℝ} {f : M → ℝ} {x : M} {d₂ : ℝ}
+    (hFnear : ∀ᶠ y in 𝓝 x,
+      HasDerivAt F (deriv F (f y)) (f y))
+    (hfnear : ∀ᶠ y in 𝓝 x, MDiffAt f y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) f y)) x)
+    (hF₂ : HasDerivAt (deriv F) d₂ (f x)) :
+    MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) (F ∘ f) y)) x := by
+  have hf₀ : MDiffAt f x := hfnear.self_of_nhds
+  let a : M → ℝ := deriv F ∘ f
+  have ha : MDiffAt a x := hF₂.differentiableAt.comp_mdifferentiableAt hf₀
+  have hchain : ∀ᶠ y in 𝓝 x,
+      scalarDifferential (I := I) (F ∘ f) y =
+        a y • scalarDifferential (I := I) f y := by
+    filter_upwards [hFnear, hfnear] with y hFy hfy
+    ext w
+    simpa [a, Function.comp_apply, smul_eq_mul] using
+      scalarDifferential_comp_of_hasDerivAt (I := I) hFy hfy w
+  have hprod : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        ((a • scalarDifferential (I := I) f) y)) x := by
+    simpa [a] using ha.smul_section hdf
+  have hsections :
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) (F ∘ f) y)) =ᶠ[𝓝 x]
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        ((a • scalarDifferential (I := I) f) y)) := by
+    filter_upwards [hchain] with y hy
+    rw [hy]
+    simp
+  exact hprod.congr_of_eventuallyEq hsections
+
+/-- Tracing the intrinsic scalar-Hessian chain rule gives the Laplace--Beltrami
+chain rule.  The gradient-square term is written as its orthonormal-frame
+sum, with no coordinate Laplacian substituted for the geometric one. -/
+theorem scalarLaplacian_comp_eq
+    (cov : CovariantDerivative I E TM) {F : ℝ → ℝ} {f : M → ℝ}
+    {x : M} {d₂ : ℝ}
+    (hFnear : ∀ᶠ y in 𝓝 x,
+      HasDerivAt F (deriv F (f y)) (f y))
+    (hfnear : ∀ᶠ y in 𝓝 x, MDiffAt f y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) f y)) x)
+    (hF₂ : HasDerivAt (deriv F) d₂ (f x))
+    (hdfcomp : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) (F ∘ f) y)) x) :
+    scalarLaplacian cov (F ∘ f) x =
+      deriv F (f x) * scalarLaplacian cov f x +
+        d₂ * ∑ i : Fin (Module.finrank ℝ (TM x)),
+          (scalarDifferential (I := I) f x
+            (stdOrthonormalBasis ℝ (TM x) i)) ^ 2 := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  rw [scalarLaplacian_eq_sum_orthonormalBasis cov (F ∘ f) x b,
+    scalarLaplacian_eq_sum_orthonormalBasis cov f x b]
+  simp_rw [scalarHessian_comp_apply_of_hasDerivAt_deriv cov
+    hFnear hfnear hdf hF₂ hdfcomp]
+  rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
+  simp [b, pow_two, mul_assoc]
+
+/-- The scalar Laplacian chain rule with the composite differential's
+regularity discharged from the ordinary first-differential regularity. -/
+theorem scalarLaplacian_comp_eq_of_hasDerivAt_deriv
+    (cov : CovariantDerivative I E TM) {F : ℝ → ℝ} {f : M → ℝ}
+    {x : M} {d₂ : ℝ}
+    (hFnear : ∀ᶠ y in 𝓝 x,
+      HasDerivAt F (deriv F (f y)) (f y))
+    (hfnear : ∀ᶠ y in 𝓝 x, MDiffAt f y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) f y)) x)
+    (hF₂ : HasDerivAt (deriv F) d₂ (f x)) :
+    scalarLaplacian cov (F ∘ f) x =
+      deriv F (f x) * scalarLaplacian cov f x +
+        d₂ * ∑ i : Fin (Module.finrank ℝ (TM x)),
+          (scalarDifferential (I := I) f x
+            (stdOrthonormalBasis ℝ (TM x) i)) ^ 2 := by
+  exact scalarLaplacian_comp_eq cov hFnear hfnear hdf hF₂
+    (mdifferentiableAt_scalarDifferential_comp_of_hasDerivAt_deriv
+      hFnear hfnear hdf hF₂)
+
 /-- A scalar function has zero intrinsic differential at a local minimum on
 a boundaryless manifold. -/
 theorem scalarDifferential_eq_zero_of_isLocalMin

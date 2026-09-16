@@ -415,6 +415,309 @@ theorem scalarDifferential_scalarCurvature_eq_raisedRicciTrace
     TM nTM sTM _ TangentSpace.fiberBundle TangentSpace.vectorBundle
     hContTangent _ fTM cov A x hRicci u
 
+local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
+
+/-- Lower the output index of a genuine tangent-bundle endomorphism with the
+Riemannian metric.  This packages the endomorphism as an actual covariant
+two-tensor; no coordinate matrix or symmetrization is involved. -/
+def metricLoweredEndomorphism
+    (A : ∀ x : M, TM x →L[ℝ] TM x) : ∀ x : M, T₂ x := fun x =>
+  (riemannianMetricCovariantTwoTensor (I := I) (M := M) x).comp (A x)
+
+@[simp] theorem metricLoweredEndomorphism_apply
+    (A : ∀ x : M, TM x →L[ℝ] TM x) (x : M) (u v : TM x) :
+    metricLoweredEndomorphism (I := I) (M := M) A x u v =
+      inner ℝ (A x u) v := by
+  simp [metricLoweredEndomorphism, riemannianMetricCovariantTwoTensor]
+
+/-- The same lowered endomorphism, represented in the nested-linear-map
+interface used by the metric contraction API. -/
+def metricLoweredEndomorphismLinear
+    (A : ∀ x : M, TM x →L[ℝ] TM x) :
+    ∀ x : M, TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ := fun x =>
+  { toFun := fun u => (metricLoweredEndomorphism (I := I) (M := M) A x u).toLinearMap
+    map_add' := by
+      intro u v
+      ext w
+      simp
+    map_smul' := by
+      intro c u
+      ext w
+      simp }
+
+@[simp] theorem metricLoweredEndomorphismLinear_apply
+    (A : ∀ x : M, TM x →L[ℝ] TM x) (x : M) (u v : TM x) :
+    metricLoweredEndomorphismLinear (I := I) (M := M) A x u v =
+      inner ℝ (A x u) v := by
+  simp [metricLoweredEndomorphismLinear, metricLoweredEndomorphism_apply]
+
+/-- Convert a genuine continuous covariant two-tensor to the nested linear
+maps expected by the metric-contraction API. -/
+def covariantTwoTensorLinear
+    (h : ∀ x : M, T₂ x) :
+    ∀ x : M, TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ := fun x =>
+  { toFun := fun u => (h x u).toLinearMap
+    map_add' := by
+      intro u v
+      ext w
+      simp
+    map_smul' := by
+      intro c u
+      ext w
+      simp }
+
+@[simp] theorem covariantTwoTensorLinear_apply
+    (h : ∀ x : M, T₂ x) (x : M) (u v : TM x) :
+    covariantTwoTensorLinear (I := I) (M := M) h x u v = h x u v := rfl
+
+/-- The induced covariant derivative of a genuine tangent endomorphism,
+viewed at a point as a linear endomorphism after fixing the derivative
+direction. -/
+def endomorphismCovariantDerivativeAt
+    (cov : CovariantDerivative I E TM)
+    (A : ∀ x : M, TM x →L[ℝ] TM x) (x : M)
+    (u : TM x) : TM x →L[ℝ] TM x := by
+  letI nTM : ∀ y : M, NormedAddCommGroup (TM y) := fun y =>
+    PoincareCurvature.instNormedAddCommGroupTangentSpace I y
+  letI sTM : ∀ y : M, NormedSpace ℝ (TM y) := fun _ =>
+    PoincareCurvature.instNormedSpaceTangentSpace I _
+  letI fTM : ∀ y : M, FiniteDimensional ℝ (TM y) := fun _ =>
+    inferInstanceAs (FiniteDimensional ℝ E)
+  let hContOne : ContMDiffVectorBundle 1 E TM I :=
+    @ContMDiffVectorBundle.of_le
+      ℝ M E TM _ E _ _ H _ I _ _ _ _ _ _ _ _
+      TangentSpace.fiberBundle TangentSpace.vectorBundle
+      1 2 one_le_two hContTangent
+  let d := @inducedHomCovariantDerivative
+    E _ _ H _ I M _ _ _ _ _ _
+    E E _ _ _ _ _
+    TM TM _ _ nTM sTM fTM nTM sTM
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    hContTangent hContOne cov cov
+  exact d A x u
+
+/-- The induced covariant derivative of an endomorphism, evaluated on its
+derivative direction and endomorphism input. -/
+def endomorphismCovariantDerivativeApply
+    (cov : CovariantDerivative I E TM)
+    (A : ∀ x : M, TM x →L[ℝ] TM x) (x : M)
+    (u v : TM x) : TM x :=
+  endomorphismCovariantDerivativeAt cov A x u v
+
+/-- The fibre trace of an endomorphism commutes with covariant
+differentiation, expressed using the canonical tangent-bundle derivative
+chosen by the endomorphism API above. -/
+theorem mvfderiv_endomorphismTrace_eq_trace_endomorphismCovariantDerivativeAt
+    (cov : CovariantDerivative I E TM)
+    (A : ∀ y : M, TM y →L[ℝ] TM y)
+    {x : M}
+    (hA : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TM z →L[ℝ] TM z) y (A y)) x)
+    (X : TM x) :
+    mvfderiv (I := I) (endomorphismTrace (F := E) (V := TM) A) x X =
+      LinearMap.trace ℝ (TM x)
+        (endomorphismCovariantDerivativeAt cov A x X).toLinearMap := by
+  letI nTM : ∀ y : M, NormedAddCommGroup (TM y) := fun y =>
+    PoincareCurvature.instNormedAddCommGroupTangentSpace I y
+  letI sTM : ∀ y : M, NormedSpace ℝ (TM y) := fun _ =>
+    PoincareCurvature.instNormedSpaceTangentSpace I _
+  letI fTM : ∀ y : M, FiniteDimensional ℝ (TM y) := fun _ =>
+    inferInstanceAs (FiniteDimensional ℝ E)
+  let hContOne : ContMDiffVectorBundle 1 E TM I :=
+    @ContMDiffVectorBundle.of_le
+      ℝ M E TM _ E _ _ H _ I _ _ _ _ _ _ _ _
+      TangentSpace.fiberBundle TangentSpace.vectorBundle
+      1 2 one_le_two hContTangent
+  let d := @inducedHomCovariantDerivative
+    E _ _ H _ I M _ _ _ _ _ _
+    E E _ _ _ _ _
+    TM TM _ _ nTM sTM fTM nTM sTM
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    hContTangent hContOne cov cov
+  let trA : M → ℝ := @endomorphismTrace
+    E _ _ M _ _ TM nTM sTM _
+    TangentSpace.fiberBundle TangentSpace.vectorBundle A
+  change mvfderiv (I := I) trA x X =
+      LinearMap.trace ℝ (TM x) ((d A x X).toLinearMap)
+  exact @mvfderiv_endomorphismTrace_eq_trace_inducedHom
+    E E _ _ _ _ H _ I M _ _ _ _ _ _ _ _
+    TM nTM sTM _ TangentSpace.fiberBundle TangentSpace.vectorBundle
+    hContTangent _ fTM cov A x hA X
+
+/-- For a metric-compatible connection, lowering an endomorphism commutes
+with covariant differentiation.  This is the general tensor statement behind
+the corresponding raised-Ricci lemma below. -/
+theorem metricLoweredEndomorphismCovariantDerivative_apply
+    [IsContMDiffRiemannianBundle I 1 E TM]
+    (cov : CovariantDerivative I E TM)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (A : ∀ y : M, TM y →L[ℝ] TM y)
+    {x : M}
+    (hA : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TM z →L[ℝ] TM z) y (A y)) x)
+    (X u v : TM x) :
+    covariantTwoTensorCovariantDerivative cov
+        (metricLoweredEndomorphism (I := I) (M := M) A) x X u v =
+      inner ℝ (endomorphismCovariantDerivativeApply cov A x X u) v := by
+  let σ : ∀ y : M, TM y := smoothExtend (I := I) (F := E) (V := TM) x u
+  let τ : ∀ y : M, TM y := smoothExtend (I := I) (F := E) (V := TM) x v
+  have hσ : MDiffAt (T% σ) x :=
+    ((smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x u).of_le
+      (by simp) x).mdifferentiableAt one_ne_zero
+  have hτ : MDiffAt (T% τ) x :=
+    ((smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x v).of_le
+      (by simp) x).mdifferentiableAt one_ne_zero
+  have hAσ : MDiffAt (T% (fun y => A y (σ y))) x := hA.clm_bundle_apply hσ
+  have hLower : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := T₂) y (metricLoweredEndomorphism (I := I) (M := M) A y)) x := by
+    simpa [metricLoweredEndomorphism] using
+      (riemannianMetricCovariantTwoTensor_mdifferentiableAt
+        (I := I) (E := E) (M := M) x).clm_bundle_comp hA
+  have hmetricEq := hmetric hAσ hτ X
+  have hmetricEq' :
+      mvfderiv (I := I) (fun y => inner ℝ (A y (σ y)) (τ y)) x X =
+        inner ℝ (cov (fun y => A y (σ y)) x X) v +
+          inner ℝ (A x u) (cov τ x X) := by
+    simpa [σ, τ, smoothExtend_apply] using hmetricEq
+  have hD : endomorphismCovariantDerivativeApply cov A x X u =
+      cov (fun y => A y (σ y)) x X - A x (cov σ x X) := by
+    unfold endomorphismCovariantDerivativeApply endomorphismCovariantDerivativeAt
+    dsimp only [inducedHomCovariantDerivative]
+    split
+    next _ => rfl
+    next h => exact (h hA).elim
+  have hDinner := congrArg (fun z : TM x => inner ℝ z v) hD
+  have hinnerSub :
+      inner ℝ
+          (cov (fun y => A y (σ y)) x X - A x (cov σ x X)) v =
+        inner ℝ (cov (fun y => A y (σ y)) x X) v -
+          inner ℝ (A x (cov σ x X)) v := by
+    exact inner_sub_left (𝕜 := ℝ) (E := TM x) _ _ _
+  rw [hinnerSub] at hDinner
+  have htwo := covariantTwoTensorCovariantDerivative_apply_of_mdifferentiableAt
+    cov hLower X u v
+  have hfun :
+      (fun y => metricLoweredEndomorphism (I := I) (M := M) A y
+        (smoothExtend (I := I) (F := E) (V := TM) x u y)
+        (smoothExtend (I := I) (F := E) (V := TM) x v y)) =
+      (fun y => inner ℝ
+        (A y (smoothExtend (I := I) (F := E) (V := TM) x u y))
+        (smoothExtend (I := I) (F := E) (V := TM) x v y)) := by
+    funext y
+    simp [metricLoweredEndomorphism_apply]
+  change covariantTwoTensorCovariantDerivative cov
+      (metricLoweredEndomorphism (I := I) (M := M) A) x X u v = _
+    at htwo
+  rw [hfun] at htwo
+  simp only [metricLoweredEndomorphism_apply] at htwo
+  rw [hmetricEq'] at htwo
+  change covariantTwoTensorCovariantDerivative cov
+      (metricLoweredEndomorphism (I := I) (M := M) A) x X u v =
+    inner ℝ (endomorphismCovariantDerivativeApply cov A x X u) v
+  rw [hDinner]
+  linarith
+
+/-- The metric trace of a lowered endomorphism commutes with the genuine
+covariant derivative.  The conclusion is evaluated in any orthonormal basis,
+so it is independent of the chosen fibre coordinates. -/
+theorem mvfderiv_covariantTwoTensorTrace_metricLoweredEndomorphism
+    [IsContMDiffRiemannianBundle I 1 E TM]
+    (cov : CovariantDerivative I E TM)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (A : ∀ y : M, TM y →L[ℝ] TM y)
+    {x : M}
+    (hA : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TM z →L[ℝ] TM z) y (A y)) x)
+    (X : TM x) {ι : Type*} [Fintype ι]
+    (b : OrthonormalBasis ι ℝ (TM x)) :
+    mvfderiv (I := I)
+        (fun y => covariantTwoTensorTrace
+          (I := I) (E := E) (M := M)
+          (metricLoweredEndomorphismLinear (I := I) (M := M) A) y) x X =
+      ∑ i, covariantTwoTensorCovariantDerivative cov
+        (metricLoweredEndomorphism (I := I) (M := M) A)
+        x X (b i) (b i) := by
+  letI : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  have htrace :
+      (fun y => covariantTwoTensorTrace
+        (I := I) (E := E) (M := M)
+        (metricLoweredEndomorphismLinear (I := I) (M := M) A) y) =
+      endomorphismTrace (F := E) (V := TM) A := by
+    funext y
+    let _ : FiniteDimensional ℝ (TM y) :=
+      VectorBundle.finiteDimensional ℝ E TM y
+    let b' := stdOrthonormalBasis ℝ (TM y)
+    rw [covariantTwoTensorTrace_eq_sum_orthonormalBasis
+        (I := I) (E := E) (M := M)
+        (metricLoweredEndomorphismLinear (I := I) (M := M) A) y b',
+      endomorphismTrace, LinearMap.trace_eq_sum_inner _ b']
+    apply Finset.sum_congr rfl
+    intro i hi
+    simp [metricLoweredEndomorphismLinear_apply, real_inner_comm]
+  rw [htrace,
+    mvfderiv_endomorphismTrace_eq_trace_endomorphismCovariantDerivativeAt
+      cov A hA X,
+    LinearMap.trace_eq_sum_inner _ b]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rw [real_inner_comm]
+  exact (metricLoweredEndomorphismCovariantDerivative_apply
+    (I := I) (E := E) (M := M) cov hmetric A hA X (b i) (b i)).symm
+
+/-- The first-order metric-trace identity for an arbitrary genuine covariant
+two-tensor. The raised section is required to be differentiable at the
+point; lowering it back recovers the original tensor by the Riesz identity. -/
+theorem mvfderiv_covariantTwoTensorTrace_eq_sum_covariantDerivative
+    [IsContMDiffRiemannianBundle I 1 E TM]
+    (cov : CovariantDerivative I E TM)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (h : ∀ y : M, T₂ y) {x : M}
+    (hhRaised : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TM z →L[ℝ] TM z) y
+        ((rieszMap (I := I) y).comp (h y))) x)
+    (X : TM x) {ι : Type*} [Fintype ι]
+    (b : OrthonormalBasis ι ℝ (TM x)) :
+    mvfderiv (I := I)
+        (fun y => covariantTwoTensorTrace
+          (I := I) (E := E) (M := M)
+          (covariantTwoTensorLinear (I := I) (M := M) h) y) x X =
+      ∑ i, covariantTwoTensorCovariantDerivative cov h x X (b i) (b i) := by
+  let A : ∀ y : M, TM y →L[ℝ] TM y := fun y =>
+    (rieszMap (I := I) y).comp (h y)
+  have hA : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TM z →L[ℝ] TM z) y (A y)) x := by
+    simpa [A] using hhRaised
+  have hLowerApply (y : M) (u v : TM y) :
+      metricLoweredEndomorphism (I := I) (M := M) A y u v = h y u v := by
+    rw [metricLoweredEndomorphism_apply]
+    change inner ℝ (rieszMap (I := I) y (h y u)) v = h y u v
+    exact rieszMap_apply_inner (I := I) y (h y u) v
+  have hLower :
+      metricLoweredEndomorphism (I := I) (M := M) A = h := by
+    funext y
+    ext u v
+    exact hLowerApply y u v
+  have hLowerLinear :
+      metricLoweredEndomorphismLinear (I := I) (M := M) A =
+        covariantTwoTensorLinear (I := I) (M := M) h := by
+    funext y
+    ext u v
+    rw [metricLoweredEndomorphismLinear_apply, covariantTwoTensorLinear_apply]
+    change inner ℝ (rieszMap (I := I) y (h y u)) v = h y u v
+    exact rieszMap_apply_inner (I := I) y (h y u) v
+  simpa only [hLowerLinear, hLower] using
+    (mvfderiv_covariantTwoTensorTrace_metricLoweredEndomorphism
+      (I := I) (E := E) (M := M) cov hmetric A hA X b)
+
 end DifferentiatedTrace
 
 /-- Ricci curvature is the first/output trace of the actual curvature tensor
