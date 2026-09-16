@@ -2005,6 +2005,79 @@ theorem hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureTensorConnection
       (curvatureTensorVelocityRicci curvatureVelocity) hRicci (by
         simpa [V] using hcurv)
 
+/-! The preceding theorem has the exact geometric input needed by the
+support calculation, but its long dependent hypothesis is inconvenient to
+thread through a global evolution argument.  Bundle that input without
+changing its meaning: the certificate contains the derivative of the actual
+time-dependent curvature four-tensor and the connection-Laplacian plus
+reaction equation for the actual lowered curvature operator.  No scalar or
+coordinate surrogate is introduced. -/
+
+structure HamiltonIveyCurvatureEvolutionCertificate
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) where
+  curvatureVelocity : ∀ z : M,
+    TM z →ₗ[ℝ] TM z →ₗ[ℝ] TM z →ₗ[ℝ] TM z
+  hCurvature : ∀ (z : M) (a b c : TM z),
+    HasDerivAt
+      (fun τ => TimeDependentCovariantDerivative.curvatureTensor
+        (I := I) (M := M) cov hcov τ z a b c)
+      (curvatureVelocity z a b c) t
+  hEvolution :
+    letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+    letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+      ContinuousLinearMap.toNormedSpace
+    letI : ∀ y : M, NormedAddCommGroup (T₂ y) := fun _ =>
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI : ∀ y : M, NormedSpace ℝ (T₂ y) := fun _ =>
+      inferInstance
+    ∀ u v : TM x,
+      HasDerivAt
+        (fun τ => g.curvatureOperatorTwoTensor cov hcov τ x u v)
+        (connectionLaplacian (cov t)
+            (g.curvatureNuShiftedContactTwoTensor
+              cov hcov hLevi hdim t x) x u v +
+          curvatureOperatorReaction g cov hcov hLevi hdim t x u v) t
+
+/-! A bundled curvature-evolution certificate feeds the pointwise support
+derivative directly.  This is deliberately a reduction theorem: the
+certificate still records the genuine curvature-evolution equation that a
+Ricci-flow proof must establish. -/
+
+theorem HamiltonIveyCurvatureEvolutionCertificate.support_derivative
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) (x : M)
+    (c : HamiltonIveyCurvatureEvolutionCertificate
+      g cov hcov hLevi hdim t x) :
+    HasDerivAt
+      (fun τ => g.curvatureNuSpacetimeSupport
+        cov hcov hLevi hdim t x (τ, x))
+      (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+        g.curvatureLambda cov hcov hLevi hdim t x *
+          g.curvatureMu cov hcov hLevi hdim t x) t := by
+  exact g.hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureTensorConnectionLaplacianEvolution
+    cov hcov hLevi hdim gdot s hflow ht x c.curvatureVelocity c.hCurvature
+      c.hEvolution
+
 /-! The support speed can therefore be obtained from a single intrinsic
 Ricci-tensor derivative.  This theorem is intentionally stated in terms of
 the already-proved support-speed calculation, so the logarithmic chain rule
