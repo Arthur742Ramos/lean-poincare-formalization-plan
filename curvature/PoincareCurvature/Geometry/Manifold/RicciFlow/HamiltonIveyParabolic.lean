@@ -529,6 +529,80 @@ theorem hamiltonIveyPinching_of_spacetime_support_certificate
       (g.curvatureMu_ge_nu cov hcov hLevi hdim 0 x)
       (hnuNeg 0 hzero x) (hnuLower x)
 
+/-! The standard tensor maximum-principle calculation only needs the support
+PDE at the spatial minimum selected by the compactness argument.  This
+variant exposes that scope instead of demanding the inequality at every
+negative point. -/
+
+theorem hamiltonIveyPinching_of_spacetime_support_certificate_at_spatial_minimum
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    {K T : ℝ} (hK : 0 < K) (hT : 0 ≤ T)
+    (hnuNeg : ∀ t ∈ Icc 0 T, ∀ x : M,
+      g.curvatureNu cov hcov hLevi hdim t x < 0)
+    (hnuLower : ∀ x : M,
+      -K ≤ g.curvatureNu cov hcov hLevi hdim 0 x)
+    (hscalar : ∀ t ∈ Icc 0 T, ∀ x : M,
+      -3 * (K / (1 + K * t)) ≤ g.scalarCurvature cov hcov t x)
+    (hcont : ContinuousOn
+      (fun p : ℝ × M =>
+        g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hcontact : ∀ {t : ℝ} {x : M}, t ∈ Icc 0 T →
+      g.hamiltonIveyDefect cov hcov hLevi hdim K t x < 0 →
+      ∃ (s : ℝ × M → ℝ) (sdot : ℝ),
+        s (t, x) = g.hamiltonIveyDefect cov hcov hLevi hdim K t x ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2 ≤ s p) ∧
+        HasDerivAt (fun τ : ℝ => s (τ, x)) sdot t ∧
+        (∀ᶠ y in 𝓝 x, MDiffAt (fun z : M => s (t, z)) y) ∧
+        MDiffAt
+          (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+            (CovariantDerivative.scalarDifferential (I := I)
+              (fun z : M => s (t, z)) y)) x ∧
+        (∀ hmin : IsLocalMin (fun y : M => s (t, y)) x,
+          g.scalarLaplacian cov (fun _ y => s (t, y)) t x +
+              g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤ sdot)) :
+    ∀ t ∈ Icc 0 T, ∀ x : M,
+      0 ≤ g.hamiltonIveyDefect cov hcov hLevi hdim K t x := by
+  let w : ℝ → M → ℝ :=
+    g.hamiltonIveyDefect cov hcov hLevi hdim K
+  let q : ℝ → M → ℝ :=
+    g.hamiltonIveyReactionTerm cov hcov hLevi hdim K
+  apply g.parabolicNonnegativeInvariant_of_upper_support_at_spatial_minimum
+    cov w q hcont
+  · intro t x ht hwneg
+    obtain ⟨s, sdot, hs_touch, hs_upper, hs_time, hs_near, hs_diff, hs_pde⟩ :=
+      hcontact ht hwneg
+    exact ⟨s, sdot, hs_touch, hs_upper, hs_time, hs_near, hs_diff,
+      hs_pde⟩
+  · intro t ht x hwneg
+    have horder₁ := g.curvatureLambda_ge_mu cov hcov hLevi hdim t x
+    have horder₂ := g.curvatureMu_ge_nu cov hcov hLevi hdim t x
+    have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+      cov hcov hLevi hdim t x
+    have hscalar' :
+        -3 * (K / (1 + K * t)) ≤
+          HamiltonIveyReaction.scalar
+            (g.curvatureLambda cov hcov hLevi hdim t x)
+            (g.curvatureMu cov hcov hLevi hdim t x)
+            (g.curvatureNu cov hcov hLevi hdim t x) := by
+      simpa only [HamiltonIveyReaction.scalar, hsum] using hscalar t ht x
+    exact (HamiltonIveyReaction.hamiltonIvey_reaction_coercive hK ht.1
+      horder₁ horder₂ (hnuNeg t ht x) hscalar' hwneg).2.2
+  · intro x
+    have hzero : (0 : ℝ) ∈ Icc 0 T := ⟨le_rfl, hT⟩
+    exact HamiltonIveyReaction.defect_zero_nonneg_of_least_eigenvalue_lower_bound
+      hK
+      (g.curvatureLambda_ge_mu cov hcov hLevi hdim 0 x)
+      (g.curvatureMu_ge_nu cov hcov hLevi hdim 0 x)
+      (hnuNeg 0 hzero x) (hnuLower x)
+
 /-! The preceding support theorem is now paired with the genuine Ricci-flow
 time-variation calculation.  The contact data below expose scalar and Ricci
 derivatives, while the support derivative itself is constructed internally;
