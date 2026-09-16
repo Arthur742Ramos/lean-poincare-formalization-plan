@@ -486,6 +486,70 @@ theorem curvatureOperatorReactionEndomorphism_apply_curvatureNuEigenvector
   ring_nf
   rw [add_smul]
 
+/-! The same polynomial reaction is diagonal on every member of the genuine
+curvature eigenbasis.  The least-direction calculation above is therefore a
+special case of a fibrewise statement about the full self-adjoint operator. -/
+
+theorem curvatureOperatorReactionEndomorphism_apply_curvatureEigenbasis
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) (i : Fin 3) :
+    curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y
+        (g.curvatureEigenbasisVector cov hcov hLevi hdim t y i) =
+      ((2 : ℝ) *
+          (g.curvatureEigenvalues cov hcov hLevi hdim t y i) ^ 2 -
+        g.scalarCurvature cov hcov t y *
+          g.curvatureEigenvalues cov hcov hLevi hdim t y i +
+        (g.curvatureLambda cov hcov hLevi hdim t y *
+            g.curvatureMu cov hcov hLevi hdim t y +
+          g.curvatureLambda cov hcov hLevi hdim t y *
+            g.curvatureNu cov hcov hLevi hdim t y +
+          g.curvatureMu cov hcov hLevi hdim t y *
+            g.curvatureNu cov hcov hLevi hdim t y)) •
+        g.curvatureEigenbasisVector cov hcov hLevi hdim t y i := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  change curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y
+      (CovariantDerivative.ricciComplementEigenbasis
+        (I := I) (M := M) (E := E)
+        (cov t) (hLevi t).1 (hLevi t).2 y (hdim y) i) = _
+  change curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y
+      (CovariantDerivative.ricciComplementEigenbasis
+        (I := I) (M := M) (E := E)
+        (cov t) (hLevi t).1 (hLevi t).2 y (hdim y) i) =
+    _ • (CovariantDerivative.ricciComplementEigenbasis
+      (I := I) (M := M) (E := E)
+      (cov t) (hLevi t).1 (hLevi t).2 y (hdim y) i)
+  have hAraw := CovariantDerivative.ricciComplementEndomorphism_apply_eigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 y (hdim y) i
+  have hA : g.curvatureEndomorphismApply cov hcov t y
+      (CovariantDerivative.ricciComplementEigenbasis
+        (I := I) (M := M) (E := E)
+        (cov t) (hLevi t).1 (hLevi t).2 y (hdim y) i) =
+      g.curvatureEigenvalues cov hcov hLevi hdim t y i •
+        (CovariantDerivative.ricciComplementEigenbasis
+          (I := I) (M := M) (E := E)
+          (cov t) (hLevi t).1 (hLevi t).2 y (hdim y) i) := by
+    simpa [curvatureEndomorphismApply, curvatureEigenvalues] using hAraw
+  rw [curvatureOperatorReactionEndomorphism_apply]
+  rw [hA]
+  unfold curvatureEndomorphismApply
+  rw [map_smul, hAraw]
+  simp only [smul_smul]
+  simp only [curvatureEigenvalues]
+  rw [sub_eq_add_neg, ← neg_smul]
+  rw [← add_smul]
+  rw [← add_smul]
+  congr 1
+  ring_nf
+
 theorem curvatureOperatorReaction_apply_contact
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative

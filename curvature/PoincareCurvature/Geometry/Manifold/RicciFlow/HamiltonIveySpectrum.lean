@@ -105,6 +105,27 @@ def curvatureNu
     (t : ℝ) (x : M) : ℝ :=
   g.curvatureEigenvalues cov hcov hLevi hdim t x 2
 
+/-! Evaluation of the genuine orthonormal curvature eigenframe corresponding
+to `curvatureEigenvalues`.  The frame itself remains local to the definition
+so that the public API does not expose a choice-dependent fibrewise instance. -/
+
+def curvatureEigenbasisVector
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) (i : Fin 3) : TM x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  haveI : ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1 := hcov t
+  exact CovariantDerivative.ricciComplementEigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x) i
+
 /-- A unit eigenvector for the least curvature eigenvalue at a spacetime
 point.  This is the contact vector used by the tensor maximum principle. -/
 def curvatureNuEigenvector
