@@ -275,6 +275,123 @@ theorem hasDerivAt_curvatureOperatorTwoTensor_of_intrinsicRicciTimeDerivative
   · simp [curvatureOperatorTwoTensorVelocity]
     ring
 
+/-! At a contact eigenvector, the genuine lowered-curvature velocity gives the
+time derivative of the Rayleigh support after the quotient correction.  The
+assumption below is the exact contact evaluation of the curvature evolution
+identity; isolating it here records the remaining geometric bridge without
+silently replacing it by a coordinate or symmetrized coefficient statement. -/
+
+theorem hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureOperatorEvolution
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) (x : M)
+    (ricciVelocity : ∀ z : M, TM z →ₗ[ℝ] TM z →ₗ[ℝ] ℝ)
+    (hRicci : RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+      (I := I) (M := M) g ricciVelocity t)
+    (hcurv :
+      g.curvatureOperatorTwoTensorVelocity cov hcov t ricciVelocity x
+          (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+          (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x) =
+        g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+          g.curvatureLambda cov hcov hLevi hdim t x *
+            g.curvatureMu cov hcov hLevi hdim t x -
+          2 * g.curvatureNu cov hcov hLevi hdim t x *
+            g.ricciCurvature cov hcov t x
+              (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+              (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)) :
+    HasDerivAt
+      (fun τ => g.curvatureNuSpacetimeSupport
+        cov hcov hLevi hdim t x (τ, x))
+      (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+        g.curvatureLambda cov hcov hLevi hdim t x *
+          g.curvatureMu cov hcov hLevi hdim t x) t := by
+  let V : TM x := g.curvatureNuContactVectorField cov hcov hLevi hdim t x x
+  let scalarVelocity : ℝ :=
+    2 * g.ricciNormSq cov hcov t x +
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x
+        (ricciVelocity x)
+  let contactRicciVelocity : ℝ := ricciVelocity x V V
+  have hscalar := g.hasDerivAt_scalarCurvature_of_intrinsicRicciTimeDerivative
+    cov hcov hLevi gdot s hflow ht (x := x) ricciVelocity hRicci
+  have hricci := g.hasDerivAt_ricciCurvature_of_intrinsicRicciTimeDerivative
+    cov hcov hLevi x V V ricciVelocity hRicci
+  have hq := g.hasDerivAt_curvatureNuSpacetimeSupport_time_eigenvalue_form
+    cov hcov hLevi hdim gdot s hflow ht x scalarVelocity contactRicciVelocity
+    hscalar hricci
+  have hRic := g.two_mul_ricci_curvatureNuEigenvector_eq_lambda_add_mu
+    cov hcov hLevi hdim t x
+  have hV : V = g.curvatureNuEigenvector cov hcov hLevi hdim t x := by
+    simp [V, curvatureNuContactVectorField,
+      firstOrderParallelSmoothExtend_apply_center]
+  have hinner : (g t).inner x V V = 1 := by
+    rw [hV]
+    exact g.inner_curvatureNuEigenvector_self cov hcov hLevi hdim t x
+  have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim t x
+  have hrel :
+      scalarVelocity - 2 * contactRicciVelocity -
+          (g.curvatureLambda cov hcov hLevi hdim t x +
+            g.curvatureMu cov hcov hLevi hdim t x) ^ 2 =
+        g.curvatureOperatorTwoTensorVelocity cov hcov t ricciVelocity x V V +
+          2 * g.curvatureNu cov hcov hLevi hdim t x *
+            g.ricciCurvature cov hcov t x V V := by
+    have hRic' : 2 * g.ricciCurvature cov hcov t x V V =
+        g.curvatureLambda cov hcov hLevi hdim t x +
+          g.curvatureMu cov hcov hLevi hdim t x := by
+      simpa [V, curvatureNuContactVectorField,
+        firstOrderParallelSmoothExtend_apply_center] using hRic
+    have hRminus :
+        g.scalarCurvature cov hcov t x -
+            g.curvatureNu cov hcov hLevi hdim t x =
+          g.curvatureLambda cov hcov hLevi hdim t x +
+            g.curvatureMu cov hcov hLevi hdim t x := by
+      linarith [hsum]
+    have hprod :
+        2 * (g.scalarCurvature cov hcov t x -
+            g.curvatureNu cov hcov hLevi hdim t x) *
+            g.ricciCurvature cov hcov t x V V =
+          (g.curvatureLambda cov hcov hLevi hdim t x +
+            g.curvatureMu cov hcov hLevi hdim t x) ^ 2 := by
+      calc
+        2 * (g.scalarCurvature cov hcov t x -
+            g.curvatureNu cov hcov hLevi hdim t x) *
+              g.ricciCurvature cov hcov t x V V =
+            (g.scalarCurvature cov hcov t x -
+              g.curvatureNu cov hcov hLevi hdim t x) *
+              (2 * g.ricciCurvature cov hcov t x V V) := by ring
+        _ = (g.curvatureLambda cov hcov hLevi hdim t x +
+              g.curvatureMu cov hcov hLevi hdim t x) ^ 2 := by
+          rw [hRic', hRminus]
+          ring
+    simp only [scalarVelocity, contactRicciVelocity,
+      curvatureOperatorTwoTensorVelocity]
+    rw [hinner]
+    ring_nf
+    linarith [hprod]
+  have hcurvV :
+      g.curvatureOperatorTwoTensorVelocity cov hcov t ricciVelocity x V V =
+        g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+          g.curvatureLambda cov hcov hLevi hdim t x *
+            g.curvatureMu cov hcov hLevi hdim t x -
+          2 * g.curvatureNu cov hcov hLevi hdim t x *
+            g.ricciCurvature cov hcov t x V V := by
+    simpa [V] using hcurv
+  apply hq.congr_deriv
+  rw [hrel, hcurvV]
+  ring
+
 /-! The support speed can therefore be obtained from a single intrinsic
 Ricci-tensor derivative.  This theorem is intentionally stated in terms of
 the already-proved support-speed calculation, so the logarithmic chain rule
