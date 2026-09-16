@@ -290,6 +290,66 @@ def curvatureTensorVelocityRicci
       rw [hE, (LinearMap.trace ℝ (TM y)).map_smul]
       rfl }
 
+/-! A curvature-type four-tensor variation has a symmetric Ricci trace for the
+same algebraic reason as an ordinary Riemann tensor.  The skew, Bianchi, and
+pair-symmetry premises are stated on the actual vector-valued variation; no
+symmetrization of the traced bilinear form is performed. -/
+
+theorem curvatureTensorVelocityRicci_symm_of_curvatureIdentities
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (t : ℝ)
+    (curvatureVelocity : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] TM y →ₗ[ℝ] TM y)
+    (hself : ∀ (y : M) (a c : TM y), curvatureVelocity y a a c = 0)
+    (hswap : ∀ (y : M) (a b c : TM y),
+      curvatureVelocity y a b c = -curvatureVelocity y b a c)
+    (hBianchi : ∀ (y : M) (a b c : TM y),
+      curvatureVelocity y a b c + curvatureVelocity y b c a +
+          curvatureVelocity y c a b = 0)
+    (hpair : ∀ (y : M) (a b c d : TM y),
+      (g t).inner y (curvatureVelocity y a b c) d =
+        (g t).inner y (curvatureVelocity y c d a) b)
+    (y : M) (u w : TM y) :
+    curvatureTensorVelocityRicci curvatureVelocity y u w =
+      curvatureTensorVelocityRicci curvatureVelocity y w u := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  let b : OrthonormalBasis (Fin (Module.finrank ℝ (TM y))) ℝ (TM y) :=
+    stdOrthonormalBasis ℝ (TM y)
+  change LinearMap.trace ℝ (TM y)
+      (curvatureTensorVelocityEndomorphism curvatureVelocity y u w) =
+    LinearMap.trace ℝ (TM y)
+      (curvatureTensorVelocityEndomorphism curvatureVelocity y w u)
+  rw [LinearMap.trace_eq_sum_inner _ b, LinearMap.trace_eq_sum_inner _ b]
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  let e : TM y := b i
+  have hInner := congrArg (fun z : TM y => Inner.inner ℝ z e)
+    (hBianchi y e u w)
+  have hInner' :
+      Inner.inner ℝ (curvatureVelocity y e u w) e +
+          Inner.inner ℝ (curvatureVelocity y u w e) e +
+        Inner.inner ℝ (curvatureVelocity y w e u) e = 0 := by
+    simpa only [inner_add_left, inner_zero_left] using hInner
+  have hmiddle :
+      Inner.inner ℝ (curvatureVelocity y u w e) e = 0 := by
+    change (g t).inner y (curvatureVelocity y u w e) e = 0
+    rw [hpair y u w e e, hself y e u]
+    simp
+  have hthird :
+      Inner.inner ℝ (curvatureVelocity y w e u) e =
+        -Inner.inner ℝ (curvatureVelocity y e w u) e := by
+    change (g t).inner y (curvatureVelocity y w e u) e =
+      -(g t).inner y (curvatureVelocity y e w u) e
+    rw [hswap y w e u]
+    simp
+  have hterm :
+      Inner.inner ℝ (curvatureVelocity y e u w) e =
+        Inner.inner ℝ (curvatureVelocity y e w u) e := by
+    rw [hmiddle, hthird] at hInner'
+    linarith
+  change Inner.inner ℝ (b i) (curvatureVelocity y (b i) u w) =
+    Inner.inner ℝ (b i) (curvatureVelocity y (b i) w u)
+  simpa [e, real_inner_comm] using hterm
+
 theorem hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
