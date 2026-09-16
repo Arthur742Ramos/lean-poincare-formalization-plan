@@ -573,4 +573,77 @@ theorem scalarLaplacian_curvatureNuSpacetimeSupport_eq_connectionLaplacian
   dsimp [q, d, a, V, A, nu] at hquot hlinear hbilinear ⊢
   linarith
 
+/-! The following structure packages exactly the geometric regularity data
+used by the bridge above.  It is kept next to that theorem so the dependent
+bundle instances for the first covariant derivative are elaborated in the
+same context as the proved bridge, rather than reconstructed by a downstream
+certificate. -/
+
+structure HamiltonIveySupportLaplacianCertificate
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t₀ : ℝ) (x₀ : M) where
+  U : Set M
+  hU : IsOpen U
+  hx₀ : x₀ ∈ U
+  hden : ∀ y ∈ U, g.curvatureNuContactMetricSquare
+    cov hcov hLevi hdim t₀ x₀ y ≠ 0
+  hq : ∀ y, MDiffAt
+    (fun z => g.curvatureNuSpacetimeSupport
+      cov hcov hLevi hdim t₀ x₀ (t₀, z)) y
+  hd : ∀ y, MDiffAt
+    (g.curvatureNuContactMetricSquare cov hcov hLevi hdim t₀ x₀) y
+  ha : ∀ y, MDiffAt
+    (g.curvatureNuContactNumerator cov hcov hLevi hdim t₀ x₀) y
+  hDq : MDiffAt
+    (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+      (scalarDifferential (I := I)
+        (fun z => g.curvatureNuSpacetimeSupport
+          cov hcov hLevi hdim t₀ x₀ (t₀, z)) y)) x₀
+  hDd : MDiffAt
+    (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+      (scalarDifferential (I := I)
+        (g.curvatureNuContactMetricSquare cov hcov hLevi hdim t₀ x₀) y)) x₀
+  hDa : MDiffAt
+    (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+      (scalarDifferential (I := I)
+        (g.curvatureNuContactNumerator cov hcov hLevi hdim t₀ x₀) y)) x₀
+  hh : ∀ y, MDiffAt
+    (fun z => TotalSpace.mk'
+      (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) z
+      (g.curvatureNuShiftedContactTwoTensor
+        cov hcov hLevi hdim t₀ x₀ z)) y
+  hV : ∀ y, MDiffAt
+    (T% (g.curvatureNuContactVectorField
+      cov hcov hLevi hdim t₀ x₀)) y
+  hfirst : letI : RiemannianBundle TM := ⟨(g t₀).toRiemannianMetric⟩
+    letI : ∀ x, NormedAddCommGroup (T₂ x) := fun _ => inferInstance
+    letI : ∀ x, NormedSpace ℝ (T₂ x) := fun _ => inferInstance
+    MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+        (E := T₃) y
+        (covariantTwoTensorCovariantDerivative (cov t₀)
+          (g.curvatureNuShiftedContactTwoTensor
+            cov hcov hLevi hdim t₀ x₀) y)) x₀
+  hdf : MDiffAt
+    (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+      (scalarDifferential (I := I)
+        (fun z =>
+          g.curvatureNuShiftedContactTwoTensor
+              cov hcov hLevi hdim t₀ x₀ z
+            (g.curvatureNuContactVectorField
+              cov hcov hLevi hdim t₀ x₀ z)
+            (g.curvatureNuContactVectorField
+              cov hcov hLevi hdim t₀ x₀ z)) y)) x₀
+  hsecondV : ∀ z : TM x₀, MDiffAt
+    (T% (fun y => cov t₀
+      (g.curvatureNuContactVectorField cov hcov hLevi hdim t₀ x₀) y
+      (smoothExtend (I := I) (F := E) (V := TM) x₀ z y))) x₀
+
 end CovariantDerivative.TimeDependentRiemannianMetric

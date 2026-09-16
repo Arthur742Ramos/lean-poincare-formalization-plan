@@ -38,6 +38,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "T₁" => (fun x : M => TM x →L[ℝ] ℝ)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
+local notation "T₃" => (fun x : M => TM x →L[ℝ] T₂ x)
 
 /-- The contact speed written directly from a genuine intrinsic Ricci-tensor
 time derivative.  The scalar velocity is the metric-variation trace
@@ -519,10 +520,40 @@ theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_trace_certificate
 
 /-! The next interface exposes the spatial contact inequality through the
 actual shifted curvature tensor.  In particular, the certificate no longer
-contains a free scalar Laplacian inequality: its spatial term is the
-connection Laplacian of the tensor whose kernel is proved by the support
-construction.  The regularity fields are retained because the corresponding
-support-Laplacian theorem is a genuinely second-order statement. -/
+contains a free scalar Laplacian equality: it stores the explicit regularity
+data consumed by the proved quotient/connection-Laplacian bridge.  The only
+remaining contact inequality is the curvature-evolution estimate itself. -/
+
+/- The regularity structure is defined next to the bridge theorem in
+HamiltonIveySupportLaplacian.lean, where its dependent bundle instances are
+elaborated in the same context as the bridge. -/
+theorem HamiltonIveySupportLaplacianCertificate.eq_connectionLaplacian
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (K : ℝ) (t₀ : ℝ) (x₀ : M)
+    (c : HamiltonIveySupportLaplacianCertificate
+      g cov hcov hLevi hdim t₀ x₀) :
+    g.scalarLaplacian cov
+        (fun _ y => g.curvatureNuSpacetimeSupport
+          cov hcov hLevi hdim t₀ x₀ (t₀, y)) t₀ x₀ =
+      g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t₀ x₀ := by
+  letI : RiemannianBundle TM := ⟨(g t₀).toRiemannianMetric⟩
+  letI : ∀ x : M, NormedAddCommGroup (TM x →L[ℝ] ℝ) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ x : M, NormedSpace ℝ (TM x →L[ℝ] ℝ) := fun _ =>
+    ContinuousLinearMap.toNormedSpace
+  letI : ∀ x : M, NormedAddCommGroup (T₂ x) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ x : M, NormedSpace ℝ (T₂ x) := fun _ => inferInstance
+  simpa [hamiltonIveyContactCurvatureLaplacian] using
+    g.scalarLaplacian_curvatureNuSpacetimeSupport_eq_connectionLaplacian
+      cov hcov hLevi hdim t₀ x₀ c.U c.hU c.hx₀ c.hden c.hq c.hd c.ha
+      c.hDq c.hDd c.hDa c.hh c.hV c.hfirst c.hdf c.hsecondV
 
 structure HamiltonIveyCurvatureContactCertificate
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
@@ -553,13 +584,23 @@ structure HamiltonIveyCurvatureContactCertificate
       (CovariantDerivative.scalarDifferential (I := I)
         (fun z : M =>
           g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y)) x
-  hSupportLaplacian :
-    g.scalarLaplacian cov
-        (fun _ y =>
-          g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, y)) t x =
-      g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x
-  hEvolution :
+  hSupport : HamiltonIveySupportLaplacianCertificate
+    g cov hcov hLevi hdim t x
+  /-- The curvature-evolution contact estimate, expressed through the
+  genuine connection Laplacian of the shifted curvature tensor. -/
+  hCurvatureEvolution :
     g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+        g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤
+      g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
+        ricciVelocity
+  /-- The scalar supported-defect inequality consumed by the maximum
+  principle.  Its derivation from `hCurvatureEvolution` is the remaining
+  chain-rule/evolution bridge, so it is recorded explicitly rather than
+  silently identifying two different Laplacians. -/
+  hEvolution :
+    g.scalarLaplacian cov
+        (fun _ y => g.hamiltonIveySupportedDefect
+          cov hcov hLevi hdim K t x (t, y)) t x +
         g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤
       g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
         ricciVelocity
@@ -621,7 +662,6 @@ theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_curvature_contact_certifi
   let c := hcontact ht hdefect
   refine ⟨c.ricciVelocity, c.hRicci, c.hupper, c.hneg, c.hscalarSupport,
     c.hnear, c.hdiff, ?_⟩
-  rw [c.hSupportLaplacian]
   exact c.hEvolution
 
 end IntrinsicTransport
