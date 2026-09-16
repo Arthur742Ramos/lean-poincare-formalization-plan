@@ -309,6 +309,80 @@ def curvatureOperatorReaction
       ((2 : ℝ) • A (A v) - R • A v + e₂ • v) -
     2 * g.ricciCurvature cov hcov t y u (A v)
 
+/-! The polynomial part of the curvature reaction is bundled as the actual
+continuous endomorphism
+
+`Q(A) = 2 A ∘ A - R A + (λ μ + λ ν + μ ν) Id`.
+
+Keeping this object as a fibrewise linear map makes the tensorial reaction
+available to downstream maximum-principle code without introducing a matrix
+or a chosen eigenbasis. -/
+
+def curvatureOperatorReactionEndomorphism
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) : TM y →L[ℝ] TM y := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  let A : TM y →L[ℝ] TM y :=
+    CovariantDerivative.ricciComplementEndomorphism (cov t) y
+  let e₂ : ℝ :=
+    g.curvatureLambda cov hcov hLevi hdim t y *
+        g.curvatureMu cov hcov hLevi hdim t y +
+      g.curvatureLambda cov hcov hLevi hdim t y *
+        g.curvatureNu cov hcov hLevi hdim t y +
+      g.curvatureMu cov hcov hLevi hdim t y *
+        g.curvatureNu cov hcov hLevi hdim t y
+  exact (2 : ℝ) • (A.comp A) -
+      g.scalarCurvature cov hcov t y • A +
+      e₂ • ContinuousLinearMap.id ℝ (TM y)
+
+@[simp] theorem curvatureOperatorReactionEndomorphism_apply
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) (v : TM y) :
+    curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y v =
+      (2 : ℝ) • g.curvatureEndomorphismApply cov hcov t y
+          (g.curvatureEndomorphismApply cov hcov t y v) -
+        g.scalarCurvature cov hcov t y •
+          g.curvatureEndomorphismApply cov hcov t y v +
+        (g.curvatureLambda cov hcov hLevi hdim t y *
+            g.curvatureMu cov hcov hLevi hdim t y +
+          g.curvatureLambda cov hcov hLevi hdim t y *
+            g.curvatureNu cov hcov hLevi hdim t y +
+          g.curvatureMu cov hcov hLevi hdim t y *
+            g.curvatureNu cov hcov hLevi hdim t y) • v := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  simp [curvatureOperatorReactionEndomorphism, curvatureEndomorphismApply]
+
+theorem curvatureOperatorReaction_eq_inner_endomorphism_sub_ricci
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) (u v : TM y) :
+    curvatureOperatorReaction g cov hcov hLevi hdim t y u v =
+      (g t).inner y u
+          (curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y v) -
+        2 * g.ricciCurvature cov hcov t y u
+          (g.curvatureEndomorphismApply cov hcov t y v) := by
+  simp [curvatureOperatorReaction, curvatureOperatorReactionEndomorphism,
+    curvatureEndomorphismApply]
+
 theorem curvatureOperatorReaction_apply_contact
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
