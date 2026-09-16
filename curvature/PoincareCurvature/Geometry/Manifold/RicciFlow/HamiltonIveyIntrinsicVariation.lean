@@ -217,6 +217,32 @@ theorem hasDerivAt_ricciCurvature_of_intrinsicRicciTimeDerivative
   rw [hricciEq]
   exact hRicci x u v
 
+/-! The intrinsic Ricci tensor is symmetric on every time slice.  Therefore
+its genuine time derivative is symmetric as well; this is the direct
+time-variation statement used by the lowered curvature-operator layer. -/
+
+theorem intrinsicRicciTimeDerivative_symm_of_isLeviCivita
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    {t : ℝ}
+    (ricciVelocity : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] ℝ)
+    (hRicci : RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+      (I := I) (M := M) g ricciVelocity t) :
+    ∀ (y : M) (u v : TM y),
+      ricciVelocity y u v = ricciVelocity y v u := by
+  intro y u v
+  have hleft := hRicci y u v
+  have hright := hRicci y v u
+  have hfun :
+      (fun τ : ℝ => RicciFlow.intrinsicRicciTensor
+        (I := I) (M := M) g τ y u v) =
+        (fun τ : ℝ => RicciFlow.intrinsicRicciTensor
+          (I := I) (M := M) g τ y v u) := by
+    funext τ
+    exact RicciFlow.intrinsicRicciTensor_symm
+      (I := I) (M := M) g τ y u v
+  rw [hfun] at hleft
+  exact hleft.unique hright
+
 /-! A curvature-tensor derivative induces the Ricci-tensor derivative by the
 same genuine trace contraction used in the definition of Ricci curvature.  We
 keep this bridge separate from the Ricci-flow evolution formula: it isolates
@@ -512,6 +538,30 @@ theorem curvatureOperatorTwoTensorVelocity_symm
     cov hcov hLevi t y u v
   unfold curvatureOperatorTwoTensorVelocity
   rw [hinner, hricci, hsymm]
+
+/-! Variant of the preceding symmetry lemma with the intrinsic derivative as
+the sole Ricci-velocity hypothesis.  The symmetry is inherited from the
+actual time-slice Ricci tensor, rather than supplied by a projected
+coefficient presentation. -/
+
+theorem curvatureOperatorTwoTensorVelocity_symm_of_intrinsicRicciTimeDerivative
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    {t : ℝ} (y : M)
+    (ricciVelocity : ∀ z : M, TM z →ₗ[ℝ] TM z →ₗ[ℝ] ℝ)
+    (hRicci : RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+      (I := I) (M := M) g ricciVelocity t)
+    (u v : TM y) :
+    curvatureOperatorTwoTensorVelocity g cov hcov t ricciVelocity y u v =
+      curvatureOperatorTwoTensorVelocity g cov hcov t ricciVelocity y v u := by
+  exact g.curvatureOperatorTwoTensorVelocity_symm cov hcov hLevi t y
+    ricciVelocity
+    (g.intrinsicRicciTimeDerivative_symm_of_isLeviCivita ricciVelocity hRicci)
+    u v
 
 theorem hasDerivAt_curvatureOperatorTwoTensor_of_intrinsicRicciTimeDerivative
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
