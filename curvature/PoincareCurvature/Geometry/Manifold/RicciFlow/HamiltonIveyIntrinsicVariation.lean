@@ -383,6 +383,55 @@ theorem curvatureOperatorReaction_eq_inner_endomorphism_sub_ricci
   simp [curvatureOperatorReaction, curvatureOperatorReactionEndomorphism,
     curvatureEndomorphismApply]
 
+theorem curvatureOperatorReactionEndomorphism_isSymmetric
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) :
+    ∀ u v : TM y,
+      (g t).inner y
+          (curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y u) v =
+        (g t).inner y u
+          (curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y v) := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  let A : TM y →L[ℝ] TM y :=
+    CovariantDerivative.ricciComplementEndomorphism (cov t) y
+  have hA : A.toLinearMap.IsSymmetric := by
+    simpa [A] using
+      (CovariantDerivative.ricciComplementEndomorphism_isSymmetric
+        (cov t) (hLevi t).1 (hLevi t).2 y)
+  have hAcomp : ∀ u v : TM y,
+      Inner.inner ℝ ((A.comp A) u) v = Inner.inner ℝ u ((A.comp A) v) := by
+    intro u v
+    rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
+    exact (hA (A u) v).trans (hA u (A v))
+  have hAuv : ∀ u v : TM y,
+      Inner.inner ℝ (A u) v = Inner.inner ℝ u (A v) := by
+    intro u v
+    exact hA u v
+  let e₂ : ℝ :=
+    g.curvatureLambda cov hcov hLevi hdim t y *
+        g.curvatureMu cov hcov hLevi hdim t y +
+      g.curvatureLambda cov hcov hLevi hdim t y *
+        g.curvatureNu cov hcov hLevi hdim t y +
+      g.curvatureMu cov hcov hLevi hdim t y *
+        g.curvatureNu cov hcov hLevi hdim t y
+  intro u v
+  change Inner.inner ℝ
+      ((2 : ℝ) • (A.comp A) u -
+        g.scalarCurvature cov hcov t y • A u + e₂ • u) v =
+    Inner.inner ℝ u
+      ((2 : ℝ) • (A.comp A) v -
+        g.scalarCurvature cov hcov t y • A v + e₂ • v)
+  simp only [inner_sub_left, inner_add_left, inner_sub_right, inner_add_right,
+    real_inner_smul_left, real_inner_smul_right]
+  rw [hAcomp u v, hAuv u v]
+
 theorem curvatureOperatorReaction_apply_contact
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
