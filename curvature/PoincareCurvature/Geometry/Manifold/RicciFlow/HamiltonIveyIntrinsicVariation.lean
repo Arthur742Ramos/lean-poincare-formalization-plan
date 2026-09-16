@@ -422,7 +422,7 @@ def curvatureOperatorTwoTensorVelocity
     (y : M) (u v : TM y) : ℝ :=
   (2 * g.ricciNormSq cov hcov t y +
       RicciFlow.metricTraceAt (I := I) (M := M) g t y (ricciVelocity y)) *
-    (g t).inner y u v -
+      (g t).inner y u v -
     2 * g.scalarCurvature cov hcov t y *
       g.ricciCurvature cov hcov t y u v -
     2 * ricciVelocity y u v
