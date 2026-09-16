@@ -4,6 +4,7 @@ public import HamiltonIveyReaction.Reaction
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveySupportLaplacian
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyScalarBarrier
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarParabolicInvariant
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurckCorrectionRegularity
 
 /-!
 # Parabolic Hamilton--Ivey invariant region for geometric curvature
@@ -75,6 +76,72 @@ def hamiltonIveyReactionTerm
     (g.curvatureMu cov hcov hLevi hdim t x)
     (g.curvatureNu cov hcov hLevi hdim t x)
 
+/-! The spatial scalar regularity used by the barrier and support arguments
+is not an independent analytic input.  On each slice it follows from the
+actual curvature tensor, metric raising, and the fibrewise trace. -/
+
+theorem scalarCurvature_mdifferentiableAt_of_curvature
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hcov₂ : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 2)
+    (t : ℝ) (x : M) :
+    MDiffAt (g.scalarCurvature cov hcov t) x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  letI : ContMDiffCovariantDerivative (cov t) 2 := hcov₂ t
+  change MDiffAt (CovariantDerivative.scalarCurvature (cov := cov t)) x
+  exact RicciFlow.scalarCurvature_mdifferentiableAt_of_curvature
+    (I := I) (M := M) (cov t) x
+
+theorem eventually_mdifferentiableAt_scalarCurvature_of_curvature
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hcov₂ : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 2)
+    (t : ℝ) (x : M) :
+    ∀ᶠ y in 𝓝 x, MDiffAt (g.scalarCurvature cov hcov t) y := by
+  exact Filter.Eventually.of_forall
+    (fun y => g.scalarCurvature_mdifferentiableAt_of_curvature cov hcov hcov₂ t y)
+
+/-! The Hilbert--Schmidt Ricci square is likewise independent of the chosen
+Levi--Civita representative.  This lets intrinsic time-variation results be
+transported back to the connection family used by the curvature spectrum. -/
+
+theorem ricciNormSq_eq_of_isLeviCivita
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    {cov cov' : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM)}
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hcov' : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov' t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hLevi' : g.IsLeviCivita cov') (t : ℝ) (x : M) :
+    g.ricciNormSq cov hcov t x = g.ricciNormSq cov' hcov' t x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  letI : ContMDiffCovariantDerivative (cov' t) 1 := hcov' t
+  let b := stdOrthonormalBasis ℝ (TM x)
+  change (∑ i, ∑ j,
+      (g.ricciCurvature cov hcov t x (b i) (b j)) ^ 2) =
+    ∑ i, ∑ j,
+      (g.ricciCurvature cov' hcov' t x (b i) (b j)) ^ 2
+  refine Finset.sum_congr rfl ?_
+  intro i hi
+  refine Finset.sum_congr rfl ?_
+  intro j hj
+  rw [g.ricciCurvature_eq_of_isLeviCivita hcov hcov' hLevi hLevi'
+    t x (b i) (b j)]
+
 /-- The smooth test defect obtained by replacing the least eigenvalue with
 its genuine spacetime Rayleigh support while retaining actual scalar
 curvature. -/
@@ -91,6 +158,95 @@ def hamiltonIveySupportedDefect
       (g.scalarCurvature cov hcov p.1 p.2)
       (g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t₀ x₀ p) +
     3 + Real.log (K / (1 + K * p.1))
+
+/-! At a contact point, the support's time derivative can be propagated all
+the way to the logarithmic Hamilton--Ivey defect.  This is the exact chain
+rule calculation that turns the metric Ricci-flow equation and the Ricci
+time-variation input into the `sdot` required by the support maximum
+principle. -/
+
+theorem hasDerivAt_hamiltonIveySupportedDefect_time_of_isRicciFlowOn
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {K t₀ : ℝ} (hK : 0 < K) {x₀ : M} (ht₀ : t₀ ∈ s)
+    (ht₀_nonneg : 0 ≤ t₀)
+    (hnu : g.curvatureNu cov hcov hLevi hdim t₀ x₀ < 0)
+    (scalarVelocity ricciVelocity : ℝ)
+    (hscalar : HasDerivAt
+      (fun τ => g.scalarCurvature cov hcov τ x₀) scalarVelocity t₀)
+    (hricci : HasDerivAt
+      (fun τ => g.ricciCurvature cov hcov τ x₀
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t₀ x₀ x₀)
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t₀ x₀ x₀))
+      ricciVelocity t₀) :
+    HasDerivAt
+      (fun τ => g.hamiltonIveySupportedDefect
+        cov hcov hLevi hdim K t₀ x₀ (τ, x₀))
+      (scalarVelocity /
+          (-g.curvatureNu cov hcov hLevi hdim t₀ x₀) +
+        (g.scalarCurvature cov hcov t₀ x₀ -
+            g.curvatureNu cov hcov hLevi hdim t₀ x₀) /
+          (g.curvatureNu cov hcov hLevi hdim t₀ x₀) ^ 2 *
+          (scalarVelocity - 2 * ricciVelocity -
+            (g.curvatureLambda cov hcov hLevi hdim t₀ x₀ +
+              g.curvatureMu cov hcov hLevi hdim t₀ x₀) ^ 2) -
+        K / (1 + K * t₀)) t₀ := by
+  let R : ℝ → ℝ := fun τ => g.scalarCurvature cov hcov τ x₀
+  let q : ℝ → ℝ := fun τ => g.curvatureNuSpacetimeSupport
+    cov hcov hLevi hdim t₀ x₀ (τ, x₀)
+  have hq := g.hasDerivAt_curvatureNuSpacetimeSupport_time_eigenvalue_form
+    cov hcov hLevi hdim gdot s hflow ht₀ x₀ scalarVelocity ricciVelocity
+    hscalar hricci
+  have hq0 : q t₀ = g.curvatureNu cov hcov hLevi hdim t₀ x₀ := by
+    exact g.curvatureNuSpacetimeSupport_eq_at_contact
+      cov hcov hLevi hdim t₀ x₀
+  have hqneg : q t₀ < 0 := by
+    rw [hq0]
+    exact hnu
+  have hq0ne : q t₀ ≠ 0 := hqneg.ne
+  have hR : HasDerivAt R scalarVelocity t₀ := by simpa [R] using hscalar
+  have hq' : HasDerivAt q
+      (scalarVelocity - 2 * ricciVelocity -
+        (g.curvatureLambda cov hcov hLevi hdim t₀ x₀ +
+          g.curvatureMu cov hcov hLevi hdim t₀ x₀) ^ 2) t₀ := by
+    simpa [q] using hq
+  have hquot := hR.div hq'.neg (neg_ne_zero.mpr hq0ne)
+  have hlogq := hq'.neg.log (neg_ne_zero.mpr hq0ne)
+  have hden : 1 + K * t₀ ≠ 0 := by
+    have hdenpos : 0 < 1 + K * t₀ := by
+      nlinarith [mul_nonneg hK.le ht₀_nonneg]
+    exact hdenpos.ne'
+  have hlinear : HasDerivAt (fun τ : ℝ => 1 + K * τ) K t₀ := by
+    have h := (hasDerivAt_const t₀ (1 : ℝ)).add
+      ((hasDerivAt_id t₀).const_mul K)
+    have hfun : (fun τ : ℝ => 1 + K * τ) =
+        (fun x : ℝ => 1) + (fun y : ℝ => K * id y) := by
+      funext τ
+      simp
+    rw [hfun]
+    simpa only [zero_add, mul_one] using h
+  have hscale := (hasDerivAt_const t₀ K).div hlinear hden
+  have hlogscale := hscale.log (div_ne_zero hK.ne' hden)
+  have htotal := (hquot.sub hlogq).add_const 3 |>.add hlogscale
+  change HasDerivAt
+    (fun τ => ((R τ) / (-q τ) - Real.log (-q τ) + 3) +
+      Real.log (K / (1 + K * τ))) _ t₀
+  apply htotal.congr_deriv
+  simp only [R, q, Pi.add_apply, Pi.sub_apply, Pi.neg_apply, Pi.div_apply,
+    id_eq, zero_add, mul_one]
+  rw [g.curvatureNuSpacetimeSupport_eq_at_contact
+    cov hcov hLevi hdim t₀ x₀]
+  field_simp [hnu.ne, hden, hK.ne']
+  ring
 
 /-- The supported defect touches the actual Hamilton--Ivey defect at the
 chosen spacetime contact point. -/
@@ -372,6 +528,96 @@ theorem hamiltonIveyPinching_of_spacetime_support_certificate
       (g.curvatureLambda_ge_mu cov hcov hLevi hdim 0 x)
       (g.curvatureMu_ge_nu cov hcov hLevi hdim 0 x)
       (hnuNeg 0 hzero x) (hnuLower x)
+
+/-! The preceding support theorem is now paired with the genuine Ricci-flow
+time-variation calculation.  The contact data below expose scalar and Ricci
+derivatives, while the support derivative itself is constructed internally;
+there is no free `defectTimeDerivative` or arbitrary contact speed left. -/
+
+theorem hamiltonIveyPinching_of_ricciFlow_support_certificate
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    {K T : ℝ} (hK : 0 < K) (hT : 0 ≤ T)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot (Icc 0 T))
+    (hnuNeg : ∀ t ∈ Icc 0 T, ∀ x : M,
+      g.curvatureNu cov hcov hLevi hdim t x < 0)
+    (hnuLower : ∀ x : M,
+      -K ≤ g.curvatureNu cov hcov hLevi hdim 0 x)
+    (hscalar : ∀ t ∈ Icc 0 T, ∀ x : M,
+      -3 * (K / (1 + K * t)) ≤ g.scalarCurvature cov hcov t x)
+    (hcont : ContinuousOn
+      (fun p : ℝ × M =>
+        g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hcontact : ∀ {t : ℝ} {x : M}, t ∈ Icc 0 T →
+      g.hamiltonIveyDefect cov hcov hLevi hdim K t x < 0 →
+      ∃ scalarVelocity ricciVelocity,
+        HasDerivAt
+          (fun τ => g.scalarCurvature cov hcov τ x) scalarVelocity t ∧
+        HasDerivAt
+          (fun τ => g.ricciCurvature cov hcov τ x
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x))
+          ricciVelocity t ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          g.curvatureNu cov hcov hLevi hdim p.1 p.2 ≤
+            g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p) ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p < 0) ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          0 < g.scalarCurvature cov hcov p.1 p.2 -
+            g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p) ∧
+        (∀ᶠ y in 𝓝 x,
+          MDiffAt
+            (fun z : M =>
+              g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y) ∧
+        MDiffAt
+          (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+            (CovariantDerivative.scalarDifferential (I := I)
+              (fun z : M =>
+                g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y)) x ∧
+        g.scalarLaplacian cov
+            (fun _ y =>
+              g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, y)) t x +
+          g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤
+        scalarVelocity /
+            (-g.curvatureNu cov hcov hLevi hdim t x) +
+          (g.scalarCurvature cov hcov t x -
+              g.curvatureNu cov hcov hLevi hdim t x) /
+            (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 *
+            (scalarVelocity - 2 * ricciVelocity -
+              (g.curvatureLambda cov hcov hLevi hdim t x +
+                g.curvatureMu cov hcov hLevi hdim t x) ^ 2) -
+          K / (1 + K * t)) :
+    ∀ t ∈ Icc 0 T, ∀ x : M,
+      0 ≤ g.hamiltonIveyDefect cov hcov hLevi hdim K t x := by
+  apply g.hamiltonIveyPinching_of_spacetime_support_certificate
+    cov hcov hLevi hdim hK hT hnuNeg hnuLower hscalar hcont
+  intro t x ht hdefect
+  obtain ⟨scalarVelocity, ricciVelocity, hscalarTime, hricciTime,
+    hupper, hneg, hscalarSupport, hnear, hdiff, hpde⟩ := hcontact ht hdefect
+  let sdot : ℝ :=
+    scalarVelocity /
+        (-g.curvatureNu cov hcov hLevi hdim t x) +
+      (g.scalarCurvature cov hcov t x -
+          g.curvatureNu cov hcov hLevi hdim t x) /
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 *
+        (scalarVelocity - 2 * ricciVelocity -
+          (g.curvatureLambda cov hcov hLevi hdim t x +
+            g.curvatureMu cov hcov hLevi hdim t x) ^ 2) -
+      K / (1 + K * t)
+  refine ⟨sdot, hupper, hneg, hscalarSupport, ?_, hnear, hdiff, ?_⟩
+  · exact g.hasDerivAt_hamiltonIveySupportedDefect_time_of_isRicciFlowOn
+      cov hcov hLevi hdim gdot (Icc 0 T) hflow hK ht ht.1
+      (hnuNeg t ht x) scalarVelocity ricciVelocity hscalarTime hricciTime
+  · simpa [sdot] using hpde
 
 /-- Hamilton--Ivey pinching for the genuine geometric curvature spectrum,
 from the scalar lower barrier and the parabolic defect inequality supplied by

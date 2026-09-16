@@ -971,6 +971,28 @@ theorem raisedRicciEndomorphismMDiffAt_of_curvature
   unfold CovariantDerivative.raisedRicciEndomorphismMDiffAt
   exact raisedRicciEndomorphism_mdifferentiableAt (I := I) (M := M) cov x
 
+/-! The scalar-curvature regularity needed by the parabolic layer is also a
+consequence of the genuine curvature contraction.  Keeping this as a
+separate theorem makes the trace bridge reusable without asking downstream
+proofs to postulate differentiability of a scalar readout. -/
+
+theorem scalarCurvature_mdifferentiableAt_of_curvature
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] [cov.ContMDiffCovariantDerivative 2]
+    (x : M) :
+    MDiffAt (CovariantDerivative.scalarCurvature (cov := cov)) x := by
+  have hA := raisedRicciEndomorphismMDiffAt_of_curvature
+    (I := I) (M := M) cov x
+  have htrace := CovariantDerivative.mdifferentiableAt_endomorphismTrace
+    (I := I) (F := E) (V := (TangentSpace I : M → Type _)) hA
+  refine htrace.congr_of_eventuallyEq ?_
+  filter_upwards [] with y
+  exact (CovariantDerivative.endomorphismTrace_raisedRicciEndomorphism_eq_scalarCurvature
+    (I := I) (M := M) cov y).symm
+
 /-- **The intrinsic Ricci–DeTurck right-hand side is a continuous `BilinearFormBundle` section,
 unconditionally** (for a `C¹` background connection slice).  This removes the last hypothesis of
 `exists_intrinsicRicciDeTurckRHSSection_contMDiff_zero_of_ricciSection` by *supplying* its Ricci
