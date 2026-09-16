@@ -621,6 +621,161 @@ theorem curvatureOperatorReactionEndomorphism_apply_curvatureEigenbasis
   congr 1
   ring_nf
 
+/-! The Ricci quadratic form on each genuine curvature eigenvector is the
+corresponding complement of the curvature eigenvalue.  This is the
+coordinate-free identity `2 Ric(eᵢ,eᵢ) = R - κᵢ` used to reduce the lowered
+reaction to its scalar polynomial. -/
+
+theorem two_mul_ricci_curvatureEigenbasis_eq_scalar_sub_eigenvalue
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) (i : Fin 3) :
+    2 * g.ricciCurvature cov hcov t y
+        (g.curvatureEigenbasisVector cov hcov hLevi hdim t y i)
+        (g.curvatureEigenbasisVector cov hcov hLevi hdim t y i) =
+      g.scalarCurvature cov hcov t y -
+        g.curvatureEigenvalues cov hcov hLevi hdim t y i := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  let b := CovariantDerivative.ricciComplementEigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 y (hdim y)
+  let k := CovariantDerivative.ricciComplementEigenvalues
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 y (hdim y) i
+  have hA := CovariantDerivative.ricciComplementEndomorphism_apply_eigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 y (hdim y) i
+  have hinner : Inner.inner ℝ (b i) (b i) = 1 := by
+    simpa [b] using
+      (CovariantDerivative.ricciComplementEigenbasis
+        (I := I) (M := M) (E := E)
+        (cov t) (hLevi t).1 (hLevi t).2 y (hdim y)).orthonormal
+        (i := i) (j := i)
+  have hnorm : ‖b i‖ ^ 2 = 1 := by
+    rw [← real_inner_self_eq_norm_sq]
+    exact hinner
+  have hAinner := congrArg (fun z : TM y => Inner.inner ℝ z (b i)) hA
+  have hAinner' :
+      Inner.inner ℝ
+          (CovariantDerivative.ricciComplementEndomorphism (cov t) y (b i))
+          (b i) = k := by
+    calc
+      Inner.inner ℝ
+          (CovariantDerivative.ricciComplementEndomorphism (cov t) y (b i))
+          (b i) = Inner.inner ℝ (k • b i) (b i) := by
+            simpa [k] using hAinner
+      _ = k := by
+        rw [real_inner_smul_left, hinner, mul_one]
+  have hquad := CovariantDerivative.inner_ricciComplementEndomorphism
+    (cov t) y (b i)
+  have hquad' :
+      Inner.inner ℝ
+          (CovariantDerivative.ricciComplementEndomorphism (cov t) y (b i))
+          (b i) =
+        CovariantDerivative.scalarCurvature (cov := cov t) y -
+          2 * CovariantDerivative.ricciCurvature (cov := cov t) y (b i) (b i) := by
+    simpa [hnorm] using hquad
+  have hresult :
+      2 * CovariantDerivative.ricciCurvature (cov := cov t) y (b i) (b i) =
+        CovariantDerivative.scalarCurvature (cov := cov t) y - k := by
+    linarith [hAinner', hquad']
+  change 2 * CovariantDerivative.ricciCurvature (cov := cov t) y (b i) (b i) =
+    CovariantDerivative.scalarCurvature (cov := cov t) y - k
+  exact hresult
+
+/-! The lowered curvature reaction is diagonal on the genuine curvature
+eigenbasis.  The formula below retains the actual scalar and Ricci terms so
+that its relation to the tensor evolution equation remains explicit. -/
+
+theorem curvatureOperatorReaction_apply_curvatureEigenbasis
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) (i : Fin 3) :
+    curvatureOperatorReaction g cov hcov hLevi hdim t y
+        (g.curvatureEigenbasisVector cov hcov hLevi hdim t y i)
+        (g.curvatureEigenbasisVector cov hcov hLevi hdim t y i) =
+      3 * (g.curvatureEigenvalues cov hcov hLevi hdim t y i) ^ 2 -
+        2 * g.scalarCurvature cov hcov t y *
+          g.curvatureEigenvalues cov hcov hLevi hdim t y i +
+        (g.curvatureLambda cov hcov hLevi hdim t y *
+            g.curvatureMu cov hcov hLevi hdim t y +
+          g.curvatureLambda cov hcov hLevi hdim t y *
+            g.curvatureNu cov hcov hLevi hdim t y +
+          g.curvatureMu cov hcov hLevi hdim t y *
+            g.curvatureNu cov hcov hLevi hdim t y) := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  let b : TM y := g.curvatureEigenbasisVector cov hcov hLevi hdim t y i
+  let k : ℝ := g.curvatureEigenvalues cov hcov hLevi hdim t y i
+  let R : ℝ := g.scalarCurvature cov hcov t y
+  have hinner : (g t).inner y b b = 1 := by
+    change Inner.inner ℝ b b = 1
+    dsimp [b, curvatureEigenbasisVector]
+    simpa using
+      (CovariantDerivative.ricciComplementEigenbasis
+        (I := I) (M := M) (E := E)
+        (cov t) (hLevi t).1 (hLevi t).2 y (hdim y)).orthonormal
+        (i := i) (j := i)
+  have hinner' : Inner.inner ℝ b b = 1 := by
+    change (g t).inner y b b = 1
+    exact hinner
+  have hA : g.curvatureEndomorphismApply cov hcov t y b = k • b := by
+    change g.curvatureEndomorphismApply cov hcov t y
+        (g.curvatureEigenbasisVector cov hcov hLevi hdim t y i) = _
+    change CovariantDerivative.ricciComplementEndomorphism (cov t) y
+        (CovariantDerivative.ricciComplementEigenbasis
+          (I := I) (M := M) (E := E)
+          (cov t) (hLevi t).1 (hLevi t).2 y (hdim y) i) = _
+    simpa [b, k, curvatureEigenvalues, curvatureEigenbasisVector,
+      curvatureEndomorphismApply] using
+      (CovariantDerivative.ricciComplementEndomorphism_apply_eigenbasis
+        (I := I) (M := M) (E := E)
+        (cov t) (hLevi t).1 (hLevi t).2 y (hdim y) i)
+  have hQ := curvatureOperatorReactionEndomorphism_apply_curvatureEigenbasis
+    g cov hcov hLevi hdim t y i
+  have hQ' :
+      curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y b =
+        (2 * k ^ 2 - R * k +
+          (g.curvatureLambda cov hcov hLevi hdim t y *
+              g.curvatureMu cov hcov hLevi hdim t y +
+            g.curvatureLambda cov hcov hLevi hdim t y *
+              g.curvatureNu cov hcov hLevi hdim t y +
+            g.curvatureMu cov hcov hLevi hdim t y *
+              g.curvatureNu cov hcov hLevi hdim t y)) • b := by
+    simpa [b, k, R] using hQ
+  have hRic := g.two_mul_ricci_curvatureEigenbasis_eq_scalar_sub_eigenvalue
+    cov hcov hLevi hdim t y i
+  have hRicScale :
+      g.ricciCurvature cov hcov t y b (k • b) =
+        k * g.ricciCurvature cov hcov t y b b := by
+    change CovariantDerivative.ricciCurvature (cov := cov t) y b (k • b) = _
+    rw [map_smul]
+    rfl
+  change curvatureOperatorReaction g cov hcov hLevi hdim t y b b = _
+  rw [curvatureOperatorReaction_eq_inner_endomorphism_sub_ricci
+    g cov hcov hLevi hdim t y b b, hQ', hA, hRicScale]
+  change Inner.inner ℝ b _ - _ = _
+  simp only [real_inner_smul_right, hinner', mul_one]
+  have hhalf : g.ricciCurvature cov hcov t y b b =
+      (g.scalarCurvature cov hcov t y - k) / 2 := by
+    linarith [hRic]
+  rw [hhalf]
+  dsimp [k, R]
+  ring
+
 theorem curvatureOperatorReaction_apply_contact
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
