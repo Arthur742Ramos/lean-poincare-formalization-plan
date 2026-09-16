@@ -1,0 +1,154 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Hamilton-Ivey curvature-ODE pinching"
+  description: >-
+    Proves preservation of the three-dimensional Hamilton-Ivey logarithmic
+    defect along differentiable ordered solutions of the curvature-reaction
+    ODE. From the standard initial least-eigenvalue bound, the proof derives
+    the scalar lower barrier, the exact defect derivative, and strict nonlinear
+    reaction coercivity, then applies a proved invariant-region principle.
+  authors:
+    - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arthur Freitas Ramos"
+
+classification:
+  arxiv: ["math.DG", "math.AP", "math.LO"]
+  msc2020: ["53E20", "35K55", "03B35"]
+
+sources:
+  - title: "Local pinching estimates in 3-dim Ricci flow"
+    authors:
+      - "Bing-Long Chen"
+      - "Guoyi Xu"
+      - "Zhuhong Zhang"
+    id: "arXiv:1206.1814"
+    type: "paper"
+    location: "https://arxiv.org/abs/1206.1814"
+    relationship: "adapts"
+    note: >-
+      The proof of Theorem 1.3, especially equations (2.13), (2.21), and
+      (2.24)-(2.31), supplies the normalization and reaction calculation.
+      This project formalizes the curvature-ODE invariant-region stage, not
+      the paper's local geometric maximum-principle theorem. No endorsement
+      is claimed.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d"
+    relationship: "builds-on"
+    note: >-
+      Pinned Mathlib real analysis, calculus, topology, ordered algebra, and
+      proof tactics. No external Ricci-flow formalization is reused.
+
+status:
+  scope: >-
+    Differentiable real eigenvalue curves lambda >= mu >= nu on [0,T] solving
+    the diagonal three-dimensional curvature-reaction ODE, with nu < 0,
+    K > 0, and nu(0) >= -K. The proof derives
+    R >= -3K/(1+Kt), and the conclusion preserves the Hamilton-Ivey defect
+    w >= 0. Supporting results prove the expanded ODE derivative identity,
+    scale crossing, the quantitative reaction lower bound (-nu)/9, and strict
+    positivity. It does not prove curvature evolution from a Ricci-flow metric,
+    a geometric tensor maximum principle, the local complete-flow estimate, or
+    the full geometric Hamilton-Ivey theorem.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  main_results:
+    - declaration: "HamiltonIveyChallenge.hamiltonIveyODEPinching"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: >-
+        Comparator-selected closed theorem preserving the Hamilton-Ivey defect
+        along ordered curvature-ODE solutions, deriving the scalar lower
+        barrier from the initial least-eigenvalue bound.
+    - declaration: "HamiltonIveyReaction.hamiltonIvey_reaction_coercive"
+      file: "HamiltonIveyReaction/Reaction.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: >-
+        Exact pointwise reaction coercivity with quantitative lower bound
+        (-nu)/9 at a hypothetical negative defect.
+    - declaration: "HamiltonIveyReaction.exp_two_mul_log_sq_le_four_mul"
+      file: "HamiltonIveyReaction/Reaction.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: "Global exp(2)*(log s)^2 <= 4s estimate for s > 1."
+    - declaration: "HamiltonIveyReaction.nonneg_on_Icc_of_deriv_pos_of_neg"
+      file: "HamiltonIveyReaction/Reaction.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      note: "Reusable one-dimensional invariant-region barrier principle."
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["OpenAI GPT-5"]
+      framework: "Codex with Lean 4.33.0 and pinned Mathlib"
+      tool_setup: >-
+        AI-assisted source audit, theorem design, proof engineering, package
+        checks, and local verification under maintainer direction.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "subscription-based"
+        hardware: "local Apple silicon machine"
+      prompting_notes: >-
+        The maintainer requested an independently developed Hamilton-Ivey
+        result without reuse of external formalization repositories.
+    - method: "manual"
+      models: []
+      framework: "Lean, Git, and mathematical review"
+      tool_setup: >-
+        Human-directed scope, authorship, repository maintenance, attribution,
+        and publication decisions.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "not tracked"
+        hardware: "local machine"
+      prompting_notes: "Human authors retain responsibility for external submission."
+  spend_usd: "subscription-based"
+  notes: >-
+    Agent assistance is disclosed without treating the agent as an author.
+
+fidelity:
+  divergences: >-
+    The formalization stops after the curvature-ODE invariant-region argument.
+    It does not model a manifold, a Ricci-flow metric family, intrinsic
+    curvature-operator spectra, diffusion, cutoff functions, distance
+    comparison, or a geometric parabolic maximum principle. Accordingly it
+    must not be described as the full geometric Hamilton-Ivey estimate.
+
+review:
+  status: "self-assessed"
+  reviewers: []
+  notes: >-
+    Lean compilation, local boundary checks, and an explicit unsandboxed macOS
+    Comparator/NanoDa development replay are available. Independent
+    mathematical review, the required Linux Landrun and hosted renderer
+    replays, Palomar intake, and registration have not occurred.
+
+alignment:
+  namespace: "HamiltonIveyChallenge selected surface; HamiltonIveyReaction implementation"
+  statements:
+    - source: "Hamilton-Ivey curvature-ODE invariant-region argument"
+      lean: "HamiltonIveyChallenge.hamiltonIveyODEPinching"
+      module: "Challenge.lean and Solution.lean"
+      status: "proved"
+      note: >-
+        Preserves the logarithmic defect along ordered curvature-ODE solutions
+        from the standard initial least-eigenvalue bound, including a proof of
+        the scalar lower barrier along the ODE.
+
+acknowledgements: >-
+  Bing-Long Chen, Guoyi Xu, and Zhuhong Zhang for the primary local pinching
+  argument; Richard Hamilton and Thomas Ivey for the foundational estimate;
+  Mathlib contributors; and the Palomar, Comparator, Lean4Export, and NanoDa
+  projects for the verification ecosystem.

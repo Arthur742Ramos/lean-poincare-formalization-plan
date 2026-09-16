@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Geometry.Manifold.VectorBundle.Hom
+public import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 
 /-!
 # Fiberwise composition of smooth hom-bundle sections
@@ -105,6 +106,96 @@ theorem ContMDiffAt.clm_bundle_comp
       x₀ := by
   rw [← contMDiffWithinAt_univ] at hϕ hψ ⊢
   exact hϕ.clm_bundle_comp hψ
+
+/-- The fiberwise composition of two differentiable hom-bundle sections is
+differentiable.  This is the first-order companion of
+`ContMDiffAt.clm_bundle_comp`; it is useful when regularity is naturally
+available only as `MDiffAt`, as for curvature contractions. -/
+theorem MDifferentiableAt.clm_bundle_comp
+    {ϕ : ∀ x, E₂ x →L[𝕜] E₃ x} {ψ : ∀ x, E₁ x →L[𝕜] E₂ x} {x₀ : B}
+    (hϕ : MDiffAt
+      (fun x ↦ TotalSpace.mk' (F₂ →L[𝕜] F₃)
+        (E := fun x ↦ E₂ x →L[𝕜] E₃ x) x (ϕ x)) x₀)
+    (hψ : MDiffAt
+      (fun x ↦ TotalSpace.mk' (F₁ →L[𝕜] F₂)
+        (E := fun x ↦ E₁ x →L[𝕜] E₂ x) x (ψ x)) x₀) :
+    MDiffAt
+      (fun x ↦ TotalSpace.mk' (F₁ →L[𝕜] F₃)
+        (E := fun x ↦ E₁ x →L[𝕜] E₃ x) x ((ϕ x).comp (ψ x))) x₀ := by
+  rw [mdifferentiableAt_hom_bundle] at hϕ hψ ⊢
+  refine ⟨hϕ.1, ?_⟩
+  have hcomp := hϕ.2.clm_comp hψ.2
+  have hmem : (trivializationAt F₂ E₂ x₀).baseSet ∈ 𝓝 x₀ :=
+    (trivializationAt F₂ E₂ x₀).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt' x₀)
+  have hev :
+      (fun x ↦ ContinuousLinearMap.inCoordinates F₁ E₁ F₃ E₃ x₀ x x₀ x
+        ((ϕ x).comp (ψ x))) =ᶠ[𝓝 x₀]
+      (fun x ↦ (ContinuousLinearMap.inCoordinates F₂ E₂ F₃ E₃ x₀ x x₀ x (ϕ x)).comp
+        (ContinuousLinearMap.inCoordinates F₁ E₁ F₂ E₂ x₀ x x₀ x (ψ x))) := by
+    filter_upwards [hmem] with x hx
+    exact inCoordinates_comp_eq hx (ϕ x) (ψ x)
+  exact hcomp.congr_of_eventuallyEq hev
+
+/-- A map into continuous linear maps between finite-dimensional spaces is
+`C^n` at a point when all of its values on a fixed basis are `C^n` there.
+This is the differentiable reconstruction analogue of extensionality for
+linear maps and is useful for assembling tensor-bundle coordinate fields from
+their frame components. -/
+theorem contMDiffAt_clm_of_forall_apply_basis
+    [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂]
+    {ι : Type*} [Fintype ι] (b : Module.Basis ι 𝕜 F₁)
+    {f : B → F₁ →L[𝕜] F₂} {x : B}
+    (h : ∀ i, ContMDiffAt IB 𝓘(𝕜, F₂) n (fun y ↦ f y (b i)) x) :
+    ContMDiffAt IB 𝓘(𝕜, F₁ →L[𝕜] F₂) n f x := by
+  classical
+  let recon : (ι → F₂) →L[𝕜] (F₁ →L[𝕜] F₂) :=
+    LinearMap.toContinuousLinearMap <|
+      (LinearMap.toContinuousLinearMap :
+        (F₁ →ₗ[𝕜] F₂) ≃ₗ[𝕜] (F₁ →L[𝕜] F₂)).toLinearMap.comp
+        (b.constr 𝕜 : (ι → F₂) ≃ₗ[𝕜] (F₁ →ₗ[𝕜] F₂)).toLinearMap
+  have hg : ContMDiffAt IB 𝓘(𝕜, ι → F₂) n
+      (fun y ↦ (fun i ↦ f y (b i))) x :=
+    contMDiffAt_pi_space.mpr h
+  have hr : ContMDiff 𝓘(𝕜, ι → F₂) 𝓘(𝕜, F₁ →L[𝕜] F₂) n recon :=
+    recon.contDiff.contMDiff
+  have hc := hr.contMDiffAt.comp x hg
+  convert hc using 1
+  funext y
+  apply ContinuousLinearMap.coe_injective
+  refine b.ext fun i ↦ ?_
+  simp [recon]
+
+/-- A hom-bundle section is `C^n` at a point when its values on one genuine local frame are
+`C^n` sections at that point. -/
+theorem contMDiffAt_homBundle_of_forall_apply_localFrame
+    [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂]
+    {s : ∀ x, E₁ x →L[𝕜] E₂ x} (x₀ : B)
+    {ι : Type*} [Fintype ι] (b : Module.Basis ι 𝕜 F₁)
+    (h : ∀ i, ContMDiffAt IB (IB.prod 𝓘(𝕜, F₂)) n
+      (fun x ↦ TotalSpace.mk' F₂ x
+        (s x ((trivializationAt F₁ E₁ x₀).localFrame b i x))) x₀) :
+    ContMDiffAt IB (IB.prod 𝓘(𝕜, F₁ →L[𝕜] F₂)) n
+      (fun x ↦ TotalSpace.mk' (F₁ →L[𝕜] F₂)
+        (E := fun x ↦ E₁ x →L[𝕜] E₂ x) x (s x)) x₀ := by
+  classical
+  rw [contMDiffAt_hom_bundle]
+  refine ⟨contMDiffAt_id, ?_⟩
+  apply contMDiffAt_clm_of_forall_apply_basis b
+  intro i
+  have hi := h i
+  rw [Bundle.contMDiffAt_section] at hi
+  refine hi.congr_of_eventuallyEq ?_
+  have hsrc : (trivializationAt F₁ E₁ x₀).baseSet ∈ 𝓝 x₀ :=
+    (trivializationAt F₁ E₁ x₀).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt' x₀)
+  have hout : (trivializationAt F₂ E₂ x₀).baseSet ∈ 𝓝 x₀ :=
+    (trivializationAt F₂ E₂ x₀).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt' x₀)
+  filter_upwards [hsrc, hout] with x hxsrc hxout
+  rw [ContinuousLinearMap.inCoordinates_eq hxsrc hxout]
+  rw [(trivializationAt F₁ E₁ x₀).localFrame_apply_of_mem_baseSet b hxsrc]
+  rfl
 
 /-- The fiberwise composition of two `C^n` hom-bundle sections is a `C^n` hom-bundle section
 (on-a-set version). -/

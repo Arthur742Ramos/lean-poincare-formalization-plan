@@ -1,6 +1,9 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.ContractedBianchi
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.RaisedRicci
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.DowngradeNormFree
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorDivergence
 
 /-!
 # Contraction of the actual connection curvature derivative
@@ -52,6 +55,54 @@ private theorem curvatureAux_contMDiff_one
       (m := (1 : ℕ∞)) (n := (2 : ℕ∞)) hY hZ (by norm_num))
   have hbrW := cov.contMDiff_along (n := 1) hbr hW₂
   exact (hYZW.sub_section hZYW).sub_section hbrW
+
+/-- Local `C¹` regularity of the raw curvature commutator for a `C²` tangent connection. -/
+theorem curvatureAux_contMDiffOn_one
+    {Y Z W : Π x : M, TangentSpace I x} {u : Set M} (hu : IsOpen u)
+    (hY : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (T% Y) u)
+    (hZ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (T% Z) u)
+    (hW : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 3 (T% W) u) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1 (T% (cov.curvatureAux Y Z W)) u := by
+  have hcov₂ : ContMDiffCovariantDerivativeOn E 2 cov.toFun u :=
+    TangentFrame.contMDiffCovariantDerivativeOn_two_of_contMDiffCovariantDerivative_two hu
+  have hcov₁ : ContMDiffCovariantDerivativeOn E 1 cov.toFun u :=
+    TangentFrame.contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one hu
+  have hY₁ := hY.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
+  have hZ₁ := hZ.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
+  have hW₂ := hW.of_le (by norm_num : (2 : WithTop ℕ∞) ≤ 3)
+  have hZW₂ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (T% (cov.along Z W)) u := by
+    simpa [CovariantDerivative.along] using (hcov₂.contMDiff hW).clm_bundle_apply hZ
+  have hYW₂ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (T% (cov.along Y W)) u := by
+    simpa [CovariantDerivative.along] using (hcov₂.contMDiff hW).clm_bundle_apply hY
+  have hYZW₁ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (cov.along Y (cov.along Z W))) u := by
+    simpa [CovariantDerivative.along] using (hcov₁.contMDiff hZW₂).clm_bundle_apply hY₁
+  have hZYW₁ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (cov.along Z (cov.along Y W))) u := by
+    simpa [CovariantDerivative.along] using (hcov₁.contMDiff hYW₂).clm_bundle_apply hZ₁
+  have hbrWithin : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (VectorField.mlieBracketWithin I Y Z u)) u := by
+    simpa using hY.mlieBracketWithin_vectorField (I := I) (m := (1 : ℕ∞)) hZ
+      hu.uniqueMDiffOn (by norm_num)
+  have hbr : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (VectorField.mlieBracket I Y Z)) u := by
+    refine ContMDiffOn.congr hbrWithin ?_
+    intro y hy
+    have hYy : MDiffAt (T% Y) y :=
+      (((hY y hy).contMDiffAt (hu.mem_nhds hy)).of_le
+        (by norm_num : (1 : WithTop ℕ∞) ≤ 2)).mdifferentiableAt one_ne_zero
+    have hZy : MDiffAt (T% Z) y :=
+      (((hZ y hy).contMDiffAt (hu.mem_nhds hy)).of_le
+        (by norm_num : (1 : WithTop ℕ∞) ≤ 2)).mdifferentiableAt one_ne_zero
+    congr 1
+    simpa using
+      (VectorField.mlieBracketWithin_eq_mlieBracket (I := I) (s := u) (x := y)
+        (hu.uniqueMDiffWithinAt hy) hYy hZy).symm
+  have hbrW₁ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (T% (cov.along (VectorField.mlieBracket I Y Z) W)) u := by
+    simpa [CovariantDerivative.along] using (hcov₁.contMDiff hW₂).clm_bundle_apply hbr
+  have hcomb := (hYZW₁.sub_section hZYW₁).sub_section hbrW₁
+  simpa only [CovariantDerivative.curvatureAux] using hcomb
 
 private theorem curvatureAux_mdifferentiableAt
     {Y Z W : Π x : M, TangentSpace I x} (x : M)
@@ -314,5 +365,111 @@ theorem curvatureCovariantDerivativeInner_doubleContraction
       (hpair (e i) (e k) (e i) w (e k)).trans (hlast (e i) w (e k) (e k) (e i))
     linarith
   linarith
+
+/-! ### Canonical metric traces -/
+
+/-- The full metric trace of the covariant derivative of curvature in its
+four curvature slots, leaving the derivative direction free.  This is the
+contraction which becomes `dR` once differentiation is proved to commute with
+the metric trace. -/
+noncomputable def curvatureCovariantDerivativeScalarTrace
+    (x : M) (w : TangentSpace I x) : ℝ := by
+  letI : FiniteDimensional ℝ (TangentSpace I x) :=
+    VectorBundle.finiteDimensional ℝ E (TangentSpace I : M → Type _) x
+  let b := stdOrthonormalBasis ℝ (TangentSpace I x)
+  exact ∑ i, ∑ k,
+    curvatureCovariantDerivativeInner cov x w (b k) (b i) (b i) (b k)
+
+/-- The metric trace of the covariant derivative of curvature which becomes
+the divergence of Ricci after the Ricci trace/differentiation bridge. -/
+noncomputable def curvatureCovariantDerivativeRicciDivergenceTrace
+    (x : M) (w : TangentSpace I x) : ℝ := by
+  letI : FiniteDimensional ℝ (TangentSpace I x) :=
+    VectorBundle.finiteDimensional ℝ E (TangentSpace I : M → Type _) x
+  let b := stdOrthonormalBasis ℝ (TangentSpace I x)
+  exact ∑ i, ∑ k,
+    curvatureCovariantDerivativeInner cov x (b i) (b k) (b i) w (b k)
+
+/-- The canonical metric contractions of the actual differentiated curvature
+tensor satisfy the numerical core of the contracted second Bianchi identity.
+No coordinate components or assumed differential identity occur here. -/
+theorem curvatureCovariantDerivativeScalarTrace_eq_two_mul_ricciDivergenceTrace
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+    (x : M) (hT : cov.torsion = 0) (hmetric : cov.IsMetricCompatibleTangent)
+    (w : TangentSpace I x) :
+    curvatureCovariantDerivativeScalarTrace cov x w =
+      2 * curvatureCovariantDerivativeRicciDivergenceTrace cov x w := by
+  letI : FiniteDimensional ℝ (TangentSpace I x) :=
+    VectorBundle.finiteDimensional ℝ E (TangentSpace I : M → Type _) x
+  exact curvatureCovariantDerivativeInner_doubleContraction cov x hT hmetric
+    (stdOrthonormalBasis ℝ (TangentSpace I x)) w
+
+/-- The scalar trace/differentiation bridge follows from the general theorem
+that trace commutes with the induced endomorphism connection, once the
+covariant derivative of raised Ricci is identified with the corresponding
+double contraction of the differentiated curvature tensor. -/
+theorem scalarDifferential_scalarCurvature_eq_curvatureTrace_of_raisedRicciTrace
+    [IsManifold I 1 M]
+    (x : M) (hRicci : raisedRicciEndomorphismMDiffAt cov x)
+    (hRaisedTrace : ∀ w : TangentSpace I x,
+      raisedRicciTraceCovariantDerivative cov x w =
+        curvatureCovariantDerivativeScalarTrace cov x w)
+    (w : TangentSpace I x) :
+    scalarDifferential (I := I) (scalarCurvature (cov := cov)) x w =
+      curvatureCovariantDerivativeScalarTrace cov x w := by
+  rw [scalarDifferential_scalarCurvature_eq_raisedRicciTrace cov x hRicci w]
+  exact hRaisedTrace w
+
+/-- Once differentiation is identified with the two canonical curvature
+traces, the numerical double contraction above is exactly the contracted
+second Bianchi identity `div Ric = (1/2) dR`.  The remaining hypotheses name
+only those two trace/differentiation commutation bridges. -/
+theorem ricciDivergence_eq_half_scalarDifferential_of_trace_bridges
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+    (x : M) (hT : cov.torsion = 0) (hmetric : cov.IsMetricCompatibleTangent)
+    (hScalarTrace : ∀ w : TangentSpace I x,
+      scalarDifferential (I := I) (scalarCurvature (cov := cov)) x w =
+        curvatureCovariantDerivativeScalarTrace cov x w)
+    (hRicciTrace : ∀ w : TangentSpace I x,
+      ricciDivergence cov x w =
+        curvatureCovariantDerivativeRicciDivergenceTrace cov x w) :
+    ricciDivergence cov x =
+      (1 / 2 : ℝ) • scalarDifferential (I := I)
+        (scalarCurvature (cov := cov)) x := by
+  ext w
+  have hcore :=
+    curvatureCovariantDerivativeScalarTrace_eq_two_mul_ricciDivergenceTrace
+      cov x hT hmetric w
+  rw [← hScalarTrace w, ← hRicciTrace w] at hcore
+  simp only [smul_apply]
+  change ricciDivergence cov x w =
+    (1 / 2 : ℝ) * scalarDifferential (I := I)
+      (scalarCurvature (cov := cov)) x w
+  linarith
+
+/-- Contracted Bianchi with the scalar differential no longer postulated as
+a primitive trace bridge.  Its scalar side is discharged by the proved
+trace/connection theorem; the two remaining hypotheses are the explicit
+curvature-to-Ricci covariant-derivative contractions. -/
+theorem ricciDivergence_eq_half_scalarDifferential_of_curvature_contractions
+    [IsManifold I 1 M]
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+    (x : M) (hT : cov.torsion = 0) (hmetric : cov.IsMetricCompatibleTangent)
+    (hRicci : raisedRicciEndomorphismMDiffAt cov x)
+    (hRaisedTrace : ∀ w : TangentSpace I x,
+      raisedRicciTraceCovariantDerivative cov x w =
+        curvatureCovariantDerivativeScalarTrace cov x w)
+    (hRicciTrace : ∀ w : TangentSpace I x,
+      ricciDivergence cov x w =
+        curvatureCovariantDerivativeRicciDivergenceTrace cov x w) :
+    ricciDivergence cov x =
+      (1 / 2 : ℝ) • scalarDifferential (I := I)
+        (scalarCurvature (cov := cov)) x := by
+  exact ricciDivergence_eq_half_scalarDifferential_of_trace_bridges cov x hT hmetric
+    (scalarDifferential_scalarCurvature_eq_curvatureTrace_of_raisedRicciTrace
+      cov x hRicci hRaisedTrace) hRicciTrace
 
 end CovariantDerivative

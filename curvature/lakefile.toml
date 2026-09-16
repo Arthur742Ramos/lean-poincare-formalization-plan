@@ -11,6 +11,10 @@ name = "mathlib"
 scope = "leanprover-community"
 rev = "db584cd6d46c92f209a44c0f1c829460d327499d"
 
+[[require]]
+name = "HamiltonIveyReaction"
+path = "../hamilton-ivey-reaction"
+
 [[lean_lib]]
 name = "PoincareCurvature"
 
