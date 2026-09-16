@@ -217,6 +217,160 @@ theorem hasDerivAt_ricciCurvature_of_intrinsicRicciTimeDerivative
   rw [hricciEq]
   exact hRicci x u v
 
+/-! A curvature-tensor derivative induces the Ricci-tensor derivative by the
+same genuine trace contraction used in the definition of Ricci curvature.  We
+keep this bridge separate from the Ricci-flow evolution formula: it isolates
+the temporal curvature-variation obligation without replacing it by a
+coordinate coefficient hypothesis. -/
+
+def curvatureTensorVelocityEndomorphism
+    (curvatureVelocity : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] TM y →ₗ[ℝ] TM y)
+    (y : M) (u w : TM y) : TM y →ₗ[ℝ] TM y :=
+  { toFun := fun v => curvatureVelocity y v u w
+    map_add' := by
+      intro v v'
+      simp
+    map_smul' := by
+      intro c v
+      simp }
+
+def curvatureTensorVelocityRicci
+    (curvatureVelocity : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] TM y →ₗ[ℝ] TM y)
+    (y : M) : TM y →ₗ[ℝ] TM y →ₗ[ℝ] ℝ :=
+  { toFun := fun u =>
+      { toFun := fun w =>
+          LinearMap.trace ℝ (TM y)
+            (curvatureTensorVelocityEndomorphism curvatureVelocity y u w)
+        map_add' := by
+          intro w w'
+          have hE :
+              curvatureTensorVelocityEndomorphism curvatureVelocity y u (w + w') =
+                curvatureTensorVelocityEndomorphism curvatureVelocity y u w +
+                  curvatureTensorVelocityEndomorphism curvatureVelocity y u w' := by
+            ext v
+            simp [curvatureTensorVelocityEndomorphism]
+          rw [hE, (LinearMap.trace ℝ (TM y)).map_add]
+        map_smul' := by
+          intro c w
+          have hE :
+              curvatureTensorVelocityEndomorphism curvatureVelocity y u (c • w) =
+                c • curvatureTensorVelocityEndomorphism curvatureVelocity y u w := by
+            ext v
+            simp [curvatureTensorVelocityEndomorphism]
+          rw [hE, (LinearMap.trace ℝ (TM y)).map_smul]
+          rfl }
+    map_add' := by
+      intro u u'
+      ext w
+      have hE :
+          curvatureTensorVelocityEndomorphism curvatureVelocity y (u + u') w =
+            curvatureTensorVelocityEndomorphism curvatureVelocity y u w +
+              curvatureTensorVelocityEndomorphism curvatureVelocity y u' w := by
+        ext v
+        simp [curvatureTensorVelocityEndomorphism]
+      change LinearMap.trace ℝ (TM y)
+          (curvatureTensorVelocityEndomorphism curvatureVelocity y (u + u') w) =
+        LinearMap.trace ℝ (TM y)
+            (curvatureTensorVelocityEndomorphism curvatureVelocity y u w) +
+          LinearMap.trace ℝ (TM y)
+            (curvatureTensorVelocityEndomorphism curvatureVelocity y u' w)
+      rw [hE, (LinearMap.trace ℝ (TM y)).map_add]
+    map_smul' := by
+      intro c u
+      ext w
+      have hE :
+          curvatureTensorVelocityEndomorphism curvatureVelocity y (c • u) w =
+            c • curvatureTensorVelocityEndomorphism curvatureVelocity y u w := by
+        ext v
+        simp [curvatureTensorVelocityEndomorphism]
+      change LinearMap.trace ℝ (TM y)
+          (curvatureTensorVelocityEndomorphism curvatureVelocity y (c • u) w) =
+        c * LinearMap.trace ℝ (TM y)
+          (curvatureTensorVelocityEndomorphism curvatureVelocity y u w)
+      rw [hE, (LinearMap.trace ℝ (TM y)).map_smul]
+      rfl }
+
+theorem hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    {t : ℝ}
+    (curvatureVelocity : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] TM y →ₗ[ℝ] TM y)
+    (hCurvature : ∀ (y : M) (u v w : TM y),
+      HasDerivAt
+        (fun τ => TimeDependentCovariantDerivative.curvatureTensor
+          (I := I) (M := M) cov hcov τ y u v w)
+        (curvatureVelocity y u v w) t) :
+    RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+      (I := I) (M := M) g (curvatureTensorVelocityRicci curvatureVelocity) t := by
+  intro y u w
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  let b : OrthonormalBasis (Fin (Module.finrank ℝ (TM y))) ℝ (TM y) :=
+    stdOrthonormalBasis ℝ (TM y)
+  have htrace : ∀ τ : ℝ,
+      g.ricciCurvature cov hcov τ y u w =
+        ∑ i,
+          (g t).inner y (b i)
+            (TimeDependentCovariantDerivative.curvatureTensor
+              (I := I) (M := M) cov hcov τ y (b i) u w) (b i) := by
+    intro τ
+    letI : ContMDiffCovariantDerivative (cov τ) 1 := hcov τ
+    change CovariantDerivative.ricciCurvature (cov := cov τ) y u w = _
+    rw [CovariantDerivative.ricciCurvature_apply,
+      LinearMap.trace_eq_sum_inner _ b]
+    apply Finset.sum_congr rfl
+    intro i hi
+    simp [CovariantDerivative.ricciEndomorphism, real_inner_comm]
+  have hsum := HasDerivAt.sum (u := Finset.univ) (fun i (_hi : i ∈ Finset.univ) => by
+    have hi := (hasDerivAt_const (x := t)
+      ((g t).inner y (b i)) :
+      HasDerivAt (fun _ : ℝ => (g t).inner y (b i)) 0 t).clm_apply
+      (hCurvature y (b i) u w)
+    simpa only [zero_smul, zero_add] using hi)
+  have hsumFun :
+      (∑ i, fun τ : ℝ =>
+        (g t).inner y (b i)
+          (TimeDependentCovariantDerivative.curvatureTensor
+            (I := I) (M := M) cov hcov τ y (b i) u w)) =
+      (fun τ : ℝ => ∑ i,
+        (g t).inner y (b i)
+          (TimeDependentCovariantDerivative.curvatureTensor
+            (I := I) (M := M) cov hcov τ y (b i) u w)) := by
+    funext τ
+    simp
+  rw [hsumFun] at hsum
+  have hderiv : HasDerivAt
+      (fun τ : ℝ => g.ricciCurvature cov hcov τ y u w)
+      (((curvatureTensorVelocityRicci curvatureVelocity y) u) w) t := by
+    rw [show (fun τ : ℝ => g.ricciCurvature cov hcov τ y u w) =
+      (fun τ : ℝ => ∑ i,
+        (g t).inner y (b i)
+          (TimeDependentCovariantDerivative.curvatureTensor
+            (I := I) (M := M) cov hcov τ y (b i) u w) (b i)) by
+        funext τ; exact htrace τ]
+    have htraceVel :
+        (∑ i, (g t).inner y (b i) (curvatureVelocity y (b i) u w)) =
+      LinearMap.trace ℝ (TM y)
+          (curvatureTensorVelocityEndomorphism curvatureVelocity y u w) := by
+      rw [LinearMap.trace_eq_sum_inner _ b]
+      rfl
+    exact hsum.congr_deriv htraceVel.symm
+  have hricciEq :
+      (fun τ : ℝ => RicciFlow.intrinsicRicciTensor
+        (I := I) (M := M) g τ y u w) =
+        (fun τ : ℝ => g.ricciCurvature cov hcov τ y u w) := by
+    funext τ
+    have hEq := congrArg (fun F => F τ y u w)
+      (RicciFlow.intrinsicRicciTensor_eq_ricciTensor_of_isLeviCivita
+        (I := I) (M := M) g hcov hLevi)
+    simpa [RicciFlow.ricciTensor,
+      TimeDependentRiemannianMetric.ricciCurvature] using hEq
+  rw [hricciEq]
+  exact hderiv
+
 /-! The previous two transport lemmas combine with the metric variation to
 give the time derivative of the actual lowered curvature operator.  This is
 the tensorial quantity that enters the curvature evolution equation; no
