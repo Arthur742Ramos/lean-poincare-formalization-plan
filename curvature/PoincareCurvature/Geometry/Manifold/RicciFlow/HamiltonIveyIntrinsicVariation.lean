@@ -1692,6 +1692,85 @@ theorem hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureOperatorReaction
   exact g.hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureOperatorEvolution
     cov hcov hLevi hdim gdot s hflow ht x ricciVelocity hRicci hcurv
 
+/-! The same support-speed calculation can be driven by the actual curvature
+four-tensor derivative.  The contact evolution hypothesis is still stated for
+the lowered curvature component, but its derivative is now independently
+identified with the velocity obtained by tracing the genuine four-tensor
+variation. -/
+
+theorem hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureTensorReactionEvolution
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) (x : M)
+    (curvatureVelocity : ∀ z : M, TM z →ₗ[ℝ] TM z →ₗ[ℝ] TM z →ₗ[ℝ] TM z)
+    (hCurvature : ∀ (z : M) (a b c : TM z),
+      HasDerivAt
+        (fun τ => TimeDependentCovariantDerivative.curvatureTensor
+          (I := I) (M := M) cov hcov τ z a b c)
+        (curvatureVelocity z a b c) t)
+    (hEvolution :
+      HasDerivAt
+        (fun τ => g.curvatureOperatorTwoTensor cov hcov τ x
+          (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+          (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x))
+        (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          curvatureOperatorReaction g cov hcov hLevi hdim t x
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)) t) :
+    HasDerivAt
+      (fun τ => g.curvatureNuSpacetimeSupport
+        cov hcov hLevi hdim t x (τ, x))
+      (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+        g.curvatureLambda cov hcov hLevi hdim t x *
+          g.curvatureMu cov hcov hLevi hdim t x) t := by
+  let V : TM x := g.curvatureNuContactVectorField cov hcov hLevi hdim t x x
+  have hRicci :=
+    hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
+      g cov hcov hLevi curvatureVelocity hCurvature
+  have hoperator :=
+    g.hasDerivAt_curvatureOperatorTwoTensor_of_curvatureTensorTimeDerivative
+      cov hcov hLevi hdim gdot s hflow ht x V V curvatureVelocity hCurvature
+  have hEvolution' :
+      HasDerivAt (fun τ => g.curvatureOperatorTwoTensor cov hcov τ x V V)
+        (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          curvatureOperatorReaction g cov hcov hLevi hdim t x V V) t := by
+    simpa [V] using hEvolution
+  have hvel := hoperator.unique hEvolution'
+  have hreaction := curvatureOperatorReaction_apply_contact g cov hcov hLevi hdim t x
+  have hreactionV :
+      curvatureOperatorReaction g cov hcov hLevi hdim t x V V =
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+          g.curvatureLambda cov hcov hLevi hdim t x *
+            g.curvatureMu cov hcov hLevi hdim t x -
+          2 * g.curvatureNu cov hcov hLevi hdim t x *
+            g.ricciCurvature cov hcov t x V V := by
+    simpa [V] using hreaction
+  have hcurv :
+      g.curvatureOperatorTwoTensorVelocity cov hcov t
+          (curvatureTensorVelocityRicci curvatureVelocity) x V V =
+        g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+          g.curvatureLambda cov hcov hLevi hdim t x *
+            g.curvatureMu cov hcov hLevi hdim t x -
+          2 * g.curvatureNu cov hcov hLevi hdim t x *
+            g.ricciCurvature cov hcov t x V V := by
+    rw [hvel, hreactionV]
+    ring
+  exact g.hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureOperatorEvolution
+    cov hcov hLevi hdim gdot s hflow ht x
+      (curvatureTensorVelocityRicci curvatureVelocity) hRicci (by
+        simpa [V] using hcurv)
+
 /-! The support speed can therefore be obtained from a single intrinsic
 Ricci-tensor derivative.  This theorem is intentionally stated in terms of
 the already-proved support-speed calculation, so the logarithmic chain rule
