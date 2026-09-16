@@ -568,6 +568,50 @@ theorem hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureOperatorEvolutio
   rw [hrel, hcurvV]
   ring
 
+/-! The preceding contact-support derivative can now consume the reaction-form
+curvature evolution directly.  The only input not proved in this file is the
+actual time derivative of the curvature component; its right-hand side is
+required to be the intrinsic connection Laplacian plus the displayed
+curvature polynomial. -/
+
+theorem hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureOperatorReactionEvolution
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) (x : M)
+    (ricciVelocity : ∀ z : M, TM z →ₗ[ℝ] TM z →ₗ[ℝ] ℝ)
+    (hRicci : RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+      (I := I) (M := M) g ricciVelocity t)
+    (hEvolution :
+      HasDerivAt
+        (fun τ => g.curvatureOperatorTwoTensor cov hcov τ x
+          (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+          (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x))
+        (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          curvatureOperatorReaction g cov hcov hLevi hdim t x
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)) t) :
+    HasDerivAt
+      (fun τ => g.curvatureNuSpacetimeSupport
+        cov hcov hLevi hdim t x (τ, x))
+      (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+        g.curvatureLambda cov hcov hLevi hdim t x *
+          g.curvatureMu cov hcov hLevi hdim t x) t := by
+  have hcurv :=
+    g.curvatureOperatorTwoTensorVelocity_eq_of_curvatureOperatorReactionEvolution
+      cov hcov hLevi hdim gdot s hflow ht x ricciVelocity hRicci hEvolution
+  exact g.hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureOperatorEvolution
+    cov hcov hLevi hdim gdot s hflow ht x ricciVelocity hRicci hcurv
+
 /-! The support speed can therefore be obtained from a single intrinsic
 Ricci-tensor derivative.  This theorem is intentionally stated in terms of
 the already-proved support-speed calculation, so the logarithmic chain rule
