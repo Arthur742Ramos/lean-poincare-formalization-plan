@@ -275,6 +275,182 @@ theorem hasDerivAt_curvatureOperatorTwoTensor_of_intrinsicRicciTimeDerivative
   · simp [curvatureOperatorTwoTensorVelocity]
     ring
 
+/-! The three-dimensional curvature reaction is recorded intrinsically as a
+polynomial in the curvature endomorphism.  If `A` is that endomorphism and
+`R` is scalar curvature, the algebraic part is
+
+`Q(A) = 2 A^2 - R A + (lambda*mu + lambda*nu + mu*nu) I`.
+
+The final term is the metric-variation contribution to a lowered curvature
+component.  Thus this is an actual tensorial bilinear expression, rather
+than an independently supplied scalar coefficient. -/
+
+def curvatureOperatorReaction
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) (u v : TM y) : ℝ :=
+  let A := fun z : TM y =>
+    g.curvatureEndomorphismApply cov hcov t y z
+  let R := g.scalarCurvature cov hcov t y
+  let e₂ :=
+    g.curvatureLambda cov hcov hLevi hdim t y *
+        g.curvatureMu cov hcov hLevi hdim t y +
+      g.curvatureLambda cov hcov hLevi hdim t y *
+        g.curvatureNu cov hcov hLevi hdim t y +
+      g.curvatureMu cov hcov hLevi hdim t y *
+        g.curvatureNu cov hcov hLevi hdim t y
+  (g t).inner y u
+      ((2 : ℝ) • A (A v) - R • A v + e₂ • v) -
+    2 * g.ricciCurvature cov hcov t y u (A v)
+
+theorem curvatureOperatorReaction_apply_contact
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    curvatureOperatorReaction g cov hcov hLevi hdim t x
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x) =
+      (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+        g.curvatureLambda cov hcov hLevi hdim t x *
+          g.curvatureMu cov hcov hLevi hdim t x -
+        2 * g.curvatureNu cov hcov hLevi hdim t x *
+          g.ricciCurvature cov hcov t x
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x) := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  let V : TM x := g.curvatureNuContactVectorField cov hcov hLevi hdim t x x
+  have hV : V = g.curvatureNuEigenvector cov hcov hLevi hdim t x := by
+    simp [V, curvatureNuContactVectorField,
+      firstOrderParallelSmoothExtend_apply_center]
+  have hA : g.curvatureEndomorphismApply cov hcov t x V =
+      (g.curvatureNu cov hcov hLevi hdim t x) • V := by
+    rw [hV]
+    exact g.curvatureEndomorphismApply_curvatureNuEigenvector
+      cov hcov hLevi hdim t x
+  have hA' : (CovariantDerivative.ricciComplementEndomorphism (cov t) x) V =
+      (g.curvatureNu cov hcov hLevi hdim t x) • V := by
+    simpa [curvatureEndomorphismApply] using hA
+  have hA_smul :
+      g.curvatureEndomorphismApply cov hcov t x
+          ((g.curvatureNu cov hcov hLevi hdim t x) • V) =
+        (g.curvatureNu cov hcov hLevi hdim t x) •
+          ((g.curvatureNu cov hcov hLevi hdim t x) • V) := by
+    unfold curvatureEndomorphismApply
+    rw [map_smul, hA']
+  have hRic_smul :
+      g.ricciCurvature cov hcov t x V
+          ((g.curvatureNu cov hcov hLevi hdim t x) • V) =
+        (g.curvatureNu cov hcov hLevi hdim t x) *
+          g.ricciCurvature cov hcov t x V V := by
+    change CovariantDerivative.ricciCurvature (cov := cov t) x V
+        ((g.curvatureNu cov hcov hLevi hdim t x) • V) = _
+    rw [map_smul]
+    rfl
+  have hinner : (g t).inner x V V = 1 := by
+    rw [hV]
+    exact g.inner_curvatureNuEigenvector_self cov hcov hLevi hdim t x
+  have hinner' : Inner.inner ℝ V V = 1 := by
+    change (g t).inner x V V = 1
+    exact hinner
+  have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim t x
+  change curvatureOperatorReaction g cov hcov hLevi hdim t x V V = _
+  change _ = (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+        g.curvatureLambda cov hcov hLevi hdim t x *
+          g.curvatureMu cov hcov hLevi hdim t x -
+        2 * g.curvatureNu cov hcov hLevi hdim t x *
+          g.ricciCurvature cov hcov t x V V
+  simp only [curvatureOperatorReaction] at ⊢
+  rw [hA, hA_smul]
+  rw [hRic_smul]
+  change Inner.inner ℝ V _ - _ = _
+  simp only [inner_sub_right, inner_add_right, real_inner_smul_right,
+    hinner']
+  rw [← hsum]
+  ring_nf
+
+/-! If the actual lowered curvature component satisfies the reaction-form
+evolution identity, uniqueness of derivatives identifies its velocity with
+the contact reaction.  This is the reusable interface for the curvature
+evolution theorem, while leaving that theorem itself as an explicit
+geometric obligation. -/
+
+theorem curvatureOperatorTwoTensorVelocity_eq_of_curvatureOperatorReactionEvolution
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) (x : M)
+    (ricciVelocity : ∀ z : M, TM z →ₗ[ℝ] TM z →ₗ[ℝ] ℝ)
+    (hRicci : RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+      (I := I) (M := M) g ricciVelocity t)
+    (hEvolution :
+      HasDerivAt
+        (fun τ => g.curvatureOperatorTwoTensor cov hcov τ x
+          (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+          (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x))
+        (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          curvatureOperatorReaction g cov hcov hLevi hdim t x
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)) t) :
+    g.curvatureOperatorTwoTensorVelocity cov hcov t ricciVelocity x
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x) =
+      g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+        g.curvatureLambda cov hcov hLevi hdim t x *
+          g.curvatureMu cov hcov hLevi hdim t x -
+        2 * g.curvatureNu cov hcov hLevi hdim t x *
+          g.ricciCurvature cov hcov t x
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x) := by
+  let V : TM x := g.curvatureNuContactVectorField cov hcov hLevi hdim t x x
+  have hoperator := g.hasDerivAt_curvatureOperatorTwoTensor_of_intrinsicRicciTimeDerivative
+    cov hcov hLevi gdot s hflow ht x V V ricciVelocity hRicci
+  have hEvolution' :
+      HasDerivAt (fun τ => g.curvatureOperatorTwoTensor cov hcov τ x V V)
+        (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          curvatureOperatorReaction g cov hcov hLevi hdim t x V V) t := by
+    simpa [V] using hEvolution
+  have hvel := hoperator.unique hEvolution'
+  have hreaction := curvatureOperatorReaction_apply_contact g cov hcov hLevi hdim t x
+  have hreactionV :
+      curvatureOperatorReaction g cov hcov hLevi hdim t x V V =
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+          g.curvatureLambda cov hcov hLevi hdim t x *
+            g.curvatureMu cov hcov hLevi hdim t x -
+          2 * g.curvatureNu cov hcov hLevi hdim t x *
+            g.ricciCurvature cov hcov t x V V := by
+    simpa [V] using hreaction
+  have hvel' :
+      g.curvatureOperatorTwoTensorVelocity cov hcov t ricciVelocity x V V =
+        g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+          g.curvatureLambda cov hcov hLevi hdim t x *
+            g.curvatureMu cov hcov hLevi hdim t x -
+          2 * g.curvatureNu cov hcov hLevi hdim t x *
+            g.ricciCurvature cov hcov t x V V := by
+    rw [hvel, hreactionV]
+    ring
+  simpa [V] using hvel'
+
 /-! At a contact eigenvector, the genuine lowered-curvature velocity gives the
 time derivative of the Rayleigh support after the quotient correction.  The
 assumption below is the exact contact evaluation of the curvature evolution
