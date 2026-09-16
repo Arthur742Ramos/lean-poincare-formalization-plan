@@ -868,6 +868,78 @@ theorem curvatureOperatorReactionEndomorphism_apply_curvatureNuEigenbasis
   congr 1
   ring
 
+/-! Taking the fibrewise trace of this genuine reaction endomorphism recovers
+the scalar component of the three-dimensional curvature-reaction ODE. -/
+
+theorem curvatureOperatorReactionEndomorphism_trace_eq_scalarReaction
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) :
+    LinearMap.trace ℝ (TM y)
+        (curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y).toLinearMap =
+      HamiltonIveyReaction.scalarReaction
+        (g.curvatureLambda cov hcov hLevi hdim t y)
+        (g.curvatureMu cov hcov hLevi hdim t y)
+        (g.curvatureNu cov hcov hLevi hdim t y) := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  let b := CovariantDerivative.ricciComplementEigenbasis
+    (I := I) (M := M) (E := E)
+    (cov t) (hLevi t).1 (hLevi t).2 y (hdim y)
+  have htrace := LinearMap.trace_eq_sum_inner
+    (curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y).toLinearMap b
+  rw [htrace, Fin.sum_univ_three]
+  have h0 := g.curvatureOperatorReactionEndomorphism_apply_curvatureLambdaEigenbasis
+    cov hcov hLevi hdim t y
+  have h1 := g.curvatureOperatorReactionEndomorphism_apply_curvatureMuEigenbasis
+    cov hcov hLevi hdim t y
+  have h2 := g.curvatureOperatorReactionEndomorphism_apply_curvatureNuEigenbasis
+    cov hcov hLevi hdim t y
+  change Inner.inner ℝ (b 0)
+        (curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y (b 0)) +
+      Inner.inner ℝ (b 1)
+        (curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y (b 1)) +
+      Inner.inner ℝ (b 2)
+        (curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y (b 2)) = _
+  have h0' :
+      curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y (b 0) =
+        (g.curvatureLambda cov hcov hLevi hdim t y) ^ 2 • b 0 +
+          (g.curvatureMu cov hcov hLevi hdim t y *
+            g.curvatureNu cov hcov hLevi hdim t y) • b 0 := by
+    simpa [b, curvatureEigenbasisVector] using h0
+  have h1' :
+      curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y (b 1) =
+        (g.curvatureMu cov hcov hLevi hdim t y) ^ 2 • b 1 +
+          (g.curvatureLambda cov hcov hLevi hdim t y *
+            g.curvatureNu cov hcov hLevi hdim t y) • b 1 := by
+    simpa [b, curvatureEigenbasisVector] using h1
+  have h2' :
+      curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y (b 2) =
+        (g.curvatureNu cov hcov hLevi hdim t y) ^ 2 • b 2 +
+          (g.curvatureLambda cov hcov hLevi hdim t y *
+            g.curvatureMu cov hcov hLevi hdim t y) • b 2 := by
+    simpa [b, curvatureEigenbasisVector] using h2
+  rw [h0', h1', h2']
+  simp only [inner_add_right, real_inner_smul_right]
+  have hb0 : Inner.inner ℝ (b 0) (b 0) = 1 := by
+    rw [real_inner_self_eq_norm_sq, b.orthonormal.1]
+    norm_num
+  have hb1 : Inner.inner ℝ (b 1) (b 1) = 1 := by
+    rw [real_inner_self_eq_norm_sq, b.orthonormal.1]
+    norm_num
+  have hb2 : Inner.inner ℝ (b 2) (b 2) = 1 := by
+    rw [real_inner_self_eq_norm_sq, b.orthonormal.1]
+    norm_num
+  rw [hb0, hb1, hb2]
+  simp only [mul_one]
+  dsimp [HamiltonIveyReaction.scalarReaction]
+
 theorem curvatureOperatorReaction_apply_contact
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
