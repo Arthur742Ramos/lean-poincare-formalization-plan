@@ -776,6 +776,98 @@ theorem curvatureOperatorReaction_apply_curvatureEigenbasis
   dsimp [k, R]
   ring
 
+/-! The polynomial reaction endomorphism has the diagonal ODE reactions from
+Hamilton--Ivey's three-dimensional curvature system.  These are the three
+ordered eigendirections of the genuine Ricci-complement operator, so the
+identification is independent of any coordinate coefficient presentation. -/
+
+theorem curvatureOperatorReactionEndomorphism_apply_curvatureLambdaEigenbasis
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) :
+    curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y
+        (g.curvatureEigenbasisVector cov hcov hLevi hdim t y 0) =
+      (g.curvatureLambda cov hcov hLevi hdim t y) ^ 2 •
+          g.curvatureEigenbasisVector cov hcov hLevi hdim t y 0 +
+        (g.curvatureMu cov hcov hLevi hdim t y *
+          g.curvatureNu cov hcov hLevi hdim t y) •
+          g.curvatureEigenbasisVector cov hcov hLevi hdim t y 0 := by
+  have hQ := curvatureOperatorReactionEndomorphism_apply_curvatureEigenbasis
+    g cov hcov hLevi hdim t y (0 : Fin 3)
+  have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim t y
+  rw [curvatureOperatorReactionEndomorphism_apply_curvatureEigenbasis
+    g cov hcov hLevi hdim t y (0 : Fin 3)]
+  rw [← hsum]
+  simp only [curvatureLambda, curvatureMu, curvatureNu, curvatureEigenvalues,
+    curvatureEigenbasisVector]
+  rw [← add_smul]
+  congr 1
+  ring
+
+theorem curvatureOperatorReactionEndomorphism_apply_curvatureMuEigenbasis
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) :
+    curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y
+        (g.curvatureEigenbasisVector cov hcov hLevi hdim t y 1) =
+      (g.curvatureMu cov hcov hLevi hdim t y) ^ 2 •
+          g.curvatureEigenbasisVector cov hcov hLevi hdim t y 1 +
+        (g.curvatureLambda cov hcov hLevi hdim t y *
+          g.curvatureNu cov hcov hLevi hdim t y) •
+          g.curvatureEigenbasisVector cov hcov hLevi hdim t y 1 := by
+  have hQ := curvatureOperatorReactionEndomorphism_apply_curvatureEigenbasis
+    g cov hcov hLevi hdim t y (1 : Fin 3)
+  have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim t y
+  rw [curvatureOperatorReactionEndomorphism_apply_curvatureEigenbasis
+    g cov hcov hLevi hdim t y (1 : Fin 3)]
+  rw [← hsum]
+  simp only [curvatureLambda, curvatureMu, curvatureNu, curvatureEigenvalues,
+    curvatureEigenbasisVector]
+  rw [← add_smul]
+  congr 1
+  ring
+
+theorem curvatureOperatorReactionEndomorphism_apply_curvatureNuEigenbasis
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) :
+    curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y
+        (g.curvatureEigenbasisVector cov hcov hLevi hdim t y 2) =
+      (g.curvatureNu cov hcov hLevi hdim t y) ^ 2 •
+          g.curvatureEigenbasisVector cov hcov hLevi hdim t y 2 +
+        (g.curvatureLambda cov hcov hLevi hdim t y *
+          g.curvatureMu cov hcov hLevi hdim t y) •
+          g.curvatureEigenbasisVector cov hcov hLevi hdim t y 2 := by
+  have hQ := curvatureOperatorReactionEndomorphism_apply_curvatureEigenbasis
+    g cov hcov hLevi hdim t y (2 : Fin 3)
+  have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim t y
+  rw [curvatureOperatorReactionEndomorphism_apply_curvatureEigenbasis
+    g cov hcov hLevi hdim t y (2 : Fin 3)]
+  rw [← hsum]
+  simp only [curvatureLambda, curvatureMu, curvatureNu, curvatureEigenvalues,
+    curvatureEigenbasisVector]
+  rw [← add_smul]
+  congr 1
+  ring
+
 theorem curvatureOperatorReaction_apply_contact
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
