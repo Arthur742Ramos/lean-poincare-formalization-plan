@@ -1,5 +1,6 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyParabolic
 import PoincareCurvature.Geometry.Manifold.RicciFlow.MetricInverseVariation
+import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.ThreeDimensionalRicciNorm
 
 /-!
 # Intrinsic time variation for the Hamilton--Ivey support
@@ -378,6 +379,77 @@ theorem curvatureOperatorReaction_apply_contact
     hinner']
   rw [← hsum]
   ring_nf
+
+/-! In dimension three the Ricci norm in the intrinsic metric-variation
+formula is exactly Hamilton--Ivey's scalar curvature reaction polynomial.
+This is an algebraic identity for the genuine raised Ricci endomorphism, not
+an assumption about a coordinate coefficient presentation. -/
+
+theorem two_mul_ricciNormSq_eq_hamiltonIveyScalarReaction
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    2 * g.ricciNormSq cov hcov t x =
+      HamiltonIveyReaction.scalarReaction
+        (g.curvatureLambda cov hcov hLevi hdim t x)
+        (g.curvatureMu cov hcov hLevi hdim t x)
+        (g.curvatureNu cov hcov hLevi hdim t x) := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  have h := CovariantDerivative.two_mul_ricciNormSq_eq_threeDimensionalCurvatureReaction
+    (cov t) (hLevi t).1 (hLevi t).2 x (hdim x)
+  dsimp [HamiltonIveyReaction.scalarReaction]
+  convert h using 1
+  · rfl
+  · simp [CovariantDerivative.TimeDependentRiemannianMetric.ricciNormSq,
+      curvatureLambda, curvatureMu, curvatureNu, curvatureEigenvalues,
+      CovariantDerivative.threeDimensionalCurvatureLambda,
+      CovariantDerivative.threeDimensionalCurvatureMu,
+      CovariantDerivative.threeDimensionalCurvatureNu]
+    ring
+
+/-! With the intrinsic metric-variation trace identified with the scalar
+Laplacian, the scalar-curvature derivative has exactly the Hamilton--Ivey
+reaction form.  The trace equality is kept as an explicit hypothesis until
+the full contracted-Bianchi/curvature-evolution bridge is proved. -/
+
+theorem hasDerivAt_scalarCurvature_eq_hamiltonIveyReaction_add_laplacian
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) {x : M}
+    (ricciVelocity : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] ℝ)
+    (hRicci : RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+      (I := I) (M := M) g ricciVelocity t)
+    (htrace : RicciFlow.metricTraceAt (I := I) (M := M) g t x
+        (ricciVelocity x) =
+      g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x) :
+    HasDerivAt
+      (fun τ => g.scalarCurvature cov hcov τ x)
+      (HamiltonIveyReaction.scalarReaction
+          (g.curvatureLambda cov hcov hLevi hdim t x)
+          (g.curvatureMu cov hcov hLevi hdim t x)
+          (g.curvatureNu cov hcov hLevi hdim t x) +
+        g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x) t := by
+  have h := g.hasDerivAt_scalarCurvature_of_intrinsicRicciTimeDerivative
+    cov hcov hLevi gdot s hflow ht (x := x) ricciVelocity hRicci
+  convert h using 1
+  rw [two_mul_ricciNormSq_eq_hamiltonIveyScalarReaction
+    g cov hcov hLevi hdim t x, htrace]
 
 /-! If the actual lowered curvature component satisfies the reaction-form
 evolution identity, uniqueness of derivatives identifies its velocity with
