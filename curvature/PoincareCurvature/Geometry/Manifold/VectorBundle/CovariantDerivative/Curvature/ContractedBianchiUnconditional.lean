@@ -102,4 +102,33 @@ theorem ricciDivergence_eq_half_scalarDifferential_of_curvature
         cov x hmetric hRicci)
   · exact ricciTraceBridge_of_curvatureDerivative cov x hRicci
 
+/-! The regularity argument for the raised Ricci endomorphism is itself a
+curvature calculation (see `DeTurckCorrectionRegularity`).  Expose the
+contracted Bianchi identity with that calculation performed internally, so a
+caller cannot accidentally replace it by an unrelated differentiability
+hypothesis on Ricci. -/
+
+/--
+  Contracted second Bianchi, with the Ricci regularity discharged from the
+  genuine curvature tensor.
+
+  This is the API intended for geometric applications: the only analytic
+  assumptions are the stated bundle/connection regularity and the actual
+  torsion-free metric-compatible connection laws.
+-/
+theorem ricciDivergence_eq_half_scalarDifferential_of_curvature_unconditional
+    [IsManifold I 1 M]
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    [IsContMDiffRiemannianBundle I 1 E TM]
+    (x : M) (hT : cov.torsion = 0)
+    (hmetric : cov.IsMetricCompatibleTangent) :
+  ricciDivergence cov x =
+      (1 / 2 : ℝ) • scalarDifferential (I := I)
+        (scalarCurvature (cov := cov)) x := by
+  let hRicci : raisedRicciEndomorphismMDiffAt cov x :=
+    RicciFlow.raisedRicciEndomorphismMDiffAt_of_curvature
+      (I := I) (M := M) cov x
+  exact ricciDivergence_eq_half_scalarDifferential_of_curvature
+    cov x hT hmetric hRicci
+
 end CovariantDerivative
