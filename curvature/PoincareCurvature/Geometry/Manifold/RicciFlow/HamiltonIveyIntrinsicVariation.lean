@@ -315,15 +315,16 @@ theorem hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
         ∑ i,
           (g t).inner y (b i)
             (TimeDependentCovariantDerivative.curvatureTensor
-              (I := I) (M := M) cov hcov τ y (b i) u w) (b i) := by
+              (I := I) (M := M) cov hcov τ y (b i) u w) := by
     intro τ
     letI : ContMDiffCovariantDerivative (cov τ) 1 := hcov τ
     change CovariantDerivative.ricciCurvature (cov := cov τ) y u w = _
-    rw [CovariantDerivative.ricciCurvature_apply,
-      LinearMap.trace_eq_sum_inner _ b]
-    apply Finset.sum_congr rfl
-    intro i hi
-    simp [CovariantDerivative.ricciEndomorphism, real_inner_comm]
+    have hinner (v w : TM y) :
+        (g t).inner y v w = Inner.inner ℝ v w := by
+      rfl
+    simpa only [TimeDependentCovariantDerivative.curvatureTensor_apply, hinner] using
+      (CovariantDerivative.ricciCurvature_eq_sum_curvature_orthonormalBasis
+        (I := I) (M := M) (cov := cov τ) y b u w)
   have hsum := HasDerivAt.sum (u := Finset.univ) (fun i (_hi : i ∈ Finset.univ) => by
     have hi := (hasDerivAt_const (x := t)
       ((g t).inner y (b i)) :
@@ -349,7 +350,7 @@ theorem hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
       (fun τ : ℝ => ∑ i,
         (g t).inner y (b i)
           (TimeDependentCovariantDerivative.curvatureTensor
-            (I := I) (M := M) cov hcov τ y (b i) u w) (b i)) by
+            (I := I) (M := M) cov hcov τ y (b i) u w)) by
         funext τ; exact htrace τ]
     have htraceVel :
         (∑ i, (g t).inner y (b i) (curvatureVelocity y (b i) u w)) =
@@ -357,7 +358,8 @@ theorem hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
           (curvatureTensorVelocityEndomorphism curvatureVelocity y u w) := by
       rw [LinearMap.trace_eq_sum_inner _ b]
       rfl
-    exact hsum.congr_deriv htraceVel.symm
+    exact hsum.congr_deriv (by
+      simpa [curvatureTensorVelocityRicci] using htraceVel)
   have hricciEq :
       (fun τ : ℝ => RicciFlow.intrinsicRicciTensor
         (I := I) (M := M) g τ y u w) =
@@ -370,6 +372,40 @@ theorem hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
       TimeDependentRiemannianMetric.ricciCurvature] using hEq
   rw [hricciEq]
   exact hderiv
+
+/-! The preceding trace bridge can be fed directly into the metric-variation
+formula.  This version is convenient for a future curvature-variation proof:
+its only temporal input is the actual curvature-tensor derivative, while the
+remaining scalar trace term is displayed by the intrinsic metric contraction. -/
+
+theorem hasDerivAt_scalarCurvature_of_curvatureTensorTimeDerivative
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) {x : M}
+    (curvatureVelocity : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] TM y →ₗ[ℝ] TM y)
+    (hCurvature : ∀ (y : M) (u v w : TM y),
+      HasDerivAt
+        (fun τ => TimeDependentCovariantDerivative.curvatureTensor
+          (I := I) (M := M) cov hcov τ y u v w)
+        (curvatureVelocity y u v w) t) :
+    HasDerivAt
+      (fun τ => g.scalarCurvature cov hcov τ x)
+      (2 * g.ricciNormSq cov hcov t x +
+        RicciFlow.metricTraceAt (I := I) (M := M) g t x
+          (curvatureTensorVelocityRicci curvatureVelocity x)) t := by
+  exact g.hasDerivAt_scalarCurvature_of_intrinsicRicciTimeDerivative
+    cov hcov hLevi gdot s hflow ht (x := x)
+      (curvatureTensorVelocityRicci curvatureVelocity)
+      (hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
+        g cov hcov hLevi curvatureVelocity hCurvature)
 
 /-! The previous two transport lemmas combine with the metric variation to
 give the time derivative of the actual lowered curvature operator.  This is
