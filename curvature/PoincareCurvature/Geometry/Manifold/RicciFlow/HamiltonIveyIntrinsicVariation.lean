@@ -483,6 +483,26 @@ theorem curvatureOperatorReaction_apply_contact_eq_gap_product
       rw [hRic]
       ring
 
+theorem curvatureOperatorReaction_apply_contact_nonneg
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M) :
+    0 ≤ curvatureOperatorReaction g cov hcov hLevi hdim t x
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+        (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x) := by
+  rw [curvatureOperatorReaction_apply_contact_eq_gap_product
+    g cov hcov hLevi hdim t x]
+  have hMuNu := g.curvatureMu_ge_nu cov hcov hLevi hdim t x
+  have hLambdaMu := g.curvatureLambda_ge_mu cov hcov hLevi hdim t x
+  have hLambdaNu : g.curvatureNu cov hcov hLevi hdim t x ≤
+      g.curvatureLambda cov hcov hLevi hdim t x := le_trans hMuNu hLambdaMu
+  exact mul_nonneg (sub_nonneg.mpr hLambdaNu) (sub_nonneg.mpr hMuNu)
+
 /-! In dimension three the Ricci norm in the intrinsic metric-variation
 formula is exactly Hamilton--Ivey's scalar curvature reaction polynomial.
 This is an algebraic identity for the genuine raised Ricci endomorphism, not
