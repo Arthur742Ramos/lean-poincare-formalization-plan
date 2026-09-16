@@ -216,6 +216,65 @@ theorem hasDerivAt_ricciCurvature_of_intrinsicRicciTimeDerivative
   rw [hricciEq]
   exact hRicci x u v
 
+/-! The previous two transport lemmas combine with the metric variation to
+give the time derivative of the actual lowered curvature operator.  This is
+the tensorial quantity that enters the curvature evolution equation; no
+coordinate matrix or symmetrized projection is used. -/
+
+def curvatureOperatorTwoTensorVelocity
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (t : ℝ) (ricciVelocity : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] ℝ)
+    (y : M) (u v : TM y) : ℝ :=
+  (2 * g.ricciNormSq cov hcov t y +
+      RicciFlow.metricTraceAt (I := I) (M := M) g t y (ricciVelocity y)) *
+      (g t).inner y u v -
+    2 * g.scalarCurvature cov hcov t y *
+      g.ricciCurvature cov hcov t y u v -
+    2 * ricciVelocity y u v
+
+theorem hasDerivAt_curvatureOperatorTwoTensor_of_intrinsicRicciTimeDerivative
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) (y : M) (u v : TM y)
+    (ricciVelocity : ∀ z : M, TM z →ₗ[ℝ] TM z →ₗ[ℝ] ℝ)
+    (hRicci : RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+      (I := I) (M := M) g ricciVelocity t) :
+    HasDerivAt
+      (fun τ => g.curvatureOperatorTwoTensor cov hcov τ y u v)
+      (curvatureOperatorTwoTensorVelocity g cov hcov t ricciVelocity y u v) t := by
+  have hscalar := g.hasDerivAt_scalarCurvature_of_intrinsicRicciTimeDerivative
+    cov hcov hLevi gdot s hflow ht (x := y) ricciVelocity hRicci
+  have hmetric := hflow.2.1 ht y u v
+  have hmetricEq := hflow.2.2 ht y u v
+  change HasDerivAt (fun τ => (g τ).inner y u v) (gdot t y u v) t at hmetric
+  rw [hmetricEq] at hmetric
+  have hmetric' : HasDerivAt (fun τ => (g τ).inner y u v)
+      (-2 * g.ricciCurvature cov hcov t y u v) t := by
+    simpa [RicciFlow.ricciFlowRHS, RicciFlow.ricciTensor] using hmetric
+  have hricci := g.hasDerivAt_ricciCurvature_of_intrinsicRicciTimeDerivative
+    cov hcov hLevi y u v ricciVelocity hRicci
+  have htotal := (hscalar.mul hmetric').sub (hricci.const_mul 2)
+  change HasDerivAt
+    (fun τ => g.scalarCurvature cov hcov τ y * (g τ).inner y u v -
+      2 * g.ricciCurvature cov hcov τ y u v)
+    _ t at htotal
+  convert htotal using 1
+  · rfl
+  · simp [curvatureOperatorTwoTensorVelocity]
+    ring
+
 /-! The support speed can therefore be obtained from a single intrinsic
 Ricci-tensor derivative.  This theorem is intentionally stated in terms of
 the already-proved support-speed calculation, so the logarithmic chain rule
