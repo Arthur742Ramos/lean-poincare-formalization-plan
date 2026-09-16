@@ -680,6 +680,36 @@ theorem curvatureOperatorReaction_apply_contact_nonneg
       g.curvatureLambda cov hcov hLevi hdim t x := le_trans hMuNu hLambdaMu
   exact mul_nonneg (sub_nonneg.mpr hLambdaNu) (sub_nonneg.mpr hMuNu)
 
+/-! The scalar Hamilton--Ivey reaction is the genuine curvature-operator
+contact reaction with the expected profile weight, together with the two
+normalization terms.  This identity is the algebraic tensor-to-scalar bridge
+used by the eventual parabolic contact calculation. -/
+
+theorem hamiltonIveyReactionTerm_eq_weighted_curvatureOperatorReaction_contact
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (K t : ℝ) (x : M) :
+    g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x =
+      -2 * g.curvatureNu cov hcov hLevi hdim t x -
+          K / (1 + K * t) +
+        (g.scalarCurvature cov hcov t x /
+            (g.curvatureNu cov hcov hLevi hdim t x) ^ 2) *
+          curvatureOperatorReaction g cov hcov hLevi hdim t x
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x)
+            (g.curvatureNuContactVectorField cov hcov hLevi hdim t x x) := by
+  rw [hamiltonIveyReactionTerm, HamiltonIveyReaction.reaction,
+    HamiltonIveyReaction.scalar,
+    curvatureOperatorReaction_apply_contact_eq_gap_product
+      g cov hcov hLevi hdim t x]
+  rw [← g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim t x]
+  ring_nf
+
 /-! In dimension three the Ricci norm in the intrinsic metric-variation
 formula is exactly Hamilton--Ivey's scalar curvature reaction polynomial.
 This is an algebraic identity for the genuine raised Ricci endomorphism, not
