@@ -2467,6 +2467,64 @@ structure HamiltonIveyCurvatureContactCertificate
         g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
           ricciVelocity
 
+/-! The compact maximum-principle argument only evaluates the supported-defect
+PDE at the spatial minimum selected on the first negative time slab.  This
+variant records that exact scope while retaining the genuine curvature and
+connection-Laplacian data above.  In particular, it does not turn the
+minimum-scoped inequality into a pointwise assumption at every bad contact. -/
+
+structure HamiltonIveyCurvatureContactCertificateAtSpatialMinimum
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (K t : ℝ) (x : M) where
+  ricciVelocity : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] ℝ
+  hRicci : RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+    (I := I) (M := M) g ricciVelocity t
+  hupper : ∀ᶠ p in 𝓝 (t, x),
+    g.curvatureNu cov hcov hLevi hdim p.1 p.2 ≤
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p
+  hneg : ∀ᶠ p in 𝓝 (t, x),
+    g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p < 0
+  hscalarSupport : ∀ᶠ p in 𝓝 (t, x),
+    0 < g.scalarCurvature cov hcov p.1 p.2 -
+      g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p
+  hnear : ∀ᶠ y in 𝓝 x,
+    MDiffAt
+      (fun z : M =>
+        g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y
+  hdiff : MDiffAt
+    (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+      (CovariantDerivative.scalarDifferential (I := I)
+        (fun z : M =>
+          g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y)) x
+  hSupport : HamiltonIveySupportLaplacianCertificate
+    g cov hcov hLevi hdim t x
+  /-- The curvature-evolution contact estimate, expressed through the
+  genuine connection Laplacian of the shifted curvature two-tensor. -/
+  hCurvatureEvolution :
+    g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+        g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤
+      g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
+        ricciVelocity
+  /-- The scalar supported-defect inequality, required only when the support
+  is at a local spatial minimum.  Deriving this from `hCurvatureEvolution`
+  remains the nonlinear tensor/eigenvalue bridge. -/
+  hEvolutionAtSpatialMinimum :
+    ∀ hmin : IsLocalMin
+      (fun y : M => g.hamiltonIveySupportedDefect
+        cov hcov hLevi hdim K t x (t, y)) x,
+      g.scalarLaplacian cov
+          (fun _ y => g.hamiltonIveySupportedDefect
+            cov hcov hLevi hdim K t x (t, y)) t x +
+        g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤
+      g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
+        ricciVelocity
+
 /-! The structured certificate is directly consumable by the capstone above.
 This is the exact reduction from the geometric connection-Laplacian contact
 inequality to the scalar supported-defect inequality required by the compact
@@ -2525,6 +2583,97 @@ theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_curvature_contact_certifi
   refine ⟨c.ricciVelocity, c.hRicci, c.hupper, c.hneg, c.hscalarSupport,
     c.hnear, c.hdiff, ?_⟩
   exact c.hEvolution
+
+/-! The minimum-scoped contact certificate feeds the corresponding compact
+maximum principle without strengthening its PDE hypothesis.  The time
+derivative is still constructed from the intrinsic Ricci derivative, while
+the spatial inequality is requested only for the local minimum produced by
+the slab argument. -/
+
+theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_curvature_contact_certificate_at_spatial_minimum
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    {K T : ℝ} (hK : 0 < K) (hT : 0 ≤ T)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot (Icc 0 T))
+    (hnuNeg : ∀ t ∈ Icc 0 T, ∀ x : M,
+      g.curvatureNu cov hcov hLevi hdim t x < 0)
+    (hnuLower : ∀ x : M,
+      -K ≤ g.curvatureNu cov hcov hLevi hdim 0 x)
+    (hScalarCont : ContinuousOn
+      (fun p : ℝ × M => g.scalarCurvature cov hcov p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hScalarNear : ∀ t ∈ Icc 0 T, ∀ x : M,
+      ∀ᶠ y in 𝓝 x, MDiffAt (g.scalarCurvature cov hcov t) y)
+    (hScalarDifferential : ∀ t ∈ Icc 0 T, ∀ x : M,
+      MDiffAt
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (CovariantDerivative.scalarDifferential
+            (I := I) (g.scalarCurvature cov hcov t) y)) x)
+    (ricciVelocity : ∀ t : ℝ, ∀ x : M,
+      TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ)
+    (hRicci : ∀ {t : ℝ}, t ∈ Icc 0 T →
+      RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+        (I := I) (M := M) g (ricciVelocity t) t)
+    (htrace : ∀ t ∈ Icc 0 T, ∀ x : M,
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x
+          (ricciVelocity t x) =
+        g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x)
+    (hcont : ContinuousOn
+      (fun p : ℝ × M =>
+        g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hcontact : ∀ {t : ℝ} {x : M}, t ∈ Icc 0 T →
+      g.hamiltonIveyDefect cov hcov hLevi hdim K t x < 0 →
+      HamiltonIveyCurvatureContactCertificateAtSpatialMinimum
+        g cov hcov hLevi hdim K t x) :
+    ∀ t ∈ Icc 0 T, ∀ x : M,
+      0 ≤ g.hamiltonIveyDefect cov hcov hLevi hdim K t x := by
+  have hscalar := g.scalarCurvature_hamiltonIvey_lowerBarrier_of_intrinsicRicciTimeDerivative
+    cov hcov hLevi hdim gdot hK.le hflow hnuLower hScalarCont hScalarNear
+      hScalarDifferential ricciVelocity hRicci htrace
+  apply g.hamiltonIveyPinching_of_spacetime_support_certificate_at_spatial_minimum
+    cov hcov hLevi hdim hK hT hnuNeg hnuLower hscalar hcont
+  intro t x ht hdefect
+  let c := hcontact ht hdefect
+  let v : TM x := g.curvatureNuContactVectorField
+    cov hcov hLevi hdim t x x
+  let scalarVelocity : ℝ :=
+    2 * g.ricciNormSq cov hcov t x +
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x
+        (c.ricciVelocity x)
+  let contactRicciVelocity : ℝ := c.ricciVelocity x v v
+  have hscalarTime :=
+    g.hasDerivAt_scalarCurvature_of_intrinsicRicciTimeDerivative
+      cov hcov hLevi gdot (Icc 0 T) hflow ht (x := x)
+        c.ricciVelocity c.hRicci
+  have hricciTime :=
+    g.hasDerivAt_ricciCurvature_of_intrinsicRicciTimeDerivative
+      cov hcov hLevi x v v c.ricciVelocity c.hRicci
+  have hs := g.hasDerivAt_hamiltonIveySupportedDefect_time_of_isRicciFlowOn
+    cov hcov hLevi hdim gdot (Icc 0 T) hflow hK ht ht.1
+      (hnuNeg t ht x) scalarVelocity contactRicciVelocity hscalarTime hricciTime
+  refine ⟨fun p => g.hamiltonIveySupportedDefect
+      cov hcov hLevi hdim K t x p,
+    g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
+      c.ricciVelocity, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · exact g.hamiltonIveySupportedDefect_eq_at_contact
+      cov hcov hLevi hdim K t x
+  · filter_upwards [c.hupper, c.hneg, c.hscalarSupport] with p hpupper hpneg hppos
+    exact g.hamiltonIveyDefect_le_supportedDefect
+      cov hcov hLevi hdim K t x p hpupper hpneg hppos
+  · simpa [hamiltonIveyIntrinsicSupportSpeed, scalarVelocity,
+      contactRicciVelocity, v] using hs
+  · exact c.hnear
+  · exact c.hdiff
+  · intro hmin
+    exact c.hEvolutionAtSpatialMinimum hmin
 
 end IntrinsicTransport
 
