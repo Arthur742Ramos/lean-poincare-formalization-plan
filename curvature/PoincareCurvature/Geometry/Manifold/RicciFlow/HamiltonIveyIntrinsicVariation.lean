@@ -466,6 +466,40 @@ theorem hasDerivAt_curvatureOperatorTwoTensor_of_intrinsicRicciTimeDerivative
   · simp [curvatureOperatorTwoTensorVelocity]
     ring
 
+/-! The same curvature-tensor derivative also supplies the time derivative of
+the lowered curvature operator.  This is the precise transport statement used
+when a later curvature-evolution calculation is expressed in terms of the
+actual four-tensor rather than an independently postulated Ricci velocity. -/
+
+theorem hasDerivAt_curvatureOperatorTwoTensor_of_curvatureTensorTimeDerivative
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) (y : M) (u v : TM y)
+    (curvatureVelocity : ∀ z : M, TM z →ₗ[ℝ] TM z →ₗ[ℝ] TM z →ₗ[ℝ] TM z)
+    (hCurvature : ∀ (z : M) (a b c : TM z),
+      HasDerivAt
+        (fun τ => TimeDependentCovariantDerivative.curvatureTensor
+          (I := I) (M := M) cov hcov τ z a b c)
+        (curvatureVelocity z a b c) t) :
+    HasDerivAt
+      (fun τ => g.curvatureOperatorTwoTensor cov hcov τ y u v)
+      (curvatureOperatorTwoTensorVelocity g cov hcov t
+        (curvatureTensorVelocityRicci curvatureVelocity) y u v) t := by
+  exact g.hasDerivAt_curvatureOperatorTwoTensor_of_intrinsicRicciTimeDerivative
+    cov hcov hLevi gdot s hflow ht y u v
+      (curvatureTensorVelocityRicci curvatureVelocity)
+      (hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
+        g cov hcov hLevi curvatureVelocity hCurvature)
+
 /-! The three-dimensional curvature reaction is recorded intrinsically as a
 polynomial in the curvature endomorphism.  If `A` is that endomorphism and
 `R` is scalar curvature, the algebraic part is
