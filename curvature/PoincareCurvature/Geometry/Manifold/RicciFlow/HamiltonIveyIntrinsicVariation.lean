@@ -1771,6 +1771,104 @@ theorem hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureTensorReactionEv
       (curvatureTensorVelocityRicci curvatureVelocity) hRicci (by
         simpa [V] using hcurv)
 
+/-! A genuine curvature-evolution theorem is naturally stated for every
+tangent pair, not only for the selected contact vector.  This specialization
+keeps that stronger interface intact: once the lowered curvature component has
+the connection-Laplacian plus reaction derivative for all `u,v`, the support
+derivative follows by evaluating it at the contact field. -/
+
+theorem hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureTensorConnectionLaplacianEvolution
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    (s : Set ℝ)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot s)
+    {t : ℝ} (ht : t ∈ s) (x : M)
+    (curvatureVelocity : ∀ z : M, TM z →ₗ[ℝ] TM z →ₗ[ℝ] TM z →ₗ[ℝ] TM z)
+    (hCurvature : ∀ (z : M) (a b c : TM z),
+      HasDerivAt
+        (fun τ => TimeDependentCovariantDerivative.curvatureTensor
+          (I := I) (M := M) cov hcov τ z a b c)
+        (curvatureVelocity z a b c) t)
+    (hEvolution :
+      letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+      letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+        ContinuousLinearMap.toNormedAddCommGroup
+      letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+        ContinuousLinearMap.toNormedSpace
+      letI : ∀ y : M, NormedAddCommGroup (T₂ y) := fun _ =>
+        ContinuousLinearMap.toNormedAddCommGroup
+      letI : ∀ y : M, NormedSpace ℝ (T₂ y) := fun _ =>
+        inferInstance
+      ∀ u v : TM x,
+        HasDerivAt
+          (fun τ => g.curvatureOperatorTwoTensor cov hcov τ x u v)
+          (connectionLaplacian (cov t)
+              (g.curvatureNuShiftedContactTwoTensor
+                cov hcov hLevi hdim t x) x u v +
+            curvatureOperatorReaction g cov hcov hLevi hdim t x u v) t) :
+    HasDerivAt
+      (fun τ => g.curvatureNuSpacetimeSupport
+        cov hcov hLevi hdim t x (τ, x))
+      (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+        g.curvatureLambda cov hcov hLevi hdim t x *
+          g.curvatureMu cov hcov hLevi hdim t x) t := by
+  let V : TM x := g.curvatureNuContactVectorField cov hcov hLevi hdim t x x
+  have hRicci :=
+    hasIntrinsicRicciTimeDerivativeAt_of_curvatureTensorTimeDerivative
+      g cov hcov hLevi curvatureVelocity hCurvature
+  have hEvolutionContact :
+      HasDerivAt
+        (fun τ => g.curvatureOperatorTwoTensor cov hcov τ x V V)
+        (g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          curvatureOperatorReaction g cov hcov hLevi hdim t x V V) t := by
+    letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+    letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+      ContinuousLinearMap.toNormedSpace
+    letI : ∀ y : M, NormedAddCommGroup (T₂ y) := fun _ =>
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI : ∀ y : M, NormedSpace ℝ (T₂ y) := fun _ =>
+      inferInstance
+    simpa [V, hamiltonIveyContactCurvatureLaplacian] using
+      (hEvolution V V)
+  have hoperator :=
+    g.hasDerivAt_curvatureOperatorTwoTensor_of_curvatureTensorTimeDerivative
+      cov hcov hLevi hdim gdot s hflow ht x V V curvatureVelocity hCurvature
+  have hvel := hoperator.unique hEvolutionContact
+  have hreaction := curvatureOperatorReaction_apply_contact g cov hcov hLevi hdim t x
+  have hreactionV :
+      curvatureOperatorReaction g cov hcov hLevi hdim t x V V =
+        (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+          g.curvatureLambda cov hcov hLevi hdim t x *
+            g.curvatureMu cov hcov hLevi hdim t x -
+          2 * g.curvatureNu cov hcov hLevi hdim t x *
+            g.ricciCurvature cov hcov t x V V := by
+    simpa [V] using hreaction
+  have hcurv :
+      g.curvatureOperatorTwoTensorVelocity cov hcov t
+          (curvatureTensorVelocityRicci curvatureVelocity) x V V =
+        g.hamiltonIveyContactCurvatureLaplacian cov hcov hLevi hdim t x +
+          (g.curvatureNu cov hcov hLevi hdim t x) ^ 2 +
+          g.curvatureLambda cov hcov hLevi hdim t x *
+            g.curvatureMu cov hcov hLevi hdim t x -
+          2 * g.curvatureNu cov hcov hLevi hdim t x *
+            g.ricciCurvature cov hcov t x V V := by
+    rw [hvel, hreactionV]
+    ring
+  exact g.hasDerivAt_curvatureNuSpacetimeSupport_time_of_curvatureOperatorEvolution
+    cov hcov hLevi hdim gdot s hflow ht x
+      (curvatureTensorVelocityRicci curvatureVelocity) hRicci (by
+        simpa [V] using hcurv)
+
 /-! The support speed can therefore be obtained from a single intrinsic
 Ricci-tensor derivative.  This theorem is intentionally stated in terms of
 the already-proved support-speed calculation, so the logarithmic chain rule
