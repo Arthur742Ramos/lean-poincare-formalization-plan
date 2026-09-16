@@ -270,6 +270,109 @@ theorem hamiltonIveySupportedDefect_isLocalMin_at_bad_contact
   exact g.hamiltonIveySupportedDefect_isLocalMin cov hcov hLevi hdim
     K t₀ x₀ hmin hnuSupport hSupportNeg hScalarSubSupport
 
+/-! ### The support-form Hamilton--Ivey maximum principle
+
+The ordered eigenvalue fields need not be differentiable when eigenvalues
+cross.  The next theorem therefore uses the exact Rayleigh-supported defect
+at each hypothetical bad contact.  Its contact certificate records the three
+geometric ingredients that the support construction must provide (upper
+support, negativity, and the scalar-minus-support sign), together with the
+actual supported-defect time derivative, spatial regularity, and parabolic
+inequality.  No derivative or Laplacian of the nonsmooth ordered defect is
+assumed globally.
+-/
+
+/-- Hamilton--Ivey pinching from the exact spacetime Rayleigh support.  This is
+the invariant-region theorem in the form needed for a tensor maximum principle;
+the remaining evolution task is to derive the contact certificate from the
+Ricci-flow curvature evolution equation. -/
+theorem hamiltonIveyPinching_of_spacetime_support_certificate
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    {K T : ℝ} (hK : 0 < K) (hT : 0 ≤ T)
+    (hnuNeg : ∀ t ∈ Icc 0 T, ∀ x : M,
+      g.curvatureNu cov hcov hLevi hdim t x < 0)
+    (hnuLower : ∀ x : M,
+      -K ≤ g.curvatureNu cov hcov hLevi hdim 0 x)
+    (hscalar : ∀ t ∈ Icc 0 T, ∀ x : M,
+      -3 * (K / (1 + K * t)) ≤ g.scalarCurvature cov hcov t x)
+    (hcont : ContinuousOn
+      (fun p : ℝ × M =>
+        g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hcontact : ∀ {t : ℝ} {x : M}, t ∈ Icc 0 T →
+      g.hamiltonIveyDefect cov hcov hLevi hdim K t x < 0 →
+      ∃ sdot : ℝ,
+        (∀ᶠ p in 𝓝 (t, x),
+          g.curvatureNu cov hcov hLevi hdim p.1 p.2 ≤
+            g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p) ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p < 0) ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          0 < g.scalarCurvature cov hcov p.1 p.2 -
+            g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p) ∧
+        HasDerivAt
+          (fun τ : ℝ =>
+            g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (τ, x))
+          sdot t ∧
+        (∀ᶠ y in 𝓝 x,
+          MDiffAt
+            (fun z : M =>
+              g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y) ∧
+        MDiffAt
+          (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+            (CovariantDerivative.scalarDifferential (I := I)
+              (fun z : M =>
+                g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y)) x ∧
+        g.scalarLaplacian cov
+            (fun _ y =>
+              g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, y)) t x +
+          g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤ sdot)
+    : ∀ t ∈ Icc 0 T, ∀ x : M,
+      0 ≤ g.hamiltonIveyDefect cov hcov hLevi hdim K t x := by
+  let w : ℝ → M → ℝ :=
+    g.hamiltonIveyDefect cov hcov hLevi hdim K
+  let q : ℝ → M → ℝ :=
+    g.hamiltonIveyReactionTerm cov hcov hLevi hdim K
+  apply g.parabolicNonnegativeInvariant_of_upper_support cov w q hcont
+  · intro t x ht hwneg
+    obtain ⟨sdot, hupper, hneg, hscalarSupport, htime, hnear, hdiff, hpde⟩ :=
+      hcontact ht hwneg
+    refine ⟨fun p =>
+        g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x p, sdot, ?_, ?_,
+      htime, hnear, hdiff, hpde⟩
+    · exact g.hamiltonIveySupportedDefect_eq_at_contact
+        cov hcov hLevi hdim K t x
+    · filter_upwards [hupper, hneg, hscalarSupport] with p hpupper hpneg hppos
+      exact g.hamiltonIveyDefect_le_supportedDefect
+        cov hcov hLevi hdim K t x p hpupper hpneg hppos
+  · intro t ht x hwneg
+    have horder₁ := g.curvatureLambda_ge_mu cov hcov hLevi hdim t x
+    have horder₂ := g.curvatureMu_ge_nu cov hcov hLevi hdim t x
+    have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+      cov hcov hLevi hdim t x
+    have hscalar' :
+        -3 * (K / (1 + K * t)) ≤
+          HamiltonIveyReaction.scalar
+            (g.curvatureLambda cov hcov hLevi hdim t x)
+            (g.curvatureMu cov hcov hLevi hdim t x)
+            (g.curvatureNu cov hcov hLevi hdim t x) := by
+      simpa only [HamiltonIveyReaction.scalar, hsum] using hscalar t ht x
+    exact (HamiltonIveyReaction.hamiltonIvey_reaction_coercive hK ht.1
+      horder₁ horder₂ (hnuNeg t ht x) hscalar' hwneg).2.2
+  · intro x
+    have hzero : (0 : ℝ) ∈ Icc 0 T := ⟨le_rfl, hT⟩
+    exact HamiltonIveyReaction.defect_zero_nonneg_of_least_eigenvalue_lower_bound
+      hK
+      (g.curvatureLambda_ge_mu cov hcov hLevi hdim 0 x)
+      (g.curvatureMu_ge_nu cov hcov hLevi hdim 0 x)
+      (hnuNeg 0 hzero x) (hnuLower x)
+
 /-- Hamilton--Ivey pinching for the genuine geometric curvature spectrum,
 from the scalar lower barrier and the parabolic defect inequality supplied by
 curvature evolution and the least-eigenvalue support construction. -/
