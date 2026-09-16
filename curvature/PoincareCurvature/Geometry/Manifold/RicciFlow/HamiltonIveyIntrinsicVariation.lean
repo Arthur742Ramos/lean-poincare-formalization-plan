@@ -432,6 +432,60 @@ theorem curvatureOperatorReactionEndomorphism_isSymmetric
     real_inner_smul_left, real_inner_smul_right]
   rw [hAcomp u v, hAuv u v]
 
+/-! On the selected least-curvature eigendirection the polynomial reaction
+operator has the diagonal ODE eigenreaction `ν² + λ μ`.  This is the
+endomorphism-level form of the reaction calculation used by the support
+maximum principle. -/
+
+theorem curvatureOperatorReactionEndomorphism_apply_curvatureNuEigenvector
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) :
+    curvatureOperatorReactionEndomorphism g cov hcov hLevi hdim t y
+        (g.curvatureNuEigenvector cov hcov hLevi hdim t y) =
+      (g.curvatureNu cov hcov hLevi hdim t y) ^ 2 •
+          g.curvatureNuEigenvector cov hcov hLevi hdim t y +
+        (g.curvatureLambda cov hcov hLevi hdim t y *
+          g.curvatureMu cov hcov hLevi hdim t y) •
+          g.curvatureNuEigenvector cov hcov hLevi hdim t y := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E TM := by infer_instance
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  let V : TM y := g.curvatureNuEigenvector cov hcov hLevi hdim t y
+  have hA : g.curvatureEndomorphismApply cov hcov t y V =
+      (g.curvatureNu cov hcov hLevi hdim t y) • V :=
+    g.curvatureEndomorphismApply_curvatureNuEigenvector
+      cov hcov hLevi hdim t y
+  have hA' : CovariantDerivative.ricciComplementEndomorphism (cov t) y V =
+      (g.curvatureNu cov hcov hLevi hdim t y) • V := by
+    simpa [curvatureEndomorphismApply] using hA
+  have hAA : g.curvatureEndomorphismApply cov hcov t y
+      (g.curvatureEndomorphismApply cov hcov t y V) =
+      (g.curvatureNu cov hcov hLevi hdim t y) ^ 2 • V := by
+    rw [hA]
+    unfold curvatureEndomorphismApply
+    rw [map_smul, hA']
+    rw [smul_smul]
+    congr 1
+    ring
+  have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+    cov hcov hLevi hdim t y
+  rw [curvatureOperatorReactionEndomorphism_apply
+    g cov hcov hLevi hdim t y V, hAA, hA]
+  rw [← hsum]
+  simp only [V, smul_smul]
+  rw [sub_eq_add_neg, ← neg_smul]
+  rw [← add_smul]
+  rw [← add_smul]
+  congr 1
+  ring_nf
+  rw [add_smul]
+
 theorem curvatureOperatorReaction_apply_contact
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
