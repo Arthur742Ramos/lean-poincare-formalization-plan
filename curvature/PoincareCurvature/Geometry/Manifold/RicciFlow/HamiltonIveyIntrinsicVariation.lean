@@ -383,6 +383,57 @@ theorem curvatureOperatorReaction_eq_inner_endomorphism_sub_ricci
   simp [curvatureOperatorReaction, curvatureOperatorReactionEndomorphism,
     curvatureEndomorphismApply]
 
+/-! The lowered reaction is itself a symmetric bilinear form.  The polynomial
+part is self-adjoint, while the remaining Ricci contraction is symmetric
+because the curvature endomorphism is the Ricci-complement
+`R Id - 2 Ric♯`. -/
+
+theorem curvatureOperatorReaction_symm
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (y : M) (u v : TM y) :
+    curvatureOperatorReaction g cov hcov hLevi hdim t y u v =
+      curvatureOperatorReaction g cov hcov hLevi hdim t y v u := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  have hQ := curvatureOperatorReactionEndomorphism_isSymmetric
+    g cov hcov hLevi hdim t y u v
+  have hRicci := g.ricciCurvature_symm_of_isLeviCivita cov hcov hLevi t y u v
+  have hcomp :
+      g.ricciCurvature cov hcov t y u
+          (g.curvatureEndomorphismApply cov hcov t y v) =
+        g.ricciCurvature cov hcov t y v
+          (g.curvatureEndomorphismApply cov hcov t y u) := by
+    change CovariantDerivative.ricciCurvature (cov := cov t) y u
+        (CovariantDerivative.ricciComplementEndomorphism (cov t) y v) =
+      CovariantDerivative.ricciCurvature (cov := cov t) y v
+        (CovariantDerivative.ricciComplementEndomorphism (cov t) y u)
+    rw [CovariantDerivative.ricciComplementEndomorphism_apply,
+      CovariantDerivative.ricciComplementEndomorphism_apply]
+    simp only [map_sub, map_smul]
+    rw [hRicci]
+    have hinner :
+        Inner.inner ℝ
+            (CovariantDerivative.raisedRicciEndomorphism (cov t) y u)
+            (CovariantDerivative.raisedRicciEndomorphism (cov t) y v) =
+          Inner.inner ℝ
+            (CovariantDerivative.raisedRicciEndomorphism (cov t) y v)
+            (CovariantDerivative.raisedRicciEndomorphism (cov t) y u) := by
+      exact real_inner_comm _ _
+    rw [← CovariantDerivative.inner_raisedRicciEndomorphism (cov t) y u
+          (CovariantDerivative.raisedRicciEndomorphism (cov t) y v),
+      ← CovariantDerivative.inner_raisedRicciEndomorphism (cov t) y v
+          (CovariantDerivative.raisedRicciEndomorphism (cov t) y u)]
+    exact hinner
+  rw [curvatureOperatorReaction_eq_inner_endomorphism_sub_ricci,
+    curvatureOperatorReaction_eq_inner_endomorphism_sub_ricci]
+  rw [hQ, hcomp]
+
 theorem curvatureOperatorReactionEndomorphism_isSymmetric
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
