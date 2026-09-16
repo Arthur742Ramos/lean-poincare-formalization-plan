@@ -422,10 +422,36 @@ def curvatureOperatorTwoTensorVelocity
     (y : M) (u v : TM y) : ℝ :=
   (2 * g.ricciNormSq cov hcov t y +
       RicciFlow.metricTraceAt (I := I) (M := M) g t y (ricciVelocity y)) *
-      (g t).inner y u v -
+    (g t).inner y u v -
     2 * g.scalarCurvature cov hcov t y *
       g.ricciCurvature cov hcov t y u v -
     2 * ricciVelocity y u v
+
+/-! The lowered curvature velocity inherits symmetry from the genuine Ricci
+velocity.  This is an algebraic preservation statement for the actual tensor;
+it does not define a symmetrized readout or discard any antisymmetric data. -/
+
+theorem curvatureOperatorTwoTensorVelocity_symm
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (t : ℝ) (y : M)
+    (ricciVelocity : ∀ z : M, TM z →ₗ[ℝ] TM z →ₗ[ℝ] ℝ)
+    (hsymm : ∀ (z : M) (u v : TM z), ricciVelocity z u v = ricciVelocity z v u)
+    (u v : TM y) :
+    curvatureOperatorTwoTensorVelocity g cov hcov t ricciVelocity y u v =
+      curvatureOperatorTwoTensorVelocity g cov hcov t ricciVelocity y v u := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  have hinner : (g t).inner y u v = (g t).inner y v u := by
+    change Inner.inner ℝ u v = Inner.inner ℝ v u
+    exact (real_inner_comm u v).symm
+  have hricci := g.ricciCurvature_symm_of_isLeviCivita
+    cov hcov hLevi t y u v
+  unfold curvatureOperatorTwoTensorVelocity
+  rw [hinner, hricci, hsymm]
 
 theorem hasDerivAt_curvatureOperatorTwoTensor_of_intrinsicRicciTimeDerivative
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
