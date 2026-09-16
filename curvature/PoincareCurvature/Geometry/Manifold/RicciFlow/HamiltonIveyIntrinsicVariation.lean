@@ -301,6 +301,171 @@ theorem hamiltonIveyPinching_of_intrinsicRicciFlow_support_certificate
   simpa [hamiltonIveyIntrinsicSupportSpeed, scalarVelocity,
     contactRicciVelocity, v] using hpde
 
+/-! Finally, the scalar lower barrier can be fed from the same intrinsic
+Ricci-time derivative.  The only additional geometric datum is the trace
+identity `tr_g(Ric') = ΔR`; this is precisely the contracted-Bianchi/curvature
+evolution bridge and is kept explicit rather than replaced by an arbitrary
+scalar time derivative. -/
+
+theorem scalarCurvature_hamiltonIvey_lowerBarrier_of_intrinsicRicciTimeDerivative
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    {K T : ℝ} (hK : 0 ≤ K)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot (Icc 0 T))
+    (hnuLower : ∀ x : M,
+      -K ≤ g.curvatureNu cov hcov hLevi hdim 0 x)
+    (hScalarCont : ContinuousOn
+      (fun p : ℝ × M => g.scalarCurvature cov hcov p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hScalarNear : ∀ t ∈ Icc 0 T, ∀ x : M,
+      ∀ᶠ y in 𝓝 x, MDiffAt (g.scalarCurvature cov hcov t) y)
+    (hScalarDifferential : ∀ t ∈ Icc 0 T, ∀ x : M,
+      MDiffAt
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (CovariantDerivative.scalarDifferential
+            (I := I) (g.scalarCurvature cov hcov t) y)) x)
+    (ricciVelocity : ∀ t : ℝ, ∀ x : M,
+      TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ)
+    (hRicci : ∀ {t : ℝ}, t ∈ Icc 0 T →
+      RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+        (I := I) (M := M) g (ricciVelocity t) t)
+    (htrace : ∀ t ∈ Icc 0 T, ∀ x : M,
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x
+          (ricciVelocity t x) =
+        g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x) :
+    ∀ t ∈ Icc 0 T, ∀ x : M,
+      -3 * (K / (1 + K * t)) ≤ g.scalarCurvature cov hcov t x := by
+  have hScalarInitial : ∀ x : M,
+      -(3 : ℝ) * K ≤ g.scalarCurvature cov hcov 0 x := by
+    intro x
+    have horder₁ := g.curvatureLambda_ge_mu cov hcov hLevi hdim 0 x
+    have horder₂ := g.curvatureMu_ge_nu cov hcov hLevi hdim 0 x
+    have hsum := g.curvatureLambda_add_mu_add_nu_eq_scalarCurvature
+      cov hcov hLevi hdim 0 x
+    have hthreeNu :
+        3 * g.curvatureNu cov hcov hLevi hdim 0 x ≤
+          g.curvatureLambda cov hcov hLevi hdim 0 x +
+            g.curvatureMu cov hcov hLevi hdim 0 x +
+            g.curvatureNu cov hcov hLevi hdim 0 x := by
+      linarith
+    rw [hsum] at hthreeNu
+    linarith [hnuLower x]
+  have hScalarTime : ∀ t ∈ Icc 0 T, ∀ x : M,
+      HasDerivAt (fun s => g.scalarCurvature cov hcov s x)
+        (g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x +
+          2 * g.ricciNormSq cov hcov t x) t := by
+    intro t ht x
+    have h := g.hasDerivAt_scalarCurvature_of_intrinsicRicciTimeDerivative
+      cov hcov hLevi gdot (Icc 0 T) hflow ht (x := x)
+        (ricciVelocity t) (hRicci ht)
+    have htr := htrace t ht x
+    convert h using 1
+    rw [htr]
+    ring
+  have hScalarStrong := g.scalarCurvature_lowerBarrier_of_evolution
+    cov hcov hdim hK hScalarCont hScalarTime hScalarNear
+      hScalarDifferential hScalarInitial
+  intro t ht x
+  have hden₁ : 0 < 1 + (K : ℝ) * t := by
+    nlinarith [mul_nonneg hK ht.1]
+  have hden₂ : 0 < 1 + 2 * (K : ℝ) * t := by
+    nlinarith [mul_nonneg hK ht.1]
+  have hcompare :
+      -3 * (K / (1 + K * t)) ≤
+        -(3 : ℝ) * K / (1 + 2 * K * t) := by
+    calc
+      -3 * (K / (1 + K * t)) =
+          (-(3 : ℝ) * K) / (1 + K * t) := by ring
+      _ ≤ (-(3 : ℝ) * K) / (1 + 2 * K * t) := by
+        rw [div_le_div_iff₀ hden₁ hden₂]
+        nlinarith [mul_nonneg (sq_nonneg K) ht.1]
+  exact hcompare.trans (hScalarStrong t ht x)
+
+/-! A single capstone now combines the intrinsic scalar barrier, the
+intrinsic contact derivative, and the support maximum principle. -/
+
+theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_trace_certificate
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (gdot : RicciFlow.MetricTensorFamily (I := I) (M := M))
+    {K T : ℝ} (hK : 0 < K) (hT : 0 ≤ T)
+    (hflow : RicciFlow.IsRicciFlowOn
+      (I := I) (M := M) g cov hcov gdot (Icc 0 T))
+    (hnuNeg : ∀ t ∈ Icc 0 T, ∀ x : M,
+      g.curvatureNu cov hcov hLevi hdim t x < 0)
+    (hnuLower : ∀ x : M,
+      -K ≤ g.curvatureNu cov hcov hLevi hdim 0 x)
+    (hScalarCont : ContinuousOn
+      (fun p : ℝ × M => g.scalarCurvature cov hcov p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hScalarNear : ∀ t ∈ Icc 0 T, ∀ x : M,
+      ∀ᶠ y in 𝓝 x, MDiffAt (g.scalarCurvature cov hcov t) y)
+    (hScalarDifferential : ∀ t ∈ Icc 0 T, ∀ x : M,
+      MDiffAt
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (CovariantDerivative.scalarDifferential
+            (I := I) (g.scalarCurvature cov hcov t) y)) x)
+    (ricciVelocity : ∀ t : ℝ, ∀ x : M,
+      TM x →ₗ[ℝ] TM x →ₗ[ℝ] ℝ)
+    (hRicci : ∀ {t : ℝ}, t ∈ Icc 0 T →
+      RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+        (I := I) (M := M) g (ricciVelocity t) t)
+    (htrace : ∀ t ∈ Icc 0 T, ∀ x : M,
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x
+          (ricciVelocity t x) =
+        g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x)
+    (hcont : ContinuousOn
+      (fun p : ℝ × M =>
+        g.hamiltonIveyDefect cov hcov hLevi hdim K p.1 p.2)
+      (Icc 0 T ×ˢ (Set.univ : Set M)))
+    (hcontact : ∀ {t : ℝ} {x : M}, t ∈ Icc 0 T →
+      g.hamiltonIveyDefect cov hcov hLevi hdim K t x < 0 →
+      ∃ ricciVelocity' : ∀ y : M, TM y →ₗ[ℝ] TM y →ₗ[ℝ] ℝ,
+        RicciFlow.HasIntrinsicRicciTimeDerivativeAt
+          (I := I) (M := M) g ricciVelocity' t ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          g.curvatureNu cov hcov hLevi hdim p.1 p.2 ≤
+            g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p) ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p < 0) ∧
+        (∀ᶠ p in 𝓝 (t, x),
+          0 < g.scalarCurvature cov hcov p.1 p.2 -
+            g.curvatureNuSpacetimeSupport cov hcov hLevi hdim t x p) ∧
+        (∀ᶠ y in 𝓝 x,
+          MDiffAt
+            (fun z : M =>
+              g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y) ∧
+        MDiffAt
+          (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+            (CovariantDerivative.scalarDifferential (I := I)
+              (fun z : M =>
+                g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, z)) y)) x ∧
+        g.scalarLaplacian cov
+            (fun _ y =>
+              g.hamiltonIveySupportedDefect cov hcov hLevi hdim K t x (t, y)) t x +
+          g.hamiltonIveyReactionTerm cov hcov hLevi hdim K t x ≤
+        g.hamiltonIveyIntrinsicSupportSpeed cov hcov hLevi hdim K t x
+          ricciVelocity') :
+    ∀ t ∈ Icc 0 T, ∀ x : M,
+      0 ≤ g.hamiltonIveyDefect cov hcov hLevi hdim K t x := by
+  have hscalar := g.scalarCurvature_hamiltonIvey_lowerBarrier_of_intrinsicRicciTimeDerivative
+    cov hcov hLevi hdim gdot hK.le hflow hnuLower hScalarCont hScalarNear
+      hScalarDifferential ricciVelocity hRicci htrace
+  exact g.hamiltonIveyPinching_of_intrinsicRicciFlow_support_certificate
+    cov hcov hLevi hdim gdot hK hT hflow hnuNeg hnuLower hscalar hcont hcontact
+
 end IntrinsicTransport
 
 end CovariantDerivative.TimeDependentRiemannianMetric
