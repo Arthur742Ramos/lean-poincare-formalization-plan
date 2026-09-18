@@ -166,6 +166,71 @@ theorem contMDiffAt_clm_of_forall_apply_basis
   refine b.ext fun i ↦ ?_
   simp [recon]
 
+/- The same finite-dimensional reconstruction at the differentiability level.
+   This is kept separate from the `C^n` lemma because a first-order
+   derivative is all that is needed for scalar-gradient regularity. -/
+theorem mdifferentiableAt_clm_of_forall_apply_basis
+    [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂]
+    {ι : Type*} [Fintype ι] (b : Module.Basis ι 𝕜 F₁)
+    {f : B → F₁ →L[𝕜] F₂} {x : B}
+    (h : ∀ i, MDifferentiableAt IB 𝓘(𝕜, F₂)
+      (fun y ↦ f y (b i)) x) :
+    MDifferentiableAt IB 𝓘(𝕜, F₁ →L[𝕜] F₂) f x := by
+  classical
+  let recon : (ι → F₂) →L[𝕜] (F₁ →L[𝕜] F₂) :=
+    LinearMap.toContinuousLinearMap <|
+      (LinearMap.toContinuousLinearMap :
+        (F₁ →ₗ[𝕜] F₂) ≃ₗ[𝕜] (F₁ →L[𝕜] F₂)).toLinearMap.comp
+        (b.constr 𝕜 : (ι → F₂) ≃ₗ[𝕜] (F₁ →ₗ[𝕜] F₂)).toLinearMap
+  have hg : MDifferentiableAt IB 𝓘(𝕜, ι → F₂)
+      (fun y ↦ (fun i ↦ f y (b i))) x := by
+    rw [mdifferentiableAt_iff]
+    refine ⟨continuousAt_pi.2 (fun i ↦ (h i).continuousAt), ?_⟩
+    rw [differentiableWithinAt_pi]
+    intro i
+    have hi := (h i).differentiableWithinAt_writtenInExtChartAt
+    convert hi using 1 <;> rfl
+  have hr : MDifferentiableAt 𝓘(𝕜, ι → F₂) 𝓘(𝕜, F₁ →L[𝕜] F₂) recon
+      (fun i ↦ f x (b i)) := by
+    exact (recon.differentiableAt).mdifferentiableAt
+  have hc := hr.comp x hg
+  convert hc using 1
+  funext y
+  apply ContinuousLinearMap.coe_injective
+  refine b.ext fun i ↦ ?_
+  simp [recon]
+
+/- A hom-bundle section is differentiable at a point when its values on one
+   genuine local frame are differentiable there. -/
+theorem mdifferentiableAt_homBundle_of_forall_apply_localFrame
+    [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂]
+    {s : ∀ x, E₁ x →L[𝕜] E₂ x} (x₀ : B)
+    {ι : Type*} [Fintype ι] (b : Module.Basis ι 𝕜 F₁)
+    (h : ∀ i, MDifferentiableAt IB (IB.prod 𝓘(𝕜, F₂))
+      (fun x ↦ TotalSpace.mk' F₂ x
+        (s x ((trivializationAt F₁ E₁ x₀).localFrame b i x))) x₀) :
+    MDifferentiableAt IB (IB.prod 𝓘(𝕜, F₁ →L[𝕜] F₂))
+      (fun x ↦ TotalSpace.mk' (F₁ →L[𝕜] F₂)
+        (E := fun x ↦ E₁ x →L[𝕜] E₂ x) x (s x)) x₀ := by
+  classical
+  rw [mdifferentiableAt_hom_bundle]
+  refine ⟨mdifferentiableAt_id, ?_⟩
+  apply mdifferentiableAt_clm_of_forall_apply_basis b
+  intro i
+  have hi := h i
+  rw [mdifferentiableAt_section] at hi
+  refine hi.congr_of_eventuallyEq ?_
+  have hsrc : (trivializationAt F₁ E₁ x₀).baseSet ∈ 𝓝 x₀ :=
+    (trivializationAt F₁ E₁ x₀).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt' x₀)
+  have hout : (trivializationAt F₂ E₂ x₀).baseSet ∈ 𝓝 x₀ :=
+    (trivializationAt F₂ E₂ x₀).open_baseSet.mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt' x₀)
+  filter_upwards [hsrc, hout] with x hxsrc hxout
+  rw [ContinuousLinearMap.inCoordinates_eq hxsrc hxout]
+  rw [(trivializationAt F₁ E₁ x₀).localFrame_apply_of_mem_baseSet b hxsrc]
+  rfl
+
 /-- A hom-bundle section is `C^n` at a point when its values on one genuine local frame are
 `C^n` sections at that point. -/
 theorem contMDiffAt_homBundle_of_forall_apply_localFrame

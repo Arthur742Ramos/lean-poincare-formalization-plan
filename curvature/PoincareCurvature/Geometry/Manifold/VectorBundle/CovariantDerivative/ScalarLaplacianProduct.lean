@@ -380,6 +380,33 @@ theorem scalarLaplacian_mul_of_eventually_mdifferentiableAt
     cov hf hg hdf hdg]
   simp [Finset.sum_add_distrib, Finset.mul_sum, Finset.sum_mul, b]
 
+/-- Local-neighborhood product rule at a critical point of the second
+factor.  This is the quotient form of the product rule: only eventual
+differentiability near the base point is required. -/
+theorem scalarLaplacian_mul_of_second_differential_eq_zero_of_eventually_mdifferentiableAt
+    (cov : CovariantDerivative I E TM) {f g : M → ℝ} {x : M}
+    (hf : ∀ᶠ y in 𝓝 x, MDiffAt f y)
+    (hg : ∀ᶠ y in 𝓝 x, MDiffAt g y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) f y)) x)
+    (hdg : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) g y)) x)
+    (hgcritical : scalarDifferential (I := I) g x = 0) :
+    scalarLaplacian cov (f * g) x =
+      f x * scalarLaplacian cov g x + g x * scalarLaplacian cov f x := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  rw [scalarLaplacian_eq_sum_orthonormalBasis cov (f * g) x b,
+    scalarLaplacian_eq_sum_orthonormalBasis cov g x b,
+    scalarLaplacian_eq_sum_orthonormalBasis cov f x b]
+  simp_rw [scalarHessian_mul_apply_of_eventually_mdifferentiableAt
+    cov hf hg hdf hdg]
+  simp only [hgcritical, zero_apply, mul_zero, zero_mul, add_zero]
+  rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
+
 /-- Full scalar Laplace--Beltrami product rule.  Both gradient cross terms
 are retained separately, so the formula needs no symmetry assumption on the
 scalar Hessian. -/
