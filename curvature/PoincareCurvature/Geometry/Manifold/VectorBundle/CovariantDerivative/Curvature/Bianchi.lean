@@ -485,6 +485,31 @@ private lemma along_curvatureAux_sub_curvatureAux_along_apply
             simp [CovariantDerivative.curvatureAux]
             abel_nf
 
+/-! The commutator expansion above is also useful outside the proof of the
+cyclic second Bianchi identity.  Keep the exact bracket correction public so
+curvature-evolution developments can use it without duplicating the nested
+covariant-derivative calculation. -/
+
+/-- The commutator of a covariant derivative with the curvature commutator,
+with all Lie-bracket correction terms displayed explicitly.  This is the
+actual local second-derivative identity proved from the covariant-derivative
+laws; no normal-frame or coordinate assumption is part of the statement. -/
+theorem curvatureAux_covariantDerivative_commutator_apply
+    {X Y Z W : Π x : M, TM x} {x : M}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (fun y ↦ TotalSpace.mk' E y (X y)))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (fun y ↦ TotalSpace.mk' E y (Y y)))
+    (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (fun y ↦ TotalSpace.mk' E y (Z y)))
+    (hW : ContMDiff I (I.prod 𝓘(ℝ, E)) 3 (fun y ↦ TotalSpace.mk' E y (W y))) :
+    cov.along X (cov.curvatureAux Y Z W) x -
+        cov.curvatureAux Y Z (cov.along X W) x =
+      cov.along X (cov.along Y (cov.along Z W)) x -
+        cov.along X (cov.along Z (cov.along Y W)) x -
+        cov.along Y (cov.along Z (cov.along X W)) x +
+        cov.along Z (cov.along Y (cov.along X W)) x +
+        -cov.curvatureAux X (VectorField.mlieBracket I Y Z) W x -
+        cov.along (VectorField.mlieBracket I X (VectorField.mlieBracket I Y Z)) W x := by
+  exact cov.along_curvatureAux_sub_curvatureAux_along_apply hX hY hZ hW
+
 private lemma cyclic_along_curvatureAux_sub_curvatureAux_along_apply
     {X Y Z W : Π x : M, TM x} {x : M}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (fun y ↦ TotalSpace.mk' E y (X y)))

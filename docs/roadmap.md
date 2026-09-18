@@ -67,7 +67,20 @@ includes the exact logarithmic reaction identity, the analytic
 `exp(2) * (log s)^2 <= 4s` estimate, the strict `(-nu)/9` inward-pointing bound,
 and an invariant-region argument. This closes the ODE stage only; the
 curvature-evolution bridge and geometric parabolic maximum principles remain
-open.
+open. The current Merge 24 follow-up adds the proved connection-variation
+constructor `HamiltonIveyCurvatureEvolutionCertificate.of_connectionVariation`,
+which derives the derivative of the actual curvature commutator from a
+connection variation. It also packages the genuine spatial regularity, derives
+the shifted-tensor trace regularity, and transports an actual unshifted
+curvature-operator evolution equation through the proved `R - nu * g`
+connection-Laplacian identity via `of_connectionVariation_of_operatorEvolution`.
+The actual curvature PDE and maximum-principle application are still
+conditional inputs. The supporting curvature layer now additionally exposes
+the proved local covariant-derivative/curvature commutator
+curvatureAux_covariantDerivative_commutator_apply and the generic
+contMDiffCovariantDerivative_inducedHom theorem. Neither bridge silently
+supplies the mixed time--space regularity needed to construct a global
+connection variation from the current slicewise Ricci-flow interface.
 
 ## Layer 3: singularity analysis
 

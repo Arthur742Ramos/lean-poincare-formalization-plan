@@ -30,7 +30,7 @@ set_option linter.unusedSectionVars false
 set_option linter.style.haveILetI false
 set_option maxHeartbeats 3000000
 
-open Bundle Set
+open Bundle Set Filter Topology
 open scoped Manifold ContDiff
 
 namespace CovariantDerivative.TimeDependentRiemannianMetric
@@ -382,7 +382,7 @@ theorem scalarLaplacian_curvatureNuSpacetimeSupport_eq
     (hU : IsOpen U) (hx₀ : x₀ ∈ U)
     (hden : ∀ y ∈ U, g.curvatureNuContactMetricSquare
       cov hcov hLevi hdim t₀ x₀ y ≠ 0)
-    (hq : ∀ y, MDiffAt
+    (hq : ∀ᶠ y in 𝓝 x₀, MDiffAt
       (fun z => g.curvatureNuSpacetimeSupport
         cov hcov hLevi hdim t₀ x₀ (t₀, z)) y)
     (hd : ∀ y, MDiffAt
@@ -422,14 +422,28 @@ theorem scalarLaplacian_curvatureNuSpacetimeSupport_eq
   have hDprod : MDiffAt
       (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
         (scalarDifferential (I := I) (q * d) y)) x₀ := by
-    have heq : scalarDifferential (I := I) (q * d) =
-        q • scalarDifferential (I := I) d +
-          d • scalarDifferential (I := I) q := by
-      funext y
-      exact scalarDifferential_mul (I := I) (hq y) (hd y)
-    rw [heq]
-    exact mdifferentiableAt_add_section
-      ((hq x₀).smul_section hDd) ((hd x₀).smul_section hDq)
+    have hsum : MDiffAt
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          ((q • scalarDifferential (I := I) d +
+            d • scalarDifferential (I := I) q) y)) x₀ := by
+      exact mdifferentiableAt_add_section
+        ((hq.self_of_nhds).smul_section hDd)
+        ((hd x₀).smul_section hDq)
+    have hchain : ∀ᶠ y in 𝓝 x₀,
+        scalarDifferential (I := I) (q * d) y =
+          (q • scalarDifferential (I := I) d +
+            d • scalarDifferential (I := I) q) y := by
+      filter_upwards [hq] with y hqy
+      exact scalarDifferential_mul (I := I) hqy (hd y)
+    have hsections :
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (scalarDifferential (I := I) (q * d) y)) =ᶠ[𝓝 x₀]
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          ((q • scalarDifferential (I := I) d +
+            d • scalarDifferential (I := I) q) y)) := by
+      filter_upwards [hchain] with y hy
+      rw [hy]
+    exact hsum.congr_of_eventuallyEq hsections
   have hcongr : CovariantDerivative.scalarLaplacian (cov t₀) (q * d) x₀ =
       CovariantDerivative.scalarLaplacian (cov t₀) a x₀ := by
     apply scalarLaplacian_congr_on_open (cov t₀) hU hx₀
@@ -438,8 +452,9 @@ theorem scalarLaplacian_curvatureNuSpacetimeSupport_eq
         cov hcov hLevi hdim t₀ x₀ y (hden y hy)
     · exact hDprod
     · exact hDa
-  have hprod := scalarLaplacian_mul_of_second_differential_eq_zero
-    (cov t₀) hq hd hDq hDd
+  have hprod :=
+    scalarLaplacian_mul_of_second_differential_eq_zero_of_eventually_mdifferentiableAt
+      (cov t₀) hq (Filter.Eventually.of_forall hd) hDq hDd
       (g.scalarDifferential_curvatureNuContactMetricSquare_eq_zero
         cov hcov hLevi hdim t₀ x₀)
   have hq0 : q x₀ = g.curvatureNu cov hcov hLevi hdim t₀ x₀ := by
@@ -470,7 +485,7 @@ theorem scalarLaplacian_curvatureNuSpacetimeSupport_eq_connectionLaplacian
     (hU : IsOpen U) (hx₀ : x₀ ∈ U)
     (hden : ∀ y ∈ U, g.curvatureNuContactMetricSquare
       cov hcov hLevi hdim t₀ x₀ y ≠ 0)
-    (hq : ∀ y, MDiffAt
+    (hq : ∀ᶠ y in 𝓝 x₀, MDiffAt
       (fun z => g.curvatureNuSpacetimeSupport
         cov hcov hLevi hdim t₀ x₀ (t₀, z)) y)
     (hd : ∀ y, MDiffAt
@@ -593,7 +608,7 @@ structure HamiltonIveySupportLaplacianCertificate
   hx₀ : x₀ ∈ U
   hden : ∀ y ∈ U, g.curvatureNuContactMetricSquare
     cov hcov hLevi hdim t₀ x₀ y ≠ 0
-  hq : ∀ y, MDiffAt
+  hq : ∀ᶠ y in 𝓝 x₀, MDiffAt
     (fun z => g.curvatureNuSpacetimeSupport
       cov hcov hLevi hdim t₀ x₀ (t₀, z)) y
   hd : ∀ y, MDiffAt
