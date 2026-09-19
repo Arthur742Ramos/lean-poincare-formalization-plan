@@ -80,7 +80,10 @@ the proved local covariant-derivative/curvature commutator
 curvatureAux_covariantDerivative_commutator_apply and the generic
 contMDiffCovariantDerivative_inducedHom theorem. Neither bridge silently
 supplies the mixed time--space regularity needed to construct a global
-connection variation from the current slicewise Ricci-flow interface.
+connection variation from the current slicewise Ricci-flow interface. The
+public moving-connection module now proves the corresponding scalar-to-vector
+Koszul bridge under an explicit differentiated Koszul certificate; it does not
+derive that certificate from `IsRicciFlowOn`.
 
 ## Layer 3: singularity analysis
 

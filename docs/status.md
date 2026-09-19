@@ -114,7 +114,10 @@ CovariantDerivative.InducedHomRegularity. These additions make the next
 curvature-evolution step auditable, but do not supply the mixed
 time--space regularity or the geometric curvature PDE itself. The tensor
 maximum-principle input therefore remains open, so milestone 5 remains future
-rather than proved.
+rather than proved. The public `HamiltonIveyMovingConnectionVariation` module
+now also proves the scalar-to-vector moving-section Koszul bridge, but its
+differentiated Koszul expression remains an explicit certificate rather than
+a consequence claimed from `IsRicciFlowOn`.
 
 ## Updating this page
 
