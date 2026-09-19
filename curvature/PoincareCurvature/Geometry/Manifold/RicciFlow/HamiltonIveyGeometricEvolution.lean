@@ -1,4 +1,5 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyIntrinsicVariation
+import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyOperatorLaplacian
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianIntrinsic
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.ThreeDimensionalDecomposition
 
@@ -38,6 +39,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "T₁" => (fun y : M => TM y →L[ℝ] ℝ)
 local notation "T₂" => (fun y : M => TM y →L[ℝ] TM y →L[ℝ] ℝ)
+local notation "T₃" => (fun y : M => TM y →L[ℝ] T₂ y)
 
 /-! The component contraction used after tracing the connection-variation
 formula.  K is the actual three-dimensional curvature tensor, Ric the
@@ -690,6 +692,294 @@ def HamiltonIveyCurvatureOperatorLaplacian
             (fun y => CovariantDerivative.ricciCovariantTwoTensor
               (cov t) y) x u v
 
+set_option synthInstance.maxHeartbeats 200000 in
+set_option maxHeartbeats 3000000 in
+theorem hamiltonIveyCurvatureOperatorLaplacian_of_globalRegularity
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (t : ℝ) (x : M)
+    (hregular : ∀ y : M,
+      g.HamiltonIveyCurvatureOperatorRegularity
+        cov hcov hLevi hdim t y) :
+    HamiltonIveyCurvatureOperatorLaplacian
+      g cov hcov hLevi hdim t x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 1 E TM :=
+    g.slice_isContMDiffRiemannianBundle t
+  letI : ∀ y : M, NormedAddCommGroup (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₁ y) := fun _ =>
+    ContinuousLinearMap.toNormedSpace
+  letI : ∀ y : M, NormedAddCommGroup (T₂ y) := fun _ =>
+    ContinuousLinearMap.toNormedAddCommGroup
+  letI : ∀ y : M, NormedSpace ℝ (T₂ y) := fun _ =>
+    inferInstance
+  letI : ∀ y : M, NormedAddCommGroup (T₃ y) := fun _ =>
+    inferInstance
+  letI : ∀ y : M, NormedSpace ℝ (T₃ y) := fun _ =>
+    inferInstance
+  letI : NormedAddCommGroup (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+  letI : NormedSpace ℝ (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+  letI : NormedAddCommGroup
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+  letI : NormedSpace ℝ
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+  letI : TopologicalSpace (TotalSpace (E →L[ℝ] ℝ) T₁) :=
+    Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
+      (RingHom.id ℝ) E TM ℝ (Bundle.Trivial M ℝ)
+  letI : FiberBundle (E →L[ℝ] ℝ) T₁ :=
+    Bundle.ContinuousLinearMap.fiberBundle
+      (RingHom.id ℝ) E TM ℝ (Bundle.Trivial M ℝ)
+  letI : VectorBundle ℝ (E →L[ℝ] ℝ) T₁ :=
+    Bundle.ContinuousLinearMap.vectorBundle
+      (RingHom.id ℝ) E TM ℝ (Bundle.Trivial M ℝ)
+  letI : ContMDiffVectorBundle 2 (E →L[ℝ] ℝ) T₁ I :=
+    ContMDiffVectorBundle.continuousLinearMap
+  letI : TopologicalSpace
+      (TotalSpace (E →L[ℝ] (E →L[ℝ] ℝ)) T₂) :=
+    Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
+      (RingHom.id ℝ) E TM (E →L[ℝ] ℝ) T₁
+  letI : FiberBundle (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ :=
+    Bundle.ContinuousLinearMap.fiberBundle
+      (RingHom.id ℝ) E TM (E →L[ℝ] ℝ) T₁
+  letI : VectorBundle ℝ (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ :=
+    Bundle.ContinuousLinearMap.vectorBundle
+      (RingHom.id ℝ) E TM (E →L[ℝ] ℝ) T₁
+  letI : ContMDiffVectorBundle 2 (E →L[ℝ] (E →L[ℝ] ℝ)) T₂ I :=
+    ContMDiffVectorBundle.continuousLinearMap
+  letI : TopologicalSpace
+      (TotalSpace (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃) :=
+    Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
+      (RingHom.id ℝ) E TM (E →L[ℝ] (E →L[ℝ] ℝ)) T₂
+  letI : FiberBundle
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ :=
+    Bundle.ContinuousLinearMap.fiberBundle
+      (RingHom.id ℝ) E TM (E →L[ℝ] (E →L[ℝ] ℝ)) T₂
+  letI : VectorBundle ℝ
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ :=
+    Bundle.ContinuousLinearMap.vectorBundle
+      (RingHom.id ℝ) E TM (E →L[ℝ] (E →L[ℝ] ℝ)) T₂
+  letI : ContMDiffVectorBundle 2
+      (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) T₃ I :=
+    ContMDiffVectorBundle.continuousLinearMap
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  let R : M → ℝ := g.scalarCurvature cov hcov t
+  let G : ∀ y : M, T₂ y :=
+    riemannianMetricCovariantTwoTensor (I := I) (M := M)
+  let O : ∀ y : M, T₂ y :=
+    fun y => g.curvatureOperatorTwoTensor cov hcov t y
+  let Ric : ∀ y : M, T₂ y :=
+    fun y => CovariantDerivative.ricciCovariantTwoTensor (cov t) y
+  have hshifted (y : M) :=
+    HamiltonIveyShiftedTensorTraceRegularity.of_curvatureOperatorRegularity
+      g cov hcov hLevi hdim t y (hregular y)
+  have hR : ∀ y : M, MDiffAt R y := by
+    intro y
+    simpa [R] using
+      (g.scalarRegularity_of_shiftedTensorRegularity
+        cov hcov hLevi hdim t y (hshifted y)).1
+  have hRdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) R y)) x := by
+    simpa [R] using
+      (g.scalarRegularity_of_shiftedTensorRegularity
+        cov hcov hLevi hdim t x (hshifted x)).2
+  have hOeq : O = R • G - (2 : ℝ) • Ric := by
+    funext y
+    ext u v
+    have hinner : (g t).inner y u v = Inner.inner ℝ u v := rfl
+    simp [O, R, G, Ric, curvatureOperatorTwoTensor,
+      riemannianMetricCovariantTwoTensor_apply,
+      ricciCovariantTwoTensor_apply, hinner, sub_eq_add_neg] <;> ring
+  have hG : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) z (G z)) y := by
+    intro y
+    exact riemannianMetricCovariantTwoTensor_mdifferentiableAt
+      (I := I) (E := E) (M := M) y
+  have hGderiv :
+      covariantTwoTensorCovariantDerivative (cov t) G = 0 := by
+    funext y
+    ext X u v
+    exact covariantTwoTensorCovariantDerivative_riemannianMetric_eq_zero
+      (cov t) ((hLevi t).2) y X u v
+  have hGfirst : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) z
+        (covariantTwoTensorCovariantDerivative (cov t) G z)) y := by
+    intro y
+    rw [hGderiv]
+    exact mdifferentiableAt_zeroSection (𝕜 := ℝ)
+      (F := E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃)
+        (B := M) (EB := E) (HB := H) (IB := I) (x := y)
+  have hRG : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) z ((R • G) z)) y := by
+    intro y
+    exact (hR y).smul_section (hG y)
+  have hRGderiv :
+      covariantTwoTensorCovariantDerivative (cov t) (R • G) =
+        R • covariantTwoTensorCovariantDerivative (cov t) G +
+          scalarTensorLeibnizTerm R G := by
+    funext y
+    exact covariantTwoTensorCovariantDerivative_smul_function
+      (cov t) (hG y) (hR y)
+  have hRGfirst : MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) z
+        (covariantTwoTensorCovariantDerivative (cov t) (R • G) z)) x := by
+    rw [hRGderiv, hGderiv]
+    simpa using
+      (CovariantDerivative.mdifferentiableAt_scalarTensorLeibnizTerm
+        R G hRdf (hG x))
+  have hLapRG : ∀ u v : TM x,
+      connectionLaplacian (cov t) (R • G) x u v =
+        CovariantDerivative.scalarLaplacian (cov t) R x * G x u v := by
+    intro u v
+    exact CovariantDerivative.connectionLaplacian_smul_riemannianMetric
+      (cov t) ((hLevi t).2) R hR hRdf u v
+  have hO : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) z (O z)) y := by
+    intro y
+    rcases hregular y with ⟨hOy, _⟩
+    simpa [O] using hOy y
+  have hOfirst : MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) z
+        (covariantTwoTensorCovariantDerivative (cov t) O z)) x := by
+    rcases hregular x with ⟨_, hOx⟩
+    simpa [O] using hOx
+  let NegO : ∀ y : M, T₂ y := (-1 : ℝ) • O
+  have hNegO : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) z (NegO z)) y := by
+    intro y
+    exact mdifferentiableAt_const.smul_section (hO y)
+  have hNegOderiv :
+      covariantTwoTensorCovariantDerivative (cov t) NegO =
+        (-1 : ℝ) • covariantTwoTensorCovariantDerivative (cov t) O := by
+    funext y
+    exact covariantTwoTensorCovariantDerivative_smul_const
+      (cov t) (-1) (hO y)
+  have hNegOfirst : MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) z
+        (covariantTwoTensorCovariantDerivative (cov t) NegO z)) x := by
+    rw [hNegOderiv]
+    exact mdifferentiableAt_const.smul_section hOfirst
+  have hRON : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) z ((R • G + NegO) z)) y := by
+    intro y
+    exact mdifferentiableAt_add_section (hRG y) (hNegO y)
+  have hRONderiv :
+      covariantTwoTensorCovariantDerivative (cov t) (R • G + NegO) =
+        covariantTwoTensorCovariantDerivative (cov t) (R • G) +
+          covariantTwoTensorCovariantDerivative (cov t) NegO := by
+    funext y
+    exact covariantTwoTensorCovariantDerivative_add
+      (cov t) (hRG y) (hNegO y)
+  have hRONfirst : MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) z
+        (covariantTwoTensorCovariantDerivative (cov t) (R • G + NegO) z)) x := by
+    rw [hRONderiv]
+    exact mdifferentiableAt_add_section hRGfirst hNegOfirst
+  have hRicEq : Ric = (1 / 2 : ℝ) • (R • G + NegO) := by
+    funext y
+    ext u v
+    have h := congrArg (fun Q => Q y u v) hOeq
+    simp [Pi.sub_apply, Pi.smul_apply, sub_eq_add_neg, NegO] at h ⊢
+    rw [h]
+    ring
+  have hRic : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) z (Ric z)) y := by
+    intro y
+    rw [hRicEq]
+    exact mdifferentiableAt_const.smul_section (hRON y)
+  have hRicderiv :
+      covariantTwoTensorCovariantDerivative (cov t) Ric =
+        (1 / 2 : ℝ) •
+          covariantTwoTensorCovariantDerivative (cov t) (R • G + NegO) := by
+    rw [hRicEq]
+    funext y
+    exact covariantTwoTensorCovariantDerivative_smul_const
+      (cov t) (1 / 2) (hRON y)
+  have hRicfirst : MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) z
+        (covariantTwoTensorCovariantDerivative (cov t) Ric z)) x := by
+    rw [hRicderiv]
+    exact mdifferentiableAt_const.smul_section hRONfirst
+  let NegRic : ∀ y : M, T₂ y := (-2 : ℝ) • Ric
+  have hNegRic : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] ℝ)) (E := T₂) z (NegRic z)) y := by
+    intro y
+    exact mdifferentiableAt_const.smul_section (hRic y)
+  have hNegRicDeriv :
+      covariantTwoTensorCovariantDerivative (cov t) NegRic =
+        (-2 : ℝ) • covariantTwoTensorCovariantDerivative (cov t) Ric := by
+    funext y
+    exact covariantTwoTensorCovariantDerivative_smul_const
+      (cov t) (-2) (hRic y)
+  have hNegRicFirst : MDiffAt
+      (fun z => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) (E := T₃) z
+        (covariantTwoTensorCovariantDerivative (cov t) NegRic z)) x := by
+    rw [hNegRicDeriv]
+    exact mdifferentiableAt_const.smul_section hRicfirst
+  have hOeqPlus : O = R • G + NegRic := by
+    simpa [NegRic, sub_eq_add_neg] using hOeq
+  have hLapNegRic :
+      connectionLaplacian (cov t) NegRic x =
+        (-2 : ℝ) • connectionLaplacian (cov t) Ric x :=
+    connectionLaplacian_smul_const (cov t) (-2) (hRicfirst)
+      hNegRicDeriv
+  have hLapAdd :
+      connectionLaplacian (cov t) (R • G + NegRic) x =
+        connectionLaplacian (cov t) (R • G) x +
+          connectionLaplacian (cov t) NegRic x :=
+    connectionLaplacian_add (cov t) hRGfirst hNegRicFirst
+      (by
+        funext y
+        exact covariantTwoTensorCovariantDerivative_add
+          (cov t) (hRG y) (hNegRic y))
+  have hLapO :
+      connectionLaplacian (cov t) O x =
+        connectionLaplacian (cov t) (R • G) x +
+          connectionLaplacian (cov t) NegRic x := by
+    rw [hOeqPlus]
+    exact hLapAdd
+  have hLapShift :
+      connectionLaplacian (cov t)
+          (g.curvatureNuShiftedContactTwoTensor
+            cov hcov hLevi hdim t x) x =
+        connectionLaplacian (cov t) O x := by
+    simpa only using
+      (connectionLaplacian_curvatureNuShiftedContactTwoTensor_eq_curvatureOperatorTwoTensor
+        g cov hcov hLevi hdim t x (hregular x))
+  unfold HamiltonIveyCurvatureOperatorLaplacian
+  intro u v
+  have hLapShiftUV := congrArg (fun B => B u v) hLapShift
+  have hLapOUV := congrArg (fun B => B u v) hLapO
+  have hLapNegRicUV := congrArg (fun B => B u v) hLapNegRic
+  rw [hLapShiftUV, hLapOUV]
+  simp only [add_apply]
+  rw [hLapNegRicUV, hLapRG u v]
+  have hinner : (g t).inner x u v = Inner.inner ℝ u v := rfl
+  rw [hinner]
+  simp [R, G, Ric, TimeDependentRiemannianMetric.scalarLaplacian]
+  ring
+
+
 /-! The following package contains only the static three-dimensional
 contractions used by the Ricci-trace bridge.  In particular, it does not
 contain either a Ricci evolution equation or an operator evolution equation. -/
@@ -885,10 +1175,11 @@ def HamiltonIveyCurvatureEvolutionCertificate.of_geometricContractions
   exact HamiltonIveyCurvatureEvolutionCertificate.of_connectionVariation
     g cov hcov hLevi hdim x A curvatureVelocity hvelocity hvariation hA hEvolution
 
-/-! The final public interface no longer accepts the curvature evolution PDE
-as an independent premise.  It asks for the connection variation and the
-static geometric contractions, derives a certificate at every time, and
-feeds those certificates to the Hamilton--Ivey capstone. -/
+/-! The final public interface no longer accepts the operator-Laplacian PDE
+as an independent premise.  It asks for genuine regularity of the actual
+curvature operator and derives that Laplacian identity above.  The scalar
+trace-evolution identity remains explicit until the mixed time--space
+Ricci-flow bridge is completed. -/
 
 theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_geometricEvolution
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
@@ -918,8 +1209,9 @@ theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_geometricEvolution
     (hTrace : ∀ {t : ℝ}, t ∈ Icc 0 T → ∀ x : M,
       HamiltonIveyMetricTraceEvolution g cov hcov
         (curvatureVelocity t) t x)
-    (hOperatorLaplacian : ∀ {t : ℝ}, t ∈ Icc 0 T → ∀ x : M,
-      HamiltonIveyCurvatureOperatorLaplacian g cov hcov hLevi hdim t x)
+    (hOperatorRegularity : ∀ {t : ℝ}, t ∈ Icc 0 T → ∀ y : M,
+      g.HamiltonIveyCurvatureOperatorRegularity
+        cov hcov hLevi hdim t y)
     (contractions : ∀ {t : ℝ}, t ∈ Icc 0 T → ∀ x : M,
       HamiltonIveyRicciTraceContractions
         g cov hcov hLevi hdim (curvatureVelocity t) t x)
@@ -976,7 +1268,9 @@ theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_geometricEvolution
       (curvatureVelocity t)
       (hvelocity (t := t) ht) (hvariation (t := t) ht) hA
       (hTrace (t := t) ht x)
-      (hOperatorLaplacian (t := t) ht x)
+      (hamiltonIveyCurvatureOperatorLaplacian_of_globalRegularity
+        g cov hcov hLevi hdim t x
+        (fun y => hOperatorRegularity (t := t) ht y))
       (contractions (t := t) ht x)
   exact hamiltonIveyPinching_of_intrinsicRicciFlow_and_curvatureEvolutionCertificates
     g cov hcov hLevi hdim gdot hK hT hflow evolution
