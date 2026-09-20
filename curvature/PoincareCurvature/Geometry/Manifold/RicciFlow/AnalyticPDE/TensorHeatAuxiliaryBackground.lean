@@ -164,8 +164,8 @@ theorem exists_short_tensorHeat_wellPosed_torsionFreeAuxiliaryBackground
     (b : Module.Basis (Fin d) ℝ E)
     (hT : t₀ < T) (hα : 0 < α) (hα1 : α < 1) :
     ∃ (cov : CovariantDerivative I E TM)
-      (hTorsionFree : cov.IsTorsionFree)
-      (hTorsionZero : cov.torsion = 0)
+      (_hTorsionFree : cov.IsTorsionFree)
+      (_hTorsionZero : cov.torsion = 0)
       (hcovOne : ContMDiffCovariantDerivative cov 1)
       (hcovTwo : ContMDiffCovariantDerivative cov 2)
       (htwoOne : ContMDiffCovariantDerivative
