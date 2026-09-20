@@ -2692,29 +2692,17 @@ theorem extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_center
     mvfderiv (I := I) φ p X =
       fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) p φ) (Set.range I)
         ((extChartAt I p) p) X := by
-  let z : E := (extChartAt I p) p
-  have hz : z ∈ Set.range I := by
-    simp [z]
-  have hzsymm : (extChartAt I p).symm z = p := by
-    simp [z]
-  have hφ' : HasMFDerivAt I 𝓘(ℝ) φ ((extChartAt I p).symm z)
-      (mfderiv I 𝓘(ℝ) φ p) := by
-    rw [hzsymm]
-    exact hφ.hasMFDerivAt
-  have hcomp :=
-      (HasMFDerivAt.comp_hasMFDerivWithinAt
-        (f := (extChartAt I p).symm) (s := Set.range I) (x := (extChartAt I p) p)
-        hφ'
-        (mdifferentiableWithinAt_extChartAt_symm
-          (mem_extChartAt_target (I := I) p)).hasMFDerivWithinAt)
-  have hderiv :=
-      hcomp.hasFDerivWithinAt.fderivWithin (I.uniqueDiffOn.uniqueDiffWithinAt hz)
-  simp only [writtenInExtChartAt, ext_chart_model_space_apply] at ⊢
-  congr 1
-  have h := hderiv
-  simp only [mfderivWithin_range_extChartAt_symm, ContinuousLinearMap.comp_id] at h
-  exact h.symm
+  -- `MDifferentiableAt.mfderiv` identifies `mfderiv` with the within Fréchet
+  -- derivative of the chart expression; `mvfderiv` only postcomposes with the
+  -- identity equiv `NormedSpace.fromTangentSpace` on the model space `ℝ`.
+  have hmf : mfderiv I 𝓘(ℝ) φ p =
+      fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) p φ) (Set.range I) ((extChartAt I p) p) :=
+    MDifferentiableAt.mfderiv hφ
+  show (NormedSpace.fromTangentSpace (φ p)) (mfderiv I 𝓘(ℝ) φ p X) = _
+  rw [hmf]
+  rfl
 
+open scoped Bundle in
 /-- Metric compatibility of the chosen Levi-Civita slice, specialized to the
 canonical `extend` sections through two tangent vectors. -/
 theorem chosenLeviCivitaFamily_extDerivFun_inner_extend_eq
@@ -2737,7 +2725,11 @@ theorem chosenLeviCivitaFamily_extDerivFun_inner_extend_eq
     simpa using FiberBundle.mdifferentiableAt_extend (I := I) (F := E) u
   have hv : MDiffAt (T% (FiberBundle.extend E v)) p := by
     simpa using FiberBundle.mdifferentiableAt_extend (I := I) (F := E) v
-  simpa using hlevi.2 (x := p) (σ := FiberBundle.extend E u)
+  -- The `RiemannianBundle` inner from `(g t).toRiemannianMetric` unfolds
+  -- definitionally to `(g t).inner`; record it as a rewrite.
+  have hinner : ∀ (y : M) (a b : TM y), inner ℝ a b = (g t).inner y a b :=
+    fun y a b => rfl
+  simpa [hinner] using hlevi.2 (x := p) (σ := FiberBundle.extend E u)
     (τ := FiberBundle.extend E v) hu hv X
 
 namespace SmoothSelfDiffeomorph3Family
@@ -2846,6 +2838,28 @@ noncomputable def tangentVectorOfCoordinate
     FiberBundle.mem_baseSet_trivializationAt' x
   ((trivializationAt E TM x).continuousLinearEquivAt ℝ x hx).symm uE
 
+/-- Roundtrip for the tangent-bundle trivialization at its base point:
+pushing a tangent vector through the trivialization and back recovers it.
+This replaces definitional unfolding of `TangentSpace` used before it became
+a non-reducible definition. -/
+@[simp]
+theorem trivializationAt_symm_apply_snd (x : M) (u : TangentSpace I x) :
+    (trivializationAt E (TangentSpace I) x).symm x
+      ((trivializationAt E (TangentSpace I) x) ⟨x, u⟩).2 = u := by
+  have hx := FiberBundle.mem_baseSet_trivializationAt' (F := E) (E := TangentSpace I) x
+  exact (Bundle.Trivialization.continuousLinearEquivAt ℝ
+    (trivializationAt E (TangentSpace I) x) x hx).symm_apply_apply u
+
+/-- Reverse roundtrip: projecting back after pushing a model vector through the
+trivialization recovers it. -/
+@[simp]
+theorem trivializationAt_snd_symm_apply (x : M) (uE : E) :
+    ((trivializationAt E (TangentSpace I) x) ⟨x,
+      (trivializationAt E (TangentSpace I) x).symm x uE⟩).2 = uE := by
+  have hx := FiberBundle.mem_baseSet_trivializationAt' (F := E) (E := TangentSpace I) x
+  exact (Bundle.Trivialization.continuousLinearEquivAt ℝ
+    (trivializationAt E (TangentSpace I) x) x hx).apply_symm_apply uE
+
 /-- The source tangent coordinate map is the manifold derivative of the
 centered extended chart at its base point. -/
 theorem sourceTangentCoordinate_eq_mfderiv_extChartAt_self_apply
@@ -2930,7 +2944,10 @@ theorem mpullbackWithin_extChartAt_symm_extend_eventuallyEq_const
   have hext :
       FiberBundle.extend E pw q =
         ((trivializationAt E (TangentSpace I) p).symmL ℝ q) cw := by
-    simp [cw, FiberBundle.extend, sourceTangentCoordinate]
+    have hq : q ∈ (trivializationAt E (TangentSpace I) p).baseSet := by
+      simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hqsrc
+    simp [cw, FiberBundle.extend, sourceTangentCoordinate,
+      Bundle.Trivialization.symmL_apply _ hq]
   have hsymmL :
       ((trivializationAt E (TangentSpace I) p).symmL ℝ q) =
         mfderivWithin (𝓘(ℝ, E)) I (extChartAt I p).symm (Set.range I) y := by
@@ -3211,8 +3228,10 @@ theorem metricBilinearCoordinateField_fixedTime_contDiffWithinAt
     let Ftot : M → _root_.Bundle.TotalSpace BilF (fun y : M ↦ TM y →L[ℝ] TStar y) :=
       fun y ↦ _root_.Bundle.TotalSpace.mk' BilF y ((g t).inner y)
     exact ((contMDiffAt_hom_bundle (f := Ftot) (x₀ := p)).mp ((g t).contMDiff p)).2
-  simpa [f, metricBilinearCoordinateField, writtenInExtChartAt] using
-    (contMDiffAt_iff.mp hf).2
+  have h2 := (contMDiffAt_iff.mp hf).2
+  rw [extChartAt_model_space_eq_id] at h2
+  simp only [f, BilF, TM, OneF, TStar, metricBilinearCoordinateField] at h2 ⊢
+  exact h2
 
 /-- Fixed-time spatial Fréchet derivative of the named metric-coordinate field
 within the model range, obtained from the `C²` chart smoothness theorem. -/
@@ -4845,6 +4864,7 @@ theorem metricBilinearCoordinateField_apply_sourceTangentCoordinate_eq_inner_ext
     (sourceTangentCoordinate (I := I) p v)]
   simp [sourceTangentCoordinate, FiberBundle.extend]
 
+open scoped Bundle in
 /-- Fixed-time spatial derivative of the metric-coordinate field at the chart
 center, evaluated on centered source tangent coordinates, rewritten as the
 exterior derivative of the metric on the canonical `extend` sections. -/
@@ -4901,7 +4921,9 @@ theorem metricBilinearCoordinateField_fixedTime_fderivWithin_sourceTangentCoordi
       simpa using FiberBundle.mdifferentiableAt_extend (I := I) (F := E) u
     have hv : MDiffAt (T% (FiberBundle.extend E v)) p := by
       simpa using FiberBundle.mdifferentiableAt_extend (I := I) (F := E) v
-    simpa [φ] using CovariantDerivative.mdiffAt_inner_sections
+    have hinner : ∀ (y : M) (a b : TM y), inner ℝ a b = (g t).inner y a b :=
+      fun y a b => rfl
+    simpa [φ, hinner] using CovariantDerivative.mdiffAt_inner_sections
       (I := I) (E := E) (M := M) (x := p)
       (σ := FiberBundle.extend E u) (τ := FiberBundle.extend E v) hu hv
   rw [← hslot]
@@ -5322,7 +5344,8 @@ theorem pullbackMetricTangentCoordinateMap_eq_mfderiv_comp_fixedChart
       (f := fN) (g := gN) (ϕ := A) (x₀ := t) (x := τ) hxsrc hysrc
   have hpush :
       A τ = mfderiv I I ((Φ τ) : M → M) x := by
-    simpa [A] using (Φ τ).pushforwardTangent_eq_mfderiv x
+    show (Φ τ).pushforwardTangent x = _
+    exact (Φ τ).pushforwardTangent_eq_mfderiv x
   simpa [pullbackMetricTangentCoordinateMap, inTangentCoordinates, fN, gN, A, hpush]
     using hcoord
 
@@ -5559,8 +5582,7 @@ theorem eventually_extChartAt_model_mem_target_of_continuousAt
   have hpair :
       ContinuousAt
         (fun p : M × ℝ ↦ ((extChartAt I x) p.1, p.2)) (x, t) := by
-    simpa using
-      (continuousAt_extChartAt (I := I) x).prodMap' continuousAt_id
+    exact (continuousAt_extChartAt (I := I) x).prodMap' (continuousAt_id (x := t))
   have hcomp :
       ContinuousAt
         (fun p : M × ℝ ↦ model ((extChartAt I x) p.1, p.2)) (x, t) := by
@@ -9246,8 +9268,8 @@ theorem const_pullbackMetricFamily_inner_hasDerivAt
           (((SmoothSelfDiffeomorph3Family.const (I := I) (M := M) φ τ).pushforwardTangent x u))
           (((SmoothSelfDiffeomorph3Family.const (I := I) (M := M) φ τ).pushforwardTangent x v)))
       (gdot t (φ x) (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)) t := by
-  simpa [SmoothSelfDiffeomorph3Family.const] using
-    hderiv ht (φ x) (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
+  simp only [SmoothSelfDiffeomorph3Family.const]
+  exact hderiv ht (φ x) (φ.pushforwardTangent x u) (φ.pushforwardTangent x v)
 
 /-- Static scalar derivative hypotheses repackage to the tensor
 time-derivative statement for a fixed `C^3` diffeomorphism pullback. -/
@@ -11955,9 +11977,7 @@ theorem coordinateProductGraph_tendstoWithin_of_isOpen
       (𝓝[domain] (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) := by
   have htime :
       ContinuousWithinAt (fun τ : ℝ ↦ τ) s t := by
-    simpa using
-      (continuousWithinAt_id (s := s) (x := t) :
-        ContinuousWithinAt (id : ℝ → ℝ) s t)
+    exact continuousWithinAt_id
   have hcoord :
       ContinuousWithinAt
         (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x)) s t :=
@@ -14476,9 +14496,7 @@ theorem coordinateProductGraph_tendsto_nhdsWithin_of_isOpen
       (𝓝[domain] (t, (extChartAt I ((G.maps3 t) x)) ((G.maps3 t) x))) := by
   have htime :
       ContinuousWithinAt (fun τ : ℝ ↦ τ) (Icc tmin tmax) t := by
-    simpa using
-      (continuousWithinAt_id (s := Icc tmin tmax) (x := t) :
-        ContinuousWithinAt (id : ℝ → ℝ) (Icc tmin tmax) t)
+    exact continuousWithinAt_id
   have hcoord :
       ContinuousWithinAt
         (fun τ : ℝ ↦ (extChartAt I ((G.maps3 t) x)) ((G.maps3 τ) x))
@@ -14809,9 +14827,7 @@ theorem variationalLocalFlow_productGraph_tendsto_nhdsWithin_of_isOpen
       (𝓝[Icc tmin tmax] t) (𝓝[domain] (t, α.flow (xE, t))) := by
   have htime :
       ContinuousWithinAt (fun τ : ℝ ↦ τ) (Icc tmin tmax) t := by
-    simpa using
-      (continuousWithinAt_id (s := Icc tmin tmax) (x := t) :
-        ContinuousWithinAt (id : ℝ → ℝ) (Icc tmin tmax) t)
+    exact continuousWithinAt_id
   have hgraph :
       ContinuousWithinAt (fun τ : ℝ ↦ (τ, α.flow (xE, τ)))
         (Icc tmin tmax) t :=
@@ -15594,7 +15610,8 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifference
       (Ioo tmin tmax) := by
   let G' := G.mono (s := Ioo tmin tmax) (t := Icc tmin tmax)
     (fun _ ht ↦ Ioo_subset_Icc_self ht)
-  simpa [G'] using
+  have hmaps : G'.maps3 = G.maps3 := rfl
+  simpa [G', hmaps] using
     G'.hasTimeDerivativeOn_of_metricCoordinateField_timeDifference
       (fun {t} ht ↦ isOpen_Ioo.mem_nhds ht) hdata
 
@@ -15686,12 +15703,13 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt
       (Ioo tmin tmax) := by
   let G' := G.mono (s := Ioo tmin tmax) (t := Icc tmin tmax)
     (fun _ ht ↦ Ioo_subset_Icc_self ht)
-  simpa [G'] using
+  have hmaps : G'.maps3 = G.maps3 := rfl
+  simpa [G', hmaps] using
     G'.hasTimeDerivativeOn_of_metricCoordinateField_hasFDerivAt
       (fun {t} ht ↦ isOpen_Ioo.mem_nhds ht)
       (by
         intro t ht x u v
-        simpa [G'] using hdata ht x u v)
+        exact hdata ht x u v)
 
 /-- Closed-Picard-interval specialization of
 `hasTimeDerivativeOn_of_eventuallyEq_metricCoordinateField_hasFDerivAt` on the
@@ -15750,12 +15768,13 @@ theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivA
       (Ioo tmin tmax) := by
   let G' := G.mono (s := Ioo tmin tmax) (t := Icc tmin tmax)
     (fun _ ht ↦ Ioo_subset_Icc_self ht)
-  simpa [G'] using
+  have hmaps : G'.maps3 = G.maps3 := rfl
+  simpa [G', hmaps] using
     G'.hasTimeDerivativeOn_of_eventuallyEq_metricCoordinateField_hasFDerivAt
       (fun {t} ht ↦ isOpen_Ioo.mem_nhds ht)
       (by
         intro t ht x u v
-        simpa [G'] using hdata ht x u v)
+        exact hdata ht x u v)
 
 /-- Direct-velocity closed-Picard specialization of
 `hasTimeDerivativeOn_of_metricCoordinateField_hasFDerivAt_self` on the open
@@ -15810,12 +15829,13 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_hasFDerivAt_self
       (Ioo tmin tmax) := by
   let G' := G.mono (s := Ioo tmin tmax) (t := Icc tmin tmax)
     (fun _ ht ↦ Ioo_subset_Icc_self ht)
-  simpa [G'] using
+  have hmaps : G'.maps3 = G.maps3 := rfl
+  simpa [G', hmaps] using
     G'.hasTimeDerivativeOn_of_metricCoordinateField_hasFDerivAt_self
       (fun {t} ht ↦ isOpen_Ioo.mem_nhds ht)
       (by
         intro t ht x u v
-        simpa [G'] using hdata ht x u v)
+        exact hdata ht x u v)
 
 /-- Readout-field direct-velocity closed-Picard specialization of
 `hasTimeDerivativeOn_of_eventuallyEq_metricCoordinateField_hasFDerivAt_self` on
@@ -15872,12 +15892,13 @@ theorem hasTimeDerivativeOn_Ioo_of_eventuallyEq_metricCoordinateField_hasFDerivA
       (Ioo tmin tmax) := by
   let G' := G.mono (s := Ioo tmin tmax) (t := Icc tmin tmax)
     (fun _ ht ↦ Ioo_subset_Icc_self ht)
-  simpa [G'] using
+  have hmaps : G'.maps3 = G.maps3 := rfl
+  simpa [G', hmaps] using
     G'.hasTimeDerivativeOn_of_eventuallyEq_metricCoordinateField_hasFDerivAt_self
       (fun {t} ht ↦ isOpen_Ioo.mem_nhds ht)
       (by
         intro t ht x u v
-        simpa [G'] using hdata ht x u v)
+        exact hdata ht x u v)
 
 /-- A geometric-slot version of
 `coordinatePullbackMetricFieldDerivativeOn_of_metricCoordinateField`.
@@ -21372,12 +21393,13 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifference_variatio
       (Ioo tmin tmax) := by
   let G' := G.mono (s := Ioo tmin tmax) (t := Icc tmin tmax)
     (fun _ ht ↦ Ioo_subset_Icc_self ht)
+  have hmaps : G'.maps3 = G.maps3 := rfl
   have htd : MetricCoordinateFieldTimeDifferenceComponentDataOn
       (I := I) (M := M) G' g gdot := by
     intro t ht x u v
     obtain ⟨xE, hxE, Btime, htime, hA_eq, hvalue⟩ := hdata ht x u v
     refine ⟨Btime, Df t (α.flow (xE, t)), ?_, ?_, ?_⟩
-    · simpa [G'] using htime
+    · simpa [G', hmaps] using htime
     · have hA_t :
           SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
               (I := I) (M := M) G.maps3 t t x =
@@ -21402,17 +21424,17 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifference_variatio
           SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
               (I := I) (M := M) G'.maps3 t t x =
             α.tangent xE t := by
-        simpa [G'] using hA_t
+        simpa [G', hmaps] using hA_t
       have hAconcrete' :
           HasDerivAt
             (fun τ : ℝ ↦
               SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
                 (I := I) (M := M) G'.maps3 t τ x)
             ((Df t (α.flow (xE, t))).comp (α.tangent xE t)) t := by
-        simpa [G'] using hAconcrete
+        simpa [G', hmaps] using hAconcrete
       simpa [hA_t'] using hAconcrete'
-    · simpa [G'] using hvalue
-  simpa [G'] using
+    · exact hvalue
+  simpa [G', hmaps] using
     G'.hasTimeDerivativeOn_of_metricCoordinateField_timeDifference
       (fun {t} ht ↦ isOpen_Ioo.mem_nhds ht) htd
 
@@ -21633,12 +21655,13 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifference_variatio
       (Ioo tmin tmax) := by
   let G' := G.mono (s := Ioo tmin tmax) (t := Icc tmin tmax)
     (fun _ ht ↦ Ioo_subset_Icc_self ht)
+  have hmaps : G'.maps3 = G.maps3 := rfl
   have htd : MetricCoordinateFieldTimeDifferenceComponentDataOnSelf
       (I := I) (M := M) G' g gdot := by
     intro t ht x u v
     obtain ⟨xE, hxE, Btime, htime, hA_eq, hvalue⟩ := hdata ht x u v
     refine ⟨Btime, Df t (α.flow (xE, t)), ?_, ?_, ?_⟩
-    · simpa [G'] using htime
+    · simpa [G', hmaps] using htime
     · have hA_t :
           SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
               (I := I) (M := M) G.maps3 t t x =
@@ -21663,17 +21686,17 @@ theorem hasTimeDerivativeOn_Ioo_of_metricCoordinateField_timeDifference_variatio
           SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
               (I := I) (M := M) G'.maps3 t t x =
             α.tangent xE t := by
-        simpa [G'] using hA_t
+        simpa [G', hmaps] using hA_t
       have hAconcrete' :
           HasDerivAt
             (fun τ : ℝ ↦
               SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
                 (I := I) (M := M) G'.maps3 t τ x)
             ((Df t (α.flow (xE, t))).comp (α.tangent xE t)) t := by
-        simpa [G'] using hAconcrete
+        simpa [G', hmaps] using hAconcrete
       simpa [hA_t'] using hAconcrete'
-    · simpa [G'] using hvalue
-  simpa [G'] using
+    · exact hvalue
+  simpa [G', hmaps] using
     G'.hasTimeDerivativeOn_of_metricCoordinateField_timeDifference_self
       (fun {t} ht ↦ isOpen_Ioo.mem_nhds ht) htd
 
@@ -35431,10 +35454,8 @@ theorem identityOfSubsingletonModel_pullbackMetricInnerDerivativeData
   refine (IntrinsicDeTurckGaugeFlowExistence.identityOfSubsingletonModel
     (E := E) (H := H) (I := I) (M := M) ivp).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn ?_
   intro sol
-  simpa [IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonModel,
-    IntrinsicDeTurckGaugeFlowExistence.identityOfSubsingletonModel] using
-    IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonModel_hpullDerivative
-      (E := E) (H := H) (I := I) (M := M) ivp sol
+  exact IntrinsicDeTurckGaugeFlowExistenceFamily.identityOfSubsingletonModel_hpullDerivative
+    (E := E) (H := H) (I := I) (M := M) ivp sol
 
 /-- Fixed-IVP empty-manifold synonym of the identity raw `C^3` gauge-flow scalar data. -/
 theorem identityOfIsEmpty_pullbackMetricInnerDerivativeData
@@ -36318,7 +36339,7 @@ theorem deTurckVector_mdiffAt_of_solution_eq_restrictSymmetricIcc_of_contMDiffCo
             G.solution.1.toIntrinsicDeTurckSolution.metric
             G.solution.1.toIntrinsicDeTurckSolution.background t)) p := by
   intro t ht p
-  simpa [hGsol] using
+  simpa [hGsol, IntrinsicDeTurckLocalSolution.restrictSymmetricIcc] using
     intrinsicDeTurckVectorField_mdiffAt_of_contMDiffCovariantDerivative_background
       (I := I) (M := M)
       sol.1.toIntrinsicDeTurckSolution.metric
@@ -37586,7 +37607,8 @@ theorem exists_restrictSymmetricIcc_spatial_tangent_correction_eq_neg_intrinsicD
             (I := I) (M := M)
             G.solution.1.toIntrinsicDeTurckSolution.metric
             G.solution.1.toIntrinsicDeTurckSolution.background t
-            (by simpa [hGsol] using hbackground (hsub htIcc)) p)
+            (by simpa [hGsol, IntrinsicDeTurckLocalSolution.restrictSymmetricIcc] using
+              hbackground (hsub htIcc)) p)
       data.htime
       (fun {t} ht x w xE hxE htangent => by
         have htIcc : t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε) := by
@@ -39702,7 +39724,8 @@ theorem exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_and_spatial_tangent_
               (I := I) (M := M)
               G.solution.1.toIntrinsicDeTurckSolution.metric
               G.solution.1.toIntrinsicDeTurckSolution.background t
-              (by simpa [hGsol] using hbackground (hsub htIcc)) p)
+              (by simpa [hGsol, IntrinsicDeTurckLocalSolution.restrictSymmetricIcc] using
+              hbackground (hsub htIcc)) p)
         data.htime
         (fun {t} ht x w xE hxE htangent => by
           have htIcc : t ∈ Icc (ivp.initialTime - ε) (ivp.initialTime + ε) := by
@@ -41651,7 +41674,8 @@ theorem exists_restrictSymmetricIcc_spatial_tangent_correction_eq_neg_intrinsicD
             (I := I) (M := M)
             (G.solution ivp).1.toIntrinsicDeTurckSolution.metric
             (G.solution ivp).1.toIntrinsicDeTurckSolution.background t
-            (by simpa [hGsol ivp] using hbackground ivp (hsub ivp htIcc)) p)
+            (by simpa [hGsol ivp, IntrinsicDeTurckLocalSolution.restrictSymmetricIcc] using
+              hbackground ivp (hsub ivp htIcc)) p)
       data.htime
       (fun {t} ht x w xE hxE htangent => by
         have htIcc : t ∈ Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) := by
@@ -41950,7 +41974,8 @@ theorem exists_restrictSymmetricIcc_hasTimeDerivativeOn_Ioo_and_spatial_tangent_
               (I := I) (M := M)
               (G.solution ivp).1.toIntrinsicDeTurckSolution.metric
               (G.solution ivp).1.toIntrinsicDeTurckSolution.background t
-              (by simpa [hGsol ivp] using hbackground ivp (hsub ivp htIcc)) p)
+              (by simpa [hGsol ivp, IntrinsicDeTurckLocalSolution.restrictSymmetricIcc] using
+              hbackground ivp (hsub ivp htIcc)) p)
         data.htime
         (fun {t} ht x w xE hxE htangent => by
           have htIcc : t ∈ Icc (ivp.initialTime - ε ivp) (ivp.initialTime + ε ivp) := by
