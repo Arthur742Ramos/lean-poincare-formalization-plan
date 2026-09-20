@@ -1,4 +1,6 @@
-import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLocalFrame
+module
+
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLocalFrame
 
 /-!
 # Spatial derivatives of inverse local Gram matrices
