@@ -26,6 +26,6 @@ nontrivial result with a plausible specialist audience and is materially
 stronger than a standalone reaction calculation. Independent review must still
 decide whether this ODE theorem alone clears Palomar's research-interest bar.
 The strongest eventual contribution to the repository's main objective remains
-the local or complete-flow geometric estimate, using this package as an
-internally developed dependency after the curvature-evolution and tensor
-maximum-principle bridge is proved.
+the local geometric estimate, if its scope is explicitly selected and its proof is completed. The current `curvature/` follow-up derives actual curvature evolution from `IsRicciFlowOn` under explicit joint time--space/spatial regularity and proves a conditional geometric pinching endpoint with explicit support-contact regularity. Those hypotheses remain explicit; this is not unconditional regularity theory.
+
+**External-overlap update (2026-09-20).** An upstream Lean formalization at [`qinz1yang/differential-geometry`, commit `4fbccdfc73f986ce59d7bb66e8bb078f8007ffe2`](https://github.com/qinz1yang/differential-geometry/blob/4fbccdfc73f986ce59d7bb66e8bb078f8007ffe2/DifferentialGeometry/Geometry/Flow/RicciFlow/DimensionThree/HamiltonIvey/MaximumPrinciple.lean) already proves the global compact-flow Hamilton--Ivey estimate. Accordingly, neither this ODE result nor the conditional global geometric endpoint is currently cleared as a distinct Palomar entry for that classical global theorem. Chen--Xu--Zhang's local estimate ([Theorem 1.3](https://arxiv.org/html/1206.1814)) is a possible separate target, not implemented here. This is a research-interest disclosure, not reused code; no new Palomar intake is authorized.

@@ -85,12 +85,24 @@ and authorization relationship have been explicitly confirmed.
 | CB-01 | Double-contracted second Bianchi identity | Double contraction of the actual corrected curvature derivative; no separate Ricci/scalar differentiation or Einstein-divergence identity | Passed (user-confirmed 2026-09-06), submitted commit `90d215d81d30a5f67922dce00dfa160b4878e1c5`; public registration not independently checked |
 | SR-01 | Schur rigidity and geometric contracted Bianchi | Actual Ricci/scalar differentiation, divergence-free Einstein tensor, and global Einstein-factor constancy; three-dimensional full-curvature rigidity | Current reviewed pair (maintainer-reported): intake `58oc259e0tln`, commit `3955dd0b8d1eaeaa7d7dd7675864352dddcf0ffb`. Original intake `l20vtgq7gct2` at `4317d35a3cf3bbf02859fcd811e8dacc83f51739` is historical. Not cleared for another intake: substantive mathematical research gate unresolved. See `schur-rigidity/SUBMISSION.md` and `RESEARCH-GATE.md` there. |
 | BM-01 | Bonnet--Myers diameter and compactness | Actual Levi--Civita Ricci lower bound implies compactness and the sharp `pi / sqrt K` diameter bound on a complete connected Riemannian manifold | Complete independent Lean proof and focused Palomar package under `bonnet-myers/`; no registry intake is authorized |
-| HI-ODE | Hamilton--Ivey curvature-ODE pinching | Preservation of the logarithmic defect along ordered curvature-reaction ODE solutions, deriving the scalar barrier and including the exact derivative and strict `(-nu)/9` coercivity | Proved independently with Mathlib only under `hamilton-ivey-reaction/`; coherent ODE-level candidate pending independent research-interest review and required renderer gates. The `curvature/` follow-up now also proves a conditional intrinsic geometric Hamilton--Ivey endpoint: it derives curvature evolution from `IsRicciFlowOn` plus explicit mixed/spatial regularity and proves pinching with explicit support-contact regularity. This is not yet cleared as a distinct Palomar result; novelty and submission boundaries require an independent research-interest review, and no new intake is authorized. |
+| HI-ODE | Hamilton--Ivey curvature-ODE pinching | Preservation of the logarithmic defect along ordered curvature-reaction ODE solutions, deriving the scalar barrier and including the exact derivative and strict `(-nu)/9` coercivity | Proved independently with Mathlib only under `hamilton-ivey-reaction/`; no Palomar entry is cleared. The `curvature/` follow-up also proves a conditional intrinsic geometric Hamilton--Ivey endpoint from `IsRicciFlowOn` plus explicit mixed/spatial regularity and support-contact regularity. An upstream Lean project already formalizes the classical global compact-flow Hamilton--Ivey estimate (see the dated overlap review below), so that global theorem is not a defensible new-entry target without a materially distinct scope. No new intake is authorized. |
 
 The table is a portfolio, not a promise that every row should be submitted as
 written. A row may be merged with a neighboring row when the dependency closure
 and theorem statement form one coherent contribution, or split when a distinct
 library result has an independently defensible boundary.
+
+## Hamilton--Ivey external-overlap review (2026-09-20)
+
+The upstream Lean repository
+[`qinz1yang/differential-geometry`](https://github.com/qinz1yang/differential-geometry)
+already contains `hamilton_ivey_pinching` at immutable commit
+[`4fbccdfc73f986ce59d7bb66e8bb078f8007ffe2`](https://github.com/qinz1yang/differential-geometry/blob/4fbccdfc73f986ce59d7bb66e8bb078f8007ffe2/DifferentialGeometry/Geometry/Flow/RicciFlow/DimensionThree/HamiltonIvey/MaximumPrinciple.lean).
+It proves the classical global scalar lower bound and logarithmic Hamilton--Ivey pinching estimate for a compact three-dimensional Ricci-flow solution from an initial curvature-operator lower bound. This is an existing formalization, not code reused by this repository.
+
+The current `curvature/` result derives actual curvature evolution from `IsRicciFlowOn` and explicit joint regularity, then proves a conditional pinching endpoint with explicit curvature/operator and support-contact regularity. This substantially overlaps the already formalized global theorem and is not presently cleared as a distinct Palomar result. Do not submit the same global theorem by changing packaging or hypotheses cosmetically.
+
+A potentially distinct target is the local Hamilton--Ivey estimate of Chen, Xu, and Zhang ([Theorem 1.3](https://arxiv.org/html/1206.1814)). It is not proved here and would require an explicit scope decision, complete proof, and renewed review and verification. This overlap is a novelty disclosure only; no files or results from the external formalization have been vendored or reused.
 
 ## Order of work
 
