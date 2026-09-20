@@ -45,8 +45,9 @@ def standardDeTurckDifferenceBilinear
     (background : ConnectionFamily (I := I) (M := M))
     (t : ℝ) (x : M) :
     TM x →L[ℝ] TM x →L[ℝ] TM x :=
-  CovariantDerivative.difference
-    ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
+  ContinuousLinearMap.flipₗᵢ ℝ (TM x) (TM x) (TM x)
+    (CovariantDerivative.difference
+      ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x)
 
 @[simp] theorem standardDeTurckDifferenceBilinear_apply
     (g : MetricFamily (I := I) (M := M))
@@ -54,7 +55,7 @@ def standardDeTurckDifferenceBilinear
     (t : ℝ) (x : M) (u v : TM x) :
     standardDeTurckDifferenceBilinear (I := I) (M := M) g background t x u v =
       (CovariantDerivative.difference
-        ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x u) v := rfl
+        ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x v) u := rfl
 
 /-- The standard DeTurck vector `W = tr_g(∇ᵍ - ∇̄)`.  Unlike the legacy
 trace-one-form construction, this contracts both lower connection indices and
@@ -98,7 +99,7 @@ theorem standardDeTurckVectorField_eq_sum_localFrame_inverseGram
          CovariantDerivative.localFrameInverseGramMatrix (I := I) e b x i j •
            (CovariantDerivative.difference
              ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
-             (e.localFrame b i x)) (e.localFrame b j x)) := by
+             (e.localFrame b j x)) (e.localFrame b i x)) := by
   letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
   let _ : FiniteDimensional ℝ (TM x) :=
     VectorBundle.finiteDimensional ℝ E TM x
