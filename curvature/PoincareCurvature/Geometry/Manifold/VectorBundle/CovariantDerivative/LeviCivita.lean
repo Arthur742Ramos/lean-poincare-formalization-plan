@@ -514,6 +514,18 @@ theorem exists_contMDiffAffineConnection [T2Space M] [SigmaCompactSpace M] [IsMa
   rcases affineConnection_contMDiff_nonempty (I := I) (E := E) (M := M) with ⟨⟨cov, hcov⟩⟩
   exact ⟨cov, hcov⟩
 
+/-- The tangent bundle admits a global `C^2` affine connection. -/
+theorem affineConnection_contMDiff_nonempty_two
+    [T2Space M] [SigmaCompactSpace M] [IsManifold I ∞ M] :
+    Nonempty { cov : CovariantDerivative I E TM // ContMDiffCovariantDerivative cov 2 } :=
+  CovariantDerivative.contMDiff_nonempty_two (I := I) (F := E) (V := TM)
+
+theorem exists_contMDiffAffineConnection_two
+    [T2Space M] [SigmaCompactSpace M] [IsManifold I ∞ M] :
+    ∃ cov : CovariantDerivative I E TM, ContMDiffCovariantDerivative cov 2 := by
+  rcases affineConnection_contMDiff_nonempty_two (I := I) (E := E) (M := M) with ⟨⟨cov, hcov⟩⟩
+  exact ⟨cov, hcov⟩
+
 section Existence
 
 variable (cov : CovariantDerivative I E TM)

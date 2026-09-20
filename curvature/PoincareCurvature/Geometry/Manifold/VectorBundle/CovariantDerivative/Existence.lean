@@ -939,13 +939,14 @@ end Global
 section GlobalRegularity
 
 variable [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [CompleteSpace F]
-  [IsManifold I ∞ M] [ContMDiffVectorBundle 2 F V I]
-  [T2Space M] [SigmaCompactSpace M]
+  [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
-/-- Every finite-dimensional `C^2` real vector bundle over a Hausdorff σ-compact smooth manifold
-admits a global `C^1` covariant derivative. -/
-theorem contMDiff_nonempty :
-    Nonempty { cov : CovariantDerivative I F V // ContMDiffCovariantDerivative cov 1 } := by
+/-- Every finite-dimensional `C^{n+1}` real vector bundle over a Hausdorff σ-compact smooth
+manifold admits a global `C^n` covariant derivative. -/
+theorem contMDiff_nonempty_of_level {n : WithTop ℕ∞}
+    [ContMDiffVectorBundle 1 F V I] [ContMDiffVectorBundle n F V I]
+    [ContMDiffVectorBundle (n + 1) F V I] (hn : n ≤ ∞) :
+    Nonempty { cov : CovariantDerivative I F V // ContMDiffCovariantDerivative cov n } := by
   classical
   let b : Module.Basis (Module.Basis.ofVectorSpaceIndex ℝ F) ℝ F :=
     Module.Basis.ofVectorSpace ℝ F
@@ -1096,10 +1097,10 @@ theorem contMDiff_nonempty :
             + (mvfderiv (I := I) g y).smulRight (σ y) := by
               rw [hsum]
               simp
-  have hreg : ∀ x, ContMDiffCovariantDerivativeOn F 1 cov (t x) := by
+  have hreg : ∀ x, ContMDiffCovariantDerivativeOn F n cov (t x) := by
     intro x
     have hlocal :
-        ContMDiffCovariantDerivativeOn F 1
+        ContMDiffCovariantDerivativeOn F n
           (fun σ y ↦
             ∑ i ∈ ρ.fintsupport x, ρ i y •
               Bundle.Trivialization.frameCovariantDerivative (I := I) (trivializationAt F V i) b σ y)
@@ -1109,12 +1110,13 @@ theorem contMDiff_nonempty :
         refine { contMDiff := ?_ }
         intro σ hσ
         simpa using
-          (trivializationAt F V i).contMDiffOn_frameCovariantDerivative (I := I) b
+          (trivializationAt F V i).contMDiffOn_frameCovariantDerivative_of_level
+            (I := I) (n := n) b
             (htOpen x) (htBaseSubset (x := x) hi) (hσ.mono (by intro y hy; trivial))
       · intro i hi
         simpa using
-          (((ρ i).contMDiff.of_le (show (1 : WithTop ℕ∞) ≤ ∞ by simp)).contMDiffOn :
-            ContMDiffOn I 𝓘(ℝ) 1 (ρ i) (t x))
+          (((ρ i).contMDiff.of_le hn).contMDiffOn :
+            ContMDiffOn I 𝓘(ℝ) n (ρ i) (t x))
     refine { contMDiff := ?_ }
     intro σ hσ
     refine (hlocal.contMDiff (hσ.mono (by intro y hy; trivial))).congr ?_
@@ -1134,6 +1136,26 @@ theorem contMDiff_nonempty :
   simpa only [Set.univ_inter, cov',
     CovariantDerivative.ofIsCovariantDerivativeOnOfOpenCover] using
     (hreg x).contMDiff (hσ.mono (by intro y hy; trivial))
+
+/-- Every finite-dimensional `C^2` real vector bundle over a Hausdorff σ-compact smooth manifold
+admits a global `C^1` covariant derivative. -/
+theorem contMDiff_nonempty [ContMDiffVectorBundle 2 F V I] :
+    Nonempty { cov : CovariantDerivative I F V // ContMDiffCovariantDerivative cov 1 } := by
+  haveI : ContMDiffVectorBundle (1 + 1) F V I := by
+    exact ContMDiffVectorBundle.of_le (n := 2) (by norm_num)
+  exact contMDiff_nonempty_of_level (I := I) (F := F) (V := V) (n := 1)
+    (WithTop.coe_le_coe.mpr le_top)
+
+/-- Every finite-dimensional `C^3` real vector bundle over a Hausdorff σ-compact smooth manifold
+admits a global `C^2` covariant derivative. -/
+theorem contMDiff_nonempty_two [ContMDiffVectorBundle 3 F V I] :
+    Nonempty { cov : CovariantDerivative I F V // ContMDiffCovariantDerivative cov 2 } := by
+  letI : ContMDiffVectorBundle 2 F V I :=
+    ContMDiffVectorBundle.of_le (n := 3) (by norm_num)
+  haveI : ContMDiffVectorBundle (2 + 1) F V I := by
+    exact ContMDiffVectorBundle.of_le (n := 3) (by norm_num)
+  exact contMDiff_nonempty_of_level (I := I) (F := F) (V := V) (n := 2)
+    (WithTop.coe_le_coe.mpr le_top)
 
 end GlobalRegularity
 
