@@ -1290,6 +1290,75 @@ theorem contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one
   refine ⟨w, hwopen, hxw, ?_⟩
   simpa [Set.inter_eq_right.mpr hwu] using hcovσw
 
+/-- **General-bundle covariant-derivative level downgrade `2 → 1`.** A globally `C²`
+covariant derivative is a `C¹` covariant derivative on every open set.  The proof uses the
+actual local-frame decomposition: the frame derivative of a `C²` section is `C¹`, while the
+connection applied to each `C³` frame is `C²`; their coefficient-weighted sum is therefore
+`C¹`. -/
+theorem contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_two
+    [ContMDiffVectorBundle 3 F V I]
+    {cov : CovariantDerivative I F V} [ContMDiffCovariantDerivative cov 2]
+    {u : Set M} (hu : IsOpen u) :
+    ContMDiffCovariantDerivativeOn F 1 cov.toFun u := by
+  classical
+  refine { contMDiff := ?_ }
+  intro σ hσ
+  apply contMDiffOn_of_locally_contMDiffOn
+  intro x hx
+  let e := trivializationAt F V x
+  let b := Module.finBasis ℝ F
+  have hxbase : x ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt F V x
+  refine ⟨e.baseSet, e.open_baseSet, hxbase, ?_⟩
+  haveI : ContMDiffVectorBundle 1 F V I :=
+    ContMDiffVectorBundle.of_le (n := 3) (show (1 : WithTop ℕ∞) ≤ 3 by norm_num)
+  haveI : ContMDiffVectorBundle (1 + 1) F V I := by
+    exact ContMDiffVectorBundle.of_le (n := 3) (by norm_num)
+  have hopen : IsOpen (u ∩ e.baseSet) := hu.inter e.open_baseSet
+  have hsub : u ∩ e.baseSet ⊆ e.baseSet := Set.inter_subset_right
+  have hσ2 : ContMDiffOn I (I.prod 𝓘(ℝ, F)) 2 (T% σ) (u ∩ e.baseSet) := by
+    convert (show ContMDiffOn I (I.prod 𝓘(ℝ, F)) (1 + 1) (T% σ) u from hσ).mono
+      Set.inter_subset_left using 1 <;> norm_num
+  have hcov2 : ContMDiffCovariantDerivativeOn F 2 cov.toFun e.baseSet :=
+    contMDiffCovariantDerivativeOn_two_of_contMDiffCovariantDerivative_two
+      (u := e.baseSet) e.open_baseSet
+  have hσ12 : ContMDiffOn I (I.prod 𝓘(ℝ, F)) (1 + 1) (T% σ)
+      (u ∩ e.baseSet) := by
+    convert hσ2 using 1 <;> norm_num
+  have hframe1 := Bundle.Trivialization.contMDiffOn_frameCovariantDerivative_of_level
+    (I := I) (V := V) (n := 1) e b hopen hsub hσ12
+  have hcoeff : ∀ i, ContMDiffOn I 𝓘(ℝ) 2
+      ((LinearMap.piApply (e.localFrameCoeff I b i)) σ) (u ∩ e.baseSet) := fun i =>
+    contMDiffOn_localFrameCoeff (I := I) (e := e) (b := b) hopen hsub hσ2 i
+  have hframe3 : ∀ i, ContMDiffOn I (I.prod 𝓘(ℝ, F)) (2 + 1)
+      (T% (e.localFrame b i)) e.baseSet := fun i => by
+    convert Bundle.Trivialization.contMDiffOn_localFrame_baseSet (I := I) (e := e)
+      (n := (3 : WithTop ℕ∞)) (b := b) i using 1 <;> norm_num
+  have hcovframe := fun i => hcov2.contMDiff (hframe3 i)
+  have hdiff1 := ContMDiffOn.sum_section (s := (Finset.univ : Finset _))
+    (fun i (_ : i ∈ Finset.univ) =>
+      ContMDiffOn.smul_section (n := (1 : WithTop ℕ∞))
+        ((hcoeff i).of_le (show (1 : WithTop ℕ∞) ≤ 2 by norm_num))
+        (((hcovframe i).mono hsub).of_le (show (1 : WithTop ℕ∞) ≤ 2 by norm_num)))
+  have htotal := ContMDiffOn.add_section hframe1 hdiff1
+  refine htotal.congr fun y hy => ?_
+  have hMDiff : MDiffAt (T% σ) y :=
+    ((hσ2 y hy).contMDiffAt (hopen.mem_nhds hy)).mdifferentiableAt (by norm_num)
+  congr 1
+  refine ContinuousLinearMap.ext fun v => ?_
+  have hdec := e.covariantDerivative_apply_eq_sum_localFrame_add_sum_covariantDerivative_localFrame
+    (I := I) b cov hy.2 hMDiff v
+  simpa [Bundle.Trivialization.frameCovariantDerivative, ContinuousLinearMap.add_apply,
+    ContinuousLinearMap.sum_apply, ContinuousLinearMap.smulRight_apply,
+    ContinuousLinearMap.smul_apply] using hdec
+
+/-- A globally `C²` covariant derivative is also globally `C¹`. -/
+theorem contMDiffCovariantDerivative_one_of_contMDiffCovariantDerivative_two
+    [ContMDiffVectorBundle 3 F V I]
+    {cov : CovariantDerivative I F V} [ContMDiffCovariantDerivative cov 2] :
+    ContMDiffCovariantDerivative cov 1 :=
+  ⟨contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_two
+    (I := I) (F := F) (V := V) (u := Set.univ) isOpen_univ⟩
+
 /-- **General-bundle covariant-derivative level downgrade `1 → 0`.**  A globally `C¹` covariant
 derivative (`ContMDiffCovariantDerivative cov 1`) is a `C⁰` covariant derivative on every open set:
 the covariant derivative of a merely-`C¹` section is a *continuous* `T*M ⊗ V`-section.  This is the
