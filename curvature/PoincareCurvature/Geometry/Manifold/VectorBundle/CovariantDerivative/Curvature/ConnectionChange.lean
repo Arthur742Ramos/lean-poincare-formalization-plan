@@ -35,7 +35,7 @@ def covariantDerivativeOneFormAlong
     (cov : CovariantDerivative I E TM) (A : ∀ x : M, TCorr x)
     (X Z Y : ∀ x : M, TM x) (x : M) : TM x :=
   cov.along X (fun y ↦ A y (Z y) (Y y)) x -
-    A x (cov.along X Z x) (Y x) - A x (Z x) (cov.along X Y x)
+    A x (Z x) (cov.along X Y x) - A x (cov.along X Z x) (Y x)
 
 /-- The raw curvature change formula
 `R(cov + A) = R(cov) + d_cov A + A ∧ A`.
@@ -104,20 +104,64 @@ theorem curvatureAux_addOneForm_apply
 section Tensor
 
 variable [T2Space M] [IsManifold I ∞ M]
-  [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
+  [hTangentTwo : ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
 
 local notation "TEnd" => (fun x : M ↦ TM x →L[ℝ] TM x)
 
-local instance tangentFiberFiniteDimensional : ∀ x : M, FiniteDimensional ℝ (TM x) :=
-  fun _ ↦ inferInstanceAs (FiniteDimensional ℝ E)
+/-- The induced hom connections below use the tangent bundle both as a
+source and as a target.  Install the lowered bundle regularity explicitly:
+typeclass search does not lower the given `C²` bundle structure by itself. -/
+local instance tangentOne : ContMDiffVectorBundle 1 E TM I :=
+  ContMDiffVectorBundle.of_le (F := E) (E := TM) (IB := I)
+    (m := 1) (n := 2) (by norm_num)
+
+/-- The endomorphism bundle inherits the tangent bundle's `C²` structure. -/
+local instance endTwo : ContMDiffVectorBundle 2 (E →L[ℝ] E) TEnd I :=
+  ContMDiffVectorBundle.continuousLinearMap
+
+/-- The outer induced hom connection only needs the `C¹` endomorphism
+bundle structure. -/
+local instance endOne : ContMDiffVectorBundle 1 (E →L[ℝ] E) TEnd I :=
+  ContMDiffVectorBundle.of_le (F := E →L[ℝ] E) (E := TEnd) (IB := I)
+    (m := 1) (n := 2) (by norm_num)
 
 /-- The connection on endomorphism-valued one-forms induced by `cov` in all
 three tangent slots.  Its arguments are `(derivative direction, differentiated
 vector, one-form direction)`. -/
 noncomputable def covariantDerivativeOneForm
     (cov : CovariantDerivative I E TM) (A : ∀ x : M, TCorr x) (x : M) :
-    TM x →L[ℝ] TM x →L[ℝ] TM x →L[ℝ] TM x :=
-  inducedHomCovariantDerivative cov (inducedHomCovariantDerivative cov cov) A x
+    TM x →L[ℝ] TM x →L[ℝ] TM x →L[ℝ] TM x := by
+  let DEnd := @inducedHomCovariantDerivative
+    E _ _ H _ I M _ _ _ _ _ _
+    E E _ _ _ _ _
+    TM TM
+      _ _ _ _ (fun _ ↦ inferInstanceAs (FiniteDimensional ℝ E)) _ _
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    hTangentTwo tangentOne cov cov
+  exact @inducedHomCovariantDerivative
+    E _ _ H _ I M _ _ _ _ _ _
+    E (E →L[ℝ] E) _ _ _ _ _
+    TM TEnd
+      _ (Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace (RingHom.id ℝ) E TM E TM)
+        _ _ (fun _ ↦ inferInstanceAs (FiniteDimensional ℝ E))
+        (fun _ ↦ ContinuousLinearMap.toNormedAddCommGroup)
+        (fun y ↦ @ContinuousLinearMap.toNormedSpace
+          ℝ ℝ (TM y) (TM y) _ _ _ _
+          (PoincareCurvature.instNormedSpaceTangentSpace I y)
+          (PoincareCurvature.instNormedSpaceTangentSpace I y)
+          (RingHom.id ℝ) _ ℝ _ (PoincareCurvature.instNormedSpaceTangentSpace I y)
+          (by
+            constructor
+            intro a b v
+            calc
+              a • b • v = (a * b) • v := (mul_smul a b v).symm
+              _ = (b * a) • v := by rw [mul_comm]
+              _ = b • a • v := mul_smul b a v))
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    (Bundle.ContinuousLinearMap.fiberBundle (RingHom.id ℝ) E TM E TM)
+    (Bundle.ContinuousLinearMap.vectorBundle (RingHom.id ℝ) E TM E TM)
+    hTangentTwo endOne cov DEnd A x
 
 /-- Evaluating the induced connection on a one-form yields the expected
 three-slot covariant derivative. -/
@@ -130,19 +174,79 @@ theorem covariantDerivativeOneForm_apply_eq_along
     (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x) :
     covariantDerivativeOneForm cov A x (X x) (Z x) (Y x) =
       covariantDerivativeOneFormAlong cov A X Z Y x := by
-  let DEnd := inducedHomCovariantDerivative cov cov
+  let DEnd := @inducedHomCovariantDerivative
+    E _ _ H _ I M _ _ _ _ _ _
+    E E _ _ _ _ _
+    TM TM
+      _ _ _ _ (fun _ ↦ inferInstanceAs (FiniteDimensional ℝ E)) _ _
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    hTangentTwo tangentOne cov cov
+  let Dcorr := @inducedHomCovariantDerivative
+    E _ _ H _ I M _ _ _ _ _ _
+    E (E →L[ℝ] E) _ _ _ _ _
+    TM TEnd
+      _ (Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace (RingHom.id ℝ) E TM E TM)
+        _ _ (fun _ ↦ inferInstanceAs (FiniteDimensional ℝ E))
+        (fun _ ↦ ContinuousLinearMap.toNormedAddCommGroup)
+        (fun y ↦ @ContinuousLinearMap.toNormedSpace
+          ℝ ℝ (TM y) (TM y) _ _ _ _
+          (PoincareCurvature.instNormedSpaceTangentSpace I y)
+          (PoincareCurvature.instNormedSpaceTangentSpace I y)
+          (RingHom.id ℝ) _ ℝ _ (PoincareCurvature.instNormedSpaceTangentSpace I y)
+          (by
+            constructor
+            intro a b v
+            calc
+              a • b • v = (a * b) • v := (mul_smul a b v).symm
+              _ = (b * a) • v := by rw [mul_comm]
+              _ = b • a • v := mul_smul b a v))
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    (Bundle.ContinuousLinearMap.fiberBundle (RingHom.id ℝ) E TM E TM)
+    (Bundle.ContinuousLinearMap.vectorBundle (RingHom.id ℝ) E TM E TM)
+    hTangentTwo endOne cov DEnd
   have hAZ : MDiffAt
       (fun y ↦ TotalSpace.mk' (E →L[ℝ] E) (E := TEnd) y (A y (Z y))) x :=
     hA.clm_bundle_apply hZ
-  have hOuter := inducedHomCovariantDerivative_apply_section_general
-    cov DEnd (φ := A) (σ := Z) hA hZ (X x)
-  have hInner := inducedHomCovariantDerivative_apply_section_general
-    cov cov (φ := fun y ↦ A y (Z y)) (σ := Y) hAZ hY (X x)
-  change (inducedHomCovariantDerivative cov DEnd A x (X x)) (Z x) (Y x) = _
+  have hOuter := @inducedHomCovariantDerivative_apply_section_general
+    E _ _ H _ I M _ _ _ _ _ _
+    E (E →L[ℝ] E) _ _ _ _ _ _
+    TM TEnd
+      _ (Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace (RingHom.id ℝ) E TM E TM)
+        _ _ (fun _ ↦ inferInstanceAs (FiniteDimensional ℝ E))
+        (fun _ ↦ ContinuousLinearMap.toNormedAddCommGroup)
+        (fun y ↦ @ContinuousLinearMap.toNormedSpace
+          ℝ ℝ (TM y) (TM y) _ _ _ _
+          (PoincareCurvature.instNormedSpaceTangentSpace I y)
+          (PoincareCurvature.instNormedSpaceTangentSpace I y)
+          (RingHom.id ℝ) _ ℝ _ (PoincareCurvature.instNormedSpaceTangentSpace I y)
+          (by
+            constructor
+            intro a b v
+            calc
+              a • b • v = (a * b) • v := (mul_smul a b v).symm
+              _ = (b * a) • v := by rw [mul_comm]
+              _ = b • a • v := mul_smul b a v))
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    (Bundle.ContinuousLinearMap.fiberBundle (RingHom.id ℝ) E TM E TM)
+    (Bundle.ContinuousLinearMap.vectorBundle (RingHom.id ℝ) E TM E TM)
+    hTangentTwo endTwo cov DEnd A Z x hA hZ (X x)
+  have hInner := @inducedHomCovariantDerivative_apply_section_general
+    E _ _ H _ I M _ _ _ _ _ _
+    E E _ _ _ _ _ _
+    TM TM
+      _ _ _ _ (fun _ ↦ inferInstanceAs (FiniteDimensional ℝ E)) _ _
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    TangentSpace.fiberBundle TangentSpace.vectorBundle
+    hTangentTwo hTangentTwo cov cov (fun y ↦ A y (Z y)) Y x hAZ hY (X x)
+  unfold covariantDerivativeOneForm
+  change (Dcorr A x (X x)) (Z x) (Y x) = _
   rw [hOuter]
   change (DEnd (fun y ↦ A y (Z y)) x (X x)) (Y x) -
       A x (cov Z x (X x)) (Y x) = _
   rw [hInner]
+  unfold covariantDerivativeOneFormAlong
+  unfold CovariantDerivative.along
   rfl
 
 /-- The bundled, pointwise curvature change formula for a torsion-free
@@ -154,8 +258,10 @@ the derivative direction, the vector being differentiated, and the one-form
 direction.  Thus the two first-order terms are
 `(∇_u A)(w,v) - (∇_v A)(w,u)`. -/
 theorem curvatureTensor_addOneForm_apply
-    (cov : CovariantDerivative I E TM) [ContMDiffCovariantDerivative cov 1]
-    (A : ∀ x : M, TCorr x) (hTorsionFree : cov.torsion = 0)
+    (cov : CovariantDerivative I E TM) (A : ∀ x : M, TCorr x)
+    [ContMDiffCovariantDerivative cov 1]
+    [ContMDiffCovariantDerivative (CovariantDerivative.addOneForm cov A) 1]
+    (hTorsionFree : cov.torsion = 0)
     (hA : ∀ y, MDiffAt
       (fun z ↦ TotalSpace.mk'
         (E →L[ℝ] (E →L[ℝ] E)) (E := TCorr) z (A z)) y)
@@ -207,8 +313,8 @@ theorem curvatureTensor_addOneForm_apply
       (covariantDerivativeOneForm_apply_eq_along (I := I) cov A
         (X := Y) (Y := X) (Z := Z) (hA x) hX hZ)
   have hraw := curvatureAux_addOneForm_apply cov A hTorsionFree hX hY hcovYZ hcovXZ hAZY hAZX
-  rw [← hDA_X, ← hDA_Y]
-  simpa [curvatureTensor_apply, X, Y, Z] using hraw
+  rw [hDA_X, hDA_Y]
+  simpa [curvatureTensor_apply, X, Y, Z, smoothExtend_apply] using hraw
 
 end Tensor
 
