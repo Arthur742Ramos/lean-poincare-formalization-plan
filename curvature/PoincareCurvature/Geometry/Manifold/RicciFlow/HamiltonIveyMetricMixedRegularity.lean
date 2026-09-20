@@ -1,4 +1,5 @@
 import Mathlib.Algebra.Group.Ext
+import PoincareCurvature.Analysis.ParametrizedInner
 import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyMixedRegularity
 import PoincareCurvature.Geometry.Manifold.RicciFlow.HamiltonIveyKoszulVariation
 
@@ -29,6 +30,46 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
 
 local notation "TM" => (TangentSpace I : M → Type _)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- A jointly `C²` metric tensor pairs jointly `C²` spatial sections.
+
+The input regularity is the actual bilinear-form section `(t, x) ↦ (g t).inner x`
+over spacetime.  This is stronger than slicewise `C²` regularity of `g` and is not
+inferred from the slicewise Ricci-flow predicate.  The conclusion follows by applying
+that section to the two pulled-back vector fields; no derivative or evolution identity
+is involved. -/
+theorem jointMetricPairing_contMDiff_of_jointMetricTensor
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (hmetric : ContMDiff (𝓘(ℝ).prod I)
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 2
+      (fun p : ℝ × M => TotalSpace.mk'
+        (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TM y →L[ℝ] TM y →L[ℝ] ℝ)
+        p.2 ((g p.1).inner p.2)))
+    {U V : Π y : M, TM y}
+    (hU : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (T% U))
+    (hV : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (T% V)) :
+    ContMDiff (𝓘(ℝ).prod I) 𝓘(ℝ) 2
+      (fun p : ℝ × M => (g p.1).inner p.2 (U p.2) (V p.2)) := by
+  letI : FiberBundle E TM := TangentSpace.fiberBundle
+  letI : VectorBundle ℝ E TM := TangentSpace.vectorBundle
+  have hUjoint : ContMDiff (𝓘(ℝ).prod I) (I.prod 𝓘(ℝ, E)) 2
+      (fun p : ℝ × M => (T% U) p.2) := by
+    change ContMDiff (𝓘(ℝ).prod I) (I.prod 𝓘(ℝ, E)) 2
+      ((T% U) ∘ Prod.snd)
+    exact hU.comp contMDiff_snd
+  have hVjoint : ContMDiff (𝓘(ℝ).prod I) (I.prod 𝓘(ℝ, E)) 2
+      (fun p : ℝ × M => (T% V) p.2) := by
+    change ContMDiff (𝓘(ℝ).prod I) (I.prod 𝓘(ℝ, E)) 2
+      ((T% V) ∘ Prod.snd)
+    exact hV.comp contMDiff_snd
+  exact PoincareCurvature.ParametrizedInner.contMDiff_paramBilin_apply₂
+    (B := M) (F := E) (E := TM) (b := Prod.snd)
+    (ψ := fun p : ℝ × M => (g p.1).inner p.2)
+    (v := fun p : ℝ × M => U p.2)
+    (w := fun p : ℝ × M => V p.2)
+    hmetric hUjoint hVjoint
 
 set_option maxHeartbeats 1000000 in
 theorem hasDerivAt_metricPairing_mvfderiv_of_jointContMDiff
