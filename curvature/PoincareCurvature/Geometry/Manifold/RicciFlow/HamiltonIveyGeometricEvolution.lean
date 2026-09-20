@@ -692,6 +692,154 @@ def HamiltonIveyCurvatureOperatorLaplacian
             (fun y => CovariantDerivative.ricciCovariantTwoTensor
               (cov t) y) x u v
 
+/-! The scalar trace identity can be recovered from the actual Ricci evolution
+and the spatial trace/Laplacian commutation.  Thus it need not be an
+independent input to the curvature-operator evolution certificate. -/
+
+set_option maxHeartbeats 3000000 in
+theorem HamiltonIveyMetricTraceEvolution_of_RicciTraceEvolution
+    (g : TimeDependentRiemannianMetric (I := I) (M := M))
+    (cov : TimeDependentCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
+    (hcov : ∀ t : ℝ, ContMDiffCovariantDerivative
+      (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 1)
+    (hLevi : g.IsLeviCivita cov)
+    (hdim : ∀ x : M, Module.finrank ℝ (TM x) = 3)
+    (curvatureVelocity : ∀ z : M,
+      TM z →ₗ[ℝ] TM z →ₗ[ℝ] TM z →ₗ[ℝ] TM z)
+    (t : ℝ) (x : M)
+    (hRicciEvolution : HamiltonIveyRicciTraceEvolution
+      g cov hcov hLevi hdim curvatureVelocity t x)
+    (hOperatorLaplacian : HamiltonIveyCurvatureOperatorLaplacian
+      g cov hcov hLevi hdim t x)
+    (hTraceLaplacian : g.HamiltonIveyTraceLaplacianAt
+      cov hcov hLevi hdim t x) :
+    HamiltonIveyMetricTraceEvolution g cov hcov curvatureVelocity t x := by
+  letI : RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
+  letI : ContMDiffCovariantDerivative (cov t) 1 := hcov t
+  let b : OrthonormalBasis (Fin 3) ℝ (TM x) :=
+    CovariantDerivative.ricciComplementEigenbasis
+      (I := I) (M := M) (E := E) (cov t)
+      (hLevi t).1 (hLevi t).2 x (hdim x)
+  let shifted : ∀ y : M, T₂ y :=
+    g.curvatureNuShiftedContactTwoTensor cov hcov hLevi hdim t x
+  let ricci : ∀ y : M, T₂ y :=
+    fun y => CovariantDerivative.ricciCovariantTwoTensor (cov t) y
+  let scalarLap : ℝ :=
+    g.scalarLaplacian cov (g.scalarCurvature cov hcov) t x
+  let scalar : ℝ := g.scalarCurvature cov hcov t x
+  let ricciVelocity := curvatureTensorVelocityRicci curvatureVelocity
+  have hOperatorLap' : ∀ u v : TM x,
+      connectionLaplacian (cov t) shifted x u v =
+        scalarLap * (g t).inner x u v -
+          2 * connectionLaplacian (cov t) ricci x u v := by
+    simpa [HamiltonIveyCurvatureOperatorLaplacian, shifted, ricci, scalarLap] using
+      hOperatorLaplacian
+  have hTraceLap' :
+      (∑ i : Fin 3,
+        connectionLaplacian (cov t) shifted x (b i) (b i)) = scalarLap := by
+    simpa [HamiltonIveyTraceLaplacianAt, b, shifted, scalarLap] using
+      hTraceLaplacian
+  have hunit (i : Fin 3) : (g t).inner x (b i) (b i) = 1 := by
+    change Inner.inner ℝ (b i) (b i) = 1
+    rw [real_inner_self_eq_norm_sq, b.orthonormal.1]
+    norm_num
+  have hLapShiftTrace :
+      (∑ i : Fin 3,
+        connectionLaplacian (cov t) shifted x (b i) (b i)) =
+        3 * scalarLap - 2 *
+          (∑ i : Fin 3,
+            connectionLaplacian (cov t) ricci x (b i) (b i)) := by
+    calc
+      _ = ∑ i : Fin 3,
+          (scalarLap * (g t).inner x (b i) (b i) -
+            2 * connectionLaplacian (cov t) ricci x (b i) (b i)) := by
+        apply Finset.sum_congr rfl
+        intro i hi
+        exact hOperatorLap' (b i) (b i)
+      _ = _ := by
+        calc
+          _ = (∑ i : Fin 3, scalarLap * (g t).inner x (b i) (b i)) -
+                2 * (∑ i : Fin 3,
+                  connectionLaplacian (cov t) ricci x (b i) (b i)) := by
+            rw [Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
+          _ = _ := by
+            rw [← Finset.mul_sum,
+              show (∑ i : Fin 3, (g t).inner x (b i) (b i)) = 3 by
+                rw [Fin.sum_univ_three]
+                simp_rw [hunit]
+                norm_num]
+            ring
+  have hLapRicciTrace :
+      (∑ i : Fin 3,
+        connectionLaplacian (cov t) ricci x (b i) (b i)) = scalarLap := by
+    linarith [hTraceLap', hLapShiftTrace]
+  have hRicciTrace :
+      (∑ i : Fin 3,
+        g.ricciCurvature cov hcov t x (b i) (b i)) = scalar := by
+    have h := CovariantDerivative.scalarCurvature_eq_sum_ricci_orthonormalBasis
+      (cov := cov t) x b
+    simpa [scalar, TimeDependentRiemannianMetric.scalarCurvature,
+      TimeDependentRiemannianMetric.ricciCurvature] using h.symm
+  have hReactionTrace :
+      (∑ i : Fin 3,
+        curvatureOperatorReaction g cov hcov hLevi hdim t x (b i) (b i)) =
+        6 * g.ricciNormSq cov hcov t x - 2 * scalar ^ 2 := by
+    simpa [b, scalar] using
+      (curvatureOperatorReaction_trace_eq_sixRicciNormSq_sub_twoScalarSq
+        g cov hcov hLevi hdim t x)
+  have hRicciEvolution' : ∀ u v : TM x,
+      ricciVelocity x u v =
+        connectionLaplacian (cov t) ricci x u v +
+          (2 * g.ricciNormSq cov hcov t x * (g t).inner x u v -
+            2 * scalar * g.ricciCurvature cov hcov t x u v -
+            curvatureOperatorReaction g cov hcov hLevi hdim t x u v) / 2 := by
+    simpa [HamiltonIveyRicciTraceEvolution, ricciVelocity, ricci, scalar] using
+      hRicciEvolution
+  have hmetricTraceBasis :
+      RicciFlow.metricTraceAt (I := I) (M := M) g t x (ricciVelocity x) =
+        ∑ i : Fin 3, ricciVelocity x (b i) (b i) := by
+    unfold RicciFlow.metricTraceAt
+    rw [InnerProductSpace.canonicalCovariantTensor_eq_sum (TM x) b, map_sum]
+    simp [ricciVelocity]
+  have hRicciTrace3 := hRicciTrace
+  rw [Fin.sum_univ_three] at hRicciTrace3
+  have hReactionTrace3 := hReactionTrace
+  rw [Fin.sum_univ_three] at hReactionTrace3
+  have hRicciTraceScaled := congrArg (fun q : ℝ => 2 * scalar * q) hRicciTrace3
+  have hReactionZero :
+      (∑ i : Fin 3,
+        (2 * g.ricciNormSq cov hcov t x * (g t).inner x (b i) (b i) -
+          2 * scalar * g.ricciCurvature cov hcov t x (b i) (b i) -
+          curvatureOperatorReaction g cov hcov hLevi hdim t x (b i) (b i)) / 2) = 0 := by
+    rw [Fin.sum_univ_three]
+    rw [hunit 0, hunit 1, hunit 2]
+    nlinarith [hRicciTraceScaled, hReactionTrace3]
+  have hVelocityTrace :
+      (∑ i : Fin 3, ricciVelocity x (b i) (b i)) = scalarLap := by
+    calc
+      _ = ∑ i : Fin 3,
+          (connectionLaplacian (cov t) ricci x (b i) (b i) +
+            (2 * g.ricciNormSq cov hcov t x * (g t).inner x (b i) (b i) -
+              2 * scalar * g.ricciCurvature cov hcov t x (b i) (b i) -
+              curvatureOperatorReaction g cov hcov hLevi hdim t x (b i) (b i)) / 2) := by
+        apply Finset.sum_congr rfl
+        intro i hi
+        exact hRicciEvolution' (b i) (b i)
+      _ = (∑ i : Fin 3,
+            connectionLaplacian (cov t) ricci x (b i) (b i)) +
+          (∑ i : Fin 3,
+            (2 * g.ricciNormSq cov hcov t x * (g t).inner x (b i) (b i) -
+              2 * scalar * g.ricciCurvature cov hcov t x (b i) (b i) -
+              curvatureOperatorReaction g cov hcov hLevi hdim t x (b i) (b i)) / 2) := by
+        rw [Finset.sum_add_distrib]
+      _ = _ := by
+        rw [hLapRicciTrace, hReactionZero]
+        simp
+  unfold HamiltonIveyMetricTraceEvolution
+  rw [show curvatureTensorVelocityRicci curvatureVelocity = ricciVelocity by rfl,
+    hmetricTraceBasis, hVelocityTrace]
+
 set_option synthInstance.maxHeartbeats 200000 in
 set_option maxHeartbeats 3000000 in
 theorem hamiltonIveyCurvatureOperatorLaplacian_of_globalRegularity
@@ -1136,8 +1284,8 @@ def HamiltonIveyCurvatureEvolutionCertificate.of_geometricContractions
     (hA : ∀ (X Y : Π y : M, TM y),
       (∀ y, MDiffAt (T% X) y) → (∀ y, MDiffAt (T% Y) y) →
         ∀ y, MDiffAt (T% (fun z => A z (X z) (Y z))) y)
-    (hTrace :
-      HamiltonIveyMetricTraceEvolution g cov hcov curvatureVelocity t x)
+    (hTraceLaplacian :
+      g.HamiltonIveyTraceLaplacianAt cov hcov hLevi hdim t x)
     (hOperatorLaplacian :
       HamiltonIveyCurvatureOperatorLaplacian g cov hcov hLevi hdim t x)
     (contractions :
@@ -1168,6 +1316,10 @@ def HamiltonIveyCurvatureEvolutionCertificate.of_geometricContractions
       contractions.hHlast contractions.hHcomm contractions.hDiv
       contractions.hTrace contractions.hSsymm contractions.hRaw
       contractions.hLaplacian contractions.hReaction
+  have hTrace :=
+    HamiltonIveyMetricTraceEvolution_of_RicciTraceEvolution
+      g cov hcov hLevi hdim curvatureVelocity t x
+      hRicciEvolution hOperatorLaplacian hTraceLaplacian
   have hEvolution :=
     hasDerivAt_curvatureOperatorTwoTensor_of_connectionVariation_traceEvolution
       g cov hcov hLevi hdim gdot s hflow ht x curvatureVelocity
@@ -1175,11 +1327,12 @@ def HamiltonIveyCurvatureEvolutionCertificate.of_geometricContractions
   exact HamiltonIveyCurvatureEvolutionCertificate.of_connectionVariation
     g cov hcov hLevi hdim x A curvatureVelocity hvelocity hvariation hA hEvolution
 
-/-! The final public interface no longer accepts the operator-Laplacian PDE
-as an independent premise.  It asks for genuine regularity of the actual
-curvature operator and derives that Laplacian identity above.  The scalar
-trace-evolution identity remains explicit until the mixed time--space
-Ricci-flow bridge is completed. -/
+/-! The final public interface no longer accepts either the operator-Laplacian
+PDE or scalar metric-trace evolution as independent premises.  It asks for
+genuine regularity of the actual curvature operator and shifted tensor, then
+derives both trace/Laplacian and scalar-trace identities from the geometric
+contractions.  The mixed time--space Ricci-flow bridge itself remains an
+explicit hypothesis. -/
 
 theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_geometricEvolution
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
@@ -1206,9 +1359,6 @@ theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_geometricEvolution
     (hA : ∀ (X Y : Π y : M, TM y),
       (∀ y, MDiffAt (T% X) y) → (∀ y, MDiffAt (T% Y) y) →
         ∀ y, MDiffAt (T% (fun z => A z (X z) (Y z))) y)
-    (hTrace : ∀ {t : ℝ}, t ∈ Icc 0 T → ∀ x : M,
-      HamiltonIveyMetricTraceEvolution g cov hcov
-        (curvatureVelocity t) t x)
     (hOperatorRegularity : ∀ {t : ℝ}, t ∈ Icc 0 T → ∀ y : M,
       g.HamiltonIveyCurvatureOperatorRegularity
         cov hcov hLevi hdim t y)
@@ -1267,7 +1417,9 @@ theorem hamiltonIveyPinching_of_intrinsicRicciFlow_and_geometricEvolution
       g cov hcov hLevi hdim gdot (Icc 0 T) hflow ht x A
       (curvatureVelocity t)
       (hvelocity (t := t) ht) (hvariation (t := t) ht) hA
-      (hTrace (t := t) ht x)
+      (g.HamiltonIveyTraceLaplacianAt_of_shiftedTensorRegularity
+        cov hcov hLevi hdim t x
+        (hShiftedTensorRegularity t ht x))
       (hamiltonIveyCurvatureOperatorLaplacian_of_globalRegularity
         g cov hcov hLevi hdim t x
         (fun y => hOperatorRegularity (t := t) ht y))

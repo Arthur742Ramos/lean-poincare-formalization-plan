@@ -59,31 +59,28 @@ Formalize evolution formulas for scalar curvature, Ricci curvature, the
 curvature operator, and other natural quantities. Develop the parabolic maximum
 principles needed for preservation, pinching, and monotonicity arguments.
 
-**Current state:** future milestone; not unlocked by Point-4 scaffolding alone.
+**Current state:** in progress; not unlocked by Point-4 scaffolding alone.
 The standalone `hamilton-ivey-reaction/` project proves Hamilton–Ivey pinching
 for differentiable ordered solutions of the three-dimensional curvature ODE,
 deriving the scalar lower barrier from the initial least-eigenvalue bound. It
 includes the exact logarithmic reaction identity, the analytic
 `exp(2) * (log s)^2 <= 4s` estimate, the strict `(-nu)/9` inward-pointing bound,
-and an invariant-region argument. This closes the ODE stage only; the
-curvature-evolution bridge and geometric parabolic maximum principles remain
-open. The current Merge 24 follow-up adds the proved connection-variation
-constructor `HamiltonIveyCurvatureEvolutionCertificate.of_connectionVariation`,
-which derives the derivative of the actual curvature commutator from a
-connection variation. It also packages the genuine spatial regularity, derives
-the shifted-tensor trace regularity, and transports an actual unshifted
-curvature-operator evolution equation through the proved `R - nu * g`
-connection-Laplacian identity via `of_connectionVariation_of_operatorEvolution`.
-The actual curvature PDE and maximum-principle application are still
-conditional inputs. The supporting curvature layer now additionally exposes
-the proved local covariant-derivative/curvature commutator
-curvatureAux_covariantDerivative_commutator_apply and the generic
-contMDiffCovariantDerivative_inducedHom theorem. Neither bridge silently
-supplies the mixed time--space regularity needed to construct a global
-connection variation from the current slicewise Ricci-flow interface. The
-public moving-connection module now proves the corresponding scalar-to-vector
-Koszul bridge under an explicit differentiated Koszul certificate; it does not
-derive that certificate from `IsRicciFlowOn`.
+and an invariant-region argument. This closes the ODE stage. The current
+follow-up also proves
+`HamiltonIveyCurvatureEvolutionCertificate.of_intrinsicRicciFlow_and_jointRegularity`:
+from `IsRicciFlowOn` and explicit mixed spacetime/spatial regularity, it derives
+the actual curvature-tensor velocity by Koszul connection variation, then
+derives the Ricci-trace and curvature-operator evolution by geometric
+contractions. The conditional endpoint
+`hamiltonIveyPinching_of_intrinsicRicciFlow_and_jointGeometricEvolution_contactData_on_negative_spectrum`
+proves Hamilton--Ivey pinching without a caller-supplied curvature PDE, but
+still requires explicit curvature/operator regularity, continuity, initial
+pinching, and support-contact regularity. These regularity/contact hypotheses
+are not yet derived from the current slice-wise `IsRicciFlowOn` interface; the
+unconditional regularity bridge and general tensor maximum-principle theory
+remain open. Supporting results include the local covariant-derivative/
+curvature commutator, induced-hom regularity, and the `R - nu * g`
+connection-Laplacian identity.
 
 ## Layer 3: singularity analysis
 

@@ -570,19 +570,19 @@ theorem hasDerivAt_along_const_of_koszul_variation_pairings
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
       (fun y ↦ TotalSpace.mk' E y (Y y)))
     (hmixedXYZ : ∀ (Z : Π y : M, TM y),
-      ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      ContMDiff I (I.prod 𝓘(ℝ, E)) 2
         (fun y ↦ TotalSpace.mk' E y (Z y)) → HasDerivAt
       (fun τ : ℝ =>
         mvfderiv (I := I) (fun y ↦ (g τ).inner y (Y y) (Z y)) x (X x))
       (mvfderiv (I := I) (fun y ↦ hdot y (Y y) (Z y)) x (X x)) t)
     (hmixedYXZ : ∀ (Z : Π y : M, TM y),
-      ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      ContMDiff I (I.prod 𝓘(ℝ, E)) 2
         (fun y ↦ TotalSpace.mk' E y (Z y)) → HasDerivAt
       (fun τ : ℝ =>
         mvfderiv (I := I) (fun y ↦ (g τ).inner y (X y) (Z y)) x (Y x))
       (mvfderiv (I := I) (fun y ↦ hdot y (X y) (Z y)) x (Y x)) t)
     (hmixedZXY : ∀ (Z : Π y : M, TM y),
-      ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      ContMDiff I (I.prod 𝓘(ℝ, E)) 2
         (fun y ↦ TotalSpace.mk' E y (Z y)) → HasDerivAt
       (fun τ : ℝ =>
         mvfderiv (I := I) (fun y ↦ (g τ).inner y (X y) (Y y)) x (Z x))
@@ -609,12 +609,12 @@ theorem hasDerivAt_along_const_of_koszul_variation_pairings
     have hZ₂ : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (T% Z) := by
       simpa [Z] using CovariantDerivative.smoothExtend_contMDiff_two
         (I := I) (F := E) (V := (TangentSpace I : M → Type _)) x v
-    have hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (T% Z) :=
-      hZ₂.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
     have hKoszul := hasDerivAt_metricKoszulExpression
       (I := I) (M := M) g hdot (t := t) hmetric
       (X := X) (Y := Y) (Z := Z) (x := x)
-      (hmixedXYZ Z hZ) (hmixedYXZ Z hZ) (hmixedZXY Z hZ)
+      (hmixedXYZ Z hZ₂) (hmixedYXZ Z hZ₂) (hmixedZXY Z hZ₂)
+    have hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (T% Z) :=
+      hZ₂.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
     have hconn := hasDerivAt_metricConnectionPairing_of_koszulExpression
       (I := I) (M := M) g cov hcov hLevi hdot (t := t)
       (X := X) (Y := Y) (Z := Z) (x := x) hKoszul hX hY hZ
@@ -663,19 +663,19 @@ theorem exists_hasDerivAt_along_const_of_koszulExpression
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
       (fun y ↦ TotalSpace.mk' E y (Y y)))
     (hmixedXYZ : ∀ (Z : Π y : M, TM y),
-      ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      ContMDiff I (I.prod 𝓘(ℝ, E)) 2
         (fun y ↦ TotalSpace.mk' E y (Z y)) → HasDerivAt
       (fun τ : ℝ =>
         mvfderiv (I := I) (fun y ↦ (g τ).inner y (Y y) (Z y)) x (X x))
       (mvfderiv (I := I) (fun y ↦ hdot y (Y y) (Z y)) x (X x)) t)
     (hmixedYXZ : ∀ (Z : Π y : M, TM y),
-      ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      ContMDiff I (I.prod 𝓘(ℝ, E)) 2
         (fun y ↦ TotalSpace.mk' E y (Z y)) → HasDerivAt
       (fun τ : ℝ =>
         mvfderiv (I := I) (fun y ↦ (g τ).inner y (X y) (Z y)) x (Y x))
       (mvfderiv (I := I) (fun y ↦ hdot y (X y) (Z y)) x (Y x)) t)
     (hmixedZXY : ∀ (Z : Π y : M, TM y),
-      ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      ContMDiff I (I.prod 𝓘(ℝ, E)) 2
         (fun y ↦ TotalSpace.mk' E y (Z y)) → HasDerivAt
       (fun τ : ℝ =>
         mvfderiv (I := I) (fun y ↦ (g τ).inner y (X y) (Y y)) x (Z x))
@@ -699,7 +699,7 @@ theorem exists_hasDerivAt_along_const_of_koszulExpression
     have hKoszul := hasDerivAt_metricKoszulExpression
       (I := I) (M := M) g hdot (t := t) hmetric
       (X := X) (Y := Y) (Z := Z) (x := x)
-      (hmixedXYZ Z hZ) (hmixedYXZ Z hZ) (hmixedZXY Z hZ)
+      (hmixedXYZ Z hZ₂) (hmixedYXZ Z hZ₂) (hmixedZXY Z hZ₂)
     have hconn := hasDerivAt_metricConnectionPairing_of_koszulExpression
       (I := I) (M := M) g cov hcov hLevi hdot (t := t)
       (X := X) (Y := Y) (Z := Z) (x := x) hKoszul hX hY hZ
@@ -792,19 +792,19 @@ theorem exists_hasDerivAt_along_const_with_cyclic_metricVariation
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) 1
       (fun y ↦ TotalSpace.mk' E y (Y y)))
     (hmixedXYZ : ∀ (Z : Π y : M, TM y),
-      ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      ContMDiff I (I.prod 𝓘(ℝ, E)) 2
         (fun y ↦ TotalSpace.mk' E y (Z y)) → HasDerivAt
       (fun τ : ℝ =>
         mvfderiv (I := I) (fun y ↦ (g τ).inner y (Y y) (Z y)) x (X x))
       (mvfderiv (I := I) (fun y ↦ hdot y (Y y) (Z y)) x (X x)) t)
     (hmixedYXZ : ∀ (Z : Π y : M, TM y),
-      ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      ContMDiff I (I.prod 𝓘(ℝ, E)) 2
         (fun y ↦ TotalSpace.mk' E y (Z y)) → HasDerivAt
       (fun τ : ℝ =>
         mvfderiv (I := I) (fun y ↦ (g τ).inner y (X y) (Z y)) x (Y x))
       (mvfderiv (I := I) (fun y ↦ hdot y (X y) (Z y)) x (Y x)) t)
     (hmixedZXY : ∀ (Z : Π y : M, TM y),
-      ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      ContMDiff I (I.prod 𝓘(ℝ, E)) 2
         (fun y ↦ TotalSpace.mk' E y (Z y)) → HasDerivAt
       (fun τ : ℝ =>
         mvfderiv (I := I) (fun y ↦ (g τ).inner y (X y) (Y y)) x (Z x))
@@ -812,7 +812,7 @@ theorem exists_hasDerivAt_along_const_with_cyclic_metricVariation
     ∃ Axy : TM x,
       HasDerivAt (fun τ : ℝ => (cov τ).along X Y x) Axy t ∧
       ∀ (Z : Π y : M, TM y),
-        ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+        ContMDiff I (I.prod 𝓘(ℝ, E)) 2
           (fun y ↦ TotalSpace.mk' E y (Z y)) →
         2 * (g t).inner x Axy (Z x) =
           metricVelocityCovariantDerivativeAlong
@@ -840,13 +840,15 @@ theorem exists_hasDerivAt_along_const_with_cyclic_metricVariation
     (X := X) (Y := Y) (x := x) hX hY hmixedXYZ hmixedYXZ hmixedZXY
   refine ⟨Axy, hAxy, ?_⟩
   intro Z hZ
+  have hZ₁ : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (T% Z) :=
+    hZ.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
   have hKoszul := hasDerivAt_metricKoszulExpression
     (I := I) (M := M) g hdot (t := t) hmetric
     (X := X) (Y := Y) (Z := Z) (x := x)
     (hmixedXYZ Z hZ) (hmixedYXZ Z hZ) (hmixedZXY Z hZ)
   have hconnectionPairing := hasDerivAt_metricConnectionPairing_of_koszulExpression
     (I := I) (M := M) g cov hcov hLevi hdot (t := t)
-    (X := X) (Y := Y) (Z := Z) (x := x) hKoszul hX hY hZ
+    (X := X) (Y := Y) (Z := Z) (x := x) hKoszul hX hY hZ₁
   have hactualPairing := hasDerivAt_metricInner_left_of_pairwise_derivative
     (I := I) (M := M) g hdot (t := t) hmetric x
     (fun τ => (cov τ).along X Y x) Axy (Z x) hAxy
@@ -870,7 +872,7 @@ theorem exists_hasDerivAt_along_const_with_cyclic_metricVariation
     exact metricVelocityKoszulExpression_eq_cyclicCovariantDerivative
       (I := I) (M := M) (g := g) (cov := cov) (hLevi := hLevi)
       (hcov := hcov) (hdot := hdot) (hdotSymm := hdotSymm) (t := t)
-      (X := X) (Y := Y) (Z := Z) (x := x) hX hY hZ
+      (X := X) (Y := Y) (Z := Z) (x := x) hX hY hZ₁
   rw [hcyclic] at hKoszulDual
   linarith
 

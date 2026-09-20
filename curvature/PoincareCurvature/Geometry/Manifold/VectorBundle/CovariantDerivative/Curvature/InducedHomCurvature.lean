@@ -194,4 +194,172 @@ theorem curvatureAux_inducedHom_apply
   simp only [map_sub, map_add, sub_eq_add_neg]
   abel
 
+/-! A localized version of the induced-Hom curvature formula.  The original
+sections are differentiable globally so their product-rule identity can be
+differentiated once more; the derived sections need only be differentiable
+where the curvature is evaluated. -/
+
+set_option maxHeartbeats 3000000 in
+theorem curvatureAux_inducedHom_apply_at
+    {φ : ∀ x : M, Hom₁₂ x} {σ : ∀ x : M, V₁ x}
+    {X Y : ∀ x : M, TM x} {x : M}
+    (hφ : ∀ y, MDiffAt
+      (fun z => TotalSpace.mk' (F₁ →L[ℝ] F₂) (E := Hom₁₂) z (φ z)) y)
+    (hσ : ∀ y, MDiffAt (T% σ) y)
+    (hφX : MDiffAt
+      (fun z => TotalSpace.mk' (F₁ →L[ℝ] F₂) (E := Hom₁₂) z
+        (inducedHomCovariantDerivative cov₁ cov₂ φ z (X z))) x)
+    (hφY : MDiffAt
+      (fun z => TotalSpace.mk' (F₁ →L[ℝ] F₂) (E := Hom₁₂) z
+        (inducedHomCovariantDerivative cov₁ cov₂ φ z (Y z))) x)
+    (hQXσ : MDiffAt (T% (cov₁.along X σ)) x)
+    (hQYσ : MDiffAt (T% (cov₁.along Y σ)) x)
+    (hP_Yφσ : MDiffAt
+      (T% (cov₂.along Y (fun z => φ z (σ z)))) x)
+    (hP_Xφσ : MDiffAt
+      (T% (cov₂.along X (fun z => φ z (σ z)))) x)
+    (hφQX : MDiffAt
+      (fun z => TotalSpace.mk' F₂ z (φ z (cov₁.along X σ z))) x)
+    (hφQY : MDiffAt
+      (fun z => TotalSpace.mk' F₂ z (φ z (cov₁.along Y σ z))) x) :
+    (inducedHomCovariantDerivative cov₁ cov₂).curvatureAux X Y φ x (σ x) =
+      cov₂.curvatureAux X Y (fun y => φ y (σ y)) x -
+        φ x (cov₁.curvatureAux X Y σ x) := by
+  let D := inducedHomCovariantDerivative cov₁ cov₂
+  let B := VectorField.mlieBracket I X Y
+  have hsub {τ υ : ∀ y : M, V₂ y} {W : ∀ y : M, TM y}
+      (hτ : MDiffAt (T% τ) x) (hυ : MDiffAt (T% υ) x) :
+      cov₂.along W (τ - υ) x =
+        cov₂.along W τ x - cov₂.along W υ x := by
+    have hneg : MDiffAt (T% (-υ)) x := mdifferentiableAt_neg_section hυ
+    have hsum := cov₂.along_add_right_apply (x := x) (X := W) hτ hneg
+    have hneg' : cov₂.along W (-υ) x = -cov₂.along W υ x := by
+      have h := cov₂.along_smul_right_apply (x := x)
+        (f := fun _ : M => (-1 : ℝ)) (X := W) (σ := υ)
+        mdifferentiableAt_const hυ
+      have hscalar : (fun _ : M => (-1 : ℝ)) • υ = -υ := by
+        funext y
+        simp
+      rw [hscalar] at h
+      simpa [mvfderiv] using h
+    rw [sub_eq_add_neg, hsum, hneg']
+    abel
+  have hprod (A : ∀ y : M, Hom₁₂ y) (τ : ∀ y : M, V₁ y)
+      (W : ∀ y : M, TM y)
+      (hA : ∀ y, MDiffAt
+        (fun z => TotalSpace.mk' (F₁ →L[ℝ] F₂) (E := Hom₁₂) z (A z)) y)
+      (hτ : ∀ y, MDiffAt (T% τ) y) :
+      (fun y => (D A y (W y)) (τ y)) =
+        (fun y => cov₂.along W (fun z => A z (τ z)) y -
+          A y (cov₁.along W τ y)) := by
+    funext y
+    have h := inducedHomCovariantDerivative_apply_section_general
+      cov₁ cov₂ (x := y) (u := W y) (hA y) (hτ y)
+    simpa [D, CovariantDerivative.along] using h
+  have hprodAt (A : ∀ y : M, Hom₁₂ y) (τ : ∀ y : M, V₁ y)
+      (W : ∀ y : M, TM y)
+      (hA : MDiffAt
+        (fun z => TotalSpace.mk' (F₁ →L[ℝ] F₂) (E := Hom₁₂) z (A z)) x)
+      (hτ : MDiffAt (T% τ) x) :
+      (D A x (W x)) (τ x) =
+        cov₂.along W (fun z => A z (τ z)) x -
+          A x (cov₁.along W τ x) := by
+    have h := inducedHomCovariantDerivative_apply_section_general
+      cov₁ cov₂ (x := x) (u := W x) hA hτ
+    simpa [D, CovariantDerivative.along] using h
+  have hpY := hprod φ σ Y hφ hσ
+  have hpX := hprod φ σ X hφ hσ
+  have hpB := hprod φ σ B hφ hσ
+  have hpYQX := hprodAt φ (cov₁.along X σ) Y (hφ x) hQXσ
+  have hpXQY := hprodAt φ (cov₁.along Y σ) X (hφ x) hQYσ
+  have h1 :
+      (D (fun y => D φ y (Y y)) x (X x)) (σ x) =
+        cov₂.along X
+            (fun y => D φ y (Y y) (σ y)) x -
+          (D φ x (Y x)) (cov₁.along X σ x) := by
+    exact hprodAt (fun y => D φ y (Y y)) σ X hφY (hσ x)
+  have h2 :
+      (D (fun y => D φ y (X y)) x (Y x)) (σ x) =
+        cov₂.along Y
+            (fun y => D φ y (X y) (σ y)) x -
+          (D φ x (X x)) (cov₁.along Y σ x) := by
+    exact hprodAt (fun y => D φ y (X y)) σ Y hφX (hσ x)
+  have h1n :
+      (D (D.along Y φ) x (X x)) (σ x) =
+        cov₂.along X
+            (fun y => D φ y (Y y) (σ y)) x -
+          (D φ x (Y x)) (cov₁.along X σ x) := by
+    change (D (fun y => D φ y (Y y)) x (X x)) (σ x) = _
+    exact h1
+  have h2n :
+      (D (D.along X φ) x (Y x)) (σ x) =
+        cov₂.along Y
+            (fun y => D φ y (X y) (σ y)) x -
+          (D φ x (X x)) (cov₁.along Y σ x) := by
+    change (D (fun y => D φ y (X y)) x (Y x)) (σ x) = _
+    exact h2
+  have h1' :
+      (D (D.along Y φ) x (X x)) (σ x) =
+        cov₂.along X (cov₂.along Y (fun z => φ z (σ z))) x -
+          cov₂.along X (fun z => φ z (cov₁.along Y σ z)) x -
+          (cov₂.along Y (fun z => φ z (cov₁.along X σ z)) x -
+            φ x (cov₁.along Y (cov₁.along X σ) x)) := by
+    rw [h1n, hpY, hpYQX]
+    have hsubY := hsub (W := X) hP_Yφσ hφQY
+    have hsubY' : cov₂.along X
+        (fun y => cov₂.along Y (fun z => φ z (σ z)) y -
+          φ y (cov₁.along Y σ y)) x =
+        cov₂.along X (cov₂.along Y (fun z => φ z (σ z))) x -
+          cov₂.along X (fun z => φ z (cov₁.along Y σ z)) x := by
+      have hfunY :
+          (fun y => cov₂.along Y (fun z => φ z (σ z)) y -
+            φ y (cov₁.along Y σ y)) =
+            cov₂.along Y (fun z => φ z (σ z)) -
+              (fun y => φ y (cov₁.along Y σ y)) := by
+        funext y
+        rfl
+      rw [hfunY]
+      exact hsubY
+    rw [hsubY']
+  have h2' :
+      (D (D.along X φ) x (Y x)) (σ x) =
+        cov₂.along Y (cov₂.along X (fun z => φ z (σ z))) x -
+          cov₂.along Y (fun z => φ z (cov₁.along X σ z)) x -
+          (cov₂.along X (fun z => φ z (cov₁.along Y σ z)) x -
+            φ x (cov₁.along X (cov₁.along Y σ) x)) := by
+    rw [h2n, hpX, hpXQY]
+    have hsubX := hsub (W := Y) hP_Xφσ hφQX
+    have hsubX' : cov₂.along Y
+        (fun y => cov₂.along X (fun z => φ z (σ z)) y -
+          φ y (cov₁.along X σ y)) x =
+        cov₂.along Y (cov₂.along X (fun z => φ z (σ z))) x -
+          cov₂.along Y (fun z => φ z (cov₁.along X σ z)) x := by
+      have hfunX :
+          (fun y => cov₂.along X (fun z => φ z (σ z)) y -
+            φ y (cov₁.along X σ y)) =
+            cov₂.along X (fun z => φ z (σ z)) -
+              (fun y => φ y (cov₁.along X σ y)) := by
+        funext y
+        rfl
+      rw [hfunX]
+      exact hsubX
+    rw [hsubX']
+  have h3 :
+      D.along B φ x (σ x) =
+        cov₂.along B (fun z => φ z (σ z)) x -
+          φ x (cov₁.along B σ x) := by
+    simpa [D, CovariantDerivative.along] using
+      hprodAt φ σ B (hφ x) (hσ x)
+  have hcurvD :
+      D.curvatureAux X Y φ x (σ x) =
+        (D (D.along Y φ) x (X x)) (σ x) -
+          (D (D.along X φ) x (Y x)) (σ x) -
+          (D.along B φ x) (σ x) := by
+    simp only [CovariantDerivative.curvatureAux, CovariantDerivative.along,
+      Pi.sub_apply, sub_apply, B]
+  rw [hcurvD, h1', h2', h3]
+  simp [CovariantDerivative.curvatureAux, CovariantDerivative.along, B]
+  simp only [map_sub, map_add, sub_eq_add_neg]
+  abel
+
 end CovariantDerivative

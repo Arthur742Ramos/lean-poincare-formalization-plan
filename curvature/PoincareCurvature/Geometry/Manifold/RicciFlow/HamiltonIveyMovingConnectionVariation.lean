@@ -111,7 +111,7 @@ theorem hasDerivAt_along_moving_of_movingKoszulPairings
     (hσ : ∀ τ : ℝ, ContMDiff I (I.prod 𝓘(ℝ, E)) 1
       (fun y ↦ TotalSpace.mk' E y (σ τ y)))
     (hKoszulRhs : ∀ (Z : Π y : M, TM y),
-      ContMDiff I (I.prod 𝓘(ℝ, E)) 1
+      ContMDiff I (I.prod 𝓘(ℝ, E)) 2
         (fun y ↦ TotalSpace.mk' E y (Z y)) →
       HasDerivAt
         (fun τ : ℝ => metricKoszulExpression (I := I) (M := M)
@@ -151,12 +151,11 @@ theorem hasDerivAt_along_moving_of_movingKoszulPairings
     have hZ₂ : ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (T% Z) := by
       simpa [Z] using CovariantDerivative.smoothExtend_contMDiff_two
         (I := I) (F := E) (V := (TangentSpace I : M → Type _)) x v
-    have hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) 1 (T% Z) :=
-      hZ₂.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
     have hconn :=
       hasDerivAt_metricConnectionPairing_of_movingKoszulExpression
         (I := I) (M := M) g cov hcov hLevi hdot (t := t)
-        (X := X) σ (Z := Z) (x := x) hX hσ hZ C (hKoszulRhs Z hZ)
+        (X := X) σ (Z := Z) (x := x) hX hσ
+        (hZ₂.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)) C (hKoszulRhs Z hZ₂)
     have hfunction :
         (fun τ : ℝ => (g τ).inner x v
           ((cov τ).along X (σ τ) x)) =

@@ -30,7 +30,7 @@ in [the Palomar portfolio](palomar-submission-plan.md).
 | 2 | Curvature identities and existence | **Proved** | The package exposes Levi–Civita existence, sectional curvature, and Bianchi identities. |
 | 3 | Time-dependent geometry | **Proved** | Time-indexed sections, metrics, connections, curvature quantities, and slice-wise Levi–Civita constructions are implemented. |
 | 4 | Ricci-flow local existence and uniqueness | **Open** | Special cases and conditional bridges are proved, but `intrinsicLocalExistenceUniquenessFamily_pointFour` is absent and the audit does not close. |
-| 5 | Evolution equations and maximum principles | **Future** | Depends on a genuine Ricci-flow solution theory. Hamilton–Ivey pinching, including the scalar lower barrier, is proved for the ordered curvature ODE, and the current Merge 24 follow-up includes proved connection-variation, actual curvature-operator regularity, shifted-tensor regularity, and conditional transport bridges; the geometric curvature PDE and tensor maximum principle remain missing. |
+| 5 | Evolution equations and maximum principles | **In Progress** | Hamilton–Ivey pinching is proved for the ordered curvature ODE, and a conditional intrinsic geometric evolution/pinching theorem is now proved from `IsRicciFlowOn` plus explicit mixed and spatial regularity. Those regularity and contact assumptions are not derived from the current slice-wise flow predicate; the general solution theory and maximum-principle layer remain open. |
 | 6 | Distance distortion and compactness | **Future** | Depends on milestones 4–5. |
 | 7 | Perelman reduced geometry | **Future** | Depends on the evolving-metric analytic toolkit. |
 | 8 | Non-collapsing | **Future** | Depends on reduced geometry and Ricci-flow estimates. |
@@ -97,27 +97,27 @@ scalar lower barrier, exact logarithmic-defect reaction identity, and strict
 does not yet connect that calculation to an intrinsic Ricci flow or prove a
 geometric parabolic maximum principle.
 
-The current `curvature/` worktree now also proves
-`HamiltonIveyCurvatureEvolutionCertificate.of_connectionVariation`. This
-constructor derives the time derivative of the actual curvature commutator
-from `HasConnectionTimeVariationAt` and records the result in the geometric
-certificate. The follow-up packages the actual curvature-operator regularity,
-derives the shifted-tensor trace regularity from it, proves that the genuine
-connection Laplacian is unchanged by the spatially constant `R - nu * g`
-contact shift, and exposes `of_connectionVariation_of_operatorEvolution` to
-transport an actual unshifted curvature-operator evolution equation into the
-existing certificate interface. The curvature library now also exposes the
-proved local second-derivative commutator
-curvatureAux_covariantDerivative_commutator_apply and the independent
-generic C1 induced-hom regularity bridge in
-CovariantDerivative.InducedHomRegularity. These additions make the next
-curvature-evolution step auditable, but do not supply the mixed
-time--space regularity or the geometric curvature PDE itself. The tensor
-maximum-principle input therefore remains open, so milestone 5 remains future
-rather than proved. The public `HamiltonIveyMovingConnectionVariation` module
-now also proves the scalar-to-vector moving-section Koszul bridge, but its
-differentiated Koszul expression remains an explicit certificate rather than
-a consequence claimed from `IsRicciFlowOn`.
+The latest `curvature/` follow-up now proves
+`HamiltonIveyCurvatureEvolutionCertificate.of_intrinsicRicciFlow_and_jointRegularity`
+and the conditional pinching endpoint
+`hamiltonIveyPinching_of_intrinsicRicciFlow_and_jointGeometricEvolution_contactData_on_negative_spectrum`.
+The constructor obtains the actual curvature-tensor velocity from
+`IsRicciFlowOn` and explicit joint spacetime regularity of metric pairings and
+nested covariant-derivative sections, deriving the connection variation from
+Koszul rather than accepting a connection-variation or curvature-evolution
+identity as input. It then derives the Ricci-trace and curvature-operator
+evolution using the geometric contractions. The pinching theorem additionally
+requires explicit slice/operator regularity, the initial least-eigenvalue
+bound, scalar and eigenvalue continuity, and support-contact regularity.
+These hypotheses are not consequences currently proved from the slice-wise
+`IsRicciFlowOn` predicate. Thus the geometric PDE is no longer an independent
+caller-supplied input, and a conditional geometric Hamilton--Ivey theorem is
+proved; an unconditional theorem from `IsRicciFlowOn` alone, analytic
+regularity/existence theory, and the general tensor maximum-principle layer
+remain open. The earlier local second-derivative commutator,
+induced-hom regularity, actual curvature-operator regularity, shifted-tensor
+regularity, and `R - nu * g` connection-Laplacian bridge remain part of the
+supporting development.
 
 ## Updating this page
 
