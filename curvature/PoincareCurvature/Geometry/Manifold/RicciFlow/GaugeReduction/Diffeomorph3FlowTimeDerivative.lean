@@ -54,38 +54,62 @@ theorem lieBracket_const_right_eq_neg_fderiv
       -fderiv 𝕜 V x v := by
   simp [lieBracket]
 
-/-- Model-manifold version of `lieBracketWithin_const_left_eq_fderivWithin`. -/
+/-- Model-manifold version of `lieBracketWithin_const_left_eq_fderivWithin`.
+
+The vector fields are genuine sections `Π y, TangentSpace 𝓘(𝕜, E) y` (rather
+than `E → E` functions): since `TangentSpace` is a non-reducible definition,
+the rewrite `mlieBracketWithin_eq_lieBracketWithin` only matches when the
+fields are elaborated with their true section types.  The constant field and
+the `E`-valued shadow of `V` are transported through
+`NormedSpace.fromTangentSpace`, which is definitionally the identity. -/
 theorem mlieBracketWithin_model_const_left_eq_fderivWithin
-    (V : E → E) (s : Set E) (x v : E) :
-    mlieBracketWithin (𝓘(𝕜, E)) (fun _ : E => v) V s x =
-      fderivWithin 𝕜 V s x v := by
+    (V : Π y : E, TangentSpace 𝓘(𝕜, E) y) (s : Set E) (x v : E) :
+    mlieBracketWithin (𝓘(𝕜, E))
+        (fun y => (NormedSpace.fromTangentSpace (𝕜 := 𝕜) (E := E) y).symm v) V s x =
+      fderivWithin 𝕜
+        (fun y => (NormedSpace.fromTangentSpace (𝕜 := 𝕜) (E := E) y) (V y)) s x v := by
   rw [mlieBracketWithin_eq_lieBracketWithin]
-  exact lieBracketWithin_const_left_eq_fderivWithin (𝕜 := 𝕜) V s x v
+  exact lieBracketWithin_const_left_eq_fderivWithin _ s x v
 
 /-- Model-manifold version of
 `lieBracketWithin_const_right_eq_neg_fderivWithin`. -/
 theorem mlieBracketWithin_model_const_right_eq_neg_fderivWithin
-    (V : E → E) (s : Set E) (x v : E) :
-    mlieBracketWithin (𝓘(𝕜, E)) V (fun _ : E => v) s x =
-      -fderivWithin 𝕜 V s x v := by
+    (V : Π y : E, TangentSpace 𝓘(𝕜, E) y) (s : Set E) (x v : E) :
+    mlieBracketWithin (𝓘(𝕜, E)) V
+        (fun y => (NormedSpace.fromTangentSpace (𝕜 := 𝕜) (E := E) y).symm v) s x =
+      -fderivWithin 𝕜
+        (fun y => (NormedSpace.fromTangentSpace (𝕜 := 𝕜) (E := E) y) (V y)) s x v := by
   rw [mlieBracketWithin_eq_lieBracketWithin]
-  exact lieBracketWithin_const_right_eq_neg_fderivWithin (𝕜 := 𝕜) V s x v
+  exact lieBracketWithin_const_right_eq_neg_fderivWithin _ s x v
 
-/-- Global model-manifold version of `lieBracket_const_left_eq_fderiv`. -/
+/-- Global model-manifold version of `lieBracket_const_left_eq_fderiv`.
+
+The right-hand side is transported into `TangentSpace 𝓘(𝕜, E) x` through
+`NormedSpace.fromTangentSpace`, since `TangentSpace` is a non-reducible
+definition and the stated equality must be well-typed at every transparency.
+The proof avoids unfolding `mlieBracket` (whose definition is not exposed in
+this module) and instead rewrites with the `rfl`-lemma
+`mlieBracketWithin_univ`. -/
 theorem mlieBracket_model_const_left_eq_fderiv
-    (V : E → E) (x v : E) :
-    mlieBracket (𝓘(𝕜, E)) (fun _ : E => v) V x =
-      fderiv 𝕜 V x v := by
-  rw [mlieBracket, mlieBracketWithin_eq_lieBracketWithin, lieBracketWithin_univ]
-  exact lieBracket_const_left_eq_fderiv (𝕜 := 𝕜) V x v
+    (V : Π y : E, TangentSpace 𝓘(𝕜, E) y) (x v : E) :
+    mlieBracket (𝓘(𝕜, E))
+        (fun y => (NormedSpace.fromTangentSpace (𝕜 := 𝕜) (E := E) y).symm v) V x =
+      (NormedSpace.fromTangentSpace (𝕜 := 𝕜) (E := E) x).symm
+        (fderiv 𝕜
+          (fun y => (NormedSpace.fromTangentSpace (𝕜 := 𝕜) (E := E) y) (V y)) x v) := by
+  rw [← mlieBracketWithin_univ, ← fderivWithin_univ]
+  exact mlieBracketWithin_model_const_left_eq_fderivWithin V univ x v
 
 /-- Global model-manifold version of `lieBracket_const_right_eq_neg_fderiv`. -/
 theorem mlieBracket_model_const_right_eq_neg_fderiv
-    (V : E → E) (x v : E) :
-    mlieBracket (𝓘(𝕜, E)) V (fun _ : E => v) x =
-      -fderiv 𝕜 V x v := by
-  rw [mlieBracket, mlieBracketWithin_eq_lieBracketWithin, lieBracketWithin_univ]
-  exact lieBracket_const_right_eq_neg_fderiv (𝕜 := 𝕜) V x v
+    (V : Π y : E, TangentSpace 𝓘(𝕜, E) y) (x v : E) :
+    mlieBracket (𝓘(𝕜, E)) V
+        (fun y => (NormedSpace.fromTangentSpace (𝕜 := 𝕜) (E := E) y).symm v) x =
+      (NormedSpace.fromTangentSpace (𝕜 := 𝕜) (E := E) x).symm
+        (-fderiv 𝕜
+          (fun y => (NormedSpace.fromTangentSpace (𝕜 := 𝕜) (E := E) y) (V y)) x v) := by
+  rw [← mlieBracketWithin_univ, ← fderivWithin_univ]
+  exact mlieBracketWithin_model_const_right_eq_neg_fderivWithin V univ x v
 
 end VectorField
 
@@ -227,7 +251,7 @@ theorem hasDerivWithinAt_bilinearForm_linear_apply_apply
       (ContinuousLinearMap.apply ℝ V u).hasFDerivWithinAt
     have hcomp := hev.comp t hA.hasFDerivWithinAt
       (Set.mapsTo_univ (fun τ : ℝ => A τ) s)
-    simpa [Function.comp] using hcomp.hasDerivWithinAt
+    simpa [Function.comp_def] using hcomp.hasDerivWithinAt
   have hv : HasDerivWithinAt (fun τ : ℝ => A τ v) (A' v) s t := by
     have hev :
         HasFDerivWithinAt
@@ -236,7 +260,7 @@ theorem hasDerivWithinAt_bilinearForm_linear_apply_apply
       (ContinuousLinearMap.apply ℝ V v).hasFDerivWithinAt
     have hcomp := hev.comp t hA.hasFDerivWithinAt
       (Set.mapsTo_univ (fun τ : ℝ => A τ) s)
-    simpa [Function.comp] using hcomp.hasDerivWithinAt
+    simpa [Function.comp_def] using hcomp.hasDerivWithinAt
   exact hasDerivWithinAt_bilinearForm_apply_apply
     (B := B) (B' := B') (u := fun τ : ℝ => A τ u)
     (u' := A' u) (v := fun τ : ℝ => A τ v) (v' := A' v)
@@ -317,7 +341,7 @@ theorem hasDerivWithinAt_of_eventuallyEq_bilinearForm_linear_apply_apply_of_comp
       (ContinuousLinearMap.apply ℝ V u).hasFDerivWithinAt
     have hcomp := hev.comp t hA.hasFDerivWithinAt
       (Set.mapsTo_univ (fun τ : ℝ ↦ A τ) s)
-    simpa [Function.comp] using hcomp.hasDerivWithinAt
+    simpa [Function.comp_def] using hcomp.hasDerivWithinAt
   have hAv : HasDerivWithinAt (fun τ : ℝ ↦ A τ v) (D (A t v)) s t := by
     have hev :
         HasFDerivWithinAt
@@ -326,7 +350,7 @@ theorem hasDerivWithinAt_of_eventuallyEq_bilinearForm_linear_apply_apply_of_comp
       (ContinuousLinearMap.apply ℝ V v).hasFDerivWithinAt
     have hcomp := hev.comp t hA.hasFDerivWithinAt
       (Set.mapsTo_univ (fun τ : ℝ ↦ A τ) s)
-    simpa [Function.comp] using hcomp.hasDerivWithinAt
+    simpa [Function.comp_def] using hcomp.hasDerivWithinAt
   have hderiv :
       HasDerivWithinAt (fun τ : ℝ ↦ B τ (A τ u) (A τ v))
         (B' (A t u) (A t v) +
@@ -2675,31 +2699,21 @@ theorem extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_center
     simp [z]
   have hφ' : HasMFDerivAt I 𝓘(ℝ) φ ((extChartAt I p).symm z)
       (mfderiv I 𝓘(ℝ) φ p) := by
-    convert hφ.hasMFDerivAt using 1
-  have hcomp :
-      HasMFDerivWithinAt 𝓘(ℝ, E) 𝓘(ℝ) (φ ∘ (extChartAt I p).symm)
-        (Set.range I) z
-        ((mfderiv I 𝓘(ℝ) φ p).comp
-          (mfderivWithin 𝓘(ℝ, E) I (extChartAt I p).symm (Set.range I) z)) := by
-    simpa [z] using
+    rw [hzsymm]
+    exact hφ.hasMFDerivAt
+  have hcomp :=
       (HasMFDerivAt.comp_hasMFDerivWithinAt
-        (f := (extChartAt I p).symm) (s := Set.range I) (x := z)
+        (f := (extChartAt I p).symm) (s := Set.range I) (x := (extChartAt I p) p)
         hφ'
         (mdifferentiableWithinAt_extChartAt_symm
           (mem_extChartAt_target (I := I) p)).hasMFDerivWithinAt)
-  have hderiv :
-      fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) p φ) (Set.range I) z =
-        (((mfderiv I 𝓘(ℝ) φ p).comp
-          (mfderivWithin 𝓘(ℝ, E) I (extChartAt I p).symm (Set.range I) z)) :
-            E →L[ℝ] ℝ) := by
-    simpa [writtenInExtChartAt, z] using
+  have hderiv :=
       hcomp.hasFDerivWithinAt.fderivWithin (I.uniqueDiffOn.uniqueDiffWithinAt hz)
-  rw [hderiv]
-  rw [mfderivWithin_range_extChartAt_symm]
-  change (mfderiv I 𝓘(ℝ) φ p) X =
-    (((mfderiv I 𝓘(ℝ) φ p).comp (ContinuousLinearMap.id ℝ E)) : E →L[ℝ] ℝ) X
-  rw [ContinuousLinearMap.comp_apply]
+  simp only [writtenInExtChartAt, ext_chart_model_space_apply] at ⊢
   congr 1
+  have h := hderiv
+  simp only [mfderivWithin_range_extChartAt_symm, ContinuousLinearMap.comp_id] at h
+  exact h.symm
 
 /-- Metric compatibility of the chosen Levi-Civita slice, specialized to the
 canonical `extend` sections through two tangent vectors. -/
@@ -3025,7 +3039,7 @@ theorem mlieBracket_extend_eq_tangentVectorOfCoordinate_fderivWithin_of_eventual
   have hmain :
       VectorField.mlieBracket I (FiberBundle.extend E pw) Y p =
         (mfderiv I (𝓘(ℝ, E)) (extChartAt I p) p).inverse z := by
-    rw [VectorField.mlieBracket, VectorField.mlieBracketWithin_apply]
+    rw [← VectorField.mlieBracketWithin_univ, VectorField.mlieBracketWithin_apply]
     simpa [Vext, VY, y0, z] using congrArg
       (fun a : E => (mfderiv I (𝓘(ℝ, E)) (extChartAt I p) p).inverse a) hLie
   rw [hmain]
