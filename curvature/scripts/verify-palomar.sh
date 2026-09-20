@@ -218,6 +218,9 @@ puts "formalization.yaml shape passed."
 RUBY
 
 lake build
+# Keep the standalone intrinsic DeTurck trace theorem in the default CI build;
+# it is intentionally not imported by the curated PoincareCurvature root.
+lake build PoincareCurvature.Geometry.Manifold.RicciFlow.StandardDeTurckIntrinsicTraceDerivative
 lake build Challenge Solution
 lake env lean Challenge.lean
 lake env lean Solution.lean
