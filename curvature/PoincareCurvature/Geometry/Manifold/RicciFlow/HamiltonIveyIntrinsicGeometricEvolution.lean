@@ -51,11 +51,12 @@ structure HamiltonIveyIntrinsicCurvatureVariationRegularity
     (hLevi : g.IsLeviCivita cov) (t : ℝ) : Prop where
   connectionC2 : ContMDiffCovariantDerivative
     (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM) (cov t) 2
-  jointMetricPairings : ∀ (U V : Π y : M, TM y),
-    ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (T% U) →
-    ContMDiff I (I.prod 𝓘(ℝ, E)) 2 (T% V) →
-    ContMDiff (𝓘(ℝ).prod I) 𝓘(ℝ) 2
-      (fun p : ℝ × M => (g p.1).inner p.2 (U p.2) (V p.2))
+  jointMetricTensor : ContMDiff (𝓘(ℝ).prod I)
+    (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 2
+    (fun p : ℝ × M => TotalSpace.mk'
+      (E →L[ℝ] E →L[ℝ] ℝ)
+      (E := fun y : M => TM y →L[ℝ] TM y →L[ℝ] ℝ)
+      p.2 ((g p.1).inner p.2))
   nestedYZ : ∀ (x : M) (a b c : TM x),
     IntrinsicRicciMovingSectionRegularity g t x
       (smoothExtend (I := I) (F := E) (V := TM) x a)
@@ -598,7 +599,9 @@ def HamiltonIveyCurvatureEvolutionCertificate.of_intrinsicRicciFlow_and_jointReg
       (gdot := gdot) (s := s) (hflow := hflow) (t := t) ht
       (hcovTwo := hregularity.connectionC2)
       (hcovTwoAll := sliceRegularity.connectionC2)
-      (hjointFixedPairing := hregularity.jointMetricPairings)
+      (hjointFixedPairing := fun U V hU hV =>
+        jointMetricPairing_contMDiff_of_jointMetricTensor
+          (I := I) (M := M) g hregularity.jointMetricTensor hU hV)
       hregularity.nestedYZ hregularity.nestedXZ
   let curvatureVelocity := Classical.choose hvelocityExists
   have hvelocity := (Classical.choose_spec hvelocityExists).1
