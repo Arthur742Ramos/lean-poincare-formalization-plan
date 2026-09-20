@@ -1175,7 +1175,11 @@ theorem variational_tangent_apply_hasDerivWithinAt
     (ContinuousLinearMap.apply ℝ V v).hasFDerivWithinAt
   have hcomp := hev.comp t htan.hasFDerivWithinAt
     (Set.mapsTo_univ (fun τ : ℝ => (α.flow z τ).2) (Icc tmin tmax))
-  simpa [Function.comp] using hcomp.hasDerivWithinAt
+  convert hcomp.hasDerivWithinAt using 1
+  · rfl
+  · simp only [ContinuousLinearMap.comp_apply,
+      ContinuousLinearMap.toSpanSingleton_apply, one_smul,
+      ContinuousLinearMap.apply_apply]
 
 /-- The base component of a product variational local-flow solution is
 continuous on the Picard interval. -/
@@ -1793,7 +1797,7 @@ theorem flow_injOn_of_lipschitzOnWith_of_mem_Ioo
     (hf_lip : ∀ τ ∈ Ioo tmin tmax, LipschitzOnWith K (f τ) (state τ))
     (hmem : ∀ x ∈ closedBall x₀ r, ∀ τ ∈ Ioo tmin tmax, α.flow (x, τ) ∈ state τ) :
     InjOn (fun x => α.flow (x, t)) (closedBall x₀ r) := by
-  simpa using
+  simpa [toLocalFlowSolution] using
     (α.toLocalFlowSolution.flow_injOn_of_lipschitzOnWith_of_mem_Ioo
       ht₀ ht hf_lip hmem)
 
@@ -1807,7 +1811,7 @@ theorem flow_injOn_common_Ioo_of_lipschitzOnWith_of_mem
     (hf_lip : ∀ τ ∈ Ioo a b, LipschitzOnWith K (f τ) (state τ))
     (hmem : ∀ x ∈ closedBall x₀ r, ∀ τ ∈ Ioo a b, α.flow (x, τ) ∈ state τ) :
     InjOn (fun x => α.flow (x, t)) (closedBall x₀ r) := by
-  simpa using
+  simpa [toLocalFlowSolution] using
     (α.toLocalFlowSolution.flow_injOn_common_Ioo_of_lipschitzOnWith_of_mem
       htime htbase ht hf_lip hmem)
 
@@ -1889,7 +1893,8 @@ theorem lipschitzWith_leftComp (D : V →L[ℝ] V) :
     change ‖L‖ ≤ ‖D‖
     exact L.opNorm_le_bound (norm_nonneg D) (fun A => by
       simpa [L] using D.opNorm_comp_le A)
-  simpa [L] using L.lipschitz.weaken hL
+  change LipschitzWith ‖D‖₊ L
+  exact L.lipschitz.weaken hL
 
 /-- Left-composition is Lipschitz on any state set, with constant bounded by the
 left factor's operator norm. -/
@@ -2044,7 +2049,7 @@ theorem lipschitzOnWith_variationalVectorField_at
     (hD_bound : ∀ y ∈ baseState, ‖Df t y‖₊ ≤ BD) :
     LipschitzOnWith (max Kf (KD * BA + BD))
       (variationalVectorField f Df t) (baseState ×ˢ tangentState) := by
-  simpa [variationalVectorField] using
+  exact
     lipschitzOnWith_variationalVectorField
       (f_t := f t) (Df_t := Df t) (tangentState := tangentState)
       hf_lip hDf_lip hA_bound hD_bound
@@ -2256,7 +2261,8 @@ theorem ofProduct_flow_tangent_continuousOn_spaceTime
       (closedBall (x₀, (1 : V →L[ℝ] V)) R ×ˢ Icc tmin tmax) := by
     intro p hp
     exact ⟨hball p.1 hp.1, hp.2⟩
-  simpa [ofProductContinuousLocalFlowSolution, embed] using α.continuousOn.comp hemb hmaps
+  change ContinuousOn (α.flow ∘ embed) (closedBall x₀ r ×ˢ Icc tmin tmax)
+  exact α.continuousOn.comp hemb hmaps
 
 /-- Pointwise within-space-time continuity of the product-derived
 base-flow/tangent-map pair. -/
@@ -3322,7 +3328,11 @@ theorem tangent_apply_hasDerivWithinAt
     (ContinuousLinearMap.apply ℝ V v).hasFDerivWithinAt
   have hcomp := hev.comp t htan.hasFDerivWithinAt
     (Set.mapsTo_univ (fun τ : ℝ => α.tangent x τ) (Icc tmin tmax))
-  simpa [Function.comp] using hcomp.hasDerivWithinAt
+  convert hcomp.hasDerivWithinAt using 1
+  · rfl
+  · simp only [ContinuousLinearMap.comp_apply,
+      ContinuousLinearMap.toSpanSingleton_apply, one_smul,
+      ContinuousLinearMap.apply_apply]
 
 /-- Center-trajectory specialization of
 `VariationalLocalFlowSolution.tangent_apply_hasDerivWithinAt`. -/
@@ -4747,7 +4757,9 @@ theorem flow_timeSlice_hasFDerivAt_of_hasFDerivAt_spaceTime
     HasFDerivAt (fun y : V => α.flow (y, t))
       (α.tangent x t : V →L[ℝ] V) x := by
   have hslice := hF.comp x (hasFDerivAt_prodMk_left (𝕜 := ℝ) x t)
-  simpa [hspatial] using hslice
+  rw [hspatial] at hslice
+  change HasFDerivAt (α.flow ∘ fun y : V => (y, t)) (α.tangent x t) x
+  exact hslice
 
 /-- Space-time `C^n` regularity of a variational model flow restricts to
 `C^n` regularity of the fixed-time slice in the initial coordinate. -/
@@ -4756,9 +4768,9 @@ theorem flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime
     {n : WithTop ℕ∞} {x : V} {t : ℝ}
     (hF : ContDiffAt ℝ n α.flow (x, t)) :
     ContDiffAt ℝ n (fun y : V => α.flow (y, t)) x := by
-  simpa using
-    hF.comp x
-      ((contDiff_prodMk_left (𝕜 := ℝ) (n := n) (E := V) (F := ℝ) t).contDiffAt)
+  change ContDiffAt ℝ n (α.flow ∘ fun y : V => (y, t)) x
+  exact hF.comp x
+    ((contDiff_prodMk_left (𝕜 := ℝ) (n := n) (E := V) (F := ℝ) t).contDiffAt)
 
 /-- Endpoint first-order remainder criterion for a fixed time slice.  If the
 remainder after subtracting the variational tangent map is bounded by
@@ -4892,8 +4904,7 @@ theorem spatialRemainder_hasDerivWithinAt
   have hflow_h := α.hasDerivWithinAt (x + h) hxh τ hτ
   have hflow := α.hasDerivWithinAt x hx τ hτ
   have htangent := α.tangent_apply_hasDerivWithinAt hx hτ h
-  simpa [spatialRemainder, spatialRemainderDeriv] using
-    (hflow_h.sub hflow).sub htangent
+  convert (hflow_h.sub hflow).sub htangent using 1 <;> rfl
 
 /-- Right-neighborhood derivative of the first-order spatial remainder on the
 left-closed/right-open Picard interval, in the shape required by Mathlib's
@@ -4967,7 +4978,8 @@ theorem norm_le_gronwallBound_of_norm_deriv_left_le
     intro y hy
     convert HasFDerivWithinAt.comp_hasDerivWithinAt y (hf' (-y) (hmt2 hy))
       (hasDerivAt_neg y).hasDerivWithinAt (hmt3 y) using 1
-    simp
+    · rfl
+    · simpa only [ContinuousLinearMap.toSpanSingleton_apply, neg_one_smul]
   have hrev_bound :
       ∀ y ∈ Ico (-b) (-a),
         ‖-f' (-y)‖ ≤ K * ‖(fun s : ℝ => f (-s)) y‖ + ε := by
@@ -6339,7 +6351,8 @@ theorem flow_timeSlice_map_nhds_eq_of_hasStrictFDerivAt_Ioo
     α.tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo hx ht hD_bound
   have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
       (e : V →L[ℝ] V) x := by
-    simpa [e] using hstrict
+    simpa [e, tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo,
+      ContinuousLinearEquiv.coe_ofBijective] using hstrict
   exact hstrict'.map_nhds_eq_of_equiv
 
 /-- C¹-style form of the inverse-function bridge: ordinary spatial derivatives
@@ -6418,7 +6431,8 @@ theorem exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo
     α.tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo hx ht hD_bound
   have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
       (e : V →L[ℝ] V) x := by
-    simpa [e] using hstrict
+    simpa [e, tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo,
+      ContinuousLinearEquiv.coe_ofBijective] using hstrict
   refine ⟨hstrict'.toOpenPartialHomeomorph (fun y : V => α.flow (y, t)), rfl,
     hstrict'.mem_toOpenPartialHomeomorph_source,
     hstrict'.image_mem_toOpenPartialHomeomorph_target⟩
@@ -7240,7 +7254,8 @@ theorem flow_timeSlice_map_nhds_eq_common_Ioo_of_hasStrictFDerivAt
       htime htbase hx ht hD_bound
   have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
       (e : V →L[ℝ] V) x := by
-    simpa [e] using hstrict
+    simpa [e, tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem,
+      ContinuousLinearEquiv.coe_ofBijective] using hstrict
   exact hstrict'.map_nhds_eq_of_equiv
 
 /-- Common-subinterval open-partial-homeomorphism bridge for a time-slice of a
@@ -7263,7 +7278,8 @@ theorem exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDeri
       htime htbase hx ht hD_bound
   have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
       (e : V →L[ℝ] V) x := by
-    simpa [e] using hstrict
+    simpa [e, tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem,
+      ContinuousLinearEquiv.coe_ofBijective] using hstrict
   refine ⟨hstrict'.toOpenPartialHomeomorph (fun y : V => α.flow (y, t)), rfl,
     hstrict'.mem_toOpenPartialHomeomorph_source,
     hstrict'.image_mem_toOpenPartialHomeomorph_target⟩
@@ -7980,7 +7996,8 @@ theorem exists_open_nhds_local_gluing_data_subset_of_contDiffAt_model
     hGdiffSg₀.mono hSgsub
   have hφsymmAt :
       ContDiffAt ℝ (3 : WithTop ℕ∞) (fun y : V ↦ φ.symm y) (G (e₀ x)) := by
-    simpa [φ, ContDiffAt.localInverse, HasStrictFDerivAt.localInverse] using
+    simpa [φ, ContDiffAt.toOpenPartialHomeomorph, ContDiffAt.localInverse,
+      HasStrictFDerivAt.localInverse] using
       (hGdiff.to_localInverse hGderiv hthree_ne_zero)
   rcases hφsymmAt.contDiffOn (m := (3 : WithTop ℕ∞)) le_rfl (by simp) with
     ⟨Tg₀, hTg₀nhds, hφsymmTg₀⟩
@@ -8125,7 +8142,8 @@ theorem flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_of_hasSt
   have hderiv : HasFDerivAt (fun y : V ↦ α.flow (y, t)) (A : V →L[ℝ] V) (e₀ x) := by
     have hstrict' : HasStrictFDerivAt (fun y : V ↦ α.flow (y, t))
         (A : V →L[ℝ] V) (e₀ x) := by
-      simpa [A] using hstrict
+      simpa [A, tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo,
+        ContinuousLinearEquiv.coe_ofBijective] using hstrict
     exact hstrict'.hasFDerivAt
   exact exists_open_nhds_local_gluing_data_subset_of_contDiffAt_model
     (M := M) e₀ e₁ he₀ he₁ hU₀open hU₀source hxU₀ hGdiff hderiv
@@ -8170,7 +8188,8 @@ theorem flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_of_hasStri
   have hderiv : HasFDerivAt (fun y : V ↦ α.flow (y, t)) (A : V →L[ℝ] V) (e₀ x) := by
     have hstrict' : HasStrictFDerivAt (fun y : V ↦ α.flow (y, t))
         (A : V →L[ℝ] V) (e₀ x) := by
-      simpa [A] using hstrict
+      simpa [A, tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo,
+        ContinuousLinearEquiv.coe_ofBijective] using hstrict
     exact hstrict'.hasFDerivAt
   exact exists_open_nhds_localGluingData_subset_of_contDiffAt_model
     (M := M) e₀ e₁ he₀ he₁ hU₀open hU₀source hxU₀ hGdiff hderiv
@@ -8554,7 +8573,8 @@ theorem flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_I
   have hderiv : HasFDerivAt (fun y : V ↦ α.flow (y, t)) (A : V →L[ℝ] V) (e₀ x) := by
     have hstrict' : HasStrictFDerivAt (fun y : V ↦ α.flow (y, t))
         (A : V →L[ℝ] V) (e₀ x) := by
-      simpa [A] using hstrict
+      simpa [A, tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem,
+        ContinuousLinearEquiv.coe_ofBijective] using hstrict
     exact hstrict'.hasFDerivAt
   exact exists_open_nhds_local_gluing_data_subset_of_contDiffAt_model
     (M := M) e₀ e₁ he₀ he₁ hU₀open hU₀source hxU₀ hGdiff hderiv
@@ -13556,7 +13576,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_map_nhds_
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx htime htbase ht ht_forward
       hD_bound hDf_lip hder
@@ -13592,7 +13613,8 @@ theorem exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_op
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx htime htbase ht ht_forward
       hD_bound hDf_lip hder
@@ -14372,7 +14394,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_map_nhds_
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_of_closedBall_nnnorm_estimates_forward_Ioo_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_orig ht_forward_orig
       hD_bound hDf_lip hder
@@ -14416,7 +14439,8 @@ theorem exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_op
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_of_closedBall_nnnorm_estimates_forward_Ioo_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_orig ht_forward_orig
       hD_bound hDf_lip hder
@@ -14459,7 +14483,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_map_nhds_
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_of_closedBall_nnnorm_estimates_backward_Ioo_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_orig ht_backward_orig
       hD_bound hDf_lip hder
@@ -14503,7 +14528,8 @@ theorem exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_op
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_of_closedBall_nnnorm_estimates_backward_Ioo_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_orig ht_backward_orig
       hD_bound hDf_lip hder
@@ -14539,7 +14565,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_map_nhds_
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx htime htbase ht ht_backward
       hD_bound hDf_lip hder
@@ -14576,7 +14603,8 @@ theorem exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_op
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx htime htbase ht ht_backward
       hD_bound hDf_lip hder
@@ -15777,7 +15805,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_hasStrict
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_hasStrictFDerivAt_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_forward
       hD_bound hDf_lip hder
@@ -15935,7 +15964,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_hasStrict
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_hasStrictFDerivAt_of_closedBall_nnnorm_estimates_backward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_backward
       hD_bound hDf_lip hder
