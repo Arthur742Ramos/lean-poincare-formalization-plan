@@ -98,7 +98,7 @@ theorem mul_one_sub_mem_Icc {t r : ℝ} (ht : t ∈ Icc (0 : ℝ) D.T)
 
 /-- The substituted Duhamel integrand on subtypes: for a curve `u`, time `t ∈ [0,T]`,
 and quadrature parameter `r ∈ [0,1]`, this is `S(t(1-r))(N(u(t·r)))`. -/
-def duhamelIntegrandSub (u : C(Icc (0 : ℝ) D.T, X)) :
+public def duhamelIntegrandSub (u : C(Icc (0 : ℝ) D.T, X)) :
     Icc (0 : ℝ) D.T → Icc (0 : ℝ) 1 → X :=
   fun t r ↦ D.S (t.val * (1 - r.val))
     (D.N (u ⟨t.val * r.val, D.mul_mem_Icc t.property r.property⟩))
@@ -192,7 +192,7 @@ theorem continuous_duhamelIntegrandSub_t (u : C(Icc (0 : ℝ) D.T, X))
 
 /-- The integrand as `ℝ → X` (for the interval integral): agrees with the subtype
 version on `[0,1]`, defined as `0` outside. -/
-def duhamelIntegrand (u : C(Icc (0 : ℝ) D.T, X)) (t : Icc (0 : ℝ) D.T) : ℝ → X :=
+public def duhamelIntegrand (u : C(Icc (0 : ℝ) D.T, X)) (t : Icc (0 : ℝ) D.T) : ℝ → X :=
   fun r ↦ if hr : r ∈ Icc (0 : ℝ) 1 then D.duhamelIntegrandSub u t ⟨r, hr⟩ else 0
 
 /-- On `[0,1]`, the `ℝ → X` integrand agrees with the subtype version. -/
@@ -261,7 +261,7 @@ theorem norm_duhamelIntegrand_le (u : C(Icc (0 : ℝ) D.T, X)) (t : Icc (0 : ℝ
     positivity
 
 /-- The Duhamel integral over `[0,1]` for a curve `u` at time `t`. -/
-def duhamelIntegral (u : C(Icc (0 : ℝ) D.T, X)) (t : Icc (0 : ℝ) D.T) : X :=
+public def duhamelIntegral (u : C(Icc (0 : ℝ) D.T, X)) (t : Icc (0 : ℝ) D.T) : X :=
   ∫ r in (0 : ℝ)..1, D.duhamelIntegrand u t r
 
 /-- The Duhamel integral is continuous in `t`, by dominated convergence on `[0,1]`. -/
@@ -300,7 +300,7 @@ theorem continuous_duhamelIntegral (u : C(Icc (0 : ℝ) D.T, X)) :
     exact D.continuous_duhamelIntegrandSub_t u ⟨r, hr'⟩
 
 /-- The free evolution `t ↦ S(t) u₀`, as a continuous curve. -/
-def freeEvolution : C(Icc (0 : ℝ) D.T, X) where
+public def freeEvolution : C(Icc (0 : ℝ) D.T, X) where
   toFun := fun t ↦ D.S t.val D.u₀
   continuous_toFun := by
     -- `(τ,y) ↦ S τ y` after `t ↦ (t, u₀)`.
@@ -319,7 +319,7 @@ def freeEvolution : C(Icc (0 : ℝ) D.T, X) where
     rwa [heq]
 
 /-- The Duhamel term `t ↦ t • ∫₀¹ S(t(1-r)) N(u(t·r)) dr`, as a continuous curve. -/
-def duhamelTerm (u : C(Icc (0 : ℝ) D.T, X)) : C(Icc (0 : ℝ) D.T, X) where
+public def duhamelTerm (u : C(Icc (0 : ℝ) D.T, X)) : C(Icc (0 : ℝ) D.T, X) where
   toFun := fun t ↦ (t.val : ℝ) • D.duhamelIntegral u t
   continuous_toFun := by
     apply Continuous.smul
