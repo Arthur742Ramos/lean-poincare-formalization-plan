@@ -19417,15 +19417,47 @@ theorem nonempty_identityOfIsEmpty
       (E := E) (H := H) (I := I) (M := M) ivp) :=
   ⟨identityOfIsEmpty ivp⟩
 
+/-- The variational data hypothesis required by `toDiffeomorph3GaugeFlow`.
+
+For each solution, time, and point, this supplies the gauge-corrected
+velocity (identified with the solution's velocity) and the variational
+data Prop. This is genuine Picard–Lindelöf ODE data, supplied by the
+constructors, not synthesized by the adapter. -/
+def IntrinsicDeTurckGaugeFlowExistence.VariationalHypothesis
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : IntrinsicDeTurckGaugeFlowExistence
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp,
+    ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ∀ x : M,
+      ∃ gdot : MetricTensorFamily (I := I) (M := M),
+        gdot = sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+          (AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.ofSatisfiesGaugeFlowOn
+            (I := I) (M := M)
+            (g := sol.1.toIntrinsicDeTurckSolution.metric)
+            (background := sol.1.toIntrinsicDeTurckSolution.background)
+            (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+            (t₀ := ivp.initialTime)
+            ((G.flow sol).maps3) ((G.flow sol).anchored)
+            ((G.flow sol).satisfies)) ∧
+        ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowVariationalData
+          (I := I) (M := M)
+          ((G.flow sol).maps3)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background
+          gdot t x
+
 def toDiffeomorph3GaugeFlow
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp) :
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hvar : G.VariationalHypothesis) :
     ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
       (E := E) (H := H) (I := I) (M := M) ivp where
   maps3 := fun sol ↦ (G.flow sol).maps3
   anchored := fun sol ↦ (G.flow sol).anchored
   satisfies := fun sol ↦ (G.flow sol).satisfies
+  variational := hvar
 
 /-- For a fixed-IVP package whose intrinsic DeTurck gauge field vanishes on each
 solution's time set, the identity raw gauge flow supplies the required pullback
@@ -19445,12 +19477,12 @@ theorem identityOfGaugeFieldEqZero_hpullDerivative
         (I := I) (M := M)
         (((identityOfGaugeFieldEqZero
           (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
-          hzero).toDiffeomorph3GaugeFlow).maps3 sol)
+          hzero).flow sol).maps3)
         sol.1.toIntrinsicDeTurckSolution.metric)
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         (((identityOfGaugeFieldEqZero
           (E := E) (H := H) (I := I) (M := M) (ivp := ivp)
-          hzero).toDiffeomorph3GaugeFlow).gauge sol))
+          hzero).flow sol).toAnchoredIntrinsicDeTurckDiffeomorph3GaugeOn))
       sol.1.toIntrinsicDeTurckSolution.timeSet := by
   let gauge3 : AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn (I := I) (M := M)
       sol.1.toIntrinsicDeTurckSolution.metric
@@ -19602,18 +19634,35 @@ def ofDiffeomorph3GaugeFlow
     ((ofDiffeomorph3GaugeFlow (I := I) (M := M) G).flow sol).satisfies =
       G.satisfies sol := rfl
 
+/-- The variational hypothesis for `ofDiffeomorph3GaugeFlow G`, constructed
+from `G`'s own variational field. -/
+def ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.toVariationalHypothesis
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp) :
+    (ofDiffeomorph3GaugeFlow (I := I) (M := M) G).VariationalHypothesis := by
+  intro sol t ht x
+  obtain ⟨gdot, hgdot, hvar⟩ := G.variational sol ht x
+  refine ⟨gdot, ?_, hvar⟩
+  -- The gdot equation: need to show the ofSatisfiesGaugeFlowOn with
+  -- (ofDiffeomorph3GaugeFlow G).flow equals the one with G's fields.
+  -- By rfl, ((ofDiffeomorph3GaugeFlow G).flow sol).maps3 = G.maps3 sol, etc.
+  rw [hgdot]
+
 @[simp] theorem toDiffeomorph3GaugeFlow_ofDiffeomorph3GaugeFlow
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
       (E := E) (H := H) (I := I) (M := M) ivp) :
-    (ofDiffeomorph3GaugeFlow (I := I) (M := M) G).toDiffeomorph3GaugeFlow =
+    (ofDiffeomorph3GaugeFlow (I := I) (M := M) G).toDiffeomorph3GaugeFlow
+      G.toVariationalHypothesis =
       G := rfl
 
 @[simp] theorem ofDiffeomorph3GaugeFlow_toDiffeomorph3GaugeFlow
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp) :
-    ofDiffeomorph3GaugeFlow (I := I) (M := M) G.toDiffeomorph3GaugeFlow =
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (hvar : G.VariationalHypothesis) :
+    ofDiffeomorph3GaugeFlow (I := I) (M := M) (G.toDiffeomorph3GaugeFlow hvar) =
       G := rfl
 
 /-- Package a fixed-IVP geometric intrinsic DeTurck gauge-flow bundle as
@@ -20663,33 +20712,37 @@ theorem eventually_mem_extChartAt_source_eval_of_mem_source_of_timeSet_eq_Ioo
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp)
+    (hvar : G.VariationalHypothesis)
     (sol : ChosenIntrinsicDeTurckLocalSolution
       (E := E) (H := H) (I := I) (M := M) ivp) :
-    (G.toDiffeomorph3GaugeFlow.maps3 sol) = (G.flow sol).maps3 := rfl
+    ((G.toDiffeomorph3GaugeFlow hvar).maps3 sol) = (G.flow sol).maps3 := rfl
 
 @[simp] theorem toDiffeomorph3GaugeFlow_anchored
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp)
+    (hvar : G.VariationalHypothesis)
     (sol : ChosenIntrinsicDeTurckLocalSolution
       (E := E) (H := H) (I := I) (M := M) ivp) :
-    (G.toDiffeomorph3GaugeFlow.anchored sol) = (G.flow sol).anchored := rfl
+    ((G.toDiffeomorph3GaugeFlow hvar).anchored sol) = (G.flow sol).anchored := rfl
 
 @[simp] theorem toDiffeomorph3GaugeFlow_satisfies
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp)
+    (hvar : G.VariationalHypothesis)
     (sol : ChosenIntrinsicDeTurckLocalSolution
       (E := E) (H := H) (I := I) (M := M) ivp) :
-    (G.toDiffeomorph3GaugeFlow.satisfies sol) = (G.flow sol).satisfies := rfl
+    ((G.toDiffeomorph3GaugeFlow hvar).satisfies sol) = (G.flow sol).satisfies := rfl
 
 @[simp] theorem toDiffeomorph3GaugeFlow_gauge
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp)
+    (hvar : G.VariationalHypothesis)
     (sol : ChosenIntrinsicDeTurckLocalSolution
       (E := E) (H := H) (I := I) (M := M) ivp) :
-    (G.toDiffeomorph3GaugeFlow.gauge sol) =
+    ((G.toDiffeomorph3GaugeFlow hvar).gauge sol) =
       (G.flow sol).toAnchoredIntrinsicDeTurckDiffeomorph3GaugeOn := rfl
 
 end IntrinsicDeTurckGaugeFlowExistence
@@ -25535,48 +25588,61 @@ theorem nonempty_iff_forall_nonempty_forInitialValueProblem :
 
 /-- Turn theorem-family raw intrinsic gauge-flow existence data into the
 geometric gauge-flow family consumed by endpoint routes. -/
+/-- The variational data hypothesis required by `toDiffeomorph3GaugeFlowFamily`. -/
+def IntrinsicDeTurckGaugeFlowExistenceFamily.VariationalHypothesis
+    (G : IntrinsicDeTurckGaugeFlowExistenceFamily
+      (E := E) (H := H) (I := I) (M := M)) : Prop :=
+  ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+    ((G.forInitialValueProblem ivp).VariationalHypothesis)
+
 def toDiffeomorph3GaugeFlowFamily
     (G : IntrinsicDeTurckGaugeFlowExistenceFamily
-      (E := E) (H := H) (I := I) (M := M)) :
+      (E := E) (H := H) (I := I) (M := M))
+    (hvar : G.VariationalHypothesis) :
     ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
       (E := E) (H := H) (I := I) (M := M) where
   maps3 := fun ivp sol ↦ (G.flow ivp sol).maps3
   anchored := fun ivp sol ↦ (G.flow ivp sol).anchored
   satisfies := fun ivp sol ↦ (G.flow ivp sol).satisfies
+  variational := fun ivp sol ↦ hvar ivp sol
 
 @[simp] theorem toDiffeomorph3GaugeFlowFamily_maps3
     (G : IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M))
+    (hvar : G.VariationalHypothesis)
     (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
     (sol : ChosenIntrinsicDeTurckLocalSolution
         (E := E) (H := H) (I := I) (M := M) ivp) :
-    (G.toDiffeomorph3GaugeFlowFamily.maps3 ivp sol) = (G.flow ivp sol).maps3 := rfl
+    ((G.toDiffeomorph3GaugeFlowFamily hvar).maps3 ivp sol) = (G.flow ivp sol).maps3 := rfl
 
 @[simp] theorem toDiffeomorph3GaugeFlowFamily_anchored
     (G : IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M))
+    (hvar : G.VariationalHypothesis)
     (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
     (sol : ChosenIntrinsicDeTurckLocalSolution
         (E := E) (H := H) (I := I) (M := M) ivp) :
-    (G.toDiffeomorph3GaugeFlowFamily.anchored ivp sol) =
+    ((G.toDiffeomorph3GaugeFlowFamily hvar).anchored ivp sol) =
       (G.flow ivp sol).anchored := rfl
 
 @[simp] theorem toDiffeomorph3GaugeFlowFamily_satisfies
     (G : IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M))
+    (hvar : G.VariationalHypothesis)
     (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
     (sol : ChosenIntrinsicDeTurckLocalSolution
         (E := E) (H := H) (I := I) (M := M) ivp) :
-    (G.toDiffeomorph3GaugeFlowFamily.satisfies ivp sol) =
+    ((G.toDiffeomorph3GaugeFlowFamily hvar).satisfies ivp sol) =
       (G.flow ivp sol).satisfies := rfl
 
 @[simp] theorem toDiffeomorph3GaugeFlowFamily_gauge
     (G : IntrinsicDeTurckGaugeFlowExistenceFamily
       (E := E) (H := H) (I := I) (M := M))
+    (hvar : G.VariationalHypothesis)
     (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M))
     (sol : ChosenIntrinsicDeTurckLocalSolution
         (E := E) (H := H) (I := I) (M := M) ivp) :
-    (G.toDiffeomorph3GaugeFlowFamily.gauge ivp sol) =
+    ((G.toDiffeomorph3GaugeFlowFamily hvar).gauge ivp sol) =
       (G.flow ivp sol).toAnchoredIntrinsicDeTurckDiffeomorph3GaugeOn := rfl
 
 /-- Package a theorem-family geometric intrinsic DeTurck gauge-flow bundle as raw
@@ -27494,18 +27560,19 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducibl
       (E := E) (H := H) (I := I) (M := M) ivp)
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp)
+    (hvar : G.VariationalHypothesis)
     (hpullDerivative : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
         (E := E) (H := H) (I := I) (M := M) ivp,
       HasTimeDerivativeOn (I := I) (M := M)
-        (((G.toDiffeomorph3GaugeFlow).maps3 sol).pullbackMetricFamily
+        ((((G.toDiffeomorph3GaugeFlow hvar).maps3 sol)).pullbackMetricFamily
           sol.1.toIntrinsicDeTurckSolution.metric)
         (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
-          ((G.toDiffeomorph3GaugeFlow).gauge sol))
+          ((G.toDiffeomorph3GaugeFlow hvar).gauge sol))
         sol.1.toIntrinsicDeTurckSolution.timeSet) :
     GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness
       (E := E) (H := H) (I := I) (M := M) ivp :=
   pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowBundleTimeDerivative
-    G.toDiffeomorph3GaugeFlow hpullDerivative
+    (G.toDiffeomorph3GaugeFlow hvar) hpullDerivative
 
 /-- Fixed-IVP intrinsic Ricci-flow theorem-package projection directly from raw intrinsic `C^3`
 gauge-flow existence data and pulled-back metric time-derivative proofs. -/
@@ -27515,17 +27582,18 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_via
       (E := E) (H := H) (I := I) (M := M) ivp)
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp)
+    (hvar : G.VariationalHypothesis)
     (hpullDerivative : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
         (E := E) (H := H) (I := I) (M := M) ivp,
       HasTimeDerivativeOn (I := I) (M := M)
-        (((G.toDiffeomorph3GaugeFlow).maps3 sol).pullbackMetricFamily
+        ((((G.toDiffeomorph3GaugeFlow hvar).maps3 sol)).pullbackMetricFamily
           sol.1.toIntrinsicDeTurckSolution.metric)
         (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
-          ((G.toDiffeomorph3GaugeFlow).gauge sol))
+          ((G.toDiffeomorph3GaugeFlow hvar).gauge sol))
         sol.1.toIntrinsicDeTurckSolution.timeSet) :
     IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
   (pkg.toGaugeReducible_viaGaugeFlowExistenceTimeDerivative
-    G hpullDerivative).toIntrinsic
+    G hvar hpullDerivative).toIntrinsic
 
 /-- Fixed-IVP ordinary Ricci-flow theorem-package projection directly from raw intrinsic `C^3`
 gauge-flow existence data and pulled-back metric time-derivative proofs. -/
@@ -27535,13 +27603,14 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaG
       (E := E) (H := H) (I := I) (M := M) ivp)
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp)
+    (hvar : G.VariationalHypothesis)
     (hpullDerivative : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
         (E := E) (H := H) (I := I) (M := M) ivp,
       HasTimeDerivativeOn (I := I) (M := M)
-        (((G.toDiffeomorph3GaugeFlow).maps3 sol).pullbackMetricFamily
+        ((((G.toDiffeomorph3GaugeFlow hvar).maps3 sol)).pullbackMetricFamily
           sol.1.toIntrinsicDeTurckSolution.metric)
         (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
-          ((G.toDiffeomorph3GaugeFlow).gauge sol))
+          ((G.toDiffeomorph3GaugeFlow hvar).gauge sol))
         sol.1.toIntrinsicDeTurckSolution.timeSet) :
     LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
   (pkg.toIntrinsic_viaGaugeFlowExistenceTimeDerivative
@@ -27606,6 +27675,7 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toInnerDerivati
       (E := E) (H := H) (I := I) (M := M) ivp)
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp)
+    (hvar : G.VariationalHypothesis)
     (hderiv : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
         (E := E) (H := H) (I := I) (M := M) ivp,
       ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet →
@@ -27613,17 +27683,17 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toInnerDerivati
           HasDerivAt
             (fun τ ↦
               (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
-                ((((G.toDiffeomorph3GaugeFlow).maps3 sol) τ) x)
-                ((((G.toDiffeomorph3GaugeFlow).maps3 sol) τ).pushforwardTangent x u)
-                ((((G.toDiffeomorph3GaugeFlow).maps3 sol) τ).pushforwardTangent x v))
+                ((((G.toDiffeomorph3GaugeFlow hvar).maps3 sol) τ) x)
+                ((((G.toDiffeomorph3GaugeFlow hvar).maps3 sol) τ).pushforwardTangent x u)
+                ((((G.toDiffeomorph3GaugeFlow hvar).maps3 sol) τ).pushforwardTangent x v))
             (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
-              ((G.toDiffeomorph3GaugeFlow).gauge sol) t x u v) t) :
+              ((G.toDiffeomorph3GaugeFlow hvar).gauge sol) t x u v) t) :
     InnerDerivativeGaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness
       (E := E) (H := H) (I := I) (M := M) ivp :=
   pkg.toInnerDerivativeGaugeReducible_viaDiffeomorph3GaugeFlowInnerDerivative
-    (G.toDiffeomorph3GaugeFlow).maps3
-    (G.toDiffeomorph3GaugeFlow).anchored
-    (G.toDiffeomorph3GaugeFlow).satisfies
+    (G.toDiffeomorph3GaugeFlow hvar).maps3
+    (G.toDiffeomorph3GaugeFlow hvar).anchored
+    (G.toDiffeomorph3GaugeFlow hvar).satisfies
     hderiv
 
 /-- A fixed-IVP chosen-background DeTurck theorem package becomes gauge-reducible directly from

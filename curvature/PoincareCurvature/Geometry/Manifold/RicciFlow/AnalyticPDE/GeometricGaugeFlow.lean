@@ -319,13 +319,14 @@ def EndpointGeometricGaugeFlowData.withGaugeFlowExistence
       (Kpic := Kpic) (Kstate := Kstate))
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := F) (H := H) (I := I) (M := M) ivp)
+    (hvar : G.VariationalHypothesis)
     (hpullDerivative : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
         (E := F) (H := H) (I := I) (M := M) ivp,
       HasTimeDerivativeOn (I := I) (M := M)
-        (((G.toDiffeomorph3GaugeFlow).maps3 sol).pullbackMetricFamily
+        ((((G.toDiffeomorph3GaugeFlow hvar).maps3 sol)).pullbackMetricFamily
           sol.1.toIntrinsicDeTurckSolution.metric)
         (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
-          ((G.toDiffeomorph3GaugeFlow).gauge sol))
+          ((G.toDiffeomorph3GaugeFlow hvar).gauge sol))
         sol.1.toIntrinsicDeTurckSolution.timeSet) :
     EndpointGeometricGaugeFlowData (I := I)
       (x0 := x0) (et := et) (het := het) (Kc := Kc) (hKc := hKc)
@@ -341,7 +342,7 @@ def EndpointGeometricGaugeFlowData.withGaugeFlowExistence
   chartRHS_eq_intrinsic := D.chartRHS_eq_intrinsic
   hbackground := D.hbackground
   encode := D.encode
-  gaugeFlow := G.toDiffeomorph3GaugeFlow
+  gaugeFlow := G.toDiffeomorph3GaugeFlow hvar
   hpullDerivative := hpullDerivative
 
 /-- Replace the geometric gauge-flow component of fixed-IVP endpoint data by a
