@@ -290,4 +290,190 @@ theorem smoothJetMap_implies_picardRegularity
       (Icc (t₀ - 1) (t₀ + 1) ×ˢ closedBall (extChartAt I p₀ p₀) (a : ℝ)) :=
   smoothJetMap_implies_regularity_aux _ _ _ _ ha _ JM H
 
+/-! ## Universal DeTurck jet calculus (Phase-1b)
+
+The following constructs the smooth coefficient maps `Ψ₀, Ψ₁, Ψ₂` for the
+genuine DeTurck field.  The 0-jet consists of the chart differential, the
+metric sharp map, and the DeTurck one-form; the field is the negated
+composition.  The sign is preserved throughout.
+-/
+
+set_option synthInstance.maxHeartbeats 50000
+set_option maxHeartbeats 500000
+
+/-- Type alias for the sharp map, with instances. -/
+abbrev SharpMap (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] := (E →L[ℝ] ℝ) →L[ℝ] E
+
+noncomputable instance : NormedAddCommGroup (SharpMap E) := inferInstance
+noncomputable instance : NormedSpace ℝ (SharpMap E) := inferInstance
+
+/-- 0-jet: chart differential, sharp map, one-form. -/
+abbrev Jet0 (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] :=
+  (E →L[ℝ] E) × (SharpMap E) × (E →L[ℝ] ℝ)
+
+noncomputable instance : NormedAddCommGroup (Jet0 E) := inferInstance
+noncomputable instance : NormedSpace ℝ (Jet0 E) := inferInstance
+
+/-- 1-jet: 0-jet plus derivative. -/
+abbrev Jet1 (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] :=
+  (Jet0 E) × (E →L[ℝ] (Jet0 E))
+
+noncomputable instance : NormedAddCommGroup (Jet1 E) := inferInstance
+noncomputable instance : NormedSpace ℝ (Jet1 E) := inferInstance
+
+/-- 2-jet: 0-jet plus first and second derivatives. -/
+abbrev Jet2 (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E] :=
+  (Jet0 E) × (E →L[ℝ] (Jet0 E)) × (E →L[ℝ] E →L[ℝ] (Jet0 E))
+
+noncomputable instance : NormedAddCommGroup (Jet2 E) := inferInstance
+noncomputable instance : NormedSpace ℝ (Jet2 E) := inferInstance
+
+/-- Explicit instances for nested CLM types to avoid synthesis timeouts. -/
+noncomputable instance : NormedAddCommGroup (E →L[ℝ] Jet0 E) := inferInstance
+noncomputable instance : NormedSpace ℝ (E →L[ℝ] Jet0 E) := inferInstance
+noncomputable instance : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] Jet0 E) := inferInstance
+noncomputable instance : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] Jet0 E) := inferInstance
+
+/-- The universal 0-jet map: negated composition. Preserves the DeTurck sign. -/
+noncomputable def deturckPsi0 (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
+    : Jet0 E → E :=
+  fun j => -(j.1 (j.2.1 (j.2.2)))
+
+theorem deturckPsi0_contDiff : ContDiff ℝ ∞ (deturckPsi0 E) := by
+  unfold deturckPsi0
+  have h2 : ContDiff ℝ ∞ (fun j : Jet0 E => j.2.1) :=
+    contDiff_fst.comp contDiff_snd
+  have h3 : ContDiff ℝ ∞ (fun j : Jet0 E => j.2.2) :=
+    contDiff_snd.comp contDiff_snd
+  have hinner : ContDiff ℝ ∞ (fun j : Jet0 E => (j.2.1 : SharpMap E) ((j.2.2 : E →L[ℝ] ℝ))) :=
+    h2.clm_apply h3
+  have h1 : ContDiff ℝ ∞ (fun j : Jet0 E => j.1) :=
+    contDiff_fst
+  have houter : ContDiff ℝ ∞ (fun j : Jet0 E => (j.1 : E →L[ℝ] E) ((j.2.1 : SharpMap E) ((j.2.2 : E →L[ℝ] ℝ)))) :=
+    h1.clm_apply hinner
+  simpa using houter.neg
+
+theorem deturckPsi0_fderiv_contDiff :
+    ContDiff ℝ ∞ (fderiv ℝ (deturckPsi0 E)) := by
+  apply deturckPsi0_contDiff.fderiv_right
+  show ((∞ : ℕ∞ω) + 1 ≤ ∞)
+  simp
+
+/-- The universal 1-jet map on the 1-jet: chain rule. -/
+noncomputable def deturckPsi1' (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
+    : Jet1 E → (E →L[ℝ] E) :=
+  fun j1 => (fderiv ℝ (deturckPsi0 E) j1.1).comp j1.2
+
+theorem deturckPsi1'_contDiff : ContDiff ℝ ∞ (deturckPsi1' E) := by
+  unfold deturckPsi1'
+  have hF : ContDiff ℝ ∞ (fun j1 : Jet1 E => fderiv ℝ (deturckPsi0 E) j1.1) :=
+    deturckPsi0_fderiv_contDiff.comp contDiff_fst
+  have hG : ContDiff ℝ ∞ (fun j1 : Jet1 E => j1.2) :=
+    contDiff_snd
+  have hpair := hF.prodMk hG
+  have hcomp : ContDiff ℝ ∞
+      (fun p : ((Jet0 E) →L[ℝ] E) × (E →L[ℝ] (Jet0 E)) => p.1.comp p.2) :=
+    isBoundedBilinearMap_comp.contDiff
+  have h := hcomp.comp hpair
+  simpa [Function.comp_def] using h
+
+set_option synthInstance.maxHeartbeats 50000 in
+theorem deturckPsi1'_fderiv_contDiff :
+    ContDiff ℝ ∞ (fderiv ℝ (deturckPsi1' E)) := by
+  apply deturckPsi1'_contDiff.fderiv_right
+  show ((∞ : ℕ∞ω) + 1 ≤ ∞)
+  simp
+
+/-- The universal 1-jet map on the 2-jet (via projection). -/
+noncomputable def deturckPsi1 (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
+    : Jet2 E → (E →L[ℝ] E) :=
+  fun j => deturckPsi1' E (j.1, j.2.1)
+
+theorem deturckPsi1_contDiff : ContDiff ℝ ∞ (deturckPsi1 E) := by
+  unfold deturckPsi1
+  apply deturckPsi1'_contDiff.comp
+  have h1 : ContDiff ℝ ∞ (fun j : Jet2 E => j.1) := contDiff_fst
+  have h2 : ContDiff ℝ ∞ (fun j : Jet2 E => j.2.1) :=
+    contDiff_fst.comp contDiff_snd
+  exact h1.prodMk h2
+
+/-- The pairing map as a continuous linear map (isometry by `opNorm_prod`).
+Used to bundle the 1-jet derivative from the 2-jet. -/
+noncomputable def prodPairCLM {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] :
+    ((E →L[ℝ] F) × (E →L[ℝ] G)) →L[ℝ] (E →L[ℝ] (F × G)) where
+  toFun p := p.1.prod p.2
+  map_add' p q := by
+    have h1 : (p + q).1 = p.1 + q.1 := rfl
+    have h2 : (p + q).2 = p.2 + q.2 := rfl
+    rw [h1, h2]
+    apply ContinuousLinearMap.ext
+    intro x
+    simp only [ContinuousLinearMap.prod_apply, add_apply, Prod.mk_add_mk]
+  map_smul' c p := by
+    have h1 : (c • p).1 = c • p.1 := rfl
+    have h2 : (c • p).2 = c • p.2 := rfl
+    rw [h1, h2]
+    apply ContinuousLinearMap.ext
+    intro x
+    simp only [ContinuousLinearMap.prod_apply, smul_apply, Prod.smul_mk, RingHom.id_apply]
+  cont := by
+    have h : LipschitzWith 1 (fun p : (E →L[ℝ] F) × (E →L[ℝ] G) => p.1.prod p.2) := by
+      rw [lipschitzWith_iff_dist_le_mul]
+      intro p q
+      rw [dist_eq_norm, dist_eq_norm]
+      have hsub : p.1.prod p.2 - q.1.prod q.2 = (p.1 - q.1).prod (p.2 - q.2) := by
+        apply ContinuousLinearMap.ext
+        intro x
+        simp only [ContinuousLinearMap.prod_apply, sub_apply, Prod.mk_sub_mk]
+      rw [hsub, ContinuousLinearMap.opNorm_prod, ← Prod.mk_sub_mk]
+      simp
+    exact h.continuous
+
+theorem prodPairCLM_contDiff {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] :
+    ContDiff ℝ (∞ : ℕ∞ω) (prodPairCLM (E := E) (F := F) (G := G)) :=
+  ContinuousLinearMap.contDiff _
+
+/-- The universal 2-jet map: second chain rule via the paired derivative. -/
+noncomputable def deturckPsi2 (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
+    : Jet2 E → (E →L[ℝ] E →L[ℝ] E) :=
+  fun j =>
+    (fderiv ℝ (deturckPsi1' E) (j.1, j.2.1)).comp
+      (ContinuousLinearMap.prod j.2.1 j.2.2)
+
+theorem deturckPsi2_contDiff : ContDiff ℝ ∞ (deturckPsi2 E) := by
+  unfold deturckPsi2
+  have hF : ContDiff ℝ ∞ (fun j : Jet2 E => fderiv ℝ (deturckPsi1' E) (j.1, j.2.1)) := by
+    apply deturckPsi1'_fderiv_contDiff.comp
+    have h1 : ContDiff ℝ ∞ (fun j : Jet2 E => j.1) := contDiff_fst
+    have h2 : ContDiff ℝ ∞ (fun j : Jet2 E => j.2.1) :=
+      contDiff_fst.comp contDiff_snd
+    exact h1.prodMk h2
+  have hG : ContDiff ℝ ∞ (fun j : Jet2 E => ContinuousLinearMap.prod j.2.1 j.2.2) := by
+    have h : (fun j : Jet2 E => ContinuousLinearMap.prod j.2.1 j.2.2)
+        = (fun j : Jet2 E => prodPairCLM (E := E) (F := Jet0 E) (G := E →L[ℝ] Jet0 E) (j.2.1, j.2.2)) := by
+      rfl
+    rw [h]
+    apply prodPairCLM_contDiff.comp
+    have h1 : ContDiff ℝ ∞ (fun j : Jet2 E => j.2.1) :=
+      contDiff_fst.comp contDiff_snd
+    have h2 : ContDiff ℝ ∞ (fun j : Jet2 E => j.2.2) :=
+      contDiff_snd.comp contDiff_snd
+    exact h1.prodMk h2
+  have hpair := hF.prodMk hG
+  have hcomp : ContDiff ℝ ∞
+      (fun p : ((Jet1 E) →L[ℝ] (E →L[ℝ] E)) × (E →L[ℝ] (Jet1 E)) => p.1.comp p.2) :=
+    isBoundedBilinearMap_comp.contDiff
+  have h := hcomp.comp hpair
+  simpa [Function.comp_def] using h
+
+/-- The 0-jet map on the full 2-jet (via 0-jet projection). -/
+noncomputable def deturckPsi0_jet2 (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
+    : Jet2 E → E :=
+  fun j => deturckPsi0 E j.1
+
+theorem deturckPsi0_jet2_contDiff : ContDiff ℝ ∞ (deturckPsi0_jet2 E) :=
+  deturckPsi0_contDiff.comp contDiff_fst
+
 end RicciFlow
