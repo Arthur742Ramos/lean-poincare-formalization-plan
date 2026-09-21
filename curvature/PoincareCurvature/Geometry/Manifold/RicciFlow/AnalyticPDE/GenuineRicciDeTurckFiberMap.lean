@@ -588,6 +588,141 @@ theorem contDiffOn_deTurckVectorOfJet {n : WithTop ℕ∞} (k : Fin d) :
     · exact contDiffOn_christoffelOfJet (d := d) k i j_
     · exact contDiff_const.contDiffOn
 
+/-- Derivative of the DeTurck vector field.
+
+`∂_m W^k = ∑_{i,j} [(∂_m g^{ij})(Γ^k_ij - Γ̄^k_ij) + g^{ij}(∂_m Γ^k_ij)]` -/
+noncomputable def derivDeTurckVectorOfJet (j : Jet2 d d) (m k : Fin d) : ℝ :=
+  ∑ i : Fin d, ∑ j_ : Fin d,
+    ((derivInvMetricOfJet j m i j_) * (christoffelOfJet j k i j_ - Γbg k i j_) +
+     (invMetricOfJet j i j_) * (derivChristoffelOfJet j m k i j_))
+
+/-- The derivative of W is smooth on the invertible locus. -/
+theorem contDiffOn_derivDeTurckVectorOfJet {n : WithTop ℕ∞} (m k : Fin d) :
+    ContDiffOn ℝ n (fun j : Jet2 d d => derivDeTurckVectorOfJet (d := d) Γbg j m k)
+      {j : Jet2 d d | j.val.det ≠ 0} := by
+  unfold derivDeTurckVectorOfJet
+  apply ContDiffOn.sum
+  intro i _
+  apply ContDiffOn.sum
+  intro j_ _
+  apply ContDiffOn.add
+  · apply ContDiffOn.mul
+    · exact contDiffOn_derivInvMetricOfJet (d := d) m i j_
+    · apply ContDiffOn.sub
+      · exact contDiffOn_christoffelOfJet (d := d) k i j_
+      · exact contDiff_const.contDiffOn
+  · apply ContDiffOn.mul
+    · -- `invMetricOfJet j i j_`
+      have h_inv : ContDiffOn ℝ n (fun j : Jet2 d d => invMetricOfJet (d := d) j i j_)
+          {j : Jet2 d d | j.val.det ≠ 0} := by
+        let evalLinear : (Fin d → Fin d → ℝ) →ₗ[ℝ] ℝ :=
+          { toFun := fun f => f i j_
+            map_add' := fun _ _ => rfl
+            map_smul' := fun _ _ => rfl }
+        have h_bound : ∀ f : Fin d → Fin d → ℝ, ‖evalLinear f‖ ≤ 1 * ‖f‖ := by
+          intro f
+          rw [one_mul]
+          calc ‖evalLinear f‖ = ‖f i j_‖ := rfl
+            _ ≤ ‖f i‖ := norm_le_pi_norm _ _
+            _ ≤ ‖f‖ := norm_le_pi_norm _ _
+        let evalCLM := LinearMap.mkContinuous evalLinear 1 h_bound
+        have h_comp : (fun j : Jet2 d d => invMetricOfJet (d := d) j i j_) =
+            ⇑evalCLM ∘ (invMetricOfJet (d := d)) := rfl
+        rw [h_comp]
+        exact ContDiffOn.continuousLinearMap_comp evalCLM contDiffOn_invMetricOfJet
+      exact h_inv
+    · exact contDiffOn_derivChristoffelOfJet (d := d) m k i j_
+
+/-- The 0-jet component as a real-valued function: `g_{ij} = (j.val) i j`. -/
+noncomputable def valComp (j : Jet2 d d) (i j_ : Fin d) : ℝ :=
+  (j.val) i j_
+
+/-- The 0-jet component is smooth. -/
+theorem contDiff_valComp {n : WithTop ℕ∞} (i j_ : Fin d) :
+    ContDiff ℝ n (fun j : Jet2 d d => valComp (d := d) j i j_) := by
+  unfold valComp
+  let fLinear : (Jet2 d d) →ₗ[ℝ] ℝ :=
+    { toFun := fun j => (j.val) i j_
+      map_add' := fun _ _ => rfl
+      map_smul' := fun _ _ => rfl }
+  have h_bound : ∀ j : Jet2 d d, ‖fLinear j‖ ≤ 1 * ‖j‖ := by
+    intro j
+    rw [one_mul]
+    have h1 : ‖(j.val) i j_‖ ≤ ‖j.val‖ := by
+      calc ‖(j.val) i j_‖ ≤ ∑ j' : Fin d, ‖(j.val) i j'‖ := by
+            apply Finset.single_le_sum _ (Finset.mem_univ j_)
+            intro _ _
+            exact norm_nonneg _
+        _ ≤ ∑ i' : Fin d, ∑ j' : Fin d, ‖(j.val) i' j'‖ := by
+            apply Finset.single_le_sum _ (Finset.mem_univ i)
+            intro _ _
+            exact Finset.sum_nonneg (fun _ _ => norm_nonneg _)
+        _ = ‖j.val‖ := rfl
+    have h2 : ‖j.val‖ ≤ ‖j‖ := by
+      have h_eq := Jet2.jet2_norm_eq (d := d) (j := j)
+      rw [h_eq]
+      have h_nonneg : 0 ≤ ∑ i : Fin d, ‖j.deriv1 i‖ + ∑ i : Fin d, ∑ k : Fin d, ‖j.deriv2 i k‖ := by
+        apply add_nonneg
+        · exact Finset.sum_nonneg (fun _ _ => norm_nonneg _)
+        · exact Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => norm_nonneg _))
+      linarith
+    calc ‖fLinear j‖ = ‖(j.val) i j_‖ := rfl
+      _ ≤ ‖j.val‖ := h1
+      _ ≤ ‖j‖ := h2
+  let fCLM := LinearMap.mkContinuous fLinear 1 h_bound
+  have h_eq : (fun j : Jet2 d d => (j.val) i j_) = ⇑fCLM := rfl
+  rw [h_eq]
+  exact fCLM.contDiff
+
+/-- The DeTurck correction (Lie derivative): `(L_W g)_{ij} = ∑_k [g_{kj} ∂_i W^k + g_{ik} ∂_j W^k + W^k ∂_k g_{ij}]`. -/
+noncomputable def deTurckCorrectionOfJet (j : Jet2 d d) (i j_ : Fin d) : ℝ :=
+  ∑ k : Fin d,
+    ((valComp j k j_) * (derivDeTurckVectorOfJet Γbg j i k) +
+     (valComp j i k) * (derivDeTurckVectorOfJet Γbg j j_ k) +
+     (deTurckVectorOfJet Γbg j k) * (deriv1Comp j k i j_))
+
+/-- The DeTurck correction is smooth on the invertible locus. -/
+theorem contDiffOn_deTurckCorrectionOfJet {n : WithTop ℕ∞} (i j_ : Fin d) :
+    ContDiffOn ℝ n (fun j : Jet2 d d => deTurckCorrectionOfJet (d := d) Γbg j i j_)
+      {j : Jet2 d d | j.val.det ≠ 0} := by
+  unfold deTurckCorrectionOfJet
+  apply ContDiffOn.sum
+  intro k _
+  apply ContDiffOn.add
+  · apply ContDiffOn.add
+    · apply ContDiffOn.mul
+      · exact (contDiff_valComp (d := d) k j_).contDiffOn
+      · exact contDiffOn_derivDeTurckVectorOfJet (d := d) Γbg i k
+    · apply ContDiffOn.mul
+      · exact (contDiff_valComp (d := d) i k).contDiffOn
+      · exact contDiffOn_derivDeTurckVectorOfJet (d := d) Γbg j_ k
+  · apply ContDiffOn.mul
+    · exact contDiffOn_deTurckVectorOfJet (d := d) Γbg k
+    · exact (contDiff_deriv1Comp (d := d) k i j_).contDiffOn
+
+/-! ## 8. The genuine Ricci-DeTurck fiber map Φ_RD -/
+
+/-- The genuine Ricci-DeTurck fiber map: `Φ_RD(j)_{ij} = -2 R_{ij} + (L_W g)_{ij}`.
+
+This is the coordinate formula for the Ricci-DeTurck RHS, computed from the
+2-jet `j` using genuine geometric definitions:
+- `R_{ij}` is the Ricci tensor (from `ricciOfJet`)
+- `(L_W g)_{ij}` is the DeTurck correction (Lie derivative along W)
+- `W` is the DeTurck vector field (negated, per Point-4 constraints) -/
+noncomputable def phiRDOfJet (j : Jet2 d d) (i j_ : Fin d) : ℝ :=
+  -2 * ricciOfJet j i j_ + deTurckCorrectionOfJet Γbg j i j_
+
+/-- Φ_RD is smooth on the invertible locus. -/
+theorem contDiffOn_phiRDOfJet {n : WithTop ℕ∞} (i j_ : Fin d) :
+    ContDiffOn ℝ n (fun j : Jet2 d d => phiRDOfJet (d := d) Γbg j i j_)
+      {j : Jet2 d d | j.val.det ≠ 0} := by
+  unfold phiRDOfJet
+  apply ContDiffOn.add
+  · apply ContDiffOn.mul
+    · exact contDiff_const.contDiffOn
+    · exact contDiffOn_ricciOfJet (d := d) i j_
+  · exact contDiffOn_deTurckCorrectionOfJet (d := d) Γbg i j_
+
 end GenuinePhiRD
 
 end RicciFlow.AnalyticPDE
