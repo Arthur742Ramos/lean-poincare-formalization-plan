@@ -67,7 +67,7 @@ theorem norm_fderiv_le_of_C2_bound
       exact inv_mul_cancel₀ hnu.ne'
     -- u = ‖u‖ • v
     have huv : u = ‖u‖ • v := by
-      rw [hv_def, ← smul_assoc, mul_inv_cancel₀ hnu.ne', one_smul]
+      rw [hv_def, smul_smul, mul_inv_cancel₀ hnu.ne', one_smul]
     -- It suffices to bound ‖(fderiv ℝ f x) v‖; the core estimate
     have key : ‖(fderiv ℝ f x) v‖ ≤ 2 * M₀ / h + h * M₂ := by
       -- Core estimate for unit vector v
@@ -95,7 +95,15 @@ theorem norm_fderiv_le_of_C2_bound
           hdiff.hasFDerivAt
         have hc : HasDerivAt (fun t : ℝ => x + t • v) v s :=
           hasDerivAt_affine_lemma x v s
-        sorry  -- comp_hasDerivAt API issue; the math is standard chain rule
+        -- The point (fun t => x + t•v) s is definitionally x + s•v
+        have hF' : HasFDerivAt f (fderiv ℝ f ((fun t : ℝ => x + t • v) s))
+            ((fun t : ℝ => x + t • v) s) := hF
+        have hcomp := HasFDerivAt.comp_hasDerivAt (l := f)
+          (l' := fderiv ℝ f ((fun t : ℝ => x + t • v) s))
+          (f := fun t : ℝ => x + t • v) (f' := v) (x := s) hF' hc
+        have heq : g = f ∘ (fun t : ℝ => x + t • v) := rfl
+        rw [heq]
+        exact hcomp.differentiableAt.differentiableWithinAt
       -- Bound on g: ‖g(s)‖ ≤ M₀
       have hg_bnd : ∀ s ∈ Icc (0:ℝ) h, ‖g s‖ ≤ M₀ :=
         fun s hs => h0 _ (hmem s hs)
