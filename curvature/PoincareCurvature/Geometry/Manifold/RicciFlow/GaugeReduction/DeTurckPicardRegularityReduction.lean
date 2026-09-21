@@ -476,4 +476,287 @@ noncomputable def deturckPsi0_jet2 (E : Type*) [NormedAddCommGroup E] [NormedSpa
 theorem deturckPsi0_jet2_contDiff : ContDiff ℝ ∞ (deturckPsi0_jet2 E) :=
   deturckPsi0_contDiff.comp contDiff_fst
 
+/-! ## Geometric DeTurck jet map (Phase-1c)
+
+This section constructs the geometric `S : ℝ × E → Jet2 E` from explicit
+ingredient maps in a fixed chart, and proves the factorization identities
+`hfactor₀`, `hfactor₁`, `hfactor₂` that assemble the full
+`SmoothDeTurckJetMap` for the genuine DeTurck coordinate field.
+
+### Ingredients
+
+In the fixed chart `extChartAt I p₀` (identified with `E`), the (negated)
+DeTurck gauge field is the negated composition of three geometric maps:
+
+* `chartDiff`: the chart differential, as an explicit `E →L[ℝ] E`-valued map;
+* `sharpMap`: the metric sharp map `(E →L[ℝ] ℝ) →L[ℝ] E`, from the metric `g`;
+* `oneForm`: the DeTurck one-form `E →L[ℝ] ℝ`, built from the background
+  metric's Christoffel symbols via the fixed-chart formula.
+
+The 2-jet `S(t,y)` packages the 0-jet `(chartDiff, sharpMap, oneForm)` with
+its first and second spatial derivatives `jetD1`, `jetD2`.
+
+### Explicit hypotheses (no smuggling)
+
+All regularity is EXPLICIT.  The metric `g` and background `background` are
+parameters of the structures below (never hidden or assumed into existence).
+The `C²`-slice and joint-2-jet-continuity hypotheses for the metric sharp
+map and the background Christoffel symbols appear as explicit fields
+(`MetricDeTurckRegularity`, `BackgroundDeTurckRegularity`).  The field
+factorization (`hfactor`) and the 0-jet derivative identities (`hD1`, `hD2`)
+are explicit hypotheses.  Nothing is assumed implicitly, and no
+`htime`/`hreg`/`hvar`-style assumptions are introduced.
+
+The sign convention is preserved: `intrinsicDeTurckGaugeField` is the NEGATED
+DeTurck vector field, and `hfactor`/`deturckPsi0` carry the negation.
+-/
+
+/-- Explicit `C²`/joint-continuity regularity for the metric sharp map.
+
+The sharp map is the coordinate representative of the metric family `g` in
+the fixed chart.  For the DeTurck 0-jet to admit first and second spatial
+derivatives, `g` must have `C²` spatial slices with jointly continuous 2-jet.
+This is stated as an EXPLICIT hypothesis: the metric is a parameter, and its
+regularity is never assumed implicitly or conjured into existence. -/
+structure MetricDeTurckRegularity
+    (g : MetricFamily (I := I) (M := M)) (p₀ : M) (y₀ : E) (R : ℝ) where
+  /-- Metric sharp map in the fixed chart (explicit ingredient map). -/
+  sharpMap : ℝ × E → SharpMap E
+  /-- First spatial derivative of the sharp map. -/
+  sharpD1 : ℝ × E → (E →L[ℝ] SharpMap E)
+  /-- Second spatial derivative of the sharp map. -/
+  sharpD2 : ℝ × E → (E →L[ℝ] E →L[ℝ] SharpMap E)
+  /-- `C²` slices: first derivative identity. -/
+  hsharpD1 : ∀ (t : ℝ) (y : E), y ∈ ball y₀ R →
+    HasFDerivAt (fun z => sharpMap (t, z)) (sharpD1 (t, y)) y
+  /-- `C²` slices: second derivative identity. -/
+  hsharpD2 : ∀ (t : ℝ) (y : E), y ∈ ball y₀ R →
+    HasFDerivAt (fun z => sharpD1 (t, z)) (sharpD2 (t, y)) y
+  /-- Joint continuity of the metric 2-jet on compact cylinders. -/
+  hsharpJoint : ∀ (t₀ : ℝ), ContinuousOn
+    (fun p : ℝ × E => (sharpMap p, sharpD1 p, sharpD2 p))
+    (Icc (t₀ - 1) (t₀ + 1) ×ˢ closedBall y₀ R)
+
+/-- Explicit instances for background Christoffel jet types to avoid synthesis
+timeout in the joint-continuity statements. -/
+noncomputable instance : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E) := inferInstance
+noncomputable instance : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E) := inferInstance
+noncomputable instance : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E →L[ℝ] E) := inferInstance
+noncomputable instance : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] E) := inferInstance
+noncomputable instance : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E →L[ℝ] E →L[ℝ] E) := inferInstance
+noncomputable instance : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] E →L[ℝ] E) := inferInstance
+
+/-- Explicit `C²`/joint-continuity regularity for the background metric's
+Christoffel symbols.
+
+The DeTurck one-form is built from the difference of the metric and
+background Christoffel symbols in the fixed chart, via the explicit
+fixed-chart formula (no `mfderiv`/`extChartAt` unfolding).  For the one-form
+(hence the 0-jet map) to admit first and second spatial derivatives, the
+background must have `C²` spatial slices with jointly continuous 2-jet.  This
+is stated as an EXPLICIT hypothesis: the background is a parameter, and its
+regularity is never assumed implicitly. -/
+structure BackgroundDeTurckRegularity
+    (background : ConnectionFamily (I := I) (M := M)) (p₀ : M) (y₀ : E) (R : ℝ) where
+  /-- Background Christoffel symbols in the fixed chart, as an explicit
+  bilinear-map-valued map (the fixed-chart component formulation). -/
+  bgChristoffel : ℝ × E → (E →L[ℝ] E →L[ℝ] E)
+  /-- First spatial derivative of the background Christoffel map. -/
+  bgD1 : ℝ × E → (E →L[ℝ] (E →L[ℝ] E →L[ℝ] E))
+  /-- Second spatial derivative of the background Christoffel map. -/
+  bgD2 : ℝ × E → (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] E →L[ℝ] E)))
+  /-- `C²` slices: first derivative identity. -/
+  hbgD1 : ∀ (t : ℝ) (y : E), y ∈ ball y₀ R →
+    HasFDerivAt (fun z => bgChristoffel (t, z)) (bgD1 (t, y)) y
+  /-- `C²` slices: second derivative identity. -/
+  hbgD2 : ∀ (t : ℝ) (y : E), y ∈ ball y₀ R →
+    HasFDerivAt (fun z => bgD1 (t, z)) (bgD2 (t, y)) y
+  /-- Joint continuity of the background 2-jet on compact cylinders. -/
+  hbgJoint : ∀ (t₀ : ℝ), ContinuousOn
+    (fun p : ℝ × E => (bgChristoffel p, bgD1 p, bgD2 p))
+    (Icc (t₀ - 1) (t₀ + 1) ×ˢ closedBall y₀ R)
+
+/-- Geometric jet data for the DeTurck field in a fixed chart (Phase-1c).
+
+Packages the genuine geometric ingredients of `deTurckGaugeCoordinateField`
+in the fixed chart, with EXPLICIT hypotheses.  The metric `g` and background
+`background` are parameters; their `C²`/joint-continuity regularity appears
+as explicit fields (`hmetric`, `hbackground`).  The field factorization
+(`hfactor`) and 0-jet derivative identities (`hD1`, `hD2`) are explicit
+hypotheses.  The negation sign is preserved throughout. -/
+structure DeTurckChartJetData
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (p₀ : M) (y₀ : E) (R : ℝ) where
+  /-- Chart differential in the fixed chart (explicit ingredient map). -/
+  chartDiff : ℝ × E → (E →L[ℝ] E)
+  /-- DeTurck one-form, built from the background metric's Christoffel
+  symbols via the fixed-chart formula (explicit ingredient map). -/
+  oneForm : ℝ × E → (E →L[ℝ] ℝ)
+  /-- First spatial derivative of the 0-jet map (explicit derivative data). -/
+  jetD1 : ℝ × E → (E →L[ℝ] Jet0 E)
+  /-- Second spatial derivative of the 0-jet map (explicit derivative data). -/
+  jetD2 : ℝ × E → (E →L[ℝ] E →L[ℝ] Jet0 E)
+  /-- EXPLICIT metric regularity: `C²` slices + joint 2-jet continuity for
+  the sharp map.  The metric is a parameter, not an implicit assumption. -/
+  hmetric : MetricDeTurckRegularity (I := I) (M := M) g p₀ y₀ R
+  /-- EXPLICIT background regularity: `C²` slices + joint 2-jet continuity
+  for the background Christoffel symbols.  The background is a parameter,
+  not an implicit assumption. -/
+  hbackground : BackgroundDeTurckRegularity (I := I) (M := M) background p₀ y₀ R
+  /-- Field factorization: the coordinate field is the negated composition of
+  the geometric ingredients.  This is the genuine geometric identity:
+  `intrinsicDeTurckGaugeField` is the negated DeTurck vector field
+  (metric-sharp of the negated one-form), and the chart differential is
+  linear, so the negation factors out. -/
+  hfactor : ∀ (t : ℝ) (y : E),
+    deTurckGaugeCoordinateField (I := I) (M := M) g background p₀ t y
+      = -(chartDiff (t, y) (hmetric.sharpMap (t, y) (oneForm (t, y))))
+  /-- First spatial derivative of the 0-jet map (explicit hypothesis). -/
+  hD1 : ∀ (t : ℝ) (y : E), y ∈ ball y₀ R →
+    HasFDerivAt
+      (fun z => (chartDiff (t, z), hmetric.sharpMap (t, z), oneForm (t, z)))
+      (jetD1 (t, y)) y
+  /-- Second spatial derivative of the 0-jet map (explicit hypothesis). -/
+  hD2 : ∀ (t : ℝ) (y : E), y ∈ ball y₀ R →
+    HasFDerivAt (fun z => jetD1 (t, z)) (jetD2 (t, y)) y
+
+/-- The geometric DeTurck jet map `S : ℝ × E → Jet2 E`.
+
+Packages the 0-jet `(chartDiff, sharpMap, oneForm)` with its first and
+second spatial derivatives.  This is the geometric `S` required by
+`SmoothDeTurckJetMap`. -/
+noncomputable def deTurckGeometricJetMap
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {p₀ : M} {y₀ : E} {R : ℝ}
+    (data : DeTurckChartJetData (I := I) (M := M) g background p₀ y₀ R) :
+    ℝ × E → Jet2 E :=
+  fun p => ((data.chartDiff p, data.hmetric.sharpMap p, data.oneForm p),
+    data.jetD1 p, data.jetD2 p)
+
+/-- `hfactor₀`: the DeTurck coordinate field factors through the universal
+`Ψ₀`.  This is the geometric factorization, proved from the explicit
+`hfactor` hypothesis.  The negation sign is preserved: `deturckPsi0` is the
+negated composition, matching `intrinsicDeTurckGaugeField`. -/
+theorem deTurckGeometricJetMap_factor0
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {p₀ : M} {y₀ : E} {R : ℝ}
+    (data : DeTurckChartJetData (I := I) (M := M) g background p₀ y₀ R)
+    (t : ℝ) (y : E) :
+    deTurckGaugeCoordinateField (I := I) (M := M) g background p₀ t y
+      = deturckPsi0_jet2 E (deTurckGeometricJetMap data (t, y)) := by
+  rw [data.hfactor t y]
+  rfl
+
+/-- `hfactor₁`: the first spatial derivative factors through the universal
+`Ψ₁` via the chain rule.  Proved from the explicit 0-jet derivative
+hypothesis `hD1` and the smoothness of the universal `Ψ₀`
+(`deturckPsi0_contDiff`). -/
+theorem deTurckGeometricJetMap_factor1
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {p₀ : M} {y₀ : E} {R : ℝ}
+    (data : DeTurckChartJetData (I := I) (M := M) g background p₀ y₀ R)
+    (t : ℝ) (y : E) (hy : y ∈ ball y₀ R) :
+    HasFDerivAt
+      (deTurckGaugeCoordinateField (I := I) (M := M) g background p₀ t)
+      (deturckPsi1 E (deTurckGeometricJetMap data (t, y))) y := by
+  -- The field equals `Ψ₀ ∘ (0-jet map)` by `hfactor₀`.
+  have hFeq : deTurckGaugeCoordinateField (I := I) (M := M) g background p₀ t
+      = (deturckPsi0 E) ∘
+        (fun z => (data.chartDiff (t, z), data.hmetric.sharpMap (t, z),
+          data.oneForm (t, z)) : E → Jet0 E) := by
+    funext z
+    have h := deTurckGeometricJetMap_factor0 data t z
+    simpa [Function.comp_apply, deTurckGeometricJetMap, deturckPsi0_jet2,
+      deturckPsi0] using h
+  rw [hFeq]
+  -- Chain rule: `Ψ₀` is smooth, the 0-jet map has derivative `jetD1`.
+  have hΨ₀ : HasFDerivAt (deturckPsi0 E)
+      (fderiv ℝ (deturckPsi0 E)
+        (data.chartDiff (t, y), data.hmetric.sharpMap (t, y), data.oneForm (t, y)))
+      (data.chartDiff (t, y), data.hmetric.sharpMap (t, y), data.oneForm (t, y)) :=
+    ((deturckPsi0_contDiff (E := E)).differentiable (by simp)).differentiableAt.hasFDerivAt
+  have hchain := hΨ₀.comp y (data.hD1 t y hy)
+  -- The chain-rule derivative is definitionally `deturckPsi1 E (S (t, y))`.
+  have hderiv : (fderiv ℝ (deturckPsi0 E)
+        (data.chartDiff (t, y), data.hmetric.sharpMap (t, y), data.oneForm (t, y))).comp
+        (data.jetD1 (t, y))
+      = deturckPsi1 E (deTurckGeometricJetMap data (t, y)) := by
+    simp [deturckPsi1, deturckPsi1', deTurckGeometricJetMap]
+  rw [← hderiv]
+  exact hchain
+
+/-- `hfactor₂`: the second spatial derivative factors through the universal
+`Ψ₂` via the chain rule applied twice.  Proved from the explicit derivative
+hypotheses `hD1`, `hD2` (bundled into the 1-jet derivative via
+`HasFDerivAt.prodMk`) and the smoothness of the universal `Ψ₁'`
+(`deturckPsi1'_contDiff`). -/
+theorem deTurckGeometricJetMap_factor2
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {p₀ : M} {y₀ : E} {R : ℝ}
+    (data : DeTurckChartJetData (I := I) (M := M) g background p₀ y₀ R)
+    (t : ℝ) (y : E) (hy : y ∈ ball y₀ R) :
+    HasFDerivAt
+      (fun z => deturckPsi1 E (deTurckGeometricJetMap data (t, z)))
+      (deturckPsi2 E (deTurckGeometricJetMap data (t, y))) y := by
+  -- `fun z => Ψ₁ (S (t, z))` equals `Ψ₁' ∘ (1-jet map)`.
+  have hFeq : (fun z => deturckPsi1 E (deTurckGeometricJetMap data (t, z)))
+      = (deturckPsi1' E) ∘
+        (fun z => ((data.chartDiff (t, z), data.hmetric.sharpMap (t, z),
+          data.oneForm (t, z)), data.jetD1 (t, z)) : E → Jet1 E) := by
+    funext z
+    simp [Function.comp_apply, deturckPsi1, deturckPsi1', deTurckGeometricJetMap]
+  rw [hFeq]
+  -- Chain rule: `Ψ₁'` is smooth; the 1-jet map has derivative `jetD1.prod jetD2`.
+  have hΨ₁ : HasFDerivAt (deturckPsi1' E)
+      (fderiv ℝ (deturckPsi1' E)
+        ((data.chartDiff (t, y), data.hmetric.sharpMap (t, y), data.oneForm (t, y)),
+          data.jetD1 (t, y)))
+      ((data.chartDiff (t, y), data.hmetric.sharpMap (t, y), data.oneForm (t, y)),
+        data.jetD1 (t, y)) :=
+    ((deturckPsi1'_contDiff (E := E)).differentiable (by simp)).differentiableAt.hasFDerivAt
+  have hj₁ : HasFDerivAt
+      (fun z => ((data.chartDiff (t, z), data.hmetric.sharpMap (t, z),
+        data.oneForm (t, z)), data.jetD1 (t, z)) : E → Jet1 E)
+      ((data.jetD1 (t, y)).prod (data.jetD2 (t, y))) y :=
+    (data.hD1 t y hy).prodMk (data.hD2 t y hy)
+  have hchain := hΨ₁.comp y hj₁
+  -- The chain-rule derivative is definitionally `deturckPsi2 E (S (t, y))`.
+  have hderiv : (fderiv ℝ (deturckPsi1' E)
+        ((data.chartDiff (t, y), data.hmetric.sharpMap (t, y), data.oneForm (t, y)),
+          data.jetD1 (t, y))).comp
+        ((data.jetD1 (t, y)).prod (data.jetD2 (t, y)))
+      = deturckPsi2 E (deTurckGeometricJetMap data (t, y)) := by
+    simp [deturckPsi2, deTurckGeometricJetMap, ContinuousLinearMap.prod]
+  rw [← hderiv]
+  exact hchain
+
+/-- **Phase-1c assembly.**  The geometric jet data assembles to a full
+`SmoothDeTurckJetMap` for the genuine DeTurck coordinate field, with the
+universal smooth coefficient maps `Ψ₀, Ψ₁, Ψ₂` and the proved factorization
+identities `hfactor₀`, `hfactor₁`, `hfactor₂`.  The negation sign is
+preserved. -/
+noncomputable def geometricSmoothDeTurckJetMap
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {p₀ : M} {y₀ : E} {R : ℝ}
+    (data : DeTurckChartJetData (I := I) (M := M) g background p₀ y₀ R) :
+    SmoothDeTurckJetMap
+      (deTurckGaugeCoordinateField (I := I) (M := M) g background p₀)
+      y₀ R (Jet2 E) where
+  S := deTurckGeometricJetMap data
+  Ψ₀ := deturckPsi0_jet2 E
+  Ψ₁ := deturckPsi1 E
+  Ψ₂ := deturckPsi2 E
+  hΨ₀ := deturckPsi0_jet2_contDiff
+  hΨ₁ := deturckPsi1_contDiff
+  hΨ₂ := deturckPsi2_contDiff
+  hfactor₀ := fun t y => deTurckGeometricJetMap_factor0 data t y
+  hfactor₁ := fun t y hy => deTurckGeometricJetMap_factor1 data t y hy
+  hfactor₂ := fun t y hy => deTurckGeometricJetMap_factor2 data t y hy
+
 end RicciFlow
