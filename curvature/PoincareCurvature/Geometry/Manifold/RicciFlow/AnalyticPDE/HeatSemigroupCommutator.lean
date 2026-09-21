@@ -148,6 +148,69 @@ theorem commutator_sup_tendsto_zero
   have hnorm := hdiff.norm
   simpa using hnorm
 
+/-! ## 3. Quantitative commutator bound -/
+
+/-- **Quantitative sup-norm commutator bound (`O(t^{α/2})`).**
+
+For `F` `L`-Lipschitz and `f` Hölder with constant `H`, for `0 < t`:
+`‖S(t)(F∘f) - F(S(t)f)‖ ≤ 2 * L * H * ∑ _j, (√t)^α * gaussianAbsMoment α`.
+
+Proof by triangle inequality:
+`‖S(t)(F∘f) - F(S(t)f)‖ ≤ ‖S(t)(F∘f) - F∘f‖ + ‖F(S(t)f) - F(f)‖`.
+- The first term uses the quantitative approximate-identity bound applied to
+  `F∘f`, via the bridge lemma `isHolderConst_holderBCF_comp_toBCF`.
+- The second term uses Lipschitz of `F` (`norm_holderBCF_comp_sub_le`) composed
+  with the quantitative approximate-identity bound for `f`. -/
+theorem norm_commutator_sup_le
+    (hα : 0 < α)
+    {F : ℝ → ℝ} {L : ℝ≥0} (hF : LipschitzWith L F)
+    (f : HolderBCF α n) {H : ℝ} (hH : IsHolderConst α f.toBCF H)
+    {t : ℝ} (ht : 0 < t) :
+    ‖(heatPropagatorHolderCLM (n := n) (α := α) t
+      (holderBCF_comp hF f)).toBCF -
+      (holderBCF_comp hF (heatPropagatorHolderCLM (n := n) (α := α) t f)).toBCF‖ ≤
+      2 * (L : ℝ) * H * ∑ _j : Fin n, (Real.sqrt t) ^ α * gaussianAbsMoment α := by
+  -- Set abbreviations for readability
+  set StF := heatPropagatorHolderCLM (n := n) (α := α) t f with hStF
+  set Ff := holderBCF_comp hF f with hFf
+  -- Triangle inequality: ‖S(t)(F∘f) - F(S(t)f)‖ ≤ ‖S(t)(F∘f) - F∘f‖ + ‖F∘f - F(S(t)f)‖
+  -- via ‖a - c‖ = ‖(a - b) + (b - c)‖ ≤ ‖a - b‖ + ‖b - c‖
+  have htri : ‖(heatPropagatorHolderCLM (n := n) (α := α) t Ff).toBCF -
+      (holderBCF_comp hF StF).toBCF‖ ≤
+      ‖(heatPropagatorHolderCLM (n := n) (α := α) t Ff).toBCF - Ff.toBCF‖ +
+      ‖Ff.toBCF - (holderBCF_comp hF StF).toBCF‖ := by
+    have h := norm_add_le
+      ((heatPropagatorHolderCLM (n := n) (α := α) t Ff).toBCF - Ff.toBCF)
+      (Ff.toBCF - (holderBCF_comp hF StF).toBCF)
+    rwa [sub_add_sub_cancel] at h
+  -- Term 1: ‖S(t)(F∘f) - F∘f‖ ≤ (L*H) * ∑ ...
+  have hterm1 : ‖(heatPropagatorHolderCLM (n := n) (α := α) t Ff).toBCF - Ff.toBCF‖ ≤
+      (L : ℝ) * H * ∑ _j : Fin n, (Real.sqrt t) ^ α * gaussianAbsMoment α :=
+    norm_heatPropagatorHolderCLM_toBCF_sub_self_le hα Ff
+      (isHolderConst_holderBCF_comp_toBCF hF f hH) ht
+  -- Term 2: ‖F∘f - F(S(t)f)‖ = ‖F(S(t)f) - F(f)‖ ≤ L * ‖S(t)f - f‖
+  have hterm2 : ‖Ff.toBCF - (holderBCF_comp hF StF).toBCF‖ ≤
+      (L : ℝ) * H * ∑ _j : Fin n, (Real.sqrt t) ^ α * gaussianAbsMoment α := by
+    have hLip := norm_holderBCF_comp_sub_le hF StF f
+    rw [norm_sub_rev] at hLip
+    -- hLip : ‖Ff.toBCF - (holderBCF_comp hF StF).toBCF‖ ≤ ↑L * ‖StF.toBCF - f.toBCF‖
+    have happrox := norm_heatPropagatorHolderCLM_toBCF_sub_self_le hα f hH ht
+    -- happrox : ‖StF.toBCF - f.toBCF‖ ≤ H * ∑ ...
+    calc ‖Ff.toBCF - (holderBCF_comp hF StF).toBCF‖
+        ≤ (L : ℝ) * ‖StF.toBCF - f.toBCF‖ := hLip
+      _ ≤ (L : ℝ) * (H * ∑ _j : Fin n, (Real.sqrt t) ^ α * gaussianAbsMoment α) := by
+          apply mul_le_mul_of_nonneg_left happrox L.coe_nonneg
+      _ = (L : ℝ) * H * ∑ _j : Fin n, (Real.sqrt t) ^ α * gaussianAbsMoment α := by ring
+  -- Combine
+  calc ‖(heatPropagatorHolderCLM (n := n) (α := α) t Ff).toBCF -
+        (holderBCF_comp hF StF).toBCF‖
+      ≤ ‖(heatPropagatorHolderCLM (n := n) (α := α) t Ff).toBCF - Ff.toBCF‖ +
+        ‖Ff.toBCF - (holderBCF_comp hF StF).toBCF‖ := htri
+    _ ≤ (L : ℝ) * H * ∑ _j : Fin n, (Real.sqrt t) ^ α * gaussianAbsMoment α +
+        ((L : ℝ) * H * ∑ _j : Fin n, (Real.sqrt t) ^ α * gaussianAbsMoment α) :=
+        add_le_add hterm1 hterm2
+    _ = 2 * (L : ℝ) * H * ∑ _j : Fin n, (Real.sqrt t) ^ α * gaussianAbsMoment α := by ring
+
 
 end AnalyticPDE
 end RicciFlow

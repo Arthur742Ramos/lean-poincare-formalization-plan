@@ -112,5 +112,20 @@ noncomputable def holderBCF_comp
       isHolderConst_comp_of_lipschitz (f := f.val) hF
         (Classical.choose_spec f.property)⟩⟩
 
+/-- **Bridge lemma: the composed function inherits an explicit Hölder constant.**
+
+For `F` `L`-Lipschitz and `f` Hölder with constant `H`, the underlying bounded
+continuous function `(holderBCF_comp hF f).toBCF` satisfies `IsHolderConst`
+with constant `L * H`.
+
+This avoids definitional-unfolding issues: `isHolderConst_comp_of_lipschitz`
+applied to `f.val` directly gives the result, since `(holderBCF_comp hF f).toBCF`
+is definitionally `f.val.comp F hF`. -/
+theorem isHolderConst_holderBCF_comp_toBCF
+    {F : ℝ → ℝ} {L : ℝ≥0} (hF : LipschitzWith L F)
+    (f : HolderBCF α n) {H : ℝ} (hH : IsHolderConst α f.toBCF H) :
+    IsHolderConst α (holderBCF_comp hF f).toBCF ((L : ℝ) * H) :=
+  isHolderConst_comp_of_lipschitz (f := f.val) hF hH
+
 end AnalyticPDE
 end RicciFlow
