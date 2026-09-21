@@ -259,7 +259,7 @@ theorem holderSeminorm_smul_le (c : ℝ) (f : HolderBCF α n) :
 
 /-- Key estimate: the Hölder seminorm controls pointwise differences.
 This is Lemma A for the completeness proof. -/
-theorem abs_sub_le_holderSeminorm_mul (hα : 0 < α) (x : HolderBCF α n)
+theorem abs_sub_le_holderSeminorm_mul (x : HolderBCF α n)
     (a b : Fin n → ℝ) :
     |x.toBCF a - x.toBCF b| ≤
       holderSeminorm x * ∑ j : Fin n, |(a - b) j| ^ α := by
@@ -365,6 +365,20 @@ noncomputable instance : MetricSpace (HolderBCF α n) where
       have h00 : ‖(x - y).toBCF‖ = 0 := le_antisymm hle (norm_nonneg _)
       exact norm_eq_zero.mp h00
     exact sub_eq_zero.mp h0
+
+/-! ### Canonical metric uniformity -/
+
+/-- The Hölder-metric uniformity is the canonical `UniformSpace` structure on
+`HolderBCF`. It is given high priority so that `CauchySeq`, `𝓝`, etc. refer to
+the Hölder metric rather than the subtype-induced uniformity from
+`BoundedContinuousFunction` (which is strictly coarser and would make the
+`CompleteSpace` statement about the wrong uniformity). -/
+noncomputable instance (priority := high) : UniformSpace (HolderBCF α n) :=
+  PseudoMetricSpace.toUniformSpace
+
+/-- The Hölder-metric topology is the canonical `TopologicalSpace` structure. -/
+noncomputable instance (priority := high) : TopologicalSpace (HolderBCF α n) :=
+  UniformSpace.toTopologicalSpace
 
 /-! ### Normed space structure -/
 
@@ -505,6 +519,217 @@ theorem isHolderConst_of_tendsto {u : ℕ → BoundedContinuousFunction (Fin n �
       _ = H * ∑ j : Fin n, |(a - b) j| ^ α + ε / 2 := by ring
       _ < H * ∑ j : Fin n, |(a - b) j| ^ α + ε := by linarith [hε]
   exact le_of_lt hcalc
+
+/-! ### Completeness -/
+
+/-- Monotonicity of Hölder constants. -/
+theorem IsHolderConst.mono {f : BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    {H₁ H₂ : ℝ} (h : IsHolderConst α f H₁) (hle : H₁ ≤ H₂) :
+    IsHolderConst α f H₂ := by
+  obtain ⟨h0, h1⟩ := h
+  refine ⟨le_trans h0 hle, fun a b => ?_⟩
+  have hC : 0 ≤ ∑ j : Fin n, |(a - b) j| ^ α :=
+    Finset.sum_nonneg (fun j _ => Real.rpow_nonneg (abs_nonneg _) _)
+  calc |f a - f b| ≤ H₁ * ∑ j : Fin n, |(a - b) j| ^ α := h1 a b
+    _ ≤ H₂ * ∑ j : Fin n, |(a - b) j| ^ α := by gcongr
+
+/-- The Hölder-constant set of a fixed function is closed in `ℝ`. -/
+theorem isClosed_isHolderConstSet (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) :
+    IsClosed {H : ℝ | IsHolderConst α f H} := by
+  have heq : {H : ℝ | IsHolderConst α f H} =
+      (Ici (0 : ℝ)) ∩ ⋂ a : (Fin n → ℝ), ⋂ b : (Fin n → ℝ),
+        (fun H : ℝ => H * ∑ j : Fin n, |(a - b) j| ^ α) ⁻¹' (Ici |f a - f b|) := by
+    ext H
+    refine ⟨fun hH => ?_, fun hH => ?_⟩
+    · obtain ⟨h0, h1⟩ := hH
+      refine ⟨h0, Set.mem_iInter.mpr fun a => Set.mem_iInter.mpr fun b => ?_⟩
+      rw [Set.mem_preimage, Set.mem_Ici]
+      exact h1 a b
+    · obtain ⟨h0, h1⟩ := hH
+      have h2 : ∀ a b : Fin n → ℝ,
+          |f a - f b| ≤ H * ∑ j : Fin n, |(a - b) j| ^ α := by
+        intro a b
+        have hmem := Set.mem_iInter.mp (Set.mem_iInter.mp h1 a) b
+        rw [Set.mem_preimage, Set.mem_Ici] at hmem
+        exact hmem
+      exact ⟨h0, h2⟩
+  rw [heq]
+  apply IsClosed.inter isClosed_Ici
+  apply isClosed_iInter; intro a
+  apply isClosed_iInter; intro b
+  exact isClosed_Ici.preimage (continuous_id.mul continuous_const)
+
+/-- The infimum of Hölder constants is itself a Hölder constant. -/
+theorem isHolderConst_holderSeminorm (f : HolderBCF α n) :
+    IsHolderConst α f.toBCF (holderSeminorm f) :=
+  IsClosed.csInf_mem (isClosed_isHolderConstSet f.toBCF) f.holderEx (bddBelow_holderSet f)
+
+/-- Every Cauchy sequence in the Hölder norm converges: sequence completeness.
+The proof follows the outline: BCF components are Cauchy, hence converge to `g`;
+the Hölder seminorms are Cauchy in `ℝ`, hence converge to `L`; `g` is Hölder by
+Lemma B; and `u k → x` in the Hölder norm by the ε/3-style estimate that the
+seminorm of `u k - x` is eventually small (proved by exhibiting an explicit
+Hölder constant via Lemma A and pointwise convergence). -/
+theorem cauchySeq_tendsto_of_holder {u : ℕ → HolderBCF α n} (hu : CauchySeq u) :
+    ∃ x : HolderBCF α n, Tendsto u atTop (𝓝 x) := by
+  rw [Metric.cauchySeq_iff] at hu
+  -- (a) the BCF components form a Cauchy sequence
+  have hBCF : CauchySeq (fun k => (u k).toBCF) := by
+    rw [Metric.cauchySeq_iff]
+    intro ε hε
+    obtain ⟨N, hN⟩ := hu ε hε
+    refine ⟨N, fun m hm n hn => ?_⟩
+    have hle : dist ((u m).toBCF) ((u n).toBCF) ≤ dist (u m) (u n) := by
+      have heq : (u m).toBCF - (u n).toBCF = (u m - u n).toBCF := (sub_toBCF _ _).symm
+      have e1 : dist ((u m).toBCF) ((u n).toBCF) = ‖(u m).toBCF - (u n).toBCF‖ := by
+        rw [SeminormedAddCommGroup.dist_eq]
+        have e : -((u m).toBCF) + (u n).toBCF = -((u m).toBCF - (u n).toBCF) := by abel
+        rw [e, norm_neg]
+      rw [e1, heq]
+      exact norm_toBCF_le _
+    exact lt_of_le_of_lt hle (hN m hm n hn)
+  -- (b) BCF limit `g`
+  obtain ⟨g, hg⟩ := cauchySeq_tendsto_of_complete hBCF
+  -- (c) the Hölder seminorms are Cauchy in `ℝ`, hence converge to `L`
+  have hsem_cauchy : CauchySeq (fun k => holderSeminorm (u k)) := by
+    rw [Metric.cauchySeq_iff]
+    intro ε hε
+    obtain ⟨N, hN⟩ := hu ε hε
+    refine ⟨N, fun m hm n hn => ?_⟩
+    rw [Real.dist_eq]
+    calc |holderSeminorm (u m) - holderSeminorm (u n)|
+        ≤ ‖u m - u n‖ := holderSeminorm_lipschitz _ _
+      _ = dist (u m) (u n) := (dist_def _ _).symm
+      _ < ε := hN m hm n hn
+  obtain ⟨L, hL⟩ := cauchySeq_tendsto_of_complete hsem_cauchy
+  have hLnn : 0 ≤ L :=
+    ge_of_tendsto hL (Filter.Eventually.of_forall fun k => holderSeminorm_nonneg _)
+  -- (d) the BCF limit `g` is Hölder (Lemma B)
+  have hevH : ∀ᶠ k in atTop, IsHolderConst α (u k).toBCF (L + 1) := by
+    have hmem : Metric.ball L 1 ∈ 𝓝 L := Metric.ball_mem_nhds L (by norm_num)
+    have hev0 := hL.eventually hmem
+    filter_upwards [hev0] with k hk
+    have hk' : holderSeminorm (u k) ≤ L + 1 := by
+      rw [Real.dist_eq] at hk
+      have := (abs_lt.mp hk).2
+      linarith
+    exact IsHolderConst.mono (isHolderConst_holderSeminorm (u k)) hk'
+  have hgH : IsHolderConst α g (L + 1) :=
+    isHolderConst_of_tendsto hg (by linarith) hevH
+  -- the limit in the Hölder space
+  set x : HolderBCF α n := ⟨g, L + 1, hgH⟩ with hxdef
+  have hxBCF : x.toBCF = g := rfl
+  -- (e1) the sup-norm component tends to 0
+  have hterm1 : Tendsto (fun k => ‖(u k).toBCF - g‖) atTop (𝓝 0) := by
+    have h := hg
+    rw [tendsto_iff_dist_tendsto_zero] at h
+    have heq : ∀ m, dist ((u m).toBCF) g = ‖(u m).toBCF - g‖ := by
+      intro m
+      rw [SeminormedAddCommGroup.dist_eq]
+      have e : -((u m).toBCF) + g = -((u m).toBCF - g) := by abel
+      rw [e, norm_neg]
+    simpa only [heq] using h
+  -- (e2) key estimate: the Hölder seminorm of `u k - x` tends to 0
+  have hkey : ∀ ε > 0, ∀ᶠ k in atTop, holderSeminorm (u k - x) < ε := by
+    intro ε hε
+    obtain ⟨N, hN⟩ := hu (ε / 2) (by linarith)
+    filter_upwards [eventually_ge_atTop N] with k hk
+    have hle : holderSeminorm (u k - x) ≤ ε / 2 := by
+      have hmem : (ε / 2) ∈ {H : ℝ | IsHolderConst α (u k - x).toBCF H} := by
+        show IsHolderConst α (u k - x).toBCF (ε / 2)
+        rw [sub_toBCF, hxBCF]
+        refine ⟨by linarith, fun a b => ?_⟩
+        set C : ℝ := ∑ j : Fin n, |(a - b) j| ^ α with hCdef
+        have hCnn : 0 ≤ C :=
+          Finset.sum_nonneg (fun j _ => Real.rpow_nonneg (abs_nonneg _) _)
+        -- pointwise error terms tend to 0
+        have herr : ∀ c : Fin n → ℝ,
+            Tendsto (fun m => |((u m).toBCF) c - g c|) atTop (𝓝 0) := by
+          intro c
+          have hle_pt : ∀ m, |((u m).toBCF) c - g c| ≤ ‖(u m).toBCF - g‖ := by
+            intro m
+            have e : ((u m).toBCF) c - g c = (((u m).toBCF - g)) c := by
+              simp only [BoundedContinuousFunction.sub_apply]
+            rw [e, ← Real.norm_eq_abs]
+            exact BoundedContinuousFunction.norm_coe_le_norm _ _
+          exact squeeze_zero (fun _ => abs_nonneg _) hle_pt hterm1
+        have hlim : Tendsto
+            (fun m => (ε/2) * C + (|((u m).toBCF) a - g a| + |((u m).toBCF) b - g b|))
+            atTop (𝓝 ((ε/2) * C)) := by
+          have hadd := (herr a).add (herr b)
+          rw [add_zero] at hadd
+          have hconst : Tendsto (fun _ : ℕ => (ε/2) * C) atTop (𝓝 ((ε/2) * C)) :=
+            tendsto_const_nhds
+          have hadd2 := hconst.add hadd
+          rwa [add_zero] at hadd2
+        apply ge_of_tendsto hlim
+        filter_upwards [eventually_ge_atTop N] with m hm
+        -- triangle inequality splitting the difference at `(u m).toBCF`
+        have htri : |((u k).toBCF - g) a - ((u k).toBCF - g) b|
+            ≤ |((u k).toBCF - (u m).toBCF) a - ((u k).toBCF - (u m).toBCF) b|
+              + (|((u m).toBCF) a - g a| + |((u m).toBCF) b - g b|) := by
+          have heq : ((u k).toBCF - g) a - ((u k).toBCF - g) b
+              = (((u k).toBCF - (u m).toBCF) a - ((u k).toBCF - (u m).toBCF) b)
+                + ((((u m).toBCF) a - g a) - (((u m).toBCF) b - g b)) := by
+            simp only [BoundedContinuousFunction.sub_apply]
+            ring
+          rw [heq]
+          have h1 := abs_add_le
+            (((u k).toBCF - (u m).toBCF) a - ((u k).toBCF - (u m).toBCF) b)
+            ((((u m).toBCF) a - g a) - (((u m).toBCF) b - g b))
+          have h2 : |(((u m).toBCF) a - g a) - (((u m).toBCF) b - g b)|
+              ≤ |((u m).toBCF) a - g a| + |((u m).toBCF) b - g b| := by
+            have e : ((((u m).toBCF) a - g a) - (((u m).toBCF) b - g b))
+                = (((u m).toBCF) a - g a) + (-(((u m).toBCF) b - g b)) := by ring
+            rw [e]
+            calc |(((u m).toBCF) a - g a) + (-(((u m).toBCF) b - g b))|
+                ≤ |((u m).toBCF) a - g a| + |-(((u m).toBCF) b - g b)| :=
+                  abs_add_le _ _
+              _ = |((u m).toBCF) a - g a| + |((u m).toBCF) b - g b| := by
+                  rw [abs_neg]
+          linarith
+        -- the Hölder term is controlled by Lemma A and the Cauchy property
+        have hterm : |((u k).toBCF - (u m).toBCF) a - ((u k).toBCF - (u m).toBCF) b|
+            ≤ (ε/2) * C := by
+          have heq2 : (u k).toBCF - (u m).toBCF = (u k - u m).toBCF :=
+            (sub_toBCF _ _).symm
+          rw [heq2]
+          have h1 := abs_sub_le_holderSeminorm_mul (u k - u m) a b
+          have h2 : holderSeminorm (u k - u m) ≤ ε / 2 := by
+            calc holderSeminorm (u k - u m) ≤ ‖u k - u m‖ := holderSeminorm_le_norm _
+              _ = dist (u k) (u m) := (dist_def _ _).symm
+              _ ≤ ε / 2 := le_of_lt (hN k hk m hm)
+          calc |((u k - u m).toBCF) a - ((u k - u m).toBCF) b|
+              ≤ holderSeminorm (u k - u m) * C := h1
+            _ ≤ (ε/2) * C := by gcongr
+        linarith
+      exact csInf_le (bddBelow_holderSet _) hmem
+    linarith
+  have hterm2 : Tendsto (fun k => holderSeminorm (u k - x)) atTop (𝓝 0) := by
+    rw [tendsto_def]
+    intro s hs
+    obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hs
+    have hev := hkey ε hε
+    filter_upwards [hev] with k hk
+    apply hball
+    rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_nonneg (holderSeminorm_nonneg _)]
+    exact hk
+  -- (f) assemble: `dist (u k) x → 0`
+  refine ⟨x, tendsto_iff_dist_tendsto_zero.mpr ?_⟩
+  have hdecomp : ∀ k, dist (u k) x
+      = ‖(u k).toBCF - g‖ + holderSeminorm (u k - x) := by
+    intro k
+    rw [dist_def, norm_def, sub_toBCF, hxBCF]
+  have hadd := hterm1.add hterm2
+  rw [add_zero] at hadd
+  exact squeeze_zero (fun _ => dist_nonneg) (fun k => le_of_eq (hdecomp k)) hadd
+
+/-- The Hölder space is complete in its metric uniformity. -/
+noncomputable instance : CompleteSpace (HolderBCF α n) :=
+  Metric.complete_of_cauchySeq_tendsto fun u hu => cauchySeq_tendsto_of_holder hu
+
+/-- The Hölder space is nonempty. -/
+instance : Nonempty (HolderBCF α n) := ⟨0⟩
 
 end HolderBCF
 end AnalyticPDE
