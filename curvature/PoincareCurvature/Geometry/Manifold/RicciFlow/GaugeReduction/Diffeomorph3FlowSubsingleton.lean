@@ -615,12 +615,11 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReducibl
     (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
       (E := E) (H := H) (I := I) (M := M) ivp)
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) :
+      (E := E) (H := H) (I := I) (M := M) ivp) :
     GaugeReducibleChosenIntrinsicDeTurckLocalExistenceUniqueness
       (E := E) (H := H) (I := I) (M := M) ivp :=
   pkg.toGaugeReducible_viaDiffeomorph3GaugeFlowBundle_of_subsingleton_tangent
-    (G.toDiffeomorph3GaugeFlow hvar)
+    G.toDiffeomorph3GaugeFlow
 
 /-- Fixed-IVP raw intrinsic gauge-flow existence projects directly to
 gauge-reduced DeTurck theorem packages on subsingleton tangent fibers without
@@ -631,11 +630,10 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toGaugeReduced_
     (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
       (E := E) (H := H) (I := I) (M := M) ivp)
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) :
+      (E := E) (H := H) (I := I) (M := M) ivp) :
     GaugeReducedIntrinsicDeTurckLocalExistenceUniqueness
       (E := E) (H := H) (I := I) (M := M) ivp :=
-  (pkg.toGaugeReducible_viaGaugeFlowExistence_of_subsingleton_tangent G hvar).toGaugeReduced
+  (pkg.toGaugeReducible_viaGaugeFlowExistence_of_subsingleton_tangent G).toGaugeReduced
 
 /-- Fixed-IVP intrinsic projection from raw intrinsic gauge-flow existence on
 subsingleton tangent fibers without additional derivative input. -/
@@ -645,10 +643,9 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toIntrinsic_via
     (pkg : ChosenIntrinsicDeTurckLocalExistenceUniqueness
       (E := E) (H := H) (I := I) (M := M) ivp)
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) :
+      (E := E) (H := H) (I := I) (M := M) ivp) :
     IntrinsicLocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
-  (pkg.toGaugeReduced_viaGaugeFlowExistence_of_subsingleton_tangent G hvar).toIntrinsic
+  (pkg.toGaugeReduced_viaGaugeFlowExistence_of_subsingleton_tangent G).toIntrinsic
 
 /-- Fixed-IVP ordinary projection from raw intrinsic gauge-flow existence on
 subsingleton tangent fibers without additional derivative input. -/

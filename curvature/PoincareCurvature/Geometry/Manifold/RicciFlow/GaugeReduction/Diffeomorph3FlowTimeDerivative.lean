@@ -34668,81 +34668,72 @@ induced by raw intrinsic DeTurck gauge-flow existence. -/
 def PullbackMetricInnerDerivativeData
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) : Prop :=
-  (G.toDiffeomorph3GaugeFlow hvar).PullbackMetricInnerDerivativeData
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.PullbackMetricInnerDerivativeData
 
 /-- Fixed-IVP coordinate-level scalar derivative data for the geometric
 gauge-flow bundle induced by raw intrinsic DeTurck gauge-flow existence. -/
 def CoordinatePullbackMetricInnerDerivativeData
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) : Prop :=
-  (G.toDiffeomorph3GaugeFlow hvar).CoordinatePullbackMetricInnerDerivativeData
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricInnerDerivativeData
 
 /-- Fixed-IVP coordinate-model derivative data for the geometric gauge-flow
 bundle induced by raw intrinsic DeTurck gauge-flow existence. -/
 def CoordinatePullbackMetricModelDerivativeData
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) : Prop :=
-  (G.toDiffeomorph3GaugeFlow hvar).CoordinatePullbackMetricModelDerivativeData
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricModelDerivativeData
 
 /-- Fixed-IVP concrete component derivative data for the geometric gauge-flow
 bundle induced by raw intrinsic DeTurck gauge-flow existence. -/
 def CoordinatePullbackMetricComponentDerivativeData
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) : Prop :=
-  (G.toDiffeomorph3GaugeFlow hvar).CoordinatePullbackMetricComponentDerivativeData
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricComponentDerivativeData
 
 /-- Fixed-IVP field-level derivative data for the geometric gauge-flow bundle
 induced by raw intrinsic DeTurck gauge-flow existence. -/
 def CoordinatePullbackMetricFieldDerivativeData
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) : Prop :=
-  (G.toDiffeomorph3GaugeFlow hvar).CoordinatePullbackMetricFieldDerivativeData
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricFieldDerivativeData
 
 /-- Fixed-IVP within-set concrete component derivative data for the geometric
 gauge-flow bundle induced by raw intrinsic DeTurck gauge-flow existence. -/
 def CoordinatePullbackMetricComponentDerivativeWithinData
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) : Prop :=
-  (G.toDiffeomorph3GaugeFlow hvar).CoordinatePullbackMetricComponentDerivativeWithinData
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricComponentDerivativeWithinData
 
 /-- Fixed-IVP within-set field-level derivative data for the geometric
 gauge-flow bundle induced by raw intrinsic DeTurck gauge-flow existence. -/
 def CoordinatePullbackMetricFieldDerivativeWithinData
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) : Prop :=
-  (G.toDiffeomorph3GaugeFlow hvar).CoordinatePullbackMetricFieldDerivativeWithinData
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricFieldDerivativeWithinData
 
 /-- Fixed-IVP within-set operator-domain derivative data for the geometric
 gauge-flow bundle induced by raw intrinsic DeTurck gauge-flow existence. -/
 def CoordinatePullbackMetricOperatorDerivativeWithinData
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) : Prop :=
-  (G.toDiffeomorph3GaugeFlow hvar).CoordinatePullbackMetricOperatorDerivativeWithinData
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricOperatorDerivativeWithinData
 
 /-- Fixed-IVP open-domain operator derivative data for the geometric gauge-flow
 bundle induced by raw intrinsic DeTurck gauge-flow existence. -/
 def CoordinatePullbackMetricOperatorDerivativeWithinOpenData
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
-      (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis) : Prop :=
-  (G.toDiffeomorph3GaugeFlow hvar).CoordinatePullbackMetricOperatorDerivativeWithinOpenData
+      (E := E) (H := H) (I := I) (M := M) ivp) : Prop :=
+  G.toDiffeomorph3GaugeFlow.CoordinatePullbackMetricOperatorDerivativeWithinOpenData
 
 /-- Fixed-IVP raw intrinsic gauge-flow coordinate curves eventually lie in the
 preferred chart range at neighborhood-times. -/
@@ -34780,10 +34771,9 @@ theorem pullbackMetricInnerDerivativeData_of_coordinate
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (G : IntrinsicDeTurckGaugeFlowExistence
       (E := E) (H := H) (I := I) (M := M) ivp)
-    (hvar : G.VariationalHypothesis)
-    (hcoord : G.CoordinatePullbackMetricInnerDerivativeData hvar) :
-    G.PullbackMetricInnerDerivativeData hvar :=
-  (G.toDiffeomorph3GaugeFlow hvar).pullbackMetricInnerDerivativeData_of_coordinate
+    (hcoord : G.CoordinatePullbackMetricInnerDerivativeData) :
+    G.PullbackMetricInnerDerivativeData :=
+  G.toDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_coordinate
     (I := I) (M := M) hcoord
 
 /-- Coordinate-model fixed-IVP data implies coordinate-level scalar data for raw
@@ -34799,7 +34789,7 @@ theorem coordinatePullbackMetricInnerDerivativeData_of_model
         sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
     (hmodel : G.CoordinatePullbackMetricModelDerivativeData) :
     G.CoordinatePullbackMetricInnerDerivativeData :=
-  (G.toDiffeomorph3GaugeFlow hvar).coordinatePullbackMetricInnerDerivativeData_of_model
+  G.toDiffeomorph3GaugeFlow.coordinatePullbackMetricInnerDerivativeData_of_model
     (I := I) (M := M) htime hmodel
 
 /-- Concrete component fixed-IVP data implies coordinate-model data for raw
@@ -34810,7 +34800,7 @@ theorem coordinatePullbackMetricModelDerivativeData_of_components
       (E := E) (H := H) (I := I) (M := M) ivp)
     (hcomponent : G.CoordinatePullbackMetricComponentDerivativeData) :
     G.CoordinatePullbackMetricModelDerivativeData :=
-  (G.toDiffeomorph3GaugeFlow hvar).coordinatePullbackMetricModelDerivativeData_of_components
+  G.toDiffeomorph3GaugeFlow.coordinatePullbackMetricModelDerivativeData_of_components
     (I := I) (M := M) hcomponent
 
 /-- Concrete component fixed-IVP data implies coordinate-level scalar data for
@@ -34826,7 +34816,7 @@ theorem coordinatePullbackMetricInnerDerivativeData_of_components
         sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
     (hcomponent : G.CoordinatePullbackMetricComponentDerivativeData) :
     G.CoordinatePullbackMetricInnerDerivativeData :=
-  (G.toDiffeomorph3GaugeFlow hvar).coordinatePullbackMetricInnerDerivativeData_of_components
+  G.toDiffeomorph3GaugeFlow.coordinatePullbackMetricInnerDerivativeData_of_components
     (I := I) (M := M) htime hcomponent
 
 /-- Field-level fixed-IVP data implies coordinate-level scalar data for raw
@@ -34842,7 +34832,7 @@ theorem coordinatePullbackMetricInnerDerivativeData_of_field
         sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
     (hfield : G.CoordinatePullbackMetricFieldDerivativeData) :
     G.CoordinatePullbackMetricInnerDerivativeData :=
-  (G.toDiffeomorph3GaugeFlow hvar).coordinatePullbackMetricInnerDerivativeData_of_field
+  G.toDiffeomorph3GaugeFlow.coordinatePullbackMetricInnerDerivativeData_of_field
     (I := I) (M := M) htime hfield
 
 /-- Within-set field-level fixed-IVP data implies named scalar data for raw
@@ -34858,7 +34848,7 @@ theorem pullbackMetricInnerDerivativeData_of_fieldWithin
         sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
     (hfield : G.CoordinatePullbackMetricFieldDerivativeWithinData) :
     G.PullbackMetricInnerDerivativeData :=
-  (G.toDiffeomorph3GaugeFlow hvar).pullbackMetricInnerDerivativeData_of_fieldWithin
+  G.toDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_fieldWithin
     (I := I) (M := M) htime hfield
 
 /-- Within-set concrete component fixed-IVP data implies named scalar data for
@@ -34874,7 +34864,7 @@ theorem pullbackMetricInnerDerivativeData_of_componentsWithin
         sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
     (hcomponent : G.CoordinatePullbackMetricComponentDerivativeWithinData) :
     G.PullbackMetricInnerDerivativeData :=
-  (G.toDiffeomorph3GaugeFlow hvar).pullbackMetricInnerDerivativeData_of_componentsWithin
+  G.toDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_componentsWithin
     (I := I) (M := M) htime hcomponent
 
 /-- Within-set operator-domain fixed-IVP data implies named scalar data for raw
@@ -34890,7 +34880,7 @@ theorem pullbackMetricInnerDerivativeData_of_operatorWithin
         sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
     (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinData) :
     G.PullbackMetricInnerDerivativeData :=
-  (G.toDiffeomorph3GaugeFlow hvar).pullbackMetricInnerDerivativeData_of_operatorWithin
+  G.toDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_operatorWithin
     (I := I) (M := M) htime hoperator
 
 /-- Open-domain operator fixed-IVP data implies named scalar data for raw
@@ -34906,7 +34896,7 @@ theorem pullbackMetricInnerDerivativeData_of_operatorWithinOpen
         sol.1.toIntrinsicDeTurckSolution.timeSet ∈ 𝓝 t)
     (hoperator : G.CoordinatePullbackMetricOperatorDerivativeWithinOpenData) :
     G.PullbackMetricInnerDerivativeData :=
-  (G.toDiffeomorph3GaugeFlow hvar).pullbackMetricInnerDerivativeData_of_operatorWithinOpen
+  G.toDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_operatorWithinOpen
     (I := I) (M := M) htime hoperator
 
 /-- Open-Picard fixed-IVP within-set field-level data gives the named scalar
@@ -35004,7 +34994,7 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricModelDerivativeData
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         ((G.toDiffeomorph3GaugeFlow).gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
-  (G.toDiffeomorph3GaugeFlow hvar).hasTimeDerivativeOn_of_coordinatePullbackMetricModelDerivativeData
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricModelDerivativeData
     (I := I) (M := M) htime hmodel sol
 
 /-- Raw gauge-flow existence plus concrete component data gives the required
@@ -35026,7 +35016,7 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeData
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         ((G.toDiffeomorph3GaugeFlow).gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
-  (G.toDiffeomorph3GaugeFlow hvar).hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeData
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeData
     (I := I) (M := M) htime hcomponent sol
 
 /-- Raw gauge-flow existence plus field-level data gives the required time
@@ -35048,7 +35038,7 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeData
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         ((G.toDiffeomorph3GaugeFlow).gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
-  (G.toDiffeomorph3GaugeFlow hvar).hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeData
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeData
     (I := I) (M := M) htime hfield sol
 
 /-- Raw gauge-flow existence plus within-set field-level data gives the required
@@ -35070,7 +35060,7 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeWithinData
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         ((G.toDiffeomorph3GaugeFlow).gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
-  (G.toDiffeomorph3GaugeFlow hvar).hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeWithinData
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricFieldDerivativeWithinData
     (I := I) (M := M) htime hfield sol
 
 /-- Raw gauge-flow existence plus within-set concrete component data gives the
@@ -35092,7 +35082,7 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithin
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         ((G.toDiffeomorph3GaugeFlow).gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
-  (G.toDiffeomorph3GaugeFlow hvar).hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithinData
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricComponentDerivativeWithinData
     (I := I) (M := M) htime hcomponent sol
 
 /-- Raw gauge-flow existence plus within-set operator-domain data gives the
@@ -35114,7 +35104,7 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinD
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         ((G.toDiffeomorph3GaugeFlow).gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
-  (G.toDiffeomorph3GaugeFlow hvar).hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinData
     (I := I) (M := M) htime hoperator sol
 
 /-- Raw gauge-flow existence plus open-domain operator data gives the required
@@ -35136,7 +35126,7 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinO
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         ((G.toDiffeomorph3GaugeFlow).gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
-  (G.toDiffeomorph3GaugeFlow hvar).hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricOperatorDerivativeWithinOpenData
     (I := I) (M := M) htime hoperator sol
 
 /-- Raw fixed-IVP gauge-flow existence plus closed-Picard readout-local
@@ -35155,7 +35145,7 @@ theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_b
     {x₀ : E} {r : ℝ≥0}
     (α : ModelGaugeFlowODE.VariationalLocalFlowSolution f Df τ₀ x₀ r)
     (hdata :
-      (G.toDiffeomorph3GaugeFlow hvar).VariationalTangentMapReadoutMemBallDerivativeDataOnIoo
+      G.toDiffeomorph3GaugeFlow.VariationalTangentMapReadoutMemBallDerivativeDataOnIoo
         sol tmin tmax α) :
     HasTimeDerivativeOn (I := I) (M := M)
       (((G.flow sol).maps3).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
@@ -35163,7 +35153,7 @@ theorem hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_b
         ((G.toDiffeomorph3GaugeFlow).gauge sol))
       (Ioo tmin tmax) := by
   simpa using
-    (G.toDiffeomorph3GaugeFlow hvar).hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_timeSet_eq_Icc
+    G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_Ioo_of_variationalTangentMapComponents_readout_mem_ball_lifted_eqOn_hasFDerivAt_of_timeSet_eq_Icc
       (I := I) (M := M) sol htimeSet α hdata
 
 /-- Open-Picard fixed-IVP coordinate-model data gives the required time
@@ -35348,7 +35338,7 @@ theorem hasTimeDerivativeOn_of_coordinatePullbackMetricInnerDerivativeData
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         ((G.toDiffeomorph3GaugeFlow).gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
-  (G.toDiffeomorph3GaugeFlow hvar).hasTimeDerivativeOn_of_coordinatePullbackMetricInnerDerivativeData
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_coordinatePullbackMetricInnerDerivativeData
     (I := I) (M := M) hcoord sol
 
 /-- Fixed-IVP raw gauge-flow existence plus named scalar data gives the required
@@ -35365,7 +35355,7 @@ theorem hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
         ((G.toDiffeomorph3GaugeFlow).gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
-  (G.toDiffeomorph3GaugeFlow hvar).hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
+  G.toDiffeomorph3GaugeFlow.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
     (I := I) (M := M) hinner sol
 
 /-- The tensor time-derivative package for every member of a fixed-IVP raw
@@ -35382,7 +35372,7 @@ theorem pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
           ((G.toDiffeomorph3GaugeFlow).gauge sol))
         sol.1.toIntrinsicDeTurckSolution.timeSet) :
     G.PullbackMetricInnerDerivativeData :=
-  (G.toDiffeomorph3GaugeFlow hvar).pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
+  G.toDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_hasTimeDerivativeOn
     (I := I) (M := M) hpullDerivative
 
 /-- Fixed-IVP raw gauge-flow scalar data is equivalent to the tensor
