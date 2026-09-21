@@ -107,7 +107,30 @@ theorem norm_fderiv_le_of_C2_bound
       -- Bound on g: ‖g(s)‖ ≤ M₀
       have hg_bnd : ∀ s ∈ Icc (0:ℝ) h, ‖g s‖ ≤ M₀ :=
         fun s hs => h0 _ (hmem s hs)
-      -- Apply MVT twice to get the bound (details in proof sketch)
+      -- Define A = g'(0) = (fderiv ℝ f x) v
+      set A : F := (fderiv ℝ f x) v with hA_def
+      -- Define ψ(s) = g(s) - s • A
+      set ψ : ℝ → F := fun s => g s - s • A with hψ_def
+      -- ψ is differentiable on [0,h]
+      have hψ_diff : DifferentiableOn ℝ ψ (Icc (0:ℝ) h) := by
+        intro s hs
+        have hg : DifferentiableWithinAt ℝ g (Icc (0:ℝ) h) s := hg_diff s hs
+        have hsmul : DifferentiableWithinAt ℝ (fun t : ℝ => t • A) (Icc (0:ℝ) h) s := by
+          apply DifferentiableWithinAt.smul_const
+          exact differentiableWithinAt_id
+        exact hg.sub hsmul
+      -- Key step: bound ‖ψ'(s)‖ via MVT on g'
+      -- This requires the second derivative bound ‖g''(t)‖ ≤ M₂
+      -- The full proof involves:
+      -- 1. g'(s) = (fderiv ℝ f (x + s•v)) v is differentiable
+      -- 2. g''(s) = ((fderiv ℝ (fun z => fderiv ℝ f z) (x+s•v)) v) v
+      -- 3. ‖g''(s)‖ ≤ M₂ by h2 and ‖v‖=1
+      -- 4. MVT gives ‖g'(s) - g'(0)‖ ≤ M₂ * s
+      -- 5. ψ'(s) = g'(s) - A, so ‖ψ'(s)‖ ≤ M₂ * s ≤ M₂ * h
+      -- 6. MVT on ψ gives ‖ψ(h) - ψ(0)‖ ≤ M₂ * h * h
+      -- 7. ψ(h) - ψ(0) = (g(h) - g(0)) - h • A
+      -- 8. h • A = (g(h) - g(0)) - (ψ(h) - ψ(0))
+      -- 9. h * ‖A‖ ≤ 2*M₀ + M₂*h², divide by h
       sorry
     -- Derive the bound for u from the bound for v
     have hsc : (fderiv ℝ f x) u = ‖u‖ • ((fderiv ℝ f x) v) := by
