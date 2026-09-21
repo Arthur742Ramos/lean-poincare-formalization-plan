@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ModelGaugeFlowODECore
 public import Mathlib.Analysis.ODE.PicardLindelof
 public import Mathlib.Analysis.ODE.Gronwall
 public import Mathlib.Analysis.Calculus.Deriv.Prod
@@ -33,65 +34,12 @@ namespace ModelGaugeFlowODE
 
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-/-- A local model-space flow for a time-dependent vector field on a Banach model.
-
-The radius is measured in initial data, and the time interval is the closed
-Picard-Lindelöf interval.  This is the chart-level object that must eventually
-be glued and upgraded to the `C³` manifold diffeomorphism flow used by point 4.
--/
-structure LocalFlowSolution
-    (f : ℝ → V → V) {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (x₀ : V)
-    (r : ℝ≥0) where
-  flow : V → ℝ → V
-  initial_eq : ∀ x ∈ closedBall x₀ r, flow x t₀ = x
-  hasDerivWithinAt :
-    ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc tmin tmax,
-      HasDerivWithinAt (flow x) (f t (flow x t)) (Icc tmin tmax) t
-
-/-- A Picard-Lindelöf local flow, with the spatial Lipschitz dependence on
-initial data that mathlib provides. -/
-structure LipschitzLocalFlowSolution
-    (f : ℝ → V → V) {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (x₀ : V)
-    (r : ℝ≥0) extends LocalFlowSolution f t₀ x₀ r where
-  exists_lipschitz_time :
-    ∃ L' : ℝ≥0, ∀ t ∈ Icc tmin tmax,
-      LipschitzOnWith L' (fun x => flow x t) (closedBall x₀ r)
-
-/-- A local model-space flow packaged as a continuous partial map on space-time.
-
-This is the form needed for chart-gluing arguments: the solution is an ODE
-curve in the time coordinate for each initial point, and the combined map is
-continuous on the product of the initial-data ball and the Picard-Lindelöf time
-interval.
--/
-structure ContinuousLocalFlowSolution
-    (f : ℝ → V → V) {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (x₀ : V)
-    (r : ℝ≥0) where
-  flow : V × ℝ → V
-  initial_eq : ∀ x ∈ closedBall x₀ r, flow (x, t₀) = x
-  hasDerivWithinAt :
-    ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc tmin tmax,
-      HasDerivWithinAt (fun τ : ℝ => flow (x, τ)) (f t (flow (x, t)))
-        (Icc tmin tmax) t
-  continuousOn : ContinuousOn flow (closedBall x₀ r ×ˢ Icc tmin tmax)
-
-/-- A local model-space flow equipped with its linearized tangent equation.
-
-For a chart vector field `f` and a spatial derivative candidate `Df`, this is the
-Banach-model form of the tangent-map variational equation
-`A'(t) = Df(t, flow(t)) ∘ A(t)`, initialized by the identity at the base time.
-This is the model ODE ingredient needed to prove the `A`-derivative hypothesis
-in the dynamic gauge-pullback scalar calculation. -/
-structure VariationalLocalFlowSolution
-    (f : ℝ → V → V) (Df : ℝ → V → V →L[ℝ] V)
-    {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (x₀ : V)
-    (r : ℝ≥0) extends ContinuousLocalFlowSolution f t₀ x₀ r where
-  tangent : V → ℝ → V →L[ℝ] V
-  tangent_initial_eq : ∀ x ∈ closedBall x₀ r, tangent x t₀ = 1
-  tangent_hasDerivWithinAt :
-    ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc tmin tmax,
-      HasDerivWithinAt (tangent x)
-        ((Df t (flow (x, t))).comp (tangent x t)) (Icc tmin tmax) t
+/-- The model-space ODE structures (`LocalFlowSolution`,
+`LipschitzLocalFlowSolution`, `ContinuousLocalFlowSolution`,
+`VariationalLocalFlowSolution`) and `variationalVectorField` are now defined in
+`ModelGaugeFlowODECore`, which this file imports. This breaks the import cycle
+for Point 4: `DeTurckFlowVariationalWitness` imports the core directly without
+transitively importing `Diffeomorph3FlowExistence`. -/
 
 /-- Interior points of the Picard cylinder see the closed Picard cylinder as an
 ordinary neighborhood. -/
@@ -103,13 +51,6 @@ theorem closedBall_prod_Icc_mem_nhds_of_mem_ball_Ioo
     mem_nhds_iff.mpr ⟨ball x₀ r, ball_subset_closedBall, isOpen_ball, hx⟩
   have ht' : Icc tmin tmax ∈ 𝓝 t := Icc_mem_nhds ht.1 ht.2
   exact prod_mem_nhds hx' ht'
-
-/-- The product ODE whose first component is the base gauge-flow equation and
-whose second component is the tangent-map variational equation. -/
-def variationalVectorField
-    (f : ℝ → V → V) (Df : ℝ → V → V →L[ℝ] V) :
-    ℝ → V × (V →L[ℝ] V) → V × (V →L[ℝ] V) :=
-  fun t z => (f t z.1, (Df t z.1).comp z.2)
 
 /-- With zero initial error, the Grönwall bound is linear in the forcing
 parameter.  This is the algebraic normalization used to turn a nonlinear

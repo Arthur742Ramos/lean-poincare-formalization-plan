@@ -19,7 +19,7 @@ via `deturckPushforward_hasDerivAt`, which is the analytic core (M1c) of the
 module
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowDerivative
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowMilestone41
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ModelGaugeFlowODE
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ModelGaugeFlowODECore
 
 open scoped Topology
 open ContinuousLinearMap
