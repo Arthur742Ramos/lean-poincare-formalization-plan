@@ -60,7 +60,7 @@ Banach space `X`.
 - `N : X → X` is the nonlinearity, globally `L`-Lipschitz. (Local Lipschitz + cutoff
   is the standard reduction for the PDE application.)
 - `u₀ : X` is the initial data. -/
-structure DuhamelData where
+public structure DuhamelData where
   T : ℝ
   hT : 0 < T
   S : ℝ → X →L[ℝ] X
@@ -327,7 +327,7 @@ def duhamelTerm (u : C(Icc (0 : ℝ) D.T, X)) : C(Icc (0 : ℝ) D.T, X) where
     · exact D.continuous_duhamelIntegral u
 
 /-- The Duhamel map `Φ(u) = freeEvolution + duhamelTerm(u)`. -/
-def duhamelMap (u : C(Icc (0 : ℝ) D.T, X)) : C(Icc (0 : ℝ) D.T, X) :=
+public def duhamelMap (u : C(Icc (0 : ℝ) D.T, X)) : C(Icc (0 : ℝ) D.T, X) :=
   D.freeEvolution + D.duhamelTerm u
 
 /-- Pointwise bound on the integrand difference:
@@ -457,7 +457,7 @@ theorem norm_duhamelIntegral_sub_le (u v : C(Icc (0 : ℝ) D.T, X))
         exact h_mono
 
 /-- The Lipschitz constant `M * L * T` as an `ℝ≥0`. -/
-def lipschitzConst : ℝ≥0 := ⟨D.M * D.L * D.T, by
+public def lipschitzConst : ℝ≥0 := ⟨D.M * D.L * D.T, by
   have h1 : (0:ℝ) ≤ (D.M * D.L : ℝ≥0) := (D.M * D.L).coe_nonneg
   have h2 : (0:ℝ) ≤ D.T := D.hT.le
   calc (0:ℝ) ≤ (D.M * D.L : ℝ) * D.T := mul_nonneg h1 h2
@@ -512,7 +512,7 @@ theorem lipschitzWith_duhamelMap :
         rfl
 
 /-- If `M * L * T < 1`, the Duhamel map is a contraction. -/
-theorem contractingWith_duhamelMap (h : (D.M * D.L * D.T : ℝ) < 1) :
+public theorem contractingWith_duhamelMap (h : (D.M * D.L * D.T : ℝ) < 1) :
     ContractingWith D.lipschitzConst D.duhamelMap := by
   constructor
   · -- `D.lipschitzConst < 1`
@@ -522,7 +522,7 @@ theorem contractingWith_duhamelMap (h : (D.M * D.L * D.T : ℝ) < 1) :
 
 /-- Existence and uniqueness of the mild solution: the Duhamel map has a unique
 fixed point when `M * L * T < 1`. -/
-theorem exists_unique_mild_solution (h : (D.M * D.L * D.T : ℝ) < 1) :
+public theorem exists_unique_mild_solution (h : (D.M * D.L * D.T : ℝ) < 1) :
     ∃! u : C(Icc (0 : ℝ) D.T, X), D.duhamelMap u = u := by
   have hcon := D.contractingWith_duhamelMap h
   -- Banach fixed-point theorem
