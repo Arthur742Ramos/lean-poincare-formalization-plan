@@ -242,6 +242,74 @@ theorem contDiff_deriv1Comp {n : WithTop ℕ∞} (k i j_ : Fin d) :
   rw [h_eq]
   exact fCLM.contDiff
 
+/-! ## 4. Christoffel symbols -/
+
+/-- The Christoffel symbols of the metric `j.val`.
+
+`Γ^k_ij = (1/2) * ∑_l g^{kl} (∂_i g_{jl} + ∂_j g_{il} - ∂_l g_{ij})`
+
+where `g^{kl}` is the inverse metric and `∂_i g_{jl}` is the 1-jet component. -/
+noncomputable def christoffelOfJet (j : Jet2 d d) (k i j_ : Fin d) : ℝ :=
+  (1/2) * ∑ l : Fin d, (invMetricOfJet j k l) *
+    (deriv1Comp j i j_ l + deriv1Comp j j_ i l - deriv1Comp j l i j_)
+
+/-- The Christoffel symbols are smooth on the invertible locus.
+
+Each `Γ^k_ij` is a polynomial in the inverse metric components (smooth by
+`contDiffOn_invMetricOfJet`) and the 1-jet components (smooth by
+`contDiff_deriv1Comp`). -/
+theorem contDiffOn_christoffelOfJet {n : WithTop ℕ∞} (k i j_ : Fin d) :
+    ContDiffOn ℝ n (fun j : Jet2 d d => christoffelOfJet (d := d) j k i j_)
+      {j : Jet2 d d | j.val.det ≠ 0} := by
+  unfold christoffelOfJet
+  -- The function is `(1/2) * ∑ l, (invMetric l) * (deriv1 + deriv1 - deriv1)`
+  have h_const : ContDiffOn ℝ n (fun _ : Jet2 d d => (1/2 : ℝ))
+      {j : Jet2 d d | j.val.det ≠ 0} :=
+    contDiff_const.contDiffOn
+  have h_sum : ContDiffOn ℝ n
+      (fun j : Jet2 d d => ∑ l : Fin d, (invMetricOfJet j k l) *
+        (deriv1Comp j i j_ l + deriv1Comp j j_ i l - deriv1Comp j l i j_))
+      {j : Jet2 d d | j.val.det ≠ 0} := by
+    apply ContDiffOn.sum
+    intro l _
+    -- Each term: `(invMetric k l) * (deriv1 + deriv1 - deriv1)`
+    have h_inv : ContDiffOn ℝ n (fun j : Jet2 d d => invMetricOfJet (d := d) j k l)
+        {j : Jet2 d d | j.val.det ≠ 0} := by
+      let evalLinear : (Fin d → Fin d → ℝ) →ₗ[ℝ] ℝ :=
+        { toFun := fun f => f k l
+          map_add' := fun _ _ => rfl
+          map_smul' := fun _ _ => rfl }
+      have h_eval_bound : ∀ f : Fin d → Fin d → ℝ, ‖evalLinear f‖ ≤ 1 * ‖f‖ := by
+        intro f
+        rw [one_mul]
+        calc ‖evalLinear f‖ = ‖f k l‖ := rfl
+          _ ≤ ‖f k‖ := norm_le_pi_norm _ _
+          _ ≤ ‖f‖ := norm_le_pi_norm _ _
+      let evalCLM := LinearMap.mkContinuous evalLinear 1 h_eval_bound
+      have h_comp : (fun j : Jet2 d d => invMetricOfJet (d := d) j k l) =
+          ⇑evalCLM ∘ (invMetricOfJet (d := d)) := rfl
+      rw [h_comp]
+      exact ContDiffOn.continuousLinearMap_comp evalCLM contDiffOn_invMetricOfJet
+    have h_deriv : ContDiffOn ℝ n
+        (fun j : Jet2 d d => deriv1Comp (d := d) j i j_ l +
+          deriv1Comp (d := d) j j_ i l - deriv1Comp (d := d) j l i j_)
+        {j : Jet2 d d | j.val.det ≠ 0} := by
+      apply ContDiffOn.sub
+      · apply ContDiffOn.add
+        · exact (contDiff_deriv1Comp (d := d) i j_ l).contDiffOn
+        · exact (contDiff_deriv1Comp (d := d) j_ i l).contDiffOn
+      · exact (contDiff_deriv1Comp (d := d) l i j_).contDiffOn
+    exact h_inv.mul h_deriv
+  -- Combine: `(1/2) * (sum)`
+  have h_eq : (fun j : Jet2 d d => (1/2 : ℝ) * ∑ l : Fin d, (invMetricOfJet j k l) *
+        (deriv1Comp j i j_ l + deriv1Comp j j_ i l - deriv1Comp j l i j_)) =
+      (fun _ : Jet2 d d => (1/2 : ℝ)) * (fun j : Jet2 d d => ∑ l : Fin d, (invMetricOfJet j k l) *
+        (deriv1Comp j i j_ l + deriv1Comp j j_ i l - deriv1Comp j l i j_)) := by
+    funext j
+    rfl
+  rw [h_eq]
+  exact h_const.mul h_sum
+
 end GenuinePhiRD
 
 end RicciFlow.AnalyticPDE
