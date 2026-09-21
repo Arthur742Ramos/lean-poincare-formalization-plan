@@ -310,6 +310,60 @@ theorem contDiffOn_christoffelOfJet {n : WithTop ℕ∞} (k i j_ : Fin d) :
   rw [h_eq]
   exact h_const.mul h_sum
 
+/-! ## 5. Second jet and Ricci tensor -/
+
+/-- The 2-jet component as a real-valued function.
+
+For `k l : Fin d` (spatial directions) and `i j : Fin d` (matrix indices),
+this is `∂_k ∂_l g_{ij} = ((j.deriv2 k l) i j)`. -/
+noncomputable def deriv2Comp (j : Jet2 d d) (k l i j_ : Fin d) : ℝ :=
+  (j.deriv2 k l) i j_
+
+/-- The 2-jet component is smooth: it's a bounded linear map. -/
+theorem contDiff_deriv2Comp {n : WithTop ℕ∞} (k l i j_ : Fin d) :
+    ContDiff ℝ n (fun j : Jet2 d d => deriv2Comp (d := d) j k l i j_) := by
+  unfold deriv2Comp
+  let fLinear : (Jet2 d d) →ₗ[ℝ] ℝ :=
+    { toFun := fun j => (j.deriv2 k l) i j_
+      map_add' := fun _ _ => rfl
+      map_smul' := fun _ _ => rfl }
+  have h_bound : ∀ j : Jet2 d d, ‖fLinear j‖ ≤ 1 * ‖j‖ := by
+    intro j
+    rw [one_mul]
+    have h1 : ‖(j.deriv2 k l) i j_‖ ≤ ‖j.deriv2 k l‖ := by
+      calc ‖(j.deriv2 k l) i j_‖ ≤ ∑ j' : Fin d, ‖(j.deriv2 k l) i j'‖ := by
+            apply Finset.single_le_sum _ (Finset.mem_univ j_)
+            intro _ _
+            exact norm_nonneg _
+        _ ≤ ∑ i' : Fin d, ∑ j' : Fin d, ‖(j.deriv2 k l) i' j'‖ := by
+            apply Finset.single_le_sum _ (Finset.mem_univ i)
+            intro _ _
+            exact Finset.sum_nonneg (fun _ _ => norm_nonneg _)
+        _ = ‖j.deriv2 k l‖ := rfl
+    have h2 : ‖j.deriv2 k l‖ ≤ ‖j‖ := by
+      have h_eq := Jet2.jet2_norm_eq (d := d) (j := j)
+      rw [h_eq]
+      have h_le1 : ‖j.deriv2 k l‖ ≤ ∑ k' : Fin d, ∑ l' : Fin d, ‖j.deriv2 k' l'‖ := by
+        calc ‖j.deriv2 k l‖ ≤ ∑ l' : Fin d, ‖j.deriv2 k l'‖ := by
+              apply Finset.single_le_sum _ (Finset.mem_univ l)
+              intro _ _
+              exact norm_nonneg _
+          _ ≤ ∑ k' : Fin d, ∑ l' : Fin d, ‖j.deriv2 k' l'‖ := by
+              apply Finset.single_le_sum _ (Finset.mem_univ k)
+              intro _ _
+              exact Finset.sum_nonneg (fun _ _ => norm_nonneg _)
+      have h_nonneg : 0 ≤ ‖j.val‖ + ∑ i : Fin d, ‖j.deriv1 i‖ := by
+        apply add_nonneg (norm_nonneg _)
+        exact Finset.sum_nonneg (fun _ _ => norm_nonneg _)
+      linarith
+    calc ‖fLinear j‖ = ‖(j.deriv2 k l) i j_‖ := rfl
+      _ ≤ ‖j.deriv2 k l‖ := h1
+      _ ≤ ‖j‖ := h2
+  let fCLM := LinearMap.mkContinuous fLinear 1 h_bound
+  have h_eq : (fun j : Jet2 d d => (j.deriv2 k l) i j_) = ⇑fCLM := rfl
+  rw [h_eq]
+  exact fCLM.contDiff
+
 end GenuinePhiRD
 
 end RicciFlow.AnalyticPDE
