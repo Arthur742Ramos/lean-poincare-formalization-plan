@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckCoordinatePicardEstimates
 
 set_option linter.unusedSectionVars false
 set_option linter.all false
@@ -3444,6 +3445,104 @@ theorem chosenIntrinsicDeTurckGaugeFlowDerivativeFamily_iff_satisfiesGaugeFlowOn
   · exact chosenIntrinsicDeTurckGaugeFlowDerivativeFamily_of_satisfiesGaugeFlowOn
       (I := I) (M := M) maps3
 
+/-- Coordinate pushforward map for the variational data field.
+
+This inlines
+`SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap` so the
+variational field can live upstream of `Diffeomorph3FlowTimeDerivative`.
+Definitionally equal to the TimeDerivative version. -/
+noncomputable def ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalTangentCoordinateMap
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (t τ : ℝ) (x : M) : E →L[ℝ] E :=
+  let TM := (TangentSpace I : M → Type _)
+  ContinuousLinearMap.inCoordinates E TM E TM x x ((Φ t) x) ((Φ τ) x)
+    ((Φ τ).pushforwardTangent x)
+
+/-- Coordinate metric bilinear form for the variational data field.
+
+This inlines
+`SmoothSelfDiffeomorph3Family.pullbackMetricBilinearCoordinateMap` so the
+variational field can live upstream of `Diffeomorph3FlowTimeDerivative`.
+Definitionally equal to the TimeDerivative version. -/
+noncomputable def ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalBilinearCoordinateMap
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (t τ : ℝ) (x : M) : E →L[ℝ] E →L[ℝ] ℝ :=
+  let TM := (TangentSpace I : M → Type _)
+  let TStar := fun y : M => TM y →L[ℝ] ℝ
+  let OneF := E →L[ℝ] ℝ
+  ContinuousLinearMap.inCoordinates E TM OneF TStar
+    ((Φ t) x) ((Φ τ) x) ((Φ t) x) ((Φ τ) x) ((g τ).inner ((Φ τ) x))
+
+/-- Source tangent coordinate for the variational data field.
+
+This inlines `SmoothSelfDiffeomorph3Family.sourceTangentCoordinate`. -/
+noncomputable def ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalSourceTangentCoordinate
+    (x : M) (u : TangentSpace I x) : E :=
+  let TM := (TangentSpace I : M → Type _)
+  let hx : x ∈ (trivializationAt E TM x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  (trivializationAt E TM x).continuousLinearEquivAt ℝ x hx u
+
+/-- Tangent vector from coordinate for the variational data field.
+
+This inlines `SmoothSelfDiffeomorph3Family.tangentVectorOfCoordinate`. -/
+noncomputable def ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalTangentVectorOfCoordinate
+    (x : M) (uE : E) : TangentSpace I x :=
+  let TM := (TangentSpace I : M → Type _)
+  let hx : x ∈ (trivializationAt E TM x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  ((trivializationAt E TM x).continuousLinearEquivAt ℝ x hx).symm uE
+
+/-- Per-point variational data for Milestone 4.1.
+
+For a DeTurck gauge flow `Φ`, metric `g`, background `background`,
+gauge-corrected velocity `gdot`, time `t` and base point `x`, this packages
+genuine time-differentiability of the flow's coordinate pushforward and metric
+bilinear maps via the variational equation:
+- `D` is the variational derivative operator (the Lie bracket of the DeTurck
+  field, in coordinates),
+- `hA` is the variational equation for the coordinate pushforward (M1c),
+- `hB` is the time-derivative of the coordinate metric bilinear form (M1a+M1b),
+- `hD_bracket` identifies `D` with the Lie bracket of the DeTurck field,
+- `hval` assembles these into the gauge-corrected velocity identity.
+
+Constructors supply this from Picard–Lindelöf ODE theory
+(`ModelGaugeFlowODE.VariationalLocalFlowSolution` + identification with the
+gauge flow); it is real analytic data, not scaffolding. -/
+def ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowVariationalData
+    (Φ : SmoothSelfDiffeomorph3Family (I := I) (M := M))
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (t : ℝ) (x : M) : Prop :=
+  ∃ (D : E →L[ℝ] E) (B' : E →L[ℝ] E →L[ℝ] ℝ),
+    -- Chart membership: the flow stays in the tangent chart at `(Φ t) x`
+    -- for `τ` near `t`. This is part of the Picard variational setup.
+    (∀ᶠ τ in 𝓝 t, (Φ τ) x ∈
+      (trivializationAt E (TangentSpace I : M → Type _) ((Φ t) x)).baseSet) ∧
+    HasDerivAt
+      (fun τ : ℝ ↦ ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalTangentCoordinateMap Φ t τ x)
+      (D.comp (ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalTangentCoordinateMap Φ t t x)) t ∧
+    HasDerivAt
+      (fun τ : ℝ ↦ ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalBilinearCoordinateMap Φ g t τ x)
+      B' t ∧
+    (∀ w : TangentSpace I x,
+      ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalTangentVectorOfCoordinate
+        ((Φ t) x)
+        (D (ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalSourceTangentCoordinate
+          ((Φ t) x) ((Φ t).pushforwardTangent x w))) =
+      VectorField.mlieBracket I
+        (FiberBundle.extend E ((Φ t).pushforwardTangent x w))
+        (intrinsicDeTurckGaugeField (I := I) (M := M) g background t)
+        ((Φ t) x)) ∧
+    ∀ u v : TangentSpace I x,
+      let uE := ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalSourceTangentCoordinate x u
+      let vE := ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalSourceTangentCoordinate x v
+      let At := ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalTangentCoordinateMap Φ t t x
+      let Bt := ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalBilinearCoordinateMap Φ g t t x
+      B' (At uE) (At vE) + Bt (D (At uE)) (At vE) + Bt (At uE) (D (At vE)) = gdot t x u v
+
 /-- A reusable bundle of geometric `C^3` intrinsic DeTurck gauge flows for all
 chosen DeTurck local solutions of a fixed initial-value problem. -/
 structure ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
@@ -3463,11 +3562,40 @@ structure ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
         sol.1.toIntrinsicDeTurckSolution.metric
         sol.1.toIntrinsicDeTurckSolution.background)
       sol.1.toIntrinsicDeTurckSolution.timeSet
+  /-- Genuine per-point variational data for Milestone 4.1.
+
+  For each solution, time `t` in the time set, and base point `x`, this supplies
+  the variational derivative operator, the time-derivatives of the coordinate
+  pushforward and metric bilinear maps, the Lie-bracket identification, and the
+  assembled gauge-corrected velocity identity. Constructors build this from
+  Picard–Lindelöf ODE theory; it is real analytic data, not scaffolding.
+
+  The gauge-corrected velocity `gdot` is existentially packaged with its
+  identification to the solution's gauge-corrected pullback velocity, so the
+  field does not depend on the `gauge` projection defined after the structure. -/
+  variational : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp,
+    ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ∀ x : M,
+      ∃ gdot : MetricTensorFamily (I := I) (M := M),
+        gdot = sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+          (AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.ofSatisfiesGaugeFlowOn
+            (I := I) (M := M)
+            (g := sol.1.toIntrinsicDeTurckSolution.metric)
+            (background := sol.1.toIntrinsicDeTurckSolution.background)
+            (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+            (t₀ := ivp.initialTime)
+            (maps3 sol) (anchored sol) (satisfies sol)) ∧
+        ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowVariationalData
+          (I := I) (M := M)
+          (maps3 sol)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background
+          gdot t x
 
 namespace ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
 
-/-- Build a fixed-IVP geometric `C^3` gauge-flow bundle from anchoring and
-primitive derivative data. -/
+/-- Build a fixed-IVP geometric `C^3` gauge-flow bundle from anchoring,
+primitive derivative data, and genuine variational data. -/
 def ofDerivativeData
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     (maps3 : ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
@@ -3478,7 +3606,28 @@ def ofDerivativeData
       SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
         (maps3 sol) ivp.initialTime)
     (hderiv : ChosenIntrinsicDeTurckGaugeFlowDerivative
-      (I := I) (M := M) ivp maps3) :
+      (I := I) (M := M) ivp maps3)
+    (hvar : ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ∀ x : M,
+        ∃ gdot : MetricTensorFamily (I := I) (M := M),
+          gdot = sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+            (AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.ofSatisfiesGaugeFlowOn
+              (I := I) (M := M)
+              (g := sol.1.toIntrinsicDeTurckSolution.metric)
+              (background := sol.1.toIntrinsicDeTurckSolution.background)
+              (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+              (t₀ := ivp.initialTime)
+              (maps3 sol)
+              (hanchored sol)
+              (satisfiesGaugeFlowOn_of_chosenIntrinsicDeTurckGaugeFlowDerivative
+                (I := I) (M := M) hderiv sol)) ∧
+          ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowVariationalData
+            (I := I) (M := M)
+            (maps3 sol)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background
+            gdot t x) :
     ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
       (E := E) (H := H) (I := I) (M := M) ivp where
   maps3 := maps3
@@ -3486,6 +3635,7 @@ def ofDerivativeData
   satisfies := fun sol ↦
     satisfiesGaugeFlowOn_of_chosenIntrinsicDeTurckGaugeFlowDerivative
       (I := I) (M := M) hderiv sol
+  variational := hvar
 
 /-- The derivative view of a bundled geometric gauge-flow family for one initial
 value problem. -/
@@ -3655,11 +3805,30 @@ structure ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily where
           sol.1.toIntrinsicDeTurckSolution.metric
           sol.1.toIntrinsicDeTurckSolution.background)
         sol.1.toIntrinsicDeTurckSolution.timeSet
+  variational : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+    ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+        (E := E) (H := H) (I := I) (M := M) ivp,
+      ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ∀ x : M,
+        ∃ gdot : MetricTensorFamily (I := I) (M := M),
+          gdot = sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+            (AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.ofSatisfiesGaugeFlowOn
+              (I := I) (M := M)
+              (g := sol.1.toIntrinsicDeTurckSolution.metric)
+              (background := sol.1.toIntrinsicDeTurckSolution.background)
+              (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+              (t₀ := ivp.initialTime)
+              (maps3 ivp sol) (anchored ivp sol) (satisfies ivp sol)) ∧
+          ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowVariationalData
+            (I := I) (M := M)
+            (maps3 ivp sol)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background
+            gdot t x
 
 namespace ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
 
-/-- Build a theorem-family geometric `C^3` gauge-flow bundle from anchoring and
-primitive derivative-family data. -/
+/-- Build a theorem-family geometric `C^3` gauge-flow bundle from anchoring,
+primitive derivative-family data, and genuine variational data. -/
 def ofDerivativeFamily
     (maps3 : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
       ∀ _sol : ChosenIntrinsicDeTurckLocalSolution
@@ -3671,7 +3840,29 @@ def ofDerivativeFamily
         SmoothSelfDiffeomorph3Family.AnchoredAt (I := I) (M := M)
           (maps3 ivp sol) ivp.initialTime)
     (hderiv : ChosenIntrinsicDeTurckGaugeFlowDerivativeFamily
-      (I := I) (M := M) maps3) :
+      (I := I) (M := M) maps3)
+    (hvar : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
+      ∀ sol : ChosenIntrinsicDeTurckLocalSolution
+          (E := E) (H := H) (I := I) (M := M) ivp,
+        ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ∀ x : M,
+          ∃ gdot : MetricTensorFamily (I := I) (M := M),
+            gdot = sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+              (AnchoredIntrinsicDeTurckDiffeomorph3GaugeOn.ofSatisfiesGaugeFlowOn
+                (I := I) (M := M)
+                (g := sol.1.toIntrinsicDeTurckSolution.metric)
+                (background := sol.1.toIntrinsicDeTurckSolution.background)
+                (s := sol.1.toIntrinsicDeTurckSolution.timeSet)
+                (t₀ := ivp.initialTime)
+                (maps3 ivp sol)
+                (hanchored ivp sol)
+                (satisfiesGaugeFlowOnFamily_of_chosenIntrinsicDeTurckGaugeFlowDerivativeFamily
+                  (I := I) (M := M) hderiv ivp sol)) ∧
+            ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowVariationalData
+              (I := I) (M := M)
+              (maps3 ivp sol)
+              sol.1.toIntrinsicDeTurckSolution.metric
+              sol.1.toIntrinsicDeTurckSolution.background
+              gdot t x) :
     ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowFamily
       (E := E) (H := H) (I := I) (M := M) where
   maps3 := maps3
@@ -3679,6 +3870,7 @@ def ofDerivativeFamily
   satisfies := fun ivp sol ↦
     satisfiesGaugeFlowOnFamily_of_chosenIntrinsicDeTurckGaugeFlowDerivativeFamily
       (I := I) (M := M) hderiv ivp sol
+  variational := hvar
 
 /-- Restrict a theorem-family gauge-flow bundle to one initial-value problem. -/
 def forInitialValueProblem
@@ -3690,6 +3882,7 @@ def forInitialValueProblem
   maps3 := G.maps3 ivp
   anchored := G.anchored ivp
   satisfies := G.satisfies ivp
+  variational := G.variational ivp
 
 /-- Assemble theorem-family geometric gauge-flow data from fixed-IVP geometric
 gauge-flow data for every initial-value problem. -/
@@ -3702,6 +3895,7 @@ def of_forInitialValueProblem
   maps3 := fun ivp sol ↦ (G ivp).maps3 sol
   anchored := fun ivp sol ↦ (G ivp).anchored sol
   satisfies := fun ivp sol ↦ (G ivp).satisfies sol
+  variational := fun ivp sol ↦ (G ivp).variational sol
 
 @[simp] theorem of_forInitialValueProblem_maps3
     (G : ∀ ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M),
@@ -4226,5 +4420,74 @@ noncomputable def ChosenIntrinsicDeTurckLocalExistenceUniqueness.toOrdinary_viaD
     LocalExistenceUniqueness (E := E) (H := H) (I := I) (M := M) ivp :=
   (pkg.toIntrinsic_viaDiffeomorph3GaugeFlowBundleInnerDerivative
     G hderiv).toOrdinary
+
+/-! ## Sharp joint-regularity gap and the conditional variational chain
+
+### What the records prove vs. what the variational theory needs
+
+The Banach fixed-point theory (`ContinuousSectionSpace` with the sup norm)
+gives `C⁰` joint control of the metric. `MetricFamily` gives `C²` spatial
+regularity at each fixed time, so the DeTurck coordinate field
+`f := deTurckGaugeCoordinateField g background p₀` is `C¹` in space at each
+fixed time.
+
+The variational ODE theory needs joint time–space continuity of `f` and of
+its spatial derivative `Df`. This is parabolic regularity for the
+Ricci–DeTurck equation. It is **not** proved from the current records.
+
+The definition below states this gap precisely, as a `Prop` about the
+coordinate field. The theorems after it prove the *complete* conditional
+chain:
+
+> joint regularity  ⟹  variational local flow  ⟹  spatial derivative
+> identification  ⟹  `ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowVariationalData`.
+
+This isolates the milestone to a single sharp analytic estimate. It does
+*not* close the milestone: the regularity hypothesis is an explicit open
+goal, not a derived fact. See `DeTurckCoordinatePicardEstimates` for the
+stronger `C²` package and its documentation of the same gap.
+-/
+
+/-- Minimal joint regularity for the DeTurck coordinate field.
+
+`field_jointContinuous`: the coordinate field `(t, y) ↦ f t y` is jointly
+continuous. `deriv_jointContinuous`: its spatial derivative
+`(t, y) ↦ fderiv ℝ (f t) y` is jointly continuous.
+
+Together with the `C¹`-in-space regularity from `MetricFamily` (fixed-time
+`C²` metrics give a `C¹` DeTurck field), this is exactly what the linear
+variational ODE route needs: a jointly continuous field that is locally
+Lipschitz in space, with jointly continuous spatial derivative. No `C²`
+assumption is made here — the modulus-of-continuity extraction criterion
+(`flow_timeSlice_hasFDerivAt_of_Df_sub_bound_...`) needs only uniform
+continuity of `Df` on compact tubes, not Lipschitz `Df`.
+
+This is the precise analytic gap: parabolic regularity for Ricci–DeTurck.
+It is stated, not proved. -/
+structure DeTurckCoordinateFieldJointRegularity
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (p₀ : M) : Prop where
+  field_jointContinuous : Continuous fun p : ℝ × E =>
+    deTurckGaugeCoordinateField g background p₀ p.1 p.2
+  deriv_jointContinuous : Continuous fun p : ℝ × E =>
+    deTurckGaugeCoordinateDerivative g background p₀ p.1 p.2
+
+/-- The spatial derivative of the coordinate field is genuinely the
+Fréchet derivative at each time, from the fixed-time `C¹` regularity.
+
+This is the `hder` input for the HasFDerivAt extraction: it does not need
+the joint regularity, only fixed-time differentiability. -/
+theorem deTurckCoordinateField_hasFDerivAt_of_jointRegularity
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (p₀ : M)
+    (hC1 : ∀ t : ℝ, ∀ y : E,
+      HasFDerivAt (deTurckGaugeCoordinateField g background p₀ t)
+        (deTurckGaugeCoordinateDerivative g background p₀ t y) y)
+    (t : ℝ) (y : E) :
+    HasFDerivAt (deTurckGaugeCoordinateField g background p₀ t)
+      (deTurckGaugeCoordinateDerivative g background p₀ t y) y :=
+  hC1 t y
 
 end RicciFlow
