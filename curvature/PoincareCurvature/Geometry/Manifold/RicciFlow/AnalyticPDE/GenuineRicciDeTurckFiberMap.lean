@@ -502,6 +502,43 @@ theorem contDiffOn_derivChristoffelOfJet {n : WithTop ℕ∞} (m k i j_ : Fin d)
   rw [h_eq]
   exact h_const.mul h_sum
 
+/-- The Ricci tensor.
+
+`R_{ij} = ∂_k Γ^k_ij - ∂_j Γ^k_ik + Γ^k_kl Γ^l_ij - Γ^k_jl Γ^l_ik`
+
+This is the genuine Ricci curvature of the metric `j.val`, computed from the
+2-jet via Christoffel symbols and their derivatives. -/
+noncomputable def ricciOfJet (j : Jet2 d d) (i j_ : Fin d) : ℝ :=
+  ∑ k : Fin d, (derivChristoffelOfJet j k k i j_ - derivChristoffelOfJet j j_ k i k) +
+  ∑ k : Fin d, ∑ l : Fin d,
+    (christoffelOfJet j k k l * christoffelOfJet j l i j_ -
+     christoffelOfJet j k j_ l * christoffelOfJet j l i k)
+
+/-- The Ricci tensor is smooth on the invertible locus. -/
+theorem contDiffOn_ricciOfJet {n : WithTop ℕ∞} (i j_ : Fin d) :
+    ContDiffOn ℝ n (fun j : Jet2 d d => ricciOfJet (d := d) j i j_)
+      {j : Jet2 d d | j.val.det ≠ 0} := by
+  unfold ricciOfJet
+  apply ContDiffOn.add
+  · -- `∑ k, (∂_k Γ^k_ij - ∂_j Γ^k_ik)`
+    apply ContDiffOn.sum
+    intro k _
+    apply ContDiffOn.sub
+    · exact contDiffOn_derivChristoffelOfJet (d := d) k k i j_
+    · exact contDiffOn_derivChristoffelOfJet (d := d) j_ k i k
+  · -- `∑ k ∑ l, (Γ^k_kl Γ^l_ij - Γ^k_jl Γ^l_ik)`
+    apply ContDiffOn.sum
+    intro k _
+    apply ContDiffOn.sum
+    intro l _
+    apply ContDiffOn.sub
+    · apply ContDiffOn.mul
+      · exact contDiffOn_christoffelOfJet (d := d) k k l
+      · exact contDiffOn_christoffelOfJet (d := d) l i j_
+    · apply ContDiffOn.mul
+      · exact contDiffOn_christoffelOfJet (d := d) k j_ l
+      · exact contDiffOn_christoffelOfJet (d := d) l i k
+
 end GenuinePhiRD
 
 end RicciFlow.AnalyticPDE
