@@ -21,6 +21,11 @@ namespace RicciFlow.AnalyticPDE
 
 variable {d : ℕ}
 
+-- Background Christoffel symbols (fixed).
+-- For the fiber map, we fix a background metric (e.g., Euclidean, so `Γ̄ = 0`).
+-- This is a parameter; the DeTurck field measures the difference from background.
+variable (Γbg : Fin d → Fin d → Fin d → ℝ)
+
 namespace GenuinePhiRD
 
 /-! ## 1. The 0-jet projection is a continuous linear map -/
@@ -538,6 +543,50 @@ theorem contDiffOn_ricciOfJet {n : WithTop ℕ∞} (i j_ : Fin d) :
     · apply ContDiffOn.mul
       · exact contDiffOn_christoffelOfJet (d := d) k j_ l
       · exact contDiffOn_christoffelOfJet (d := d) l i k
+
+/-! ## 7. DeTurck vector field and correction -/
+
+/-- The DeTurck vector field: `W^k = ∑_{i,j} g^{ij} (Γ^k_ij - Γ̄^k_ij)`.
+
+This is the negated DeTurck vector field (per the Point-4 constraints:
+`intrinsicDeTurckGaugeField` is the negated DeTurck vector field). -/
+noncomputable def deTurckVectorOfJet (j : Jet2 d d) (k : Fin d) : ℝ :=
+  ∑ i : Fin d, ∑ j_ : Fin d, (invMetricOfJet j i j_) *
+    (christoffelOfJet j k i j_ - Γbg k i j_)
+
+/-- The DeTurck vector field is smooth on the invertible locus. -/
+theorem contDiffOn_deTurckVectorOfJet {n : WithTop ℕ∞} (k : Fin d) :
+    ContDiffOn ℝ n (fun j : Jet2 d d => deTurckVectorOfJet (d := d) Γbg j k)
+      {j : Jet2 d d | j.val.det ≠ 0} := by
+  unfold deTurckVectorOfJet
+  apply ContDiffOn.sum
+  intro i _
+  apply ContDiffOn.sum
+  intro j_ _
+  apply ContDiffOn.mul
+  · -- `invMetricOfJet j i j_`
+    have h_inv : ContDiffOn ℝ n (fun j : Jet2 d d => invMetricOfJet (d := d) j i j_)
+        {j : Jet2 d d | j.val.det ≠ 0} := by
+      let evalLinear : (Fin d → Fin d → ℝ) →ₗ[ℝ] ℝ :=
+        { toFun := fun f => f i j_
+          map_add' := fun _ _ => rfl
+          map_smul' := fun _ _ => rfl }
+      have h_bound : ∀ f : Fin d → Fin d → ℝ, ‖evalLinear f‖ ≤ 1 * ‖f‖ := by
+        intro f
+        rw [one_mul]
+        calc ‖evalLinear f‖ = ‖f i j_‖ := rfl
+          _ ≤ ‖f i‖ := norm_le_pi_norm _ _
+          _ ≤ ‖f‖ := norm_le_pi_norm _ _
+      let evalCLM := LinearMap.mkContinuous evalLinear 1 h_bound
+      have h_comp : (fun j : Jet2 d d => invMetricOfJet (d := d) j i j_) =
+          ⇑evalCLM ∘ (invMetricOfJet (d := d)) := rfl
+      rw [h_comp]
+      exact ContDiffOn.continuousLinearMap_comp evalCLM contDiffOn_invMetricOfJet
+    exact h_inv
+  · -- `Γ^k_ij - Γ̄^k_ij`
+    apply ContDiffOn.sub
+    · exact contDiffOn_christoffelOfJet (d := d) k i j_
+    · exact contDiff_const.contDiffOn
 
 end GenuinePhiRD
 
