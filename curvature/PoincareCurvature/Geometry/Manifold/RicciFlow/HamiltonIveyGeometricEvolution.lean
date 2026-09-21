@@ -419,7 +419,7 @@ structure HamiltonIveyRicciTraceMapData
   map_apply : ∀ u v, map u v =
     hamiltonIveyRicciTraceRHS g cov hcov hLevi hdim t x u v
 
-opaque hamiltonIveyRicciTraceMapData
+def hamiltonIveyRicciTraceMapData
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
       (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
