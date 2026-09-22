@@ -242,6 +242,16 @@ field and spatial-derivative `LipschitzOnWith` constants consumed by the
 Picard estimate. The intrinsic `C²` premise, chart containment, and all
 time-joint/uniform regularity remain explicit; this does not close Point 4.
 
+The next product-domain bridge is packaged in
+`DeTurckJointC2CoordinateBridge.lean`. Given a jointly `C²` intrinsic
+DeTurck tangent-bundle section on `ℝ × M`, it proves jointly `C²` regularity
+of the genuine coordinate field on `ℝ × E` by composing the existing product
+chart-pushforward theorem with the exact coordinate identity. This is the
+correct geometric shape for the remaining time--space input, but the joint
+section premise is not implied by the current slicewise `MetricFamily` and
+`ConnectionFamily` interfaces; derivative-continuity packaging and the final
+Picard/local-existence theorem remain open.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
