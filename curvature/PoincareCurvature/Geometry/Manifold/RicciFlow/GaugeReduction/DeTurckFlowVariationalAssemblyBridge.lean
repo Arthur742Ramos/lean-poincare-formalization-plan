@@ -37,6 +37,65 @@ namespace DeTurckFlowVariationalWitness
 
 open ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
 
+/-! ### Witness core -/
+
+/--
+The constructive part of a local variational witness.
+
+The final scalar identity is intentionally absent.  It is derived by the
+assembly bridge from the exact time-difference data and the geometric
+bracket identity, so keeping it in a separate structure avoids making the
+constructor for the genuine analytic inputs circular.
+-/
+structure FullVariationalWitnessCore
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    (sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp)
+    {t : ℝ} (x : M) where
+  gdot : MetricTensorFamily (I := I) (M := M)
+  hgdot : gdot = sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+    (G.gauge sol)
+  picard : DeTurckFlowVariationalWitness.VariationalWitness
+    (G.maps3 sol) t x
+  Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ)
+  hBfield : HasFDerivAt
+    (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+      (I := I) (M := M) sol.1.toIntrinsicDeTurckSolution.metric
+      ((G.maps3 sol t) x))
+    Bfield'
+    (t, (extChartAt I ((G.maps3 sol t) x)) ((G.maps3 sol t) x))
+  hD_bracket : ∀ w : TangentSpace I x,
+    variationalTangentVectorOfCoordinate
+        ((G.maps3 sol t) x)
+        ((picard.Df t (picard.α.flow (picard.x₀, t)))
+          (variationalSourceTangentCoordinate
+            ((G.maps3 sol t) x) ((G.maps3 sol t).pushforwardTangent x w))) =
+      VectorField.mlieBracket I
+        (FiberBundle.extend E ((G.maps3 sol t).pushforwardTangent x w))
+        (intrinsicDeTurckGaugeField (I := I) (M := M)
+          sol.1.toIntrinsicDeTurckSolution.metric
+          sol.1.toIntrinsicDeTurckSolution.background t)
+        ((G.maps3 sol t) x)
+
+/-- Forget the scalar assembly field of an existing full witness. -/
+def FullVariationalWitness.toCore
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {t : ℝ} {x : M}
+    (w : FullVariationalWitness (t := t) G sol x) :
+    FullVariationalWitnessCore (t := t) G sol x where
+  gdot := w.gdot
+  hgdot := w.hgdot
+  picard := w.picard
+  Bfield' := w.Bfield'
+  hBfield := w.hBfield
+  hD_bracket := w.hD_bracket
+
 /-- The one remaining scalar input needed to assemble `FullVariationalWitness`.
 
 It is the exact corrected time derivative of the metric-coordinate field at the
@@ -51,7 +110,7 @@ structure MetricTimeDifferenceData
     {sol : ChosenIntrinsicDeTurckLocalSolution
       (E := E) (H := H) (I := I) (M := M) ivp}
     {t : ℝ} (x : M)
-    (w : FullVariationalWitness (t := t) G sol x) : Prop where
+    (w : FullVariationalWitnessCore (t := t) G sol x) : Prop where
   htime : ∀ u v : TangentSpace I x,
     let p : M := (G.maps3 sol t) x
     let pu : TangentSpace I p := (G.maps3 sol t).pushforwardTangent x u
@@ -88,7 +147,7 @@ theorem fullWitness_tangentVectorOfCoordinate_Df_eq_cov_sub_extend
     {sol : ChosenIntrinsicDeTurckLocalSolution
       (E := E) (H := H) (I := I) (M := M) ivp}
     {t : ℝ} {x : M}
-    (w : FullVariationalWitness (t := t) G sol x)
+    (w : FullVariationalWitnessCore (t := t) G sol x)
     (u : TangentSpace I x)
     (hW : MDiffAt (T%
       (intrinsicDeTurckVectorField (I := I) (M := M)
@@ -153,15 +212,15 @@ theorem fullWitness_tangentVectorOfCoordinate_Df_eq_cov_sub_extend
   simpa [p, pu, cov, Y, hpw] using hBracket
 
 /-- The exact time-difference identity plus the geometric bracket field
-discharges the scalar `hvalue` assembly of a full witness. -/
-theorem FullVariationalWitness.hvalue_of_metricTimeDifference
+discharges the scalar `hvalue` assembly for a witness core. -/
+theorem FullVariationalWitnessCore.hvalue_of_metricTimeDifference
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
     {G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
       (E := E) (H := H) (I := I) (M := M) ivp}
     {sol : ChosenIntrinsicDeTurckLocalSolution
       (E := E) (H := H) (I := I) (M := M) ivp}
     {t : ℝ} {x : M}
-    (w : FullVariationalWitness (t := t) G sol x)
+    (w : FullVariationalWitnessCore (t := t) G sol x)
     (hW : MDiffAt (T%
       (intrinsicDeTurckVectorField (I := I) (M := M)
         sol.1.toIntrinsicDeTurckSolution.metric
@@ -182,7 +241,7 @@ theorem FullVariationalWitness.hvalue_of_metricTimeDifference
             sol.1.toIntrinsicDeTurckSolution.metric
             sol.1.toIntrinsicDeTurckSolution.background t
             ((G.maps3 sol t) x)))
-      B' (At uE) (At vE) + Bt (D (At uE)) (At vE) +
+    B' (At uE) (At vE) + Bt (D (At uE)) (At vE) +
           Bt (At uE) (D (At vE)) = w.gdot t x u v := by
   intro u v
   let p : M := (G.maps3 sol t) x
@@ -383,6 +442,64 @@ theorem FullVariationalWitness.hvalue_of_metricTimeDifference
   rw [hBt_Du, hBt_Dv, hAt_u, hAt_v]
   exact hsum
 
+/-- Assemble a full witness from its core and the two remaining geometric
+inputs used by the scalar calculation. -/
+def FullVariationalWitnessCore.toFullVariationalWitness_of_metricTimeDifferenceData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {t : ℝ} {x : M}
+    (w : FullVariationalWitnessCore (t := t) G sol x)
+    (hW : MDiffAt (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background t))
+      ((G.maps3 sol t) x))
+    (hdata : MetricTimeDifferenceData (t := t) x w) :
+    FullVariationalWitness (t := t) G sol x where
+  gdot := w.gdot
+  hgdot := w.hgdot
+  picard := w.picard
+  Bfield' := w.Bfield'
+  hBfield := w.hBfield
+  hD_bracket := w.hD_bracket
+  hvalue := w.hvalue_of_metricTimeDifference hW hdata
+
+/-- Backwards-compatible assembly for an already complete witness. -/
+theorem FullVariationalWitness.hvalue_of_metricTimeDifference
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {t : ℝ} {x : M}
+    (w : FullVariationalWitness (t := t) G sol x)
+    (hW : MDiffAt (T%
+      (intrinsicDeTurckVectorField (I := I) (M := M)
+        sol.1.toIntrinsicDeTurckSolution.metric
+        sol.1.toIntrinsicDeTurckSolution.background t))
+      ((G.maps3 sol t) x))
+    (hdata : MetricTimeDifferenceData (t := t) x w.toCore) :
+    ∀ u v : TangentSpace I x,
+      let uE := variationalSourceTangentCoordinate x u
+      let vE := variationalSourceTangentCoordinate x v
+      let At := variationalTangentCoordinateMap (G.maps3 sol) t t x
+      let Bt := variationalBilinearCoordinateMap
+        (G.maps3 sol) sol.1.toIntrinsicDeTurckSolution.metric t t x
+      let D := w.picard.Df t (w.picard.α.flow (w.picard.x₀, t))
+      let B' := w.Bfield'
+        (1, tangentCoordChange I ((G.maps3 sol t) x) ((G.maps3 sol t) x)
+          ((G.maps3 sol t) x)
+          (intrinsicDeTurckGaugeField (I := I) (M := M)
+            sol.1.toIntrinsicDeTurckSolution.metric
+            sol.1.toIntrinsicDeTurckSolution.background t
+            ((G.maps3 sol t) x)))
+      B' (At uE) (At vE) + Bt (D (At uE)) (At vE) +
+          Bt (At uE) (D (At vE)) = w.gdot t x u v := by
+  exact w.toCore.hvalue_of_metricTimeDifference hW hdata
+
 /-- The temporal remainder is a constructor-level replacement for the former
 `hvalue` witness field.  The bracket identity stays in `w`; only the exact
 time-difference input and the DeTurck differentiability hypothesis are new. -/
@@ -399,10 +516,9 @@ def FullVariationalWitness.ofMetricTimeDifferenceData
         sol.1.toIntrinsicDeTurckSolution.metric
         sol.1.toIntrinsicDeTurckSolution.background t))
       ((G.maps3 sol t) x))
-    (hdata : MetricTimeDifferenceData (t := t) x w) :
+    (hdata : MetricTimeDifferenceData (t := t) x w.toCore) :
     FullVariationalWitness (t := t) G sol x :=
-  { w with
-    hvalue := w.hvalue_of_metricTimeDifference hW hdata }
+  w.toCore.toFullVariationalWitness_of_metricTimeDifferenceData hW hdata
 
 end DeTurckFlowVariationalWitness
 

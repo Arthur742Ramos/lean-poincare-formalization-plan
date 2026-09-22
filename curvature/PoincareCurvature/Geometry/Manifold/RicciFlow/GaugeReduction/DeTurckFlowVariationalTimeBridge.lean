@@ -44,7 +44,7 @@ theorem metricTimeDifferenceData_of_hasTimeDerivativeOn
       (E := E) (H := H) (I := I) (M := M) ivp}
     {t : ℝ} {x : M}
     (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
-    (w : FullVariationalWitness (t := t) G sol x) :
+    (w : FullVariationalWitnessCore (t := t) G sol x) :
     MetricTimeDifferenceData (t := t) x w := by
   refine ⟨?_⟩
   intro u v

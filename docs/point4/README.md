@@ -171,26 +171,27 @@ two explicit analytic inputs: the exact metric-coordinate time-difference
 identity and differentiability of the intrinsic DeTurck vector field at the
 selected image point. The fixed-time Levi-Civita derivative, the torsion-free
 Picard bracket calculation, and the pulled-back velocity/correction theorem
-prove the spatial cancellation and reconstruct `hvalue` exactly. The
-the pointwise differentiability input and construction of the underlying full
-witnesses remain open; this is a genuine assembly bridge, not a closure of the
-variational refinement or Point 4.
+prove the spatial cancellation and reconstruct `hvalue` exactly. The new
+`FullVariationalWitnessCore` separates those constructive inputs from
+the derived scalar field, so the assembly bridge no longer makes witness
+construction circular. The pointwise differentiability input and the actual
+analytic construction of the core data remain explicit; this is a genuine
+assembly bridge, not a closure of the variational refinement or Point 4.
 
 `DeTurckFlowVariationalTimeBridge.lean` now derives the temporal
 `MetricTimeDifferenceData` input from the intrinsic DeTurck solution's existing
 `HasTimeDerivativeOn` field and the genuine full Fréchet derivative of the
 metric-coordinate field. The proof separates the time slice from the frozen
-spatial `fderivWithin` contribution. It does not construct the full witness,
-the pointwise DeTurck differentiability needed by the assembly bridge, the
-endpoint chart data, or the general gauge flow.
+spatial `fderivWithin` contribution. It works on the six-field witness core;
+the core-to-full constructor remains in the chosen-background bridge.
 
 `DeTurckFlowVariationalChosenBackground.lean` discharges that pointwise
 differentiability input for the actual chosen solution: its recorded
-Levi-Civita background supplies the required `C^1` connection regularity. The
-resulting constructor combines this fact with the temporal bridge, so an
-existing `FullVariationalWitness` needs only `MetricTimeDifferenceData` to
-obtain the assembled `hvalue`. Full witness construction and endpoint data
-remain open.
+Levi-Civita background supplies the required `C^1` connection regularity. It
+also constructs a core from explicit `gdot`, Picard, metric-coordinate
+derivative, and model-bracket data, then combines that core with the temporal
+bridge to obtain a `FullVariationalWitness`. Constructing those analytic core
+inputs, endpoint data, and the general gauge flow remain open.
 
 ## Proved architecture
 
