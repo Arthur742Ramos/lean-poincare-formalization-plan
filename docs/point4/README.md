@@ -232,6 +232,16 @@ narrows the chart-level boundary, but it does not supply the `C²` spatial
 estimate, the joint time--space continuity of the field and derivative, or
 the general Ricci-flow local-existence theorem.
 
+The next fixed-time `C²` bridge is packaged in
+`DeTurckFixedTimeC2CoordinateBridge.lean`. Given an explicit `C²` intrinsic
+DeTurck tangent-bundle section on the chart source, it proves `C²` regularity
+of the genuine coordinate field on the chart target through the fixed-center
+chart pushforward and exact coordinate identity. On a closed coordinate ball
+whose one-unit enlargement lies in the chart target, it also extracts the
+field and spatial-derivative `LipschitzOnWith` constants consumed by the
+Picard estimate. The intrinsic `C²` premise, chart containment, and all
+time-joint/uniform regularity remain explicit; this does not close Point 4.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
