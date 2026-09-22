@@ -38,7 +38,7 @@ run. Gates 3–5 therefore failed and the verdict remained `POINT 4 OPEN`.
 
 See [Current formalization status](../status.md) for the repository-wide dashboard.
 
-The latest supporting PDE milestone is the genuine Ricci--DeTurck
+The preceding supporting PDE milestone is the genuine Ricci--DeTurck
 Hölder-seminorm difference estimate in
 `GenuineRicciDeTurckHolderDifference.lean`. It combines the compact-domain
 derivative bound for the actual Ricci--DeTurck fiber map with the explicit
@@ -56,6 +56,19 @@ map, with a uniform extracted-jet bound. It is still intentionally not
 reported as the completed PDE closure: strong continuity of the big Hölder
 heat propagator and the variable-coefficient quasilinear evolution remain
 open.
+
+The following supporting milestone makes the little-Hölder Duhamel boundary
+explicit in `GenuineRicciDeTurckLittleHolderDuhamel.lean`. It lifts the
+componentwise little-Hölder heat propagator to the genuine `Jet2Section`,
+proves its zero-time identity, contraction bound, and joint continuity, and
+provides a parameterized `LocalDuhamelData` constructor for any little-Hölder
+endomap satisfying the required closed-ball Lipschitz estimate. The actual
+geometric output currently packaged above is still `Jet2HolderSection`
+(big-Hölder valued), so this constructor is not yet instantiated with the
+Ricci--DeTurck nonlinearity. The remaining nonlinear gate is a genuine
+little-Hölder preservation theorem for that output, including the required
+commutator/seminorm control; neither this interface nor the preceding
+Lipschitz estimate is a claim of PDE existence.
 
 ## Proved architecture
 
