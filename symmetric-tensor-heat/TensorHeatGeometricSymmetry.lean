@@ -438,6 +438,211 @@ theorem geometricDifference_zeroData
     rw [geometricDifference_tensorHeatOperator cov U V t ht x,
       hU t ht x, hV t ht x, sub_self]
 
+/-! ## Linearity of represented reconstruction -/
+
+private theorem higherValue_sub
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    (u v : FiniteParabolicC2AlphaBanach E V t₀ T α)
+    (z : ℝ × E) :
+    FiniteParabolicC2AlphaBanach.value (u - v) z =
+      FiniteParabolicC2AlphaBanach.value u z -
+        FiniteParabolicC2AlphaBanach.value v z := by
+  rw [sub_eq_add_neg, FiniteParabolicC2AlphaBanach.value_add]
+  have hneg : FiniteParabolicC2AlphaBanach.value (-v) z =
+      -FiniteParabolicC2AlphaBanach.value v z := by
+    have hv : -v = (-1 : ℝ) • v := (neg_one_smul ℝ v).symm
+    rw [hv, FiniteParabolicC2AlphaBanach.value_smul, neg_one_smul]
+  rw [hneg, sub_eq_add_neg]
+
+/-- The ordinary local tensor reconstruction is linear in its higher jet.
+This holds for the actual field, without projecting onto symmetric tensors. -/
+theorem localFieldOfHigher_toFun_sub
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α)
+    (i : A.cover.Index)
+    (u v : FiniteParabolicC2AlphaBanach E (Fin d × Fin d → ℝ) t₀ T α)
+    (t : ℝ) (x : M) :
+    (localFieldOfHigher cov A i (u - v)).toFun t x =
+      (localFieldOfHigher cov A i u).toFun t x -
+        (localFieldOfHigher cov A i v).toFun t x := by
+  let s := FiniteClassicalTensorHeatField.normalizedTime
+    t₀ (A.radius (i : M)) t
+  let ξ := normalizedTensorHeatCoordinate (I := I)
+    (i : M) (A.radius (i : M)) x
+  let S := cutoffLocalTensorSynthesisAt (I := I)
+    (trivializationAt E TM (i : M)) b (A.cover.partition i) x
+  have hnorm : normalizedHigherSolution (u - v) =
+      normalizedHigherSolution u - normalizedHigherSolution v := by
+    simp [normalizedHigherSolution]
+  change S (FiniteParabolicC2AlphaBanach.value
+      (normalizedHigherSolution (u - v)) (s, ξ)) =
+    S (FiniteParabolicC2AlphaBanach.value (normalizedHigherSolution u) (s, ξ)) -
+      S (FiniteParabolicC2AlphaBanach.value (normalizedHigherSolution v) (s, ξ))
+  rw [hnorm]
+  rw [higherValue_sub, map_sub]
+
+/-- The unprojected atlas reconstruction respects subtraction. -/
+theorem atlasFieldOfHigher_toFun_sub
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α)
+    (u v : HigherCoefficientSpace cov A) (t : ℝ) (x : M) :
+    (atlasFieldOfHigher cov A (u - v)).toFun t x =
+      (atlasFieldOfHigher cov A u).toFun t x -
+        (atlasFieldOfHigher cov A v).toFun t x := by
+  simp only [atlasFieldOfHigher_toFun, Pi.sub_apply,
+    localFieldOfHigher_toFun_sub, Finset.sum_sub_distrib]
+
+/-- The stored temporal derivative of the ordinary atlas reconstruction is
+linear on the open time interval. The proof uses uniqueness of genuine time
+derivatives, so no extra formula for the totalized values outside the interval
+is needed. -/
+theorem atlasFieldOfHigher_timeDerivative_sub
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α)
+    (u v : HigherCoefficientSpace cov A)
+    (t : ℝ) (ht : t ∈ Ioo t₀ A.commonTerminalTime)
+    (x : M) :
+    (atlasFieldOfHigher cov A (u - v)).timeDerivative t x =
+      (atlasFieldOfHigher cov A u).timeDerivative t x -
+        (atlasFieldOfHigher cov A v).timeDerivative t x := by
+  let W := atlasFieldOfHigher cov A (u - v)
+  let U := atlasFieldOfHigher cov A u
+  let V := atlasFieldOfHigher cov A v
+  ext a c
+  have hdiff := (U.hasTimeDerivative t ht x a c).sub
+    (V.hasTimeDerivative t ht x a c)
+  have hfun : (fun s : ℝ => W.toFun s x a c) =
+      (fun s : ℝ => U.toFun s x a c) -
+        (fun s : ℝ => V.toFun s x a c) := by
+    funext s
+    change W.toFun s x a c = U.toFun s x a c - V.toFun s x a c
+    exact congrArg (fun h : T₂ x => h a c)
+      (atlasFieldOfHigher_toFun_sub cov A u v s x)
+  rw [← hfun] at hdiff
+  exact (W.hasTimeDerivative t ht x a c).unique hdiff
+
+/-- The actual intrinsic connection heat operator respects subtraction of
+represented, unprojected atlas fields. -/
+theorem atlasFieldOfHigher_tensorHeatOperator_sub
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α)
+    (u v : HigherCoefficientSpace cov A)
+    (t : ℝ) (ht : t ∈ Ioo t₀ A.commonTerminalTime)
+    (x : M) :
+    (atlasFieldOfHigher cov A (u - v)).tensorHeatOperator cov t ht x =
+      (atlasFieldOfHigher cov A u).tensorHeatOperator cov t ht x -
+        (atlasFieldOfHigher cov A v).tensorHeatOperator cov t ht x := by
+  let W := atlasFieldOfHigher cov A (u - v)
+  let U := atlasFieldOfHigher cov A u
+  let V := atlasFieldOfHigher cov A v
+  have hfield : W.toFun t = U.toFun t - V.toFun t := by
+    funext y
+    exact atlasFieldOfHigher_toFun_sub cov A u v t y
+  have hLap :
+      connectionLaplacian cov (W.toFun t) x =
+        connectionLaplacian cov (U.toFun t) x -
+          connectionLaplacian cov (V.toFun t) x := by
+    have h := (connectionLaplacianLinearMapAt cov x).map_sub
+      (U.slice cov t ⟨ht.1, ht.2.le⟩)
+      (V.slice cov t ⟨ht.1, ht.2.le⟩)
+    rw [hfield]
+    simpa only [connectionLaplacianLinearMapAt_apply, Submodule.coe_sub,
+      FiniteClassicalTensorHeatField.slice] using h
+  change W.timeDerivative t x - connectionLaplacian cov (W.toFun t) x =
+    (U.timeDerivative t x - connectionLaplacian cov (U.toFun t) x) -
+      (V.timeDerivative t x - connectionLaplacian cov (V.toFun t) x)
+  rw [atlasFieldOfHigher_timeDerivative_sub cov A u v t ht x, hLap]
+  abel
+
+/-- Subtracting two represented solutions with the same *global* Cauchy data
+gives a represented homogeneous solution. No equality of their individual
+chartwise traces is used or claimed. -/
+theorem geometricAtlasCauchySolution_sub
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α)
+    (u₀ : ∀ x : M, T₂ x)
+    (f : ℝ → ∀ x : M, T₂ x)
+    (u v : HigherCoefficientSpace cov A)
+    (hu : GeometricAtlasCauchySolution cov A u₀ f u)
+    (hv : GeometricAtlasCauchySolution cov A u₀ f v) :
+    GeometricAtlasCauchySolution cov A 0 0 (u - v) := by
+  constructor
+  · intro x
+    have h := (hu.1 x).sub (hv.1 x)
+    have h' : Tendsto
+        (fun t : ℝ => (atlasFieldOfHigher cov A (u - v)).toFun t x)
+        (nhdsWithin t₀ (Ioc t₀ A.commonTerminalTime))
+        (nhds (u₀ x - u₀ x)) := by
+      convert h using 1
+      funext t
+      exact atlasFieldOfHigher_toFun_sub cov A u v t x
+    simpa using h'
+  · intro t ht x
+    rw [atlasFieldOfHigher_tensorHeatOperator_sub cov A u v t ht x,
+      hu.2 t ht x, hv.2 t ht x, sub_self]
+    simp
+
+/-- The exact remaining uniqueness obligation for the represented geometric
+class. It is a mathematical estimate problem, not a consequence of the
+chartwise strong atlas uniqueness theorem. -/
+def HasRepresentedZeroDataUniqueness
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α) : Prop :=
+  ∀ w : HigherCoefficientSpace cov A,
+    GeometricAtlasCauchySolution cov A 0 0 w →
+    ∀ t, t ∈ Ioc t₀ A.commonTerminalTime →
+      (atlasFieldOfHigher cov A w).toFun t = 0
+
+/-- Zero-data uniqueness in the represented class implies uniqueness for
+arbitrary represented solutions with equal global Cauchy data. -/
+theorem geometricAtlasCauchySolution_unique_of_zeroData
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α)
+    (hzero : HasRepresentedZeroDataUniqueness cov A)
+    (u₀ : ∀ x : M, T₂ x)
+    (f : ℝ → ∀ x : M, T₂ x)
+    (u v : HigherCoefficientSpace cov A)
+    (hu : GeometricAtlasCauchySolution cov A u₀ f u)
+    (hv : GeometricAtlasCauchySolution cov A u₀ f v) :
+    ∀ t, t ∈ Ioc t₀ A.commonTerminalTime →
+      (atlasFieldOfHigher cov A u).toFun t =
+        (atlasFieldOfHigher cov A v).toFun t := by
+  intro t ht
+  have hw := hzero (u - v)
+    (geometricAtlasCauchySolution_sub cov A u₀ f u v hu hv) t ht
+  funext x
+  have hx := congrArg (fun s => s x) hw
+  rw [atlasFieldOfHigher_toFun_sub cov A u v t x] at hx
+  exact sub_eq_zero.mp hx
+
 /-- If a zero-data uniqueness principle holds for this full classical-field
 type, then any two solutions with the same data agree. This is a conditional
 reduction only: the field type records pointwise initial trace, and a proof of

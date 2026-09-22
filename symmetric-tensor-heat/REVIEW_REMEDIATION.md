@@ -195,6 +195,17 @@ regularity for a global estimate or maximum-principle argument. The atlas
 higher-coefficient class is a possible source of that control, but its transfer
 to a geometric norm remains unproved.
 
+The subsequent represented-difference lemmas prove that ordinary atlas
+reconstruction, its genuine time derivative, and its intrinsic heat operator
+commute with coefficient subtraction. Therefore two members of
+`GeometricAtlasCauchySolution` with the same global data have a *represented*
+zero-data difference, without requiring equal chartwise traces. The remaining
+obligation is now the explicit `HasRepresentedZeroDataUniqueness` proposition;
+`geometricAtlasCauchySolution_unique_of_zeroData` proves that it suffices for
+equal-data geometric uniqueness. The proposition itself remains unproved;
+the existing strong atlas uniqueness theorem still cannot be invoked from the
+global heat equation alone.
+
 The package provenance check now reads the disclosed `curvature` source from
 its immutable Git commit. The main repository's `curvature/` tree has advanced
 since that commit, so comparing all of current `curvature/` with the old tree
