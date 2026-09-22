@@ -602,6 +602,39 @@ theorem geometricAtlasCauchySolution_sub
       hu.2 t ht x, hv.2 t ht x, sub_self]
     simp
 
+/-- The global geometric heat equation identifies the *physical readout* of
+the strong atlas source residual. It does not identify the individual source
+coefficients: that additional injectivity or localization is exactly what a
+transfer to `StrongAtlasSolutionEquation` would require. -/
+theorem atlasFieldOfHigher_physicalStrongResidual
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 2]
+    [ContMDiffCovariantDerivative
+      (covariantThreeTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α)
+    (Hlift : StrongCommutatorLift cov A)
+    (u : HigherCoefficientSpace cov A) (f : SourceSpace cov A)
+    (hu : ∀ t (ht : t ∈ Ioo t₀ A.commonTerminalTime) x,
+      (atlasFieldOfHigher cov A u).tensorHeatOperator cov t ht x =
+        A.physicalAtlasSourceSlice cov f t x)
+    (t : ℝ) (ht : t ∈ Ioo t₀ A.commonTerminalTime) (x : M) :
+    A.physicalAtlasSourceSlice cov
+        (localCoordinateCauchyFamilyL cov A u) t x =
+      A.physicalAtlasSourceSlice cov
+        (f + Hlift.higherMap u) t x := by
+  have h := atlasFieldOfHigher_tensorHeatOperator_eq_source_sub_commutator
+    cov A u t ht x
+  rw [hu t ht x, ← Hlift.realizesHigher u t ht x] at h
+  rw [A.physicalAtlasSourceSlice_add cov]
+  exact (sub_eq_iff_eq_add).mp h.symm
+
 /-- The exact remaining uniqueness obligation for the represented geometric
 class. It is a mathematical estimate problem, not a consequence of the
 chartwise strong atlas uniqueness theorem. -/

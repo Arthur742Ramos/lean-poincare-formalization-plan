@@ -170,6 +170,13 @@ limits. It still does not identify the individual chartwise coefficient
 traces. The reconstruction is a weighted finite sum, so this lemma does not
 transfer the strong atlas uniqueness theorem to the geometric class.
 
+The new `atlasFieldOfHigher_physicalStrongResidual` lemma identifies exactly
+what the global heat equation says about the coordinate residual: its
+**physical atlas readout** equals the readout of the prescribed source plus
+the lifted commutator. It does not establish equality in `SourceSpace`.
+The latter equality is the strong atlas equation used by coefficient
+uniqueness, and no injectivity of the physical readout has been proved.
+
 The viable proof interfaces are now explicit:
 
 1. Define an intrinsic or proved-equivalent atlas Hölder norm on geometric
