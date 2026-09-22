@@ -297,6 +297,15 @@ uniform orbit-graph confinement remain explicit inputs; the adapter therefore
 connects the two existing interfaces without claiming that the remaining
 geometric comparison packages have already been constructed.
 
+The joint-field compact assembly is packaged in
+`DeTurckJointFieldCompactGaugeFlow.lean`. Given one jointly intrinsic smooth
+dependent field, it constructs the finite chart-ball cover, compact windows,
+cutoffs, model gauge flows, raw orbit confinement, and paired forward/inverse
+slice regularity, then feeds them to the compact gauge-flow constructor. This
+is a conditional compact `Diffeomorph3GaugeFlowOn` result; the geometric proof
+that the actual Ricci--DeTurck field has the required joint smoothness remains
+outside this interface.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
