@@ -70,6 +70,15 @@ little-Hölder preservation theorem for that output, including the required
 commutator/seminorm control; neither this interface nor the preceding
 Lipschitz estimate is a claim of PDE existence.
 
+The next analytic gate is now also explicit in
+`LittleHolderDuhamel.lean`: `isGoodHolder_of_isHolderConst_one` proves that
+globally Lipschitz Hölder data are genuinely little-Hölder. It combines the
+heat-flow sup-norm approximate-identity estimate with the interpolation bound
+for the Hölder seminorm of the error. This establishes a nontrivial input
+subspace for the little-Hölder theory, but it does not yet show that arbitrary
+little-Hölder data are preserved by the geometric Nemytskii map; the
+commutator/seminorm estimate for that nonlinear output remains open.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
