@@ -38,6 +38,16 @@ run. Gates 3–5 therefore failed and the verdict remained `POINT 4 OPEN`.
 
 See [Current formalization status](../status.md) for the repository-wide dashboard.
 
+The latest supporting PDE milestone is the genuine Ricci--DeTurck
+Hölder-seminorm difference estimate in
+`GenuineRicciDeTurckHolderDifference.lean`. It combines the compact-domain
+derivative bound for the actual Ricci--DeTurck fiber map with the explicit
+2-jet extraction bound, and specializes the range hypotheses to the Euclidean
+small-data ball. This advances workstream C, but it is intentionally not
+reported as full Banach-space local Lipschitzness: the supremum-norm
+packaging, the strong-continuity issue for the big Hölder heat propagator, and
+the variable-coefficient quasilinear closure remain open.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
