@@ -119,6 +119,21 @@ Nemytskii image little-Hölder. The full-norm path theorem and
 commutator premise; it remains deliberately separate from the unresolved
 tensorial Ricci--DeTurck endomap.
 
+The next matrix-valued closure layer is now proved in
+`GenuineRicciDeTurckMatrixLittleHolderClosure.lean`. The theorem
+`isGoodHolder_geometricNRDHolder_of_heat_path` applies the genuine
+matrix-valued Ricci--DeTurck output to the componentwise little-Hölder heat
+approximants. It proves the full `Jet2Section` heat-path convergence, an
+explicit exponent-one certificate for every positive-time extracted jet, and
+the entrywise little-Hölder carrier transfer using the existing genuine
+`HolderBCF` difference estimate. The result is packaged as
+`geometricNRDLittleHolderOfHeat` and `geometricNLittleHolderOfHeat`, so the
+actual matrix reaction is now represented in `Jet2Section`. The geometric
+compact jet-range condition along the heat path remains an explicit premise;
+this milestone therefore closes the matrix carrier conditional on that
+invariant region, while the local Duhamel endomap and its closed-ball
+Lipschitz estimate remain open.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
