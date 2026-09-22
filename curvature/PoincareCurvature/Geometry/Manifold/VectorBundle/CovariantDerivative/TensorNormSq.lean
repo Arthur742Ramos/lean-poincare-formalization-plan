@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.RicciNorm
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TraceLaplacian
 
 /-!
 # Pointwise norm square of a covariant two-tensor
@@ -26,6 +27,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E]
   [IsManifold I ∞ M]
   [RiemannianBundle (TangentSpace I : M → Type _)]
+  [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
   [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
 
 local notation "TM" => (TangentSpace I : M → Type _)
@@ -53,6 +55,48 @@ theorem covariantTwoTensorNormSq_nonneg
     0 ≤ covariantTwoTensorNormSq h x := by
   rw [covariantTwoTensorNormSq_eq_sum]
   positivity
+
+/-- The norm square is the intrinsic trace of the adjoint-square of the
+raised tensor. In particular, the orthonormal-basis formula is independent of
+the basis chosen at the point. -/
+theorem covariantTwoTensorNormSq_eq_trace_adjoint_comp
+    (h : ∀ x : M, T₂ x) (x : M) :
+    covariantTwoTensorNormSq h x =
+      (by
+        let _ : FiniteDimensional ℝ (TM x) :=
+          VectorBundle.finiteDimensional ℝ E TM x
+        let A : TM x →ₗ[ℝ] TM x :=
+          (raisedCovariantTwoTensor (I := I) (E := E) h x).toLinearMap
+        exact LinearMap.trace ℝ (TM x) (A.adjoint.comp A)) := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  let A : TM x →ₗ[ℝ] TM x :=
+    (raisedCovariantTwoTensor (I := I) (E := E) h x).toLinearMap
+  have hnorm : covariantTwoTensorNormSq h x =
+      ∑ i, ‖A (b i)‖ ^ 2 := by
+    rw [covariantTwoTensorNormSq_eq_sum]
+    apply Finset.sum_congr rfl
+    intro i hi
+    have hparse := b.sum_sq_inner_left (A (b i))
+    calc
+      ∑ j, (h x (b i) (b j)) ^ 2 =
+          ∑ j, (inner ℝ (A (b i)) (b j)) ^ 2 := by
+        apply Finset.sum_congr rfl
+        intro j hj
+        congr 1
+        change h x (b i) (b j) =
+          inner ℝ (rieszMap (I := I) x (h x (b i))) (b j)
+        exact (rieszMap_apply_inner (I := I) x (h x (b i)) (b j)).symm
+      _ = ‖A (b i)‖ ^ 2 := hparse
+  rw [hnorm, LinearMap.trace_eq_sum_inner (A.adjoint.comp A) b]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rw [real_inner_comm]
+  change ‖A (b i)‖ ^ 2 =
+    inner ℝ (LinearMap.adjoint A (A (b i))) (b i)
+  rw [LinearMap.adjoint_inner_left]
+  exact (real_inner_self_eq_norm_sq _).symm
 
 /-- The pointwise norm square vanishes exactly when the complete bilinear
 form vanishes, including all off-diagonal tensor slots. -/
