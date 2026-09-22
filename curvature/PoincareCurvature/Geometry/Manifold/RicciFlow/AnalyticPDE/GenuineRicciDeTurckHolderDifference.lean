@@ -25,7 +25,9 @@ No `sorry`, `admit`, or axioms.
 namespace RicciFlow
 namespace AnalyticPDE
 
+open Filter
 open GenuinePhiRD
+open Topology
 
 variable {d : ℕ} {α : ℝ}
 
@@ -39,6 +41,201 @@ theorem isHolderNorm_mono
   have hsum : 0 ≤ ∑ j : Fin d, |(x - y) j| ^ α := by
     exact Finset.sum_nonneg fun j _ => Real.rpow_nonneg (abs_nonneg _) _
   exact le_trans (hf.2 x y) (mul_le_mul_of_nonneg_right hHH' hsum)
+
+/-! A positive-exponent `IsHolderNorm` certificate supplies continuity. -/
+theorem isHolderNorm_continuous
+    {E : Type*} [NormedAddCommGroup E]
+    {f : (Fin d → ℝ) → E} {H : ℝ} (hα : 0 < α)
+    (hf : IsHolderNorm α f H) : Continuous f := by
+  rw [Metric.continuous_iff]
+  intro x ε hε
+  have hsum : Tendsto
+      (fun y : Fin d → ℝ => ∑ j : Fin d, |(y - x) j| ^ α)
+      (𝓝 x) (𝓝 0) := by
+    have hterm : ∀ j : Fin d, Tendsto
+        (fun y : Fin d → ℝ => |(y - x) j| ^ α)
+        (𝓝 x) (𝓝 0) := by
+      intro j
+      have harg : Tendsto
+          (fun y : Fin d → ℝ => |(y - x) j|)
+          (𝓝 x) (𝓝 0) := by
+        have hcont : Continuous (fun y : Fin d → ℝ => |(y - x) j|) :=
+          continuous_abs.comp ((continuous_apply j).sub continuous_const)
+        have hcontAt : ContinuousAt (fun y : Fin d → ℝ => |(y - x) j|) x :=
+          hcont.continuousAt
+        change Tendsto (fun y : Fin d → ℝ => |(y - x) j|)
+          (𝓝 x) (𝓝 ((fun y : Fin d → ℝ => |(y - x) j|) x)) at hcontAt
+        simpa using hcontAt
+      have hpow := harg.rpow_const (Or.inr hα.le)
+      simpa [Real.zero_rpow hα.ne'] using hpow
+    have hsum' := tendsto_finsetSum (Finset.univ : Finset (Fin d))
+      (fun j _ => hterm j)
+    simpa using hsum'
+  have hmod : Tendsto
+      (fun y : Fin d → ℝ => H * ∑ j : Fin d, |(y - x) j| ^ α)
+      (𝓝 x) (𝓝 0) := by
+    have h := (tendsto_const_nhds (x := H)).mul hsum
+    simpa using h
+  obtain ⟨δ, hδ, hδmod⟩ := Metric.tendsto_nhds_nhds.1 hmod ε hε
+  refine ⟨δ, hδ, fun y hy => ?_⟩
+  have hsum_nonneg : 0 ≤ ∑ j : Fin d, |(y - x) j| ^ α := by
+    exact Finset.sum_nonneg fun j _ => Real.rpow_nonneg (abs_nonneg _) _
+  have hmod_nonneg : 0 ≤ H * ∑ j : Fin d, |(y - x) j| ^ α :=
+    mul_nonneg hf.1 hsum_nonneg
+  have hδmod' : dist
+      (H * ∑ j : Fin d, |(y - x) j| ^ α) (0 : ℝ) < ε := hδmod hy
+  have hmod_lt : H * ∑ j : Fin d, |(y - x) j| ^ α < ε := by
+    rw [Real.dist_eq, sub_zero, abs_of_nonneg hmod_nonneg] at hδmod'
+    exact hδmod'
+  rw [dist_eq_norm]
+  calc
+    _ ≤ H * ∑ j : Fin d, |(y - x) j| ^ α := hf.2 y x
+    _ < ε := hmod_lt
+
+/-! Package a scalar Hölder function as a `HolderBCF` element. -/
+noncomputable def holderBCFOfIsHolderNorm
+    {n : ℕ} {f : (Fin n → ℝ) → ℝ} (hcont : Continuous f)
+    {B H : ℝ} (hB : ∀ x, |f x| ≤ B)
+    (hf : IsHolderNorm α f H) : HolderBCF α n :=
+  ⟨BoundedContinuousFunction.ofNormedAddCommGroup f hcont B (fun x => by
+      simpa only [Real.norm_eq_abs] using hB x),
+    ⟨H, by
+      refine ⟨hf.1, fun x y => ?_⟩
+      change |f x - f y| ≤ H * ∑ j : Fin n, |(x - y) j| ^ α
+      simpa only [Real.norm_eq_abs] using hf.2 x y⟩⟩
+
+@[simp] theorem holderBCFOfIsHolderNorm_apply
+    {n : ℕ} {f : (Fin n → ℝ) → ℝ} (hcont : Continuous f)
+    {B H : ℝ} (hB : ∀ x, |f x| ≤ B)
+    (hf : IsHolderNorm α f H) (x : Fin n → ℝ) :
+    (holderBCFOfIsHolderNorm hcont hB hf).toBCF x = f x := rfl
+
+/-! Package a matrix-valued Hölder function entrywise. -/
+noncomputable def matrixHolderBCFOfIsHolderNorm
+    {n : ℕ} {f : (Fin n → ℝ) → (Fin d → Fin d → ℝ)}
+    (hcont : Continuous f) {B H : ℝ} (hB : ∀ x, ‖f x‖ ≤ B)
+    (hf : IsHolderNorm α f H) : MatrixHolderBCF n d α :=
+  Matrix.of fun i j =>
+    holderBCFOfIsHolderNorm
+      ((continuous_apply j).comp ((continuous_apply i).comp hcont))
+      (fun x => le_trans
+        (by
+          rw [← Real.norm_eq_abs]
+          exact le_trans (pi_entry_norm_le (f x i) j) (pi_entry_norm_le (f x) i))
+        (hB x))
+      ⟨hf.1, fun x y => by
+        calc
+          |f x i j - f y i j| ≤ ‖f x - f y‖ := by
+            rw [← Real.norm_eq_abs]
+            change ‖(f x - f y) i j‖ ≤ ‖f x - f y‖
+            exact le_trans (pi_entry_norm_le ((f x - f y) i) j)
+              (pi_entry_norm_le (f x - f y) i)
+          _ ≤ H * ∑ k : Fin n, |(x - y) k| ^ α := hf.2 x y⟩
+
+@[simp] theorem matrixHolderBCFOfIsHolderNorm_apply
+    {n : ℕ} {f : (Fin n → ℝ) → (Fin d → Fin d → ℝ)}
+    (hcont : Continuous f) {B H : ℝ} (hB : ∀ x, ‖f x‖ ≤ B)
+    (hf : IsHolderNorm α f H) (x : Fin n → ℝ) (i j : Fin d) :
+    (matrixHolderBCFOfIsHolderNorm hcont hB hf i j).toBCF x = f x i j := rfl
+
+/-! ## Genuine output packaging
+
+The compact fiber domain gives a finite output bound.  Together with the
+positive-exponent continuity bridge above, this turns the genuine source
+from a plain function into the repository's big-Hölder output type. -/
+
+noncomputable def phiRDBoundData
+    (Γbg : Fin d → Fin d → Fin d → ℝ) :
+    {B : ℝ // 0 ≤ B ∧ ∀ x ∈ phiRDK (d := d),
+      ‖phiRDMatrix (d := d) Γbg x‖ ≤ B} :=
+  GenuinePhiRD.norm_bound_of_continuousOn
+    (isCompact_phiRDK (d := d))
+    ((contDiffOn_phiRDMatrix (d := d) Γbg).continuousOn.mono
+      (phiRDK_subset_locus (d := d)))
+
+noncomputable def phiRDBound
+    (Γbg : Fin d → Fin d → Fin d → ℝ) : ℝ :=
+  (phiRDBoundData Γbg).1
+
+theorem phiRDBound_nonneg
+    (Γbg : Fin d → Fin d → Fin d → ℝ) :
+    0 ≤ phiRDBound Γbg :=
+  (phiRDBoundData Γbg).2.1
+
+theorem phiRDBound_spec
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    {x : Jet2 d d} (hx : x ∈ phiRDK (d := d)) :
+    ‖phiRDMatrix (d := d) Γbg x‖ ≤ phiRDBound Γbg :=
+  (phiRDBoundData Γbg).2.2 x hx
+
+theorem norm_geometricNRD_le_phiRDBound
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s : Jet2Section d d α)
+    (hrange : ∀ x, jet2OfSection s x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K)
+    (x : Fin d → ℝ) :
+    ‖geometricNRD Γbg s x‖ ≤ phiRDBound Γbg := by
+  have hx := phiRDBound_spec Γbg (hrange x)
+  change ‖phiRDMatrix (d := d) Γbg (jet2OfSection s x)‖ ≤
+    phiRDBound Γbg
+  exact hx
+
+/-! The genuine 0-jet source as a matrix of big-Hölder functions. -/
+noncomputable def geometricNRDHolder
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s : Jet2Section d d α)
+    (hα : 0 < α)
+    (hrange : ∀ x, jet2OfSection s x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K) :
+    MatrixHolderBCF d d α :=
+  matrixHolderBCFOfIsHolderNorm
+    (f := geometricNRD Γbg s)
+    (hcont := isHolderNorm_continuous hα
+      (isHolderNorm_geometricNRD Γbg s hrange))
+    (B := phiRDBound Γbg)
+    (H := (phiRDNemytskiiData (d := d) Γbg).B *
+      jet2SectionHolderConst s)
+    (hB := fun x => norm_geometricNRD_le_phiRDBound Γbg s hrange x)
+    (hf := isHolderNorm_geometricNRD Γbg s hrange)
+
+@[simp] theorem geometricNRDHolder_apply
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s : Jet2Section d d α)
+    (hα : 0 < α)
+    (hrange : ∀ x, jet2OfSection s x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K)
+    (x : Fin d → ℝ) (i j : Fin d) :
+    (geometricNRDHolder Γbg s hα hrange i j).toBCF x =
+      geometricNRD Γbg s x i j := by
+  exact matrixHolderBCFOfIsHolderNorm_apply
+    (f := geometricNRD Γbg s)
+    (hcont := isHolderNorm_continuous hα
+      (isHolderNorm_geometricNRD Γbg s hrange))
+    (hB := fun x => norm_geometricNRD_le_phiRDBound Γbg s hrange x)
+    (hf := isHolderNorm_geometricNRD Γbg s hrange) x i j
+
+/-! Package the source in the full section-space shape used by the Duhamel
+formulation.  The derivative slots remain zero, as in `geometricN₀`; the
+genuine nonlinear output is now present in the 0-jet component itself. -/
+noncomputable def geometricNHolder
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s : Jet2Section d d α)
+    (hα : 0 < α)
+    (hrange : ∀ x, jet2OfSection s x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K) :
+    Jet2HolderSection d α :=
+  (geometricNRDHolder Γbg s hα hrange, 0, 0)
+
+@[simp] theorem geometricNHolder_apply
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s : Jet2Section d d α)
+    (hα : 0 < α)
+    (hrange : ∀ x, jet2OfSection s x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K)
+    (x : Fin d → ℝ) (i j : Fin d) :
+    ((geometricNHolder Γbg s hα hrange).1 i j).toBCF x =
+      geometricNRD Γbg s x i j := by
+  exact geometricNRDHolder_apply Γbg s hα hrange x i j
 
 /-! ## The genuine source difference -/
 
