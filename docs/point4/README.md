@@ -156,6 +156,16 @@ and the actual construction of such full witnesses remain explicit gates;
 this bridge therefore narrows the boundary without claiming the full
 variational refinement or Point 4 closure.
 
+The next bridge in `DeTurckFlowVariationalBracketBridge.lean` discharges the
+Lie-bracket gate from one explicit model-side obligation: the Picard
+linearization `Df` must equal the fixed-chart `fderivWithin` of the genuine
+intrinsic DeTurck gauge field at the selected Picard point. The existing
+manifold bracket theorem then supplies the exact `hD_bracket` identity, and a
+constructor builds `FullVariationalWitness` from that derivative data while
+leaving the gauge-velocity assembly `hvalue` explicit. No ODE equation alone
+is treated as an identification of the model vector field with the geometric
+gauge field.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
