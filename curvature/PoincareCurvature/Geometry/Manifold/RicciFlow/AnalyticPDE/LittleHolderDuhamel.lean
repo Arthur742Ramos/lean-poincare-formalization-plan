@@ -205,6 +205,115 @@ in Hölder norm as `t → 0⁺`. -/
 def IsGoodHolder (f : HolderBCF α n) : Prop :=
   Tendsto (fun t : ℝ ↦ heatPropagatorTotal t f) (𝓝[>] 0) (𝓝 f)
 
+/-! ### Lipschitz data are little-Hölder -/
+
+/-- Globally Lipschitz data belong to the little-Hölder space.
+
+The proof keeps the two components of the `HolderBCF` norm separate.  Heat
+flow preserves the Lipschitz constant, while the sup-norm error tends to zero
+at the approximate identity.  The interpolation estimate above therefore
+forces the Hölder seminorm of the error to tend to zero as well. -/
+theorem isGoodHolder_of_isHolderConst_one (hα0 : 0 < α) (hα1 : α < 1)
+    {f : HolderBCF α n} {L₁ : ℝ}
+    (hL₁ : IsHolderConst (1 : ℝ) f.toBCF L₁) :
+    IsGoodHolder f := by
+  let l : Filter ℝ := nhdsWithin 0 (Set.Ioi 0)
+  have hprop : ∀ t : ℝ,
+      (heatPropagatorTotal (n := n) (α := α) t f).toBCF =
+        (heatPropagatorHolderCLM (n := n) (α := α) t f).toBCF := by
+    intro t
+    by_cases ht : 0 < t
+    · rw [heatPropagatorTotal_of_pos ht, heatPropagatorHolderCLM_of_pos ht]
+      rfl
+    · have htle : t ≤ 0 := le_of_not_gt ht
+      rw [heatPropagatorTotal_of_nonpos ht,
+        heatPropagatorHolderCLM_of_nonpos htle]
+      rfl
+  have hsup : Filter.Tendsto
+      (fun t : ℝ => (heatPropagatorTotal (n := n) (α := α) t f).toBCF)
+      l (𝓝 f.toBCF) := by
+    have h := tendsto_heatPropagatorHolderCLM_toBCF_nhdsWithin_zero hα0 f
+    exact h.congr' (Filter.Eventually.of_forall (fun t => (hprop t).symm))
+  have hdiffsup : Filter.Tendsto
+      (fun t : ℝ => (heatPropagatorTotal (n := n) (α := α) t f).toBCF - f.toBCF)
+      l (𝓝 0) := by
+    have h := hsup.sub_const f.toBCF
+    simpa using h
+  have hM : Filter.Tendsto
+      (fun t : ℝ => ‖(heatPropagatorTotal (n := n) (α := α) t f - f).toBCF‖)
+      l (𝓝 0) := by
+    have h := hdiffsup.norm
+    convert h using 1
+    funext t
+    rw [HolderBCF.sub_toBCF]
+    simp
+  have hscaled : Filter.Tendsto
+      (fun t : ℝ => 2 * ‖(heatPropagatorTotal (n := n) (α := α) t f - f).toBCF‖)
+      l (𝓝 0) := by
+    simpa using hM.const_mul (2 : ℝ)
+  have hpow : Filter.Tendsto
+      (fun t : ℝ =>
+        (2 * ‖(heatPropagatorTotal (n := n) (α := α) t f - f).toBCF‖) ^
+          (1 - α))
+      l (𝓝 0) :=
+    hscaled.rpow_const_nhds_zero (by linarith)
+  have hbound : Filter.Tendsto
+      (fun t : ℝ =>
+        (2 * ‖(heatPropagatorTotal (n := n) (α := α) t f - f).toBCF‖) ^
+            (1 - α) * (2 * L₁) ^ α)
+      l (𝓝 0) := by
+    simpa using hpow.mul (tendsto_const_nhds : Filter.Tendsto
+      (fun _ : ℝ => (2 * L₁) ^ α) l (𝓝 ((2 * L₁) ^ α)))
+  have hsemi_le : ∀ᶠ t in l,
+      HolderBCF.holderSeminorm
+          (heatPropagatorTotal (n := n) (α := α) t f - f) ≤
+        (2 * ‖(heatPropagatorTotal (n := n) (α := α) t f - f).toBCF‖) ^
+            (1 - α) * (2 * L₁) ^ α := by
+    filter_upwards [self_mem_nhdsWithin] with t ht
+    have ht' : 0 < t := ht
+    have hS : IsHolderConst (1 : ℝ)
+        (heatPropagatorTotal (n := n) (α := α) t f).toBCF L₁ := by
+      rw [heatPropagatorTotal_of_pos ht', heatSemigroupHolderFun_toBCF]
+      exact isHolderConst_heatSemigroupNDbcf ht' hL₁
+    have hD' := HolderBCF.IsHolderConst.add hS (HolderBCF.IsHolderConst.neg hL₁)
+    have hD : IsHolderConst (1 : ℝ)
+        (heatPropagatorTotal (n := n) (α := α) t f - f).toBCF (2 * L₁) := by
+      rw [HolderBCF.sub_toBCF]
+      simpa [sub_eq_add_neg, two_mul] using hD'
+    exact holderSeminorm_le_of_isHolderConst_one
+      (D := heatPropagatorTotal (n := n) (α := α) t f - f)
+      (M₀ := ‖(heatPropagatorTotal (n := n) (α := α) t f - f).toBCF‖)
+      (L₁ := 2 * L₁) (norm_nonneg _) le_rfl hD hα0 hα1
+  have hsemi : Filter.Tendsto
+      (fun t : ℝ => HolderBCF.holderSeminorm
+        (heatPropagatorTotal (n := n) (α := α) t f - f))
+      l (𝓝 0) := by
+    apply squeeze_zero'
+    · exact Filter.Eventually.of_forall (fun t =>
+        HolderBCF.holderSeminorm_nonneg _)
+    · exact hsemi_le
+    · exact hbound
+  have hnorm : Filter.Tendsto
+      (fun t : ℝ => ‖heatPropagatorTotal (n := n) (α := α) t f - f‖)
+      l (𝓝 0) := by
+    have hsum := hM.add hsemi
+    simpa [HolderBCF.norm_def, HolderBCF.sub_toBCF] using hsum
+  unfold IsGoodHolder
+  change Filter.Tendsto
+    (fun t : ℝ => heatPropagatorTotal (n := n) (α := α) t f) l (𝓝 f)
+  rw [Metric.tendsto_nhdsWithin_nhds]
+  intro ε hε
+  have hnorm' := hnorm
+  rw [Metric.tendsto_nhdsWithin_nhds] at hnorm'
+  obtain ⟨δ, hδpos, hδ⟩ := hnorm' ε hε
+  refine ⟨δ, hδpos, fun t ht hdist => ?_⟩
+  have h := hδ ht hdist
+  rw [HolderBCF.dist_def] at ⊢
+  have hnonneg : 0 ≤ ‖heatPropagatorTotal (n := n) (α := α) t f - f‖ :=
+    norm_nonneg _
+  rw [Real.dist_eq, sub_zero, abs_of_nonneg hnonneg] at h
+  exact h
+
 /-- The total propagator preserves `0`. -/
 theorem heatPropagatorTotal_zero (t : ℝ) :
     heatPropagatorTotal (n := n) (α := α) t (0 : HolderBCF α n) = 0 := by
