@@ -314,6 +314,16 @@ and inner-product compatibility, together with joint regularity of the negated
 DeTurck one-form, remain explicit analytic inputs; this is a field-instantiation
 bridge, not a PDE closure.
 
+The next correction-tensor adapter is packaged in
+`DeTurckJointOneFormRegularity.lean`. It derives that joint regularity of the
+negated intrinsic DeTurck one-form from joint smoothness of the actual
+`explicitLeviCivitaCorrection` tensor: the proof applies that tensor to two
+local-frame sections, reads the resulting coefficients in a fixed
+trivialization, and performs the finite trace sum. Its compact-flow wrapper
+therefore consumes a geometric correction-section premise rather than merely
+renaming the previous one-form premise. Joint smoothness of the correction
+tensor itself, and the downstream PDE closure, remain open.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
