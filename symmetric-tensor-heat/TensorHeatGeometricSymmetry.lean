@@ -185,6 +185,29 @@ def GeometricAtlasCauchySolution
     ∀ t (ht : t ∈ Ioo t₀ A.commonTerminalTime) x,
       (atlasFieldOfHigher cov A u).tensorHeatOperator cov t ht x = f t x
 
+/-- A global geometric initial condition determines the tensor reconstructed
+from the atlas coefficient traces, even though it need not determine those
+coefficient traces individually. This is the exact direction available from
+the current reconstruction theorem. -/
+theorem geometricAtlasCauchySolution_initialTensor
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α)
+    (u₀ : ∀ x : M,
+      TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (f : ℝ → ∀ x : M,
+      TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (u : HigherCoefficientSpace cov A)
+    (hu : GeometricAtlasCauchySolution cov A u₀ f u) :
+    atlasInitialTrace cov A u = u₀ := by
+  funext x
+  let _ : NeBot (nhdsWithin t₀ (Ioc t₀ A.commonTerminalTime)) :=
+    left_nhdsWithin_Ioc_neBot (A.lt_commonTerminalTime cov)
+  exact tendsto_nhds_unique (A.hasInitialTrace_atlasFieldOfHigher cov u x) (hu.1 x)
+
 /-- The represented geometric solution class is closed under slot
 transposition when its global Cauchy data are symmetric. -/
 theorem geometricAtlasCauchySolution_transpose

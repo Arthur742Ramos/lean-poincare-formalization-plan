@@ -163,6 +163,13 @@ that class. The required next proof must establish that two members with the
 same global Cauchy data have equal ordinary reconstructed fields; equality of
 their chartwise traces is unavailable from the current hypotheses.
 
+The global initial condition does identify `atlasInitialTrace` with the
+prescribed initial tensor: the new
+`geometricAtlasCauchySolution_initialTensor` lemma proves this by uniqueness of
+limits. It still does not identify the individual chartwise coefficient
+traces. The reconstruction is a weighted finite sum, so this lemma does not
+transfer the strong atlas uniqueness theorem to the geometric class.
+
 The viable proof interfaces are now explicit:
 
 1. Define an intrinsic or proved-equivalent atlas Hölder norm on geometric

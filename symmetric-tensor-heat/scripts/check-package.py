@@ -15,6 +15,7 @@ from pathlib import Path
 import json
 import re
 import subprocess
+import sys
 import tomllib
 import urllib.request
 
@@ -258,7 +259,7 @@ def main() -> None:
             require(path.suffix not in {".olean", ".ilean", ".a", ".bc", ".o", ".so", ".dylib", ".pyc"},
                     "compiled artifact outside build/cache: " + str(path.relative_to(ROOT)))
 
-    subprocess.run(["python3", "scripts/check-provenance.py"], cwd=ROOT, check=True)
+    subprocess.run([sys.executable, "scripts/check-provenance.py"], cwd=ROOT, check=True)
     print("Package shape, schema, pins, proof policy, and source boundary passed.")
 
 
