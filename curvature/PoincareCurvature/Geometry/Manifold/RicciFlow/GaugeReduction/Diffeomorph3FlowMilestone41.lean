@@ -162,9 +162,9 @@ theorem deturckPushforward_hasDerivAt
 the scalar pullback-derivative identity. -/
 theorem pullbackMetricInnerDerivativeData_of_actualDeTurckGaugeFlow
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
-    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowWithVariationalData
       (E := E) (H := H) (I := I) (M := M) ivp) :
-    G.PullbackMetricInnerDerivativeData := by
+    G.toChosen.PullbackMetricInnerDerivativeData := by
   intro sol t ht x u v
   -- Unpack the genuine variational data bundled in the gauge flow: the
   -- variational derivative operator `D`, the bilinear-form derivative `B'`,
@@ -174,14 +174,15 @@ theorem pullbackMetricInnerDerivativeData_of_actualDeTurckGaugeFlow
   obtain ⟨gdot, hgdot, D, B', hchart, hA, hB, _hDbracket, hval⟩ :=
     G.variational sol ht x
   have hgdot' : gdot =
-      sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol) := hgdot
+      sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+        (G.toChosen.gauge sol) := hgdot
   -- Local abbreviations for the coordinate model maps.
   set A : ℝ → E →L[ℝ] E := fun τ ↦
     ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalTangentCoordinateMap
-      (G.maps3 sol) t τ x with hAdef
+      (G.toChosen.maps3 sol) t τ x with hAdef
   set B : ℝ → E →L[ℝ] E →L[ℝ] ℝ := fun τ ↦
     ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalBilinearCoordinateMap
-      (G.maps3 sol) sol.1.toIntrinsicDeTurckSolution.metric t τ x with hBdef
+      (G.toChosen.maps3 sol) sol.1.toIntrinsicDeTurckSolution.metric t τ x with hBdef
   set uE : E :=
     ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.variationalSourceTangentCoordinate
       x u with huEdef
@@ -192,15 +193,15 @@ theorem pullbackMetricInnerDerivativeData_of_actualDeTurckGaugeFlow
   -- differentiate `τ ↦ A τ` then evaluate at the fixed coordinate vectors.
   have hAu : HasDerivAt (fun τ : ℝ ↦ A τ uE) (D (A t uE)) t := by
     have h := hA.clm_apply (hasDerivAt_const t uE)
-    simpa using h
+    simpa [A] using h
   have hAv : HasDerivAt (fun τ : ℝ ↦ A τ vE) (D (A t vE)) t := by
     have h := hA.clm_apply (hasDerivAt_const t vE)
-    simpa using h
+    simpa [A] using h
   -- Bilinear chain rule (M1d): derivative of `τ ↦ B τ (A τ uE) (A τ vE)`.
   have hbilinear := hasDerivAt_bilinearForm_apply_apply hB hAu hAv
   -- The preferred coordinate model is exactly `B τ (A τ uE) (A τ vE)`.
   have hmodel : SmoothSelfDiffeomorph3Family.pullbackMetricInnerCoordinateModel
-        (I := I) (M := M) (G.maps3 sol)
+        (I := I) (M := M) (G.toChosen.maps3 sol)
         sol.1.toIntrinsicDeTurckSolution.metric t x u v =
       fun τ : ℝ ↦ B τ (A τ uE) (A τ vE) := by
     funext τ
@@ -209,13 +210,13 @@ theorem pullbackMetricInnerDerivativeData_of_actualDeTurckGaugeFlow
   -- The geometric scalar agrees with the coordinate model near `t`
   -- (chart-membership part of the variational data).
   have hF_eq : (fun τ : ℝ ↦ (sol.1.toIntrinsicDeTurckSolution.metric τ).inner
-        ((G.maps3 sol τ) x)
-        (((G.maps3 sol) τ).pushforwardTangent x u)
-        (((G.maps3 sol) τ).pushforwardTangent x v))
+        ((G.toChosen.maps3 sol τ) x)
+        (((G.toChosen.maps3 sol) τ).pushforwardTangent x u)
+        (((G.toChosen.maps3 sol) τ).pushforwardTangent x v))
       =ᶠ[𝓝 t] fun τ : ℝ ↦ B τ (A τ uE) (A τ vE) := by
     rw [← hmodel]
     exact SmoothSelfDiffeomorph3Family.eventuallyEq_geometric_pullbackMetricInnerCoordinateModel
-      (I := I) (M := M) (G.maps3 sol) sol.1.toIntrinsicDeTurckSolution.metric
+      (I := I) (M := M) (G.toChosen.maps3 sol) sol.1.toIntrinsicDeTurckSolution.metric
       t x u v hchart
   -- The assembled bilinear value is the packaged gauge-corrected velocity
   -- (this is where the Lie-bracket identification of `D`, i.e.
@@ -232,7 +233,7 @@ gauge-corrected velocity `Φₜ^* (∂ₜ gₜ + Lie_{Xₜ} gₜ)` on the soluti
 set. -/
 theorem milestone4_1_gaugePullbackDerivative
     {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
-    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+    (G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowWithVariationalData
       (E := E) (H := H) (I := I) (M := M) ivp)
     (sol : ChosenIntrinsicDeTurckLocalSolution
       (E := E) (H := H) (I := I) (M := M) ivp) :
@@ -240,8 +241,9 @@ theorem milestone4_1_gaugePullbackDerivative
       ((G.maps3 sol).pullbackMetricFamily sol.1.toIntrinsicDeTurckSolution.metric)
       (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
       sol.1.toIntrinsicDeTurckSolution.timeSet :=
-  G.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
-    G.pullbackMetricInnerDerivativeData_of_actualDeTurckGaugeFlow sol
+  G.toChosen.hasTimeDerivativeOn_of_pullbackMetricInnerDerivativeData
+    (ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.pullbackMetricInnerDerivativeData_of_actualDeTurckGaugeFlow
+      G) sol
 
 end ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
 

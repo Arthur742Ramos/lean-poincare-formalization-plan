@@ -21,17 +21,22 @@ public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffe
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowMilestone41
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ModelGaugeFlowODECore
 
-open scoped Topology
+open scoped Manifold ContDiff Topology NNReal
 open ContinuousLinearMap
+
+namespace RicciFlow
 
 namespace DeTurckFlowVariationalWitness
 
-variable {E H : Type*}
-  [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-  [NormedAddCommGroup H] [NormedSpace ℝ H]
+variable {E : Type*}
+  [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+  [CompleteSpace E]
+  {H : Type*} [TopologicalSpace H]
   {I : ModelWithCorners ℝ E H} {M : Type*}
-  [TopologicalSpace M] [ChartedSpace H M] [SmoothManifoldWithCorners I M]
-  [T2Space M] [SigmaFiniteDimensional ℝ M E]
+  [TopologicalSpace M] [ChartedSpace H M]
+  [T2Space M] [IsManifold I ∞ M]
+  [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
+  [SigmaCompactSpace M]
 
 /-- A variational witness packages genuine Picard–Lindelöf variational data
 for a DeTurck gauge flow at a specific time and base point.
@@ -44,11 +49,13 @@ structure VariationalWitness
     (t : ℝ) (x : M) where
   f : ℝ → E → E
   Df : ℝ → E → E →L[ℝ] E
-  tmin tmax : ℝ
+  tmin : ℝ
+  tmax : ℝ
   t₀ : Set.Icc tmin tmax
   x₀ : E
   r : ℝ≥0
-  α : ModelGaugeFlowODE.VariationalLocalFlowSolution (V := E) f Df t₀ x₀ r
+  α : @ModelGaugeFlowODE.VariationalLocalFlowSolution
+    E _ _ f Df tmin tmax t₀ x₀ r
   htIoo : t ∈ Set.Ioo tmin tmax
   htangent : ∀ τ ∈ Set.Icc tmin tmax,
     α.tangent x₀ τ =
@@ -65,7 +72,7 @@ theorem hasDerivAt_of_witness
       (E := E) (H := H) (I := I) (M := M) ivp)
     {t : ℝ} (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet)
     (x : M)
-    (w : VariationalWitness (I := I) (M := M) (G.maps3 sol) t x) :
+    (w : VariationalWitness (G.maps3 sol) t x) :
     ∃ (D : E →L[ℝ] E),
       HasDerivAt
         (fun τ : ℝ ↦ SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
@@ -73,8 +80,10 @@ theorem hasDerivAt_of_witness
         (D.comp (SmoothSelfDiffeomorph3Family.pullbackMetricTangentCoordinateMap
           (I := I) (M := M) (G.maps3 sol) t t x)) t := by
   -- Package the witness as the `hvar` existential for `deturckPushforward_hasDerivAt`.
-  apply deturckPushforward_hasDerivAt G sol ht x
-  exact ⟨w.f, w.Df, w.tmin, w.tmax, w.t₀, w.x₀, w.r, w.α, w.htIoo, w.htangent⟩
+  apply ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow.deturckPushforward_hasDerivAt
+    G sol ht x
+  exact ⟨w.f, w.Df, w.tmin, w.tmax, w.t₀, w.x₀, w.r, w.α, w.htIoo,
+    w.htangent⟩
 
 end DeTurckFlowVariationalWitness
 
@@ -85,12 +94,15 @@ This is the compliant Point-4 repair: the `toDiffeomorph3GaugeFlow` adapter
 consumes this enriched package (not the raw `IntrinsicDeTurckGaugeFlowExistence`),
 so the `variational` field is supplied internally by genuine ODE theory. -/
 structure IntrinsicDeTurckGaugeFlowExistenceWithWitness
-    {E H : Type*}
-    [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    [NormedAddCommGroup H] [NormedSpace ℝ H]
+    {E : Type*}
+    [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    [CompleteSpace E]
+    {H : Type*} [TopologicalSpace H]
     {I : ModelWithCorners ℝ E H} {M : Type*}
-    [TopologicalSpace M] [ChartedSpace H M] [SmoothManifoldWithCorners I M]
-    [T2Space M] [SigmaFiniteDimensional ℝ M E]
+    [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [IsManifold I ∞ M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
+    [SigmaCompactSpace M]
     (ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)) where
   toExistence : IntrinsicDeTurckGaugeFlowExistence
     (E := E) (H := H) (I := I) (M := M) ivp
@@ -98,4 +110,6 @@ structure IntrinsicDeTurckGaugeFlowExistenceWithWitness
       (E := E) (H := H) (I := I) (M := M) ivp,
     ∀ ⦃t : ℝ⦄, t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet → ∀ x : M,
       DeTurckFlowVariationalWitness.VariationalWitness
-        (I := I) (M := M) (toExistence.flow sol).maps3 t x
+        (toExistence.flow sol).maps3 t x
+
+end RicciFlow
