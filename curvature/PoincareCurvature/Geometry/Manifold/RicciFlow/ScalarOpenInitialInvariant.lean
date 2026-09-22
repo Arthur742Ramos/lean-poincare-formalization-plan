@@ -117,6 +117,29 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "T₁" => (fun x : M => TM x →L[ℝ] ℝ)
 
+/-- Spatially constant affine negation reverses the scalar differential. -/
+theorem scalarDifferential_const_sub
+    (c : ℝ) {f : M → ℝ} (hf : ∀ y, MDiffAt f y) :
+    scalarDifferential (I := I) (fun y => c - f y) =
+      -scalarDifferential (I := I) f := by
+  have heq : (fun y : M => c - f y) =
+      (fun _ : M => c) + (-1 : ℝ) • f := by
+    funext y
+    simp [Pi.add_apply, sub_eq_add_neg]
+  have hneg : ∀ y, MDiffAt ((-1 : ℝ) • f) y := by
+    intro y
+    exact (mdifferentiableAt_const : MDiffAt (fun _ : M => (-1 : ℝ)) y).smul (hf y)
+  rw [heq, scalarDifferential_add (fun y => mdifferentiableAt_const) hneg]
+  rw [scalarDifferential_smul_const (-1) hf]
+  have hc : scalarDifferential (I := I) (fun _ : M => c) = 0 := by
+    funext y
+    ext v
+    simp only [scalarDifferential_apply, Pi.zero_apply]
+    rw [mvfderiv_const]
+  rw [hc]
+  simpa only [zero_add] using
+    (neg_one_smul ℝ (scalarDifferential (I := I) f))
+
 /-- Spatial constants disappear and negation reverses the intrinsic scalar
 Laplacian. This affine form is used for time-dependent maximum-principle
 barriers, whose spatial offset is constant on each time slice. -/
