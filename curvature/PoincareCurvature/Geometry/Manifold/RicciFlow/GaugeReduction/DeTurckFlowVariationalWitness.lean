@@ -24,6 +24,8 @@ public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Model
 open scoped Manifold ContDiff Topology NNReal
 open ContinuousLinearMap
 
+@[expose] public noncomputable section
+
 namespace RicciFlow
 
 namespace DeTurckFlowVariationalWitness

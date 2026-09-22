@@ -145,6 +145,17 @@ gauge family. The refinement is intentionally not constructed here: producing
 its full tangent-map, bilinear-form, and Lie-bracket data from the compact-
 manifold ODE/PDE regularity remains an analytic obligation.
 
+The follow-up bridge in
+`DeTurckFlowVariationalDataBridge.lean` now assembles a
+`FullVariationalWitness` into the exact per-point `VariationalData` consumed by
+M4.1 at ordinary-neighborhood times. The Picard tangent equation discharges
+the coordinate pushforward derivative, and a genuine Fréchet derivative of
+the metric-coordinate field discharges the moving bilinear derivative. The
+Lie-bracket identity, final gauge-velocity assembly, endpoint chart control,
+and the actual construction of such full witnesses remain explicit gates;
+this bridge therefore narrows the boundary without claiming the full
+variational refinement or Point 4 closure.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
