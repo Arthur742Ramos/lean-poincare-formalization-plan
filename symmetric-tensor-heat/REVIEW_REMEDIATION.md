@@ -206,6 +206,27 @@ equal-data geometric uniqueness. The proposition itself remains unproved;
 the existing strong atlas uniqueness theorem still cannot be invoked from the
 global heat equation alone.
 
+The conditional `geometricAtlasCauchySolution_symmetric_of_zeroData` now
+composes the transpose closure with that represented zero-data obligation:
+once the obligation is proved, the **ordinary** atlas field is symmetric
+because it and its transpose solve the same geometric Cauchy problem. This
+does not discharge the obligation or change the selected averaged readout.
+`symmetrizedAtlasField_eq_at_of_zeroData` then identifies that historical
+averaged field with the ordinary field on the solution interval, subject to
+the same still-unproved zero-data estimate.
+
+An intrinsic compact-manifold scalar parabolic maximum principle exists in
+`curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/ScalarParabolicInvariant.lean`.
+It is not yet a tensor-heat uniqueness theorem. Applying it would require a
+proved scalar differential inequality for a tensor norm (including connection
+terms), the regularity of that norm or a smooth support, and the initial-time
+continuity furnished by the represented class. No such bridge is currently
+available in the tensor-heat modules. The other possible route is a canonical
+localization proving that every represented global solution satisfies the
+strong atlas equation with suitable chartwise traces. The existing
+`strongAtlasSolutionEquation_unique` assumes those individual traces equal;
+equality of their partition-weighted global tensor does not imply this.
+
 The package provenance check now reads the disclosed `curvature` source from
 its immutable Git commit. The main repository's `curvature/` tree has advanced
 since that commit, so comparing all of current `curvature/` with the old tree

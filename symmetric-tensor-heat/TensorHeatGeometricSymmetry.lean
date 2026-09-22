@@ -643,6 +643,68 @@ theorem geometricAtlasCauchySolution_unique_of_zeroData
   rw [atlasFieldOfHigher_toFun_sub cov A u v t x] at hx
   exact sub_eq_zero.mp hx
 
+/-- A zero-data estimate for represented geometric solutions makes symmetry a
+consequence of the heat equation and symmetric Cauchy data. The field here is
+the ordinary, unprojected atlas reconstruction. -/
+theorem geometricAtlasCauchySolution_symmetric_of_zeroData
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α)
+    (hzero : HasRepresentedZeroDataUniqueness cov A)
+    (u₀ : ∀ x : M, T₂ x)
+    (f : ℝ → ∀ x : M, T₂ x)
+    (u : HigherCoefficientSpace cov A)
+    (hD : ∀ x v w, u₀ x v w = u₀ x w v)
+    (hf : ∀ t (_ht : t ∈ Ioo t₀ A.commonTerminalTime) x v w,
+      f t x w v = f t x v w)
+    (hu : GeometricAtlasCauchySolution cov A u₀ f u) :
+    ∀ t, t ∈ Ioc t₀ A.commonTerminalTime → ∀ x v w,
+      (atlasFieldOfHigher cov A u).toFun t x v w =
+        (atlasFieldOfHigher cov A u).toFun t x w v := by
+  let ut := transposeHigherFamily cov A u
+  have hut : GeometricAtlasCauchySolution cov A u₀ f ut :=
+    geometricAtlasCauchySolution_transpose cov A u₀ f u hD hf hu
+  intro t ht x v w
+  have heq := geometricAtlasCauchySolution_unique_of_zeroData
+    cov A hzero u₀ f u ut hu hut t ht
+  have heqx := congrArg (fun s => s x v w) heq
+  rw [atlasFieldOfHigher_transpose_toFun cov A u t ht x v w] at heqx
+  exact heqx
+
+/-- Under geometric zero-data uniqueness, the historical averaged readout
+agrees with the ordinary reconstruction on the actual solution interval.
+This is an equality theorem, not a substitute for proving that uniqueness. -/
+theorem symmetrizedAtlasField_eq_at_of_zeroData
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α)
+    (hzero : HasRepresentedZeroDataUniqueness cov A)
+    (u₀ : ∀ x : M, T₂ x)
+    (f : ℝ → ∀ x : M, T₂ x)
+    (u : HigherCoefficientSpace cov A)
+    (hD : ∀ x v w, u₀ x v w = u₀ x w v)
+    (hf : ∀ t (_ht : t ∈ Ioo t₀ A.commonTerminalTime) x v w,
+      f t x w v = f t x v w)
+    (hu : GeometricAtlasCauchySolution cov A u₀ f u) :
+    ∀ t, t ∈ Ioc t₀ A.commonTerminalTime →
+      (symmetrizedAtlasField cov A u).toFun t =
+        (atlasFieldOfHigher cov A u).toFun t := by
+  intro t ht
+  funext x
+  ext v w
+  have hsym := geometricAtlasCauchySolution_symmetric_of_zeroData
+    cov A hzero u₀ f u hD hf hu t ht x v w
+  simp only [symmetrizedAtlasField_toFun, Pi.smul_apply, Pi.add_apply,
+    smul_apply, add_apply, smul_eq_mul]
+  rw [atlasFieldOfHigher_transpose_toFun cov A u t ht x v w, ← hsym]
+  ring
+
 /-- If a zero-data uniqueness principle holds for this full classical-field
 type, then any two solutions with the same data agree. This is a conditional
 reduction only: the field type records pointwise initial trace, and a proof of
