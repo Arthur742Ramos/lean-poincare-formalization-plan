@@ -361,6 +361,13 @@ joint `ContMDiffOn`. This replaces the scalar correction-functional premise
 by explicit metric-defect and torsion component premises; those premises still
 carry the missing time--space regularity, so Point 4 remains open.
 
+The fixed-time component adapter is packaged in
+`DeTurckJointCorrectionFunctionalComponentsSliceRegularity.lean`. It applies
+the static Levi--Civita metric-defect and torsion-inner regularity theorems to
+the actual local frame and produces the scalar components used by the lowering
+bridge above. This discharges the spatial slice of those premises only; the
+joint time--space regularity and downstream PDE construction remain open.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
