@@ -33,8 +33,12 @@ structure is the precise interface for the geometric input.  Constructing it
 for the genuine DeTurck field requires unfolding `deTurckGaugeCoordinateField`
 through `extChartAt`, `mfderiv`, `intrinsicDeTurckGaugeField` (the NEGATED
 DeTurck vector field), and the Christoffel-symbol calculus, then verifying
-smoothness of the resulting jet expression.  This construction is NOT carried
-out here; it is the Phase-1b work item.
+smoothness of the resulting jet expression.  The canonical zeroth-order chart
+representatives and their DeTurck factorization are constructed below.  The
+remaining Phase-1b work is the analytic regularity bridge: proving the
+displayed derivative identities and joint time--space continuity for those
+representatives from genuine metric and background-solution data.
+`CanonicalDeTurckChartJetData` records that remaining boundary explicitly.
 
 What IS proved here, with no `sorry`, is the pure-calculus implication:
 
@@ -468,6 +472,109 @@ theorem deturckPsi2_contDiff : ContDiff ℝ ∞ (deturckPsi2 E) := by
   have h := hcomp.comp hpair
   simpa [Function.comp_def] using h
 
+/-! ## Canonical geometric coordinate representatives
+
+The first version of the jet interface left the chart differential, metric
+sharp map, and DeTurck one-form as independent fields.  The following maps
+remove that artificial freedom.  They use the actual extended-chart
+differential and the tangent-bundle trivialization at
+`x = (extChartAt I p₀).symm y`; the only remaining inputs are the metric and
+the intrinsic DeTurck one-form themselves.
+
+This is deliberately a factorization result, not a regularity result.  The
+spatial derivatives and their joint time--space continuity are still supplied
+by the explicit jet hypotheses below, but the zeroth-order geometric identity
+is now proved from the definitions. -/
+
+/-- The model-coordinate equivalence supplied by the tangent-bundle
+trivialization centered at `x`. -/
+noncomputable def tangentCoordinateEquiv (x : M) :
+    TangentSpace I x ≃L[ℝ] E :=
+  (trivializationAt E (TangentSpace I : M → Type _) x).continuousLinearEquivAt ℝ x
+    (FiberBundle.mem_baseSet_trivializationAt' x)
+
+/-- The coordinate differential of the fixed extended chart, with tangent
+vectors written in the centered tangent trivialization. -/
+noncomputable def geometricChartDiff (p₀ : M) : ℝ × E → (E →L[ℝ] E) :=
+  fun p =>
+    let φ := extChartAt I p₀
+    let x := φ.symm p.2
+    let C := tangentCoordinateEquiv (I := I) x
+    (NormedSpace.fromTangentSpace (φ x)).toContinuousLinearMap.comp
+      ((mfderiv I 𝓘(ℝ, E) φ x).comp C.symm.toContinuousLinearMap)
+
+/-- The intrinsic DeTurck one-form in the same model coordinates. -/
+noncomputable def geometricDeTurckCoordinateOneForm
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (p₀ : M) : ℝ × E → (E →L[ℝ] ℝ) :=
+  fun p =>
+    let φ := extChartAt I p₀
+    let x := φ.symm p.2
+    let C := tangentCoordinateEquiv (I := I) x
+    (intrinsicDeTurckOneForm (I := I) (M := M) g background p.1 x).comp
+      C.symm.toContinuousLinearMap
+
+/-- The metric Riesz map in the centered model coordinates. -/
+noncomputable def geometricMetricSharp
+    (g : MetricFamily (I := I) (M := M)) (p₀ : M) :
+    ℝ × E → SharpMap E :=
+  fun p => by
+    let φ := extChartAt I p₀
+    let x := φ.symm p.2
+    let C := tangentCoordinateEquiv (I := I) x
+    letI tangentNormedAddCommGroup : NormedAddCommGroup (TangentSpace I x) :=
+      inferInstanceAs (NormedAddCommGroup E)
+    letI tangentNormedSpace : NormedSpace ℝ (TangentSpace I x) :=
+      inferInstanceAs (NormedSpace ℝ E)
+    letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+      ⟨(g p.1).toRiemannianMetric⟩
+    let pre : (E →L[ℝ] ℝ) →L[ℝ] (TangentSpace I x →L[ℝ] ℝ) :=
+      (ContinuousLinearMap.compL ℝ (TangentSpace I x) E ℝ).flip
+        C.toContinuousLinearMap
+    let post : (TangentSpace I x →L[ℝ] ℝ) →L[ℝ] E :=
+      C.toContinuousLinearMap.comp (CovariantDerivative.rieszMap (I := I) x)
+    exact post.comp pre
+
+/-- The canonical zeroth-order factorization of the genuine coordinate field.
+The sign is the repository convention: `intrinsicDeTurckGaugeField` is the
+negative of the DeTurck vector field. -/
+theorem geometricDeTurckChartFactorization
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (p₀ : M) (t : ℝ) (y : E) :
+    deTurckGaugeCoordinateField (I := I) (M := M) g background p₀ t y =
+      -(geometricChartDiff (I := I) p₀ (t, y)
+        (geometricMetricSharp (I := I) (M := M) g p₀ (t, y)
+          (geometricDeTurckCoordinateOneForm (I := I) (M := M)
+            g background p₀ (t, y)))) := by
+  let φ := extChartAt I p₀
+  let x := φ.symm y
+  let C := tangentCoordinateEquiv (I := I) x
+  letI : NormedAddCommGroup (TangentSpace I x) := inferInstanceAs (NormedAddCommGroup E)
+  letI : NormedSpace ℝ (TangentSpace I x) := inferInstanceAs (NormedSpace ℝ E)
+  letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+    ⟨(g t).toRiemannianMetric⟩
+  let oneForm := intrinsicDeTurckOneForm (I := I) (M := M) g background t x
+  have hsharp :
+      geometricMetricSharp (I := I) (M := M) g p₀ (t, y)
+          (geometricDeTurckCoordinateOneForm (I := I) (M := M)
+            g background p₀ (t, y)) =
+        C (CovariantDerivative.rieszMap (I := I) x oneForm) := by
+    change C (CovariantDerivative.rieszMap (I := I) x
+      ((oneForm.comp C.symm.toContinuousLinearMap).comp C.toContinuousLinearMap)) =
+        C (CovariantDerivative.rieszMap (I := I) x oneForm)
+    simp [ContinuousLinearMap.comp_assoc]
+  rw [hsharp]
+  change
+    NormedSpace.fromTangentSpace (φ x)
+        (mfderiv I 𝓘(ℝ, E) φ x
+          (intrinsicDeTurckGaugeField (I := I) (M := M) g background t x)) =
+      -(NormedSpace.fromTangentSpace (φ x)
+        (mfderiv I 𝓘(ℝ, E) φ x
+          (C.symm (C (CovariantDerivative.rieszMap (I := I) x oneForm)))))
+  simp [intrinsicDeTurckGaugeField, intrinsicDeTurckVectorField, C, oneForm]
+
 /-- The 0-jet map on the full 2-jet (via 0-jet projection). -/
 noncomputable def deturckPsi0_jet2 (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     : Jet2 E → E :=
@@ -621,6 +728,83 @@ structure DeTurckChartJetData
   hD2 : ∀ (t : ℝ) (y : E), y ∈ ball y₀ R →
     HasFDerivAt (fun z => jetD1 (t, z)) (jetD2 (t, y)) y
 
+/-- Regularity data for the canonical geometric zeroth-order representatives.
+
+Unlike `DeTurckChartJetData`, this record does not ask for an independent
+`hfactor`: the chart differential, metric sharp map, and one-form are fixed to
+the definitions above, and `toDeTurckChartJetData` proves the factorization
+from `geometricDeTurckChartFactorization`.  The derivative and joint-
+continuity fields remain explicit analytic input. -/
+structure CanonicalDeTurckChartJetData
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (p₀ : M) (y₀ : E) (R : ℝ) where
+  /-- First spatial derivative of the canonical metric sharp map. -/
+  sharpD1 : ℝ × E → (E →L[ℝ] SharpMap E)
+  /-- Second spatial derivative of the canonical metric sharp map. -/
+  sharpD2 : ℝ × E → (E →L[ℝ] E →L[ℝ] SharpMap E)
+  /-- First derivative identity for the canonical sharp map. -/
+  hsharpD1 : ∀ (t : ℝ) (y : E), y ∈ ball y₀ R →
+    HasFDerivAt (fun z => geometricMetricSharp (I := I) (M := M) g p₀ (t, z))
+      (sharpD1 (t, y)) y
+  /-- Second derivative identity for the canonical sharp map. -/
+  hsharpD2 : ∀ (t : ℝ) (y : E), y ∈ ball y₀ R →
+    HasFDerivAt (fun z => sharpD1 (t, z)) (sharpD2 (t, y)) y
+  /-- Joint continuity of the canonical sharp-map 2-jet. -/
+  hsharpJoint : ∀ (t₀ : ℝ), ContinuousOn
+    (fun p : ℝ × E =>
+      (geometricMetricSharp (I := I) (M := M) g p₀ p, sharpD1 p, sharpD2 p))
+    (Icc (t₀ - 1) (t₀ + 1) ×ˢ closedBall y₀ R)
+  /-- Explicit background Christoffel regularity, retained until the
+  chart-level bridge from Christoffel data to the intrinsic one-form is proved. -/
+  hbackground : BackgroundDeTurckRegularity (I := I) (M := M) background p₀ y₀ R
+  /-- First spatial derivative of the canonical zeroth-order jet. -/
+  jetD1 : ℝ × E → (E →L[ℝ] Jet0 E)
+  /-- Second spatial derivative of the canonical zeroth-order jet. -/
+  jetD2 : ℝ × E → (E →L[ℝ] E →L[ℝ] Jet0 E)
+  /-- First derivative identity for the canonical zeroth-order jet. -/
+  hD1 : ∀ (t : ℝ) (y : E), y ∈ ball y₀ R →
+    HasFDerivAt
+      (fun z =>
+        (geometricChartDiff (I := I) p₀ (t, z),
+          geometricMetricSharp (I := I) (M := M) g p₀ (t, z),
+          geometricDeTurckCoordinateOneForm (I := I) (M := M)
+            g background p₀ (t, z)))
+      (jetD1 (t, y)) y
+  /-- Second derivative identity for the canonical zeroth-order jet. -/
+  hD2 : ∀ (t : ℝ) (y : E), y ∈ ball y₀ R →
+    HasFDerivAt (fun z => jetD1 (t, z)) (jetD2 (t, y)) y
+
+/-- Convert canonical geometric jet data to the original jet interface.
+The only nontrivial field filled here is `hfactor`; it is the proved
+zeroth-order coordinate identity, not a supplied hypothesis. -/
+noncomputable def CanonicalDeTurckChartJetData.toDeTurckChartJetData
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {p₀ : M} {y₀ : E} {R : ℝ}
+    (data : CanonicalDeTurckChartJetData
+      (I := I) (M := M) g background p₀ y₀ R) :
+    DeTurckChartJetData (I := I) (M := M) g background p₀ y₀ R where
+  chartDiff := geometricChartDiff (I := I) p₀
+  oneForm := geometricDeTurckCoordinateOneForm (I := I) (M := M)
+    g background p₀
+  jetD1 := data.jetD1
+  jetD2 := data.jetD2
+  hmetric :=
+    { sharpMap := geometricMetricSharp (I := I) (M := M) g p₀
+      sharpD1 := data.sharpD1
+      sharpD2 := data.sharpD2
+      hsharpD1 := data.hsharpD1
+      hsharpD2 := data.hsharpD2
+      hsharpJoint := data.hsharpJoint }
+  hbackground := data.hbackground
+  hfactor := by
+    intro t y
+    exact geometricDeTurckChartFactorization
+      (I := I) (M := M) g background p₀ t y
+  hD1 := data.hD1
+  hD2 := data.hD2
+
 /-- The geometric DeTurck jet map `S : ℝ × E → Jet2 E`.
 
 Packages the 0-jet `(chartDiff, sharpMap, oneForm)` with its first and
@@ -758,5 +942,20 @@ noncomputable def geometricSmoothDeTurckJetMap
   hfactor₀ := fun t y => deTurckGeometricJetMap_factor0 data t y
   hfactor₁ := fun t y hy => deTurckGeometricJetMap_factor1 data t y hy
   hfactor₂ := fun t y hy => deTurckGeometricJetMap_factor2 data t y hy
+
+/-- Assemble the smooth jet map directly from canonical geometric data.
+This is the entry point for the next regularity milestone: once the explicit
+derivative and joint-continuity fields in `CanonicalDeTurckChartJetData` are
+proved, no independent chart-factorization hypothesis is needed. -/
+noncomputable def canonicalSmoothDeTurckJetMap
+    {g : MetricFamily (I := I) (M := M)}
+    {background : ConnectionFamily (I := I) (M := M)}
+    {p₀ : M} {y₀ : E} {R : ℝ}
+    (data : CanonicalDeTurckChartJetData
+      (I := I) (M := M) g background p₀ y₀ R) :
+    SmoothDeTurckJetMap
+      (deTurckGaugeCoordinateField (I := I) (M := M) g background p₀)
+      y₀ R (Jet2 E) :=
+  geometricSmoothDeTurckJetMap data.toDeTurckChartJetData
 
 end RicciFlow
