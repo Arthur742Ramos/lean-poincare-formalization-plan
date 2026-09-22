@@ -50,10 +50,12 @@ canonical Euclidean-section specialization. It also proves the
 `IsHolderNorm`-to-`HolderBCF` continuity/boundedness bridge, derives a genuine
 compact-fiber output bound, and packages the actual nonlinear 0-jet as a
 `MatrixHolderBCF` and a `Jet2HolderSection`. This advances workstream C, but
-it is intentionally not reported as full Banach-space local Lipschitzness:
-the `LipschitzOnWith` map on the full section space, the strong-continuity
-issue for the big Hölder heat propagator, and the variable-coefficient
-quasilinear closure remain open.
+the next refinement now controls the full `HolderBCF` norm and proves a
+closed-ball `LipschitzOnWith` estimate for the packaged `Jet2HolderSection`
+map, with a uniform extracted-jet bound. It is still intentionally not
+reported as the completed PDE closure: strong continuity of the big Hölder
+heat propagator and the variable-coefficient quasilinear evolution remain
+open.
 
 ## Proved architecture
 

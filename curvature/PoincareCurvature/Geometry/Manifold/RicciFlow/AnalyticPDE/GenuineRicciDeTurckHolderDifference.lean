@@ -237,6 +237,28 @@ noncomputable def geometricNHolder
       geometricNRD Γbg s x i j := by
   exact geometricNRDHolder_apply Γbg s hα hrange x i j
 
+/-! ## Norm control for the packaged output -/
+
+theorem holderSeminorm_le_of_isHolderConst
+    {n : ℕ} {f : HolderBCF α n} {H : ℝ}
+    (hf : IsHolderConst α f.toBCF H) :
+    HolderBCF.holderSeminorm f ≤ H := by
+  unfold HolderBCF.holderSeminorm
+  exact csInf_le (HolderBCF.bddBelow_holderSet f) hf
+
+noncomputable def geometricNRDLipschitzConst
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s : Jet2Section d d α) : ℝ :=
+  (phiRDNemytskiiData (d := d) Γbg).L *
+      jet2SectionHolderConst s * jet2LipConst d d +
+    (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d
+
+noncomputable def geometricNRDHolderLipschitzConst
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s : Jet2Section d d α) : ℝ :=
+  (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d +
+    geometricNRDLipschitzConst Γbg s
+
 /-! ## The genuine source difference -/
 
 /-! The Hölder-seminorm difference bound for the genuine Ricci--DeTurck
@@ -548,6 +570,266 @@ theorem isHolderNorm_geometricNRD_sub_of_euclidean_closedBall_linear
       (fun x => jet2OfSection_euclideanSection d α x) hR hRsmall hs
   · exact hrange_of_mem_closedBall Γbg (euclideanSection d α)
       (fun x => jet2OfSection_euclideanSection d α x) hR hRsmall ht
+
+theorem isHolderConst_geometricNRDHolder_sub
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s t : Jet2Section d d α)
+    (hα : 0 < α)
+    (hs : ∀ x, jet2OfSection s x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K)
+    (ht : ∀ x, jet2OfSection t x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K)
+    (i j : Fin d) :
+    IsHolderConst α
+      ((geometricNRDHolder Γbg s hα hs i j).toBCF -
+        (geometricNRDHolder Γbg t hα ht i j).toBCF)
+      (geometricNRDLipschitzConst Γbg s * ‖s - t‖) := by
+  have hdiff := isHolderNorm_geometricNRD_sub_linear Γbg s t hs ht
+  have hK : 0 ≤ geometricNRDLipschitzConst Γbg s * ‖s - t‖ := by
+    simpa [geometricNRDLipschitzConst] using hdiff.1
+  refine ⟨hK, fun a b => ?_⟩
+  simp only [BoundedContinuousFunction.sub_apply, geometricNRDHolder_apply]
+  have hpoint := hdiff.2 a b
+  calc
+    |geometricNRD Γbg s a i j - geometricNRD Γbg t a i j -
+        (geometricNRD Γbg s b i j - geometricNRD Γbg t b i j)|
+        ≤ ‖(geometricNRD Γbg s a - geometricNRD Γbg t a) -
+            (geometricNRD Γbg s b - geometricNRD Γbg t b)‖ := by
+              rw [← Real.norm_eq_abs]
+              exact le_trans
+                (pi_entry_norm_le
+                  (((geometricNRD Γbg s a - geometricNRD Γbg t a) -
+                    (geometricNRD Γbg s b - geometricNRD Γbg t b)) i) j)
+                (pi_entry_norm_le
+                  ((geometricNRD Γbg s a - geometricNRD Γbg t a) -
+                    (geometricNRD Γbg s b - geometricNRD Γbg t b)) i)
+    _ ≤ geometricNRDLipschitzConst Γbg s * ‖s - t‖ *
+        ∑ k : Fin d, |(a - b) k| ^ α := by
+          simpa [geometricNRDLipschitzConst] using hpoint
+
+theorem norm_geometricNRDHolder_sub_le
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s t : Jet2Section d d α)
+    (hα : 0 < α)
+    (hs : ∀ x, jet2OfSection s x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K)
+    (ht : ∀ x, jet2OfSection t x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K) :
+    ‖geometricNRDHolder Γbg s hα hs -
+        geometricNRDHolder Γbg t hα ht‖ ≤
+      geometricNRDHolderLipschitzConst Γbg s * ‖s - t‖ := by
+  have hdiff := isHolderNorm_geometricNRD_sub_linear Γbg s t hs ht
+  have hK : 0 ≤ geometricNRDLipschitzConst Γbg s * ‖s - t‖ := by
+    simpa [geometricNRDLipschitzConst] using hdiff.1
+  have hL : 0 ≤ (phiRDNemytskiiData (d := d) Γbg).L :=
+    (phiRDNemytskiiData (d := d) Γbg).L.coe_nonneg
+  have hB : 0 ≤ (phiRDNemytskiiData (d := d) Γbg).B :=
+    (phiRDNemytskiiData (d := d) Γbg).hB_nonneg
+  have hHs : 0 ≤ jet2SectionHolderConst s :=
+    (isHolderNorm_jet2OfSection s).1
+  have hC : 0 ≤ jet2LipConst d d := jet2LipConst_nonneg d d
+  have hKcoeff : 0 ≤ geometricNRDLipschitzConst Γbg s := by
+    simp only [geometricNRDLipschitzConst]
+    exact add_nonneg (mul_nonneg (mul_nonneg hL hHs) hC)
+      (mul_nonneg hB hC)
+  have hsupBound : 0 ≤
+      (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d *
+        ‖s - t‖ :=
+    mul_nonneg (mul_nonneg hB hC) (norm_nonneg _)
+  have htotalBound : 0 ≤
+      geometricNRDHolderLipschitzConst Γbg s * ‖s - t‖ := by
+    simp only [geometricNRDHolderLipschitzConst, add_mul]
+    exact add_nonneg hsupBound hK
+  have hentry : ∀ i j : Fin d,
+      ‖geometricNRDHolder Γbg s hα hs i j -
+          geometricNRDHolder Γbg t hα ht i j‖ ≤
+        geometricNRDHolderLipschitzConst Γbg s * ‖s - t‖ := by
+    intro i j
+    have hsup : ‖(geometricNRDHolder Γbg s hα hs i j -
+        geometricNRDHolder Γbg t hα ht i j).toBCF‖ ≤
+        (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d *
+          ‖s - t‖ := by
+      rw [BoundedContinuousFunction.norm_le hsupBound]
+      intro x
+      simp only [HolderBCF.sub_toBCF, BoundedContinuousFunction.sub_apply,
+        geometricNRDHolder_apply]
+      calc
+        ‖geometricNRD Γbg s x i j - geometricNRD Γbg t x i j‖ ≤
+            ‖geometricNRD Γbg s x - geometricNRD Γbg t x‖ := by
+              exact le_trans
+                (pi_entry_norm_le
+                  ((geometricNRD Γbg s x - geometricNRD Γbg t x) i) j)
+                (pi_entry_norm_le
+                  (geometricNRD Γbg s x - geometricNRD Γbg t x) i)
+        _ ≤ (phiRDNemytskiiData (d := d) Γbg).B *
+              (jet2LipConst d d * ‖s - t‖) :=
+          norm_geometricNRD_sub Γbg s t hs ht x
+        _ = (phiRDNemytskiiData (d := d) Γbg).B *
+            jet2LipConst d d * ‖s - t‖ := by ring
+    have hsemi : HolderBCF.holderSeminorm
+        (geometricNRDHolder Γbg s hα hs i j -
+          geometricNRDHolder Γbg t hα ht i j) ≤
+        geometricNRDLipschitzConst Γbg s * ‖s - t‖ :=
+      holderSeminorm_le_of_isHolderConst
+        (isHolderConst_geometricNRDHolder_sub Γbg s t hα hs ht i j)
+    rw [HolderBCF.norm_def]
+    calc
+      ‖(geometricNRDHolder Γbg s hα hs i j -
+          geometricNRDHolder Γbg t hα ht i j).toBCF‖ +
+          HolderBCF.holderSeminorm
+            (geometricNRDHolder Γbg s hα hs i j -
+              geometricNRDHolder Γbg t hα ht i j) ≤
+        (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d *
+            ‖s - t‖ + geometricNRDLipschitzConst Γbg s * ‖s - t‖ :=
+          add_le_add hsup hsemi
+      _ = geometricNRDHolderLipschitzConst Γbg s * ‖s - t‖ := by
+        simp only [geometricNRDHolderLipschitzConst]
+        ring
+  change ‖fun i => fun j =>
+      geometricNRDHolder Γbg s hα hs i j -
+        geometricNRDHolder Γbg t hα ht i j‖ ≤
+    geometricNRDHolderLipschitzConst Γbg s * ‖s - t‖
+  rw [pi_norm_le_iff_of_nonneg htotalBound]
+  intro i
+  rw [pi_norm_le_iff_of_nonneg htotalBound]
+  intro j
+  exact hentry i j
+
+/-! ## Uniform closed-ball Lipschitz control -/
+
+noncomputable def geometricNRDHolderBallLipschitzConst
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (c : Jet2Section d d α) (R : ℝ) : ℝ :=
+  (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d +
+    ((phiRDNemytskiiData (d := d) Γbg).L *
+        (jet2LipConst d d * (‖c‖ + R)) * jet2LipConst d d +
+      (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d)
+
+theorem jet2SectionHolderConst_le_on_closedBall
+    (c : Jet2Section d d α) {R : ℝ}
+    (s : Jet2Section d d α)
+    (hs : s ∈ Metric.closedBall c R) :
+    jet2SectionHolderConst s ≤
+      jet2LipConst d d * (‖c‖ + R) := by
+  have hsc : ‖s - c‖ ≤ R := by
+    have hmem : dist s c ≤ R := Metric.mem_closedBall.mp hs
+    rwa [dist_eq_norm] at hmem
+  have hnorm : ‖s‖ ≤ ‖c‖ + R := by
+    calc
+      ‖s‖ = ‖(s - c) + c‖ := by congr 1 <;> abel
+      _ ≤ ‖s - c‖ + ‖c‖ := norm_add_le _ _
+      _ ≤ R + ‖c‖ := add_le_add hsc (le_refl _)
+      _ = ‖c‖ + R := by ring
+  calc
+    jet2SectionHolderConst s ≤ jet2LipConst d d * ‖s‖ := by
+      simpa [jet2LipConst] using jet2SectionHolderConst_le_norm s
+    _ ≤ jet2LipConst d d * (‖c‖ + R) := by
+      exact mul_le_mul_of_nonneg_left hnorm (jet2LipConst_nonneg d d)
+
+theorem geometricNRDHolderLipschitzConst_le_ball
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (c : Jet2Section d d α) {R : ℝ}
+    (s : Jet2Section d d α)
+    (hs : s ∈ Metric.closedBall c R) :
+    geometricNRDHolderLipschitzConst Γbg s ≤
+      geometricNRDHolderBallLipschitzConst Γbg c R := by
+  have hHs := jet2SectionHolderConst_le_on_closedBall c s hs
+  have hL : 0 ≤ (phiRDNemytskiiData (d := d) Γbg).L :=
+    (phiRDNemytskiiData (d := d) Γbg).L.coe_nonneg
+  have hB : 0 ≤ (phiRDNemytskiiData (d := d) Γbg).B :=
+    (phiRDNemytskiiData (d := d) Γbg).hB_nonneg
+  have hC : 0 ≤ jet2LipConst d d := jet2LipConst_nonneg d d
+  simp only [geometricNRDHolderLipschitzConst,
+    geometricNRDLipschitzConst, geometricNRDHolderBallLipschitzConst]
+  calc
+    (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d +
+          ((phiRDNemytskiiData (d := d) Γbg).L *
+              jet2SectionHolderConst s * jet2LipConst d d +
+            (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d) ≤
+      (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d +
+          ((phiRDNemytskiiData (d := d) Γbg).L *
+              (jet2LipConst d d * (‖c‖ + R)) * jet2LipConst d d +
+            (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d) := by
+              gcongr
+
+theorem geometricNRDHolderBallLipschitzConst_nonneg
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (c : Jet2Section d d α) {R : ℝ} (hR : 0 < R) :
+    0 ≤ geometricNRDHolderBallLipschitzConst Γbg c R := by
+  have hL : 0 ≤ (phiRDNemytskiiData (d := d) Γbg).L :=
+    (phiRDNemytskiiData (d := d) Γbg).L.coe_nonneg
+  have hB : 0 ≤ (phiRDNemytskiiData (d := d) Γbg).B :=
+    (phiRDNemytskiiData (d := d) Γbg).hB_nonneg
+  have hC : 0 ≤ jet2LipConst d d := jet2LipConst_nonneg d d
+  have hcR : 0 ≤ ‖c‖ + R :=
+    add_nonneg (norm_nonneg _) (le_of_lt hR)
+  simp only [geometricNRDHolderBallLipschitzConst]
+  exact add_nonneg (mul_nonneg hB hC)
+    (add_nonneg
+      (mul_nonneg (mul_nonneg hL (mul_nonneg hC hcR)) hC)
+      (mul_nonneg hB hC))
+
+noncomputable def geometricNHolderOnClosedBall
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (c : Jet2Section d d α)
+    (hc : ∀ x : Fin d → ℝ, jet2OfSection c x =
+      (euclideanJet2 : Jet2 d d))
+    {R : ℝ} (hR : 0 < R)
+    (hRsmall : 2 * jet2LipConst d d * R < phiRDRadius (d := d))
+    (hα : 0 < α) (s : Jet2Section d d α) :
+    Jet2HolderSection d α := by
+  classical
+  exact if hs : s ∈ Metric.closedBall c R then
+    geometricNHolder Γbg s hα
+      (hrange_of_mem_closedBall Γbg c hc hR hRsmall hs)
+  else 0
+
+theorem geometricNHolderOnClosedBall_eq
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (c : Jet2Section d d α)
+    (hc : ∀ x : Fin d → ℝ, jet2OfSection c x =
+      (euclideanJet2 : Jet2 d d))
+    {R : ℝ} (hR : 0 < R)
+    (hRsmall : 2 * jet2LipConst d d * R < phiRDRadius (d := d))
+    (hα : 0 < α) {s : Jet2Section d d α}
+    (hs : s ∈ Metric.closedBall c R) :
+    geometricNHolderOnClosedBall Γbg c hc hR hRsmall hα s =
+      geometricNHolder Γbg s hα
+        (hrange_of_mem_closedBall Γbg c hc hR hRsmall hs) := by
+  simp only [geometricNHolderOnClosedBall, dif_pos hs]
+
+theorem lipschitzOnWith_geometricNHolderOnClosedBall
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (c : Jet2Section d d α)
+    (hc : ∀ x : Fin d → ℝ, jet2OfSection c x =
+      (euclideanJet2 : Jet2 d d))
+    {R : ℝ} (hR : 0 < R)
+    (hRsmall : 2 * jet2LipConst d d * R < phiRDRadius (d := d))
+    (hα : 0 < α) :
+    LipschitzOnWith
+      ⟨geometricNRDHolderBallLipschitzConst Γbg c R,
+        geometricNRDHolderBallLipschitzConst_nonneg Γbg c hR⟩
+      (geometricNHolderOnClosedBall Γbg c hc hR hRsmall hα)
+      (Metric.closedBall c R) := by
+  refine LipschitzOnWith.of_dist_le_mul ?_
+  intro s hs t ht
+  rw [geometricNHolderOnClosedBall_eq Γbg c hc hR hRsmall hα hs,
+    geometricNHolderOnClosedBall_eq Γbg c hc hR hRsmall hα ht]
+  rw [dist_eq_norm, dist_eq_norm]
+  change ‖geometricNHolder Γbg s hα _ -
+      geometricNHolder Γbg t hα _‖ ≤
+    geometricNRDHolderBallLipschitzConst Γbg c R * ‖s - t‖
+  calc
+    ‖geometricNHolder Γbg s hα _ - geometricNHolder Γbg t hα _‖ ≤
+        geometricNRDHolderLipschitzConst Γbg s * ‖s - t‖ := by
+      simpa [geometricNHolder] using
+        norm_geometricNRDHolder_sub_le Γbg s t hα
+          (hrange_of_mem_closedBall Γbg c hc hR hRsmall hs)
+          (hrange_of_mem_closedBall Γbg c hc hR hRsmall ht)
+    _ ≤ geometricNRDHolderBallLipschitzConst Γbg c R * ‖s - t‖ := by
+      apply mul_le_mul_of_nonneg_right
+        (geometricNRDHolderLipschitzConst_le_ball Γbg c s hs)
+        (norm_nonneg _)
 
 end AnalyticPDE
 end RicciFlow
