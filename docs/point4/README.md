@@ -353,6 +353,14 @@ Thus the remaining analytic obligation is exposed at scalar metric-defect
 and torsion components; no joint time regularity is inferred from slicewise
 families, and the downstream PDE construction remains open.
 
+The scalar lowering is packaged in
+`DeTurckJointCorrectionFunctionalComponentsLowering.lean`. It expands each
+local-frame correction-functional component through the actual
+metric-defect/torsion identity and closes the finite scalar expression under
+joint `ContMDiffOn`. This replaces the scalar correction-functional premise
+by explicit metric-defect and torsion component premises; those premises still
+carry the missing time--space regularity, so Point 4 remains open.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
