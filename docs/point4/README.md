@@ -184,6 +184,14 @@ spatial `fderivWithin` contribution. It does not construct the full witness,
 the pointwise DeTurck differentiability needed by the assembly bridge, the
 endpoint chart data, or the general gauge flow.
 
+`DeTurckFlowVariationalChosenBackground.lean` discharges that pointwise
+differentiability input for the actual chosen solution: its recorded
+Levi-Civita background supplies the required `C^1` connection regularity. The
+resulting constructor combines this fact with the temporal bridge, so an
+existing `FullVariationalWitness` needs only `MetricTimeDifferenceData` to
+obtain the assembled `hvalue`. Full witness construction and endpoint data
+remain open.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
