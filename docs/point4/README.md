@@ -289,6 +289,14 @@ for an unrelated field. The genuine compact-flow comparison hypotheses remain
 explicit; this is an interface repair, not a claim that those hypotheses or
 Point 4 local existence have already been proved.
 
+The native cutoff adapter is packaged in
+`DeTurckCompactFlowCutoffComparison.lean`. It turns the existing cutoff-model
+flow, cutoff-equals-one graph control, raw ODE, tube membership, and anchor data
+into the coherent comparison premise consumed above. Cutoff construction and
+uniform orbit-graph confinement remain explicit inputs; the adapter therefore
+connects the two existing interfaces without claiming that the remaining
+geometric comparison packages have already been constructed.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
