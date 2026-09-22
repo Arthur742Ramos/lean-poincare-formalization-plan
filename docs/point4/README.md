@@ -99,6 +99,17 @@ analytic inputs remain explicit; the current repository still does not claim
 the missing nonlinear seminorm estimate or the unrestricted Ricci--DeTurck
 endomap.
 
+The full-norm path input is discharged under global `C^{1,1}` fiber-map
+hypotheses in `LittleHolderNemytskiiPath.lean`. The theorem
+`tendsto_holderBCF_comp_heatPropagator_of_c11` uses the existing quantitative
+`isHolderNorm_comp_sub` estimate together with the two little-Hölder heat
+path components, so the next commutator milestone only needs to supply the
+vanishing Hölder-seminorm estimate. Its wrapper
+`isGoodHolder_comp_of_commutator_seminorm_of_c11` now packages the resulting
+conditional little-Hölder conclusion. The assumptions are deliberately
+stated for an abstract scalar fiber map; the tensor-valued Ricci--DeTurck map
+still needs its own derivative and commutator discharge.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
