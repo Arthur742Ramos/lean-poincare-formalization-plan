@@ -262,6 +262,16 @@ estimate. The jointly intrinsic `C²` section remains an explicit premise (and
 the specialization uses the boundaryless chart-target setting); no general
 parabolic regularity or Point-4 existence theorem is claimed.
 
+The flow-composition milestone is packaged in
+`DeTurckJointC2FlowBridge.lean`. It feeds that exact regularity package into
+the existing cycle-free Picard constructor and therefore produces an actual
+model-space `VariationalLocalFlowSolution` with selected time `t₀`, under the
+same joint intrinsic `C²`, chart-containment, and boundaryless hypotheses. The
+constructor interface is now explicitly exported from
+`DeTurckWitnessPhase1.lean` so this composition is a public downstream
+theorem; the geometric premises and the later manifold identification,
+endpoint, and Ricci-flow conclusions remain open.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:

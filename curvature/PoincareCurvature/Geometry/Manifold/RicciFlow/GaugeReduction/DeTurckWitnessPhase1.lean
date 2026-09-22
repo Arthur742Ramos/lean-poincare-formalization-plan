@@ -24,6 +24,8 @@ public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTur
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ModelGaugeFlowODECore
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckPicardRegularityReduction
 
+@[expose] public noncomputable section
+
 open RicciFlow
 open Metric Set
 open scoped Manifold ContDiff Topology NNReal
