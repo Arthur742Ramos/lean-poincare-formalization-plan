@@ -125,6 +125,7 @@ theorem picardEstimates_of_contDiffOn_two_and_jointContinuity
     (hjoint2 : ContinuousOn (fun p : ℝ × E => fderiv ℝ (fderiv ℝ (f p.1)) p.2)
       (Icc (t₀ - 1) (t₀ + 1) ×ˢ closedBall y₀ (a : ℝ))) :
     ∃ (tmin tmax : ℝ) (r Kf KD Lf BA BD : ℝ≥0),
+      t₀ ∈ Icc tmin tmax ∧
       (∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall y₀ ↑a)) ∧
       (∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (fderiv ℝ (f t)) (closedBall y₀ ↑a)) ∧
       (∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall y₀ ↑a, ‖f t y‖ ≤ ↑Lf) ∧
@@ -216,7 +217,10 @@ theorem picardEstimates_of_contDiffOn_two_and_jointContinuity
     simp only [mem_Icc] at ht ⊢
     constructor <;> linarith
   refine ⟨t₀ - δ, t₀ + δ, a / 2, ‖CD‖₊, ‖CD2‖₊, ‖Cf‖₊, ‖A₀‖₊ + a, ‖CD‖₊,
-    ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · -- The base time is an interior point of the chosen Picard interval.
+    simp only [mem_Icc]
+    constructor <;> linarith [hδ_nn]
   · -- hf_lip: C¹ with bounded derivative on the convex ball gives Lipschitz.
     intro t ht
     apply Convex.lipschitzOnWith_of_nnnorm_fderiv_le (𝕜 := ℝ) _ _ (convex_closedBall y₀ ↑a)
@@ -317,6 +321,7 @@ theorem deTurckGaugeCoordinatePicardEstimates
           (fderiv ℝ (deTurckGaugeCoordinateField (I := I) (M := M) g background p₀ p.1)) p.2)
       (Icc (t₀ - 1) (t₀ + 1) ×ˢ closedBall (extChartAt I p₀ p₀) (a : ℝ))) :
     ∃ (tmin tmax : ℝ) (r Kf KD Lf BA BD : ℝ≥0),
+      t₀ ∈ Icc tmin tmax ∧
       (∀ t ∈ Icc tmin tmax,
         LipschitzOnWith Kf
           (deTurckGaugeCoordinateField (I := I) (M := M) g background p₀ t)

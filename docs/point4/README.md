@@ -194,6 +194,14 @@ gauge-corrected pullback velocity. That core then combines with the temporal
 bridge to obtain a `FullVariationalWitness`. Constructing the remaining
 analytic core inputs, endpoint data, and the general gauge flow remain open.
 
+`DeTurckWitnessPhase1.lean` now carries the next constructive boundary: after
+the explicit `C²`/joint-continuity regularity package yields component Picard
+estimates, the cycle-free model ODE core constructs an actual
+`VariationalLocalFlowSolution`, including the product-field continuity and norm
+bound. The estimate API now also exposes that the selected base time belongs to
+the returned Picard interval. This is conditional on the still-open geometric
+regularity package; it does not construct the DeTurck jet map or close Point 4.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
