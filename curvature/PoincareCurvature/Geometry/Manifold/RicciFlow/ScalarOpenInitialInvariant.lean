@@ -103,3 +103,53 @@ theorem parabolicNonnegativeInvariant_openInitial
   linarith
 
 end CovariantDerivative.TimeDependentRiemannianMetric
+
+namespace CovariantDerivative
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [IsManifold I ∞ M]
+  [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
+  [RiemannianBundle (TangentSpace I : M → Type _)]
+
+local notation "TM" => (TangentSpace I : M → Type _)
+local notation "T₁" => (fun x : M => TM x →L[ℝ] ℝ)
+
+/-- Spatial constants disappear and negation reverses the intrinsic scalar
+Laplacian. This affine form is used for time-dependent maximum-principle
+barriers, whose spatial offset is constant on each time slice. -/
+theorem scalarLaplacian_const_sub
+    (cov : CovariantDerivative I E TM) (c : ℝ) {f : M → ℝ} {x : M}
+    (hf : ∀ y, MDiffAt f y)
+    (hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) f y)) x) :
+    scalarLaplacian cov (fun y => c - f y) x =
+      -scalarLaplacian cov f x := by
+  have hdc : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I) (fun _ : M => c) y)) x := by
+    have hz :
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (scalarDifferential (I := I) (fun _ : M => c) y)) =
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y 0) := by
+      funext y
+      congr 1
+      ext v
+      simp only [scalarDifferential_apply]
+      rw [mvfderiv_const]
+    rw [hz]
+    exact mdifferentiableAt_zeroSection (𝕜 := ℝ)
+      (F := E →L[ℝ] ℝ) (E := T₁) (x := x)
+  have heq : (fun y : M => c - f y) =
+      (fun _ : M => c) + (-1 : ℝ) • f := by
+    funext y
+    simp [Pi.add_apply, sub_eq_add_neg]
+  rw [heq, scalarLaplacian_add_smul_const cov (-1)
+    (fun y => mdifferentiableAt_const) hf hdc hdf]
+  rw [scalarLaplacian_const]
+  ring
+
+end CovariantDerivative
