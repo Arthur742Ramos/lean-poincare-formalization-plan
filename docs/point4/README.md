@@ -200,7 +200,7 @@ estimates, the cycle-free model ODE core constructs an actual
 `VariationalLocalFlowSolution`, including the product-field continuity and norm
 bound. The estimate API now also exposes that the selected base time belongs to
 the returned Picard interval. This is conditional on the still-open geometric
-regularity package; it does not construct the DeTurck jet map or close Point 4.
+regularity package; it does not prove that package or close Point 4.
 
 The Phase-1 constructor now also composes with
 `DeTurckPicardRegularityReduction.smoothJetMap_implies_picardRegularity`:
@@ -208,6 +208,18 @@ explicit smooth jet data and joint jet continuity produce the regularity
 package, which then produces the model variational flow. This removes a
 redundant three-hypothesis boundary without hiding the geometric jet-map
 construction; the jet and its continuity remain explicit inputs.
+
+The follow-up canonical-coordinate milestone discharges the zeroth-order
+geometric part of that input. `DeTurckPicardRegularityReduction.lean` now
+defines `tangentCoordinateEquiv`, `geometricChartDiff`,
+`geometricMetricSharp`, and `geometricDeTurckCoordinateOneForm` from the actual
+extended-chart differential, tangent-bundle trivialization, metric Riesz map,
+and intrinsic DeTurck one-form, and proves
+`geometricDeTurckChartFactorization`. `CanonicalDeTurckChartJetData` converts
+these representatives into the existing jet interface without an independent
+factorization hypothesis. Its derivative and joint-continuity fields remain
+explicit: the chart-level regularity bridge and the parabolic time--space
+regularity needed for the unconditional Point-4 theorem are still open.
 
 ## Proved architecture
 
