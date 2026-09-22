@@ -188,10 +188,11 @@ the core-to-full constructor remains in the chosen-background bridge.
 `DeTurckFlowVariationalChosenBackground.lean` discharges that pointwise
 differentiability input for the actual chosen solution: its recorded
 Levi-Civita background supplies the required `C^1` connection regularity. It
-also constructs a core from explicit `gdot`, Picard, metric-coordinate
-derivative, and model-bracket data, then combines that core with the temporal
-bridge to obtain a `FullVariationalWitness`. Constructing those analytic core
-inputs, endpoint data, and the general gauge flow remain open.
+also constructs a core from Picard, metric-coordinate derivative, and
+model-bracket data; the chosen solution supplies `gdot` as its canonical
+gauge-corrected pullback velocity. That core then combines with the temporal
+bridge to obtain a `FullVariationalWitness`. Constructing the remaining
+analytic core inputs, endpoint data, and the general gauge flow remain open.
 
 ## Proved architecture
 
