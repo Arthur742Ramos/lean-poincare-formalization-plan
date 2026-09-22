@@ -34,7 +34,7 @@ namespace ModelGaugeFlowODE
 
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-/-- The model-space ODE structures (`LocalFlowSolution`,
+/- The model-space ODE structures (`LocalFlowSolution`,
 `LipschitzLocalFlowSolution`, `ContinuousLocalFlowSolution`,
 `VariationalLocalFlowSolution`) and `variationalVectorField` are now defined in
 `ModelGaugeFlowODECore`, which this file imports. This breaks the import cycle
@@ -104,14 +104,16 @@ theorem gronwallBound_zero_left_forcing_mul_norm_isLittleO
       _ ≤ c * ‖h‖ := by
             gcongr
 
-/-- Project the base ODE from a solution of the product variational system. -/
+/- Project the base ODE from a solution of the product variational system. -/
 
-/-- `hasDerivWithinAt_fst_of_variationalVectorField` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `hasDerivWithinAt_fst_of_variationalVectorField` was moved to
+  `ModelGaugeFlowODECore` to break the import cycle. -/
 
-/-- Project the tangent-map variational ODE from a solution of the product
-variational system. -/
+/- Project the tangent-map variational ODE from a solution of the product
+  variational system. -/
 
-/-- `hasDerivWithinAt_snd_of_variationalVectorField` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `hasDerivWithinAt_snd_of_variationalVectorField` was moved to
+  `ModelGaugeFlowODECore` to break the import cycle. -/
 
 namespace LocalFlowSolution
 
@@ -146,10 +148,10 @@ theorem flow_hasDerivAt_of_mem_Ioo
   (α.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
     (Icc_mem_nhds ht.1 ht.2)
 
-/-- Every initial point in the local ball has within-interval continuity on the
-Picard interval. -/
+/- Every initial point in the local ball has within-interval continuity on the
+  Picard interval. -/
 
-/-- `flow_continuousWithinAt` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `flow_continuousWithinAt` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Center-curve within-interval continuity on the Picard interval. -/
 theorem center_continuousWithinAt
@@ -905,10 +907,10 @@ theorem exists_dist_flow_le_mul_of_mem_Ioo
     ∃ L' : ℝ≥0, dist (α.flow x t) (α.flow y t) ≤ L' * dist x y :=
   α.exists_dist_flow_le_mul (Ioo_subset_Icc_self ht) hx hy
 
-/-- Uniform initial-data Lipschitz dependence plus the ODE time-continuity of
-each trajectory gives joint space-time continuity on the local Picard cylinder. -/
+/- Uniform initial-data Lipschitz dependence plus the ODE time-continuity of
+  each trajectory gives joint space-time continuity on the local Picard cylinder. -/
 
-/-- `flow_continuousOn_spaceTime` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `flow_continuousOn_spaceTime` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Pointwise within-space-time continuity of a Lipschitz local-flow package. -/
 theorem flow_continuousWithinAt_spaceTime
@@ -973,10 +975,10 @@ theorem flow_eventually_mem_of_mem_spaceTime_Ioo
     (fun q : V × ℝ => α.flow q.1 q.2) ⁻¹' U ∈ 𝓝 (x, t) :=
   (α.flow_continuousAt_spaceTime_of_mem_ball_Ioo hx ht) (hU.mem_nhds hmem)
 
-/-- A Lipschitz local-flow package is automatically a continuous space-time
-local-flow package. -/
+/- A Lipschitz local-flow package is automatically a continuous space-time
+  local-flow package. -/
 
-/-- `toContinuousLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `toContinuousLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- A proof-level Lipschitz local-flow witness automatically gives a continuous
 space-time local-flow witness. -/
@@ -1772,13 +1774,13 @@ theorem lipschitzOnWith_leftComp (D : V →L[ℝ] V) (state : Set (V →L[ℝ] V
     LipschitzOnWith ‖D‖₊ (fun A : V →L[ℝ] V => D.comp A) state :=
   (lipschitzWith_leftComp D).lipschitzOnWith
 
-/-- Distance estimate for composition with a fixed right factor. -/
+/- Distance estimate for composition with a fixed right factor. -/
 
-/-- `dist_comp_right_le` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `dist_comp_right_le` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
-/-- Distance estimate for composition with a fixed left factor. -/
+/- Distance estimate for composition with a fixed left factor. -/
 
-/-- `dist_comp_left_le` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `dist_comp_left_le` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Applying two continuous linear maps to a fixed vector is controlled by their
 operator distance. -/
@@ -1810,32 +1812,32 @@ theorem nnnorm_le_one_add_radius_of_mem_closedBall_one
       rw [← NNReal.coe_le_coe]
       exact_mod_cast (ContinuousLinearMap.norm_id_le (𝕜 := ℝ) (E := V))
 
-/-- Product-space Lipschitz estimate for the base component of the variational
-ODE. -/
+/- Product-space Lipschitz estimate for the base component of the variational
+  ODE. -/
 
-/-- `lipschitzOnWith_variationalBasePart` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `lipschitzOnWith_variationalBasePart` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
-/-- Product-space Lipschitz estimate for the linearized component
-`(y, A) ↦ Df(y) ∘ A` on a base state and an operator state. -/
+/- Product-space Lipschitz estimate for the linearized component
+  `(y, A) ↦ Df(y) ∘ A` on a base state and an operator state. -/
 
-/-- `lipschitzOnWith_variationalLinearPart` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `lipschitzOnWith_variationalLinearPart` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
-/-- Product-space Lipschitz estimate for the full variational vector field,
-combining a base-field Lipschitz estimate with bounded/Lipschitz control of the
-linearized coefficient on the chosen base and operator states. -/
+/- Product-space Lipschitz estimate for the full variational vector field,
+  combining a base-field Lipschitz estimate with bounded/Lipschitz control of the
+  linearized coefficient on the chosen base and operator states. -/
 
-/-- `lipschitzOnWith_variationalVectorField` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `lipschitzOnWith_variationalVectorField` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
-/-- Time-dependent specialization of the product-space Lipschitz estimate for
-`variationalVectorField`. -/
+/- Time-dependent specialization of the product-space Lipschitz estimate for
+  `variationalVectorField`. -/
 
-/-- `lipschitzOnWith_variationalVectorField_at` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `lipschitzOnWith_variationalVectorField_at` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
-/-- Closed-ball specialization of the product-space Lipschitz estimate for the
-variational vector field, matching the spatial state used by
-`IsPicardLindelof`. -/
+/- Closed-ball specialization of the product-space Lipschitz estimate for the
+  variational vector field, matching the spatial state used by
+  `IsPicardLindelof`. -/
 
-/-- `lipschitzOnWith_variationalVectorField_closedBall_at` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `lipschitzOnWith_variationalVectorField_closedBall_at` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Closed-ball norm estimate for the full variational vector field from
 componentwise bounds on the base field, linearized coefficient, and tangent
@@ -1880,15 +1882,16 @@ theorem continuousOn_variationalVectorField_const
     simpa using hDf_cont.clm_comp (continuousOn_const (c := z.2))
   simpa [variationalVectorField] using hf_cont.prodMk hlin
 
-/-- Assemble Picard-Lindelöf hypotheses for the product variational system from
-closed-ball estimates for the base field and its linearization.
+
+/- Assemble Picard-Lindelöf hypotheses for the product variational system from
+  closed-ball estimates for the base field and its linearization.
 
 The spatial Lipschitz field is discharged by
-`lipschitzOnWith_variationalVectorField_closedBall_at`; continuity, a vector
-field norm bound, and the interval-size inequality remain as the standard
-Picard-Lindelöf assumptions. -/
+  `lipschitzOnWith_variationalVectorField_closedBall_at`; continuity, a vector
+  field norm bound, and the interval-size inequality remain as the standard
+  Picard-Lindelöf assumptions. -/
 
-/-- `isPicardLindelof_variationalVectorField_of_closedBall_estimates` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `isPicardLindelof_variationalVectorField_of_closedBall_estimates` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Assemble Picard-Lindelöf hypotheses for the product variational system from
 componentwise closed-ball estimates, deriving the product vector-field norm
@@ -1945,14 +1948,15 @@ theorem isPicardLindelof_variationalVectorField_of_component_closedBall_continui
         (hf_cont z.1 hzprod.1) (hDf_cont z.1 hzprod.1))
     hmul
 
-/-- Extract a variational local flow from a continuous local flow of the product
-system `(y, A)' = (f(t, y), Df(t, y) ∘ A)` initialized on pairs `(x, 1)`.
 
-The radius for the extracted initial base points can be smaller than the product
-Picard radius; `hball` records that every `(x, 1)` lies in the product initial
-ball. -/
+/- Extract a variational local flow from a continuous local flow of the product
+  system `(y, A)' = (f(t, y), Df(t, y) ∘ A)` initialized on pairs `(x, 1)`.
 
-/-- `ofProductContinuousLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+  The radius for the extracted initial base points can be smaller than the product
+  Picard radius; `hball` records that every `(x, 1)` lies in the product initial
+  ball. -/
+
+/- `ofProductContinuousLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Product-derived variational local flows inherit joint space-time continuity
 of the base flow and tangent map from the continuous product flow. -/
@@ -11949,10 +11953,10 @@ theorem nonempty_localFlowSolution_restrict
     Nonempty (LocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
   ⟨toLocalFlowSolution_restrict hf htime ht₀' hr⟩
 
-/-- Picard-Lindelöf also supplies Lipschitz dependence on the initial point, a
-key ingredient for upgrading the chartwise ODE solutions to a local flow. -/
+/- Picard-Lindelöf also supplies Lipschitz dependence on the initial point, a
+  key ingredient for upgrading the chartwise ODE solutions to a local flow. -/
 
-/-- `toLipschitzLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `toLipschitzLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Picard-Lindelöf Lipschitz local-flow data, immediately localized to a
 smaller closed time interval and initial ball. -/
@@ -12181,10 +12185,10 @@ theorem exists_continuousLocalFlowSolution_mem_closedBall_restrict
       toStatePreservingContinuousLocalFlowSolution_restrict_flow_mem_closedBall
         hf htime ht₀' hr hx ht⟩
 
-/-- Picard-Lindelöf also yields a continuous partial space-time flow on the
-initial-data ball times the closed time interval. -/
+/- Picard-Lindelöf also yields a continuous partial space-time flow on the
+  initial-data ball times the closed time interval. -/
 
-/-- `toContinuousLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `toContinuousLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Picard-Lindelöf continuous local-flow data, immediately localized to a
 smaller closed time interval and initial ball. -/
@@ -12220,11 +12224,11 @@ namespace VariationalLocalFlowSolution
 variable {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
   {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
 
-/-- Picard-Lindelöf for the product variational system directly supplies the
-base-flow/tangent-flow package after restricting to a base ball contained in the
-product Picard ball. -/
+/- Picard-Lindelöf for the product variational system directly supplies the
+  base-flow/tangent-flow package after restricting to a base ball contained in the
+  product Picard ball. -/
 
-/-- `ofProductPicardLindelof` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `ofProductPicardLindelof` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Product Picard-Lindelöf variational flow existence as a proof-level
 witness. -/
@@ -14417,11 +14421,11 @@ theorem nonempty_ofProductPicardLindelof_restrict
       (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
   ⟨ofProductPicardLindelof_restrict hf htime ht₀' hball⟩
 
-/-- Picard-Lindelöf for the product variational system supplies the variational
-flow package on any base ball whose radius is no larger than the product Picard
-radius. -/
+/- Picard-Lindelöf for the product variational system supplies the variational
+  flow package on any base ball whose radius is no larger than the product Picard
+  radius. -/
 
-/-- `ofProductPicardLindelof_of_le_radius` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- `ofProductPicardLindelof_of_le_radius` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Product Picard-Lindelöf variational flow existence on any base ball whose
 radius is no larger than the product Picard radius, kept proof-level. -/
@@ -14472,21 +14476,22 @@ theorem nonempty_ofProductPicardLindelof_restrict_of_le_radius
       (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
   ⟨ofProductPicardLindelof_restrict_of_le_radius hf htime ht₀' hr⟩
 
-/-- One-step variational local-flow constructor from closed-ball
-Picard-Lindelöf estimates for the product system centered at `(x₀, 1)`.
 
-This is the chart-level form expected in the positive-dimensional gauge-flow
-construction: base-field and linearized-coefficient Lipschitz/boundedness
-estimates supply the product Lipschitz hypothesis, while the remaining
-continuity, norm, and time-radius assumptions are exactly the usual
-Picard-Lindelöf data. -/
+/- One-step variational local-flow constructor from closed-ball
+  Picard-Lindelöf estimates for the product system centered at `(x₀, 1)`.
 
-/-- `ofProductClosedBallEstimates` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+  This is the chart-level form expected in the positive-dimensional gauge-flow
+  construction: base-field and linearized-coefficient Lipschitz/boundedness
+  estimates supply the product Lipschitz hypothesis, while the remaining
+  continuity, norm, and time-radius assumptions are exactly the usual
+  Picard-Lindelöf data. -/
 
-/-- One-step variational local-flow existence from closed-ball estimates,
-kept proof-level. -/
+/- `ofProductClosedBallEstimates` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
-/-- `nonempty_ofProductClosedBallEstimates` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+/- One-step variational local-flow existence from closed-ball estimates,
+  kept proof-level. -/
+
+/- `nonempty_ofProductClosedBallEstimates` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Localized one-step variational local-flow constructor from closed-ball
 Picard-Lindelöf estimates for the product system centered at `(x₀, 1)`. -/

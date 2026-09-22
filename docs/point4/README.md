@@ -134,6 +134,17 @@ this milestone therefore closes the matrix carrier conditional on that
 invariant region, while the local Duhamel endomap and its closed-ball
 Lipschitz estimate remain open.
 
+The gauge-flow interface now records the remaining analytic dependency instead
+of attaching it to every ordinary flow record. `Diffeomorph3FlowDerivative.lean`
+keeps the raw anchored `C^3` gauge-flow API buildable, while
+`ChosenIntrinsicDeTurckDiffeomorph3GaugeFlowWithVariationalData` is the
+explicit refinement that carries the per-point coordinate variational data.
+Under that refinement, `Diffeomorph3FlowMilestone41.lean` proves the actual
+scalar and tensor pullback-metric time-derivative identities for the DeTurck
+gauge family. The refinement is intentionally not constructed here: producing
+its full tangent-map, bilinear-form, and Lie-bracket data from the compact-
+manifold ODE/PDE regularity remains an analytic obligation.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
@@ -167,9 +178,11 @@ d/dt (Φ_t^* g_t) = Φ_t^* (∂_t g_t + Lie_{X_t} g_t)
 
 in the repository's bundled tensor vocabulary. Scalar-to-tensor reductions,
 bilinear chain rules, endpoint variants, and several model-coordinate pieces
-already exist. What matters for closure is a theorem that supplies the required
-derivative package for the actual gauge family used by the general
-Ricci–DeTurck solution.
+already exist, and `Diffeomorph3FlowMilestone41.lean` now proves the complete
+identity under the explicit `WithVariationalData` refinement. What matters for
+closure is constructing that refinement for the actual gauge family used by
+the general Ricci–DeTurck solution; the current theorem does not turn a raw
+gauge-flow existence record into variational data.
 
 ### B. Compact-manifold `C³` gauge flow
 
