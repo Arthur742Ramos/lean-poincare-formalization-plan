@@ -324,6 +324,17 @@ therefore consumes a geometric correction-section premise rather than merely
 renaming the previous one-form premise. Joint smoothness of the correction
 tensor itself, and the downstream PDE closure, remain open.
 
+The next lowering bridge is packaged in
+`DeTurckJointCorrectionTensorRegularity.lean`. It replaces the full correction
+tensor premise with a jointly smooth metric representative, pointwise metric
+agreement, and joint smoothness of the actual `correctionFunctional` after
+application to every pair of local-frame sections. The time-dependent Gram
+solver raises those covectors, the Riesz identity identifies the result with
+the explicit Levi--Civita correction, and nested hom-bundle coordinates
+reconstruct the tensor. The local-frame correction-functional regularity,
+the metric representative, and the downstream PDE construction remain
+explicit gates; this bridge does not close Point 4.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
