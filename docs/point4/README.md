@@ -368,6 +368,13 @@ the actual local frame and produces the scalar components used by the lowering
 bridge above. This discharges the spatial slice of those premises only; the
 joint time--space regularity and downstream PDE construction remain open.
 
+The joint section-to-component adapter is packaged in
+`DeTurckJointMetricDefectTorsionComponents.lean`. It consumes genuine joint
+`ContMDiff` sections for the actual metric-defect and torsion-inner trilinear
+maps, evaluates them on local frames, and supplies the scalar premises used
+by the lowering bridge. This is an interface reduction only: the joint
+geometric section regularity remains an explicit Point 4 gate.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
