@@ -252,6 +252,16 @@ section premise is not implied by the current slicewise `MetricFamily` and
 `ConnectionFamily` interfaces; derivative-continuity packaging and the final
 Picard/local-existence theorem remain open.
 
+The next analytic bridge is packaged in
+`DeTurckJointC2PicardRegularity.lean`. From the jointly `C²` coordinate field,
+it derives continuity of the field, its spatial derivative, and its second
+spatial derivative by differentiating along the fixed-time product inclusion.
+It then specializes these facts, with an explicit chart-containment buffer, to
+the exact `hreg`, `hjoint`, and `hjoint2` premises of the coordinate Picard
+estimate. The jointly intrinsic `C²` section remains an explicit premise (and
+the specialization uses the boundaryless chart-target setting); no general
+parabolic regularity or Point-4 existence theorem is claimed.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
