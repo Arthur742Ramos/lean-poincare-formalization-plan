@@ -29,6 +29,17 @@ open GenuinePhiRD
 
 variable {d : ℕ} {α : ℝ}
 
+/-! A larger Hölder constant preserves an `IsHolderNorm` certificate. -/
+theorem isHolderNorm_mono
+    {E : Type*} [NormedAddCommGroup E]
+    {f : (Fin d → ℝ) → E} {H H' : ℝ}
+    (hf : IsHolderNorm α f H) (hHH' : H ≤ H') :
+    IsHolderNorm α f H' := by
+  refine ⟨le_trans hf.1 hHH', fun x y => ?_⟩
+  have hsum : 0 ≤ ∑ j : Fin d, |(x - y) j| ^ α := by
+    exact Finset.sum_nonneg fun j _ => Real.rpow_nonneg (abs_nonneg _) _
+  exact le_trans (hf.2 x y) (mul_le_mul_of_nonneg_right hHH' hsum)
+
 /-! ## The genuine source difference -/
 
 /-! The Hölder-seminorm difference bound for the genuine Ricci--DeTurck
@@ -209,6 +220,137 @@ theorem isHolderNorm_geometricNRD_sub_of_euclidean_closedBall_norm
     (euclideanSection d α)
     (fun x => jet2OfSection_euclideanSection d α x)
     hR hRsmall hs ht
+
+/-! The sharp Hölder estimate uses the extracted jet of `s - t` itself.  Its
+seminorm therefore vanishes with the section difference; the earlier coarse
+certificate is retained for callers that only have separate section bounds. -/
+theorem isHolderNorm_geometricNRD_sub_sharp
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s t : Jet2Section d d α)
+    (hs : ∀ x, jet2OfSection s x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K)
+    (ht : ∀ x, jet2OfSection t x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K) :
+    IsHolderNorm α (fun x => geometricNRD Γbg s x - geometricNRD Γbg t x)
+      (((phiRDNemytskiiData (d := d) Γbg).L : ℝ) *
+          jet2SectionHolderConst s *
+            (jet2LipConst d d * ‖s - t‖) +
+        (phiRDNemytskiiData (d := d) Γbg).B *
+          jet2SectionHolderConst (s - t)) := by
+  have hsHolder : IsHolderNorm α (jet2OfSection s)
+      (jet2SectionHolderConst s) :=
+    isHolderNorm_jet2OfSection s
+  have hdiffHolder : IsHolderNorm α
+      (fun x => jet2OfSection s x - jet2OfSection t x)
+      (jet2SectionHolderConst (s - t)) := by
+    have h := isHolderNorm_jet2OfSection (s - t)
+    have heq : (fun x => jet2OfSection s x - jet2OfSection t x) =
+        jet2OfSection (s - t) := by
+      funext x
+      rfl
+    rw [heq]
+    exact h
+  have hM : ∀ x, ‖jet2OfSection s x - jet2OfSection t x‖ ≤
+      jet2LipConst d d * ‖s - t‖ := by
+    intro x
+    exact jet2OfSection_lipschitz s t x
+  have h := isHolderNorm_comp_sub
+    (phiRDNemytskiiData (d := d) Γbg).hconv
+    (phiRDNemytskiiData (d := d) Γbg).hderiv
+    (phiRDNemytskiiData (d := d) Γbg).hB_nonneg
+    (phiRDNemytskiiData (d := d) Γbg).hB
+    (phiRDNemytskiiData (d := d) Γbg).hL
+    hsHolder hdiffHolder hs ht hM
+  simpa [geometricNRD, GenuinePhiRD.genuineNRD,
+    NemytskiiData.nemytskii] using h
+
+/-! The extracted-jet norm bound turns the sharp certificate into a linear
+Hölder-seminorm Lipschitz bound in the section norm. -/
+theorem isHolderNorm_geometricNRD_sub_linear
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s t : Jet2Section d d α)
+    (hs : ∀ x, jet2OfSection s x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K)
+    (ht : ∀ x, jet2OfSection t x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K) :
+    IsHolderNorm α (fun x => geometricNRD Γbg s x - geometricNRD Γbg t x)
+      ((((phiRDNemytskiiData (d := d) Γbg).L : ℝ) *
+            jet2SectionHolderConst s * jet2LipConst d d +
+          (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d) *
+        ‖s - t‖) := by
+  have hsharp := isHolderNorm_geometricNRD_sub_sharp Γbg s t hs ht
+  have hdiff : jet2SectionHolderConst (s - t) ≤
+      jet2LipConst d d * ‖s - t‖ := by
+    simpa [jet2LipConst] using jet2SectionHolderConst_le_norm (s - t)
+  have hHs : 0 ≤ jet2SectionHolderConst s :=
+    (isHolderNorm_jet2OfSection s).1
+  have hL : 0 ≤ (phiRDNemytskiiData (d := d) Γbg).L :=
+    (phiRDNemytskiiData (d := d) Γbg).L.coe_nonneg
+  have hB : 0 ≤ (phiRDNemytskiiData (d := d) Γbg).B :=
+    (phiRDNemytskiiData (d := d) Γbg).hB_nonneg
+  have hC : 0 ≤ jet2LipConst d d := jet2LipConst_nonneg d d
+  have hnorm : 0 ≤ ‖s - t‖ := norm_nonneg _
+  refine isHolderNorm_mono
+    (f := fun x => geometricNRD Γbg s x - geometricNRD Γbg t x)
+    (H := (phiRDNemytskiiData (d := d) Γbg).L *
+      jet2SectionHolderConst s * (jet2LipConst d d * ‖s - t‖) +
+      (phiRDNemytskiiData (d := d) Γbg).B * jet2SectionHolderConst (s - t))
+    (H' := (((phiRDNemytskiiData (d := d) Γbg).L : ℝ) *
+          jet2SectionHolderConst s * jet2LipConst d d +
+        (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d) *
+      ‖s - t‖)
+    hsharp ?_
+  calc
+    (phiRDNemytskiiData (d := d) Γbg).L * jet2SectionHolderConst s *
+          (jet2LipConst d d * ‖s - t‖) +
+        (phiRDNemytskiiData (d := d) Γbg).B *
+          jet2SectionHolderConst (s - t) ≤
+      (phiRDNemytskiiData (d := d) Γbg).L * jet2SectionHolderConst s *
+          (jet2LipConst d d * ‖s - t‖) +
+        (phiRDNemytskiiData (d := d) Γbg).B *
+          (jet2LipConst d d * ‖s - t‖) := by
+            gcongr
+    _ = (((phiRDNemytskiiData (d := d) Γbg).L : ℝ) *
+            jet2SectionHolderConst s * jet2LipConst d d +
+          (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d) *
+        ‖s - t‖ := by ring
+
+theorem isHolderNorm_geometricNRD_sub_of_euclidean_closedBall_sharp
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    {R : ℝ} (hR : 0 < R)
+    (hRsmall : 2 * jet2LipConst d d * R < phiRDRadius (d := d))
+    {s t : Jet2Section d d α}
+    (hs : s ∈ Metric.closedBall (euclideanSection d α) R)
+    (ht : t ∈ Metric.closedBall (euclideanSection d α) R) :
+    IsHolderNorm α (fun x => geometricNRD Γbg s x - geometricNRD Γbg t x)
+      (((phiRDNemytskiiData (d := d) Γbg).L : ℝ) *
+          jet2SectionHolderConst s *
+            (jet2LipConst d d * ‖s - t‖) +
+        (phiRDNemytskiiData (d := d) Γbg).B *
+          jet2SectionHolderConst (s - t)) := by
+  apply isHolderNorm_geometricNRD_sub_sharp Γbg s t
+  · exact hrange_of_mem_closedBall Γbg (euclideanSection d α)
+      (fun x => jet2OfSection_euclideanSection d α x) hR hRsmall hs
+  · exact hrange_of_mem_closedBall Γbg (euclideanSection d α)
+      (fun x => jet2OfSection_euclideanSection d α x) hR hRsmall ht
+
+theorem isHolderNorm_geometricNRD_sub_of_euclidean_closedBall_linear
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    {R : ℝ} (hR : 0 < R)
+    (hRsmall : 2 * jet2LipConst d d * R < phiRDRadius (d := d))
+    {s t : Jet2Section d d α}
+    (hs : s ∈ Metric.closedBall (euclideanSection d α) R)
+    (ht : t ∈ Metric.closedBall (euclideanSection d α) R) :
+    IsHolderNorm α (fun x => geometricNRD Γbg s x - geometricNRD Γbg t x)
+      ((((phiRDNemytskiiData (d := d) Γbg).L : ℝ) *
+            jet2SectionHolderConst s * jet2LipConst d d +
+          (phiRDNemytskiiData (d := d) Γbg).B * jet2LipConst d d) *
+        ‖s - t‖) := by
+  apply isHolderNorm_geometricNRD_sub_linear Γbg s t
+  · exact hrange_of_mem_closedBall Γbg (euclideanSection d α)
+      (fun x => jet2OfSection_euclideanSection d α x) hR hRsmall hs
+  · exact hrange_of_mem_closedBall Γbg (euclideanSection d α)
+      (fun x => jet2OfSection_euclideanSection d α x) hR hRsmall ht
 
 end AnalyticPDE
 end RicciFlow
