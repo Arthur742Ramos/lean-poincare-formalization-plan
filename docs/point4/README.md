@@ -65,9 +65,9 @@ provides a parameterized `LocalDuhamelData` constructor for any little-Hölder
 endomap satisfying the required closed-ball Lipschitz estimate. The actual
 geometric output currently packaged above is still `Jet2HolderSection`
 (big-Hölder valued), so this constructor is not yet instantiated with the
-Ricci--DeTurck nonlinearity. The remaining nonlinear gate is a genuine
-little-Hölder preservation theorem for that output, including the required
-commutator/seminorm control; neither this interface nor the preceding
+Ricci--DeTurck nonlinearity. The remaining nonlinear gate for that geometric
+output is a tensorial little-Hölder preservation theorem, including the
+required commutator/seminorm control; neither this interface nor the preceding
 Lipschitz estimate is a claim of PDE existence.
 
 The next analytic gate is now also explicit in
@@ -103,12 +103,21 @@ The full-norm path input is discharged under global `C^{1,1}` fiber-map
 hypotheses in `LittleHolderNemytskiiPath.lean`. The theorem
 `tendsto_holderBCF_comp_heatPropagator_of_c11` uses the existing quantitative
 `isHolderNorm_comp_sub` estimate together with the two little-Hölder heat
-path components, so the next commutator milestone only needs to supply the
-vanishing Hölder-seminorm estimate. Its wrapper
+path components. Its wrapper
 `isGoodHolder_comp_of_commutator_seminorm_of_c11` now packages the resulting
 conditional little-Hölder conclusion. The assumptions are deliberately
 stated for an abstract scalar fiber map; the tensor-valued Ricci--DeTurck map
 still needs its own derivative and commutator discharge.
+
+The unconditional scalar closure step is now proved in
+`LittleHolderNemytskiiClosureC11.lean`. For positive heat time,
+`heatSemigroupND_lipschitzWith_spatial` supplies a global Lipschitz certificate
+for the smoothed datum, and `isGoodHolder_of_isHolderConst_one` makes its
+Nemytskii image little-Hölder. The full-norm path theorem and
+`isClosed_littleHolderSubmodule` then pass the limit to `F ∘ f`. The theorem
+`isGoodHolder_comp_of_c11` is an actual scalar preservation result with no
+commutator premise; it remains deliberately separate from the unresolved
+tensorial Ricci--DeTurck endomap.
 
 ## Proved architecture
 
