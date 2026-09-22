@@ -200,13 +200,14 @@ review:
   status: "self-assessed"
   reviewers: []
   notes: >-
-    The statement, Mathlib-only Challenge boundary, bridge to the inherited
-    geometric theorem, structured provenance, proof-hole policy, axiom surface,
-    Comparator identity, anti-vacuity regression and renderer workflow are
-    mechanically checked. The historical candidate's editorial rejection is
-    acknowledged rather than treated as fixed by metadata. No independent
-    human line-by-line proof review, Palomar editorial acceptance, fresh intake
-    or registration is claimed.
+    Mathematical repair is required before intake. The selected readout is
+    symmetrized by construction, and coefficient uniqueness for fixed local
+    traces has not been extended to geometric uniqueness for the ordinary
+    reconstructed field. Data coverage also remains to be established. The
+    historical candidate's editorial rejection is acknowledged rather than
+    treated as fixed by metadata or mechanical checks. No independent human
+    line-by-line proof review, Palomar editorial acceptance, fresh intake or
+    registration is claimed.
 
 alignment:
   namespace: "SymmetricTensorHeatEntry Challenge/Solution surface; RicciFlow.AnalyticPDE implementation"

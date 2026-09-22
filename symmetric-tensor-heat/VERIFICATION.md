@@ -3,6 +3,38 @@
 Selected theorem:
 `SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed`.
 
+## Current mathematical repair (working tree)
+
+The chart geometry and frame constraints in the selected Challenge and Solution
+compile. The separate `TensorHeatGeometricSymmetry` module proves the
+unprojected transpose/PDE and initial-trace bridges and a conditional symmetry
+lemma with geometric uniqueness stated explicitly. It also defines the
+global-data `GeometricAtlasCauchySolution` class, proves transposition closure
+for symmetric data, and obtains existence in that class from the strong atlas
+construction. That module passes direct Lean elaboration and its Lake target
+build. It also proves linearity of the intrinsic heat operator under
+subtraction and reduces equal-data uniqueness to a zero-data problem. This
+does not prove the zero-data uniqueness premise, which may need stronger
+uniform regularity than the current classical-field interface records. The
+selected theorem still uses a symmetrized readout; geometric
+uniqueness has not been proved. This is not a candidate for intake.
+
+Before the subsequent trace-estimate addition, `lake build` completed all 3,242 jobs;
+`scripts/check-challenge-boundary.py` compiled the Challenge using only pinned
+Mathlib dependencies; `scripts/check-axioms.py` accepted exactly the permitted
+three axioms; `scripts/check-closed-statement.lean` found no proof-development
+reference in the compiled selected body; and `scripts/check-package.py` passed
+package, schema, pin, source-boundary and immutable vendored-provenance checks.
+These checks do not replace the geometric proof or the exact-commit hosted
+Linux renderer and mechanical replay.
+
+The subsequent handoff adds two uniform initial-trace estimates in
+`Parabolic/FiniteInitialTrace.lean`. Direct Lean elaboration of that file
+passed. Its dependent curvature target is being rebuilt separately; the
+earlier 3,242-job result predates this addition and must not be read as
+verification of the handoff commit. No Palomar or Comparator result is
+claimed for the handoff commit.
+
 The reproducible checks are:
 
 ```sh

@@ -2,6 +2,7 @@ module
 
 public import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 public import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
+public import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 public import Mathlib.Geometry.Manifold.Riemannian.Basic
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.Analysis.Calculus.Deriv.Basic
@@ -342,9 +343,11 @@ def completeStatement : Prop :=
         (solutionLocalTimeDerivative : Solution → Index → ℝ →
           ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
         (atlasCoordinate : Index → M → E)
+        (atlasBasis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E)
         (atlasFrame : Index → Fin (Module.finrank ℝ E) →
           ∀ x : M, TangentSpace I x)
         (atlasWeight : Index → M → ℝ)
+        (atlasCenter : Index → M) (atlasRadius : Index → ℝ)
         (normalizedTimeCoordinate : Index → ℝ → ℝ)
         (sourceRescale : Index → ℝ)
         (initialValue : Initial → Index → E →
@@ -371,6 +374,21 @@ def completeStatement : Prop :=
         (coordinateClass : Initial → Source → Solution → Prop)
         (C : ℝ),
         Nonempty Initial ∧ Nonempty Source ∧ Nonempty Solution ∧ 0 ≤ C ∧
+        ((∀ i, 0 < atlasRadius i) ∧
+          (∀ i x, atlasCoordinate i x =
+            (atlasRadius i)⁻¹ •
+              ((extChartAt I (atlasCenter i)) x -
+                (extChartAt I (atlasCenter i)) (atlasCenter i))) ∧
+          (∀ i, ContMDiff I 𝓘(ℝ, ℝ) ∞ (atlasWeight i)) ∧
+          (∀ i, tsupport (atlasWeight i) ⊆
+            (extChartAt I (atlasCenter i)).source) ∧
+          (∀ x, ∃ i, x ∈ (extChartAt I (atlasCenter i)).source) ∧
+          (∀ i t, normalizedTimeCoordinate i t =
+            t₀ + (atlasRadius i)⁻¹ ^ 2 * (t - t₀)) ∧
+          (∀ i, sourceRescale i = (atlasRadius i)⁻¹ ^ 2)) ∧
+        (∀ i p x, atlasFrame i p x =
+          (trivializationAt E (TangentSpace I : M → Type _)
+            (atlasCenter i)).localFrame atlasBasis p x) ∧
         (∀ x, ∑ᶠ i, atlasWeight i x = 1) ∧
         (∀ i x, 0 ≤ atlasWeight i x) ∧
         (∀ i, 0 < sourceRescale i) ∧

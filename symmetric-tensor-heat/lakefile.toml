@@ -1,7 +1,7 @@
 name = "SymmetricTensorHeat"
 version = "0.1.0"
 keywords = ["math", "geometry", "parabolic-pde", "ricci-flow"]
-defaultTargets = ["TensorHeatChallenge", "TensorHeatSolution"]
+defaultTargets = ["TensorHeatChallenge", "TensorHeatSolution", "TensorHeatGeometricSymmetry"]
 
 [leanOptions]
 pp.unicode.fun = true
@@ -22,3 +22,7 @@ roots = ["TensorHeatChallenge"]
 [[lean_lib]]
 name = "TensorHeatSolution"
 roots = ["TensorHeatSolution"]
+
+[[lean_lib]]
+name = "TensorHeatGeometricSymmetry"
+roots = ["TensorHeatGeometricSymmetry"]
