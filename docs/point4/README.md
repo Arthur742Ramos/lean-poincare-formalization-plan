@@ -221,6 +221,17 @@ factorization hypothesis. Its derivative and joint-continuity fields remain
 explicit: the chart-level regularity bridge and the parabolic time--space
 regularity needed for the unconditional Point-4 theorem are still open.
 
+The next fixed-time regularity bridge is packaged in
+`DeTurckFixedTimeRegularity.lean`. Under the explicit `C¹` background
+connection-slice hypothesis, it converts the already proved intrinsic
+DeTurck-section regularity through the fixed-center chart-pushforward theorem
+and identifies that pushforward with the exact
+`deTurckGaugeCoordinateField` definition. Thus the genuine coordinate field
+is now proved `ContDiffOn ℝ 1` on the chart target at each such time. This
+narrows the chart-level boundary, but it does not supply the `C²` spatial
+estimate, the joint time--space continuity of the field and derivative, or
+the general Ricci-flow local-existence theorem.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
