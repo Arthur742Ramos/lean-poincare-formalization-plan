@@ -344,6 +344,15 @@ part of the joint premise without inferring any time regularity from the
 `MetricFamily` or `ConnectionFamily` abbreviations; the joint time--space
 regularity and the downstream PDE construction remain open.
 
+The next coordinate bridge is packaged in
+`DeTurckJointCorrectionFunctionalComponents.lean`. It reconstructs the joint
+covector section required above from scalar evaluations of the actual
+`correctionFunctional` on every triple of local-frame vectors, using the
+finite-dimensional cotangent coordinates induced by the same local frame.
+Thus the remaining analytic obligation is exposed at scalar metric-defect
+and torsion components; no joint time regularity is inferred from slicewise
+families, and the downstream PDE construction remains open.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
