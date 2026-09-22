@@ -272,6 +272,15 @@ constructor interface is now explicitly exported from
 theorem; the geometric premises and the later manifold identification,
 endpoint, and Ricci-flow conclusions remain open.
 
+The compact-flow comparison assembly is packaged in
+`DeTurckCompactFlowModelComparison.lean`. It composes the existing raw compact
+flow, chart-transfer `C³` gluing, and inverse-slice argument into an actual
+`Diffeomorph3GaugeFlowOn`, provided slice continuity/surjectivity and genuine
+`C³` coordinate model-diffeomorph comparisons are supplied. The theorem keeps
+both the dependent manifold field and coordinate comparison field explicit; it
+does not claim that the single local `VariationalLocalFlowSolution` above
+supplies those global comparison data.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
