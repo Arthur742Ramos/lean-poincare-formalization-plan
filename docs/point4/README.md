@@ -166,6 +166,16 @@ leaving the gauge-velocity assembly `hvalue` explicit. No ODE equation alone
 is treated as an identification of the model vector field with the geometric
 gauge field.
 
+`DeTurckFlowVariationalAssemblyBridge.lean` now discharges that assembly from
+two explicit analytic inputs: the exact metric-coordinate time-difference
+identity and differentiability of the intrinsic DeTurck vector field at the
+selected image point. The fixed-time Levi-Civita derivative, the torsion-free
+Picard bracket calculation, and the pulled-back velocity/correction theorem
+prove the spatial cancellation and reconstruct `hvalue` exactly. The
+time-difference input, the pointwise differentiability input, and construction
+of the underlying full witnesses remain open; this is a genuine assembly
+bridge, not a closure of the variational refinement or Point 4.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
