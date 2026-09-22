@@ -99,6 +99,31 @@ def FullVariationalWitnessCore.ofModelBracketDerivativeData
   hBfield := hBfield
   hD_bracket := hbracket.hD_bracket
 
+/-- The chosen solution supplies the metric velocity canonically, so callers
+only need to provide the genuinely analytic Picard, Fréchet, and bracket data.
+-/
+def FullVariationalWitnessCore.ofModelBracketDerivativeData_of_gaugeCorrectedVelocity
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {t : ℝ} {x : M}
+    (picard : DeTurckFlowVariationalWitness.VariationalWitness
+      (G.maps3 sol) t x)
+    (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+    (hBfield : HasFDerivAt
+      (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+        (I := I) (M := M) sol.1.toIntrinsicDeTurckSolution.metric
+        ((G.maps3 sol t) x))
+      Bfield'
+      (t, (extChartAt I ((G.maps3 sol t) x)) ((G.maps3 sol t) x)))
+    (hbracket : ModelBracketDerivativeData (t := t) (x := x) picard) :
+    FullVariationalWitnessCore (t := t) G sol x :=
+  FullVariationalWitnessCore.ofModelBracketDerivativeData
+    (sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge (G.gauge sol))
+    rfl picard Bfield' hBfield hbracket
+
 /-- The chosen solution's time derivative supplies the temporal input needed
 to complete a witness core once the core's geometric bracket data is present. -/
 def FullVariationalWitnessCore.toFullVariationalWitness_of_hasTimeDerivativeOn
