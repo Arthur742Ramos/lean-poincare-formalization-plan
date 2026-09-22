@@ -43,10 +43,13 @@ Hölder-seminorm difference estimate in
 `GenuineRicciDeTurckHolderDifference.lean`. It combines the compact-domain
 derivative bound for the actual Ricci--DeTurck fiber map with the explicit
 2-jet extraction bound, and specializes the range hypotheses to the Euclidean
-small-data ball. This advances workstream C, but it is intentionally not
-reported as full Banach-space local Lipschitzness: the supremum-norm
-packaging, the strong-continuity issue for the big Hölder heat propagator, and
-the variable-coefficient quasilinear closure remain open.
+small-data ball. The same file now proves the pointwise/supremum component of
+the difference bound and supplies the canonical Euclidean-section
+specialization. This advances workstream C, but it is intentionally not
+reported as full Banach-space local Lipschitzness: packaging the genuine
+output as the required Hölder-space element, the strong-continuity issue for
+the big Hölder heat propagator, and the variable-coefficient quasilinear
+closure remain open.
 
 ## Proved architecture
 

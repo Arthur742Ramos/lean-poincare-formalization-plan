@@ -3,6 +3,7 @@ Copyright (c) 2026 Poincare formalization project. All rights reserved.
 -/
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GeometricDuhamelData
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.HrangeDischarge
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanSection
 
 /-!
 # Hölder-seminorm difference estimate for the genuine Ricci--DeTurck source
@@ -83,6 +84,48 @@ theorem isHolderNorm_geometricNRD_sub
   simpa [geometricNRD, GenuinePhiRD.genuineNRD,
     NemytskiiData.nemytskii] using h
 
+/-! The corresponding pointwise estimate controls the supremum component of
+the full Hölder norm. -/
+theorem norm_geometricNRD_sub
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (s t : Jet2Section d d α)
+    (hs : ∀ x, jet2OfSection s x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K)
+    (ht : ∀ x, jet2OfSection t x ∈
+      (phiRDNemytskiiData (d := d) Γbg).K) :
+    ∀ x, ‖geometricNRD Γbg s x - geometricNRD Γbg t x‖ ≤
+      (phiRDNemytskiiData (d := d) Γbg).B *
+        (jet2LipConst d d * ‖s - t‖) := by
+  intro x
+  have hMVT := Convex.norm_image_sub_le_of_norm_hasFDerivWithin_le
+    (phiRDNemytskiiData (d := d) Γbg).hderiv
+    (phiRDNemytskiiData (d := d) Γbg).hB
+    (phiRDNemytskiiData (d := d) Γbg).hconv
+    (hs x) (ht x)
+  have hbound :
+      ‖(phiRDNemytskiiData (d := d) Γbg).Φ (jet2OfSection s x) -
+          (phiRDNemytskiiData (d := d) Γbg).Φ (jet2OfSection t x)‖ ≤
+        (phiRDNemytskiiData (d := d) Γbg).B *
+          (jet2LipConst d d * ‖s - t‖) := by
+    calc
+      ‖(phiRDNemytskiiData (d := d) Γbg).Φ (jet2OfSection s x) -
+            (phiRDNemytskiiData (d := d) Γbg).Φ (jet2OfSection t x)‖ =
+          ‖(phiRDNemytskiiData (d := d) Γbg).Φ (jet2OfSection t x) -
+            (phiRDNemytskiiData (d := d) Γbg).Φ (jet2OfSection s x)‖ :=
+        norm_sub_rev _ _
+      _ ≤ (phiRDNemytskiiData (d := d) Γbg).B *
+            ‖jet2OfSection t x - jet2OfSection s x‖ := hMVT
+      _ = (phiRDNemytskiiData (d := d) Γbg).B *
+            ‖jet2OfSection s x - jet2OfSection t x‖ := by
+        rw [norm_sub_rev]
+      _ ≤ (phiRDNemytskiiData (d := d) Γbg).B *
+            (jet2LipConst d d * ‖s - t‖) := by
+        apply mul_le_mul_of_nonneg_left
+          (jet2OfSection_lipschitz s t x)
+          (phiRDNemytskiiData (d := d) Γbg).hB_nonneg
+  simpa [geometricNRD, GenuinePhiRD.genuineNRD,
+    NemytskiiData.nemytskii] using hbound
+
 /-! ## Small-ball specialization -/
 
 /-! On the Euclidean small-data ball, the range hypotheses needed by the
@@ -129,6 +172,43 @@ theorem isHolderNorm_geometricNRD_sub_of_mem_closedBall_norm
     (M := jet2LipConst d d * ‖s - t‖) ?_
   intro x
   exact jet2OfSection_lipschitz s t x
+
+/-! The pointwise estimate has the same explicit small-ball range discharge. -/
+theorem norm_geometricNRD_sub_of_mem_closedBall
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (c : Jet2Section d d α)
+    (hc : ∀ x : Fin d → ℝ, jet2OfSection c x = (euclideanJet2 : Jet2 d d))
+    {R : ℝ} (hR : 0 < R)
+    (hRsmall : 2 * jet2LipConst d d * R < phiRDRadius (d := d))
+    {s t : Jet2Section d d α}
+    (hs : s ∈ Metric.closedBall c R)
+    (ht : t ∈ Metric.closedBall c R) :
+    ∀ x, ‖geometricNRD Γbg s x - geometricNRD Γbg t x‖ ≤
+      (phiRDNemytskiiData (d := d) Γbg).B *
+        (jet2LipConst d d * ‖s - t‖) := by
+  apply norm_geometricNRD_sub Γbg s t
+  · exact hrange_of_mem_closedBall Γbg c hc hR hRsmall hs
+  · exact hrange_of_mem_closedBall Γbg c hc hR hRsmall ht
+
+/-! The Euclidean section discharges the constant-section hypothesis, so the
+combined seminorm certificate is directly usable on the canonical small ball. -/
+theorem isHolderNorm_geometricNRD_sub_of_euclidean_closedBall_norm
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    {R : ℝ} (hR : 0 < R)
+    (hRsmall : 2 * jet2LipConst d d * R < phiRDRadius (d := d))
+    {s t : Jet2Section d d α}
+    (hs : s ∈ Metric.closedBall (euclideanSection d α) R)
+    (ht : t ∈ Metric.closedBall (euclideanSection d α) R) :
+    IsHolderNorm α (fun x => geometricNRD Γbg s x - geometricNRD Γbg t x)
+      (((phiRDNemytskiiData (d := d) Γbg).L : ℝ) *
+          jet2SectionHolderConst s *
+            (jet2LipConst d d * ‖s - t‖) +
+        (phiRDNemytskiiData (d := d) Γbg).B *
+          (jet2SectionHolderConst s + jet2SectionHolderConst t)) := by
+  exact isHolderNorm_geometricNRD_sub_of_mem_closedBall_norm Γbg
+    (euclideanSection d α)
+    (fun x => jet2OfSection_euclideanSection d α x)
+    hR hRsmall hs ht
 
 end AnalyticPDE
 end RicciFlow
