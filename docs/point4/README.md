@@ -306,6 +306,14 @@ is a conditional compact `Diffeomorph3GaugeFlowOn` result; the geometric proof
 that the actual Ricci--DeTurck field has the required joint smoothness remains
 outside this interface.
 
+The raised-field instantiation is packaged in
+`DeTurckRaisedCompactGaugeFlow.lean`. It globalizes the existing time-dependent
+metric-raising regularity and uses the metric-dual identity to feed the actual
+intrinsic DeTurck gauge field into the compact-flow assembly. The smooth metric
+and inner-product compatibility, together with joint regularity of the negated
+DeTurck one-form, remain explicit analytic inputs; this is a field-instantiation
+bridge, not a PDE closure.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
