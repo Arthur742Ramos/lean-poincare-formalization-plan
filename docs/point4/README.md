@@ -202,6 +202,13 @@ bound. The estimate API now also exposes that the selected base time belongs to
 the returned Picard interval. This is conditional on the still-open geometric
 regularity package; it does not construct the DeTurck jet map or close Point 4.
 
+The Phase-1 constructor now also composes with
+`DeTurckPicardRegularityReduction.smoothJetMap_implies_picardRegularity`:
+explicit smooth jet data and joint jet continuity produce the regularity
+package, which then produces the model variational flow. This removes a
+redundant three-hypothesis boundary without hiding the geometric jet-map
+construction; the jet and its continuity remain explicit inputs.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:

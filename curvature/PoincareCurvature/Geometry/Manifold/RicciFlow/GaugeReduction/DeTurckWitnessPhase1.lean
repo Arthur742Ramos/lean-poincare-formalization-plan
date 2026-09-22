@@ -22,6 +22,7 @@ separate Phase-1b obligation.
 module
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckCoordinatePicardEstimates
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ModelGaugeFlowODECore
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckPicardRegularityReduction
 
 open RicciFlow
 open Metric Set
@@ -194,3 +195,42 @@ theorem DeTurckWitnessPhase1.variationalLocalFlowSolution_of_picardEstimates
       (f := f) (Df := Df) (t₀ := t₀') (x₀ := y₀) (r := r) (R := r)
       hf_lip' hDf_lip' hA_bound hD_bound' hcont hnorm
       (by simpa [t₀'] using hmul) le_rfl
+
+/-- Construct the same model-space variational flow after applying the proven
+smooth-jet regularity reduction.
+
+This packages the dependency chain
+`SmoothDeTurckJetMap` + joint continuity of its jet
+`→ hreg ∧ hjoint ∧ hjoint2 → VariationalLocalFlowSolution`.  The jet map and
+its joint-continuity hypothesis remain explicit geometric inputs; this theorem
+only composes the already-proved calculus reduction with the cycle-free ODE
+constructor above. -/
+theorem DeTurckWitnessPhase1.variationalLocalFlowSolution_of_smoothJetMap
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E]
+    [IsManifold I (⊤ : ℕ∞) M]
+    [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
+    [SigmaCompactSpace M]
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M))
+    (p₀ : M) (t₀ : ℝ) (a : ℝ≥0) (ha : 0 < (a : ℝ))
+    (J : Type*) [NormedAddCommGroup J] [NormedSpace ℝ J]
+    (JM : SmoothDeTurckJetMap
+      (deTurckGaugeCoordinateField (I := I) (M := M) g background p₀)
+      (extChartAt I p₀ p₀) ((a : ℝ) + 1) J)
+    (hS : ContinuousOn JM.S
+      (Icc (t₀ - 1) (t₀ + 1) ×ˢ
+        closedBall (extChartAt I p₀ p₀) ((a : ℝ) + 1))) :
+    ∃ (tmin tmax : ℝ) (r : ℝ≥0) (t₀' : Icc tmin tmax)
+      (_α : @ModelGaugeFlowODE.VariationalLocalFlowSolution
+        E _ _ (DeTurckWitnessPhase1.witnessModelField g background p₀)
+        (DeTurckWitnessPhase1.witnessModelDerivative g background p₀)
+        tmin tmax t₀' (extChartAt I p₀ p₀) r),
+      t₀'.1 = t₀ := by
+  obtain ⟨hreg, hjoint, hjoint2⟩ :=
+    smoothJetMap_implies_picardRegularity
+      (I := I) (M := M) g background p₀ t₀ a ha J JM hS
+  exact variationalLocalFlowSolution_of_picardEstimates
+    (I := I) (M := M) g background p₀ t₀ a ha hreg hjoint hjoint2
