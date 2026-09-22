@@ -164,4 +164,5 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SectionPointwis
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GenuineRicciDeTurckHolderDifference
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GenuineRicciDeTurckLittleHolderDuhamel
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GenuineRicciDeTurckLittleHolderOutput
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.LittleHolderNemytskiiClosure
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ResearchTheorems
