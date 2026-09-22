@@ -281,6 +281,14 @@ both the dependent manifold field and coordinate comparison field explicit; it
 does not claim that the single local `VariationalLocalFlowSolution` above
 supplies those global comparison data.
 
+The coherent specialization is packaged in
+`DeTurckCompactFlowCoherentModelComparison.lean`. It derives the chart/model
+field from the same dependent `TimeDependentVectorField` used by the compact
+flow, so the model raw-flow derivative and Lipschitz data cannot be supplied
+for an unrelated field. The genuine compact-flow comparison hypotheses remain
+explicit; this is an interface repair, not a claim that those hypotheses or
+Point 4 local existence have already been proved.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
