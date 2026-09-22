@@ -88,6 +88,17 @@ the remaining boundary precisely: the certificate is an additional
 regularity hypothesis, so it is not yet an endomap theorem for every
 little-Hölder section.
 
+The next closure theorem is now packaged in
+`LittleHolderNemytskiiClosure.lean`. The theorem
+`isGoodHolder_comp_of_commutator_seminorm` proves the exact algebraic-to-
+topological implication needed for nonlinear closure: the already proved
+supremum commutator convergence, a vanishing Hölder-seminorm commutator, and
+full `HolderBCF` continuity of the composed heat path imply genuine
+little-Hölder preservation. This is a real closure result, but its two
+analytic inputs remain explicit; the current repository still does not claim
+the missing nonlinear seminorm estimate or the unrestricted Ricci--DeTurck
+endomap.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
