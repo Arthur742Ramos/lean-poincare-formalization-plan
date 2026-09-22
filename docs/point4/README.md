@@ -79,6 +79,15 @@ subspace for the little-Hölder theory, but it does not yet show that arbitrary
 little-Hölder data are preserved by the geometric Nemytskii map; the
 commutator/seminorm estimate for that nonlinear output remains open.
 
+The genuine nonlinear output now has a proved restricted preservation theorem
+in `GenuineRicciDeTurckLittleHolderOutput.lean`. Given an explicit global
+Lipschitz `IsHolderNorm 1` certificate for the extracted 2-jet, the actual
+Ricci--DeTurck fiber map is packaged componentwise into `LittleHolder`, and
+the section-shaped source is returned in `Jet2Section`. The theorem exposes
+the remaining boundary precisely: the certificate is an additional
+regularity hypothesis, so it is not yet an endomap theorem for every
+little-Hölder section.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
