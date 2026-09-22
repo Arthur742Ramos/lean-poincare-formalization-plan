@@ -184,7 +184,8 @@ def main() -> None:
     require(libraries["TensorHeatChallenge"].get("roots") == ["TensorHeatChallenge"] and
             libraries["TensorHeatSolution"].get("roots") == ["TensorHeatSolution"],
             "Challenge/Solution Lake roots changed")
-    require(set(lakefile["defaultTargets"]) == {"TensorHeatChallenge", "TensorHeatSolution"},
+    require(set(lakefile["defaultTargets"]) == {
+        "TensorHeatChallenge", "TensorHeatSolution", "TensorHeatGeometricSymmetry"},
             "default target coverage changed")
 
     manifest = json.loads((ROOT / "lake-manifest.json").read_text(encoding="utf-8"))

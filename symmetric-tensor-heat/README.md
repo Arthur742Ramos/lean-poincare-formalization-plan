@@ -1,5 +1,14 @@
 # Symmetric tensor heat equation
 
+**Review status: mathematical repair required.** The current selected
+statement now ties its coordinates to actual extended charts and requires
+smooth subordinate weights, chart coverage, positive radii, and explicit
+parabolic scaling. It also identifies each frame with a tangent-bundle
+trivialization. Its solution readout remains symmetrized by construction.
+The geometric well-posedness and research-interest claims below
+are development targets, not established submission claims. See
+[the remediation requirements](REVIEW_REMEDIATION.md).
+
 This focused Lean package prepares a new Palomar entry for short-time
 well-posedness of the inhomogeneous heat equation on symmetric covariant
 two-tensors over a closed smooth Riemannian manifold.
@@ -24,7 +33,7 @@ The compared proposition now exposes the analytic representation itself:
   same sizes and norms used in the Schauder estimate.
 
 For symmetric represented data it then proves existence and uniqueness of a
-coefficient witness whose reconstructed geometric field:
+coefficient witness whose **symmetrized** geometric readout:
 
 - is fiberwise symmetric;
 - has the prescribed initial trace;
@@ -35,7 +44,7 @@ The Mathlib-only [TensorHeatChallenge.lean](TensorHeatChallenge.lean) expands
 the induced two- and three-tensor connections and takes the orthonormal trace
 of the second covariant derivative. The independently compiled
 [TensorHeatSolution.lean](TensorHeatSolution.lean) does not import the
-Challenge; it bridges the statement to the unchanged implementation in the
+Challenge; it bridges the statement to the existing implementation in the
 repository's `curvature/` project.
 
 ## Scope boundary

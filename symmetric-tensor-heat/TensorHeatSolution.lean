@@ -1,5 +1,6 @@
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
+import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.Calculus.Deriv.Basic
@@ -344,9 +345,11 @@ def completeStatement : Prop :=
         (solutionLocalTimeDerivative : Solution → Index → ℝ →
           ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
         (atlasCoordinate : Index → M → E)
+        (atlasBasis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E)
         (atlasFrame : Index → Fin (Module.finrank ℝ E) →
           ∀ x : M, TangentSpace I x)
         (atlasWeight : Index → M → ℝ)
+        (atlasCenter : Index → M) (atlasRadius : Index → ℝ)
         (normalizedTimeCoordinate : Index → ℝ → ℝ)
         (sourceRescale : Index → ℝ)
         (initialValue : Initial → Index → E →
@@ -373,6 +376,21 @@ def completeStatement : Prop :=
         (coordinateClass : Initial → Source → Solution → Prop)
         (C : ℝ),
         Nonempty Initial ∧ Nonempty Source ∧ Nonempty Solution ∧ 0 ≤ C ∧
+        ((∀ i, 0 < atlasRadius i) ∧
+          (∀ i x, atlasCoordinate i x =
+            (atlasRadius i)⁻¹ •
+              ((extChartAt I (atlasCenter i)) x -
+                (extChartAt I (atlasCenter i)) (atlasCenter i))) ∧
+          (∀ i, ContMDiff I 𝓘(ℝ, ℝ) ∞ (atlasWeight i)) ∧
+          (∀ i, tsupport (atlasWeight i) ⊆
+            (extChartAt I (atlasCenter i)).source) ∧
+          (∀ x, ∃ i, x ∈ (extChartAt I (atlasCenter i)).source) ∧
+          (∀ i t, normalizedTimeCoordinate i t =
+            t₀ + (atlasRadius i)⁻¹ ^ 2 * (t - t₀)) ∧
+          (∀ i, sourceRescale i = (atlasRadius i)⁻¹ ^ 2)) ∧
+        (∀ i p x, atlasFrame i p x =
+          (trivializationAt E (TangentSpace I : M → Type _)
+            (atlasCenter i)).localFrame atlasBasis p x) ∧
         (∀ x, ∑ᶠ i, atlasWeight i x = 1) ∧
         (∀ i x, 0 ≤ atlasWeight i x) ∧
         (∀ i, 0 < sourceRescale i) ∧
@@ -836,18 +854,35 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
   refine ⟨Index, Initial, Source, Solution, inferInstance, A.index_nonempty,
     initialTensor, sourceTensor, solutionTensor, solutionTimeDerivative,
     initialLocalTensor, sourceLocalTensor, solutionLocalTensor,
-    solutionLocalTimeDerivative, atlasCoordinate, atlasFrame,
-    atlasWeight, normalizedTimeCoordinate, sourceRescale,
+    solutionLocalTimeDerivative, atlasCoordinate, b, atlasFrame,
+    atlasWeight, (fun i => (i : M)), (fun i => A.radius (i : M)),
+    normalizedTimeCoordinate, sourceRescale,
     initialValue, initialSpaceDeriv, initialSpaceSecondDeriv,
     initialHolderConstant, sourceValue,
     solutionValue, solutionSpaceDeriv, solutionSpaceSecondDeriv,
     solutionTimeDerivCoordinate, initialSize, sourceNorm,
     solutionNorm, coordinateClass, C, ?_⟩
   refine ⟨⟨fun _ => zeroSpatialData⟩, ⟨0⟩, ⟨0⟩,
-    strongAtlasSchauderConstant_nonneg cov Hlift, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
-    ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
+    strongAtlasSchauderConstant_nonneg cov Hlift, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
+    ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
     ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · -- The displayed weights are a genuine finite partition of unity.
+  · -- The displayed coordinates and weights retain their geometric origin.
+    have hsub : ∀ i : Index, tsupport (atlasWeight i) ⊆
+        (extChartAt I (i : M)).source := by
+      intro i
+      exact (A.cover.subordinate i).trans
+        (RicciFlow.AnalyticPDE.actualLocalTensorHeatPatch_subset_chartSource
+          (i : M) (A.radius (i : M)))
+    refine ⟨(fun i => A.radius_pos (i : M)), (fun _ _ => rfl),
+      (fun i => (A.cover.partition i).contMDiff), hsub, ?_,
+      (fun _ _ => rfl), (fun _ => rfl)⟩
+    intro x
+    obtain ⟨i, hi⟩ := A.cover.partition.exists_pos_of_mem (Set.mem_univ x)
+    exact ⟨i, hsub i (subset_closure (Function.mem_support.mpr (ne_of_gt hi)))⟩
+  · -- Each frame is the local frame of the displayed smooth trivialization.
+    intro i p x
+    rfl
+  · -- The displayed weights sum to one.
     intro x
     dsimp [atlasWeight]
     exact A.cover.partition.sum_eq_one (Set.mem_univ x)

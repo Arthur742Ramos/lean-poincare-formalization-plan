@@ -1,5 +1,11 @@
 # Research-interest case
 
+**Withdrawn as a readiness justification.** The review identified missing
+geometric constraints and symmetry imposed by the selected readout. The
+discussion below describes the intended geometric theorem; it does not
+establish research interest for the current selected proposition. A replacement
+proof and assessment are required under [the remediation requirements](REVIEW_REMEDIATION.md).
+
 The connection heat equation on tensor fields is the linear analytic model
 behind geometric parabolic equations. For a Levi-Civita connection, its
 principal part is the scalar heat operator in every local frame, while the

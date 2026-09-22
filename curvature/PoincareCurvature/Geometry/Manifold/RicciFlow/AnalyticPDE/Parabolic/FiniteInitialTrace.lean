@@ -173,6 +173,38 @@ theorem norm_initialTraceL_le (hT : t₀ < T) (hα : 0 < α) :
       exact le_max_left _ _
     _ = 1 * ‖u‖ := by rw [one_mul]
 
+/-- The value component of a higher jet approaches its canonical initial trace
+uniformly in the spatial coordinate, with the parabolic Hölder modulus. -/
+theorem dist_valueTimeSlice_initialTrace_le
+    (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    (t : ParabolicC0AlphaBanach.positiveTimeInIcc t₀ T) :
+    dist (ParabolicC0AlphaBanach.finiteTimeSlice hα (valueComponentL u) t)
+      (initialTraceL hT hα u) ≤
+        ‖u‖ * |(t : ℝ) - t₀| ^ (α / 2) := by
+  rw [initialTraceL_apply]
+  exact (ParabolicC0AlphaBanach.dist_finiteTimeSlice_initial_le
+    hT hα (valueComponentL u) t).trans
+    (mul_le_mul_of_nonneg_right
+      (by
+        change ‖u.1.1‖ ≤ ‖u.1‖
+        exact le_max_left _ _)
+      (Real.rpow_nonneg (abs_nonneg _) _))
+
+/-- Pointwise form of the uniform initial-trace estimate for higher jets. -/
+theorem norm_value_sub_initialTrace_le
+    (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    (t : ParabolicC0AlphaBanach.positiveTimeInIcc t₀ T) (x : X) :
+    ‖value u ((t : ℝ), x) - (initialTraceL hT hα u) x‖ ≤
+      ‖u‖ * |(t : ℝ) - t₀| ^ (α / 2) := by
+  have hpoint := BoundedContinuousFunction.abs_sub_coe_le_dist (x := x)
+    (ParabolicC0AlphaBanach.finiteTimeSlice hα (valueComponentL u) t)
+    (initialTraceL hT hα u)
+  rw [ParabolicC0AlphaBanach.finiteTimeSlice_apply,
+    evalCLM_valueComponentL] at hpoint
+  exact hpoint.trans (dist_valueTimeSlice_initialTrace_le hT hα u t)
+
 /-- Restricting a finite-cylinder higher function to an earlier terminal time
 does not change its canonical initial trace. -/
 theorem initialTraceL_restrictTerminal
