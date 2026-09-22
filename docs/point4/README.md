@@ -172,9 +172,17 @@ identity and differentiability of the intrinsic DeTurck vector field at the
 selected image point. The fixed-time Levi-Civita derivative, the torsion-free
 Picard bracket calculation, and the pulled-back velocity/correction theorem
 prove the spatial cancellation and reconstruct `hvalue` exactly. The
-time-difference input, the pointwise differentiability input, and construction
-of the underlying full witnesses remain open; this is a genuine assembly
-bridge, not a closure of the variational refinement or Point 4.
+the pointwise differentiability input and construction of the underlying full
+witnesses remain open; this is a genuine assembly bridge, not a closure of the
+variational refinement or Point 4.
+
+`DeTurckFlowVariationalTimeBridge.lean` now derives the temporal
+`MetricTimeDifferenceData` input from the intrinsic DeTurck solution's existing
+`HasTimeDerivativeOn` field and the genuine full Fréchet derivative of the
+metric-coordinate field. The proof separates the time slice from the frozen
+spatial `fderivWithin` contribution. It does not construct the full witness,
+the pointwise DeTurck differentiability needed by the assembly bridge, the
+endpoint chart data, or the general gauge flow.
 
 ## Proved architecture
 
