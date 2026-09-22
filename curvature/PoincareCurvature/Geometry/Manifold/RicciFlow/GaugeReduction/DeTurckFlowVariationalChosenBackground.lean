@@ -12,8 +12,9 @@ Levi-Civita connection of the intrinsic metric.  Its existing regularity
 theorem therefore supplies the pointwise differentiability of the intrinsic
 DeTurck vector field required by the variational assembly bridge.  This module
 packages that consequence and removes the duplicate pointwise hypothesis from
-the conditional `hvalue` constructor.  It does not construct a
-`FullVariationalWitness`.
+the conditional `hvalue` constructor.  Together with the witness-core
+constructor below, it also gives the first direct route from constructive
+geometric inputs to a `FullVariationalWitness`.
 -/
 
 @[expose] public noncomputable section
@@ -61,12 +62,59 @@ def FullVariationalWitness.ofMetricTimeDifferenceData_of_chosenBackground
       (E := E) (H := H) (I := I) (M := M) ivp}
     {t : ℝ} {x : M}
     (w : FullVariationalWitness (t := t) G sol x)
-    (hdata : MetricTimeDifferenceData (t := t) x w) :
+    (hdata : MetricTimeDifferenceData (t := t) x w.toCore) :
     FullVariationalWitness (t := t) G sol x :=
   w.ofMetricTimeDifferenceData
     (chosenSolution_intrinsicDeTurckVectorField_mdiffAt
       (I := I) (M := M) sol (t := t) ((G.maps3 sol t) x))
     hdata
+
+/-- Build the witness core from the explicit geometric and model-side inputs,
+without asking for the scalar assembly as a separate hypothesis. -/
+def FullVariationalWitnessCore.ofModelBracketDerivativeData
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {t : ℝ} {x : M}
+    (gdot : MetricTensorFamily (I := I) (M := M))
+    (hgdot : gdot = sol.1.gaugeCorrectedPullbackVelocityOfDiffeomorph3Gauge
+      (G.gauge sol))
+    (picard : DeTurckFlowVariationalWitness.VariationalWitness
+      (G.maps3 sol) t x)
+    (Bfield' : ℝ × E →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ))
+    (hBfield : HasFDerivAt
+      (SmoothSelfDiffeomorph3Family.metricBilinearCoordinateField
+        (I := I) (M := M) sol.1.toIntrinsicDeTurckSolution.metric
+        ((G.maps3 sol t) x))
+      Bfield'
+      (t, (extChartAt I ((G.maps3 sol t) x)) ((G.maps3 sol t) x)))
+    (hbracket : ModelBracketDerivativeData (t := t) (x := x) picard) :
+    FullVariationalWitnessCore (t := t) G sol x where
+  gdot := gdot
+  hgdot := hgdot
+  picard := picard
+  Bfield' := Bfield'
+  hBfield := hBfield
+  hD_bracket := hbracket.hD_bracket
+
+/-- The chosen solution's time derivative supplies the temporal input needed
+to complete a witness core once the core's geometric bracket data is present. -/
+def FullVariationalWitnessCore.toFullVariationalWitness_of_hasTimeDerivativeOn
+    {ivp : InitialValueProblem (E := E) (H := H) (I := I) (M := M)}
+    {G : ChosenIntrinsicDeTurckDiffeomorph3GaugeFlow
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {sol : ChosenIntrinsicDeTurckLocalSolution
+      (E := E) (H := H) (I := I) (M := M) ivp}
+    {t : ℝ} {x : M}
+    (w : FullVariationalWitnessCore (t := t) G sol x)
+    (ht : t ∈ sol.1.toIntrinsicDeTurckSolution.timeSet) :
+    FullVariationalWitness (t := t) G sol x :=
+  w.toFullVariationalWitness_of_metricTimeDifferenceData
+    (chosenSolution_intrinsicDeTurckVectorField_mdiffAt
+      (I := I) (M := M) sol (t := t) ((G.maps3 sol t) x))
+    (metricTimeDifferenceData_of_hasTimeDerivativeOn ht w)
 
 end DeTurckFlowVariationalWitness
 
