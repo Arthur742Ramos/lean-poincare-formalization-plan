@@ -335,6 +335,15 @@ reconstruct the tensor. The local-frame correction-functional regularity,
 the metric representative, and the downstream PDE construction remain
 explicit gates; this bridge does not close Point 4.
 
+The following slice adapter is packaged in
+`DeTurckCorrectionFunctionalSliceRegularity.lean`. For each fixed time it
+derives the spatial `C¹` regularity of those actual local-frame covector
+sections from the `C²` metric family and a `C¹` background connection slice,
+using the static correction-functional theorem. This discharges the spatial
+part of the joint premise without inferring any time regularity from the
+`MetricFamily` or `ConnectionFamily` abbreviations; the joint time--space
+regularity and the downstream PDE construction remain open.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
