@@ -24,8 +24,9 @@ partition of unity and spanning frames, exact local-to-global reconstruction
 of data, solution, and time derivative, faithful and nontrivial coefficient
 representations, coverage of every bounded spatial `C^{2,alpha}` coefficient
 jet family and every parabolic `C^{alpha,alpha/2}` coefficient source family,
-actual first/second/time derivatives, explicit Hölder inequalities, and the
-norms used by the estimate.
+with exact finite-atlas initial size and a source norm bounded by the
+specified chartwise budgets, actual first/second/time derivatives, explicit
+Hölder inequalities, and the norms used by the estimate.
 The conclusion proves:
 
 - existence for every symmetric represented spatial datum and source;

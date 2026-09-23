@@ -5,6 +5,14 @@ Selected theorem:
 
 ## Current selected repair (verification in progress)
 
+The quantitative follow-on after `5908b028825c76537955118eff76772c3ab4a455`
+adds an exact finite-atlas size formula for each represented spatial jet family
+and bounds the chosen source norm by the sum of the supplied chartwise
+parabolic Hölder budgets. Challenge and independent Solution compiled locally;
+their selected propositions match byte for byte. Exact-commit hosted checks
+must be repeated for this follow-on. The `5908b028` renderer receipt is
+historical for this candidate and does not verify the new statement.
+
 The data-coverage extension after `40f66568d51f8424a2d3265cd4c63718e2576515`
 adds selected coverage for every bounded spatial `C^{2,alpha}` atlas jet family
 and every parabolic `C^{alpha,alpha/2}` atlas source family satisfying the

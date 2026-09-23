@@ -372,6 +372,10 @@ def completeStatement : Prop :=
             inner ℝ (cov U x w) (V x) + inner ℝ (U x) (cov V x w)
     let leviCivita : Prop := cov.torsion = 0 ∧ metricCompatible
     let Matrix := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ
+    letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] Matrix) :=
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] Matrix) :=
+      ContinuousLinearMap.toNormedSpace
     let parabolicMetric := fun (p q : ℝ × E) =>
       max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2)
     let hasParabolicC0 := fun (S N : ℝ) (f : ℝ × E → Matrix) =>
@@ -547,11 +551,15 @@ def completeStatement : Prop :=
             (∀ i x, initialValue D i x = v i x) ∧
             (∀ i x, initialSpaceDeriv D i x = dv i x) ∧
             (∀ i x, initialSpaceSecondDeriv D i x = d2v i x) ∧
-            (∀ i, initialHolderConstant D i = H i)) ∧
+            (∀ i, initialHolderConstant D i = H i) ∧
+            initialSize D = ∑ᶠ i,
+              max (‖v i‖ + H i)
+                (max (‖dv i‖ + H i) (‖d2v i‖ + H i))) ∧
         (∀ (c : Index → ℝ × E → Matrix) (N : Index → ℝ),
           (∀ i, hasParabolicC0 Tcoord (N i) (c i)) →
-          ∃ f : Source, ∀ i z, z.1 ∈ Ioc t₀ Tcoord →
-            sourceValue f i z = c i z) ∧
+          ∃ f : Source,
+            (∀ i z, z.1 ∈ Ioc t₀ Tcoord → sourceValue f i z = c i z) ∧
+            sourceNorm f ≤ ∑ᶠ i, N i) ∧
         (∀ c : Index →
             (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ),
           ∃ D, ∀ i x, initialValue D i x = c i) ∧
@@ -1258,18 +1266,21 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
       spaceSecondDeriv_holder := hd2v i
       hasFDerivAt_value := hderiv i
       hasFDerivAt_spaceDeriv := hderiv₂ i }
-    refine ⟨D, ?_, ?_, ?_, ?_⟩
+    refine ⟨D, ?_, ?_, ?_, ?_, ?_⟩
     · intro i x; rfl
     · intro i x; rfl
     · intro i x; rfl
     · intro i; rfl
+    · change (∑ i : Index, (D i).normRadius) = _
+      rw [finsum_eq_sum_of_fintype]
+      rfl
   · -- Every parabolic C⁰ᵅ atlas source family is represented on the cylinder.
     intro c N hc
-    have hsource (i : Index) :
-        RicciFlow.AnalyticPDE.ParabolicC0AlphaOn α (c i)
+    have hnormle (i : Index) :
+        RicciFlow.AnalyticPDE.ParabolicC0AlphaNormLe (N i) α (c i)
           (RicciFlow.AnalyticPDE.parabolicFiniteCylinder E t₀ Sraw) := by
       rcases hc i with ⟨B, hB, H, hH, _hN, hbound, hholder⟩
-      refine ⟨B, hB, H, hH, ?_, ?_⟩
+      refine ⟨B, hB, H, hH, _hN, ?_, ?_⟩
       · intro z hz
         exact hbound z (by simpa [RicciFlow.AnalyticPDE.parabolicFiniteCylinder] using hz)
       · intro p hp q hq
@@ -1279,12 +1290,26 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
     let g : Source := fun i =>
       RicciFlow.AnalyticPDE.ParabolicC0AlphaBanach.mk
         (RicciFlow.AnalyticPDE.ParabolicC0AlphaSpace.ofSubmodule
-          ⟨c i, hsource i⟩)
-    refine ⟨g, ?_⟩
-    intro i z hz
-    dsimp [sourceValue, g]
-    exact RicciFlow.AnalyticPDE.ParabolicC0AlphaBanach.representative_mk_eq _ z
-      (by simpa [RicciFlow.AnalyticPDE.parabolicFiniteCylinder] using hz)
+          ⟨c i, (hnormle i).c0AlphaOn⟩)
+    refine ⟨g, ?_, ?_⟩
+    · intro i z hz
+      dsimp [sourceValue, g]
+      exact RicciFlow.AnalyticPDE.ParabolicC0AlphaBanach.representative_mk_eq _ z
+        (by simpa [RicciFlow.AnalyticPDE.parabolicFiniteCylinder] using hz)
+    · have hN (i : Index) : 0 ≤ N i := (hnormle i).nonneg
+      have hsum : 0 ≤ ∑ i : Index, N i :=
+        Finset.sum_nonneg fun i _hi => hN i
+      change ‖g‖ ≤ ∑ᶠ i, N i
+      rw [finsum_eq_sum_of_fintype]
+      apply (pi_norm_le_iff_of_nonneg hsum).2
+      intro i
+      calc
+        ‖g i‖ ≤ N i := by
+          dsimp [g]
+          rw [RicciFlow.AnalyticPDE.ParabolicC0AlphaBanach.norm_mk_ofSubmodule]
+          exact RicciFlow.AnalyticPDE.parabolicC0AlphaNorm_le_of_normLe (hnormle i)
+        _ ≤ ∑ j : Index, N j :=
+          Finset.single_le_sum (fun j _hj => hN j) (Finset.mem_univ i)
   · -- Every atlas-wide family of constant spatial matrices is represented.
     intro c
     refine ⟨fun i => constSpatialData (c i), ?_⟩
