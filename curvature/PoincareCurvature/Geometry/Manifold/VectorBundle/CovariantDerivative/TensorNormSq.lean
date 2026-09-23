@@ -15,6 +15,8 @@ evolution identity remains a separate differential theorem.
 @[expose] public noncomputable section
 
 set_option linter.unusedSectionVars false
+set_option synthInstance.maxHeartbeats 200000
+set_option maxHeartbeats 2000000
 
 open Bundle FiberBundle
 open scoped Manifold ContDiff BigOperators
@@ -32,6 +34,25 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
+local notation "T₃" => (fun x : M => TM x →L[ℝ] T₂ x)
+local notation "T₁" => (fun x : M => TM x →L[ℝ] ℝ)
+
+local instance tensorNormTwoModelNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+local instance tensorNormTwoModelNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+local instance tensorNormTwoFiberNormedAddCommGroup (x : M) :
+    NormedAddCommGroup (T₂ x) := inferInstance
+local instance tensorNormTwoFiberNormedSpace (x : M) :
+    NormedSpace ℝ (T₂ x) := inferInstance
+local instance tensorNormThreeModelNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+local instance tensorNormThreeModelNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+local instance tensorNormThreeFiberNormedAddCommGroup (x : M) :
+    NormedAddCommGroup (T₃ x) := inferInstance
+local instance tensorNormThreeFiberNormedSpace (x : M) :
+    NormedSpace ℝ (T₃ x) := inferInstance
 
 /-- Pointwise Hilbert--Schmidt square of an arbitrary covariant two-tensor. -/
 def covariantTwoTensorNormSq (h : ∀ x : M, T₂ x) (x : M) : ℝ := by
@@ -239,6 +260,114 @@ theorem covariantTwoTensorNormSq_mdifferentiableAt
     exact covariantTwoTensorNormSq_eq_trace_gram h x
   rw [heq, covariantTwoTensorTraceFunction_eq_endomorphismTrace_raised]
   exact htrace
+
+/-- Metric compatibility and differentiability of the covariant derivative
+of the Gram tensor give differentiability of the energy's scalar gradient. -/
+theorem mdifferentiableAt_scalarDifferential_covariantTwoTensorNormSq
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    (cov : CovariantDerivative I E TM)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (h : ∀ y : M, T₂ y)
+    (hh : ∀ y : M,
+      MDiffAt
+        (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+          (E := T₂) z (h z)) y)
+    {x : M}
+    (hfirstGram : MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+        (E := T₃) y
+          (covariantTwoTensorCovariantDerivative cov
+            (covariantTwoTensorGram (I := I) (E := E) h) y)) x) :
+    MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I)
+          (covariantTwoTensorNormSq (I := I) (E := E) h) y)) x := by
+  let gram := covariantTwoTensorGram (I := I) (E := E) h
+  have hraised : ∀ y : M,
+      MDiffAt
+        (fun z => TotalSpace.mk' (E →L[ℝ] E)
+          (E := fun w : M => TM w →L[ℝ] TM w) z
+          (raisedCovariantTwoTensor (I := I) (E := E) gram z)) y := by
+    intro y
+    exact raisedCovariantTwoTensor_mdifferentiableAt
+      (covariantTwoTensorGram_mdifferentiableAt (hh y))
+  have heq : covariantTwoTensorNormSq (I := I) (E := E) h =
+      covariantTwoTensorTraceFunction (I := I) (E := E) gram := by
+    funext y
+    exact covariantTwoTensorNormSq_eq_trace_gram h y
+  rw [heq]
+  exact mdifferentiableAt_scalarDifferential_covariantTwoTensorTraceFunction
+    cov hmetric gram hraised hfirstGram
+
+/-- The scalar Laplacian of the complete tensor energy is the metric trace
+of the genuine connection Laplacian of its Gram tensor. This follows from the
+existing intrinsic trace--Laplacian theorem; expanding the Laplacian of the
+Gram tensor into the tensor Bochner formula is a separate step. -/
+theorem scalarLaplacian_covariantTwoTensorNormSq_eq_trace_laplacian_gram
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    (cov : CovariantDerivative I E TM)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (h : ∀ y : M, T₂ y)
+    (hh : ∀ y : M,
+      MDiffAt
+        (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+          (E := T₂) z (h z)) y)
+    {x : M}
+    (hfirstGram : MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+        (E := T₃) y
+          (covariantTwoTensorCovariantDerivative cov
+            (covariantTwoTensorGram (I := I) (E := E) h) y)) x) :
+    scalarLaplacian cov (covariantTwoTensorNormSq (I := I) (E := E) h) x =
+      covariantTwoTensorTrace (I := I) (E := E) (M := M)
+        (covariantTwoTensorLinear (I := I) (M := M)
+          (fun y => connectionLaplacian cov
+            (covariantTwoTensorGram (I := I) (E := E) h) y)) x := by
+  let gram := covariantTwoTensorGram (I := I) (E := E) h
+  have hgram : ∀ y : M,
+      MDiffAt
+        (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+          (E := T₂) z (gram z)) y := by
+    intro y
+    exact covariantTwoTensorGram_mdifferentiableAt (hh y)
+  have hraised : ∀ y : M,
+      MDiffAt
+        (fun z => TotalSpace.mk' (E →L[ℝ] E)
+          (E := fun w : M => TM w →L[ℝ] TM w) z
+          (raisedCovariantTwoTensor (I := I) (E := E) gram z)) y := by
+    intro y
+    exact raisedCovariantTwoTensor_mdifferentiableAt (hgram y)
+  have hdf : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+        (scalarDifferential (I := I)
+          (covariantTwoTensorTraceFunction (I := I) (E := E) gram) y)) x :=
+    mdifferentiableAt_scalarDifferential_covariantTwoTensorTraceFunction
+      cov hmetric gram hraised hfirstGram
+  have hsecondRaised (Y : TM x) :
+      MDiffAt
+        (fun z => TotalSpace.mk' (E →L[ℝ] E)
+          (E := fun w : M => TM w →L[ℝ] TM w) z
+          (raisedCovariantTwoTensor (I := I) (E := E)
+            (covariantTwoTensorDerivativeAlong cov gram
+              (smoothExtend (I := I) (F := E) (V := TM) x Y)) z)) x := by
+    have hY : MDiffAt
+        (T% (smoothExtend (I := I) (F := E) (V := TM) x Y)) x :=
+      ((smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x Y).of_le
+        (by norm_num) x).mdifferentiableAt one_ne_zero
+    have hderiv := hfirstGram.clm_bundle_apply hY
+    exact raisedCovariantTwoTensor_mdifferentiableAt hderiv
+  have heq : covariantTwoTensorNormSq (I := I) (E := E) h =
+      covariantTwoTensorTraceFunction (I := I) (E := E) gram := by
+    funext y
+    exact covariantTwoTensorNormSq_eq_trace_gram h y
+  rw [heq]
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  exact scalarLaplacian_covariantTwoTensorTraceFunction_eq_covariantTwoTensorTrace_connectionLaplacian
+    cov hmetric gram hraised hfirstGram hdf hsecondRaised
+      (stdOrthonormalBasis ℝ (TM x))
 
 /-- The fibrewise Hilbert--Schmidt pairing of complete covariant two-tensors. -/
 def covariantTwoTensorPair
