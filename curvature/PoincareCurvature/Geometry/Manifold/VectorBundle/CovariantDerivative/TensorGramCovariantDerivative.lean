@@ -264,4 +264,29 @@ theorem covariantTwoTensorCovariantDerivative_gram_mdifferentiableAt
   rw [heq]
   exact hscalar
 
+/-- The scalar Laplacian of tensor energy is the trace of the Gram
+connection Laplacian under second-order regularity of the original tensor. -/
+theorem scalarLaplacian_covariantTwoTensorNormSq_eq_trace_laplacian_gram_of_tensor_regular
+    (cov : CovariantDerivative I E TM)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (h : ∀ y : M, T₂ y)
+    (hh : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := T₂) z (h z)) y)
+    {x : M}
+    (hfirst : MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+        (E := T₃) y
+          (covariantTwoTensorCovariantDerivative cov h y)) x) :
+    scalarLaplacian cov (covariantTwoTensorNormSq (I := I) (E := E) h) x =
+      covariantTwoTensorTrace (I := I) (E := E) (M := M)
+        (covariantTwoTensorLinear (I := I) (M := M)
+          (fun y => connectionLaplacian cov
+            (covariantTwoTensorGram (I := I) (E := E) h) y)) x := by
+  have hfirstGram := covariantTwoTensorCovariantDerivative_gram_mdifferentiableAt
+    (I := I) (E := E) (M := M) cov hmetric h hh hfirst
+  exact scalarLaplacian_covariantTwoTensorNormSq_eq_trace_laplacian_gram
+    cov hmetric h hh hfirstGram
+
 end CovariantDerivative
