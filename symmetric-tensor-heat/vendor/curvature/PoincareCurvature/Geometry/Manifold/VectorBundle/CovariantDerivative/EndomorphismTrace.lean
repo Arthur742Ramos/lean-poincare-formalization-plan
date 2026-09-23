@@ -163,6 +163,8 @@ theorem mvfderiv_endomorphismTrace_apply_eq_sum_localFrame
         (e.localFrameCoeff I b i y) (A y (e.localFrame b i y))) x := by
     unfold mvfderiv
     rw [hevent.eq_of_nhds, hevent.mfderiv_eq]
+    ext v
+    rfl
   rw [hmv]
   have hterm : ∀ i : ι, MDiffAt (fun y =>
       (e.localFrameCoeff I b i y) (A y (e.localFrame b i y))) x := by

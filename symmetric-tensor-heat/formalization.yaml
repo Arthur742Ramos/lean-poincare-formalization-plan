@@ -87,22 +87,26 @@ related_formalizations:
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/13fa15d6a8352ed08bf71b3533b1c2e922c21388/curvature"
     relationship: "builds-on"
     note: >-
-      Immutable same-repository source subproject reused through an exact
-      mechanically extracted snapshot under vendor/curvature so the focused
+      Immutable same-repository source subproject reused through a mechanically
+      extracted baseline under vendor/curvature so the focused
       project is self-contained. The snapshot is compiled as a root library,
       with no nested Lake path dependency, so every generated file remains
       beneath the single writable package build root used by Palomar.
-      All vendored implementation sources and contributor notices are checked
-      byte-for-byte against this commit. The selected implementation theorem is
+      Contributor notices and unchanged vendored implementation sources are
+      checked byte-for-byte against this commit. Explicit Lean 4.35
+      compatibility adaptations are separately hash-pinned and documented.
+      The selected implementation theorem is
       curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.
-      The curvature tree at this commit is preserved byte-for-byte. The
+      The baseline curvature tree is preserved as the provenance reference. The
       inherited code supplies finite-atlas heat estimates, reconstruction,
-      tensor energy continuity, and represented zero-data uniqueness. This
-      focused entry selects an unprojected reconstructed tensor theorem with
+      tensor energy continuity, represented zero-data uniqueness, and the
+      compact cutoff proof pattern adapted from
+      curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ModelManifoldGaugeFlow.lean.
+      This focused entry selects an unprojected reconstructed tensor theorem with
       symmetry derived from geometric uniqueness, plus a Mathlib-only
       Challenge and matching Solution bridge. It does not claim those
       inherited proofs as new formal code.
-  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d"
+  - id: "https://github.com/leanprover-community/mathlib4/tree/065356127b1dc0016f66b7283ce0ce2c4055aa55"
     relationship: "builds-on"
     note: >-
       Pinned Mathlib foundations for manifolds, Riemannian bundles, covariant
@@ -165,7 +169,7 @@ automation:
   methods:
     - method: "agent"
       models: ["OpenAI GPT-5", "OpenAI GPT-6"]
-      framework: "Codex with Lean 4.33.0 and pinned Mathlib"
+      framework: "Codex with Lean 4.35.0-rc2 and pinned Mathlib"
       tool_setup: >-
         AI-assisted theorem design, proof engineering, literature and registry
         overlap audit, Challenge/Solution bridging, provenance packaging,

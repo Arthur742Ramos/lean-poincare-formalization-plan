@@ -3,7 +3,31 @@
 Selected theorem:
 `SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed`.
 
-## Current selected repair (verification in progress)
+## Current toolchain migration (verification in progress)
+
+The candidate stacked on `2613d7b40d2e8c38126ee040b424d3ca57a86220`
+migrates the focused package to Lean `v4.35.0-rc2` and Mathlib
+`065356127b1dc0016f66b7283ce0ce2c4055aa55`, the current production
+Palomar minimum and its matching Mathlib pin. Ten attributed vendor files
+receive API compatibility edits; the selected Challenge and Solution theorem
+statements remain unchanged. The Challenge compiled locally on this toolchain.
+The full Solution build and independent audits are still in progress. Exact-SHA
+current production mechanical verification and the separate Linux renderer
+replay remain release gates. There is no active Palomar intake or registration.
+
+## Historical verification of the immediate predecessor
+
+Commit `2613d7b40d2e8c38126ee040b424d3ca57a86220` passed the pinned
+Palomar mechanical replay (GitHub run `35859592079`) and the separate pinned
+Landrun renderer with its core-notation audit (run `35859592105`). The
+mechanical report recorded `status: pass`, `stage: complete`, Comparator and
+NanoDa passes, and high Challenge trust. Its only review warning was that the
+configured Challenge exceeds Palomar's preferred 32 KiB / 300-line review
+surface. These receipts verify that exact predecessor under its historical
+toolchain, not the new 4.35 candidate or the current production pipeline.
+They were verification runs, not Palomar intake or registration.
+
+## Earlier selected repairs
 
 The quantitative follow-on after `5908b028825c76537955118eff76772c3ab4a455`
 adds an exact finite-atlas size formula for each represented spatial jet family

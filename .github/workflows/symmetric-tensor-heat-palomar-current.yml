@@ -1,0 +1,32 @@
+name: Symmetric tensor heat current Palomar preflight
+
+# Calls Palomar's production verifier at an exact upstream commit. This is a
+# mechanical preflight only; it creates no intake or registry entry.
+on:
+  push:
+    paths:
+      - "symmetric-tensor-heat/**"
+      - ".github/workflows/symmetric-tensor-heat-palomar-current.yml"
+  pull_request:
+    paths:
+      - "symmetric-tensor-heat/**"
+      - ".github/workflows/symmetric-tensor-heat-palomar-current.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  current-mechanical:
+    uses: PalomarRegistry/PalomarSubmission/.github/workflows/submission.yml@1703d7babd984ccc3831cdf89c28221abe34808f
+    with:
+      repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+      commit: ${{ github.event.pull_request.head.sha || github.sha }}
+      pipeline_commit: 1703d7babd984ccc3831cdf89c28221abe34808f
+      request_id: heatcheck01x
+      mode: full
+      options: '{"project_path":"symmetric-tensor-heat","comparator_config_path":"symmetric-tensor-heat/comparator.json","formalization_metadata_path":"symmetric-tensor-heat/formalization.yaml","authorization_relationship":"I am a responsible author or maintainer"}'

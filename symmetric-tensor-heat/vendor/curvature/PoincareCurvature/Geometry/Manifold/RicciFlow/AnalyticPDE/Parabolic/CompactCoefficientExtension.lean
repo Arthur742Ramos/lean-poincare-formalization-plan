@@ -53,9 +53,17 @@ theorem exists_compactCoefficientExtension_of_contDiffOn
     exists_normalizedCutoffControl_one_nhdsSet_of_isCompact hK hU hKU
   let G : X → V := fun x => χ.cutoff x • F x
   have hχ1 : ContDiff ℝ 1 χ.cutoff := χ.contDiff_three.of_le (by norm_num)
-  have hG : ContDiff ℝ 1 G ∧ HasCompactSupport G :=
-    SmoothDependenceCk.contDiff_and_hasCompactSupport_cutoff_smul
-      hU hF hχ1 χ.compactSupport hχsupp
+  have hG : ContDiff ℝ 1 G ∧ HasCompactSupport G := by
+    refine ⟨contDiff_iff_contDiffAt.mpr (fun x => ?_), ?_⟩
+    · by_cases hx : x ∈ tsupport χ.cutoff
+      · exact hχ1.contDiffAt.smul (hF.contDiffAt (hU.mem_nhds (hχsupp hx)))
+      · refine (contDiffAt_const (c := (0 : V))).congr_of_eventuallyEq ?_
+        filter_upwards [(isClosed_tsupport χ.cutoff).isOpen_compl.mem_nhds hx] with y hy
+        simp [G, image_eq_zero_of_notMem_tsupport hy]
+    · refine χ.compactSupport.of_isClosed_subset (isClosed_tsupport _) (closure_mono ?_)
+      intro x hx
+      rw [Function.mem_support] at hx ⊢
+      exact fun hχx => hx (by simp [G, hχx])
   have hGsupp : tsupport G ⊆ U := by
     calc
       tsupport G = closure (Function.support G) := rfl
