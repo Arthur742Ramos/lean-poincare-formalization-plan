@@ -15,6 +15,7 @@ parabolic trace.
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 set_option maxHeartbeats 4000000
+set_option synthInstance.maxHeartbeats 300000
 
 open Bundle FiberBundle Set
 open scoped Manifold ContDiff Topology
@@ -47,6 +48,58 @@ local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
     NormedSpace ℝ (T₂ x) :=
   CovariantDerivative.coordinateTwoFiberNormedSpace x
 
+local instance closedAtlasTwoFiberAddCommMonoid (x : M) :
+    AddCommMonoid (T₂ x) :=
+  (closedAtlasTwoFiberNormedAddCommGroup x).toAddCommMonoid
+
+/-- The completed local coefficient matrix is jointly continuous on its
+genuine coordinate patch. -/
+theorem continuousOn_closedHigherCoefficient_on_patch
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index)
+    (u : FiniteParabolicC2AlphaBanach E W₂ t₀ T α) :
+    ContinuousOn
+      (fun p : ℝ × M =>
+        FiniteParabolicC2AlphaBanach.completedValue
+          A.time_lt A.alpha_pos (normalizedHigherSolution u)
+          (FiniteClassicalTensorHeatField.normalizedTime t₀
+            (A.radius (i : M)) p.1,
+           normalizedTensorHeatCoordinate (I := I)
+            (i : M) (A.radius (i : M)) p.2))
+      (Set.univ ×ˢ actualLocalTensorHeatPatch (I := I)
+        (i : M) (A.radius (i : M))) := by
+  let U := actualLocalTensorHeatPatch (I := I)
+    (i : M) (A.radius (i : M))
+  have hcoord : ContinuousOn
+      (normalizedTensorHeatCoordinate (I := I)
+        (i : M) (A.radius (i : M))) U := by
+    unfold normalizedTensorHeatCoordinate
+    exact (((continuousOn_extChartAt (I := I) (i : M)).mono
+      (actualLocalTensorHeatPatch_subset_chartSource (I := I)
+        (i : M) (A.radius (i : M)))).sub continuousOn_const).const_smul _
+  have hpair : ContinuousOn
+      (fun p : ℝ × M =>
+        (FiniteClassicalTensorHeatField.normalizedTime t₀
+          (A.radius (i : M)) p.1,
+         normalizedTensorHeatCoordinate (I := I)
+          (i : M) (A.radius (i : M)) p.2))
+      (Set.univ ×ˢ U) := by
+    have htime : Continuous (fun t : ℝ =>
+        FiniteClassicalTensorHeatField.normalizedTime t₀
+          (A.radius (i : M)) t) := by
+      unfold FiniteClassicalTensorHeatField.normalizedTime
+      fun_prop
+    apply (htime.comp continuous_fst).continuousOn.prodMk
+    exact hcoord.comp continuousOn_snd (by
+      intro p hp
+      exact hp.2)
+  exact (FiniteParabolicC2AlphaBanach.continuous_completedValue
+    A.time_lt A.alpha_pos (normalizedHigherSolution u)).continuousOn.comp
+      hpair (by intro p _hp; exact Set.mem_univ _)
+
 /-- Reconstruct a local tensor from the completed coefficient value at every
 physical time. The positive-time restriction is the existing classical field. -/
 def closedLocalFieldOfHigher
@@ -65,6 +118,93 @@ def closedLocalFieldOfHigher
         (A.radius (i : M)) t,
        normalizedTensorHeatCoordinate (I := I)
         (i : M) (A.radius (i : M)) y))
+
+theorem continuousOn_closedLocalField_totalSpace_on_patch
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index)
+    (u : FiniteParabolicC2AlphaBanach E W₂ t₀ T α) :
+    ContinuousOn
+      (fun p : ℝ × M =>
+        TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := T₂) p.2 (closedLocalFieldOfHigher cov A i u p.1 p.2))
+      (Set.univ ×ˢ actualLocalTensorHeatPatch (I := I)
+        (i : M) (A.radius (i : M))) := by
+  let q : ℝ × M → Fin d → Fin d → ℝ := fun p =>
+    FiniteParabolicC2AlphaBanach.completedValue
+      A.time_lt A.alpha_pos (normalizedHigherSolution u)
+      (FiniteClassicalTensorHeatField.normalizedTime t₀
+        (A.radius (i : M)) p.1,
+       normalizedTensorHeatCoordinate (I := I)
+        (i : M) (A.radius (i : M)) p.2)
+  have hq : ContinuousOn q
+      (Set.univ ×ˢ actualLocalTensorHeatPatch (I := I)
+        (i : M) (A.radius (i : M))) :=
+    A.continuousOn_closedHigherCoefficient_on_patch cov i u
+  have hψ : Continuous (A.cover.partition i) :=
+    (A.cover.partition i).contMDiff.continuous
+  have h := continuousOn_cutoffLocalTensorOfMatrix_on_patch
+    (I := I) (p := (i : M))
+    (trivializationAt E TM (i : M)) b
+    (A.cover.partition i) hψ
+    (A.patch_subset_trivialization (i : M)) q hq
+  exact h
+
+/-- The cutoff erases the arbitrary local-frame branch outside its support,
+so the completed local tensor is jointly continuous globally as a section. -/
+theorem continuous_closedLocalField_totalSpace
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (i : A.cover.Index)
+    (u : FiniteParabolicC2AlphaBanach E W₂ t₀ T α) :
+    Continuous (fun p : ℝ × M =>
+      TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := T₂) p.2 (closedLocalFieldOfHigher cov A i u p.1 p.2)) := by
+  let U := actualLocalTensorHeatPatch (I := I)
+    (i : M) (A.radius (i : M))
+  let ψ := A.cover.partition i
+  let F : ℝ × M → TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) T₂ :=
+    fun p => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+      (E := T₂) p.2 (closedLocalFieldOfHigher cov A i u p.1 p.2)
+  let Z : ℝ × M → TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) T₂ :=
+    fun p => zeroSection (E →L[ℝ] E →L[ℝ] ℝ) T₂ p.2
+  have hU : IsOpen ((Set.univ : Set ℝ) ×ˢ U) :=
+    isOpen_univ.prod (isOpen_actualLocalTensorHeatPatch (I := I)
+      (i : M) (A.radius (i : M)))
+  have hFpatch : ContinuousOn F ((Set.univ : Set ℝ) ×ˢ U) :=
+    A.continuousOn_closedLocalField_totalSpace_on_patch cov i u
+  have hZ : Continuous Z :=
+    (Bundle.Trivialization.continuous_zeroSection ℝ).comp continuous_snd
+  have hZset : IsOpen
+      ((Set.univ : Set ℝ) ×ˢ (tsupport ψ)ᶜ) :=
+    isOpen_univ.prod (isClosed_tsupport ψ).isOpen_compl
+  have hFzero : EqOn F Z ((Set.univ : Set ℝ) ×ˢ (tsupport ψ)ᶜ) := by
+    intro p hp
+    have hψzero : ψ p.2 = 0 := by
+      by_contra hne
+      have hsupport : p.2 ∈ Function.support ψ := by
+        simpa [Function.mem_support] using hne
+      exact hp.2 (subset_tsupport ψ hsupport)
+    simp [F, Z, closedLocalFieldOfHigher, cutoffLocalTensorOfMatrix,
+      ψ, hψzero, zeroSection]
+  change Continuous F
+  apply continuous_iff_continuousAt.mpr
+  intro p
+  by_cases hpU : p.2 ∈ U
+  · exact hFpatch.continuousAt
+      (hU.mem_nhds ⟨Set.mem_univ _, hpU⟩)
+  · have hpZ : p ∈ (Set.univ : Set ℝ) ×ˢ (tsupport ψ)ᶜ := by
+      refine ⟨Set.mem_univ _, ?_⟩
+      intro hsupport
+      exact hpU (A.cover.pieces_subset_domain i hsupport)
+    have hev : F =ᶠ[𝓝 p] Z := by
+      filter_upwards [hZset.mem_nhds hpZ] with z hz
+      exact hFzero hz
+    exact hZ.continuousAt.congr_of_eventuallyEq hev
 
 theorem closedLocalFieldOfHigher_eq_localFieldOfHigher
     (cov : CovariantDerivative I E TM)
