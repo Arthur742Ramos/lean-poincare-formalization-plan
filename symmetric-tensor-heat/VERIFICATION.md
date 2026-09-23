@@ -5,6 +5,17 @@ Selected theorem:
 
 ## Current selected repair (verification in progress)
 
+The data-coverage extension after `40f66568d51f8424a2d3265cd4c63718e2576515`
+adds selected coverage for every bounded spatial `C^{2,alpha}` atlas jet family
+and every parabolic `C^{alpha,alpha/2}` atlas source family satisfying the
+displayed bounds. The independent Challenge and Solution propositions match
+byte for byte. Both compiled locally, and the closed-statement audit passed
+with 281 reachable constants, 60 compiler-generated proposition proofs, and
+no candidate-defined mathematical data. The nonvacuity check, exact axiom
+query (`propext`, `Classical.choice`, `Quot.sound`), package/schema, and
+structured provenance checks passed locally. These are working-tree results;
+the exact-commit hosted renderer and mechanical verification remain pending.
+
 The selected Challenge and Solution state ordinary, unprojected atlas
 reconstruction. The curvature subproject at the disclosed source commit proves
 joint space-time continuity of the represented tensor norm and a zero-data

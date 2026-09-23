@@ -30,9 +30,11 @@ The compared proposition now exposes the analytic representation itself:
   matrix representatives; the displayed time derivative is the actual
   derivative for every represented solution, including those compared for
   uniqueness;
-- injective initial, source, and solution coefficient readouts and witnesses
-  for every atlas-wide family of constant matrices, which rule out singleton
-  or all-zero coefficient carriers; and
+- injective initial, source, and solution coefficient readouts; coverage of
+  every bounded spatial `C^{2,alpha}` atlas jet family with its actual first
+  and second derivatives, and every parabolic `C^{alpha,alpha/2}` atlas source
+  family satisfying the displayed norm bound; constant-matrix witnesses also
+  make nontriviality explicit; and
 - explicit spatial `C^{2,alpha}`, parabolic `C^{alpha,alpha/2}`, and solution
   `C^{2+alpha,1+alpha/2}` derivative and Hölder certificates controlled by the
   same sizes and norms used in the Schauder estimate.
@@ -60,6 +62,12 @@ repository's `curvature/` project.
 ## Scope boundary
 
 The theorem is deliberately about the constructed finite-atlas Holder class.
+The selected coverage clauses characterize its coefficient inputs directly:
+bounded continuous spatial values and jets with a common Holder constant and
+their stated Frechet derivatives, plus parabolically bounded Holder sources
+on the normalized cylinder. These inputs are independent of the
+proof-selected carriers. The geometric data are their weighted atlas
+reconstructions.
 It does not claim that every bare intrinsic tensor section has a coefficient
 representation, nor uniqueness outside the represented classical class. It
 constructs a short endpoint rather than solving to an arbitrary prescribed

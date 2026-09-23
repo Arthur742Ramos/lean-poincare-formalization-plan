@@ -529,6 +529,26 @@ def completeStatement : Prop :=
         Function.Injective (fun q =>
           (solutionValue q, solutionSpaceDeriv q,
             solutionSpaceSecondDeriv q, solutionTimeDerivCoordinate q)) ∧
+        (∀ (v : Index → BoundedContinuousFunction E Matrix)
+            (dv : Index → BoundedContinuousFunction E (E →L[ℝ] Matrix))
+            (d2v : Index → BoundedContinuousFunction E
+              (E →L[ℝ] E →L[ℝ] Matrix))
+            (H : Index → ℝ),
+          (∀ i, 0 ≤ H i) →
+          (∀ i x y, ‖v i x - v i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x y, ‖dv i x - dv i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x y, ‖d2v i x - d2v i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x, HasFDerivAt (v i) (dv i x) x) →
+          (∀ i x, HasFDerivAt (dv i) (d2v i x) x) →
+          ∃ D : Initial,
+            (∀ i x, initialValue D i x = v i x) ∧
+            (∀ i x, initialSpaceDeriv D i x = dv i x) ∧
+            (∀ i x, initialSpaceSecondDeriv D i x = d2v i x) ∧
+            (∀ i, initialHolderConstant D i = H i)) ∧
+        (∀ (c : Index → ℝ × E → Matrix) (N : Index → ℝ),
+          (∀ i, hasParabolicC0 Tcoord (N i) (c i)) →
+          ∃ f : Source, ∀ i z, z.1 ∈ Ioc t₀ Tcoord →
+            sourceValue f i z = c i z) ∧
         (∀ c : Index →
             (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ),
           ∃ D, ∀ i x, initialValue D i x = c i) ∧
