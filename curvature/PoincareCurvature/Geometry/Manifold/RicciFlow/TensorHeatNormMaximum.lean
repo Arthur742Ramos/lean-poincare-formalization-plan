@@ -1,7 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarOpenInitialPotential
-public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorNormSq
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorGramCovariantDerivative
 
 /-!
 # Tensor heat uniqueness from a scalar norm inequality
@@ -106,13 +106,13 @@ theorem covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial_potential
           (E := T₂) z (h t z)) y)
     (hmetric : ∀ t ∈ Ioo t₀ T,
       (cov t).IsMetricCompatibleTangent)
-    (hfirstGram : ∀ t ∈ Ioo t₀ T, ∀ x : M,
+    (hfirst : ∀ t ∈ Ioo t₀ T, ∀ x : M,
       MDiffAt
         (fun y => TotalSpace.mk'
           (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
           (E := T₃) y
             (CovariantDerivative.covariantTwoTensorCovariantDerivative (cov t)
-              (CovariantDerivative.covariantTwoTensorGram (h t)) y)) x)
+              (h t) y)) x)
     (hpde : ∀ t ∈ Ioo t₀ T, ∀ x : M,
       covariantTwoTensorNormTimePair h dh t x ≤
         g.scalarLaplacian cov
@@ -144,8 +144,11 @@ theorem covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial_potential
           (CovariantDerivative.scalarDifferential (I := I)
             (CovariantDerivative.covariantTwoTensorNormSq (h t)) y)) x := by
     intro t ht x
+    have hfirstGram :=
+      CovariantDerivative.covariantTwoTensorCovariantDerivative_gram_mdifferentiableAt
+        (cov t) (hmetric t ht) (h t) (hspatial t ht) (hfirst t ht x)
     exact CovariantDerivative.mdifferentiableAt_scalarDifferential_covariantTwoTensorNormSq
-      (cov t) (hmetric t ht) (h t) (hspatial t ht) (hfirstGram t ht x)
+      (cov t) (hmetric t ht) (h t) (hspatial t ht) hfirstGram
   have hnonpos := g.parabolicSubsolution_nonpositive_openInitial_potential cov
     (fun t x => CovariantDerivative.covariantTwoTensorNormSq (h t) x)
     (covariantTwoTensorNormTimePair h dh) K
@@ -176,13 +179,13 @@ theorem covariantTwoTensor_eq_zero_of_connectionHeat_bochner
           (E := T₂) z (h t z)) y)
     (hmetric : ∀ t ∈ Ioo t₀ T,
       (cov t).IsMetricCompatibleTangent)
-    (hfirstGram : ∀ t ∈ Ioo t₀ T, ∀ x : M,
+    (hfirst : ∀ t ∈ Ioo t₀ T, ∀ x : M,
       MDiffAt
         (fun y => TotalSpace.mk'
           (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
           (E := T₃) y
             (CovariantDerivative.covariantTwoTensorCovariantDerivative (cov t)
-              (CovariantDerivative.covariantTwoTensorGram (h t)) y)) x)
+              (h t) y)) x)
     (hheat : ∀ t ∈ Ioo t₀ T, ∀ x : M,
       dh t x = CovariantDerivative.connectionLaplacian (cov t) (h t) x +
         reaction t x)
@@ -215,6 +218,6 @@ theorem covariantTwoTensor_eq_zero_of_connectionHeat_bochner
         (h t) (reaction t) x C (hreaction t ht x)
     linarith
   exact covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial_potential
-    g cov h dh (1 + C) hcont htime hspatial hmetric hfirstGram hpde hinitial
+    g cov h dh (1 + C) hcont htime hspatial hmetric hfirst hpde hinitial
 
 end CovariantDerivative.TimeDependentRiemannianMetric

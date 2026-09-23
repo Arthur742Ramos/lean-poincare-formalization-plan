@@ -33,6 +33,24 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
+local notation "T₃" => (fun x : M => TM x →L[ℝ] T₂ x)
+
+local instance tensorGramTwoModelNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+local instance tensorGramTwoModelNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+local instance tensorGramTwoFiberNormedAddCommGroup (x : M) :
+    NormedAddCommGroup (T₂ x) := inferInstance
+local instance tensorGramTwoFiberNormedSpace (x : M) :
+    NormedSpace ℝ (T₂ x) := inferInstance
+local instance tensorGramThreeModelNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+local instance tensorGramThreeModelNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+local instance tensorGramThreeFiberNormedAddCommGroup (x : M) :
+    NormedAddCommGroup (T₃ x) := inferInstance
+local instance tensorGramThreeFiberNormedSpace (x : M) :
+    NormedSpace ℝ (T₃ x) := inferInstance
 
 /-- Metric compatibility differentiates both factors of the Gram tensor.
 The two correction terms remove the derivatives of the chosen smooth
@@ -167,5 +185,83 @@ theorem covariantTwoTensorCovariantDerivative_gram_eq
     exact hv
   rw [hu, hv'] at hgram
   simpa [A] using hgram
+
+/-- Second-order regularity of the original tensor supplies the first
+covariant-derivative regularity of its Gram tensor. -/
+theorem covariantTwoTensorCovariantDerivative_gram_mdifferentiableAt
+    (cov : CovariantDerivative I E TM)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (h : ∀ y : M, T₂ y)
+    (hh : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := T₂) z (h z)) y)
+    {x₀ : M}
+    (hfirst : MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+        (E := T₃) y
+          (covariantTwoTensorCovariantDerivative cov h y)) x₀) :
+    MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+        (E := T₃) y
+          (covariantTwoTensorCovariantDerivative cov
+            (covariantTwoTensorGram (I := I) (E := E) h) y)) x₀ := by
+  let e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M) :=
+    trivializationAt E TM x₀
+  let b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E :=
+    Module.finBasis ℝ E
+  let A : ∀ y : M, TM y →L[ℝ] TM y :=
+    raisedCovariantTwoTensor (I := I) (E := E) h
+  have hA := raisedCovariantTwoTensor_mdifferentiableAt
+    (I := I) (E := E) (M := M) (hh x₀)
+  have hx : x₀ ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt' x₀
+  refine mdifferentiableAt_homBundle_of_forall_apply_localFrame
+    (IB := I) (E₁ := TM) (E₂ := T₂) x₀ b ?_
+  intro i
+  let X : ∀ y : M, TM y := fun y => e.localFrame b i y
+  have hX : MDiffAt (T% X) x₀ :=
+    (contMDiffAt_localFrame_of_mem (I := I) (e := e) (b := b)
+      (n := (1 : ℕ∞)) (i := i) (hx := hx)).mdifferentiableAt one_ne_zero
+  have hfirstX := hfirst.clm_bundle_apply hX
+  refine mdifferentiableAt_homBundle_of_forall_apply_localFrame
+    (IB := I) (E₁ := TM) (E₂ := fun y : M => TM y →L[ℝ] ℝ) x₀ b ?_
+  intro j
+  let U : ∀ y : M, TM y := fun y => e.localFrame b j y
+  have hU : MDiffAt (T% U) x₀ :=
+    (contMDiffAt_localFrame_of_mem (I := I) (e := e) (b := b)
+      (n := (1 : ℕ∞)) (i := j) (hx := hx)).mdifferentiableAt one_ne_zero
+  have hfirstXU := hfirstX.clm_bundle_apply hU
+  have hAU := hA.clm_bundle_apply hU
+  refine mdifferentiableAt_homBundle_of_forall_apply_localFrame
+    (IB := I) (E₁ := TM) (E₂ := Bundle.Trivial M ℝ) x₀ b ?_
+  intro k
+  let V : ∀ y : M, TM y := fun y => e.localFrame b k y
+  have hV : MDiffAt (T% V) x₀ :=
+    (contMDiffAt_localFrame_of_mem (I := I) (e := e) (b := b)
+      (n := (1 : ℕ∞)) (i := k) (hx := hx)).mdifferentiableAt one_ne_zero
+  have hAV := hA.clm_bundle_apply hV
+  have hfirstXV := hfirstX.clm_bundle_apply hV
+  have hterm1 := hfirstXU.clm_bundle_apply hAV
+  have hterm2 := hfirstXV.clm_bundle_apply hAU
+  rw [mdifferentiableAt_section] at hterm1 hterm2
+  have hscalar : MDiffAt
+      (fun y => covariantTwoTensorCovariantDerivative cov h y (X y) (U y) (A y (V y)) +
+        covariantTwoTensorCovariantDerivative cov h y (X y) (V y) (A y (U y))) x₀ := by
+    exact hterm1.add hterm2
+  rw [mdifferentiableAt_section]
+  have heq : (fun y =>
+      covariantTwoTensorCovariantDerivative cov
+        (covariantTwoTensorGram (I := I) (E := E) h) y (X y) (U y) (V y)) =
+      (fun y => covariantTwoTensorCovariantDerivative cov h y (X y) (U y) (A y (V y)) +
+        covariantTwoTensorCovariantDerivative cov h y (X y) (V y) (A y (U y))) := by
+    funext y
+    exact covariantTwoTensorCovariantDerivative_gram_eq
+      (I := I) (E := E) (M := M) cov hmetric (hh y) (X y) (U y) (V y)
+  change MDiffAt (fun y =>
+    covariantTwoTensorCovariantDerivative cov
+      (covariantTwoTensorGram (I := I) (E := E) h) y (X y) (U y) (V y)) x₀
+  rw [heq]
+  exact hscalar
 
 end CovariantDerivative
