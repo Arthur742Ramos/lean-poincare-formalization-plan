@@ -289,4 +289,151 @@ theorem scalarLaplacian_covariantTwoTensorNormSq_eq_trace_laplacian_gram_of_tens
   exact scalarLaplacian_covariantTwoTensorNormSq_eq_trace_laplacian_gram
     cov hmetric h hh hfirstGram
 
+/-- The full second covariant derivative of the Gram tensor. The last two
+terms are the derivatives of the two tensor factors and produce the positive
+energy term after taking the metric trace. -/
+theorem covariantHessianTwoTensor_gram_eq
+    (cov : CovariantDerivative I E TM)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (h : ∀ y : M, T₂ y)
+    (hh : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := T₂) z (h z)) y)
+    {x : M}
+    (hfirst : MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+        (E := T₃) y
+          (covariantTwoTensorCovariantDerivative cov h y)) x)
+    (X₁ X₂ u v : TM x) :
+    covariantHessianTwoTensor cov
+        (covariantTwoTensorGram (I := I) (E := E) h) x X₁ X₂ u v =
+      covariantHessianTwoTensor cov h x X₁ X₂ u
+          (raisedCovariantTwoTensor (I := I) (E := E) h x v) +
+        covariantHessianTwoTensor cov h x X₁ X₂ v
+          (raisedCovariantTwoTensor (I := I) (E := E) h x u) +
+        covariantTwoTensorCovariantDerivative cov h x X₂ u
+          (endomorphismCovariantDerivativeApply cov
+            (raisedCovariantTwoTensor (I := I) (E := E) h) x X₁ v) +
+        covariantTwoTensorCovariantDerivative cov h x X₂ v
+          (endomorphismCovariantDerivativeApply cov
+            (raisedCovariantTwoTensor (I := I) (E := E) h) x X₁ u) := by
+  let A : ∀ y : M, TM y →L[ℝ] TM y :=
+    raisedCovariantTwoTensor (I := I) (E := E) h
+  let S : ∀ y : M, TM y :=
+    smoothExtend (I := I) (F := E) (V := TM) x X₂
+  let U : ∀ y : M, TM y :=
+    smoothExtend (I := I) (F := E) (V := TM) x u
+  let V : ∀ y : M, TM y :=
+    smoothExtend (I := I) (F := E) (V := TM) x v
+  have hS : MDiffAt (T% S) x :=
+    ((smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x X₂).of_le
+      (by norm_num) x).mdifferentiableAt one_ne_zero
+  have hU : MDiffAt (T% U) x :=
+    ((smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x u).of_le
+      (by norm_num) x).mdifferentiableAt one_ne_zero
+  have hV : MDiffAt (T% V) x :=
+    ((smoothExtend_contMDiff_two (I := I) (F := E) (V := TM) x v).of_le
+      (by norm_num) x).mdifferentiableAt one_ne_zero
+  have hA := raisedCovariantTwoTensor_mdifferentiableAt
+    (I := I) (E := E) (M := M) (hh x)
+  have hAU := hA.clm_bundle_apply hU
+  have hAV := hA.clm_bundle_apply hV
+  have hfirstGram := covariantTwoTensorCovariantDerivative_gram_mdifferentiableAt
+    (I := I) (E := E) (M := M) cov hmetric h hh hfirst
+  have hfirstS := hfirst.clm_bundle_apply hS
+  have hfirstSU := hfirstS.clm_bundle_apply hU
+  have hfirstSV := hfirstS.clm_bundle_apply hV
+  have hterm1 := hfirstSU.clm_bundle_apply hAV
+  have hterm2 := hfirstSV.clm_bundle_apply hAU
+  rw [mdifferentiableAt_section] at hterm1 hterm2
+  have hterm1' : MDiffAt
+      (fun y => covariantTwoTensorCovariantDerivative cov h y
+        (S y) (U y) (A y (V y))) x := by
+    simpa [Bundle.Trivial.eq_trivialization M ℝ, A] using hterm1
+  have hterm2' : MDiffAt
+      (fun y => covariantTwoTensorCovariantDerivative cov h y
+        (S y) (V y) (A y (U y))) x := by
+    simpa [Bundle.Trivial.eq_trivialization M ℝ, A] using hterm2
+  have hG := realLineCovariantDerivative_trilinear cov
+    hfirstGram hS hU hV X₁
+  have hT1 := realLineCovariantDerivative_trilinear cov
+    hfirst hS hU hAV X₁
+  have hT2 := realLineCovariantDerivative_trilinear cov
+    hfirst hS hV hAU X₁
+  have hpoint :
+      (fun y => covariantTwoTensorCovariantDerivative cov
+        (covariantTwoTensorGram (I := I) (E := E) h) y
+          (S y) (U y) (V y)) =
+      (fun y => covariantTwoTensorCovariantDerivative cov h y
+          (S y) (U y) (A y (V y)) +
+        covariantTwoTensorCovariantDerivative cov h y
+          (S y) (V y) (A y (U y))) := by
+    funext y
+    exact covariantTwoTensorCovariantDerivative_gram_eq
+      (I := I) (E := E) (M := M) cov hmetric (hh y) (S y) (U y) (V y)
+  have hderiv :
+      realLineCovariantDerivative (I := I) (M := M)
+        (fun y => covariantTwoTensorCovariantDerivative cov
+          (covariantTwoTensorGram (I := I) (E := E) h) y
+            (S y) (U y) (V y)) x X₁ =
+      realLineCovariantDerivative (I := I) (M := M)
+        (fun y => covariantTwoTensorCovariantDerivative cov h y
+          (S y) (U y) (A y (V y))) x X₁ +
+      realLineCovariantDerivative (I := I) (M := M)
+        (fun y => covariantTwoTensorCovariantDerivative cov h y
+          (S y) (V y) (A y (U y))) x X₁ := by
+    rw [hpoint]
+    change (mvfderiv (I := I)
+      ((fun y => covariantTwoTensorCovariantDerivative cov h y
+          (S y) (U y) (A y (V y))) +
+        (fun y => covariantTwoTensorCovariantDerivative cov h y
+          (S y) (V y) (A y (U y)))) x) X₁ = _
+    rw [mvfderiv_add (I := I) hterm1' hterm2']
+    rfl
+  have hEndU :
+      endomorphismCovariantDerivativeApply cov A x X₁ u =
+        cov (fun y => A y (U y)) x X₁ - A x (cov U x X₁) := by
+    unfold endomorphismCovariantDerivativeApply endomorphismCovariantDerivativeAt
+    dsimp only [inducedHomCovariantDerivative]
+    split
+    next _ => rfl
+    next hnot => exact (hnot hA).elim
+  have hEndV :
+      endomorphismCovariantDerivativeApply cov A x X₁ v =
+        cov (fun y => A y (V y)) x X₁ - A x (cov V x X₁) := by
+    unfold endomorphismCovariantDerivativeApply endomorphismCovariantDerivativeAt
+    dsimp only [inducedHomCovariantDerivative]
+    split
+    next _ => rfl
+    next hnot => exact (hnot hA).elim
+  have hcovAU : cov (fun y => A y (U y)) x X₁ =
+      endomorphismCovariantDerivativeApply cov A x X₁ u +
+        A x (cov U x X₁) := by
+    rw [hEndU]
+    abel
+  have hcovAV : cov (fun y => A y (V y)) x X₁ =
+      endomorphismCovariantDerivativeApply cov A x X₁ v +
+        A x (cov V x X₁) := by
+    rw [hEndV]
+    abel
+  have hG' := hG
+  rw [hderiv] at hG'
+  rw [hT1, hT2] at hG'
+  rw [hcovAU, hcovAV] at hG'
+  simp only [map_add, S, U, V, smoothExtend_apply] at hG'
+  have hCorrS := covariantTwoTensorCovariantDerivative_gram_eq
+    (I := I) (E := E) (M := M) cov hmetric (hh x)
+      (cov S x X₁) u v
+  have hCorrU := covariantTwoTensorCovariantDerivative_gram_eq
+    (I := I) (E := E) (M := M) cov hmetric (hh x)
+      X₂ (cov U x X₁) v
+  have hCorrV := covariantTwoTensorCovariantDerivative_gram_eq
+    (I := I) (E := E) (M := M) cov hmetric (hh x)
+      X₂ u (cov V x X₁)
+  simp only [S, U, V] at hCorrS hCorrU hCorrV
+  simp only [A] at hG'
+  unfold covariantHessianTwoTensor
+  linarith [hG', hCorrS, hCorrU, hCorrV]
+
 end CovariantDerivative
