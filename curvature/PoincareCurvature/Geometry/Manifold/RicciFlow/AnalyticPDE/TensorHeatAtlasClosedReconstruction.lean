@@ -37,8 +37,19 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {d : ℕ} {t₀ T α : ℝ}
 
 local notation "TM" => (TangentSpace I : M → Type _)
+local notation "T₁" => (fun x : M => TM x →L[ℝ] ℝ)
 local notation "W₂" => (Fin d × Fin d → ℝ)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
+
+local instance closedAtlasCovectorVectorBundle :
+    VectorBundle ℝ (E →L[ℝ] ℝ) T₁ :=
+  Bundle.ContinuousLinearMap.vectorBundle
+    (RingHom.id ℝ) E TM ℝ (Bundle.Trivial M ℝ)
+
+local instance closedAtlasTwoVectorBundle :
+    VectorBundle ℝ (E →L[ℝ] E →L[ℝ] ℝ) T₂ :=
+  Bundle.ContinuousLinearMap.vectorBundle
+    (RingHom.id ℝ) E TM (E →L[ℝ] ℝ) T₁
 
 @[reducible] local instance closedAtlasTwoFiberNormedAddCommGroup (x : M) :
     NormedAddCommGroup (T₂ x) :=
@@ -51,6 +62,71 @@ local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
 local instance closedAtlasTwoFiberAddCommMonoid (x : M) :
     AddCommMonoid (T₂ x) :=
   (closedAtlasTwoFiberNormedAddCommGroup x).toAddCommMonoid
+
+local instance closedAtlasTwoModelNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ) := inferInstance
+
+local instance closedAtlasTwoModelNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) := inferInstance
+
+private theorem continuous_add_tensorSections
+    (f g : ∀ p : ℝ × M, T₂ p.2)
+    (hf : Continuous (fun p : ℝ × M =>
+      TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) p.2 (f p)))
+    (hg : Continuous (fun p : ℝ × M =>
+      TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) p.2 (g p))) :
+    Continuous (fun p : ℝ × M =>
+      TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) p.2 (f p + g p)) := by
+  apply continuous_iff_continuousAt.mpr
+  intro p
+  let e := trivializationAt (E →L[ℝ] E →L[ℝ] ℝ) T₂ p.2
+  have hlin : e.IsLinear ℝ :=
+    _root_.Bundle.trivializationAt_bilinearFormBundle_isLinear
+      (F := E) (W := TM) p.2
+  letI : e.IsLinear ℝ := hlin
+  have hp : p.2 ∈ e.baseSet := by
+    exact FiberBundle.mem_baseSet_trivializationAt' p.2
+  have hfAt := (e.tendsto_nhds_iff (e.mem_source.mpr hp)).1
+    (hf.continuousAt (x := p))
+  have hgAt := (e.tendsto_nhds_iff (e.mem_source.mpr hp)).1
+    (hg.continuousAt (x := p))
+  have hsum := hfAt.2.add hgAt.2
+  have hcoord : ContinuousAt (fun q : ℝ × M =>
+      (e (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := T₂) q.2 (f q + g q))).2) p := by
+    have hpoint := (e.linear ℝ hp).1 (f p) (g p)
+    change Filter.Tendsto (fun q : ℝ × M =>
+      (e (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := T₂) q.2 (f q + g q))).2) (𝓝 p)
+      (𝓝 ((e (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := T₂) p.2 (f p + g p))).2))
+    rw [hpoint]
+    apply hsum.congr'
+    have hopen : IsOpen ((fun q : ℝ × M => q.2) ⁻¹' e.baseSet) :=
+      e.open_baseSet.preimage continuous_snd
+    filter_upwards [hopen.mem_nhds hp] with q hq
+    exact ((e.linear ℝ hq).1 (f q) (g q)).symm
+  refine (e.tendsto_nhds_iff (e.mem_source.mpr hp)).2 ?_
+  exact ⟨continuous_snd.continuousAt, hcoord⟩
+
+private theorem continuous_finset_sum_tensorSections
+    {ι : Type*} (s : Finset ι) (f : ι → ∀ p : ℝ × M, T₂ p.2)
+    (hf : ∀ i, Continuous (fun p : ℝ × M =>
+      TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) p.2 (f i p))) :
+    Continuous (fun p : ℝ × M =>
+      TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) p.2
+        (∑ i ∈ s, f i p)) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+      simpa only [Finset.sum_empty, zeroSection, Function.comp_def] using
+        ((Bundle.Trivialization.continuous_zeroSection ℝ).comp continuous_snd :
+          Continuous (fun p : ℝ × M =>
+            zeroSection (E →L[ℝ] E →L[ℝ] ℝ) T₂ p.2))
+  | @insert i s his ih =>
+      simp only [Finset.sum_insert his]
+      exact continuous_add_tensorSections (f i)
+        (fun p => ∑ j ∈ s, f j p) (hf i) ih
 
 /-- The completed local coefficient matrix is jointly continuous on its
 genuine coordinate patch. -/
@@ -323,6 +399,21 @@ def closedAtlasFieldOfHigher
     (u : HigherCoefficientSpace cov A)
     (t : ℝ) : ∀ x : M, T₂ x :=
   fun x => ∑ i : A.cover.Index, closedLocalFieldOfHigher cov A i (u i) t x
+
+theorem continuous_closedAtlasFieldOfHigher_totalSpace
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (u : HigherCoefficientSpace cov A) :
+    Continuous (fun p : ℝ × M =>
+      TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) p.2
+        (closedAtlasFieldOfHigher cov A u p.1 p.2)) := by
+  simpa only [closedAtlasFieldOfHigher] using
+    (continuous_finset_sum_tensorSections (I := I)
+      (s := Finset.univ)
+      (f := fun i p => closedLocalFieldOfHigher cov A i (u i) p.1 p.2)
+      (fun i => A.continuous_closedLocalField_totalSpace cov i (u i)))
 
 theorem continuous_closedAtlasFieldOfHigher_at
     (cov : CovariantDerivative I E TM)
