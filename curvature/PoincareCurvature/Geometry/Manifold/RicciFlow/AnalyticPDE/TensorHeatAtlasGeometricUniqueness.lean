@@ -41,12 +41,39 @@ variable {d : ℕ} {t₀ T α : ℝ}
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
 
+/-- The ambient smooth Riemannian bundle structure has an explicit smooth
+metric witness with exactly its existing fiber inner products. -/
+private noncomputable def compatibleSmoothMetric :
+    Bundle.ContMDiffRiemannianMetric I 2 E TM := by
+  let g : Bundle.RiemannianMetric TM := RiemannianBundle.g
+  let hexists :=
+    (inferInstance : IsContMDiffRiemannianBundle I 2 E TM).exists_contMDiff
+  let g' := Classical.choose hexists
+  have hg' := (Classical.choose_spec hexists).1
+  have hinner := (Classical.choose_spec hexists).2
+  have hgg : g' = g.inner := by
+    funext x
+    ext v w
+    change g' x v w = g.inner x v w
+    rw [← hinner x v w]
+    rfl
+  exact {
+    inner := g.inner
+    symm := g.symm
+    pos := g.pos
+    isVonNBounded := g.isVonNBounded
+    contMDiff := by simpa only [← hgg] using hg'
+  }
+
+private theorem compatibleSmoothMetric_eq_bundleMetric :
+    (compatibleSmoothMetric (I := I) (E := E) (M := M)).toRiemannianMetric =
+      (RiemannianBundle.g : Bundle.RiemannianMetric TM) := by
+  rfl
+
 /-- The geometric zero-data theorem for the represented atlas class, with
 the exact remaining closed-time norm-continuity condition exposed. -/
 theorem atlasFieldOfHigher_zero_of_closedNormContinuous
-    (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM) :
-    letI : RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩
-    ∀ (cov : CovariantDerivative I E TM)
+    : ∀ (cov : CovariantDerivative I E TM)
       [ContMDiffCovariantDerivative
         (covariantTwoTensorCovariantDerivative
           (E := E) (I := I) (M := M) cov) 1]
@@ -64,6 +91,7 @@ theorem atlasFieldOfHigher_zero_of_closedNormContinuous
         (atlasFieldOfHigher cov A u).tensorHeatOperator cov t ht x = 0) →
       ∀ t ∈ Ioc t₀ A.commonTerminalTime,
         (atlasFieldOfHigher cov A u).toFun t = 0 := by
+  let g₀ := compatibleSmoothMetric (I := I) (E := E) (M := M)
   letI : RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩
   intro cov hcov b A u hmetric hcont htrace hheat
   have hinitial : ∀ x : M, closedAtlasFieldOfHigher cov A u t₀ x = 0 := by
