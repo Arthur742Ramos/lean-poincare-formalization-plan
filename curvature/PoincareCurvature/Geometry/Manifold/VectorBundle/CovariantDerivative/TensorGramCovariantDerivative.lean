@@ -436,4 +436,159 @@ theorem covariantHessianTwoTensor_gram_eq
   unfold covariantHessianTwoTensor
   linarith [hG', hCorrS, hCorrU, hCorrV]
 
+/-- The complete Hilbert--Schmidt pairing is contraction against the raised
+first tensor in the second slot of the other tensor. -/
+theorem covariantTwoTensorPair_eq_sum_raised
+    (h k : ∀ y : M, T₂ y) (x : M) :
+    covariantTwoTensorPair h k x =
+      letI : FiniteDimensional ℝ (TM x) :=
+        VectorBundle.finiteDimensional ℝ E TM x
+      let b := stdOrthonormalBasis ℝ (TM x)
+      ∑ i, k x (b i)
+        (raisedCovariantTwoTensor (I := I) (E := E) h x (b i)) := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  let A := raisedCovariantTwoTensor (I := I) (E := E) h x
+  let B := raisedCovariantTwoTensor (I := I) (E := E) k x
+  change (∑ i, ∑ j, h x (b i) (b j) * k x (b i) (b j)) =
+    ∑ i, k x (b i) (A (b i))
+  apply Finset.sum_congr rfl
+  intro i hi
+  calc
+    ∑ j, h x (b i) (b j) * k x (b i) (b j) =
+        ∑ j, inner ℝ (A (b i)) (b j) *
+          inner ℝ (b j) (B (b i)) := by
+      apply Finset.sum_congr rfl
+      intro j hj
+      have hAij : h x (b i) (b j) = inner ℝ (A (b i)) (b j) := by
+        change h x (b i) (b j) =
+          inner ℝ (rieszMap (I := I) x (h x (b i))) (b j)
+        exact (rieszMap_apply_inner (I := I) x (h x (b i)) (b j)).symm
+      have hBij : k x (b i) (b j) = inner ℝ (b j) (B (b i)) := by
+        calc
+          k x (b i) (b j) = inner ℝ (B (b i)) (b j) := by
+            change k x (b i) (b j) =
+              inner ℝ (rieszMap (I := I) x (k x (b i))) (b j)
+            exact (rieszMap_apply_inner (I := I) x (k x (b i)) (b j)).symm
+          _ = inner ℝ (b j) (B (b i)) := real_inner_comm _ _
+      rw [hAij, hBij]
+    _ = inner ℝ (A (b i)) (B (b i)) := b.sum_inner_mul_inner _ _
+    _ = k x (b i) (A (b i)) := by
+      calc
+        inner ℝ (A (b i)) (B (b i)) =
+            inner ℝ (B (b i)) (A (b i)) := real_inner_comm _ _
+        _ = k x (b i) (A (b i)) := by
+          change inner ℝ (rieszMap (I := I) x (k x (b i))) (A (b i)) = _
+          exact rieszMap_apply_inner (I := I) x (k x (b i)) (A (b i))
+
+/-- Each mixed term in the Gram Hessian is a nonnegative square for a
+metric-compatible connection. -/
+theorem covariantTwoTensorCovariantDerivative_raised_self_nonneg
+    (cov : CovariantDerivative I E TM)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    {h : ∀ y : M, T₂ y} {x : M}
+    (hh : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := T₂) y (h y)) x)
+    (X u : TM x) :
+    0 ≤ covariantTwoTensorCovariantDerivative cov h x X u
+      (endomorphismCovariantDerivativeApply cov
+        (raisedCovariantTwoTensor (I := I) (E := E) h) x X u) := by
+  let D := endomorphismCovariantDerivativeApply cov
+    (raisedCovariantTwoTensor (I := I) (E := E) h) x X u
+  have hdefect :=
+    (isMetricCompatibleTangent_iff_metricDefect_eq_zero cov).mp hmetric x
+      (raisedCovariantTwoTensor (I := I) (E := E) h x u) D
+  have hinner := inner_endomorphismCovariantDerivative_raisedCovariantTwoTensor_eq
+    (I := I) (E := E) (M := M) cov hh X u D
+  simp only [hdefect, zero_apply, sub_zero] at hinner
+  change 0 ≤ covariantTwoTensorCovariantDerivative cov h x X u D
+  rw [← hinner]
+  exact real_inner_self_nonneg
+
+/-- The spatial Bochner inequality for the complete covariant two-tensor
+norm. This is a geometric consequence of the Gram Hessian product identity. -/
+theorem two_mul_pair_le_trace_connectionLaplacian_gram
+    (cov : CovariantDerivative I E TM)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (h : ∀ y : M, T₂ y)
+    (hh : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := T₂) z (h z)) y)
+    {x : M}
+    (hfirst : MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+        (E := T₃) y
+          (covariantTwoTensorCovariantDerivative cov h y)) x) :
+    2 * covariantTwoTensorPair h
+      (fun y => connectionLaplacian cov h y) x ≤
+      covariantTwoTensorTrace (I := I) (E := E) (M := M)
+        (covariantTwoTensorLinear (I := I) (M := M)
+          (fun y => connectionLaplacian cov
+            (covariantTwoTensorGram (I := I) (E := E) h) y)) x := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  let A := raisedCovariantTwoTensor (I := I) (E := E) h x
+  have hleft : 2 * covariantTwoTensorPair h
+      (fun y => connectionLaplacian cov h y) x =
+      ∑ j, ∑ i, 2 * covariantHessianTwoTensor cov h x
+        (b i) (b i) (b j) (A (b j)) := by
+    rw [covariantTwoTensorPair_eq_sum_raised]
+    change 2 * (∑ j, connectionLaplacian cov h x (b j) (A (b j))) = _
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro j hj
+    rw [connectionLaplacian_apply]
+    simp only [Finset.mul_sum]
+    rfl
+  have hright : covariantTwoTensorTrace (I := I) (E := E) (M := M)
+        (covariantTwoTensorLinear (I := I) (M := M)
+          (fun y => connectionLaplacian cov
+            (covariantTwoTensorGram (I := I) (E := E) h) y)) x =
+      ∑ j, ∑ i, covariantHessianTwoTensor cov
+        (covariantTwoTensorGram (I := I) (E := E) h) x
+        (b i) (b i) (b j) (b j) := by
+    rw [covariantTwoTensorTrace_eq_sum_orthonormalBasis
+      (I := I) (E := E) (M := M) _ x b]
+    apply Finset.sum_congr rfl
+    intro j hj
+    simp only [covariantTwoTensorLinear_apply, connectionLaplacian_apply]
+    rfl
+  rw [hleft, hright]
+  apply Finset.sum_le_sum
+  intro j hj
+  apply Finset.sum_le_sum
+  intro i hi
+  have hess := covariantHessianTwoTensor_gram_eq
+    cov hmetric h hh hfirst (b i) (b i) (b j) (b j)
+  have hnonneg := covariantTwoTensorCovariantDerivative_raised_self_nonneg
+    cov hmetric (hh x) (b i) (b j)
+  linarith
+
+/-- The geometric Bochner inequality in the scalar form needed by the tensor
+heat maximum principle. No spatial differential inequality is assumed. -/
+theorem two_mul_pair_le_scalarLaplacian_covariantTwoTensorNormSq
+    (cov : CovariantDerivative I E TM)
+    (hmetric : cov.IsMetricCompatibleTangent)
+    (h : ∀ y : M, T₂ y)
+    (hh : ∀ y : M, MDiffAt
+      (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := T₂) z (h z)) y)
+    {x : M}
+    (hfirst : MDiffAt
+      (fun y => TotalSpace.mk'
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+        (E := T₃) y
+          (covariantTwoTensorCovariantDerivative cov h y)) x) :
+    2 * covariantTwoTensorPair h
+      (fun y => connectionLaplacian cov h y) x ≤
+      scalarLaplacian cov (covariantTwoTensorNormSq (I := I) (E := E) h) x := by
+  rw [scalarLaplacian_covariantTwoTensorNormSq_eq_trace_laplacian_gram_of_tensor_regular
+    cov hmetric h hh hfirst]
+  exact two_mul_pair_le_trace_connectionLaplacian_gram
+    cov hmetric h hh hfirst
+
 end CovariantDerivative
