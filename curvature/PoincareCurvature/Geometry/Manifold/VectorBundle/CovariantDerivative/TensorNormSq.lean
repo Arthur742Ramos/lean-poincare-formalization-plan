@@ -144,6 +144,15 @@ theorem covariantTwoTensorPair_self
   unfold covariantTwoTensorPair covariantTwoTensorNormSq
   simp only [← sq]
 
+theorem covariantTwoTensorPair_add_right
+    (h k l : ∀ x : M, T₂ x) (x : M) :
+    covariantTwoTensorPair h (fun y => k y + l y) x =
+      covariantTwoTensorPair h k x + covariantTwoTensorPair h l x := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  unfold covariantTwoTensorPair
+  simp only [add_apply, mul_add, Finset.sum_add_distrib]
+
 /-- The elementary energy bound used to estimate a bounded curvature
 reaction: twice the tensor pairing is at most the sum of the two complete
 tensor squares. -/
