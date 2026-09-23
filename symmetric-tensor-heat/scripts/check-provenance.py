@@ -40,7 +40,7 @@ def main() -> None:
         raise SystemExit("recorded baseline curvature tree is incorrect")
     # The main curvature subproject continues to evolve. This entry vendors an
     # immutable snapshot, so validate against that commit rather than HEAD.
-    digest = hashlib.sha256(git_bytes(f"{BASE}:{SOURCE}")).hexdigest()
+    digest = hashlib.sha256(git_bytes(f"{BASE}:{SOURCE.as_posix()}")).hexdigest()
     if digest != SOURCE_SHA256:
         raise SystemExit("selected inherited theorem source hash changed")
     expected = set(run(
@@ -57,13 +57,21 @@ def main() -> None:
         missing = sorted((expected | generated) - actual)
         extra = sorted(actual - (expected | generated))
         raise SystemExit(f"vendored inventory mismatch; missing={missing}, extra={extra}")
+    # Compare committed blobs. Git may materialize CRLF worktree files on
+    # Windows even when the immutable source and vendor blobs are identical.
+    subprocess.check_call(
+        ["git", "diff", "--quiet", "HEAD", "--", "symmetric-tensor-heat/vendor/curvature"],
+        cwd=REPO,
+    )
     for relative in sorted(expected):
-        if (VENDOR / relative).read_bytes() != git_bytes(f"{BASE}:curvature/{relative}"):
+        if git_bytes(f"HEAD:symmetric-tensor-heat/vendor/curvature/{relative}") != \
+                git_bytes(f"{BASE}:curvature/{relative}"):
             raise SystemExit("vendored file differs from disclosed source: " + relative)
-    if (VENDOR / "LICENSE").read_bytes() != git_bytes(f"{BASE}:LICENSE"):
+    if git_bytes("HEAD:symmetric-tensor-heat/vendor/curvature/LICENSE") != \
+            git_bytes(f"{BASE}:LICENSE"):
         raise SystemExit("vendored repository license differs from disclosed source")
     metadata = (PACKAGE / "formalization.yaml").read_text(encoding="utf-8")
-    for required in (BASE, str(SOURCE), "vendor/curvature", "relationship: \"builds-on\""):
+    for required in (BASE, SOURCE.as_posix(), "vendor/curvature", "relationship: \"builds-on\""):
         if required not in metadata:
             raise SystemExit("structured provenance is incomplete: " + required)
     print("Immutable source, exact vendored snapshot, notices, and structured provenance passed.")
