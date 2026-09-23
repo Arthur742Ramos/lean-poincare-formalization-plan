@@ -30,6 +30,8 @@ The conclusion proves:
 - uniqueness of the higher-coefficient witness in the constructed classical
   solution class, and equality of represented geometric readouts with the
   same global trace and source whenever both solve the geometric equation;
+  the selected statement certifies the displayed time derivative for every
+  represented solution, including each member of that comparison;
 - fiberwise symmetry and the correct initial trace;
 - the inhomogeneous geometric tensor heat equation; and
 - a global finite-atlas Schauder estimate with the standard linear dependence

@@ -547,6 +547,7 @@ def completeStatement : Prop :=
         (∀ f i, hasParabolicC0 Tcoord (sourceNorm f)
           (sourceValue f i)) ∧
         (∀ D, 0 ≤ initialSize D) ∧ (∀ f, 0 ≤ sourceNorm f) ∧
+        (∀ q, timeDerivative S (solutionTensor q) (solutionTimeDerivative q)) ∧
         (∀ D f,
           symmetric (initialTensor D) →
           (∀ t, t ∈ Ioo t₀ S → symmetric (sourceTensor f t)) →
@@ -957,7 +958,7 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
   refine ⟨⟨fun _ => zeroSpatialData⟩, ⟨0⟩, ⟨0⟩,
     strongAtlasSchauderConstant_nonneg cov Hlift, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
     ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
-    ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · -- The displayed coordinates and weights retain their geometric origin.
     have hsub : ∀ i : Index, tsupport (atlasWeight i) ⊆
         (extChartAt I (i : M)).source := by
@@ -1302,6 +1303,9 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
     exact A.spatialInitialSize_nonneg cov D
   · intro f
     exact norm_nonneg f
+  · -- Every represented tensor readout has the displayed time derivative.
+    intro q
+    exact (A.atlasFieldOfHigher cov q).hasTimeDerivative
   · intro D f hD hf
     have hD' :
         RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.AtlasSpatialInitialData.IsSymmetric

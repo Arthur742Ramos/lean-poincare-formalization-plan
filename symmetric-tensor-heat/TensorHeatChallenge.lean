@@ -544,6 +544,7 @@ def completeStatement : Prop :=
         (∀ f i, hasParabolicC0 Tcoord (sourceNorm f)
           (sourceValue f i)) ∧
         (∀ D, 0 ≤ initialSize D) ∧ (∀ f, 0 ≤ sourceNorm f) ∧
+        (∀ q, timeDerivative S (solutionTensor q) (solutionTimeDerivative q)) ∧
         (∀ D f,
           symmetric (initialTensor D) →
           (∀ t, t ∈ Ioo t₀ S → symmetric (sourceTensor f t)) →
