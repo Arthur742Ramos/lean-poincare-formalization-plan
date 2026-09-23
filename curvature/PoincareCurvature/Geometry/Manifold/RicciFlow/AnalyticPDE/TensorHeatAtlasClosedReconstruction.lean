@@ -1,5 +1,6 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasInitial
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteInitialTrace
+import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorNormSq
 
 /-!
 # Canonical closed-time tensor reconstruction from atlas coefficients
@@ -427,6 +428,34 @@ theorem continuous_closedAtlasFieldOfHigher_at
   apply continuous_finsetSum
   intro i _hi
   exact A.continuous_closedLocalFieldOfHigher_at cov i (u i) x
+
+/-- At every fixed manifold point, the intrinsic Hilbert--Schmidt energy of
+the completed atlas tensor is continuous across the canonical initial trace. -/
+theorem continuous_closedAtlasFieldOfHigher_normSq_at
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (u : HigherCoefficientSpace cov A) (x : M) :
+    Continuous (fun t : ℝ => covariantTwoTensorNormSq
+      (closedAtlasFieldOfHigher cov A u t) x) := by
+  letI : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let bₓ := stdOrthonormalBasis ℝ (TM x)
+  change Continuous (fun t : ℝ =>
+    ∑ i, ∑ j, (closedAtlasFieldOfHigher cov A u t x (bₓ i) (bₓ j)) ^ 2)
+  apply continuous_finsetSum
+  intro i _hi
+  apply continuous_finsetSum
+  intro j _hj
+  have hfield := A.continuous_closedAtlasFieldOfHigher_at cov u x
+  have hfirst : Continuous (fun t : ℝ =>
+      closedAtlasFieldOfHigher cov A u t x (bₓ i)) :=
+    (ContinuousLinearMap.apply ℝ (TM x →L[ℝ] ℝ) (bₓ i)).continuous.comp hfield
+  have hscalar : Continuous (fun t : ℝ =>
+      closedAtlasFieldOfHigher cov A u t x (bₓ i) (bₓ j)) :=
+    (ContinuousLinearMap.apply ℝ ℝ (bₓ j)).continuous.comp hfirst
+  exact hscalar.pow 2
 
 theorem closedAtlasFieldOfHigher_eq_atlasFieldOfHigher
     (cov : CovariantDerivative I E TM)
