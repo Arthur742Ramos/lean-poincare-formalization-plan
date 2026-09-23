@@ -1,15 +1,15 @@
 module
 
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarOpenInitialInvariant
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarOpenInitialPotential
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorNormSq
 
 /-!
 # Tensor heat uniqueness from a scalar norm inequality
 
 This reduction uses the complete Hilbert--Schmidt norm of a covariant
-two-tensor. The spatial Bochner inequality remains an explicit, unproved
-input here; this theorem does not supply it or assert tensor-heat uniqueness
-without it.
+two-tensor and allows bounded zero-order growth. The spatial Bochner
+inequality remains an explicit, unproved input here; this theorem does not
+supply it or assert tensor-heat uniqueness without it.
 -/
 
 @[expose] public noncomputable section
@@ -43,15 +43,16 @@ def covariantTwoTensorNormTimePair
   exact ∑ i, ∑ j,
     2 * h t x (b i) (b j) * dh t x (b i) (b j)
 
-/-- A proved spatial norm subsolution with zero initial tensor forces the
+/-- A spatial norm subsolution with zero initial tensor forces the
 entire tensor to vanish, including its off-diagonal components. The needed
-spatial differential inequality is visible as `hpde`; proving it from a
-geometric connection Laplacian is the remaining Bochner step. -/
-theorem covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial
+spatial differential inequality and zero-order bound are visible as `hpde`;
+proving them from a geometric connection Laplacian is the remaining Bochner
+step. -/
+theorem covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial_potential
     (g : TimeDependentRiemannianMetric (I := I) (M := M))
     (cov : TimeDependentCovariantDerivative
       (𝕜 := ℝ) (I := I) (M := M) (F := E) (V := TM))
-    (h dh : ℝ → ∀ x : M, T₂ x) {t₀ T : ℝ}
+    (h dh : ℝ → ∀ x : M, T₂ x) (K : ℝ) {t₀ T : ℝ}
     (hcont : ContinuousOn
       (fun p : ℝ × M =>
         CovariantDerivative.covariantTwoTensorNormSq (h p.1) p.2)
@@ -68,7 +69,8 @@ theorem covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial
     (hpde : ∀ t ∈ Ioo t₀ T, ∀ x : M,
       covariantTwoTensorNormTimePair h dh t x ≤
         g.scalarLaplacian cov
-          (fun _ => CovariantDerivative.covariantTwoTensorNormSq (h t)) t x)
+          (fun _ => CovariantDerivative.covariantTwoTensorNormSq (h t)) t x +
+          K * CovariantDerivative.covariantTwoTensorNormSq (h t) x)
     (hinitial : ∀ x : M, h t₀ x = 0) :
     ∀ t ∈ Ioo t₀ T, ∀ x : M, h t x = 0 := by
   have hnormTime : ∀ t ∈ Ioo t₀ T, ∀ x : M,
@@ -84,9 +86,9 @@ theorem covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial
     intro x
     rw [(CovariantDerivative.covariantTwoTensorNormSq_eq_zero_iff
       (h t₀) x).2 (hinitial x)]
-  have hnonpos := g.parabolicSubsolution_nonpositive_openInitial cov
+  have hnonpos := g.parabolicSubsolution_nonpositive_openInitial_potential cov
     (fun t x => CovariantDerivative.covariantTwoTensorNormSq (h t) x)
-    (covariantTwoTensorNormTimePair h dh)
+    (covariantTwoTensorNormTimePair h dh) K
     hcont hnormTime hspatial hgradient hpde hnormInitial
   intro t ht x
   apply (CovariantDerivative.covariantTwoTensorNormSq_eq_zero_iff (h t) x).1
