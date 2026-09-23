@@ -29,7 +29,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
   [CompactSpace M] [Nonempty M]
   [RiemannianBundle (TangentSpace I : M → Type _)]
-  [IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _)]
+  [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
@@ -81,7 +81,9 @@ theorem covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial_potential
     (htime : ∀ t ∈ Ioo t₀ T, ∀ x : M, ∀ u v : TM x,
       HasDerivAt (fun s => h s x u v) (dh t x u v) t)
     (hspatial : ∀ t ∈ Ioo t₀ T, ∀ y : M,
-      MDiffAt (CovariantDerivative.covariantTwoTensorNormSq (h t)) y)
+      MDiffAt
+        (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+          (E := T₂) z (h t z)) y)
     (hgradient : ∀ t ∈ Ioo t₀ T, ∀ x : M,
       MDiffAt
         (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
@@ -107,10 +109,15 @@ theorem covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial_potential
     intro x
     rw [(CovariantDerivative.covariantTwoTensorNormSq_eq_zero_iff
       (h t₀) x).2 (hinitial x)]
+  have hnormSpatial : ∀ t ∈ Ioo t₀ T, ∀ y : M,
+      MDiffAt (CovariantDerivative.covariantTwoTensorNormSq (h t)) y := by
+    intro t ht y
+    exact CovariantDerivative.covariantTwoTensorNormSq_mdifferentiableAt
+      (hspatial t ht y)
   have hnonpos := g.parabolicSubsolution_nonpositive_openInitial_potential cov
     (fun t x => CovariantDerivative.covariantTwoTensorNormSq (h t) x)
     (covariantTwoTensorNormTimePair h dh) K
-    hcont hnormTime hspatial hgradient hpde hnormInitial
+    hcont hnormTime hnormSpatial hgradient hpde hnormInitial
   intro t ht x
   apply (CovariantDerivative.covariantTwoTensorNormSq_eq_zero_iff (h t) x).1
   exact le_antisymm (hnonpos t ht x)
@@ -132,7 +139,9 @@ theorem covariantTwoTensor_eq_zero_of_connectionHeat_bochner
     (htime : ∀ t ∈ Ioo t₀ T, ∀ x : M, ∀ u v : TM x,
       HasDerivAt (fun s => h s x u v) (dh t x u v) t)
     (hspatial : ∀ t ∈ Ioo t₀ T, ∀ y : M,
-      MDiffAt (CovariantDerivative.covariantTwoTensorNormSq (h t)) y)
+      MDiffAt
+        (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+          (E := T₂) z (h t z)) y)
     (hgradient : ∀ t ∈ Ioo t₀ T, ∀ x : M,
       MDiffAt
         (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y

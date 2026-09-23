@@ -128,6 +128,118 @@ theorem covariantTwoTensorNormSq_eq_zero_iff
     rw [covariantTwoTensorNormSq_eq_sum]
     simp [hzero]
 
+/-- The Gram two-tensor of the metric-raised covariant tensor. Its trace is
+the complete Hilbert--Schmidt square. -/
+def covariantTwoTensorGram (h : ∀ x : M, T₂ x) : ∀ x : M, T₂ x :=
+  fun x =>
+    let A := raisedCovariantTwoTensor (I := I) (E := E) h x
+    ((ContinuousLinearMap.compL ℝ (TM x) (TM x) ℝ).flip A).comp
+      ((innerSL ℝ).comp A)
+
+@[simp] theorem covariantTwoTensorGram_apply
+    (h : ∀ x : M, T₂ x) (x : M) (u v : TM x) :
+    covariantTwoTensorGram h x u v =
+      inner ℝ (raisedCovariantTwoTensor (I := I) (E := E) h x u)
+        (raisedCovariantTwoTensor (I := I) (E := E) h x v) := by
+  rfl
+
+/-- A differentiable covariant tensor has a differentiable Gram tensor when
+the Riemannian metric is differentiable. The proof evaluates the Gram tensor
+on genuine local frames in both slots. -/
+theorem covariantTwoTensorGram_mdifferentiableAt
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    {h : ∀ y : M, T₂ y} {x₀ : M}
+    (hh : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := T₂) y (h y)) x₀) :
+    MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := T₂) y (covariantTwoTensorGram (I := I) (E := E) h y)) x₀ := by
+  let e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M) :=
+    trivializationAt E TM x₀
+  let b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E :=
+    Module.finBasis ℝ E
+  let A : ∀ y : M, TM y →L[ℝ] TM y :=
+    raisedCovariantTwoTensor (I := I) (E := E) h
+  have hA := raisedCovariantTwoTensor_mdifferentiableAt
+    (I := I) (E := E) (M := M) hh
+  refine mdifferentiableAt_homBundle_of_forall_apply_localFrame
+    (IB := I) (E₁ := TM)
+    (E₂ := fun y : M => TM y →L[ℝ] ℝ) x₀ b ?_
+  intro i
+  let U : ∀ y : M, TM y := fun y => e.localFrame b i y
+  have hx : x₀ ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt' x₀
+  have hU : MDiffAt (T% U) x₀ :=
+    (contMDiffAt_localFrame_of_mem (I := I) (e := e) (b := b)
+      (n := (1 : ℕ∞)) (i := i) (hx := hx)).mdifferentiableAt one_ne_zero
+  have hAU : MDiffAt (T% (fun y => A y (U y))) x₀ :=
+    hA.clm_bundle_apply hU
+  refine mdifferentiableAt_homBundle_of_forall_apply_localFrame
+    (IB := I) (E₁ := TM) (E₂ := Bundle.Trivial M ℝ) x₀ b ?_
+  intro j
+  let V : ∀ y : M, TM y := fun y => e.localFrame b j y
+  have hV : MDiffAt (T% V) x₀ :=
+    (contMDiffAt_localFrame_of_mem (I := I) (e := e) (b := b)
+      (n := (1 : ℕ∞)) (i := j) (hx := hx)).mdifferentiableAt one_ne_zero
+  have hAV : MDiffAt (T% (fun y => A y (V y))) x₀ :=
+    hA.clm_bundle_apply hV
+  have hscalar : MDiffAt
+      (fun y => inner ℝ (A y (U y)) (A y (V y))) x₀ :=
+    MDifferentiableAt.inner_bundle (IB := I) (IM := I)
+      (F := E) (E := TM) (b := id) hAU hAV
+  rw [mdifferentiableAt_section]
+  simpa [Bundle.Trivial.eq_trivialization M ℝ, U, V,
+    covariantTwoTensorGram_apply, A] using hscalar
+
+/-- The tensor energy is an ordinary metric trace of a genuine Gram
+two-tensor. This form can be fed into the existing intrinsic trace--Laplacian
+theorem when proving the spatial Bochner identity. -/
+theorem covariantTwoTensorNormSq_eq_trace_gram
+    (h : ∀ x : M, T₂ x) (x : M) :
+    covariantTwoTensorNormSq h x =
+      covariantTwoTensorTraceFunction (I := I) (E := E)
+        (covariantTwoTensorGram (I := I) (E := E) h) x := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  let A : TM x →ₗ[ℝ] TM x :=
+    (raisedCovariantTwoTensor (I := I) (E := E) h x).toLinearMap
+  rw [covariantTwoTensorNormSq_eq_trace_adjoint_comp,
+    LinearMap.trace_eq_sum_inner (A.adjoint.comp A) b]
+  rw [covariantTwoTensorTraceFunction,
+    covariantTwoTensorTrace_eq_sum_orthonormalBasis
+      (I := I) (E := E) (M := M)
+      (covariantTwoTensorLinear (I := I) (M := M)
+        (covariantTwoTensorGram (I := I) (E := E) h)) x b]
+  apply Finset.sum_congr rfl
+  intro i hi
+  change inner ℝ (b i) (A.adjoint (A (b i))) =
+    inner ℝ (A (b i)) (A (b i))
+  rw [LinearMap.adjoint_inner_right]
+
+/-- Spatial differentiability of the complete tensor norm square follows
+from differentiability of the tensor and the Riemannian metric. -/
+theorem covariantTwoTensorNormSq_mdifferentiableAt
+    [IsContMDiffRiemannianBundle I 2 E TM]
+    {h : ∀ y : M, T₂ y} {x₀ : M}
+    (hh : MDiffAt
+      (fun y => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
+        (E := T₂) y (h y)) x₀) :
+    MDiffAt (covariantTwoTensorNormSq (I := I) (E := E) h) x₀ := by
+  let gram := covariantTwoTensorGram (I := I) (E := E) h
+  have hgram := covariantTwoTensorGram_mdifferentiableAt
+    (I := I) (E := E) (M := M) hh
+  have hraised := raisedCovariantTwoTensor_mdifferentiableAt
+    (I := I) (E := E) (M := M) hgram
+  have htrace := mdifferentiableAt_endomorphismTrace
+    (F := E) (V := TM) hraised
+  have heq : covariantTwoTensorNormSq (I := I) (E := E) h =
+      covariantTwoTensorTraceFunction (I := I) (E := E) gram := by
+    funext x
+    exact covariantTwoTensorNormSq_eq_trace_gram h x
+  rw [heq, covariantTwoTensorTraceFunction_eq_endomorphismTrace_raised]
+  exact htrace
+
 /-- The fibrewise Hilbert--Schmidt pairing of complete covariant two-tensors. -/
 def covariantTwoTensorPair
     (h k : ∀ x : M, T₂ x) (x : M) : ℝ := by
