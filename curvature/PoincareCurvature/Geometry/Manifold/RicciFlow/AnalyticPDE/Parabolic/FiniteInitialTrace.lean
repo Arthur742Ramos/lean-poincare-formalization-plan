@@ -40,6 +40,16 @@ def finiteInitialTrace (hT : t₀ < T) (hα : 0 < α)
     BoundedContinuousFunction X E :=
   finiteClosedTimeSlice hT hα q ⟨t₀, le_rfl, hT.le⟩
 
+/-- Evaluation of the canonical global extension at the initial face is
+exactly the canonical finite-cylinder trace. -/
+theorem finiteSourceExtensionFun_initial
+    (hT : t₀ < T) (hα : 0 < α)
+    (q : ParabolicC0AlphaBanach X E α
+      (parabolicFiniteCylinder X t₀ T)) (x : X) :
+    finiteSourceExtensionFun hT hα q (t₀, x) =
+      finiteInitialTrace hT hα q x := by
+  simp [finiteSourceExtensionFun, finiteInitialTrace, Set.projIcc_left]
+
 @[simp]
 theorem finiteInitialTrace_zero (hT : t₀ < T) (hα : 0 < α) :
     finiteInitialTrace (X := X) (E := E) hT hα
@@ -147,6 +157,29 @@ namespace FiniteParabolicC2AlphaBanach
 
 variable {t₀ T α : ℝ}
 
+/-- The canonical jointly continuous closed-time value of a finite-cylinder
+higher jet, clamped outside its time interval. -/
+def completedValue (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α) : ℝ × X → E :=
+  ParabolicC0AlphaBanach.finiteSourceExtensionFun hT hα
+    (valueComponentL u)
+
+theorem continuous_completedValue (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α) :
+    Continuous (completedValue hT hα u) :=
+  ParabolicC0AlphaBanach.continuous_finiteSourceExtensionFun hT hα _
+
+theorem completedValue_of_mem (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    (z : ℝ × X) (hz : z ∈ parabolicFiniteCylinder X t₀ T) :
+    completedValue hT hα u z = value u z := by
+  change ParabolicC0AlphaBanach.evalCLM z (Set.mem_univ z)
+      (ParabolicC0AlphaBanach.finiteSourceExtension hT hα
+        (valueComponentL u)) = value u z
+  rw [ParabolicC0AlphaBanach.eval_finiteSourceExtension_of_mem hT hα
+    (valueComponentL u) z hz]
+  exact evalCLM_valueComponentL u z hz
+
 /-- Initial trace of the value component of a genuine finite-cylinder
 `C^{2+α,1+α/2}` jet. -/
 def initialTraceL (hT : t₀ < T) (hα : 0 < α) :
@@ -160,6 +193,12 @@ theorem initialTraceL_apply (hT : t₀ < T) (hα : 0 < α)
     initialTraceL hT hα u =
       ParabolicC0AlphaBanach.finiteInitialTrace hT hα (valueComponentL u) :=
   rfl
+
+@[simp] theorem completedValue_initial (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α) (x : X) :
+    completedValue hT hα u (t₀, x) = (initialTraceL hT hα u) x :=
+  ParabolicC0AlphaBanach.finiteSourceExtensionFun_initial hT hα
+    (valueComponentL u) x
 
 theorem norm_initialTraceL_le (hT : t₀ < T) (hα : 0 < α) :
     ‖initialTraceL (X := X) (E := E) hT hα‖ ≤ 1 := by
