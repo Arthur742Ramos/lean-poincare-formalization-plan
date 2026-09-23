@@ -3,21 +3,22 @@
 Selected theorem:
 `SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed`.
 
-## Current mathematical repair (working tree)
+## Current selected repair (verification in progress)
 
-The chart geometry and frame constraints in the selected Challenge and Solution
-compile. The separate `TensorHeatGeometricSymmetry` module proves the
-unprojected transpose/PDE and initial-trace bridges and a conditional symmetry
-lemma with geometric uniqueness stated explicitly. It also defines the
-global-data `GeometricAtlasCauchySolution` class, proves transposition closure
-for symmetric data, and obtains existence in that class from the strong atlas
-construction. That module passes direct Lean elaboration and its Lake target
-build. It also proves linearity of the intrinsic heat operator under
-subtraction and reduces equal-data uniqueness to a zero-data problem. This
-does not prove the zero-data uniqueness premise, which may need stronger
-uniform regularity than the current classical-field interface records. The
-selected theorem still uses a symmetrized readout; geometric
-uniqueness has not been proved. This is not a candidate for intake.
+The selected Challenge and Solution state ordinary, unprojected atlas
+reconstruction. The curvature subproject at the disclosed source commit proves
+joint space-time continuity of the represented tensor norm and a zero-data
+uniqueness theorem using the genuine tensor connection Laplacian. The local
+`TensorHeatGeometricSymmetry` bridge derives equal-global-data uniqueness in
+the represented geometric class. The selected Solution uses that bridge to
+derive symmetry of the ordinary solution and includes a separate uniqueness
+clause for any represented readouts with the same global trace and source that
+satisfy the geometric heat equation. Direct Lean elaboration of the Solution
+passed locally. The complete vendored package, exact-commit provenance,
+Comparator, NanoDa, and pinned Linux Palomar renderer/mechanical checks are
+still release gates. There is no active intake for this replacement.
+
+## Historical verification of earlier candidates
 
 Before the subsequent trace-estimate addition, `lake build` completed all 3,242 jobs;
 `scripts/check-challenge-boundary.py` compiled the Challenge using only pinned

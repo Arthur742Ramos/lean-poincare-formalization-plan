@@ -1,13 +1,12 @@
 # Symmetric tensor heat equation
 
-**Review status: mathematical repair required.** The current selected
-statement now ties its coordinates to actual extended charts and requires
-smooth subordinate weights, chart coverage, positive radii, and explicit
-parabolic scaling. It also identifies each frame with a tangent-bundle
-trivialization. Its solution readout remains symmetrized by construction.
-The geometric well-posedness and research-interest claims below
-are development targets, not established submission claims. See
-[the remediation requirements](REVIEW_REMEDIATION.md).
+**Review status: selected theorem under verification.** The current statement
+ties its coordinates to actual extended charts, smooth subordinate weights,
+positive radii, parabolic scaling, and tangent-bundle frames. It uses the
+ordinary, unprojected atlas reconstruction. Symmetry follows from a proved
+zero-data uniqueness argument for represented geometric solutions. The
+remaining release gates and editorial assessment are recorded in
+[the verification record](VERIFICATION.md).
 
 This focused Lean package prepares a new Palomar entry for short-time
 well-posedness of the inhomogeneous heat equation on symmetric covariant
@@ -32,13 +31,18 @@ The compared proposition now exposes the analytic representation itself:
   `C^{2+alpha,1+alpha/2}` derivative and Hölder certificates controlled by the
   same sizes and norms used in the Schauder estimate.
 
-For symmetric represented data it then proves existence and uniqueness of a
-coefficient witness whose **symmetrized** geometric readout:
+For symmetric represented data it then proves existence of a coefficient
+witness whose ordinary geometric readout:
 
 - is fiberwise symmetric;
 - has the prescribed initial trace;
 - satisfies `partial_t u - tr_g(nabla^2 u) = f`; and
 - obeys a global finite-atlas `C^{2+alpha,1+alpha/2}` estimate.
+
+It also proves that any two represented solution readouts with the same
+global initial tensor and source agree throughout the interval when both
+satisfy the displayed trace and geometric heat equation. This uniqueness
+does not assume matching chartwise coefficients.
 
 The Mathlib-only [TensorHeatChallenge.lean](TensorHeatChallenge.lean) expands
 the induced two- and three-tensor connections and takes the orthonormal trace

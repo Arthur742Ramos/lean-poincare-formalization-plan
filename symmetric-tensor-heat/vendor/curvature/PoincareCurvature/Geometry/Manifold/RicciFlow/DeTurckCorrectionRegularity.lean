@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurck
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.ContractedBianchiBridge
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.DowngradeNormFree
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection
@@ -623,6 +624,41 @@ theorem curvatureTensor_contMDiffOn_frame_zero
   exact congrArg (TotalSpace.mk' E z)
     (curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame hu hz hea heb hec).symm
 
+/-- A `C²` tangent connection has a `C¹` bundled curvature tensor when evaluated on two local
+`C²` frame fields and one local `C³` frame field. -/
+theorem curvatureTensor_contMDiffOn_frame_one
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
+    [CovariantDerivative.ContMDiffCovariantDerivative cov 1]
+    [CovariantDerivative.ContMDiffCovariantDerivative cov 2]
+    {ea eb ec : Π x : M, TangentSpace I x} {u : Set M} (hu : IsOpen u)
+    (hea : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (ea z)) u)
+    (heb : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2 (fun z ↦ TotalSpace.mk' E z (eb z)) u)
+    (hec : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 3 (fun z ↦ TotalSpace.mk' E z (ec z)) u) :
+    ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (fun z ↦ TotalSpace.mk' E z
+        (CovariantDerivative.curvatureTensor (cov := cov) z (ea z) (eb z) (ec z))) u := by
+  haveI : IsManifold I (minSmoothness ℝ 2) M := by
+    rw [minSmoothness_of_isRCLikeNormedField]
+    infer_instance
+  haveI : IsManifold I (minSmoothness ℝ 3) M := by
+    rw [minSmoothness_of_isRCLikeNormedField]
+    infer_instance
+  haveI : IsManifold I (minSmoothness ℝ 4) M := by
+    rw [minSmoothness_of_isRCLikeNormedField]
+    infer_instance
+  haveI : IsManifold I ((2 : ℕ∞) + 1) M :=
+    IsManifold.of_le (n := (∞ : WithTop ℕ∞)) (by exact_mod_cast le_top)
+  haveI : IsManifold I ((3 : ℕ∞) + 1) M :=
+    IsManifold.of_le (n := (∞ : WithTop ℕ∞)) (by exact_mod_cast le_top)
+  have hcurv := CovariantDerivative.curvatureAux_contMDiffOn_one cov hu hea heb hec
+  refine hcurv.congr ?_
+  intro z hz
+  exact congrArg (TotalSpace.mk' E z)
+    (curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame hu hz hea heb
+      (hec.of_le (by norm_num))).symm
+
 /-- **Finite-dimensional reconstruction continuity for `E →L G`-valued maps.**
 If `E` and `G` are finite-dimensional and `b` is a basis of `E`, then a map `f : M → (E →L[ℝ] G)`
 is continuous on `t` as soon as each basis evaluation `x ↦ f x (b i)` is.  The continuous linear map
@@ -805,6 +841,157 @@ theorem ricciBilinearFormSection_contMDiff_zero
   have hcoeff := contMDiffOn_localFrameCoeff (I := I) (e := trivializationAt E TM x0) (b := b)
     (k := (0 : WithTop ℕ∞)) hbase (subset_refl _) hcurv k
   exact hcoeff.continuousOn
+
+/-- The intrinsic Ricci tensor of a `C²` tangent connection is `C¹` as a genuine covariant
+two-tensor section.  This regularity is derived from the actual curvature tensor in a genuine local
+frame, rather than assumed as an independent analytic input. -/
+theorem ricciBilinearFormSection_contMDiff_one
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] [cov.ContMDiffCovariantDerivative 2]
+    {iota : Type*} [Fintype iota] [DecidableEq iota] (b : Module.Basis iota ℝ E) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) 1
+      (fun x ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := _root_.Bundle.BilinearFormBundle (V := TM)) x
+        (ricciBilinearFormSection (I := I) (M := M) cov x)) := by
+  classical
+  intro x0
+  refine CovariantDerivative.contMDiffAt_one_covariantTwoTensor_of_localFrame
+    (ricciBilinearFormSection (I := I) (M := M) cov) x0 b ?_
+  intro i j
+  let e := trivializationAt E TM x0
+  have hbase : IsOpen e.baseSet := e.open_baseSet
+  have hx0 : x0 ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt E TM x0
+  have hframe2 : ∀ m : iota, ContMDiffOn I (I.prod 𝓘(ℝ, E)) 2
+      (fun x ↦ TotalSpace.mk' E x (e.localFrame b m x)) e.baseSet :=
+    fun m ↦ e.contMDiffOn_localFrame_baseSet (I := I) (n := 2) b m
+  have hframe3 : ∀ m : iota, ContMDiffOn I (I.prod 𝓘(ℝ, E)) 3
+      (fun x ↦ TotalSpace.mk' E x (e.localFrame b m x)) e.baseSet :=
+    fun m ↦ e.contMDiffOn_localFrame_baseSet (I := I) (n := 3) b m
+  let term : iota → M → ℝ := fun k x ↦
+    e.localFrameCoeff I b k x
+      (CovariantDerivative.curvatureTensor (cov := cov) x
+        (e.localFrame b k x) (e.localFrame b i x) (e.localFrame b j x))
+  have hterm : ∀ k, ContMDiffOn I 𝓘(ℝ) 1 (term k) e.baseSet := by
+    intro k
+    have hcurv := curvatureTensor_contMDiffOn_frame_one (cov := cov) hbase
+      (hframe2 k) (hframe2 i) (hframe3 j)
+    simpa [term] using
+      (contMDiffOn_localFrameCoeff (I := I) (e := e) (b := b)
+        (k := (1 : WithTop ℕ∞)) hbase (subset_refl _) hcurv k)
+  have hsum : ∀ s : Finset iota,
+      ContMDiffOn I 𝓘(ℝ) 1 (fun x ↦ s.sum (fun k ↦ term k x)) e.baseSet := by
+    intro s
+    induction s using Finset.induction_on with
+    | empty => simpa using
+        (contMDiffOn_const : ContMDiffOn I 𝓘(ℝ) 1 (fun _ : M ↦ (0 : ℝ)) e.baseSet)
+    | @insert k s hk hs =>
+        convert (hterm k).add hs using 1 <;> ext x <;>
+          simp only [Finset.sum_insert, hk, not_false_eq_true, Pi.add_apply]
+  have hreg := (hsum Finset.univ).contMDiffAt (hbase.mem_nhds hx0)
+  refine hreg.congr_of_eventuallyEq ?_
+  filter_upwards [hbase.mem_nhds hx0] with x hx
+  change ricciBilinearFormSection (I := I) (M := M) cov x (e.localFrame b i x)
+      (e.localFrame b j x) = (∑ k, term k x)
+  rw [ricciBilinearFormSection_apply,
+    ricciCurvature_eq_sum_localFrameCoeff b x0 hx]
+
+/-- Pointwise differentiability of the canonical covariant Ricci tensor, with no independent Ricci
+regularity assumption. -/
+theorem ricciCovariantTwoTensor_mdifferentiableAt
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] [cov.ContMDiffCovariantDerivative 2]
+    (x : M) :
+    MDiffAt
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun z : M ↦ TangentSpace I z →L[ℝ] TangentSpace I z →L[ℝ] ℝ) y
+        (CovariantDerivative.ricciCovariantTwoTensor cov y)) x := by
+  have h := ricciBilinearFormSection_contMDiff_one (I := I) (M := M) cov
+    (Module.finBasis ℝ E)
+  refine ((h x).mdifferentiableAt one_ne_zero).congr_of_eventuallyEq ?_
+  filter_upwards [] with y
+  apply congrArg (fun B ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+    (E := fun z : M ↦ TangentSpace I z →L[ℝ] TangentSpace I z →L[ℝ] ℝ) y B)
+  ext u v
+  rfl
+
+/-- Pointwise differentiability of the genuine metric-raised Ricci endomorphism, derived from the
+`C¹` covariant Ricci tensor and the regularity of the Riemannian Riesz map. -/
+theorem raisedRicciEndomorphism_mdifferentiableAt
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] [cov.ContMDiffCovariantDerivative 2]
+    (x₀ : M) :
+    MDiffAt
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M ↦ TangentSpace I z →L[ℝ] TangentSpace I z) y
+        (CovariantDerivative.raisedRicciEndomorphism cov y)) x₀ := by
+  classical
+  let e := trivializationAt E (TangentSpace I : M → Type _) x₀
+  let b := Module.finBasis ℝ E
+  have hRicci := ricciBilinearFormSection_contMDiff_one (I := I) (M := M) cov b
+  have hframe : ∀ i, ContMDiffOn I (I.prod 𝓘(ℝ, E)) 1
+      (fun y ↦ TotalSpace.mk' E y (e.localFrame b i y)) e.baseSet :=
+    fun i ↦ e.contMDiffOn_localFrame_baseSet (I := I) (n := 1) b i
+  refine (contMDiffAt_homBundle_of_forall_apply_localFrame
+    (IB := I) (E₁ := TangentSpace I) (E₂ := TangentSpace I) x₀ b ?_).mdifferentiableAt
+      one_ne_zero
+  intro i
+  let omega : ∀ y : M, TangentSpace I y →L[ℝ] ℝ := fun y ↦
+    CovariantDerivative.ricciCovariantTwoTensor cov y (e.localFrame b i y)
+  have homega : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) 1
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] ℝ)
+        (E := fun z : M ↦ TangentSpace I z →L[ℝ] ℝ) y (omega y)) e.baseSet := by
+    have happ := hRicci.contMDiffOn.clm_bundle_apply (hframe i)
+    simpa [omega, ricciBilinearFormSection,
+      CovariantDerivative.ricciCovariantTwoTensor] using happ
+  have hraised := CovariantDerivative.contMDiffOn_rieszMap_section
+    (I := I) (E := E) e b e.open_baseSet (Set.Subset.rfl) homega
+  have hat := hraised.contMDiffAt
+    (e.open_baseSet.mem_nhds (FiberBundle.mem_baseSet_trivializationAt E _ x₀))
+  refine hat.congr_of_eventuallyEq ?_
+  filter_upwards [] with y
+  apply congrArg (TotalSpace.mk' E y)
+  rfl
+
+/-- The regularity predicate used by the differentiated Ricci-trace API follows from curvature
+regularity; it is not an additional hypothesis on Ricci. -/
+theorem raisedRicciEndomorphismMDiffAt_of_curvature
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] [cov.ContMDiffCovariantDerivative 2]
+    (x : M) : CovariantDerivative.raisedRicciEndomorphismMDiffAt cov x := by
+  unfold CovariantDerivative.raisedRicciEndomorphismMDiffAt
+  exact raisedRicciEndomorphism_mdifferentiableAt (I := I) (M := M) cov x
+
+/-! The scalar-curvature regularity needed by the parabolic layer is also a
+consequence of the genuine curvature contraction.  Keeping this as a
+separate theorem makes the trace bridge reusable without asking downstream
+proofs to postulate differentiability of a scalar readout. -/
+
+theorem scalarCurvature_mdifferentiableAt_of_curvature
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    [_root_.Bundle.RiemannianBundle (fun x : M ↦ TangentSpace I x)]
+    [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [cov.ContMDiffCovariantDerivative 1] [cov.ContMDiffCovariantDerivative 2]
+    (x : M) :
+    MDiffAt (CovariantDerivative.scalarCurvature (cov := cov)) x := by
+  have hA := raisedRicciEndomorphismMDiffAt_of_curvature
+    (I := I) (M := M) cov x
+  have htrace := CovariantDerivative.mdifferentiableAt_endomorphismTrace
+    (I := I) (F := E) (V := (TangentSpace I : M → Type _)) hA
+  refine htrace.congr_of_eventuallyEq ?_
+  filter_upwards [] with y
+  exact (CovariantDerivative.endomorphismTrace_raisedRicciEndomorphism_eq_scalarCurvature
+    (I := I) (M := M) cov y).symm
 
 /-- **The intrinsic Ricci–DeTurck right-hand side is a continuous `BilinearFormBundle` section,
 unconditionally** (for a `C¹` background connection slice).  This removes the last hypothesis of

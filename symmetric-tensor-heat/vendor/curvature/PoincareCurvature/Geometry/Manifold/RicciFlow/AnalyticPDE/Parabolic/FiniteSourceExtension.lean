@@ -379,6 +379,23 @@ def finiteSourceExtensionFun
   fun z => finiteClosedTimeSlice hT hα q
     (Set.projIcc t₀ T hT.le z.1) z.2
 
+/-- The canonical clamped extension is jointly continuous in time and space,
+including the completed initial face. -/
+theorem continuous_finiteSourceExtensionFun
+    (hT : t₀ < T) (hα : 0 < α)
+    (q : ParabolicC0AlphaBanach X E α
+      (parabolicFiniteCylinder X t₀ T)) :
+    Continuous (finiteSourceExtensionFun hT hα q) := by
+  unfold finiteSourceExtensionFun
+  have hf : Continuous (fun z : ℝ × X =>
+      finiteClosedTimeSlice hT hα q (Set.projIcc t₀ T hT.le z.1)) :=
+    (continuous_finiteClosedTimeSlice hT hα q).comp
+      (continuous_projIcc.comp continuous_fst)
+  have heval : Continuous
+      (fun fx : BoundedContinuousFunction X E × X => fx.1 fx.2) :=
+    continuous_eval
+  exact heval.comp (hf.prodMk continuous_snd)
+
 @[simp]
 theorem finiteSourceExtensionFun_zero
     (hT : t₀ < T) (hα : 0 < α) :

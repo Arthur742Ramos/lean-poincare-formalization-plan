@@ -1,8 +1,13 @@
 # Geometric tensor-heat review remediation
 
-Status: mathematical repair required. The existing selected proposition is
-not a submission-ready statement of geometric symmetric-tensor heat
-well-posedness. This document records requirements, not completed proofs.
+Status: historical review findings and repair plan. The current selected
+statement uses ordinary reconstruction, and the disclosed curvature source
+proves represented zero-data uniqueness. The selected Solution now derives
+symmetry from geometric uniqueness and exposes equal-global-data uniqueness
+for represented solutions. These changes still require exact-commit release
+checks and an editorial assessment of the explicitly represented data class.
+The findings below describe the earlier reviewed statement unless a later
+paragraph gives a subsequent development update.
 
 ## Scope
 

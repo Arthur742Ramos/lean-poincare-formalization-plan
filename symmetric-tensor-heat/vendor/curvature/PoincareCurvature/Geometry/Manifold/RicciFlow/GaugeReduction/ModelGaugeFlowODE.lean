@@ -1,6 +1,7 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ModelGaugeFlowODECore
 public import Mathlib.Analysis.ODE.PicardLindelof
 public import Mathlib.Analysis.ODE.Gronwall
 public import Mathlib.Analysis.Calculus.Deriv.Prod
@@ -33,65 +34,12 @@ namespace ModelGaugeFlowODE
 
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 
-/-- A local model-space flow for a time-dependent vector field on a Banach model.
-
-The radius is measured in initial data, and the time interval is the closed
-Picard-Lindelöf interval.  This is the chart-level object that must eventually
-be glued and upgraded to the `C³` manifold diffeomorphism flow used by point 4.
--/
-structure LocalFlowSolution
-    (f : ℝ → V → V) {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (x₀ : V)
-    (r : ℝ≥0) where
-  flow : V → ℝ → V
-  initial_eq : ∀ x ∈ closedBall x₀ r, flow x t₀ = x
-  hasDerivWithinAt :
-    ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc tmin tmax,
-      HasDerivWithinAt (flow x) (f t (flow x t)) (Icc tmin tmax) t
-
-/-- A Picard-Lindelöf local flow, with the spatial Lipschitz dependence on
-initial data that mathlib provides. -/
-structure LipschitzLocalFlowSolution
-    (f : ℝ → V → V) {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (x₀ : V)
-    (r : ℝ≥0) extends LocalFlowSolution f t₀ x₀ r where
-  exists_lipschitz_time :
-    ∃ L' : ℝ≥0, ∀ t ∈ Icc tmin tmax,
-      LipschitzOnWith L' (fun x => flow x t) (closedBall x₀ r)
-
-/-- A local model-space flow packaged as a continuous partial map on space-time.
-
-This is the form needed for chart-gluing arguments: the solution is an ODE
-curve in the time coordinate for each initial point, and the combined map is
-continuous on the product of the initial-data ball and the Picard-Lindelöf time
-interval.
--/
-structure ContinuousLocalFlowSolution
-    (f : ℝ → V → V) {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (x₀ : V)
-    (r : ℝ≥0) where
-  flow : V × ℝ → V
-  initial_eq : ∀ x ∈ closedBall x₀ r, flow (x, t₀) = x
-  hasDerivWithinAt :
-    ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc tmin tmax,
-      HasDerivWithinAt (fun τ : ℝ => flow (x, τ)) (f t (flow (x, t)))
-        (Icc tmin tmax) t
-  continuousOn : ContinuousOn flow (closedBall x₀ r ×ˢ Icc tmin tmax)
-
-/-- A local model-space flow equipped with its linearized tangent equation.
-
-For a chart vector field `f` and a spatial derivative candidate `Df`, this is the
-Banach-model form of the tangent-map variational equation
-`A'(t) = Df(t, flow(t)) ∘ A(t)`, initialized by the identity at the base time.
-This is the model ODE ingredient needed to prove the `A`-derivative hypothesis
-in the dynamic gauge-pullback scalar calculation. -/
-structure VariationalLocalFlowSolution
-    (f : ℝ → V → V) (Df : ℝ → V → V →L[ℝ] V)
-    {tmin tmax : ℝ} (t₀ : Icc tmin tmax) (x₀ : V)
-    (r : ℝ≥0) extends ContinuousLocalFlowSolution f t₀ x₀ r where
-  tangent : V → ℝ → V →L[ℝ] V
-  tangent_initial_eq : ∀ x ∈ closedBall x₀ r, tangent x t₀ = 1
-  tangent_hasDerivWithinAt :
-    ∀ x ∈ closedBall x₀ r, ∀ t ∈ Icc tmin tmax,
-      HasDerivWithinAt (tangent x)
-        ((Df t (flow (x, t))).comp (tangent x t)) (Icc tmin tmax) t
+/- The model-space ODE structures (`LocalFlowSolution`,
+`LipschitzLocalFlowSolution`, `ContinuousLocalFlowSolution`,
+`VariationalLocalFlowSolution`) and `variationalVectorField` are now defined in
+`ModelGaugeFlowODECore`, which this file imports. This breaks the import cycle
+for Point 4: `DeTurckFlowVariationalWitness` imports the core directly without
+transitively importing `Diffeomorph3FlowExistence`. -/
 
 /-- Interior points of the Picard cylinder see the closed Picard cylinder as an
 ordinary neighborhood. -/
@@ -103,13 +51,6 @@ theorem closedBall_prod_Icc_mem_nhds_of_mem_ball_Ioo
     mem_nhds_iff.mpr ⟨ball x₀ r, ball_subset_closedBall, isOpen_ball, hx⟩
   have ht' : Icc tmin tmax ∈ 𝓝 t := Icc_mem_nhds ht.1 ht.2
   exact prod_mem_nhds hx' ht'
-
-/-- The product ODE whose first component is the base gauge-flow equation and
-whose second component is the tangent-map variational equation. -/
-def variationalVectorField
-    (f : ℝ → V → V) (Df : ℝ → V → V →L[ℝ] V) :
-    ℝ → V × (V →L[ℝ] V) → V × (V →L[ℝ] V) :=
-  fun t z => (f t z.1, (Df t z.1).comp z.2)
 
 /-- With zero initial error, the Grönwall bound is linear in the forcing
 parameter.  This is the algebraic normalization used to turn a nonlinear
@@ -163,25 +104,16 @@ theorem gronwallBound_zero_left_forcing_mul_norm_isLittleO
       _ ≤ c * ‖h‖ := by
             gcongr
 
-/-- Project the base ODE from a solution of the product variational system. -/
-theorem hasDerivWithinAt_fst_of_variationalVectorField
-    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
-    {curve : ℝ → V × (V →L[ℝ] V)} {s : Set ℝ} {t : ℝ}
-    (h : HasDerivWithinAt curve (variationalVectorField f Df t (curve t)) s t) :
-    HasDerivWithinAt (fun τ : ℝ => (curve τ).1) (f t (curve t).1) s t := by
-  have hf := h.hasFDerivWithinAt.fst
-  simpa [variationalVectorField] using hf.hasDerivWithinAt
+/- Project the base ODE from a solution of the product variational system. -/
 
-/-- Project the tangent-map variational ODE from a solution of the product
-variational system. -/
-theorem hasDerivWithinAt_snd_of_variationalVectorField
-    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
-    {curve : ℝ → V × (V →L[ℝ] V)} {s : Set ℝ} {t : ℝ}
-    (h : HasDerivWithinAt curve (variationalVectorField f Df t (curve t)) s t) :
-    HasDerivWithinAt (fun τ : ℝ => (curve τ).2)
-      ((Df t (curve t).1).comp (curve t).2) s t := by
-  have hf := h.hasFDerivWithinAt.snd
-  simpa [variationalVectorField] using hf.hasDerivWithinAt
+/- `hasDerivWithinAt_fst_of_variationalVectorField` was moved to
+  `ModelGaugeFlowODECore` to break the import cycle. -/
+
+/- Project the tangent-map variational ODE from a solution of the product
+  variational system. -/
+
+/- `hasDerivWithinAt_snd_of_variationalVectorField` was moved to
+  `ModelGaugeFlowODECore` to break the import cycle. -/
 
 namespace LocalFlowSolution
 
@@ -216,13 +148,10 @@ theorem flow_hasDerivAt_of_mem_Ioo
   (α.hasDerivWithinAt x hx t (Ioo_subset_Icc_self ht)).hasDerivAt
     (Icc_mem_nhds ht.1 ht.2)
 
-/-- Every initial point in the local ball has within-interval continuity on the
-Picard interval. -/
-theorem flow_continuousWithinAt
-    (α : LocalFlowSolution f t₀ x₀ r) {x : V} (hx : x ∈ closedBall x₀ r)
-    {t : ℝ} (ht : t ∈ Icc tmin tmax) :
-    ContinuousWithinAt (α.flow x) (Icc tmin tmax) t :=
-  (α.hasDerivWithinAt x hx t ht).continuousWithinAt
+/- Every initial point in the local ball has within-interval continuity on the
+  Picard interval. -/
+
+/- `flow_continuousWithinAt` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Center-curve within-interval continuity on the Picard interval. -/
 theorem center_continuousWithinAt
@@ -978,56 +907,10 @@ theorem exists_dist_flow_le_mul_of_mem_Ioo
     ∃ L' : ℝ≥0, dist (α.flow x t) (α.flow y t) ≤ L' * dist x y :=
   α.exists_dist_flow_le_mul (Ioo_subset_Icc_self ht) hx hy
 
-/-- Uniform initial-data Lipschitz dependence plus the ODE time-continuity of
-each trajectory gives joint space-time continuity on the local Picard cylinder. -/
-theorem flow_continuousOn_spaceTime
-    (α : LipschitzLocalFlowSolution f t₀ x₀ r) :
-    ContinuousOn (fun p : V × ℝ => α.flow p.1 p.2) (closedBall x₀ r ×ˢ Icc tmin tmax) := by
-  rw [Metric.continuousOn_iff]
-  intro p hp ε hε
-  rcases hp with ⟨hpx, hpt⟩
-  obtain ⟨L, hL⟩ := α.exists_lipschitz_time
-  have htime_cont := α.toLocalFlowSolution.flow_continuousWithinAt hpx hpt
-  rw [Metric.continuousWithinAt_iff] at htime_cont
-  have hε2 : 0 < ε / 2 := by linarith
-  obtain ⟨δt, hδt_pos, hδt⟩ := htime_cont (ε / 2) hε2
-  let δx : ℝ := (ε / 2) / ((L : ℝ) + 1)
-  have hLnonneg : 0 ≤ (L : ℝ) := by exact_mod_cast L.2
-  have hden_pos : 0 < (L : ℝ) + 1 := by linarith
-  have hδx_pos : 0 < δx := by
-    dsimp [δx]
-    positivity
-  refine ⟨min δt δx, lt_min hδt_pos hδx_pos, ?_⟩
-  intro q hq hpq
-  rcases hq with ⟨hqx, hqt⟩
-  rw [Prod.dist_eq] at hpq
-  have hqtime_lt : dist q.2 p.2 < δt :=
-    lt_of_le_of_lt (le_max_right _ _) (lt_of_lt_of_le hpq (min_le_left _ _))
-  have hqx_lt : dist q.1 p.1 < δx :=
-    lt_of_le_of_lt (le_max_left _ _) (lt_of_lt_of_le hpq (min_le_right _ _))
-  have hspace_le :
-      dist (α.flow q.1 q.2) (α.flow p.1 q.2) ≤ (L : ℝ) * dist q.1 p.1 :=
-    (hL q.2 hqt).dist_le_mul q.1 hqx p.1 hpx
-  have hdist_nonneg : 0 ≤ dist q.1 p.1 := dist_nonneg
-  have hmul_le : (L : ℝ) * dist q.1 p.1 ≤ (L : ℝ) * δx := by
-    nlinarith
-  have hmul_bound : (L : ℝ) * δx ≤ ε / 2 := by
-    dsimp [δx]
-    have hfrac : (L : ℝ) / ((L : ℝ) + 1) ≤ 1 := by
-      rw [div_le_one hden_pos]
-      linarith
-    have heps_nonneg : 0 ≤ ε / 2 := by linarith
-    calc
-      (L : ℝ) * ((ε / 2) / ((L : ℝ) + 1)) =
-          ((L : ℝ) / ((L : ℝ) + 1)) * (ε / 2) := by ring
-      _ ≤ 1 * (ε / 2) := mul_le_mul_of_nonneg_right hfrac heps_nonneg
-      _ = ε / 2 := by ring
-  have hspace_bound : dist (α.flow q.1 q.2) (α.flow p.1 q.2) ≤ ε / 2 := by
-    exact le_trans hspace_le (le_trans hmul_le hmul_bound)
-  have htime_lt : dist (α.flow p.1 q.2) (α.flow p.1 p.2) < ε / 2 :=
-    hδt hqt hqtime_lt
-  have htri := dist_triangle (α.flow q.1 q.2) (α.flow p.1 q.2) (α.flow p.1 p.2)
-  linarith
+/- Uniform initial-data Lipschitz dependence plus the ODE time-continuity of
+  each trajectory gives joint space-time continuity on the local Picard cylinder. -/
+
+/- `flow_continuousOn_spaceTime` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Pointwise within-space-time continuity of a Lipschitz local-flow package. -/
 theorem flow_continuousWithinAt_spaceTime
@@ -1092,21 +975,10 @@ theorem flow_eventually_mem_of_mem_spaceTime_Ioo
     (fun q : V × ℝ => α.flow q.1 q.2) ⁻¹' U ∈ 𝓝 (x, t) :=
   (α.flow_continuousAt_spaceTime_of_mem_ball_Ioo hx ht) (hU.mem_nhds hmem)
 
-/-- A Lipschitz local-flow package is automatically a continuous space-time
-local-flow package. -/
-def toContinuousLocalFlowSolution
-    (α : LipschitzLocalFlowSolution f t₀ x₀ r) :
-    ContinuousLocalFlowSolution f t₀ x₀ r where
-  flow p := α.flow p.1 p.2
-  initial_eq := α.initial_eq
-  hasDerivWithinAt := by
-    intro x hx t ht
-    exact α.hasDerivWithinAt x hx t ht
-  continuousOn := α.flow_continuousOn_spaceTime
+/- A Lipschitz local-flow package is automatically a continuous space-time
+  local-flow package. -/
 
-@[simp] theorem toContinuousLocalFlowSolution_flow
-    (α : LipschitzLocalFlowSolution f t₀ x₀ r) :
-    α.toContinuousLocalFlowSolution.flow = fun p : V × ℝ => α.flow p.1 p.2 := rfl
+/- `toContinuousLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- A proof-level Lipschitz local-flow witness automatically gives a continuous
 space-time local-flow witness. -/
@@ -1175,7 +1047,11 @@ theorem variational_tangent_apply_hasDerivWithinAt
     (ContinuousLinearMap.apply ℝ V v).hasFDerivWithinAt
   have hcomp := hev.comp t htan.hasFDerivWithinAt
     (Set.mapsTo_univ (fun τ : ℝ => (α.flow z τ).2) (Icc tmin tmax))
-  simpa [Function.comp] using hcomp.hasDerivWithinAt
+  convert hcomp.hasDerivWithinAt using 1
+  · rfl
+  · simp only [ContinuousLinearMap.comp_apply,
+      ContinuousLinearMap.toSpanSingleton_apply, one_smul,
+      ContinuousLinearMap.apply_apply]
 
 /-- The base component of a product variational local-flow solution is
 continuous on the Picard interval. -/
@@ -1793,7 +1669,7 @@ theorem flow_injOn_of_lipschitzOnWith_of_mem_Ioo
     (hf_lip : ∀ τ ∈ Ioo tmin tmax, LipschitzOnWith K (f τ) (state τ))
     (hmem : ∀ x ∈ closedBall x₀ r, ∀ τ ∈ Ioo tmin tmax, α.flow (x, τ) ∈ state τ) :
     InjOn (fun x => α.flow (x, t)) (closedBall x₀ r) := by
-  simpa using
+  simpa [toLocalFlowSolution] using
     (α.toLocalFlowSolution.flow_injOn_of_lipschitzOnWith_of_mem_Ioo
       ht₀ ht hf_lip hmem)
 
@@ -1807,7 +1683,7 @@ theorem flow_injOn_common_Ioo_of_lipschitzOnWith_of_mem
     (hf_lip : ∀ τ ∈ Ioo a b, LipschitzOnWith K (f τ) (state τ))
     (hmem : ∀ x ∈ closedBall x₀ r, ∀ τ ∈ Ioo a b, α.flow (x, τ) ∈ state τ) :
     InjOn (fun x => α.flow (x, t)) (closedBall x₀ r) := by
-  simpa using
+  simpa [toLocalFlowSolution] using
     (α.toLocalFlowSolution.flow_injOn_common_Ioo_of_lipschitzOnWith_of_mem
       htime htbase ht hf_lip hmem)
 
@@ -1889,7 +1765,8 @@ theorem lipschitzWith_leftComp (D : V →L[ℝ] V) :
     change ‖L‖ ≤ ‖D‖
     exact L.opNorm_le_bound (norm_nonneg D) (fun A => by
       simpa [L] using D.opNorm_comp_le A)
-  simpa [L] using L.lipschitz.weaken hL
+  change LipschitzWith ‖D‖₊ L
+  exact L.lipschitz.weaken hL
 
 /-- Left-composition is Lipschitz on any state set, with constant bounded by the
 left factor's operator norm. -/
@@ -1897,17 +1774,13 @@ theorem lipschitzOnWith_leftComp (D : V →L[ℝ] V) (state : Set (V →L[ℝ] V
     LipschitzOnWith ‖D‖₊ (fun A : V →L[ℝ] V => D.comp A) state :=
   (lipschitzWith_leftComp D).lipschitzOnWith
 
-/-- Distance estimate for composition with a fixed right factor. -/
-theorem dist_comp_right_le (D₁ D₂ A : V →L[ℝ] V) :
-    dist (D₁.comp A) (D₂.comp A) ≤ dist D₁ D₂ * ‖A‖ := by
-  have h := (D₁ - D₂).opNorm_comp_le A
-  simpa [dist_eq_norm, ContinuousLinearMap.sub_comp] using h
+/- Distance estimate for composition with a fixed right factor. -/
 
-/-- Distance estimate for composition with a fixed left factor. -/
-theorem dist_comp_left_le (D A B : V →L[ℝ] V) :
-    dist (D.comp A) (D.comp B) ≤ ‖D‖ * dist A B := by
-  have h := D.opNorm_comp_le (A - B)
-  simpa [dist_eq_norm, ContinuousLinearMap.comp_sub] using h
+/- `dist_comp_right_le` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+
+/- Distance estimate for composition with a fixed left factor. -/
+
+/- `dist_comp_left_le` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Applying two continuous linear maps to a fixed vector is controlled by their
 operator distance. -/
@@ -1939,133 +1812,32 @@ theorem nnnorm_le_one_add_radius_of_mem_closedBall_one
       rw [← NNReal.coe_le_coe]
       exact_mod_cast (ContinuousLinearMap.norm_id_le (𝕜 := ℝ) (E := V))
 
-/-- Product-space Lipschitz estimate for the base component of the variational
-ODE. -/
-theorem lipschitzOnWith_variationalBasePart
-    {f_t : V → V} {baseState : Set V} {tangentState : Set (V →L[ℝ] V)}
-    {Kf : ℝ≥0}
-    (hf_lip : LipschitzOnWith Kf f_t baseState) :
-    LipschitzOnWith Kf (fun z : V × (V →L[ℝ] V) => f_t z.1)
-      (baseState ×ˢ tangentState) := by
-  refine LipschitzOnWith.of_dist_le_mul ?_
-  intro z hz w hw
-  have hbase := hf_lip.dist_le_mul z.1 hz.1 w.1 hw.1
-  have hfst : dist z.1 w.1 ≤ dist z w := by
-    rw [Prod.dist_eq]
-    exact le_max_left _ _
-  exact hbase.trans (by gcongr)
+/- Product-space Lipschitz estimate for the base component of the variational
+  ODE. -/
 
-/-- Product-space Lipschitz estimate for the linearized component
-`(y, A) ↦ Df(y) ∘ A` on a base state and an operator state. -/
-theorem lipschitzOnWith_variationalLinearPart
-    {Df_t : V → V →L[ℝ] V}
-    {baseState : Set V} {tangentState : Set (V →L[ℝ] V)}
-    {KD BA BD : ℝ≥0}
-    (hDf_lip : LipschitzOnWith KD Df_t baseState)
-    (hA_bound : ∀ A ∈ tangentState, ‖A‖₊ ≤ BA)
-    (hD_bound : ∀ y ∈ baseState, ‖Df_t y‖₊ ≤ BD) :
-    LipschitzOnWith (KD * BA + BD)
-      (fun z : V × (V →L[ℝ] V) => (Df_t z.1).comp z.2)
-      (baseState ×ˢ tangentState) := by
-  refine LipschitzOnWith.of_dist_le_mul ?_
-  intro z hz w hw
-  have hbase := hDf_lip.dist_le_mul z.1 hz.1 w.1 hw.1
-  have hA_bound' : ‖z.2‖ ≤ (BA : ℝ) := by
-    exact_mod_cast hA_bound z.2 hz.2
-  have hD_bound' : ‖Df_t w.1‖ ≤ (BD : ℝ) := by
-    exact_mod_cast hD_bound w.1 hw.1
-  have hfst : dist z.1 w.1 ≤ dist z w := by
-    rw [Prod.dist_eq]
-    exact le_max_left _ _
-  have hsnd : dist z.2 w.2 ≤ dist z w := by
-    rw [Prod.dist_eq]
-    exact le_max_right _ _
-  have hterm₁ :
-      dist ((Df_t z.1).comp z.2) ((Df_t w.1).comp z.2) ≤
-        (KD : ℝ) * (BA : ℝ) * dist z w := by
-    calc
-      dist ((Df_t z.1).comp z.2) ((Df_t w.1).comp z.2)
-          ≤ dist (Df_t z.1) (Df_t w.1) * ‖z.2‖ :=
-            dist_comp_right_le (Df_t z.1) (Df_t w.1) z.2
-      _ ≤ ((KD : ℝ) * dist z.1 w.1) * (BA : ℝ) := by
-            gcongr
-      _ = (KD : ℝ) * (BA : ℝ) * dist z.1 w.1 := by ring
-      _ ≤ (KD : ℝ) * (BA : ℝ) * dist z w := by
-            gcongr
-  have hterm₂ :
-      dist ((Df_t w.1).comp z.2) ((Df_t w.1).comp w.2) ≤
-        (BD : ℝ) * dist z w := by
-    calc
-      dist ((Df_t w.1).comp z.2) ((Df_t w.1).comp w.2)
-          ≤ ‖Df_t w.1‖ * dist z.2 w.2 :=
-            dist_comp_left_le (Df_t w.1) z.2 w.2
-      _ ≤ (BD : ℝ) * dist z.2 w.2 := by
-            gcongr
-      _ ≤ (BD : ℝ) * dist z w := by
-            gcongr
-  calc
-    dist ((Df_t z.1).comp z.2) ((Df_t w.1).comp w.2)
-        ≤ dist ((Df_t z.1).comp z.2) ((Df_t w.1).comp z.2) +
-            dist ((Df_t w.1).comp z.2) ((Df_t w.1).comp w.2) :=
-          dist_triangle _ _ _
-    _ ≤ ((KD : ℝ) * (BA : ℝ) * dist z w) + (BD : ℝ) * dist z w :=
-          add_le_add hterm₁ hterm₂
-    _ ≤ ↑(KD * BA + BD) * dist z w := by
-          rw [NNReal.coe_add, NNReal.coe_mul]
-          ring_nf
-          exact le_rfl
+/- `lipschitzOnWith_variationalBasePart` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
-/-- Product-space Lipschitz estimate for the full variational vector field,
-combining a base-field Lipschitz estimate with bounded/Lipschitz control of the
-linearized coefficient on the chosen base and operator states. -/
-theorem lipschitzOnWith_variationalVectorField
-    {f_t : V → V} {Df_t : V → V →L[ℝ] V}
-    {baseState : Set V} {tangentState : Set (V →L[ℝ] V)}
-    {Kf KD BA BD : ℝ≥0}
-    (hf_lip : LipschitzOnWith Kf f_t baseState)
-    (hDf_lip : LipschitzOnWith KD Df_t baseState)
-    (hA_bound : ∀ A ∈ tangentState, ‖A‖₊ ≤ BA)
-    (hD_bound : ∀ y ∈ baseState, ‖Df_t y‖₊ ≤ BD) :
-    LipschitzOnWith (max Kf (KD * BA + BD))
-      (fun z : V × (V →L[ℝ] V) => (f_t z.1, (Df_t z.1).comp z.2))
-      (baseState ×ˢ tangentState) :=
-  (lipschitzOnWith_variationalBasePart (tangentState := tangentState) hf_lip).prodMk
-    (lipschitzOnWith_variationalLinearPart hDf_lip hA_bound hD_bound)
+/- Product-space Lipschitz estimate for the linearized component
+  `(y, A) ↦ Df(y) ∘ A` on a base state and an operator state. -/
 
-/-- Time-dependent specialization of the product-space Lipschitz estimate for
-`variationalVectorField`. -/
-theorem lipschitzOnWith_variationalVectorField_at
-    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V} {t : ℝ}
-    {baseState : Set V} {tangentState : Set (V →L[ℝ] V)}
-    {Kf KD BA BD : ℝ≥0}
-    (hf_lip : LipschitzOnWith Kf (f t) baseState)
-    (hDf_lip : LipschitzOnWith KD (Df t) baseState)
-    (hA_bound : ∀ A ∈ tangentState, ‖A‖₊ ≤ BA)
-    (hD_bound : ∀ y ∈ baseState, ‖Df t y‖₊ ≤ BD) :
-    LipschitzOnWith (max Kf (KD * BA + BD))
-      (variationalVectorField f Df t) (baseState ×ˢ tangentState) := by
-  simpa [variationalVectorField] using
-    lipschitzOnWith_variationalVectorField
-      (f_t := f t) (Df_t := Df t) (tangentState := tangentState)
-      hf_lip hDf_lip hA_bound hD_bound
+/- `lipschitzOnWith_variationalLinearPart` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
-/-- Closed-ball specialization of the product-space Lipschitz estimate for the
-variational vector field, matching the spatial state used by
-`IsPicardLindelof`. -/
-theorem lipschitzOnWith_variationalVectorField_closedBall_at
-    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V} {t : ℝ}
-    {x₀ : V} {A₀ : V →L[ℝ] V} {a Kf KD BA BD : ℝ≥0}
-    (hf_lip : LipschitzOnWith Kf (f t) (closedBall x₀ a))
-    (hDf_lip : LipschitzOnWith KD (Df t) (closedBall x₀ a))
-    (hA_bound : ∀ A ∈ closedBall A₀ a, ‖A‖₊ ≤ BA)
-    (hD_bound : ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD) :
-    LipschitzOnWith (max Kf (KD * BA + BD))
-      (variationalVectorField f Df t) (closedBall (x₀, A₀) a) := by
-  rw [← closedBall_prod_same x₀ A₀ (a : ℝ)]
-  exact lipschitzOnWith_variationalVectorField_at
-    (f := f) (Df := Df) (t := t)
-    (baseState := closedBall x₀ a) (tangentState := closedBall A₀ a)
-    hf_lip hDf_lip hA_bound hD_bound
+/- Product-space Lipschitz estimate for the full variational vector field,
+  combining a base-field Lipschitz estimate with bounded/Lipschitz control of the
+  linearized coefficient on the chosen base and operator states. -/
+
+/- `lipschitzOnWith_variationalVectorField` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+
+/- Time-dependent specialization of the product-space Lipschitz estimate for
+  `variationalVectorField`. -/
+
+/- `lipschitzOnWith_variationalVectorField_at` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+
+/- Closed-ball specialization of the product-space Lipschitz estimate for the
+  variational vector field, matching the spatial state used by
+  `IsPicardLindelof`. -/
+
+/- `lipschitzOnWith_variationalVectorField_closedBall_at` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Closed-ball norm estimate for the full variational vector field from
 componentwise bounds on the base field, linearized coefficient, and tangent
@@ -2110,36 +1882,16 @@ theorem continuousOn_variationalVectorField_const
     simpa using hDf_cont.clm_comp (continuousOn_const (c := z.2))
   simpa [variationalVectorField] using hf_cont.prodMk hlin
 
-/-- Assemble Picard-Lindelöf hypotheses for the product variational system from
-closed-ball estimates for the base field and its linearization.
+
+/- Assemble Picard-Lindelöf hypotheses for the product variational system from
+  closed-ball estimates for the base field and its linearization.
 
 The spatial Lipschitz field is discharged by
-`lipschitzOnWith_variationalVectorField_closedBall_at`; continuity, a vector
-field norm bound, and the interval-size inequality remain as the standard
-Picard-Lindelöf assumptions. -/
-theorem isPicardLindelof_variationalVectorField_of_closedBall_estimates
-    {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
-    {tmin tmax : ℝ} {t₀ : Icc tmin tmax}
-    {x₀ : V} {A₀ : V →L[ℝ] V}
-    {a r L Kf KD BA BD : ℝ≥0}
-    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
-    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
-    (hA_bound : ∀ A ∈ closedBall A₀ a, ‖A‖₊ ≤ BA)
-    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
-    (hcont : ∀ z ∈ closedBall (x₀, A₀) a,
-      ContinuousOn (fun t : ℝ => variationalVectorField f Df t z) (Icc tmin tmax))
-    (hnorm : ∀ t ∈ Icc tmin tmax, ∀ z ∈ closedBall (x₀, A₀) a,
-      ‖variationalVectorField f Df t z‖ ≤ L)
-    (hmul : L * max (tmax - t₀) (t₀ - tmin) ≤ a - r) :
-    IsPicardLindelof (variationalVectorField f Df) t₀ (x₀, A₀) a r L
-      (max Kf (KD * BA + BD)) where
-  lipschitzOnWith := fun t ht =>
-    lipschitzOnWith_variationalVectorField_closedBall_at
-      (f := f) (Df := Df) (t := t)
-      (hf_lip t ht) (hDf_lip t ht) hA_bound (hD_bound t ht)
-  continuousOn := hcont
-  norm_le := hnorm
-  mul_max_le := hmul
+  `lipschitzOnWith_variationalVectorField_closedBall_at`; continuity, a vector
+  field norm bound, and the interval-size inequality remain as the standard
+  Picard-Lindelöf assumptions. -/
+
+/- `isPicardLindelof_variationalVectorField_of_closedBall_estimates` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Assemble Picard-Lindelöf hypotheses for the product variational system from
 componentwise closed-ball estimates, deriving the product vector-field norm
@@ -2196,44 +1948,15 @@ theorem isPicardLindelof_variationalVectorField_of_component_closedBall_continui
         (hf_cont z.1 hzprod.1) (hDf_cont z.1 hzprod.1))
     hmul
 
-/-- Extract a variational local flow from a continuous local flow of the product
-system `(y, A)' = (f(t, y), Df(t, y) ∘ A)` initialized on pairs `(x, 1)`.
 
-The radius for the extracted initial base points can be smaller than the product
-Picard radius; `hball` records that every `(x, 1)` lies in the product initial
-ball. -/
-def ofProductContinuousLocalFlowSolution
-    {R : ℝ≥0}
-    (α : ContinuousLocalFlowSolution (variationalVectorField f Df) t₀ (x₀, (1 : V →L[ℝ] V)) R)
-    (hball : ∀ x ∈ closedBall x₀ r,
-      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
-    VariationalLocalFlowSolution f Df t₀ x₀ r where
-  flow p := (α.flow ((p.1, (1 : V →L[ℝ] V)), p.2)).1
-  initial_eq := by
-    intro x hx
-    exact congrArg Prod.fst (α.initial_eq (x, (1 : V →L[ℝ] V)) (hball x hx))
-  hasDerivWithinAt := by
-    intro x hx t ht
-    exact hasDerivWithinAt_fst_of_variationalVectorField
-      (α.hasDerivWithinAt (x, (1 : V →L[ℝ] V)) (hball x hx) t ht)
-  continuousOn := by
-    let embed : V × ℝ → (V × (V →L[ℝ] V)) × ℝ :=
-      fun p => ((p.1, (1 : V →L[ℝ] V)), p.2)
-    have hemb : ContinuousOn embed (closedBall x₀ r ×ˢ Icc tmin tmax) :=
-      (by fun_prop : Continuous embed).continuousOn
-    have hmaps : MapsTo embed (closedBall x₀ r ×ˢ Icc tmin tmax)
-        (closedBall (x₀, (1 : V →L[ℝ] V)) R ×ˢ Icc tmin tmax) := by
-      intro p hp
-      exact ⟨hball p.1 hp.1, hp.2⟩
-    exact (α.continuousOn.comp hemb hmaps).fst
-  tangent x t := (α.flow ((x, (1 : V →L[ℝ] V)), t)).2
-  tangent_initial_eq := by
-    intro x hx
-    exact congrArg Prod.snd (α.initial_eq (x, (1 : V →L[ℝ] V)) (hball x hx))
-  tangent_hasDerivWithinAt := by
-    intro x hx t ht
-    exact hasDerivWithinAt_snd_of_variationalVectorField
-      (α.hasDerivWithinAt (x, (1 : V →L[ℝ] V)) (hball x hx) t ht)
+/- Extract a variational local flow from a continuous local flow of the product
+  system `(y, A)' = (f(t, y), Df(t, y) ∘ A)` initialized on pairs `(x, 1)`.
+
+  The radius for the extracted initial base points can be smaller than the product
+  Picard radius; `hball` records that every `(x, 1)` lies in the product initial
+  ball. -/
+
+/- `ofProductContinuousLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Product-derived variational local flows inherit joint space-time continuity
 of the base flow and tangent map from the continuous product flow. -/
@@ -2256,7 +1979,8 @@ theorem ofProduct_flow_tangent_continuousOn_spaceTime
       (closedBall (x₀, (1 : V →L[ℝ] V)) R ×ˢ Icc tmin tmax) := by
     intro p hp
     exact ⟨hball p.1 hp.1, hp.2⟩
-  simpa [ofProductContinuousLocalFlowSolution, embed] using α.continuousOn.comp hemb hmaps
+  change ContinuousOn (α.flow ∘ embed) (closedBall x₀ r ×ˢ Icc tmin tmax)
+  exact α.continuousOn.comp hemb hmaps
 
 /-- Pointwise within-space-time continuity of the product-derived
 base-flow/tangent-map pair. -/
@@ -3322,7 +3046,11 @@ theorem tangent_apply_hasDerivWithinAt
     (ContinuousLinearMap.apply ℝ V v).hasFDerivWithinAt
   have hcomp := hev.comp t htan.hasFDerivWithinAt
     (Set.mapsTo_univ (fun τ : ℝ => α.tangent x τ) (Icc tmin tmax))
-  simpa [Function.comp] using hcomp.hasDerivWithinAt
+  convert hcomp.hasDerivWithinAt using 1
+  · rfl
+  · simp only [ContinuousLinearMap.comp_apply,
+      ContinuousLinearMap.toSpanSingleton_apply, one_smul,
+      ContinuousLinearMap.apply_apply]
 
 /-- Center-trajectory specialization of
 `VariationalLocalFlowSolution.tangent_apply_hasDerivWithinAt`. -/
@@ -4747,7 +4475,9 @@ theorem flow_timeSlice_hasFDerivAt_of_hasFDerivAt_spaceTime
     HasFDerivAt (fun y : V => α.flow (y, t))
       (α.tangent x t : V →L[ℝ] V) x := by
   have hslice := hF.comp x (hasFDerivAt_prodMk_left (𝕜 := ℝ) x t)
-  simpa [hspatial] using hslice
+  rw [hspatial] at hslice
+  change HasFDerivAt (α.flow ∘ fun y : V => (y, t)) (α.tangent x t) x
+  exact hslice
 
 /-- Space-time `C^n` regularity of a variational model flow restricts to
 `C^n` regularity of the fixed-time slice in the initial coordinate. -/
@@ -4756,9 +4486,9 @@ theorem flow_timeSlice_contDiffAt_of_contDiffAt_spaceTime
     {n : WithTop ℕ∞} {x : V} {t : ℝ}
     (hF : ContDiffAt ℝ n α.flow (x, t)) :
     ContDiffAt ℝ n (fun y : V => α.flow (y, t)) x := by
-  simpa using
-    hF.comp x
-      ((contDiff_prodMk_left (𝕜 := ℝ) (n := n) (E := V) (F := ℝ) t).contDiffAt)
+  change ContDiffAt ℝ n (α.flow ∘ fun y : V => (y, t)) x
+  exact hF.comp x
+    ((contDiff_prodMk_left (𝕜 := ℝ) (n := n) (E := V) (F := ℝ) t).contDiffAt)
 
 /-- Endpoint first-order remainder criterion for a fixed time slice.  If the
 remainder after subtracting the variational tangent map is bounded by
@@ -4892,8 +4622,7 @@ theorem spatialRemainder_hasDerivWithinAt
   have hflow_h := α.hasDerivWithinAt (x + h) hxh τ hτ
   have hflow := α.hasDerivWithinAt x hx τ hτ
   have htangent := α.tangent_apply_hasDerivWithinAt hx hτ h
-  simpa [spatialRemainder, spatialRemainderDeriv] using
-    (hflow_h.sub hflow).sub htangent
+  convert (hflow_h.sub hflow).sub htangent using 1 <;> rfl
 
 /-- Right-neighborhood derivative of the first-order spatial remainder on the
 left-closed/right-open Picard interval, in the shape required by Mathlib's
@@ -4967,7 +4696,8 @@ theorem norm_le_gronwallBound_of_norm_deriv_left_le
     intro y hy
     convert HasFDerivWithinAt.comp_hasDerivWithinAt y (hf' (-y) (hmt2 hy))
       (hasDerivAt_neg y).hasDerivWithinAt (hmt3 y) using 1
-    simp
+    · rfl
+    · simpa only [ContinuousLinearMap.toSpanSingleton_apply, neg_one_smul]
   have hrev_bound :
       ∀ y ∈ Ico (-b) (-a),
         ‖-f' (-y)‖ ≤ K * ‖(fun s : ℝ => f (-s)) y‖ + ε := by
@@ -6339,7 +6069,8 @@ theorem flow_timeSlice_map_nhds_eq_of_hasStrictFDerivAt_Ioo
     α.tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo hx ht hD_bound
   have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
       (e : V →L[ℝ] V) x := by
-    simpa [e] using hstrict
+    simpa [e, tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo,
+      ContinuousLinearEquiv.coe_ofBijective] using hstrict
   exact hstrict'.map_nhds_eq_of_equiv
 
 /-- C¹-style form of the inverse-function bridge: ordinary spatial derivatives
@@ -6418,7 +6149,8 @@ theorem exists_flow_timeSlice_openPartialHomeomorph_of_hasStrictFDerivAt_Ioo
     α.tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo hx ht hD_bound
   have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
       (e : V →L[ℝ] V) x := by
-    simpa [e] using hstrict
+    simpa [e, tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo,
+      ContinuousLinearEquiv.coe_ofBijective] using hstrict
   refine ⟨hstrict'.toOpenPartialHomeomorph (fun y : V => α.flow (y, t)), rfl,
     hstrict'.mem_toOpenPartialHomeomorph_source,
     hstrict'.image_mem_toOpenPartialHomeomorph_target⟩
@@ -7240,7 +6972,8 @@ theorem flow_timeSlice_map_nhds_eq_common_Ioo_of_hasStrictFDerivAt
       htime htbase hx ht hD_bound
   have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
       (e : V →L[ℝ] V) x := by
-    simpa [e] using hstrict
+    simpa [e, tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem,
+      ContinuousLinearEquiv.coe_ofBijective] using hstrict
   exact hstrict'.map_nhds_eq_of_equiv
 
 /-- Common-subinterval open-partial-homeomorphism bridge for a time-slice of a
@@ -7263,7 +6996,8 @@ theorem exists_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_hasStrictFDeri
       htime htbase hx ht hD_bound
   have hstrict' : HasStrictFDerivAt (fun y : V => α.flow (y, t))
       (e : V →L[ℝ] V) x := by
-    simpa [e] using hstrict
+    simpa [e, tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem,
+      ContinuousLinearEquiv.coe_ofBijective] using hstrict
   refine ⟨hstrict'.toOpenPartialHomeomorph (fun y : V => α.flow (y, t)), rfl,
     hstrict'.mem_toOpenPartialHomeomorph_source,
     hstrict'.image_mem_toOpenPartialHomeomorph_target⟩
@@ -7980,7 +7714,8 @@ theorem exists_open_nhds_local_gluing_data_subset_of_contDiffAt_model
     hGdiffSg₀.mono hSgsub
   have hφsymmAt :
       ContDiffAt ℝ (3 : WithTop ℕ∞) (fun y : V ↦ φ.symm y) (G (e₀ x)) := by
-    simpa [φ, ContDiffAt.localInverse, HasStrictFDerivAt.localInverse] using
+    simpa [φ, ContDiffAt.toOpenPartialHomeomorph, ContDiffAt.localInverse,
+      HasStrictFDerivAt.localInverse] using
       (hGdiff.to_localInverse hGderiv hthree_ne_zero)
   rcases hφsymmAt.contDiffOn (m := (3 : WithTop ℕ∞)) le_rfl (by simp) with
     ⟨Tg₀, hTg₀nhds, hφsymmTg₀⟩
@@ -8125,7 +7860,8 @@ theorem flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_of_hasSt
   have hderiv : HasFDerivAt (fun y : V ↦ α.flow (y, t)) (A : V →L[ℝ] V) (e₀ x) := by
     have hstrict' : HasStrictFDerivAt (fun y : V ↦ α.flow (y, t))
         (A : V →L[ℝ] V) (e₀ x) := by
-      simpa [A] using hstrict
+      simpa [A, tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo,
+        ContinuousLinearEquiv.coe_ofBijective] using hstrict
     exact hstrict'.hasFDerivAt
   exact exists_open_nhds_local_gluing_data_subset_of_contDiffAt_model
     (M := M) e₀ e₁ he₀ he₁ hU₀open hU₀source hxU₀ hGdiff hderiv
@@ -8170,7 +7906,8 @@ theorem flow_timeSlice_exists_lifted_open_nhds_localGluingData_subset_of_hasStri
   have hderiv : HasFDerivAt (fun y : V ↦ α.flow (y, t)) (A : V →L[ℝ] V) (e₀ x) := by
     have hstrict' : HasStrictFDerivAt (fun y : V ↦ α.flow (y, t))
         (A : V →L[ℝ] V) (e₀ x) := by
-      simpa [A] using hstrict
+      simpa [A, tangent_continuousLinearEquiv_of_opNorm_bound_of_mem_Ioo,
+        ContinuousLinearEquiv.coe_ofBijective] using hstrict
     exact hstrict'.hasFDerivAt
   exact exists_open_nhds_localGluingData_subset_of_contDiffAt_model
     (M := M) e₀ e₁ he₀ he₁ hU₀open hU₀source hxU₀ hGdiff hderiv
@@ -8554,7 +8291,8 @@ theorem flow_timeSlice_exists_lifted_open_nhds_local_gluing_data_subset_common_I
   have hderiv : HasFDerivAt (fun y : V ↦ α.flow (y, t)) (A : V →L[ℝ] V) (e₀ x) := by
     have hstrict' : HasStrictFDerivAt (fun y : V ↦ α.flow (y, t))
         (A : V →L[ℝ] V) (e₀ x) := by
-      simpa [A] using hstrict
+      simpa [A, tangent_continuousLinearEquiv_common_Ioo_of_opNorm_bound_of_mem,
+        ContinuousLinearEquiv.coe_ofBijective] using hstrict
     exact hstrict'.hasFDerivAt
   exact exists_open_nhds_local_gluing_data_subset_of_contDiffAt_model
     (M := M) e₀ e₁ he₀ he₁ hU₀open hU₀source hxU₀ hGdiff hderiv
@@ -12215,19 +11953,10 @@ theorem nonempty_localFlowSolution_restrict
     Nonempty (LocalFlowSolution f (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
   ⟨toLocalFlowSolution_restrict hf htime ht₀' hr⟩
 
-/-- Picard-Lindelöf also supplies Lipschitz dependence on the initial point, a
-key ingredient for upgrading the chartwise ODE solutions to a local flow. -/
-def toLipschitzLocalFlowSolution
-    (hf : IsPicardLindelof f t₀ x₀ a r L K) :
-    LipschitzLocalFlowSolution f t₀ x₀ r :=
-  let h := hf.exists_forall_mem_closedBall_eq_hasDerivWithinAt_lipschitzOnWith
-  let α := Classical.choose h
-  let hα := (Classical.choose_spec h).1
-  let hLip := (Classical.choose_spec h).2
-  { flow := α
-    initial_eq := fun x hx => (hα x hx).1
-    hasDerivWithinAt := fun x hx t ht => (hα x hx).2 t ht
-    exists_lipschitz_time := hLip }
+/- Picard-Lindelöf also supplies Lipschitz dependence on the initial point, a
+  key ingredient for upgrading the chartwise ODE solutions to a local flow. -/
+
+/- `toLipschitzLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Picard-Lindelöf Lipschitz local-flow data, immediately localized to a
 smaller closed time interval and initial ball. -/
@@ -12456,12 +12185,10 @@ theorem exists_continuousLocalFlowSolution_mem_closedBall_restrict
       toStatePreservingContinuousLocalFlowSolution_restrict_flow_mem_closedBall
         hf htime ht₀' hr hx ht⟩
 
-/-- Picard-Lindelöf also yields a continuous partial space-time flow on the
-initial-data ball times the closed time interval. -/
-def toContinuousLocalFlowSolution
-    (hf : IsPicardLindelof f t₀ x₀ a r L K) :
-    ContinuousLocalFlowSolution f t₀ x₀ r :=
-  (toLipschitzLocalFlowSolution hf).toContinuousLocalFlowSolution
+/- Picard-Lindelöf also yields a continuous partial space-time flow on the
+  initial-data ball times the closed time interval. -/
+
+/- `toContinuousLocalFlowSolution` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Picard-Lindelöf continuous local-flow data, immediately localized to a
 smaller closed time interval and initial ball. -/
@@ -12497,19 +12224,11 @@ namespace VariationalLocalFlowSolution
 variable {f : ℝ → V → V} {Df : ℝ → V → V →L[ℝ] V}
   {tmin tmax : ℝ} {t₀ : Icc tmin tmax} {x₀ : V} {r : ℝ≥0}
 
-/-- Picard-Lindelöf for the product variational system directly supplies the
-base-flow/tangent-flow package after restricting to a base ball contained in the
-product Picard ball. -/
-def ofProductPicardLindelof
-    [CompleteSpace V]
-    {a R L K : ℝ≥0}
-    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
-      (x₀, (1 : V →L[ℝ] V)) a R L K)
-    (hball : ∀ x ∈ closedBall x₀ r,
-      (x, (1 : V →L[ℝ] V)) ∈ closedBall (x₀, (1 : V →L[ℝ] V)) R) :
-    VariationalLocalFlowSolution f Df t₀ x₀ r :=
-  ofProductContinuousLocalFlowSolution
-    (IsPicardLindelof.toContinuousLocalFlowSolution hf) hball
+/- Picard-Lindelöf for the product variational system directly supplies the
+  base-flow/tangent-flow package after restricting to a base ball contained in the
+  product Picard ball. -/
+
+/- `ofProductPicardLindelof` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Product Picard-Lindelöf variational flow existence as a proof-level
 witness. -/
@@ -13556,7 +13275,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_map_nhds_
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx htime htbase ht ht_forward
       hD_bound hDf_lip hder
@@ -13592,7 +13312,8 @@ theorem exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_op
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx htime htbase ht ht_forward
       hD_bound hDf_lip hder
@@ -14372,7 +14093,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_map_nhds_
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_of_closedBall_nnnorm_estimates_forward_Ioo_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_orig ht_forward_orig
       hD_bound hDf_lip hder
@@ -14416,7 +14138,8 @@ theorem exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_op
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_of_closedBall_nnnorm_estimates_forward_Ioo_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_orig ht_forward_orig
       hD_bound hDf_lip hder
@@ -14459,7 +14182,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_map_nhds_
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_of_closedBall_nnnorm_estimates_backward_Ioo_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_orig ht_backward_orig
       hD_bound hDf_lip hder
@@ -14503,7 +14227,8 @@ theorem exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_op
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_of_closedBall_nnnorm_estimates_backward_Ioo_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_orig ht_backward_orig
       hD_bound hDf_lip hder
@@ -14539,7 +14264,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_map_nhds_
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_map_nhds_eq_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx htime htbase ht ht_backward
       hD_bound hDf_lip hder
@@ -14576,7 +14302,8 @@ theorem exists_ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_op
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     exists_ofProductStatePreservingPicardLindelof_flow_timeSlice_openPartialHomeomorph_common_Ioo_of_closedBall_nnnorm_estimates_backward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx htime htbase ht ht_backward
       hD_bound hDf_lip hder
@@ -14694,25 +14421,11 @@ theorem nonempty_ofProductPicardLindelof_restrict
       (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
   ⟨ofProductPicardLindelof_restrict hf htime ht₀' hball⟩
 
-/-- Picard-Lindelöf for the product variational system supplies the variational
-flow package on any base ball whose radius is no larger than the product Picard
-radius. -/
-def ofProductPicardLindelof_of_le_radius
-    [CompleteSpace V]
-    {a R L K : ℝ≥0}
-    (hf : IsPicardLindelof (variationalVectorField f Df) t₀
-      (x₀, (1 : V →L[ℝ] V)) a R L K)
-    (hr : r ≤ R) :
-    VariationalLocalFlowSolution f Df t₀ x₀ r :=
-  ofProductPicardLindelof hf (by
-    intro x hx
-    rw [mem_closedBall] at hx ⊢
-    calc
-      dist (x, (1 : V →L[ℝ] V)) (x₀, (1 : V →L[ℝ] V))
-          = max (dist x x₀) (dist (1 : V →L[ℝ] V) 1) := by
-            rw [Prod.dist_eq]
-      _ = dist x x₀ := by simp
-      _ ≤ (R : ℝ) := hx.trans (by exact_mod_cast hr))
+/- Picard-Lindelöf for the product variational system supplies the variational
+  flow package on any base ball whose radius is no larger than the product Picard
+  radius. -/
+
+/- `ofProductPicardLindelof_of_le_radius` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Product Picard-Lindelöf variational flow existence on any base ball whose
 radius is no larger than the product Picard radius, kept proof-level. -/
@@ -14763,53 +14476,22 @@ theorem nonempty_ofProductPicardLindelof_restrict_of_le_radius
       (⟨(t₀ : ℝ), ht₀'⟩ : Icc tmin' tmax') x₀ r') :=
   ⟨ofProductPicardLindelof_restrict_of_le_radius hf htime ht₀' hr⟩
 
-/-- One-step variational local-flow constructor from closed-ball
-Picard-Lindelöf estimates for the product system centered at `(x₀, 1)`.
 
-This is the chart-level form expected in the positive-dimensional gauge-flow
-construction: base-field and linearized-coefficient Lipschitz/boundedness
-estimates supply the product Lipschitz hypothesis, while the remaining
-continuity, norm, and time-radius assumptions are exactly the usual
-Picard-Lindelöf data. -/
-def ofProductClosedBallEstimates
-    [CompleteSpace V]
-    {a R L Kf KD BA BD : ℝ≥0}
-    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
-    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
-    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
-    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
-    (hcont : ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
-      ContinuousOn (fun t : ℝ => variationalVectorField f Df t z) (Icc tmin tmax))
-    (hnorm : ∀ t ∈ Icc tmin tmax,
-      ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
-        ‖variationalVectorField f Df t z‖ ≤ L)
-    (hmul : L * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
-    (hr : r ≤ R) :
-    VariationalLocalFlowSolution f Df t₀ x₀ r :=
-  ofProductPicardLindelof_of_le_radius
-    (isPicardLindelof_variationalVectorField_of_closedBall_estimates
-      (A₀ := (1 : V →L[ℝ] V))
-      (r := R) hf_lip hDf_lip hA_bound hD_bound hcont hnorm hmul)
-    hr
+/- One-step variational local-flow constructor from closed-ball
+  Picard-Lindelöf estimates for the product system centered at `(x₀, 1)`.
 
-/-- One-step variational local-flow existence from closed-ball estimates,
-kept proof-level. -/
-theorem nonempty_ofProductClosedBallEstimates
-    [CompleteSpace V]
-    {a R L Kf KD BA BD : ℝ≥0}
-    (hf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith Kf (f t) (closedBall x₀ a))
-    (hDf_lip : ∀ t ∈ Icc tmin tmax, LipschitzOnWith KD (Df t) (closedBall x₀ a))
-    (hA_bound : ∀ A ∈ closedBall (1 : V →L[ℝ] V) a, ‖A‖₊ ≤ BA)
-    (hD_bound : ∀ t ∈ Icc tmin tmax, ∀ y ∈ closedBall x₀ a, ‖Df t y‖₊ ≤ BD)
-    (hcont : ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
-      ContinuousOn (fun t : ℝ => variationalVectorField f Df t z) (Icc tmin tmax))
-    (hnorm : ∀ t ∈ Icc tmin tmax,
-      ∀ z ∈ closedBall (x₀, (1 : V →L[ℝ] V)) a,
-        ‖variationalVectorField f Df t z‖ ≤ L)
-    (hmul : L * max (tmax - t₀) (t₀ - tmin) ≤ a - R)
-    (hr : r ≤ R) :
-    Nonempty (VariationalLocalFlowSolution f Df t₀ x₀ r) :=
-  ⟨ofProductClosedBallEstimates hf_lip hDf_lip hA_bound hD_bound hcont hnorm hmul hr⟩
+  This is the chart-level form expected in the positive-dimensional gauge-flow
+  construction: base-field and linearized-coefficient Lipschitz/boundedness
+  estimates supply the product Lipschitz hypothesis, while the remaining
+  continuity, norm, and time-radius assumptions are exactly the usual
+  Picard-Lindelöf data. -/
+
+/- `ofProductClosedBallEstimates` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
+
+/- One-step variational local-flow existence from closed-ball estimates,
+  kept proof-level. -/
+
+/- `nonempty_ofProductClosedBallEstimates` was moved to `ModelGaugeFlowODECore` to break the import cycle. -/
 
 /-- Localized one-step variational local-flow constructor from closed-ball
 Picard-Lindelöf estimates for the product system centered at `(x₀, 1)`. -/
@@ -15777,7 +15459,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_hasStrict
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_hasStrictFDerivAt_of_closedBall_nnnorm_estimates_forward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_forward
       hD_bound hDf_lip hder
@@ -15935,7 +15618,8 @@ theorem ofProductStatePreservingPicardLindelof_restrict_flow_timeSlice_hasStrict
   simpa [ofProductStatePreservingPicardLindelof_restrict_of_le_radius,
     ofProductStatePreservingPicardLindelof_restrict,
     ofProductContinuousLocalFlowSolution_restrict,
-    ofProductStatePreservingPicardLindelof_of_le_radius] using
+    ofProductStatePreservingPicardLindelof_of_le_radius,
+    ofProductStatePreservingPicardLindelof] using
     ofProductStatePreservingPicardLindelof_flow_timeSlice_hasStrictFDerivAt_of_closedBall_nnnorm_estimates_backward_Icc_of_le_radius
       (f := f) (Df := Df) (r := r') (hf := hf) hr hx ht_backward
       hD_bound hDf_lip hder

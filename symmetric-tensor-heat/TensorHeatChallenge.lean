@@ -401,12 +401,10 @@ def completeStatement : Prop :=
         (∀ f t x, sourceTensor f t x = ∑ᶠ i, sourceLocalTensor f i t x) ∧
         (∀ q t, t ∈ Ioc t₀ S → ∀ x a b,
           solutionTensor q t x a b =
-            ((∑ᶠ i, solutionLocalTensor q i t x a b) +
-              ∑ᶠ i, solutionLocalTensor q i t x b a) / 2) ∧
+            ∑ᶠ i, solutionLocalTensor q i t x a b) ∧
         (∀ q t, t ∈ Ioo t₀ S → ∀ x a b,
           solutionTimeDerivative q t x a b =
-            ((∑ᶠ i, solutionLocalTimeDerivative q i t x a b) +
-              ∑ᶠ i, solutionLocalTimeDerivative q i t x b a) / 2) ∧
+            ∑ᶠ i, solutionLocalTimeDerivative q i t x a b) ∧
         (∀ D i x, atlasWeight i x = 0 → initialLocalTensor D i x = 0) ∧
         (∀ f i t x, atlasWeight i x = 0 → sourceLocalTensor f i t x = 0) ∧
         (∀ q i t x, atlasWeight i x = 0 → solutionLocalTensor q i t x = 0) ∧
@@ -467,6 +465,12 @@ def completeStatement : Prop :=
             (∀ t, t ∈ Ioc t₀ S →
               symmetric (solutionTensor q t)) ∧
             solves S (solutionTensor q) (solutionTimeDerivative q) (sourceTensor f)) ∧
+        (∀ D f q r,
+          initialTrace S (solutionTensor q) (initialTensor D) →
+          initialTrace S (solutionTensor r) (initialTensor D) →
+          solves S (solutionTensor q) (solutionTimeDerivative q) (sourceTensor f) →
+          solves S (solutionTensor r) (solutionTimeDerivative r) (sourceTensor f) →
+          ∀ t, t ∈ Ioc t₀ S → solutionTensor q t = solutionTensor r t) ∧
         (∀ D f q, coordinateClass D f q →
           (∀ i, HasParabolicC2AlphaNormLe (X := E)
             (V := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ)

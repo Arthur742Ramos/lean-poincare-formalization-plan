@@ -79,7 +79,7 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
-  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/d6ef7f253bb95fa44d1fe61c9b1a52e061ca0951/curvature"
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/13fa15d6a8352ed08bf71b3533b1c2e922c21388/curvature"
     relationship: "builds-on"
     note: >-
       Immutable same-repository source subproject reused through an exact
@@ -90,11 +90,13 @@ related_formalizations:
       All vendored implementation sources and contributor notices are checked
       byte-for-byte against this commit. The selected implementation theorem is
       curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.
-      The curvature tree at this
-      commit is preserved byte-for-byte; this new entry contributes a focused
-      Mathlib-only Challenge, matching Solution bridge, Comparator identity and
-      Palomar metadata, rather than claiming the inherited tensor-heat
-      development as new work.
+      The curvature tree at this commit is preserved byte-for-byte. The
+      inherited code supplies finite-atlas heat estimates, reconstruction,
+      tensor energy continuity, and represented zero-data uniqueness. This
+      focused entry selects an unprojected reconstructed tensor theorem with
+      symmetry derived from geometric uniqueness, plus a Mathlib-only
+      Challenge and matching Solution bridge. It does not claim those
+      inherited proofs as new formal code.
   - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d"
     relationship: "builds-on"
     note: >-
