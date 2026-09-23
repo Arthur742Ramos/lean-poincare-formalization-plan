@@ -28,22 +28,7 @@ SCHEMA = "https://raw.githubusercontent.com/mathlib-initiative/formalization.yam
 MATHLIB = "db584cd6d46c92f209a44c0f1c829460d327499d"
 CURVATURE_BASE = "13fa15d6a8352ed08bf71b3533b1c2e922c21388"
 THEOREM = "SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed"
-DEFINITIONS = [
-    "SymmetricTensorHeatEntry.IsInducedTwoTensorConnection",
-    "SymmetricTensorHeatEntry.IsInducedThreeTensorConnection",
-    "SymmetricTensorHeatEntry.connectionLaplacianApply",
-    "SymmetricTensorHeatEntry.IsSymmetricSection",
-    "SymmetricTensorHeatEntry.HasInitialTrace",
-    "SymmetricTensorHeatEntry.HasTimeDerivative",
-    "SymmetricTensorHeatEntry.SolvesTensorHeat",
-    "SymmetricTensorHeatEntry.IsMetricCompatibleTangent",
-    "SymmetricTensorHeatEntry.IsLeviCivita",
-    "SymmetricTensorHeatEntry.parabolicDistance",
-    "SymmetricTensorHeatEntry.HasParabolicC0AlphaNormLe",
-    "SymmetricTensorHeatEntry.HasSpatialC2AlphaNormLe",
-    "SymmetricTensorHeatEntry.HasParabolicC2AlphaNormLe",
-    "SymmetricTensorHeatEntry.completeStatement",
-]
+DEFINITIONS = ["SymmetricTensorHeatEntry.completeStatement"]
 ALLOWED_AXIOMS = ["propext", "Quot.sound", "Classical.choice"]
 PALOMAR = "a013555a88a0fc9ec910a09ea833dc9cc338db35"
 COMPARATOR = "575674928e239f5bc452aab72d1dd7b0f1326494"
@@ -150,9 +135,11 @@ def main() -> None:
         "∃ D, ∀ i x",
         "∃ f, ∀ i z",
         "∃ q, ∀ i z",
-        "HasSpatialC2AlphaNormLe",
-        "HasParabolicC0AlphaNormLe",
-        "HasParabolicC2AlphaNormLe",
+        "let hasSpatialC2 :=",
+        "let hasParabolicC0 :=",
+        "let hasParabolicC0First :=",
+        "let hasParabolicC0Second :=",
+        "let hasParabolicC2 :=",
     ):
         require(semantic_guard in statement,
                 "anti-vacuity statement guard missing: " + semantic_guard)

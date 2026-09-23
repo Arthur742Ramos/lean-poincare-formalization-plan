@@ -15,6 +15,10 @@ two-tensors over a closed smooth Riemannian manifold.
 The selected theorem is
 `SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed`. It constructs
 a positive time interval and finite-atlas initial, source, and solution spaces.
+Comparator selects this theorem and its single `completeStatement : Prop`;
+the norm and regularity predicates used below are local definitions within
+that complete statement. A compiled-body audit rejects reachable
+candidate-defined mathematical data.
 The compared proposition now exposes the analytic representation itself:
 
 - a finite nonempty chart index;
