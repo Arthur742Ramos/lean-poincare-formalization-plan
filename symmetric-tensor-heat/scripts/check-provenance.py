@@ -32,21 +32,35 @@ def run(*args: str) -> str:
 
 
 def git_bytes(object_name: str) -> bytes:
-    return subprocess.check_output(["git", "show", object_name], cwd=REPO)
+    return subprocess.check_output(["git", "cat-file", "blob", object_name], cwd=REPO)
+
+
+def tree_blobs(tree: str) -> dict[str, str]:
+    result = {}
+    for line in run("git", "ls-tree", "-r", tree).splitlines():
+        header, path = line.split("\t", 1)
+        _, kind, object_id = header.split()
+        if kind != "blob":
+            raise SystemExit("non-blob source in disclosed tree: " + path)
+        result[path] = object_id
+    return result
 
 
 def main() -> None:
     if run("git", "rev-parse", f"{BASE}:curvature") != TREE:
         raise SystemExit("recorded baseline curvature tree is incorrect")
+    source_blobs = tree_blobs(f"{BASE}:curvature")
+    vendor_blobs = tree_blobs("HEAD:symmetric-tensor-heat/vendor/curvature")
     # The main curvature subproject continues to evolve. This entry vendors an
     # immutable snapshot, so validate against that commit rather than HEAD.
-    digest = hashlib.sha256(git_bytes(f"{BASE}:{SOURCE.as_posix()}")).hexdigest()
+    source_relative = SOURCE.relative_to("curvature").as_posix()
+    digest = hashlib.sha256(git_bytes(source_blobs[source_relative])).hexdigest()
     if digest != SOURCE_SHA256:
         raise SystemExit("selected inherited theorem source hash changed")
-    expected = set(run(
-        "git", "ls-tree", "-r", "--name-only", f"{BASE}:curvature", "--",
-        *VENDORED_PATHS,
-    ).splitlines())
+    expected = {
+        path for path in source_blobs
+        if any(path == item or path.startswith(item + "/") for item in VENDORED_PATHS)
+    }
     actual = {
         path.relative_to(VENDOR).as_posix()
         for path in VENDOR.rglob("*")
@@ -64,13 +78,11 @@ def main() -> None:
         cwd=REPO,
     )
     for relative in sorted(expected):
-        if git_bytes(f"HEAD:symmetric-tensor-heat/vendor/curvature/{relative}") != \
-                git_bytes(f"{BASE}:curvature/{relative}"):
+        if vendor_blobs.get(relative) != source_blobs[relative]:
             raise SystemExit("vendored file differs from disclosed source: " + relative)
-    if git_bytes("HEAD:symmetric-tensor-heat/vendor/curvature/LICENSE") != \
-            git_bytes(f"{BASE}:LICENSE"):
+    if vendor_blobs.get("LICENSE") != run("git", "rev-parse", f"{BASE}:LICENSE"):
         raise SystemExit("vendored repository license differs from disclosed source")
-    metadata = (PACKAGE / "formalization.yaml").read_text(encoding="utf-8")
+    metadata = git_bytes("HEAD:symmetric-tensor-heat/formalization.yaml").decode("utf-8")
     for required in (BASE, SOURCE.as_posix(), "vendor/curvature", "relationship: \"builds-on\""):
         if required not in metadata:
             raise SystemExit("structured provenance is incomplete: " + required)
