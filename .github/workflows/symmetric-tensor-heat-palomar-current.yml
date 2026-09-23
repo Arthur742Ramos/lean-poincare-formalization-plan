@@ -29,4 +29,5 @@ jobs:
       pipeline_commit: 1703d7babd984ccc3831cdf89c28221abe34808f
       request_id: heatcheck01x
       mode: full
+      execution_profile: palomar-standard-v1
       options: '{"project_path":"symmetric-tensor-heat","comparator_config_path":"symmetric-tensor-heat/comparator.json","formalization_metadata_path":"symmetric-tensor-heat/formalization.yaml","authorization_relationship":"I am a responsible author or maintainer"}'

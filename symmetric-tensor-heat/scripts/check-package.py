@@ -218,7 +218,9 @@ def main() -> None:
         require(required_text in renderer,
                 "hosted Palomar renderer workflow changed: " + required_text)
     current_mechanical = workflows["current-mechanical"].read_text(encoding="utf-8")
-    for required_text in (CURRENT_PALOMAR, "mode: full", "commit: ${{ github.event.pull_request.head.sha || github.sha }}"):
+    for required_text in (CURRENT_PALOMAR, "mode: full",
+                          "execution_profile: palomar-standard-v1",
+                          "commit: ${{ github.event.pull_request.head.sha || github.sha }}"):
         require(required_text in current_mechanical,
                 "current Palomar mechanical workflow changed: " + required_text)
     current_renderer = workflows["current-renderer"].read_text(encoding="utf-8")
