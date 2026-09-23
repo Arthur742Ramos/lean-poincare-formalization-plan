@@ -1,16 +1,9 @@
 name: Symmetric tensor heat actual Palomar verifier replay
 
-# Runs PalomarSubmission's unmodified preparation and execution pipeline at the
-# pinned production revision. This creates no intake and cannot register an entry.
+# Retains the historical Palomar mechanical pipeline for manual replay.
+# Current production mechanical verification runs on pull requests instead.
+# This creates no intake and cannot register an entry.
 on:
-  push:
-    paths:
-      - "symmetric-tensor-heat/**"
-      - ".github/workflows/symmetric-tensor-heat-palomar-mechanical.yml"
-  pull_request:
-    paths:
-      - "symmetric-tensor-heat/**"
-      - ".github/workflows/symmetric-tensor-heat-palomar-mechanical.yml"
   workflow_dispatch:
 
 permissions:

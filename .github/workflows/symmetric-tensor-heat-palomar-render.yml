@@ -3,10 +3,6 @@ name: Symmetric tensor heat actual Palomar renderer replay
 # Runs the unmodified pinned renderer, including its core-notation audit and
 # Linux Landrun sandbox. It cannot submit, publish, or alter a registry entry.
 on:
-  push:
-    paths:
-      - "symmetric-tensor-heat/**"
-      - ".github/workflows/symmetric-tensor-heat-palomar-render.yml"
   pull_request:
     paths:
       - "symmetric-tensor-heat/**"

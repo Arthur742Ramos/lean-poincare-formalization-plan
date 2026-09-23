@@ -3,10 +3,6 @@ name: Symmetric tensor heat current Palomar renderer replay
 # Replays the pinned current production renderer for the exact candidate SHA.
 # This is a read-only preflight and creates no intake or registry entry.
 on:
-  push:
-    paths:
-      - "symmetric-tensor-heat/**"
-      - ".github/workflows/symmetric-tensor-heat-palomar-current-render.yml"
   pull_request:
     paths:
       - "symmetric-tensor-heat/**"

@@ -3,10 +3,6 @@ name: Symmetric tensor heat current Palomar preflight
 # Calls Palomar's production verifier at an exact upstream commit. This is a
 # mechanical preflight only; it creates no intake or registry entry.
 on:
-  push:
-    paths:
-      - "symmetric-tensor-heat/**"
-      - ".github/workflows/symmetric-tensor-heat-palomar-current.yml"
   pull_request:
     paths:
       - "symmetric-tensor-heat/**"

@@ -198,7 +198,11 @@ def main() -> None:
     }
     for name, path in workflows.items():
         require(path.is_file() and not path.is_symlink(), f"missing regular {name} workflow")
+        require("  push:" not in path.read_text(encoding="utf-8"),
+                f"duplicate push trigger in {name} workflow")
     mechanical = workflows["mechanical"].read_text(encoding="utf-8")
+    require("  pull_request:" not in mechanical and "  workflow_dispatch:" in mechanical,
+            "historical mechanical replay must be manual only")
     for required_text in (
         PALOMAR, COMPARATOR, NANODA, LANDRUN, CACHE_ACTION,
         "verify_submission.py prepare", "verify_submission.py execute",
@@ -214,16 +218,21 @@ def main() -> None:
         require(required_text in mechanical,
                 "complete hosted Palomar verifier workflow changed: " + required_text)
     renderer = workflows["renderer"].read_text(encoding="utf-8")
+    require("  pull_request:" in renderer, "pinned renderer must run on pull requests")
     for required_text in (PALOMAR, LANDRUN, "render_challenge prepare", "render_challenge execute"):
         require(required_text in renderer,
                 "hosted Palomar renderer workflow changed: " + required_text)
     current_mechanical = workflows["current-mechanical"].read_text(encoding="utf-8")
+    require("  pull_request:" in current_mechanical,
+            "current mechanical preflight must run on pull requests")
     for required_text in (CURRENT_PALOMAR, "mode: full",
                           "execution_profile: palomar-standard-v1",
                           "commit: ${{ github.event.pull_request.head.sha || github.sha }}"):
         require(required_text in current_mechanical,
                 "current Palomar mechanical workflow changed: " + required_text)
     current_renderer = workflows["current-renderer"].read_text(encoding="utf-8")
+    require("  pull_request:" in current_renderer,
+            "current renderer must run on pull requests")
     for required_text in (CURRENT_PALOMAR, "render_challenge prepare", "render_challenge execute", "--bwrap"):
         require(required_text in current_renderer,
                 "current Palomar renderer workflow changed: " + required_text)
