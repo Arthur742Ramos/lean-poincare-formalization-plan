@@ -128,4 +128,33 @@ theorem covariantTwoTensorNormSq_eq_zero_iff
     rw [covariantTwoTensorNormSq_eq_sum]
     simp [hzero]
 
+/-- The time derivative of the pointwise tensor norm square is twice the
+Hilbert--Schmidt pairing with the tensor's genuine time derivative. The
+Riemannian metric is fixed in time here. -/
+theorem hasDerivAt_covariantTwoTensorNormSq
+    (h dh : ℝ → ∀ x : M, T₂ x) (t : ℝ) (x : M)
+    (htime : ∀ u v : TM x,
+      HasDerivAt (fun s => h s x u v) (dh t x u v) t) :
+    HasDerivAt (fun s => covariantTwoTensorNormSq (h s) x)
+      (by
+        let _ : FiniteDimensional ℝ (TM x) :=
+          VectorBundle.finiteDimensional ℝ E TM x
+        let b := stdOrthonormalBasis ℝ (TM x)
+        exact ∑ i, ∑ j,
+          2 * h t x (b i) (b j) * dh t x (b i) (b j)) t := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  change HasDerivAt
+    (fun s => ∑ i, ∑ j, (h s x (b i) (b j)) ^ 2)
+    (∑ i, ∑ j,
+      2 * h t x (b i) (b j) * dh t x (b i) (b j)) t
+  apply HasDerivAt.fun_sum
+  intro i hi
+  apply HasDerivAt.fun_sum
+  intro j hj
+  have hpow := (htime (b i) (b j)).pow 2
+  convert hpow using 1 <;> try rfl
+  norm_num [Nat.reduceSub, pow_one]
+
 end CovariantDerivative
