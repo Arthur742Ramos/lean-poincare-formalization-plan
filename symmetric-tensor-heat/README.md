@@ -66,6 +66,28 @@ constructs a short endpoint rather than solving to an arbitrary prescribed
 final time. This is a formalization of classical mathematics, not a novelty or
 priority claim.
 
+## Research interest and literature comparison
+
+[Huang, Theorems 2.3 and 2.4](https://arxiv.org/html/1506.05030v8#S2)
+prove a global Schauder estimate and existence and uniqueness for linear
+strongly parabolic systems on vector bundles over closed manifolds. The
+selected result specializes this classical theory to the Levi-Civita rough
+Laplacian on covariant two-tensors. Its checked mathematical conclusion joins
+an ordinary atlas reconstruction, the intrinsic tensor heat equation,
+represented-data existence, geometric uniqueness for equal global data,
+symmetry preservation, and a finite-atlas Schauder estimate. Those links form
+a coherent subject for a serious formalized-mathematics research note.
+
+A credible audience is researchers in geometric analysis and parabolic PDE
+who use connection heat equations as linear models for geometric flows, along
+with mathematicians formalizing geometric analysis who need a checked tensor
+heat and finite-atlas Schauder foundation. The actual theorem uses
+constructed represented data and an existential short interval; Huang's
+result covers all data in its intrinsic Hölder spaces and a prescribed finite
+interval. We claim neither that broader theorem nor mathematical novelty.
+The [research-interest account](RESEARCH_INTEREST.md) explains the proof
+architecture and this scope boundary in more detail.
+
 ## Verification
 
 From this directory:
