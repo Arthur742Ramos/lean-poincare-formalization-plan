@@ -49,10 +49,12 @@ witness whose ordinary geometric readout:
 - satisfies `partial_t u - tr_g(nabla^2 u) = f`; and
 - obeys a global finite-atlas `C^{2+alpha,1+alpha/2}` estimate.
 
-It also proves that any two represented solution readouts with the same
-global initial tensor and source agree throughout the interval when both
-satisfy the displayed trace and geometric heat equation. This uniqueness
-does not assume matching chartwise coefficients.
+For each fixed pair of initial and source representatives `D` and `f`, it
+also proves that any two represented solution readouts agree throughout the
+interval when both satisfy the displayed trace and geometric heat equation.
+This comparison does not assume matching chartwise coefficients, but it does
+not identify solutions attached to different representatives of the same
+global tensors.
 
 The Mathlib-only [TensorHeatChallenge.lean](TensorHeatChallenge.lean) expands
 the induced two- and three-tensor connections and takes the orthonormal trace
@@ -71,7 +73,8 @@ on the normalized cylinder. These inputs are independent of the
 proof-selected carriers. The geometric data are their weighted atlas
 reconstructions.
 It does not claim that every bare intrinsic tensor section has a coefficient
-representation, nor uniqueness outside the represented classical class. It
+representation, coefficient-witness uniqueness for the proof-chosen
+`coordinateClass`, or uniqueness outside the represented classical class. It
 constructs a short endpoint rather than solving to an arbitrary prescribed
 final time. This is a formalization of classical mathematics, not a novelty or
 priority claim.
@@ -84,7 +87,7 @@ strongly parabolic systems on vector bundles over closed manifolds. The
 selected result specializes this classical theory to the Levi-Civita rough
 Laplacian on covariant two-tensors. Its checked mathematical conclusion joins
 an ordinary atlas reconstruction, the intrinsic tensor heat equation,
-represented-data existence, geometric uniqueness for equal global data,
+represented-data existence, fixed-representative geometric uniqueness,
 symmetry preservation, and a finite-atlas Schauder estimate. Those links form
 a coherent subject for a serious formalized-mathematics research note.
 

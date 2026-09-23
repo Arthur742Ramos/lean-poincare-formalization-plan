@@ -2,7 +2,8 @@
 
 **Editorial assessment pending.** The selected theorem now uses the ordinary
 atlas reconstruction, with symmetry proved through geometric zero-data
-uniqueness in the represented class. The case below describes the exact
+uniqueness in the represented class. Its selected uniqueness comparison is
+for fixed initial and source representatives. The case below describes the exact
 selected result. It is not a claim of Palomar acceptance or of coverage of
 all intrinsic Hölder sections.
 
@@ -30,9 +31,10 @@ Hölder inequalities, and the norms used by the estimate.
 The conclusion proves:
 
 - existence for every symmetric represented spatial datum and source;
-- uniqueness of the higher-coefficient witness in the constructed classical
-  solution class, and equality of represented geometric readouts with the
-  same global trace and source whenever both solve the geometric equation;
+- existence of a witness in the constructed analytic class, and, for each
+  fixed initial representative `D` and source representative `f`, equality
+  of represented geometric readouts whenever both solve the geometric
+  equation with the displayed trace;
   the selected statement certifies the displayed time derivative for every
   represented solution, including each member of that comparison;
 - fiberwise symmetry and the correct initial trace;
@@ -46,14 +48,15 @@ uniqueness for linear strongly parabolic systems on vector bundles over closed
 manifolds. The selected statement isolates the rough connection Laplacian on
 covariant two-tensors. Its substantive formal content is the link from finite
 parabolic Hölder estimates and atlas reconstruction to the intrinsic tensor
-equation, followed by symmetry and equal-global-data uniqueness for represented
-solutions. This gives a checked linear building block for geometric parabolic
+equation, followed by symmetry and fixed-representative geometric uniqueness.
+This gives a checked linear building block for geometric parabolic
 arguments such as Ricci-DeTurck theory; it does not formalize that nonlinear
 application.
 
 The scope is intentionally narrower than the classical abstract theorem. The
 inputs are the specified finite-atlas Holder coefficient families, geometric uniqueness is
-within the represented classical class, and the endpoint is existentially short. No
+stated only for fixed representatives within the represented classical class,
+and the endpoint is existentially short. No
 surjectivity theorem for arbitrary intrinsic Holder sections, arbitrary-time
 continuation, nonlinear Ricci-flow theorem, or mathematical novelty is
 claimed. In particular Huang's theorem covers all data in its intrinsic

@@ -2,10 +2,13 @@
 
 Status: historical review findings and repair plan. The current selected
 statement uses ordinary reconstruction, and the disclosed curvature source
-proves represented zero-data uniqueness. The selected Solution now derives
-symmetry from geometric uniqueness and exposes equal-global-data uniqueness
-for represented solutions. These changes still require exact-commit release
-checks and an editorial assessment of the explicitly represented data class.
+proves represented zero-data uniqueness. The selected Solution derives
+symmetry from geometric uniqueness and exposes a fixed-representative
+uniqueness comparison for represented solutions. The selected statement no
+longer claims uniqueness of the proof-chosen coefficient witness, and the
+public account does not identify different atlas representatives of equal
+global tensors. Exact-commit release checks and editorial assessment of the
+explicitly represented data class remain separate gates.
 The findings below describe the earlier reviewed statement unless a later
 paragraph gives a subsequent development update.
 
@@ -149,95 +152,31 @@ Solution and Mathlib-only Challenge have passed direct Lean elaboration with
 these strengthened constraints. The Challenge's one intentional theorem
 placeholder remains.
 
-`TensorHeatGeometricSymmetry.lean` proves that transposing the unprojected
-atlas field commutes with its intrinsic tensor heat operator and transforms
-its initial trace. It also proves that a geometric uniqueness theorem covering
-all represented solutions with the same geometric trace and source would imply
-symmetry of the ordinary reconstruction. That uniqueness is an explicit
-hypothesis of the new lemma, not a result obtained from the existing
-chartwise-coefficient uniqueness theorem. The selected theorem still uses
-symmetrization; geometric uniqueness, data coverage, the remaining analytic
-bridges, and complete submission verification remain open. These local changes
-do not establish submission readiness.
+`TensorHeatGeometricSymmetry.lean` proves that transposing the ordinary atlas
+field commutes with its intrinsic tensor heat operator and transforms its
+initial trace. The selected proof uses the represented zero-data principle to
+derive symmetry and the fixed-representative geometric comparison. The
+selected proposition deliberately asserts existence of an analytic-class
+witness rather than `∃!` over the proof-chosen `coordinateClass`; that
+predicate is not advertised as an independently defined uniqueness class.
 
-The current proof module also isolates `GeometricAtlasCauchySolution`, whose
-inputs are the global initial tensor and global physical source. The existing
-strong atlas solution yields a member of this class, and transposition
-preserves the class for symmetric data. Neither result supplies uniqueness in
-that class. The required next proof must establish that two members with the
-same global Cauchy data have equal ordinary reconstructed fields; equality of
-their chartwise traces is unavailable from the current hypotheses.
+The selected geometric uniqueness clause fixes the initial representative
+`D` and source representative `f`. The represented-difference lemmas show
+that two solution readouts attached to those same representatives have a
+zero-data difference without requiring equal chartwise traces, after which
+the disclosed represented zero-data uniqueness principle gives equality.
+Different atlas representatives that happen to reconstruct equal global
+initial or source tensors are outside this claim and are explicitly excluded
+from the public account.
 
-The global initial condition does identify `atlasInitialTrace` with the
-prescribed initial tensor: the new
-`geometricAtlasCauchySolution_initialTensor` lemma proves this by uniqueness of
-limits. It still does not identify the individual chartwise coefficient
-traces. The reconstruction is a weighted finite sum, so this lemma does not
-transfer the strong atlas uniqueness theorem to the geometric class.
-
-The new `atlasFieldOfHigher_physicalStrongResidual` lemma identifies exactly
-what the global heat equation says about the coordinate residual: its
-**physical atlas readout** equals the readout of the prescribed source plus
-the lifted commutator. It does not establish equality in `SourceSpace`.
-The latter equality is the strong atlas equation used by coefficient
-uniqueness, and no injectivity of the physical readout has been proved.
-
-The viable proof interfaces are now explicit:
-
-1. Define an intrinsic or proved-equivalent atlas Hölder norm on geometric
-   covariant two-tensor fields, and prove a zero-data global Schauder estimate
-   for every field in `GeometricAtlasCauchySolution`. Then the difference of
-   two solutions is zero by that estimate.
-2. Alternatively, construct a canonical localization of every such field into
-   `HigherCoefficientSpace`; prove that localization preserves its global
-   initial trace and PDE as the exact strong atlas equation. Only then can
-   `strongAtlasSolutionEquation_unique` be applied.
-3. Use the proved transpose closure plus that uniqueness theorem to replace
-   both selected averaged reconstruction equations and the selected solution
-   predicate with the ordinary atlas field. Re-run the Challenge, package,
-   provenance, Comparator, NanoDa, and pinned hosted renderer gates on the
-   resulting immutable commit.
-
-The geometric difference lemmas now show that two classical solutions with
-the same data have a field with zero trace and zero heat operator. This is a
-reduction, not zero-data uniqueness. `FiniteClassicalTensorHeatField` itself
-only requires pointwise convergence to the initial trace; the planned
-uniqueness theorem must specify and prove enough uniform spatial-temporal
-regularity for a global estimate or maximum-principle argument. The atlas
-higher-coefficient class is a possible source of that control, but its transfer
-to a geometric norm remains unproved.
-
-The subsequent represented-difference lemmas prove that ordinary atlas
-reconstruction, its genuine time derivative, and its intrinsic heat operator
-commute with coefficient subtraction. Therefore two members of
-`GeometricAtlasCauchySolution` with the same global data have a *represented*
-zero-data difference, without requiring equal chartwise traces. The remaining
-obligation is now the explicit `HasRepresentedZeroDataUniqueness` proposition;
-`geometricAtlasCauchySolution_unique_of_zeroData` proves that it suffices for
-equal-data geometric uniqueness. The proposition itself remains unproved;
-the existing strong atlas uniqueness theorem still cannot be invoked from the
-global heat equation alone.
-
-The conditional `geometricAtlasCauchySolution_symmetric_of_zeroData` now
-composes the transpose closure with that represented zero-data obligation:
-once the obligation is proved, the **ordinary** atlas field is symmetric
-because it and its transpose solve the same geometric Cauchy problem. This
-does not discharge the obligation or change the selected averaged readout.
-`symmetrizedAtlasField_eq_at_of_zeroData` then identifies that historical
-averaged field with the ordinary field on the solution interval, subject to
-the same still-unproved zero-data estimate.
-
-An intrinsic compact-manifold scalar parabolic maximum principle exists in
-`curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/ScalarParabolicInvariant.lean`.
-It is not yet a tensor-heat uniqueness theorem. Applying it would require a
-proved scalar differential inequality for a tensor norm (including connection
-terms), the regularity of that norm or a smooth support, and the initial-time
-continuity furnished by the represented class. No such bridge is currently
-available in the tensor-heat modules. The other possible route is a canonical
-localization proving that every represented global solution satisfies the
-strong atlas equation with suitable chartwise traces. The existing
-`strongAtlasSolutionEquation_unique` assumes those individual traces equal;
-equality of their partition-weighted global tensor does not imply this.
+The package still deliberately stops short of a theorem that every intrinsic
+Hölder tensor section admits one of these atlas representations, or of a
+uniqueness theorem across different representatives. Those are mathematical
+scope boundaries, not hidden premises. The actual chart, partition, frame,
+time-scaling, data-coverage, geometric-equation, symmetry, fixed-
+representative comparison, and norm clauses are exposed in the selected
+Challenge. Exact-commit Lean, Comparator, independent-kernel, provenance,
+and renderer gates remain separate verification evidence.
 
 The package provenance check now reads the disclosed `curvature` source from
 its immutable Git commit. The main repository's `curvature/` tree has advanced

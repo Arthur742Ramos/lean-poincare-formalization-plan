@@ -4,7 +4,8 @@ version: "v0.4"
 project:
   name: "Short-time well-posedness for the symmetric tensor heat equation"
   description: >-
-    Formalizes a finite-atlas Schauder-class existence, uniqueness and a priori
+    Formalizes a finite-atlas Schauder-class existence, fixed-representative
+    geometric uniqueness and a priori
     estimate theorem for the inhomogeneous heat equation on symmetric covariant
     two-tensors over a nonempty closed smooth Riemannian manifold. The equation
     uses the actual Levi-Civita rough Laplacian tr_g(nabla^2 u), expanded in the
@@ -17,13 +18,16 @@ project:
     derivative and Holder bounds, and the norms used by the estimate. For every
     represented symmetric C^{2+alpha} initial datum and represented symmetric
     C^{alpha,alpha/2} source, the theorem constructs a positive time interval
-    and a unique atlas coefficient witness whose geometric readout is
-    symmetric, has the correct initial trace, solves the tensor heat equation,
-    and obeys a global finite-atlas C^{2+alpha,1+alpha/2} estimate.
+    and an atlas coefficient witness whose geometric readout is symmetric, has
+    the correct initial trace, solves the tensor heat equation, and obeys a
+    global finite-atlas C^{2+alpha,1+alpha/2} estimate. The statement does not
+    claim uniqueness of the proof-chosen coefficient class.
     Every represented solution has the displayed genuine time derivative.
-    Any two represented geometric readouts with the same global initial tensor
-    and source also agree when both satisfy the displayed trace and heat
-    equation, without a matching-chartwise-trace premise.
+    For each fixed initial representative D and source representative f, any
+    two represented geometric readouts also agree when both satisfy the
+    displayed trace and heat equation, without a matching-chartwise-trace
+    premise. The statement does not identify different atlas representatives
+    of the same global tensors.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -132,14 +136,14 @@ status:
     Constant-matrix witnesses independently certify nontriviality. The
     displayed norms control genuine spatial C2-alpha and parabolic
     C-alpha/C2-alpha derivative and Holder bounds. It then proves existence
-    and uniqueness of the solution
-    coefficient witness in the constructed classical class, fiberwise
+    of a solution coefficient witness in the constructed
+    classical class, fiberwise
     symmetry, initial trace, the componentwise inhomogeneous tensor heat
     equation, and an estimate of solution norm by initial size plus source
     norm. The displayed time derivative is genuine for every represented
-    solution, including the pair quantified in the uniqueness clause. It also
-    proves equality of any two represented geometric solutions
-    with the same global data under the displayed trace and PDE. It does not
+    solution, including the pair quantified in the uniqueness clause. For each
+    fixed D and f, it also proves equality of represented geometric readouts
+    under the displayed trace and PDE. It does not
     prove that every bare intrinsic tensor section admits the constructed
     atlas representation, uniqueness outside the represented class, a
     prescribed arbitrary final time, nonlinear
@@ -154,9 +158,9 @@ status:
       axioms: ["propext", "Classical.choice", "Quot.sound"]
       note: >-
         Comparator-selected Mathlib-facing theorem for short-time existence,
-        coefficient-class uniqueness, symmetry derived from geometric
-        uniqueness, initial trace, the genuine connection-rough-Laplacian
-        equation, represented geometric uniqueness for equal global data,
+        existence of an analytic-class witness, symmetry derived from
+        geometric uniqueness, initial trace, the genuine connection-rough-
+        Laplacian equation, fixed-representative geometric uniqueness,
         and the global finite-atlas Schauder estimate. Unlike the historical
         rejected statement, this
         selected proposition itself constrains the atlas reconstruction of
@@ -203,9 +207,10 @@ fidelity:
   divergences: >-
     The classical vector-bundle theorem is represented through explicitly
     constructed finite-atlas coefficient spaces. Initial data and sources are
-    quantified through those representations. Uniqueness covers both the
-    higher-coefficient witness satisfying the constructed classical-solution
-    predicate and represented geometric readouts with the same global trace
+    quantified through those representations. The theorem asserts existence
+    of a higher-coefficient witness satisfying the constructed
+    classical-solution predicate. For fixed initial and source representatives,
+    it also compares represented geometric readouts with the same global trace
     and source that solve the equation. The Challenge exposes exact atlas
     reconstruction of data,
     solution and time derivative, active
@@ -225,8 +230,9 @@ review:
   reviewers: []
   notes: >-
     The selected readout is the ordinary atlas field. Represented geometric
-    zero-data uniqueness now proves its symmetry and equal-global-data
-    uniqueness, independently of matching chartwise traces. Coverage of every
+    zero-data uniqueness now proves its symmetry and fixed-representative
+    geometric uniqueness, independently of matching chartwise traces.
+    Coverage of every
     intrinsic Holder section remains unproved, and exact-commit renderer and
     mechanical gates plus editorial assessment remain pending. The historical
     candidate's rejection is not treated as fixed by metadata or mechanical
@@ -243,8 +249,8 @@ alignment:
       note: >-
         Specializes the classical theory to the Levi-Civita rough Laplacian on
         symmetric covariant two-tensors, with represented finite-atlas data,
-        actual geometric readouts, short-time existence, coefficient-class
-        uniqueness and a Schauder estimate.
+        actual geometric readouts, short-time existence, fixed-representative
+        geometric uniqueness and a Schauder estimate.
 
 acknowledgements: >-
   Hong Huang for a direct closed-manifold vector-bundle formulation of linear
