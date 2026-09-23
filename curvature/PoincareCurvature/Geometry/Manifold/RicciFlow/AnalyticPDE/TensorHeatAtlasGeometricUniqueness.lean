@@ -70,9 +70,10 @@ private theorem compatibleSmoothMetric_eq_bundleMetric :
       (RiemannianBundle.g : Bundle.RiemannianMetric TM) := by
   rfl
 
-/-- The geometric zero-data theorem for the represented atlas class, with
-the exact remaining closed-time norm-continuity condition exposed. -/
-theorem atlasFieldOfHigher_zero_of_closedNormContinuous
+/-- Zero-data uniqueness for the unprojected represented geometric tensor
+heat field. The closed-time energy continuity follows from the canonical
+atlas reconstruction and the inverse-Gram local-frame identity. -/
+theorem atlasFieldOfHigher_zero_of_zeroDataHeat
     : ∀ (cov : CovariantDerivative I E TM)
       [ContMDiffCovariantDerivative
         (covariantTwoTensorCovariantDerivative
@@ -82,10 +83,6 @@ theorem atlasFieldOfHigher_zero_of_closedNormContinuous
         (E := E) (I := I) (M := M) cov b t₀ T α)
       (u : HigherCoefficientSpace cov A),
       cov.IsMetricCompatibleTangent →
-      ContinuousOn
-        (fun p : ℝ × M => covariantTwoTensorNormSq
-          (closedAtlasFieldOfHigher cov A u p.1) p.2)
-        (Icc t₀ A.commonTerminalTime ×ˢ (Set.univ : Set M)) →
       atlasInitialTrace cov A u = 0 →
       (∀ t (ht : t ∈ Ioo t₀ A.commonTerminalTime) x,
         (atlasFieldOfHigher cov A u).tensorHeatOperator cov t ht x = 0) →
@@ -93,7 +90,12 @@ theorem atlasFieldOfHigher_zero_of_closedNormContinuous
         (atlasFieldOfHigher cov A u).toFun t = 0 := by
   let g₀ := compatibleSmoothMetric (I := I) (E := E) (M := M)
   letI : RiemannianBundle TM := ⟨g₀.toRiemannianMetric⟩
-  intro cov hcov b A u hmetric hcont htrace hheat
+  intro cov hcov b A u hmetric htrace hheat
+  have hcont : ContinuousOn
+      (fun p : ℝ × M => covariantTwoTensorNormSq
+        (closedAtlasFieldOfHigher cov A u p.1) p.2)
+      (Icc t₀ A.commonTerminalTime ×ˢ (Set.univ : Set M)) :=
+    (A.continuous_closedAtlasFieldOfHigher_normSq cov u).continuousOn
   have hinitial : ∀ x : M, closedAtlasFieldOfHigher cov A u t₀ x = 0 := by
     intro x
     rw [A.closedAtlasFieldOfHigher_initial cov u, htrace]

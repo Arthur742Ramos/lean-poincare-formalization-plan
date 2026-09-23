@@ -1,6 +1,6 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasInitial
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteInitialTrace
-import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorNormSq
+import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorNormSqLocalFrame
 
 /-!
 # Canonical closed-time tensor reconstruction from atlas coefficients
@@ -456,6 +456,131 @@ theorem continuous_closedAtlasFieldOfHigher_normSq_at
       closedAtlasFieldOfHigher cov A u t x (bₓ i) (bₓ j)) :=
     (ContinuousLinearMap.apply ℝ ℝ (bₓ j)).continuous.comp hfirst
   exact hscalar.pow 2
+
+/-- The completed atlas tensor has jointly continuous intrinsic energy on
+space-time. The metric variation is handled by the inverse local Gram matrix,
+so no regularity of a pointwise chosen orthonormal basis is presumed. -/
+theorem continuous_closedAtlasFieldOfHigher_normSq
+    (cov : CovariantDerivative I E TM)
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas
+      (E := E) (I := I) (M := M) cov b t₀ T α)
+    (u : HigherCoefficientSpace cov A) :
+    Continuous (fun p : ℝ × M => covariantTwoTensorNormSq
+      (closedAtlasFieldOfHigher cov A u p.1) p.2) := by
+  apply continuous_iff_continuousAt.mpr
+  intro p₀
+  classical
+  let e := trivializationAt E TM p₀.2
+  let bas : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E
+  have hp : p₀.2 ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt' p₀.2
+  have hframe (i : Fin (Module.finrank ℝ E)) :
+      ContinuousAt (fun p : ℝ × M =>
+        TotalSpace.mk' E p.2 (e.localFrame bas i p.2)) p₀ := by
+    have hs := (contMDiffAt_localFrame_of_mem
+      (I := I) (n := 3) e bas i hp).continuousAt
+    exact hs.comp continuous_snd.continuousAt
+  have hfield :=
+    (A.continuous_closedAtlasFieldOfHigher_totalSpace cov u).continuousAt (x := p₀)
+  haveI : IsContinuousRiemannianBundle E TM := by
+    obtain ⟨g, hg, hinner⟩ :=
+      (inferInstance : IsContMDiffRiemannianBundle I 2 E TM).exists_contMDiff
+    exact ⟨g, hg.continuous, hinner⟩
+  have hcov (i : Fin (Module.finrank ℝ E)) :
+      ContinuousAt (fun p : ℝ × M =>
+        TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) p.2
+          (closedAtlasFieldOfHigher cov A u p.1 p.2
+            (e.localFrame bas i p.2))) p₀ :=
+    hfield.clm_bundle_apply (hframe i)
+  have hriesz : ContinuousAt (fun p : ℝ × M =>
+      TotalSpace.mk' ((E →L[ℝ] ℝ) →L[ℝ] E)
+        (E := fun x : M => T₁ x →L[ℝ] TM x) p.2
+        (rieszMap (I := I) p.2)) p₀ := by
+    have hs := (rieszMap_mdifferentiableAt (I := I) (E := E) p₀.2).continuousAt
+    exact hs.comp continuous_snd.continuousAt
+  have hraised (i : Fin (Module.finrank ℝ E)) :
+      ContinuousAt (fun p : ℝ × M =>
+        TotalSpace.mk' E p.2
+          (raisedCovariantTwoTensor (I := I) (E := E)
+            (closedAtlasFieldOfHigher cov A u p.1) p.2
+              (e.localFrame bas i p.2))) p₀ := by
+    simpa only [raisedCovariantTwoTensor, ContinuousLinearMap.comp_apply] using
+      hriesz.clm_bundle_apply (hcov i)
+  have hinvSpace : ContinuousAt (fun x : M =>
+      (show Matrix (Fin (Module.finrank ℝ E))
+        (Fin (Module.finrank ℝ E)) ℝ from
+          localFrameGramMatrix (I := I) e bas x)⁻¹) p₀.2 :=
+    ((contMDiffOn_localFrameGramMatrix_inv (I := I) (E := E)
+      e bas e.open_baseSet (Set.Subset.rfl)).continuousOn).continuousAt
+      (e.open_baseSet.mem_nhds hp)
+  have hinv := hinvSpace.comp continuous_snd.continuousAt
+  have hentry (i j : Fin (Module.finrank ℝ E)) :
+      ContinuousAt (fun p : ℝ × M =>
+        ((show Matrix (Fin (Module.finrank ℝ E))
+          (Fin (Module.finrank ℝ E)) ℝ from
+            localFrameGramMatrix (I := I) e bas p.2)⁻¹) i j) p₀ :=
+    (continuous_apply j).continuousAt.comp
+      ((continuous_apply i).continuousAt.comp hinv)
+  have hterm (i j : Fin (Module.finrank ℝ E)) :
+      ContinuousAt (fun p : ℝ × M =>
+        ((show Matrix (Fin (Module.finrank ℝ E))
+          (Fin (Module.finrank ℝ E)) ℝ from
+            localFrameGramMatrix (I := I) e bas p.2)⁻¹) i j *
+          inner ℝ
+            (raisedCovariantTwoTensor (I := I) (E := E)
+              (closedAtlasFieldOfHigher cov A u p.1) p.2
+                (e.localFrame bas i p.2))
+            (raisedCovariantTwoTensor (I := I) (E := E)
+              (closedAtlasFieldOfHigher cov A u p.1) p.2
+                (e.localFrame bas j p.2))) p₀ :=
+    (hentry i j).mul ((hraised i).inner_bundle (hraised j))
+  have hsum : ContinuousAt (fun p : ℝ × M =>
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          ((show Matrix (Fin (Module.finrank ℝ E))
+            (Fin (Module.finrank ℝ E)) ℝ from
+              localFrameGramMatrix (I := I) e bas p.2)⁻¹) i j *
+            inner ℝ
+              (raisedCovariantTwoTensor (I := I) (E := E)
+                (closedAtlasFieldOfHigher cov A u p.1) p.2
+                  (e.localFrame bas i p.2))
+              (raisedCovariantTwoTensor (I := I) (E := E)
+                (closedAtlasFieldOfHigher cov A u p.1) p.2
+                  (e.localFrame bas j p.2))) p₀ := by
+    apply tendsto_finsetSum Finset.univ
+    intro i _hi
+    apply tendsto_finsetSum Finset.univ
+    intro j _hj
+    exact hterm i j
+  have heq (p : ℝ × M) (hp : p.2 ∈ e.baseSet) :
+      covariantTwoTensorNormSq
+        (closedAtlasFieldOfHigher cov A u p.1) p.2 =
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            ((show Matrix (Fin (Module.finrank ℝ E))
+              (Fin (Module.finrank ℝ E)) ℝ from
+                localFrameGramMatrix (I := I) e bas p.2)⁻¹) i j *
+              inner ℝ
+                (raisedCovariantTwoTensor (I := I) (E := E)
+                  (closedAtlasFieldOfHigher cov A u p.1) p.2
+                    (e.localFrame bas i p.2))
+                (raisedCovariantTwoTensor (I := I) (E := E)
+                  (closedAtlasFieldOfHigher cov A u p.1) p.2
+                    (e.localFrame bas j p.2)) :=
+    covariantTwoTensorNormSq_eq_sum_inverseGram
+      (I := I) (E := E) (closedAtlasFieldOfHigher cov A u p.1) e bas hp
+  change Filter.Tendsto
+    (fun p : ℝ × M => covariantTwoTensorNormSq
+      (closedAtlasFieldOfHigher cov A u p.1) p.2)
+    (𝓝 p₀)
+    (𝓝 (covariantTwoTensorNormSq
+      (closedAtlasFieldOfHigher cov A u p₀.1) p₀.2))
+  rw [heq p₀ hp]
+  apply hsum.congr'
+  have hopen : IsOpen ((fun p : ℝ × M => p.2) ⁻¹' e.baseSet) :=
+    e.open_baseSet.preimage continuous_snd
+  filter_upwards [hopen.mem_nhds hp] with p hp
+  exact (heq p hp).symm
 
 theorem closedAtlasFieldOfHigher_eq_atlasFieldOfHigher
     (cov : CovariantDerivative I E TM)
