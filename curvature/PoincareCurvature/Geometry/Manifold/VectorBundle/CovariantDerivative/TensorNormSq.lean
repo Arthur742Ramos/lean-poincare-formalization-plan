@@ -128,6 +128,59 @@ theorem covariantTwoTensorNormSq_eq_zero_iff
     rw [covariantTwoTensorNormSq_eq_sum]
     simp [hzero]
 
+/-- The fibrewise Hilbert--Schmidt pairing of complete covariant two-tensors. -/
+def covariantTwoTensorPair
+    (h k : ∀ x : M, T₂ x) (x : M) : ℝ := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  exact ∑ i, ∑ j, h x (b i) (b j) * k x (b i) (b j)
+
+theorem covariantTwoTensorPair_self
+    (h : ∀ x : M, T₂ x) (x : M) :
+    covariantTwoTensorPair h h x = covariantTwoTensorNormSq h x := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  unfold covariantTwoTensorPair covariantTwoTensorNormSq
+  simp only [← sq]
+
+/-- The elementary energy bound used to estimate a bounded curvature
+reaction: twice the tensor pairing is at most the sum of the two complete
+tensor squares. -/
+theorem two_mul_covariantTwoTensorPair_le_normSq_add
+    (h k : ∀ x : M, T₂ x) (x : M) :
+    2 * covariantTwoTensorPair h k x ≤
+      covariantTwoTensorNormSq h x + covariantTwoTensorNormSq k x := by
+  let _ : FiniteDimensional ℝ (TM x) :=
+    VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  change 2 * (∑ i, ∑ j, h x (b i) (b j) * k x (b i) (b j)) ≤
+    (∑ i, ∑ j, (h x (b i) (b j)) ^ 2) +
+      ∑ i, ∑ j, (k x (b i) (b j)) ^ 2
+  rw [Finset.mul_sum, ← Finset.sum_add_distrib]
+  apply Finset.sum_le_sum
+  intro i hi
+  rw [Finset.mul_sum, ← Finset.sum_add_distrib]
+  apply Finset.sum_le_sum
+  intro j hj
+  nlinarith only [sq_nonneg (h x (b i) (b j) - k x (b i) (b j))]
+
+/-- A fibrewise square bound on a linear reaction tensor gives the scalar
+zero-order bound required by the norm maximum principle. -/
+theorem two_mul_covariantTwoTensorPair_le_potential
+    (h k : ∀ x : M, T₂ x) (x : M) (C : ℝ)
+    (hk : covariantTwoTensorNormSq k x ≤
+      C * covariantTwoTensorNormSq h x) :
+    2 * covariantTwoTensorPair h k x ≤
+      (1 + C) * covariantTwoTensorNormSq h x := by
+  calc
+    2 * covariantTwoTensorPair h k x ≤
+        covariantTwoTensorNormSq h x + covariantTwoTensorNormSq k x :=
+      two_mul_covariantTwoTensorPair_le_normSq_add h k x
+    _ ≤ covariantTwoTensorNormSq h x +
+        C * covariantTwoTensorNormSq h x := add_le_add_right hk _
+    _ = (1 + C) * covariantTwoTensorNormSq h x := by ring
+
 /-- The time derivative of the pointwise tensor norm square is twice the
 Hilbert--Schmidt pairing with the tensor's genuine time derivative. The
 Riemannian metric is fixed in time here. -/
