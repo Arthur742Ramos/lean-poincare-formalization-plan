@@ -15,6 +15,8 @@ supply it or assert tensor-heat uniqueness without it.
 @[expose] public noncomputable section
 
 set_option linter.unusedSectionVars false
+set_option synthInstance.maxHeartbeats 200000
+set_option maxHeartbeats 2000000
 
 open Bundle Set Topology
 open scoped Manifold ContDiff BigOperators
@@ -33,7 +35,25 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 local notation "TM" => (TangentSpace I : M → Type _)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
+local notation "T₃" => (fun x : M => TM x →L[ℝ] T₂ x)
 local notation "T₁" => (fun x : M => TM x →L[ℝ] ℝ)
+
+local instance tensorHeatNormTwoModelNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+local instance tensorHeatNormTwoModelNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] (E →L[ℝ] ℝ)) := inferInstance
+local instance tensorHeatNormTwoFiberNormedAddCommGroup (x : M) :
+    NormedAddCommGroup (T₂ x) := inferInstance
+local instance tensorHeatNormTwoFiberNormedSpace (x : M) :
+    NormedSpace ℝ (T₂ x) := inferInstance
+local instance tensorHeatNormThreeModelNormedAddCommGroup :
+    NormedAddCommGroup (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+local instance tensorHeatNormThreeModelNormedSpace :
+    NormedSpace ℝ (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) := inferInstance
+local instance tensorHeatNormThreeFiberNormedAddCommGroup (x : M) :
+    NormedAddCommGroup (T₃ x) := inferInstance
+local instance tensorHeatNormThreeFiberNormedSpace (x : M) :
+    NormedSpace ℝ (T₃ x) := inferInstance
 
 /-- Twice the pointwise Hilbert--Schmidt pairing with the genuine tensor
 time derivative, for a fixed spatial Riemannian metric. -/
@@ -84,11 +104,15 @@ theorem covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial_potential
       MDiffAt
         (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
           (E := T₂) z (h t z)) y)
-    (hgradient : ∀ t ∈ Ioo t₀ T, ∀ x : M,
+    (hmetric : ∀ t ∈ Ioo t₀ T,
+      (cov t).IsMetricCompatibleTangent)
+    (hfirstGram : ∀ t ∈ Ioo t₀ T, ∀ x : M,
       MDiffAt
-        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
-          (CovariantDerivative.scalarDifferential (I := I)
-            (CovariantDerivative.covariantTwoTensorNormSq (h t)) y)) x)
+        (fun y => TotalSpace.mk'
+          (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+          (E := T₃) y
+            (CovariantDerivative.covariantTwoTensorCovariantDerivative (cov t)
+              (CovariantDerivative.covariantTwoTensorGram (h t)) y)) x)
     (hpde : ∀ t ∈ Ioo t₀ T, ∀ x : M,
       covariantTwoTensorNormTimePair h dh t x ≤
         g.scalarLaplacian cov
@@ -114,10 +138,18 @@ theorem covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial_potential
     intro t ht y
     exact CovariantDerivative.covariantTwoTensorNormSq_mdifferentiableAt
       (hspatial t ht y)
+  have hnormGradient : ∀ t ∈ Ioo t₀ T, ∀ x : M,
+      MDiffAt
+        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
+          (CovariantDerivative.scalarDifferential (I := I)
+            (CovariantDerivative.covariantTwoTensorNormSq (h t)) y)) x := by
+    intro t ht x
+    exact CovariantDerivative.mdifferentiableAt_scalarDifferential_covariantTwoTensorNormSq
+      (cov t) (hmetric t ht) (h t) (hspatial t ht) (hfirstGram t ht x)
   have hnonpos := g.parabolicSubsolution_nonpositive_openInitial_potential cov
     (fun t x => CovariantDerivative.covariantTwoTensorNormSq (h t) x)
     (covariantTwoTensorNormTimePair h dh) K
-    hcont hnormTime hnormSpatial hgradient hpde hnormInitial
+    hcont hnormTime hnormSpatial hnormGradient hpde hnormInitial
   intro t ht x
   apply (CovariantDerivative.covariantTwoTensorNormSq_eq_zero_iff (h t) x).1
   exact le_antisymm (hnonpos t ht x)
@@ -142,11 +174,15 @@ theorem covariantTwoTensor_eq_zero_of_connectionHeat_bochner
       MDiffAt
         (fun z => TotalSpace.mk' (E →L[ℝ] (E →L[ℝ] ℝ))
           (E := T₂) z (h t z)) y)
-    (hgradient : ∀ t ∈ Ioo t₀ T, ∀ x : M,
+    (hmetric : ∀ t ∈ Ioo t₀ T,
+      (cov t).IsMetricCompatibleTangent)
+    (hfirstGram : ∀ t ∈ Ioo t₀ T, ∀ x : M,
       MDiffAt
-        (fun y => TotalSpace.mk' (E →L[ℝ] ℝ) (E := T₁) y
-          (CovariantDerivative.scalarDifferential (I := I)
-            (CovariantDerivative.covariantTwoTensorNormSq (h t)) y)) x)
+        (fun y => TotalSpace.mk'
+          (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)))
+          (E := T₃) y
+            (CovariantDerivative.covariantTwoTensorCovariantDerivative (cov t)
+              (CovariantDerivative.covariantTwoTensorGram (h t)) y)) x)
     (hheat : ∀ t ∈ Ioo t₀ T, ∀ x : M,
       dh t x = CovariantDerivative.connectionLaplacian (cov t) (h t) x +
         reaction t x)
@@ -179,6 +215,6 @@ theorem covariantTwoTensor_eq_zero_of_connectionHeat_bochner
         (h t) (reaction t) x C (hreaction t ht x)
     linarith
   exact covariantTwoTensor_eq_zero_of_norm_subsolution_openInitial_potential
-    g cov h dh (1 + C) hcont htime hspatial hgradient hpde hinitial
+    g cov h dh (1 + C) hcont htime hspatial hmetric hfirstGram hpde hinitial
 
 end CovariantDerivative.TimeDependentRiemannianMetric
