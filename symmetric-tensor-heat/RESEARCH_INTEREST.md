@@ -35,19 +35,28 @@ The conclusion proves:
 - a global finite-atlas Schauder estimate with the standard linear dependence
   on initial size and source norm.
 
-This is useful infrastructure for Ricci-DeTurck arguments, stability analyses,
-and other geometric evolution equations. Hamilton's foundational paper uses
-geometric parabolic systems, and DeTurck's reduction makes strict parabolicity
-the engine of Ricci-flow local existence. Huang gives a direct modern account
-of linear strongly parabolic systems and Schauder estimates on vector bundles
-over closed manifolds.
+The direct comparison is [Huang, Theorems 2.3 and 2.4](https://arxiv.org/html/1506.05030v8):
+the former gives a global Schauder estimate and the latter existence and
+uniqueness for linear strongly parabolic systems on vector bundles over closed
+manifolds. The selected statement isolates the rough connection Laplacian on
+covariant two-tensors. Its substantive formal content is the link from finite
+parabolic Hölder estimates and atlas reconstruction to the intrinsic tensor
+equation, followed by symmetry and equal-global-data uniqueness for represented
+solutions. This gives a checked linear building block for geometric parabolic
+arguments such as Ricci-DeTurck theory; it does not formalize that nonlinear
+application.
 
 The scope is intentionally narrower than the classical abstract theorem. The
 inputs are represented finite-atlas Holder data, geometric uniqueness is
 within the represented classical class, and the endpoint is existentially short. No
 surjectivity theorem for arbitrary intrinsic Holder sections, arbitrary-time
 continuation, nonlinear Ricci-flow theorem, or mathematical novelty is
-claimed. Palomar editors remain responsible for assessing research interest.
+claimed. In particular Huang's theorem covers all data in its intrinsic
+Hölder spaces, whereas the selected theorem quantifies over the constructed
+finite-atlas spaces. The claim of research interest is therefore the verified
+tensor-heat specialization with its explicit represented scope, not the full
+generality of Huang's theorem. Palomar editors remain responsible for
+assessing research interest.
 
 The earlier mechanically passing statement at merge commit `a210bc38` did not
 expose these analytic constraints and was editorially rejected as potentially
