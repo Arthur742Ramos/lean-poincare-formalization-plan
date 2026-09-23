@@ -51,10 +51,15 @@ closed-manifold vector-bundle parabolic Schauder theory in Huang,
 arXiv:1506.05030, especially Section 2. Hamilton's 1982 Ricci-flow paper and
 DeTurck's 1983 strictly parabolic reduction provide the geometric context.
 
-A live Palomar search on 2026-09-14 found no entry indexed by `parabolic`,
-`schauder`, or `heat`; the indexed `tensor` entries concerned different
-curvature results. That search supports a distinct new-entry identity but is
-not a mathematical novelty or editorial-interest claim.
+A live Palomar search on 2026-09-23 found no entry indexed by `heat` or
+`schauder`. The sole `parabolic` hit is the distinct
+[Caffarelli--Kohn--Nirenberg partial regularity entry](https://palomar-registry.org/entry?id=PALOMAR-2026-09-22-000003&version=1)
+for Navier--Stokes. The `tensor` hits include this repository's earlier
+[Levi--Civita curvature entry](https://palomar-registry.org/entry?id=PALOMAR-2026-09-02-000007&version=3)
+and [double-contracted Bianchi entry](https://palomar-registry.org/entry?id=PALOMAR-2026-09-06-000004&version=1),
+whose selected results are different from the tensor heat theorem. The search
+supports a distinct new-entry identity; it is not a mathematical novelty or
+editorial-interest claim.
 
 ## Authorship and automation
 
