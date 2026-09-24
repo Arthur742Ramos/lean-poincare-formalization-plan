@@ -63,13 +63,30 @@ def without_comments(source: str) -> str:
     return "".join(result)
 
 
+def vendored_import_entrypoints() -> set[str]:
+    """Return vendored modules directly imported by the candidate entry points."""
+    vendor = ROOT / "vendor/curvature"
+    modules = {
+        ".".join(path.relative_to(vendor).with_suffix("").parts)
+        for path in vendor.rglob("*.lean")
+    }
+    import_pattern = re.compile(r"^(?:public )?import\s+([A-Za-z0-9_.]+)$",
+                                re.MULTILINE)
+    entrypoints: set[str] = set()
+    for entry in (ROOT / "TensorHeatSolution.lean",
+                  ROOT / "TensorHeatGeometricSymmetry.lean"):
+        source = without_comments(entry.read_text(encoding="utf-8"))
+        entrypoints.update(module for module in import_pattern.findall(source)
+                           if module in modules)
+    return entrypoints
+
+
 def vendored_import_closure() -> set[str]:
     """Return the vendored modules reachable from the candidate entry points.
 
-    Lake does not infer same-library source modules when a library has an
-    explicit ``roots`` list, so keep that list fail-closed and derive the
-    expected closure from the actual public and private imports.  The parser
-    deliberately accepts ``public import`` as well as ordinary imports.
+    Derive the expected closure from the actual public and private imports.
+    The parser deliberately accepts ``public import`` as well as ordinary
+    imports.
     """
     vendor = ROOT / "vendor/curvature"
     modules = {
@@ -78,12 +95,7 @@ def vendored_import_closure() -> set[str]:
     }
     import_pattern = re.compile(r"^(?:public )?import\s+([A-Za-z0-9_.]+)$",
                                 re.MULTILINE)
-    queue: list[str] = []
-    for entry in (ROOT / "TensorHeatSolution.lean",
-                  ROOT / "TensorHeatGeometricSymmetry.lean"):
-        source = without_comments(entry.read_text(encoding="utf-8"))
-        queue.extend(module for module in import_pattern.findall(source)
-                     if module in modules)
+    queue: list[str] = list(vendored_import_entrypoints())
     closure: set[str] = set()
     while queue:
         module = queue.pop()
@@ -203,10 +215,14 @@ def main() -> None:
     libraries = {entry["name"]: entry for entry in lakefile["lean_lib"]}
     curvature = libraries["PoincareCurvature"]
     require(curvature.get("srcDir") == "vendor/curvature" and
-            set(curvature) == {"name", "srcDir", "roots"},
-            "vendored curvature must be a rooted library, not a nested Lake package")
-    require(set(curvature["roots"]) == vendored_import_closure(),
-            "vendored curvature roots do not match the candidate import closure")
+            set(curvature) == {"name", "srcDir", "roots", "globs"},
+            "vendored curvature must be a rooted library with closed build globs")
+    require(curvature["roots"] == ["PoincareCurvature"],
+            "vendored curvature namespace root changed")
+    require(set(curvature["globs"]) == vendored_import_entrypoints(),
+            "vendored curvature globs must be the direct candidate entry points")
+    require(vendored_import_closure(),
+            "vendored curvature import closure is empty")
     require(libraries["TensorHeatChallenge"].get("roots") == ["TensorHeatChallenge"] and
             libraries["TensorHeatSolution"].get("roots") == ["TensorHeatSolution"],
             "Challenge/Solution Lake roots changed")
