@@ -63,6 +63,39 @@ def without_comments(source: str) -> str:
     return "".join(result)
 
 
+def vendored_import_closure() -> set[str]:
+    """Return the vendored modules reachable from the candidate entry points.
+
+    Lake does not infer same-library source modules when a library has an
+    explicit ``roots`` list, so keep that list fail-closed and derive the
+    expected closure from the actual public and private imports.  The parser
+    deliberately accepts ``public import`` as well as ordinary imports.
+    """
+    vendor = ROOT / "vendor/curvature"
+    modules = {
+        ".".join(path.relative_to(vendor).with_suffix("").parts): path
+        for path in vendor.rglob("*.lean")
+    }
+    import_pattern = re.compile(r"^(?:public )?import\s+([A-Za-z0-9_.]+)$",
+                                re.MULTILINE)
+    queue: list[str] = []
+    for entry in (ROOT / "TensorHeatSolution.lean",
+                  ROOT / "TensorHeatGeometricSymmetry.lean"):
+        source = without_comments(entry.read_text(encoding="utf-8"))
+        queue.extend(module for module in import_pattern.findall(source)
+                     if module in modules)
+    closure: set[str] = set()
+    while queue:
+        module = queue.pop()
+        if module in closure:
+            continue
+        closure.add(module)
+        source = without_comments(modules[module].read_text(encoding="utf-8"))
+        queue.extend(imported for imported in import_pattern.findall(source)
+                     if imported in modules and imported not in closure)
+    return closure
+
+
 def statement_block(source: str) -> str:
     start = source.index("def completeStatement : Prop :=")
     end_markers = ["\ntheorem symmetricTensorHeatShortTimeWellPosed", "\n\nprivate theorem canonicalTwo_apply_eq"]
@@ -168,9 +201,12 @@ def main() -> None:
         "name": "mathlib", "scope": "leanprover-community", "rev": MATHLIB,
     }], "Lake must depend directly on the pinned Mathlib revision")
     libraries = {entry["name"]: entry for entry in lakefile["lean_lib"]}
-    require(libraries["PoincareCurvature"].get("srcDir") == "vendor/curvature" and
-            set(libraries["PoincareCurvature"]) == {"name", "srcDir"},
-            "vendored curvature must be a root library, not a nested Lake package")
+    curvature = libraries["PoincareCurvature"]
+    require(curvature.get("srcDir") == "vendor/curvature" and
+            set(curvature) == {"name", "srcDir", "roots"},
+            "vendored curvature must be a rooted library, not a nested Lake package")
+    require(set(curvature["roots"]) == vendored_import_closure(),
+            "vendored curvature roots do not match the candidate import closure")
     require(libraries["TensorHeatChallenge"].get("roots") == ["TensorHeatChallenge"] and
             libraries["TensorHeatSolution"].get("roots") == ["TensorHeatSolution"],
             "Challenge/Solution Lake roots changed")
