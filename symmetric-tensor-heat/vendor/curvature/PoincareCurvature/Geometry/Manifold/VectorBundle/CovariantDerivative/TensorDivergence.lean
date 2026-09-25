@@ -1,5 +1,6 @@
 module
 
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSectionCore
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLeibniz
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ScalarLaplacian
