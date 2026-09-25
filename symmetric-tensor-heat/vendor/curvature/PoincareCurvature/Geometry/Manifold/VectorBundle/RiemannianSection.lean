@@ -640,33 +640,6 @@ variable {W : M → Type*} [TopologicalSpace (_root_.Bundle.TotalSpace F W)] [�
 local notation "BilF" => (F →L[ℝ] F →L[ℝ] ℝ)
 local notation "BilW" => BilinearFormBundle (V := W)
 
-
-/-- Preferred bilinear-form bundle trivializations are fiberwise linear. This explicit instance
-avoids typeclass-search ambiguity from the nested hom-bundle construction when using coordinate
-changes for bilinear-form coordinates. -/
-lemma trivializationAt_bilinearFormBundle_isLinear (x0 : M) :
-    (trivializationAt BilF BilW x0).IsLinear ℝ where
-  linear x hx := by
-    have hxW : x ∈ (trivializationAt F W x0).baseSet := by
-      simpa using hx
-    refine ⟨?_, ?_⟩
-    · intro B C
-      ext u v
-      rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W)
-        x0 x hxW (B + C) u v]
-      simp only [ContinuousLinearMap.add_apply]
-      rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W)
-        x0 x hxW B u v]
-      rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W)
-        x0 x hxW C u v]
-    · intro c B
-      ext u v
-      rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W)
-        x0 x hxW (c • B) u v]
-      simp only [ContinuousLinearMap.smul_apply]
-      rw [trivializationAt_bilinearFormBundle_apply_eq (F := F) (W := W)
-        x0 x hxW B u v]
-
 /-- In preferred local coordinates, a bundled bilinear form evaluates by pulling the model vector
 back through the inverse fiber trivialization. -/
 lemma trivializationAt_bilinearFormBundle_apply_apply_eq

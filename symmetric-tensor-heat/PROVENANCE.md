@@ -74,9 +74,13 @@ RiemannianSectionCore.lean. The wider section module imports that core to
 preserve its API, while LeviCivita.lean and TensorDivergence.lean import the
 core directly. This keeps both consumers independent of the unrelated
 section-space API and omits its ContinuousSection dependency from the focused
-closure. The provenance check pins both edited source files and the new core
-module by hash, then checks that the moved declarations occur in the immutable
-source and the core. The selected heat theorem and its proof are unchanged.
+closure. The fiberwise linearity lemma for bilinear-form trivializations now
+lives in the core alongside its coordinate identity. It retains the original
+100,000 typeclass-search heartbeat allowance. `TensorHeatAtlasClosedReconstruction.lean`
+imports that lemma directly instead of depending on the wider section-space API.
+The provenance check pins the edited source files and the new core module by
+hash, then checks that the moved declarations occur in the immutable source
+and the core. The selected heat theorem and its proof are unchanged.
 
 The short-time commutator retains its explicit
 TensorHeatAtlasCommutatorLift.lean import. The Solution build confirmed that

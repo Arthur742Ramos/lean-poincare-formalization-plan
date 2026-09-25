@@ -36,6 +36,8 @@ ADAPTED_SHA256 = {
         "7390d0367bd2b62c849ad473158111ca863828dcb7925e212b9a015b68c0d1d2",
     "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatEuclidean.lean":
         "d3e8684dbfc312d9dfc30b4f47a289589cc12e8fee3e049515f569a14551e637",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasClosedReconstruction.lean":
+        "bab1b3e5f95a332c86732f2a88760c6e435ed928de61681a51e2b28ba1d5cb3d",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/ContinuousSection.lean":
         "21d6c184331d870d9fdf7666961258a833080ba9b89d645622be47c1f70a912a",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianChart.lean":
@@ -53,13 +55,13 @@ ADAPTED_SHA256 = {
     "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/BanachSpace.lean":
         "425d1d2e93476279bfe4ebea9f65ca30d19c7301aa08b53e3e58820b81e0337d",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean":
-        "39d79d7bbeb76e6a67510c2698bcb620160e9b283337302e1d8476ff0b0a8d5a",
+        "399a830faea8437e829c6cba4fcd1f3f1143a7425d9f46b5ea4b6b56e71d57ad",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TensorDivergence.lean":
         "29a4de07240b29e134f3a96570f7bf8ee442c329980a56304fb333f8dbefb3a8",
 }
 ADDED_ADAPTATION_SHA256 = {
     "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSectionCore.lean":
-        "b03b85f2d006bcea39026c301d9559c242c2aa5718175e1b1b2c9e24be621ed0",
+        "71c72712f44ba9a456a2fa4816a2f0809eb0a5c61141c3b99a08fab432c42c9a",
 }
 
 
@@ -147,6 +149,7 @@ def main() -> None:
             "ContMDiffRiemannianMetric.ext",
             "BilinearFormBundle",
             "trivializationAt_bilinearFormBundle_apply_eq",
+            "trivializationAt_bilinearFormBundle_isLinear",
         ):
             if declaration not in source_section or declaration not in core_section:
                 raise SystemExit("source-derived core declaration missing: " + declaration)

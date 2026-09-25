@@ -114,6 +114,11 @@ related_formalizations:
       Parabolic/BanachSpace.lean also drops an unused direct
       Mathlib.Analysis.Normed.Group.SeparationQuotient import after a
       declaration-aware import audit and a successful full-file compile.
+      The fiberwise linearity lemma for bilinear-form trivializations is
+      factored into RiemannianSectionCore.lean and imported directly by
+      TensorHeatAtlasClosedReconstruction.lean, avoiding a dependency on the
+      wider section-space API. No theorem statement or mathematical condition
+      changes.
       The selected implementation theorem is
       curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.
       The baseline curvature tree is preserved as the provenance reference. The
