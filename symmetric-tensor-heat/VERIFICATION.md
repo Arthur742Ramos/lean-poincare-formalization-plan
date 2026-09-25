@@ -14,9 +14,24 @@ the represented geometric class. The selected Solution uses that bridge to
 derive symmetry of the ordinary solution and includes a separate uniqueness
 clause for any represented readouts with the same global trace and source that
 satisfy the geometric heat equation. Direct Lean elaboration of the Solution
-passed locally. The complete vendored package, exact-commit provenance,
-Comparator, NanoDa, and pinned Linux Palomar renderer/mechanical checks are
-still release gates. There is no active intake for this replacement.
+passed locally. The Mathlib-only Challenge compiled with its one intentional
+hole; the dependency-only boundary check and negative import control passed;
+the anti-vacuity regression passed; and the package, schema, source-boundary,
+exact vendored snapshot, contributor notices, and structured provenance checks
+passed. The compiled-body audit found 277 constants, 60 compiler-generated
+theorem proofs, and no candidate-defined data or proof-development references.
+These are working-tree results. Exact-commit provenance, the axiom check,
+Comparator, NanoDa, and pinned Linux Palomar renderer/mechanical checks remain
+release gates for this closed-surface commit. There is no active intake for
+this replacement.
+
+The immediate predecessor at commit
+`f91b0e39390091819e3841bc1bf8a2c7a766deb2` passed the exact hosted
+Palomar mechanical replay and the separate pinned Linux renderer, including
+its core-notation audit. Its Comparator surface still selected thirteen helper
+definitions alongside `completeStatement`; those receipts are historical for
+the closed-surface branch and cannot verify a later commit. The mechanical
+report was a verification run, not an intake or registration.
 
 ## Historical verification of earlier candidates
 
@@ -56,12 +71,13 @@ import the Challenge and active proof sources contain no `sorry`, `admit`, or
 `axiom`. The selected theorem is expected to use exactly `propext`,
 `Classical.choice`, and `Quot.sound`.
 
-The closure audit checks the compiled `completeStatement` body and rejects
-candidate proof-development references. Its only candidate-local dependencies
-may be the statement's explicitly enumerated Mathlib-facing semantic helpers,
-their structural bundle instances, and generated proposition proofs. All
-thirteen semantic helper definitions are independently selected by Comparator
-in addition to `completeStatement` itself.
+The current Comparator configuration selects the theorem and only
+`completeStatement`; the mathematical norm and regularity predicates occur as
+local definitions in that proposition. The compiled-body audit rejects every
+candidate-defined data constant reachable from its value, including structural
+instances. It permits a compiler-generated proposition proof only after
+checking that the declaration is a theorem. Its pass must be established on
+the exact candidate commit before intake.
 
 Comparator pins:
 
