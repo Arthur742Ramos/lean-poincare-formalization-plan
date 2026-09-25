@@ -33,8 +33,10 @@ The compared proposition now exposes the analytic representation itself:
 - injective initial, source, and solution coefficient readouts; coverage of
   every bounded spatial `C^{2,alpha}` atlas jet family with its actual first
   and second derivatives, and every parabolic `C^{alpha,alpha/2}` atlas source
-  family satisfying the displayed norm bound; constant-matrix witnesses also
-  make nontriviality explicit; and
+  family satisfying the displayed norm bound; the selected coverage witnesses
+  have an exact finite-atlas spatial size and a source norm bounded by the sum
+  of the supplied chartwise budgets; constant-matrix witnesses also make
+  nontriviality explicit; and
 - explicit spatial `C^{2,alpha}`, parabolic `C^{alpha,alpha/2}`, and solution
   `C^{2+alpha,1+alpha/2}` derivative and Hölder certificates controlled by the
   same sizes and norms used in the Schauder estimate.

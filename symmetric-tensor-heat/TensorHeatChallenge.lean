@@ -369,6 +369,10 @@ def completeStatement : Prop :=
             inner ℝ (cov U x w) (V x) + inner ℝ (U x) (cov V x w)
     let leviCivita : Prop := cov.torsion = 0 ∧ metricCompatible
     let Matrix := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ
+    letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] Matrix) :=
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] Matrix) :=
+      ContinuousLinearMap.toNormedSpace
     let parabolicMetric := fun (p q : ℝ × E) =>
       max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2)
     let hasParabolicC0 := fun (S N : ℝ) (f : ℝ × E → Matrix) =>
@@ -544,11 +548,15 @@ def completeStatement : Prop :=
             (∀ i x, initialValue D i x = v i x) ∧
             (∀ i x, initialSpaceDeriv D i x = dv i x) ∧
             (∀ i x, initialSpaceSecondDeriv D i x = d2v i x) ∧
-            (∀ i, initialHolderConstant D i = H i)) ∧
+            (∀ i, initialHolderConstant D i = H i) ∧
+            initialSize D = ∑ᶠ i,
+              max (‖v i‖ + H i)
+                (max (‖dv i‖ + H i) (‖d2v i‖ + H i))) ∧
         (∀ (c : Index → ℝ × E → Matrix) (N : Index → ℝ),
           (∀ i, hasParabolicC0 Tcoord (N i) (c i)) →
-          ∃ f : Source, ∀ i z, z.1 ∈ Ioc t₀ Tcoord →
-            sourceValue f i z = c i z) ∧
+          ∃ f : Source,
+            (∀ i z, z.1 ∈ Ioc t₀ Tcoord → sourceValue f i z = c i z) ∧
+            sourceNorm f ≤ ∑ᶠ i, N i) ∧
         (∀ c : Index →
             (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ),
           ∃ D, ∀ i x, initialValue D i x = c i) ∧

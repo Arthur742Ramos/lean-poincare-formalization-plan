@@ -11,9 +11,10 @@ project:
     Mathlib-only Challenge through induced tensor connections and an
     orthonormal trace. The selected statement exposes its finite nonempty
     atlas, partition weights and spanning frames, exact local-to-global data,
-    solution and time-derivative reconstruction, faithful nontrivial
-    coefficient representatives, genuine derivative and Holder bounds, and
-    the norms used by the estimate. For every
+    solution and time-derivative reconstruction, faithful coefficient readouts,
+    coverage of all bounded spatial C2-alpha atlas jet families and parabolic
+    C-alpha source families with explicit chartwise norm budgets, genuine
+    derivative and Holder bounds, and the norms used by the estimate. For every
     represented symmetric C^{2+alpha} initial datum and represented symmetric
     C^{alpha,alpha/2} source, the theorem constructs a positive time interval
     and a unique atlas coefficient witness whose geometric readout is
@@ -120,10 +121,14 @@ status:
     local frames, normalized coordinates and time, positive source rescaling,
     exact local-to-global initial/source/solution/time-derivative reconstruction
     and local-frame coefficient identities. Initial/source/solution readouts
-    are injective and realize every atlas-wide constant matrix family. Their
-    displayed norms
-    control genuine spatial C2-alpha and parabolic C-alpha/C2-alpha derivative
-    and Holder bounds. It then proves existence and uniqueness of the solution
+    are injective. The initial and source carriers cover every bounded spatial
+    C2-alpha jet family and parabolic C-alpha source family satisfying the
+    displayed conditions, with initial size equal to an explicit finite-atlas
+    norm sum and source norm bounded by the supplied chartwise budgets.
+    Constant-matrix witnesses independently certify nontriviality. The
+    displayed norms control genuine spatial C2-alpha and parabolic
+    C-alpha/C2-alpha derivative and Holder bounds. It then proves existence
+    and uniqueness of the solution
     coefficient witness in the constructed classical class, fiberwise
     symmetry, initial trace, the componentwise inhomogeneous tensor heat
     equation, and an estimate of solution norm by initial size plus source
@@ -151,9 +156,10 @@ status:
         and the global finite-atlas Schauder estimate. Unlike the historical
         rejected statement, this
         selected proposition itself constrains the atlas reconstruction of
-        data, solution and time derivative, coefficient representations,
-        derivative fields, Holder bounds and norm control enough to exclude
-        singleton/all-zero carriers.
+        data, solution and time derivative, all admissible represented initial
+        jets and sources with explicit input norm budgets, derivative fields,
+        Holder bounds and norm control enough to exclude singleton/all-zero
+        carriers.
 
 automation:
   methods:
