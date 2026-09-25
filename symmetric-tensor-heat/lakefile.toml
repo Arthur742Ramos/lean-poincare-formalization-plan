@@ -74,7 +74,6 @@ roots = [
   "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.SpatialLinearChange",
   "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.TimeIndependentHolder",
   "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder",
-  "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicInterpolation",
   "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasAffineCorrection",
   "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasClosedReconstruction",
   "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasCommutatorCoordinate",

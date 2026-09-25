@@ -48,6 +48,10 @@ ADAPTED_SHA256 = {
         "647ae886731f58c6c3d3bb6f6806db7c4b8c6defe8167c11b9e8508a950ce434",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean":
         "f7f1477993f745a5901f23340c0602ec659240c7c4a8beabec8ff16db6b6e936",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/FiniteCylinderInterpolation.lean":
+        "7f86ecba272aae7e510e66c7101c8a7357a642e749cb6faa85d6cdeba3aee9a7",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/BanachSpace.lean":
+        "425d1d2e93476279bfe4ebea9f65ca30d19c7301aa08b53e3e58820b81e0337d",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean":
         "39d79d7bbeb76e6a67510c2698bcb620160e9b283337302e1d8476ff0b0a8d5a",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TensorDivergence.lean":
@@ -154,6 +158,11 @@ def main() -> None:
             raise SystemExit("structured provenance is incomplete: " + required)
     if "RiemannianSectionCore.lean" not in metadata:
         raise SystemExit("structured provenance omits the proof-support module split")
+    banach_space = git_bytes(vendor_blobs[
+        "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/BanachSpace.lean"
+    ]).decode("utf-8")
+    if "import Mathlib.Analysis.Normed.Group.SeparationQuotient" in banach_space:
+        raise SystemExit("unused BanachSpace separation-quotient import was restored")
     print("Immutable source, exact baseline/adapted vendor inventory, notices, and structured provenance passed.")
 
 

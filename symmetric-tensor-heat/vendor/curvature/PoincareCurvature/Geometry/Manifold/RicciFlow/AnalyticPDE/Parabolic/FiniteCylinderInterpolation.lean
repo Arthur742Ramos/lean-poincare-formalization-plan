@@ -1,5 +1,4 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteInitialTrace
-import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicInterpolation
 
 /-!
 # Short-time lower-order interpolation on finite cylinders
