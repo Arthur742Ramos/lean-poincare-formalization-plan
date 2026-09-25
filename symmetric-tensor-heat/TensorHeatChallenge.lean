@@ -15,15 +15,17 @@ development.  The rough Laplacian is the orthonormal trace of the second
 covariant derivative, expanded using Mathlib's manifold derivative and the
 given tangent connection.  The conclusion constructs finite-atlas coefficient
 spaces and their geometric readouts.  For every represented symmetric spatial
-datum and symmetric parabolic source, there is a unique coefficient witness
-whose readout has the asserted initial trace, is fiberwise symmetric, solves
-the actual tensor heat equation, and satisfies a global finite-atlas Schauder
-estimate.
+datum and symmetric parabolic source, there is a coefficient witness whose
+readout has the asserted initial trace, is fiberwise symmetric, solves the
+actual tensor heat equation, and satisfies a global finite-atlas Schauder
+estimate.  The statement does not claim uniqueness of the coefficient
+witness.
 
 This is deliberately a theorem for the constructed finite-atlas Holder data
 class.  It does not assert that every bare intrinsic section has such a
-coefficient representation, and uniqueness is of the atlas coefficient
-witness in the constructed classical class.
+coefficient representation.  Its geometric uniqueness clause compares
+readouts for fixed initial and source representatives `D` and `f`; it does
+not identify different atlas representatives of the same global data.
 -/
 
 @[expose] public noncomputable section
@@ -228,9 +230,11 @@ def HasParabolicC2AlphaNormLe {X : Type u} {V : Type v}
 
 /-- The complete Mathlib-facing statement.  The existential types are the
 finite-atlas initial, source, and higher-coefficient spaces constructed by the
-proof.  Their readout maps expose every geometric conclusion, while
-`coordinateClass` records the precise unique atlas solution class rather than
-claiming uniqueness among unrepresented bare fields. -/
+proof.  Their readout maps expose every geometric conclusion.  The
+proof-chosen `coordinateClass` records which represented witnesses receive the
+analytic estimate; no coefficient-witness uniqueness is asserted.  The
+geometric uniqueness clause is explicitly for fixed initial and source
+representatives. -/
 def completeStatement : Prop :=
   ∀ {E : Type u} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [CompleteSpace E] [Nontrivial E]
@@ -576,7 +580,7 @@ def completeStatement : Prop :=
         (∀ D f,
           symmetric (initialTensor D) →
           (∀ t, t ∈ Ioo t₀ S → symmetric (sourceTensor f t)) →
-          ∃! q : Solution,
+          ∃ q : Solution,
             coordinateClass D f q ∧
             timeDerivative S (solutionTensor q) (solutionTimeDerivative q) ∧
             initialTrace S (solutionTensor q) (initialTensor D) ∧

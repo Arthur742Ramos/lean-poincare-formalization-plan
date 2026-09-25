@@ -69,11 +69,13 @@ The selected Challenge and Solution state ordinary, unprojected atlas
 reconstruction. The curvature subproject at the disclosed source commit proves
 joint space-time continuity of the represented tensor norm and a zero-data
 uniqueness theorem using the genuine tensor connection Laplacian. The local
-`TensorHeatGeometricSymmetry` bridge derives equal-global-data uniqueness in
-the represented geometric class. The selected Solution uses that bridge to
-derive symmetry of the ordinary solution and includes a separate uniqueness
-clause for any represented readouts with the same global trace and source that
-satisfy the geometric heat equation. Direct Lean elaboration of the Solution
+`TensorHeatGeometricSymmetry` bridge derives the fixed-representative
+zero-data comparison in the represented geometric class. The selected
+Solution uses that bridge to derive symmetry of the ordinary solution and
+includes a separate uniqueness clause for represented readouts attached to
+the same initial representative `D` and source representative `f`, when they
+satisfy the displayed trace and PDE. It does not claim uniqueness across
+different atlas representatives of equal global tensors. Direct Lean elaboration of the Solution
 passed locally. The Mathlib-only Challenge compiled with its one intentional
 hole; the dependency-only boundary check and negative import control passed;
 the anti-vacuity regression passed; and the package, schema, source-boundary,
