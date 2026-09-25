@@ -27,7 +27,9 @@ The compared proposition now exposes the analytic representation itself:
 - exact finite-sum reconstruction of the global initial tensor, source,
   solution, and solution time derivative from their local tensors, together
   with equations identifying the local-frame coefficients with the displayed
-  matrix representatives;
+  matrix representatives; the displayed time derivative is the actual
+  derivative for every represented solution, including those compared for
+  uniqueness;
 - injective initial, source, and solution coefficient readouts and witnesses
   for every atlas-wide family of constant matrices, which rule out singleton
   or all-zero coefficient carriers; and

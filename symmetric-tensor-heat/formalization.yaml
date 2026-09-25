@@ -19,6 +19,7 @@ project:
     and a unique atlas coefficient witness whose geometric readout is
     symmetric, has the correct initial trace, solves the tensor heat equation,
     and obeys a global finite-atlas C^{2+alpha,1+alpha/2} estimate.
+    Every represented solution has the displayed genuine time derivative.
     Any two represented geometric readouts with the same global initial tensor
     and source also agree when both satisfy the displayed trace and heat
     equation, without a matching-chartwise-trace premise.
@@ -126,7 +127,9 @@ status:
     coefficient witness in the constructed classical class, fiberwise
     symmetry, initial trace, the componentwise inhomogeneous tensor heat
     equation, and an estimate of solution norm by initial size plus source
-    norm. It also proves equality of any two represented geometric solutions
+    norm. The displayed time derivative is genuine for every represented
+    solution, including the pair quantified in the uniqueness clause. It also
+    proves equality of any two represented geometric solutions
     with the same global data under the displayed trace and PDE. It does not
     prove that every bare intrinsic tensor section admits the constructed
     atlas representation, uniqueness outside the represented class, a
