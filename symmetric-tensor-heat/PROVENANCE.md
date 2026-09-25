@@ -5,15 +5,15 @@ must not be submitted as a later version of another result.
 
 ## Reused formalization
 
-The proof development is reused, unchanged, from:
+The vendored curvature proof development is reused, unchanged, from:
 
 - repository: `https://github.com/Arthur742Ramos/lean-poincare-formalization-plan`
-- commit: `d6ef7f253bb95fa44d1fe61c9b1a52e061ca0951`
+- commit: `13fa15d6a8352ed08bf71b3533b1c2e922c21388`
 - source project: `curvature/`
 - selected source file:
   `curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean`
 - relationship: `builds-on`
-- source tree object: `a448a1d7d62c04a5ab85ba0d943b67db293e77c2`
+- source tree object: `255c32fa869ec955e7c09b21fb74914b9ce13ec7`
 - selected source SHA-256:
   `beadeb28c37b72ffc0700756ba506e213f97c351fb1ee3125de41667314012a7`
 
@@ -30,10 +30,12 @@ selected source hash, the complete vendored file inventory, every vendored
 byte, and the structured metadata. `scripts/check-package.py` separately
 rejects any path package or change to the root-library topology.
 
-The new work in this package is the focused Mathlib-only Challenge surface,
-matching independent Solution bridge, Comparator configuration, metadata,
-provenance checks, and renderer workflow. It does not relabel inherited
-implementation as new formal code.
+The new work in this package is the selected, unprojected theorem surface,
+the Mathlib-only Challenge, matching Solution bridge, Comparator configuration,
+metadata, provenance checks, and renderer workflow. The vendored source
+already contains finite-atlas estimates, reconstruction, norm continuity,
+and geometric zero-data uniqueness; those proofs remain credited to the
+source subproject.
 
 ## Mathlib
 

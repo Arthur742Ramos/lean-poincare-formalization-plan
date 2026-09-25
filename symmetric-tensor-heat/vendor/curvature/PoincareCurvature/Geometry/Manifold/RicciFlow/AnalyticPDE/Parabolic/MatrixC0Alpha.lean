@@ -36,11 +36,12 @@ theorem matrix_of_entries {m n A : Type*} [Fintype m] [Fintype n]
     [NormedAddCommGroup A] {N : m → n → ℝ} {M : ℝ × X → Matrix m n A}
     (h : ∀ i j, ParabolicC0AlphaNormLe (N i j) α (fun z => M z i j) s) :
     ParabolicC0AlphaNormLe (∑ i, ∑ j, N i j) α M s := by
-  simpa using
-    (ParabolicC0AlphaNormLe.pi (X := X) (F := n → A) (α := α) (s := s)
+  change ParabolicC0AlphaNormLe (∑ i, ∑ j, N i j) α (fun z i j => M z i j) s
+  exact
+    ParabolicC0AlphaNormLe.pi (X := X) (F := n → A) (α := α) (s := s)
       (N := fun i => ∑ j, N i j) (u := fun z i j => M z i j) fun i =>
         ParabolicC0AlphaNormLe.pi (X := X) (F := A) (α := α) (s := s)
-          (N := N i) (u := fun z j => M z i j) (h i))
+          (N := N i) (u := fun z j => M z i j) (h i)
 
 /-- A matrix-valued single-radius parabolic `C^{0,α}` control projects to each entry with the
 same radius. -/
@@ -349,7 +350,8 @@ theorem matrix_det_sub_with {n A : Type*} [Fintype n] [DecidableEq n] [NormedCom
           α
           (fun z => (∏ i : n, M z (σ i) i) -
             ∏ i : n, N z (σ i) i) s := by
-      simpa [matrixDetTermSubBoundConst, matrixDetTermSubHolderConst] using
+      simpa [matrixDetTermSubBoundConst, matrixDetTermSubHolderConst,
+        matrixDetTermBoundConst] using
         (ParabolicC0AlphaWith.finset_prod_sub_prod (X := X) (α := α) (s := s)
           (S := (Finset.univ : Finset n))
           (B := fun i => B (σ i) i)
@@ -1959,12 +1961,14 @@ theorem matrix_symmetrize_entry_sub_with {n 𝕜 : Type*} [NormedField 𝕜]
       α (fun z =>
         ((2 : 𝕜)⁻¹ • (M z + (M z).transpose) -
           (2 : 𝕜)⁻¹ • (M' z + (M' z).transpose)) i j) s := by
-  convert (((hMd i j).add (hMd j i)).smul ((2 : 𝕜)⁻¹)) using 1
-  ext z
-  change (2 : 𝕜)⁻¹ * (M z i j + M z j i) -
-      (2 : 𝕜)⁻¹ * (M' z i j + M' z j i) =
-    (2 : 𝕜)⁻¹ * ((M z i j - M' z i j) + (M z j i - M' z j i))
-  ring
+  convert (((hMd i j).add (hMd j i)).smul ((2 : 𝕜)⁻¹)) using 1 <;>
+    first
+    | rfl
+    | (funext z
+       change (2 : 𝕜)⁻¹ * (M z i j + M z j i) -
+           (2 : 𝕜)⁻¹ * (M' z i j + M' z j i) =
+         (2 : 𝕜)⁻¹ * ((M z i j - M' z i j) + (M z j i - M' z j i))
+       ring)
 
 /-- Quantitative sup constant for finite matrix symmetrization difference. -/
 def matrixSymmetrizeSubBoundConst {n 𝕜 : Type*} [Fintype n] [NormedField 𝕜]
@@ -2113,7 +2117,7 @@ theorem matrix_trace_sub_with {n A : Type*} [Fintype n] [NormedAddCommGroup A]
     ParabolicC0AlphaWith.sum_sub_sum (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset n)) (B := fun i => B i i) (H := fun i => H i i)
       (u := fun i z => M z i i) (v := fun i z => M' z i i) (fun i _hi => hMd i i)
-  simpa [Matrix.trace] using hsum
+  simpa [Matrix.trace, matrixTraceSubBoundConst, matrixTraceSubHolderConst] using hsum
 
 /-- Entrywise sup constants for replacing row `j` by the `i`th coordinate vector. -/
 def matrixUpdateRowBoundConst {n A : Type*} [DecidableEq n] [NormedRing A]
@@ -2211,10 +2215,10 @@ theorem matrix_adjugate_entry_with {n A : Type*} [Fintype n] [DecidableEq n]
     intro r c
     by_cases hr : r = j
     · subst r
-      simpa [matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow] using
+      simpa [matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow_apply] using
         (ParabolicC0AlphaWith.const (s := s) (α := α)
           (((Pi.single i (1 : A)) : n → A) c) le_rfl le_rfl)
-    · simpa [matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow,
+    · simpa [matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow_apply,
         Function.update_of_ne hr, hr] using hM r c
   have hdet :
       ParabolicC0AlphaWith
@@ -2263,10 +2267,10 @@ theorem matrix_adjugate_entry_sub_with {n A : Type*} [Fintype n] [DecidableEq n]
     intro r c
     by_cases hr : r = j
     · subst r
-      simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow] using
+      simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow_apply] using
         (ParabolicC0AlphaWith.const (s := s) (α := α)
           (((Pi.single i (1 : A)) : n → A) c) le_rfl le_rfl)
-    · simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow,
+    · simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow_apply,
         Function.update_of_ne hr, hr] using hM r c
   have hNupd : ∀ r c,
       ParabolicC0AlphaWith
@@ -2276,10 +2280,10 @@ theorem matrix_adjugate_entry_sub_with {n A : Type*} [Fintype n] [DecidableEq n]
     intro r c
     by_cases hr : r = j
     · subst r
-      simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow] using
+      simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow_apply] using
         (ParabolicC0AlphaWith.const (s := s) (α := α)
           (((Pi.single i (1 : A)) : n → A) c) le_rfl le_rfl)
-    · simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow,
+    · simpa [e, matrixUpdateRowBoundConst, matrixUpdateRowHolderConst, Matrix.updateRow_apply,
         Function.update_of_ne hr, hr] using hN r c
   have hdiffupd : ∀ r c,
       ParabolicC0AlphaWith
@@ -2289,10 +2293,10 @@ theorem matrix_adjugate_entry_sub_with {n A : Type*} [Fintype n] [DecidableEq n]
     intro r c
     by_cases hr : r = j
     · subst r
-      simpa [e, matrixUpdateRowHolderConst, Matrix.updateRow] using
+      simpa [e, matrixUpdateRowHolderConst, Matrix.updateRow_apply] using
         (ParabolicC0AlphaWith.const (s := s) (α := α) (B := 0) (H := 0)
           (0 : A) (by simp) le_rfl)
-    · simpa [e, matrixUpdateRowHolderConst, Matrix.updateRow, Function.update_of_ne hr, hr]
+    · simpa [e, matrixUpdateRowHolderConst, Matrix.updateRow_apply, Function.update_of_ne hr, hr]
         using hdiff r c
   have hdet :
       ParabolicC0AlphaWith
@@ -2332,16 +2336,16 @@ theorem matrix_adjugate_entry_norm_sub_le {n A : Type*} [Fintype n] [DecidableEq
     intro r c
     by_cases hr : r = j
     · subst r
-      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow]
-    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow, Function.update_of_ne hr, hr]
+      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow_apply]
+    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow_apply, Function.update_of_ne hr, hr]
         using hM r c
   have hNupd : ∀ r c, ‖(N.updateRow j e) r c‖ ≤
       matrixUpdateRowBoundConst (A := A) C i j r c := by
     intro r c
     by_cases hr : r = j
     · subst r
-      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow]
-    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow, Function.update_of_ne hr, hr]
+      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow_apply]
+    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow_apply, Function.update_of_ne hr, hr]
         using hN r c
   simpa [e, Matrix.adjugate_apply] using
     (matrix_det_norm_sub_le
@@ -2373,16 +2377,16 @@ theorem matrix_adjugate_entry_norm_sub_le_const_mul {n A : Type*} [Fintype n]
     intro r c
     by_cases hr : r = j
     · subst r
-      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow]
-    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow, Function.update_of_ne hr, hr]
+      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow_apply]
+    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow_apply, Function.update_of_ne hr, hr]
         using hM r c
   have hNupd : ∀ r c, ‖(N.updateRow j e) r c‖ ≤
       matrixUpdateRowBoundConst (A := A) C i j r c := by
     intro r c
     by_cases hr : r = j
     · subst r
-      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow]
-    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow, Function.update_of_ne hr, hr]
+      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow_apply]
+    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow_apply, Function.update_of_ne hr, hr]
         using hN r c
   have hupd_norm :
       ‖M.updateRow j e - N.updateRow j e‖ ≤ ‖M - N‖ := by
@@ -2390,8 +2394,8 @@ theorem matrix_adjugate_entry_norm_sub_le_const_mul {n A : Type*} [Fintype n]
     intro r c
     by_cases hr : r = j
     · subst r
-      simp [Matrix.updateRow]
-    · simpa [Matrix.updateRow, Function.update_of_ne hr] using
+      simp [Matrix.updateRow_apply]
+    · simpa [Matrix.updateRow_ne hr] using
         Matrix.norm_entry_le_entrywise_sup_norm (M - N) (i := r) (j := c)
   have hdet :
       ‖(M.updateRow j e).det - (N.updateRow j e).det‖ ≤
@@ -2421,8 +2425,8 @@ theorem matrix_adjugate_entry_norm_le {n A : Type*} [Fintype n] [DecidableEq n]
     intro r c
     by_cases hr : r = j
     · subst r
-      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow]
-    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow, Function.update_of_ne hr, hr]
+      simp [e, matrixUpdateRowBoundConst, Matrix.updateRow_apply]
+    · simpa [e, matrixUpdateRowBoundConst, Matrix.updateRow_apply, Function.update_of_ne hr, hr]
         using hM r c
   simpa [e, Matrix.adjugate_apply, matrixAdjugateEntryBoundConst] using
     (matrix_det_norm_le
@@ -2441,10 +2445,10 @@ theorem matrix_adjugate_entry {n A : Type*} [Fintype n] [DecidableEq n] [NormedC
       (fun r c => by
         by_cases hr : r = j
         · subst r
-          simpa [Matrix.updateRow] using
+          simpa [Matrix.updateRow_apply] using
             (ParabolicC0AlphaOn.const (α := α) (s := s)
               (((Pi.single i (1 : A)) : n → A) c))
-        · simpa [Matrix.updateRow, Function.update_of_ne hr] using hM r c)
+        · simpa [Matrix.updateRow_ne hr] using hM r c)
   convert hdet using 1
   funext z
   rw [Matrix.adjugate_apply]
@@ -2464,28 +2468,28 @@ theorem matrix_adjugate_entry_sub {n A : Type*} [Fintype n] [DecidableEq n]
     intro r c
     by_cases hr : r = j
     · subst r
-      simpa [e, Matrix.updateRow] using
+      simpa [e, Matrix.updateRow_apply] using
         (ParabolicC0AlphaOn.const (α := α) (s := s)
           (((Pi.single i (1 : A)) : n → A) c))
-    · simpa [e, Matrix.updateRow, Function.update_of_ne hr] using hM r c
+    · simpa [e, Matrix.updateRow_ne hr] using hM r c
   have hNupd : ∀ r c,
       ParabolicC0AlphaOn α (fun z => ((N z).updateRow j e) r c) s := by
     intro r c
     by_cases hr : r = j
     · subst r
-      simpa [e, Matrix.updateRow] using
+      simpa [e, Matrix.updateRow_apply] using
         (ParabolicC0AlphaOn.const (α := α) (s := s)
           (((Pi.single i (1 : A)) : n → A) c))
-    · simpa [e, Matrix.updateRow, Function.update_of_ne hr] using hN r c
+    · simpa [e, Matrix.updateRow_ne hr] using hN r c
   have hdiffupd : ∀ r c,
       ParabolicC0AlphaOn α
         (fun z => ((M z).updateRow j e) r c - ((N z).updateRow j e) r c) s := by
     intro r c
     by_cases hr : r = j
     · subst r
-      simpa [e, Matrix.updateRow] using
+      simpa [e, Matrix.updateRow_apply] using
         (ParabolicC0AlphaOn.const (α := α) (s := s) (0 : A))
-    · simpa [e, Matrix.updateRow, Function.update_of_ne hr] using hdiff r c
+    · simpa [e, Matrix.updateRow_ne hr] using hdiff r c
   have hdet :
       ParabolicC0AlphaOn α
         (fun z => ((M z).updateRow j e).det - ((N z).updateRow j e).det) s :=
@@ -2683,6 +2687,8 @@ theorem matrix_inv_entry_norm_sub_le {n 𝕜 : Type*} [Fintype n] [DecidableEq n
     have hdist := (lipschitzOnWith_inv_of_norm_ge (𝕜 := 𝕜) hδpos).dist_le_mul
       M.det (show M.det ∈ {a : 𝕜 | δ ≤ ‖a‖} from hdetM)
       N.det (show N.det ∈ {a : 𝕜 | δ ≤ ‖a‖} from hdetN)
+    change dist ((M.det)⁻¹) ((N.det)⁻¹) ≤
+      (δ⁻¹ * δ⁻¹ : ℝ) * dist M.det N.det at hdist
     simpa [dist_eq_norm, mul_assoc] using hdist
   have hdet_inv_Rhs :
       ‖(M.det)⁻¹ - (N.det)⁻¹‖ ≤ (δ⁻¹ * δ⁻¹) * detRhs :=
@@ -2789,6 +2795,8 @@ theorem matrix_inv_entry_norm_sub_le_const_mul {n 𝕜 : Type*} [Fintype n] [Dec
     have hdist := (lipschitzOnWith_inv_of_norm_ge (𝕜 := 𝕜) hδpos).dist_le_mul
       M.det (show M.det ∈ {a : 𝕜 | δ ≤ ‖a‖} from hdetM)
       N.det (show N.det ∈ {a : 𝕜 | δ ≤ ‖a‖} from hdetN)
+    change dist ((M.det)⁻¹) ((N.det)⁻¹) ≤
+      (δ⁻¹ * δ⁻¹ : ℝ) * dist M.det N.det at hdist
     simpa [dist_eq_norm, mul_assoc] using hdist
   have hdet_inv_const :
       ‖(M.det)⁻¹ - (N.det)⁻¹‖ ≤
@@ -3042,10 +3050,12 @@ theorem matrix_inv_entry_with {n 𝕜 : Type*} [Fintype n] [DecidableEq n] [Norm
       α (fun z => (M z).adjugate i j) s :=
     matrix_adjugate_entry_with (M := M) hH hM i j
   have hprod := hdet_inv.mul hadj (inv_nonneg.mpr hδpos.le)
-  convert hprod using 1
-  funext z
-  rw [Matrix.inv_def, Ring.inverse_eq_inv]
-  rfl
+  convert hprod using 1 <;>
+    first
+    | rfl
+    | (funext z
+       rw [Matrix.inv_def, Ring.inverse_eq_inv]
+       rfl)
 
 /-- One inverse-matrix entry has existential difference-based parabolic `C^{0,α}` control when
 the two matrices have entrywise controls and a common determinant lower bound. -/
@@ -4085,7 +4095,7 @@ theorem matrix_mulVec_entry {m n A : Type*} [Fintype n] [NormedRing A]
       (S := (Finset.univ : Finset n))
       (u := fun j z => M z i j) (v := fun j z => v z j)
       (fun j _hj => hM i j) (fun j _hj => hv j)
-  simpa [Matrix.mulVec] using hsum
+  simpa only [Matrix.mulVec_apply_eq_sum] using hsum
 
 /-- Matrix-vector products preserve parabolic `C^{0,α}` control from entrywise matrix control and
 componentwise vector control. -/
@@ -4137,7 +4147,8 @@ theorem matrix_mulVec_entry_with {m n A : Type*} [Fintype n] [NormedRing A]
       (matrixMulVecEntryHolderConst BM HM Bv Hv i)
       α (fun z => (M z).mulVec (v z) i) s := by
   classical
-  simpa [Matrix.mulVec, matrixMulVecEntryBoundConst, matrixMulVecEntryHolderConst] using
+  simpa [Matrix.mulVec_apply_eq_sum, matrixMulVecEntryBoundConst,
+    matrixMulVecEntryHolderConst] using
     (ParabolicC0AlphaWith.finset_sum_mul (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset n))
       (Bu := fun j => BM i j) (Hu := fun j => HM i j)
@@ -4226,7 +4237,8 @@ theorem matrix_mulVec_entry_sub_with {m n A : Type*} [Fintype n] [NormedRing A]
       (matrixMulVecEntrySubHolderConst BM HM Bv' Hv' BMd HMd Bvd Hvd i)
       α (fun z => (M z).mulVec (v z) i - (M' z).mulVec (v' z) i) s := by
   classical
-  simpa [Matrix.mulVec, matrixMulVecEntrySubBoundConst, matrixMulVecEntrySubHolderConst] using
+  simpa [Matrix.mulVec_apply_eq_sum, matrixMulVecEntrySubBoundConst,
+    matrixMulVecEntrySubHolderConst] using
     (ParabolicC0AlphaWith.finset_sum_mul_sub_sum_mul (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset n))
       (Bu := fun j => BM i j) (Hu := fun j => HM i j)
@@ -4281,7 +4293,7 @@ theorem matrix_vecMul_entry {m n A : Type*} [Fintype m] [NormedRing A]
       (S := (Finset.univ : Finset m))
       (u := fun i z => v z i) (v := fun i z => M z i j)
       (fun i _hi => hv i) (fun i _hi => hM i j)
-  simpa [Matrix.vecMul] using hsum
+  simpa only [Matrix.vecMul_apply_eq_sum] using hsum
 
 /-- Vector-matrix products preserve parabolic `C^{0,α}` control from componentwise vector control
 and entrywise matrix control. -/
@@ -4333,7 +4345,8 @@ theorem matrix_vecMul_entry_with {m n A : Type*} [Fintype m] [NormedRing A]
       (matrixVecMulEntryHolderConst Bv Hv BM HM j)
       α (fun z => Matrix.vecMul (v z) (M z) j) s := by
   classical
-  simpa [Matrix.vecMul, matrixVecMulEntryBoundConst, matrixVecMulEntryHolderConst] using
+  simpa [Matrix.vecMul_apply_eq_sum, matrixVecMulEntryBoundConst,
+    matrixVecMulEntryHolderConst] using
     (ParabolicC0AlphaWith.finset_sum_mul (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset m))
       (Bu := fun i => Bv i) (Hu := fun i => Hv i)
@@ -4422,7 +4435,8 @@ theorem matrix_vecMul_entry_sub_with {m n A : Type*} [Fintype m] [NormedRing A]
       (matrixVecMulEntrySubHolderConst Bv Hv BM' HM' Bvd Hvd BMd HMd j)
       α (fun z => Matrix.vecMul (v z) (M z) j - Matrix.vecMul (v' z) (M' z) j) s := by
   classical
-  simpa [Matrix.vecMul, matrixVecMulEntrySubBoundConst, matrixVecMulEntrySubHolderConst] using
+  simpa [Matrix.vecMul_apply_eq_sum, matrixVecMulEntrySubBoundConst,
+    matrixVecMulEntrySubHolderConst] using
     (ParabolicC0AlphaWith.finset_sum_mul_sub_sum_mul (X := X) (α := α) (s := s)
       (S := (Finset.univ : Finset m))
       (Bu := fun i => Bv i) (Hu := fun i => Hv i)
@@ -6177,7 +6191,7 @@ theorem matrix_inv_christoffel_entry {n 𝕜 : Type*} [Fintype n] [DecidableEq n
           (2 : 𝕜)⁻¹ *
             ((M z)⁻¹).mulVec (fun l : n => D z j k l + D z k j l - D z l j k) i) s :=
     (ParabolicC0AlphaOn.const (α := α) (s := s) ((2 : 𝕜)⁻¹)).mul hcontraction
-  simpa [Matrix.mulVec] using hhalf
+  simpa only [Matrix.mulVec_apply_eq_sum] using hhalf
 
 /-- The full finite Christoffel-symbol type array preserves parabolic `C^{0,α}` control from
 entrywise metric and derivative control, under a determinant lower bound. -/
@@ -7281,10 +7295,12 @@ theorem matrix_inv_christoffel_entry_sub_with_entrywise {n 𝕜 : Type*} [Fintyp
         (fun l _hl => matrixInvEntryBoundConst_nonneg (𝕜 := 𝕜) hδpos B i l)
         (fun l _hl => matrixInvEntrySubBoundConst_nonneg (𝕜 := 𝕜) hδpos hBd i l))
   have hhalf := hsum.smul ((2 : 𝕜)⁻¹)
-  convert hhalf using 1
-  · ext z
-    simp [invM, invN, comboD, comboE, smul_eq_mul]
-    ring
+  convert hhalf using 1 <;>
+    first
+    | rfl
+    | (funext z
+       simp [invM, invN, comboD, comboE, smul_eq_mul]
+       ring)
 
 /-- Finite inverse-Christoffel arrays have difference-based parabolic `C^{0,α}` control from
 entrywise metric and derivative-array difference controls. -/
@@ -8286,9 +8302,11 @@ theorem matrix_inv_two_index_contract_entry_sub_with_entrywise {n p q 𝕜 : Typ
           (∑ b : n, invM a b z * coeffT a b z) -
             ∑ b : n, invN a b z * coeffU a b z)
         hinner)
-  convert hsum using 1
-  · ext z
-    simp [invM, invN, coeffT, coeffU, Finset.sum_sub_distrib]
+  convert hsum using 1 <;>
+    first
+    | rfl
+    | (funext z
+       simp [invM, invN, coeffT, coeffU, Finset.sum_sub_distrib])
 
 /-- Finite inverse-principal contractions have difference-based parabolic `C^{0,α}` control from
 entrywise metric and coefficient-array difference controls. -/
@@ -8540,10 +8558,12 @@ theorem matrix_inv_two_index_contract_entry_norm_sub_le_const {n p q 𝕜 : Type
       have hTB_nonneg : 0 ≤ TB a b i j := (norm_nonneg _).trans (hU a b i j)
       have hcoeff_diff :
           ‖T a b i j - U a b i j‖ ≤ coeffDiffNorm := by
-        simpa [coeffDiffNorm] using
-          Matrix.norm_entry_le_entrywise_sup_norm
-            (((fun a b => T a b i j) : Matrix n n 𝕜) -
-              ((fun a b => U a b i j) : Matrix n n 𝕜)) (i := a) (j := b)
+        change ‖T a b i j - U a b i j‖ ≤
+          ‖(fun a b => T a b i j) - fun a b => U a b i j‖
+        simpa only [Pi.sub_apply] using
+          (norm_le_pi_norm
+            (((fun a b => T a b i j) - fun a b => U a b i j) a) b).trans
+            (norm_le_pi_norm ((fun a b => T a b i j) - fun a b => U a b i j) a)
       have hinv_diff :
           ‖(M⁻¹ : Matrix n n 𝕜) a b - (N⁻¹ : Matrix n n 𝕜) a b‖ ≤
             matrixInvEntryMatrixNormLipschitzConst (𝕜 := 𝕜) δ C a b * ‖M - N‖ :=
@@ -11031,7 +11051,11 @@ theorem ricciDeTurck_schematic_from_christoffel_entry_sub_with_entrywise {n 𝕜
     christoffel_quadratic_ricci_entry_sub_with hΓB hΓdB hΓ hΛ hΓdiff i j
   have hsum := hprincipal.add hquadratic
   convert hsum using 1
-  · ext z
+  · unfold ricciDeTurckSchematicFromChristoffelEntrySubBoundConst
+    abel
+  · unfold ricciDeTurckSchematicFromChristoffelEntrySubHolderConst
+    abel
+  · funext z
     abel
 
 /-- The supplied-Christoffel schematic Ricci-DeTurck RHS has matrix-valued difference-based
@@ -11147,10 +11171,47 @@ theorem ricciDeTurck_schematic_from_christoffel_sub_entrywise {n 𝕜 : Type*}
     hM hN hMdiff hKc hHdiff hδpos hdetM hdetN
   have hquad := christoffel_quadratic_ricci_sub (Γ := Γ) (Λ := Λ) hΓ hΛ hΓdiff
   have hsum := hprincipal.add hquad
-  convert hsum using 1
-  ext z i j
-  simp
-  ring
+  change @ParabolicC0AlphaOn X (n → n → 𝕜) _ Pi.normedAddCommGroup α _ s
+  rcases hsum with ⟨B, hB, C, hC, hraw⟩
+  let P : ℝ × X → n → n → 𝕜 := fun z i j =>
+    ∑ a : n, ∑ b : n, ((M z)⁻¹ : Matrix n n 𝕜) a b * H z a b i j
+  let Q : ℝ × X → n → n → 𝕜 := fun z i j =>
+    (∑ a : n, ∑ b : n, Γ z a i j * Γ z b a b) -
+      (∑ a : n, ∑ b : n, Γ z a i b * Γ z b a j)
+  let R : ℝ × X → n → n → 𝕜 := fun z i j =>
+    ∑ a : n, ∑ b : n, ((N z)⁻¹ : Matrix n n 𝕜) a b * Kc z a b i j
+  let S : ℝ × X → n → n → 𝕜 := fun z i j =>
+    (∑ a : n, ∑ b : n, Λ z a i j * Λ z b a b) -
+      (∑ a : n, ∑ b : n, Λ z a i b * Λ z b a j)
+  change @ParabolicC0AlphaWith X (n → n → 𝕜) _ Pi.normedAddCommGroup B C α
+    (fun z => (P z - R z) + (Q z - S z)) s at hraw
+  refine ⟨B, hB, C, hC, ?_⟩
+  change @ParabolicC0AlphaWith X (n → n → 𝕜) _ Pi.normedAddCommGroup B C α
+    (fun z => (show Matrix n n 𝕜 from fun i j => P z i j + Q z i j) -
+      (show Matrix n n 𝕜 from fun i j => R z i j + S z i j)) s
+  have hfun : ∀ z : ℝ × X,
+      (show Matrix n n 𝕜 from fun i j => P z i j + Q z i j) -
+        (show Matrix n n 𝕜 from fun i j => R z i j + S z i j) =
+      (P z - R z) + (Q z - S z) := by
+    intro z
+    ext i j
+    change (P z i j + Q z i j) - (R z i j + S z i j) =
+      (P z i j - R z i j) + (Q z i j - S z i j)
+    abel
+  constructor
+  · intro z hz
+    change ‖(show Matrix n n 𝕜 from fun i j => P z i j + Q z i j) -
+      (show Matrix n n 𝕜 from fun i j => R z i j + S z i j)‖ ≤ B
+    rw [hfun z]
+    exact hraw.bounded hz
+  · intro p hp q hq
+    change ‖((show Matrix n n 𝕜 from fun i j => P p i j + Q p i j) -
+      (show Matrix n n 𝕜 from fun i j => R p i j + S p i j)) -
+      ((show Matrix n n 𝕜 from fun i j => P q i j + Q q i j) -
+        (show Matrix n n 𝕜 from fun i j => R q i j + S q i j))‖ ≤
+      C * parabolicDistance p q ^ α
+    rw [hfun p, hfun q]
+    exact hraw.holder hp hq
 
 /-- The finite matrix-valued schematic Ricci-DeTurck coordinate RHS.  This definition names the
 algebraic expression used by the pointwise and time-space Lipschitz estimates. -/
@@ -11295,13 +11356,27 @@ theorem ricciDeTurckSchematicMatrix_sub_with_entrywise {n 𝕜 : Type*} [Fintype
       matrix_inv_christoffel_entry_sub_with_entrywise
         (M := M) (N := N) (D := D) (E := E)
         hMH hMBd hMHd hM hN hMdiff hE hDdiff hδpos hdetM hdetN a b c
-  simpa [ricciDeTurckSchematicMatrix, ricciDeTurckSchematicEntrywiseSubBoundConst,
-    ricciDeTurckSchematicEntrywiseSubHolderConst, Γ, Λ, ΓB, ΓH, ΓdB, ΓdH] using
-    ricciDeTurck_schematic_from_christoffel_sub_with_entrywise
+  have hraw := ricciDeTurck_schematic_from_christoffel_sub_with_entrywise
       (M := M) (N := N) (H := Hc) (K := Kc) (Γ := Γ) (Λ := Λ)
       hMH hMBd hMHd hHB hHH hHBd hHHd
       hΓB_nonneg hΓH_nonneg hΓB_nonneg hΓH_nonneg hΓdB_nonneg hΓdH_nonneg
       hM hN hMdiff hKc hHdiff hΓ hΛ hΓdiff hδpos hdetM hdetN
+  change @ParabolicC0AlphaWith X (n → n → 𝕜) _ Pi.normedAddCommGroup _ _ _ _ _
+  constructor
+  · intro z hz
+    unfold ricciDeTurckSchematicMatrix
+    have hbound := hraw.bounded hz
+    simp only [Matrix.norm_def, Pi.norm_def, Pi.nnnorm_def, Matrix.sub_apply, Pi.sub_apply,
+      Γ, Λ, ricciDeTurckSchematicEntrywiseSubBoundConst,
+      ricciDeTurckSchematicEntrywiseSubHolderConst, ΓB, ΓH, ΓdB, ΓdH] at hbound ⊢
+    exact hbound
+  · intro p hp q hq
+    unfold ricciDeTurckSchematicMatrix
+    have hholder := hraw.holder hp hq
+    simp only [Matrix.norm_def, Pi.norm_def, Pi.nnnorm_def, Matrix.sub_apply, Pi.sub_apply,
+      Γ, Λ, ricciDeTurckSchematicEntrywiseSubBoundConst,
+      ricciDeTurckSchematicEntrywiseSubHolderConst, ΓB, ΓH, ΓdB, ΓdH] at hholder ⊢
+    exact hholder
 
 end ParabolicC0AlphaOn
 
@@ -11377,15 +11452,22 @@ theorem ricciDeTurck_schematic_of_entries {n 𝕜 : Type*} [Fintype n] [Decidabl
           (ParabolicC0AlphaOn.christoffelQuadraticRicciEntryHolderConst_nonneg
             hΓB hΓH i j))
     (by
-      simpa [ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix] using
-        (ParabolicC0AlphaOn.ricciDeTurck_schematic_with
-          (M := M) (D := D) (H := H) (MB := R) (MH := R)
-          (DB := RD) (DH := RD) (HB := RH) (HH := RH)
-          hR hRD hRD hRH hRH
-          (fun a b => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM a b))
-          (fun a b c => ParabolicC0AlphaNormLe.c0AlphaWith_self (hD a b c))
-          (fun a b i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hH a b i j))
-          hδpos hdet))
+      have hraw := ParabolicC0AlphaOn.ricciDeTurck_schematic_with
+        (M := M) (D := D) (H := H) (MB := R) (MH := R)
+        (DB := RD) (DH := RD) (HB := RH) (HH := RH)
+        hR hRD hRD hRH hRH
+        (fun a b => ParabolicC0AlphaNormLe.c0AlphaWith_self (hM a b))
+        (fun a b c => ParabolicC0AlphaNormLe.c0AlphaWith_self (hD a b c))
+        (fun a b i j => ParabolicC0AlphaNormLe.c0AlphaWith_self (hH a b i j))
+        hδpos hdet
+      change @ParabolicC0AlphaWith X (n → n → 𝕜) _ Pi.normedAddCommGroup _ _ _ _ _
+      constructor
+      · intro z hz
+        unfold ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        simpa only using hraw.1 hz
+      · intro p hp q hq
+        unfold ParabolicC0AlphaOn.ricciDeTurckSchematicMatrix
+        simpa only using hraw.2 hp hq)
 
 /-- Entrywise primitive controls, primitive difference controls, and a common determinant lower
 bound package schematic Ricci-DeTurck RHS differences with the corresponding single-radius
@@ -11600,7 +11682,8 @@ theorem ricciDeTurckSchematicMatrix_sub_entrywise {n 𝕜 : Type*} [Fintype n]
     simpa [Γ, Λ] using
       matrix_inv_christoffel_entry_sub_entrywise (M := M) (N := N) (D := D) (E := E)
         hM hN hMdiff hE hDdiff hδpos hdetM hdetN a b c
-  simpa [ricciDeTurckSchematicMatrix, Γ, Λ] using
+  unfold ricciDeTurckSchematicMatrix
+  simpa [Matrix.sub_apply, Γ, Λ] using
     ricciDeTurck_schematic_from_christoffel_sub_entrywise
       (M := M) (N := N) (H := Hc) (Kc := Kc) (Γ := Γ) (Λ := Λ)
       hM hN hMdiff hKc hHdiff hΓ hΛ hΓdiff hδpos hdetM hdetN
@@ -12451,10 +12534,10 @@ theorem ricciDeTurckSchematicMatrix_norm_sub_le_const {n 𝕜 : Type*} [Fintype 
             (fun a b c => matrixInvChristoffelEntryBoundConst (𝕜 := 𝕜) δ C DB a b c)
             i j *
             matrixInvChristoffelArrayDiffBoundConst (𝕜 := 𝕜) δ C DB ηD ‖M - N‖) := by
-  simpa [ricciDeTurckSchematicMatrix] using
-    ricciDeTurck_schematic_norm_sub_le_const
-      (δ := δ) (C := C) (DB := DB) (HB := HB) (ηD := ηD)
-      M N D E H K hM hN hD hE hK hηD hDdiff hδpos hdetM hdetN
+  convert ricciDeTurck_schematic_norm_sub_le_const
+    (δ := δ) (C := C) (DB := DB) (HB := HB) (ηD := ηD)
+    M N D E H K hM hN hD hE hK hηD hDdiff hδpos hdetM hdetN using 1 <;>
+    congr 1
 
 /-- Function-level bounded-difference estimate for the finite schematic Ricci-DeTurck RHS.
 It packages the pointwise algebraic Lipschitz estimate into the parabolic sup-norm predicate. -/
@@ -12709,6 +12792,9 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le
         (fun u : Y => ricciDeTurckSchematicMatrix (M u z) (D u z) (H u z))
         stateSet := by
   intro z hz
+  let L : NNReal :=
+    ⟨ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH,
+      ricciDeTurckSchematicDiffBoundConst_nonneg (𝕜 := 𝕜) hδpos hDB hHB hKM hKD hKH⟩
   refine LipschitzOnWith.of_dist_le_mul ?_
   intro u hu v hv
   have hbounded :
@@ -12724,7 +12810,12 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le
       (M := M u) (N := M v) (D := D u) (E := D v) (H := H u) (K := H v)
       hDB hHB (hM hu) (hM hv) (hD hu) (hD hv) (hH hv) hKD dist_nonneg
       (hMdiff hu hv) (hDdiff hu hv) (hHdiff hu hv) hδpos (hdet hu) (hdet hv)
-  simpa [dist_eq_norm] using hbounded hz
+  change dist (ricciDeTurckSchematicMatrix (M u z) (D u z) (H u z))
+      (ricciDeTurckSchematicMatrix (M v z) (D v z) (H v z)) ≤
+    (↑L : ℝ) * dist u v
+  have hL : (↑L : ℝ) =
+      ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH := rfl
+  simpa [hL, dist_eq_norm] using hbounded hz
 
 /-- State-space Lipschitz bridge for the finite schematic Ricci-DeTurck RHS with coarser
 primitive Lipschitz constants.  The primitive estimates may be proved with sharper constants
@@ -12768,6 +12859,10 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le_of_le
         (fun u : Y => ricciDeTurckSchematicMatrix (M u z) (D u z) (H u z))
         stateSet := by
   intro z hz
+  let L : NNReal :=
+    ⟨ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH,
+      ricciDeTurckSchematicDiffBoundConst_nonneg
+        (𝕜 := 𝕜) hδpos hDB hHB hKM_nonneg hKD_nonneg hKH_nonneg⟩
   refine LipschitzOnWith.of_dist_le_mul ?_
   intro u hu v hv
   have hbounded :
@@ -12785,7 +12880,12 @@ theorem ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le_of_le
       hDB hHB hKM hKD hKH (hM hu) (hM hv) (hD hu) (hD hv) (hH hv)
       hKD0 dist_nonneg (hMdiff hu hv) (hDdiff hu hv) (hHdiff hu hv)
       hδpos (hdet hu) (hdet hv)
-  simpa [dist_eq_norm] using hbounded hz
+  change dist (ricciDeTurckSchematicMatrix (M u z) (D u z) (H u z))
+      (ricciDeTurckSchematicMatrix (M v z) (D v z) (H v z)) ≤
+    (↑L : ℝ) * dist u v
+  have hL : (↑L : ℝ) =
+      ricciDeTurckSchematicDiffBoundConst (𝕜 := 𝕜) δ C DB HB KM KD KH := rfl
+  simpa [hL, dist_eq_norm] using hbounded hz
 
 /-- Finite-family version of
 `ricciDeTurckSchematicMatrix_lipschitzOnWith_of_primitive_dist_le`: one uniform determinant lower
@@ -14734,7 +14834,14 @@ theorem ricciDeTurckSchematicMatrix_sub_with {n 𝕜 : Type*} [Fintype n]
   have hNEK := ricciDeTurck_schematic_with
     (M := N) (D := E) (H := Kc) hMH hDB hDH hHB hHH hN hE hKc hδpos hdetN
   exact ⟨hbounded, by
-    simpa [ricciDeTurckSchematicDiffHolderConst] using hMDH.holder.sub hNEK.holder⟩
+    have hraw := hMDH.holder.sub hNEK.holder
+    change @ParabolicHolderWith X (n → n → 𝕜) _ Pi.normedAddCommGroup _ _ _ _
+    intro p hp q hq
+    unfold ricciDeTurckSchematicMatrix
+    have hholder := hraw hp hq
+    simp only [Matrix.norm_def, Pi.norm_def, Pi.nnnorm_def, Matrix.sub_apply, Pi.sub_apply,
+      ricciDeTurckSchematicDiffHolderConst] at hholder ⊢
+    exact hholder⟩
 
 /-- Compact-domain version of `ricciDeTurckSchematicMatrix_sub_with`: pointwise nonvanishing of
 both metric determinants supplies one common determinant lower bound. -/

@@ -19,6 +19,9 @@ project:
     and a unique atlas coefficient witness whose geometric readout is
     symmetric, has the correct initial trace, solves the tensor heat equation,
     and obeys a global finite-atlas C^{2+alpha,1+alpha/2} estimate.
+    Any two represented geometric readouts with the same global initial tensor
+    and source also agree when both satisfy the displayed trace and heat
+    equation, without a matching-chartwise-trace premise.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -79,7 +82,7 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
-  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/d6ef7f253bb95fa44d1fe61c9b1a52e061ca0951/curvature"
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/13fa15d6a8352ed08bf71b3533b1c2e922c21388/curvature"
     relationship: "builds-on"
     note: >-
       Immutable same-repository source subproject reused through an exact
@@ -90,11 +93,13 @@ related_formalizations:
       All vendored implementation sources and contributor notices are checked
       byte-for-byte against this commit. The selected implementation theorem is
       curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.
-      The curvature tree at this
-      commit is preserved byte-for-byte; this new entry contributes a focused
-      Mathlib-only Challenge, matching Solution bridge, Comparator identity and
-      Palomar metadata, rather than claiming the inherited tensor-heat
-      development as new work.
+      The curvature tree at this commit is preserved byte-for-byte. The
+      inherited code supplies finite-atlas heat estimates, reconstruction,
+      tensor energy continuity, and represented zero-data uniqueness. This
+      focused entry selects an unprojected reconstructed tensor theorem with
+      symmetry derived from geometric uniqueness, plus a Mathlib-only
+      Challenge and matching Solution bridge. It does not claim those
+      inherited proofs as new formal code.
   - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d"
     relationship: "builds-on"
     note: >-
@@ -121,9 +126,11 @@ status:
     coefficient witness in the constructed classical class, fiberwise
     symmetry, initial trace, the componentwise inhomogeneous tensor heat
     equation, and an estimate of solution norm by initial size plus source
-    norm. It does not prove that every bare intrinsic tensor section admits the
-    constructed atlas representation, uniqueness outside the represented
-    coefficient class, a prescribed arbitrary final time, nonlinear
+    norm. It also proves equality of any two represented geometric solutions
+    with the same global data under the displayed trace and PDE. It does not
+    prove that every bare intrinsic tensor section admits the constructed
+    atlas representation, uniqueness outside the represented class, a
+    prescribed arbitrary final time, nonlinear
     Ricci-DeTurck well-posedness, or mathematical novelty.
   sorry_count: 0
   sorry_in_definitions: 0
@@ -135,9 +142,11 @@ status:
       axioms: ["propext", "Classical.choice", "Quot.sound"]
       note: >-
         Comparator-selected Mathlib-facing theorem for short-time existence,
-        coefficient-class uniqueness, symmetry, initial trace, the genuine
-        connection-rough-Laplacian equation and the global finite-atlas
-        Schauder estimate. Unlike the historical rejected statement, this
+        coefficient-class uniqueness, symmetry derived from geometric
+        uniqueness, initial trace, the genuine connection-rough-Laplacian
+        equation, represented geometric uniqueness for equal global data,
+        and the global finite-atlas Schauder estimate. Unlike the historical
+        rejected statement, this
         selected proposition itself constrains the atlas reconstruction of
         data, solution and time derivative, coefficient representations,
         derivative fields, Holder bounds and norm control enough to exclude
@@ -146,7 +155,7 @@ status:
 automation:
   methods:
     - method: "agent"
-      models: ["OpenAI GPT-5"]
+      models: ["OpenAI GPT-5", "OpenAI GPT-6"]
       framework: "Codex with Lean 4.33.0 and pinned Mathlib"
       tool_setup: >-
         AI-assisted theorem design, proof engineering, literature and registry
@@ -156,7 +165,7 @@ automation:
       cost:
         wall_time: "not tracked"
         spend_usd: "subscription-based"
-        hardware: "local Apple silicon machine"
+        hardware: "local Apple silicon and Windows machines; hosted Linux runners"
       prompting_notes: >-
         The maintainer first requested the geometric tensor-heat theorem and
         subsequently requested preparation of a distinct new Palomar entry.
@@ -181,9 +190,11 @@ fidelity:
   divergences: >-
     The classical vector-bundle theorem is represented through explicitly
     constructed finite-atlas coefficient spaces. Initial data and sources are
-    quantified through those representations, and uniqueness is for the
+    quantified through those representations. Uniqueness covers both the
     higher-coefficient witness satisfying the constructed classical-solution
-    predicate. The Challenge now exposes exact atlas reconstruction of data,
+    predicate and represented geometric readouts with the same global trace
+    and source that solve the equation. The Challenge exposes exact atlas
+    reconstruction of data,
     solution and time derivative, active
     spanning frames, nontrivial injective coefficient readouts, derivative
     identities, Holder bounds, geometric readouts, symmetry, the initial trace
@@ -200,14 +211,14 @@ review:
   status: "self-assessed"
   reviewers: []
   notes: >-
-    Mathematical repair is required before intake. The selected readout is
-    symmetrized by construction, and coefficient uniqueness for fixed local
-    traces has not been extended to geometric uniqueness for the ordinary
-    reconstructed field. Data coverage also remains to be established. The
-    historical candidate's editorial rejection is acknowledged rather than
-    treated as fixed by metadata or mechanical checks. No independent human
-    line-by-line proof review, Palomar editorial acceptance, fresh intake or
-    registration is claimed.
+    The selected readout is the ordinary atlas field. Represented geometric
+    zero-data uniqueness now proves its symmetry and equal-global-data
+    uniqueness, independently of matching chartwise traces. Coverage of every
+    intrinsic Holder section remains unproved, and exact-commit renderer and
+    mechanical gates plus editorial assessment remain pending. The historical
+    candidate's rejection is not treated as fixed by metadata or mechanical
+    checks. No independent human line-by-line proof review, Palomar editorial
+    acceptance, fresh intake or registration is claimed.
 
 alignment:
   namespace: "SymmetricTensorHeatEntry Challenge/Solution surface; RicciFlow.AnalyticPDE implementation"

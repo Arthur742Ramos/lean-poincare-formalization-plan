@@ -40,6 +40,16 @@ def finiteInitialTrace (hT : t₀ < T) (hα : 0 < α)
     BoundedContinuousFunction X E :=
   finiteClosedTimeSlice hT hα q ⟨t₀, le_rfl, hT.le⟩
 
+/-- Evaluation of the canonical global extension at the initial face is
+exactly the canonical finite-cylinder trace. -/
+theorem finiteSourceExtensionFun_initial
+    (hT : t₀ < T) (hα : 0 < α)
+    (q : ParabolicC0AlphaBanach X E α
+      (parabolicFiniteCylinder X t₀ T)) (x : X) :
+    finiteSourceExtensionFun hT hα q (t₀, x) =
+      finiteInitialTrace hT hα q x := by
+  simp [finiteSourceExtensionFun, finiteInitialTrace, Set.projIcc_left]
+
 @[simp]
 theorem finiteInitialTrace_zero (hT : t₀ < T) (hα : 0 < α) :
     finiteInitialTrace (X := X) (E := E) hT hα
@@ -147,6 +157,29 @@ namespace FiniteParabolicC2AlphaBanach
 
 variable {t₀ T α : ℝ}
 
+/-- The canonical jointly continuous closed-time value of a finite-cylinder
+higher jet, clamped outside its time interval. -/
+def completedValue (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α) : ℝ × X → E :=
+  ParabolicC0AlphaBanach.finiteSourceExtensionFun hT hα
+    (valueComponentL u)
+
+theorem continuous_completedValue (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α) :
+    Continuous (completedValue hT hα u) :=
+  ParabolicC0AlphaBanach.continuous_finiteSourceExtensionFun hT hα _
+
+theorem completedValue_of_mem (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    (z : ℝ × X) (hz : z ∈ parabolicFiniteCylinder X t₀ T) :
+    completedValue hT hα u z = value u z := by
+  change ParabolicC0AlphaBanach.evalCLM z (Set.mem_univ z)
+      (ParabolicC0AlphaBanach.finiteSourceExtension hT hα
+        (valueComponentL u)) = value u z
+  rw [ParabolicC0AlphaBanach.eval_finiteSourceExtension_of_mem hT hα
+    (valueComponentL u) z hz]
+  exact evalCLM_valueComponentL u z hz
+
 /-- Initial trace of the value component of a genuine finite-cylinder
 `C^{2+α,1+α/2}` jet. -/
 def initialTraceL (hT : t₀ < T) (hα : 0 < α) :
@@ -161,6 +194,12 @@ theorem initialTraceL_apply (hT : t₀ < T) (hα : 0 < α)
       ParabolicC0AlphaBanach.finiteInitialTrace hT hα (valueComponentL u) :=
   rfl
 
+@[simp] theorem completedValue_initial (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α) (x : X) :
+    completedValue hT hα u (t₀, x) = (initialTraceL hT hα u) x :=
+  ParabolicC0AlphaBanach.finiteSourceExtensionFun_initial hT hα
+    (valueComponentL u) x
+
 theorem norm_initialTraceL_le (hT : t₀ < T) (hα : 0 < α) :
     ‖initialTraceL (X := X) (E := E) hT hα‖ ≤ 1 := by
   refine ContinuousLinearMap.opNorm_le_bound _ zero_le_one ?_
@@ -172,6 +211,38 @@ theorem norm_initialTraceL_le (hT : t₀ < T) (hα : 0 < α) :
       change ‖u.1.1‖ ≤ ‖u.1‖
       exact le_max_left _ _
     _ = 1 * ‖u‖ := by rw [one_mul]
+
+/-- The value component of a higher jet approaches its canonical initial trace
+uniformly in the spatial coordinate, with the parabolic Hölder modulus. -/
+theorem dist_valueTimeSlice_initialTrace_le
+    (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    (t : ParabolicC0AlphaBanach.positiveTimeInIcc t₀ T) :
+    dist (ParabolicC0AlphaBanach.finiteTimeSlice hα (valueComponentL u) t)
+      (initialTraceL hT hα u) ≤
+        ‖u‖ * |(t : ℝ) - t₀| ^ (α / 2) := by
+  rw [initialTraceL_apply]
+  exact (ParabolicC0AlphaBanach.dist_finiteTimeSlice_initial_le
+    hT hα (valueComponentL u) t).trans
+    (mul_le_mul_of_nonneg_right
+      (by
+        change ‖u.1.1‖ ≤ ‖u.1‖
+        exact le_max_left _ _)
+      (Real.rpow_nonneg (abs_nonneg _) _))
+
+/-- Pointwise form of the uniform initial-trace estimate for higher jets. -/
+theorem norm_value_sub_initialTrace_le
+    (hT : t₀ < T) (hα : 0 < α)
+    (u : FiniteParabolicC2AlphaBanach X E t₀ T α)
+    (t : ParabolicC0AlphaBanach.positiveTimeInIcc t₀ T) (x : X) :
+    ‖value u ((t : ℝ), x) - (initialTraceL hT hα u) x‖ ≤
+      ‖u‖ * |(t : ℝ) - t₀| ^ (α / 2) := by
+  have hpoint := BoundedContinuousFunction.abs_sub_coe_le_dist (x := x)
+    (ParabolicC0AlphaBanach.finiteTimeSlice hα (valueComponentL u) t)
+    (initialTraceL hT hα u)
+  rw [ParabolicC0AlphaBanach.finiteTimeSlice_apply,
+    evalCLM_valueComponentL] at hpoint
+  exact hpoint.trans (dist_valueTimeSlice_initialTrace_le hT hα u t)
 
 /-- Restricting a finite-cylinder higher function to an earlier terminal time
 does not change its canonical initial trace. -/

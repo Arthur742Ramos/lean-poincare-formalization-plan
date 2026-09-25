@@ -1,4 +1,5 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasSymmetricWellPosedness
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasGeometricUniqueness
 
 /-! Transposition of the unprojected geometric heat operator.
 
@@ -649,6 +650,22 @@ def HasRepresentedZeroDataUniqueness
     GeometricAtlasCauchySolution cov A 0 0 w →
     ∀ t, t ∈ Ioc t₀ A.commonTerminalTime →
       (atlasFieldOfHigher cov A w).toFun t = 0
+
+/-- The intrinsic tensor energy maximum principle proves represented
+zero-data uniqueness from the global geometric Cauchy condition. -/
+theorem hasRepresentedZeroDataUniqueness
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) 1]
+    {b : Module.Basis (Fin d) ℝ E}
+    (A : FiniteTensorHeatParametrixAtlas cov b t₀ T α)
+    (hmetric : cov.IsMetricCompatibleTangent) :
+    HasRepresentedZeroDataUniqueness cov A := by
+  intro w hw t ht
+  have htrace : atlasInitialTrace cov A w = 0 :=
+    geometricAtlasCauchySolution_initialTensor cov A 0 0 w hw
+  exact A.atlasFieldOfHigher_zero_of_zeroDataHeat cov w hmetric htrace hw.2 t ht
 
 /-- Zero-data uniqueness in the represented class implies uniqueness for
 arbitrary represented solutions with equal global Cauchy data. -/

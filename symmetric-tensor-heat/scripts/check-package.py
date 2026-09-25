@@ -26,6 +26,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = "https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json"
 MATHLIB = "db584cd6d46c92f209a44c0f1c829460d327499d"
+CURVATURE_BASE = "13fa15d6a8352ed08bf71b3533b1c2e922c21388"
 THEOREM = "SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed"
 DEFINITIONS = [
     "SymmetricTensorHeatEntry.IsInducedTwoTensorConnection",
@@ -240,7 +241,7 @@ def main() -> None:
         "Arthur Freitas Ramos", "David Barros Hulak", "Ruy J. G. B. de Queiroz"
     ], "human authorship metadata changed")
     related = {entry["id"] for entry in metadata["related_formalizations"]}
-    require(any("d6ef7f253bb95fa44d1fe61c9b1a52e061ca0951/curvature" in item
+    require(any(f"{CURVATURE_BASE}/curvature" in item
                 for item in related), "same-repository provenance missing")
     require(any(MATHLIB in item for item in related), "Mathlib provenance missing")
     result = metadata["status"]["main_results"]

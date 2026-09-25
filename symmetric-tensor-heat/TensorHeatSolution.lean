@@ -5,6 +5,7 @@ import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasSymmetricWellPosedness
+import TensorHeatGeometricSymmetry
 
 /-!
 # Short-time heat well-posedness for symmetric covariant two-tensors
@@ -403,12 +404,10 @@ def completeStatement : Prop :=
         (∀ f t x, sourceTensor f t x = ∑ᶠ i, sourceLocalTensor f i t x) ∧
         (∀ q t, t ∈ Ioc t₀ S → ∀ x a b,
           solutionTensor q t x a b =
-            ((∑ᶠ i, solutionLocalTensor q i t x a b) +
-              ∑ᶠ i, solutionLocalTensor q i t x b a) / 2) ∧
+            ∑ᶠ i, solutionLocalTensor q i t x a b) ∧
         (∀ q t, t ∈ Ioo t₀ S → ∀ x a b,
           solutionTimeDerivative q t x a b =
-            ((∑ᶠ i, solutionLocalTimeDerivative q i t x a b) +
-              ∑ᶠ i, solutionLocalTimeDerivative q i t x b a) / 2) ∧
+            ∑ᶠ i, solutionLocalTimeDerivative q i t x a b) ∧
         (∀ D i x, atlasWeight i x = 0 → initialLocalTensor D i x = 0) ∧
         (∀ f i t x, atlasWeight i x = 0 → sourceLocalTensor f i t x = 0) ∧
         (∀ q i t x, atlasWeight i x = 0 → solutionLocalTensor q i t x = 0) ∧
@@ -469,6 +468,12 @@ def completeStatement : Prop :=
             (∀ t, t ∈ Ioc t₀ S →
               symmetric (solutionTensor q t)) ∧
             solves S (solutionTensor q) (solutionTimeDerivative q) (sourceTensor f)) ∧
+        (∀ D f q r,
+          initialTrace S (solutionTensor q) (initialTensor D) →
+          initialTrace S (solutionTensor r) (initialTensor D) →
+          solves S (solutionTensor q) (solutionTimeDerivative q) (sourceTensor f) →
+          solves S (solutionTensor r) (solutionTimeDerivative r) (sourceTensor f) →
+          ∀ t, t ∈ Ioc t₀ S → solutionTensor q t = solutionTensor r t) ∧
         (∀ D f q, coordinateClass D f q →
           (∀ i, HasParabolicC2AlphaNormLe (X := E)
             (V := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ)
@@ -782,10 +787,10 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
     fun f t => A.physicalAtlasSourceSlice cov f t
   let solutionTensor : Solution → ℝ → ∀ x : M,
       TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
-    fun q => (A.symmetrizedAtlasField cov q).toFun
+    fun q => (A.atlasFieldOfHigher cov q).toFun
   let solutionTimeDerivative : Solution → ℝ → ∀ x : M,
       TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
-    fun q => (A.symmetrizedAtlasField cov q).timeDerivative
+    fun q => (A.atlasFieldOfHigher cov q).timeDerivative
   let initialLocalTensor : Initial → Index → ∀ x : M,
       TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
     fun D i => RicciFlow.AnalyticPDE.cutoffLocalTensorOfMatrix (I := I)
@@ -865,7 +870,7 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
   refine ⟨⟨fun _ => zeroSpatialData⟩, ⟨0⟩, ⟨0⟩,
     strongAtlasSchauderConstant_nonneg cov Hlift, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
     ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
-    ?_, ?_, ?_, ?_, ?_, ?_⟩
+    ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · -- The displayed coordinates and weights retain their geometric origin.
     have hsub : ∀ i : Index, tsupport (atlasWeight i) ⊆
         (extChartAt I (i : M)).source := by
@@ -921,33 +926,23 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
     dsimp [sourceTensor, sourceLocalTensor]
     unfold RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.physicalAtlasSourceSlice
     rw [finsum_eq_sum_of_fintype]
-  · -- The geometric solution is the symmetrized sum of its local jets.
+  · -- The geometric solution is the ordinary sum of its local jets.
     intro q t ht x a b'
-    change (A.symmetrizedAtlasField cov q).toFun t x a b' = _
-    rw [A.symmetrizedAtlasField_toFun cov q t]
-    simp only [Pi.smul_apply, Pi.add_apply, _root_.smul_apply, add_apply,
-      smul_eq_mul]
-    rw [A.atlasFieldOfHigher_transpose_toFun cov q t ht x a b']
+    change (A.atlasFieldOfHigher cov q).toFun t x a b' = _
     rw [A.atlasFieldOfHigher_toFun cov q t x]
     dsimp [solutionLocalTensor]
-    rw [finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype]
+    rw [finsum_eq_sum_of_fintype]
     simp only [_root_.sum_apply]
-    rw [Finset.attach_eq_univ]
-    ring
+    rfl
   · -- Its displayed time derivative is reconstructed from the same local jets.
     intro q t ht x a b'
-    change (A.symmetrizedAtlasField cov q).timeDerivative t x a b' = _
-    rw [A.symmetrizedAtlasField_timeDerivative cov q t]
-    simp only [Pi.smul_apply, Pi.add_apply, _root_.smul_apply, add_apply,
-      smul_eq_mul]
-    rw [A.atlasFieldOfHigher_transpose_timeDerivative cov q t ht x a b']
+    change (A.atlasFieldOfHigher cov q).timeDerivative t x a b' = _
     unfold RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.atlasFieldOfHigher
     simp only [CovariantDerivative.FiniteClassicalTensorHeatField.finsetSum_timeDerivative,
       _root_.sum_apply]
     dsimp [solutionLocalTimeDerivative]
-    rw [finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype]
+    rw [finsum_eq_sum_of_fintype]
     rw [Finset.attach_eq_univ]
-    ring
   · -- A zero chart weight removes the corresponding initial tensor summand.
     intro D i x hweight
     dsimp [initialLocalTensor, atlasWeight] at hweight ⊢
@@ -1231,28 +1226,74 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
           cov f := by
       exact hf
     obtain ⟨q, hq, huniq⟩ := (hwell D f hD' hf').1
-    refine ⟨q, ⟨hq, ?_, hq.2.1, hq.2.2.1, ?_⟩, ?_⟩
-    · exact (A.symmetrizedAtlasField cov q).hasTimeDerivative
+    have hzero := A.hasRepresentedZeroDataUniqueness cov hLevi'.2
+    have hgeom :
+        RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.GeometricAtlasCauchySolution cov A
+          (RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.spatialInitialTensor cov A D)
+          (fun t => A.physicalAtlasSourceSlice cov f t) q :=
+      ⟨hq.1.2.1, hq.1.2.2⟩
+    refine ⟨q, ⟨hq, ?_, hq.1.2.1, ?_, ?_⟩, ?_⟩
+    · exact (A.atlasFieldOfHigher cov q).hasTimeDerivative
     · intro t ht x a c
-      have hP := hq.2.2.2 t ht x
+      exact A.geometricAtlasCauchySolution_symmetric_of_zeroData
+        cov hzero _ _ q hD (fun t ht x v w => hf t ht x w v)
+        hgeom t ht x a c
+    · intro t ht x a c
+      have hP := hq.1.2.2 t ht x
       have hPeval := congrArg
         (fun k : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ => k a c) hP
       have hlap := connectionLaplacianApply_eq_canonical cov cov₂ cov₃
         hcov₂ hcov₃
-        ((A.symmetrizedAtlasField cov q).slice cov t ⟨ht.1, ht.2.le⟩) x a c
+        ((A.atlasFieldOfHigher cov q).slice cov t ⟨ht.1, ht.2.le⟩) x a c
       have hlap' : connectionLaplacianApply cov₂ cov₃
-          ((A.symmetrizedAtlasField cov q).toFun t) x a c =
+          ((A.atlasFieldOfHigher cov q).toFun t) x a c =
           _root_.CovariantDerivative.connectionLaplacian cov
-            ((A.symmetrizedAtlasField cov q).toFun t) x a c := hlap
+            ((A.atlasFieldOfHigher cov q).toFun t) x a c := hlap
       change
-        (A.symmetrizedAtlasField cov q).timeDerivative t x a c -
+        (A.atlasFieldOfHigher cov q).timeDerivative t x a c -
           connectionLaplacianApply cov₂ cov₃
-            ((A.symmetrizedAtlasField cov q).toFun t) x a c =
+            ((A.atlasFieldOfHigher cov q).toFun t) x a c =
           A.physicalAtlasSourceSlice cov f t x a c
       rw [hlap']
       exact hPeval
     · intro q' hq'
       exact huniq q' hq'.1
+  · -- Any two represented geometric solutions with the same global data agree.
+    intro D f q r htraceq htracer hsolveq hsolver t ht
+    have hzero := A.hasRepresentedZeroDataUniqueness cov hLevi'.2
+    have hgeom (w : Solution)
+        (htrace : CovariantDerivative.FiniteClassicalTensorHeatField.HasInitialTrace
+          cov (A.atlasFieldOfHigher cov w)
+          (RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.spatialInitialTensor
+            cov A D))
+        (hsolve : ∀ s (hs : s ∈ Ioo t₀ S) (x : M)
+          (a c : TangentSpace I x),
+          (A.atlasFieldOfHigher cov w).timeDerivative s x a c -
+            connectionLaplacianApply cov₂ cov₃
+              ((A.atlasFieldOfHigher cov w).toFun s) x a c =
+            A.physicalAtlasSourceSlice cov f s x a c) :
+        RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.GeometricAtlasCauchySolution
+          cov A
+          (RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.spatialInitialTensor
+            cov A D)
+          (fun s => A.physicalAtlasSourceSlice cov f s) w := by
+      constructor
+      · exact htrace
+      · intro s hs x
+        ext a c
+        have hEq := hsolve s hs x a c
+        have hlap := connectionLaplacianApply_eq_canonical cov cov₂ cov₃
+          hcov₂ hcov₃
+          ((A.atlasFieldOfHigher cov w).slice cov s ⟨hs.1, hs.2.le⟩) x a c
+        have hlap' : connectionLaplacianApply cov₂ cov₃
+            ((A.atlasFieldOfHigher cov w).toFun s) x a c =
+            _root_.CovariantDerivative.connectionLaplacian cov
+              ((A.atlasFieldOfHigher cov w).toFun s) x a c := hlap
+        rw [hlap'] at hEq
+        exact hEq
+    exact A.geometricAtlasCauchySolution_unique_of_zeroData
+      cov hzero _ _ q r (hgeom q htraceq hsolveq)
+      (hgeom r htracer hsolver) t ht
   · intro D f q hq
     refine ⟨?_, A.norm_le_strongAtlasSchauderConstant_mul_symmetricData
       cov hunique Hlift D f q hq⟩

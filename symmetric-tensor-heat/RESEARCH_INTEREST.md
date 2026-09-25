@@ -1,10 +1,10 @@
 # Research-interest case
 
-**Withdrawn as a readiness justification.** The review identified missing
-geometric constraints and symmetry imposed by the selected readout. The
-discussion below describes the intended geometric theorem; it does not
-establish research interest for the current selected proposition. A replacement
-proof and assessment are required under [the remediation requirements](REVIEW_REMEDIATION.md).
+**Editorial assessment pending.** The selected theorem now uses the ordinary
+atlas reconstruction, with symmetry proved through geometric zero-data
+uniqueness in the represented class. The case below describes the exact
+selected result. It is not a claim of Palomar acceptance or of coverage of
+all intrinsic Hölder sections.
 
 The connection heat equation on tensor fields is the linear analytic model
 behind geometric parabolic equations. For a Levi-Civita connection, its
@@ -28,25 +28,35 @@ The conclusion proves:
 
 - existence for every symmetric represented spatial datum and source;
 - uniqueness of the higher-coefficient witness in the constructed classical
-  solution class;
+  solution class, and equality of represented geometric readouts with the
+  same global trace and source whenever both solve the geometric equation;
 - fiberwise symmetry and the correct initial trace;
 - the inhomogeneous geometric tensor heat equation; and
 - a global finite-atlas Schauder estimate with the standard linear dependence
   on initial size and source norm.
 
-This is useful infrastructure for Ricci-DeTurck arguments, stability analyses,
-and other geometric evolution equations. Hamilton's foundational paper uses
-geometric parabolic systems, and DeTurck's reduction makes strict parabolicity
-the engine of Ricci-flow local existence. Huang gives a direct modern account
-of linear strongly parabolic systems and Schauder estimates on vector bundles
-over closed manifolds.
+The direct comparison is [Huang, Theorems 2.3 and 2.4](https://arxiv.org/html/1506.05030v8):
+the former gives a global Schauder estimate and the latter existence and
+uniqueness for linear strongly parabolic systems on vector bundles over closed
+manifolds. The selected statement isolates the rough connection Laplacian on
+covariant two-tensors. Its substantive formal content is the link from finite
+parabolic Hölder estimates and atlas reconstruction to the intrinsic tensor
+equation, followed by symmetry and equal-global-data uniqueness for represented
+solutions. This gives a checked linear building block for geometric parabolic
+arguments such as Ricci-DeTurck theory; it does not formalize that nonlinear
+application.
 
 The scope is intentionally narrower than the classical abstract theorem. The
-inputs are represented finite-atlas Holder data, uniqueness is within the
-constructed coefficient class, and the endpoint is existentially short. No
+inputs are represented finite-atlas Holder data, geometric uniqueness is
+within the represented classical class, and the endpoint is existentially short. No
 surjectivity theorem for arbitrary intrinsic Holder sections, arbitrary-time
 continuation, nonlinear Ricci-flow theorem, or mathematical novelty is
-claimed. Palomar editors remain responsible for assessing research interest.
+claimed. In particular Huang's theorem covers all data in its intrinsic
+Hölder spaces, whereas the selected theorem quantifies over the constructed
+finite-atlas spaces. The claim of research interest is therefore the verified
+tensor-heat specialization with its explicit represented scope, not the full
+generality of Huang's theorem. Palomar editors remain responsible for
+assessing research interest.
 
 The earlier mechanically passing statement at merge commit `a210bc38` did not
 expose these analytic constraints and was editorially rejected as potentially
