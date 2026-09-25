@@ -41,6 +41,16 @@ local notation "D2W₂" => (E →L[ℝ] E →L[ℝ] W₂)
 local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
 local notation "T₃" => (fun x : M => TM x →L[ℝ] T₂ x)
 
+@[reducible] local instance contractionTwoFiberNormedAddCommGroup (x : M) :
+    NormedAddCommGroup (T₂ x) :=
+  CovariantDerivative.coordinateTwoFiberNormedAddCommGroup x
+@[reducible] local instance contractionTwoFiberNormedSpace (x : M) :
+    NormedSpace ℝ (T₂ x) :=
+  CovariantDerivative.coordinateTwoFiberNormedSpace x
+local instance contractionTwoTensorModuleFamily :
+    ∀ x : M, Module ℝ (T₂ x) := fun x => by
+  infer_instance
+
 @[reducible] local instance contractionFirstDerivativeNormedAddCommGroup :
     NormedAddCommGroup DW₂ := ContinuousLinearMap.toNormedAddCommGroup
 @[reducible] local instance contractionFirstDerivativeNormedSpace :
