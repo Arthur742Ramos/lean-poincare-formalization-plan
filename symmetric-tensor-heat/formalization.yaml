@@ -114,6 +114,17 @@ related_formalizations:
       Parabolic/BanachSpace.lean also drops an unused direct
       Mathlib.Analysis.Normed.Group.SeparationQuotient import after a
       declaration-aware import audit and a successful full-file compile.
+      The fiberwise linearity lemma for bilinear-form trivializations is
+      factored into RiemannianSectionCore.lean and imported directly by
+      TensorHeatAtlasClosedReconstruction.lean, avoiding a dependency on the
+      wider section-space API. No theorem statement or mathematical condition
+      changes. A profile-guided proof pass also replaces three broad
+      simplifier calls in LeviCivita.lean with restricted rewrites and direct
+      normalization; the baseline simplifier cost was 86.2 seconds, and the
+      focused replay of two replacements took 103 milliseconds of tactic time.
+      Three coefficient-regularity conversions in
+      TensorHeatGeometricRegularity.lean are replaced by direct proof terms.
+      These edits do not change theorem statements or hypotheses.
       The selected implementation theorem is
       curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.
       The baseline curvature tree is preserved as the provenance reference. The

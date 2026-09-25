@@ -36,6 +36,10 @@ ADAPTED_SHA256 = {
         "7390d0367bd2b62c849ad473158111ca863828dcb7925e212b9a015b68c0d1d2",
     "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatEuclidean.lean":
         "d3e8684dbfc312d9dfc30b4f47a289589cc12e8fee3e049515f569a14551e637",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasClosedReconstruction.lean":
+        "bab1b3e5f95a332c86732f2a88760c6e435ed928de61681a51e2b28ba1d5cb3d",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatGeometricRegularity.lean":
+        "6a6f6d70e9638922f1f10ec582a3af73de6545208061e608a06fbe3348c1b2b4",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/ContinuousSection.lean":
         "21d6c184331d870d9fdf7666961258a833080ba9b89d645622be47c1f70a912a",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianChart.lean":
@@ -47,19 +51,25 @@ ADAPTED_SHA256 = {
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/EndomorphismTrace.lean":
         "647ae886731f58c6c3d3bb6f6806db7c4b8c6defe8167c11b9e8508a950ce434",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean":
-        "f7f1477993f745a5901f23340c0602ec659240c7c4a8beabec8ff16db6b6e936",
+        "2418919d2fab4e7c90041d0c7d0e3f354a9d3987b8cc0987f2d8aaf0fd0a8ed4",
     "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/FiniteCylinderInterpolation.lean":
         "7f86ecba272aae7e510e66c7101c8a7357a642e749cb6faa85d6cdeba3aee9a7",
     "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/BanachSpace.lean":
         "425d1d2e93476279bfe4ebea9f65ca30d19c7301aa08b53e3e58820b81e0337d",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean":
-        "39d79d7bbeb76e6a67510c2698bcb620160e9b283337302e1d8476ff0b0a8d5a",
+        "399a830faea8437e829c6cba4fcd1f3f1143a7425d9f46b5ea4b6b56e71d57ad",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasShortContraction.lean":
+        "a1eb4c6b0415c15a2907d5b6c85c01f488759a153607cab397a6ab424d96fd19",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasShortCommutatorLift.lean":
+        "4a2d709098f719b864424d366699444b068f1f991564edbb9b252cf3b0011bd9",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasAffineCorrection.lean":
+        "edc8a176e0895a3a1ff687a205f1f3fbef6b74db81338f51bbc01a95539b6489",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TensorDivergence.lean":
         "29a4de07240b29e134f3a96570f7bf8ee442c329980a56304fb333f8dbefb3a8",
 }
 ADDED_ADAPTATION_SHA256 = {
     "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSectionCore.lean":
-        "b03b85f2d006bcea39026c301d9559c242c2aa5718175e1b1b2c9e24be621ed0",
+        "71c72712f44ba9a456a2fa4816a2f0809eb0a5c61141c3b99a08fab432c42c9a",
 }
 
 
@@ -147,6 +157,7 @@ def main() -> None:
             "ContMDiffRiemannianMetric.ext",
             "BilinearFormBundle",
             "trivializationAt_bilinearFormBundle_apply_eq",
+            "trivializationAt_bilinearFormBundle_isLinear",
         ):
             if declaration not in source_section or declaration not in core_section:
                 raise SystemExit("source-derived core declaration missing: " + declaration)

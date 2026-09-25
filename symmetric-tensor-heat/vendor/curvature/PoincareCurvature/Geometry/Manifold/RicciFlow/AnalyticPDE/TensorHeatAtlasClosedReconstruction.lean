@@ -1,6 +1,7 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasInitial
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FiniteInitialTrace
 import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TensorNormSqLocalFrame
+import PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSectionCore
 
 /-!
 # Canonical closed-time tensor reconstruction from atlas coefficients
