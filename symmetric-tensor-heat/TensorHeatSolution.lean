@@ -532,6 +532,26 @@ def completeStatement : Prop :=
         Function.Injective (fun q =>
           (solutionValue q, solutionSpaceDeriv q,
             solutionSpaceSecondDeriv q, solutionTimeDerivCoordinate q)) ∧
+        (∀ (v : Index → BoundedContinuousFunction E Matrix)
+            (dv : Index → BoundedContinuousFunction E (E →L[ℝ] Matrix))
+            (d2v : Index → BoundedContinuousFunction E
+              (E →L[ℝ] E →L[ℝ] Matrix))
+            (H : Index → ℝ),
+          (∀ i, 0 ≤ H i) →
+          (∀ i x y, ‖v i x - v i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x y, ‖dv i x - dv i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x y, ‖d2v i x - d2v i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x, HasFDerivAt (v i) (dv i x) x) →
+          (∀ i x, HasFDerivAt (dv i) (d2v i x) x) →
+          ∃ D : Initial,
+            (∀ i x, initialValue D i x = v i x) ∧
+            (∀ i x, initialSpaceDeriv D i x = dv i x) ∧
+            (∀ i x, initialSpaceSecondDeriv D i x = d2v i x) ∧
+            (∀ i, initialHolderConstant D i = H i)) ∧
+        (∀ (c : Index → ℝ × E → Matrix) (N : Index → ℝ),
+          (∀ i, hasParabolicC0 Tcoord (N i) (c i)) →
+          ∃ f : Source, ∀ i z, z.1 ∈ Ioc t₀ Tcoord →
+            sourceValue f i z = c i z) ∧
         (∀ c : Index →
             (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ),
           ∃ D, ∀ i x, initialValue D i x = c i) ∧
@@ -958,7 +978,7 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
   refine ⟨⟨fun _ => zeroSpatialData⟩, ⟨0⟩, ⟨0⟩,
     strongAtlasSchauderConstant_nonneg cov Hlift, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
     ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
-    ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · -- The displayed coordinates and weights retain their geometric origin.
     have hsub : ∀ i : Index, tsupport (atlasWeight i) ⊆
         (extChartAt I (i : M)).source := by
@@ -1225,6 +1245,46 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
     apply RicciFlow.AnalyticPDE.FiniteParabolicC2AlphaBanach.ext_value hα A.time_lt
     intro z _hz
     exact congrFun (congrFun hv i) z
+  · -- Every bounded spatial C²ᵅ atlas jet family is represented.
+    intro v dv d2v H hH hv hdv hd2v hderiv hderiv₂
+    let D : Initial := fun i => {
+      value := v i
+      spaceDeriv := dv i
+      spaceSecondDeriv := d2v i
+      holderConstant := H i
+      holderConstant_nonneg := hH i
+      value_holder := hv i
+      spaceDeriv_holder := hdv i
+      spaceSecondDeriv_holder := hd2v i
+      hasFDerivAt_value := hderiv i
+      hasFDerivAt_spaceDeriv := hderiv₂ i }
+    refine ⟨D, ?_, ?_, ?_, ?_⟩
+    · intro i x; rfl
+    · intro i x; rfl
+    · intro i x; rfl
+    · intro i; rfl
+  · -- Every parabolic C⁰ᵅ atlas source family is represented on the cylinder.
+    intro c N hc
+    have hsource (i : Index) :
+        RicciFlow.AnalyticPDE.ParabolicC0AlphaOn α (c i)
+          (RicciFlow.AnalyticPDE.parabolicFiniteCylinder E t₀ Sraw) := by
+      rcases hc i with ⟨B, hB, H, hH, _hN, hbound, hholder⟩
+      refine ⟨B, hB, H, hH, ?_, ?_⟩
+      · intro z hz
+        exact hbound z (by simpa [RicciFlow.AnalyticPDE.parabolicFiniteCylinder] using hz)
+      · intro p hp q hq
+        exact hholder p
+          (by simpa [RicciFlow.AnalyticPDE.parabolicFiniteCylinder] using hp) q
+          (by simpa [RicciFlow.AnalyticPDE.parabolicFiniteCylinder] using hq)
+    let g : Source := fun i =>
+      RicciFlow.AnalyticPDE.ParabolicC0AlphaBanach.mk
+        (RicciFlow.AnalyticPDE.ParabolicC0AlphaSpace.ofSubmodule
+          ⟨c i, hsource i⟩)
+    refine ⟨g, ?_⟩
+    intro i z hz
+    dsimp [sourceValue, g]
+    exact RicciFlow.AnalyticPDE.ParabolicC0AlphaBanach.representative_mk_eq _ z
+      (by simpa [RicciFlow.AnalyticPDE.parabolicFiniteCylinder] using hz)
   · -- Every atlas-wide family of constant spatial matrices is represented.
     intro c
     refine ⟨fun i => constSpatialData (c i), ?_⟩

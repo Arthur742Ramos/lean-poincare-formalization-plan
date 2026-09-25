@@ -22,8 +22,10 @@ Laplacian is the orthonormal trace of the second covariant derivative. It also
 puts the finite-atlas analysis into the compared statement: a genuine
 partition of unity and spanning frames, exact local-to-global reconstruction
 of data, solution, and time derivative, faithful and nontrivial coefficient
-representations, actual first/second/time derivatives, explicit Hölder
-inequalities, and the norms used by the estimate.
+representations, coverage of every bounded spatial `C^{2,alpha}` coefficient
+jet family and every parabolic `C^{alpha,alpha/2}` coefficient source family,
+actual first/second/time derivatives, explicit Hölder inequalities, and the
+norms used by the estimate.
 The conclusion proves:
 
 - existence for every symmetric represented spatial datum and source;
@@ -49,7 +51,7 @@ arguments such as Ricci-DeTurck theory; it does not formalize that nonlinear
 application.
 
 The scope is intentionally narrower than the classical abstract theorem. The
-inputs are represented finite-atlas Holder data, geometric uniqueness is
+inputs are the specified finite-atlas Holder coefficient families, geometric uniqueness is
 within the represented classical class, and the endpoint is existentially short. No
 surjectivity theorem for arbitrary intrinsic Holder sections, arbitrary-time
 continuation, nonlinear Ricci-flow theorem, or mathematical novelty is
