@@ -25,6 +25,28 @@ VENDORED_PATHS = (
     "lake-manifest.json",
     "lean-toolchain",
 )
+ADAPTED_SHA256 = {
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/HeatKernel1D.lean":
+        "824990b4aad942a6f28214d8bc7fd6acb8db85d7921b7a6f861218344ec15246",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/CompactCoefficientExtension.lean":
+        "8e42658d1e53ce7c43afca1f667bc9b34a1685b343d4cd50f674bc8330fa9c92",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/NormalizedCutoff.lean":
+        "8bdc17251cd27da4f63c357947a65b88b4c27f1c2c5f62ea7c669be7f5e40283",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/SmoothDependenceCk.lean":
+        "7390d0367bd2b62c849ad473158111ca863828dcb7925e212b9a015b68c0d1d2",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatEuclidean.lean":
+        "d3e8684dbfc312d9dfc30b4f47a289589cc12e8fee3e049515f569a14551e637",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/ContinuousSection.lean":
+        "21d6c184331d870d9fdf7666961258a833080ba9b89d645622be47c1f70a912a",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianChart.lean":
+        "3db9f52f16ff40d4262534777f0efc197e03761e5f4ccf82259cabd1fb000033",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianCoordinate.lean":
+        "55446fd439b84183d8f7190edc6fba6b42c2bb430cffcc53650fd3dca7345ac9",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Tensor.lean":
+        "626c9efc0ce0563ef8a6576ec0e3a332eb42c1e2d12614272f54fc7f558510ea",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/EndomorphismTrace.lean":
+        "647ae886731f58c6c3d3bb6f6806db7c4b8c6defe8167c11b9e8508a950ce434",
+}
 
 
 def run(*args: str) -> str:
@@ -77,8 +99,17 @@ def main() -> None:
         ["git", "diff", "--quiet", "HEAD", "--", "symmetric-tensor-heat/vendor/curvature"],
         cwd=REPO,
     )
+    if not set(ADAPTED_SHA256) <= expected:
+        raise SystemExit("adapted file is absent from the disclosed source inventory")
     for relative in sorted(expected):
-        if vendor_blobs.get(relative) != source_blobs[relative]:
+        vendor_oid = vendor_blobs.get(relative)
+        if relative in ADAPTED_SHA256:
+            if vendor_oid == source_blobs[relative]:
+                raise SystemExit("stale adaptation entry: " + relative)
+            digest = hashlib.sha256(git_bytes(vendor_oid)).hexdigest()
+            if digest != ADAPTED_SHA256[relative]:
+                raise SystemExit("adapted vendored file hash changed: " + relative)
+        elif vendor_oid != source_blobs[relative]:
             raise SystemExit("vendored file differs from disclosed source: " + relative)
     if vendor_blobs.get("LICENSE") != run("git", "rev-parse", f"{BASE}:LICENSE"):
         raise SystemExit("vendored repository license differs from disclosed source")
@@ -86,7 +117,7 @@ def main() -> None:
     for required in (BASE, SOURCE.as_posix(), "vendor/curvature", "relationship: \"builds-on\""):
         if required not in metadata:
             raise SystemExit("structured provenance is incomplete: " + required)
-    print("Immutable source, exact vendored snapshot, notices, and structured provenance passed.")
+    print("Immutable source, exact baseline/adapted vendor inventory, notices, and structured provenance passed.")
 
 
 if __name__ == "__main__":

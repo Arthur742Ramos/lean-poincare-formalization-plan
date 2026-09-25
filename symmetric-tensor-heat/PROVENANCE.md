@@ -5,7 +5,7 @@ must not be submitted as a later version of another result.
 
 ## Reused formalization
 
-The vendored curvature proof development is reused, unchanged, from:
+The vendored curvature proof development is reused from:
 
 - repository: `https://github.com/Arthur742Ramos/lean-poincare-formalization-plan`
 - commit: `13fa15d6a8352ed08bf71b3533b1c2e922c21388`
@@ -17,18 +17,21 @@ The vendored curvature proof development is reused, unchanged, from:
 - selected source SHA-256:
   `beadeb28c37b72ffc0700756ba506e213f97c351fb1ee3125de41667314012a7`
 
-The package carries a mechanically extracted snapshot in `vendor/curvature/`
-so the selected project is self-contained. Every vendored implementation
-source, README, contributor notice, inherited manifest, and toolchain is
-byte-for-byte identical to the disclosed commit. The package's root Lakefile
+The package carries a mechanically extracted baseline in `vendor/curvature/`
+so the selected project is self-contained. The inherited README, contributor
+notices, manifest, toolchain, and all implementation files outside the
+explicit Lean 4.35 compatibility adaptation list remain byte-for-byte
+identical to the disclosed commit. `scripts/check-provenance.py` checks those
+source blobs and pins every adapted file by SHA-256. The package's root Lakefile
 exposes those sources as a `PoincareCurvature` library with
 `srcDir = "vendor/curvature"`; it deliberately has no nested path dependency,
 so Palomar's single writable package build root contains every build output.
 The repository's Apache-2.0 license is preserved beside the snapshot.
 `scripts/check-provenance.py` verifies the baseline curvature tree object, the
-selected source hash, the complete vendored file inventory, every vendored
-byte, and the structured metadata. `scripts/check-package.py` separately
-rejects any path package or change to the root-library topology.
+selected source hash, the complete vendored file inventory, every unchanged
+vendored byte, each adapted file hash, and the structured metadata.
+`scripts/check-package.py` separately rejects any path package or change to
+the root-library topology.
 
 The new work in this package is the selected, unprojected theorem surface,
 the Mathlib-only Challenge, matching Solution bridge, Comparator configuration,
@@ -37,11 +40,35 @@ already contains finite-atlas estimates, reconstruction, norm continuity,
 and geometric zero-data uniqueness; those proofs remain credited to the
 source subproject.
 
+## Lean 4.35 compatibility adaptations
+
+The ten adapted vendor files and their exact submitted hashes are listed in
+`scripts/check-provenance.py`. No selected theorem statement or source theorem
+file was changed. The edits are confined to:
+
+- `HeatKernel1D.lean` and `TensorHeatEuclidean.lean`: the renamed ordered
+  product inequality;
+- `SmoothDependenceCk.lean`: a changed `convert` tactic goal;
+- `ContinuousSection.lean`: an explicit additive equivalence for Mathlib's
+  revised instance transfer;
+- `Curvature/Tensor.lean` and `ConnectionLaplacianChart.lean`: explicit real
+  Hausdorff witnesses in the revised derivative API;
+- `ConnectionLaplacianCoordinate.lean` and `EndomorphismTrace.lean`: explicit
+  identity casts for germ-equal manifold derivatives;
+- `Parabolic/NormalizedCutoff.lean` and
+  `Parabolic/CompactCoefficientExtension.lean`: the compact cutoff and
+  extension arguments formerly inherited through the unrelated gauge-flow
+  import. These proof patterns come from
+  `curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ModelManifoldGaugeFlow.lean`
+  at the disclosed source commit, and remain credited to that development.
+
 ## Mathlib
 
-The inherited manifest pins Mathlib commit
-`db584cd6d46c92f209a44c0f1c829460d327499d`. The Challenge boundary check
-removes all local candidate build paths and recompiles from the pinned
+The focused root manifest pins Mathlib commit
+`065356127b1dc0016f66b7283ce0ce2c4055aa55` for Lean 4.35.0-rc2.
+The immutable vendored manifest retains its historical Mathlib pin.
+The Challenge boundary check removes all local candidate build paths and
+recompiles from the pinned
 dependency closure.
 
 ## Literature and overlap

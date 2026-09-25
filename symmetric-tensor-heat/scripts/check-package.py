@@ -25,7 +25,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = "https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json"
-MATHLIB = "db584cd6d46c92f209a44c0f1c829460d327499d"
+MATHLIB = "065356127b1dc0016f66b7283ce0ce2c4055aa55"
 CURVATURE_BASE = "13fa15d6a8352ed08bf71b3533b1c2e922c21388"
 THEOREM = "SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed"
 DEFINITIONS = ["SymmetricTensorHeatEntry.completeStatement"]
@@ -35,6 +35,7 @@ COMPARATOR = "575674928e239f5bc452aab72d1dd7b0f1326494"
 NANODA = "68d5ca9db226849b41a6fff59d796ff19d0a8840"
 LANDRUN = "811cfff51ceaf3d9843708aa6d22e9b84ccac8b4"
 CACHE_ACTION = "0400d5f644dc74513175e3cd8d07132dd4860809"
+CURRENT_PALOMAR = "1703d7babd984ccc3831cdf89c28221abe34808f"
 
 
 def require(condition: bool, message: str) -> None:
@@ -186,16 +187,22 @@ def main() -> None:
             mathlib["url"] == "https://github.com/leanprover-community/mathlib4" and
             mathlib["rev"] == MATHLIB and not mathlib["inherited"],
             "direct Mathlib manifest pin changed")
-    require((ROOT / "lean-toolchain").read_text().strip() == "leanprover/lean4:v4.33.0",
+    require((ROOT / "lean-toolchain").read_text().strip() == "leanprover/lean4:v4.35.0-rc2",
             "unsupported Lean toolchain")
 
     workflows = {
         "mechanical": ROOT.parent / ".github/workflows/symmetric-tensor-heat-palomar-mechanical.yml",
         "renderer": ROOT.parent / ".github/workflows/symmetric-tensor-heat-palomar-render.yml",
+        "current-mechanical": ROOT.parent / ".github/workflows/symmetric-tensor-heat-palomar-current.yml",
+        "current-renderer": ROOT.parent / ".github/workflows/symmetric-tensor-heat-palomar-current-render.yml",
     }
     for name, path in workflows.items():
         require(path.is_file() and not path.is_symlink(), f"missing regular {name} workflow")
+        require("  push:" not in path.read_text(encoding="utf-8"),
+                f"duplicate push trigger in {name} workflow")
     mechanical = workflows["mechanical"].read_text(encoding="utf-8")
+    require("  pull_request:" not in mechanical and "  workflow_dispatch:" in mechanical,
+            "historical mechanical replay must be manual only")
     for required_text in (
         PALOMAR, COMPARATOR, NANODA, LANDRUN, CACHE_ACTION,
         "verify_submission.py prepare", "verify_submission.py execute",
@@ -211,9 +218,24 @@ def main() -> None:
         require(required_text in mechanical,
                 "complete hosted Palomar verifier workflow changed: " + required_text)
     renderer = workflows["renderer"].read_text(encoding="utf-8")
+    require("  pull_request:" in renderer, "pinned renderer must run on pull requests")
     for required_text in (PALOMAR, LANDRUN, "render_challenge prepare", "render_challenge execute"):
         require(required_text in renderer,
                 "hosted Palomar renderer workflow changed: " + required_text)
+    current_mechanical = workflows["current-mechanical"].read_text(encoding="utf-8")
+    require("  pull_request:" in current_mechanical,
+            "current mechanical preflight must run on pull requests")
+    for required_text in (CURRENT_PALOMAR, "mode: full",
+                          "execution_profile: palomar-standard-v1",
+                          "commit: ${{ github.event.pull_request.head.sha || github.sha }}"):
+        require(required_text in current_mechanical,
+                "current Palomar mechanical workflow changed: " + required_text)
+    current_renderer = workflows["current-renderer"].read_text(encoding="utf-8")
+    require("  pull_request:" in current_renderer,
+            "current renderer must run on pull requests")
+    for required_text in (CURRENT_PALOMAR, "render_challenge prepare", "render_challenge execute", "--bwrap"):
+        require(required_text in current_renderer,
+                "current Palomar renderer workflow changed: " + required_text)
 
     metadata_text = (ROOT / "formalization.yaml").read_text(encoding="utf-8")
     require(len(metadata_text.encode()) <= 256 * 1024, "formalization.yaml too large")

@@ -3,6 +3,24 @@ set -euo pipefail
 
 repository_root=$(cd "$(dirname "$0")/.." && pwd)
 comparator_config=${1:-"$repository_root/comparator.json"}
+
+# Lean 4.35 includes the current Palomar Comparator and external checkers.
+if [ "$(tr -d '[:space:]' < "$repository_root/lean-toolchain")" = \
+    "leanprover/lean4:v4.35.0-rc2" ]; then
+  cd "$repository_root"
+  if [ "$(uname -s)" = "Linux" ]; then
+    lake comparator --config "$comparator_config" --paranoid
+  elif [ "${PALOMAR_ALLOW_UNSANDBOXED_LOCAL:-}" = "1" ]; then
+    lake comparator --config "$comparator_config" --paranoid --inadvisably-no-sandbox
+  else
+    echo "error: bubblewrap requires Linux; set PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 for a local diagnostic" >&2
+    exit 1
+  fi
+  echo "Bundled Comparator and external kernel replay passed."
+  exit 0
+fi
+
+# Historical 4.33 replay retained for the earlier immutable candidate.
 cache_root=${PALOMAR_COMPARATOR_CACHE:-"$repository_root/.cache/palomar-comparator"}
 bin_dir="$cache_root/bin"
 comparator_dir="$cache_root/comparator"

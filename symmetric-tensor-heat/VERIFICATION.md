@@ -3,15 +3,56 @@
 Selected theorem:
 `SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed`.
 
-## Current selected repair (verification in progress)
+## Lean 4.35 migration receipt
+
+The candidate stacked on `2613d7b40d2e8c38126ee040b424d3ca57a86220`
+migrates the focused package to Lean `v4.35.0-rc2` and Mathlib
+`065356127b1dc0016f66b7283ce0ce2c4055aa55`, the current production
+Palomar minimum and its matching Mathlib pin. Ten attributed vendor files
+receive API compatibility edits; the selected Challenge and Solution theorem
+statements remain unchanged. At migration commit
+`b73d71f2af4e6f3c6341a31f9c473e53aefa623b`, the full Lean 4.35 Solution
+build completed 3,877 jobs. The Mathlib-only Challenge boundary and negative
+import control, nonvacuity, compiled closed-statement audit, selected-theorem
+axiom check, exact committed provenance, and package/schema checks passed.
+The closed-body audit found 282 reachable constants, 60 compiler-generated
+proposition proofs, and no candidate-defined mathematical data.
+
+That exact commit also passed the pinned Linux Landrun renderer and
+core-notation audit (run `35878326663`), the current production bubblewrap
+renderer and core-notation audit (run `35878326705`), and current production
+full mechanical verification (run `35878327975`). The current mechanical
+report recorded `status: pass`, `stage: complete`, high Challenge trust, and
+acceptance by protected NanoDa, verified `con-ron`, and Lean's default kernel.
+Its only warning is that the 601-line, 31,831-byte Challenge exceeds Palomar's
+preferred 300-line review surface. The exact selected surface comprises only
+the theorem and `completeStatement`.
+
+These receipts remain historical for any subsequent commit, including a
+documentation-only update. The current candidate SHA and its own receipts
+are tracked in PR #101. There is no active Palomar intake or registration.
+
+## Historical verification of the immediate predecessor
+
+Commit `2613d7b40d2e8c38126ee040b424d3ca57a86220` passed the pinned
+Palomar mechanical replay (GitHub run `35859592079`) and the separate pinned
+Landrun renderer with its core-notation audit (run `35859592105`). The
+mechanical report recorded `status: pass`, `stage: complete`, Comparator and
+NanoDa passes, and high Challenge trust. Its only review warning was that the
+configured Challenge exceeds Palomar's preferred 32 KiB / 300-line review
+surface. These receipts verify that exact predecessor under its historical
+toolchain, not the new 4.35 candidate or the current production pipeline.
+They were verification runs, not Palomar intake or registration.
+
+## Earlier selected repairs
 
 The quantitative follow-on after `5908b028825c76537955118eff76772c3ab4a455`
 adds an exact finite-atlas size formula for each represented spatial jet family
 and bounds the chosen source norm by the sum of the supplied chartwise
 parabolic Hölder budgets. Challenge and independent Solution compiled locally;
-their selected propositions match byte for byte. Exact-commit hosted checks
-must be repeated for this follow-on. The `5908b028` renderer receipt is
-historical for this candidate and does not verify the new statement.
+their selected propositions match byte for byte. At that stage, exact-commit
+hosted checks were pending. They later passed at
+`2613d7b40d2e8c38126ee040b424d3ca57a86220`, as recorded above.
 
 The data-coverage extension after `40f66568d51f8424a2d3265cd4c63718e2576515`
 adds selected coverage for every bounded spatial `C^{2,alpha}` atlas jet family
@@ -21,8 +62,8 @@ byte for byte. Both compiled locally, and the closed-statement audit passed
 with 281 reachable constants, 60 compiler-generated proposition proofs, and
 no candidate-defined mathematical data. The nonvacuity check, exact axiom
 query (`propext`, `Classical.choice`, `Quot.sound`), package/schema, and
-structured provenance checks passed locally. These are working-tree results;
-the exact-commit hosted renderer and mechanical verification remain pending.
+structured provenance checks passed locally. Those were working-tree results
+at that stage; later exact-commit receipts are identified above.
 
 The selected Challenge and Solution state ordinary, unprojected atlas
 reconstruction. The curvature subproject at the disclosed source commit proves

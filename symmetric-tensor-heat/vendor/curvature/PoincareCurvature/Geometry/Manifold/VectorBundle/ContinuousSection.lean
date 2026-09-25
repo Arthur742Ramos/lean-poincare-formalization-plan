@@ -1424,7 +1424,15 @@ instance instModule
   letI : AddCommGroup
       (ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) :=
     instAddCommGroup (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo hKoEq hcover
-  exact e.module 𝕜
+  let eAdd : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover ≃+
+        compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo :=
+    { e with
+      map_add' := by
+        intro s t
+        change e (e.symm (e s + e t)) = e s + e t
+        simp }
+  exact eAdd.module 𝕜
 
 instance instNormedAddCommGroup
     {κ : Type*} [Finite κ] [T2Space M]
@@ -1472,7 +1480,15 @@ instance instNormedSpace
   letI : NormedAddCommGroup
       (ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V) et Kc hKc Ko hKo hKoEq hcover) :=
     instNormedAddCommGroup (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo hKoEq hcover
-  exact e.normedSpace 𝕜
+  let eAdd : ContinuousSectionSpace (𝕜 := 𝕜) (F := F) (V := V)
+      et Kc hKc Ko hKo hKoEq hcover ≃+
+        compatibleCoordFamilySubmodule (𝕜 := 𝕜) (F := F) et Kc hKc Ko hKo :=
+    { e with
+      map_add' := by
+        intro s t
+        change e (e.symm (e s + e t)) = e s + e t
+        simp }
+  exact eAdd.normedSpace 𝕜
 
 instance instCompleteSpace
     {κ : Type*} [Finite κ] [T2Space M] [CompleteSpace F]

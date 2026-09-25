@@ -7,6 +7,7 @@ public import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 public import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 public import Mathlib.Analysis.InnerProductSpace.Dual
 public import Mathlib.Analysis.InnerProductSpace.Trace
+public import Mathlib.Topology.Algebra.Ring.Real
 
 /-!
 # Tensorial curvature
@@ -476,6 +477,7 @@ private lemma extDerivFun_apply_eq_fderivWithin_writtenInExtChartAt_mpullbackWit
   have hderiv :
       fderivWithin ℝ (writtenInExtChartAt I 𝓘(ℝ) x g) (Set.range I) z =
         (((mfderiv% g y).comp (mfderiv[Set.range I] φ.symm z)) : E →L[ℝ] ℝ) := by
+    letI : T2Space ℝ := TopologicalSpace.t2Space_of_metrizableSpace
     simpa [writtenInExtChartAt, φ, z] using
       hcomp.hasFDerivWithinAt.fderivWithin (I.uniqueDiffOn.uniqueDiffWithinAt hz_range)
   have hmp :
