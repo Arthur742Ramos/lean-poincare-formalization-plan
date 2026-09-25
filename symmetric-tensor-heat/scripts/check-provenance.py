@@ -38,6 +38,8 @@ ADAPTED_SHA256 = {
         "d3e8684dbfc312d9dfc30b4f47a289589cc12e8fee3e049515f569a14551e637",
     "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasClosedReconstruction.lean":
         "bab1b3e5f95a332c86732f2a88760c6e435ed928de61681a51e2b28ba1d5cb3d",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatGeometricRegularity.lean":
+        "6a6f6d70e9638922f1f10ec582a3af73de6545208061e608a06fbe3348c1b2b4",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/ContinuousSection.lean":
         "21d6c184331d870d9fdf7666961258a833080ba9b89d645622be47c1f70a912a",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianChart.lean":
@@ -49,7 +51,7 @@ ADAPTED_SHA256 = {
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/EndomorphismTrace.lean":
         "647ae886731f58c6c3d3bb6f6806db7c4b8c6defe8167c11b9e8508a950ce434",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean":
-        "f7f1477993f745a5901f23340c0602ec659240c7c4a8beabec8ff16db6b6e936",
+        "2418919d2fab4e7c90041d0c7d0e3f354a9d3987b8cc0987f2d8aaf0fd0a8ed4",
     "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/FiniteCylinderInterpolation.lean":
         "7f86ecba272aae7e510e66c7101c8a7357a642e749cb6faa85d6cdeba3aee9a7",
     "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/BanachSpace.lean":

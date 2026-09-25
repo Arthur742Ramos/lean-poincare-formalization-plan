@@ -1149,7 +1149,11 @@ noncomputable def continuousDualBasis {ι : Type*} (b : Module.Basis ι ℝ E) :
   letI := FiniteDimensional.fintypeBasisIndex b
   change (((LinearMap.toContinuousLinearMap :
       (E →ₗ[ℝ] ℝ) ≃ₗ[ℝ] (E →L[ℝ] ℝ)).symm.trans b.dualBasis.repr) φ) i = φ (b i)
-  simp [Module.Basis.dualBasis_repr]
+  change (b.dualBasis.repr
+    ((LinearMap.toContinuousLinearMap :
+      (E →ₗ[ℝ] ℝ) ≃ₗ[ℝ] (E →L[ℝ] ℝ)).symm φ)) i = φ (b i)
+  rw [Module.Basis.dualBasis_repr]
+  rfl
 
 theorem contMDiffOn_correctionFunctional_apply_section
     [IsManifold I 3 M] [IsContMDiffRiemannianBundle I 2 E TM]
@@ -1253,7 +1257,9 @@ theorem contMDiffOn_correctionFunctional_apply_section
       simpa [Pi.smul_apply, smul_eq_mul] using contMDiffOn_const.smul_section hsum
     refine ContMDiffOn.congr hscaled ?_
     intro x hx
-    simp [correctionFunctional_apply, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
+    rw [correctionFunctional_apply]
+    simp only [torsionInnerFunctional_apply]
+    ring_nf
   let eLine : Trivialization ℝ (TotalSpace.proj : TotalSpace ℝ (fun _ : M ↦ ℝ) → M) :=
     Bundle.Trivial.trivialization M ℝ
   letI : MemTrivializationAtlas eLine := by
@@ -2226,7 +2232,9 @@ lemma torsion_addOneForm_apply
   rw [CovariantDerivative.torsion_apply_eq_extend
       (cov := CovariantDerivative.addOneForm cov A) (x := x) u v]
   rw [CovariantDerivative.torsion_apply_eq_extend (cov := cov) (x := x) u v]
-  simp [CovariantDerivative.addOneForm, sub_eq_add_neg, add_assoc, add_left_comm, add_comm]
+  simp only [CovariantDerivative.addOneForm, FiberBundle.extend_apply_self,
+    sub_eq_add_neg, add_apply, neg_add]
+  ac_rfl
 
 lemma metricDefect_addOneForm_apply
     (cov : CovariantDerivative I E TM)

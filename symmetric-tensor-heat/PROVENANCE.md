@@ -82,6 +82,17 @@ The provenance check pins the edited source files and the new core module by
 hash, then checks that the moved declarations occur in the immutable source
 and the core. The selected heat theorem and its proof are unchanged.
 
+The profile-guided proof pass is also hash-pinned. In `LeviCivita.lean`, three
+broad simplifier calls were replaced with the dual-basis identity, restricted
+rewrites plus scalar normalization, and explicit additive/multiplicative
+normalization. The three baseline simplifier measurements totalled 86.2s; a
+focused replay of the latter two replacements took 103ms of tactic time. The
+module compiles with the changes. `TensorHeatGeometricRegularity.lean` replaces
+three unnecessary `convert ... <;> rfl` transports in coefficient-regularity
+proofs with direct proofs; its exact source hash is pinned as well. These are
+proof-engineering changes only; theorem statements and hypotheses are
+unchanged.
+
 The short-time commutator retains its explicit
 TensorHeatAtlasCommutatorLift.lean import. The Solution build confirmed that
 the short-time module uses its atlas source-space and coordinate declarations,
