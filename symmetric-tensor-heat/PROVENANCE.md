@@ -84,6 +84,7 @@ the short-time module uses its atlas source-space and coordinate declarations,
 so the commutator-lift module and its reachable atlas-coordinate and cutoff
 dependencies remain in the exact closure. scripts/check-package.py derives
 and checks that closure. No selected theorem statement or proof changed.
+and checks that closure. No selected theorem statement or proof changed.
 
 The 556-line ParabolicInterpolation.lean module describes itself as a leaf,
 and none of its declarations are referenced by the selected source modules.
