@@ -111,6 +111,9 @@ related_formalizations:
       therefore remain in the exact closure. A separate import cleanup removes
       the unused standalone ParabolicInterpolation import from finite-cylinder
       interpolation; the selected finite-cylinder theorem still compiles.
+      Parabolic/BanachSpace.lean also drops an unused direct
+      Mathlib.Analysis.Normed.Group.SeparationQuotient import after a
+      declaration-aware import audit and a successful full-file compile.
       The selected implementation theorem is
       curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.
       The baseline curvature tree is preserved as the provenance reference. The

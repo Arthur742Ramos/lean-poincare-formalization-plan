@@ -84,7 +84,6 @@ the short-time module uses its atlas source-space and coordinate declarations,
 so the commutator-lift module and its reachable atlas-coordinate and cutoff
 dependencies remain in the exact closure. scripts/check-package.py derives
 and checks that closure. No selected theorem statement or proof changed.
-and checks that closure. No selected theorem statement or proof changed.
 
 The 556-line ParabolicInterpolation.lean module describes itself as a leaf,
 and none of its declarations are referenced by the selected source modules.
@@ -93,6 +92,14 @@ module. Removing it preserves a successful Lean build of the finite-cylinder
 module and drops the unrelated interpolation module from the candidate roots.
 The edited import file is hash-pinned alongside the other source-derived
 adaptations. No theorem statement or proof script changed.
+
+`Parabolic/BanachSpace.lean` also directly imported
+`Mathlib.Analysis.Normed.Group.SeparationQuotient` without using declarations
+from it. Lean's declaration-aware import audit identified the unused import,
+and the complete source module compiled after its removal. The adapted source
+hash and the import-removal regression are pinned in
+`scripts/check-provenance.py`. This changes only the direct import list; no
+theorem statement or proof term changed.
 
 ## Mathlib
 
