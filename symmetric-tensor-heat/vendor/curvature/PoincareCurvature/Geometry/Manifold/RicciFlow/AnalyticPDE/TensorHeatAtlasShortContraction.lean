@@ -73,6 +73,11 @@ local notation "T₃" => (fun x : M => TM x →L[ℝ] T₂ x)
 @[reducible] local instance contractionThreeFiberNormedSpace (x : M) :
     NormedSpace ℝ (T₃ x) :=
   CovariantDerivative.coordinateThreeFiberNormedSpace x
+-- Make the dependent tensor-fiber module family explicit. The generic Pi
+-- instance otherwise rebuilds it repeatedly while elaborating the atlas bounds.
+local instance contractionThreeTensorModuleFamily :
+    ∀ x : M, Module ℝ (T₃ x) := fun x => by
+  infer_instance
 local instance contractionThreeTotalSpaceTopology :
     TopologicalSpace (TotalSpace
       (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃) :=
