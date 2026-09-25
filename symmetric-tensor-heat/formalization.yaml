@@ -98,13 +98,19 @@ related_formalizations:
       beneath the single writable package build root used by Palomar.
       Contributor notices and unchanged vendored implementation sources are
       checked byte-for-byte against this commit. Explicit Lean 4.35
-      compatibility adaptations and a hash-pinned proof-support module split
-      are separately documented. The split extracts the tangent-space
-      instances, metric extensionality, and the preferred bilinear-form
-      coordinate evaluation identity into RiemannianSectionCore.lean. The
-      latter lets TensorDivergence compile without importing the large
-      RiemannianSection module. Thus the heat build avoids unrelated section
-      space results from RiemannianSection and its ContinuousSection dependency.
+      compatibility adaptations and hash-pinned proof-support changes are
+      separately documented. The split extracts the tangent-space instances,
+      metric extensionality, the BilinearFormBundle abbreviation, and the
+      preferred bilinear-form coordinate evaluation identity into
+      RiemannianSectionCore.lean. This lets TensorDivergence compile without
+      importing the large RiemannianSection module, so the heat build avoids
+      unrelated section-space results and its ContinuousSection dependency.
+      The short-time commutator retains its explicit
+      TensorHeatAtlasCommutatorLift import because the Solution build uses its
+      atlas source-space and coordinate declarations. Its reachable roots
+      therefore remain in the exact closure. A separate import cleanup removes
+      the unused standalone ParabolicInterpolation import from finite-cylinder
+      interpolation; the selected finite-cylinder theorem still compiles.
       The selected implementation theorem is
       curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.
       The baseline curvature tree is preserved as the provenance reference. The
