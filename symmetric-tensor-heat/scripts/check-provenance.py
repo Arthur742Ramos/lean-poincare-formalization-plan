@@ -59,7 +59,9 @@ ADAPTED_SHA256 = {
     "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean":
         "399a830faea8437e829c6cba4fcd1f3f1143a7425d9f46b5ea4b6b56e71d57ad",
     "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasShortContraction.lean":
-        "d1687e737cab1f7da11c44be2e4d67e8cc40ff09aeec1f0c8b81fca14140ff12",
+        "a1eb4c6b0415c15a2907d5b6c85c01f488759a153607cab397a6ab424d96fd19",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasShortCommutatorLift.lean":
+        "4a2d709098f719b864424d366699444b068f1f991564edbb9b252cf3b0011bd9",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TensorDivergence.lean":
         "29a4de07240b29e134f3a96570f7bf8ee442c329980a56304fb333f8dbefb3a8",
 }
