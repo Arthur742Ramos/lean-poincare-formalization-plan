@@ -100,10 +100,11 @@ related_formalizations:
       checked byte-for-byte against this commit. Explicit Lean 4.35
       compatibility adaptations and a hash-pinned proof-support module split
       are separately documented. The split extracts the tangent-space
-      instances and metric extensionality needed by LeviCivita into
-      RiemannianSectionCore.lean, so the heat build does not compile unrelated
-      section-space results from RiemannianSection or its ContinuousSection
-      dependency.
+      instances, metric extensionality, and the preferred bilinear-form
+      coordinate evaluation identity into RiemannianSectionCore.lean. The
+      latter lets TensorDivergence compile without importing the large
+      RiemannianSection module. Thus the heat build avoids unrelated section
+      space results from RiemannianSection and its ContinuousSection dependency.
       The selected implementation theorem is
       curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.
       The baseline curvature tree is preserved as the provenance reference. The

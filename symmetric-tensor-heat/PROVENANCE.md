@@ -64,15 +64,19 @@ file was changed. The edits are confined to:
 
 ## Proof-support module split
 
-The vendored `RiemannianSection.lean` contains a broad section-space API. The
-heat dependency closure used only its four tangent-space structure instances
-and the `ContMDiffRiemannianMetric.ext` lemma through `LeviCivita.lean`. Those
-source declarations are factored into `RiemannianSectionCore.lean`; the wider
-module imports that core to preserve its API, while `LeviCivita.lean` imports
-the core directly. The focused import closure also omits the unrelated
-`ContinuousSection` dependency of the wider API. The provenance check pins the two edited source files and the new core module
-by hash, then checks that the moved declarations occur in the immutable source
-and the core. The selected heat theorem and its proof are unchanged.
+The vendored RiemannianSection.lean contains a broad section-space API. The
+heat dependency closure uses its four tangent-space structure instances and the
+ContMDiffRiemannianMetric.ext lemma through LeviCivita.lean. The
+TensorDivergence.lean coordinate-regularity proof also needs the
+trivializationAt_bilinearFormBundle_apply_eq identity. These source
+declarations and the BilinearFormBundle abbreviation are factored into
+RiemannianSectionCore.lean. The wider section module imports that core to
+preserve its API, while LeviCivita.lean and TensorDivergence.lean import the
+core directly. This keeps both consumers independent of the unrelated
+section-space API and omits its ContinuousSection dependency from the focused
+closure. The provenance check pins both edited source files and the new core
+module by hash, then checks that the moved declarations occur in the immutable
+source and the core. The selected heat theorem and its proof are unchanged.
 
 ## Mathlib
 

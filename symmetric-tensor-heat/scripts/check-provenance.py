@@ -49,11 +49,13 @@ ADAPTED_SHA256 = {
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean":
         "f7f1477993f745a5901f23340c0602ec659240c7c4a8beabec8ff16db6b6e936",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean":
-        "f51ea4502b70449a5df43cefa69e9740cbb28612e1768d3cf12d563366a30207",
+        "39d79d7bbeb76e6a67510c2698bcb620160e9b283337302e1d8476ff0b0a8d5a",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TensorDivergence.lean":
+        "29a4de07240b29e134f3a96570f7bf8ee442c329980a56304fb333f8dbefb3a8",
 }
 ADDED_ADAPTATION_SHA256 = {
     "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSectionCore.lean":
-        "bc2610937d545ec9c8ffe38d72db3fed65cc31f657046cca16697bf9e2bfba55",
+        "b03b85f2d006bcea39026c301d9559c242c2aa5718175e1b1b2c9e24be621ed0",
 }
 
 
@@ -139,6 +141,8 @@ def main() -> None:
             "instIsTopologicalAddGroupTangentSpace",
             "instT2SpaceTangentSpace",
             "ContMDiffRiemannianMetric.ext",
+            "BilinearFormBundle",
+            "trivializationAt_bilinearFormBundle_apply_eq",
         ):
             if declaration not in source_section or declaration not in core_section:
                 raise SystemExit("source-derived core declaration missing: " + declaration)

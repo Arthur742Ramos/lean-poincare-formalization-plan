@@ -33,12 +33,6 @@ open scoped Bundle Manifold ContDiff
 
 namespace Bundle
 
-/-- The bundle of real bilinear forms on the fibers of `V`. -/
-abbrev BilinearFormBundle {B : Type*} {V : B → Type*}
-    [∀ x, TopologicalSpace (V x)] [∀ x, AddCommGroup (V x)] [∀ x, Module ℝ (V x)] :
-    B → Type _ :=
-  fun x : B ↦ V x →L[ℝ] V x →L[ℝ] ℝ
-
 section Continuous
 
 variable {B : Type*} [TopologicalSpace B]
@@ -646,37 +640,6 @@ variable {W : M → Type*} [TopologicalSpace (_root_.Bundle.TotalSpace F W)] [�
 local notation "BilF" => (F →L[ℝ] F →L[ℝ] ℝ)
 local notation "BilW" => BilinearFormBundle (V := W)
 
-/-- In preferred local coordinates, a bundled bilinear form evaluates by pulling the model vectors
-back through the inverse fiber trivialization. -/
-lemma trivializationAt_bilinearFormBundle_apply_eq
-    (x0 x : M) (hx : x ∈ (trivializationAt F W x0).baseSet)
-    (B : BilW x) (u v : F) :
-    ((trivializationAt BilF BilW x0 ⟨x, B⟩).2) u v =
-      B (((trivializationAt F W x0).continuousLinearEquivAt ℝ x hx).symm u)
-        (((trivializationAt F W x0).continuousLinearEquivAt ℝ x hx).symm v) := by
-  let e : W x ≃L[ℝ] F := (trivializationAt F W x0).continuousLinearEquivAt ℝ x hx
-  let eDual : (W x →L[ℝ] ℝ) →L[ℝ] (F →L[ℝ] ℝ) :=
-    ((trivializationAt (F →L[ℝ] ℝ) (fun y => W y →L[ℝ] ℝ) x0).continuousLinearEquivAt ℝ x
-      (by simpa using hx) : (W x →L[ℝ] ℝ) →L[ℝ] (F →L[ℝ] ℝ))
-  have hdual (φ : W x →L[ℝ] ℝ) :
-      ((trivializationAt (F →L[ℝ] ℝ) (fun y => W y →L[ℝ] ℝ) x0 ⟨x, φ⟩).2) v =
-        φ (e.symm v) := by
-    have htrivDual := hom_trivializationAt_apply (σ := RingHom.id ℝ)
-        (F₁ := F) (E₁ := W) (F₂ := ℝ) (E₂ := fun _ : M => ℝ) x0 ⟨x, φ⟩
-    have hφ :
-        (trivializationAt (F →L[ℝ] ℝ) (fun y => W y →L[ℝ] ℝ) x0 ⟨x, φ⟩).2 =
-          φ.comp (e.symm : F →L[ℝ] W x) := by
-      simpa [e, ContinuousLinearMap.inCoordinates_eq, hx] using congrArg Prod.snd htrivDual
-    have hv := congrArg (fun ψ : F →L[ℝ] ℝ => ψ v) hφ
-    simpa [e] using hv
-  have htriv := hom_trivializationAt_apply (σ := RingHom.id ℝ)
-      (F₁ := F) (E₁ := W) (F₂ := F →L[ℝ] ℝ) (E₂ := fun y => W y →L[ℝ] ℝ) x0 ⟨x, B⟩
-  have hB :
-      (trivializationAt BilF BilW x0 ⟨x, B⟩).2 =
-        eDual.comp (B.comp (e.symm : F →L[ℝ] W x)) := by
-    simpa [e, eDual, ContinuousLinearMap.inCoordinates_eq, hx] using congrArg Prod.snd htriv
-  have hu := congrArg (fun ψ : F →L[ℝ] F →L[ℝ] ℝ => ψ u v) hB
-  simpa [hdual, e, eDual] using hu
 
 /-- Preferred bilinear-form bundle trivializations are fiberwise linear. This explicit instance
 avoids typeclass-search ambiguity from the nested hom-bundle construction when using coordinate
