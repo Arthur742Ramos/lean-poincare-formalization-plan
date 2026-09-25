@@ -11,6 +11,7 @@ public import Mathlib.Topology.ContinuousMap.Bounded.Basic
 public import Mathlib.Topology.MetricSpace.ProperSpace
 public import Mathlib.Topology.Order.Compact
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSectionCore
 
 /-!
 # Riemannian metrics as bilinear-form sections
@@ -29,45 +30,6 @@ fiberwise bilinear forms.
 @[expose] public noncomputable section
 
 open scoped Bundle Manifold ContDiff
-
-namespace PoincareCurvature
-
-/-!
-The tangent fiber `TangentSpace I x` is definitionally the model vector space `F`, but the
-class search path does not unfold it while synthesizing normed-space structure.  These low-priority
-instances expose that structure for fiberwise continuous-linear constructions on tangent bilinear
-forms.
--/
-
-instance (priority := 70) instNormedAddCommGroupTangentSpace
-    {M F H : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [TopologicalSpace H]
-    (I : ModelWithCorners ℝ F H) [TopologicalSpace M] [ChartedSpace H M] (x : M) :
-    NormedAddCommGroup (TangentSpace I x) := by
-  change NormedAddCommGroup F
-  infer_instance
-
-instance (priority := 100) instNormedSpaceTangentSpace
-    {M F H : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [TopologicalSpace H]
-    (I : ModelWithCorners ℝ F H) [TopologicalSpace M] [ChartedSpace H M] (x : M) :
-    NormedSpace ℝ (TangentSpace I x) := by
-  change NormedSpace ℝ F
-  infer_instance
-
-instance (priority := 100) instIsTopologicalAddGroupTangentSpace
-    {M F H : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [TopologicalSpace H]
-    (I : ModelWithCorners ℝ F H) [TopologicalSpace M] [ChartedSpace H M] (x : M) :
-    IsTopologicalAddGroup (TangentSpace I x) := by
-  change IsTopologicalAddGroup F
-  infer_instance
-
-instance (priority := 100) instT2SpaceTangentSpace
-    {M F H : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [TopologicalSpace H]
-    (I : ModelWithCorners ℝ F H) [TopologicalSpace M] [ChartedSpace H M] (x : M) :
-    T2Space (TangentSpace I x) := by
-  change T2Space F
-  infer_instance
-
-end PoincareCurvature
 
 namespace Bundle
 
@@ -182,19 +144,6 @@ def ContMDiffRiemannianMetric.toContinuousSection (g : ContMDiffRiemannianMetric
     ((g.toContinuousSection : {s : Π x : B, BilV x //
       Continuous (fun x ↦ TotalSpace.mk' (F →L[ℝ] F →L[ℝ] ℝ) x (s x))}).1) = g.toSection :=
   rfl
-
-@[ext] theorem ContMDiffRiemannianMetric.ext
-    {g g' : ContMDiffRiemannianMetric IB n F V}
-    (hinner : ∀ x : B, ∀ u v : V x, g.inner x u v = g'.inner x u v) :
-    g = g' := by
-  have hinner' : g.inner = g'.inner := by
-    funext x
-    ext u v
-    exact hinner x u v
-  cases g
-  cases g'
-  simp at hinner' ⊢
-  exact hinner'
 
 end Smooth
 

@@ -98,7 +98,12 @@ related_formalizations:
       beneath the single writable package build root used by Palomar.
       Contributor notices and unchanged vendored implementation sources are
       checked byte-for-byte against this commit. Explicit Lean 4.35
-      compatibility adaptations are separately hash-pinned and documented.
+      compatibility adaptations and a hash-pinned proof-support module split
+      are separately documented. The split extracts the tangent-space
+      instances and metric extensionality needed by LeviCivita into
+      RiemannianSectionCore.lean, so the heat build does not compile unrelated
+      section-space results from RiemannianSection or its ContinuousSection
+      dependency.
       The selected implementation theorem is
       curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.
       The baseline curvature tree is preserved as the provenance reference. The

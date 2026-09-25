@@ -20,9 +20,9 @@ The vendored curvature proof development is reused from:
 The package carries a mechanically extracted baseline in `vendor/curvature/`
 so the selected project is self-contained. The inherited README, contributor
 notices, manifest, toolchain, and all implementation files outside the
-explicit Lean 4.35 compatibility adaptation list remain byte-for-byte
-identical to the disclosed commit. `scripts/check-provenance.py` checks those
-source blobs and pins every adapted file by SHA-256. The package's root Lakefile
+explicit Lean 4.35 compatibility adaptations and proof-support module split
+remain byte-for-byte identical to the disclosed commit. `scripts/check-provenance.py`
+checks those source blobs and pins every adapted file by SHA-256. The package's root Lakefile
 exposes those sources as a `PoincareCurvature` library with
 `srcDir = "vendor/curvature"`; it deliberately has no nested path dependency,
 so Palomar's single writable package build root contains every build output.
@@ -42,7 +42,7 @@ source subproject.
 
 ## Lean 4.35 compatibility adaptations
 
-The ten adapted vendor files and their exact submitted hashes are listed in
+The ten Lean 4.35 compatibility files and their exact submitted hashes are listed in
 `scripts/check-provenance.py`. No selected theorem statement or source theorem
 file was changed. The edits are confined to:
 
@@ -61,6 +61,18 @@ file was changed. The edits are confined to:
   import. These proof patterns come from
   `curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ModelManifoldGaugeFlow.lean`
   at the disclosed source commit, and remain credited to that development.
+
+## Proof-support module split
+
+The vendored `RiemannianSection.lean` contains a broad section-space API. The
+heat dependency closure used only its four tangent-space structure instances
+and the `ContMDiffRiemannianMetric.ext` lemma through `LeviCivita.lean`. Those
+source declarations are factored into `RiemannianSectionCore.lean`; the wider
+module imports that core to preserve its API, while `LeviCivita.lean` imports
+the core directly. The focused import closure also omits the unrelated
+`ContinuousSection` dependency of the wider API. The provenance check pins the two edited source files and the new core module
+by hash, then checks that the moved declarations occur in the immutable source
+and the core. The selected heat theorem and its proof are unchanged.
 
 ## Mathlib
 

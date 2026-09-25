@@ -46,6 +46,14 @@ ADAPTED_SHA256 = {
         "626c9efc0ce0563ef8a6576ec0e3a332eb42c1e2d12614272f54fc7f558510ea",
     "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/EndomorphismTrace.lean":
         "647ae886731f58c6c3d3bb6f6806db7c4b8c6defe8167c11b9e8508a950ce434",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean":
+        "f7f1477993f745a5901f23340c0602ec659240c7c4a8beabec8ff16db6b6e936",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean":
+        "f51ea4502b70449a5df43cefa69e9740cbb28612e1768d3cf12d563366a30207",
+}
+ADDED_ADAPTATION_SHA256 = {
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSectionCore.lean":
+        "bc2610937d545ec9c8ffe38d72db3fed65cc31f657046cca16697bf9e2bfba55",
 }
 
 
@@ -89,9 +97,10 @@ def main() -> None:
         if path.is_file() and ".lake" not in path.relative_to(VENDOR).parts
     }
     generated = {"LICENSE"}
-    if actual != expected | generated:
-        missing = sorted((expected | generated) - actual)
-        extra = sorted(actual - (expected | generated))
+    added_adaptations = set(ADDED_ADAPTATION_SHA256)
+    if actual != expected | generated | added_adaptations:
+        missing = sorted((expected | generated | added_adaptations) - actual)
+        extra = sorted(actual - (expected | generated | added_adaptations))
         raise SystemExit(f"vendored inventory mismatch; missing={missing}, extra={extra}")
     # Compare committed blobs. Git may materialize CRLF worktree files on
     # Windows even when the immutable source and vendor blobs are identical.
@@ -101,6 +110,8 @@ def main() -> None:
     )
     if not set(ADAPTED_SHA256) <= expected:
         raise SystemExit("adapted file is absent from the disclosed source inventory")
+    if set(ADDED_ADAPTATION_SHA256) & expected:
+        raise SystemExit("added adaptation unexpectedly exists in the source inventory")
     for relative in sorted(expected):
         vendor_oid = vendor_blobs.get(relative)
         if relative in ADAPTED_SHA256:
@@ -111,12 +122,34 @@ def main() -> None:
                 raise SystemExit("adapted vendored file hash changed: " + relative)
         elif vendor_oid != source_blobs[relative]:
             raise SystemExit("vendored file differs from disclosed source: " + relative)
+    for relative, expected_hash in ADDED_ADAPTATION_SHA256.items():
+        vendor_oid = vendor_blobs.get(relative)
+        if vendor_oid is None:
+            raise SystemExit("missing added source-derived adaptation: " + relative)
+        digest = hashlib.sha256(git_bytes(vendor_oid)).hexdigest()
+        if digest != expected_hash:
+            raise SystemExit("added adaptation hash changed: " + relative)
+        source_section = git_bytes(source_blobs[
+            "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean"
+        ]).decode("utf-8")
+        core_section = git_bytes(vendor_oid).decode("utf-8")
+        for declaration in (
+            "instNormedAddCommGroupTangentSpace",
+            "instNormedSpaceTangentSpace",
+            "instIsTopologicalAddGroupTangentSpace",
+            "instT2SpaceTangentSpace",
+            "ContMDiffRiemannianMetric.ext",
+        ):
+            if declaration not in source_section or declaration not in core_section:
+                raise SystemExit("source-derived core declaration missing: " + declaration)
     if vendor_blobs.get("LICENSE") != run("git", "rev-parse", f"{BASE}:LICENSE"):
         raise SystemExit("vendored repository license differs from disclosed source")
     metadata = git_bytes("HEAD:symmetric-tensor-heat/formalization.yaml").decode("utf-8")
     for required in (BASE, SOURCE.as_posix(), "vendor/curvature", "relationship: \"builds-on\""):
         if required not in metadata:
             raise SystemExit("structured provenance is incomplete: " + required)
+    if "RiemannianSectionCore.lean" not in metadata:
+        raise SystemExit("structured provenance omits the proof-support module split")
     print("Immutable source, exact baseline/adapted vendor inventory, notices, and structured provenance passed.")
 
 

@@ -1,6 +1,6 @@
 module
 
-public import PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection
+public import PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSectionCore
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Existence
 public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Metric
 public import Mathlib.Analysis.InnerProductSpace.Dual

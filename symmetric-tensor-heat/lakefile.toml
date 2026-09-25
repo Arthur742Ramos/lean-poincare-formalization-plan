@@ -126,7 +126,6 @@ roots = [
   "PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarParabolicBarrier",
   "PoincareCurvature.Geometry.Manifold.RicciFlow.ScalarParabolicInvariant",
   "PoincareCurvature.Geometry.Manifold.RicciFlow.TensorHeatNormMaximum",
-  "PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection",
   "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along",
   "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.BilinearEvaluation",
   "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacian",
@@ -162,7 +161,7 @@ roots = [
   "PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteSmoothTrivializingCover",
   "PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteTrivializingCover",
   "PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp",
-  "PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection",
+  "PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSectionCore",
 ]
 
 [[lean_lib]]
