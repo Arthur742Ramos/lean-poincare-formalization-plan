@@ -1,0 +1,15 @@
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatWeakLaplacian
+
+-- Exact elaborated theorem types, including local-domain and regularity premises.
+-- The main type retains ContMDiffVectorBundle 3 for the tangent bundle.
+-- Metric regularity is only IsContMDiffRiemannianBundle I 1.
+-- Tensor C2 is confined to e.baseSet; no induced-three connection class is supplied.
+#check CovariantDerivative.contMDiffOn_localTwoTensorConnectionCoefficient_one
+#check CovariantDerivative.contDiffOn_localTwoTensorConnectionCoefficientInChart_one
+#check RicciFlow.AnalyticPDE.contDiffOn_localTensorCoordinates_of_contMDiffOn_two
+#print RicciFlow.AnalyticPDE.connectionLaplacian_apply_eq_localTensorHeatSecondOrder_of_baseC1_and_localC2
+
+#print axioms CovariantDerivative.contMDiffOn_localTwoTensorConnectionCoefficient_one
+#print axioms CovariantDerivative.contDiffOn_localTwoTensorConnectionCoefficientInChart_one
+#print axioms RicciFlow.AnalyticPDE.contDiffOn_localTensorCoordinates_of_contMDiffOn_two
+#print axioms RicciFlow.AnalyticPDE.connectionLaplacian_apply_eq_localTensorHeatSecondOrder_of_baseC1_and_localC2

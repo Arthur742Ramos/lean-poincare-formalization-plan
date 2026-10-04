@@ -1,0 +1,98 @@
+name: Point-4 weak-regularity actual tensor Laplacian
+
+on:
+  pull_request:
+    paths:
+      - "curvature/**"
+      - ".github/workflows/point4-weak-laplacian.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  weak_laplacian:
+    name: Exact-head base-C1 local-C2 Laplacian identity and unchanged full audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Compile geometric regularity and the C1 coefficient helpers
+        working-directory: curvature
+        run: lake build PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatGeometricRegularity
+      - name: Compile the actual local-C2 Laplacian adapter
+        working-directory: curvature
+        run: lake build PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatWeakLaplacian
+      - name: Check exact weak-regularity theorem types and axioms
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_weak_laplacian_probe.lean | tee /tmp/point4-weak-laplacian-axioms.log
+          python3 - <<'PY'
+          import pathlib, re
+          output = pathlib.Path('/tmp/point4-weak-laplacian-axioms.log').read_text()
+          entries = re.findall(r"'([^']+)' depends on axioms:\s*\[([^]]*)\]", output)
+          clean = re.findall(r"'([^']+)' does not depend on any axioms?", output)
+          expected = {
+            'CovariantDerivative.contMDiffOn_localTwoTensorConnectionCoefficient_one',
+            'CovariantDerivative.contDiffOn_localTwoTensorConnectionCoefficientInChart_one',
+            'RicciFlow.AnalyticPDE.contDiffOn_localTensorCoordinates_of_contMDiffOn_two',
+            'RicciFlow.AnalyticPDE.connectionLaplacian_apply_eq_localTensorHeatSecondOrder_of_baseC1_and_localC2',
+          }
+          assert {n for n, _ in entries} | set(clean) == expected, output
+          allowed = {'propext', 'Classical.choice', 'Quot.sound'}
+          for name, axioms in entries:
+            actual = {a.strip() for a in axioms.split(',') if a.strip()}
+            assert actual <= allowed, (name, actual)
+          print('All four weak-regularity tensor-Laplacian axiom surfaces passed')
+          PY
+      - name: Run unchanged full Point-4 completion audit
+        working-directory: curvature
+        run: |
+          set +e
+          bash scripts/point4_audit.sh --json /tmp/point4-weak-laplacian-full-audit.json | tee /tmp/point4-weak-laplacian-full-audit.log
+          audit_rc=${PIPESTATUS[0]}
+          set -e
+          export POINT4_AUDIT_RC="$audit_rc"
+          python3 - <<'PY'
+          import json, os, pathlib
+          data = json.loads(pathlib.Path('/tmp/point4-weak-laplacian-full-audit.json').read_text())
+          assert data['build_run'] is True, data
+          assert data['gates']['G1_sorry_free']['status'] == 'PASS', data
+          assert data['gates']['G2_build_green']['status'] == 'PASS', data
+          if data['verdict'] == 'CLOSED':
+            assert os.environ['POINT4_AUDIT_RC'] == '0', data
+            assert all(g['status'] == 'PASS' for g in data['gates'].values()), data
+          else:
+            assert data['verdict'] == 'OPEN', data
+            assert os.environ['POINT4_AUDIT_RC'] == '1', data
+            print('POINT 4 OPEN: the weak-regularity actual tensor-Laplacian identity does not close the canonical theorem')
+          PY
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-weak-laplacian-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-weak-laplacian-axioms.log
+            /tmp/point4-weak-laplacian-full-audit.json
+            /tmp/point4-weak-laplacian-full-audit.log
+            /tmp/point4_build.log
+          if-no-files-found: ignore

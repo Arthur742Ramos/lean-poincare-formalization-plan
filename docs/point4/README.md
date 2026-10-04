@@ -571,3 +571,6 @@ metric and proves its genuine finite-cylinder coordinate Cauchy action.
 See [the exact theorem and verification boundary](frozen-metric-principal.md).
 This does not construct the general manifold encoding, nonlinear solver,
 metric preservation, realization or uniqueness. Point 4 remains open.
+The [weak-regularity actual tensor-Laplacian proof unit](weak-laplacian.md)
+removes the unnecessary C² connection/induced-three oracle from a new local
+adapter. Authored source awaits exact Lean 4.33.0 verification; Point 4 stays open.

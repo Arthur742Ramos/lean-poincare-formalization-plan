@@ -165,3 +165,11 @@ When implementation changes:
 4. keep publication status in the submission portfolio;
 5. preserve partial or failed approaches in `docs/history/` only when they are
    useful research records.
+
+## Weak-regularity Laplacian proof unit
+
+The [base-C¹, local-C² actual tensor-Laplacian adapter](point4/weak-laplacian.md)
+has been authored and awaits independent source review and exact Lean 4.33.0
+hosted verification. It constructs coordinate certificates internally and
+preserves the actual operator and reversed tensor-output convention. It does
+not provide Hölder coefficient bounds or close the canonical Point-4 target.
