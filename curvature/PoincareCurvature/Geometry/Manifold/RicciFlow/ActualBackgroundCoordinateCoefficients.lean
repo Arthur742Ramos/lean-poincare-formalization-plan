@@ -154,7 +154,7 @@ theorem backgroundFirst_actualBackgroundCoordinates_eq_mvfderiv
       |>.mdifferentiableAt one_ne_zero
   change fderiv ℝ ((scalarReadout (I := I) p
     (actualBackgroundFrameCoeff background t p b k i j)) ∘ toModel b)
-      ((toModel b).symm (extChartAt I p x)) (coordinateVector m) = _
+      ((toModel b).symm (extChartAt I p x)) (Pi.single m 1) = _
   rw [fderiv_comp_toModel_coordinateVector b hreadout]
   exact (mvfderiv_frame_eq_fderiv (I := I) p b hx hcoeff m).symm
 
