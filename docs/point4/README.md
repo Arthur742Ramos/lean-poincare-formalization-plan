@@ -40,7 +40,11 @@ It has no inhabitant supplied here. The only approved scope correction is the
 geometric `BoundarylessManifold I M` premise; see the distinct
 [closed-manifold contract milestone](closed-contract.md). All C² data, current
 weak candidate regularity, ordinary initial derivatives and common closed
-intervals remain required. `--no-build` always leaves the completion verdict open.
+intervals remain required. The eight fingerprints guard selected declaration
+bodies and the expected expression, not every unlisted dependency body; no
+current dependency mutation is part of this milestone, and independent
+exact-head source and mathematical review remains required. `--no-build`
+always leaves the completion verdict open.
 
 ## Current verdict
 

@@ -71,9 +71,12 @@ G5 now imports the actual target and checks a bare `@target` against the entire
 expected dependent function type at three independent universes. Compiler exit
 status is mandatory. G5 also requires the eight original requirement-interface
 fingerprints and the complete expected binder/result expression to match the
-immutable base. This guards against weakening a definition while retaining its
-name. A future semantics-preserving refactor needs explicit reviewed fingerprint
-renewal; the check is not permission to change the requirements. A name grep is no longer accepted as a signature proof.
+immutable base. These guard the selected declaration bodies and the expected
+binder/result expression against same-name weakening; they do not fingerprint
+every unlisted transitive dependency body. No current dependency mutation is
+part of this milestone. Independent exact-head source and mathematical review
+remains required. A future semantics-preserving refactor needs explicit reviewed
+fingerprint renewal; the check is not permission to change the requirements. A name grep is no longer accepted as a signature proof.
 G3 cannot certify unconditional construction when that assignment fails.
 The previous forbidden restriction checks remain additional defenses. The
 canonical identity is fixed as
@@ -104,8 +107,12 @@ if every other gate were to pass.
 
 Local source checks and shell syntax are distinct from Lean verification.
 Exact Lean 4.33 hosted compilation and full gates must be established for the
-frozen commit before review/publication claims. No toolchain, package, pin,
-structured attribution or contributor notice is changed here. No registry
+frozen commit before review/publication claims. No toolchain, package, pin or contributor notice is changed here. The focused
+[`formalization.yaml`](closed-contract/formalization.yaml) adds immutable
+structured `builds-on` attribution for the inherited same-repository
+`LocalExistence.lean` and `TimeDependent.lean` source and pinned Mathlib
+`InteriorBoundary.lean`. Earlier artifacts' structured identities and notices
+are retained unchanged. No registry
 submission or broader smooth-data/candidate-class correction is authorized.
 
 ## Remaining open obligations
