@@ -84,7 +84,7 @@ theorem first_component_hasFDerivAt
       ((fderiv ℝ (fderiv ℝ (fun y => g y i k)) x).flip (coordinateVector b)) x := by
   simpa [first] using
     (component_differential_hasFDerivAt hU hg hx i k).clm_apply
-      (hasFDerivAt_const x (coordinateVector b))
+      (hasFDerivAt_const (coordinateVector b) x)
 
 /-- Compatibility of the actual first and second slots. The differentiated
 first-coordinate component has precisely the second-slot evaluation. -/
