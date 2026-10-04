@@ -72,13 +72,20 @@ theorem chosenLC_coordinateFrame_metricCompatibility
       (CovariantDerivative.torsion_eq_zero_iff (cov := cov)).mp hLevi.1
         (X := frame (I := I) p b r) (Y := frame (I := I) p b q)
         (x := x) (hmd r) (hmd q)
+  have hinner (y : M) (u v : TM y) : inner ℝ u v = (g t).inner y u v := rfl
+  have hcomponent :
+      (fun y => inner ℝ (frame (I := I) p b i y) (frame (I := I) p b j y)) =
+        chosenLCMetricComponent g t p b i j := by
+    funext y
+    exact hinner y _ _
   have hmetric := hLevi.2 (hmd i) (hmd j) (frame (I := I) p b q x)
+  rw [hcomponent, hinner x, hinner x] at hmetric
   change
     (g t).inner x (cov (frame (I := I) p b q) x (frame (I := I) p b i x))
         (frame (I := I) p b j x) +
       (g t).inner x (frame (I := I) p b i x)
         (cov (frame (I := I) p b q) x (frame (I := I) p b j x)) = _
   rw [hswap i, hswap j, first_chosenLCMetricCoordinates_eq_mvfderiv g t p b hx]
-  simpa only [chosenLCMetricComponent] using hmetric.symm
+  exact hmetric.symm
 
 end RicciFlow
