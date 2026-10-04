@@ -31,7 +31,7 @@ namespace CovariantDerivative
 local notation "TM" => (TangentSpace I : M → Type _)
 
 /-- The actual connection difference, retaining both covariant slots. -/
-def metricConnectionDifferenceBilinear
+noncomputable def metricConnectionDifferenceBilinear
     (cov cov' : CovariantDerivative I E TM) (x : M) :
     TM x →ₗ[ℝ] TM x →ₗ[ℝ] TM x where
   toFun u := (CovariantDerivative.difference cov cov' x u).toLinearMap
@@ -49,7 +49,7 @@ def metricConnectionDifferenceBilinear
     metricConnectionDifferenceBilinear cov cov' x u v =
       CovariantDerivative.difference cov cov' x u v := rfl
 
-variable [RiemannianBundle TM]
+variable [RiemannianBundle (TangentSpace I : M → Type _)]
 
 /-- The inverse-metric trace of the connection-difference bilinear tensor. -/
 noncomputable def metricConnectionDifferenceVector
