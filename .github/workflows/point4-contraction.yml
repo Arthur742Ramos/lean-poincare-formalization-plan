@@ -56,13 +56,14 @@ jobs:
             'CovariantDerivative.metricConnectionDifferenceVector_localFrameCoeff',
             'CovariantDerivative.metricConnectionDifferenceVector_eq_zero_of_isLeviCivita',
             'RicciFlow.metricContractedDeTurckVectorField_eq_zero_of_isLeviCivita',
+            'RicciFlow.metricContractedDeTurckVectorField_eq_standardDeTurckVectorField',
           }
           assert {n for n, _ in entries} | set(clean) == expected, output
           allowed = {'propext', 'Classical.choice', 'Quot.sound'}
           for name, axioms in entries:
             actual = {a.strip() for a in axioms.split(',') if a.strip()}
             assert actual <= allowed, (name, actual)
-          print('All five contraction/bridge/regression axiom surfaces passed')
+          print('All six contraction/bridge/comparison/regression axiom surfaces passed')
           PY
       - name: Run unchanged full Point-4 completion audit
         working-directory: curvature

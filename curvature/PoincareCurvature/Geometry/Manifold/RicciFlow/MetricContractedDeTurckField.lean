@@ -3,6 +3,7 @@ Copyright (c) 2026 Poincaré formalization project. All rights reserved.
 -/
 import PoincareCurvature.Analysis.MetricBilinearContraction
 import PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurck
+import PoincareCurvature.Geometry.Manifold.RicciFlow.StandardDeTurck
 
 /-!
 # The conventional metric-contracted DeTurck field
@@ -151,6 +152,32 @@ noncomputable def metricContractedDeTurckVectorField
       ⟨(g t).toRiemannianMetric⟩
     exact CovariantDerivative.metricConnectionDifferenceVector
       ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x
+
+/-- Identify this generic contraction adapter with the existing standard
+DeTurck field. Its bilinear adapter reverses the inputs, but contraction with
+the canonical metric tensor agrees on every orthonormal diagonal. -/
+theorem metricContractedDeTurckVectorField_eq_standardDeTurckVectorField
+    (g : MetricFamily (I := I) (M := M))
+    (background : ConnectionFamily (I := I) (M := M)) :
+    metricContractedDeTurckVectorField (I := I) (M := M) g background =
+      standardDeTurckVectorField (I := I) (M := M) g background := by
+  classical
+  funext t x
+  letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+    ⟨(g t).toRiemannianMetric⟩
+  letI : FiniteDimensional ℝ (TM x) := VectorBundle.finiteDimensional ℝ E TM x
+  let b := stdOrthonormalBasis ℝ (TM x)
+  change CovariantDerivative.metricConnectionDifferenceVector
+    ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x = _
+  rw [CovariantDerivative.metricConnectionDifferenceVector_eq_sum_orthonormalBasis
+    _ _ x b]
+  symm
+  unfold standardDeTurckVectorField
+  dsimp only
+  rw [InnerProductSpace.canonicalCovariantTensor_eq_sum (TM x) b, map_sum]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rfl
 
 /-- The recovery gauge has the negative sign. Its analytic flow is a separate
 construction, not supplied by this abbreviation. -/

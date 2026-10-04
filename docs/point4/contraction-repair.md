@@ -16,7 +16,16 @@ the first component of `V` is `2`. This is a slot-contraction difference, not
 merely a sign convention. The positive conventional field, the equation
 `-2 Ric + Lie_W g`, and the negative recovery gauge are mutually consistent.
 
-## New supporting construction
+## Existing standard route and new supporting construction
+
+`RicciFlow/StandardDeTurck.lean` already defines the conventional two-input
+contraction, and `StandardDeTurckRegularity.lean` proves spatial C¹ regularity
+from the C² metric and C¹ background connection. The new generic adapter is
+proved equal to that existing standard field. It is not a second geometric
+model or a claim that no correct field existed before this milestone.
+
+The equality also permits reuse of the existing standard-field derivative and
+Koszul-expansion infrastructure when the remaining analytic bridge is proved.
 
 `Analysis/MetricBilinearContraction.lean` contracts a vector-valued bilinear
 map with `InnerProductSpace.canonicalCovariantTensor`. It proves:
@@ -30,7 +39,8 @@ map with `InnerProductSpace.canonicalCovariantTensor`. It proves:
 
 `RicciFlow/MetricContractedDeTurckField.lean` applies this construction to the
 actual `CovariantDerivative.difference`, proves its conventional local-frame
-coefficient formula, and defines the metric-contracted vector and negative
+coefficient formula, identifies it with the existing standard field, and defines
+the metric-contracted vector and negative
 gauge fields. Equal Levi-Civita connections have zero contraction, so the
 evolving-Levi-Civita special case still reduces to zero gauge.
 
