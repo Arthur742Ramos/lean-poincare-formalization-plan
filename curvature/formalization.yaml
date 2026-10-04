@@ -121,7 +121,7 @@ status:
 
 automation:
   methods:
-    - method: "agent-assisted"
+    - method: "agent"
       models: ["GPT-5 Codex"]
       framework: "Codex with Lean 4.33 and Mathlib"
       tool_setup: >-

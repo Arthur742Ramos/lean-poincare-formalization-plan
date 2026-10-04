@@ -19,13 +19,19 @@ coordinate differentiability certificates.
 
 ## Exact regularity boundary
 
-- Smooth finite-dimensional complete-model Hausdorff boundaryless manifold
+- Smooth finite-dimensional complete-model Hausdorff manifold with the
+  model-level `[I.Boundaryless]` assumption
 - Existing Riemannian bundle with C¹ metric regularity
 - Existing C³ tangent-vector-bundle regularity, used by the already-proved C²
   pulled-back moving-frame theorem; this is not a C³ metric assumption
 - A C¹ base tangent connection
 - The tensor section is C² only on the open frame patch `e.baseSet`
 - The evaluation point lies in the frame patch and the chosen chart source
+
+The model-level `[I.Boundaryless]` assumption is stronger than the canonical
+Point-4 target's manifold-level `BoundarylessManifold`. Transporting this local
+identity to that canonical hypothesis remains an open adapter obligation; this
+proof unit does not change or weaken the canonical target.
 
 There is no C² connection hypothesis or induced-three regularity hypothesis.
 The induced-two C¹ connection class is constructed from the base C¹ connection
