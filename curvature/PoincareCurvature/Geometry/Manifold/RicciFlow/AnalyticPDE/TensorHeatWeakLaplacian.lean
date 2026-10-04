@@ -1,7 +1,5 @@
-module
-
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatGeometricRegularity
-public import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.InducedHomRegularity
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatGeometricRegularity
+import PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.InducedHomRegularity
 
 /-!
 # Actual tensor Laplacian from a C¹ connection and a local C² tensor
@@ -17,7 +15,7 @@ This supporting identity does not establish Hölder coefficient estimates or
 Ricci-flow local existence.
 -/
 
-@[expose] public noncomputable section
+noncomputable section
 
 set_option linter.unusedSectionVars false
 set_option synthInstance.maxHeartbeats 800000
