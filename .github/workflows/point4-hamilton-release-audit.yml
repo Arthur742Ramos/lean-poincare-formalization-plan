@@ -1,0 +1,61 @@
+name: Point-4 upstream Hamilton release audit
+
+on:
+  push:
+    paths:
+      - "scripts/point4/audit-hamilton-release.py"
+      - ".github/workflows/point4-hamilton-release-audit.yml"
+  pull_request:
+    paths:
+      - "scripts/point4/audit-hamilton-release.py"
+      - ".github/workflows/point4-hamilton-release-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  upstream-endpoints:
+    name: Immutable upstream closure, signatures, and foundational axioms
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout exact audit candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: campaign
+          persist-credentials: false
+      - name: Checkout immutable Apache-2.0 upstream release
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: qinz1yang/differential-geometry
+          ref: 8bd406e35c33a200e9b88895cf11ee8429194e15
+          path: upstream
+          persist-credentials: false
+      - name: Check pin and inspect focused source closure before compilation
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --plan-only
+      - name: Install upstream pinned toolchain and official Mathlib cache
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          build: false
+      - name: Compile exact endpoint import closure and inspect axioms
+        run: |
+          python3 campaign/scripts/point4/audit-hamilton-release.py upstream | tee hamilton-release-audit/build.log
+      - name: Preserve complete audit evidence and unresolved bridge status
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: hamilton-release-audit-${{ github.event.pull_request.head.sha || github.sha }}
+          path: hamilton-release-audit/
+          if-no-files-found: error
