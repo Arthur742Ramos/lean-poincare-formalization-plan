@@ -185,3 +185,5 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateJetCo
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateRicciDeTurckOperator
 
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ChosenLeviCivitaCoordinateChristoffel
+
+import PoincareCurvature.Geometry.Manifold.RicciFlow.ChosenLeviCivitaCoordinateCurvature

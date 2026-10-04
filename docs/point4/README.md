@@ -526,3 +526,14 @@ coefficients and their derivatives with the coordinate Christoffel formulas.
 See [`chosen-lc-coordinate.md`](chosen-lc-coordinate.md). The generic frame
 check passed in rc2 development; exact Lean-4.33 geometric verification remains
 pending. The curvature/Lie/PDE boundaries and Point-4 OPEN verdict remain.
+
+The next supporting source candidate adds actual chosen-LC curvature and
+intrinsic Ricci coordinate readouts in
+`ChosenLeviCivitaCoordinateCurvature.lean`. Genuine local C¹ covariant-derivative
+and scalar coefficient regularity supplies the derivative transport; the
+existing local-to-bundled-curvature theorem supplies actual curvature.
+Lower Christoffel-slot symmetry is differentiated on an open neighborhood,
+and the ordinary basis trace's transpose is resolved separately by actual
+intrinsic Ricci symmetry. See [curvature/Ricci scope](chosen-lc-curvature.md).
+Exact Lean-4.33 compilation is pending; the Lie/DeTurck, analytic and PDE
+boundaries and the Point-4 **OPEN** verdict remain.
