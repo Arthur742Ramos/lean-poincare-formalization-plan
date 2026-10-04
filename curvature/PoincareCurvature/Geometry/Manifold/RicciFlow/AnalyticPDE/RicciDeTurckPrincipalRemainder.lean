@@ -61,8 +61,6 @@ def secondOrderJet (j : Jet2 d d) : Jet2 d d := ⟨0, 0, j.deriv2⟩
     firstOrderJet j + secondOrderJet j = j := by
   change (⟨j.val + 0, j.deriv1 + 0, 0 + j.deriv2⟩ : Jet2 d d) = j
   simp only [add_zero, zero_add]
-  cases j
-  rfl
 
 @[simp] theorem firstOrderJet_idempotent (j : Jet2 d d) :
     firstOrderJet (firstOrderJet j) = firstOrderJet j := rfl
@@ -338,8 +336,17 @@ theorem hasDerivAt_conventionalContraction
       (∑ a : Fin d, ∑ b : Fin d,
         (A1 a b * (Γ t l a b - Γbar t l a b) +
           A t a b * (Γ1 l a b - Γbar1 l a b))) t := by
-  exact HasDerivAt.sum (u := Finset.univ) fun a _ =>
+  have h := HasDerivAt.sum (u := Finset.univ) fun a _ =>
     HasDerivAt.sum (u := Finset.univ) fun b _ =>
       (hA a b).mul ((hΓ l a b).sub (hΓbar l a b))
+  have hfun :
+      (∑ a : Fin d, ∑ b : Fin d,
+        (fun s => A s a b) * ((fun s => Γ s l a b) - (fun s => Γbar s l a b))) =
+      (fun s => ∑ a : Fin d, ∑ b : Fin d,
+        A s a b * (Γ s l a b - Γbar s l a b)) := by
+    funext s
+    simp only [Finset.sum_apply, Pi.mul_apply, Pi.sub_apply]
+  rw [hfun] at h
+  exact h
 
 end RicciFlow.AnalyticPDE.GenuinePhiRD
