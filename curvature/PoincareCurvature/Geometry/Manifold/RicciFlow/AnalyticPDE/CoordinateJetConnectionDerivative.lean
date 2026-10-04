@@ -26,8 +26,12 @@ variable {d : ℕ} {g : (Fin d → ℝ) → (Fin d → Fin d → ℝ)}
 /-- The actual jet inverse is the genuine nonsingular coordinate matrix inverse. -/
 theorem invMetricOfJet_coordinateJet_eq_inverse (i k : Fin d) :
     invMetricOfJet (coordinateJet g x) i k = inverse g x i k := by
-  simp only [invMetricOfJet, coordinateJet, inverse, Matrix.inv_def,
-    Ring.inverse_eq_inv, Matrix.smul_apply, smul_eq_mul]
+  change ((show Matrix (Fin d) (Fin d) ℝ from g x).det)⁻¹ *
+    Matrix.adjugate (show Matrix (Fin d) (Fin d) ℝ from g x) i k =
+      ((show Matrix (Fin d) (Fin d) ℝ from g x)⁻¹) i k
+  simpa only [Ring.inverse_eq_inv, Matrix.smul_apply, smul_eq_mul] using
+    (congrArg (fun C : Matrix (Fin d) (Fin d) ℝ => C i k)
+      (Matrix.inv_def (show Matrix (Fin d) (Fin d) ℝ from g x))).symm
 
 /-- The existing algebraic inverse derivative equals the actual computed
 coordinate inverse derivative, rather than serving as its assumption. -/
