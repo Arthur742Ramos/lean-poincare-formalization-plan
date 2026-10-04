@@ -193,7 +193,7 @@ theorem contMDiff_metricContractedDeTurckGaugeField_of_joint_correction
     metricContractionTangentVectorBundle (I := I) (M := M)
   have hvector := contMDiff_metricContractedDeTurckVectorField_of_joint_correction
     g gSmooth background bas hinner hmetric hcorrection
-  simpa only [metricContractedDeTurckGaugeField, Pi.neg_apply] using
+  simpa only [ModelWithCorners.tangent, metricContractedDeTurckGaugeField, Pi.neg_apply] using
     (@PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg
       E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› H ‹TopologicalSpace H› I ∞
       M ‹TopologicalSpace M› ‹ChartedSpace H M›
