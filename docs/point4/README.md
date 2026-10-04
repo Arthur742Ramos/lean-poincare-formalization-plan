@@ -46,6 +46,17 @@ current dependency mutation is part of this milestone, and independent
 exact-head source and mathematical review remains required. `--no-build`
 always leaves the completion verdict open.
 
+## Boundaryless chart transport
+
+The supporting [boundaryless-chart/frame milestone](boundaryless-chart-frames.md)
+proves openness of each preferred chart target and local ordinary derivative
+and vector-field pullback transport from `BoundarylessManifold I M`. The actual
+preferred-frame constant pullback, scalar derivative and commuting-bracket
+identities now use that theorem-level hypothesis. No global model-range
+identity, supplied chart, germ or commuting certificate is required. The
+chosen-LC and analytic consumers are unchanged; quantitative norm/heat/PDE
+transport and the canonical Point-4 theorem remain open.
+
 ## Current verdict
 
 The fast audit run on 2026-09-11 passed the forbidden-term scan but did not find
