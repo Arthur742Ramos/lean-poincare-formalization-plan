@@ -384,10 +384,21 @@ gauge. The correction-functional corollary derives the tensor premise by the
 existing geometric Gram/Riesz reconstruction, and a conditional compact-flow
 wrapper uses this same conventional gauge. These are explicit geometric
 regularity hypotheses, not assumptions about the final contracted field or a
-claim of PDE existence. The generic contraction prototype passed only a
-development-toolchain check; exact Lean-4.33 compilation of the new geometric
-adapter remains pending. See [contraction repair](contraction-repair.md) for the
+claim of PDE existence. The generic contraction passed exact Lean-4.33 compilation; final
+verification of the new geometric adapter remains pending. See [contraction repair](contraction-repair.md) for the
 field distinction and verification boundary. Point 4 remains OPEN.
+
+The candidate algebraic principal/remainder milestone is packaged in
+`RicciDeTurckPrincipalRemainder.lean`. It derives an exact finite reaction split
+from the actual Ricci and conventional DeTurck coordinate formulas, exposes
+both Hessian-slot symmetries, and isolates a truly Hessian-independent
+lower-order reaction. It also adds the two missing background-first-jet Lie
+contributions with their negative sign and proves the corrected frozen
+coefficient remainder identity and a coefficient-error bound. It constructs no
+holonomic jets or PDE solution, and does not identify this algebraic contraction
+with the manifold tensor-heat generator. Its exact Lean-4.33 full build and eleven standard-only axiom probes
+passed before the principal milestone was merged into master. See [principal/remainder scope](principal-remainder.md) for the
+precise statement, derivative-compatibility boundary, and verification gates.
 
 ## Proved architecture
 

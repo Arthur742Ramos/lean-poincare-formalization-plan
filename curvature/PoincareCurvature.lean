@@ -180,3 +180,4 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GenuineRicciDeT
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ResearchTheorems
 import PoincareCurvature.Geometry.Manifold.RicciFlow.MetricContractedDeTurckField
 import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.MetricContractedDeTurckJointRegularity
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.RicciDeTurckPrincipalRemainder
