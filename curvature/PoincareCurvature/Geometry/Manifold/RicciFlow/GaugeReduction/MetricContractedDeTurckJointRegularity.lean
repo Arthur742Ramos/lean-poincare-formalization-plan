@@ -80,7 +80,7 @@ theorem metricContractedDeTurckVectorField_eq_sum_inverseGram_correction
     _ _ x basis, hGram]
   simp_rw [hframe, intrinsicDeTurck_difference_apply_eq_leviCivitaCorrection]
 
-set_option maxHeartbeats 1000000 in
+set_option maxHeartbeats 2000000 in
 /-- The genuine conventional vector section is jointly smooth if the actual
 metric and explicit correction tensor are jointly smooth. Neither the inverse
 Gram matrix nor the contracted field is assumed smooth. -/
@@ -135,9 +135,12 @@ theorem contMDiff_metricContractedDeTurckVectorField_of_joint_correction
           explicitLeviCivitaCorrection (I := I) (M := M) g background p.1 p.2
             (e.localFrame bas i p.2) (e.localFrame bas j p.2))) S := by
     exact @PoincareCurvature.ParametrizedInner.contMDiffOn_timeDependentMetricContraction
-      E _ _ H _ I ∞ M _ _ E _ _ (TangentSpace I : M → Type _)
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› H ‹TopologicalSpace H› I ∞
+      M ‹TopologicalSpace M› ‹ChartedSpace H M›
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› (TangentSpace I : M → Type _)
       instTopologicalSpaceTangentBundle
-      (fun _ => inferInstance) (fun _ => inferInstance)
+      (fun x => (inferInstance : NormedAddCommGroup (TM x)))
+      (fun x => (inferInstance : NormedSpace ℝ (TM x)))
       (metricContractionTangentFiberBundle (I := I) (M := M))
       (metricContractionTangentVectorBundle (I := I) (M := M))
       ‹ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I›
@@ -186,13 +189,17 @@ theorem contMDiff_metricContractedDeTurckGaugeField_of_joint_correction
     g gSmooth background bas hinner hmetric hcorrection
   simpa only [metricContractedDeTurckGaugeField, Pi.neg_apply] using
     (@PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg
-      E _ _ H _ I ∞ M _ _ E _ _ (TangentSpace I : M → Type _)
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› H ‹TopologicalSpace H› I ∞
+      M ‹TopologicalSpace M› ‹ChartedSpace H M›
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› (TangentSpace I : M → Type _)
       instTopologicalSpaceTangentBundle
-      (fun _ => inferInstance) (fun _ => inferInstance)
+      (fun x => (inferInstance : NormedAddCommGroup (TM x)))
+      (fun x => (inferInstance : NormedSpace ℝ (TM x)))
       (metricContractionTangentFiberBundle (I := I) (M := M))
       (metricContractionTangentVectorBundle (I := I) (M := M))
       ‹ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I›
-      (ℝ × E) _ _ (ℝ × H) _ (𝓘(ℝ).prod I) (ℝ × M) _ _
+      (ℝ × E) _ _ (ModelProd ℝ H) _ (𝓘(ℝ).prod I)
+      (ℝ × M) _ (prodChartedSpace ℝ ℝ H M)
       (Prod.snd : ℝ × M → M)
       (fun p : ℝ × M =>
         metricContractedDeTurckVectorField (I := I) (M := M) g background p.1 p.2)
