@@ -50,10 +50,11 @@ It requires all of the following in one full run:
 
 1. no forbidden proof placeholders or locally declared axioms in the library;
 2. a successful `lake build`;
-3. an unconditional general compact-manifold construction of
+3. an unconditional general compact-boundaryless-manifold construction of
    `IntrinsicLocalExistenceUniquenessFamily`;
 4. only the accepted foundational axioms in the target's proof dependencies;
-5. an elaborated target type without hidden restrictive hypotheses.
+5. a kernel-checked assignment to the complete expected closed-manifold type,
+   with no added analytic, solver, package or restrictive type hypotheses.
 
 The canonical target name is maintained in
 [`curvature/scripts/point4_target.txt`](../curvature/scripts/point4_target.txt).
@@ -66,6 +67,12 @@ As of the documentation audit on 2026-09-11, the fast audit found:
 | G3: unconditional construction | Fail: canonical target missing |
 | G4: axiom audit | Fail because target is missing |
 | G5: faithful target type | Fail because target is missing |
+
+The maintainer-approved 2026-10-04 scope correction adds only the theorem-level
+`BoundarylessManifold I M` premise. It does not change the reusable geometric,
+IVP, candidate or family interfaces. The complete expected type and rationale
+are recorded in [the closed-manifold contract milestone](point4/closed-contract.md).
+This is an interface/audit milestone, not a construction of the canonical target.
 
 Therefore milestone 4 is **open**. A previous successful build, a conditional
 theorem, or a proved special family cannot override that verdict.
@@ -131,11 +138,25 @@ does not change the Point-4 **Open** status.
 The weighted initial-face supporting source candidate constructs actual
 compatible positive-time C²,α heat data with an explicit Hessian Hölder constant
 whose `t^(α/2)` weight vanishes, under uniform continuity only of the initial
-Hessian entries. It builds on exact unmerged PR124 head
-`591c25914c80366d619ece00da204997ee2a65d7`; exact Lean-4.33 verification is pending.
+Hessian entries. It now builds on exact unmerged integrated PR124 head
+`ba47fe1f4d8efad8bad68c61b4d25d0d8ff5387e`, preserving the weighted API repair from
+`f908454fac787a720239e04feee6d61a9f9ab202`. The historical `633ec144`
+weighted run failed compilation; the current integrated head is UNVERIFIED
+until fresh actual Lean-4.33 gates and independent review pass.
 No initial positive-exponent Hessian Hölder hypothesis is introduced. See
 [the weighted initial heat boundary](point4/weighted-initial-heat.md).
 Compact localization, weighted nonlinear evolution and Point 4 remain open.
+
+The next supporting source candidate supplies the actual conventional
+StandardDeTurck background/W coordinate producers, genuine derivative
+transport, actual torsion/metric-compatible Lie correction and intrinsic RHS
+identification. It then specializes the corrected jet, principal and frozen
+remainder identities to that same actual geometric RHS. Exact Lean-4.33
+verification is pending; no local compiler was run for this unit. See
+[actual standard coordinate-operator scope](point4/standard-coordinate-operator.md).
+The heat-generator, analytic, PDE and canonical Point-4 **OPEN** boundaries
+remain unchanged.
+
 
 ## Updating this page
 

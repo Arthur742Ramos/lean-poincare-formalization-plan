@@ -42,8 +42,9 @@ existence, and time-dependent geometric structures. They are proved in the
 ## Layer 2: Ricci-flow foundations
 
 Milestone 4 must produce genuine short-time existence and uniqueness on compact
-manifolds. Milestone 5 then develops evolution equations and maximum principles
-on those solutions.
+manifolds without boundary, for every spatially C² initial metric and every
+candidate in the existing weak solution class. Milestone 5 then develops
+evolution equations and maximum principles on those solutions.
 
 This is the current frontier. Conditional Ricci–DeTurck bridges and special-case
 solutions do not unlock the layer by themselves. See the

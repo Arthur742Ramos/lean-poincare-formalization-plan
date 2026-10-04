@@ -1,7 +1,12 @@
 # Vanishing weighted initial Hessian Hölder certificates
 
-This supporting source candidate builds on immutable PR124 head
-`591c25914c80366d619ece00da204997ee2a65d7`, an explicit unmerged stack dependency.
+This supporting source candidate now builds on immutable integrated PR124 head
+`ba47fe1f4d8efad8bad68c61b4d25d0d8ff5387e`, an explicit unmerged stack dependency.
+That head merges historical heat-trace source
+`591c25914c80366d619ece00da204997ee2a65d7` with exact current master
+`60b6f8ef9d37d1fc5fac1f6113584e1b16370016` by ancestry.
+This weighted integration has real parents: the one-file API repair
+`f908454fac787a720239e04feee6d61a9f9ab202` and the integrated PR124 head.
 The actual Gaussian, its normalization and semigroup law, coordinate derivative
 commutation, compatible bounded-C² heat producer, and arbitrary-modulus initial
 trace are inherited byte-for-byte. Structured builds-on attribution is recorded
@@ -54,10 +59,30 @@ covered by the compiled-type probe, with Hessian constant identically zero.
 
 ## Verification boundary
 
-The inherited PR124 actual trace/generator type and axiom checks reportedly
-passed at its exact Lean-4.33 head; its complete build remains a separate
-pending inherited gate. This candidate has had no local Lean compiler run.
-Exact Lean-4.33 verification and independent review are pending.
+Historical PR124 head `591c25914c80366d619ece00da204997ee2a65d7`
+passed its actual Lean-4.33 helpers, trace/generator type and twelve axiom
+surfaces, G1 and full G2 build in run `37231132865`, with Point4 OPEN.
+Its separate current closed-contract run `37231132971` failed source identity
+before Lean, because that branch lacked the subsequently merged contract.
+Both outcomes are preserved; neither verifies the new integrated head.
+
+Historical weighted head `633ec144d7f1fb1b04737f309942b73b7a63d083`
+failed actual Lean-4.33 compilation at four API/proof points: the unavailable
+`abs_add` name, the square-root/positive-filter limit composition, the rpow
+weight-normalization rewrite, and the final conditional-holder-constant
+simplification. The minimal one-file repair at
+`f908454fac787a720239e04feee6d61a9f9ab202` received independent source
+approval before this integration but was not Lean-compiled or published.
+That exact repaired proof is retained byte-for-byte, with SHA256
+`a1ca6c80dabcc0f9df8d788870869bc0a5eff453752e8fef1379cc8a2d0dca23`.
+The failed head and its evidence remain historical rather than being relabeled
+successful. The original author/development history remains unchanged.
+
+The current integrated weighted head is **UNVERIFIED**. Fresh actual Lean-4.33
+closed-contract, inherited initial-trace and weighted workflows must pass all
+compile/type/axiom/kernel-regression and full-build gates, followed by new
+independent exact-head review, before any merge. No local Lean compiler,
+dependency install, toolchain change or cache download was used for integration.
 
 The new pinned read-only workflow builds the actual weighted module, checks
 all eleven selected axiom surfaces and exact headline types, and runs the
@@ -65,9 +90,12 @@ unchanged full Point-4 audit. The inherited initial-trace workflow is unchanged
 and also triggers on the new candidate's `curvature/**` changes.
 
 The source preflight
-`curvature/scripts/point4_weighted_initial_heat_guard.py` checks all 385 inherited
-Lean proof files against the exact base, preserves the canonical contracts,
-initial-data meaning, full completion audit, inherited workflow and toolchain
+`curvature/scripts/point4_weighted_initial_heat_guard.py` checks the exact immutable parent union of all inherited
+repository Lean proof files and rejects unknown proof files. It retains the
+390-file integrated library plus the exact repaired weighted file, preserves
+the current canonical closed contract, all eight interface fingerprints and
+negative kernel fixtures, the current full auditor,
+initial-data meaning, all inherited workflows and toolchain
 pins, and checks the new headline source signature. The compiled type/axiom
 probe is an independent required gate, not replaced by that source check.
 With the cached complete official v0.4 schema supplied, full metadata validation

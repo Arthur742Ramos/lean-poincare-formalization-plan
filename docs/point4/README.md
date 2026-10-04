@@ -1,8 +1,8 @@
 # Point 4: Ricci-flow local existence and uniqueness
 
 Point 4 aims to prove short-time existence and uniqueness of Ricci flow for
-general initial data on a compact smooth manifold. It is the first open
-dependency in the [Poincaré roadmap](../roadmap.md).
+every spatially C² initial metric on a compact smooth manifold without boundary.
+It is the first open dependency in the [Poincaré roadmap](../roadmap.md).
 
 This file records the current boundary and next work. The long chronological
 development record has moved to
@@ -21,14 +21,30 @@ The audit requires:
    `native_decide`, and `decide!` after comments and strings are removed;
 2. a successful `lake build`;
 3. an unconditional theorem constructing
-   `IntrinsicLocalExistenceUniquenessFamily` on a general compact manifold;
+   `IntrinsicLocalExistenceUniquenessFamily` on a general compact manifold
+   without boundary;
 4. an axiom set contained in `propext`, `Classical.choice`, and `Quot.sound`;
-5. an elaborated theorem type with no empty, subsingleton, rank, preconstructed
-   chart, or preconstructed closure-data restriction.
+5. a kernel-checked assignment to `PointFourClosedManifoldContract` and mandatory
+   preserved-interface fingerprint checks, retaining
+   the existing exact IVP/candidate/family interfaces and excluding every added
+   analytic, solver, package, empty, subsingleton, rank, preconstructed chart,
+   closure-data or stronger global model-boundary restriction.
 
 The canonical declaration is named by
 [`curvature/scripts/point4_target.txt`](../../curvature/scripts/point4_target.txt),
-currently `intrinsicLocalExistenceUniquenessFamily_pointFour`.
+with fixed identity `RicciFlow.intrinsicLocalExistenceUniquenessFamily_pointFour`.
+An alternate name, namespace or completion package cannot close this goal.
+The full expected type is recorded in
+[`PointFourContract.lean`](../../curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/PointFourContract.lean).
+It has no inhabitant supplied here. The only approved scope correction is the
+geometric `BoundarylessManifold I M` premise; see the distinct
+[closed-manifold contract milestone](closed-contract.md). All C² data, current
+weak candidate regularity, ordinary initial derivatives and common closed
+intervals remain required. The eight fingerprints guard selected declaration
+bodies and the expected expression, not every unlisted dependency body; no
+current dependency mutation is part of this milestone, and independent
+exact-head source and mathematical review remains required. `--no-build`
+always leaves the completion verdict open.
 
 ## Current verdict
 
@@ -42,8 +58,10 @@ The bounded-C² initial-face supporting candidate is recorded in
 [`c2-heat-initial-trace.md`](c2-heat-initial-trace.md). It adds the Gaussian
 approximate identity with an arbitrary continuity modulus, local-uniform
 actual gradient/Hessian traces, global C² trace under uniform continuity only
-of Hessian entries, and the right initial generator. Exact Lean-4.33
-verification is pending. It does not construct compact-manifold localization,
+of Hessian entries, and the right initial generator. Historical head
+`591c25914c80366d619ece00da204997ee2a65d7` passed its actual Lean-4.33
+type/axiom and full build gates. This current-master integration is UNVERIFIED
+until fresh exact-head hosted gates and independent review pass. It does not construct compact-manifold localization,
 an ordinary endpoint derivative, a weighted nonlinear solver, or Point-4
 closure.
 
@@ -555,3 +573,13 @@ and the ordinary basis trace's transpose is resolved separately by actual
 intrinsic Ricci symmetry. See [curvature/Ricci scope](chosen-lc-curvature.md).
 Exact Lean-4.33 compilation is pending; the Lie/DeTurck, analytic and PDE
 boundaries and the Point-4 **OPEN** verdict remain.
+
+The next supporting source candidate supplies the actual conventional
+StandardDeTurck background/W coordinate producers, genuine derivative
+transport, actual torsion/metric-compatible Lie correction and intrinsic RHS
+identification. It then specializes the corrected jet, principal and frozen
+remainder identities to that same actual geometric RHS. Exact Lean-4.33
+verification is pending; no local compiler was run for this unit. See
+[actual standard coordinate-operator scope](standard-coordinate-operator.md).
+The heat-generator, analytic, PDE and canonical Point-4 **OPEN** boundaries
+remain unchanged.
