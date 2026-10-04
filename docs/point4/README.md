@@ -537,3 +537,12 @@ and the ordinary basis trace's transpose is resolved separately by actual
 intrinsic Ricci symmetry. See [curvature/Ricci scope](chosen-lc-curvature.md).
 Exact Lean-4.33 compilation is pending; the Lie/DeTurck, analytic and PDE
 boundaries and the Point-4 **OPEN** verdict remain.
+
+## Actual frozen metric principal and holonomic action
+
+The next supporting candidate identifies the existing geometric frozen
+tensor-heat principal coefficient with the actual preferred-frame inverse
+metric and proves its genuine finite-cylinder coordinate Cauchy action.
+See [the exact theorem and verification boundary](frozen-metric-principal.md).
+This does not construct the general manifold encoding, nonlinear solver,
+metric preservation, realization or uniqueness. Point 4 remains open.
