@@ -39,7 +39,9 @@ theorem second_fderiv_linear_readout
     funext y
     exact ((R.hasFDerivAt.comp y
       ((hD (L y)).comp y L.hasFDerivAt)).fderiv)
-  have hsecond := S.hasFDerivAt.comp x (hD₂.comp x L.hasFDerivAt)
+  have hsecond : HasFDerivAt (fun y => S (D (L y)))
+      (S.comp (D₂.comp L)) x :=
+    S.hasFDerivAt.comp x (hD₂.comp x L.hasFDerivAt)
   rw [hfirst, hsecond.fderiv]
   rfl
 
