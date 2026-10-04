@@ -184,6 +184,13 @@ theorem chosenLC_coordinateFrameCoeff_curvatureTensor_eq
   rw [← hactual]
   simp only [CovariantDerivative.curvatureAux_apply, CovariantDerivative.along,
     mlieBracket_frame_eq_zero (I := I) p b hx, map_zero, sub_zero, map_sub]
+  change
+    (trivialization (I := I) p).localFrameCoeff I b k x
+      ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+        (chosenLCCoordinateFrameDerivative g t p b b' c) x (frame (I := I) p b a x)) -
+    (trivialization (I := I) p).localFrameCoeff I b k x
+      ((chosenLeviCivitaFamily (I := I) (M := M) g t)
+        (chosenLCCoordinateFrameDerivative g t p b a c) x (frame (I := I) p b b' x)) = _
   rw [hcoeff a b' c, hcoeff b' a c, Finset.sum_sub_distrib]
   simp only [mul_comm]
   ring
