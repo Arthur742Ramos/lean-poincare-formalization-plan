@@ -111,6 +111,7 @@ theorem metricConnectionDifferenceVector_localFrameCoeff
   rw [metricConnectionDifferenceVector_eq_sum_inverseGram cov cov' x basis]
   simp_rw [map_sum, map_smul, smul_eq_mul, hG, hframe,
     Module.Basis.coord_apply, ← hcoeff]
+  rfl
 
 /-- Equal Levi-Civita connections give zero metric contraction, as required
 for the existing Ricci-flat and chosen-background special cases. -/
