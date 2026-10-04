@@ -60,7 +60,7 @@ jobs:
           # This source release deliberately does not track lake-manifest.json.
           # Resolve it under the immutable source's pinned toolchain before any
           # Lean-action configuration could require the generated manifest.
-          lake --keep-toolchain update
+          MATHLIB_NO_CACHE_ON_UPDATE=1 lake --keep-toolchain update
           python3 - <<'PY'
           import json, subprocess
           from pathlib import Path
