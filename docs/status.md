@@ -126,6 +126,15 @@ induced-hom regularity, actual curvature-operator regularity, shifted-tensor
 regularity, and `R - nu * g` connection-Laplacian bridge remain part of the
 supporting development.
 
+The next supporting source candidate adds fixed-chart actual chosen-LC
+curvature coefficients and intrinsic Ricci readouts, keeping the ordinary
+trace's transpose explicit before using intrinsic Ricci symmetry. It derives
+local C¹ coefficient regularity and derivative transport from the actual
+chosen connection and local frame. Exact Lean-4.33 verification is pending;
+see [the precise candidate boundary](point4/chosen-lc-curvature.md). It does
+not supply the conventional Lie/DeTurck, heat-generator or PDE bridges and
+does not change the Point-4 **Open** status.
+
 ## Updating this page
 
 When implementation changes:

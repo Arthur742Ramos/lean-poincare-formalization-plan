@@ -182,3 +182,10 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.MetricContractedDeTurckFiel
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.RicciDeTurckPrincipalRemainder
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateJetPrincipalRemainder
 import PoincareCurvature.Geometry.Manifold.RicciFlow.PointFourContract
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateJetConnectionDerivative
+
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateRicciDeTurckOperator
+
+import PoincareCurvature.Geometry.Manifold.RicciFlow.ChosenLeviCivitaCoordinateChristoffel
+
+import PoincareCurvature.Geometry.Manifold.RicciFlow.ChosenLeviCivitaCoordinateCurvature

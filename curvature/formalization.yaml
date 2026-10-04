@@ -57,7 +57,39 @@ sources:
     license: "unknown"
     author_endorsement: "not-contacted"
 
-related_formalizations: []
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/73212853b1c48e5fea511191e89072dd003b2d0a/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository source for the prior chosen Levi-Civita
+      coordinate producer in Geometry/Manifold/RicciFlow/
+      ChosenLeviCivitaCoordinateChristoffel.lean, the preferred coordinate
+      frame, actual finite coordinate calculus, local tangent-frame connection
+      formula, and local-to-bundled-curvature and ordinary Ricci trace APIs.
+      Existing implementation and contributor notices are preserved. The new
+      supporting modules CoordinateMatrixCurvature.lean and
+      ChosenLeviCivitaCoordinateCurvature.lean add the genuine local C1
+      coefficient transport and actual curvature/Ricci coordinate identities.
+      They are not new selected registry entries and do not establish
+      Ricci-flow PDE local existence or close Point 4.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/db5bf257fa4c452b6f120ef49d916da31fe44da4/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository source for the unchanged PR112 contraction
+      intake: Analysis/MetricBilinearContraction.lean,
+      Geometry/Manifold/RicciFlow/MetricContractedDeTurckField.lean, the
+      metric-contraction axiom probe, and its pinned read-only verification
+      workflow. The combined spatial milestone preserves those implementations
+      and contributor notices, including the conventional two-input metric
+      contraction, actual connection-difference bridge, and conformal
+      regression. This is supporting proof provenance, not a new selected
+      registry entry or a Ricci-flow local-existence claim.
+  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d"
+    relationship: "builds-on"
+    note: >-
+      Pinned Mathlib foundations for manifolds, tangent bundles, local frames,
+      real Frechet calculus, finite basis traces and linear algebra.
+
 
 status:
   scope: >-
