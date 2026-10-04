@@ -123,7 +123,7 @@ def main() -> None:
         return
     # The immutable release intentionally does not track a Lake manifest.
     # Check its tagged configuration before setup and the actual resolved
-    # immutable revision after Lean action has generated the local manifest.
+    # immutable revision after setup has generated the local manifest.
     manifest = json.loads((root / "lake-manifest.json").read_text())
     mathlib = next(p for p in manifest["packages"] if p["name"] == "mathlib")
     assert mathlib["rev"] == MATHLIB_SHA, "Wrong resolved Mathlib pin"
