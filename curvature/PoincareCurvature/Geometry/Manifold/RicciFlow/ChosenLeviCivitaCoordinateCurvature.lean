@@ -228,10 +228,14 @@ theorem coordinateRicci_chosenLCMetricCoordinates_eq_intrinsicRicciTensor
         (chosenLCCoordinatePoint (I := I) p b x) i j =
       intrinsicRicciTensor (I := I) (M := M) g t x
         (frame (I := I) p b i x) (frame (I := I) p b j x) := by
-  haveI : IsManifold I (minSmoothness ℝ 3) M :=
-    IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞)) le_top
+  haveI : IsManifold I (minSmoothness ℝ 3) M := by
+    have hsmooth : minSmoothness ℝ 3 ≤ (∞ : WithTop ℕ∞) := by
+      simpa [minSmoothness] using
+        (show (3 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) by decide)
+    exact IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞)) hsmooth
   haveI : IsManifold I ((2 : ℕ∞) + 1) M :=
-    IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞)) le_top
+    IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞))
+      (by exact_mod_cast (show ((2 : ℕ∞) + 1) ≤ (⊤ : ℕ∞) from le_top))
   rw [coordinateRicci_chosenLCMetricCoordinates_eq_intrinsicRicciTensor_transpose g t p b hx i j]
   exact intrinsicRicciTensor_symm g t x _ _
 
