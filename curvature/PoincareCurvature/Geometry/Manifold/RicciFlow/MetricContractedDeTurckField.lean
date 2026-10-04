@@ -115,6 +115,7 @@ theorem metricConnectionDifferenceVector_localFrameCoeff
 /-- Equal Levi-Civita connections give zero metric contraction, as required
 for the existing Ricci-flat and chosen-background special cases. -/
 theorem metricConnectionDifferenceVector_eq_zero_of_isLeviCivita
+    [IsContMDiffRiemannianBundle I 1 E TM]
     (cov cov' : CovariantDerivative I E TM)
     (hcov : cov.IsLeviCivita) (hcov' : cov'.IsLeviCivita) (x : M) :
     metricConnectionDifferenceVector cov cov' x = 0 := by
@@ -165,6 +166,10 @@ theorem metricContractedDeTurckVectorField_eq_zero_of_isLeviCivita
   funext t x
   letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
     ⟨(g t).toRiemannianMetric⟩
+  letI : IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _) := by
+    infer_instance
+  letI : IsContMDiffRiemannianBundle I 1 E (TangentSpace I : M → Type _) := by
+    infer_instance
   change CovariantDerivative.metricConnectionDifferenceVector
     ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x = 0
   exact CovariantDerivative.metricConnectionDifferenceVector_eq_zero_of_isLeviCivita
