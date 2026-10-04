@@ -11,23 +11,23 @@
 #                       in the library source (comment- & string-stripped scan,
 #                       immune to "sorry-free" prose false positives)
 #   G2  build green     `lake build` succeeds
-#   G3  unconditional   a hypothesis-free target theorem concluding in
-#                       IntrinsicLocalExistenceUniquenessFamily exists, with NO
-#                       restricting instance and NO assumed chart/closure data
+#   G3  unconditional   the canonical target constructs the existing family
+#                       for arbitrary compact boundaryless manifolds, with NO
+#                       added analytic, solver, chart or package hypothesis
 #   G4  axiom-clean     `#print axioms <target>` ⊆ {propext,Classical.choice,
 #                       Quot.sound} and contains no sorryAx
-#   G5  faithful type   the target's elaborated type is the real point-4
-#                       package and carries none of the forbidden binders
+#   G5  faithful type   a kernel-checked assignment to the complete closed-
+#                       manifold contract succeeds (not merely a name grep)
 #
 # Usage:
 #   scripts/point4_audit.sh [--no-build] [--quiet] [--json PATH]
 #     --no-build   skip G2 (fast; for status pulses that must not contend with
-#                  the worker's build). Verdict is then "GATED (build not run)".
+#                  the worker's build). It cannot certify closure.
 #     --json PATH  also write a machine-readable summary to PATH.
 #
-# The canonical target theorem base-name is read from
-# scripts/point4_target.txt (default below). The worker may retarget by editing
-# that file; the audit derives the fully-qualified name and module from source.
+# The canonical target base-name is read from scripts/point4_target.txt,
+# which must retain the fixed canonical base-name below.
+# The namespace is fixed too; an alternate identity cannot close Point 4.
 # =============================================================================
 set -uo pipefail
 
@@ -39,8 +39,10 @@ LIB="PoincareCurvature"
 SCAN="python3 $SCRIPT_DIR/point4_scan.py"
 TARGET_FILE="$SCRIPT_DIR/point4_target.txt"
 DEFAULT_TARGET="intrinsicLocalExistenceUniquenessFamily_pointFour"
+CANONICAL_FQN="RicciFlow.$DEFAULT_TARGET"
+CONTRACT_MODULE="PoincareCurvature.Geometry.Manifold.RicciFlow.PointFourContract"
 ALLOWED_AXIOMS=("propext" "Classical.choice" "Quot.sound")
-FORBIDDEN='IsEmpty|Subsingleton|Module\.finrank|finrank|TimeDependentGeometricRicciDeTurckBanachChart|RicciDeTurckChartClosureData|ChartClosureData'
+FORBIDDEN='IsEmpty|Subsingleton|Module\.finrank|finrank|TimeDependentGeometricRicciDeTurckBanachChart|RicciDeTurckChartClosureData|ChartClosureData|ModelWithCorners\.Boundaryless|I\.Boundaryless'
 
 DO_BUILD=1
 QUIET=0
@@ -109,32 +111,41 @@ fi
 # --- G3: unconditional target exists & is not gated ------------------------
 if [ $LOC_RC -ne 0 ]; then
   g3="FAIL"; g3_note="target theorem '$TARGET_BASE' not found in source (point 4 not yet constructed)"
+elif [ "$TARGET_BASE" != "$DEFAULT_TARGET" ] || [ "$FQN" != "$CANONICAL_FQN" ]; then
+  g3="FAIL"; g3_note="target identity differs from fixed canonical $CANONICAL_FQN"
 else
-  if ! printf '%s\n' "$SIG" | grep -q 'IntrinsicLocalExistenceUniquenessFamily'; then
+  if ! printf '%s\n' "$SIG" | grep -Eq 'IntrinsicLocalExistenceUniquenessFamily|PointFourClosedManifoldContract'; then
     g3="FAIL"; g3_note="target does not conclude in IntrinsicLocalExistenceUniquenessFamily"
   elif printf '%s\n' "$SIG" | grep -Eq "$FORBIDDEN"; then
     g3="FAIL"; g3_note="target signature carries a forbidden restricting/assumed binder: $(printf '%s\n' "$SIG" | grep -Eo "$FORBIDDEN" | sort -u | tr '\n' ' ')"
   else
-    g3="PASS"; g3_note="$FQN (hypothesis-free family, no restricting binder)"
+    g3="PASS"; g3_note="$FQN (source candidate; full unconditional type checked by G5)"
   fi
 fi
-say "G3 unconditional : $g3  ($g3_note)"
 
 # --- G4 & G5: axiom-clean + faithful type (Lean probe) ---------------------
 if [ $LOC_RC -eq 0 ]; then
-  PROBE="$REPO_DIR/_point4_audit_probe.lean"
+  PROBE="$(mktemp "$REPO_DIR/_point4_audit_probe.XXXXXX.lean")"
   cat > "$PROBE" <<EOF
 import $MODULE
+import $CONTRACT_MODULE
+universe u v w
+-- The RHS is a bare constant, with implicit insertion disabled. Kernel checking
+-- must accept its entire dependent function type, at independent universes.
+def pointFourAuditAssignment : RicciFlow.PointFourClosedManifoldContract.{u, v, w} :=
+  @$FQN
 #print axioms $FQN
 set_option pp.all false in
 #check @$FQN
 EOF
   PROBE_OUT="$(lake env lean "$PROBE" 2>&1)"
+  PROBE_RC=$?
   rm -f "$PROBE"
 
-  if printf '%s\n' "$PROBE_OUT" | grep -qi 'unknownIdentifier\|unknown constant\|unknown identifier'; then
-    g4="FAIL"; g4_note="target does not elaborate (unknown constant)"
-    g5="FAIL"; g5_note="target does not elaborate"
+  if [ "$PROBE_RC" -ne 0 ]; then
+    g4="FAIL"; g4_note="kernel/type probe failed; no axiom certification"
+    g5="FAIL"; g5_note="full kernel assignment to closed-manifold contract failed"
+    say "    $PROBE_OUT"
   else
     # G4: axioms
     if printf '%s\n' "$PROBE_OUT" | grep -q 'sorryAx'; then
@@ -161,20 +172,24 @@ EOF
         g4="FAIL"; g4_note="could not parse axiom list from probe"
       fi
     fi
-    # G5: faithful elaborated type
-    TYPE="$(printf '%s\n' "$PROBE_OUT" | sed -n "/^@$(printf '%s' "$FQN" | sed 's/[.[\*^$]/\\&/g')/,\$p")"
-    [ -z "$TYPE" ] && TYPE="$PROBE_OUT"
-    if ! printf '%s\n' "$TYPE" | grep -q 'IntrinsicLocalExistenceUniquenessFamily'; then
-      g5="FAIL"; g5_note="elaborated type is not the point-4 package"
-    elif printf '%s\n' "$TYPE" | grep -Eq "$FORBIDDEN"; then
-      g5="FAIL"; g5_note="elaborated type carries forbidden binder: $(printf '%s\n' "$TYPE" | grep -Eo "$FORBIDDEN" | sort -u | tr '\n' ' ')"
+    # G5: kernel assignment above is the authoritative full-signature test.
+    # Preserve the earlier forbidden-name checks as additional diagnostics.
+    if [ "$TARGET_BASE" != "$DEFAULT_TARGET" ] || [ "$FQN" != "$CANONICAL_FQN" ]; then
+      g5="FAIL"; g5_note="target identity differs from fixed canonical $CANONICAL_FQN"
+    elif printf '%s\n' "$PROBE_OUT" | grep -Eq "$FORBIDDEN"; then
+      g5="FAIL"; g5_note="elaborated type carries a forbidden restriction"
     else
-      g5="PASS"; g5_note="type is the real family, no forbidden binder"
+      g5="PASS"; g5_note="full kernel assignment to PointFourClosedManifoldContract passed"
     fi
   fi
 else
   g4_note="target missing"; g5_note="target missing"
 fi
+# Source discovery alone cannot certify unconditional construction.
+if [ "$g3" = "PASS" ] && [ "$g5" != "PASS" ]; then
+  g3="FAIL"; g3_note="source candidate lacks the full unconditional kernel-checked contract"
+fi
+say "G3 unconditional : $g3  ($g3_note)"
 say "G4 axiom-clean   : $g4  ($g4_note)"
 say "G5 faithful type : $g5  ($g5_note)"
 
@@ -186,7 +201,7 @@ CLOSED=1
 [ "$g3" = "PASS" ] || CLOSED=0
 [ "$g4" = "PASS" ] || CLOSED=0
 [ "$g5" = "PASS" ] || CLOSED=0
-if [ "$DO_BUILD" -eq 1 ]; then [ "$g2" = "PASS" ] || CLOSED=0; fi
+[ "$g2" = "PASS" ] || CLOSED=0
 
 if [ "$JSON" != "" ]; then
   cat > "$JSON" <<EOF
@@ -210,9 +225,6 @@ fi
 
 if [ $CLOSED -eq 1 ] && [ "$DO_BUILD" -eq 1 ]; then
   say "VERDICT: POINT 4 CLOSED  ✅  (all five gates pass)"
-  exit 0
-elif [ $CLOSED -eq 1 ] && [ "$DO_BUILD" -eq 0 ]; then
-  say "VERDICT: GATED — G1/G3/G4/G5 pass, but build not run (rerun without --no-build to certify)"
   exit 0
 else
   say "VERDICT: POINT 4 OPEN  ❌  (see failing gates above)"

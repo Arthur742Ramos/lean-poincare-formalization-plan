@@ -181,3 +181,4 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.ResearchTheorems
 import PoincareCurvature.Geometry.Manifold.RicciFlow.MetricContractedDeTurckField
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.RicciDeTurckPrincipalRemainder
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateJetPrincipalRemainder
+import PoincareCurvature.Geometry.Manifold.RicciFlow.PointFourContract

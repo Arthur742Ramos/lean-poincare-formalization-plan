@@ -50,10 +50,11 @@ It requires all of the following in one full run:
 
 1. no forbidden proof placeholders or locally declared axioms in the library;
 2. a successful `lake build`;
-3. an unconditional general compact-manifold construction of
+3. an unconditional general compact-boundaryless-manifold construction of
    `IntrinsicLocalExistenceUniquenessFamily`;
 4. only the accepted foundational axioms in the target's proof dependencies;
-5. an elaborated target type without hidden restrictive hypotheses.
+5. a kernel-checked assignment to the complete expected closed-manifold type,
+   with no added analytic, solver, package or restrictive type hypotheses.
 
 The canonical target name is maintained in
 [`curvature/scripts/point4_target.txt`](../curvature/scripts/point4_target.txt).
@@ -66,6 +67,12 @@ As of the documentation audit on 2026-09-11, the fast audit found:
 | G3: unconditional construction | Fail: canonical target missing |
 | G4: axiom audit | Fail because target is missing |
 | G5: faithful target type | Fail because target is missing |
+
+The maintainer-approved 2026-10-04 scope correction adds only the theorem-level
+`BoundarylessManifold I M` premise. It does not change the reusable geometric,
+IVP, candidate or family interfaces. The complete expected type and rationale
+are recorded in [the closed-manifold contract milestone](point4/closed-contract.md).
+This is an interface/audit milestone, not a construction of the canonical target.
 
 Therefore milestone 4 is **open**. A previous successful build, a conditional
 theorem, or a proved special family cannot override that verdict.
