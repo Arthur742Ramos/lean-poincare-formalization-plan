@@ -1,0 +1,116 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Point-4 closed-manifold completion contract"
+  description: >-
+    Records the maintainer-approved theorem-level BoundarylessManifold premise
+    for the still-open all-C2 Ricci-flow existence/uniqueness goal. The new
+    development is an expected type, stricter completion audit, signature
+    regression fixtures and documentation. It does not construct the canonical
+    theorem or establish Ricci-flow existence, uniqueness or a Lean counterexample.
+  authors:
+    - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arthur Freitas Ramos"
+
+sources:
+  - title: "The Ricci flow on manifolds with boundary"
+    authors: ["Panagiotis Gianniotis"]
+    id: "arXiv:1210.0813v2"
+    type: "paper"
+    location: "https://arxiv.org/pdf/1210.0813"
+    relationship: "background"
+    note: >-
+      Theorems 1.1/4.2, compatibility equations 4.12-4.14 and Remark 5.3 support
+      the independently reviewed classical boundary nonuniqueness route that
+      motivated the geometric scope correction. No Lean refutation was built,
+      and this source does not supply a proof of the remaining all-C2 goal.
+    license: "unknown"
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/db5bf257fa4c452b6f120ef49d916da31fe44da4/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository curvature subproject at full commit
+      db5bf257fa4c452b6f120ef49d916da31fe44da4, source path
+      curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean.
+      Reuses the existing metric family, all-C2 initial-value problem, intrinsic
+      candidate/local-solution definitions, ordinary component derivatives,
+      closed time intervals and intrinsic existence/uniqueness family, together
+      with their inherited geometric dependency development. LocalExistence.lean
+      is unchanged by this milestone. The newly contributed expected type and
+      completion/signature checks do not reclassify inherited results as new
+      proofs or construct the still-missing canonical theorem.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/db5bf257fa4c452b6f120ef49d916da31fe44da4/curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TimeDependent.lean"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository curvature subproject at full commit
+      db5bf257fa4c452b6f120ef49d916da31fe44da4, source path
+      curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TimeDependent.lean.
+      Reuses real-indexed TimeFamily, C2 TimeDependentRiemannianMetric and the
+      slice-wise chosen Levi-Civita/curvature infrastructure through the original
+      interfaces. TimeDependent.lean and its contributor notices are unchanged.
+      These are inherited definitions/results, not new constructions claimed
+      by the closed-manifold contract milestone.
+  - id: "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/IsManifold/InteriorBoundary.lean"
+    relationship: "builds-on"
+    note: >-
+      Pinned Mathlib subproject at full commit
+      db584cd6d46c92f209a44c0f1c829460d327499d, source path
+      Mathlib/Geometry/Manifold/IsManifold/InteriorBoundary.lean, lines 164-217.
+      Reuses BoundarylessManifold, the implication from global model
+      boundarylessness and the equivalence with empty manifold boundary, plus
+      Mathlib's pinned manifold, bundle, real-calculus and foundational imports.
+      The geometric regression invokes these existing lemmas; it does not claim
+      them as original results or impose the stronger global model restriction.
+
+status:
+  scope: >-
+    Supporting interface/audit milestone only. The expected type adds precisely
+    BoundarylessManifold I M to the compact-manifold completion theorem while
+    retaining arbitrary models, all C2 initial data, current weak candidates,
+    ordinary initial derivatives and closed intervals. The canonical target
+    RicciFlow.intrinsicLocalExistenceUniquenessFamily_pointFour remains absent;
+    the actual fast audit is OPEN. Exact Lean 4.33 hosted verification remains
+    pending for this corrected metadata/documentation head.
+  main_results: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["GPT-6.1"]
+      framework: "Codex"
+      tool_setup: >-
+        Repository source inspection, narrow expected-type and audit edits,
+        conditional signature fixtures, source scans and fingerprint checks,
+        documentation, published-schema validation and a pinned read-only
+        compile-first hosted workflow. No local compiler, toolchain download,
+        repository publication or registry submission was performed.
+      prompting_notes: >-
+        The maintainer explicitly approved compact manifolds without boundary
+        while preserving every other requirement. Independent source review
+        requested immutable structured provenance and a precise account of the
+        selected fingerprint checks' boundary. Human authorship and existing
+        contributor attribution remain inherited from the repository.
+
+review:
+  status: "source-reviewed; hosted verification pending"
+  notes: >-
+    Independent review requested this metadata/documentation correction. The
+    eight fingerprints guard selected declaration bodies and the expected-type
+    expression, not every unlisted transitive dependency body. No dependency
+    mutation is part of this milestone. Independent exact-head source and
+    mathematical review remains required, alongside actual compiler/full-build
+    evidence; fingerprint renewal for a future semantics-preserving refactor
+    requires explicit review. No completion or submission-readiness claim is made.
+
+acknowledgements: >-
+  The repository's human authors and inherited contributors, Mathlib authors
+  and contributors including the preserved InteriorBoundary notices, and
+  Panagiotis Gianniotis for the primary boundary-flow literature. This dossier
+  does not replace the identity or notices of any historical registry artifact.

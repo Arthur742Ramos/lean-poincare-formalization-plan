@@ -1,8 +1,8 @@
 # Point 4: Ricci-flow local existence and uniqueness
 
 Point 4 aims to prove short-time existence and uniqueness of Ricci flow for
-general initial data on a compact smooth manifold. It is the first open
-dependency in the [Poincaré roadmap](../roadmap.md).
+every spatially C² initial metric on a compact smooth manifold without boundary.
+It is the first open dependency in the [Poincaré roadmap](../roadmap.md).
 
 This file records the current boundary and next work. The long chronological
 development record has moved to
@@ -21,14 +21,30 @@ The audit requires:
    `native_decide`, and `decide!` after comments and strings are removed;
 2. a successful `lake build`;
 3. an unconditional theorem constructing
-   `IntrinsicLocalExistenceUniquenessFamily` on a general compact manifold;
+   `IntrinsicLocalExistenceUniquenessFamily` on a general compact manifold
+   without boundary;
 4. an axiom set contained in `propext`, `Classical.choice`, and `Quot.sound`;
-5. an elaborated theorem type with no empty, subsingleton, rank, preconstructed
-   chart, or preconstructed closure-data restriction.
+5. a kernel-checked assignment to `PointFourClosedManifoldContract` and mandatory
+   preserved-interface fingerprint checks, retaining
+   the existing exact IVP/candidate/family interfaces and excluding every added
+   analytic, solver, package, empty, subsingleton, rank, preconstructed chart,
+   closure-data or stronger global model-boundary restriction.
 
 The canonical declaration is named by
 [`curvature/scripts/point4_target.txt`](../../curvature/scripts/point4_target.txt),
-currently `intrinsicLocalExistenceUniquenessFamily_pointFour`.
+with fixed identity `RicciFlow.intrinsicLocalExistenceUniquenessFamily_pointFour`.
+An alternate name, namespace or completion package cannot close this goal.
+The full expected type is recorded in
+[`PointFourContract.lean`](../../curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/PointFourContract.lean).
+It has no inhabitant supplied here. The only approved scope correction is the
+geometric `BoundarylessManifold I M` premise; see the distinct
+[closed-manifold contract milestone](closed-contract.md). All C² data, current
+weak candidate regularity, ordinary initial derivatives and common closed
+intervals remain required. The eight fingerprints guard selected declaration
+bodies and the expected expression, not every unlisted dependency body; no
+current dependency mutation is part of this milestone, and independent
+exact-head source and mathematical review remains required. `--no-build`
+always leaves the completion verdict open.
 
 ## Current verdict
 
