@@ -1,6 +1,6 @@
 module
 
-public import Mathlib.Analysis.Normed.Module.Pi
+public import Mathlib.Analysis.Normed.Group.Constructions
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 public import Mathlib.Topology.ContinuousMap.Bounded.Normed
