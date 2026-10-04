@@ -174,8 +174,9 @@ theorem uniformContinuous_value {n : ℕ} (D : EuclideanBoundedC2Data n) :
       Finset.sum_nonneg fun _ _ => norm_nonneg _⟩ D.value := by
     apply LipschitzWith.of_dist_le_mul
     intro x y
-    simpa only [Real.dist_eq, dist_eq_norm, Real.norm_eq_abs, NNReal.coe_mk] using
-      abs_sub_le_of_bounded_coordinate_derivatives D.value D.first D.hasDeriv_value x y
+    change ‖D.value x - D.value y‖ ≤ (∑ k : Fin n, ‖D.first k‖) * ‖x - y‖
+    rw [Real.norm_eq_abs]
+    exact abs_sub_le_of_bounded_coordinate_derivatives D.value D.first D.hasDeriv_value x y
   exact hlip.uniformContinuous
 
 /-- Each actual first derivative is uniformly continuous because its
@@ -186,9 +187,10 @@ theorem uniformContinuous_first {n : ℕ} (D : EuclideanBoundedC2Data n)
       Finset.sum_nonneg fun _ _ => norm_nonneg _⟩ (D.first k) := by
     apply LipschitzWith.of_dist_le_mul
     intro x y
-    simpa only [Real.dist_eq, dist_eq_norm, Real.norm_eq_abs, NNReal.coe_mk] using
-      abs_sub_le_of_bounded_coordinate_derivatives (D.first k)
-        (fun j => D.second j k) (fun j x => D.hasDeriv_first j k x) x y
+    change ‖D.first k x - D.first k y‖ ≤ (∑ j : Fin n, ‖D.second j k‖) * ‖x - y‖
+    rw [Real.norm_eq_abs]
+    exact abs_sub_le_of_bounded_coordinate_derivatives (D.first k)
+      (fun j => D.second j k) (fun j x => D.hasDeriv_first j k x) x y
   exact hlip.uniformContinuous
 
 /-- Locally uniform trace of the actual homogeneous heat gradient. -/
