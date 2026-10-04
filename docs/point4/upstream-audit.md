@@ -66,10 +66,41 @@ Thus Point 4 remains **OPEN**, and the canonical target, its solution predicates
 and the completion auditor are unchanged. A theorem-specific bridge or an
 explicit reviewed scope decision is required before altering that contract.
 
+## First independent source build and recovery
+
+Exact candidate `8832fa011a0f3576e42cd8f03a66af476d822dcf` ran under the
+configured 350-minute job budget in
+[run 37174751920](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37174751920).
+It ended cancelled during source compilation, with **1,807 of 2,270** project
+modules successfully compiled and no failed module recorded. The endpoint
+signature/axiom probe was not reached. This is an incomplete independent build,
+not a source-error finding or a verified endpoint. Its report and build log are
+preserved in artifact `11299626645`.
+
+The recovery rebuilds the entire immutable closure from fresh source, using at
+most two dependency-ready workers on the same standard public Linux runner.
+[GitHub's runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+lists that runner as free for public repositories, with four CPUs and 16 GB RAM.
+Every project source module still uses the same `lake --no-cache build
+<module>:olean` command. A child is submitted only after all its project imports
+have successfully compiled. No compiled upstream objects from the first run or
+an external cache are reused. The worker count falls back to one on smaller
+machines; memory pressure suppresses starting the second worker, and the 1 GiB
+free-disk guard remains. Compiler exits and per-module logs are retained.
+
+A source failure stops new submissions and retains results of independent
+compilations already running. An interruption or incomplete graph cannot pass
+the final gate. The original pinned source, dependency checks, trust scans,
+endpoint type/axiom probe, clean-source check, and unresolved Point-4 bridge all
+remain required. Small mocked scheduler tests check dependency ordering,
+single compilation, worker bounds, failure handling, and resource-guard failure.
+The workflow runs on pull requests and manual dispatch, avoiding the original
+duplicate push-plus-pull-request audit.
+
 ## Running the audit
 
 The workflow `Point-4 upstream Hamilton release audit` performs the pinned
-checkout, source preflight, official Mathlib cache setup, topologically ordered
+checkout, source preflight, official Mathlib cache setup, dependency-ready
 source compilation, and final signature/axiom probe. The local audit entry point
 is `scripts/point4/audit-hamilton-release.py`; it requires a fresh exact upstream
 checkout and the upstream pinned Lean/Mathlib environment. It intentionally does

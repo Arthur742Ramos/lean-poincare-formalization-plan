@@ -1,13 +1,10 @@
 name: Point-4 upstream Hamilton release audit
 
 on:
-  push:
-    paths:
-      - "scripts/point4/audit-hamilton-release.py"
-      - ".github/workflows/point4-hamilton-release-audit.yml"
   pull_request:
     paths:
       - "scripts/point4/audit-hamilton-release.py"
+      - "scripts/point4/test_audit_hamilton_release.py"
       - ".github/workflows/point4-hamilton-release-audit.yml"
   workflow_dispatch:
 
@@ -44,6 +41,8 @@ jobs:
           persist-credentials: false
       - name: Check pin and inspect focused source closure before compilation
         run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --plan-only
+      - name: Test dependency-ready scheduler without executing upstream code
+        run: python3 campaign/scripts/point4/test_audit_hamilton_release.py
       - name: Install checksum-pinned official elan
         run: |
           curl --fail --location --proto '=https' --tlsv1.2 \

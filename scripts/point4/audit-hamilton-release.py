@@ -7,6 +7,8 @@ The immutable source must already be checked out in a separate directory.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
+import heapq
 import importlib.util
 import json
 import pathlib
@@ -14,6 +16,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import tomllib
 
 SOURCE_SHA = "8bd406e35c33a200e9b88895cf11ee8429194e15"
@@ -26,10 +29,61 @@ TARGETS = {
 }
 
 
+def dependency_ready_build(order, graph, build, completed, *, jobs=2,
+                           can_launch=lambda active: True):
+    """Compile each source exactly once, only after its project imports finish.
+
+    A failure stops new submissions; already running independent jobs finish
+    and retain their evidence. This never accepts an upstream object cache.
+    """
+    assert jobs in (1, 2)
+    positions = {module: i for i, module in enumerate(order)}
+    assert len(positions) == len(order)
+    dependencies = {m: set(graph[m]) & positions.keys() for m in order}
+    children = {m: [] for m in order}
+    for module, deps in dependencies.items():
+        for parent in deps:
+            children[parent].append(module)
+    ready = [(positions[m], m) for m in order if not dependencies[m]]
+    heapq.heapify(ready)
+    succeeded = set()
+    failure = None
+    with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as executor:
+        running = {}
+        while running or (ready and failure is None):
+            while ready and failure is None and len(running) < jobs:
+                if not can_launch(len(running)):
+                    break
+                _, module = heapq.heappop(ready)
+                assert dependencies[module] <= succeeded
+                running[executor.submit(build, module)] = module
+            if not running:
+                raise RuntimeError("Resource guard prevented the next source build")
+            finished, _ = concurrent.futures.wait(
+                running, return_when=concurrent.futures.FIRST_COMPLETED)
+            for future in sorted(finished, key=lambda f: positions[running[f]]):
+                module = running.pop(future)
+                result = future.result()
+                completed(module, result)
+                if result[0] != 0:
+                    if failure is None:
+                        failure = (module, result[0])
+                    continue
+                succeeded.add(module)
+                for child in children[module]:
+                    dependencies[child].discard(module)
+                    if not dependencies[child]:
+                        heapq.heappush(ready, (positions[child], child))
+    if failure is None:
+        assert succeeded == set(order), "Incomplete or cyclic source graph"
+    return failure
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=pathlib.Path)
     parser.add_argument("--plan-only", action="store_true")
+    parser.add_argument("--jobs", type=int, choices=(1, 2), default=2)
     args = parser.parse_args()
     root = args.source.resolve()
     here = pathlib.Path(__file__).resolve().parents[2]
@@ -113,7 +167,9 @@ def main() -> None:
     report_path = output / "report.json"
 
     def save() -> None:
-        report_path.write_text(json.dumps(report, indent=2) + "\n")
+        temporary = report_path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(report, indent=2) + "\n")
+        temporary.replace(report_path)
 
     save()
     print(f"Focused upstream source closure: {len(order)} modules", flush=True)
@@ -131,24 +187,72 @@ def main() -> None:
         ["git", "rev-parse", "HEAD"], cwd=root / ".lake/packages/mathlib", text=True).strip()
     assert resolved == MATHLIB_SHA, "Resolved Mathlib checkout disagrees with manifest"
 
-    # Build the import DAG in topological order to avoid launching the entire
-    # large upstream project concurrently on a standard hosted runner. Only
-    # Mathlib uses its official cache; all upstream modules compile from source.
-    for position, module in enumerate(order, 1):
-        free = shutil.disk_usage(root).free
-        if free < 1024 ** 3:
+    # Two dependency-ready workers use the same source-only Lake invocation.
+    # Repeated serial Lake calls timed out after 1,807 successful modules in the
+    # first audit. A public standard Linux runner supplies 4 CPU / 16 GB RAM;
+    # retain serial fallback and do not introduce paid runners or proof caches.
+    memory = {}
+    if pathlib.Path("/proc/meminfo").is_file():
+        memory = {line.split(':')[0]: int(line.split()[1]) * 1024
+                  for line in pathlib.Path("/proc/meminfo").read_text().splitlines()
+                  if line.startswith(("MemTotal:", "MemAvailable:"))}
+    jobs = args.jobs if memory.get("MemTotal", 0) >= 14 * 1024 ** 3 else 1
+    report.update(kernel_audit_status="RUNNING: source closure incomplete",
+                  source_compile_workers=jobs, initial_memory_bytes=memory,
+                  compiler_results={})
+    logs = output / "module-build-logs"
+    logs.mkdir(exist_ok=True)
+    positions = {module: i + 1 for i, module in enumerate(order)}
+    save()
+
+    def can_launch(active):
+        if shutil.disk_usage(root).free < 1024 ** 3:
             report["kernel_audit_status"] = "BLOCKED: less than 1 GiB free on hosted runner"
             save()
-            raise SystemExit(report["kernel_audit_status"])
-        print(f"[{position}/{len(order)}] {module}", flush=True)
-        result = subprocess.run(["lake", "--no-cache", "build", module + ":olean"], cwd=root)
-        if result.returncode:
+            return False
+        if active and pathlib.Path("/proc/meminfo").is_file():
+            available = next(int(line.split()[1]) * 1024
+                for line in pathlib.Path("/proc/meminfo").read_text().splitlines()
+                if line.startswith("MemAvailable:"))
+            # Do not start the second compiler under memory pressure.
+            return available >= 8 * 1024 ** 3
+        return True
+
+    def build(module):
+        position = positions[module]
+        print(f"[{position}/{len(order)}] START {module}", flush=True)
+        started = time.monotonic()
+        path = logs / f"{position:04d}.log"
+        with path.open("w") as stream:
+            result = subprocess.run(
+                ["lake", "--no-cache", "build", module + ":olean"], cwd=root,
+                stdout=stream, stderr=subprocess.STDOUT)
+        return result.returncode, time.monotonic() - started, path
+
+    def completed(module, result):
+        code, elapsed, path = result
+        print(path.read_text(), end="", flush=True)
+        print(f"[{positions[module]}/{len(order)}] EXIT {code} {module} ({elapsed:.3f}s)",
+              flush=True)
+        report["compiler_results"][module] = {"exit_code": code, "elapsed_seconds": elapsed}
+        if code == 0:
+            report["built"].append(module)
+            report["built"].sort(key=positions.__getitem__)
+        elif "failed_module" not in report:
             report["kernel_audit_status"] = "BUILD FAILED"
             report["failed_module"] = module
-            save()
-            raise SystemExit(result.returncode)
-        report["built"].append(module)
         save()
+
+    try:
+        failure = dependency_ready_build(order, graph, build, completed,
+                                         jobs=jobs, can_launch=can_launch)
+    except BaseException:
+        if report["kernel_audit_status"].startswith("RUNNING"):
+            report["kernel_audit_status"] = "INCONCLUSIVE: interrupted or scheduler failure"
+        save()
+        raise
+    if failure is not None:
+        raise SystemExit(failure[1])
 
     probe = output / "endpoint-probe.lean"
     probe.write_text("\n".join(
