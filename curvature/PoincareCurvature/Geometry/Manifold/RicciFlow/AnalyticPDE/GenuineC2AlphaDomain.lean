@@ -5,21 +5,25 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GenuineRicciDeT
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ConcreteRicciDeTurck
 
 /-!
-# Genuine C^{2,α} domain with bounded 2-jet extraction (Point 4 PDE milestone)
+# Auxiliary little-Hölder jet-component space with bounded extraction
 
-This file builds the real function space in which the Ricci–DeTurck PDE is
-posed, together with the genuine (non-model) 2-jet extraction map.
+This file builds a complete product space of little-Hölder component fields
+and its pointwise extraction map. The coordinate Ricci--DeTurck fiber formula
+acts on the extracted data. This does not yet construct a `C^{2,α}` derivative
+graph on which the geometric Ricci--DeTurck PDE is posed.
 
 ## The space
 
-A `C^{2,α}` metric section is represented by its 2-jet data in the Whitney
-jet formalism:
+The component fields are:
 - `val`: the 0-jet (metric value), a matrix-valued little-Hölder function,
 - `der1`: the 1-jet (first derivatives), `n` matrix-valued little-Hölder functions,
 - `der2`: the 2-jet (second derivatives), `n × n` matrix-valued little-Hölder functions.
 
 `Jet2Section n d α` is this product, hence a Banach space
 (`NormedAddCommGroup`, `NormedSpace ℝ`, `CompleteSpace` are all inferred).
+Its slots are independent: there is no requirement that `der1` is the derivative
+of `val`, or that `der2` is the derivative of `der1`. Such compatibility must be
+proved separately before interpreting a section as the jet of an actual metric.
 
 ## The extraction
 
@@ -47,13 +51,11 @@ namespace AnalyticPDE
 
 variable {n d : ℕ} {α : ℝ}
 
-/-! ## 1. The C^{2,α} 2-jet section space -/
+/-! ## 1. The auxiliary 2-jet component space -/
 
-/-- **C^{2,α} 2-jet sections** (genuine).
-
-The Whitney-jet model of `C^{2,α}` metric sections: the 0-jet, 1-jet, and
-2-jet as little-Hölder matrix-valued functions. A product of Banach
-spaces, hence a Banach space. -/
+/-- Independent 0-, 1-, and 2-jet component fields, each little-Hölder.
+This is a Banach product space; derivative compatibility is not part of its
+definition. It is not by itself a `C^{2,α}` metric-section space. -/
 abbrev Jet2Section (n d : ℕ) (α : ℝ) : Type :=
   MatrixLittleHolder n d α × (Fin n → MatrixLittleHolder n d α) ×
     (Fin n → Fin n → MatrixLittleHolder n d α)
@@ -90,12 +92,9 @@ def Jet2Section.der2 (s : Jet2Section n d α) :
 noncomputable def evalLH (f : LittleHolder n α) (x : Fin n → ℝ) : ℝ :=
   f.toHolder.toBCF x
 
-/-- **Genuine 2-jet extraction.**
-
-Packages the 0-jet, 1-jet, and 2-jet data of the section at the point `x`
-into a `Jet2 n d` fiber element. This is the real extraction map: unlike
-`extract2JetModel`, the derivative slots carry the section's genuine jet
-data. -/
+/-- Pointwise extraction of all three component slots into a `Jet2 n d` fiber.
+Unlike `extract2JetModel`, this retains the supplied nonzero derivative slots;
+it does not establish that those slots are derivatives of the value field. -/
 noncomputable def jet2OfSection (s : Jet2Section n d α) (x : Fin n → ℝ) :
     Jet2 n d :=
   ⟨fun i j => evalLH (s.val i j) x,

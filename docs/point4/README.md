@@ -38,6 +38,57 @@ run. Gates 3–5 therefore failed and the verdict remained `POINT 4 OPEN`.
 
 See [Current formalization status](../status.md) for the repository-wide dashboard.
 
+## Correctness boundaries for the next campaign
+
+The current source has three important distinctions that must be preserved
+when selecting the next proof milestones:
+
+1. `UsesChosenBackground` chooses the Levi--Civita connection of the evolving
+   metric itself. The proved
+   `intrinsicRicciDeTurckRHS_chosenLeviCivitaFamily_eq_intrinsicRicciFlowRHS`
+   shows that this choice removes the DeTurck correction. The corresponding
+   closure packages are conditional Ricci-flow packages; they are not a
+   construction of the strictly parabolic fixed-background DeTurck equation.
+2. `Jet2Section` is a complete product of independent little-Hölder component
+   fields. It does not impose that the first slots are derivatives of the value
+   field or that the second slots are derivatives of the first slots.
+   `jet2OfSection` evaluates supplied components; a derivative-compatible
+   `C^{2,α}` function space remains to be constructed.
+3. `phiRDOfJet` is the full coordinate right-hand side `-2 Ric + Lie_W g`.
+   It is not a remainder after subtraction of a frozen heat generator. A
+   Duhamel equation using heat propagation and `(phiRD, 0, 0)` is therefore an
+   auxiliary product-space equation. It does not establish the geometric
+   Ricci--DeTurck PDE or preservation of derivative compatibility.
+
+These distinctions do not invalidate the proved component-space Hölder
+estimates. They prohibit identifying those estimates alone with the missing
+quasilinear parabolic solver.
+
+The intended next supporting result is in
+`GenuineRicciDeTurckHeatInvariantClosure.lean`: heat fixes the Euclidean
+section, its contraction bound preserves the Euclidean-centered small ball,
+and the existing compact-jet range theorem then supplies the formerly explicit
+heat-path range premise. The reaction is packaged in the little-Hölder carrier
+with a full-norm closed-ball Lipschitz estimate. The theorem retains
+`0 < α < 1`, `0 < R`,
+`2 * jet2LipConst d d * R < phiRDRadius d`, and the fixed coordinate background
+coefficients. It makes no Duhamel or geometric PDE existence claim.
+
+There is also a target-scope review obligation. The current
+`IntrinsicLocalExistenceUniquenessFamily` permits arbitrary `ModelWithCorners`
+without an explicit boundaryless assumption, all spatially `C²` initial
+metrics, and uniqueness against slice-wise `C²` candidates with pointwise
+time derivatives. The intended closed-manifold smooth Hamilton--DeTurck
+argument must justify those exact hypotheses or obtain an explicit reviewed
+scope decision before changing them. The canonical target and completion
+auditor are unchanged; this warning is not a claimed counterexample.
+
+The next genuine PDE milestones should address derivative-compatible spaces,
+the frozen-generator/remainder identity, local quasilinear parabolic estimates
+and existence, positive-metric preservation, intrinsic coordinate
+identification, actual gauge regularity, and uniqueness for the target's
+candidate class. Interfaces assuming those results do not discharge them.
+
 The preceding supporting PDE milestone is the genuine Ricci--DeTurck
 Hölder-seminorm difference estimate in
 `GenuineRicciDeTurckHolderDifference.lean`. It combines the compact-domain
