@@ -500,3 +500,40 @@ twice differentiating the actual local component equality. Open-domain C²
 regularity and invertibility remain explicit, distinct hypotheses. See
 [`coordinate-jet.md`](coordinate-jet.md) for the API map and remaining chart
 identifications. Exact Lean-4.33 verification is pending; Point 4 remains open.
+
+The following candidate localizes the actual matrix-inverse derivative to
+invertibility at the selected point, then derives the coordinate inverse and
+Christoffel Fréchet derivatives from the actual C² matrix field.
+`CoordinateJetConnectionDerivative.lean` identifies these derivatives with the
+existing finite-jet formulas, without assuming inverse derivative data. See
+[`coordinate-connection.md`](coordinate-connection.md). Exact Lean-4.33
+verification and the manifold curvature identification remain pending.
+
+The next coordinate-operator candidate differentiates the actual positive
+conventional W against an actual C¹ background coefficient array. Its Ricci
+and Lie readouts use actual Fréchet derivatives and are identified with the
+corrected produced-jet RHS, then split into the inverse-metric principal part
+and an explicit frozen-coefficient remainder. See
+[`coordinate-operator.md`](coordinate-operator.md) for the hypotheses and
+remaining manifold/generator/PDE boundaries. The generic rc2 development check
+passed; exact Lean-4.33 verification remains pending and Point 4 stays open.
+
+The chosen-LC coordinate candidate supplies an actual fixed preferred chart
+frame, derives its commutation and scalar derivative transport, and constructs
+the metric's C² symmetric invertible coordinate matrix. Pointwise geometric
+Koszul and inverse-Gram reconstruction identify the actual chosen LC
+coefficients and their derivatives with the coordinate Christoffel formulas.
+See [`chosen-lc-coordinate.md`](chosen-lc-coordinate.md). The generic frame
+check passed in rc2 development; exact Lean-4.33 geometric verification remains
+pending. The curvature/Lie/PDE boundaries and Point-4 OPEN verdict remain.
+
+The next supporting source candidate adds actual chosen-LC curvature and
+intrinsic Ricci coordinate readouts in
+`ChosenLeviCivitaCoordinateCurvature.lean`. Genuine local C¹ covariant-derivative
+and scalar coefficient regularity supplies the derivative transport; the
+existing local-to-bundled-curvature theorem supplies actual curvature.
+Lower Christoffel-slot symmetry is differentiated on an open neighborhood,
+and the ordinary basis trace's transpose is resolved separately by actual
+intrinsic Ricci symmetry. See [curvature/Ricci scope](chosen-lc-curvature.md).
+Exact Lean-4.33 compilation is pending; the Lie/DeTurck, analytic and PDE
+boundaries and the Point-4 **OPEN** verdict remain.
