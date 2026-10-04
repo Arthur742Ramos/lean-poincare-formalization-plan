@@ -8,8 +8,14 @@ import PoincareCurvature.Analysis.MatrixSmoothness
 /-!
 # The genuine Ricci–DeTurck fiber map
 
-Defines the **genuine** Ricci–DeTurck fiber map `Φ_RD : Jet2 d d → Matrix`
-using actual coordinate formulas, and proves smoothness.
+Defines the coordinate Ricci–DeTurck fiber map `Φ_RD : Jet2 d d → Matrix`
+using the conventional positive metric contraction and proves smoothness.
+
+Here `Γbg` is held constant as a coordinate fiber parameter. The spatial
+background-derivative contribution is not present in `derivDeTurckVectorOfJet`.
+`RicciDeTurckPrincipalRemainder` supplies an additive algebraic RHS with explicit
+background-first-jet slots. Identifying either jet expression with actual
+manifold geometry requires derivative compatibility and a chart bridge.
 
 No `sorry`, no `admit`, no axioms.
 -/
@@ -548,8 +554,9 @@ theorem contDiffOn_ricciOfJet {n : WithTop ℕ∞} (i j_ : Fin d) :
 
 /-- The DeTurck vector field: `W^k = ∑_{i,j} g^{ij} (Γ^k_ij - Γ̄^k_ij)`.
 
-This is the negated DeTurck vector field (per the Point-4 constraints:
-`intrinsicDeTurckGaugeField` is the negated DeTurck vector field). -/
+This formula is the positive conventional vector, not the negative recovery
+gauge. It is also a different slot contraction from the legacy intrinsic
+raised-trace field; no equality with that field is asserted here. -/
 noncomputable def deTurckVectorOfJet (j : Jet2 d d) (k : Fin d) : ℝ :=
   ∑ i : Fin d, ∑ j_ : Fin d, (invMetricOfJet j i j_) *
     (christoffelOfJet j k i j_ - Γbg k i j_)
@@ -590,7 +597,10 @@ theorem contDiffOn_deTurckVectorOfJet {n : WithTop ℕ∞} (k : Fin d) :
 
 /-- Derivative of the DeTurck vector field.
 
-`∂_m W^k = ∑_{i,j} [(∂_m g^{ij})(Γ^k_ij - Γ̄^k_ij) + g^{ij}(∂_m Γ^k_ij)]` -/
+`∂_m W^k = ∑_{i,j} [(∂_m g^{ij})(Γ^k_ij - Γ̄^k_ij) + g^{ij}(∂_m Γ^k_ij)]`
+
+This expression holds the background-symbol parameter constant. A varying
+background contributes the additional term `-∑_{i,j} g^{ij} ∂_m Γ̄^k_ij`. -/
 noncomputable def derivDeTurckVectorOfJet (j : Jet2 d d) (m k : Fin d) : ℝ :=
   ∑ i : Fin d, ∑ j_ : Fin d,
     ((derivInvMetricOfJet j m i j_) * (christoffelOfJet j k i j_ - Γbg k i j_) +
@@ -708,7 +718,11 @@ This is the coordinate formula for the Ricci-DeTurck RHS, computed from the
 2-jet `j` using genuine geometric definitions:
 - `R_{ij}` is the Ricci tensor (from `ricciOfJet`)
 - `(L_W g)_{ij}` is the DeTurck correction (Lie derivative along W)
-- `W` is the DeTurck vector field (negated, per Point-4 constraints) -/
+- `W` is the positive conventional metric-contracted DeTurck vector
+
+The background symbols are held constant here. A variable-background coordinate
+RHS requires the explicit background-first-jet contribution provided separately
+in `RicciDeTurckPrincipalRemainder`. -/
 noncomputable def phiRDOfJet (j : Jet2 d d) (i j_ : Fin d) : ℝ :=
   -2 * ricciOfJet j i j_ + deTurckCorrectionOfJet Γbg j i j_
 
