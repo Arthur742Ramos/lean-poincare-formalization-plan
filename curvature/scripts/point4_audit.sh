@@ -185,6 +185,15 @@ EOF
 else
   g4_note="target missing"; g5_note="target missing"
 fi
+# G5 also locks the preserved requirement interfaces against same-name changes.
+# A type assignment alone cannot detect a weakened body behind an unchanged FQN.
+CONTRACT_INVARIANTS_OUT="$(python3 "$SCRIPT_DIR/point4_closed_contract_source_test.py" 2>&1)"
+CONTRACT_INVARIANTS_RC=$?
+if [ "$CONTRACT_INVARIANTS_RC" -ne 0 ]; then
+  g5="FAIL"; g5_note="preserved requirement-interface fingerprint/contract check failed"
+  say "    $CONTRACT_INVARIANTS_OUT"
+fi
+
 # Source discovery alone cannot certify unconditional construction.
 if [ "$g3" = "PASS" ] && [ "$g5" != "PASS" ]; then
   g3="FAIL"; g3_note="source candidate lacks the full unconditional kernel-checked contract"

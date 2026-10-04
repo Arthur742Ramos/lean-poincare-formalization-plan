@@ -69,7 +69,11 @@ only `propext`, `Classical.choice`, and `Quot.sound`.
 
 G5 now imports the actual target and checks a bare `@target` against the entire
 expected dependent function type at three independent universes. Compiler exit
-status is mandatory. A name grep is no longer accepted as a signature proof.
+status is mandatory. G5 also requires the eight original requirement-interface
+fingerprints and the complete expected binder/result expression to match the
+immutable base. This guards against weakening a definition while retaining its
+name. A future semantics-preserving refactor needs explicit reviewed fingerprint
+renewal; the check is not permission to change the requirements. A name grep is no longer accepted as a signature proof.
 G3 cannot certify unconditional construction when that assignment fails.
 The previous forbidden restriction checks remain additional defenses. The
 canonical identity is fixed as

@@ -24,7 +24,8 @@ The audit requires:
    `IntrinsicLocalExistenceUniquenessFamily` on a general compact manifold
    without boundary;
 4. an axiom set contained in `propext`, `Classical.choice`, and `Quot.sound`;
-5. a kernel-checked assignment to `PointFourClosedManifoldContract`, retaining
+5. a kernel-checked assignment to `PointFourClosedManifoldContract` and mandatory
+   preserved-interface fingerprint checks, retaining
    the existing exact IVP/candidate/family interfaces and excluding every added
    analytic, solver, package, empty, subsingleton, rank, preconstructed chart,
    closure-data or stronger global model-boundary restriction.
