@@ -375,6 +375,20 @@ maps, evaluates them on local frames, and supplies the scalar premises used
 by the lowering bridge. This is an interface reduction only: the joint
 geometric section regularity remains an explicit Point 4 gate.
 
+The conventional two-input-slot DeTurck repair now has a candidate joint-field
+follow-up in `MetricContractedDeTurckJointRegularity.lean`. From a jointly smooth
+metric representative agreeing with the defining metric and the actual jointly
+smooth Levi--Civita correction tensor, it proves the conventional inverse-Gram
+vector formula and joint smoothness of the positive field and negative recovery
+gauge. The correction-functional corollary derives the tensor premise by the
+existing geometric Gram/Riesz reconstruction, and a conditional compact-flow
+wrapper uses this same conventional gauge. These are explicit geometric
+regularity hypotheses, not assumptions about the final contracted field or a
+claim of PDE existence. The generic contraction prototype passed only a
+development-toolchain check; exact Lean-4.33 compilation of the new geometric
+adapter remains pending. See [contraction repair](contraction-repair.md) for the
+field distinction and verification boundary. Point 4 remains OPEN.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
