@@ -255,7 +255,6 @@ def run_batch(command, *, root, env, stream, refresh, poll_seconds=2,
     pending = []
     signal.signal(signal.SIGTERM, lambda signum, frame: pending.append(signum))
     process = None
-    completed = False
     try:
         process = subprocess.Popen(command, cwd=root, env=env, stdout=stream,
                                    stderr=subprocess.STDOUT, start_new_session=True)
@@ -265,11 +264,12 @@ def run_batch(command, *, root, env, stream, refresh, poll_seconds=2,
         while process.poll() is None:
             time.sleep(poll_seconds)
             refresh()
-        completed = True
+        # Capture the actual Lake exit before cleanup. Once Lake exits, no
+        # valid compiler work should remain in its owned process group.
         return process.returncode
     finally:
         try:
-            if process is not None and not completed:
+            if process is not None:
                 drain_process_group(process, grace_seconds=grace_seconds,
                                     kill_seconds=kill_seconds)
         finally:

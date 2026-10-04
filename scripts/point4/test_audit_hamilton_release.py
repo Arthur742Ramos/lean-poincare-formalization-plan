@@ -434,6 +434,57 @@ class CancellationTests(unittest.TestCase):
                         process.kill()
                     process.wait(timeout=3)
 
+    def test_exited_mock_lake_group_is_drained_and_actual_exit_retained(self):
+        """A dead owner must not leave its live child/grandchild running."""
+        import json, os, signal, sys, tempfile
+        for code in (0, 7, -9):
+            with self.subTest(actual_exit=code), tempfile.TemporaryDirectory() as tmp:
+                root = pathlib.Path(tmp)
+                child = root / "mock_child.py"
+                child.write_text(
+                    "import json, os, pathlib, signal, subprocess, sys, time\n"
+                    "signal.signal(signal.SIGTERM, signal.SIG_IGN)\n"
+                    "grandchild = subprocess.Popen([sys.executable, '-c', "
+                    "'import signal,time; signal.signal(signal.SIGTERM, signal.SIG_IGN); time.sleep(60)'])\n"
+                    "pathlib.Path(sys.argv[1]).write_text(json.dumps([int(sys.argv[2]), os.getpid(), grandchild.pid]))\n"
+                    "time.sleep(60)\n")
+                owner = root / "mock_lake.py"
+                owner.write_text(
+                    "import os, pathlib, signal, subprocess, sys, time\n"
+                    "root = pathlib.Path(sys.argv[1])\n"
+                    "subprocess.Popen([sys.executable, str(root / 'mock_child.py'), str(root / 'pids.json'), str(os.getpid())])\n"
+                    "deadline = time.monotonic() + 3\n"
+                    "while not (root / 'pids.json').exists() and time.monotonic() < deadline: time.sleep(0.01)\n"
+                    "if not (root / 'pids.json').exists(): sys.exit(99)\n"
+                    "code = int(sys.argv[2])\n"
+                    "if code < 0: os.kill(os.getpid(), signal.SIGKILL)\n"
+                    "sys.exit(code)\n")
+                pids = []
+                try:
+                    started = time.monotonic()
+                    with (root / "group.log").open("w") as stream:
+                        actual = audit.run_batch([sys.executable, str(owner), str(root), str(code)],
+                                                 root=root, env=os.environ.copy(), stream=stream,
+                                                 refresh=lambda: None, poll_seconds=0.01,
+                                                 grace_seconds=0.15, kill_seconds=1)
+                    self.assertEqual(actual, code, (root / "group.log").read_text())
+                    self.assertLess(time.monotonic() - started, 2)
+                    pids = json.loads((root / "pids.json").read_text())
+                    deadline = time.monotonic() + 1
+                    while time.monotonic() < deadline:
+                        running = [pid for pid in pids if pathlib.Path(f"/proc/{pid}/stat").exists()
+                                   and pathlib.Path(f"/proc/{pid}/stat").read_text().split()[2] != "Z"]
+                        if not running: break
+                        time.sleep(0.01)
+                    self.assertEqual(running, [], "Exited Lake left running mock descendants")
+                finally:
+                    path = root / "pids.json"
+                    if path.exists():
+                        pids = json.loads(path.read_text())
+                    if pids:
+                        try: os.killpg(pids[0], signal.SIGKILL)
+                        except ProcessLookupError: pass
+
     def test_spawn_signal_is_deferred_until_cleanup_handle_exists(self):
         import os, signal
         from unittest.mock import Mock, patch
