@@ -40,8 +40,12 @@ def coordinateLine (x : Fin n → ℝ) (m : Fin n) (t : ℝ) : Fin n → ℝ :=
 /-- Actual derivative of the straight coordinate line. -/
 theorem hasDerivAt_coordinateLine (x : Fin n → ℝ) (m : Fin n) :
     HasDerivAt (coordinateLine x m) (coordinateVector m) 0 := by
-  simpa [coordinateLine] using
-    (hasDerivAt_const (0 : ℝ) x).add ((hasDerivAt_id (0 : ℝ)).smul_const (coordinateVector m))
+  change HasDerivAt (fun t : ℝ => x + t • coordinateVector m) (coordinateVector m) 0
+  have h := (hasDerivAt_const (0 : ℝ) x).add
+    ((hasDerivAt_id (0 : ℝ)).smul_const (coordinateVector m))
+  change HasDerivAt (fun t : ℝ => x + t • coordinateVector m)
+    (0 + (1 : ℝ) • coordinateVector m) 0 at h
+  simpa only [zero_add, one_smul] using h
 
 /-- Restrict a genuine scalar Fréchet derivative to a coordinate line. -/
 theorem hasDerivAt_comp_coordinateLine {f : (Fin n → ℝ) → ℝ}
@@ -73,8 +77,19 @@ theorem differentiableAt_inverse_entry
       (by norm_num) (g x)).comp x hd
   have hadjEntry := differentiableAt_pi.mp (differentiableAt_pi.mp hadjDiff i) k
   have hentry := (hdetDiff.inv hdet).mul hadjEntry
-  simpa only [inverse, Matrix.inv_def, Ring.inverse_eq_inv, Pi.inv_apply, Pi.mul_apply,
-    Matrix.smul_apply, smul_eq_mul] using hentry
+  change DifferentiableAt ℝ (fun y =>
+    ((show Matrix (Fin d) (Fin d) ℝ from g y).det)⁻¹ *
+      Matrix.adjugate (show Matrix (Fin d) (Fin d) ℝ from g y) i k) x at hentry
+  have heq : (fun y => inverse g y i k) =
+      (fun y => ((show Matrix (Fin d) (Fin d) ℝ from g y).det)⁻¹ *
+        Matrix.adjugate (show Matrix (Fin d) (Fin d) ℝ from g y) i k) := by
+    funext y
+    unfold inverse
+    simpa only [Ring.inverse_eq_inv, Matrix.smul_apply, smul_eq_mul] using
+      congrArg (fun C : Matrix (Fin d) (Fin d) ℝ => C i k)
+        (Matrix.inv_def (show Matrix (Fin d) (Fin d) ℝ from g y))
+  rw [heq]
+  exact hentry
 
 /-- Coordinate inverse derivative, computed using the actual first derivatives. -/
 def inverseFirst (g : (Fin n → ℝ) → (Fin d → Fin d → ℝ))
@@ -109,7 +124,9 @@ theorem fderiv_inverse_apply
 theorem inverseFirst_eq_sum (m : Fin n) (i k : Fin d) :
     inverseFirst g x m i k =
       -∑ a : Fin d, ∑ b : Fin d, inverse g x i a * first g x m a b * inverse g x b k := by
-  simp only [inverseFirst, Matrix.neg_apply, Matrix.mul_apply, Finset.sum_mul, inverse]
+  change -(∑ b : Fin d, (∑ a : Fin d, inverse g x i a * first g x m a b) *
+    inverse g x b k) = _
+  simp only [Finset.sum_mul]
   rw [Finset.sum_comm]
 
 /-- The actual coordinate Christoffel expression of the produced field. -/
@@ -155,10 +172,11 @@ theorem fderiv_christoffel_apply
         (first_component_hasFDerivAt hU hg hx j i l)).sub
         (first_component_hasFDerivAt hU hg hx l i j))
   have h := hsum.const_mul (1/2 : ℝ)
+  simp only [Pi.mul_apply, Pi.add_apply, Pi.sub_apply] at h
   change fderiv ℝ (fun y => (1/2 : ℝ) * ∑ l : Fin d, inverse g y k l *
     (first g y i j l + first g y j i l - first g y l i j)) x (coordinateVector m) = _
   rw [h.fderiv]
   simp [christoffelFirst, second, fderiv_inverse_apply hU hg hx hdet,
-    mul_comm, mul_left_comm, mul_assoc]
+    mul_comm, add_comm]
 
 end PoincareCurvature.CoordinateMatrixJet
