@@ -164,8 +164,6 @@ theorem contMDiff_metricContractedDeTurckVectorField_of_joint_correction
         g gSmooth background hinner p.1 e bas hp.2)
   exact hactual.contMDiffAt (hSopen.mem_nhds hp₀)
 
-set_option pp.all true in
-set_option pp.universes true in
 /-- The recovery gauge is the negative of the conventional field, so the
 same geometric data supply its joint smoothness. -/
 theorem contMDiff_metricContractedDeTurckGaugeField_of_joint_correction
@@ -195,8 +193,7 @@ theorem contMDiff_metricContractedDeTurckGaugeField_of_joint_correction
     metricContractionTangentVectorBundle (I := I) (M := M)
   have hvector := contMDiff_metricContractedDeTurckVectorField_of_joint_correction
     g gSmooth background bas hinner hmetric hcorrection
-  simpa only [ModelWithCorners.tangent, metricContractedDeTurckGaugeField, Pi.neg_apply] using
-    (@PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg
+  have hraw := (@PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg
       E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› H ‹TopologicalSpace H› I ∞
       M ‹TopologicalSpace M› ‹ChartedSpace H M›
       E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› (TangentSpace I : M → Type _)
@@ -216,6 +213,14 @@ theorem contMDiff_metricContractedDeTurckGaugeField_of_joint_correction
       (fun p : ℝ × M =>
         metricContractedDeTurckVectorField (I := I) (M := M) g background p.1 p.2)
       hvector)
+  have hneg : ContMDiff (𝓘(ℝ).prod I) I.tangent ∞
+      (fun p : ℝ × M => (⟨p.2,
+        -metricContractedDeTurckVectorField (I := I) (M := M) g background p.1 p.2⟩ :
+        TangentBundle I M)) := by
+    convert hraw using 1 <;> rfl
+  refine hneg.congr ?_
+  intro p
+  rfl
 
 /-- Conditional compact gauge-flow construction for this same conventional
 field. This migrates the field-level input only: it constructs no Ricci--DeTurck
