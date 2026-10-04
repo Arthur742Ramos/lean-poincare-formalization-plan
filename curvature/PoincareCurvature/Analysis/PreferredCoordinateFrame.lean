@@ -113,8 +113,11 @@ theorem mlieBracket_frame_eq_zero {x : M}
   have hinv : ContMDiffAt 𝓘(ℝ, E) I 2 (extChartAt I p).symm z :=
     (contMDiffWithinAt_extChartAt_symm_target p hz).contMDiffAt
       ((isOpen_extChartAt_target p).mem_nhds hz)
-  haveI : IsManifold I (minSmoothness ℝ 2) M :=
-    IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞)) (by simp)
+  haveI : IsManifold I (minSmoothness ℝ 2) M := by
+    have hsmooth : minSmoothness ℝ 2 ≤ (∞ : WithTop ℕ∞) := by
+      simpa [minSmoothness] using
+        (show (2 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) by decide)
+    exact IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞)) hsmooth
   have hbr := VectorField.mpullback_mlieBracket
     (I := 𝓘(ℝ, E)) (I' := I)
     (by simpa only [z, (extChartAt I p).left_inv hx] using hmd i)

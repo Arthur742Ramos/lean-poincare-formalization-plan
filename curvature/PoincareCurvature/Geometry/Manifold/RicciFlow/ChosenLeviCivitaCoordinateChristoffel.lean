@@ -171,7 +171,9 @@ theorem chosenLC_inner_coordinateFrame_eq_first_metric
         first (chosenLCMetricCoordinates g t p b) (chosenLCCoordinatePoint (I := I) p b x) j i l -
         first (chosenLCMetricCoordinates g t p b) (chosenLCCoordinatePoint (I := I) p b x) l i j := by
   letI : Bundle.RiemannianBundle TM := ⟨(g t).toRiemannianMetric⟩
-  haveI : IsManifold I 2 M := IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞)) (by simp)
+  haveI : IsManifold I 2 M :=
+    IsManifold.of_le (I := I) (n := (∞ : WithTop ℕ∞))
+      (show (2 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) by decide)
   have hbase : x ∈ (trivialization (I := I) p).baseSet := by
     simpa only [trivialization, TangentBundle.trivializationAt_baseSet, extChartAt_source] using hx
   have hmd (k : Fin d) : MDiffAt (T% (frame (I := I) p b k)) x :=
