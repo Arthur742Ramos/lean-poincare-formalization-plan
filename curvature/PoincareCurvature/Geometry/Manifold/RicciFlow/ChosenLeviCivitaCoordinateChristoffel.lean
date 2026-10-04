@@ -119,8 +119,10 @@ theorem chosenLCMetricCoordinates_eq_Gram
       (fun i j => (g t).inner x (frame (I := I) p b i x) (frame (I := I) p b j x)) := by
   funext i j
   simp only [chosenLCMetricCoordinates, chosenLCCoordinatePoint, scalarReadout,
-    Function.comp_apply, ContinuousLinearEquiv.apply_symm_apply,
-    (extChartAt I p).left_inv hx, chosenLCMetricComponent]
+    Function.comp_apply, ContinuousLinearEquiv.apply_symm_apply]
+  change chosenLCMetricComponent g t p b i j ((extChartAt I p).symm (extChartAt I p x)) =
+    chosenLCMetricComponent g t p b i j x
+  exact congrArg (chosenLCMetricComponent g t p b i j) ((extChartAt I p).left_inv hx)
 
 /-- Point invertibility is produced from positive definiteness, not assumed. -/
 theorem chosenLCMetricCoordinates_det_ne_zero
