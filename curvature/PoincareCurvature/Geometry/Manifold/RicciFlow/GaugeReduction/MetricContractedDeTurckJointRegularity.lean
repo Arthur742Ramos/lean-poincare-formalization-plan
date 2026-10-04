@@ -164,6 +164,8 @@ theorem contMDiff_metricContractedDeTurckVectorField_of_joint_correction
         g gSmooth background hinner p.1 e bas hp.2)
   exact hactual.contMDiffAt (hSopen.mem_nhds hp₀)
 
+set_option pp.all true in
+set_option pp.universes true in
 /-- The recovery gauge is the negative of the conventional field, so the
 same geometric data supply its joint smoothness. -/
 theorem contMDiff_metricContractedDeTurckGaugeField_of_joint_correction
