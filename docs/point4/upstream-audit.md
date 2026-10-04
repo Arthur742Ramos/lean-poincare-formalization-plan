@@ -205,12 +205,19 @@ The symlink view is removed before artifact upload without touching its official
 file targets. Historical evidence remains in its original format and is not
 rewritten to match this new format.
 
-Twenty bounded Python mock tests cover the old scheduler plus chain ordering
+Twenty-two bounded Python mock tests cover the old scheduler plus chain ordering
 and width, fresh-object rejection, exact argument forwarding, genuine nonzero
 and signal exits, timeout and fake-success failures, missing/duplicate/unexpected
 records, dependency evidence, per-launch memory/disk guards, concurrent lock
 bounds, untouched official files, metadata forwarding, setup/log tampering, and
-the unchanged endpoint signature/axiom gate. These tests execute no Lean build.
+the unchanged endpoint signature/axiom gate. A scoped SIGTERM handler marks
+cancellation inconclusive and restores the previous handler. Cancellation drains
+the detached Lake process group under a 30-second graceful wait followed by
+SIGKILL and a five-second final reap bound; remaining descendants are killed even
+if Lake exits first. Signals during process creation are deferred until the
+cleanup handle exists, without blocking SIGTERM in the child. Two cancellation
+regressions send actual SIGTERM to disposable Python mocks, including a child
+and grandchild that ignore SIGTERM. These tests execute no Lean build.
 A fresh complete hosted run is still required to verify this new audit code.
 Point 4 remains **OPEN**; no canonical contract or semantic bridge was changed.
 

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import contextlib
 import heapq
 import hashlib
 import gzip
@@ -194,6 +195,85 @@ def endpoint_output(stdout, code):
     actual.update({name: [] for name in clean})
     assert all(set(axioms) <= allowed for axioms in actual.values()), actual
     return actual
+
+
+class AuditInterrupted(RuntimeError):
+    """An external cancellation is an inconclusive audit, never a compiler exit."""
+
+
+@contextlib.contextmanager
+def audit_execution(report, save):
+    """Translate SIGTERM only within source execution; restore the old handler."""
+    previous = signal.getsignal(signal.SIGTERM)
+
+    def terminate(signum, frame):
+        raise AuditInterrupted("Audit received SIGTERM")
+
+    signal.signal(signal.SIGTERM, terminate)
+    try:
+        yield
+    except BaseException:
+        if report["kernel_audit_status"].startswith("RUNNING"):
+            report["kernel_audit_status"] = "INCONCLUSIVE: interrupted, resource, or evidence failure"
+        save()
+        raise
+    finally:
+        signal.signal(signal.SIGTERM, previous)
+
+
+def drain_process_group(process, *, grace_seconds=30, kill_seconds=5):
+    """Bound cancellation of the detached Lake group, including its compilers."""
+    previous = signal.getsignal(signal.SIGTERM)
+    # Repeated cancellation must not interrupt the cleanup itself.
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    try:
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+        try:
+            process.wait(timeout=grace_seconds)
+        except subprocess.TimeoutExpired:
+            pass
+        # Even if Lake exits promptly, descendants may ignore SIGTERM. Kill the
+        # entire remaining group before the final bounded parent reap.
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.wait(timeout=kill_seconds)
+    finally:
+        signal.signal(signal.SIGTERM, previous)
+
+
+def run_batch(command, *, root, env, stream, refresh, poll_seconds=2,
+              grace_seconds=30, kill_seconds=5):
+    """Run unchanged Lake arguments with signal-safe, bounded group cleanup."""
+    # Close the spawn/assignment race without passing a blocked signal mask to
+    # the child: defer SIGTERM until the process handle and finally block exist.
+    previous = signal.getsignal(signal.SIGTERM)
+    pending = []
+    signal.signal(signal.SIGTERM, lambda signum, frame: pending.append(signum))
+    process = None
+    completed = False
+    try:
+        process = subprocess.Popen(command, cwd=root, env=env, stdout=stream,
+                                   stderr=subprocess.STDOUT, start_new_session=True)
+        signal.signal(signal.SIGTERM, previous)
+        if pending:
+            raise AuditInterrupted("Audit received SIGTERM while spawning Lake")
+        while process.poll() is None:
+            time.sleep(poll_seconds)
+            refresh()
+        completed = True
+        return process.returncode
+    finally:
+        try:
+            if process is not None and not completed:
+                drain_process_group(process, grace_seconds=grace_seconds,
+                                    kill_seconds=kill_seconds)
+        finally:
+            signal.signal(signal.SIGTERM, previous)
 
 
 def main() -> None:
@@ -383,7 +463,7 @@ def main() -> None:
                                     if v.get("status") == "finished" and v.get("exit_code") != 0]
         save()
 
-    try:
+    with audit_execution(report, save):
         for index, batch in enumerate(batches, 1):
             assert all(set(graph[m]) <= set(report["built"]) | set(batch["modules"])
                        for m in batch["modules"])
@@ -395,23 +475,7 @@ def main() -> None:
             print(f"BATCH {index}/{len(batches)} START ({len(batch['modules'])} source modules)", flush=True)
             path = output / "batch-build-logs" / f"{index:04d}.log"
             with path.open("w") as stream:
-                process = subprocess.Popen(command, cwd=root, env=env, stdout=stream,
-                                           stderr=subprocess.STDOUT, start_new_session=True)
-                try:
-                    while process.poll() is None:
-                        time.sleep(2)
-                        refresh()
-                finally:
-                    if process.poll() is None:
-                        # Evidence/resource exceptions must not leave detached
-                        # Lake or real compiler processes consuming the runner.
-                        os.killpg(process.pid, signal.SIGTERM)
-                        try:
-                            process.wait(timeout=30)
-                        except subprocess.TimeoutExpired:
-                            os.killpg(process.pid, signal.SIGKILL)
-                            process.wait()
-            code = process.returncode
+                code = run_batch(command, root=root, env=env, stream=stream, refresh=refresh)
             refresh()
             report["batch_results"].append({"batch": index, "command": command, "exit_code": code,
                                             "elapsed_seconds": time.monotonic() - started})
@@ -431,11 +495,6 @@ def main() -> None:
             result = report["compiler_results"][m]
             assert hashlib.sha256((root / (m.replace('.', '/') + '.lean')).read_bytes()).hexdigest() == result["source_sha256"]
             assert hashlib.sha256((root / (".lake/build/lib/lean/" + m.replace('.', '/') + '.olean')).read_bytes()).hexdigest() == result["olean_sha256"]
-    except BaseException:
-        if report["kernel_audit_status"].startswith("RUNNING"):
-            report["kernel_audit_status"] = "INCONCLUSIVE: interrupted, resource, or evidence failure"
-        save()
-        raise
 
     report["kernel_audit_status"] = "RUNNING: source closure complete, endpoint audit pending"
     save()

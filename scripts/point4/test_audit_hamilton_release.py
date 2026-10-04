@@ -370,5 +370,89 @@ class EndpointGateTests(unittest.TestCase):
                 audit.endpoint_output(output, code)
 
 
+class CancellationTests(unittest.TestCase):
+    def test_actual_sigterm_marks_inconclusive_and_drains_mock_descendants(self):
+        """Three tiny Python processes only; no Lean or native build."""
+        import json, os, signal, subprocess, sys, tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            child = root / "mock_child.py"
+            child.write_text(
+                "import json, os, pathlib, signal, subprocess, sys, time\n"
+                "signal.signal(signal.SIGTERM, signal.SIG_IGN)\n"
+                "grandchild = subprocess.Popen([sys.executable, '-c', "
+                "'import signal,time; signal.signal(signal.SIGTERM, signal.SIG_IGN); time.sleep(60)'])\n"
+                "pathlib.Path(sys.argv[1]).write_text(json.dumps([os.getpid(), grandchild.pid]))\n"
+                "time.sleep(60)\n")
+            parent = root / "mock_audit_parent.py"
+            source = pathlib.Path(audit.__file__).resolve()
+            parent.write_text(
+                "import importlib.util, json, os, pathlib, signal, sys\n"
+                f"spec = importlib.util.spec_from_file_location('audit', {str(source)!r})\n"
+                "audit = importlib.util.module_from_spec(spec); spec.loader.exec_module(audit)\n"
+                "root = pathlib.Path(sys.argv[1])\n"
+                "report = {'kernel_audit_status': 'RUNNING: mock source compilation'}\n"
+                "before = signal.getsignal(signal.SIGTERM)\n"
+                "def save(): (root / 'report.json').write_text(json.dumps(report))\n"
+                "try:\n"
+                "    with audit.audit_execution(report, save):\n"
+                "        with (root / 'child.log').open('w') as stream:\n"
+                "            audit.run_batch([sys.executable, str(root / 'mock_child.py'), str(root / 'pids.json')], "
+                "root=root, env=os.environ.copy(), stream=stream, refresh=lambda: None, "
+                "poll_seconds=0.01, grace_seconds=0.15, kill_seconds=1)\n"
+                "except audit.AuditInterrupted:\n"
+                "    report['handler_restored'] = signal.getsignal(signal.SIGTERM) == before\n"
+                "    save(); sys.exit(23)\n")
+            pids = []
+            with (root / "parent.log").open("w") as log:
+                process = subprocess.Popen([sys.executable, str(parent), str(root)],
+                                           stdout=log, stderr=subprocess.STDOUT)
+                try:
+                    deadline = time.monotonic() + 3
+                    path = root / "pids.json"
+                    while not path.exists() and time.monotonic() < deadline and process.poll() is None:
+                        time.sleep(0.01)
+                    self.assertTrue(path.exists(), (root / "parent.log").read_text())
+                    pids = json.loads(path.read_text())
+                    started = time.monotonic()
+                    os.kill(process.pid, signal.SIGTERM)
+                    self.assertEqual(process.wait(timeout=3), 23, (root / "parent.log").read_text())
+                    self.assertLess(time.monotonic() - started, 2)
+                    report = json.loads((root / "report.json").read_text())
+                    self.assertTrue(report["kernel_audit_status"].startswith("INCONCLUSIVE:"))
+                    self.assertTrue(report["handler_restored"])
+                    for pid in pids:
+                        stat = pathlib.Path(f"/proc/{pid}/stat")
+                        # An orphan awaiting init reap is not a running compiler.
+                        self.assertTrue(not stat.exists() or stat.read_text().split()[2] == "Z",
+                                        f"Mock descendant {pid} remains running")
+                finally:
+                    if pids:
+                        try: os.killpg(pids[0], signal.SIGKILL)
+                        except ProcessLookupError: pass
+                    if process.poll() is None:
+                        process.kill()
+                    process.wait(timeout=3)
+
+    def test_spawn_signal_is_deferred_until_cleanup_handle_exists(self):
+        import os, signal
+        from unittest.mock import Mock, patch
+        report = {"kernel_audit_status": "RUNNING: mock"}
+        before = signal.getsignal(signal.SIGTERM)
+        process = Mock(pid=987654321)
+        def spawn(*args, **kwargs):
+            os.kill(os.getpid(), signal.SIGTERM)
+            return process
+        saved = []
+        with patch.object(audit.subprocess, "Popen", side_effect=spawn), \
+             patch.object(audit, "drain_process_group") as cleanup:
+            with self.assertRaises(audit.AuditInterrupted):
+                with audit.audit_execution(report, lambda: saved.append(report.copy())):
+                    audit.run_batch(["mock"], root=".", env={}, stream=None, refresh=lambda: None)
+            cleanup.assert_called_once_with(process, grace_seconds=30, kill_seconds=5)
+        self.assertEqual(signal.getsignal(signal.SIGTERM), before)
+        self.assertTrue(saved[-1]["kernel_audit_status"].startswith("INCONCLUSIVE:"))
+
+
 if __name__ == "__main__":
     unittest.main()
