@@ -117,6 +117,7 @@ theorem chosenLCMetricCoordinates_eq_Gram
     (b : Module.Basis (Fin d) ℝ E) {x : M} (hx : x ∈ (extChartAt I p).source) :
     chosenLCMetricCoordinates g t p b (chosenLCCoordinatePoint (I := I) p b x) =
       (fun i j => (g t).inner x (frame (I := I) p b i x) (frame (I := I) p b j x)) := by
+  funext i j
   simp only [chosenLCMetricCoordinates, chosenLCCoordinatePoint, scalarReadout,
     Function.comp_apply, ContinuousLinearEquiv.apply_symm_apply,
     (extChartAt I p).left_inv hx, chosenLCMetricComponent]
