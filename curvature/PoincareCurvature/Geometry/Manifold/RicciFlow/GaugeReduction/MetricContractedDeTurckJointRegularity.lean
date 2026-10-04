@@ -134,10 +134,16 @@ theorem contMDiff_metricContractedDeTurckVectorField_of_joint_correction
             (e.localFrame bas a p.2) (e.localFrame bas b p.2)))⁻¹) i j •
           explicitLeviCivitaCorrection (I := I) (M := M) g background p.1 p.2
             (e.localFrame bas i p.2) (e.localFrame bas j p.2))) S := by
-    exact PoincareCurvature.ParametrizedInner.contMDiffOn_timeDependentMetricContraction
-      (IB := I) (n := ∞) (F := E) (V := (TangentSpace I : M → Type _))
+    exact @PoincareCurvature.ParametrizedInner.contMDiffOn_timeDependentMetricContraction
+      E _ _ H _ I ∞ M _ _ E _ _ (TangentSpace I : M → Type _)
+      instTopologicalSpaceTangentBundle
+      (fun _ => inferInstance) (fun _ => inferInstance)
+      (metricContractionTangentFiberBundle (I := I) (M := M))
+      (metricContractionTangentVectorBundle (I := I) (M := M))
+      ‹ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I›
       gSmooth (explicitLeviCivitaCorrection (I := I) (M := M) g background)
-      e bas (u := e.baseSet) subset_rfl hmetricOn hcorrectionOn
+      e (by infer_instance) ι (by infer_instance) (by infer_instance)
+      bas e.baseSet subset_rfl hmetricOn hcorrectionOn
   have hactual : ContMDiffOn (𝓘(ℝ).prod I) I.tangent ∞
       (fun p : ℝ × M => (⟨p.2,
         metricContractedDeTurckVectorField (I := I) (M := M) g background p.1 p.2⟩ :
@@ -179,10 +185,16 @@ theorem contMDiff_metricContractedDeTurckGaugeField_of_joint_correction
   have hvector := contMDiff_metricContractedDeTurckVectorField_of_joint_correction
     g gSmooth background bas hinner hmetric hcorrection
   simpa only [metricContractedDeTurckGaugeField, Pi.neg_apply] using
-    (PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg
-      (IB := I) (n := ∞) (F := E) (V := (TangentSpace I : M → Type _))
-      (IM := (𝓘(ℝ).prod I)) (b := (Prod.snd : ℝ × M → M))
-      (v := fun p : ℝ × M =>
+    (@PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg
+      E _ _ H _ I ∞ M _ _ E _ _ (TangentSpace I : M → Type _)
+      instTopologicalSpaceTangentBundle
+      (fun _ => inferInstance) (fun _ => inferInstance)
+      (metricContractionTangentFiberBundle (I := I) (M := M))
+      (metricContractionTangentVectorBundle (I := I) (M := M))
+      ‹ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I›
+      (ℝ × E) _ _ (ℝ × H) _ (𝓘(ℝ).prod I) (ℝ × M) _ _
+      (Prod.snd : ℝ × M → M)
+      (fun p : ℝ × M =>
         metricContractedDeTurckVectorField (I := I) (M := M) g background p.1 p.2)
       hvector)
 
