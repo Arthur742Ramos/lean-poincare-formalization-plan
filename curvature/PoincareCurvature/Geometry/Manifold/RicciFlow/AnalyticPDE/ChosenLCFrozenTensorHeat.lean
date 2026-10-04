@@ -49,9 +49,12 @@ theorem localFrameInChart_preferred_eq_basis
     (p : M) (b : Module.Basis (Fin d) ℝ E) {z : E}
     (hz : z ∈ (extChartAt I p).target) (a : Fin d) :
     localFrameInChart (I := I) p (trivialization (I := I) p) b a z = b a := by
-  have h := mpullback_frame_eq_const (I := I) p b hz a
-  simpa only [localFrameInChart, VectorField.mpullback,
-    ModelWithCorners.Boundaryless.range_eq_univ] using h
+  unfold localFrameInChart
+  rw [ModelWithCorners.Boundaryless.range_eq_univ, VectorField.mpullbackWithin_univ]
+  change VectorField.mpullback 𝓘(ℝ, E) I (extChartAt I p).symm
+    (frame (I := I) p b a) z =
+      (NormedSpace.fromTangentSpace (𝕜 := ℝ) z).symm (b a)
+  exact mpullback_frame_eq_const (I := I) p b hz a
 
 /-- The actual metric slice selects the Riemannian bundle used by the existing
 frozen geometric principal coefficient; no background metric is silently used. -/
@@ -159,8 +162,8 @@ theorem evalCLM_chosenLCFrozenTensorHeatCauchyL
     (u : FiniteParabolicC2AlphaBanach E TW t₀ T α)
     {s : ℝ} (hs : s ∈ Set.Ioc t₀ T) (ξ : Fin d → ℝ) (i j : Fin d) :
     ParabolicC0AlphaBanach.evalCLM (s, toModel b ξ)
-        (show (s, toModel b ξ) ∈ parabolicFiniteCylinder E t₀ T by
-          simpa only [mem_parabolicFiniteCylinder] using hs)
+        (show (s, toModel b ξ) ∈ parabolicFiniteCylinder E t₀ T from
+          mem_parabolicFiniteCylinder.mpr ⟨hs.1, hs.2⟩)
         (chosenLCFrozenTensorHeatCauchyL g tStar p b x₀ t₀ T α u) (j, i) =
       FiniteParabolicC2AlphaBanach.timeDeriv u (s, toModel b ξ) (j, i) -
         ∑ a : Fin d, ∑ c : Fin d,
@@ -169,8 +172,8 @@ theorem evalCLM_chosenLCFrozenTensorHeatCauchyL
             second (finiteCylinderTensorReadout b u s) ξ a c i j := by
   letI : Bundle.RiemannianBundle TM := ⟨(g tStar).toRiemannianMetric⟩
   letI : IsContMDiffRiemannianBundle I 1 E TM := g.slice_isContMDiffRiemannianBundle tStar
-  have hz : (s, toModel b ξ) ∈ parabolicFiniteCylinder E t₀ T := by
-    simpa only [mem_parabolicFiniteCylinder] using hs
+  have hz : (s, toModel b ξ) ∈ parabolicFiniteCylinder E t₀ T :=
+    mem_parabolicFiniteCylinder.mpr ⟨hs.1, hs.2⟩
   have h := congrFun (evalCLM_frozenTensorHeatCauchyL (I := I)
     p (trivialization (I := I) p) b x₀ u (s, toModel b ξ) hz) (j, i)
   change _ = FiniteParabolicC2AlphaBanach.timeDeriv u (s, toModel b ξ) (j, i) -
@@ -189,8 +192,8 @@ theorem evalCLM_chosenLCFrozenTensorHeatCauchyL_eq_actual_derivatives
     (u : FiniteParabolicC2AlphaBanach E TW t₀ T α)
     {s : ℝ} (hs : s ∈ Set.Ioo t₀ T) (ξ : Fin d → ℝ) (i j : Fin d) :
     ParabolicC0AlphaBanach.evalCLM (s, toModel b ξ)
-        (show (s, toModel b ξ) ∈ parabolicFiniteCylinder E t₀ T by
-          simpa only [mem_parabolicFiniteCylinder] using (show s ∈ Set.Ioc t₀ T from ⟨hs.1, hs.2.le⟩))
+        (show (s, toModel b ξ) ∈ parabolicFiniteCylinder E t₀ T from
+          mem_parabolicFiniteCylinder.mpr ⟨hs.1, hs.2.le⟩)
         (chosenLCFrozenTensorHeatCauchyL g tStar p b x₀ t₀ T α u) (j, i) =
       deriv (fun r => finiteCylinderTensorReadout b u r ξ i j) s -
         ∑ a : Fin d, ∑ c : Fin d,
