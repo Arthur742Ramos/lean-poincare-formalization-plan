@@ -47,6 +47,15 @@ verification is pending. It does not construct compact-manifold localization,
 an ordinary endpoint derivative, a weighted nonlinear solver, or Point-4
 closure.
 
+The next supporting initial-face candidate constructs actual compatible
+positive-time C²,α Gaussian data with an explicit Hölder certificate whose
+`t^(α/2)` weight tends to zero, using only uniform continuity of the initial
+Hessian entries. It uses the actual heat approximation error at scale `√t`
+and the genuine semigroup, with no initial positive-exponent Hölder premise.
+Exact Lean-4.33 verification is pending. See
+[`weighted-initial-heat.md`](weighted-initial-heat.md). Compact localization,
+weighted nonlinear estimates and the canonical Point-4 theorem remain open.
+
 The preceding supporting PDE milestone is the genuine Ricci--DeTurck
 Hölder-seminorm difference estimate in
 `GenuineRicciDeTurckHolderDifference.lean`. It combines the compact-domain

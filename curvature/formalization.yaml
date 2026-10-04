@@ -58,6 +58,23 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/591c25914c80366d619ece00da204997ee2a65d7/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository PR124 source for the actual normalized Gaussian,
+      bounded-C2 derivative commutation, heatSemigroupNDbcf_comp,
+      RicciDeTurckHolderSmoothing.lean, EuclideanHeatInitialTrace.lean,
+      the arbitrary-modulus Gaussian approximation, global Hessian sup-norm
+      initial trace under uniform continuity, and the right initial generator.
+      This stack dependency is not asserted merged or fully build-verified.
+      Existing implementation, contributor notices and verification pins are
+      unchanged. The new supporting EuclideanHeatWeightedInitialHolder.lean
+      constructs actual compatible positive-time C2-alpha Gaussian data with an
+      explicit heat-error certificate at scale sqrt(t), proves its weighted
+      Hessian Holder constant tends to zero without an initial positive-exponent
+      Holder modulus, and preserves dimension zero. It is not a new selected
+      registry entry, compact-manifold localization, a nonlinear weighted solver,
+      an ordinary endpoint metric derivative, or Point4 closure.
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/1d1f97fe481e0899a0cd54889b0f99ba159ba3fa/curvature"
     relationship: "builds-on"
     note: >-

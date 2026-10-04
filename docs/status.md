@@ -128,6 +128,15 @@ see [the precise candidate boundary](point4/chosen-lc-curvature.md). It does
 not supply the conventional Lie/DeTurck, heat-generator or PDE bridges and
 does not change the Point-4 **Open** status.
 
+The weighted initial-face supporting source candidate constructs actual
+compatible positive-time C²,α heat data with an explicit Hessian Hölder constant
+whose `t^(α/2)` weight vanishes, under uniform continuity only of the initial
+Hessian entries. It builds on exact unmerged PR124 head
+`591c25914c80366d619ece00da204997ee2a65d7`; exact Lean-4.33 verification is pending.
+No initial positive-exponent Hessian Hölder hypothesis is introduced. See
+[the weighted initial heat boundary](point4/weighted-initial-heat.md).
+Compact localization, weighted nonlinear evolution and Point 4 remain open.
+
 ## Updating this page
 
 When implementation changes:
