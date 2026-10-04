@@ -116,7 +116,6 @@ theorem metricConnectionDifferenceVector_localFrameCoeff
   rw [metricConnectionDifferenceVector_eq_sum_inverseGram cov cov' x basis]
   simp_rw [map_sum, map_smul, smul_eq_mul, hG, hframe,
     Module.Basis.coord_apply, ← hcoeff]
-  rfl
 
 /-- Equal Levi-Civita connections give zero metric contraction, as required
 for the existing Ricci-flat and chosen-background special cases. -/
@@ -165,8 +164,9 @@ theorem metricContractedDeTurckVectorField_eq_standardDeTurckVectorField
   funext t x
   letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
     ⟨(g t).toRiemannianMetric⟩
-  letI : FiniteDimensional ℝ (TM x) := VectorBundle.finiteDimensional ℝ E TM x
-  let b := stdOrthonormalBasis ℝ (TM x)
+  letI : FiniteDimensional ℝ (TangentSpace I x) :=
+    VectorBundle.finiteDimensional ℝ E (TangentSpace I : M → Type _) x
+  let b := stdOrthonormalBasis ℝ (TangentSpace I x)
   change CovariantDerivative.metricConnectionDifferenceVector
     ((chosenLeviCivitaFamily (I := I) (M := M) g) t) (background t) x = _
   rw [CovariantDerivative.metricConnectionDifferenceVector_eq_sum_orthonormalBasis
@@ -174,7 +174,7 @@ theorem metricContractedDeTurckVectorField_eq_standardDeTurckVectorField
   symm
   unfold standardDeTurckVectorField
   dsimp only
-  rw [InnerProductSpace.canonicalCovariantTensor_eq_sum (TM x) b, map_sum]
+  rw [InnerProductSpace.canonicalCovariantTensor_eq_sum (TangentSpace I x) b, map_sum]
   apply Finset.sum_congr rfl
   intro i hi
   rfl
