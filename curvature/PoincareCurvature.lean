@@ -179,3 +179,4 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.LittleHolderNem
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GenuineRicciDeTurckMatrixLittleHolderClosure
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ResearchTheorems
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.RicciDeTurckPrincipalRemainder
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateJetPrincipalRemainder

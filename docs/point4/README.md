@@ -491,3 +491,12 @@ historical records:
 Those files contain useful theorem names, failed approaches, performance notes,
 and intermediate milestones. Their locally dated "next" statements are not
 current-status claims.
+
+The next candidate supplies an actual C² coordinate-jet producer in the
+Mathlib-only `Analysis/CoordinateMatrixJet.lean`, then instantiates the
+principal/remainder identities in `CoordinateJetPrincipalRemainder.lean`.
+Derivative-slot symmetry follows from Schwarz and tensor-slot symmetry from
+twice differentiating the actual local component equality. Open-domain C²
+regularity and invertibility remain explicit, distinct hypotheses. See
+[`coordinate-jet.md`](coordinate-jet.md) for the API map and remaining chart
+identifications. Exact Lean-4.33 verification is pending; Point 4 remains open.
