@@ -145,3 +145,12 @@ When implementation changes:
 4. keep publication status in the submission portfolio;
 5. preserve partial or failed approaches in `docs/history/` only when they are
    useful research records.
+
+The fixed-background local-heat candidate composes the existing global C²
+auxiliary-connection constructor with actual coefficient regularity and
+scale-correct zero-trace local right-inverses for the literal arbitrary C²
+metric. No connection, induced-regularity, coefficient-regularity or solver
+witness is an input. Its stronger `I.Boundaryless` and unweighted Hölder source
+scope remain explicit; exact Lean-4.33 verification is pending. See
+[the precise local linear boundary](point4/fixed-background-heat.md).
+The canonical Point-4 theorem and **OPEN** verdict remain unchanged.

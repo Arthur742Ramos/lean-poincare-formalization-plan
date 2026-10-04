@@ -58,6 +58,20 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/99aa49484f8decc5a6344591d5e319011ebea73b/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository source for the existing global C2 affine
+      connection constructor in CovariantDerivative/LeviCivita.lean, induced
+      tensor-connection regularity in InducedHomRegularity.lean, actual
+      geometric tensor-heat coefficient regularity, and scale-correct
+      zero-trace local right-inverse in TensorHeatCoefficientLocalization.lean.
+      The new TensorHeatFixedBackgroundProducer.lean composes those actual
+      constructors for the literal supplied arbitrary C2 metric and chooses
+      one global auxiliary connection before all chart/interval choices.
+      Existing implementation, contributor notices and registry selection
+      remain unchanged. This is supporting local linear theory, not a new
+      selected registry entry or a Ricci-flow/PDE existence claim.
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/73212853b1c48e5fea511191e89072dd003b2d0a/curvature"
     relationship: "builds-on"
     note: >-
