@@ -67,7 +67,14 @@ theorem initialHeatHolderConstant_nonneg {n : ℕ}
     (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) (α t : ℝ) :
     0 ≤ initialHeatHolderConstant f α t := by
   unfold initialHeatHolderConstant
-  positivity
+  by_cases ht : 0 ≤ t
+  · positivity
+  · have hs : Real.sqrt t = 0 :=
+      Real.sqrt_eq_zero_of_nonpos (le_of_lt (lt_of_not_ge ht))
+    have hzero : heatFlowPathBcf f 0 = f := dif_neg (lt_irrefl 0)
+    simp only [hs, hzero, sub_self, norm_zero, mul_zero, zero_add]
+    exact mul_nonneg (mul_nonneg (by norm_num)
+      (Real.rpow_nonneg (le_refl (0 : ℝ)) _)) (norm_nonneg f)
 
 /-- Actual scalar Gaussian Hölder certificate, with no initial Hölder premise. -/
 theorem abs_heatSemigroupNDbcf_sub_le_initialHeatHolderConstant
