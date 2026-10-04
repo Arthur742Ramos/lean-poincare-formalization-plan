@@ -145,6 +145,15 @@ verification is pending; no local compiler was run for this unit. See
 The heat-generator, analytic, PDE and canonical Point-4 **OPEN** boundaries
 remain unchanged.
 
+A further supporting source candidate identifies the actual preferred-frame
+frozen metric inverse with the existing geometric tensor-heat principal
+coefficient and evaluates its bounded finite-cylinder Cauchy operator using
+genuine coordinate derivatives from the proved compatible derivative graph.
+It preserves tensor output `(j,i)`, uses actual time differentiation only on
+the open time interval, and requires no added candidate regularity or
+principal-identification premise. Exact Lean-4.33 verification is pending;
+see [the precise candidate boundary](point4/frozen-metric-principal.md).
+This is differential-operator identification only. Point 4 remains **Open**.
 
 ## Updating this page
 

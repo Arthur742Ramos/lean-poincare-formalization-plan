@@ -72,6 +72,21 @@ related_formalizations:
       source candidates pending exact Lean 4.33 verification. They are not
       new registry selections and do not construct a heat generator, PDE
       solution, or canonical Point-4 local-existence theorem.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/1d1f97fe481e0899a0cd54889b0f99ba159ba3fa/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository source for the existing actual preferred frame,
+      chosen C2 metric-coordinate Gram and inverse, geometric tensor-heat
+      principal coefficient, bounded frozen tensor-heat Cauchy operator, and
+      proved closed compatible finite-cylinder derivative graph. Inherited
+      implementation and contributor notices are preserved. The new supporting
+      Analysis/LinearReadoutSecondDerivative.lean and Geometry/Manifold/
+      RicciFlow/AnalyticPDE/ChosenLCFrozenTensorHeat.lean prove constant-linear
+      actual second-derivative transport, actual preferred-frame frozen
+      inverse-metric principal identification, and genuine holonomic coordinate
+      Cauchy action with tensor output (j,i). This is not a selected new registry
+      entry, analytic solver construction, semigroup claim, manifold realization,
+      uniqueness theorem, or Point-4 closure.
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/73212853b1c48e5fea511191e89072dd003b2d0a/curvature"
     relationship: "builds-on"
     note: >-
@@ -123,7 +138,7 @@ status:
 
 automation:
   methods:
-    - method: "agent-assisted"
+    - method: "agent"
       models: ["GPT-5 Codex"]
       framework: "Codex with Lean 4.33 and Mathlib"
       tool_setup: >-

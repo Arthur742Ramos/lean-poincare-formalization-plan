@@ -563,3 +563,11 @@ verification is pending; no local compiler was run for this unit. See
 [actual standard coordinate-operator scope](standard-coordinate-operator.md).
 The heat-generator, analytic, PDE and canonical Point-4 **OPEN** boundaries
 remain unchanged.
+## Actual frozen metric principal and holonomic action
+
+The next supporting candidate identifies the existing geometric frozen
+tensor-heat principal coefficient with the actual preferred-frame inverse
+metric and proves its genuine finite-cylinder coordinate Cauchy action.
+See [the exact theorem and verification boundary](frozen-metric-principal.md).
+This does not construct the general manifold encoding, nonlinear solver,
+metric preservation, realization or uniqueness. Point 4 remains open.

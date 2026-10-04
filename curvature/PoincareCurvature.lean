@@ -191,3 +191,4 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.ChosenLeviCivitaCoordinateC
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ChosenLeviCivitaCoordinateCurvature
 
 import PoincareCurvature.Geometry.Manifold.RicciFlow.StandardRicciDeTurckCoordinateOperator
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ChosenLCFrozenTensorHeat
