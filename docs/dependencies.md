@@ -86,3 +86,11 @@ Useful parallel work that does not overstate dependency completion includes:
 Every such contribution should name the theorem it proves and the assumptions
 it retains. It should not claim to close a downstream milestone merely because
 its interface has been designed.
+
+## Weak-regularity Laplacian proof unit
+
+The [base-C¹, local-C² actual tensor-Laplacian adapter](point4/weak-laplacian.md)
+has been authored and awaits independent source review and exact Lean 4.33.0
+hosted verification. It constructs coordinate certificates internally and
+preserves the actual operator and reversed tensor-output convention. It does
+not provide Hölder coefficient bounds or close the canonical Point-4 target.

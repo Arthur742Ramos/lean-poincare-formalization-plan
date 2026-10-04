@@ -162,3 +162,11 @@ separate until their actual Lean dependencies justify combining them.
 The milestone count is not a percentage-of-effort estimate. Although three of
 fifteen milestones are proved, the major quasilinear PDE, singularity-analysis,
 surgery, and extinction arguments remain ahead.
+
+## Weak-regularity Laplacian proof unit
+
+The [base-C¹, local-C² actual tensor-Laplacian adapter](point4/weak-laplacian.md)
+has been authored and awaits independent source review and exact Lean 4.33.0
+hosted verification. It constructs coordinate certificates internally and
+preserves the actual operator and reversed tensor-output convention. It does
+not provide Hölder coefficient bounds or close the canonical Point-4 target.

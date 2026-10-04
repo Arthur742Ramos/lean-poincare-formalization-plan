@@ -537,3 +537,7 @@ and the ordinary basis trace's transpose is resolved separately by actual
 intrinsic Ricci symmetry. See [curvature/Ricci scope](chosen-lc-curvature.md).
 Exact Lean-4.33 compilation is pending; the Lie/DeTurck, analytic and PDE
 boundaries and the Point-4 **OPEN** verdict remain.
+
+The [weak-regularity actual tensor-Laplacian proof unit](weak-laplacian.md)
+removes the unnecessary C² connection/induced-three oracle from a new local
+adapter. Authored source awaits exact Lean 4.33.0 verification; Point 4 stays open.
