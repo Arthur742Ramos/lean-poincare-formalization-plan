@@ -95,8 +95,7 @@ theorem abs_integral_sub_self_le_of_local_modulus
   have hzero : (∫ z, K z * f (x - z)) - f x =
       ∫ z : Fin n → ℝ, K z * (f (x - z) - f x) := by
     have heq : (fun z : Fin n → ℝ => K z * (f (x - z) - f x)) =
-        (fun z => K z * f (x - z)) -
-          (fun z => K z * f x) := by ext z; simp [mul_sub]
+        (fun z => K z * f (x - z) - K z * f x) := by ext z; ring
     rw [heq, integral_sub hfi hci, integral_mul_const, hmass, one_mul]
   rw [hzero, ← Real.norm_eq_abs]
   calc
