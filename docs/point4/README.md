@@ -537,3 +537,13 @@ and the ordinary basis trace's transpose is resolved separately by actual
 intrinsic Ricci symmetry. See [curvature/Ricci scope](chosen-lc-curvature.md).
 Exact Lean-4.33 compilation is pending; the Lie/DeTurck, analytic and PDE
 boundaries and the Point-4 **OPEN** verdict remain.
+
+The next supporting source candidate supplies the actual conventional
+StandardDeTurck background/W coordinate producers, genuine derivative
+transport, actual torsion/metric-compatible Lie correction and intrinsic RHS
+identification. It then specializes the corrected jet, principal and frozen
+remainder identities to that same actual geometric RHS. Exact Lean-4.33
+verification is pending; no local compiler was run for this unit. See
+[actual standard coordinate-operator scope](standard-coordinate-operator.md).
+The heat-generator, analytic, PDE and canonical Point-4 **OPEN** boundaries
+remain unchanged.

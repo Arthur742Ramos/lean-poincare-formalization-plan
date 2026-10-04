@@ -58,6 +58,20 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/3f997315c2173474225d9e02407a2af444fcd4f3/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable combined spatial-stack source for the actual conventional
+      standard coordinate-operator supporting milestone. Reuses the preferred
+      frame, actual metric/Christoffel/curvature/Ricci coordinate producers,
+      conventional two-input StandardDeTurck inverse-Gram and regularity APIs,
+      actual torsion and metric compatibility, and corrected finite-jet
+      principal/frozen-remainder identities. Existing proof files and notices
+      are preserved. New actual background and W scalar producers, actual Lie
+      and RHS identifications, and their derivative transports are supporting
+      source candidates pending exact Lean 4.33 verification. They are not
+      new registry selections and do not construct a heat generator, PDE
+      solution, or canonical Point-4 local-existence theorem.
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/73212853b1c48e5fea511191e89072dd003b2d0a/curvature"
     relationship: "builds-on"
     note: >-

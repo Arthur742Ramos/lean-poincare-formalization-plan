@@ -128,6 +128,17 @@ see [the precise candidate boundary](point4/chosen-lc-curvature.md). It does
 not supply the conventional Lie/DeTurck, heat-generator or PDE bridges and
 does not change the Point-4 **Open** status.
 
+The next supporting source candidate supplies the actual conventional
+StandardDeTurck background/W coordinate producers, genuine derivative
+transport, actual torsion/metric-compatible Lie correction and intrinsic RHS
+identification. It then specializes the corrected jet, principal and frozen
+remainder identities to that same actual geometric RHS. Exact Lean-4.33
+verification is pending; no local compiler was run for this unit. See
+[actual standard coordinate-operator scope](point4/standard-coordinate-operator.md).
+The heat-generator, analytic, PDE and canonical Point-4 **OPEN** boundaries
+remain unchanged.
+
+
 ## Updating this page
 
 When implementation changes:
