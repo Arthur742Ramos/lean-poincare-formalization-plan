@@ -500,3 +500,11 @@ twice differentiating the actual local component equality. Open-domain C²
 regularity and invertibility remain explicit, distinct hypotheses. See
 [`coordinate-jet.md`](coordinate-jet.md) for the API map and remaining chart
 identifications. Exact Lean-4.33 verification is pending; Point 4 remains open.
+
+The following candidate localizes the actual matrix-inverse derivative to
+invertibility at the selected point, then derives the coordinate inverse and
+Christoffel Fréchet derivatives from the actual C² matrix field.
+`CoordinateJetConnectionDerivative.lean` identifies these derivatives with the
+existing finite-jet formulas, without assuming inverse derivative data. See
+[`coordinate-connection.md`](coordinate-connection.md). Exact Lean-4.33
+verification and the manifold curvature identification remain pending.
