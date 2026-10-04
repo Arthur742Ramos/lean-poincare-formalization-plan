@@ -42,7 +42,7 @@ local notation "T₃" => (fun x : M => TM x →L[ℝ] T₂ x)
 
 -- These orders come from the smooth manifold, never from metric smoothing.
 local instance fixedBackgroundTangentThree : ContMDiffVectorBundle 3 E TM I :=
-  ContMDiffVectorBundle.of_le (n := ∞) (by simp)
+  ContMDiffVectorBundle.of_le (n := ∞) (by decide)
 local instance fixedBackgroundTangentTwo : ContMDiffVectorBundle 2 E TM I :=
   ContMDiffVectorBundle.of_le (n := 3) (by norm_num)
 
