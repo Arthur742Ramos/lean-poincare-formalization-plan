@@ -1,7 +1,8 @@
 # Genuine bounded-C² initial heat traces
 
-This supporting source candidate builds on immutable master
-`1d1f97fe481e0899a0cd54889b0f99ba159ba3fa`. The actual Gaussian,
+This supporting source candidate builds on immutable original master
+`1d1f97fe481e0899a0cd54889b0f99ba159ba3fa` and integrates current master
+`60b6f8ef9d37d1fc5fac1f6113584e1b16370016` by a real merge. The actual Gaussian,
 its normalization and coordinate first moments, positive-time kernel
 calculus and actual initial derivative witnesses are inherited unchanged.
 Structured builds-on attribution is recorded in `curvature/formalization.yaml`.
@@ -56,6 +57,29 @@ Hessian Hölder certificate nor global Hessian uniform continuity.
 
 ## Verification status
 
+The historical head `591c25914c80366d619ece00da204997ee2a65d7`
+passed actual Lean-4.33 workflow run `37231132865`: both Mathlib-only helpers,
+the genuine C2 trace/right generator, all twelve accepted-foundational-axiom
+surfaces, G1 and the full G2 library build. Its audit verdict was OPEN.
+Independent downloaded-artifact verification confirmed that exact identity.
+This qualification applies only to that historical head and its older audit.
+
+The separate inherited current closed-contract run `37231132971` failed at
+"Preserve exact source identity" before Lean: that historical branch predated
+the merged closed contract and lacked its workflow and source preflight. The
+failure is preserved; it is not waived or converted into a successful run.
+
+The current integration retains every historical proof blob, imports the
+current master contract, interface fingerprints, negative kernel fixtures,
+full auditor and actual standard geometric RHS source unchanged. The only
+approved canonical scope correction remains `BoundarylessManifold I M`.
+The integrated head is **UNVERIFIED** until fresh exact-head closed-contract
+and C2 trace workflows pass their actual Lean-4.33 compilation, type/axiom,
+regression and full-build gates and independent review passes. No local Lean,
+dependency installation, cache download or toolchain change was used for this
+source integration. Local Python/schema/source checks are separate evidence.
+
+
 The compact ambient-modulus helper passed a bounded, read-only Lean
 4.35.0-rc2 **development-only** probe. The finite-moment helper's first bounded development probe hit its enforced
 3GB memory guard at 28.42 seconds while loading the overly broad Mathlib
@@ -63,7 +87,8 @@ import. That resource-inconclusive run produced no Lean proof result. The
 helper now uses narrow Mathlib imports; this exact source has not had a local
 compiler check. The actual Gaussian and C² assembly
 have not been compiled locally against the incompatible rc2 baseline.
-Exact Lean-4.33 verification remains pending.
+That development history is retained; the following exact-head qualification
+supersedes its pending status only for the historical heat-trace head.
 
 The dedicated exact-head read-only workflow builds both Mathlib-only helpers,
 then the actual trace/generator module, checks exact elaborated theorem types

@@ -1,0 +1,88 @@
+name: Point-4 closed-manifold contract
+
+on:
+  pull_request:
+    paths:
+      - "curvature/**"
+      - ".github/workflows/point4-closed-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  closed_contract:
+    name: Exact-head closed contract, signature regressions and full audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Preserve exact source identity
+        run: |
+          git rev-parse HEAD | tee /tmp/point4-closed-contract-sha.log
+          cat curvature/lean-toolchain | tee /tmp/point4-closed-contract-toolchain.log
+          python3 curvature/scripts/point4_closed_contract_source_test.py
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Compile expected contract before full library build
+        working-directory: curvature
+        run: lake build PoincareCurvature.Geometry.Manifold.RicciFlow.PointFourContract 2>&1 | tee /tmp/point4-closed-contract-compile.log
+      - name: Print exact existing interfaces and expected type
+        working-directory: curvature
+        run: lake env lean scripts/point4_closed_contract_probe.lean 2>&1 | tee /tmp/point4-closed-contract-type.log
+      - name: Kernel signature regression fixtures
+        working-directory: curvature
+        run: lake env lean scripts/point4_closed_contract_regression.lean 2>&1 | tee /tmp/point4-closed-contract-regression.log
+      - name: Run all five real Point-4 gates including full build
+        working-directory: curvature
+        run: |
+          set +e
+          bash scripts/point4_audit.sh --json /tmp/point4-closed-contract-full-audit.json | tee /tmp/point4-closed-contract-full-audit.log
+          audit_rc=${PIPESTATUS[0]}
+          set -e
+          export POINT4_AUDIT_RC="$audit_rc"
+          python3 - <<'PY'
+          import json, os, pathlib
+          data = json.loads(pathlib.Path('/tmp/point4-closed-contract-full-audit.json').read_text())
+          assert data['build_run'] is True, data
+          assert data['gates']['G1_sorry_free']['status'] == 'PASS', data
+          assert data['gates']['G2_build_green']['status'] == 'PASS', data
+          if data['verdict'] == 'CLOSED':
+            assert os.environ['POINT4_AUDIT_RC'] == '0', data
+            assert all(g['status'] == 'PASS' for g in data['gates'].values()), data
+          else:
+            assert data['verdict'] == 'OPEN', data
+            assert os.environ['POINT4_AUDIT_RC'] == '1', data
+            print('POINT 4 OPEN: an expected contract and regression tests do not construct the canonical target')
+          PY
+      - name: Preserve exact-head evidence including failures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-closed-contract-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-closed-contract-sha.log
+            /tmp/point4-closed-contract-toolchain.log
+            /tmp/point4-closed-contract-compile.log
+            /tmp/point4-closed-contract-type.log
+            /tmp/point4-closed-contract-regression.log
+            /tmp/point4-closed-contract-full-audit.json
+            /tmp/point4-closed-contract-full-audit.log
+            /tmp/point4_build.log
+          if-no-files-found: ignore

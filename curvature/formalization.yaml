@@ -58,6 +58,20 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/60b6f8ef9d37d1fc5fac1f6113584e1b16370016/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable current-master integration source for the approved theorem-level
+      BoundarylessManifold closed-manifold contract, complete canonical audit,
+      eight unchanged interface fingerprints, kernel negative fixtures, and
+      actual standard background/W, Lie and intrinsic Ricci-DeTurck RHS producers.
+      All inherited Lean source, actions and toolchain pins, contributor notices,
+      authorship, license and selected registry identity remain unchanged. The
+      genuine C2 heat traces from 591c25914c80366d619ece00da204997ee2a65d7
+      are integrated by ancestry, with no theorem-body or hypothesis changes.
+      This combined head requires fresh exact Lean 4.33 compilation, type and
+      axiom gates, full build/audit and independent review; historical successful
+      heat-trace verification is not verification of the integrated head.
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/1d1f97fe481e0899a0cd54889b0f99ba159ba3fa/curvature"
     relationship: "builds-on"
     note: >-
@@ -76,6 +90,20 @@ related_formalizations:
       Inherited implementation and contributor notices are preserved.
       This is not a new selected registry entry, a compact-manifold
       localization producer, an ordinary endpoint derivative, or Point4 closure.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/3f997315c2173474225d9e02407a2af444fcd4f3/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable combined spatial-stack source for the actual conventional
+      standard coordinate-operator supporting milestone. Reuses the preferred
+      frame, actual metric/Christoffel/curvature/Ricci coordinate producers,
+      conventional two-input StandardDeTurck inverse-Gram and regularity APIs,
+      actual torsion and metric compatibility, and corrected finite-jet
+      principal/frozen-remainder identities. Existing proof files and notices
+      are preserved. New actual background and W scalar producers, actual Lie
+      and RHS identifications, and their derivative transports are supporting
+      source candidates pending exact Lean 4.33 verification. They are not
+      new registry selections and do not construct a heat generator, PDE
+      solution, or canonical Point-4 local-existence theorem.
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/73212853b1c48e5fea511191e89072dd003b2d0a/curvature"
     relationship: "builds-on"
     note: >-
@@ -162,8 +190,12 @@ automation:
         the read-only Lean 4.35.0-rc2 cache. The compact-modulus helper passed
         that development check; the initial broad-import finite-moment probe
         hit its enforced 3GB guard without a proof result. Narrowed imports
-        remain locally uncompiled. Exact Lean 4.33 verification of
-        the assembled candidate is pending; no new registry entry is selected.
+        remain locally uncompiled. Historical head 591c25914c80366d619ece00da204997ee2a65d7 passed
+        actual Lean 4.33 type/axiom and full G1/G2 build gates in run 37231132865.
+        Its separate current closed-contract workflow failed source identity
+        before Lean in run 37231132971. This current-master integration is
+        unverified and requires fresh exact-head hosted gates and independent
+        review; no new registry entry is selected.
       prompting_notes: >-
         Human direction requested genuine C2 initial data without importing
         a positive-exponent Hessian modulus or treating the existing

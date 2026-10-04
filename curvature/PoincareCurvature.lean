@@ -181,6 +181,7 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.ResearchTheorems
 import PoincareCurvature.Geometry.Manifold.RicciFlow.MetricContractedDeTurckField
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.RicciDeTurckPrincipalRemainder
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateJetPrincipalRemainder
+import PoincareCurvature.Geometry.Manifold.RicciFlow.PointFourContract
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateJetConnectionDerivative
 
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateRicciDeTurckOperator
@@ -190,3 +191,4 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.ChosenLeviCivitaCoordinateC
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ChosenLeviCivitaCoordinateCurvature
 
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialTrace
+import PoincareCurvature.Geometry.Manifold.RicciFlow.StandardRicciDeTurckCoordinateOperator

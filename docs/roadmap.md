@@ -43,9 +43,9 @@ stated cleanly.
 
 ### 4. Ricci-flow local existence and uniqueness
 
-Prove short-time existence and uniqueness of Ricci flow from general initial
-data on a compact smooth manifold. The planned route is the Hamilton–DeTurck
-argument: solve a strictly parabolic Ricci–DeTurck equation, construct the gauge
+Prove short-time existence and uniqueness of Ricci flow from every spatially C²
+initial metric on a compact smooth manifold without boundary. The planned route
+is the Hamilton–DeTurck argument: solve a strictly parabolic Ricci–DeTurck equation, construct the gauge
 flow, and transport the result back to intrinsic Ricci flow.
 
 **Current state:** open. The repository contains substantial proof-bearing
