@@ -45,14 +45,18 @@ theorem jet2SectionLittleHolderPropagator_euclideanSection (t : ℝ) :
   rw [jet2SectionLittleHolderPropagator_apply]
   apply Prod.ext
   · funext i j
-    rw [matrixLittleHolderPropagator_apply]
+    change LittleHolder.littleHolderPropagator t
+      (constLittleHolder d α (if i = j then 1 else 0)) =
+        constLittleHolder d α (if i = j then 1 else 0)
     exact littleHolderPropagator_constLittleHolder d α t _
   · apply Prod.ext
     · funext k i j
-      rw [matrixLittleHolderPropagator_apply]
+      change LittleHolder.littleHolderPropagator t
+        (constLittleHolder d α 0) = constLittleHolder d α 0
       exact littleHolderPropagator_constLittleHolder d α t 0
     · funext k l i j
-      rw [matrixLittleHolderPropagator_apply]
+      change LittleHolder.littleHolderPropagator t
+        (constLittleHolder d α 0) = constLittleHolder d α 0
       exact littleHolderPropagator_constLittleHolder d α t 0
 
 /-- The Euclidean-centered section ball is invariant under componentwise heat. -/
@@ -134,11 +138,12 @@ theorem geometricNRDLittleHolderOnEuclideanClosedBall_apply
     (x : Fin d → ℝ) (i j : Fin d) :
     ((geometricNRDLittleHolderOnEuclideanClosedBall Γbg hα0 hα1 hR hRsmall s
       i j).toHolder).toBCF x = geometricNRD Γbg s x i j := by
-  simp only [geometricNRDLittleHolderOnEuclideanClosedBall, dif_pos hs]
+  simp only [geometricNRDLittleHolderOnEuclideanClosedBall, dif_pos hs, if_pos hs]
   exact geometricNRDHolder_apply Γbg s hα0 _ x i j
 
 /-- The matrix reaction obeys the full-norm local Lipschitz bound in the
 little-Hölder carrier, whose norm is inherited from the ambient Hölder space. -/
+set_option maxHeartbeats 800000 in
 theorem lipschitzOnWith_geometricNRDLittleHolderOnEuclideanClosedBall
     (Γbg : Fin d → Fin d → Fin d → ℝ)
     (hα0 : 0 < α) (hα1 : α < 1)
@@ -151,7 +156,8 @@ theorem lipschitzOnWith_geometricNRDLittleHolderOnEuclideanClosedBall
       (Metric.closedBall (euclideanSection d α) R) := by
   refine LipschitzOnWith.of_dist_le_mul ?_
   intro s hs t ht
-  simp only [geometricNRDLittleHolderOnEuclideanClosedBall, dif_pos hs, dif_pos ht]
+  simp only [geometricNRDLittleHolderOnEuclideanClosedBall,
+    dif_pos hs, if_pos hs, dif_pos ht, if_pos ht]
   rw [dist_eq_norm, dist_eq_norm]
   change ‖geometricNRDHolder Γbg s hα0 _ -
       geometricNRDHolder Γbg t hα0 _‖ ≤

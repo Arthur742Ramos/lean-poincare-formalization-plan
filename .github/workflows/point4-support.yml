@@ -1,11 +1,6 @@
 name: Point-4 supporting proofs
 
 on:
-  push:
-    paths:
-      - "curvature/**"
-      - "hamilton-ivey-reaction/**"
-      - ".github/workflows/point4-support.yml"
   pull_request:
     paths:
       - "curvature/**"
@@ -44,8 +39,8 @@ jobs:
       - name: Build package and changed supporting theorem
         working-directory: curvature
         run: |
-          lake build
           lake build PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GenuineRicciDeTurckHeatInvariantClosure
+          lake build
       - name: Check supporting theorem axioms
         working-directory: curvature
         run: |
