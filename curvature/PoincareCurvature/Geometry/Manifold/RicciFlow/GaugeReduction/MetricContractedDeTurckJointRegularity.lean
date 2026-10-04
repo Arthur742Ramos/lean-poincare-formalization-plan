@@ -111,7 +111,7 @@ theorem contMDiff_metricContractedDeTurckVectorField_of_joint_correction
     metricContractionTangentVectorBundle (I := I) (M := M)
   intro p₀
   let e : Trivialization E (π E TM) := trivializationAt E TM p₀.2
-  letI : MemTrivializationAtlas e := by infer_instance
+  letI hAtlas : MemTrivializationAtlas e := by infer_instance
   let S : Set (ℝ × M) := Set.univ ×ˢ e.baseSet
   have hp₀ : p₀ ∈ S :=
     ⟨Set.mem_univ _, FiberBundle.mem_baseSet_trivializationAt E TM p₀.2⟩
@@ -134,18 +134,24 @@ theorem contMDiff_metricContractedDeTurckVectorField_of_joint_correction
             (e.localFrame bas a p.2) (e.localFrame bas b p.2)))⁻¹) i j •
           explicitLeviCivitaCorrection (I := I) (M := M) g background p.1 p.2
             (e.localFrame bas i p.2) (e.localFrame bas j p.2))) S := by
+    -- Use the flat model norm explicitly: its algebra and topology are the
+    -- canonical tangent structures, rather than independently inferred fibre norms.
     exact @PoincareCurvature.ParametrizedInner.contMDiffOn_timeDependentMetricContraction
       E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› H ‹TopologicalSpace H› I ∞
       M ‹TopologicalSpace M› ‹ChartedSpace H M›
       E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› (TangentSpace I : M → Type _)
       instTopologicalSpaceTangentBundle
-      (fun x => (inferInstance : NormedAddCommGroup (TM x)))
-      (fun x => (inferInstance : NormedSpace ℝ (TM x)))
-      (metricContractionTangentFiberBundle (I := I) (M := M))
-      (metricContractionTangentVectorBundle (I := I) (M := M))
+      (PoincareCurvature.instNormedAddCommGroupTangentSpace (M := M) I)
+      (PoincareCurvature.instNormedSpaceTangentSpace (M := M) I)
+      (by
+        change FiberBundle E TM
+        exact metricContractionTangentFiberBundle (I := I) (M := M))
+      (by
+        change VectorBundle ℝ E TM
+        exact metricContractionTangentVectorBundle (I := I) (M := M))
       ‹ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I›
       gSmooth (explicitLeviCivitaCorrection (I := I) (M := M) g background)
-      e (by infer_instance) ι (by infer_instance) (by infer_instance)
+      e hAtlas ι (by infer_instance) (by infer_instance)
       bas e.baseSet subset_rfl hmetricOn hcorrectionOn
   have hactual : ContMDiffOn (𝓘(ℝ).prod I) I.tangent ∞
       (fun p : ℝ × M => (⟨p.2,
@@ -193,10 +199,14 @@ theorem contMDiff_metricContractedDeTurckGaugeField_of_joint_correction
       M ‹TopologicalSpace M› ‹ChartedSpace H M›
       E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› (TangentSpace I : M → Type _)
       instTopologicalSpaceTangentBundle
-      (fun x => (inferInstance : NormedAddCommGroup (TM x)))
-      (fun x => (inferInstance : NormedSpace ℝ (TM x)))
-      (metricContractionTangentFiberBundle (I := I) (M := M))
-      (metricContractionTangentVectorBundle (I := I) (M := M))
+      (PoincareCurvature.instNormedAddCommGroupTangentSpace (M := M) I)
+      (PoincareCurvature.instNormedSpaceTangentSpace (M := M) I)
+      (by
+        change FiberBundle E TM
+        exact metricContractionTangentFiberBundle (I := I) (M := M))
+      (by
+        change VectorBundle ℝ E TM
+        exact metricContractionTangentVectorBundle (I := I) (M := M))
       ‹ContMDiffVectorBundle ∞ E (TangentSpace I : M → Type _) I›
       (ℝ × E) _ _ (ModelProd ℝ H) _ (𝓘(ℝ).prod I)
       (ℝ × M) _ (prodChartedSpace ℝ ℝ H M)
