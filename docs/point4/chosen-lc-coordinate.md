@@ -26,8 +26,11 @@ The basis supplies a continuous linear equivalence between E and
 vector. Ordinary scalar differentiation through this actual equivalence is
 proved by the Fréchet chain rule.
 
-The supporting boundaryless hypothesis makes the chart target open and
-replaces derivatives within `range I` by ordinary derivatives. The fixed chart
+The preferred-frame layer now uses theorem-level `BoundarylessManifold I M`
+through the [local chart transport milestone](boundaryless-chart-frames.md):
+it proves chart-target openness and replaces derivatives within `range I` by
+ordinary derivatives at chart-target points. The chosen-LC producer below
+continues to assume model-level `I.Boundaryless`. The fixed chart
 is selected from the manifold's existing preferred atlas. A commuting frame,
 coordinate derivative package or Christoffel formula is never supplied as data.
 

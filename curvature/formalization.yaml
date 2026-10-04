@@ -58,6 +58,20 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/1d1f97fe481e0899a0cd54889b0f99ba159ba3fa/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository source for Analysis/PreferredCoordinateFrame.lean
+      and its actual inverse-chart differential, constant frame pullback,
+      scalar derivative and commuting-frame proofs. Existing implementation
+      and contributor notices are preserved. The new supporting module
+      Analysis/BoundarylessChartTransport.lean proves local chart-target
+      openness and ordinary derivative/pullback transport under
+      BoundarylessManifold I M; PreferredCoordinateFrame now uses that
+      theorem-level hypothesis instead of model-level I.Boundaryless.
+      Chosen-LC, frozen, weak and gauge consumers retain their existing scope.
+      This is supporting proof provenance, not a new selected registry entry
+      or a Ricci-flow local-existence claim.
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/73212853b1c48e5fea511191e89072dd003b2d0a/curvature"
     relationship: "builds-on"
     note: >-
