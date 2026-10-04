@@ -21,6 +21,12 @@ assert "exists_contMDiffAffineConnection_two" in code
 assert "contMDiffCovariantDerivative_covariantTwoTensor_two" in code
 assert "contMDiffCovariantDerivative_covariantThreeTensor_one" in code
 assert "contDiffOn_actualTensorHeatCoefficients" in code
+assert "CovariantDerivative.contDiffOn_actualTensorHeatCoefficients" not in code
+assert "local instance fixedBackgroundThreeFiber" not in code
+assert code.index("letI : RiemannianBundle TM") < code.index("letI : ∀ x : M, NormedAddCommGroup (T₃ x)")
+assert "tensorCoordinatePrincipalNormedAddCommGroup" in code
+assert "tensorCoordinateFirstCoefficientNormedAddCommGroup" in code
+assert "tensorCoordinateZeroNormedAddCommGroup" in code
 assert "exists_radius_actualLocalTensorHeatUnitBall_zeroTrace" in code
 assert "localTensorHeatPrincipalCoefficient (I := I) p e b" in code
 assert "localTensorHeatPrincipalCoefficient (I := I) cov" not in code

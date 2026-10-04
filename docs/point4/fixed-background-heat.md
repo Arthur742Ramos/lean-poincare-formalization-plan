@@ -59,6 +59,18 @@ its full inferred type, checks its axiom surface, and runs the unchanged full
 package audit. Exact-head independent source review and actual Lean-4.33
 verification remain required before publication/merge decisions.
 
+The historical candidate `3f41e03fc6481a9b41abb27a2af8bac1f864a861`
+reached an actual Lean-4.33 hosted producer build. Its imported geometric,
+regularity and localization modules compiled, but the new producer failed:
+its three-tensor fiber instance aliases needed the Riemannian metric before
+they were installed, finite coefficient norm aliases were missing, and the
+actual coefficient-regularity theorem was referenced in the wrong namespace.
+The repair installs the tensor instances inside the literal `g₀` metric scope,
+uses the existing finite coefficient norms, and corrects that namespace.
+No input hypotheses, source spaces, coefficient formulas, or solver conclusions
+were weakened. The repaired source still requires independent review and a
+fresh actual Lean-4.33 build; the historical failed run is not certification.
+
 ## Still open
 
 This is local linear theory with the existing unweighted Hölder source/solution

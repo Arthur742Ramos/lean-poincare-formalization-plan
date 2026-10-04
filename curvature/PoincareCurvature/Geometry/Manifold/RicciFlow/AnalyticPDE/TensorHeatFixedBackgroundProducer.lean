@@ -46,31 +46,35 @@ local instance fixedBackgroundTangentThree : ContMDiffVectorBundle 3 E TM I :=
 local instance fixedBackgroundTangentTwo : ContMDiffVectorBundle 2 E TM I :=
   ContMDiffVectorBundle.of_le (n := 3) (by norm_num)
 
-@[reducible] local instance fixedBackgroundThreeModelNormedAddCommGroup :
-    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) :=
-  CovariantDerivative.coordinateThreeModelNormedAddCommGroup
-@[reducible] local instance fixedBackgroundThreeModelNormedSpace :
-    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) :=
-  CovariantDerivative.coordinateThreeModelNormedSpace
-@[reducible] local instance fixedBackgroundThreeFiberNormedAddCommGroup (x : M) :
-    NormedAddCommGroup (T₃ x) :=
-  CovariantDerivative.coordinateThreeFiberNormedAddCommGroup x
-@[reducible] local instance fixedBackgroundThreeFiberNormedSpace (x : M) :
-    NormedSpace ℝ (T₃ x) :=
-  CovariantDerivative.coordinateThreeFiberNormedSpace x
-local instance fixedBackgroundThreeTotalSpaceTopology :
-    TopologicalSpace (TotalSpace
-      (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃) :=
-  Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
-    (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
-local instance fixedBackgroundThreeFiberBundle :
-    FiberBundle (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃ :=
-  Bundle.ContinuousLinearMap.fiberBundle
-    (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
-local instance fixedBackgroundThreeVectorBundle :
-    VectorBundle ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃ :=
-  Bundle.ContinuousLinearMap.vectorBundle
-    (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
+-- The finite coefficient model has no ambient metric dependency.
+@[reducible] local instance fixedBackgroundCoordinateNormedAddCommGroup {d : ℕ} :
+    NormedAddCommGroup (Fin d × Fin d → ℝ) := tensorCoordinateNormedAddCommGroup
+@[reducible] local instance fixedBackgroundCoordinateNormedSpace {d : ℕ} :
+    NormedSpace ℝ (Fin d × Fin d → ℝ) := tensorCoordinateNormedSpace
+@[reducible] local instance fixedBackgroundFirstNormedAddCommGroup {d : ℕ} :
+    NormedAddCommGroup (E →L[ℝ] (Fin d × Fin d → ℝ)) := tensorCoordinateFirstNormedAddCommGroup
+@[reducible] local instance fixedBackgroundFirstNormedSpace {d : ℕ} :
+    NormedSpace ℝ (E →L[ℝ] (Fin d × Fin d → ℝ)) := tensorCoordinateFirstNormedSpace
+@[reducible] local instance fixedBackgroundSecondNormedAddCommGroup {d : ℕ} :
+    NormedAddCommGroup (E →L[ℝ] E →L[ℝ] (Fin d × Fin d → ℝ)) := tensorCoordinateSecondNormedAddCommGroup
+@[reducible] local instance fixedBackgroundSecondNormedSpace {d : ℕ} :
+    NormedSpace ℝ (E →L[ℝ] E →L[ℝ] (Fin d × Fin d → ℝ)) := tensorCoordinateSecondNormedSpace
+@[reducible] local instance fixedBackgroundPrincipalNormedAddCommGroup {d : ℕ} :
+    NormedAddCommGroup ((E →L[ℝ] E →L[ℝ] (Fin d × Fin d → ℝ)) →L[ℝ] (Fin d × Fin d → ℝ)) :=
+  tensorCoordinatePrincipalNormedAddCommGroup
+@[reducible] local instance fixedBackgroundPrincipalNormedSpace {d : ℕ} :
+    NormedSpace ℝ ((E →L[ℝ] E →L[ℝ] (Fin d × Fin d → ℝ)) →L[ℝ] (Fin d × Fin d → ℝ)) :=
+  tensorCoordinatePrincipalNormedSpace
+@[reducible] local instance fixedBackgroundFirstCoefficientNormedAddCommGroup {d : ℕ} :
+    NormedAddCommGroup ((E →L[ℝ] (Fin d × Fin d → ℝ)) →L[ℝ] (Fin d × Fin d → ℝ)) :=
+  tensorCoordinateFirstCoefficientNormedAddCommGroup
+@[reducible] local instance fixedBackgroundFirstCoefficientNormedSpace {d : ℕ} :
+    NormedSpace ℝ ((E →L[ℝ] (Fin d × Fin d → ℝ)) →L[ℝ] (Fin d × Fin d → ℝ)) :=
+  tensorCoordinateFirstCoefficientNormedSpace
+@[reducible] local instance fixedBackgroundZeroNormedAddCommGroup {d : ℕ} :
+    NormedAddCommGroup ((Fin d × Fin d → ℝ) →L[ℝ] (Fin d × Fin d → ℝ)) := tensorCoordinateZeroNormedAddCommGroup
+@[reducible] local instance fixedBackgroundZeroNormedSpace {d : ℕ} :
+    NormedSpace ℝ ((Fin d × Fin d → ℝ) →L[ℝ] (Fin d × Fin d → ℝ)) := tensorCoordinateZeroNormedSpace
 
 /-- One global auxiliary connection, its actual induced regularity, and
 local coefficient/right-inverse data for the literal arbitrary C² metric.
@@ -83,6 +87,24 @@ theorem exists_fixedBackground_actualLocalTensorHeat
       ⟨g₀.inner, g₀.contMDiff, fun _ _ _ => rfl⟩
     letI : IsContMDiffRiemannianBundle I 1 E TM :=
       IsContMDiffRiemannianBundle.of_le (n := 2) (by norm_num)
+    letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) :=
+      CovariantDerivative.coordinateThreeModelNormedAddCommGroup
+    letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) :=
+      CovariantDerivative.coordinateThreeModelNormedSpace
+    letI : ∀ x : M, NormedAddCommGroup (T₃ x) :=
+      fun x => CovariantDerivative.coordinateThreeFiberNormedAddCommGroup (I := I) x
+    letI : ∀ x : M, NormedSpace ℝ (T₃ x) :=
+      fun x => CovariantDerivative.coordinateThreeFiberNormedSpace (I := I) x
+    letI : TopologicalSpace (TotalSpace
+        (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃) :=
+      Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
+        (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
+    letI : FiberBundle (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃ :=
+      Bundle.ContinuousLinearMap.fiberBundle
+        (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
+    letI : VectorBundle ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃ :=
+      Bundle.ContinuousLinearMap.vectorBundle
+        (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
     ∃ (cov : CovariantDerivative I E TM)
       (hcovTwo : ContMDiffCovariantDerivative cov 2)
       (hcovOne : ContMDiffCovariantDerivative cov 1)
@@ -145,6 +167,24 @@ theorem exists_fixedBackground_actualLocalTensorHeat
     ⟨g₀.inner, g₀.contMDiff, fun _ _ _ => rfl⟩
   letI : IsContMDiffRiemannianBundle I 1 E TM :=
     IsContMDiffRiemannianBundle.of_le (n := 2) (by norm_num)
+  letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) :=
+    CovariantDerivative.coordinateThreeModelNormedAddCommGroup
+  letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) :=
+    CovariantDerivative.coordinateThreeModelNormedSpace
+  letI : ∀ x : M, NormedAddCommGroup (T₃ x) :=
+    fun x => CovariantDerivative.coordinateThreeFiberNormedAddCommGroup (I := I) x
+  letI : ∀ x : M, NormedSpace ℝ (T₃ x) :=
+    fun x => CovariantDerivative.coordinateThreeFiberNormedSpace (I := I) x
+  letI : TopologicalSpace (TotalSpace
+      (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃) :=
+    Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
+      (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
+  letI : FiberBundle (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃ :=
+    Bundle.ContinuousLinearMap.fiberBundle
+      (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
+  letI : VectorBundle ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃ :=
+    Bundle.ContinuousLinearMap.vectorBundle
+      (RingHom.id ℝ) E TM (E →L[ℝ] E →L[ℝ] ℝ) T₂
   obtain ⟨cov, hcovTwo⟩ :=
     CovariantDerivative.exists_contMDiffAffineConnection_two
       (I := I) (E := E) (M := M)
@@ -177,7 +217,7 @@ theorem exists_fixedBackground_actualLocalTensorHeat
   refine ⟨cov, hcovTwo, hcovOne, htwoTwo, htwoOne, hthreeOne, ?_⟩
   intro d p e _ hpFrame b t₀ T α hT hα hα1
   obtain ⟨hA, hB, hC⟩ :=
-    CovariantDerivative.contDiffOn_actualTensorHeatCoefficients
+    contDiffOn_actualTensorHeatCoefficients
       (I := I) cov p e b
   refine ⟨hA, hB, hC, ?_⟩
   exact exists_radius_actualLocalTensorHeatUnitBall_zeroTrace
