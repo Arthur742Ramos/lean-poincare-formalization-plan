@@ -10,7 +10,11 @@ are preserved. No registry intake is part of this milestone.
 
 The geometric interface retains an arbitrary finite-dimensional complete real
 model, smooth Hausdorff boundaryless manifold, C² tangent bundle and sigma
-compactness inherited from the chosen-LC metric-coordinate producer. It takes
+compactness inherited from the chosen-LC metric-coordinate producer. The
+existing preferred-frame API explicitly uses model-level `[I.Boundaryless]`,
+which is stronger than the canonical theorem-level `BoundarylessManifold I M`
+scope. Transport to that full canonical model setting is still a separate
+obligation. It takes
 a genuine `MetricFamily` slice, an arbitrary basis indexed by `Fin d`, and a
 freeze point in the preferred fixed chart source. It requires no compactness,
 nonempty/rank restriction, additional time regularity, C³ metric, or supplied
