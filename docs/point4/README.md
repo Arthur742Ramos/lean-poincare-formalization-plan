@@ -38,6 +38,15 @@ run. Gates 3–5 therefore failed and the verdict remained `POINT 4 OPEN`.
 
 See [Current formalization status](../status.md) for the repository-wide dashboard.
 
+The bounded-C² initial-face supporting candidate is recorded in
+[`c2-heat-initial-trace.md`](c2-heat-initial-trace.md). It adds the Gaussian
+approximate identity with an arbitrary continuity modulus, local-uniform
+actual gradient/Hessian traces, global C² trace under uniform continuity only
+of Hessian entries, and the right initial generator. Exact Lean-4.33
+verification is pending. It does not construct compact-manifold localization,
+an ordinary endpoint derivative, a weighted nonlinear solver, or Point-4
+closure.
+
 The preceding supporting PDE milestone is the genuine Ricci--DeTurck
 Hölder-seminorm difference estimate in
 `GenuineRicciDeTurckHolderDifference.lean`. It combines the compact-domain

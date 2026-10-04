@@ -188,3 +188,5 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateRicci
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ChosenLeviCivitaCoordinateChristoffel
 
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ChosenLeviCivitaCoordinateCurvature
+
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialTrace
