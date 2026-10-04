@@ -40,18 +40,30 @@ or trust constructs stop the workflow for review before compilation.
 
 ## Evidence boundary
 
-A static source review found substantive existence and uniqueness statements
-with actual Ricci-flow differential equations. That is useful evidence for
-selecting the candidate, but it is not a kernel rebuild of the full import
-closure. The workflow result, exact source and audit commit, printed signatures,
-and axiom output must all be checked before claiming verified upstream reuse.
-Failure, resource exhaustion, or a timeout must remain a reported blocker.
+The fresh source rebuild passed in
+[run 37193292343](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37193292343)
+at audit commit `7e9f36a72f899b88f089d38ff51f11c6a053740d`, completed on
+2026-10-04 at 13:51:35 UTC. All **2,270** project modules compiled with exit zero.
+The graph, build order, compiled-module set, compiler-result set, and indexed
+module logs agree exactly. Both endpoint signatures were printed, and each
+depends only on `propext`, `Classical.choice`, and `Quot.sound`. Independent
+artifact review checked these results against the source graph and audit code.
+
+The evidence is preserved in artifact `11305411419`. Its `report.json` SHA-256
+is `5784c244c7c4c5d4475e729cc5f5a5e68b82f6de864fb1e80865c231844da30a`.
+This certifies the immutable upstream project-source closure under Lean 4.29.0
+over the official pinned Mathlib cache; it is not a fresh rebuild of Mathlib's
+own source and does not certify a Lean 4.33 port. The original incomplete run
+and its evidence remain preserved below. Future failures, resource exhaustion,
+or timeouts must still be reported without promoting them to a passing gate.
 
 Even a passing upstream audit leaves a semantic integration obligation. The
 upstream existence endpoint assumes a smooth initial metric and a boundaryless,
 positive-dimensional compact manifold. It returns a jointly smooth metric
-family with a one-sided initial-time Ricci equation. Upstream forward uniqueness
-uses its own jointly smooth candidate class and an inner-product model space.
+family with a one-sided initial-time Ricci equation. Existence accepts a
+finite-dimensional normed model. Upstream forward uniqueness additionally
+requires an inner-product model and `BoundarylessManifold`; it compares its own
+jointly smooth, continuous chart-Gram candidate class.
 The current Point-4 target uses different
 metric/curvature constructions, allows arbitrary model-with-corners scope and
 spatially `C²` initial metrics, and compares its broader recorded candidate
