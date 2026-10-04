@@ -111,7 +111,7 @@ theorem abs_heatSemigroupNDbcf_sub_le_initialHeatHolderConstant
   calc
     _ ≤ |heatSemigroupNDbcf ht g x - heatSemigroupNDbcf ht g y| +
         |heatSemigroupNDbcf (add_pos ht hs) f x -
-          heatSemigroupNDbcf (add_pos ht hs) f y| := abs_add _ _
+          heatSemigroupNDbcf (add_pos ht hs) f y| := abs_add_le _ _
     _ ≤ _ := add_le_add herr hsmooth'
     _ = _ := by
       rw [initialHeatHolderConstant, heatFlowPathBcf_of_pos f hs]
@@ -154,13 +154,22 @@ theorem tendsto_weighted_initialHeatHolderConstant_zero
     {α : ℝ} (hα : 0 < α) :
     Tendsto (fun t : ℝ => t ^ (α / 2) * initialHeatHolderConstant f α t)
       (𝓝[>] 0) (𝓝 0) := by
-  have hpath : ContinuousAt (fun t : ℝ => heatFlowPathBcf f (Real.sqrt t)) 0 := by
-    simpa only [Real.sqrt_zero] using
-      (continuousAt_heatFlowPathBcf_zero_of_uniformContinuous f hf).comp
-        Real.continuous_sqrt.continuousAt
+  have hsqrt : Tendsto Real.sqrt (𝓝 (0 : ℝ)) (𝓝 (0 : ℝ)) := by
+    simpa only [Real.sqrt_zero] using Real.continuous_sqrt.tendsto (0 : ℝ)
+  have hheat : Tendsto (heatFlowPathBcf f) (𝓝 (0 : ℝ))
+      (𝓝 (heatFlowPathBcf f 0)) :=
+    continuousAt_heatFlowPathBcf_zero_of_uniformContinuous f hf
+  have hzero : heatFlowPathBcf f 0 = f := dif_neg (lt_irrefl 0)
+  have hpath : Tendsto (fun t : ℝ => heatFlowPathBcf f (Real.sqrt t))
+      (𝓝 (0 : ℝ)) (𝓝 f) := by
+    have hheat' : Tendsto (heatFlowPathBcf f) (𝓝 (0 : ℝ)) (𝓝 f) := by
+      simpa only [hzero] using hheat
+    exact hheat'.comp hsqrt
+  have hconst : Tendsto (fun _ : ℝ => f) (𝓝 (0 : ℝ)) (𝓝 f) :=
+    tendsto_const_nhds
   have herr : Tendsto (fun t : ℝ => ‖f - heatFlowPathBcf f (Real.sqrt t)‖)
       (𝓝 0) (𝓝 0) := by
-    simpa [heatFlowPathBcf] using (continuousAt_const.sub hpath).norm.tendsto
+    simpa only [sub_self, norm_zero] using (hconst.sub hpath).norm
   have hpow : Tendsto (fun t : ℝ => t ^ (α / 4)) (𝓝 0) (𝓝 0) := by
     simpa only [Real.zero_rpow (show α / 4 ≠ 0 by positivity)] using
       (Real.continuous_rpow_const (show 0 ≤ α / 4 by positivity)).tendsto (0 : ℝ)
@@ -249,6 +258,7 @@ theorem EuclideanBoundedC2Data.tendsto_weighted_heatEvolvedWeightedC2AlphaData_z
       else 0)) (𝓝[>] 0) (𝓝 0) := by
   apply (D.tendsto_weighted_initialHessianHolderConstant_zero hsecond hα).congr'
   filter_upwards [self_mem_nhdsWithin] with t ht
+  change 0 < t at ht
   simp only [dif_pos ht, heatEvolvedWeightedC2AlphaData_holderConstant_eq]
 
 end AnalyticPDE
