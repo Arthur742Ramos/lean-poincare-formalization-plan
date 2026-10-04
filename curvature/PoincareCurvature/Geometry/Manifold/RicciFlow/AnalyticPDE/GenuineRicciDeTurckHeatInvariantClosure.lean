@@ -127,6 +127,26 @@ noncomputable def geometricNRDLittleHolderOnEuclideanClosedBall
         Γbg hα0 hα1 hR hRsmall hs i j⟩
   else 0
 
+/-- On the ball the total extension is exactly the packaged coordinate map. -/
+theorem geometricNRDLittleHolderOnEuclideanClosedBall_eq
+    (Γbg : Fin d → Fin d → Fin d → ℝ)
+    (hα0 : 0 < α) (hα1 : α < 1)
+    {R : ℝ} (hR : 0 < R)
+    (hRsmall : 2 * jet2LipConst d d * R < phiRDRadius (d := d))
+    {s : Jet2Section d d α}
+    (hs : s ∈ Metric.closedBall (euclideanSection d α) R) :
+    geometricNRDLittleHolderOnEuclideanClosedBall Γbg hα0 hα1 hR hRsmall s =
+      fun i j => ⟨geometricNRDHolder Γbg s hα0
+        (hrange_of_mem_closedBall Γbg (euclideanSection d α)
+          (jet2OfSection_euclideanSection d α) hR hRsmall hs) i j,
+        isGoodHolder_geometricNRDHolder_of_euclidean_closedBall
+          Γbg hα0 hα1 hR hRsmall hs i j⟩ := by
+  classical
+  unfold geometricNRDLittleHolderOnEuclideanClosedBall
+  split_ifs with h
+  · rfl
+  · exact (h hs).elim
+
 /-- On the ball the packaged reaction evaluates to the actual coordinate map. -/
 theorem geometricNRDLittleHolderOnEuclideanClosedBall_apply
     (Γbg : Fin d → Fin d → Fin d → ℝ)
@@ -138,12 +158,12 @@ theorem geometricNRDLittleHolderOnEuclideanClosedBall_apply
     (x : Fin d → ℝ) (i j : Fin d) :
     ((geometricNRDLittleHolderOnEuclideanClosedBall Γbg hα0 hα1 hR hRsmall s
       i j).toHolder).toBCF x = geometricNRD Γbg s x i j := by
-  simp only [geometricNRDLittleHolderOnEuclideanClosedBall, dif_pos hs, if_pos hs]
+  rw [geometricNRDLittleHolderOnEuclideanClosedBall_eq Γbg hα0 hα1 hR hRsmall hs]
   exact geometricNRDHolder_apply Γbg s hα0 _ x i j
 
+set_option maxHeartbeats 800000 in
 /-- The matrix reaction obeys the full-norm local Lipschitz bound in the
 little-Hölder carrier, whose norm is inherited from the ambient Hölder space. -/
-set_option maxHeartbeats 800000 in
 theorem lipschitzOnWith_geometricNRDLittleHolderOnEuclideanClosedBall
     (Γbg : Fin d → Fin d → Fin d → ℝ)
     (hα0 : 0 < α) (hα1 : α < 1)
@@ -154,17 +174,32 @@ theorem lipschitzOnWith_geometricNRDLittleHolderOnEuclideanClosedBall
         geometricNRDHolderBallLipschitzConst_nonneg Γbg (euclideanSection d α) hR⟩
       (geometricNRDLittleHolderOnEuclideanClosedBall Γbg hα0 hα1 hR hRsmall)
       (Metric.closedBall (euclideanSection d α) R) := by
+  classical
   refine LipschitzOnWith.of_dist_le_mul ?_
   intro s hs t ht
-  simp only [geometricNRDLittleHolderOnEuclideanClosedBall,
-    dif_pos hs, if_pos hs, dif_pos ht, if_pos ht]
+  rw [geometricNRDLittleHolderOnEuclideanClosedBall_eq Γbg hα0 hα1 hR hRsmall hs,
+    geometricNRDLittleHolderOnEuclideanClosedBall_eq Γbg hα0 hα1 hR hRsmall ht]
   rw [dist_eq_norm, dist_eq_norm]
-  change ‖geometricNRDHolder Γbg s hα0 _ -
-      geometricNRDHolder Γbg t hα0 _‖ ≤
-    geometricNRDHolderBallLipschitzConst Γbg (euclideanSection d α) R * ‖s - t‖
-  exact le_trans (norm_geometricNRDHolder_sub_le Γbg s t hα0 _ _)
-    (mul_le_mul_of_nonneg_right
-      (geometricNRDHolderLipschitzConst_le_ball Γbg (euclideanSection d α) s hs)
-      (norm_nonneg _))
+  let C := geometricNRDHolderBallLipschitzConst Γbg (euclideanSection d α) R
+  have hnonneg : 0 ≤ C * ‖s - t‖ := mul_nonneg
+    (geometricNRDHolderBallLipschitzConst_nonneg Γbg (euclideanSection d α) hR)
+    (norm_nonneg _)
+  have hfull : ‖geometricNRDHolder Γbg s hα0
+      (hrange_of_mem_closedBall Γbg (euclideanSection d α)
+        (jet2OfSection_euclideanSection d α) hR hRsmall hs) -
+      geometricNRDHolder Γbg t hα0
+        (hrange_of_mem_closedBall Γbg (euclideanSection d α)
+          (jet2OfSection_euclideanSection d α) hR hRsmall ht)‖ ≤ C * ‖s - t‖ :=
+    le_trans (norm_geometricNRDHolder_sub_le Γbg s t hα0 _ _)
+      (mul_le_mul_of_nonneg_right
+        (geometricNRDHolderLipschitzConst_le_ball Γbg (euclideanSection d α) s hs)
+        (norm_nonneg _))
+  apply (pi_norm_le_iff_of_nonneg hnonneg).mpr
+  intro i
+  apply (pi_norm_le_iff_of_nonneg hnonneg).mpr
+  intro j
+  change ‖geometricNRDHolder Γbg s hα0 _ i j -
+      geometricNRDHolder Γbg t hα0 _ i j‖ ≤ C * ‖s - t‖
+  exact le_trans (le_trans (pi_entry_norm_le _ j) (pi_entry_norm_le _ i)) hfull
 
 end RicciFlow.AnalyticPDE

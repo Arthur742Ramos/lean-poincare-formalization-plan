@@ -56,6 +56,7 @@ jobs:
             'jet2SectionLittleHolderPropagator_mem_euclidean_closedBall',
             'jet2OfSection_heat_mem_phiRDNemytskiiData',
             'isGoodHolder_geometricNRDHolder_of_euclidean_closedBall',
+            'geometricNRDLittleHolderOnEuclideanClosedBall_eq',
             'geometricNRDLittleHolderOnEuclideanClosedBall_apply',
             'lipschitzOnWith_geometricNRDLittleHolderOnEuclideanClosedBall',
           }
@@ -65,7 +66,7 @@ jobs:
           for name, axioms in entries:
             actual = {a.strip() for a in axioms.split(',') if a.strip()}
             assert actual <= allowed, (name, actual)
-          print('Supporting axiom audit passed for all seven declarations')
+          print('Supporting axiom audit passed for all eight declarations')
           PY
       - name: Run unchanged full Point-4 completion audit
         working-directory: curvature
