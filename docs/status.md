@@ -155,6 +155,19 @@ principal-identification premise. Exact Lean-4.33 verification is pending;
 see [the precise candidate boundary](point4/frozen-metric-principal.md).
 This is differential-operator identification only. Point 4 remains **Open**.
 
+## Latest supporting integration boundary
+
+The [combined linear-heat geometry milestone](point4/linear-heat-geometry.md)
+combines the independently qualified exact PR122 frozen actual-metric/holonomic
+action, PR123 weak actual Laplacian and PR125 manifold-boundaryless chart/frame
+proofs with current-master actual conventional W/Lie/Ricci RHS and the approved
+closed-manifold contract. Their preparation-time candidate wording above and
+in focused pages is historical. Exact combined-head Lean 4.33 full compilation,
+all inherited/current/focused axiom and type checks, canonical contract
+regressions and full-stack review remain pending. Mathematical proof blobs,
+requirements and individual verification gates are preserved. The integration
+adds no PDE solver or canonical theorem and leaves milestone 4 **Open**.
+
 ## Updating this page
 
 When implementation changes:

@@ -1,0 +1,80 @@
+name: Point-4 combined linear-heat geometry
+
+on:
+  pull_request:
+    paths:
+      - "curvature/**"
+      - "docs/**"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linear_heat_geometry:
+    name: Exact-head combined source, all 127 axiom occurrences, closed contract and full audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout exact candidate and real parent ancestry
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Preserve immutable source identity and reject integration drift
+        run: |
+          git rev-parse HEAD | tee /tmp/point4-linear-heat-geometry-sha.log
+          python3 curvature/scripts/point4_linear_heat_geometry_source_test.py | tee /tmp/point4-linear-heat-geometry-source.log
+          python3 curvature/scripts/point4_linear_heat_geometry_mock_test.py
+          python3 curvature/scripts/point4_closed_contract_source_test.py
+          python3 scripts/check-doc-links.py
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Compile combined public library before evidence probes
+        working-directory: curvature
+        run: lake build 2>&1 | tee /tmp/point4-linear-heat-geometry-build.log
+      - name: Recheck all inherited, current-master and three supporting axiom/type surfaces
+        working-directory: curvature
+        run: |
+          mkdir -p /tmp/point4-linear-heat-geometry-probes
+          for probe in contraction coordinate_connection coordinate_jet coordinate_operator principal_remainder chosen_lc_coordinate chosen_lc_curvature standard_coordinate_operator frozen_metric_principal weak_laplacian boundaryless_chart_frames; do
+            lake env lean "scripts/point4_${probe}_probe.lean" 2>&1 | tee "/tmp/point4-linear-heat-geometry-probes/${probe}.log"
+          done
+          python3 scripts/point4_linear_heat_geometry_source_test.py --axiom-dir /tmp/point4-linear-heat-geometry-probes
+      - name: Print current canonical contract and run unchanged kernel signature regressions
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_closed_contract_probe.lean 2>&1 | tee /tmp/point4-linear-heat-geometry-contract.log
+          lake env lean scripts/point4_closed_contract_regression.lean 2>&1 | tee /tmp/point4-linear-heat-geometry-regression.log
+      - name: Run all five current canonical gates with full build
+        working-directory: curvature
+        run: |
+          set +e
+          bash scripts/point4_audit.sh --json /tmp/point4-linear-heat-geometry-full-audit.json | tee /tmp/point4-linear-heat-geometry-full-audit.log
+          audit_rc=${PIPESTATUS[0]}
+          set -e
+          python3 scripts/point4_linear_heat_geometry_source_test.py --audit-json /tmp/point4-linear-heat-geometry-full-audit.json --audit-rc "$audit_rc"
+      - name: Preserve exact combined-head evidence including failures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-linear-heat-geometry-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-linear-heat-geometry-*.log
+            /tmp/point4-linear-heat-geometry-probes/*.log
+            /tmp/point4-linear-heat-geometry-full-audit.json
+            /tmp/point4_build.log
+          if-no-files-found: ignore

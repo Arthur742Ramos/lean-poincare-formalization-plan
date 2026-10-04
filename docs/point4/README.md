@@ -57,6 +57,18 @@ identity, supplied chart, germ or commuting certificate is required. The
 chosen-LC and analytic consumers are unchanged; quantitative norm/heat/PDE
 transport and the canonical Point-4 theorem remain open.
 
+## Combined supporting linear-heat geometry
+
+The [combined milestone](linear-heat-geometry.md) retains real merge ancestry
+for qualified PR122/123/125 together with current-master actual conventional
+W/Lie/Ricci RHS and the approved closed-manifold contract. Exact mathematical
+proof blobs and original verification workflows are preserved. Individual-head
+qualification is historical evidence; fresh combined-head full compilation,
+all axiom/type/audit gates and independent full-stack review are still required.
+The preferred frame now has manifold-boundaryless scope; its existing frozen,
+weak, chosen-LC and gauge consumers retain their stronger model scope. No
+nonlinear PDE solver or canonical target is constructed. Point 4 remains OPEN.
+
 ## Current verdict
 
 The fast audit run on 2026-09-11 passed the forbidden-term scan but did not find
