@@ -4,6 +4,7 @@ Copyright (c) 2026 Poincaré formalization project. All rights reserved.
 import PoincareCurvature.Analysis.TimeDependentMetricContraction
 import PoincareCurvature.Geometry.Manifold.RicciFlow.MetricContractedDeTurckField
 import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointCorrectionTensorRegularity
+import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointFieldCompactGaugeFlow
 
 /-!
 # Joint regularity of the conventional metric-contracted DeTurck field
@@ -104,6 +105,10 @@ theorem contMDiff_metricContractedDeTurckVectorField_of_joint_correction
       (fun p : ℝ × M => (⟨p.2,
         metricContractedDeTurckVectorField (I := I) (M := M) g background p.1 p.2⟩ :
         TangentBundle I M)) := by
+  letI : FiberBundle E (TangentSpace I : M → Type _) :=
+    metricContractionTangentFiberBundle (I := I) (M := M)
+  letI : VectorBundle ℝ E (TangentSpace I : M → Type _) :=
+    metricContractionTangentVectorBundle (I := I) (M := M)
   intro p₀
   let e : Trivialization E (π E TM) := trivializationAt E TM p₀.2
   letI : MemTrivializationAtlas e := by infer_instance
@@ -111,16 +116,28 @@ theorem contMDiff_metricContractedDeTurckVectorField_of_joint_correction
   have hp₀ : p₀ ∈ S :=
     ⟨Set.mem_univ _, FiberBundle.mem_baseSet_trivializationAt E TM p₀.2⟩
   have hSopen : IsOpen S := isOpen_univ.prod e.open_baseSet
-  have hlocal := @PoincareCurvature.ParametrizedInner.contMDiffOn_timeDependentMetricContraction
-    E _ _ H _ I ∞ M _ _ E _ _ TM
-    (by exact instTopologicalSpaceTangentBundle)
-    (fun _ => by exact inferInstance) (fun _ => by exact inferInstance)
-    (by exact ‹FiberBundle E TM›) (by exact ‹VectorBundle ℝ E TM›)
-    (by exact ‹ContMDiffVectorBundle ∞ E TM I›)
-    gSmooth (explicitLeviCivitaCorrection (I := I) (M := M) g background)
-    e (by exact ‹MemTrivializationAtlas e›) ι (by infer_instance) (by infer_instance)
-    bas (u := e.baseSet) (subset_rfl)
-    hmetric.contMDiffOn hcorrection.contMDiffOn
+  have hmetricOn : ContMDiffOn (𝓘(ℝ).prod I)
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun p : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ) p.2
+        ((gSmooth p.1).inner p.2)) S := hmetric.contMDiffOn
+  have hcorrectionOn : ContMDiffOn (𝓘(ℝ).prod I)
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E)) ∞
+      (fun p : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E)
+        (E := fun x : M => TM x →L[ℝ] TM x →L[ℝ] TM x) p.2
+        (explicitLeviCivitaCorrection (I := I) (M := M) g background p.1 p.2)) S :=
+    hcorrection.contMDiffOn
+  have hlocal : ContMDiffOn (𝓘(ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : ℝ × M => TotalSpace.mk' E p.2
+        (∑ i, ∑ j,
+          ((Matrix.of (fun a b => (gSmooth p.1).inner p.2
+            (e.localFrame bas a p.2) (e.localFrame bas b p.2)))⁻¹) i j •
+          explicitLeviCivitaCorrection (I := I) (M := M) g background p.1 p.2
+            (e.localFrame bas i p.2) (e.localFrame bas j p.2))) S := by
+    exact PoincareCurvature.ParametrizedInner.contMDiffOn_timeDependentMetricContraction
+      (IB := I) (n := ∞) (F := E) (V := (TangentSpace I : M → Type _))
+      gSmooth (explicitLeviCivitaCorrection (I := I) (M := M) g background)
+      e bas (u := e.baseSet) subset_rfl hmetricOn hcorrectionOn
   have hactual : ContMDiffOn (𝓘(ℝ).prod I) I.tangent ∞
       (fun p : ℝ × M => (⟨p.2,
         metricContractedDeTurckVectorField (I := I) (M := M) g background p.1 p.2⟩ :
@@ -155,11 +172,16 @@ theorem contMDiff_metricContractedDeTurckGaugeField_of_joint_correction
       (fun p : ℝ × M => (⟨p.2,
         metricContractedDeTurckGaugeField (I := I) (M := M) g background p.1 p.2⟩ :
         TangentBundle I M)) := by
+  letI : FiberBundle E (TangentSpace I : M → Type _) :=
+    metricContractionTangentFiberBundle (I := I) (M := M)
+  letI : VectorBundle ℝ E (TangentSpace I : M → Type _) :=
+    metricContractionTangentVectorBundle (I := I) (M := M)
   have hvector := contMDiff_metricContractedDeTurckVectorField_of_joint_correction
     g gSmooth background bas hinner hmetric hcorrection
   simpa only [metricContractedDeTurckGaugeField, Pi.neg_apply] using
     (PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg
-      (b := Prod.snd)
+      (IB := I) (n := ∞) (F := E) (V := (TangentSpace I : M → Type _))
+      (IM := (𝓘(ℝ).prod I)) (b := (Prod.snd : ℝ × M → M))
       (v := fun p : ℝ × M =>
         metricContractedDeTurckVectorField (I := I) (M := M) g background p.1 p.2)
       hvector)
@@ -189,8 +211,7 @@ theorem exists_pos_metricContractedDiffeomorph3GaugeFlowOn_of_joint_correction
       (Diffeomorph3GaugeFlowOn (I := I) (M := M)
         (metricContractedDeTurckGaugeField (I := I) (M := M) g background)
         (Set.Ioo (-ε) ε) 0) := by
-  apply PoincareCurvature.GaugeFlowAssembly.
-    exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_joint_coherent_field
+  apply PoincareCurvature.GaugeFlowAssembly.exists_pos_diffeomorph3GaugeFlowOn_of_compact_of_joint_coherent_field
   simpa only [PoincareCurvature.GaugeFlowAssembly.coherentCoordinateField] using
     contMDiff_metricContractedDeTurckGaugeField_of_joint_correction
       g gSmooth background bas hinner hmetric hcorrection
@@ -226,8 +247,7 @@ theorem contMDiff_metricContractedDeTurckVectorField_of_joint_correctionFunction
         TangentBundle I M)) := by
   exact contMDiff_metricContractedDeTurckVectorField_of_joint_correction
     g gSmooth background bas hinner hmetric
-    (PoincareCurvature.GaugeFlowAssembly.
-      contMDiff_joint_explicitLeviCivitaCorrection_of_joint_correctionFunctional
+    (PoincareCurvature.GaugeFlowAssembly.contMDiff_joint_explicitLeviCivitaCorrection_of_joint_correctionFunctional
         g gSmooth background bas hinner hmetric hfunctional)
 
 end RicciFlow
