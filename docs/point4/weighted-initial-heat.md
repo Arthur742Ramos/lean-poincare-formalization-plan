@@ -68,8 +68,8 @@ Both outcomes are preserved; neither verifies the new integrated head.
 
 Historical weighted head `633ec144d7f1fb1b04737f309942b73b7a63d083`
 failed actual Lean-4.33 compilation at four API/proof points: the unavailable
-`abs_add` name, the square-root/positive-filter limit composition, the rpow
-weight-normalization rewrite, and the final conditional-holder-constant
+`abs_add` name, the square-root/heat-path limit composition, the untyped
+constant in the norm-error limit, and the final conditional-holder-constant
 simplification. The minimal one-file repair at
 `f908454fac787a720239e04feee6d61a9f9ab202` received independent source
 approval before this integration but was not Lean-compiled or published.
