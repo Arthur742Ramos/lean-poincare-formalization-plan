@@ -1,0 +1,12 @@
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateRicciDeTurckOperator
+
+#print axioms PoincareCurvature.CoordinateMatrixJet.background_component_hasFDerivAt
+#print axioms PoincareCurvature.CoordinateMatrixJet.differentiableAt_deTurck
+#print axioms PoincareCurvature.CoordinateMatrixJet.deTurckFirst_eq_productRule
+#print axioms RicciFlow.AnalyticPDE.GenuinePhiRD.deTurck_eq_coordinateJet
+#print axioms RicciFlow.AnalyticPDE.GenuinePhiRD.deTurckFirst_eq_coordinateJet
+#print axioms RicciFlow.AnalyticPDE.GenuinePhiRD.coordinateRicci_eq_coordinateJet
+#print axioms RicciFlow.AnalyticPDE.GenuinePhiRD.coordinateLie_eq_coordinateJet
+#print axioms RicciFlow.AnalyticPDE.GenuinePhiRD.coordinateRD_eq_correctedJet
+#print axioms RicciFlow.AnalyticPDE.GenuinePhiRD.coordinateRD_eq_principal_add_lowerOrder
+#print axioms RicciFlow.AnalyticPDE.GenuinePhiRD.coordinateRD_eq_frozenPrincipal_add_remainder

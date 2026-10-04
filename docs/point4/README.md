@@ -508,3 +508,12 @@ Christoffel Fréchet derivatives from the actual C² matrix field.
 existing finite-jet formulas, without assuming inverse derivative data. See
 [`coordinate-connection.md`](coordinate-connection.md). Exact Lean-4.33
 verification and the manifold curvature identification remain pending.
+
+The next coordinate-operator candidate differentiates the actual positive
+conventional W against an actual C¹ background coefficient array. Its Ricci
+and Lie readouts use actual Fréchet derivatives and are identified with the
+corrected produced-jet RHS, then split into the inverse-metric principal part
+and an explicit frozen-coefficient remainder. See
+[`coordinate-operator.md`](coordinate-operator.md) for the hypotheses and
+remaining manifold/generator/PDE boundaries. The generic rc2 development check
+passed; exact Lean-4.33 verification remains pending and Point 4 stays open.
