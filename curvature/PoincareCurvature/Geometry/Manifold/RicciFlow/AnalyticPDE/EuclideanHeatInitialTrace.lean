@@ -79,8 +79,9 @@ theorem continuousAt_heatFlowPathBcf_zero_of_uniformContinuous
   let M : ℝ := (2 * ‖f‖ / δ) * (n : ℝ) * (2 / Real.sqrt π)
   have hsmall : ∀ᶠ t : ℝ in 𝓝 0, M * Real.sqrt t < ε / 2 := by
     have hlim : Tendsto (fun t : ℝ => M * Real.sqrt t) (𝓝 0) (𝓝 0) := by
-      simpa only [Real.sqrt_zero, mul_zero] using
-        ((continuous_const (y := M)).mul Real.continuous_sqrt).tendsto (0 : ℝ)
+      have hcont : Continuous (fun t : ℝ => M * Real.sqrt t) :=
+        continuous_const.mul Real.continuous_sqrt
+      simpa only [Real.sqrt_zero, mul_zero] using hcont.tendsto (0 : ℝ)
     exact hlim.eventually (Iio_mem_nhds (half_pos hε))
   filter_upwards [hsmall] with t ht
   by_cases htpos : 0 < t
@@ -110,9 +111,11 @@ theorem tendstoUniformlyOn_heatSemigroupND_zero
   let M : ℝ := (2 * ‖f‖ / δ) * (n : ℝ) * (2 / Real.sqrt π)
   have hsmall : ∀ᶠ t : ℝ in 𝓝[>] 0, M * Real.sqrt t < ε / 2 := by
     have hlim : Tendsto (fun t : ℝ => M * Real.sqrt t) (𝓝[>] 0) (𝓝 0) := by
-      simpa only [Real.sqrt_zero, mul_zero] using
-        (((continuous_const (y := M)).mul Real.continuous_sqrt).tendsto (0 : ℝ)).mono_left
-          nhdsWithin_le_nhds
+      have hcont : Continuous (fun t : ℝ => M * Real.sqrt t) :=
+        continuous_const.mul Real.continuous_sqrt
+      have hlim0 : Tendsto (fun t : ℝ => M * Real.sqrt t) (𝓝 0) (𝓝 0) := by
+        simpa only [Real.sqrt_zero, mul_zero] using hcont.tendsto (0 : ℝ)
+      exact hlim0.mono_left nhdsWithin_le_nhds
     exact hlim.eventually (Iio_mem_nhds (half_pos hε))
   filter_upwards [hsmall, self_mem_nhdsWithin] with t ht htpos
   intro x hx
@@ -171,7 +174,7 @@ theorem uniformContinuous_value {n : ℕ} (D : EuclideanBoundedC2Data n) :
       Finset.sum_nonneg fun _ _ => norm_nonneg _⟩ D.value := by
     apply LipschitzWith.of_dist_le_mul
     intro x y
-    simpa only [Real.dist_eq, dist_eq_norm, NNReal.coe_mk] using
+    simpa only [Real.dist_eq, dist_eq_norm, Real.norm_eq_abs, NNReal.coe_mk] using
       abs_sub_le_of_bounded_coordinate_derivatives D.value D.first D.hasDeriv_value x y
   exact hlip.uniformContinuous
 
@@ -183,7 +186,7 @@ theorem uniformContinuous_first {n : ℕ} (D : EuclideanBoundedC2Data n)
       Finset.sum_nonneg fun _ _ => norm_nonneg _⟩ (D.first k) := by
     apply LipschitzWith.of_dist_le_mul
     intro x y
-    simpa only [Real.dist_eq, dist_eq_norm, NNReal.coe_mk] using
+    simpa only [Real.dist_eq, dist_eq_norm, Real.norm_eq_abs, NNReal.coe_mk] using
       abs_sub_le_of_bounded_coordinate_derivatives (D.first k)
         (fun j => D.second j k) (fun j x => D.hasDeriv_first j k x) x y
   exact hlip.uniformContinuous
@@ -229,7 +232,7 @@ theorem continuousAt_heatC2Trace_zero
   have hsecond' := continuousAt_pi.2 (fun j => continuousAt_pi.2 (fun k =>
     continuousAt_heatFlowPathBcf_zero_of_uniformContinuous
       (D.second j k) (hsecond j k)))
-  exact hv.prod (hfirst.prod hsecond')
+  exact hv.prodMk (hfirst.prodMk hsecond')
 
 /-- The initial generator is the finite trace of the actual initial Hessian.
 This is a right derivative of the closed heat path, requiring only the
@@ -245,7 +248,8 @@ theorem hasDerivWithinAt_heatFlowPathBcf_apply_zero
     intro t ht
     apply (hasDerivAt_heatSemigroupND_time_eq_laplacian ht D.value x).congr_of_eventuallyEq
     filter_upwards [Ioi_mem_nhds ht] with s hs
-    simp only [F, heatFlowPathBcf_of_pos D.value hs, heatSemigroupNDbcf_apply]
+    simp only [F, heatFlowPathBcf_of_pos D.value hs]
+    exact heatSemigroupNDbcf_apply hs D.value x
   have hcont : ContinuousWithinAt F (Ioi 0) 0 :=
     ((continuous_eval_const x).continuousAt.comp
       (continuousAt_heatFlowPathBcf_zero_of_uniformContinuous
