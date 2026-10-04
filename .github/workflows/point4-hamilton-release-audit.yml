@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "scripts/point4/audit-hamilton-release.py"
+      - "scripts/point4/observe-hamilton-compiler.py"
       - "scripts/point4/test_audit_hamilton_release.py"
       - ".github/workflows/point4-hamilton-release-audit.yml"
   workflow_dispatch:
@@ -41,7 +42,7 @@ jobs:
           persist-credentials: false
       - name: Check pin and inspect focused source closure before compilation
         run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --plan-only
-      - name: Test dependency-ready scheduler without executing upstream code
+      - name: Test bounded batches and compiler observation without executing upstream code
         run: python3 campaign/scripts/point4/test_audit_hamilton_release.py
       - name: Install checksum-pinned official elan
         run: |
@@ -74,10 +75,24 @@ jobs:
       - name: Compile exact endpoint import closure and inspect axioms
         run: |
           python3 campaign/scripts/point4/audit-hamilton-release.py upstream | tee hamilton-release-audit/build.log
+      - name: Remove only the audit-local toolchain symlink view
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil
+          shim = Path('hamilton-release-audit/observed-toolchain')
+          if shim.exists():
+              # rmtree unlinks symlink entries, never their official targets.
+              shutil.rmtree(shim)
+          PY
       - name: Preserve complete audit evidence and unresolved bridge status
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: hamilton-release-audit-${{ github.event.pull_request.head.sha || github.sha }}
-          path: hamilton-release-audit/
+          # Never follow the audit-local symlink view of the official toolchain.
+          path: |
+            hamilton-release-audit/
+            !hamilton-release-audit/observed-toolchain/**
           if-no-files-found: error

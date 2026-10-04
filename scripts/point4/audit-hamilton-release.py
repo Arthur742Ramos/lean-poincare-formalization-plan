@@ -9,9 +9,14 @@ from __future__ import annotations
 import argparse
 import concurrent.futures
 import heapq
+import hashlib
+import gzip
 import importlib.util
 import json
 import pathlib
+import os
+import shlex
+import signal
 import re
 import shutil
 import subprocess
@@ -79,6 +84,118 @@ def dependency_ready_build(order, graph, build, completed, *, jobs=2,
     return failure
 
 
+def chain_batches(order, graph, jobs):
+    """Partition into explicit direct-import chains, with width at most jobs.
+
+    Off-batch project imports must be in earlier batches. No Lake concurrency
+    flag is assumed: at most jobs chains can have a project compiler ready.
+    """
+    assert jobs in (1, 2)
+    assert len(order) == len(set(order))
+    known = set(order)
+    assert set(graph) == known
+    assert all(set(graph[m]) <= known for m in order)
+    built, batches = set(), []
+    while built != known:
+        batch, selected, chains = [], set(), []
+        for module in order:
+            if module in built or not set(graph[module]) <= built | selected:
+                continue
+            candidates = [i for i, chain in enumerate(chains) if chain[-1] in graph[module]]
+            if candidates:
+                chains[candidates[0]].append(module)
+            elif len(chains) < jobs:
+                chains.append([module])
+            else:
+                continue
+            batch.append(module)
+            selected.add(module)
+        assert batch, "Incomplete or cyclic source graph"
+        batches.append({"modules": batch, "chains": chains})
+        built.update(selected)
+    return batches
+
+
+def assert_no_project_objects(root):
+    """The root project is source-only; dependency Mathlib objects are allowed."""
+    root = pathlib.Path(root)
+    found = []
+    for base in (root / "DifferentialGeometry", root / ".lake/build"):
+        if base.exists():
+            found.extend(str(path.relative_to(root)) for path in base.rglob("*.olean*"))
+    found.extend(str(path.relative_to(root)) for path in root.glob("*.olean*"))
+    assert not found, "Precompiled project objects before source build: " + ", ".join(found[:10])
+    return found
+
+
+def make_compiler_shim(output, sysroot, observer, control_path):
+    """Create audit-local links; never edit the official toolchain installation."""
+    shim = output / "observed-toolchain"
+    shim.mkdir()
+    (shim / "bin").mkdir()
+    for entry in sysroot.iterdir():
+        if entry.name != "bin":
+            (shim / entry.name).symlink_to(entry, target_is_directory=entry.is_dir())
+    for entry in (sysroot / "bin").iterdir():
+        if entry.name != "lean":
+            (shim / "bin" / entry.name).symlink_to(entry, target_is_directory=entry.is_dir())
+    launcher = shim / "bin/lean"
+    launcher.write_text("#!/bin/sh\nexec " + shlex.quote(sys.executable) + " " +
+                        shlex.quote(str(observer)) + ' "$@"\n')
+    launcher.chmod(0o755)
+    env = os.environ.copy()
+    # Ignore caller-supplied library/trust/cache overrides. Lake calculates the
+    # original workspace paths itself; the observer receives those exact paths.
+    for key in ("LEAN_PATH", "LEAN_SRC_PATH", "LEAN", "LEAN_GITHASH", "LAKE_CACHE_KEY"):
+        env.pop(key, None)
+    env.update(LEAN_SYSROOT=str(shim), LAKE_OVERRIDE_LEAN="true",
+               LAKE_ARTIFACT_CACHE="false", LAKE_CACHE_DIR="",
+               HAMILTON_COMPILER_CONTROL=str(control_path))
+    return env
+
+
+def compiler_records(output, modules, *, required=False):
+    records = {}
+    for path in sorted((output / "compiler-records").glob("*.json")):
+        value = json.loads(path.read_text())
+        module = value.get("module")
+        assert module in modules, ("Unexpected compiler record", path, module)
+        assert path.name == f"{modules[module]['position']:04d}.json", path
+        assert module not in records, ("Duplicate compiler record", module)
+        assert value["source_sha256"] == modules[module]["source_sha256"], module
+        records[module] = value
+    if required:
+        assert set(records) == set(modules), "Missing actual source compiler records"
+        assert all(v.get("status") == "finished" and v.get("exit_code") == 0
+                   and v.get("olean_sha256") for v in records.values()), (
+                       "Incomplete, interrupted, or unsuccessful actual source compilation")
+        assert not (output / "compiler-stop.json").exists(), "Compiler observer failed"
+        for module, value in records.items():
+            position = modules[module]["position"]
+            for stream in ("stdout", "stderr"):
+                assert hashlib.sha256((output / "module-build-logs" / f"{position:04d}.{stream}.log").read_bytes()).hexdigest() == value[f"{stream}_sha256"], "Compiler log hash mismatch"
+            setup_bytes = gzip.decompress((output / "module-setups" / f"{position:04d}.json.gz").read_bytes())
+            assert hashlib.sha256(setup_bytes).hexdigest() == value["setup_sha256"], "Lake setup evidence mismatch"
+    return records
+
+
+def endpoint_output(stdout, code):
+    assert code == 0, "Endpoint signature/axiom probe failed"
+    entries = re.findall(r"'([^']+)' depends on axioms:\s*\[([^]]*)\]", stdout)
+    clean = re.findall(r"'([^']+)' does not depend on any axioms?", stdout)
+    names = [name for name, _ in entries] + clean
+    assert len(names) == len(TARGETS) and set(names) == set(TARGETS.values()), names
+    for theorem in TARGETS.values():
+        assert len(re.findall(r"(?m)^@" + re.escape(theorem) + r"\s*:", stdout)) == 1, (
+            "Missing or duplicate actual endpoint signature", theorem)
+    allowed = {"propext", "Classical.choice", "Quot.sound"}
+    actual = {name: sorted({a.strip() for a in axioms.split(",") if a.strip()})
+              for name, axioms in entries}
+    actual.update({name: [] for name in clean})
+    assert all(set(axioms) <= allowed for axioms in actual.values()), actual
+    return actual
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=pathlib.Path)
@@ -99,8 +216,12 @@ def main() -> None:
 
     assert git("rev-parse", "HEAD") == SOURCE_SHA, "Wrong upstream source SHA"
     assert git("status", "--porcelain") == "", "Upstream checkout is modified"
+    assert_no_project_objects(root)
     assert (root / "lean-toolchain").read_text().strip() == "leanprover/lean4:v4.29.0"
     config = tomllib.loads((root / "lakefile.toml").read_text())
+    assert set(config) == {"name", "version", "keywords", "defaultTargets", "leanOptions", "require", "lean_lib"}
+    assert config["name"] == "DifferentialGeometry"
+    assert config["lean_lib"] == [{"name": "DifferentialGeometry"}], "Unexpected library options"
     requirements = config["require"]
     assert len(requirements) == 1 and requirements[0] == {
         "name": "mathlib", "scope": "leanprover-community", "rev": "v4.29.0"
@@ -148,10 +269,15 @@ def main() -> None:
 
     for module in TARGETS:
         visit(module)
+    assert len(order) == 2270, "Unexpected immutable source closure size"
+    assert sum((root / (m.replace('.', '/') + '.lean')).stat().st_size for m in order) == 64667615, "Unexpected immutable source closure bytes"
     output = root.parent / "hamilton-release-audit"
     output.mkdir(exist_ok=True)
     report = {
         "source_sha": SOURCE_SHA,
+        "audit_commit_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=here, text=True).strip(),
+        "audit_script_sha256": hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
+        "observer_script_sha256": hashlib.sha256(pathlib.Path(__file__).with_name("observe-hamilton-compiler.py").read_bytes()).hexdigest(),
         "mathlib_sha": MATHLIB_SHA,
         "targets": TARGETS,
         "source_closure_modules": len(order),
@@ -161,6 +287,9 @@ def main() -> None:
         "graph": graph,
         "build_order": order,
         "built": [],
+        "project_objects_before_build": [],
+        "source_sha256": {m: hashlib.sha256((root / (m.replace('.', '/') + '.lean')).read_bytes()).hexdigest() for m in order},
+        "lakefile_sha256": hashlib.sha256((root / "lakefile.toml").read_bytes()).hexdigest(),
         "kernel_audit_status": "NOT RUN",
         "point4_status": "OPEN: no semantic bridge constructed",
     }
@@ -187,90 +316,147 @@ def main() -> None:
         ["git", "rev-parse", "HEAD"], cwd=root / ".lake/packages/mathlib", text=True).strip()
     assert resolved == MATHLIB_SHA, "Resolved Mathlib checkout disagrees with manifest"
 
-    # Two dependency-ready workers use the same source-only Lake invocation.
-    # Repeated serial Lake calls timed out after 1,807 successful modules in the
-    # first audit. A public standard Linux runner supplies 4 CPU / 16 GB RAM;
-    # retain serial fallback and do not introduce paid runners or proof caches.
+    # One official Lake plan per bounded direct-import-chain batch. The audit
+    # observer retains actual compiler exits and performs resource checks at
+    # every compiler launch, rather than deriving exits from a batch result.
     memory = {}
     if pathlib.Path("/proc/meminfo").is_file():
         memory = {line.split(':')[0]: int(line.split()[1]) * 1024
                   for line in pathlib.Path("/proc/meminfo").read_text().splitlines()
                   if line.startswith(("MemTotal:", "MemAvailable:"))}
     jobs = args.jobs if memory.get("MemTotal", 0) >= 14 * 1024 ** 3 else 1
+    batches = chain_batches(order, graph, jobs)
+    positions = {module: i + 1 for i, module in enumerate(order)}
     report.update(kernel_audit_status="RUNNING: source closure incomplete",
                   source_compile_workers=jobs, initial_memory_bytes=memory,
-                  compiler_results={})
-    logs = output / "module-build-logs"
-    logs.mkdir(exist_ok=True)
-    positions = {module: i + 1 for i, module in enumerate(order)}
+                  build_mode="official Lake bounded-chain batches with real compiler observation",
+                  compiler_results={}, batch_plan=batches, batch_results=[],
+                  project_artifact_cache_enabled=False)
+    for name in ("module-build-logs", "compiler-records", "module-setups", "batch-build-logs"):
+        directory = output / name
+        directory.mkdir(exist_ok=True)
+        assert not list(directory.iterdir()), "Audit evidence directory is not fresh: " + name
+    # Resolve the real compiler through the original pinned Lake environment.
+    # Metadata queries are forwarded to this exact binary by the shim.
+    environment = subprocess.check_output(["lake", "env"], cwd=root, text=True)
+    original_env = dict(line.split("=", 1) for line in environment.splitlines() if "=" in line)
+    sysroot = pathlib.Path(original_env["LEAN_SYSROOT"]).resolve()
+    compiler = sysroot / "bin/lean"
+    version = subprocess.check_output([str(compiler), "--version"], cwd=root, text=True).strip()
+    assert re.search(r"Lean \(version 4\.29\.0(?:,|\))", version), version
+    report.update(compiler_version=version, compiler_sha256=hashlib.sha256(compiler.read_bytes()).hexdigest(),
+                  original_lean_sysroot=str(sysroot))
+    modules = {m: {"position": positions[m], "source_sha256": report["source_sha256"][m],
+                   "project_imports": graph[m]} for m in order}
+    control = {"root": str(root), "evidence": str(output), "sysroot": str(sysroot),
+               "compiler": str(compiler), "compiler_sha256": report["compiler_sha256"],
+               "jobs": jobs, "modules": modules, "allowed_modules": []}
+    control_path = output / "compiler-control.json"
+    control_path.write_text(json.dumps(control, indent=2) + "\n")
+    observer = pathlib.Path(__file__).with_name("observe-hamilton-compiler.py")
+    env = make_compiler_shim(output, sysroot, observer, control_path)
+    # This second assertion is immediately before the first compilation, after
+    # official dependency-cache retrieval and all audit plumbing setup.
+    assert_no_project_objects(root)
     save()
 
-    def can_launch(active):
-        if shutil.disk_usage(root).free < 1024 ** 3:
-            report["kernel_audit_status"] = "BLOCKED: less than 1 GiB free on hosted runner"
-            save()
-            return False
-        if active and pathlib.Path("/proc/meminfo").is_file():
-            available = next(int(line.split()[1]) * 1024
-                for line in pathlib.Path("/proc/meminfo").read_text().splitlines()
-                if line.startswith("MemAvailable:"))
-            # Do not start the second compiler under memory pressure.
-            return available >= 8 * 1024 ** 3
-        return True
+    record_mtimes = {}
 
-    def build(module):
-        position = positions[module]
-        print(f"[{position}/{len(order)}] START {module}", flush=True)
-        started = time.monotonic()
-        path = logs / f"{position:04d}.log"
-        with path.open("w") as stream:
-            result = subprocess.run(
-                ["lake", "--no-cache", "build", module + ":olean"], cwd=root,
-                stdout=stream, stderr=subprocess.STDOUT)
-        return result.returncode, time.monotonic() - started, path
-
-    def completed(module, result):
-        code, elapsed, path = result
-        print(path.read_text(), end="", flush=True)
-        print(f"[{positions[module]}/{len(order)}] EXIT {code} {module} ({elapsed:.3f}s)",
-              flush=True)
-        report["compiler_results"][module] = {"exit_code": code, "elapsed_seconds": elapsed}
-        if code == 0:
-            report["built"].append(module)
-            report["built"].sort(key=positions.__getitem__)
-        elif "failed_module" not in report:
-            report["kernel_audit_status"] = "BUILD FAILED"
-            report["failed_module"] = module
+    def refresh():
+        changed = False
+        for path in (output / "compiler-records").glob("*.json"):
+            mtime = path.stat().st_mtime_ns
+            if record_mtimes.get(path) != mtime:
+                record_mtimes[path] = mtime
+                value = json.loads(path.read_text())
+                m = value.get("module")
+                assert m in modules and path.name == f"{positions[m]:04d}.json", "Unexpected compiler record"
+                assert value["source_sha256"] == modules[m]["source_sha256"], "Source evidence mismatch"
+                report["compiler_results"][m] = value
+                changed = True
+        if not changed:
+            return
+        report["built"] = [m for m in order if report["compiler_results"].get(m, {}).get("status") == "finished"
+                           and report["compiler_results"][m].get("exit_code") == 0
+                           and report["compiler_results"][m].get("olean_sha256")]
+        report["failed_modules"] = [m for m, v in report["compiler_results"].items()
+                                    if v.get("status") == "finished" and v.get("exit_code") != 0]
         save()
 
     try:
-        failure = dependency_ready_build(order, graph, build, completed,
-                                         jobs=jobs, can_launch=can_launch)
+        for index, batch in enumerate(batches, 1):
+            assert all(set(graph[m]) <= set(report["built"]) | set(batch["modules"])
+                       for m in batch["modules"])
+            control["allowed_modules"] = batch["modules"]
+            control_path.write_text(json.dumps(control, indent=2) + "\n")
+            command = ["lake", "--no-cache", "--no-ansi", "--verbose", "build",
+                       *["+" + m + ":olean" for m in batch["modules"]]]
+            started = time.monotonic()
+            print(f"BATCH {index}/{len(batches)} START ({len(batch['modules'])} source modules)", flush=True)
+            path = output / "batch-build-logs" / f"{index:04d}.log"
+            with path.open("w") as stream:
+                process = subprocess.Popen(command, cwd=root, env=env, stdout=stream,
+                                           stderr=subprocess.STDOUT, start_new_session=True)
+                try:
+                    while process.poll() is None:
+                        time.sleep(2)
+                        refresh()
+                finally:
+                    if process.poll() is None:
+                        # Evidence/resource exceptions must not leave detached
+                        # Lake or real compiler processes consuming the runner.
+                        os.killpg(process.pid, signal.SIGTERM)
+                        try:
+                            process.wait(timeout=30)
+                        except subprocess.TimeoutExpired:
+                            os.killpg(process.pid, signal.SIGKILL)
+                            process.wait()
+            code = process.returncode
+            refresh()
+            report["batch_results"].append({"batch": index, "command": command, "exit_code": code,
+                                            "elapsed_seconds": time.monotonic() - started})
+            print(path.read_text(), end="", flush=True)
+            print(f"BATCH {index}/{len(batches)} EXIT {code}; {len(report['built'])}/{len(order)} actual source compiler successes", flush=True)
+            if code != 0:
+                report["kernel_audit_status"] = "BUILD FAILED: batch or real compiler/observer failure"
+                save()
+                raise SystemExit(code if code > 0 else 1)
+            assert all(m in report["built"] for m in batch["modules"]), "Batch success without every real compiler success"
+            assert not (output / "compiler-stop.json").exists(), "Compiler observer failed"
+            save()
+        compiler_records(output, modules, required=True)
+        assert report["built"] == order, "Incomplete source closure"
+        for m in order:
+            assert hashlib.sha256((root / (m.replace('.', '/') + '.lean')).read_bytes()).hexdigest() == report["source_sha256"][m]
+            result = report["compiler_results"][m]
+            assert hashlib.sha256((root / (m.replace('.', '/') + '.lean')).read_bytes()).hexdigest() == result["source_sha256"]
+            assert hashlib.sha256((root / (".lake/build/lib/lean/" + m.replace('.', '/') + '.olean')).read_bytes()).hexdigest() == result["olean_sha256"]
     except BaseException:
         if report["kernel_audit_status"].startswith("RUNNING"):
-            report["kernel_audit_status"] = "INCONCLUSIVE: interrupted or scheduler failure"
+            report["kernel_audit_status"] = "INCONCLUSIVE: interrupted, resource, or evidence failure"
         save()
         raise
-    if failure is not None:
-        raise SystemExit(failure[1])
 
+    report["kernel_audit_status"] = "RUNNING: source closure complete, endpoint audit pending"
+    save()
     probe = output / "endpoint-probe.lean"
     probe.write_text("\n".join(
         ["import " + m for m in TARGETS] +
         [command + theorem for theorem in TARGETS.values()
          for command in ("#check @", "#print axioms ")] + [""]))
-    result = subprocess.run(["lake", "env", "lean", str(probe)], cwd=root,
-                            text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    (output / "endpoint-probe.log").write_text(result.stdout)
-    print(result.stdout, flush=True)
-    assert result.returncode == 0, "Endpoint signature/axiom probe failed"
-    entries = re.findall(r"'([^']+)' depends on axioms:\s*\[([^]]*)\]", result.stdout)
-    clean = re.findall(r"'([^']+)' does not depend on any axioms?", result.stdout)
-    assert {name for name, _ in entries} | set(clean) == set(TARGETS.values()), entries
-    allowed = {"propext", "Classical.choice", "Quot.sound"}
-    for name, axioms in entries:
-        actual = {a.strip() for a in axioms.split(",") if a.strip()}
-        assert actual <= allowed, (name, actual)
+    try:
+        command = ["lake", "env", "lean", str(probe)]
+        result = subprocess.run(command, cwd=root,
+                                text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        (output / "endpoint-probe.log").write_text(result.stdout)
+        print(result.stdout, flush=True)
+        report["endpoint_probe_result"] = {"command": command, "exit_code": result.returncode,
+                                            "log_sha256": hashlib.sha256(result.stdout.encode()).hexdigest()}
+        report["endpoint_axioms"] = endpoint_output(result.stdout, result.returncode)
+    except BaseException:
+        report["kernel_audit_status"] = "INCONCLUSIVE: endpoint signature/axiom audit failed or interrupted"
+        save()
+        raise
     assert git("status", "--porcelain") == "", "Build modified upstream tracked sources"
     report["kernel_audit_status"] = "PASS: exact focused source closure and endpoint axioms"
     save()

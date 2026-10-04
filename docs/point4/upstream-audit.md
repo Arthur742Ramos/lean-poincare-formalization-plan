@@ -89,11 +89,11 @@ signature/axiom probe was not reached. This is an incomplete independent build,
 not a source-error finding or a verified endpoint. Its report and build log are
 preserved in artifact `11299626645`.
 
-The recovery rebuilds the entire immutable closure from fresh source, using at
-most two dependency-ready workers on the same standard public Linux runner.
+The historical `7e9f36a7` recovery rebuilt the entire immutable closure from
+fresh source, using at most two dependency-ready workers on the same standard public Linux runner.
 [GitHub's runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
 lists that runner as free for public repositories, with four CPUs and 16 GB RAM.
-Every project source module still uses the same `lake --no-cache build
+That historical implementation used the same `lake --no-cache build
 <module>:olean` command. A child is submitted only after all its project imports
 have successfully compiled. No compiled upstream objects from the first run or
 an external cache are reused. The worker count falls back to one on smaller
@@ -109,11 +109,116 @@ single compilation, worker bounds, failure handling, and resource-guard failure.
 The workflow runs on pull requests and manual dispatch, avoiding the original
 duplicate push-plus-pull-request audit.
 
+## Documentation-only repeat and throughput correction
+
+The documentation-only candidate `e161243f09dcdb72596ebb9a5e1949f5f33ad41c`
+repeated the same audit code in
+[run 37209311774](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37209311774).
+It reached the unchanged 350-minute timeout on 2026-10-04 at 20:17:35 UTC,
+with 1,981 successful project compiler-command results and no failed source
+module or source finding recorded. It did not reach the endpoint probe. The
+historical complete `7e9f36a7` certificate remains valid for its exact immutable
+upstream source; it cannot be relabeled as passing current-head CI.
+
+The new audit plumbing reduces repeated Lake graph planning while retaining
+Lake's own original module configuration, dependency resolution, setup files,
+and ordinary Lean compiler/kernel invocation. It partitions the 2,270-module
+source DAG into batches covered by at most two explicit direct-import chains.
+Every module after a chain's first module directly imports its predecessor.
+Every off-batch project dependency must already have a successful real compiler
+record in an earlier batch. A single official `lake --no-cache --no-ansi
+--verbose build +<module>:olean ...` handles each batch. The pinned graph produces
+347 two-chain batches, or 705 serial-chain batches on the smaller-runner fallback,
+instead of 2,270 separate Lake plans. This is a structural planning reduction,
+not a measured wall-time guarantee or a new kernel certificate.
+
+### Compiler identity and unchanged compilation
+
+The audit resolves the actual Lean 4.29.0 installation through the original
+`lake env`, records its version and compiler SHA-256, and creates a separate
+symlink view under the audit evidence directory. All official installation
+files are unchanged. Only that view's `bin/lean` is a reviewed observation
+launcher. Process-local `LAKE_OVERRIDE_LEAN=true` and `LEAN_SYSROOT` select the
+view for the batch command. Before executing the actual pinned compiler, the
+launcher restores the real `LEAN_SYSROOT` and `LEAN` values, forwards every
+Lake-generated argument unchanged, and preserves Lake's `LEAN_PATH` and the
+untouched `--setup` JSON. Metadata queries (`--githash`, `--version`, and
+`--print-prefix`) also execute the real compiler with the real installation;
+the launcher does not invent metadata or successful exits.
+
+This routing is grounded in the official Lean 4.29.0 implementation:
+
+- [Lake installation detection](https://github.com/leanprover/lean4/blob/v4.29.0/src/lake/Lake/Config/InstallPath.lean#L321-L323)
+  honors the explicit sysroot, and
+  [the override branch](https://github.com/leanprover/lean4/blob/v4.29.0/src/lake/Lake/Config/InstallPath.lean#L369-L374)
+  selects it even when Lake is co-located with Lean
+- [Lake's compiler action](https://github.com/leanprover/lean4/blob/v4.29.0/src/lake/Lake/Build/Actions.lean#L26-L77)
+  supplies artifact paths, setup JSON, original arguments, and library paths,
+  and rejects an actual nonzero compiler exit
+- [The module build](https://github.com/leanprover/lean4/blob/v4.29.0/src/lake/Lake/Build/Module.lean)
+  retains configured options and its complete transitive import-artifact setup
+
+No direct-Lean emulation, source repair, import skipping, proof oracle, or
+undocumented Lake concurrency flag is used. Ordinary Mathlib dependency objects
+come only from the existing official pinned cache setup. Unexpected compiler
+invocations, including a dependency-source compilation that would cross this
+cache boundary, fail closed for diagnosis.
+
+### Resource bounds and stronger evidence
+
+The direct-import chains structurally bound ready project compilations to two.
+The observer additionally holds kernel file locks through each real compiler's
+lifetime. It checks the existing 1 GiB free-disk floor before every launch and
+requires 8 GiB available memory before starting a second compiler. Smaller
+machines retain a one-compiler fallback. A failure blocks further launches;
+independent compilers already running may finish and retain their actual results.
+The hosted timeout and standard public runner are unchanged.
+
+Before compilation, two checks reject every precompiled project object in the
+root source/build locations. Lake's project artifact cache and system artifact
+cache are explicitly disabled in addition to `--no-cache`. Fresh evidence
+directories, a source SHA-256 per module, exact closure size/bytes, and unchanged
+tracked sources are mandatory. Every project import must have its own prior
+successful real compiler record; aggregate batch success is insufficient.
+
+The evidence format distinguishes:
+
+- `compiler-results` in `report.json` (key `compiler_results`) and indexed
+  `compiler-records/*.json`: actual individual Lean process return codes,
+  complete argv, compiler/source/setup hashes, options, elapsed time, and
+  resulting project-object hashes
+- Indexed `module-build-logs/*.stdout.log` and `*.stderr.log`: exact individual
+  compiler output, with recorded hashes
+- Indexed `module-setups/*.json.gz`: losslessly compressed copies of the exact
+  Lake-generated setup JSON used by each compiler, with uncompressed hashes
+- `batch_results` and `batch-build-logs`: separate aggregate Lake commands,
+  process exits, timing, and verbose output
+- The actual final `#check @` signatures and `#print axioms` output, command,
+  process exit, and log hash for both endpoints
+
+Missing, duplicate, unexpected, interrupted, resource-blocked, or nonzero
+compiler evidence cannot pass. A zero compiler exit without a newly produced
+project object also cannot pass. Logs, setup files, sources, and final objects
+are checked against their recorded hashes. Both actual signatures must appear
+exactly once; the same three foundational axioms are the entire allowlist.
+The symlink view is removed before artifact upload without touching its official
+file targets. Historical evidence remains in its original format and is not
+rewritten to match this new format.
+
+Twenty bounded Python mock tests cover the old scheduler plus chain ordering
+and width, fresh-object rejection, exact argument forwarding, genuine nonzero
+and signal exits, timeout and fake-success failures, missing/duplicate/unexpected
+records, dependency evidence, per-launch memory/disk guards, concurrent lock
+bounds, untouched official files, metadata forwarding, setup/log tampering, and
+the unchanged endpoint signature/axiom gate. These tests execute no Lean build.
+A fresh complete hosted run is still required to verify this new audit code.
+Point 4 remains **OPEN**; no canonical contract or semantic bridge was changed.
+
 ## Running the audit
 
 The workflow `Point-4 upstream Hamilton release audit` performs the pinned
-checkout, source preflight, official Mathlib cache setup, dependency-ready
-source compilation, and final signature/axiom probe. The local audit entry point
+checkout, source preflight, official Mathlib cache setup, bounded-chain
+source compilation with real compiler observation, and final signature/axiom probe. The local audit entry point
 is `scripts/point4/audit-hamilton-release.py`; it requires a fresh exact upstream
 checkout and the upstream pinned Lean/Mathlib environment. It intentionally does
 not invoke the upstream umbrella library target.
