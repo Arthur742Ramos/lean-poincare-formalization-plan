@@ -1,12 +1,10 @@
-module
-
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialC2
-public import Mathlib.Analysis.Calculus.MeanValue
-public import Mathlib.Analysis.Calculus.FDeriv.Extend
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelTime
-public import PoincareCurvature.Analysis.FiniteMomentApproximation
-public import PoincareCurvature.Analysis.CompactUniformModulus
-public import Mathlib.Topology.UniformSpace.UniformConvergence
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialC2
+import Mathlib.Analysis.Calculus.MeanValue
+import Mathlib.Analysis.Calculus.FDeriv.Extend
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelTime
+import PoincareCurvature.Analysis.FiniteMomentApproximation
+import PoincareCurvature.Analysis.CompactUniformModulus
+import Mathlib.Topology.UniformSpace.UniformConvergence
 
 /-!
 # Initial traces for the heat evolution of genuine bounded C² data
@@ -18,7 +16,7 @@ uniform continuity of the Hessian entries. No backward heat evolution or
 manifold localization is constructed here.
 -/
 
-@[expose] public noncomputable section
+noncomputable section
 
 set_option maxHeartbeats 1000000
 
