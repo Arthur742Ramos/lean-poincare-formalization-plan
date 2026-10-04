@@ -375,6 +375,18 @@ maps, evaluates them on local frames, and supplies the scalar premises used
 by the lowering bridge. This is an interface reduction only: the joint
 geometric section regularity remains an explicit Point 4 gate.
 
+The candidate algebraic principal/remainder milestone is packaged in
+`RicciDeTurckPrincipalRemainder.lean`. It derives an exact finite reaction split
+from the actual Ricci and conventional DeTurck coordinate formulas, exposes
+both Hessian-slot symmetries, and isolates a truly Hessian-independent
+lower-order reaction. It also adds the two missing background-first-jet Lie
+contributions with their negative sign and proves the corrected frozen
+coefficient remainder identity and a coefficient-error bound. It constructs no
+holonomic jets or PDE solution, and does not identify this algebraic contraction
+with the manifold tensor-heat generator. No compilation of this candidate has
+been run yet. See [principal/remainder scope](principal-remainder.md) for the
+precise statement, derivative-compatibility boundary, and verification gates.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
