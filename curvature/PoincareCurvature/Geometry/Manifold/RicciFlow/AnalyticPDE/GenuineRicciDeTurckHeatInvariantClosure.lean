@@ -119,13 +119,14 @@ noncomputable def geometricNRDLittleHolderOnEuclideanClosedBall
     (hRsmall : 2 * jet2LipConst d d * R < phiRDRadius (d := d))
     (s : Jet2Section d d α) : MatrixLittleHolder d d α := by
   classical
-  exact if hs : s ∈ Metric.closedBall (euclideanSection d α) R then
-    fun i j => ⟨geometricNRDHolder Γbg s hα0
-      (hrange_of_mem_closedBall Γbg (euclideanSection d α)
-        (jet2OfSection_euclideanSection d α) hR hRsmall hs) i j,
-      isGoodHolder_geometricNRDHolder_of_euclidean_closedBall
-        Γbg hα0 hα1 hR hRsmall hs i j⟩
-  else 0
+  exact Matrix.of fun i j =>
+    if hs : s ∈ Metric.closedBall (euclideanSection d α) R then
+      (⟨Matrix.of.symm (geometricNRDHolder Γbg s hα0
+        (hrange_of_mem_closedBall Γbg (euclideanSection d α)
+          (jet2OfSection_euclideanSection d α) hR hRsmall hs)) i j,
+        isGoodHolder_geometricNRDHolder_of_euclidean_closedBall
+          Γbg hα0 hα1 hR hRsmall hs i j⟩ : LittleHolder d α)
+    else 0
 
 /-- On the ball the total extension is exactly the packaged coordinate map. -/
 theorem geometricNRDLittleHolderOnEuclideanClosedBall_eq
@@ -142,10 +143,20 @@ theorem geometricNRDLittleHolderOnEuclideanClosedBall_eq
         isGoodHolder_geometricNRDHolder_of_euclidean_closedBall
           Γbg hα0 hα1 hR hRsmall hs i j⟩ := by
   classical
-  unfold geometricNRDLittleHolderOnEuclideanClosedBall
-  split_ifs with h
-  · rfl
-  · exact (h hs).elim
+  apply Matrix.ext
+  intro i j
+  change (if h : s ∈ Metric.closedBall (euclideanSection d α) R then
+    (⟨Matrix.of.symm (geometricNRDHolder Γbg s hα0
+      (hrange_of_mem_closedBall Γbg (euclideanSection d α)
+        (jet2OfSection_euclideanSection d α) hR hRsmall h)) i j,
+      isGoodHolder_geometricNRDHolder_of_euclidean_closedBall
+        Γbg hα0 hα1 hR hRsmall h i j⟩ : LittleHolder d α) else 0) =
+    (⟨Matrix.of.symm (geometricNRDHolder Γbg s hα0
+      (hrange_of_mem_closedBall Γbg (euclideanSection d α)
+        (jet2OfSection_euclideanSection d α) hR hRsmall hs)) i j,
+      isGoodHolder_geometricNRDHolder_of_euclidean_closedBall
+        Γbg hα0 hα1 hR hRsmall hs i j⟩ : LittleHolder d α)
+  exact dif_pos hs
 
 /-- On the ball the packaged reaction evaluates to the actual coordinate map. -/
 theorem geometricNRDLittleHolderOnEuclideanClosedBall_apply
@@ -158,8 +169,12 @@ theorem geometricNRDLittleHolderOnEuclideanClosedBall_apply
     (x : Fin d → ℝ) (i j : Fin d) :
     ((geometricNRDLittleHolderOnEuclideanClosedBall Γbg hα0 hα1 hR hRsmall s
       i j).toHolder).toBCF x = geometricNRD Γbg s x i j := by
+  let hrs := hrange_of_mem_closedBall Γbg (euclideanSection d α)
+    (jet2OfSection_euclideanSection d α) hR hRsmall hs
   rw [geometricNRDLittleHolderOnEuclideanClosedBall_eq Γbg hα0 hα1 hR hRsmall hs]
-  exact geometricNRDHolder_apply Γbg s hα0 _ x i j
+  change ((Matrix.of.symm (geometricNRDHolder Γbg s hα0 hrs)) i j).toBCF x =
+    geometricNRD Γbg s x i j
+  exact geometricNRDHolder_apply Γbg s hα0 hrs x i j
 
 set_option maxHeartbeats 800000 in
 /-- The matrix reaction obeys the full-norm local Lipschitz bound in the
@@ -177,29 +192,49 @@ theorem lipschitzOnWith_geometricNRDLittleHolderOnEuclideanClosedBall
   classical
   refine LipschitzOnWith.of_dist_le_mul ?_
   intro s hs t ht
-  rw [geometricNRDLittleHolderOnEuclideanClosedBall_eq Γbg hα0 hα1 hR hRsmall hs,
-    geometricNRDLittleHolderOnEuclideanClosedBall_eq Γbg hα0 hα1 hR hRsmall ht]
-  rw [dist_eq_norm, dist_eq_norm]
+  let hrs := hrange_of_mem_closedBall Γbg (euclideanSection d α)
+    (jet2OfSection_euclideanSection d α) hR hRsmall hs
+  let hrt := hrange_of_mem_closedBall Γbg (euclideanSection d α)
+    (jet2OfSection_euclideanSection d α) hR hRsmall ht
   let C := geometricNRDHolderBallLipschitzConst Γbg (euclideanSection d α) R
-  have hnonneg : 0 ≤ C * ‖s - t‖ := mul_nonneg
-    (geometricNRDHolderBallLipschitzConst_nonneg Γbg (euclideanSection d α) hR)
-    (norm_nonneg _)
-  have hfull : ‖geometricNRDHolder Γbg s hα0
-      (hrange_of_mem_closedBall Γbg (euclideanSection d α)
-        (jet2OfSection_euclideanSection d α) hR hRsmall hs) -
-      geometricNRDHolder Γbg t hα0
-        (hrange_of_mem_closedBall Γbg (euclideanSection d α)
-          (jet2OfSection_euclideanSection d α) hR hRsmall ht)‖ ≤ C * ‖s - t‖ :=
-    le_trans (norm_geometricNRDHolder_sub_le Γbg s t hα0 _ _)
+  let gs : Fin d → Fin d → HolderBCF α d :=
+    Matrix.of.symm (geometricNRDHolder Γbg s hα0 hrs)
+  let gt : Fin d → Fin d → HolderBCF α d :=
+    Matrix.of.symm (geometricNRDHolder Γbg t hα0 hrt)
+  let fs : Fin d → Fin d → LittleHolder d α := fun i j =>
+    ⟨gs i j, isGoodHolder_geometricNRDHolder_of_euclidean_closedBall
+      Γbg hα0 hα1 hR hRsmall hs i j⟩
+  let ft : Fin d → Fin d → LittleHolder d α := fun i j =>
+    ⟨gt i j, isGoodHolder_geometricNRDHolder_of_euclidean_closedBall
+      Γbg hα0 hα1 hR hRsmall ht i j⟩
+  have heqs : geometricNRDLittleHolderOnEuclideanClosedBall
+      Γbg hα0 hα1 hR hRsmall s = Matrix.of fs :=
+    geometricNRDLittleHolderOnEuclideanClosedBall_eq Γbg hα0 hα1 hR hRsmall hs
+  have heqt : geometricNRDLittleHolderOnEuclideanClosedBall
+      Γbg hα0 hα1 hR hRsmall t = Matrix.of ft :=
+    geometricNRDLittleHolderOnEuclideanClosedBall_eq Γbg hα0 hα1 hR hRsmall ht
+  have hfull : ‖gs - gt‖ ≤ C * ‖s - t‖ :=
+    le_trans (norm_geometricNRDHolder_sub_le Γbg s t hα0 hrs hrt)
       (mul_le_mul_of_nonneg_right
         (geometricNRDHolderLipschitzConst_le_ball Γbg (euclideanSection d α) s hs)
         (norm_nonneg _))
-  apply (pi_norm_le_iff_of_nonneg hnonneg).mpr
+  have hentry (i j : Fin d) : ‖gs i j - gt i j‖ ≤ C * dist s t := by
+    calc
+      ‖gs i j - gt i j‖ ≤ ‖(gs - gt) i‖ := norm_le_pi_norm ((gs - gt) i) j
+      _ ≤ ‖gs - gt‖ := norm_le_pi_norm (gs - gt) i
+      _ ≤ C * ‖s - t‖ := hfull
+      _ = C * dist s t := by rw [dist_eq_norm]
+  rw [heqs, heqt]
+  change dist fs ft ≤ C * dist s t
+  have hb : 0 ≤ C * dist s t := mul_nonneg
+    (geometricNRDHolderBallLipschitzConst_nonneg Γbg (euclideanSection d α) hR)
+    dist_nonneg
+  apply (dist_pi_le_iff hb).mpr
   intro i
-  apply (pi_norm_le_iff_of_nonneg hnonneg).mpr
+  apply (dist_pi_le_iff hb).mpr
   intro j
-  change ‖geometricNRDHolder Γbg s hα0 _ i j -
-      geometricNRDHolder Γbg t hα0 _ i j‖ ≤ C * ‖s - t‖
-  exact le_trans (le_trans (pi_entry_norm_le _ j) (pi_entry_norm_le _ i)) hfull
+  change dist (gs i j) (gt i j) ≤ C * dist s t
+  rw [dist_eq_norm]
+  exact hentry i j
 
 end RicciFlow.AnalyticPDE
