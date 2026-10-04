@@ -72,9 +72,16 @@ theorem standardDeTurckCorrection_coordinateFrame_eq_coordinateLie
         (∑ k : Fin d, mvfderiv (I := I) (standardDeTurckFrameCoeff g background t p b k)
           x (F m x) • F k x) +
         ∑ k : Fin d, standardDeTurckFrameCoeff g background t p b k x • cov (F k) x (F m x) := by
-    simpa only [F, W, standardDeTurckFrameCoeff, frame, LinearMap.piApply_apply] using
+    have hCoeffFun (k : Fin d) :
+        (LinearMap.piApply ((trivialization (I := I) p).localFrameCoeff I b k)) W =
+          standardDeTurckFrameCoeff g background t p b k := by
+      funext y
+      rfl
+    have h :=
       CovariantDerivative.TangentFrame.covariantDerivative_apply_eq_sum_localFrame_add_sum_covariantDerivative_localFrame
         (I := I) (trivialization (I := I) p) b cov hbase hW (F m x)
+    simp_rw [hCoeffFun] at h
+    simpa only [F, frame] using h
   have hgram (a c : Fin d) : G z a c = (g t).inner x (F a x) (F c x) :=
     congrFun (congrFun (chosenLCMetricCoordinates_eq_Gram g t p b hx) a) c
   have hcoeff (k : Fin d) : standardDeTurckFrameCoeff g background t p b k x = deTurck G B z k :=
