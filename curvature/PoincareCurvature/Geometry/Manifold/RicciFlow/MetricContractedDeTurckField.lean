@@ -78,7 +78,10 @@ theorem metricConnectionDifferenceVector_eq_sum_inverseGram
     (metricConnectionDifferenceBilinear cov cov' x) b
 
 /-- The genuine local-frame formula has the conventional `g^{ij} D^k_{ij}`
-contraction, with the inverse of the actual local metric Gram matrix. -/
+contraction, with the inverse of the actual local metric Gram matrix.
+
+The explicit `Matrix` type is essential: the existing Gram readout API returns
+an entry function, whose untyped inverse would instead be entrywise reciprocal. -/
 theorem metricConnectionDifferenceVector_localFrameCoeff
     (cov cov' : CovariantDerivative I E TM)
     (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
@@ -86,7 +89,8 @@ theorem metricConnectionDifferenceVector_localFrameCoeff
     {ι : Type*} [Fintype ι] [DecidableEq ι] (b : Module.Basis ι ℝ E)
     {x : M} (hx : x ∈ e.baseSet) (k : ι) :
     e.localFrameCoeff I b k x (metricConnectionDifferenceVector cov cov' x) =
-      ∑ i, ∑ j, (localFrameGramMatrix (I := I) e b x)⁻¹ i j *
+      ∑ i, ∑ j,
+        ((show Matrix ι ι ℝ from localFrameGramMatrix (I := I) e b x)⁻¹) i j *
         e.localFrameCoeff I b k x
           (CovariantDerivative.difference cov cov' x
             (e.localFrame b i x) (e.localFrame b j x)) := by
