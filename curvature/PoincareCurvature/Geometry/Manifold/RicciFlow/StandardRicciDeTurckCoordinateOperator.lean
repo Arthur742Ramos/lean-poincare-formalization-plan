@@ -73,7 +73,7 @@ theorem standardDeTurckCorrection_coordinateFrame_eq_coordinateLie
           x (F m x) • F k x) +
         ∑ k : Fin d, standardDeTurckFrameCoeff g background t p b k x • cov (F k) x (F m x) := by
     simpa only [F, W, standardDeTurckFrameCoeff, frame, LinearMap.piApply_apply] using
-      CovariantDerivative.covariantDerivative_apply_eq_sum_localFrame_add_sum_covariantDerivative_localFrame
+      CovariantDerivative.TangentFrame.covariantDerivative_apply_eq_sum_localFrame_add_sum_covariantDerivative_localFrame
         (I := I) (trivialization (I := I) p) b cov hbase hW (F m x)
   have hgram (a c : Fin d) : G z a c = (g t).inner x (F a x) (F c x) :=
     congrFun (congrFun (chosenLCMetricCoordinates_eq_Gram g t p b hx) a) c
@@ -83,12 +83,14 @@ theorem standardDeTurckCorrection_coordinateFrame_eq_coordinateLie
       mvfderiv (I := I) (standardDeTurckFrameCoeff g background t p b k) x (F m x) =
         deTurckFirst G B z m k :=
     standardDeTurck_coordinateFrameCoeff_mvfderiv_eq_deTurckFirst g background t p b hbackground hx m k
+  have hinner (u v : TM x) : inner ℝ u v = (g t).inner x u v := rfl
   have hleft : (g t).inner x (cov W x (F i x)) (F j x) =
       ∑ k : Fin d, (G z k j * deTurckFirst G B z i k +
         deTurck G B z k * (g t).inner x (cov (F k) x (F i x)) (F j x)) := by
     rw [hdecomp i]
-    change ⟪_, F j x⟫_ℝ = _
+    rw [← hinner]
     simp only [inner_add_left, sum_inner, real_inner_smul_left, hderiv, hcoeff]
+    simp only [hinner]
     rw [← Finset.sum_add_distrib]
     apply Finset.sum_congr rfl
     intro k _
@@ -99,8 +101,9 @@ theorem standardDeTurckCorrection_coordinateFrame_eq_coordinateLie
       ∑ k : Fin d, (G z i k * deTurckFirst G B z j k +
         deTurck G B z k * (g t).inner x (F i x) (cov (F k) x (F j x))) := by
     rw [hdecomp j]
-    change ⟪F i x, _⟫_ℝ = _
+    rw [← hinner]
     simp only [inner_add_right, inner_sum, real_inner_smul_right, hderiv, hcoeff]
+    simp only [hinner]
     rw [← Finset.sum_add_distrib]
     apply Finset.sum_congr rfl
     intro k _
@@ -151,7 +154,7 @@ theorem standardRicciDeTurckRHS_coordinateFrame_eq_correctedJet
       phiRDWithBackgroundJetOfJet
         (actualBackgroundCoordinates background t p b (chosenLCCoordinatePoint (I := I) p b x))
         (backgroundFirst (actualBackgroundCoordinates background t p b) (chosenLCCoordinatePoint (I := I) p b x))
-        (coordinateJet (chosenLCMetricCoordinates g t p b) (chosenLCCoordinatePoint (I := I) p b x)) i j := by
+        (AnalyticPDE.coordinateJet (chosenLCMetricCoordinates g t p b) (chosenLCCoordinatePoint (I := I) p b x)) i j := by
   rw [standardRicciDeTurckRHS_coordinateFrame_eq_coordinateRD g background t p b hbackground hx]
   exact coordinateRD_eq_correctedJet (isOpen_chosenLCCoordinateDomain (I := I) p b)
     (contDiffOn_chosenLCMetricCoordinates g t p b)
@@ -172,7 +175,7 @@ theorem standardRicciDeTurckRHS_coordinateFrame_eq_principal_add_lowerOrder
       lowerOrderRDWithBackgroundJetOfJet
         (actualBackgroundCoordinates background t p b (chosenLCCoordinatePoint (I := I) p b x))
         (backgroundFirst (actualBackgroundCoordinates background t p b) (chosenLCCoordinatePoint (I := I) p b x))
-        (coordinateJet (chosenLCMetricCoordinates g t p b) (chosenLCCoordinatePoint (I := I) p b x)) i j := by
+        (AnalyticPDE.coordinateJet (chosenLCMetricCoordinates g t p b) (chosenLCCoordinatePoint (I := I) p b x)) i j := by
   rw [standardRicciDeTurckRHS_coordinateFrame_eq_coordinateRD g background t p b hbackground hx]
   exact coordinateRD_eq_principal_add_lowerOrder (isOpen_chosenLCCoordinateDomain (I := I) p b)
     (contDiffOn_chosenLCMetricCoordinates g t p b)
@@ -197,7 +200,7 @@ theorem standardRicciDeTurckRHS_coordinateFrame_eq_frozenPrincipal_add_remainder
         lowerOrderRDWithBackgroundJetOfJet
           (actualBackgroundCoordinates background t p b (chosenLCCoordinatePoint (I := I) p b x))
           (backgroundFirst (actualBackgroundCoordinates background t p b) (chosenLCCoordinatePoint (I := I) p b x))
-          (coordinateJet (chosenLCMetricCoordinates g t p b) (chosenLCCoordinatePoint (I := I) p b x)) i j) := by
+          (AnalyticPDE.coordinateJet (chosenLCMetricCoordinates g t p b) (chosenLCCoordinatePoint (I := I) p b x)) i j) := by
   rw [standardRicciDeTurckRHS_coordinateFrame_eq_coordinateRD g background t p b hbackground hx]
   exact coordinateRD_eq_frozenPrincipal_add_remainder A (isOpen_chosenLCCoordinateDomain (I := I) p b)
     (contDiffOn_chosenLCMetricCoordinates g t p b)
