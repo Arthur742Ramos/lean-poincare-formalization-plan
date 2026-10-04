@@ -517,3 +517,12 @@ and an explicit frozen-coefficient remainder. See
 [`coordinate-operator.md`](coordinate-operator.md) for the hypotheses and
 remaining manifold/generator/PDE boundaries. The generic rc2 development check
 passed; exact Lean-4.33 verification remains pending and Point 4 stays open.
+
+The chosen-LC coordinate candidate supplies an actual fixed preferred chart
+frame, derives its commutation and scalar derivative transport, and constructs
+the metric's C² symmetric invertible coordinate matrix. Pointwise geometric
+Koszul and inverse-Gram reconstruction identify the actual chosen LC
+coefficients and their derivatives with the coordinate Christoffel formulas.
+See [`chosen-lc-coordinate.md`](chosen-lc-coordinate.md). The generic frame
+check passed in rc2 development; exact Lean-4.33 geometric verification remains
+pending. The curvature/Lie/PDE boundaries and Point-4 OPEN verdict remain.
