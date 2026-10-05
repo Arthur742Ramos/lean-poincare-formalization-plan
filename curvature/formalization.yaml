@@ -232,6 +232,23 @@ related_formalizations:
     note: >-
       Primary-qualified actual compatible weighted C2-alpha Gaussian datum and vanishing weighted Holder certificate; exact proof source and documentation correction are retained.
 
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/fe921dbc34918d22389e87f30bdffb73ed7ebeb9/curvature"
+    relationship: "builds-on"
+    note: >-
+      Exact source-reviewed PR129 integration parent, preserving current master0ae,
+      PR124 ba47 and PR127 4c through real ancestry. All inherited mathematical
+      proof blobs, selected metadata, contributor notices and licensing remain
+      unchanged. New CompactlySupportedC2Jet, FiniteCoordinateBilinear,
+      EuclideanC2Localization, PositiveFrozenC2Localization and
+      BoundarylessInitialMetricLocalization source constructs actual bounded C2
+      derivatives, uniform Hessian continuity and literal positive frozen-exterior
+      metric heat data. A precise count-one adapter expands only the inherited
+      source/import/provenance union; every original fixture,150 inherited axiom
+      occurrences, seven boundaryless types and full canonical audit remains
+      required. The parent and new sources still need exact combined-head Lean4.33
+      qualification; no nonlinear solver, registry submission or canonical Point4
+      construction is added.
+
 status:
   scope: >-
     The selected Challenge surface is a smooth finite-dimensional Hausdorff

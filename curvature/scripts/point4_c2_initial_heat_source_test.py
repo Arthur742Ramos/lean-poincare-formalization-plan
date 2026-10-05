@@ -266,5 +266,16 @@ def main(argv=None) -> None:
     print('Source checks are not kernel certification; exact-head full builds and independent review remain mandatory; Point 4 OPEN')
 
 
+# Reviewed literal-C2 localization adapter. Every original definition, fixture
+# and evidence gate remains above. The literal-unit guard pins this count-one
+# transform of exact reviewed PR129 and extends only the enumerated source union.
+if (ROOT / 'curvature/scripts/point4_c2_metric_localization_source_test.py').is_file():
+    import point4_c2_metric_localization_source_test as _literal_unit
+    expected_sources = _literal_unit.legacy_expected_sources
+    check_imports = _literal_unit.legacy_check_imports
+    check_metadata = _literal_unit.legacy_check_metadata
+    ADDED = ADDED | _literal_unit.ADDED
+
+
 if __name__ == '__main__':
     main()
