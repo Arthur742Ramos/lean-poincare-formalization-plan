@@ -102,8 +102,14 @@ theorem exists_positiveFrozenC2Bilinear
       by_cases hx : x ∈ tsupport χ
       · have hball : F x ∈ ball (F x₀) (c / 2) := (hχV hx).2
         have hnorm : ‖F x - F x₀‖ < c / 2 := by
-          rw [mem_ball, dist_eq_norm] at hball
-          exact hball
+          letI : NormedSpace ℝ (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+          have hdist : dist (F x) (F x₀) = ‖F x - F x₀‖ :=
+            @dist_eq_norm (E →L[ℝ] E →L[ℝ] ℝ)
+              (ContinuousLinearMap.toSeminormedAddCommGroup
+                (𝕜 := ℝ) (𝕜₂ := ℝ) (E := E) (F := E →L[ℝ] ℝ)
+                (σ₁₂ := RingHom.id ℝ))
+              (F x) (F x₀)
+          exact hdist ▸ (mem_ball.mp hball)
         letI : NormedSpace ℝ (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
         letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
         letI : NormSMulClass ℝ (E →L[ℝ] E →L[ℝ] ℝ) :=

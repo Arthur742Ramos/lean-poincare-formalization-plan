@@ -317,6 +317,41 @@ semantics remain unchanged. This new proof repair has not been compiled.
 Fresh independent exact-byte review and complete exact-head Lean 4.33
 verification are still required before merge. Point 4 remains **OPEN**.
 
+## Historical 5cf distance rewrite failure and explicit-instance repair
+
+The exact source-reviewed `5cf1da2517f3a907f506d31667559c9c7b56b606`
+candidate failed the literal-metric job of Lean 4.33 run
+[`37304828956`](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37304828956)
+on 2026-10-05 at 12:24 UTC. Both generic modules and
+`EuclideanC2Localization` compiled against the unchanged pins. The earlier
+near-point, frozen-exterior and exterior-norm repairs passed their previous
+error sites. `PositiveFrozenC2Localization` still failed at line 105: the
+generic `dist_eq_norm` rewrite did not match the actual distance expression
+after ball membership was exposed. The full module and every later metric,
+signature, axiom, library and canonical-audit gate remain unverified. The
+immutable 5cf source, source-only review and exact failed log remain historical;
+the preceding review's predicted distance-rewrite elaboration did not hold.
+
+This source-only repair replaces only that strict-radius proof. It explicitly
+instantiates the pinned `dist_eq_norm` theorem with the actual bilinear-map
+type and `ContinuousLinearMap.toSeminormedAddCommGroup`, using the standard
+inner-dual `ContinuousLinearMap.toNormedSpace` instance within the proof.
+A fully typed equality connects the same operator metric to the same genuine
+operator norm; transporting `mem_ball.mp hball` across that equality avoids
+the generic rewrite search. The pinned operator construction defines its norm
+as the infimum of genuine operator bounds and preserves its existing topology
+when constructing the pseudometric. No coordinate norm is substituted.
+
+All public signatures and hypotheses, literal C² regularity, rank-zero branch,
+F/V/P/D definitions, strict half-radius, positivity and coercivity constants,
+and every other proof block remain byte-identical to 5cf. Only the module's
+derived digest changes in the existing source guard. Inherited sources,
+workflows, probes, toolchain and Mathlib pins, metadata, contract, fixtures and
+canonical-gate semantics are unchanged. This candidate has not been compiled.
+Fresh independent exact-source review and complete hosted exact-head Lean 4.33
+verification remain required before qualification or merge. Point 4 remains
+**OPEN**.
+
 ## Remaining mathematical gaps
 
 This local constructor does not discharge anisotropic inverse-Gram heat
