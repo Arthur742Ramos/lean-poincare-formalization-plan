@@ -1,7 +1,8 @@
 # Weighted actual Gaussian Duhamel Hessian: reviewed source-only preparation
 
-Status: independently source-reviewed mathematical candidates; UNCOMPILED.
-Point 4 remains OPEN. Publication and CI execution have not been performed.
+Status: independently source-reviewed mathematical bodies; narrow module/import
+repair pending fresh independent review and exact-head compilation.
+Point 4 remains OPEN. The published historical head has only partial CI evidence.
 
 ## Concrete supporting source
 
@@ -21,10 +22,19 @@ The exact base is `3a8ed697d1f0366f8370efb2fa9e524b68d27e97`, targeting Lean
 - `EuclideanHeatRegularizerC2Trace`: genuine uniform C0/value, C1/gradient, Hessian-entry and BCF trace of `h*heat(h)q` for actual bounded uniformly continuous C0 data, with actual coordinate derivative witnesses
 
 All new definitions, hypotheses and proof bodies are byte-identical to their
-independently reviewed frozen sources. `source-transformations.json` records
-only eight count-one repository import qualifications. `WeightedTimeKernel` is
-entirely identical, as is the ninth regularizer module. The legacy non-module Gaussian helper retains its original
-visibility and `noncomputable section`; no exposure normalization was made.
+independently reviewed frozen sources. The original frozen snapshots and their
+digests remain unchanged. `source-transformations.json` retains the eight original
+count-one repository import qualifications and records three additional exact
+compatibility edits: the new Gaussian helper's modern/public import preamble and
+public exposed noncomputable section, and the regularizer's replacement import
+block. `WeightedTimeKernel` is entirely identical. The regularizer now imports
+modern `EuclideanHeatFrechet`, modern `FiniteMomentApproximation`, and Mathlib's
+`UniformConvergence` directly. It never used a declaration from the legacy
+`EuclideanHeatInitialTrace` itself. The finite-coordinate bound is the existing
+`FiniteMomentApproximation.norm_le_sum_abs_coord`. `EuclideanHeatFrechet` supplies
+the existing gradient definition and publicly imports the actual Hessian/BCF
+continuity closure; no C2 datum constructor or initial trace is used. No new mathematical primitive,
+shadow declaration, or proof modification is introduced.
 
 The actual integral/derivative hypotheses are explicit: `t0<t`, `0<alpha<1`,
 continuous BCF-valued forcing, an actual global value bound, nonnegative `L`,
@@ -62,14 +72,41 @@ fragment and adversarial fingerprint tests are retained.
 
 Strict duplicate-free YAML, complete schema identity, structured provenance,
 original/transformed module/adaptor bindings, source closure and exact evidence
-inventory are required. Synthetic fixture logs test rejection logic only and
+inventory are required. A source-only traversal checks every project import
+reachable from all nine new modules for modern module status, public imports,
+cycles and membership in the exact source union. External Mathlib/Lean import
+closure and elaboration remain exact-toolchain obligations. Synthetic fixture logs test rejection logic only and
 are never compiler or theorem-verification evidence.
+
+## Historical compiler failure and narrow replacement
+
+PR133 head `90cc7ebed996f28acb57ef9948d37f114088bd4d` was published and checked by
+[official Lean 4.33 run 37298223369, job 111724469033](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37298223369/job/111724469033).
+The job failed at 2026-10-05 11:10:55 UTC after compiling the scalar time kernel,
+scalar envelope and old Gaussian helper. It reported exactly two modern/legacy
+import errors: `WeightedDuhamelHessianIntegral` imported the non-module
+`WeightedDuhamelIntegrand`, and `EuclideanHeatRegularizerC2Trace` imported the
+non-module `EuclideanHeatInitialTrace`. The retained downloaded job log has
+SHA256 `bed3479ee5ffe3456478915966f8fb4805b0ed78d9b8dfa38c091f93d7c00a9c`.
+There is no complete nine-module compile receipt, new actual theorem/type/axiom
+probe, or full release certificate for that head. Its source, normalized import
+pairs and favorable earlier source review remain historical evidence only.
+
+The replacement changes only the two new source preambles plus exact
+transformation guards, source digests, adversarial fixtures and truthful dossier
+text. Inherited legacy modules, all 74 mathematical declaration surfaces and
+proofs, all inherited 161/155/11 evidence surfaces, workflows and evidence gates,
+runtime/source closure, pins and canonical contracts remain unchanged. Fresh
+exact-byte delta/integration review is required before any draft push; exact
+Lean compilation is still required afterward. PR131's separately stopped
+ready/merge action and all PR bases are outside this repair.
 
 ## Honest remaining boundary
 
 No Lean compiler, proof runtime, dependency installation, cache write, new
-source download, publication or CI execution was performed here. Exact-toolchain
-elaboration and final independent integrated release review remain pending.
+source download, publication or CI execution was performed for this local repair.
+The historical CI failure above is disclosed separately. Exact-toolchain
+elaboration of the repaired bytes and final independent integrated release review remain pending.
 The approved replacement trace is SHA64f8f5bc; original SHA065d29c1 was rejected
 for seven unresolved initial-time applications and remains historical. The
 replacement adds only seven explicit initial-time arguments before independent

@@ -1,5 +1,7 @@
-import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian
-import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope
+module
+
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope
 
 /-!
 Source-only research helper. Not compiled, not part of a candidate tree or CI gate.
@@ -10,7 +12,7 @@ integrated Gaussian estimate, derivative compatibility, and strong zero trace
 still have to be proved. No solver or solver norm is an input.
 -/
 
-noncomputable section
+@[expose] public noncomputable section
 
 open Real Set MeasureTheory Metric
 open scoped Real BigOperators

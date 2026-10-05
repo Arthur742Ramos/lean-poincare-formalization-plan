@@ -25,8 +25,8 @@ METADATA = DOSSIER + 'formalization.yaml'
 SELF_PATHS = {'curvature/scripts/point4_weighted_hessian_release_guard.py',
               'curvature/scripts/point4_weighted_hessian_release_mock_test.py'}
 ENV = dict(os.environ, GIT_NO_LAZY_FETCH='1', PYTHONDONTWRITEBYTECODE='1')
-UNIT_FILE_SHA256 = {'docs/point4/weighted-duhamel-hessian.md': '427fbd783fe4cef213034604c48b06263868e9b11620c39b7f3cefdc05aa74c7', 'docs/point4/weighted-duhamel-hessian/inventory-adapters.json': '125156cbbdbfc582538fc70bfd3f6d140ad1140f46776659459a96de25e776dd', 'docs/point4/weighted-duhamel-hessian/runtime-inventory-source.json': '9c633da8d90fa63c7c1003c07bb340dd15bf76c651a9ed262b71d37fbc821800', 'docs/point4/weighted-duhamel-hessian/trace-review-history.json': '7eba118db43ed0d1c1057e47b0eafb8b9d3c96a5b473dc67e38375a998b22c7d', 'docs/point4/weighted-duhamel-hessian/reviewed-integral-source-review.md': 'f32c71416b00829393b59edce8915c2f9634f09b4de5c253dfca8d7cfece8702', 'docs/point4/weighted-duhamel-hessian/formalization.yaml': '93c2856ddbb727e8dfc13e93ae57cd6699796d4a8f5afb610f992e5cfc050550', 'docs/point4/weighted-duhamel-hessian/evidence-inventory.json': 'aa57b4d1cc3a7ee85e99446d5c906ed660232dae7ebb0e300929a0d4a3d49475', 'docs/point4/weighted-duhamel-hessian/declaration-surfaces.json': 'f4326629fa2e0e801823d9b3a2c2151ec67bc27ff0bc0017990628d8060c20ef', 'docs/point4/weighted-duhamel-hessian/reviewed-derivative-source-review.md': 'aa820cf617e9818a4ff93578e6f0a39ac18a9c1fa69e9733f714abf3c91b80c2', 'docs/point4/weighted-duhamel-hessian/reviewed-time-kernel-source-review.md': '827202e49c58d308daec6f2891a8cf3c34a4c9c986c1f1685bf6715a7ee5f277', 'docs/point4/weighted-duhamel-hessian/source-transformations.json': '63aa9a291defa9495386eb8e019f80ec1d4e57b0596d5c43f9262e5ea5ef8d78', 'docs/point4/weighted-duhamel-hessian/reviewed-regularizer-source-review.md': 'e8d1e766e147898b8bcce00e97ec4065e7ad4f122da80c2b2250bc6add7b02fc', 'docs/point4/weighted-duhamel-hessian/reviewed-trace-source-review.md': 'ec6e7c034511c2d1d8da976265a2f1cdb0fcf1bd6992789d2efb151952371536', 'docs/point4/weighted-duhamel-hessian/reviewed-source/EuclideanHeatRegularizerC2Trace.lean.txt': 'ca8598bd4eddf118a7bf2afa097e232cd872e8ffc7f3b2b9fe76bdf913531f44', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelIntegrand.lean.txt': '77da0c8aaad5fc44aae5dfd9bb9958da90528112d93eedba7082647f64d4a577', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedTimeKernel.lean.txt': '20ceba4efe5d3c2d0d302220e94db8394496be16ee336382c4d1049b470fc3a5', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianIntegral.lean.txt': '84ff76aeee604c8824d2daa226f2b876d6146b14e5a292f37f18693c4c9fd8f2', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianDerivative.lean.txt': '19e8ec44954e3c1ad6b75042465a2251de48124ab0ea923a1b90dd24e422a381', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianFrechetTrace.lean.txt': '3af628927dd651ea247f07159243a8dd100267bdabcaabb06fb9263882ff7b08', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelFrechet.lean.txt': 'a817cc34a6be25422e6bef2f30faaba65aaccea706b0204eab671b5e9b02c900', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianTrace.lean.txt': '64f8f5bc8cfd468fe9b46b60be39c5686dec4b870b481b766403d9e52cda9d33', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedHessianTimeEnvelope.lean.txt': '4283e582912f8556266e2944e9453a2ed475522e8d4e95a5cba19ec39deb070d', 'curvature/scripts/point4_weighted_hessian_probe.lean': '9b5b14ea6d9289699e84d8d609af14c0adad074b41f1065b77b0131b8953adba', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatRegularizerC2Trace.lean': 'ca8598bd4eddf118a7bf2afa097e232cd872e8ffc7f3b2b9fe76bdf913531f44', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedTimeKernel.lean': '20ceba4efe5d3c2d0d302220e94db8394496be16ee336382c4d1049b470fc3a5', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianTrace.lean': '026f7f603a567f54e3e55a36b8378400714c00b92c4f7346627303c53b8b449b', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelFrechet.lean': 'e88a56c21d0f04ab9a106a2f380be7cef982afb3a990a2ccbff7c6cd91fedd00', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelIntegrand.lean': 'ea3529558277a64e0ceb077ebea640a14851babca62c3af2b2df864ed24b064f', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianDerivative.lean': 'b26e872c205995c466fb371b6a54e28e5df2ab646edb81b41dca84bca7dfadd6', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianFrechetTrace.lean': 'd391d949ceec351ecb52c4c55d2a14d252eeb92e9d1009e047e6c50f5a9b8c7e', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianIntegral.lean': 'e87862d112c345e5a5ae18759962445c542777a6e81f2350be0f3558c4f584c5', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedHessianTimeEnvelope.lean': '120930e97935c4c86c0dd26aa2340aafde77bb33c8ba0002bbcd48b8c7365699', '.github/workflows/point4-weighted-duhamel-hessian.yml': '3880cbee7ece768a2fbdf76003f9fd545a1c9029a8eb9991612cfa409a2906c9'}
-TRANSFORM_SHA256 = '63aa9a291defa9495386eb8e019f80ec1d4e57b0596d5c43f9262e5ea5ef8d78'
+UNIT_FILE_SHA256 = {'docs/point4/weighted-duhamel-hessian.md': '797fbcccf04d0a0fbcc2061be0b38a5a58946c6875c037cea2b47a7b8ab1d9fa', 'docs/point4/weighted-duhamel-hessian/inventory-adapters.json': '125156cbbdbfc582538fc70bfd3f6d140ad1140f46776659459a96de25e776dd', 'docs/point4/weighted-duhamel-hessian/runtime-inventory-source.json': '9c633da8d90fa63c7c1003c07bb340dd15bf76c651a9ed262b71d37fbc821800', 'docs/point4/weighted-duhamel-hessian/trace-review-history.json': '7eba118db43ed0d1c1057e47b0eafb8b9d3c96a5b473dc67e38375a998b22c7d', 'docs/point4/weighted-duhamel-hessian/reviewed-integral-source-review.md': 'f32c71416b00829393b59edce8915c2f9634f09b4de5c253dfca8d7cfece8702', 'docs/point4/weighted-duhamel-hessian/formalization.yaml': 'f5d9f7fb71f79429cdc41b9c7c3dabf703393bf83cfd7fc4370f203339db7b02', 'docs/point4/weighted-duhamel-hessian/evidence-inventory.json': 'aa57b4d1cc3a7ee85e99446d5c906ed660232dae7ebb0e300929a0d4a3d49475', 'docs/point4/weighted-duhamel-hessian/declaration-surfaces.json': 'f4326629fa2e0e801823d9b3a2c2151ec67bc27ff0bc0017990628d8060c20ef', 'docs/point4/weighted-duhamel-hessian/reviewed-derivative-source-review.md': 'aa820cf617e9818a4ff93578e6f0a39ac18a9c1fa69e9733f714abf3c91b80c2', 'docs/point4/weighted-duhamel-hessian/reviewed-time-kernel-source-review.md': '827202e49c58d308daec6f2891a8cf3c34a4c9c986c1f1685bf6715a7ee5f277', 'docs/point4/weighted-duhamel-hessian/source-transformations.json': '612c4f700739a9b78b1746e26ad51168122ebce7806b638de2b4511af0c458ac', 'docs/point4/weighted-duhamel-hessian/reviewed-regularizer-source-review.md': 'e8d1e766e147898b8bcce00e97ec4065e7ad4f122da80c2b2250bc6add7b02fc', 'docs/point4/weighted-duhamel-hessian/reviewed-trace-source-review.md': 'ec6e7c034511c2d1d8da976265a2f1cdb0fcf1bd6992789d2efb151952371536', 'docs/point4/weighted-duhamel-hessian/reviewed-source/EuclideanHeatRegularizerC2Trace.lean.txt': 'ca8598bd4eddf118a7bf2afa097e232cd872e8ffc7f3b2b9fe76bdf913531f44', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelIntegrand.lean.txt': '77da0c8aaad5fc44aae5dfd9bb9958da90528112d93eedba7082647f64d4a577', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedTimeKernel.lean.txt': '20ceba4efe5d3c2d0d302220e94db8394496be16ee336382c4d1049b470fc3a5', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianIntegral.lean.txt': '84ff76aeee604c8824d2daa226f2b876d6146b14e5a292f37f18693c4c9fd8f2', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianDerivative.lean.txt': '19e8ec44954e3c1ad6b75042465a2251de48124ab0ea923a1b90dd24e422a381', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianFrechetTrace.lean.txt': '3af628927dd651ea247f07159243a8dd100267bdabcaabb06fb9263882ff7b08', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelFrechet.lean.txt': 'a817cc34a6be25422e6bef2f30faaba65aaccea706b0204eab671b5e9b02c900', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianTrace.lean.txt': '64f8f5bc8cfd468fe9b46b60be39c5686dec4b870b481b766403d9e52cda9d33', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedHessianTimeEnvelope.lean.txt': '4283e582912f8556266e2944e9453a2ed475522e8d4e95a5cba19ec39deb070d', 'curvature/scripts/point4_weighted_hessian_probe.lean': '9b5b14ea6d9289699e84d8d609af14c0adad074b41f1065b77b0131b8953adba', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatRegularizerC2Trace.lean': '177fdfdf992c95c77f8211f331379f92b58163764d91a8bd48678640715870b5', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedTimeKernel.lean': '20ceba4efe5d3c2d0d302220e94db8394496be16ee336382c4d1049b470fc3a5', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianTrace.lean': '026f7f603a567f54e3e55a36b8378400714c00b92c4f7346627303c53b8b449b', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelFrechet.lean': 'e88a56c21d0f04ab9a106a2f380be7cef982afb3a990a2ccbff7c6cd91fedd00', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelIntegrand.lean': 'f8d067d0bcf72973693e59ed0b8c6d0b716aa72e0f9a6baa9c4f3f023f9fd372', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianDerivative.lean': 'b26e872c205995c466fb371b6a54e28e5df2ab646edb81b41dca84bca7dfadd6', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianFrechetTrace.lean': 'd391d949ceec351ecb52c4c55d2a14d252eeb92e9d1009e047e6c50f5a9b8c7e', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianIntegral.lean': 'e87862d112c345e5a5ae18759962445c542777a6e81f2350be0f3558c4f584c5', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedHessianTimeEnvelope.lean': '120930e97935c4c86c0dd26aa2340aafde77bb33c8ba0002bbcd48b8c7365699', '.github/workflows/point4-weighted-duhamel-hessian.yml': '3880cbee7ece768a2fbdf76003f9fd545a1c9029a8eb9991612cfa409a2906c9'}
+TRANSFORM_SHA256 = '612c4f700739a9b78b1746e26ad51168122ebce7806b638de2b4511af0c458ac'
 ADAPTER_SHA256 = '125156cbbdbfc582538fc70bfd3f6d140ad1140f46776659459a96de25e776dd'
 RUNTIME_INVENTORY_FRAGMENT_SHA256 = '41e5e5e853d8dd79ead807f76124d5bdaec723548493a4b6540b5de90515b6c2'
 
@@ -94,22 +94,89 @@ def source_transformations():
     assert data['base'] == BASE and data['point4'] == 'OPEN'
     return data['modules']
 
+# These exact additional edits repair two observed modern/legacy import errors.
+# They apply only to the new reviewed helper and regularizer, never inherited source.
+MODULE_COMPATIBILITY_EDITS = {
+    PREFIX + 'WeightedDuhamelIntegrand.lean': (
+        ('import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian\n'
+         'import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope\n',
+         'module\n\n'
+         'public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian\n'
+         'public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope\n'),
+        ('\nnoncomputable section\n', '\n@[expose] public noncomputable section\n'),
+    ),
+    PREFIX + 'EuclideanHeatRegularizerC2Trace.lean': (
+        ('public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialTrace\n',
+         'public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatFrechet\n'
+         'public import PoincareCurvature.Analysis.FiniteMomentApproximation\n'
+         'public import Mathlib.Topology.UniformSpace.UniformConvergence\n'),
+    ),
+}
+
 def reconstruct_module(path, original):
     spec = source_transformations()[path]
     assert sha256(original) == spec['original_sha256'], 'Reviewed module input changed'
     source = original
+    compatibility = MODULE_COMPATIBILITY_EDITS.get(path, ())
+    seen_compatibility = []
     for edit in spec['transformations']:
         before, after = edit['before'].encode(), edit['after'].encode()
         assert edit['count'] == 1 and source.count(before) == 1 and after not in source
-        assert re.fullmatch(rb'(?:public )?import \S+\n', before)
-        assert re.fullmatch(rb'(?:public )?import \S+\n', after)
-        assert before.startswith(b'public ') == after.startswith(b'public '), 'Visibility normalization forbidden'
+        pair = (edit['before'], edit['after'])
+        if pair in compatibility:
+            seen_compatibility.append(pair)
+        else:
+            assert re.fullmatch(rb'(?:public )?import \S+\n', before)
+            assert re.fullmatch(rb'(?:public )?import \S+\n', after)
+            assert before.startswith(b'public ') == after.startswith(b'public '), 'Unrecorded visibility normalization forbidden'
         source = source.replace(before, after, 1)
+    assert tuple(seen_compatibility) == compatibility, 'Exact module compatibility edits required'
     assert sha256(source) == spec['integrated_sha256'], 'Integrated module result changed'
-    # Signature, mathematical data, proof, comments and section semantics are exact.
+    # Reverse only the helper's exact preamble before comparing every remaining byte.
+    mathematical_source = source
+    if path == PREFIX + 'WeightedDuhamelIntegrand.lean':
+        for before, after in reversed(compatibility):
+            mathematical_source = mathematical_source.replace(after.encode(), before.encode(), 1)
     erase = lambda data: re.sub(rb'^(?:public )?import \S+\n', b'', data, flags=re.M)
-    assert erase(source) == erase(original), 'Non-import module byte drift'
+    assert erase(mathematical_source) == erase(original), 'Mathematical module byte drift'
     return source
+
+def check_module_import_graph(sources=None):
+    """Traverse real project sources; inspect every reachable project import edge.
+
+    Mathlib/Lean external imports remain exact-toolchain verification obligations.
+    The source union binds project sources independently of this graph check.
+    """
+    from point4_scan import strip_comments
+    visited, visiting, edges, external = set(), set(), set(), set()
+    def read(path):
+        return (ROOT/path).read_text() if sources is None else sources[path].decode()
+    def visit(path):
+        assert path not in visiting, f'Project import cycle: {path}'
+        if path in visited:
+            return
+        code = '\n'.join(strip_comments(read(path)))
+        assert re.search(r'^module\s*$', code, re.M), f'Reachable non-module project import: {path}'
+        visiting.add(path)
+        for line in code.splitlines():
+            match = re.fullmatch(r'\s*(public )?import (\S+)\s*', line)
+            if not match:
+                continue
+            assert match[1], f'Non-public project graph import: {path}: {line.strip()}'
+            name = match[2]
+            if name.startswith('PoincareCurvature.'):
+                target = 'curvature/' + name.replace('.', '/') + '.lean'
+                assert target in public_paths(), f'Project import outside exact source union: {target}'
+                edges.add((path, target))
+                visit(target)
+            else:
+                external.add(name)
+        visiting.remove(path)
+        visited.add(path)
+    for path in source_transformations():
+        visit(path)
+    return {'project_modules': len(visited), 'project_import_edges': len(edges),
+            'external_import_modules': len(external), 'project_legacy_imports': 0}
 
 def expected_sources():
     subprocess.run(['git', '-C', str(ROOT), 'merge-base', '--is-ancestor', BASE, 'HEAD'], check=True, env=ENV)
@@ -423,11 +490,13 @@ def check_current(schema=None):
         code = '\n'.join(strip_comments((ROOT/path).read_text()))
         assert not re.search(r'\b(sorry|admit|sorryAx|axiom|unsafe|opaque|native_decide)\b|\bdecide!', code)
         assert 'I.Boundaryless' not in code and 'intrinsicLocalExistenceUniquenessFamily_pointFour' not in code
+    module_graph = check_module_import_graph()
     regression = (ROOT/'curvature/scripts/point4_closed_contract_regression.lean').read_text()
     assert regression.count('fail_if_success exact @bad') == 12
     return {'base':BASE, 'public_paths':len(public_paths()), 'inherited_byte_identical':1653-len(adapters()),
             'count_one_entrypoint_adapters':sum(p.endswith('.py') for p in adapters()),
             'count_one_startup_workflow_adapters':sum(p.endswith('.yml') for p in adapters()), 'new_modules':len(source_transformations()),
+            'module_import_graph':module_graph,
             'root_imports_and_all_pins_unchanged':True, 'lean_verified':False, 'point4':'OPEN'}
 
 def check_historical_reconstruction(target):

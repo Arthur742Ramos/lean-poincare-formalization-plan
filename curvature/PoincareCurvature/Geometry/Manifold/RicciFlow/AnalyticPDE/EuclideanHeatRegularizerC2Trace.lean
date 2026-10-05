@@ -1,6 +1,8 @@
 module
 
-public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialTrace
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatFrechet
+public import PoincareCurvature.Analysis.FiniteMomentApproximation
+public import Mathlib.Topology.UniformSpace.UniformConvergence
 public import Mathlib.Topology.MetricSpace.Pseudo.Basic
 public import Mathlib.Tactic.Abel
 public import Mathlib.Tactic.FieldSimp

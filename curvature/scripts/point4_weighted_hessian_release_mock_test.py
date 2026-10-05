@@ -84,7 +84,7 @@ class WeightedHessianReleaseTests(unittest.TestCase):
             finally:
                 subprocess.run(['git','-C',str(release.ROOT),'worktree','remove','--force',str(root)],check=True,env=release.ENV)
 
-    def test_module_only_import_qualification_preserves_all_math_bytes(self):
+    def test_exact_import_and_helper_preamble_edits_preserve_all_math_bytes(self):
         for path,spec in release.source_transformations().items():
             original = (release.ROOT/spec['original_path']).read_bytes()
             actual = release.reconstruct_module(path,original)
@@ -92,9 +92,55 @@ class WeightedHessianReleaseTests(unittest.TestCase):
             for wrong in (original+b'\n',original.replace(b'namespace RicciFlow',b'namespace Wrong',1),original.replace(b' := by',b' := sorry',1)):
                 if wrong != original:
                     with self.assertRaises(AssertionError): release.reconstruct_module(path,wrong)
-        legacy = release.PREFIX+'WeightedDuhamelIntegrand.lean'
-        self.assertFalse((release.ROOT/legacy).read_bytes().startswith(b'module'))
-        self.assertIn(b'\nnoncomputable section\n',(release.ROOT/legacy).read_bytes())
+        helper = release.PREFIX+'WeightedDuhamelIntegrand.lean'
+        original=(release.ROOT/release.source_transformations()[helper]['original_path']).read_bytes()
+        self.assertFalse(original.startswith(b'module'))
+        actual=(release.ROOT/helper).read_bytes()
+        self.assertTrue(actual.startswith(b'module\n\npublic import '))
+        self.assertIn(b'\n@[expose] public noncomputable section\n',actual)
+        for before,after in reversed(release.MODULE_COMPATIBILITY_EDITS[helper]):
+            actual=actual.replace(after.encode(),before.encode(),1)
+        # The first reviewed import qualification remains exactly reversible.
+        actual=actual.replace(b'import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope\n',b'import WeightedHessianTimeEnvelope\n',1)
+        self.assertEqual(actual,original)
+
+    def test_module_compatibility_allowlist_rejects_missing_extra_or_changed_edits(self):
+        specs=release.source_transformations()
+        for path,allowed in release.MODULE_COMPATIBILITY_EDITS.items():
+            original=(release.ROOT/specs[path]['original_path']).read_bytes()
+            for mutate in ('missing','changed','extra'):
+                wrong=copy.deepcopy(specs)
+                target=wrong[path]['transformations']
+                if mutate=='missing': target.pop()
+                elif mutate=='changed': target[-1]['after']+='-- unreviewed change\n'
+                else: target.append({'before':'namespace RicciFlow\n','after':'namespace Unreviewed\n','count':1})
+                with self.subTest(path=path,mutate=mutate),mock.patch.object(release,'source_transformations',return_value=wrong):
+                    with self.assertRaises(AssertionError): release.reconstruct_module(path,original)
+
+    def test_real_project_module_graph_rejects_legacy_cycles_and_hidden_imports(self):
+        sources={p:data for p,(_,data) in self.expected.items() if p.endswith('.lean')}
+        report=release.check_module_import_graph(sources)
+        self.assertEqual(report['project_legacy_imports'],0)
+        self.assertGreater(report['project_modules'],9)
+        self.assertGreater(report['project_import_edges'],9)
+        helper=release.PREFIX+'WeightedDuhamelIntegrand.lean'
+        integral=release.PREFIX+'WeightedDuhamelHessianIntegral.lean'
+        regularizer=release.PREFIX+'EuclideanHeatRegularizerC2Trace.lean'
+        modern=release.PREFIX+'EuclideanHeatHessian.lean'
+        attacks=(
+            (helper,sources[helper].replace(b'module\n',b'-- module\n',1)),
+            (modern,sources[modern].replace(b'module\n',b'',1)),
+            (regularizer,sources[regularizer].replace(b'.EuclideanHeatFrechet\n',b'.EuclideanHeatInitialTrace\n',1)),
+            (helper,sources[helper]+b'\npublic import '+integral.removeprefix('curvature/').removesuffix('.lean').replace('/','.').encode()+b'\n'),
+            (helper,sources[helper]+b'\npublic import PoincareCurvature.HiddenTarget\n'),
+            (modern,sources[modern].replace(b'public import ',b'import ',1)),
+        )
+        for path,data in attacks:
+            wrong=dict(sources);wrong[path]=data
+            with self.subTest(path=path,data=data[:30]),self.assertRaises(AssertionError):
+                release.check_module_import_graph(wrong)
+        comments=dict(sources);comments[helper]+=b'\n/- public import PoincareCurvature.HiddenTarget -/\n'
+        self.assertEqual(release.check_module_import_graph(comments),report)
 
     def test_every_current_union_path_is_required_and_extras_rejected(self):
         valid = release.public_paths()

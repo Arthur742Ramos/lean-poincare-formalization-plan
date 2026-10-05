@@ -1,6 +1,6 @@
 {
   "base": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
-  "source_status": "INDEPENDENT_STATIC_SOURCE_REVIEW_APPROVED_UNCOMPILED",
+  "source_status": "NARROW_MODULE_IMPORT_REPAIR_PENDING_INDEPENDENT_REVIEW_UNCOMPILED",
   "point4": "OPEN",
   "modules": {
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedTimeKernel.lean": {
@@ -24,11 +24,21 @@
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelIntegrand.lean": {
       "original_path": "docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelIntegrand.lean.txt",
       "original_sha256": "77da0c8aaad5fc44aae5dfd9bb9958da90528112d93eedba7082647f64d4a577",
-      "integrated_sha256": "ea3529558277a64e0ceb077ebea640a14851babca62c3af2b2df864ed24b064f",
+      "integrated_sha256": "f8d067d0bcf72973693e59ed0b8c6d0b716aa72e0f9a6baa9c4f3f023f9fd372",
       "transformations": [
         {
           "before": "import WeightedHessianTimeEnvelope\n",
           "after": "import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope\n",
+          "count": 1
+        },
+        {
+          "before": "import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian\nimport PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope\n",
+          "after": "module\n\npublic import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian\npublic import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope\n",
+          "count": 1
+        },
+        {
+          "before": "\nnoncomputable section\n",
+          "after": "\n@[expose] public noncomputable section\n",
           "count": 1
         }
       ]
@@ -101,8 +111,14 @@
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatRegularizerC2Trace.lean": {
       "original_path": "docs/point4/weighted-duhamel-hessian/reviewed-source/EuclideanHeatRegularizerC2Trace.lean.txt",
       "original_sha256": "ca8598bd4eddf118a7bf2afa097e232cd872e8ffc7f3b2b9fe76bdf913531f44",
-      "integrated_sha256": "ca8598bd4eddf118a7bf2afa097e232cd872e8ffc7f3b2b9fe76bdf913531f44",
-      "transformations": []
+      "integrated_sha256": "177fdfdf992c95c77f8211f331379f92b58163764d91a8bd48678640715870b5",
+      "transformations": [
+        {
+          "before": "public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialTrace\n",
+          "after": "public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatFrechet\npublic import PoincareCurvature.Analysis.FiniteMomentApproximation\npublic import Mathlib.Topology.UniformSpace.UniformConvergence\n",
+          "count": 1
+        }
+      ]
     }
   }
 }
