@@ -20,7 +20,7 @@ SCHEMA_SHA256 = '25ff6b25ca4511635aff4443cf20480c15e59dddf19591c730950b442ea54fc
 PREFIX = 'curvature/PoincareCurvature/'
 MODULES = {
     PREFIX + 'Analysis/CompactlySupportedC2Jet.lean': '3dfa3d8bd3cea730bf08afc91fd8dd759ba3c0365790072ee0b52f5844dc997f',
-    PREFIX + 'Analysis/FiniteCoordinateBilinear.lean': '74e12fd6847f512f35af91ff1be72abf3a8f3eb9a9b81edd495f419df97ef571',
+    PREFIX + 'Analysis/FiniteCoordinateBilinear.lean': '1983651e92f98f5c7358e57508432d6aa8db503389c36ef1faef73dde0d96b59',
     PREFIX + 'Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2Localization.lean': 'd6e931583b99a0b0af48d2c3143deea3e225ed9a41af1bc6c74da9073f1c0d95',
     PREFIX + 'Geometry/Manifold/RicciFlow/AnalyticPDE/PositiveFrozenC2Localization.lean': '792abb3502c66fe25dd520edb4ce94c8979c20945de25f3ff80eba886a194f0a',
     PREFIX + 'Geometry/Manifold/RicciFlow/AnalyticPDE/BoundarylessInitialMetricLocalization.lean': 'b2334e88fb307d3978be6605f753046fe4d30db9102df71cf25800a99c29b424',

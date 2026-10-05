@@ -66,39 +66,42 @@ theorem norm_proj_le_one (i : Fin d) :
 theorem norm_ofMatrix_le (A : Fin d → Fin d → ℝ) :
     ‖ofMatrix A‖ ≤ (d : ℝ) ^ 2 * ‖A‖ := by
   classical
+  refine ContinuousLinearMap.opNorm_le_bound₂ (ofMatrix A)
+    (mul_nonneg (sq_nonneg _) (norm_nonneg A)) ?_
+  intro u v
+  rw [ofMatrix_apply]
   have hentry : ∀ i j, ‖A i j‖ ≤ ‖A‖ := fun i j =>
     (norm_le_pi_norm (A i) j).trans (norm_le_pi_norm A i)
-  have hterm : ∀ i j,
-      ‖A i j • (ContinuousLinearMap.proj i : (Fin d → ℝ) →L[ℝ] ℝ).smulRight
-        (ContinuousLinearMap.proj j : (Fin d → ℝ) →L[ℝ] ℝ)‖ ≤
-        ‖A‖ := by
+  have hterm : ∀ i j, ‖A i j * u i * v j‖ ≤ ‖A‖ * ‖u‖ * ‖v‖ := by
     intro i j
-    rw [norm_smul, ContinuousLinearMap.norm_smulRight_apply]
-    calc
-      ‖A i j‖ * (‖(ContinuousLinearMap.proj i : (Fin d → ℝ) →L[ℝ] ℝ)‖ *
-          ‖(ContinuousLinearMap.proj j : (Fin d → ℝ) →L[ℝ] ℝ)‖) ≤ ‖A‖ * (1 * 1) := by
-        gcongr
-        · exact hentry i j
-        · exact norm_proj_le_one i
-        · exact norm_proj_le_one j
-      _ = ‖A‖ := by ring
+    rw [norm_mul, norm_mul]
+    exact mul_le_mul
+      (mul_le_mul (hentry i j) (norm_le_pi_norm u i)
+        (norm_nonneg _) (norm_nonneg A))
+      (norm_le_pi_norm v j) (norm_nonneg _)
+      (mul_nonneg (norm_nonneg A) (norm_nonneg u))
   calc
-    ‖ofMatrix A‖ ≤ ∑ i : Fin d, ‖∑ j : Fin d,
-        A i j • (ContinuousLinearMap.proj i).smulRight (ContinuousLinearMap.proj j)‖ :=
+    ‖∑ i : Fin d, ∑ j : Fin d, A i j * u i * v j‖ ≤
+        ∑ i : Fin d, ‖∑ j : Fin d, A i j * u i * v j‖ :=
       norm_sum_le _ _
-    _ ≤ ∑ i : Fin d, ∑ j : Fin d,
-        ‖A i j • (ContinuousLinearMap.proj i : (Fin d → ℝ) →L[ℝ] ℝ).smulRight
-        (ContinuousLinearMap.proj j : (Fin d → ℝ) →L[ℝ] ℝ)‖ :=
+    _ ≤ ∑ i : Fin d, ∑ j : Fin d, ‖A i j * u i * v j‖ :=
       Finset.sum_le_sum (fun i _ => norm_sum_le _ _)
-    _ ≤ ∑ _i : Fin d, ∑ _j : Fin d, ‖A‖ :=
+    _ ≤ ∑ _i : Fin d, ∑ _j : Fin d, ‖A‖ * ‖u‖ * ‖v‖ :=
       Finset.sum_le_sum (fun i _ => Finset.sum_le_sum (fun j _ => hterm i j))
-    _ = (d : ℝ) ^ 2 * ‖A‖ := by
+    _ = (d : ℝ) ^ 2 * ‖A‖ * ‖u‖ * ‖v‖ := by
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
       ring
 
 /-- Matrix-to-bilinear conversion is smooth at every finite differentiability order. -/
 theorem contDiff_ofMatrix {r : WithTop ℕ∞} : ContDiff ℝ r (@ofMatrix d) := by
   classical
+  letI : NormedSpace ℝ ((Fin d → ℝ) →L[ℝ] ℝ) :=
+    ContinuousLinearMap.toNormedSpace
+  letI : NormedSpace ℝ ((Fin d → ℝ) →L[ℝ] (Fin d → ℝ) →L[ℝ] ℝ) :=
+    ContinuousLinearMap.toNormedSpace
+  letI : IsBoundedSMul ℝ ((Fin d → ℝ) →L[ℝ] (Fin d → ℝ) →L[ℝ] ℝ) :=
+    NormedSpace.toIsBoundedSMul (𝕜 := ℝ)
+      (E := (Fin d → ℝ) →L[ℝ] (Fin d → ℝ) →L[ℝ] ℝ)
   unfold ofMatrix
   apply ContDiff.sum
   intro i _

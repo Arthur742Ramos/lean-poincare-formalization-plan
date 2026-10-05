@@ -139,6 +139,34 @@ proof-module hashes identify the repaired authored blobs; old b293 hashes
 remain in its immutable history. The repaired source still needs independent
 review and a new complete exact-head Lean 4.33 run before qualification.
 
+## Historical nested-operator instance failure and proof-local candidate
+
+Exact source-reviewed draft `e0231c3458c25115a0afabe7244a62e0716b204c`
+failed focused Lean 4.33 CI run `37261014410`. The actual compact-support
+constructor compiled, but `FiniteCoordinateBilinear` could not synthesize
+`NormSMulClass` and `IsBoundedSMul` for the nested continuous-linear-map
+codomain. A subsequent heartbeat timeout also occurred in the matrix norm
+proof. The remaining metric modules, full signatures, ten new axiom surfaces,
+150 inherited axiom occurrences and full canonical audit were not verified by
+that failed run. The exact e023 source and failed result remain historical.
+
+This proof-local candidate uses Mathlib's `opNorm_le_bound₂` directly on the
+unchanged actual finite contraction. Its real-valued double sum is bounded
+using two explicit `mul_le_mul` inequalities per entry, the finite Pi sup-norm
+bounds and the same dimension-squared factor. No nested scalar-norm search or
+heartbeat increase is needed for that estimate. The smoothness proof explicitly
+supplies Mathlib's existing `ContinuousLinearMap.toNormedSpace` instances for
+the inner real dual and outer real bilinear map, together with the derived
+`IsBoundedSMul` instance.
+
+It changes no theorem statement or hypothesis, matrix contraction,
+dimension-squared sup-norm bound, inherited source, workflow, pin or canonical
+gate. The new matrix-module hash identifies the authored candidate. A bounded
+Lean 4.35.0-rc2 development run compiled this finite module without raising the
+default heartbeat limit. That is development evidence only. No pinned Lean
+4.33 compiler pass or independent review is claimed; all release gates remain
+required.
+
 ## Remaining mathematical gaps
 
 This local constructor does not discharge anisotropic inverse-Gram heat
