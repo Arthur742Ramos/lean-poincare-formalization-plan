@@ -218,5 +218,13 @@ if (ROOT / 'curvature/scripts/point4_c2_initial_heat_source_test.py').is_file():
     check_metadata = _c2_union.check_metadata
     check_audit = _c2_union.check_audit
 
+# Exact weighted-Hessian inventory dispatch. The original semantic gate body
+# above is replayed from its byte/mode-pinned historical source reconstruction;
+# current physical source and evidence checks are independently mandatory.
+_weighted_hessian_historical_main = main
+def main(argv=None):
+    from point4_weighted_hessian_release_guard import run_inherited
+    run_inherited('curvature/scripts/point4_linear_heat_geometry_source_test.py', argv)
+
 if __name__ == '__main__':
     main()

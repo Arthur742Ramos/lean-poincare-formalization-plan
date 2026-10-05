@@ -1,0 +1,31 @@
+{
+  "required": [
+    "sha.log",
+    "source.log",
+    "compile.log",
+    "probe.log",
+    "inherited-build.log",
+    "manifold-probe.log",
+    "contract.log",
+    "regression.log",
+    "audit.log",
+    "audit-build.log",
+    "audit.json",
+    "official-schema.json",
+    "inherited-probes/contraction.log",
+    "inherited-probes/coordinate_connection.log",
+    "inherited-probes/coordinate_jet.log",
+    "inherited-probes/coordinate_operator.log",
+    "inherited-probes/principal_remainder.log",
+    "inherited-probes/chosen_lc_coordinate.log",
+    "inherited-probes/chosen_lc_curvature.log",
+    "inherited-probes/standard_coordinate_operator.log",
+    "inherited-probes/frozen_metric_principal.log",
+    "inherited-probes/weak_laplacian.log",
+    "inherited-probes/boundaryless_chart_frames.log",
+    "inherited-probes/c2_heat_trace.log",
+    "inherited-probes/weighted_initial_heat.log"
+  ],
+  "missing_or_extra_rejected": true,
+  "no_lean_evidence_available": true
+}
