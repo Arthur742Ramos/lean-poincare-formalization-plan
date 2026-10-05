@@ -77,6 +77,26 @@ run. Gates 3–5 therefore failed and the verdict remained `POINT 4 OPEN`.
 
 See [Current formalization status](../status.md) for the repository-wide dashboard.
 
+The bounded-C² initial-face supporting candidate is recorded in
+[`c2-heat-initial-trace.md`](c2-heat-initial-trace.md). It adds the Gaussian
+approximate identity with an arbitrary continuity modulus, local-uniform
+actual gradient/Hessian traces, global C² trace under uniform continuity only
+of Hessian entries, and the right initial generator. Historical head
+`591c25914c80366d619ece00da204997ee2a65d7` passed its actual Lean-4.33
+type/axiom and full build gates. This current-master integration is UNVERIFIED
+until fresh exact-head hosted gates and independent review pass. It does not construct compact-manifold localization,
+an ordinary endpoint derivative, a weighted nonlinear solver, or Point-4
+closure.
+
+The next supporting initial-face candidate constructs actual compatible
+positive-time C²,α Gaussian data with an explicit Hölder certificate whose
+`t^(α/2)` weight tends to zero, using only uniform continuity of the initial
+Hessian entries. It uses the actual heat approximation error at scale `√t`
+and the genuine semigroup, with no initial positive-exponent Hölder premise.
+Exact Lean-4.33 verification is pending. See
+[`weighted-initial-heat.md`](weighted-initial-heat.md). Compact localization,
+weighted nonlinear estimates and the canonical Point-4 theorem remain open.
+
 The preceding supporting PDE milestone is the genuine Ricci--DeTurck
 Hölder-seminorm difference estimate in
 `GenuineRicciDeTurckHolderDifference.lean`. It combines the compact-domain
