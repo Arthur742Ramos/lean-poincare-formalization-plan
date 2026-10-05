@@ -25,10 +25,27 @@ METADATA = DOSSIER + 'formalization.yaml'
 SELF_PATHS = {'curvature/scripts/point4_weighted_hessian_release_guard.py',
               'curvature/scripts/point4_weighted_hessian_release_mock_test.py'}
 ENV = dict(os.environ, GIT_NO_LAZY_FETCH='1', PYTHONDONTWRITEBYTECODE='1')
-UNIT_FILE_SHA256 = {'docs/point4/weighted-duhamel-hessian.md': '797fbcccf04d0a0fbcc2061be0b38a5a58946c6875c037cea2b47a7b8ab1d9fa', 'docs/point4/weighted-duhamel-hessian/inventory-adapters.json': '125156cbbdbfc582538fc70bfd3f6d140ad1140f46776659459a96de25e776dd', 'docs/point4/weighted-duhamel-hessian/runtime-inventory-source.json': '9c633da8d90fa63c7c1003c07bb340dd15bf76c651a9ed262b71d37fbc821800', 'docs/point4/weighted-duhamel-hessian/trace-review-history.json': '7eba118db43ed0d1c1057e47b0eafb8b9d3c96a5b473dc67e38375a998b22c7d', 'docs/point4/weighted-duhamel-hessian/reviewed-integral-source-review.md': 'f32c71416b00829393b59edce8915c2f9634f09b4de5c253dfca8d7cfece8702', 'docs/point4/weighted-duhamel-hessian/formalization.yaml': 'f5d9f7fb71f79429cdc41b9c7c3dabf703393bf83cfd7fc4370f203339db7b02', 'docs/point4/weighted-duhamel-hessian/evidence-inventory.json': 'aa57b4d1cc3a7ee85e99446d5c906ed660232dae7ebb0e300929a0d4a3d49475', 'docs/point4/weighted-duhamel-hessian/declaration-surfaces.json': 'f4326629fa2e0e801823d9b3a2c2151ec67bc27ff0bc0017990628d8060c20ef', 'docs/point4/weighted-duhamel-hessian/reviewed-derivative-source-review.md': 'aa820cf617e9818a4ff93578e6f0a39ac18a9c1fa69e9733f714abf3c91b80c2', 'docs/point4/weighted-duhamel-hessian/reviewed-time-kernel-source-review.md': '827202e49c58d308daec6f2891a8cf3c34a4c9c986c1f1685bf6715a7ee5f277', 'docs/point4/weighted-duhamel-hessian/source-transformations.json': '612c4f700739a9b78b1746e26ad51168122ebce7806b638de2b4511af0c458ac', 'docs/point4/weighted-duhamel-hessian/reviewed-regularizer-source-review.md': 'e8d1e766e147898b8bcce00e97ec4065e7ad4f122da80c2b2250bc6add7b02fc', 'docs/point4/weighted-duhamel-hessian/reviewed-trace-source-review.md': 'ec6e7c034511c2d1d8da976265a2f1cdb0fcf1bd6992789d2efb151952371536', 'docs/point4/weighted-duhamel-hessian/reviewed-source/EuclideanHeatRegularizerC2Trace.lean.txt': 'ca8598bd4eddf118a7bf2afa097e232cd872e8ffc7f3b2b9fe76bdf913531f44', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelIntegrand.lean.txt': '77da0c8aaad5fc44aae5dfd9bb9958da90528112d93eedba7082647f64d4a577', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedTimeKernel.lean.txt': '20ceba4efe5d3c2d0d302220e94db8394496be16ee336382c4d1049b470fc3a5', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianIntegral.lean.txt': '84ff76aeee604c8824d2daa226f2b876d6146b14e5a292f37f18693c4c9fd8f2', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianDerivative.lean.txt': '19e8ec44954e3c1ad6b75042465a2251de48124ab0ea923a1b90dd24e422a381', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianFrechetTrace.lean.txt': '3af628927dd651ea247f07159243a8dd100267bdabcaabb06fb9263882ff7b08', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelFrechet.lean.txt': 'a817cc34a6be25422e6bef2f30faaba65aaccea706b0204eab671b5e9b02c900', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianTrace.lean.txt': '64f8f5bc8cfd468fe9b46b60be39c5686dec4b870b481b766403d9e52cda9d33', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedHessianTimeEnvelope.lean.txt': '4283e582912f8556266e2944e9453a2ed475522e8d4e95a5cba19ec39deb070d', 'curvature/scripts/point4_weighted_hessian_probe.lean': '9b5b14ea6d9289699e84d8d609af14c0adad074b41f1065b77b0131b8953adba', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatRegularizerC2Trace.lean': '177fdfdf992c95c77f8211f331379f92b58163764d91a8bd48678640715870b5', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedTimeKernel.lean': '20ceba4efe5d3c2d0d302220e94db8394496be16ee336382c4d1049b470fc3a5', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianTrace.lean': '026f7f603a567f54e3e55a36b8378400714c00b92c4f7346627303c53b8b449b', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelFrechet.lean': 'e88a56c21d0f04ab9a106a2f380be7cef982afb3a990a2ccbff7c6cd91fedd00', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelIntegrand.lean': 'f8d067d0bcf72973693e59ed0b8c6d0b716aa72e0f9a6baa9c4f3f023f9fd372', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianDerivative.lean': 'b26e872c205995c466fb371b6a54e28e5df2ab646edb81b41dca84bca7dfadd6', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianFrechetTrace.lean': 'd391d949ceec351ecb52c4c55d2a14d252eeb92e9d1009e047e6c50f5a9b8c7e', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianIntegral.lean': 'e87862d112c345e5a5ae18759962445c542777a6e81f2350be0f3558c4f584c5', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedHessianTimeEnvelope.lean': '120930e97935c4c86c0dd26aa2340aafde77bb33c8ba0002bbcd48b8c7365699', '.github/workflows/point4-weighted-duhamel-hessian.yml': '3880cbee7ece768a2fbdf76003f9fd545a1c9029a8eb9991612cfa409a2906c9'}
-TRANSFORM_SHA256 = '612c4f700739a9b78b1746e26ad51168122ebce7806b638de2b4511af0c458ac'
+UNIT_FILE_SHA256 = {'docs/point4/weighted-duhamel-hessian.md': '699e456ad542d5096e7c67c3c8c40f911a200cee75bc33719122bb532035cadb', 'docs/point4/weighted-duhamel-hessian/inventory-adapters.json': '125156cbbdbfc582538fc70bfd3f6d140ad1140f46776659459a96de25e776dd', 'docs/point4/weighted-duhamel-hessian/runtime-inventory-source.json': '9c633da8d90fa63c7c1003c07bb340dd15bf76c651a9ed262b71d37fbc821800', 'docs/point4/weighted-duhamel-hessian/trace-review-history.json': '7eba118db43ed0d1c1057e47b0eafb8b9d3c96a5b473dc67e38375a998b22c7d', 'docs/point4/weighted-duhamel-hessian/reviewed-integral-source-review.md': 'f32c71416b00829393b59edce8915c2f9634f09b4de5c253dfca8d7cfece8702', 'docs/point4/weighted-duhamel-hessian/formalization.yaml': 'c5c7fa014e968c1d132927724d4e1f0b85e587d5fcab63a5546b6f99cfe425d2', 'docs/point4/weighted-duhamel-hessian/evidence-inventory.json': 'aa57b4d1cc3a7ee85e99446d5c906ed660232dae7ebb0e300929a0d4a3d49475', 'docs/point4/weighted-duhamel-hessian/declaration-surfaces.json': 'f4326629fa2e0e801823d9b3a2c2151ec67bc27ff0bc0017990628d8060c20ef', 'docs/point4/weighted-duhamel-hessian/reviewed-derivative-source-review.md': 'aa820cf617e9818a4ff93578e6f0a39ac18a9c1fa69e9733f714abf3c91b80c2', 'docs/point4/weighted-duhamel-hessian/reviewed-time-kernel-source-review.md': '827202e49c58d308daec6f2891a8cf3c34a4c9c986c1f1685bf6715a7ee5f277', 'docs/point4/weighted-duhamel-hessian/source-transformations.json': '712fcdb83587cfccbf9080b52f39445a4b8932dfb4835d0d57cce520a99c926c', 'docs/point4/weighted-duhamel-hessian/reviewed-regularizer-source-review.md': 'e8d1e766e147898b8bcce00e97ec4065e7ad4f122da80c2b2250bc6add7b02fc', 'docs/point4/weighted-duhamel-hessian/reviewed-trace-source-review.md': 'ec6e7c034511c2d1d8da976265a2f1cdb0fcf1bd6992789d2efb151952371536', 'docs/point4/weighted-duhamel-hessian/reviewed-source/EuclideanHeatRegularizerC2Trace.lean.txt': 'ca8598bd4eddf118a7bf2afa097e232cd872e8ffc7f3b2b9fe76bdf913531f44', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelIntegrand.lean.txt': '77da0c8aaad5fc44aae5dfd9bb9958da90528112d93eedba7082647f64d4a577', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedTimeKernel.lean.txt': '20ceba4efe5d3c2d0d302220e94db8394496be16ee336382c4d1049b470fc3a5', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianIntegral.lean.txt': '84ff76aeee604c8824d2daa226f2b876d6146b14e5a292f37f18693c4c9fd8f2', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianDerivative.lean.txt': '19e8ec44954e3c1ad6b75042465a2251de48124ab0ea923a1b90dd24e422a381', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianFrechetTrace.lean.txt': '3af628927dd651ea247f07159243a8dd100267bdabcaabb06fb9263882ff7b08', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelFrechet.lean.txt': 'a817cc34a6be25422e6bef2f30faaba65aaccea706b0204eab671b5e9b02c900', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianTrace.lean.txt': '64f8f5bc8cfd468fe9b46b60be39c5686dec4b870b481b766403d9e52cda9d33', 'docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedHessianTimeEnvelope.lean.txt': '4283e582912f8556266e2944e9453a2ed475522e8d4e95a5cba19ec39deb070d', 'curvature/scripts/point4_weighted_hessian_probe.lean': '9b5b14ea6d9289699e84d8d609af14c0adad074b41f1065b77b0131b8953adba', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatRegularizerC2Trace.lean': '688c4879791b4afd629eaf29ab2fcdf2d8821ed7ce255986ee225906fd9fd96b', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedTimeKernel.lean': '20ceba4efe5d3c2d0d302220e94db8394496be16ee336382c4d1049b470fc3a5', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianTrace.lean': '026f7f603a567f54e3e55a36b8378400714c00b92c4f7346627303c53b8b449b', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelFrechet.lean': 'e88a56c21d0f04ab9a106a2f380be7cef982afb3a990a2ccbff7c6cd91fedd00', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelIntegrand.lean': 'f8d067d0bcf72973693e59ed0b8c6d0b716aa72e0f9a6baa9c4f3f023f9fd372', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianDerivative.lean': 'b26e872c205995c466fb371b6a54e28e5df2ab646edb81b41dca84bca7dfadd6', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianFrechetTrace.lean': 'd391d949ceec351ecb52c4c55d2a14d252eeb92e9d1009e047e6c50f5a9b8c7e', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianIntegral.lean': 'e87862d112c345e5a5ae18759962445c542777a6e81f2350be0f3558c4f584c5', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedHessianTimeEnvelope.lean': '120930e97935c4c86c0dd26aa2340aafde77bb33c8ba0002bbcd48b8c7365699', '.github/workflows/point4-weighted-duhamel-hessian.yml': '363baa9f3060cfaa5f5f462dfd0ccd6bc2e0cafca55e80c93464e82e0b1a72ef'}
+TRANSFORM_SHA256 = '712fcdb83587cfccbf9080b52f39445a4b8932dfb4835d0d57cce520a99c926c'
 ADAPTER_SHA256 = '125156cbbdbfc582538fc70bfd3f6d140ad1140f46776659459a96de25e776dd'
 RUNTIME_INVENTORY_FRAGMENT_SHA256 = '41e5e5e853d8dd79ead807f76124d5bdaec723548493a4b6540b5de90515b6c2'
+
+# Exact old primary workflow plus two reversible, independent Git checkpoints.
+EXACT_HEAD_WORKFLOW_BASE = '24a0b6532304116ff25f1c793a4dbc6696251b9e'
+EXACT_HEAD_WORKFLOW_PATH = '.github/workflows/point4-weighted-duhamel-hessian.yml'
+EXACT_HEAD_WORKFLOW_JOB = 'weighted_hessian'
+EXACT_HEAD_WORKFLOW_ORIGINAL_SHA256 = '3880cbee7ece768a2fbdf76003f9fd545a1c9029a8eb9991612cfa409a2906c9'
+EXACT_HEAD_WORKFLOW_SHA256 = '363baa9f3060cfaa5f5f462dfd0ccd6bc2e0cafca55e80c93464e82e0b1a72ef'
+EXACT_HEAD_BEFORE_ANCHOR = '      - name: Install pinned safe YAML parser from the official package registry\n'
+EXACT_HEAD_AFTER_ANCHOR = '      - name: Preserve exact-head evidence\n'
+EXACT_HEAD_PREFLIGHT = '      - name: Check immutable release HEAD and tracked cleanliness before candidate gates\n        env:\n          GIT_NO_LAZY_FETCH: \'1\'\n          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}\n        run: |\n          set -euo pipefail\n          test "$(/usr/bin/git --no-replace-objects rev-parse HEAD)" = "$EXPECTED_SHA"\n          /usr/bin/git --no-replace-objects -c core.fileMode=true -c core.fsmonitor=false diff --cached --no-ext-diff --no-textconv --ignore-submodules=none --exit-code HEAD -- .\n          /usr/bin/git --no-replace-objects -c core.fileMode=true -c core.fsmonitor=false diff --no-ext-diff --no-textconv --ignore-submodules=none --exit-code -- .\n          /usr/bin/python3 -I -B - <<\'PY_TRACKED_SOURCE\'\n          import hashlib, os, pathlib, stat, subprocess\n          root = pathlib.Path(\'.\').absolute()\n          def git(*args):\n              return subprocess.check_output([\'/usr/bin/git\', \'--no-replace-objects\', \'-C\', str(root), *args])\n          expected_sha = os.environ[\'EXPECTED_SHA\']\n          assert git(\'rev-parse\', \'HEAD\').decode().strip() == expected_sha, \'Independent expected release HEAD mismatch\'\n          head = {}\n          for record in git(\'ls-tree\', \'-rz\', expected_sha).split(b\'\\0\')[:-1]:\n              descriptor, name = record.split(b\'\\t\', 1)\n              mode, kind, oid = descriptor.decode().split()\n              path = name.decode()\n              assert kind == \'blob\' and mode in {\'100644\', \'100755\'} and path not in head\n              head[path] = (mode, oid)\n          index = {}\n          for record in git(\'ls-files\', \'--stage\', \'-z\').split(b\'\\0\')[:-1]:\n              descriptor, name = record.split(b\'\\t\', 1)\n              mode, oid, stage = descriptor.decode().split()\n              path = name.decode()\n              assert stage == \'0\' and path not in index\n              index[path] = (mode, oid)\n          assert index == head, \'Independent tracked index/HEAD identity mismatch\'\n          for path, (mode, oid) in head.items():\n              physical = root / path\n              for parent in physical.parents:\n                  assert stat.S_ISDIR(parent.lstat().st_mode), \'Independent tracked source directory/symlink drift\'\n                  if parent == root:\n                      break\n              actual_mode = physical.lstat().st_mode\n              assert stat.S_ISREG(actual_mode) and bool(actual_mode & 0o111) == (mode == \'100755\'), \'Independent tracked source file/mode drift\'\n              data = physical.read_bytes()\n              blob = hashlib.sha1(b\'blob \' + str(len(data)).encode() + b\'\\0\' + data).hexdigest()\n              assert blob == oid, \'Independent tracked physical/HEAD blob mismatch: \' + path\n          assert git(\'rev-parse\', \'HEAD\').decode().strip() == expected_sha, \'Independent expected release HEAD changed during tracked inspection\'\n          PY_TRACKED_SOURCE\n'
+EXACT_HEAD_POSTFLIGHT = '      - name: Check immutable release HEAD and tracked cleanliness after candidate gates\n        if: always()\n        env:\n          GIT_NO_LAZY_FETCH: \'1\'\n          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}\n        run: |\n          set -euo pipefail\n          test "$(/usr/bin/git --no-replace-objects rev-parse HEAD)" = "$EXPECTED_SHA"\n          /usr/bin/git --no-replace-objects -c core.fileMode=true -c core.fsmonitor=false diff --cached --no-ext-diff --no-textconv --ignore-submodules=none --exit-code HEAD -- .\n          /usr/bin/git --no-replace-objects -c core.fileMode=true -c core.fsmonitor=false diff --no-ext-diff --no-textconv --ignore-submodules=none --exit-code -- .\n          /usr/bin/python3 -I -B - <<\'PY_TRACKED_SOURCE\'\n          import hashlib, os, pathlib, stat, subprocess\n          root = pathlib.Path(\'.\').absolute()\n          def git(*args):\n              return subprocess.check_output([\'/usr/bin/git\', \'--no-replace-objects\', \'-C\', str(root), *args])\n          expected_sha = os.environ[\'EXPECTED_SHA\']\n          assert git(\'rev-parse\', \'HEAD\').decode().strip() == expected_sha, \'Independent expected release HEAD mismatch\'\n          head = {}\n          for record in git(\'ls-tree\', \'-rz\', expected_sha).split(b\'\\0\')[:-1]:\n              descriptor, name = record.split(b\'\\t\', 1)\n              mode, kind, oid = descriptor.decode().split()\n              path = name.decode()\n              assert kind == \'blob\' and mode in {\'100644\', \'100755\'} and path not in head\n              head[path] = (mode, oid)\n          index = {}\n          for record in git(\'ls-files\', \'--stage\', \'-z\').split(b\'\\0\')[:-1]:\n              descriptor, name = record.split(b\'\\t\', 1)\n              mode, oid, stage = descriptor.decode().split()\n              path = name.decode()\n              assert stage == \'0\' and path not in index\n              index[path] = (mode, oid)\n          assert index == head, \'Independent tracked index/HEAD identity mismatch\'\n          for path, (mode, oid) in head.items():\n              physical = root / path\n              for parent in physical.parents:\n                  assert stat.S_ISDIR(parent.lstat().st_mode), \'Independent tracked source directory/symlink drift\'\n                  if parent == root:\n                      break\n              actual_mode = physical.lstat().st_mode\n              assert stat.S_ISREG(actual_mode) and bool(actual_mode & 0o111) == (mode == \'100755\'), \'Independent tracked source file/mode drift\'\n              data = physical.read_bytes()\n              blob = hashlib.sha1(b\'blob \' + str(len(data)).encode() + b\'\\0\' + data).hexdigest()\n              assert blob == oid, \'Independent tracked physical/HEAD blob mismatch: \' + path\n          assert git(\'rev-parse\', \'HEAD\').decode().strip() == expected_sha, \'Independent expected release HEAD changed during tracked inspection\'\n          PY_TRACKED_SOURCE\n'
+
+
+def raw_git(*args: str) -> bytes:
+    """Read the actual committed self objects without Git replacement refs."""
+    return subprocess.check_output(['/usr/bin/git', '--no-replace-objects', '-C', str(ROOT), *args], env=ENV)
+
 
 def git(*args):
     return subprocess.check_output(['git', '-C', str(ROOT), *args], env=ENV)
@@ -113,17 +130,39 @@ MODULE_COMPATIBILITY_EDITS = {
     ),
 }
 
+# Exactly three count-one proof repairs address the actual 24a0 compiler errors.
+# No declaration header, definition, hypothesis, bound, or other module is changed.
+REGULARIZER_PROOF_REPAIR_BASE = '24a0b6532304116ff25f1c793a4dbc6696251b9e'
+REGULARIZER_PROOF_REPAIR_SHA256 = '177fdfdf992c95c77f8211f331379f92b58163764d91a8bd48678640715870b5'
+REGULARIZER_PROOF_ONLY_EDITS = {
+    PREFIX + 'EuclideanHeatRegularizerC2Trace.lean': (
+        ('    simp only [heatHessianMajorantFirstMoment, if_pos rfl]\n',
+         '    simp only [heatHessianMajorantFirstMoment, ↓reduceIte]\n'),
+        ('    simpa only [M, mul_add] using\n      (integrable_abs_coord_mul_heatHessianMajorantND hh ell j).add\n        (integrable_abs_coord_mul_heatHessianMajorantND hh ell k)\n',
+         '    have hsum : Integrable (fun z : Fin n → ℝ =>\n        |z ell| * heatHessianMajorantND h z j +\n          |z ell| * heatHessianMajorantND h z k)\n        (volume : Measure (Fin n → ℝ)) :=\n      (integrable_abs_coord_mul_heatHessianMajorantND hh ell j).fun_add\n        (integrable_abs_coord_mul_heatHessianMajorantND hh ell k)\n    exact hsum.congr (Eventually.of_forall fun z => by\n      dsimp only [M]\n      rw [mul_add])\n'),
+        ('      time_mul_integral_abs_coord_heatHessianMajorantND hh ell j,\n      time_mul_integral_abs_coord_heatHessianMajorantND hh ell k]\n    ring\n  have htransWi : ∀ ell : Fin n,\n',
+         '      time_mul_integral_abs_coord_heatHessianMajorantND hh ell j,\n      time_mul_integral_abs_coord_heatHessianMajorantND hh ell k]\n  have htransWi : ∀ ell : Fin n,\n'),
+    ),
+}
+
 def reconstruct_module(path, original):
     spec = source_transformations()[path]
     assert sha256(original) == spec['original_sha256'], 'Reviewed module input changed'
     source = original
     compatibility = MODULE_COMPATIBILITY_EDITS.get(path, ())
-    seen_compatibility = []
+    proof_edits = REGULARIZER_PROOF_ONLY_EDITS.get(path, ())
+    seen_compatibility, seen_proof_edits = [], []
     for edit in spec['transformations']:
         before, after = edit['before'].encode(), edit['after'].encode()
         assert edit['count'] == 1 and source.count(before) == 1 and after not in source
         pair = (edit['before'], edit['after'])
-        if pair in compatibility:
+        if pair in proof_edits:
+            if not seen_proof_edits:
+                assert spec['pre_proof_repair_commit'] == REGULARIZER_PROOF_REPAIR_BASE
+                assert spec['pre_proof_repair_sha256'] == REGULARIZER_PROOF_REPAIR_SHA256
+                assert sha256(source) == REGULARIZER_PROOF_REPAIR_SHA256, 'Proof repair input must be exact 24a0 bytes'
+            seen_proof_edits.append(pair)
+        elif pair in compatibility:
             seen_compatibility.append(pair)
         else:
             assert re.fullmatch(rb'(?:public )?import \S+\n', before)
@@ -131,9 +170,17 @@ def reconstruct_module(path, original):
             assert before.startswith(b'public ') == after.startswith(b'public '), 'Unrecorded visibility normalization forbidden'
         source = source.replace(before, after, 1)
     assert tuple(seen_compatibility) == compatibility, 'Exact module compatibility edits required'
+    assert tuple(seen_proof_edits) == proof_edits, 'Exactly the three ordered proof repairs required'
     assert sha256(source) == spec['integrated_sha256'], 'Integrated module result changed'
-    # Reverse only the helper's exact preamble before comparing every remaining byte.
+    # Reverse the three exact proof edits to the immutable failed 24a0 input,
+    # then reverse only the helper preamble before comparing every remaining byte.
     mathematical_source = source
+    for before, after in reversed(proof_edits):
+        assert mathematical_source.count(after.encode()) == 1, 'Non-unique proof repair output'
+        mathematical_source = mathematical_source.replace(after.encode(), before.encode(), 1)
+    if proof_edits:
+        assert sha256(mathematical_source) == REGULARIZER_PROOF_REPAIR_SHA256
+        assert mathematical_source == git('show', f'{REGULARIZER_PROOF_REPAIR_BASE}:{path}'), 'Historical 24a0 proof bytes changed'
     if path == PREFIX + 'WeightedDuhamelIntegrand.lean':
         for before, after in reversed(compatibility):
             mathematical_source = mathematical_source.replace(after.encode(), before.encode(), 1)
@@ -193,10 +240,80 @@ def expected_sources():
         assert path in expected and path not in baseline
         original = (ROOT/spec['original_path']).read_bytes()
         assert expected[path][1] == reconstruct_module(path, original)
+    check_inventory()
+    check_release_self_sources()
+    restored_exact_head_workflow((ROOT / EXACT_HEAD_WORKFLOW_PATH).read_bytes())
     return expected
 
 def public_paths():
     return set(baseline_sources()) | set(UNIT_FILE_SHA256) | SELF_PATHS
+
+
+def check_release_self_sources() -> None:
+    """Bind each reviewed self file to stage-zero index and committed HEAD.
+
+    A source-only development tree can be staged, but it is not an exact-head
+    release until the reviewed files are committed. No self digest is recursive.
+    """
+    paths = sorted(SELF_PATHS)
+    head = {}
+    for record in nul_records(raw_git('ls-tree', '-rz', 'HEAD', '--', *paths)):
+        descriptor, name = record.split(b'\t', 1)
+        mode, kind, oid = descriptor.decode().split()
+        path = name.decode()
+        assert path in SELF_PATHS and path not in head, 'Committed self inventory drift'
+        assert kind == 'blob' and mode == '100644' and re.fullmatch(r'[0-9a-f]{40}', oid), 'Committed self blob/mode drift'
+        head[path] = (mode, oid)
+    assert set(head) == SELF_PATHS, 'Missing committed self source'
+    index = {}
+    for record in nul_records(raw_git('ls-files', '--stage', '-z', '--', *paths)):
+        descriptor, name = record.split(b'\t', 1)
+        mode, oid, stage = descriptor.decode().split()
+        path = name.decode()
+        assert path in SELF_PATHS and path not in index and stage == '0', 'Unmerged/missing self index source'
+        assert re.fullmatch(r'[0-9a-f]{40}', oid), 'Self index blob identity drift'
+        index[path] = (mode, oid)
+    assert index == head, 'Self index/committed HEAD blob or mode mismatch'
+    for path, (mode, oid) in head.items():
+        actual = ROOT / path
+        physical = actual.lstat().st_mode
+        assert stat.S_ISREG(physical) and not physical & 0o111, 'Self physical file/mode drift'
+        data = actual.read_bytes()
+        identity = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+        assert identity == oid, 'Self physical/committed HEAD blob mismatch: ' + path
+
+
+
+def adapted_exact_head_workflow(original: bytes) -> bytes:
+    """Insert two independent checkpoints; every original byte stays exact."""
+    assert sha256(original) == EXACT_HEAD_WORKFLOW_ORIGINAL_SHA256, 'Original primary workflow digest drift'
+    source = original.decode()
+    assert source.count(EXACT_HEAD_BEFORE_ANCHOR) == 1 and source.count(EXACT_HEAD_AFTER_ANCHOR) == 1, 'Primary workflow checkpoint anchor count drift'
+    assert EXACT_HEAD_PREFLIGHT not in source and EXACT_HEAD_POSTFLIGHT not in source, 'Primary workflow checkpoints already present'
+    adapted = source.replace(EXACT_HEAD_BEFORE_ANCHOR, EXACT_HEAD_PREFLIGHT + EXACT_HEAD_BEFORE_ANCHOR, 1)
+    adapted = adapted.replace(EXACT_HEAD_AFTER_ANCHOR, EXACT_HEAD_POSTFLIGHT + EXACT_HEAD_AFTER_ANCHOR, 1)
+    before = parse_workflow(source)
+    after = parse_workflow(adapted)
+    steps = after['jobs'][EXACT_HEAD_WORKFLOW_JOB]['steps']
+    assert len(steps) == len(before['jobs'][EXACT_HEAD_WORKFLOW_JOB]['steps']) + 2, 'Primary workflow checkpoint count drift'
+    assert steps.pop(-2) == parse_workflow('steps:\n' + EXACT_HEAD_POSTFLIGHT)['steps'][0], 'Post-gate exact-head checkpoint drift'
+    assert steps.pop(1) == parse_workflow('steps:\n' + EXACT_HEAD_PREFLIGHT)['steps'][0], 'Pre-gate exact-head checkpoint drift'
+    assert after == before, 'Original primary workflow semantics changed'
+    assert adapted.count(EXACT_HEAD_PREFLIGHT) == adapted.count(EXACT_HEAD_POSTFLIGHT) == 1, 'Duplicate exact-head checkpoint'
+    assert adapted.replace(EXACT_HEAD_PREFLIGHT, '', 1).replace(EXACT_HEAD_POSTFLIGHT, '', 1).encode() == original, 'Original primary workflow bytes changed'
+    assert sha256(adapted.encode()) == EXACT_HEAD_WORKFLOW_SHA256, 'Adapted primary workflow digest drift'
+    return adapted.encode()
+
+
+def restored_exact_head_workflow(actual: bytes) -> bytes:
+    original = git('show', EXACT_HEAD_WORKFLOW_BASE + ':' + EXACT_HEAD_WORKFLOW_PATH)
+    expected = adapted_exact_head_workflow(original)
+    assert parse_workflow(actual.decode()) == parse_workflow(expected.decode()), 'Primary workflow exact-head semantic drift'
+    assert actual == expected, 'Primary workflow exact-head bytes changed'
+    restored = actual.decode().replace(EXACT_HEAD_PREFLIGHT, '', 1).replace(EXACT_HEAD_POSTFLIGHT, '', 1).encode()
+    assert restored == original, 'Primary workflow original remainder changed'
+    return restored
+
 
 LAKE_ROOTS = ('curvature/.lake', 'hamilton-ivey-reaction/.lake')
 MANIFESTS = ('curvature/lake-manifest.json', 'hamilton-ivey-reaction/lake-manifest.json')

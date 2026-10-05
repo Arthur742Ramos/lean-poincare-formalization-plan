@@ -1,6 +1,6 @@
 # Weighted actual Gaussian Duhamel Hessian: reviewed source-only preparation
 
-Status: independently source-reviewed mathematical bodies; narrow module/import
+Status: independently source-reviewed mathematical bodies; narrow regularizer proof
 repair pending fresh independent review and exact-head compilation.
 Point 4 remains OPEN. The published historical head has only partial CI evidence.
 
@@ -21,8 +21,9 @@ The exact base is `3a8ed697d1f0366f8370efb2fa9e524b68d27e97`, targeting Lean
 - `WeightedDuhamelHessianFrechetTrace`: uniform-in-space right vanishing of the actual iterated Frechet derivative in its ordinary operator norm
 - `EuclideanHeatRegularizerC2Trace`: genuine uniform C0/value, C1/gradient, Hessian-entry and BCF trace of `h*heat(h)q` for actual bounded uniformly continuous C0 data, with actual coordinate derivative witnesses
 
-All new definitions, hypotheses and proof bodies are byte-identical to their
-independently reviewed frozen sources. The original frozen snapshots and their
+All new definitions, declaration headers, hypotheses and bounds are byte-identical
+to their independently reviewed frozen sources. Proof bodies are unchanged except
+for three exact count-one elaboration repairs in the regularizer, described below. The original frozen snapshots and their
 digests remain unchanged. `source-transformations.json` retains the eight original
 count-one repository import qualifications and records three additional exact
 compatibility edits: the new Gaussian helper's modern/public import preamble and
@@ -34,7 +35,7 @@ modern `EuclideanHeatFrechet`, modern `FiniteMomentApproximation`, and Mathlib's
 `FiniteMomentApproximation.norm_le_sum_abs_coord`. `EuclideanHeatFrechet` supplies
 the existing gradient definition and publicly imports the actual Hessian/BCF
 continuity closure; no C2 datum constructor or initial trace is used. No new mathematical primitive,
-shadow declaration, or proof modification is introduced.
+shadow declaration, hypothesis or weakened bound is introduced.
 
 The actual integral/derivative hypotheses are explicit: `t0<t`, `0<alpha<1`,
 continuous BCF-valued forcing, an actual global value bound, nonnegative `L`,
@@ -92,7 +93,7 @@ There is no complete nine-module compile receipt, new actual theorem/type/axiom
 probe, or full release certificate for that head. Its source, normalized import
 pairs and favorable earlier source review remain historical evidence only.
 
-The replacement changes only the two new source preambles plus exact
+The first replacement changed only the two new source preambles plus exact
 transformation guards, source digests, adversarial fixtures and truthful dossier
 text. Inherited legacy modules, all 74 mathematical declaration surfaces and
 proofs, all inherited 161/155/11 evidence surfaces, workflows and evidence gates,
@@ -101,11 +102,48 @@ exact-byte delta/integration review is required before any draft push; exact
 Lean compilation is still required afterward. PR131's separately stopped
 ready/merge action and all PR bases are outside this repair.
 
+## Actual 24a0 elaboration failure and three proof-only repairs
+
+The next published PR133 head `24a0b6532304116ff25f1c793a4dbc6696251b9e` was checked by
+[official Lean 4.33 run 37306626807](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37306626807).
+It genuinely compiled the other eight mandatory new modules, including
+`WeightedDuhamelHessianFrechetTrace`, but failed the ninth regularizer at
+2026-10-05 12:30:02 UTC. The retained complete failed job log has SHA256
+`7f8088506e81958ac20fb13e1374f3662c2cef67c1df9eb220fa43c11a092417`.
+The new actual theorem/type/axiom/rank-zero probe, inherited full build and
+later final audit gates were skipped. Eight successful units do not qualify
+this head or the replacement as a complete verified release.
+
+This second repair changes exactly three regularizer proof blocks:
+
+1. Reduce the reflexive diagonal conditional before the existing sound
+   Gaussian first/third moment, square-root and nonzero-denominator arithmetic
+2. Give the positive first-moment pair an explicitly typed pointwise sum and
+   volume measure, use the pinned `Integrable.fun_add` API, and transport it by
+   actual almost-everywhere distributivity using `Integrable.congr`
+3. Remove the redundant `ring` after the summed-moment rewrite already closes
+   its goal, as the actual compiler reported
+
+The original reviewed regularizer snapshot and the failed 24a0 input retain
+SHA256 `ca8598bd4eddf118a7bf2afa097e232cd872e8ffc7f3b2b9fe76bdf913531f44` and
+`177fdfdf992c95c77f8211f331379f92b58163764d91a8bd48678640715870b5` respectively.
+The source guard reconstructs the three exact ordered count-one edits, then
+reverses them to every original 24a0 byte before comparing the original frozen
+mathematical source. Missing, duplicated, reordered, changed or extra proof
+transformations are rejected. The other eight new modules, all 23 regularizer
+public declarations, every data definition and hypothesis, all norm constants,
+genuine actual Gaussian derivatives, rank-zero scope, inherited sources, pins,
+probes, workflows, contract and compiler/evidence gates remain unchanged.
+Fresh exact-byte source review is required before any draft push, and actual
+exact-head Lean qualification is still required afterward.
+
 ## Honest remaining boundary
 
-No Lean compiler, proof runtime, dependency installation, cache write, new
-source download, publication or CI execution was performed for this local repair.
-The historical CI failure above is disclosed separately. Exact-toolchain
+No Lean compiler, proof runtime, dependency installation, cache expansion,
+publication or CI execution was performed for this local repair. Small read-only
+official pinned API excerpts and retained immutable source snapshots support
+the source review; they are not compiler evidence.
+The two historical CI failures above are disclosed separately. Exact-toolchain
 elaboration of the repaired bytes and final independent integrated release review remain pending.
 The approved replacement trace is SHA64f8f5bc; original SHA065d29c1 was rejected
 for seven unresolved initial-time applications and remains historical. The

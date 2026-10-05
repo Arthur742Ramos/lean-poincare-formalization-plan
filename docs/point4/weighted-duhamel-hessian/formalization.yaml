@@ -10,9 +10,10 @@ project:
     forcing, strong finite-BCF Hessian-entry trace, and uniform vanishing of
     the actual second Frechet derivative operator norm. A ninth independent Euclidean leaf proves actual
     C0/C1/Hessian regularizer traces from bounded uniform continuity of C0 data,
-    with actual coordinate derivative witnesses. The current narrow
-    module/import replacement remains uncompiled; a historical head has only
-    partial compiler evidence and failed two legacy-module imports. This does not prove nonlinear Ricci-DeTurck existence, a
+    with actual coordinate derivative witnesses. The current narrow regularizer
+    proof replacement remains uncompiled. Historical 90cc failed two legacy-module
+    imports; historical 24a0 compiled eight mandatory units and failed the ninth
+    regularizer. Neither has complete release qualification. This does not prove nonlinear Ricci-DeTurck existence, a
     weighted solver, geometric gauge recovery, weak uniqueness, or Point-4
     closure. Assembly in the full strong C2 topology and positive-time Hessian time
     continuity remain separate OPEN obligations.
@@ -88,11 +89,17 @@ automation:
         Immutable-source/API review and additive source integration. Historical
         PR133 head 90cc7ebed996f28acb57ef9948d37f114088bd4d has partial official
         4.33 CI evidence, ending in two modern/legacy module-import failures.
-        No Lean compiler/runtime/cache/install/download, publication, CI execution,
+        Historical 24a0b6532304116ff25f1c793a4dbc6696251b9e compiled eight
+        mandatory new units but failed three proof elaboration blocks in the
+        ninth regularizer; later probes/full build/audit were skipped.
+        Small read-only pinned source/API excerpts and retained snapshots were
+        inspected. No Lean compiler/runtime/cache expansion/install, publication, CI execution,
         merge or registry action was performed for the current local repair.
       prompting_notes: >-
-        Preserve every reviewed definition, theorem hypothesis and proof byte;
-        admit only count-one import qualifications, the new Gaussian helper's
+        Preserve every reviewed definition, public declaration header, hypothesis,
+        bound and other mathematical byte. Admit exactly three ordered
+        count-one regularizer proof elaboration repairs, with full reversal to
+        the immutable failed 24a0 source, alongside count-one import qualifications, the new Gaussian helper's
         exact module/public-preamble normalization, the regularizer's exact
         modern import-block replacement, and exact source dispatch adapters.
         Inherited legacy modules are not normalized. New modules are deliberately absent from inherited root
@@ -107,8 +114,8 @@ review:
     publication. The original trace was rejected for missing initial-time arguments; the exact
     seven-argument replacement and unchanged optional operator trace are
     independently approved source only. The regularizer has independent source-only
-    approval of its unchanged mathematical body. The current exact module/import
-    compatibility delta and integrated release require fresh independent review
+    approval of its original mathematical body. The current exact three-block
+    proof elaboration delta and integrated release require fresh independent review
     before a draft push; historical partial CI is not a complete verification
     certificate. Identification with a constructed global metric endpoint family
     and its ordinary endpoint component derivatives, and full strong C2 assembly,

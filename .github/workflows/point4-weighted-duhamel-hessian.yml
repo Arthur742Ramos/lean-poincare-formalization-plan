@@ -34,6 +34,50 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
           fetch-depth: 0
+      - name: Check immutable release HEAD and tracked cleanliness before candidate gates
+        env:
+          GIT_NO_LAZY_FETCH: '1'
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(/usr/bin/git --no-replace-objects rev-parse HEAD)" = "$EXPECTED_SHA"
+          /usr/bin/git --no-replace-objects -c core.fileMode=true -c core.fsmonitor=false diff --cached --no-ext-diff --no-textconv --ignore-submodules=none --exit-code HEAD -- .
+          /usr/bin/git --no-replace-objects -c core.fileMode=true -c core.fsmonitor=false diff --no-ext-diff --no-textconv --ignore-submodules=none --exit-code -- .
+          /usr/bin/python3 -I -B - <<'PY_TRACKED_SOURCE'
+          import hashlib, os, pathlib, stat, subprocess
+          root = pathlib.Path('.').absolute()
+          def git(*args):
+              return subprocess.check_output(['/usr/bin/git', '--no-replace-objects', '-C', str(root), *args])
+          expected_sha = os.environ['EXPECTED_SHA']
+          assert git('rev-parse', 'HEAD').decode().strip() == expected_sha, 'Independent expected release HEAD mismatch'
+          head = {}
+          for record in git('ls-tree', '-rz', expected_sha).split(b'\0')[:-1]:
+              descriptor, name = record.split(b'\t', 1)
+              mode, kind, oid = descriptor.decode().split()
+              path = name.decode()
+              assert kind == 'blob' and mode in {'100644', '100755'} and path not in head
+              head[path] = (mode, oid)
+          index = {}
+          for record in git('ls-files', '--stage', '-z').split(b'\0')[:-1]:
+              descriptor, name = record.split(b'\t', 1)
+              mode, oid, stage = descriptor.decode().split()
+              path = name.decode()
+              assert stage == '0' and path not in index
+              index[path] = (mode, oid)
+          assert index == head, 'Independent tracked index/HEAD identity mismatch'
+          for path, (mode, oid) in head.items():
+              physical = root / path
+              for parent in physical.parents:
+                  assert stat.S_ISDIR(parent.lstat().st_mode), 'Independent tracked source directory/symlink drift'
+                  if parent == root:
+                      break
+              actual_mode = physical.lstat().st_mode
+              assert stat.S_ISREG(actual_mode) and bool(actual_mode & 0o111) == (mode == '100755'), 'Independent tracked source file/mode drift'
+              data = physical.read_bytes()
+              blob = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+              assert blob == oid, 'Independent tracked physical/HEAD blob mismatch: ' + path
+          assert git('rev-parse', 'HEAD').decode().strip() == expected_sha, 'Independent expected release HEAD changed during tracked inspection'
+          PY_TRACKED_SOURCE
       - name: Install pinned safe YAML parser from the official package registry
         run: |
           python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0
@@ -110,6 +154,51 @@ jobs:
           set -e
           cp /tmp/point4_build.log /tmp/point4-weighted-hessian-evidence/audit-build.log
           python3 scripts/point4_weighted_hessian_release_guard.py --schema /tmp/point4-weighted-hessian-evidence/official-schema.json --compile-log /tmp/point4-weighted-hessian-evidence/compile.log --probe-log /tmp/point4-weighted-hessian-evidence/probe.log --axiom-dir /tmp/point4-weighted-hessian-evidence/inherited-probes --audit-json /tmp/point4-weighted-hessian-evidence/audit.json --audit-rc "$audit_rc" --evidence-dir /tmp/point4-weighted-hessian-evidence
+      - name: Check immutable release HEAD and tracked cleanliness after candidate gates
+        if: always()
+        env:
+          GIT_NO_LAZY_FETCH: '1'
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(/usr/bin/git --no-replace-objects rev-parse HEAD)" = "$EXPECTED_SHA"
+          /usr/bin/git --no-replace-objects -c core.fileMode=true -c core.fsmonitor=false diff --cached --no-ext-diff --no-textconv --ignore-submodules=none --exit-code HEAD -- .
+          /usr/bin/git --no-replace-objects -c core.fileMode=true -c core.fsmonitor=false diff --no-ext-diff --no-textconv --ignore-submodules=none --exit-code -- .
+          /usr/bin/python3 -I -B - <<'PY_TRACKED_SOURCE'
+          import hashlib, os, pathlib, stat, subprocess
+          root = pathlib.Path('.').absolute()
+          def git(*args):
+              return subprocess.check_output(['/usr/bin/git', '--no-replace-objects', '-C', str(root), *args])
+          expected_sha = os.environ['EXPECTED_SHA']
+          assert git('rev-parse', 'HEAD').decode().strip() == expected_sha, 'Independent expected release HEAD mismatch'
+          head = {}
+          for record in git('ls-tree', '-rz', expected_sha).split(b'\0')[:-1]:
+              descriptor, name = record.split(b'\t', 1)
+              mode, kind, oid = descriptor.decode().split()
+              path = name.decode()
+              assert kind == 'blob' and mode in {'100644', '100755'} and path not in head
+              head[path] = (mode, oid)
+          index = {}
+          for record in git('ls-files', '--stage', '-z').split(b'\0')[:-1]:
+              descriptor, name = record.split(b'\t', 1)
+              mode, oid, stage = descriptor.decode().split()
+              path = name.decode()
+              assert stage == '0' and path not in index
+              index[path] = (mode, oid)
+          assert index == head, 'Independent tracked index/HEAD identity mismatch'
+          for path, (mode, oid) in head.items():
+              physical = root / path
+              for parent in physical.parents:
+                  assert stat.S_ISDIR(parent.lstat().st_mode), 'Independent tracked source directory/symlink drift'
+                  if parent == root:
+                      break
+              actual_mode = physical.lstat().st_mode
+              assert stat.S_ISREG(actual_mode) and bool(actual_mode & 0o111) == (mode == '100755'), 'Independent tracked source file/mode drift'
+              data = physical.read_bytes()
+              blob = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+              assert blob == oid, 'Independent tracked physical/HEAD blob mismatch: ' + path
+          assert git('rev-parse', 'HEAD').decode().strip() == expected_sha, 'Independent expected release HEAD changed during tracked inspection'
+          PY_TRACKED_SOURCE
       - name: Preserve exact-head evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

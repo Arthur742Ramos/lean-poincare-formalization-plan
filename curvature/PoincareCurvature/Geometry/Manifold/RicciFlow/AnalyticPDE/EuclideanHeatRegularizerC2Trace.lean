@@ -102,7 +102,7 @@ theorem time_mul_integral_abs_coord_heatHessianMajorantND
       simpa only [show (1 : ℝ) + 2 = 3 by norm_num, Real.rpow_one,
         hpow, hcube, heatHessianMajorantND, mul_assoc] using hm
     rw [hm']
-    simp only [heatHessianMajorantFirstMoment, if_pos rfl]
+    simp only [heatHessianMajorantFirstMoment, ↓reduceIte]
     field_simp [hh.ne']
     <;> ring
   · have hm := integral_abs_coord_rpow_secondDeriv_majorantND_offdiag_eq
@@ -172,9 +172,15 @@ theorem abs_time_mul_heatHessianEntryConvolutionND_le_modulus
     (heatHessianMajorantND_nonneg hh z j) (heatHessianMajorantND_nonneg hh z k)
   have hWi : ∀ ell : Fin n, Integrable (fun z => |z ell| * M z) := by
     intro ell
-    simpa only [M, mul_add] using
-      (integrable_abs_coord_mul_heatHessianMajorantND hh ell j).add
+    have hsum : Integrable (fun z : Fin n → ℝ =>
+        |z ell| * heatHessianMajorantND h z j +
+          |z ell| * heatHessianMajorantND h z k)
+        (volume : Measure (Fin n → ℝ)) :=
+      (integrable_abs_coord_mul_heatHessianMajorantND hh ell j).fun_add
         (integrable_abs_coord_mul_heatHessianMajorantND hh ell k)
+    exact hsum.congr (Eventually.of_forall fun z => by
+      dsimp only [M]
+      rw [mul_add])
   have hmass : h * (∫ z : Fin n → ℝ, M z) = 2 := by
     rw [integral_add (integrable_heatHessianMajorantND hh j)
       (integrable_heatHessianMajorantND hh k),
@@ -192,7 +198,6 @@ theorem abs_time_mul_heatHessianEntryConvolutionND_le_modulus
       (integrable_abs_coord_mul_heatHessianMajorantND hh ell k), mul_add,
       time_mul_integral_abs_coord_heatHessianMajorantND hh ell j,
       time_mul_integral_abs_coord_heatHessianMajorantND hh ell k]
-    ring
   have htransWi : ∀ ell : Fin n,
       (∫ y : Fin n → ℝ, |(x - y) ell| * M (x - y)) =
         ∫ z : Fin n → ℝ, |z ell| * M z := fun ell =>
