@@ -31,8 +31,8 @@ private def writeJsonAtomic (path : FilePath) (value : Json) : IO Unit := do
 
 private def batchRecordPath (evidence : FilePath) (batch : Nat) : FilePath :=
   let number := toString batch
-  let prefix := String.ofList (List.replicate (4 - number.length) '0')
-  evidence / "batch-results" / (prefix ++ number ++ ".json")
+  let batchPrefix := String.ofList (List.replicate (4 - number.length) '0')
+  evidence / "batch-results" / (batchPrefix ++ number ++ ".json")
 
 private def batchTargets (batch : HamiltonBatch) (jobs : Nat) : IO (Array String) := do
   if batch.modules.isEmpty || batch.chains.isEmpty || batch.chains.size > jobs then
