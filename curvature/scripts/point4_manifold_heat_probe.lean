@@ -1,7 +1,7 @@
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.BoundarylessTensorHeatFixedBackground
 
 set_option pp.universes false
-set_option pp.width 180
+set_option format.width 180
 
 #print axioms CovariantDerivative.ManifoldBoundaryless.contDiffOn_writtenInExtChartAt_of_contMDiffOn
 #print axioms CovariantDerivative.ManifoldBoundaryless.contDiffOn_localFrameInChart

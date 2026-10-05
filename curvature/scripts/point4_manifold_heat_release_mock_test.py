@@ -65,13 +65,34 @@ class ManifoldReleaseGuardTests(unittest.TestCase):
         for path in release.R2_FILE_SHA256:
             actual = (release.ROOT / path).read_bytes()
             release.check_unit_blob(path, actual)
-            if path.endswith('.lean') or path.endswith('point4_manifold_heat_mock_test.py'):
+            if path != release.PROBE and (path.endswith('.lean') or path.endswith('point4_manifold_heat_mock_test.py')):
                 self.assertEqual(release.sha256(actual), release.R2_FILE_SHA256[path])
         for path in release.UNIT_FILE_SHA256:
             with self.subTest(path=path), self.assertRaises(AssertionError):
                 release.check_unit_blob(path, (release.ROOT / path).read_bytes() + b'\n')
         with self.assertRaises(AssertionError):
             release.check_unit_blob('unknown.lean', b'')
+
+    def test_exact_count_one_printer_repair_preserves_all_probe_commands(self):
+        original = release.git('show', f'{release.PROBE_ORIGINAL_HEAD}:{release.PROBE}')
+        actual = (release.ROOT / release.PROBE).read_bytes()
+        self.assertEqual(actual, release.repaired_probe(original))
+        self.assertEqual(actual.replace(release.PROBE_NEW_OPTION, release.PROBE_OLD_OPTION, 1), original)
+        commands = lambda data: [line for line in data.splitlines() if line.startswith(b'#')]
+        self.assertEqual(commands(actual), commands(original))
+        self.assertEqual(sum(line.startswith(b'#print axioms ') for line in commands(actual)), 11)
+        self.assertEqual(sum(line.startswith(b'#check @') for line in commands(actual)), 4)
+        for wrong in (original + b'\n', actual,
+                      original.replace(release.PROBE_OLD_OPTION, b''),
+                      original.replace(release.PROBE_OLD_OPTION, release.PROBE_OLD_OPTION * 2),
+                      original.replace(b'#check @', b'#check ', 1)):
+            with self.subTest(identity=release.sha256(wrong)), self.assertRaises(AssertionError):
+                release.repaired_probe(wrong)
+        for wrong in (original, actual + b'\n',
+                      actual.replace(release.PROBE_NEW_OPTION, b'set_option format.width 80\n'),
+                      actual.replace(b'#print axioms ', b'#check ', 1)):
+            with self.subTest(identity=release.sha256(wrong)), self.assertRaises(AssertionError):
+                release.check_unit_blob(release.PROBE, wrong)
 
     def test_precise_public_union_no_missing_or_arbitrary_extra_path(self):
         valid = release.public_paths()

@@ -1,6 +1,6 @@
 # Guarded manifold-only heat release integration
 
-Status: source-only and uncompiled. Point 4 remains OPEN. Fresh independent
+Status: source-only printer-option repair, not compiler-verified. Point 4 remains OPEN. Fresh independent
 release review and all exact-head Lean 4.33 gates are required before merging.
 No local Lean, installation, cache expansion, publication or registry action
 was performed while preparing this release unit.
@@ -10,8 +10,14 @@ was performed while preparing this release unit.
 Baseline: `e6b54dd0d7e73a51eb8efb083764b68ae8305a5a` (merged PR129).
 The approved R2 patch is SHA256
 `7ad46de150fee41810bdc78b3751d8b0451b4d99f4b6c741e886789d94084134`.
-All three R2 proof modules and the full theorem/axiom probe are byte-identical
-to that source-reviewed patch. All 1,640 other baseline paths are exact bytes
+All three R2 proof modules are byte-identical to that source-reviewed patch.
+The full theorem/axiom probe differs only by the count-one replacement of
+`set_option pp.width 180` with `set_option format.width 180`. All eleven axiom
+commands, four full-type commands, markers and imports remain byte-identical.
+The release guard preserves the original R2 probe digest and reconstructs this
+exact substitution from immutable PR131 head
+`c1537f72b6f354f63c5f76678a4c4d33d55d52f7`, in addition to pinning the new digest.
+All 1,640 other baseline paths are exact bytes
 and modes, including every proof, workflow, pin, contract, auditor, contributor
 notice, root library import and root formalization metadata.
 
@@ -45,6 +51,21 @@ remain mandatory. The additional mode check rejects symlink substitutions and
 executable-mode drift.
 
 ## Evidence boundary and pending gates
+
+At the original PR131 head `c1537f72b6f354f63c5f76678a4c4d33d55d52f7`,
+[exact-head run 37264707859](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37264707859)
+successfully built the actual producer with Lean 4.33.0, commit
+`d8b18978322de05a8f3dba51ef03cf5461676c17`. The next full type/axiom probe
+failed at line 4 with `Unknown option pp.width`; its terminal job log remains
+historical evidence. The later unchanged full-library build, inherited probes,
+contract/kernel fixtures and completion audit were not reached in that run.
+The pinned official
+[Lean format-option source](https://github.com/leanprover/lean4/blob/d8b18978322de05a8f3dba51ef03cf5461676c17/src/Lean/Data/Format.lean)
+(Git blob `ff82cfbcd4419a8a3c9ae0e6213902c60f4466cf`) registers `format.width`.
+Only that printer-option name is repaired, retaining the intended width of
+180. No local Lean process has run for this repair. Fresh exact-repair-head
+compilation and every subsequent gate remain required; a historical producer
+pass or source/mock validation cannot certify the repaired release unit.
 
 The focused workflow first directly builds the actual new producer, since
 it is intentionally not imported by the unchanged root library. It then

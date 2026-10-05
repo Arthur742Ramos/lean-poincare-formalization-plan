@@ -18,6 +18,10 @@ BASE = 'e6b54dd0d7e73a51eb8efb083764b68ae8305a5a'
 R2_PATCH_SHA256 = '7ad46de150fee41810bdc78b3751d8b0451b4d99f4b6c741e886789d94084134'
 C2_GUARD = 'curvature/scripts/point4_c2_initial_heat_source_test.py'
 SOURCE_GUARD = 'curvature/scripts/point4_manifold_heat_source_test.py'
+PROBE = 'curvature/scripts/point4_manifold_heat_probe.lean'
+PROBE_ORIGINAL_HEAD = 'c1537f72b6f354f63c5f76678a4c4d33d55d52f7'
+PROBE_OLD_OPTION = b'set_option pp.width 180\n'
+PROBE_NEW_OPTION = b'set_option format.width 180\n'
 WORKFLOW = '.github/workflows/point4-manifold-only-fixed-background-heat.yml'
 METADATA = 'docs/point4/manifold-only-fixed-background-heat/formalization.yaml'
 RELEASE_GUARD = 'curvature/scripts/point4_manifold_heat_release_guard.py'
@@ -41,13 +45,13 @@ R2_FILE_SHA256 = {'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/Analy
 UNIT_FILE_SHA256 = {'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/BoundarylessTensorHeatCoefficients.lean': 'd585dbb3ff601c57e325249c28a0f0698a9a2750e2f5759e9260bb751a83da0f',
  'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/BoundarylessTensorHeatLocalization.lean': '026bae310bfc18ae5ceb20765222ef6d6852690a6b593e5be4e188d45b38ebb9',
  'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/BoundarylessTensorHeatFixedBackground.lean': '2986e77ff34184000d57defba9675f363ceeb7cdb06ef48d8f9a6a18949c6a26',
- 'curvature/scripts/point4_manifold_heat_probe.lean': 'dda0e8ebbfb3c11661df666fed6d739225ef66fa16eae5048d1b8b8b8e300537',
+ 'curvature/scripts/point4_manifold_heat_probe.lean': 'be26ae8baf105960e616b2bde500d318f972ec3b7858ede6b84e926e0f98edff',
  'curvature/scripts/point4_manifold_heat_source_test.py': '7bf46239191c67066bee4576c309daed6535cde2234b2dd4c4f8b5146c327f78',
  'curvature/scripts/point4_manifold_heat_mock_test.py': '8fa11d167b71d949eb89885b3ea4285aec85cc8d20d3070b207e9f2c3200d5b0',
  'docs/point4/manifold-only-fixed-background-heat.md': '80864bb52073f4fb420fdb109781d939a5e3985eb779c71632d2d820115cbb59',
  'docs/point4/manifold-only-fixed-background-heat/formalization.yaml': '5572cb0804cb1343ff49aaed805e4370b6c9bc409e3856a3dc46d6086e3bf759',
  '.github/workflows/point4-manifold-only-fixed-background-heat.yml': 'ec514eb318b5869a6ace7f99c8c70f958def3bb937ed76c4d286a1d807beb360',
- 'docs/point4/manifold-only-heat-release-integration.md': 'eaf706f31abc1a96df57a26f5f7a5fd519af790cb3073bd386feae658a222454'}
+ 'docs/point4/manifold-only-heat-release-integration.md': '2de3a557978152e93d1e0a86b5abb834bc2678e29282a7f864088005e94f39fa'}
 
 
 def git(*args: str) -> bytes:
@@ -64,6 +68,13 @@ def adapted_c2_guard(original: bytes) -> bytes:
     assert source.count(ENTRY_POINT) == 1, 'Inherited guard needs exactly one original entry point'
     assert C2_ADAPTER not in source, 'Inherited guard adapter already present'
     return source.replace(ENTRY_POINT, C2_ADAPTER + ENTRY_POINT.lstrip('\n'), 1).encode()
+
+
+def repaired_probe(original: bytes) -> bytes:
+    assert sha256(original) == R2_FILE_SHA256[PROBE], 'Historical R2 probe identity changed'
+    assert original.count(PROBE_OLD_OPTION) == 1, 'Probe needs exactly one unsupported printer option'
+    assert PROBE_NEW_OPTION not in original, 'Probe printer-option repair already present'
+    return original.replace(PROBE_OLD_OPTION, PROBE_NEW_OPTION, 1)
 
 
 @functools.lru_cache(maxsize=1)
@@ -87,7 +98,10 @@ def baseline_sources() -> dict[str, tuple[str, bytes]]:
 def check_unit_blob(path: str, actual: bytes) -> None:
     assert path in UNIT_FILE_SHA256, f'Non-enumerated release blob: {path}'
     assert sha256(actual) == UNIT_FILE_SHA256[path], f'Exact release blob changed: {path}'
-    if path.endswith('.lean') or path.endswith('point4_manifold_heat_mock_test.py'):
+    if path == PROBE:
+        assert actual == repaired_probe(git('show', f'{PROBE_ORIGINAL_HEAD}:{PROBE}')), \
+            'Probe differs beyond the exact printer-option repair'
+    elif path.endswith('.lean') or path.endswith('point4_manifold_heat_mock_test.py'):
         assert UNIT_FILE_SHA256[path] == R2_FILE_SHA256[path], f'Reviewed R2 proof/probe/test changed: {path}'
 
 
@@ -232,7 +246,7 @@ def main(argv=None) -> None:
         check_new_probe(args.probe_log.read_text())
     print(json.dumps({'baseline': BASE, 'public_paths': len(public_paths()),
                       'inherited_files_byte_identical': 1640, 'exact_inherited_guard_adapters': 1,
-                      'r2_proof_and_probe_blobs_unchanged': True,
+                      'r2_proof_blobs_unchanged': True, 'exact_probe_printer_option_replacements': 1,
                       'root_imports_and_metadata_byte_identical': True,
                       'lean_verified': False, 'point4': 'OPEN'}, indent=2))
     print('Source-only release checks passed; exact Lean 4.33 producer/probes/full-build/kernel gates remain separate')
