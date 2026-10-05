@@ -114,25 +114,40 @@ theorem initialMetricCoordinates_pos_at_point
     (p : M) (b : Module.Basis (Fin d) ℝ E) (v : Fin d → ℝ) (hv : v ≠ 0) :
     0 < ofMatrix (initialMetricCoordinates g₀ p b
       (initialMetricCoordinatePoint (I := I) p b)) v v := by
-  letI : FiberBundle E TM := TangentSpace.fiberBundle (I := I)
-  letI : VectorBundle ℝ E TM := TangentSpace.vectorBundle (I := I)
-  letI : MemTrivializationAtlas (trivialization (I := I) p) := by
-    change MemTrivializationAtlas (trivializationAt E TM p)
-    infer_instance
+  classical
   have hp : p ∈ (trivialization (I := I) p).baseSet := by
     simpa only [trivialization, TangentBundle.trivializationAt_baseSet, extChartAt_source] using
       (mem_extChartAt_source (I := I) p)
-  have h := PoincareCurvature.ParametrizedInner.timeDependentGram_pos
-    g₀ (trivialization (I := I) p) b hp hv
-  rw [ofMatrix_apply]
-  simp only [initialMetricCoordinates_at_point]
-  convert h using 1
-  apply Finset.sum_congr rfl
-  intro i _
-  apply Finset.sum_congr rfl
-  intro k _
-  simp only [frame]
-  ring
+  let bas : Module.Basis (Fin d) ℝ (TM p) :=
+    (trivialization (I := I) p).basisAt b hp
+  have hframe (i : Fin d) : frame (I := I) p b i p = bas i :=
+    Bundle.Trivialization.localFrame_apply_of_mem_baseSet
+      (e := trivialization (I := I) p) (b := b) hp
+  let w : TM p := ∑ i, v i • bas i
+  have hw : w ≠ 0 := by
+    intro hw0
+    apply hv
+    calc
+      v = bas.repr w := by
+        simpa only [w] using (bas.repr_sum_self v).symm
+      _ = 0 := by simp [hw0]
+  have hsum : g₀.inner p w w =
+      ofMatrix (initialMetricCoordinates g₀ p b
+        (initialMetricCoordinatePoint (I := I) p b)) v v := by
+    rw [ofMatrix_apply]
+    simp only [initialMetricCoordinates_at_point, hframe]
+    show (g₀.inner p) (∑ i, v i • bas i) (∑ k, v k • bas k) = _
+    rw [_root_.map_sum (g₀.inner p), ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.smul_apply,
+      _root_.map_sum (g₀.inner p (bas i)), Finset.smul_sum]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [ContinuousLinearMap.map_smul, smul_eq_mul, smul_eq_mul]
+    ring
+  calc
+    0 < g₀.inner p w w := g₀.pos p w hw
+    _ = ofMatrix (initialMetricCoordinates g₀ p b
+        (initialMetricCoordinatePoint (I := I) p b)) v v := hsum
 
 /-- Every literal C² metric yields genuine bounded C² Euclidean heat data in
 the actual preferred coordinates, equal to the metric near the point and

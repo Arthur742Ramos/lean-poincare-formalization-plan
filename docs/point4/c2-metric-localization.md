@@ -394,6 +394,62 @@ obstruction to the universal C² existence campaign remains in effect;
 this localization is independently useful supporting work and does not
 restart that stopped closure. Point 4 remains **OPEN**.
 
+## Historical 3cc normed-fibre specialization failure
+
+The exact source-reviewed `3cc022efb0ba8f117e7a8b729a736be71e8a0fe1`
+candidate, tree `81aca106f722c27dc54e74d56416e78fea47b5e9`, failed
+[`111855039677`](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37337249603/job/111855039677)
+in Lean 4.33 run `37337249603` on 2026-10-05 at 16:19 UTC.
+The complete log again reaches the actual Gram positivity call, with both
+canonical bundle instances and the preferred-trivialization atlas proof
+already present in the local context. It still reports failure to synthesize
+`FiberBundle E (TangentSpace I)`, leaves three atlas obligations, and cannot
+close the coefficient equality by `ring` although its default pretty-printer
+shows apparently identical Gram coefficients. The complete localization
+module, all later signature/axiom/library/canonical gates, and the exact
+candidate remain compiler-unverified. All earlier source reviews, immutable
+candidates and failed compiler logs remain historical, including 880a and 3cc.
+
+The source-level specialization mismatch is the generic Gram theorem's
+`[forall x, NormedAddCommGroup (V x)]` and `[forall x, NormedSpace real (V x)]`
+route. It carries the normed structures' projected fibre topology, group and
+module into its hidden `FiberBundle`, `VectorBundle`, atlas and `localFrame`
+parameters. By contrast, the actual tangent metric and preferred frame use
+Mathlib's separately derived tangent fibre topology, additive group and
+module. The existing `instNormedAddCommGroupTangentSpace` and
+`instNormedSpaceTangentSpace` unfold the tangent synonym to the model to
+provide pointwise norms; a generic normed-fibre family does not identify the
+original hidden parameters by syntactic instance inference. The existing
+`DowngradeNormFree` module records this same tangent-family diamond. The
+failed log does not print the hidden metavariable expressions, so this is a
+source-parameter diagnosis rather than a newly measured compiler trace.
+
+This caller-only repair removes the generic normed-fibre specialization. It
+selects the genuine preferred trivialization's `basisAt` in the original
+tangent family, identifies its vectors with the same actual preferred frame,
+and shows that the weighted basis sum of a nonzero coordinate vector is
+nonzero using `Basis.repr_sum_self`. Expanding the unchanged continuous
+bilinear form by finite-sum and scalar-multiplication identities then gives
+exactly the unchanged `ofMatrix` contraction. Positivity is `g0.pos` on that
+actual nonzero tangent vector. No new bundle or normed-fibre instance is
+installed, and the shared proven `TimeDependentGram` module is unchanged.
+
+Every public declaration header and every byte outside the existing
+positivity proof block remains identical to 3cc. The actual metric, preferred
+chart, frame, definitions and data values, literal C2 regularity, arbitrary
+models under `BoundarylessManifold I M`, rank-zero/empty cases and bounds are
+unchanged. The only source-guard change is this module's derived digest.
+Mocks, fixtures, probes, inherited modules, workflows, metadata, toolchain
+and Mathlib pins, contract and full canonical-gate semantics are unchanged.
+
+This candidate is **SOURCE_ONLY_COMPILER_UNVERIFIED**. Static API review and
+reversible source-transform checks do not establish Lean elaboration.
+Independent exact-source review and complete hosted exact-head Lean 4.33
+verification remain required before qualification or merge. The independently
+reviewed, unformalized obstruction to universal all-C2 existence remains in
+effect; this supporting localization does not restart that stopped closure.
+Point 4 remains **OPEN**.
+
 ## Remaining mathematical gaps
 
 This local constructor does not discharge anisotropic inverse-Gram heat
