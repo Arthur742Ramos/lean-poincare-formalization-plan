@@ -70,7 +70,7 @@ R1_PROOF_REPAIRS = (
         '    simp only [Function.comp_apply, smul_eq_mul, sub_zero, add_sub_cancel_left]\n    rw [mul_div_cancel_left₀ _ (ne_of_lt htneg)]\n',
     ),
 )
-UNIT_FILE_SHA256 = {'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatTwoSidedInitial.lean': '80570fc81fe42ad5cd958584ab2b1252c3145bc815877235b2de3d05be26c487', 'curvature/scripts/point4_two_sided_heat_probe.lean': '3b871129c36100927a141430678bed1bcd190e2f2ea0f7acbbfec0f9f3451af4', '.github/workflows/point4-two-sided-heat.yml': '376368cd2508cff7dd9c140204a86d2ea60088d032dfb8b619e2a126b1d026fa', 'docs/point4/two-sided-initial-heat.md': '62098f30c834757f8cc8bb8e4943bb19a48e9fbe0f2792f92d48aa1aa852447f', 'docs/point4/two-sided-initial-heat/formalization.yaml': '2ef33efb616317d135381c7d059a70055cf9c99bc3cf4486491508f5ec370e43', 'docs/point4/two-sided-heat-release-integration.md': 'df554d8f747bc462b3c917ee412e1b919150beda2837f9fa432a09e993e2e126'}
+UNIT_FILE_SHA256 = {'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatTwoSidedInitial.lean': '80570fc81fe42ad5cd958584ab2b1252c3145bc815877235b2de3d05be26c487', 'curvature/scripts/point4_two_sided_heat_probe.lean': '3b871129c36100927a141430678bed1bcd190e2f2ea0f7acbbfec0f9f3451af4', '.github/workflows/point4-two-sided-heat.yml': '376368cd2508cff7dd9c140204a86d2ea60088d032dfb8b619e2a126b1d026fa', 'docs/point4/two-sided-initial-heat.md': '62098f30c834757f8cc8bb8e4943bb19a48e9fbe0f2792f92d48aa1aa852447f', 'docs/point4/two-sided-initial-heat/formalization.yaml': '2ef33efb616317d135381c7d059a70055cf9c99bc3cf4486491508f5ec370e43', 'docs/point4/two-sided-heat-release-integration.md': '0cb908658683da8b69e01e542c1e8defbb0f9526db5948e35053c0c80394445c'}
 
 
 # Importlib writes a module's bytecode before executing its body. Suppression
@@ -239,6 +239,17 @@ def nul_paths(output: bytes) -> set[str]:
 
 LAKE_ROOTS = ('curvature/.lake', 'hamilton-ivey-reaction/.lake')
 MANIFESTS = ('curvature/lake-manifest.json', 'hamilton-ivey-reaction/lake-manifest.json')
+# The pinned ProofWidgets widgetPackageLock target uses Lake's text-file hash.
+# Lake 4.33 writes exactly 16 lowercase hex bytes beside this tracked input.
+# This is one fixed sidecar, never a package-wide or arbitrary .hash exemption.
+PROOFWIDGETS_REV = '4be2e3d5087eeb272cf5a8853b8f9dd025ef5957'
+PROOFWIDGETS_LOCK = 'curvature/.lake/packages/proofwidgets/widget/package-lock.json'
+PROOFWIDGETS_LOCK_BLOB = '06d5baf2fae78fed1fdae485f4c2c054a0bccfb2'
+PROOFWIDGETS_LOCK_SIZE = 172140
+PROOFWIDGETS_FINGERPRINT = PROOFWIDGETS_LOCK + '.hash'
+# Source-derived for the pinned Linux/little-endian Lean 4.33 text hash;
+# this is not a compiler/runtime qualification claim. See release integration.
+PROOFWIDGETS_LOCK_HASH = b'179e66574f04806e'
 OUTPUT_SUFFIXES = {'.olean', '.ilean', '.private', '.server', '.ir', '.sig', '.hash',
                    '.trace', '.lock', '.json', '.c', '.o', '.export', '.rsp', '.a', '.so', '.h',
                    '.dll', '.dylib', '.bc', '.exe', '.js', '.map', '.css', '.html',
@@ -329,15 +340,50 @@ def dependency_inventory() -> tuple[set[str], set[str]]:
     return sources, git_roots
 
 
-def check_inventory_sets(tracked: set[str], untracked: set[str], physical: set[str], dependencies: set[str] | None = None, git_roots: set[str] | None = None) -> None:
+def runtime_fingerprints(dependencies: set[str]) -> set[str]:
+    path = ROOT / PROOFWIDGETS_FINGERPRINT
+    if not path.exists() and not path.is_symlink():
+        return set()
+    # Require the unchanged manifest entry, verified package HEAD and full
+    # dependency inventory before reading the fixed regular source and sidecar.
+    manifest = json.loads(baseline_sources()['curvature/lake-manifest.json'][1])
+    assert manifest['packagesDir'] == '.lake/packages', 'Fingerprint dependency layout drift'
+    packages = [p for p in manifest['packages'] if p['name'] == 'proofwidgets']
+    assert len(packages) == 1, 'Fingerprint package identity drift'
+    package = packages[0]
+    assert (package['type'], package['url'], package['rev']) == (
+        'git', 'https://github.com/leanprover-community/ProofWidgets4', PROOFWIDGETS_REV), 'Fingerprint package pin drift'
+    assert PROOFWIDGETS_LOCK in dependencies, 'Fingerprint parent is not a verified dependency source'
+    package_dir = ROOT / 'curvature/.lake/packages/proofwidgets'
+    assert git_at(package_dir, 'rev-parse', 'HEAD').decode().strip() == PROOFWIDGETS_REV, 'Fingerprint dependency HEAD drift'
+    for parent in path.parents:
+        if parent == ROOT:
+            break
+        assert stat.S_ISDIR(parent.lstat().st_mode), f'Non-directory/symlink fingerprint parent: {parent}'
+    source = ROOT / PROOFWIDGETS_LOCK
+    check_mode(PROOFWIDGETS_LOCK, source.lstat().st_mode, '100644')
+    assert source.stat().st_size == PROOFWIDGETS_LOCK_SIZE, 'Fingerprint source size drift'
+    assert git_blob_identity(source.read_bytes()) == PROOFWIDGETS_LOCK_BLOB, 'Fingerprint source blob drift'
+    check_mode(PROOFWIDGETS_FINGERPRINT, path.lstat().st_mode, '100644')
+    assert path.stat().st_size == 16, 'Fingerprint must be exactly 16 bytes'
+    with path.open('rb') as stream:
+        fingerprint = stream.read(17)
+    assert re.fullmatch(rb'[0-9a-f]{16}', fingerprint), 'Noncanonical Lake fingerprint'
+    assert fingerprint == PROOFWIDGETS_LOCK_HASH, 'Pinned input fingerprint mismatch'
+    return {PROOFWIDGETS_FINGERPRINT}
+
+
+def check_inventory_sets(tracked: set[str], untracked: set[str], physical: set[str], dependencies: set[str] | None = None, git_roots: set[str] | None = None, fingerprints: set[str] | None = None) -> None:
     assert not tracked & untracked, 'Overlapping tracked/untracked inventory'
     assert set(baseline_sources()) <= tracked, 'Inherited source must stay tracked'
     assert not any(runtime_path(path) for path in tracked), 'Tracked Lake cache forbidden'
     dependencies, git_roots = dependencies or set(), git_roots or set()
+    fingerprints = fingerprints or set()
+    assert fingerprints <= {PROOFWIDGETS_FINGERPRINT}, 'Unapproved runtime fingerprint path'
     def runtime_file(path):
         # Git reports an untracked nested repository as one trailing-slash
         # directory record. Its pinned source inventory was validated separately.
-        return path in dependencies or generated_build_path(path) or any(
+        return path in dependencies or path in fingerprints or generated_build_path(path) or any(
             path == root.removesuffix('/.git') + '/' or path == root or path.startswith(root + '/')
             for root in git_roots)
     untracked_source = {path for path in untracked if not runtime_file(path)}
@@ -362,6 +408,7 @@ def check_inventory() -> None:
     # new proof, target, workflow, interpreter cache or arbitrary public blob.
     untracked = nul_paths(git('ls-files', '-z', '--others'))
     dependencies, git_roots = dependency_inventory()
+    fingerprints = runtime_fingerprints(dependencies)
     physical = set()
     for directory, directories, files in os.walk(ROOT, followlinks=False):
         for name in list(directories):
@@ -381,11 +428,11 @@ def check_inventory() -> None:
                 continue
             if path in dependencies:
                 continue
-            if generated_build_path(path):
+            if path in fingerprints or generated_build_path(path):
                 assert stat.S_ISREG((ROOT / path).lstat().st_mode), f'Non-regular runtime file: {path}'
             else:
                 physical.add(path)
-    check_inventory_sets(set(tracked_modes), untracked, physical, dependencies, git_roots)
+    check_inventory_sets(set(tracked_modes), untracked, physical, dependencies, git_roots, fingerprints)
     baseline = baseline_sources()
     for path in public_paths():
         wanted = baseline[path][0] if path in baseline else '100644'

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Adversarial release fixtures; no compiler evidence or working-tree mutation."""
 import copy
+from contextlib import contextmanager
 import os
 import py_compile
 import subprocess
@@ -423,6 +424,156 @@ class TwoSidedReleaseGuardTests(unittest.TestCase):
                  mock.patch.object(release, 'git_at', return_value=b'wrong-head\n'):
                 with self.assertRaises(AssertionError):
                     release.dependency_inventory()
+
+    @contextmanager
+    def fingerprint_fixture(self):
+        # Physical candidate with a synthetic pinned source, no compiler/cache
+        # download. Only the fixture's source identity/size are substituted.
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            package = root / 'curvature/.lake/packages/proofwidgets'
+            (package / 'widget').mkdir(parents=True)
+            (package / '.git').mkdir()
+            lock = root / release.PROOFWIDGETS_LOCK
+            source = b'verified synthetic lockfile\n'
+            lock.write_bytes(source)
+            fingerprint = root / release.PROOFWIDGETS_FINGERPRINT
+            fingerprint.write_bytes(release.PROOFWIDGETS_LOCK_HASH)
+            manifest = {'packagesDir': '.lake/packages', 'packages': [{
+                'name': 'proofwidgets', 'type': 'git', 'rev': release.PROOFWIDGETS_REV,
+                'url': 'https://github.com/leanprover-community/ProofWidgets4'}]}
+            baseline = {'base.lean': ('100644', b'base'),
+                        'curvature/lake-manifest.json': ('100644', release.json.dumps(manifest).encode())}
+            for name, (_, data) in baseline.items():
+                (root / name).write_bytes(data)
+            (root / 'guard.py').write_bytes(b'guard')
+            records = b''.join(('100644 ' + release.git_blob_identity(data) + ' 0\t' + name + '\0').encode()
+                               for name, data in {**{p: d for p, (_, d) in baseline.items()}, 'guard.py': b'guard'}.items())
+            tree = ('100644 blob ' + release.git_blob_identity(source) + '\twidget/package-lock.json\0').encode()
+            def root_git(*args):
+                return records if args == ('ls-files', '--stage', '-z') else b'curvature/.lake/packages/proofwidgets/\0'
+            def package_git(path, *args):
+                self.assertEqual(path, package)
+                return (release.PROOFWIDGETS_REV + '\n').encode() if args == ('rev-parse', 'HEAD') else tree
+            with mock.patch.object(release, 'ROOT', root), \
+                 mock.patch.object(release, 'baseline_sources', return_value=baseline), \
+                 mock.patch.object(release, 'UNIT_FILE_SHA256', {}), \
+                 mock.patch.object(release, 'SELF_PATHS', {'guard.py'}), \
+                 mock.patch.object(release, 'PROOFWIDGETS_LOCK_SIZE', len(source)), \
+                 mock.patch.object(release, 'PROOFWIDGETS_LOCK_BLOB', release.git_blob_identity(source)), \
+                 mock.patch.object(release, 'git', side_effect=root_git), \
+                 mock.patch.object(release, 'git_at', side_effect=package_git):
+                release.check_inventory()
+                yield root, lock, fingerprint, source, baseline
+                release.check_inventory()
+
+    def test_exact_verified_fingerprint_rejects_bad_oversized_and_wrong_hash(self):
+        with self.fingerprint_fixture() as (_, _, fingerprint, _, _):
+            cases = (b'', b'0' * 15, b'0' * 17, b'0' * 65536,
+                     b'0' * 16, b'g' * 16, b'179E66574F04806E',
+                     release.PROOFWIDGETS_LOCK_HASH + b'\n', b'\0' * 16)
+            for wrong in cases:
+                fingerprint.write_bytes(wrong)
+                with self.subTest(size=len(wrong)), self.assertRaises(AssertionError):
+                    release.check_inventory()
+                self.assertEqual(fingerprint.read_bytes(), wrong, 'Gate changed rejected fingerprint evidence')
+            fingerprint.write_bytes(release.PROOFWIDGETS_LOCK_HASH)
+            self.assertFalse(release.generated_build_path(release.PROOFWIDGETS_FINGERPRINT))
+            sources, _ = release.dependency_inventory()
+            self.assertEqual(release.runtime_fingerprints(sources), {release.PROOFWIDGETS_FINGERPRINT})
+            with self.assertRaises(AssertionError):
+                release.runtime_fingerprints(set())
+
+    def test_exact_verified_fingerprint_rejects_symlink_directory_and_mode_drift(self):
+        with self.fingerprint_fixture() as (_, lock, fingerprint, source, _):
+            fingerprint.unlink()
+            for target in (lock, fingerprint.parent / 'missing'):
+                fingerprint.symlink_to(target)
+                with self.assertRaises(AssertionError):
+                    release.check_inventory()
+                self.assertTrue(fingerprint.is_symlink())
+                fingerprint.unlink()
+            fingerprint.mkdir()
+            with self.assertRaises(AssertionError):
+                release.check_inventory()
+            fingerprint.rmdir()
+            fingerprint.write_bytes(release.PROOFWIDGETS_LOCK_HASH)
+            fingerprint.chmod(0o755)
+            with self.assertRaises(AssertionError):
+                release.check_inventory()
+            fingerprint.chmod(0o644)
+            lock.unlink()
+            lock.symlink_to(fingerprint)
+            with self.assertRaises(AssertionError):
+                release.check_inventory()
+            lock.unlink()
+            lock.write_bytes(source)
+            lock.chmod(0o755)
+            with self.assertRaises(AssertionError):
+                release.check_inventory()
+            lock.chmod(0o644)
+
+    def test_exact_verified_fingerprint_rejects_parent_source_head_and_manifest_drift(self):
+        with self.fingerprint_fixture() as (_, lock, fingerprint, source, baseline):
+            lock.write_bytes(source.replace(b'verified', b'modified'))
+            with self.assertRaises(AssertionError):
+                release.check_inventory()
+            self.assertNotEqual(lock.read_bytes(), source)
+            lock.write_bytes(source)
+            with mock.patch.object(release, 'git_at', return_value=b'wrong-head\n'), self.assertRaises(AssertionError):
+                release.check_inventory()
+            sources, _ = release.dependency_inventory()
+            for field, value in (('rev', 'a' * 40), ('url', 'https://example.invalid/ProofWidgets4'),
+                                 ('name', 'wrong-package'), ('type', 'path')):
+                wrong = copy.deepcopy(release.json.loads(baseline['curvature/lake-manifest.json'][1]))
+                wrong['packages'][0][field] = value
+                altered = dict(baseline)
+                altered['curvature/lake-manifest.json'] = ('100644', release.json.dumps(wrong).encode())
+                with mock.patch.object(release, 'baseline_sources', return_value=altered), self.assertRaises(AssertionError):
+                    release.runtime_fingerprints(sources)
+            widget = lock.parent
+            renamed = widget.with_name('displaced-widget')
+            widget.rename(renamed)
+            widget.symlink_to(renamed, target_is_directory=True)
+            with self.assertRaises(AssertionError):
+                release.check_inventory()
+            widget.unlink()
+            renamed.rename(widget)
+            self.assertEqual(fingerprint.read_bytes(), release.PROOFWIDGETS_LOCK_HASH)
+
+    def test_fingerprint_does_not_admit_other_paths_hidden_lean_or_caches(self):
+        with self.fingerprint_fixture() as (root, _, fingerprint, _, _):
+            paths = (
+                'curvature/.lake/packages/proofwidgets/widget/package.json.hash',
+                'curvature/.lake/packages/proofwidgets/widget/package-lock.json.hash.extra',
+                'curvature/.lake/packages/proofwidgets/widget/other/package-lock.json.hash',
+                'curvature/.lake/packages/mathlib/widget/package-lock.json.hash',
+                'hamilton-ivey-reaction/.lake/packages/proofwidgets/widget/package-lock.json.hash',
+                'curvature/.lake/packages/proofwidgets/widget/Hidden.lean',
+                'curvature/.lake/packages/proofwidgets/widget/__pycache__/hidden.lean',
+                'curvature/.lake/packages/proofwidgets/widget/stale.pyc',
+                'curvature/.lake/packages/proofwidgets/.lake/build/Hidden.lean',
+            )
+            for name in paths:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(release.PROOFWIDGETS_LOCK_HASH)
+                with self.subTest(path=name), self.assertRaises(AssertionError):
+                    release.check_inventory()
+                self.assertEqual(path.read_bytes(), release.PROOFWIDGETS_LOCK_HASH)
+                path.unlink()
+                while path.parent != root and not any(path.parent.iterdir()):
+                    parent = path.parent
+                    parent.rmdir()
+                    path = parent
+            fingerprint.unlink()
+            release.check_inventory()  # Sidecar is optional before Lake writes it.
+            fingerprint.write_bytes(release.PROOFWIDGETS_LOCK_HASH)
+            public = release.public_paths()
+            with self.assertRaises(AssertionError):
+                release.check_inventory_sets(public | {release.PROOFWIDGETS_FINGERPRINT}, set(), public)
+            with self.assertRaises(AssertionError):
+                release.check_inventory_sets(public, set(), public, fingerprints={'other.hash'})
 
     def test_physical_lean_union_no_ignored_or_hidden_canonical_target(self):
         valid = {path for path in release.public_paths() if path.endswith('.lean')}

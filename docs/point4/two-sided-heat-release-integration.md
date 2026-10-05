@@ -1,10 +1,11 @@
 # Guarded two-sided heat release integration
 
-Status: source-only proof repair, uncompiled and not published. Point 4 remains
-OPEN. Fresh independent release review and exact-head Lean 4.33 verification
-remain gates. No local Lean process, toolchain/cache expansion or remote action
-was performed for this repair. The preceding draft is already public and its
-failed compiler evidence remains historical.
+Status: source-only runtime-inventory repair, not locally compiled or published.
+Point 4 remains OPEN. Fresh independent release review and exact-head Lean 4.33
+verification remain gates. No local Lean process, toolchain/cache expansion or
+publication was performed for this repair. The preceding public draft compiled
+the new module, then failed its post-probe source inventory; that partial
+historical evidence does not qualify this new head.
 
 ## Immutable scope
 
@@ -19,7 +20,7 @@ source, pins the repaired digest, and rejects every other byte change. All
 public theorem signatures, hypotheses, mathematical definitions and stored
 value/first/second derivative data are unchanged. The full type/axiom/rank-zero
 probe is byte-identical. Mathematical source approval remains conditional on
-actual compilation; these repairs are source-only.
+actual exact-head verification; the current repair changes no proof bytes.
 
 All 1,637 unaffected inherited files retain exact bytes and Git/physical
 executable modes. This includes every proof, pin, probe, contract, kernel
@@ -53,7 +54,7 @@ The R1 source guard is repaired to require every addition, reject unexpected
 tracked/untracked/ignored/physical source, use NUL-safe inventories and reject
 symlinks and executable-mode drift. Untracked Python caches are rejected here,
 even though an unchanged legacy synthetic fixture demonstrates the legacy
-filter's historical behavior. The only non-public generated files after CI starts the compiler are bounded
+filter's historical behavior. The non-public generated files after CI starts the compiler are bounded
 Lake build/config output formats under the immutable curvature and inherited
 Hamilton-Ivey path-dependency roots. Dependency source is admitted only under
 manifest-enumerated package names after checking the pinned HEAD and every
@@ -65,6 +66,47 @@ exempt. The source checks suppress bytecode creation. No arbitrary `.toolchain`,
 The guard/test source itself is independently reviewed as part of the exact
 release patch/tree; all proof/probe/workflow/document/dossier blobs are pinned
 inside the guard. This avoids a self-referential digest claim.
+
+## One verified ProofWidgets input fingerprint
+
+The only added runtime exception is
+`curvature/.lake/packages/proofwidgets/widget/package-lock.json.hash`.
+It is optional before Lake generates it. The underlying dependency must pass
+the unchanged complete HEAD, tracked-blob and mode inventory. The fixed
+ProofWidgets manifest entry must retain repository
+`leanprover-community/ProofWidgets4` and revision
+`4be2e3d5087eeb272cf5a8853b8f9dd025ef5957`; its regular, non-executable,
+non-symlink lockfile must have exactly 172,140 bytes and Git blob
+`06d5baf2fae78fed1fdae485f4c2c054a0bccfb2`. Every sidecar ancestor must
+be a real directory. The sidecar must be a regular, non-executable,
+non-symlink file with exactly 16 lowercase hexadecimal bytes, no newline.
+Its bytes must equal the pinned Linux/little-endian Lake 4.33 text fingerprint
+`179e66574f04806e`; a correctly formatted stale/wrong fingerprint is rejected.
+
+This is supported by the immutable official
+[ProofWidgets lakefile](https://github.com/leanprover-community/ProofWidgets4/blob/4be2e3d5087eeb272cf5a8853b8f9dd025ef5957/lakefile.lean):
+`widgetPackageLock` uses `buildFileAfterDep` with `text := true` on this
+[tracked lockfile](https://github.com/leanprover-community/ProofWidgets4/blob/4be2e3d5087eeb272cf5a8853b8f9dd025ef5957/widget/package-lock.json).
+Lean 4.33.0 resolves to commit `d8b18978322de05a8f3dba51ef03cf5461676c17`.
+Its [Lake build functions](https://github.com/leanprover/lean4/blob/d8b18978322de05a8f3dba51ef03cf5461676c17/src/lake/Lake/Build/Common.lean)
+append `.hash` and write `Hash.toString`; its
+[hash definitions](https://github.com/leanprover/lean4/blob/d8b18978322de05a8f3dba51ef03cf5461676c17/src/lake/Lake/Build/Trace.lean)
+normalize CRLF and encode 16 lowercase hex digits. The source-derived value
+uses `Hash.ofText`, the `1723` nil seed, and string hashing with seed `11`
+from the pinned
+[runtime string entry point](https://github.com/leanprover/lean4/blob/d8b18978322de05a8f3dba51ef03cf5461676c17/src/runtime/object.cpp),
+[MurmurHash64A](https://github.com/leanprover/lean4/blob/d8b18978322de05a8f3dba51ef03cf5461676c17/src/runtime/hash.cpp)
+and [hash mixing](https://github.com/leanprover/lean4/blob/d8b18978322de05a8f3dba51ef03cf5461676c17/src/runtime/hash.h).
+This derivation is static source evidence, not a local Lean execution or
+observation of the failed job's sidecar bytes. The new exact-head CI must still
+validate the genuine generated file against these restrictions.
+
+There is no arbitrary `.hash` or package-directory exemption, no new tracked
+cache allowance, and no evidence deletion or cache cleanup. Adversarial
+physical fixtures reject wrong package/path, missing verified parent, source
+or manifest/HEAD drift, directory/symlink/executable changes, malformed,
+oversized or wrong-value fingerprints, hidden Lean and Python caches. All
+previous fixtures and evidence gates remain unchanged.
 
 The original R1 workflow and narrative are updated only for truthful release
 integration, strict verification sequencing and provenance. The new source
@@ -89,7 +131,17 @@ extracts strict negativity from `Iio` membership, and unfolds composition in
 the left difference quotient. It does not change the mathematical argument,
 weaken ordinary `HasDerivAt`, strengthen bounded C² data, or claim negative
 Hessian-norm convergence, global positivity or canonical completion. These
-are pinned-API/source diagnoses, not successful compiler evidence.
+were pinned-API/source diagnoses before the next historical run.
+
+At historical head `c88d9c2ebeef9f72193400a8202f40285aa86d04`,
+[actual Lean 4.33.0 run 37280378637](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37280378637)
+successfully compiled the new module. Its type/axiom step printed the probe
+output, then exited 1 solely because the strict source inventory rejected the
+generated fixed ProofWidgets sidecar above. This is partial historical output,
+not a passing type/axiom gate or qualification of this guard-only candidate.
+The workflow, module, theorem headers, ordinary derivative and rank-zero
+probe, 12 new and 150 inherited axiom gates, contract, kernel fixtures and
+full OPEN audit are byte-identical to that head.
 
 The workflow first checks the exact source union, full schema and all inherited
 and new adversarial fixtures. It explicitly builds the new module, since the
@@ -103,6 +155,7 @@ It builds the unchanged full library before running the 13 inherited probes
 the unchanged contract and kernel negative fixtures, then invokes the
 unchanged full Point-4 audit. Only its actual full-build five-gate OPEN pattern
 and exit 1 are accepted. This unit cannot turn fabricated all-PASS evidence
-into canonical closure. All these compiler/kernel/audit gates remain NOT RUN
-locally and mandatory before merge. Reviewed draft publication for CI is a
+into canonical closure. All compiler/type/axiom/full-build/contract/kernel/full
+OPEN audit gates remain mandatory at the new exact head and NOT RUN locally.
+Reviewed draft publication for CI is a
 separate decision; this preparation performs no publication.
