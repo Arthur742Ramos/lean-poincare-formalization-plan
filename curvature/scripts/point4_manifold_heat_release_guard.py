@@ -252,5 +252,13 @@ def main(argv=None) -> None:
     print('Source-only release checks passed; exact Lean 4.33 producer/probes/full-build/kernel gates remain separate')
 
 
+# Reviewed smooth-forward inventory adapter. Gate bodies remain unchanged.
+_smooth_guard_path = ROOT / 'curvature/scripts/point4_smooth_forward_release_guard.py'
+assert stat.S_ISREG(_smooth_guard_path.lstat().st_mode) and not (_smooth_guard_path.lstat().st_mode & 0o111), 'Smooth guard mode changed'
+assert hashlib.sha256(_smooth_guard_path.read_bytes()).hexdigest() == '469d37d443ed670675a0da37a368a908f20e6f3b58e827706202a8f9a548b35b', 'Reviewed smooth executable changed'
+sys.modules.setdefault('point4_manifold_heat_release_guard', sys.modules[__name__])
+import point4_smooth_forward_release_guard as _smooth_release
+_smooth_release.install_release_adapter(globals(), '469d37d443ed670675a0da37a368a908f20e6f3b58e827706202a8f9a548b35b')
+
 if __name__ == '__main__':
     main()
