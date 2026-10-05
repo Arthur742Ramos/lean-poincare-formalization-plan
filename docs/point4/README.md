@@ -69,6 +69,19 @@ The preferred frame now has manifold-boundaryless scope; its existing frozen,
 weak, chosen-LC and gauge consumers retain their stronger model scope. No
 nonlinear PDE solver or canonical target is constructed. Point 4 remains OPEN.
 
+## Combined supporting C² initial heat
+
+The [combined C² initial-heat milestone](c2-initial-heat-integration.md) joins
+fully qualified PR124 and primary-qualified PR127 by real ancestry to the merged linear-heat geometry and
+approved canonical contract. Exact mathematical proof/probe blobs and all original workflow steps are
+preserved; two precise source-guard adapters and parser-only dependency
+insertions protect the complete pinned parent union. PR127 inherited checks
+remain pending; its actual primary qualification is separate. Earlier candidate wording below is
+historical. Fresh exact combined-head full compilation, all thirteen axiom/type
+surfaces, canonical contract/kernel regressions, unchanged full audit and
+independent full-stack review remain required. Compact localization,
+anisotropic transport, nonlinear closure and the canonical target remain open.
+
 ## Current verdict
 
 The fast audit run on 2026-09-11 passed the forbidden-term scan but did not find
@@ -76,6 +89,26 @@ the canonical target. The build gate was intentionally skipped in that fast
 run. Gates 3–5 therefore failed and the verdict remained `POINT 4 OPEN`.
 
 See [Current formalization status](../status.md) for the repository-wide dashboard.
+
+The bounded-C² initial-face supporting candidate is recorded in
+[`c2-heat-initial-trace.md`](c2-heat-initial-trace.md). It adds the Gaussian
+approximate identity with an arbitrary continuity modulus, local-uniform
+actual gradient/Hessian traces, global C² trace under uniform continuity only
+of Hessian entries, and the right initial generator. Historical head
+`591c25914c80366d619ece00da204997ee2a65d7` passed its actual Lean-4.33
+type/axiom and full build gates. This current-master integration is UNVERIFIED
+until fresh exact-head hosted gates and independent review pass. It does not construct compact-manifold localization,
+an ordinary endpoint derivative, a weighted nonlinear solver, or Point-4
+closure.
+
+The next supporting initial-face candidate constructs actual compatible
+positive-time C²,α Gaussian data with an explicit Hölder certificate whose
+`t^(α/2)` weight tends to zero, using only uniform continuity of the initial
+Hessian entries. It uses the actual heat approximation error at scale `√t`
+and the genuine semigroup, with no initial positive-exponent Hölder premise.
+Exact Lean-4.33 verification is pending. See
+[`weighted-initial-heat.md`](weighted-initial-heat.md). Compact localization,
+weighted nonlinear estimates and the canonical Point-4 theorem remain open.
 
 The preceding supporting PDE milestone is the genuine Ricci--DeTurck
 Hölder-seminorm difference estimate in
