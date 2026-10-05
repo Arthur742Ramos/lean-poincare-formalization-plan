@@ -60,6 +60,7 @@ class SmoothReleaseTests(unittest.TestCase):
         self.cached = set(self.baseline) | set(smooth.ADDED)
         self.untracked = set()
         self.tree = type(self).tree
+        self.parent_tree = smooth.SCALAR_PARENT_TREE
         self.expected_error = None
         self.mode_error = None
         self.fail_body = False
@@ -67,6 +68,8 @@ class SmoothReleaseTests(unittest.TestCase):
             self.trace.append(('git', argv))
             if argv == ('ls-tree', '-rz', smooth.BASE):
                 return self.tree
+            if argv == ('rev-parse', smooth.SCALAR_PARENT + '^{tree}'):
+                return (self.parent_tree + '\n').encode()
             if argv[:1] == ('show',):
                 ref, path = argv[1].split(':', 1)
                 assert ref == smooth.BASE
@@ -122,9 +125,12 @@ class SmoothReleaseTests(unittest.TestCase):
         self.ns['main'](['--schema', 'schema.json'])
         first_history = self.trace.index(('historical',))
         modes = [item for item in self.trace[:first_history] if item[0] == 'mode']
-        self.assertEqual(len(modes), 1665)
+        self.assertEqual(len(modes), 1672)
         self.assertEqual(self.trace[-1], ('body', ['--schema', 'schema.json']))
-        self.run.assert_called_once_with(['git', '-C', str(self.root), 'merge-base', '--is-ancestor', smooth.BASE, 'HEAD'], check=True, env={})
+        self.run.assert_has_calls([
+            unittest.mock.call(['git', '-C', str(self.root), 'merge-base', '--is-ancestor', smooth.BASE, 'HEAD'], check=True, env={}),
+            unittest.mock.call(['git', '-C', str(self.root), 'merge-base', '--is-ancestor', smooth.SCALAR_PARENT, 'HEAD'], check=True, env={})])
+        self.assertEqual(self.run.call_count, 2)
         self.assert_restored()
         # Outside actual gate mains the historical fixture inventory is exact.
         self.assertEqual(len(self.ns['public_paths']()), 1653)
@@ -335,6 +341,71 @@ class SmoothReleaseTests(unittest.TestCase):
                     smooth.check_support_probe(wrong)
 
 
+    def test_each_scalar_blob_executable_and_omission_fails_before_history(self):
+        for path in smooth.SCALAR_UNIT_PATHS:
+            file = self.root/path
+            original = file.read_bytes()
+            file.write_bytes(original + b'\nunauthorized scalar executable/body\n')
+            try:
+                self.trace.clear()
+                with self.assertRaises(AssertionError): self.ns['main']()
+                self.assertNotIn(('historical',), self.trace)
+                self.assert_restored()
+            finally:
+                file.write_bytes(original)
+            file.unlink()
+            try:
+                self.trace.clear()
+                with self.assertRaises((OSError, AssertionError)): self.ns['main']()
+                self.assertNotIn(('historical',), self.trace)
+                self.assert_restored()
+            finally:
+                file.write_bytes(original)
+
+    def test_each_scalar_cached_omission_and_extra_fail_before_history(self):
+        original = self.cached.copy()
+        for path in smooth.SCALAR_UNIT_PATHS:
+            self.cached = original - {path}
+            try:
+                self.trace.clear()
+                with self.assertRaises(AssertionError): self.ns['main']()
+                self.assertNotIn(('historical',), self.trace)
+                self.assert_restored()
+            finally:
+                self.cached = original.copy()
+        self.cached.add('curvature/scripts/scalar_unapproved.py')
+        try:
+            with self.assertRaises(AssertionError): self.ns['main']()
+            self.assert_restored()
+        finally:
+            self.cached = original
+
+    def test_each_scalar_mode_and_symlink_fails_before_history(self):
+        real_stat = pathlib.Path.lstat
+        for path in smooth.SCALAR_UNIT_PATHS:
+            file = self.root/path
+            for bad in (stat.S_IFREG | 0o755, stat.S_IFLNK | 0o777):
+                def changed_mode(current, target=file, mode=bad):
+                    return types.SimpleNamespace(st_mode=mode) if current == target else real_stat(current)
+                with patch.object(pathlib.Path, 'lstat', changed_mode):
+                    self.trace.clear()
+                    with self.assertRaises(AssertionError): self.ns['main']()
+                    self.assertNotIn(('historical',), self.trace)
+                self.assert_restored()
+
+    def test_published_smooth_dependency_tree_and_ancestry_are_mandatory(self):
+        self.parent_tree = '0'*40
+        with self.assertRaises(AssertionError): self.ns['main']()
+        self.assert_restored()
+        self.parent_tree = smooth.SCALAR_PARENT_TREE
+        self.run.reset_mock()
+        self.run.side_effect = [types.SimpleNamespace(returncode=0),
+                                smooth.subprocess.CalledProcessError(1, 'missing scalar parent')]
+        with self.assertRaises(smooth.subprocess.CalledProcessError): self.ns['main']()
+        self.assertEqual(self.run.call_count, 2)
+        self.assert_restored()
+
+
 class RealComposedGateTests(unittest.TestCase):
     """Required on the complete CI checkout after official parser/schema setup.
 
@@ -458,6 +529,38 @@ class RealComposedGateTests(unittest.TestCase):
             self.assertIs(self.release.public_paths, paths_before)
             self.assertEqual(smooth._depth, 0)
             self.assertIsNone(smooth._active_namespace)
+
+
+    def test_actual_scalar_main_validators_and_type_failures_restore_inventory(self):
+        scalar = importlib.import_module('point4_c2_resonance_guard')
+        log = self.evidence/'scalar-probe.log'
+        text = self.axiom_output(scalar.NAMES) + '\nC2_RESONANCE_TYPES_BEGIN\n' + scalar.EXPECTED_TYPES + '\nC2_RESONANCE_TYPES_END\n'
+        log.write_text(text, encoding='utf-8')
+        functions = [scalar.check_sources, scalar.check_unit_blobs, scalar.check_metadata,
+                     scalar.check_probe, smooth.check_new_metadata, self.release._smooth_original_main,
+                     self.c2.main.__wrapped__, self.c2.check_metadata, self.c2.check_imports]
+        required = {fn.__code__ for fn in functions}
+        called = set()
+        previous = sys.getprofile()
+        def profile(frame, event, arg):
+            if event == 'call' and frame.f_code in required: called.add(frame.f_code)
+        expected_before, paths_before = self.release.expected_sources, self.release.public_paths
+        try:
+            with self.external_git_reads(), contextlib.redirect_stdout(io.StringIO()):
+                sys.setprofile(profile)
+                scalar.main(['--schema', str(self.schema), '--probe-log', str(log)])
+        finally:
+            sys.setprofile(previous)
+        self.assertEqual(called, required, 'Actual scalar/inherited validator body did not execute')
+        for before, after in (('Ne.{1} L 0 →', ''), ('LT.lt.{0} 0 ε →', ''), ('Filter.atBot.{0}', 'Filter.atTop.{0}')):
+            log.write_text(text.replace(before, after, 1), encoding='utf-8')
+            with self.external_git_reads(), contextlib.redirect_stdout(io.StringIO()), self.assertRaises(AssertionError):
+                scalar.main(['--schema', str(self.schema), '--probe-log', str(log)])
+            self.assertIs(self.release.expected_sources, expected_before)
+            self.assertIs(self.release.public_paths, paths_before)
+            self.assertEqual(smooth._depth, 0)
+            self.assertIsNone(smooth._active_namespace)
+        log.write_text(text, encoding='utf-8')
 
 
 if __name__ == '__main__':
