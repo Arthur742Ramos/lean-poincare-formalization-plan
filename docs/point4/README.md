@@ -46,6 +46,29 @@ current dependency mutation is part of this milestone, and independent
 exact-head source and mathematical review remains required. `--no-build`
 always leaves the completion verdict open.
 
+## Boundaryless chart transport
+
+The supporting [boundaryless-chart/frame milestone](boundaryless-chart-frames.md)
+proves openness of each preferred chart target and local ordinary derivative
+and vector-field pullback transport from `BoundarylessManifold I M`. The actual
+preferred-frame constant pullback, scalar derivative and commuting-bracket
+identities now use that theorem-level hypothesis. No global model-range
+identity, supplied chart, germ or commuting certificate is required. The
+chosen-LC and analytic consumers are unchanged; quantitative norm/heat/PDE
+transport and the canonical Point-4 theorem remain open.
+
+## Combined supporting linear-heat geometry
+
+The [combined milestone](linear-heat-geometry.md) retains real merge ancestry
+for qualified PR122/123/125 together with current-master actual conventional
+W/Lie/Ricci RHS and the approved closed-manifold contract. Exact mathematical
+proof blobs and original verification workflows are preserved. Individual-head
+qualification is historical evidence; fresh combined-head full compilation,
+all axiom/type/audit gates and independent full-stack review are still required.
+The preferred frame now has manifold-boundaryless scope; its existing frozen,
+weak, chosen-LC and gauge consumers retain their stronger model scope. No
+nonlinear PDE solver or canonical target is constructed. Point 4 remains OPEN.
+
 ## Current verdict
 
 The fast audit run on 2026-09-11 passed the forbidden-term scan but did not find
@@ -563,3 +586,14 @@ verification is pending; no local compiler was run for this unit. See
 [actual standard coordinate-operator scope](standard-coordinate-operator.md).
 The heat-generator, analytic, PDE and canonical Point-4 **OPEN** boundaries
 remain unchanged.
+## Actual frozen metric principal and holonomic action
+
+The next supporting candidate identifies the existing geometric frozen
+tensor-heat principal coefficient with the actual preferred-frame inverse
+metric and proves its genuine finite-cylinder coordinate Cauchy action.
+See [the exact theorem and verification boundary](frozen-metric-principal.md).
+This does not construct the general manifold encoding, nonlinear solver,
+metric preservation, realization or uniqueness. Point 4 remains open.
+The [weak-regularity actual tensor-Laplacian proof unit](weak-laplacian.md)
+removes the unnecessary C² connection/induced-three oracle from a new local
+adapter. Authored source awaits exact Lean 4.33.0 verification; Point 4 stays open.

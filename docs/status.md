@@ -145,6 +145,28 @@ verification is pending; no local compiler was run for this unit. See
 The heat-generator, analytic, PDE and canonical Point-4 **OPEN** boundaries
 remain unchanged.
 
+A further supporting source candidate identifies the actual preferred-frame
+frozen metric inverse with the existing geometric tensor-heat principal
+coefficient and evaluates its bounded finite-cylinder Cauchy operator using
+genuine coordinate derivatives from the proved compatible derivative graph.
+It preserves tensor output `(j,i)`, uses actual time differentiation only on
+the open time interval, and requires no added candidate regularity or
+principal-identification premise. Exact Lean-4.33 verification is pending;
+see [the precise candidate boundary](point4/frozen-metric-principal.md).
+This is differential-operator identification only. Point 4 remains **Open**.
+
+## Latest supporting integration boundary
+
+The [combined linear-heat geometry milestone](point4/linear-heat-geometry.md)
+combines the independently qualified exact PR122 frozen actual-metric/holonomic
+action, PR123 weak actual Laplacian and PR125 manifold-boundaryless chart/frame
+proofs with current-master actual conventional W/Lie/Ricci RHS and the approved
+closed-manifold contract. Their preparation-time candidate wording above and
+in focused pages is historical. Exact combined-head Lean 4.33 full compilation,
+all inherited/current/focused axiom and type checks, canonical contract
+regressions and full-stack review remain pending. Mathematical proof blobs,
+requirements and individual verification gates are preserved. The integration
+adds no PDE solver or canonical theorem and leaves milestone 4 **Open**.
 
 ## Updating this page
 
@@ -156,3 +178,11 @@ When implementation changes:
 4. keep publication status in the submission portfolio;
 5. preserve partial or failed approaches in `docs/history/` only when they are
    useful research records.
+
+## Weak-regularity Laplacian proof unit
+
+The [base-C¹, local-C² actual tensor-Laplacian adapter](point4/weak-laplacian.md)
+has been authored and awaits independent source review and exact Lean 4.33.0
+hosted verification. It constructs coordinate certificates internally and
+preserves the actual operator and reversed tensor-output convention. It does
+not provide Hölder coefficient bounds or close the canonical Point-4 target.

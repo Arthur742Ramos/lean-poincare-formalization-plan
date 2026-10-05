@@ -58,6 +58,50 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/60b6f8ef9d37d1fc5fac1f6113584e1b16370016/curvature"
+    relationship: "builds-on"
+    note: >-
+      Current-master actual conventional StandardDeTurck W/Lie/Ricci RHS and
+      coordinate operator in Geometry/Manifold/RicciFlow/:
+      ActualBackgroundCoordinateCoefficients.lean,
+      ChosenLeviCivitaCoordinateMetricCompatibility.lean,
+      StandardDeTurckCoordinateIdentification.lean and
+      StandardRicciDeTurckCoordinateOperator.lean.
+      Also preserves the current PointFourContract.lean,
+      LocalExistence.lean interfaces, full completion auditor and signature
+      regressions. Existing implementation, notices and selected registry
+      identity are unchanged; this combination adds no new proof body or
+      intake.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/4e27b905a5645b27e0e101124fd011c4dbd00586/curvature"
+    relationship: "builds-on"
+    note: >-
+      Qualified PR122 source for Analysis/LinearReadoutSecondDerivative.lean,
+      AnalyticPDE/ChosenLCFrozenTensorHeat.lean and
+      scripts/point4_frozen_metric_principal_probe.lean. Exact proof blobs and
+      the original eight-axiom-surface workflow are preserved. Real merge
+      ancestry records this inherited frozen actual-metric and holonomic
+      Cauchy identification; combined-head verification is a separate
+      requirement.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/f1ee137abbd46111f5d9722d41d4f62960e8f171/curvature"
+    relationship: "builds-on"
+    note: >-
+      Qualified PR123 source for
+      AnalyticPDE/TensorHeatGeometricRegularity.lean,
+      AnalyticPDE/TensorHeatWeakLaplacian.lean and
+      scripts/point4_weak_laplacian_probe.lean. Exact proof blobs and the
+      original four-axiom-surface workflow are preserved. It retains base C1
+      and tensor local C2 hypotheses and output (q,p); this combination does
+      not generalize its model-boundaryless scope.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/ecb86c90b902b17cf6889c4f89a31e80702e39c9/curvature"
+    relationship: "builds-on"
+    note: >-
+      Qualified PR125 source for Analysis/BoundarylessChartTransport.lean,
+      Analysis/PreferredCoordinateFrame.lean and
+      scripts/point4_boundaryless_chart_frames_probe.lean. Exact proof blobs
+      and the original ten-axiom-surface/seven-type workflow are preserved.
+      This is the legitimate proof-bearing preferred-frame replacement under
+      BoundarylessManifold I M; existing chosen-LC, frozen, weak and gauge
+      consumers retain their original stronger scope.
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/3f997315c2173474225d9e02407a2af444fcd4f3/curvature"
     relationship: "builds-on"
     note: >-
@@ -72,6 +116,41 @@ related_formalizations:
       source candidates pending exact Lean 4.33 verification. They are not
       new registry selections and do not construct a heat generator, PDE
       solution, or canonical Point-4 local-existence theorem.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/1d1f97fe481e0899a0cd54889b0f99ba159ba3fa/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository source for the existing actual preferred frame,
+      chosen C2 metric-coordinate Gram and inverse, geometric tensor-heat
+      principal coefficient, bounded frozen tensor-heat Cauchy operator, and
+      proved closed compatible finite-cylinder derivative graph. Inherited
+      implementation and contributor notices are preserved. The new supporting
+      Analysis/LinearReadoutSecondDerivative.lean and Geometry/Manifold/
+      RicciFlow/AnalyticPDE/ChosenLCFrozenTensorHeat.lean prove constant-linear
+      actual second-derivative transport, actual preferred-frame frozen
+      inverse-metric principal identification, and genuine holonomic coordinate
+      Cauchy action with tensor output (j,i). This is not a selected new registry
+      entry, analytic solver construction, semigroup claim, manifold realization,
+      uniqueness theorem, or Point-4 closure.
+      Immutable same-repository source for the unchanged actual tensor-Laplacian
+      coordinate operator, geometric tensor regularity, local coefficient
+      readouts, and C1 induced-Hom regularity. TensorHeatWeakLaplacian.lean and
+      the two new C1 coefficient helpers reuse those proved implementations and
+      preserve their conventions and contributor notices. The new proof unit
+      derives the actual Laplacian identity from base connection C1 and tensor
+      C2 only on the open frame patch, preserving reversed output (q,p).
+      This is supporting proof provenance, not a new selected registry entry,
+      a Holder-estimate theorem, or a Point-4 completion claim.
+      Immutable same-repository source for Analysis/PreferredCoordinateFrame.lean
+      and its actual inverse-chart differential, constant frame pullback,
+      scalar derivative and commuting-frame proofs. Existing implementation
+      and contributor notices are preserved. The new supporting module
+      Analysis/BoundarylessChartTransport.lean proves local chart-target
+      openness and ordinary derivative/pullback transport under
+      BoundarylessManifold I M; PreferredCoordinateFrame now uses that
+      theorem-level hypothesis instead of model-level I.Boundaryless.
+      Chosen-LC, frozen, weak and gauge consumers retain their existing scope.
+      This is supporting proof provenance, not a new selected registry entry
+      or a Ricci-flow local-existence claim.
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/73212853b1c48e5fea511191e89072dd003b2d0a/curvature"
     relationship: "builds-on"
     note: >-
@@ -123,7 +202,7 @@ status:
 
 automation:
   methods:
-    - method: "agent-assisted"
+    - method: "agent"
       models: ["GPT-5 Codex"]
       framework: "Codex with Lean 4.33 and Mathlib"
       tool_setup: >-
