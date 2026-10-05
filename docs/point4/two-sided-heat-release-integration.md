@@ -159,3 +159,21 @@ into canonical closure. All compiler/type/axiom/full-build/contract/kernel/full
 OPEN audit gates remain mandatory at the new exact head and NOT RUN locally.
 Reviewed draft publication for CI is a
 separate decision; this preparation performs no publication.
+
+## Final audit interpreter-startup repair (c72 historical failure)
+
+The exact c72 job passed its actual Lean 4.33 two-sided probe, inherited
+probes, full library build, closed-contract kernel fixtures and full OPEN
+audit. The final source inventory then correctly rejected an interpreter
+cache created by a Python subprocess of the unchanged audit shell. Its
+failed run 37287043942 and artifact 11341389499 remain historical.
+
+This new source-only candidate adds exactly one job-level
+`PYTHONDONTWRITEBYTECODE: '1'` setting to the two-sided primary job.
+Removing that count-one insertion reproduces the complete c72 workflow
+byte for byte; all steps, action pins, triggers and audit code remain
+unchanged. The strict cache rejection is retained, including preexisting
+cache attacks. No mathematical source, probe, compiler pin or dependency
+changes. The workflow and documentation digests are updated to these exact
+bytes. Independent source review and fresh exact-head official verification
+remain required; this candidate is not a Lean certificate. Point 4 is OPEN.

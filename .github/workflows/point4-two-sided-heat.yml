@@ -22,6 +22,8 @@ concurrency:
 jobs:
   two_sided_heat:
     name: Exact-head ordinary initial derivative with unchanged full OPEN audit
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:
