@@ -3,6 +3,7 @@ Copyright (c) 2026 Poincaré formalization project. All rights reserved.
 -/
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.Normed.Operator.Bilinear
+import Mathlib.Analysis.Normed.Operator.NormedSpace
 
 /-!
 # Finite-coordinate matrices as genuine continuous bilinear forms
@@ -25,18 +26,6 @@ def ofMatrix (A : Fin d → Fin d → ℝ) :
   ∑ i : Fin d, ∑ j : Fin d,
     A i j • (ContinuousLinearMap.proj i).smulRight (ContinuousLinearMap.proj j)
 
-theorem ofMatrix_add (A B : Fin d → Fin d → ℝ) :
-    ofMatrix (A + B) = ofMatrix A + ofMatrix B := by
-  simp [ofMatrix, add_smul, Finset.sum_add_distrib]
-
-theorem ofMatrix_sub (A B : Fin d → Fin d → ℝ) :
-    ofMatrix (A - B) = ofMatrix A - ofMatrix B := by
-  simp [ofMatrix, sub_smul, Finset.sum_sub_distrib]
-
-theorem ofMatrix_smul (c : ℝ) (A : Fin d → Fin d → ℝ) :
-    ofMatrix (c • A) = c • ofMatrix A := by
-  simp [ofMatrix, smul_smul, Finset.smul_sum, mul_comm]
-
 theorem ofMatrix_apply (A : Fin d → Fin d → ℝ) (u v : Fin d → ℝ) :
     ofMatrix A u v = ∑ i : Fin d, ∑ j : Fin d, A i j * u i * v j := by
   simp only [ofMatrix, ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply,
@@ -46,6 +35,20 @@ theorem ofMatrix_apply (A : Fin d → Fin d → ℝ) (u v : Fin d → ℝ) :
   congr 1
   ext j
   ring
+
+theorem ofMatrix_add (A B : Fin d → Fin d → ℝ) :
+    ofMatrix (A + B) = ofMatrix A + ofMatrix B := by
+  ext u v
+  simp [ofMatrix_apply, Pi.add_apply, add_mul, Finset.sum_add_distrib]
+
+theorem ofMatrix_sub (A B : Fin d → Fin d → ℝ) :
+    ofMatrix (A - B) = ofMatrix A - ofMatrix B := by
+  ext u v
+  simp [ofMatrix_apply, Pi.sub_apply, sub_mul, Finset.sum_sub_distrib]
+
+theorem ofMatrix_smul (c : ℝ) (A : Fin d → Fin d → ℝ) :
+    ofMatrix (c • A) = c • ofMatrix A := by
+  simp [ofMatrix, smul_smul, Finset.smul_sum, mul_comm]
 
 theorem ofMatrix_coordinateVector (A : Fin d → Fin d → ℝ) (i j : Fin d) :
     ofMatrix A (Pi.single i 1) (Pi.single j 1) = A i j := by
@@ -66,7 +69,8 @@ theorem norm_ofMatrix_le (A : Fin d → Fin d → ℝ) :
   have hentry : ∀ i j, ‖A i j‖ ≤ ‖A‖ := fun i j =>
     (norm_le_pi_norm (A i) j).trans (norm_le_pi_norm A i)
   have hterm : ∀ i j,
-      ‖A i j • (ContinuousLinearMap.proj i).smulRight (ContinuousLinearMap.proj j)‖ ≤
+      ‖A i j • (ContinuousLinearMap.proj i : (Fin d → ℝ) →L[ℝ] ℝ).smulRight
+        (ContinuousLinearMap.proj j : (Fin d → ℝ) →L[ℝ] ℝ)‖ ≤
         ‖A‖ := by
     intro i j
     rw [norm_smul, ContinuousLinearMap.norm_smulRight_apply]
@@ -83,7 +87,8 @@ theorem norm_ofMatrix_le (A : Fin d → Fin d → ℝ) :
         A i j • (ContinuousLinearMap.proj i).smulRight (ContinuousLinearMap.proj j)‖ :=
       norm_sum_le _ _
     _ ≤ ∑ i : Fin d, ∑ j : Fin d,
-        ‖A i j • (ContinuousLinearMap.proj i).smulRight (ContinuousLinearMap.proj j)‖ :=
+        ‖A i j • (ContinuousLinearMap.proj i : (Fin d → ℝ) →L[ℝ] ℝ).smulRight
+        (ContinuousLinearMap.proj j : (Fin d → ℝ) →L[ℝ] ℝ)‖ :=
       Finset.sum_le_sum (fun i _ => norm_sum_le _ _)
     _ ≤ ∑ _i : Fin d, ∑ _j : Fin d, ‖A‖ :=
       Finset.sum_le_sum (fun i _ => Finset.sum_le_sum (fun j _ => hterm i j))
@@ -95,9 +100,9 @@ theorem norm_ofMatrix_le (A : Fin d → Fin d → ℝ) :
 theorem contDiff_ofMatrix {r : WithTop ℕ∞} : ContDiff ℝ r (@ofMatrix d) := by
   classical
   unfold ofMatrix
-  apply contDiff_sum
+  apply ContDiff.sum
   intro i _
-  apply contDiff_sum
+  apply ContDiff.sum
   intro j _
   exact (contDiff_apply_apply (𝕜 := ℝ) (E := ℝ) i j).smul contDiff_const
 

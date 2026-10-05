@@ -121,6 +121,24 @@ memory guard. The log is preserved as inconclusive development evidence; no
 source module was checked. Shared caches were unchanged. A later separately
 admitted single-worker probe or exact hosted verification is still needed.
 
+## Historical exact-toolchain failure and narrow repair
+
+Exact source-reviewed draft `b29304efd90232b11b42fd7ab7d659e018a837dc`
+failed focused Lean 4.33 CI run `37259615397` at the first two generic
+modules. The compact-support constructor was incorrectly qualified, and
+the finite-matrix adapter needed explicit Pi evaluation, projection types
+and the actual finite-sum differentiability API. All later metric, signature,
+axiom and canonical-audit steps were skipped. The failed source and logs
+remain historical; the initial source review was not compiler certification.
+
+The narrow repair uses the pinned Mathlib global `ofCompactSupport`, explicit
+Pi add/sub evaluation and typed real projection maps, and `ContDiff.sum`.
+No theorem statement, metric regularity, geometric hypothesis, derivative
+meaning, inherited source/workflow or canonical gate changes. Updated new
+proof-module hashes identify the repaired authored blobs; old b293 hashes
+remain in its immutable history. The repaired source still needs independent
+review and a new complete exact-head Lean 4.33 run before qualification.
+
 ## Remaining mathematical gaps
 
 This local constructor does not discharge anisotropic inverse-Gram heat

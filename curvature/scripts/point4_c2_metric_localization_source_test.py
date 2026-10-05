@@ -19,8 +19,8 @@ TOOLCHAIN = 'leanprover/lean4:v4.33.0\n'
 SCHEMA_SHA256 = '25ff6b25ca4511635aff4443cf20480c15e59dddf19591c730950b442ea54fce'
 PREFIX = 'curvature/PoincareCurvature/'
 MODULES = {
-    PREFIX + 'Analysis/CompactlySupportedC2Jet.lean': '72b2e0298febeb39857833c55bb38c97ce22ff40a5cfa79bf13d31b9426ceb27',
-    PREFIX + 'Analysis/FiniteCoordinateBilinear.lean': '34dd64466ae2e50597a1e7a067914f4de3c82ba8e8794175905a283b2985f8d1',
+    PREFIX + 'Analysis/CompactlySupportedC2Jet.lean': '3dfa3d8bd3cea730bf08afc91fd8dd759ba3c0365790072ee0b52f5844dc997f',
+    PREFIX + 'Analysis/FiniteCoordinateBilinear.lean': '74e12fd6847f512f35af91ff1be72abf3a8f3eb9a9b81edd495f419df97ef571',
     PREFIX + 'Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2Localization.lean': 'd6e931583b99a0b0af48d2c3143deea3e225ed9a41af1bc6c74da9073f1c0d95',
     PREFIX + 'Geometry/Manifold/RicciFlow/AnalyticPDE/PositiveFrozenC2Localization.lean': '792abb3502c66fe25dd520edb4ce94c8979c20945de25f3ff80eba886a194f0a',
     PREFIX + 'Geometry/Manifold/RicciFlow/AnalyticPDE/BoundarylessInitialMetricLocalization.lean': 'b2334e88fb307d3978be6605f753046fe4d30db9102df71cf25800a99c29b424',

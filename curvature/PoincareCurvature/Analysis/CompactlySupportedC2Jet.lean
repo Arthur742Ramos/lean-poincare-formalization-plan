@@ -89,18 +89,18 @@ theorem hasDerivAt_first (hf : ContDiff ℝ 2 f) (j k : Fin n) (x : Fin n → �
 /-- Compact support gives the bounded value without a supplied bound. -/
 def boundedValue (hf : ContDiff ℝ 2 f) (hfc : HasCompactSupport f) :
     BoundedContinuousFunction (Fin n → ℝ) ℝ :=
-  BoundedContinuousFunction.ofCompactSupport f hf.continuous hfc
+  _root_.ofCompactSupport f hf.continuous hfc
 
 /-- Compact support is inherited by the actual first derivatives. -/
 def boundedFirst (hf : ContDiff ℝ 2 f) (hfc : HasCompactSupport f) (k : Fin n) :
     BoundedContinuousFunction (Fin n → ℝ) ℝ :=
-  BoundedContinuousFunction.ofCompactSupport (first f k)
+  _root_.ofCompactSupport (first f k)
     (contDiff_first hf k).continuous (hasCompactSupport_first hfc k)
 
 /-- The actual second derivatives are continuous and compactly supported. -/
 def boundedSecond (hf : ContDiff ℝ 2 f) (hfc : HasCompactSupport f) (j k : Fin n) :
     BoundedContinuousFunction (Fin n → ℝ) ℝ :=
-  BoundedContinuousFunction.ofCompactSupport (second f j k)
+  _root_.ofCompactSupport (second f j k)
     (continuous_second hf j k) (hasCompactSupport_second hfc j k)
 
 /-- No positive Hölder exponent or C³ assumption is used for this conclusion. -/
