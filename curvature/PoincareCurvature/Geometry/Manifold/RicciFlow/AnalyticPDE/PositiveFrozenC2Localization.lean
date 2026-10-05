@@ -88,14 +88,22 @@ theorem exists_positiveFrozenC2Bilinear
   · have hχone' : ∀ᶠ x in 𝓝 x₀, χ x = 1 := by
       simpa only [nhdsSet_singleton] using hχone
     filter_upwards [hχone'] with x hx
-    simp [hx]
+    ext u w
+    change F x₀ u w + χ x * (F x u w - F x₀ u w) = F x u w
+    rw [hx]
+    ring
   · intro x hx
-    simp [image_eq_zero_of_notMem_tsupport hx]
+    ext u w
+    change F x₀ u w + χ x * (F x u w - F x₀ u w) = F x₀ u w
+    rw [image_eq_zero_of_notMem_tsupport hx]
+    ring
   · intro x v
     have hclose : ‖(F x₀ + χ x • (F x - F x₀)) - F x₀‖ ≤ c / 2 := by
       by_cases hx : x ∈ tsupport χ
-      · have hnorm : ‖F x - F x₀‖ < c / 2 := by
-          simpa only [mem_ball, dist_eq_norm] using (hχV hx).2
+      · have hball : F x ∈ ball (F x₀) (c / 2) := (hχV hx).2
+        have hnorm : ‖F x - F x₀‖ < c / 2 := by
+          rw [mem_ball, dist_eq_norm] at hball
+          exact hball
         letI : NormedSpace ℝ (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
         letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
         letI : NormSMulClass ℝ (E →L[ℝ] E →L[ℝ] ℝ) :=
@@ -112,7 +120,13 @@ theorem exists_positiveFrozenC2Bilinear
             mul_le_mul_of_nonneg_right (hχIcc x).2
               (ContinuousLinearMap.opNorm_nonneg (F x - F x₀))
           _ ≤ c / 2 := by simpa using hnorm.le
-      · simp [image_eq_zero_of_notMem_tsupport hx, (half_pos hc).le]
+      · have hzero : (F x₀ + χ x • (F x - F x₀)) - F x₀ = 0 := by
+          ext u w
+          change F x₀ u w + χ x * (F x u w - F x₀ u w) - F x₀ u w = 0
+          rw [image_eq_zero_of_notMem_tsupport hx]
+          ring
+        rw [hzero, ContinuousLinearMap.opNorm_zero]
+        exact (half_pos hc).le
     have h := bilinear_coercivity_of_norm_sub_le hcoer hclose v
     convert h using 1 <;> ring
 

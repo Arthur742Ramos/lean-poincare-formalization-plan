@@ -279,6 +279,44 @@ unexecuted. Fresh independent review and separate execution admission remain
 required, followed by complete exact-head Lean 4.33 source, type, axiom, full
 library and canonical-audit verification before merge. Point 4 remains **OPEN**.
 
+## Historical b18 exact-toolchain failure and literal proof repair
+
+The exact reviewed `b18aff42cc373124912a39cc32887f2545ef439b` candidate
+failed the literal-metric job
+[`111672366729`](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37282119161/job/111672366729)
+of Lean 4.33 run `37282119161` on 2026-10-05. The job actually started at
+09:54:35 UTC and ended with failure at 10:20:01 UTC. Both generic modules and
+`EuclideanC2Localization` compiled. `PositiveFrozenC2Localization` had four
+remaining elaboration failures at lines 88, 92, 98 and 115: the near-point
+bilinear equality, frozen-exterior equality, preimage-to-ball norm estimate,
+and exterior perturbation norm bound. Later metric, full-signature, axiom,
+full-library and canonical-audit gates were not reached. The immutable b18
+source and exact failure log remain historical.
+
+Its previously admitted Lean 4.35.0-rc2 isolated operator-norm control had
+exited 0 at 08:09:09 UTC, with the process group confirmed absent after cleanup.
+That earlier fragment established only its cached-development cancellation,
+scalar-norm, coefficient, coherence and rank-zero examples. It did not check
+the four literal proof blocks now reported by the actual pinned compiler.
+
+This source-only repair evaluates the two bilinear equalities on two vectors
+and closes the resulting real polynomial identities. It explicitly types
+`F x` as a member of the same existing operator-norm ball before rewriting
+ball membership and distance. In the exterior estimate it proves that the
+actual bilinear perturbation is the zero map by the same pointwise method,
+then uses the pinned `ContinuousLinearMap.opNorm_zero` and the unchanged
+positive half-radius. The supported-point scalar-norm, typed cancellation,
+explicit nonnegativity and coefficient bound are preserved unchanged.
+
+All four public theorem signatures and hypotheses, rank-zero branch,
+F/V/P/D value definitions, derivative meaning, literal C² order, actual
+operator norm and positivity bound are unchanged. Only the PositiveFrozen
+module's authored digest changes in the source guard. Inherited source,
+workflows, existing probes, pins, contract, metadata and canonical-gate
+semantics remain unchanged. This new proof repair has not been compiled.
+Fresh independent exact-byte review and complete exact-head Lean 4.33
+verification are still required before merge. Point 4 remains **OPEN**.
+
 ## Remaining mathematical gaps
 
 This local constructor does not discharge anisotropic inverse-Gram heat
