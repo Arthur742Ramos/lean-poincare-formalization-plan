@@ -22,6 +22,8 @@ concurrency:
 jobs:
   c2_initial_heat:
     name: Exact-head C2 union, all 150 axiom occurrences, current contract and full audit
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:
