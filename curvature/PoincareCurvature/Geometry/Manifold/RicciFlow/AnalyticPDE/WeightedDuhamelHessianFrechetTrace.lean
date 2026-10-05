@@ -1,0 +1,93 @@
+module
+
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianTrace
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelFrechet
+
+/-!
+# Optional actual second-Fréchet-derivative zero-trace corollary
+
+SOURCE ONLY, UNCOMPILED. This file additionally imports the separately
+source-reviewed derivative leaf, retained byte-for-byte. The raw-entry trace
+file remains independently usable without that derivative leaf.
+
+The conclusion is uniform-in-space decay of the actual iterated Fréchet
+derivative in its ordinary curried operator norm. No full parabolic carrier,
+time-PDE identity, manifold result, gauge recovery, or uniqueness is claimed.
+-/
+
+@[expose] public noncomputable section
+
+open Real Set MeasureTheory Metric Filter
+open scoped Real BigOperators Interval Topology
+
+namespace RicciFlow
+namespace AnalyticPDE
+
+/-- A derived finite Gaussian-moment coefficient for the actual operator norm. -/
+def weightedHessianOperatorTraceConstant (n : ℕ) (α : ℝ) : ℝ :=
+  ∑ j : Fin n, ∑ k : Fin n, weightedHessianEntryTraceConstant n α j k
+
+lemma weightedHessianOperatorTraceConstant_nonneg
+    {n : ℕ} {α : ℝ} (hα : 0 < α) (hα1 : α < 1) :
+    0 ≤ weightedHessianOperatorTraceConstant n α := by
+  unfold weightedHessianOperatorTraceConstant
+  apply Finset.sum_nonneg
+  intro j _
+  apply Finset.sum_nonneg
+  intro k _
+  exact weightedHessianEntryTraceConstant_nonneg hα hα1 j k
+
+/-- The operator-norm majorant is derived from actual Gaussian entry bounds. -/
+theorem norm_weightedHeatDuhamelHessianCLM_le_trace_constant
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C) (hL : 0 ≤ L)
+    (hholder : HasWeightedSpatialHolderOn q t₀ t α L) (x : Fin n → ℝ) :
+    ‖weightedHeatDuhamelHessianCLM t₀ t q x‖ ≤
+      weightedHessianOperatorTraceConstant n α * L := by
+  calc
+    ‖weightedHeatDuhamelHessianCLM t₀ t q x‖ ≤
+      ∑ j : Fin n, ∑ k : Fin n,
+        heatHessianEntryHolderMoment n α j k * L *
+          (1 / (α / 2) + 1 / (1 - α / 2)) :=
+      norm_weightedHeatDuhamelHessianCLM_le ht hα hα1 hq hL hqb hholder x
+    _ = weightedHessianOperatorTraceConstant n α * L := by
+      unfold weightedHessianOperatorTraceConstant
+      simp only [Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro j _
+      apply Finset.sum_congr rfl
+      intro k _
+      unfold weightedHessianEntryTraceConstant
+      ring
+
+/-- Genuine uniform-in-space strong zero trace of the actual twice-iterated
+Fréchet derivative. For eta choose epsilon `eta/(Kop+1)` and the forcing's
+corresponding delta. This also covers rank zero, where the finite sum is zero. -/
+theorem exists_initial_interval_fderiv_fderiv_heatDuhamelND_norm_lt_of_little
+    {n : ℕ} {t₀ α C : ℝ} (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hsmall : LittleWeightedSpatialHolder q t₀ α) (η : ℝ) (hη : 0 < η) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ t ∈ Ioo t₀ (t₀ + δ), ∀ x : Fin n → ℝ,
+      ‖fderiv ℝ (fderiv ℝ (fun z : Fin n → ℝ => ∫ s in t₀..t,
+        heatSemigroupND (t - s) (q s) z)) x‖ < η := by
+  let K := weightedHessianOperatorTraceConstant n α
+  have hK : 0 ≤ K := weightedHessianOperatorTraceConstant_nonneg hα hα1
+  have hK1 : 0 < K + 1 := by linarith
+  let ε : ℝ := η / (K + 1)
+  have hε : 0 < ε := div_pos hη hK1
+  have hscale : ε * (K + 1) = η := div_mul_cancel₀ η (ne_of_gt hK1)
+  have hlt : K * ε < η := by nlinarith
+  rcases hsmall ε hε with ⟨δ, hδ, hholder⟩
+  refine ⟨δ, hδ, ?_⟩
+  intro t ht x
+  have hholder' := hholder.mono_right ht.2.le
+  rw [fderiv_fderiv_heatDuhamelND_eq_of_weighted
+    ht.1 hα hα1 hq hε.le hqb hholder' x]
+  exact (norm_weightedHeatDuhamelHessianCLM_le_trace_constant
+    ht.1 hα hα1 hq hqb hε.le hholder' x).trans_lt hlt
+
+end AnalyticPDE
+end RicciFlow

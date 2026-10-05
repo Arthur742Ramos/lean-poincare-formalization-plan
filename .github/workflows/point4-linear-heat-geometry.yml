@@ -22,6 +22,8 @@ concurrency:
 jobs:
   linear_heat_geometry:
     name: Exact-head combined source, all 127 axiom occurrences, closed contract and full audit
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:

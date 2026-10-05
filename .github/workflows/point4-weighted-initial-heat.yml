@@ -21,6 +21,8 @@ concurrency:
 jobs:
   weighted_initial_heat:
     name: Exact-head weighted heat certificate with unchanged full audit
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:

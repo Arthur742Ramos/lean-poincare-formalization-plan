@@ -241,4 +241,5 @@ class ManifoldReleaseGuardTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    from point4_weighted_hessian_release_guard import run_inherited
+    run_inherited('curvature/scripts/point4_manifold_heat_release_mock_test.py')

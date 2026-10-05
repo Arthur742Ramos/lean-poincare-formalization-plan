@@ -1,0 +1,144 @@
+name: Point-4 weighted actual Gaussian Duhamel Hessian
+
+on:
+  pull_request:
+    paths:
+      - "curvature/**"
+      - "docs/point4/weighted-duhamel-hessian**"
+      - ".github/workflows/point4-weighted-duhamel-hessian.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  weighted_hessian:
+    name: Exact-head weighted source, actual derivatives, inherited evidence and OPEN audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Install pinned safe YAML parser from the official package registry
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0
+      - name: Read complete official metadata schema
+        run: |
+          mkdir -p /tmp/point4-weighted-hessian-evidence
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/v0.4.schema.json -o /tmp/point4-weighted-hessian-evidence/official-schema.json
+      - name: Validate current exact source union, provenance and all inherited/new adversarial fixtures
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          git rev-parse HEAD | tee /tmp/point4-weighted-hessian-evidence/sha.log
+          python3 curvature/scripts/point4_weighted_hessian_release_guard.py --schema /tmp/point4-weighted-hessian-evidence/official-schema.json | tee /tmp/point4-weighted-hessian-evidence/source.log
+          python3 curvature/scripts/point4_c2_initial_heat_mock_test.py
+          python3 curvature/scripts/point4_linear_heat_geometry_mock_test.py
+          python3 curvature/scripts/point4_manifold_heat_mock_test.py
+          python3 curvature/scripts/point4_manifold_heat_release_mock_test.py
+          python3 curvature/scripts/point4_weighted_hessian_release_mock_test.py
+          python3 curvature/scripts/point4_weighted_initial_heat_guard.py
+          python3 curvature/scripts/point4_closed_contract_source_test.py
+          python3 scripts/check-doc-links.py
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Check unchanged exact Lean and Mathlib pins
+        working-directory: curvature
+        run: |
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.33.0"
+          version="$(lake env lean --version)"
+          case "$version" in 'Lean (version 4.33.0,'*) ;; *) printf '%s\n' "$version" >&2; exit 1;; esac
+          test "$(git -C .lake/packages/mathlib rev-parse HEAD)" = "db584cd6d46c92f209a44c0f1c829460d327499d"
+      - name: Mandatory explicit compilation of every new module before its actual probe
+        working-directory: curvature
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedTimeKernel PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelIntegrand PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianIntegral PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianDerivative PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelFrechet PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianTrace PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianFrechetTrace PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatRegularizerC2Trace 2>&1 | tee /tmp/point4-weighted-hessian-evidence/compile.log
+          printf '%s\n' "WEIGHTED_HESSIAN_COMPILED $EXPECTED_SHA PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedTimeKernel PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelIntegrand PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianIntegral PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianDerivative PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelFrechet PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianTrace PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianFrechetTrace PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatRegularizerC2Trace" | tee -a /tmp/point4-weighted-hessian-evidence/compile.log
+      - name: Check actual complete theorem types, axioms and rank-zero specializations
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_weighted_hessian_probe.lean 2>&1 | tee /tmp/point4-weighted-hessian-evidence/probe.log
+          python3 scripts/point4_weighted_hessian_release_guard.py --compile-log /tmp/point4-weighted-hessian-evidence/compile.log --probe-log /tmp/point4-weighted-hessian-evidence/probe.log
+      - name: Preserve mandatory inherited manifold producer compilation and evidence
+        working-directory: curvature
+        run: |
+          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.BoundarylessTensorHeatFixedBackground
+          lake env lean scripts/point4_manifold_heat_probe.lean 2>&1 | tee /tmp/point4-weighted-hessian-evidence/manifold-probe.log
+          python3 scripts/point4_manifold_heat_release_guard.py --probe-log /tmp/point4-weighted-hessian-evidence/manifold-probe.log
+      - name: Compile unchanged complete inherited library
+        working-directory: curvature
+        run: lake build 2>&1 | tee /tmp/point4-weighted-hessian-evidence/inherited-build.log
+      - name: Preserve all 150 inherited axiom occurrences and seven boundaryless theorem types
+        working-directory: curvature
+        run: |
+          mkdir -p /tmp/point4-weighted-hessian-evidence/inherited-probes
+          for probe in contraction coordinate_connection coordinate_jet coordinate_operator principal_remainder chosen_lc_coordinate chosen_lc_curvature standard_coordinate_operator frozen_metric_principal weak_laplacian boundaryless_chart_frames c2_heat_trace weighted_initial_heat; do
+            lake env lean "scripts/point4_${probe}_probe.lean" 2>&1 | tee "/tmp/point4-weighted-hessian-evidence/inherited-probes/${probe}.log"
+          done
+          python3 scripts/point4_weighted_hessian_release_guard.py --axiom-dir /tmp/point4-weighted-hessian-evidence/inherited-probes
+      - name: Recheck unchanged closed contract and twelve kernel negatives
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_closed_contract_probe.lean 2>&1 | tee /tmp/point4-weighted-hessian-evidence/contract.log
+          lake env lean scripts/point4_closed_contract_regression.lean 2>&1 | tee /tmp/point4-weighted-hessian-evidence/regression.log
+      - name: Preserve unchanged full Point-4 OPEN completion audit and exact evidence inventory
+        working-directory: curvature
+        run: |
+          set +e
+          bash scripts/point4_audit.sh --json /tmp/point4-weighted-hessian-evidence/audit.json | tee /tmp/point4-weighted-hessian-evidence/audit.log
+          audit_rc=${PIPESTATUS[0]}
+          set -e
+          cp /tmp/point4_build.log /tmp/point4-weighted-hessian-evidence/audit-build.log
+          python3 scripts/point4_weighted_hessian_release_guard.py --schema /tmp/point4-weighted-hessian-evidence/official-schema.json --compile-log /tmp/point4-weighted-hessian-evidence/compile.log --probe-log /tmp/point4-weighted-hessian-evidence/probe.log --axiom-dir /tmp/point4-weighted-hessian-evidence/inherited-probes --audit-json /tmp/point4-weighted-hessian-evidence/audit.json --audit-rc "$audit_rc" --evidence-dir /tmp/point4-weighted-hessian-evidence
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-weighted-hessian-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-weighted-hessian-evidence/sha.log
+            /tmp/point4-weighted-hessian-evidence/source.log
+            /tmp/point4-weighted-hessian-evidence/compile.log
+            /tmp/point4-weighted-hessian-evidence/probe.log
+            /tmp/point4-weighted-hessian-evidence/inherited-build.log
+            /tmp/point4-weighted-hessian-evidence/manifold-probe.log
+            /tmp/point4-weighted-hessian-evidence/contract.log
+            /tmp/point4-weighted-hessian-evidence/regression.log
+            /tmp/point4-weighted-hessian-evidence/audit.log
+            /tmp/point4-weighted-hessian-evidence/audit-build.log
+            /tmp/point4-weighted-hessian-evidence/audit.json
+            /tmp/point4-weighted-hessian-evidence/official-schema.json
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/contraction.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/coordinate_connection.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/coordinate_jet.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/coordinate_operator.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/principal_remainder.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/chosen_lc_coordinate.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/chosen_lc_curvature.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/standard_coordinate_operator.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/frozen_metric_principal.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/weak_laplacian.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/boundaryless_chart_frames.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/c2_heat_trace.log
+            /tmp/point4-weighted-hessian-evidence/inherited-probes/weighted_initial_heat.log
+          if-no-files-found: error

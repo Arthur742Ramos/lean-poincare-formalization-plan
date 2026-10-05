@@ -117,5 +117,13 @@ def main() -> None:
     print('Source/provenance checks passed; exact Lean 4.33 compilation, full build and independent review are separate gates')
 
 
+# Exact weighted-Hessian inventory dispatch. The original semantic gate body
+# above is replayed from its byte/mode-pinned historical source reconstruction;
+# current physical source and evidence checks are independently mandatory.
+_weighted_hessian_historical_main = main
+def main(argv=None):
+    from point4_weighted_hessian_release_guard import run_inherited
+    run_inherited('curvature/scripts/point4_manifold_heat_source_test.py', argv)
+
 if __name__ == '__main__':
     main()
