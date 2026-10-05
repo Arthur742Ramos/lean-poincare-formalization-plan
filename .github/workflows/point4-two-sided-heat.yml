@@ -1,0 +1,103 @@
+name: Point-4 supporting two-sided ordinary initial heat derivative
+
+on:
+  pull_request:
+    paths:
+      - "curvature/**"
+      - "docs/point4/two-sided**"
+      - ".github/workflows/point4-two-sided-heat.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  two_sided_heat:
+    name: Exact-head ordinary initial derivative with unchanged full OPEN audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Install pinned safe YAML parser from the official package registry
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0
+      - name: Read full official metadata schema with exact digest checked by source guard
+        run: |
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/v0.4.schema.json -o /tmp/point4-two-sided-heat-official-schema.json
+      - name: Check exact release union and all inherited and new adversarial fixtures
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(cat curvature/lean-toolchain)" = 'leanprover/lean4:v4.33.0'
+          git rev-parse HEAD | tee /tmp/point4-two-sided-heat-sha.log
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_two_sided_heat_source_guard.py --schema /tmp/point4-two-sided-heat-official-schema.json | tee /tmp/point4-two-sided-heat-source.log
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_c2_initial_heat_mock_test.py
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_linear_heat_geometry_mock_test.py
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_two_sided_heat_mock_test.py
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_weighted_initial_heat_guard.py
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_closed_contract_source_test.py
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/check-doc-links.py
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Compile actual two-sided initial heat derivative
+        working-directory: curvature
+        run: lake build PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatTwoSidedInitial
+      - name: Check exact types, ordinary derivative, actual C2 slices, rank zero and twelve axiom surfaces
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_two_sided_heat_probe.lean | tee /tmp/point4-two-sided-heat-probe.log
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_two_sided_heat_source_guard.py --probe-log /tmp/point4-two-sided-heat-probe.log
+      - name: Compile unchanged full library before inherited evidence probes
+        working-directory: curvature
+        run: lake build 2>&1 | tee /tmp/point4-two-sided-heat-inherited-build.log
+      - name: Preserve all 150 inherited axiom occurrences and seven boundaryless types
+        working-directory: curvature
+        run: |
+          mkdir -p /tmp/point4-two-sided-heat-inherited-probes
+          for probe in contraction coordinate_connection coordinate_jet coordinate_operator principal_remainder chosen_lc_coordinate chosen_lc_curvature standard_coordinate_operator frozen_metric_principal weak_laplacian boundaryless_chart_frames c2_heat_trace weighted_initial_heat; do
+            lake env lean "scripts/point4_${probe}_probe.lean" 2>&1 | tee "/tmp/point4-two-sided-heat-inherited-probes/${probe}.log"
+          done
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_two_sided_heat_source_guard.py --axiom-dir /tmp/point4-two-sided-heat-inherited-probes
+      - name: Recheck unchanged canonical contract and kernel negative fixtures
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_closed_contract_probe.lean 2>&1 | tee /tmp/point4-two-sided-heat-contract.log
+          lake env lean scripts/point4_closed_contract_regression.lean 2>&1 | tee /tmp/point4-two-sided-heat-regression.log
+      - name: Run unchanged full Point-4 completion audit
+        working-directory: curvature
+        run: |
+          set +e
+          bash scripts/point4_audit.sh --json /tmp/point4-two-sided-heat-full-audit.json | tee /tmp/point4-two-sided-heat-full-audit.log
+          audit_rc=${PIPESTATUS[0]}
+          set -e
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_two_sided_heat_source_guard.py --probe-log /tmp/point4-two-sided-heat-probe.log --axiom-dir /tmp/point4-two-sided-heat-inherited-probes --audit-json /tmp/point4-two-sided-heat-full-audit.json --audit-rc "$audit_rc"
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-two-sided-heat-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-two-sided-heat-*.log
+            /tmp/point4-two-sided-heat-inherited-probes/*.log
+            /tmp/point4-two-sided-heat-full-audit.json
+            /tmp/point4-two-sided-heat-official-schema.json
+            /tmp/point4-two-sided-heat-full-audit.log
+            /tmp/point4_build.log
+          if-no-files-found: error
