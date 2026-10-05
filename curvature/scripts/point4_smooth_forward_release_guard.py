@@ -19,6 +19,8 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 BASE = 'a0132cd55e2540b2fd26adecea9a07b51f1b8292'
+SCALAR_PARENT = '229533f83c83e45e8b7725adda50b53d88699aba'
+SCALAR_PARENT_TREE = '5aa2971a0b54b77aaa1bc711b435795d86db6467'
 LEGACY_GUARD = 'curvature/scripts/point4_manifold_heat_release_guard.py'
 LEGACY_TEST = 'curvature/scripts/point4_manifold_heat_release_mock_test.py'
 GUARD = 'curvature/scripts/point4_smooth_forward_release_guard.py'
@@ -33,7 +35,8 @@ ORIGINAL_SHA256 = '713af9477a3595655ddbd2cde6dd4dfc5ce7230f4310b28593171407e33ab
 ADAPTER_TEMPLATE = "\n# Reviewed smooth-forward inventory adapter. Gate bodies remain unchanged.\n_smooth_guard_path = ROOT / 'curvature/scripts/point4_smooth_forward_release_guard.py'\nassert stat.S_ISREG(_smooth_guard_path.lstat().st_mode) and not (_smooth_guard_path.lstat().st_mode & 0o111), 'Smooth guard mode changed'\nassert hashlib.sha256(_smooth_guard_path.read_bytes()).hexdigest() == '{guard_sha256}', 'Reviewed smooth executable changed'\nsys.modules.setdefault('point4_manifold_heat_release_guard', sys.modules[__name__])\nimport point4_smooth_forward_release_guard as _smooth_release\n_smooth_release.install_release_adapter(globals(), '{guard_sha256}')\n\n"
 # Every non-self addition is pinned. This guard body still requires independent
 # review; hashing itself would not establish trust. Paths and modes are exact.
-FILE_SHA256 = {'.github/workflows/point4-smooth-forward-support.yml': '425e2c575361602f5b676a33f28e6977a5ba16986d75fdbd10b85e85390a1910', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardContract.lean': 'b096fe0ff63b6adc19c344a2239183b3fdb0921cef5a128c30e5cac49da47e30', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardRegularity.lean': '2e46cea0e6587f803e7d01cda26ea5bdb439d6216ec44b574a87dcae414607a6', 'curvature/scripts/point4_smooth_forward_audit.py': '358affd9a9f7c567ba8d01b05bea981b844f692c9acdcb2b728852d304bffcf2', 'curvature/scripts/point4_smooth_forward_completion.lean': '644d4fb1a354e11ef5e730652559f815c43ae5a13f8753708a0b19cfaafdd07d', 'curvature/scripts/point4_smooth_forward_interface_sha256.json': '6d4bf424f368d00c151a05c37ad56b52cf82bfb3e56c7e48a467d80eea0019a5', 'curvature/scripts/point4_smooth_forward_probe.lean': '24490add867b9e60adc1deeb52b6dfc347788f453727617ea7ef1be20f163821', 'curvature/scripts/point4_smooth_forward_release_mock_test.py': '94f90deab86e2b47a030bd8146b2bc5d0e0c02ac4e13f0c918b26e459733184b', 'docs/point4/smooth-forward-model-contract.md': '43749ea7bffea985011b397433eb6ba404de8345ab617f7f7864374da5e37093', 'docs/point4/smooth-forward-model/formalization.yaml': '5ad59f77a615dd6d77ed284e97b1d4eadc9b6efd76caae221cbcf2dd4545f7af', 'docs/point4/smooth-forward-release-integration.md': '8f8bcf4c250499d7c90c69fe49cd26fb029e8e81b2680dcab444c0454e508c8e'}
+FILE_SHA256 = {'.github/workflows/point4-smooth-forward-support.yml': '425e2c575361602f5b676a33f28e6977a5ba16986d75fdbd10b85e85390a1910', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardContract.lean': 'b096fe0ff63b6adc19c344a2239183b3fdb0921cef5a128c30e5cac49da47e30', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardRegularity.lean': '2e46cea0e6587f803e7d01cda26ea5bdb439d6216ec44b574a87dcae414607a6', 'curvature/scripts/point4_smooth_forward_audit.py': '358affd9a9f7c567ba8d01b05bea981b844f692c9acdcb2b728852d304bffcf2', 'curvature/scripts/point4_smooth_forward_completion.lean': '644d4fb1a354e11ef5e730652559f815c43ae5a13f8753708a0b19cfaafdd07d', 'curvature/scripts/point4_smooth_forward_interface_sha256.json': '6d4bf424f368d00c151a05c37ad56b52cf82bfb3e56c7e48a467d80eea0019a5', 'curvature/scripts/point4_smooth_forward_probe.lean': '24490add867b9e60adc1deeb52b6dfc347788f453727617ea7ef1be20f163821', 'curvature/scripts/point4_smooth_forward_release_mock_test.py': '121193aa2467bd5cad04e1100a545300728f42367fdc572a407803161e477e10', 'docs/point4/smooth-forward-model-contract.md': '43749ea7bffea985011b397433eb6ba404de8345ab617f7f7864374da5e37093', 'docs/point4/smooth-forward-model/formalization.yaml': '5ad59f77a615dd6d77ed284e97b1d4eadc9b6efd76caae221cbcf2dd4545f7af', 'docs/point4/smooth-forward-release-integration.md': '8f8bcf4c250499d7c90c69fe49cd26fb029e8e81b2680dcab444c0454e508c8e', 'curvature/PoincareCurvature/Analysis/C2Resonance.lean': 'f2c0f2ec234e570e626e0ae436a5de156465b15d17b4ca3d73e8ec10b4df61cc', 'curvature/scripts/point4_c2_resonance_probe.lean': '9bd3092ffc5bcf090e12473492f1d6f488a8848df72fc230e664cceed7085ee3', 'curvature/scripts/point4_c2_resonance_guard.py': '2681309b231ceab5ad6299c9002dd856d6df5adc0a61e27409efed780307c389', 'curvature/scripts/point4_c2_resonance_mock_test.py': '22707131eb469cc9597497977bb3b81b157c5bb676e9ce049dbe54171688bbe6', 'docs/point4/c2-resonance.md': 'd3465cce3f95243c8d74dfe8cd5ce4a4a9a749b52c1fd4b67cebdc11f12abf5f', 'docs/point4/c2-resonance/formalization.yaml': '33c022bac42fa4c90a0bee496664750407c0245bd2f83a5508f6e14b88007f33', '.github/workflows/point4-c2-resonance.yml': 'e4f39177d37c5edba8815c97c5d348f4341fe6db9363484f20b326db1978ae74'}
+SCALAR_UNIT_PATHS = frozenset({'curvature/scripts/point4_c2_resonance_guard.py', 'curvature/PoincareCurvature/Analysis/C2Resonance.lean', '.github/workflows/point4-c2-resonance.yml', 'curvature/scripts/point4_c2_resonance_mock_test.py', 'docs/point4/c2-resonance/formalization.yaml', 'curvature/scripts/point4_c2_resonance_probe.lean', 'docs/point4/c2-resonance.md'})
 ADDED = frozenset(FILE_SHA256) | {GUARD}
 _depth = 0
 _active_namespace = None
@@ -92,8 +95,11 @@ def reconstruct_baseline(namespace: dict, inventory) -> dict[str, tuple[str, byt
 def expected_sources(namespace: dict) -> dict[str, tuple[str, bytes]]:
     subprocess.run(['git', '-C', str(ROOT), 'merge-base', '--is-ancestor', BASE, 'HEAD'],
                    check=True, env=namespace['ENV'])
+    subprocess.run(['git', '-C', str(ROOT), 'merge-base', '--is-ancestor', SCALAR_PARENT, 'HEAD'],
+                   check=True, env=namespace['ENV'])
+    assert namespace['git']('rev-parse', SCALAR_PARENT + '^{tree}').decode().strip() == SCALAR_PARENT_TREE, 'Published smooth dependency tree changed'
     inventory = parse_tree(namespace['git']('ls-tree', '-rz', BASE))
-    assert not ADDED & set(inventory) and len(ADDED) == 12, 'Reviewed smooth addition inventory changed'
+    assert not ADDED & set(inventory) and len(ADDED) == 19, 'Reviewed smooth addition inventory changed'
     original_guard = namespace['git']('show', f'{BASE}:{LEGACY_GUARD}')
     adapted = adapted_release_guard(original_guard, namespace['_smooth_guard_sha256'])
     # Validate the complete physical/public composed inventory before historical
@@ -121,7 +127,7 @@ def expected_sources(namespace: dict) -> dict[str, tuple[str, bytes]]:
     expected = {path: (BASE, data) for path, (_, data) in baseline.items()}
     expected[LEGACY_GUARD] = BASE, adapted
     assert not ADDED & set(baseline), 'Smooth support overlaps fresh master'
-    assert len(ADDED) == 12, 'Reviewed smooth addition inventory changed'
+    assert len(ADDED) == 19, 'Reviewed smooth addition inventory changed'
     for path in ADDED:
         data = (ROOT / path).read_bytes()
         if path != GUARD:
@@ -265,7 +271,7 @@ def main(argv=None) -> None:
     assert (args.smooth_audit_json is None) == (args.smooth_audit_rc is None)
     if args.smooth_audit_json:
         check_smooth_audit_open(json.loads(args.smooth_audit_json.read_text()), args.smooth_audit_rc)
-    print(json.dumps({'base': BASE, 'public_paths': 1665, 'exact_inherited_release_adapters': 1,
+    print(json.dumps({'base': BASE, 'public_paths': 1672, 'exact_inherited_release_adapters': 1,
                       'smooth_support_proofs': 'separate exact-head gates required',
                       'smooth_general_target': 'OPEN', 'canonical_point4': 'OPEN'}, indent=2))
 
