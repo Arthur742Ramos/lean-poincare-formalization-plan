@@ -84,6 +84,13 @@ anisotropic transport, nonlinear closure and the canonical target remain open.
 
 ## Current verdict
 
+The [literal C² initial metric localization candidate](c2-metric-localization.md)
+constructs actual bounded coordinate heat data with a symmetric positive frozen
+exterior and uniformly continuous Hessian entries. Its mathematical source
+review is positive, but exact compilation and the complete inherited/new
+release gates remain pending. This local construction adds no Ricci-flow solver
+or canonical theorem and leaves Point 4 OPEN.
+
 The fast audit run on 2026-09-11 passed the forbidden-term scan but did not find
 the canonical target. The build gate was intentionally skipped in that fast
 run. Gates 3–5 therefore failed and the verdict remained `POINT 4 OPEN`.
