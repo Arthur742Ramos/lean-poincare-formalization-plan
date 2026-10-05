@@ -13,17 +13,33 @@ Its `EuclideanHeatTwoSidedInitial.lean` module and full type/axiom/rank-zero
 probe are byte-identical in this release. Mathematical source approval for R1
 is conditional on actual compilation; these repairs are source-only.
 
-All 1,640 other inherited files retain exact bytes and Git/physical executable
-modes. This includes every proof, pin, workflow, probe, contract, kernel
+All 1,637 unaffected inherited files retain exact bytes and Git/physical
+executable modes. This includes every proof, pin, probe, contract, kernel
 negative fixture, auditor, contributor notice, root import and root metadata.
-The only changed inherited file is the C2 union guard. Its original SHA256 is
+Four inherited files have only exact, digest-pinned adapters: the C2 union
+guard and three workflow job-startup environments. Its original SHA256 is
 `2ce315f52a5f8de5c2f2eed6543cd4ef26bf7f4411e8d94025251b7d62e68a47`.
 The new source guard reconstructs and pins one insertion immediately before
 the original main entry point, leaving every inherited function body intact.
 That adapter first executes the original immutable union reconstruction,
 checks its exact baseline correspondence, then admits this enumerated unit.
 Existing geometry and weighted adapters continue delegating to the same C2
-checks; all 9 C2 and 13 geometry fixtures remain byte-identical.
+checks; all 9 C2 and 13 geometry fixtures remain byte-identical. The workflow
+validator adapter verifies the exact C2 startup transform, removes only that
+count-one insertion and calls the unchanged original validator on original
+bytes. No path-read monkeypatch or broad workflow acceptance is introduced.
+
+The inherited geometry, C2 and weighted workflow jobs each gain exactly one
+job-level environment insertion, `PYTHONDONTWRITEBYTECODE: '1'`. Their original
+bytes, steps, action pins, permissions, triggers and all other YAML semantics
+are retained and checked with duplicate-key-aware parsing. CPython caches an
+imported module before executing its body, so a flag inside the C2 adapter
+cannot suppress its own import cache. The prior draft head
+`96e666f0520ca261fe745c5cf2c2a4abef38f645` failed that inherited startup gate; its
+failed evidence remains historical. Regression fixtures use ordinary Python
+commands with the exact pinned job environment and also reject preexisting
+empty caches, hidden Lean, invalid bytecode and byte-identical gate bytecode
+without deleting or overwriting the attack evidence.
 
 The R1 source guard is repaired to require every addition, reject unexpected
 tracked/untracked/ignored/physical source, use NUL-safe inventories and reject

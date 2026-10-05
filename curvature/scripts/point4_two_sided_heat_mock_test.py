@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Adversarial release fixtures; no compiler evidence or working-tree mutation."""
 import copy
+import os
+import py_compile
+import subprocess
 import sys
 sys.dont_write_bytecode = True
 import pathlib
@@ -36,13 +39,149 @@ class TwoSidedReleaseGuardTests(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 self.guard.check_equal(release.C2_GUARD, wrong, expected)
 
+    def test_three_count_one_startup_workflow_adapters_pin_all_original_bytes(self):
+        self.assertEqual(len(release.STARTUP_WORKFLOWS), 3)
+        for path, (_, job, anchor) in release.STARTUP_WORKFLOWS.items():
+            original = self.baseline[path][1]
+            adapted = release.adapted_startup_workflow(path, original)
+            self.assertEqual(adapted, (release.ROOT / path).read_bytes())
+            self.assertEqual(adapted.decode().count(anchor), 1)
+            self.assertEqual(adapted.decode().count(release.STARTUP_ENV), 1)
+            self.assertEqual(release.restored_startup_workflow(path, adapted), original)
+            parsed = release.parse_workflow(adapted.decode())
+            self.assertEqual(parsed['jobs'][job]['env'], {'PYTHONDONTWRITEBYTECODE': '1'})
+            del parsed['jobs'][job]['env']
+            self.assertEqual(parsed, release.parse_workflow(original.decode()))
+            for wrong in (original + b'\n', adapted, original.replace(anchor.encode(), b''),
+                          original + anchor.encode()):
+                with self.subTest(path=path, original=release.sha256(wrong)), self.assertRaises(AssertionError):
+                    release.adapted_startup_workflow(path, wrong)
+            wrong_cases = (
+                adapted.replace(release.STARTUP_ENV.encode(), b''),
+                adapted.replace(release.STARTUP_ENV.encode(), release.STARTUP_ENV.encode() * 2),
+                adapted.replace(b"PYTHONDONTWRITEBYTECODE: '1'", b"PYTHONDONTWRITEBYTECODE: '0'"),
+                adapted.replace(b"PYTHONDONTWRITEBYTECODE: '1'", b'PYTHONDONTWRITEBYTECODE: 1'),
+                adapted.replace(b"PYTHONDONTWRITEBYTECODE: '1'", b"PYTHONDONTWRITEBYTECODE: '1'\n      PYTHONPATH: /tmp"),
+                adapted.replace(b'contents: read', b'contents: write'),
+                adapted.replace(b'fetch-depth: 0', b'fetch-depth: 1'),
+                adapted.replace(b'      - name: Checkout', b"      - env: {PYTHONDONTWRITEBYTECODE: '0'}\n        name: Checkout", 1),
+                adapted + b'\n',
+            )
+            for wrong in wrong_cases:
+                with self.subTest(path=path, adapted=release.sha256(wrong)), self.assertRaises(AssertionError):
+                    release.restored_startup_workflow(path, wrong)
+        with self.assertRaises(AssertionError):
+            release.adapted_startup_workflow('unapproved.yml', b'')
+
+    def test_duplicate_workflow_yaml_keys_rejected_at_all_mapping_levels(self):
+        for source in (
+            "jobs: {}\njobs: {}\n",
+            "jobs:\n  gate:\n    env: {}\n    env: {}\n",
+            "jobs:\n  gate:\n    env:\n      PYTHONDONTWRITEBYTECODE: '1'\n      PYTHONDONTWRITEBYTECODE: '0'\n",
+            "jobs:\n  gate:\n    steps:\n      - run: echo good\n        run: echo bad\n",
+            "permissions: {contents: read, contents: write}\n",
+        ):
+            with self.subTest(source=source), self.assertRaises(AssertionError):
+                release.parse_workflow(source)
+
+    def test_workflow_wrapper_checks_exact_transform_then_runs_original_validator(self):
+        namespace = vars(self.guard).copy()
+        namespace['expected_sources'] = namespace.pop('_two_sided_release_original_expected_sources')
+        namespace['ADDED'] = namespace['ADDED'] - release.SELF_PATHS
+        namespace.pop('_two_sided_release_original_check_workflow')
+        original_validator = mock.Mock(wraps=self.guard._two_sided_release_original_check_workflow)
+        namespace['check_workflow'] = original_validator
+        release.install_c2_inventory_adapter(namespace)
+        path = '.github/workflows/point4-c2-initial-heat.yml'
+        original = self.baseline[path][1]
+        adapted = (release.ROOT / path).read_bytes()
+        namespace['check_workflow'](adapted)
+        original_validator.assert_called_once_with(original)
+        original_validator.reset_mock()
+        for wrong in (original, adapted + b'\n', adapted.replace(b'contents: read', b'contents: write')):
+            with self.assertRaises(AssertionError):
+                namespace['check_workflow'](wrong)
+        original_validator.assert_not_called()
+
+    def ordinary_startup_env(self, workflow):
+        # Ignore any ambient caller flag. Reproduce GitHub's pinned job env with
+        # the ordinary interpreter command, without -B or per-command prefixes.
+        env = dict(os.environ)
+        env.pop('PYTHONDONTWRITEBYTECODE', None)
+        env.pop('PYTHONPYCACHEPREFIX', None)
+        _, job, _ = release.STARTUP_WORKFLOWS[workflow]
+        env.update(release.parse_workflow((release.ROOT / workflow).read_text())['jobs'][job]['env'])
+        return env
+
+    def test_clean_ordinary_python_startup_matches_inherited_job_environments(self):
+        self.assertFalse(any(path.name == '__pycache__' for path in release.ROOT.rglob('__pycache__')))
+        entries = (
+            ('point4-linear-heat-geometry', 'point4_linear_heat_geometry_source_test.py'),
+            ('point4-linear-heat-geometry', 'point4_linear_heat_geometry_mock_test.py'),
+            ('point4-c2-initial-heat', 'point4_c2_initial_heat_source_test.py'),
+            ('point4-c2-initial-heat', 'point4_c2_initial_heat_mock_test.py'),
+            ('point4-weighted-initial-heat', 'point4_weighted_initial_heat_guard.py'),
+        )
+        for workflow, entry in entries:
+            with self.subTest(entry=entry):
+                result = subprocess.run([sys.executable, 'curvature/scripts/' + entry],
+                                        cwd=release.ROOT, env=self.ordinary_startup_env('.github/workflows/' + workflow + '.yml'),
+                                        capture_output=True, text=True, timeout=120)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertFalse(any(release.ROOT.rglob('__pycache__')), result.stdout + result.stderr)
+        # The new guard's main entry is also safe with no startup environment.
+        env = dict(os.environ)
+        env.pop('PYTHONDONTWRITEBYTECODE', None)
+        env.pop('PYTHONPYCACHEPREFIX', None)
+        result = subprocess.run([sys.executable, release.SOURCE_GUARD], cwd=release.ROOT,
+                                env=env, capture_output=True, text=True, timeout=120)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(any(release.ROOT.rglob('__pycache__')))
+
+    def test_preexisting_empty_hidden_stale_and_identical_python_caches_still_rejected(self):
+        # Separate exact-index checkout: attack fixtures never alter the release
+        # tree. Ordinary startup must preserve and reject every existing cache.
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory) / 'candidate'
+            subprocess.run(['git', 'clone', '--quiet', '--shared', '--no-checkout', str(release.ROOT), str(root)], check=True)
+            tree = release.git('write-tree').decode().strip()
+            subprocess.run(['git', '-C', str(root), 'read-tree', tree], check=True)
+            subprocess.run(['git', '-C', str(root), 'checkout-index', '-a'], check=True)
+            cache = root / 'curvature/scripts/__pycache__'
+            cache.mkdir()
+            own_pyc = cache / ('point4_c2_initial_heat_source_test.' + sys.implementation.cache_tag + '.pyc')
+            cases = ('empty', 'hidden.lean', 'stale.pyc', 'identical-own-pyc')
+            for case in cases:
+                attack = None
+                if case == 'hidden.lean':
+                    attack = cache / 'hidden.lean'; attack.write_bytes(b'axiom hidden : False\n')
+                elif case == 'stale.pyc':
+                    attack = own_pyc; attack.write_bytes(b'preexisting invalid cache')
+                elif case == 'identical-own-pyc':
+                    attack = own_pyc
+                    py_compile.compile(str(root / release.C2_GUARD), cfile=str(attack), doraise=True)
+                before = attack.read_bytes() if attack else None
+                with self.subTest(case=case):
+                    result = subprocess.run([sys.executable, 'curvature/scripts/point4_linear_heat_geometry_source_test.py'],
+                                            cwd=root, env=self.ordinary_startup_env('.github/workflows/point4-linear-heat-geometry.yml'),
+                                            capture_output=True, text=True, timeout=120)
+                    self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                    self.assertIn('Interpreter cache forbidden:', result.stderr)
+                    self.assertTrue(cache.is_dir())
+                    if attack:
+                        self.assertEqual(attack.read_bytes(), before, 'Gate erased/overwrote preexisting cache evidence')
+                if attack:
+                    attack.unlink()
+            cache.rmdir()
+
     def test_legacy_reconstruction_runs_and_gate_functions_are_untouched(self):
         namespace = vars(self.guard).copy()
         original = namespace.pop('_two_sided_release_original_expected_sources')
         namespace['expected_sources'] = original
         namespace['ADDED'] = namespace['ADDED'] - release.SELF_PATHS
+        namespace['check_workflow'] = namespace.pop('_two_sided_release_original_check_workflow')
         names = ('main', 'check_imports', 'check_metadata', 'check_axiom_output',
-                 'check_boundaryless_types', 'check_audit', 'check_workflow',
+                 'check_boundaryless_types', 'check_audit',
                  'check_public_paths', 'public_paths', 'nul_paths')
         before = {name: namespace[name] for name in names}
         release.install_c2_inventory_adapter(namespace)
@@ -53,6 +192,7 @@ class TwoSidedReleaseGuardTests(unittest.TestCase):
         for key in ('EDITABLE', 'ADDED'):
             wrong = vars(self.guard).copy()
             wrong.pop('_two_sided_release_original_expected_sources')
+            wrong['check_workflow'] = wrong.pop('_two_sided_release_original_check_workflow')
             wrong['expected_sources'] = original
             wrong['ADDED'] = wrong['ADDED'] - release.SELF_PATHS
             wrong[key] = set(wrong[key]) | {'arbitrary/exception.lean'}
@@ -62,7 +202,8 @@ class TwoSidedReleaseGuardTests(unittest.TestCase):
     def test_every_inherited_file_and_r1_proof_probe_is_pinned(self):
         self.assertEqual(len(self.baseline), 1641)
         for path, (_, original) in self.baseline.items():
-            wanted = release.adapted_c2_guard(original) if path == release.C2_GUARD else original
+            wanted = (release.adapted_c2_guard(original) if path == release.C2_GUARD else
+                      release.adapted_startup_workflow(path, original) if path in release.STARTUP_WORKFLOWS else original)
             with self.subTest(path=path):
                 self.assertEqual((release.ROOT / path).read_bytes(), wanted)
                 with self.assertRaises(AssertionError):
@@ -311,7 +452,8 @@ class TwoSidedReleaseGuardTests(unittest.TestCase):
     def test_inherited_workflows_and_focused_evidence_are_pinned(self):
         for path, (_, data) in self.baseline.items():
             if path.startswith('.github/workflows/'):
-                self.assertEqual((release.ROOT / path).read_bytes(), data)
+                wanted = release.adapted_startup_workflow(path, data) if path in release.STARTUP_WORKFLOWS else data
+                self.assertEqual((release.ROOT / path).read_bytes(), wanted)
         workflow = (release.ROOT / release.WORKFLOW).read_bytes()
         release.check_unit_blob(release.WORKFLOW, workflow)
         replacements = (

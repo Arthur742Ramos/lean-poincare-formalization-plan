@@ -33,7 +33,27 @@ ENTRY_POINT = "\nif __name__ == '__main__':\n    main()\n"
 C2_ORIGINAL_SHA256 = '2ce315f52a5f8de5c2f2eed6543cd4ef26bf7f4411e8d94025251b7d62e68a47'
 C2_ADAPTER = "\n# Reviewed two-sided heat inventory adapter. All inherited gate bodies remain\n# unchanged; the source guard pins this count-one insertion and exact union.\nif (ROOT / 'curvature/scripts/point4_two_sided_heat_source_guard.py').is_file():\n    import sys as _two_sided_sys\n    _two_sided_sys.dont_write_bytecode = True\n    import point4_two_sided_heat_source_guard as _two_sided_release\n    _two_sided_release.install_c2_inventory_adapter(globals())\n\n"
 R1_FILE_SHA256 = {'.github/workflows/point4-two-sided-heat.yml': 'd87d08a5d5545ab69c6b579921078efbd70bfa20dcd6f058ed753f575b928ad7', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatTwoSidedInitial.lean': '488c1fdaa617f306e9bd2c714d5917b07319a88cc251195cd0e950b240747529', 'curvature/scripts/point4_two_sided_heat_probe.lean': '3b871129c36100927a141430678bed1bcd190e2f2ea0f7acbbfec0f9f3451af4', 'curvature/scripts/point4_two_sided_heat_source_guard.py': '601d74c08fb5d300dd7bb896f6441cd06e3c4f0b511026518f96bfc040debf11', 'docs/point4/two-sided-initial-heat.md': '0eb9f3eb41ca0712c0d2d203f07bcc720e65393342614f1c5560026b99a8793a'}
-UNIT_FILE_SHA256 = {'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatTwoSidedInitial.lean': '488c1fdaa617f306e9bd2c714d5917b07319a88cc251195cd0e950b240747529', 'curvature/scripts/point4_two_sided_heat_probe.lean': '3b871129c36100927a141430678bed1bcd190e2f2ea0f7acbbfec0f9f3451af4', '.github/workflows/point4-two-sided-heat.yml': '376368cd2508cff7dd9c140204a86d2ea60088d032dfb8b619e2a126b1d026fa', 'docs/point4/two-sided-initial-heat.md': 'abf91c58ecdd81c340fd3d99e2caa351628dbd10b415720546a05f1e79672e84', 'docs/point4/two-sided-initial-heat/formalization.yaml': '2ef33efb616317d135381c7d059a70055cf9c99bc3cf4486491508f5ec370e43', 'docs/point4/two-sided-heat-release-integration.md': '5ccecfd232b1db16c86d52d0eeff21a5bc04d7419f8d01bb8289fe70031f2327'}
+UNIT_FILE_SHA256 = {'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatTwoSidedInitial.lean': '488c1fdaa617f306e9bd2c714d5917b07319a88cc251195cd0e950b240747529', 'curvature/scripts/point4_two_sided_heat_probe.lean': '3b871129c36100927a141430678bed1bcd190e2f2ea0f7acbbfec0f9f3451af4', '.github/workflows/point4-two-sided-heat.yml': '376368cd2508cff7dd9c140204a86d2ea60088d032dfb8b619e2a126b1d026fa', 'docs/point4/two-sided-initial-heat.md': 'abf91c58ecdd81c340fd3d99e2caa351628dbd10b415720546a05f1e79672e84', 'docs/point4/two-sided-initial-heat/formalization.yaml': '2ef33efb616317d135381c7d059a70055cf9c99bc3cf4486491508f5ec370e43', 'docs/point4/two-sided-heat-release-integration.md': 'b8c6740ec5bcd7ac9d979d6fb88d78a3f300893e41d3adef8b56e24306fa5f68'}
+
+
+# Importlib writes a module's bytecode before executing its body. Suppression
+# must therefore be set by the interpreter-startup environment, never by a
+# cache exemption or deletion after the inherited caller has imported C2.
+STARTUP_ENV = "    env:\n      PYTHONDONTWRITEBYTECODE: '1'\n"
+STARTUP_WORKFLOWS = {
+    '.github/workflows/point4-linear-heat-geometry.yml': (
+        '2cfd17bf27e5e5983bf8a524948382a1965dcd7f6a44a5a5efe44bae91dbf582',
+        'linear_heat_geometry',
+        '  linear_heat_geometry:\n    name: Exact-head combined source, all 127 axiom occurrences, closed contract and full audit\n'),
+    '.github/workflows/point4-c2-initial-heat.yml': (
+        'bb3efbcc8a477181aea2857a002f2d5eb7b7670ad34527dd231d9cfa5c543f3d',
+        'c2_initial_heat',
+        '  c2_initial_heat:\n    name: Exact-head C2 union, all 150 axiom occurrences, current contract and full audit\n'),
+    '.github/workflows/point4-weighted-initial-heat.yml': (
+        '3b52ebefb56317864cc95ba9dacf8276776d51d82e25f5ad83e2083638f4be8a',
+        'weighted_initial_heat',
+        '  weighted_initial_heat:\n    name: Exact-head weighted heat certificate with unchanged full audit\n'),
+}
 
 
 def git(*args: str) -> bytes:
@@ -50,6 +70,53 @@ def adapted_c2_guard(original: bytes) -> bytes:
     assert source.count(ENTRY_POINT) == 1, 'Inherited guard needs exactly one original entry point'
     assert C2_ADAPTER not in source, 'Inherited guard adapter already present'
     return source.replace(ENTRY_POINT, C2_ADAPTER + ENTRY_POINT.lstrip('\n'), 1).encode()
+
+
+def parse_workflow(source: str) -> dict:
+    import yaml
+    class StrictWorkflowLoader(yaml.BaseLoader):
+        def construct_mapping(self, node, deep=False):
+            result = {}
+            for key_node, value_node in node.value:
+                key = self.construct_object(key_node, deep=deep)
+                assert isinstance(key, str), 'Workflow mapping key must be a string'
+                assert key not in result, f'Duplicate workflow YAML mapping key: {key}'
+                result[key] = self.construct_object(value_node, deep=deep)
+            return result
+    data = yaml.load(source, Loader=StrictWorkflowLoader)
+    assert isinstance(data, dict), 'Workflow must be a mapping'
+    return data
+
+
+def adapted_startup_workflow(path: str, original: bytes) -> bytes:
+    assert path in STARTUP_WORKFLOWS, 'Unapproved startup workflow path'
+    digest, job, anchor = STARTUP_WORKFLOWS[path]
+    assert sha256(original) == digest, f'Inherited startup workflow original digest changed: {path}'
+    source = original.decode()
+    assert source.count(anchor) == 1, 'Startup workflow needs exactly one pinned job header'
+    assert STARTUP_ENV not in source, 'Startup workflow adapter already present'
+    before = parse_workflow(source)
+    assert 'env' not in before and 'env' not in before['jobs'][job], 'Inherited startup environment changed'
+    adapted = source.replace(anchor, anchor + STARTUP_ENV, 1)
+    wanted = json.loads(json.dumps(before))
+    wanted['jobs'][job]['env'] = {'PYTHONDONTWRITEBYTECODE': '1'}
+    assert parse_workflow(adapted) == wanted, 'Startup workflow semantic remainder changed'
+    assert adapted.count(STARTUP_ENV) == 1, 'Startup workflow adapter must occur once'
+    assert adapted.replace(STARTUP_ENV, '', 1).encode() == original, 'Startup workflow byte remainder changed'
+    return adapted.encode()
+
+
+def restored_startup_workflow(path: str, actual: bytes) -> bytes:
+    # Validate exact bytes and duplicate-free semantics before restoring the
+    # original input for the unchanged inherited workflow validator.
+    original = baseline_sources()[path][1]
+    expected = adapted_startup_workflow(path, original)
+    assert parse_workflow(actual.decode()) == parse_workflow(expected.decode()), 'Startup workflow semantic drift'
+    assert actual == expected, f'Exact startup workflow changed: {path}'
+    assert actual.decode().count(STARTUP_ENV) == 1, 'Startup workflow adapter count changed'
+    restored = actual.decode().replace(STARTUP_ENV, '', 1).encode()
+    assert restored == original, 'Startup workflow inherited remainder changed'
+    return restored
 
 
 @functools.lru_cache(maxsize=1)
@@ -82,6 +149,8 @@ def expected_sources() -> dict[str, tuple[str, bytes]]:
     baseline = baseline_sources()
     expected = {path: (BASE, data) for path, (_, data) in baseline.items()}
     expected[C2_GUARD] = (BASE, adapted_c2_guard(baseline[C2_GUARD][1]))
+    for path in STARTUP_WORKFLOWS:
+        expected[path] = (BASE, adapted_startup_workflow(path, baseline[path][1]))
     assert not set(UNIT_FILE_SHA256) & set(baseline), 'New release path overlaps baseline'
     assert set(R1_FILE_SHA256) <= set(UNIT_FILE_SHA256) | SELF_PATHS, 'R1 path was omitted'
     assert not SELF_PATHS & (set(baseline) | set(UNIT_FILE_SHA256)), 'Guard/test path collision'
@@ -293,7 +362,9 @@ def check_modes() -> None:
 
 def install_c2_inventory_adapter(namespace: dict) -> None:
     assert '_two_sided_release_original_expected_sources' not in namespace, 'Duplicate inventory adapter installation'
+    assert '_two_sided_release_original_check_workflow' not in namespace, 'Duplicate workflow adapter installation'
     original_expected = namespace['expected_sources']
+    original_check_workflow = namespace['check_workflow']
     original_editable = set(namespace['EDITABLE'])
     original_added = set(namespace['ADDED'])
     assert original_added == {
@@ -312,10 +383,17 @@ def install_c2_inventory_adapter(namespace: dict) -> None:
         for path, (_, data) in legacy.items():
             assert data == baseline[path][1], f'Inherited reconstruction no longer matches master: {path}'
         return expected_sources()
+    def startup_checked_workflow(actual: bytes):
+        original = restored_startup_workflow('.github/workflows/point4-c2-initial-heat.yml', actual)
+        original_check_workflow(original)
     namespace['_two_sided_release_original_expected_sources'] = original_expected
+    namespace['_two_sided_release_original_check_workflow'] = original_check_workflow
+    namespace['check_workflow'] = startup_checked_workflow
     namespace['expected_sources'] = full_expected_sources
     namespace['ADDED'] = original_added | SELF_PATHS
-    # Import, provenance, axiom, type, audit and workflow checks are untouched.
+    # Import, provenance, axiom, type and audit functions are untouched. The
+    # workflow wrapper checks one exact startup-only transform, then executes
+    # the unchanged original validator on the reconstructed original bytes.
 
 
 def c2_guard():
@@ -378,7 +456,8 @@ def main(argv=None) -> None:
     if args.probe_log:
         check_new_probe(args.probe_log.read_text())
     print(json.dumps({'baseline': BASE, 'public_paths': len(public_paths()),
-                      'inherited_files_byte_identical': 1640, 'exact_inherited_guard_adapters': 1,
+                      'inherited_files_byte_identical': 1637, 'exact_inherited_guard_adapters': 1,
+                      'exact_startup_workflow_adapters': len(STARTUP_WORKFLOWS),
                       'r1_proof_and_probe_blobs_unchanged': True,
                       'root_imports_and_metadata_byte_identical': True,
                       'lean_verified': False, 'point4': 'OPEN'}, indent=2))
