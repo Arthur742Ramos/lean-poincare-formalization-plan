@@ -114,6 +114,11 @@ theorem initialMetricCoordinates_pos_at_point
     (p : M) (b : Module.Basis (Fin d) ℝ E) (v : Fin d → ℝ) (hv : v ≠ 0) :
     0 < ofMatrix (initialMetricCoordinates g₀ p b
       (initialMetricCoordinatePoint (I := I) p b)) v v := by
+  letI : FiberBundle E TM := TangentSpace.fiberBundle (I := I)
+  letI : VectorBundle ℝ E TM := TangentSpace.vectorBundle (I := I)
+  letI : MemTrivializationAtlas (trivialization (I := I) p) := by
+    change MemTrivializationAtlas (trivializationAt E TM p)
+    infer_instance
   have hp : p ∈ (trivialization (I := I) p).baseSet := by
     simpa only [trivialization, TangentBundle.trivializationAt_baseSet, extChartAt_source] using
       (mem_extChartAt_source (I := I) p)
@@ -126,6 +131,7 @@ theorem initialMetricCoordinates_pos_at_point
   intro i _
   apply Finset.sum_congr rfl
   intro k _
+  simp only [frame]
   ring
 
 /-- Every literal C² metric yields genuine bounded C² Euclidean heat data in

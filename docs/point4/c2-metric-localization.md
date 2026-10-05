@@ -352,6 +352,48 @@ Fresh independent exact-source review and complete hosted exact-head Lean 4.33
 verification remain required before qualification or merge. Point 4 remains
 **OPEN**.
 
+## Historical 880a tangent-bundle and atlas elaboration failure
+
+The exact source-reviewed `880a8b7cd31c64d2076847cef7d61684959e3e27`
+candidate failed the literal-metric job
+[`111816126934`](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37325807619/job/111816126934)
+of Lean 4.33 run `37325807619` on 2026-10-05 at 14:54 UTC.
+Both generic modules, `EuclideanC2Localization`, and the complete
+`PositiveFrozenC2Localization` module compiled against the unchanged pins.
+`BoundarylessInitialMetricLocalization` then failed at the actual Gram
+positivity call: the compiler could not synthesize its tangent `FiberBundle`
+instance and left preferred-trivialization atlas goals. The coefficient
+identity also retained the `frame` abbreviation, so `ring` did not recognize
+the two Gram coefficients as the same atom. Every later full-signature,
+axiom, full-library and canonical-audit gate remains unverified. The exact
+880a source, review, distance repair and failed CI log remain historical.
+
+This source-only candidate replaces only that existing positivity proof
+block. It explicitly supplies Mathlib's canonical `TangentSpace.fiberBundle`
+and `TangentSpace.vectorBundle` inside the proof. Those instances derive
+from the existing smooth manifold assumption; they do not introduce a
+new geometric premise. It installs canonical `MemTrivializationAtlas`
+for the same `trivializationAt E TM p`, using the existing preferred
+trivialization abbreviation. Finally it unfolds only the existing `frame`
+abbreviation before the unchanged real coefficient identity is proved
+by `ring`. The actual metric, chart, frame and finite contraction are
+unchanged.
+
+All public declaration headers and all bytes outside that one proof block
+remain identical to 880a. Literal C² metric regularity, arbitrary models
+under `BoundarylessManifold I M`, the rank-zero case, every definition and
+data value, positivity and coercivity bounds remain unchanged. Only the
+Boundaryless module's derived digest changes in the existing source guard.
+All inherited proofs, fixtures, probes, workflows, pins, metadata, contract
+and full canonical-gate semantics remain unchanged.
+
+This new candidate is **SOURCE_ONLY_COMPILER_UNVERIFIED**. Independent
+exact-source review and complete hosted exact-head Lean 4.33 verification
+are required before qualification or merge. The separately reviewed
+obstruction to the universal C² existence campaign remains in effect;
+this localization is independently useful supporting work and does not
+restart that stopped closure. Point 4 remains **OPEN**.
+
 ## Remaining mathematical gaps
 
 This local constructor does not discharge anisotropic inverse-Gram heat
