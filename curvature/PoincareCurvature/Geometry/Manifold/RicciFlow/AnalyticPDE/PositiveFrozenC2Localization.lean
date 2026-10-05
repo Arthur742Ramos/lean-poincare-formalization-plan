@@ -109,7 +109,8 @@ theorem exists_positiveFrozenC2Bilinear
         rw [hcancel, norm_smul, Real.norm_eq_abs, abs_of_nonneg (hχIcc x).1]
         calc
           χ x * ‖F x - F x₀‖ ≤ 1 * ‖F x - F x₀‖ :=
-            mul_le_mul_of_nonneg_right (hχIcc x).2 (norm_nonneg _)
+            mul_le_mul_of_nonneg_right (hχIcc x).2
+              (ContinuousLinearMap.opNorm_nonneg (F x - F x₀))
           _ ≤ c / 2 := by simpa using hnorm.le
       · simp [image_eq_zero_of_notMem_tsupport hx, (half_pos hc).le]
     have h := bilinear_coercivity_of_norm_sub_le hcoer hclose v

@@ -251,6 +251,34 @@ cached-development execution, and a complete new exact-head Lean 4.33 run
 remain required. Merge only after every required verification and review gate
 passes. Point 4 remains **OPEN**.
 
+## Development-only operator-norm nonnegativity repair candidate
+
+The source-reviewed candidate `d40aee088c67db3fada92ff36db079cddc96f9f8`
+retains all prior source repairs. Its separately admitted corrected serial
+Lean 4.35.0-rc2 diagnostic pair completed on 2026-10-05 at 07:43:49 UTC,
+with both probes exiting 1 and both process groups absent after cleanup.
+The repair probe cleared typed bilinear cancellation, the explicit standard
+scalar-norm proof, operation coherence and rank-zero specialization. Its
+single remaining error was the generic `norm_nonneg _` argument in the
+coefficient bound: that argument selected `SeminormedAddGroup.toNorm`, while
+the target used the actual `ContinuousLinearMap.hasOpNorm`. These are isolated
+cached-development observations, not pinned Lean 4.33 qualification. Both
+failed pairs, their owners, exact sources and terminal logs remain historical.
+
+This source-only candidate changes exactly that argument to the pinned
+`ContinuousLinearMap.opNorm_nonneg (F x - F x₀)`. The existing lemma proves
+nonnegativity directly for the actual operator norm, without synthesizing
+another norm on the map space. Every theorem signature, hypothesis, rank-zero
+branch, local instance, bilinear cancellation, F/V/P/D value definition,
+literal C² order and coercivity bound is unchanged. Only the authored
+PositiveFrozen module digest is updated; inherited sources, existing probes,
+workflows, pins, contract and canonical-gate semantics are unchanged.
+
+The additional patch and one corrected control probe are source-only and
+unexecuted. Fresh independent review and separate execution admission remain
+required, followed by complete exact-head Lean 4.33 source, type, axiom, full
+library and canonical-audit verification before merge. Point 4 remains **OPEN**.
+
 ## Remaining mathematical gaps
 
 This local constructor does not discharge anisotropic inverse-Gram heat
