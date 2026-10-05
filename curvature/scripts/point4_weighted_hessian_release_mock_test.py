@@ -52,7 +52,7 @@ class WeightedHessianReleaseTests(unittest.TestCase):
                 release.parse_workflow(actual.decode().replace("PYTHONDONTWRITEBYTECODE: '1'","PYTHONDONTWRITEBYTECODE: '1'\n      PYTHONDONTWRITEBYTECODE: '0'",1))
 
     def test_real_startup_rejects_empty_hidden_stale_and_identical_caches_without_erasing(self):
-        patch = release.git('diff','--cached','--binary')
+        patch = release.git('diff','--binary',release.BASE)
         with tempfile.TemporaryDirectory(prefix='weighted-hessian-cache-fixture-') as parent:
             root = pathlib.Path(parent)/'source'
             subprocess.run(['git','-C',str(release.ROOT),'worktree','add','--detach',str(root),release.BASE],check=True,env=release.ENV,stdout=subprocess.DEVNULL)
