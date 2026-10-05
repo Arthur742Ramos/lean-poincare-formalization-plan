@@ -272,9 +272,13 @@ if (ROOT / 'curvature/scripts/point4_manifold_heat_release_guard.py').is_file():
     import point4_manifold_heat_release_guard as _manifold_release
     _manifold_release.install_c2_inventory_adapter(globals())
 
-# Exact reviewed-parent union; inherited evidence gate bodies remain unchanged.
-import point4_pr130_pr131_inventory as _joint_inventory
-_joint_inventory.install_c2_inventory_adapter(globals())
+# Exact weighted-Hessian inventory dispatch. The original semantic gate body
+# above is replayed from its byte/mode-pinned historical source reconstruction;
+# current physical source and evidence checks are independently mandatory.
+_weighted_hessian_historical_main = main
+def main(argv=None):
+    from point4_weighted_hessian_release_guard import run_inherited
+    run_inherited('curvature/scripts/point4_c2_initial_heat_source_test.py', argv)
 
 if __name__ == '__main__':
     main()

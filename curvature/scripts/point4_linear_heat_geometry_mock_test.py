@@ -98,4 +98,5 @@ class IntegrationGuardTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    from point4_weighted_hessian_release_guard import run_inherited
+    run_inherited('curvature/scripts/point4_linear_heat_geometry_mock_test.py')
