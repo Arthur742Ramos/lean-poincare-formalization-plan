@@ -1,0 +1,85 @@
+{
+  "review_date": "2026-10-05",
+  "review_scope": "independent bounded source/API replacement review; no Lean execution",
+  "snapshot": "frozen-003",
+  "verdict": "SOURCE-ONLY APPROVE",
+  "historical_verdicts": [
+    {
+      "snapshot": "frozen-001",
+      "verdict": "SOURCE-ONLY REJECT",
+      "manifest": "../REVIEW-MANIFEST.json"
+    },
+    {
+      "snapshot": "frozen-002",
+      "verdict": "SOURCE-ONLY APPROVE",
+      "status": "superseded by explicit-inner-function precaution",
+      "manifest": "../replacement-frozen-002/REVIEW-MANIFEST.json"
+    }
+  ],
+  "source_files": [
+    {
+      "file": "C0EndpointCompactPositivity.lean",
+      "bytes": 14511,
+      "sha256": "45261b684e7add6c9e83eca9266777b8d12b6c7c598084d1d9e10b74f7867274",
+      "git_blob_sha1": "8ccc3b69623eb04e51c5245eddcbf28c7d94ced2",
+      "lines": 286
+    },
+    {
+      "file": "C0FiniteAtlasGaussian.lean",
+      "bytes": 20949,
+      "sha256": "474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f",
+      "git_blob_sha1": "b992548e1168157fdaa77e9c59a070cd75965392",
+      "lines": 403
+    },
+    {
+      "file": "C0GaussianEndpoint.lean",
+      "bytes": 4776,
+      "sha256": "dd5dcbe309cc2e41eb60c7ed6e95a4e87161272abdc207658ff249f1cb077fa8",
+      "git_blob_sha1": "1c2f70c3a83e1f32193593ac0dd76181be66ee4f",
+      "lines": 108
+    },
+    {
+      "file": "C2MetricVelocityExtension.lean",
+      "bytes": 9800,
+      "sha256": "0c6c921536d3cade268948431dd254dd7c602cc04f2d8d4aa7365ab6c39793b7",
+      "git_blob_sha1": "4bc0ef189f561fb4d8278273b3f6361048e115cf",
+      "lines": 196
+    }
+  ],
+  "source_baseline_commit": "90cc7ebed996f28acb57ef9948d37f114088bd4d",
+  "mathlib_commit": "db584cd6d46c92f209a44c0f1c829460d327499d",
+  "statements_hypotheses_imports_other_bytes_preserved": true,
+  "established_blockers_resolved": [
+    "R1",
+    "R2"
+  ],
+  "inner_function_explicit": true,
+  "additional_established_blockers": [],
+  "compiler_elaboration_unverified": true,
+  "exact_lean_4_33_verification": "pending",
+  "compiled_axiom_audit": "pending",
+  "signature_audit": "pending",
+  "project_graph_reused_from_exact_unchanged_bindings": true,
+  "external_transitive_graph_complete": false,
+  "byte_roundtrip": {
+    "forward_file_matches": 4,
+    "reverse_file_matches": 4,
+    "fuzz": 0
+  },
+  "artifacts": {
+    "report": {
+      "file": "REVIEW.md",
+      "sha256": "07c9bce974d0fe9b4bf4d7044263bdf520dfeecc018873078674c4481ee4c5fa"
+    },
+    "forward_patch": {
+      "file": "forward.patch",
+      "sha256": "15351558b7c673db8542f791b67c8753931c6045f3547ff19f33d3edff8118b5"
+    },
+    "reverse_patch": {
+      "file": "reverse.patch",
+      "sha256": "c097b685fedc8ed6ad16d063723b78201d4b4951276e847d9a27a36f591d64a8"
+    },
+    "rejected_proof_bytes": "reverse-reconstruction/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/",
+    "roundtrip_audit": "BYTE-ROUNDTRIP-AUDIT.txt"
+  }
+}

@@ -1,0 +1,178 @@
+[
+  {
+    "path": "Mathlib/Geometry/Manifold/VectorBundle/Riemannian.lean",
+    "sha": "b5fc92352e7156e1adda4068c258f3e6dcb1d091",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/VectorBundle/Riemannian.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Geometry__Manifold__VectorBundle__Riemannian.lean",
+    "bytes": 11877,
+    "sha256": "e3d87dc3514ff67c64f5c223071dd46842ccaa1138af5df3383e3f283d103b2b",
+    "computed_git_blob_sha1": "b5fc92352e7156e1adda4068c258f3e6dcb1d091",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+    "sha": "3d430cddf9790bd71375727570118e3aed74e183",
+    "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/curvature__PoincareCurvature__Geometry__Manifold__RicciFlow__LocalExistence.lean",
+    "bytes": 188253,
+    "sha256": "bf9de4bf83c75b4373d72842dae0eaca96fd2e333df48336f393ff998cce1ddf",
+    "computed_git_blob_sha1": "3d430cddf9790bd71375727570118e3aed74e183",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Topology/ContinuousMap/Bounded/Basic.lean",
+    "sha": "ce9f56fc4406e5eba5c21a655692dc5a9993c0ee",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/ContinuousMap/Bounded/Basic.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__ContinuousMap__Bounded__Basic.lean",
+    "bytes": 34153,
+    "sha256": "efd930a132ec7cba53752f43961815b719a27514573e52e9894cf5e7fc2e421d",
+    "computed_git_blob_sha1": "ce9f56fc4406e5eba5c21a655692dc5a9993c0ee",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Topology/Algebra/Support.lean",
+    "sha": "6724d9a28680cfee734a0e2be71203cd5ca0d9ee",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/Algebra/Support.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__Algebra__Support.lean",
+    "bytes": 22345,
+    "sha256": "aab196644260f0c77d8aab52c3151df9c49880c1e9b8ee08cb97193a6ef994a9",
+    "computed_git_blob_sha1": "6724d9a28680cfee734a0e2be71203cd5ca0d9ee",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Analysis/Calculus/Deriv/Basic.lean",
+    "sha": "99b298181811591362a2467cfd825017ac9d0fef",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/Calculus/Deriv/Basic.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Analysis__Calculus__Deriv__Basic.lean",
+    "bytes": 40271,
+    "sha256": "da1d29570f45bd14f5a37aa5b024d46b3076a47f04e9315bf72cd65f6505d55b",
+    "computed_git_blob_sha1": "99b298181811591362a2467cfd825017ac9d0fef",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/PointFourContract.lean",
+    "sha": "ab4be9d25a9178cb17cb9c1ed67dc60ff10025ec",
+    "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/PointFourContract.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/curvature__PoincareCurvature__Geometry__Manifold__RicciFlow__PointFourContract.lean",
+    "bytes": 1718,
+    "sha256": "36842cb3898b3a510a597877e7394f7a8e84ab6f716916e7baecb3f7572d1fca",
+    "computed_git_blob_sha1": "ab4be9d25a9178cb17cb9c1ed67dc60ff10025ec",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Topology/ContinuousMap/BoundedCompactlySupported.lean",
+    "sha": "8e463a392ed21beb3d728ce9c6068a004543692c",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/ContinuousMap/BoundedCompactlySupported.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__ContinuousMap__BoundedCompactlySupported.lean",
+    "bytes": 4828,
+    "sha256": "d3c748be9a560274e8be6246cdd5ae4eb345ae9279176c7be340f873d2e38ac6",
+    "computed_git_blob_sha1": "8e463a392ed21beb3d728ce9c6068a004543692c",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Topology/VectorBundle/Hom.lean",
+    "sha": "5162b27a435c26918e70ee6b466192e8055504be",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/VectorBundle/Hom.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__VectorBundle__Hom.lean",
+    "bytes": 29140,
+    "sha256": "8cfe2d2c3dbac2533b45407ebe8c83b6b9cf651c577e8bc3857bba2798d95dd2",
+    "computed_git_blob_sha1": "5162b27a435c26918e70ee6b466192e8055504be",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Analysis/Calculus/Deriv/Mul.lean",
+    "sha": "f688112f3812e3f50cdf169956d6c1323d32c19a",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/Calculus/Deriv/Mul.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Analysis__Calculus__Deriv__Mul.lean",
+    "bytes": 29294,
+    "sha256": "9eaf8d222c347ea647939daa68fac11edeb7c2572719246ce03d43cb04c94b44",
+    "computed_git_blob_sha1": "f688112f3812e3f50cdf169956d6c1323d32c19a",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Topology/UniformSpace/HeineCantor.lean",
+    "sha": "a3c9f8490f96b0056785997fc91987e11e587020",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/UniformSpace/HeineCantor.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__UniformSpace__HeineCantor.lean",
+    "bytes": 7534,
+    "sha256": "307718982cda076dc252c6506dc9ab94a3c84e3eb92516dda94e364afc0bf07a",
+    "computed_git_blob_sha1": "a3c9f8490f96b0056785997fc91987e11e587020",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Geometry/Manifold/VectorBundle/ContMDiffSection.lean",
+    "sha": "a6593d1272ab0bd3e6780cc5573b760e865c5f30",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/VectorBundle/ContMDiffSection.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Geometry__Manifold__VectorBundle__ContMDiffSection.lean",
+    "bytes": 16568,
+    "sha256": "06fb03179d5f63e43c0a646aa0f87e8903e3189c7b0a7866ce0c7dbad3dc630c",
+    "computed_git_blob_sha1": "a6593d1272ab0bd3e6780cc5573b760e865c5f30",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Topology/FiberBundle/Constructions.lean",
+    "sha": "a3a215afae4ff96a725940bd3e131d18b54c5035",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/FiberBundle/Constructions.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__FiberBundle__Constructions.lean",
+    "bytes": 16268,
+    "sha256": "f0fd3cc7ed96557b9ec6c892438de027366c1d6d730e574070ec6c050e19231d",
+    "computed_git_blob_sha1": "a3a215afae4ff96a725940bd3e131d18b54c5035",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Topology/MetricSpace/Pseudo/Lemmas.lean",
+    "sha": "bd5e7cc7d3820491f99e382c0f3240ee6b99ff03",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/MetricSpace/Pseudo/Lemmas.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__MetricSpace__Pseudo__Lemmas.lean",
+    "bytes": 5868,
+    "sha256": "0194113c847c252d63b1e3d924a818c3ab72343b2112acf7b0d5c13d133a6431",
+    "computed_git_blob_sha1": "bd5e7cc7d3820491f99e382c0f3240ee6b99ff03",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Geometry/Manifold/PartitionOfUnity.lean",
+    "sha": "e9d0243283efab7d65cd7144ef21bf1b717e5eb0",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/PartitionOfUnity.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Geometry__Manifold__PartitionOfUnity.lean",
+    "bytes": 40999,
+    "sha256": "dea35887e7f3c058fde7c988e99dda3bf12ecf142784cce8baa84644e892f384",
+    "computed_git_blob_sha1": "e9d0243283efab7d65cd7144ef21bf1b717e5eb0",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Topology/Algebra/Module/Spaces/ContinuousLinearMap.lean",
+    "sha": "a59c26385477df5e903b91d26447a03e25f16a6e",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/Algebra/Module/Spaces/ContinuousLinearMap.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__Algebra__Module__Spaces__ContinuousLinearMap.lean",
+    "bytes": 27032,
+    "sha256": "72115f36a523bcfee4dc9979a16067bc1429c576a1524d27f00a44fc64bb521a",
+    "computed_git_blob_sha1": "a59c26385477df5e903b91d26447a03e25f16a6e",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  },
+  {
+    "path": "Mathlib/Topology/Algebra/Monoid.lean",
+    "sha": "0dac831950493b3a8af9373f5f9c6cd99b6f4538",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/Algebra/Monoid.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__Algebra__Monoid.lean",
+    "bytes": 49233,
+    "sha256": "cf858f52c0f84ad0f0f950ddc0c76128c4893ced7620d0c7a4cef1c9c3ddab56",
+    "computed_git_blob_sha1": "0dac831950493b3a8af9373f5f9c6cd99b6f4538",
+    "blob_verified": true,
+    "fetched_with": "read-only GitHub fetch_file at explicit immutable ref"
+  }
+]

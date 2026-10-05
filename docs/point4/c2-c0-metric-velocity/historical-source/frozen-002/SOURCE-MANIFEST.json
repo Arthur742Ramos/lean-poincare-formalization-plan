@@ -1,0 +1,41 @@
+{
+  "snapshot": "frozen-002",
+  "date": "2026-10-05",
+  "status": "uncompiled source candidate; exact-byte replacement review pending",
+  "predecessor": "frozen-001 (source rejected for two composition basepoint mismatches)",
+  "scope": "Only C0GaussianEndpoint.continuousAt_gaussianPath_zero and C2MetricVelocityExtension final derivative composition proof blocks changed; all declaration statements/hypotheses/imports/other bytes preserved",
+  "headers": "intentional legacy headers; no module command",
+  "source_baseline_commit": "90cc7ebed996f28acb57ef9948d37f114088bd4d",
+  "contract_commit": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
+  "mathlib_commit": "db584cd6d46c92f209a44c0f1c829460d327499d",
+  "files": [
+    {
+      "file": "C0EndpointCompactPositivity.lean",
+      "bytes": 14511,
+      "sha256": "45261b684e7add6c9e83eca9266777b8d12b6c7c598084d1d9e10b74f7867274",
+      "git_blob_sha1": "8ccc3b69623eb04e51c5245eddcbf28c7d94ced2",
+      "lines": 286
+    },
+    {
+      "file": "C0FiniteAtlasGaussian.lean",
+      "bytes": 20949,
+      "sha256": "474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f",
+      "git_blob_sha1": "b992548e1168157fdaa77e9c59a070cd75965392",
+      "lines": 403
+    },
+    {
+      "file": "C0GaussianEndpoint.lean",
+      "bytes": 4776,
+      "sha256": "dd5dcbe309cc2e41eb60c7ed6e95a4e87161272abdc207658ff249f1cb077fa8",
+      "git_blob_sha1": "1c2f70c3a83e1f32193593ac0dd76181be66ee4f",
+      "lines": 108
+    },
+    {
+      "file": "C2MetricVelocityExtension.lean",
+      "bytes": 9769,
+      "sha256": "31dbda60b3c654061973de61557cb4dcabe2ab22f32361ba76937f697d84159c",
+      "git_blob_sha1": "6d5ec859ce90a786fab22e63b8453061bbdf7b53",
+      "lines": 196
+    }
+  ]
+}

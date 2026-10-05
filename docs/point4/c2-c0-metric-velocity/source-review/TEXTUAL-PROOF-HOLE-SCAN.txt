@@ -1,0 +1,81 @@
+
+MODULE PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.HeatKernel1D
+3798:constant `‖c‖∞`. -/
+6514:constant is exactly this Duhamel one) — the Banach fixed-point input for a mild Ricci–DeTurck
+8501:constant `K`, there is a forward time `T > t₀` with BOTH `M₁·√(T − t₀) + M₂·(T − t₀) ≤ a` (a-priori
+
+MODULE PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialTrace
+242:constant negative-time continuation. -/
+
+MODULE PoincareCurvature.Analysis.CompactUniformModulus
+59:/-- Bounded continuous scalar functions admit the compact-uniform ambient
+
+MODULE PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection
+1181:constant `2`. -/
+
+MODULE PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection
+2430:constant `C ≥ 0` with `‖(coord (f t)).1 i x‖ ≤ C` for all `t ∈ Icc t₀ T`, indices `i`, and base
+3553:constant the forward-time section-space Picard endpoint chooser consumes. -/
+
+MODULE PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.BanachSpace
+1345:constant `c` at any space-time point `z ∈ s` is `c`. -/
+1691:constant is subunital, `‖A‖ + k < 1`.  The following lemmas are the **well-posedness data** the
+
+MODULE PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FunctionSpace
+171:constant and a Holder constant.  This is the closed-ball predicate for the eventual
+
+MODULE PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder
+2003:constant, then `u` has a global Holder constant on `K`. -/
+3211:constants. -/
+3537:constant controls the global bounded part, while the Holder constant globalizes through the
+3606:constants. -/
+3629:constants. -/
+3692:constant remains the fixed local sup constant. -/
+3868:constants. -/
+4550:constants chosen automatically and summed over the finite cover. -/
+4664:constant is supplied by the variable-radius Holder patching theorem. -/
+4710:constant is supplied by the variable-radius cylinder Holder patching theorem. -/
+5572:constants `B, H` on the closed parabolic ball of radius `R` about the origin, and `|r| * ρ ≤ R`,
+5680:constants `B, H` on the closed parabolic ball of radius `R` about an arbitrary center `c`, and
+6059:constant `C` on the closed parabolic ball of radius `ρ` about the source center `a`, then `u`
+6075:constant scaled by `|r⁻¹| ^ α`. -/
+6309:constant `H * |r| ^ α`.  Open-domain companion of
+6384:constant scaled by `|r⁻¹| ^ α`. -/
+7090:constant.  This is the standard way parabolic Schauder estimates are obtained: control the space and
+7168:constant) form of `ParabolicHolderWith.of_space_time_holder`. -/
+7598:constant, `sInf` of the (closed, upward) set of valid constants.  The defining set is bounded below
+7606:constant set is empty and the seminorm is `0` by the `sInf` convention. -/
+7650:constant.  This packages `ParabolicHolderOn` as attainment of the `ℝ`-valued seminorm functional. -/
+7714:constants. -/
+7723:constants: both extremal constants are attained simultaneously. -/
+7868:constant sets coincide). -/
+8557:constant `Ht` (at each fixed space point), and `s` is closed under mixing the time coordinate of one
+
+MODULE PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ModelManifoldGaugeFlow
+394:  constant `M₃` as `hD3vlip`;
+
+MODULE PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceCk
+1494:constant for the derivative. -/
+3279:constant scalar coordinate `c ≡ 1` (its derivative is `0`), so the operator coordinate `V` satisfies
+5049:constant.  Global existence of `V` with `V t₀ = 0`, `V' = A ∘ V + F` therefore follows *directly*
+7195:constant collapses to the clean `exp³·(M + 3LC'g)` form by `Real.exp_add` (`exp(2·) = exp(·)²`) and
+9222:constant of `norm_bilinearCompForcing_curry2_sub_sub_le_sq` (assembled from the six field bounds
+9228:constant on the single `exact`. -/
+9471:constant `C` is chosen **once, before** the direction `h` and the `h`-dependent curves `Uz`, `Ux`, `V₃`
+9588:constant of `norm_coeffVariation_sub_secondDerivComp_le_sq` and `C₂` is the explicit engine constant of
+9852:constant of `norm_secondFundamentalSolution_sub_sub_thirdVariation_le_sq_uniformC` clamped nonnegative —
+11490:constant `Cλ · gronwallBound 0 K 1 (t − t₀)` (now with **no** trailing `‖k‖`, absorbed into the
+
+MODULE PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ManifoldFlowExistence
+501:constant derivative `1`. -/
+545:constant derivative `1`, so it is the affine map `t ↦ t₀ + t`. This lets an
+1074:and *every* point `y` admit a time-dependent integral curve `γ` of `X` on the common
+
+MODULE PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence
+3805:constant-in-time vector field. -/
+
+MODULE PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction
+211:constant-scalar rule to the section
+
+MODULE PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence
+2185:constant metric family. -/

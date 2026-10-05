@@ -266,5 +266,13 @@ def main(argv=None) -> None:
     print('Source checks are not kernel certification; exact-head full builds and independent review remain mandatory; Point 4 OPEN')
 
 
+# Reviewed literal-C2/C0 metric velocity inventory adapter. All inherited gate bodies remain
+# unchanged; the source guard pins this count-one insertion and exact union.
+if (ROOT / 'curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py').is_file():
+    import sys as _metric_velocity_sys
+    _metric_velocity_sys.dont_write_bytecode = True
+    import point4_c2_c0_metric_velocity_source_guard as _metric_velocity_release
+    _metric_velocity_release.install_c2_inventory_adapter(globals())
+
 if __name__ == '__main__':
     main()
