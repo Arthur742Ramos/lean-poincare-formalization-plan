@@ -199,7 +199,7 @@ class TwoSidedReleaseGuardTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(AssertionError):
                 release.install_c2_inventory_adapter(wrong)
 
-    def test_every_inherited_file_and_r1_proof_probe_is_pinned(self):
+    def test_every_inherited_file_historical_r1_and_exact_proof_repair_is_pinned(self):
         self.assertEqual(len(self.baseline), 1641)
         for path, (_, original) in self.baseline.items():
             wanted = (release.adapted_c2_guard(original) if path == release.C2_GUARD else
@@ -211,12 +211,46 @@ class TwoSidedReleaseGuardTests(unittest.TestCase):
         for path in (release.MODULE, release.PROBE):
             actual = (release.ROOT / path).read_bytes()
             release.check_unit_blob(path, actual)
-            self.assertEqual(release.sha256(actual), release.R1_FILE_SHA256[path])
+            if path == release.MODULE:
+                original = release.historical_r1_module()
+                self.assertEqual(release.sha256(original), release.R1_FILE_SHA256[path])
+                self.assertEqual(actual, release.repaired_r1_module(original))
+            else:
+                self.assertEqual(release.sha256(actual), release.R1_FILE_SHA256[path])
         for path in release.UNIT_FILE_SHA256:
             with self.subTest(path=path), self.assertRaises(AssertionError):
                 release.check_unit_blob(path, (release.ROOT / path).read_bytes() + b'\n')
         with self.assertRaises(AssertionError):
             release.check_unit_blob('unknown.lean', b'')
+
+    def test_exact_count_one_proof_repair_rejects_missing_duplicate_and_unrelated_edits(self):
+        original = release.historical_r1_module()
+        repaired = release.repaired_r1_module(original)
+        self.assertEqual(len(release.R1_PROOF_REPAIRS), 8)
+        self.assertNotEqual(original, repaired)
+        for wrong in (original + b'\n', repaired,
+                      original.replace(b'HasDerivAt (fun t => D.twoSidedHeatPathBcf t x)',
+                                       b'HasDerivWithinAt (fun t => D.twoSidedHeatPathBcf t x)', 1)):
+            with self.assertRaises(AssertionError):
+                release.repaired_r1_module(wrong)
+        release.check_unit_blob(release.MODULE, repaired)
+        for before, after in release.R1_PROOF_REPAIRS:
+            before, after = before.encode(), after.encode()
+            self.assertEqual(original.count(before), 1)
+            self.assertEqual(repaired.count(after), 1)
+            for wrong in (repaired.replace(after, before, 1),
+                          repaired.replace(after, after * 2, 1),
+                          repaired.replace(after, b'', 1)):
+                with self.assertRaises(AssertionError):
+                    release.check_unit_blob(release.MODULE, wrong)
+        for index, (before, after) in enumerate(release.R1_PROOF_REPAIRS):
+            for replacement in (('', after), (before + before, after),
+                                (before, after + after), (before, after + '\n')):
+                wrong = list(release.R1_PROOF_REPAIRS)
+                wrong[index] = replacement
+                with mock.patch.object(release, 'R1_PROOF_REPAIRS', tuple(wrong)), \
+                     self.assertRaises(AssertionError):
+                    release.repaired_r1_module(original)
 
     def test_precise_public_union_no_missing_or_arbitrary_extra_path(self):
         valid = release.public_paths()

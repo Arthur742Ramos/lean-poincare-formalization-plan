@@ -1,17 +1,25 @@
 # Guarded two-sided heat release integration
 
-Status: source-only, uncompiled and not published. Point 4 remains OPEN. Fresh
-independent release review and exact-head Lean 4.33 verification remain gates.
-No local Lean process, toolchain/cache expansion or remote action was performed.
+Status: source-only proof repair, uncompiled and not published. Point 4 remains
+OPEN. Fresh independent release review and exact-head Lean 4.33 verification
+remain gates. No local Lean process, toolchain/cache expansion or remote action
+was performed for this repair. The preceding draft is already public and its
+failed compiler evidence remains historical.
 
 ## Immutable scope
 
 Baseline: `e6b54dd0d7e73a51eb8efb083764b68ae8305a5a` (merged PR129).
 The original isolated R1 patch remains historical, unchanged, with SHA256
 `aeb8a459b25e3eb45bf05dc8763f7ec00552a01136e4fe992d19f52e152bd1c6`.
-Its `EuclideanHeatTwoSidedInitial.lean` module and full type/axiom/rank-zero
-probe are byte-identical in this release. Mathematical source approval for R1
-is conditional on actual compilation; these repairs are source-only.
+Its original `EuclideanHeatTwoSidedInitial.lean` module retains SHA256
+`488c1fdaa617f306e9bd2c714d5917b07319a88cc251195cd0e950b240747529`
+at immutable historical commit `96e666f0520ca261fe745c5cf2c2a4abef38f645`.
+The guard admits only eight exact count-one proof-body replacements from that
+source, pins the repaired digest, and rejects every other byte change. All
+public theorem signatures, hypotheses, mathematical definitions and stored
+value/first/second derivative data are unchanged. The full type/axiom/rank-zero
+probe is byte-identical. Mathematical source approval remains conditional on
+actual compilation; these repairs are source-only.
 
 All 1,637 unaffected inherited files retain exact bytes and Git/physical
 executable modes. This includes every proof, pin, probe, contract, kernel
@@ -66,6 +74,22 @@ and selected artifact identity stay unchanged. PR130, the manifold-only unit,
 historical artifacts and any registry intake are untouched.
 
 ## Pending evidence gates
+
+The historical head `a30173cea3c70df93cfe17bec130b870324b8526` passed the
+source union, full official schema and startup regression gates in
+[dedicated run 37271905230](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37271905230).
+Actual Lean 4.33.0 compiled the inherited heat imports, then rejected the new
+module at original lines 103, 159, 166, 190, 197, 256 and 258. Later types,
+axiom, full-build, contract, kernel and audit steps were not reached.
+
+The source repair makes the coerced generator function equality explicit,
+rewrites only the heat path's zero value, types the scalar continuity limit,
+uses eta-expanded derivative addition and constant scalar multiplication,
+extracts strict negativity from `Iio` membership, and unfolds composition in
+the left difference quotient. It does not change the mathematical argument,
+weaken ordinary `HasDerivAt`, strengthen bounded C² data, or claim negative
+Hessian-norm convergence, global positivity or canonical completion. These
+are pinned-API/source diagnoses, not successful compiler evidence.
 
 The workflow first checks the exact source union, full schema and all inherited
 and new adversarial fixtures. It explicitly builds the new module, since the

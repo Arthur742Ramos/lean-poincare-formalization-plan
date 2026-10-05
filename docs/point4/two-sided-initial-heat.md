@@ -1,8 +1,11 @@
 # Supporting two-sided initial heat derivative
 
-Status: source candidate only, **not compiled**. Independent review and an
-actual Lean 4.33.0 exact-head CI run remain required. This document does not
-qualify the source as verified, publish it, or close Point 4.
+Status: proof-repair source candidate, **not compiled or verified**. The
+historical draft head `a30173cea3c70df93cfe17bec130b870324b8526` passed its
+source/schema/startup gates but failed the new-module compilation in
+[Lean 4.33.0 run 37271905230](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37271905230).
+Fresh independent review and an actual exact-head run remain required. This
+document does not qualify the repair as verified or close Point 4.
 
 ## Literal construction
 
@@ -77,9 +80,9 @@ path continuity.
 This module is a supporting **linear Euclidean** heat continuation. It is
 not a canonical nonlinear or manifold solution and proves no gauge bridge.
 Weak competitors, common closed intervals, ordinary derivative requirements,
-the canonical target, inherited pins, root imports/metadata, and all inherited
-workflows remain untouched. The release integration changes only the inherited
-C2 inventory guard by a digest-pinned, count-one insertion; every existing
+the canonical target, inherited pins and root imports/metadata remain
+untouched. The release integration retains the exact inherited C2 inventory
+adapter and three job-startup environment adapters; every existing
 source/evidence gate is retained. No change is made to active PR 130 or the manifold heat bridge.
 
 Before integration or qualification:
@@ -97,16 +100,23 @@ Before integration or qualification:
 
 The candidate is isolated on exact verified master
 `e6b54dd0d7e73a51eb8efb083764b68ae8305a5a` of
-`Arthur742Ramos/lean-poincare-formalization-plan`. All 1,640 inherited files other than the C2 inventory guard are
-inherited verbatim, with modes preserved. The sole guard insertion is exactly
-reconstructed from the immutable master guard by the new source guard. The new module imports existing verified heat results;
+`Arthur742Ramos/lean-poincare-formalization-plan`. All 1,637 unaffected inherited
+files are inherited verbatim, with modes preserved. The C2 inventory insertion
+and three startup-only workflow insertions are exactly reconstructed from
+immutable master bytes by the new source guard. The new module imports existing verified heat results;
 it is not a new registry subproject or a submission identity. If a separate
 submission is later proposed, the repository's structured provenance and
 new-entry rules apply at that time.
 
 The original isolated R1 patch remains historical and unchanged (SHA256
 `aeb8a459b25e3eb45bf05dc8763f7ec00552a01136e4fe992d19f52e152bd1c6`).
-Its module and full probe are byte-identical in this source-only release.
+Its original module is pinned separately by SHA256
+`488c1fdaa617f306e9bd2c714d5917b07319a88cc251195cd0e950b240747529`
+at historical commit `96e666f0520ca261fe745c5cf2c2a4abef38f645`. The live
+module admits only eight exact count-one proof-body replacements, with no
+public signature, hypothesis, mathematical data value or stored
+value/first/second field change; only proof witnesses are repaired. The full probe stays byte-identical. The repair is source-only and
+has not established compiler acceptance.
 See [release integration](two-sided-heat-release-integration.md) and the
 [structured source dossier](two-sided-initial-heat/formalization.yaml) for
 the exact inherited boundary and pending verification gates.

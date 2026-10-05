@@ -33,7 +33,44 @@ ENTRY_POINT = "\nif __name__ == '__main__':\n    main()\n"
 C2_ORIGINAL_SHA256 = '2ce315f52a5f8de5c2f2eed6543cd4ef26bf7f4411e8d94025251b7d62e68a47'
 C2_ADAPTER = "\n# Reviewed two-sided heat inventory adapter. All inherited gate bodies remain\n# unchanged; the source guard pins this count-one insertion and exact union.\nif (ROOT / 'curvature/scripts/point4_two_sided_heat_source_guard.py').is_file():\n    import sys as _two_sided_sys\n    _two_sided_sys.dont_write_bytecode = True\n    import point4_two_sided_heat_source_guard as _two_sided_release\n    _two_sided_release.install_c2_inventory_adapter(globals())\n\n"
 R1_FILE_SHA256 = {'.github/workflows/point4-two-sided-heat.yml': 'd87d08a5d5545ab69c6b579921078efbd70bfa20dcd6f058ed753f575b928ad7', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatTwoSidedInitial.lean': '488c1fdaa617f306e9bd2c714d5917b07319a88cc251195cd0e950b240747529', 'curvature/scripts/point4_two_sided_heat_probe.lean': '3b871129c36100927a141430678bed1bcd190e2f2ea0f7acbbfec0f9f3451af4', 'curvature/scripts/point4_two_sided_heat_source_guard.py': '601d74c08fb5d300dd7bb896f6441cd06e3c4f0b511026518f96bfc040debf11', 'docs/point4/two-sided-initial-heat.md': '0eb9f3eb41ca0712c0d2d203f07bcc720e65393342614f1c5560026b99a8793a'}
-UNIT_FILE_SHA256 = {'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatTwoSidedInitial.lean': '488c1fdaa617f306e9bd2c714d5917b07319a88cc251195cd0e950b240747529', 'curvature/scripts/point4_two_sided_heat_probe.lean': '3b871129c36100927a141430678bed1bcd190e2f2ea0f7acbbfec0f9f3451af4', '.github/workflows/point4-two-sided-heat.yml': '376368cd2508cff7dd9c140204a86d2ea60088d032dfb8b619e2a126b1d026fa', 'docs/point4/two-sided-initial-heat.md': 'abf91c58ecdd81c340fd3d99e2caa351628dbd10b415720546a05f1e79672e84', 'docs/point4/two-sided-initial-heat/formalization.yaml': '2ef33efb616317d135381c7d059a70055cf9c99bc3cf4486491508f5ec370e43', 'docs/point4/two-sided-heat-release-integration.md': 'b8c6740ec5bcd7ac9d979d6fb88d78a3f300893e41d3adef8b56e24306fa5f68'}
+R1_SOURCE_COMMIT = '96e666f0520ca261fe745c5cf2c2a4abef38f645'
+# Frozen R1 remains historical. Only these exact count-one proof-body edits
+# are admitted; mathematical data, public statements and every other byte are fixed.
+R1_PROOF_REPAIRS = (
+    (
+        '  simpa only [initialLaplacianBcf_apply] using hsum Finset.univ\n',
+        '  have hfun : (D.initialLaplacianBcf : (Fin n → ℝ) → ℝ) =\n      fun x => ∑ k : Fin n, D.second k k x := by\n    funext x\n    exact D.initialLaplacianBcf_apply x\n  rw [hfun]\n  exact hsum Finset.univ\n',
+    ),
+    (
+        '    simpa only [heatFlowPathBcf, dif_neg (lt_irrefl 0)] using\n',
+        '    have hzero : heatFlowPathBcf D.value 0 = D.value := dif_neg (lt_irrefl 0)\n    simpa only [hzero] using\n',
+    ),
+    (
+        '      simpa only [abs_zero, zero_mul] using\n        (continuous_abs.mul continuous_const).tendsto (0 : ℝ)\n',
+        '      have hcont : Continuous (fun t : ℝ => |t| * ‖D.initialLaplacianBcf‖) :=\n        continuous_abs.mul continuous_const\n      simpa only [abs_zero, zero_mul] using hcont.tendsto (0 : ℝ)\n',
+    ),
+    (
+        '    simpa only [BoundedContinuousFunction.add_apply,\n      BoundedContinuousFunction.smul_apply, smul_eq_mul] using\n      (D.hasDeriv_value k x).add\n        (((heatSmoothedBoundedC2Data (neg_pos.mpr ht)\n          D.initialLaplacianBcf).hasDeriv_value k x).const_mul t)\n',
+        '    simp only [BoundedContinuousFunction.add_apply,\n      BoundedContinuousFunction.smul_apply]\n    apply HasDerivAt.fun_add\n    · exact D.hasDeriv_value k x\n    · exact ((heatSmoothedBoundedC2Data (neg_pos.mpr ht)\n        D.initialLaplacianBcf).hasDeriv_value k x).fun_const_smul t\n',
+    ),
+    (
+        '    simpa only [BoundedContinuousFunction.add_apply,\n      BoundedContinuousFunction.smul_apply, smul_eq_mul] using\n      (D.hasDeriv_first j k x).add\n        (((heatSmoothedBoundedC2Data (neg_pos.mpr ht)\n          D.initialLaplacianBcf).hasDeriv_first j k x).const_mul t)\n',
+        '    simp only [BoundedContinuousFunction.add_apply,\n      BoundedContinuousFunction.smul_apply]\n    apply HasDerivAt.fun_add\n    · exact D.hasDeriv_first j k x\n    · exact ((heatSmoothedBoundedC2Data (neg_pos.mpr ht)\n        D.initialLaplacianBcf).hasDeriv_first j k x).fun_const_smul t\n',
+    ),
+    (
+        '      exact neg_pos.mpr ht\n',
+        '      exact neg_pos.mpr (mem_Iio.mp ht)\n',
+    ),
+    (
+        '    rw [slope_def_field, D.twoSidedHeatPathBcf_of_neg ht,\n',
+        '    have htneg : t < 0 := mem_Iio.mp ht\n    rw [slope_def_field, D.twoSidedHeatPathBcf_of_neg htneg,\n',
+    ),
+    (
+        '    simp only [smul_eq_mul, sub_zero, add_sub_cancel_left]\n    rw [mul_div_cancel_left₀ _ (ne_of_lt ht)]\n',
+        '    simp only [Function.comp_apply, smul_eq_mul, sub_zero, add_sub_cancel_left]\n    rw [mul_div_cancel_left₀ _ (ne_of_lt htneg)]\n',
+    ),
+)
+UNIT_FILE_SHA256 = {'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatTwoSidedInitial.lean': '80570fc81fe42ad5cd958584ab2b1252c3145bc815877235b2de3d05be26c487', 'curvature/scripts/point4_two_sided_heat_probe.lean': '3b871129c36100927a141430678bed1bcd190e2f2ea0f7acbbfec0f9f3451af4', '.github/workflows/point4-two-sided-heat.yml': '376368cd2508cff7dd9c140204a86d2ea60088d032dfb8b619e2a126b1d026fa', 'docs/point4/two-sided-initial-heat.md': '62098f30c834757f8cc8bb8e4943bb19a48e9fbe0f2792f92d48aa1aa852447f', 'docs/point4/two-sided-initial-heat/formalization.yaml': '2ef33efb616317d135381c7d059a70055cf9c99bc3cf4486491508f5ec370e43', 'docs/point4/two-sided-heat-release-integration.md': 'df554d8f747bc462b3c917ee412e1b919150beda2837f9fa432a09e993e2e126'}
 
 
 # Importlib writes a module's bytecode before executing its body. Suppression
@@ -140,8 +177,29 @@ def baseline_sources() -> dict[str, tuple[str, bytes]]:
 def check_unit_blob(path: str, actual: bytes) -> None:
     assert path in UNIT_FILE_SHA256, f'Non-enumerated release blob: {path}'
     assert sha256(actual) == UNIT_FILE_SHA256[path], f'Exact release blob changed: {path}'
-    if path in {MODULE, PROBE}:
-        assert UNIT_FILE_SHA256[path] == R1_FILE_SHA256[path], f'Reviewed R1 proof/probe changed: {path}'
+    if path == MODULE:
+        assert actual == repaired_r1_module(historical_r1_module()), 'Exact R1 proof-only transform changed'
+    if path == PROBE:
+        assert UNIT_FILE_SHA256[path] == R1_FILE_SHA256[path], 'Reviewed R1 probe changed'
+
+
+def historical_r1_module() -> bytes:
+    original = git('show', f'{R1_SOURCE_COMMIT}:{MODULE}')
+    assert sha256(original) == R1_FILE_SHA256[MODULE], 'Historical R1 proof digest changed'
+    return original
+
+
+def repaired_r1_module(original: bytes) -> bytes:
+    assert sha256(original) == R1_FILE_SHA256[MODULE], 'R1 proof repair needs the frozen original'
+    source = original.decode()
+    for before, after in R1_PROOF_REPAIRS:
+        assert source.count(before) == 1, 'R1 proof repair needs exactly one original block'
+        assert after not in source, 'R1 proof repair block already present'
+        source = source.replace(before, after, 1)
+        assert source.count(after) == 1, 'R1 proof repair must occur once'
+    repaired = source.encode()
+    assert sha256(repaired) == UNIT_FILE_SHA256[MODULE], 'R1 proof-only repaired digest changed'
+    return repaired
 
 
 def expected_sources() -> dict[str, tuple[str, bytes]]:
@@ -458,7 +516,9 @@ def main(argv=None) -> None:
     print(json.dumps({'baseline': BASE, 'public_paths': len(public_paths()),
                       'inherited_files_byte_identical': 1637, 'exact_inherited_guard_adapters': 1,
                       'exact_startup_workflow_adapters': len(STARTUP_WORKFLOWS),
-                      'r1_proof_and_probe_blobs_unchanged': True,
+                      'historical_r1_proof_sha256': R1_FILE_SHA256[MODULE],
+                      'exact_r1_proof_only_repairs': len(R1_PROOF_REPAIRS),
+                      'r1_probe_blob_unchanged': True,
                       'root_imports_and_metadata_byte_identical': True,
                       'lean_verified': False, 'point4': 'OPEN'}, indent=2))
     print('Source-only release checks passed; exact Lean 4.33 module/probes/full-build/kernel gates remain separate')

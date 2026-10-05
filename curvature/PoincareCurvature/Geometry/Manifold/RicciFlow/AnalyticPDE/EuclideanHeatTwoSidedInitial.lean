@@ -100,7 +100,12 @@ theorem uniformContinuous_initialLaplacianBcf
         UniformContinuous (fun _ : Fin n → ℝ => (0 : ℝ)))
     | @insert k s hks ih =>
         simpa only [Finset.sum_insert hks] using (hsecond k k).add ih
-  simpa only [initialLaplacianBcf_apply] using hsum Finset.univ
+  have hfun : (D.initialLaplacianBcf : (Fin n → ℝ) → ℝ) =
+      fun x => ∑ k : Fin n, D.second k k x := by
+    funext x
+    exact D.initialLaplacianBcf_apply x
+  rw [hfun]
+  exact hsum Finset.univ
 
 /-- The positive and zero branch is exactly the inherited heat path. The
 negative branch smooths the bounded actual generator at positive time `-t`.
@@ -156,15 +161,17 @@ theorem continuousAt_twoSidedHeatPathBcf_zero
   apply Metric.tendsto_nhds.2
   intro ε hε
   have hheat : Tendsto (heatFlowPathBcf D.value) (𝓝 0) (𝓝 D.value) := by
-    simpa only [heatFlowPathBcf, dif_neg (lt_irrefl 0)] using
+    have hzero : heatFlowPathBcf D.value 0 = D.value := dif_neg (lt_irrefl 0)
+    simpa only [hzero] using
       (continuousAt_heatFlowPathBcf_zero_of_uniformContinuous
         D.value D.uniformContinuous_value).tendsto
   have hnear := Metric.tendsto_nhds.mp hheat ε hε
   have hlinear : ∀ᶠ t : ℝ in 𝓝 0, |t| * ‖D.initialLaplacianBcf‖ < ε := by
     have hlim : Tendsto (fun t : ℝ => |t| * ‖D.initialLaplacianBcf‖)
         (𝓝 0) (𝓝 0) := by
-      simpa only [abs_zero, zero_mul] using
-        (continuous_abs.mul continuous_const).tendsto (0 : ℝ)
+      have hcont : Continuous (fun t : ℝ => |t| * ‖D.initialLaplacianBcf‖) :=
+        continuous_abs.mul continuous_const
+      simpa only [abs_zero, zero_mul] using hcont.tendsto (0 : ℝ)
     exact hlim.eventually (Iio_mem_nhds hε)
   filter_upwards [hnear, hlinear] with t htnear htlinear
   by_cases ht : 0 ≤ t
@@ -187,18 +194,20 @@ def negativeHeatC2Data
     (heatSmoothedBoundedC2Data (neg_pos.mpr ht) D.initialLaplacianBcf).second j k
   hasDeriv_value := by
     intro k x
-    simpa only [BoundedContinuousFunction.add_apply,
-      BoundedContinuousFunction.smul_apply, smul_eq_mul] using
-      (D.hasDeriv_value k x).add
-        (((heatSmoothedBoundedC2Data (neg_pos.mpr ht)
-          D.initialLaplacianBcf).hasDeriv_value k x).const_mul t)
+    simp only [BoundedContinuousFunction.add_apply,
+      BoundedContinuousFunction.smul_apply]
+    apply HasDerivAt.fun_add
+    · exact D.hasDeriv_value k x
+    · exact ((heatSmoothedBoundedC2Data (neg_pos.mpr ht)
+        D.initialLaplacianBcf).hasDeriv_value k x).fun_const_smul t
   hasDeriv_first := by
     intro j k x
-    simpa only [BoundedContinuousFunction.add_apply,
-      BoundedContinuousFunction.smul_apply, smul_eq_mul] using
-      (D.hasDeriv_first j k x).add
-        (((heatSmoothedBoundedC2Data (neg_pos.mpr ht)
-          D.initialLaplacianBcf).hasDeriv_first j k x).const_mul t)
+    simp only [BoundedContinuousFunction.add_apply,
+      BoundedContinuousFunction.smul_apply]
+    apply HasDerivAt.fun_add
+    · exact D.hasDeriv_first j k x
+    · exact ((heatSmoothedBoundedC2Data (neg_pos.mpr ht)
+        D.initialLaplacianBcf).hasDeriv_first j k x).fun_const_smul t
 
 theorem negativeHeatC2Data_value_eq
     {n : ℕ} (D : EuclideanBoundedC2Data n) {t : ℝ} (ht : t < 0) :
@@ -253,16 +262,17 @@ theorem hasDerivAt_twoSidedHeatPathBcf_apply_zero
         ((show Continuous (fun t : ℝ => -t) from continuous_neg).tendsto 0).mono_left
           nhdsWithin_le_nhds
     · filter_upwards [self_mem_nhdsWithin] with t ht
-      exact neg_pos.mpr ht
+      exact neg_pos.mpr (mem_Iio.mp ht)
   have hslope : Tendsto (slope (fun t => D.twoSidedHeatPathBcf t x) 0)
       (𝓝[<] 0) (𝓝 (∑ k : Fin n, D.second k k x)) := by
     apply (htrace.comp hneg).congr'
     filter_upwards [self_mem_nhdsWithin] with t ht
-    rw [slope_def_field, D.twoSidedHeatPathBcf_of_neg ht,
+    have htneg : t < 0 := mem_Iio.mp ht
+    rw [slope_def_field, D.twoSidedHeatPathBcf_of_neg htneg,
       D.twoSidedHeatPathBcf_zero, BoundedContinuousFunction.add_apply,
       BoundedContinuousFunction.smul_apply, heatSemigroupNDbcf_apply]
-    simp only [smul_eq_mul, sub_zero, add_sub_cancel_left]
-    rw [mul_div_cancel_left₀ _ (ne_of_lt ht)]
+    simp only [Function.comp_apply, smul_eq_mul, sub_zero, add_sub_cancel_left]
+    rw [mul_div_cancel_left₀ _ (ne_of_lt htneg)]
   have hleft : HasDerivWithinAt (fun t => D.twoSidedHeatPathBcf t x)
       (∑ k : Fin n, D.second k k x) (Iic 0) 0 :=
     ((hasDerivWithinAt_iff_tendsto_slope' (by simp : (0 : ℝ) ∉ Iio 0)).mpr
