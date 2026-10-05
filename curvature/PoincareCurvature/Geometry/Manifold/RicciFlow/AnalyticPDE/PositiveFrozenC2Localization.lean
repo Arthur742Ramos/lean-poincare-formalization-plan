@@ -54,7 +54,7 @@ theorem exists_bilinear_coercivity_of_pos [FiniteDimensional ℝ E]
     have hv : v = 0 := Subsingleton.elim _ _
     simp [hv]
   · letI : Nontrivial E := not_subsingleton_iff_nontrivial.mp hsub
-    exact ContinuousLinearMap.exists_pos_mul_sq_le_of_pos B hB
+    exact Bundle.ContinuousLinearMap.exists_pos_mul_sq_le_of_pos B hB
 
 /-- Construct a globally C², uniformly coercive localization which agrees with
 the actual local form near the selected point and freezes to its value outside
@@ -81,7 +81,8 @@ theorem exists_positiveFrozenC2Bilinear
       (n := (2 : ℕ∞)) isCompact_singleton hVo (singleton_subset_iff.mpr hxV)
   have hχU : tsupport χ ⊆ U := fun x hx => (hχV hx).1
   have hP := SmoothDependenceCk.contDiff_and_hasCompactSupport_cutoff_smul
-    hU (hF.sub contDiffOn_const) hχ hχc hχU
+    (w := fun x => F x - F x₀)
+    hU (hF.sub (contDiffOn_const (c := F x₀))) hχ hχc hχU
   refine ⟨χ, c / 2, half_pos hc, hχ, hχc, hχU, hχIcc,
     contDiff_const.add hP.1, ?_, ?_, ?_⟩
   · have hχone' : ∀ᶠ x in 𝓝 x₀, χ x = 1 := by
@@ -145,7 +146,6 @@ theorem exists_positiveFrozenC2MatrixHeatData
     intro x
     change ofMatrix (G x₀ + χ x • (G x - G x₀)) = _
     rw [ofMatrix_add, ofMatrix_smul, ofMatrix_sub]
-    rfl
   refine ⟨χ, c, hc, hχ, hχc, hχU, D, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · intro i k x
     rfl

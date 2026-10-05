@@ -189,6 +189,39 @@ source, workflow, contract, pin or canonical gate changes. This repaired source
 has not been compiled; fresh independent review and a complete exact-head
 Lean 4.33 run remain required before qualification.
 
+## Historical positive-frozen elaboration failure and narrow repair
+
+Exact source-reviewed draft `5af5630b3f3553d4b6afd9c4fd04adc4fa62d308`
+failed focused Lean 4.33 CI run
+[`37268699381`](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37268699381).
+Both generic modules and `EuclideanC2Localization` compiled against the
+unchanged compiler and Mathlib pins. `PositiveFrozenC2Localization` then failed
+at its incorrectly qualified coercivity lemma, unresolved cutoff-field and
+constant implicit arguments, and a redundant `rfl` after an already closed
+matrix rewrite. The remaining metric module, complete signatures, ten new
+axiom surfaces, 150 inherited axiom occurrences and full canonical audit were
+not verified by that run. The exact failed source and logs remain historical.
+
+This narrow proof candidate calls the existing
+`Bundle.ContinuousLinearMap.exists_pos_mul_sq_le_of_pos` from the unchanged
+owned `RiemannianSection` source, explicitly supplies the actual perturbation
+`w := fun x => F x - F x₀` and `contDiffOn_const (c := F x₀)` to the cutoff
+proof, and removes only the redundant final `rfl`. The pinned Mathlib
+[`contDiffOn_const`](https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/Calculus/ContDiff/Basic.lean#L107-L108)
+and
+[`ContDiffOn.sub`](https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/Calculus/ContDiff/Operations.lean#L318-L320)
+declarations determine those explicit arguments. No theorem statement,
+hypothesis, rank-zero handling, matrix or heat-data value, ordinary derivative
+meaning, literal C² regularity, or positivity bound changes.
+
+Only this module's authored-source digest is updated. Inherited source,
+workflows, probes, pins, contract and canonical-gate semantics are unchanged.
+The later nested-operator scalar-norm instance concern is source-only; this
+candidate adds no instance or assumption. It has not been compiled. Independent
+review and a complete new exact-head Lean 4.33 run remain required, including
+the remaining metric module and all type, axiom and canonical-audit gates.
+Point 4 remains **OPEN**.
+
 ## Remaining mathematical gaps
 
 This local constructor does not discharge anisotropic inverse-Gram heat
