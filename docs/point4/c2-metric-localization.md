@@ -222,6 +222,35 @@ review and a complete new exact-head Lean 4.33 run remain required, including
 the remaining metric module and all type, axiom and canonical-audit gates.
 Point 4 remains **OPEN**.
 
+## Development-only positive-frozen norm repair candidate
+
+Source-reviewed `ff9d985eb81e8209df4e9c5838eeb24a3c98eed1` retains the three
+preceding exact-error repairs. Two serial, separately admitted Lean 4.35.0-rc2
+isolated diagnostics then terminated with exit code 1. The default generic
+nested-operator `NormSMulClass` search failed; explicit standard proof-local
+inner and outer `ContinuousLinearMap.toNormedSpace` instances and
+`NormedSpace.toNormSMulClass` cleared that scalar-norm failure. Both diagnostics
+still failed the untyped `add_sub_cancel_left` rewrite under the operator norm.
+Those cached-development results do not establish the corresponding pinned
+Lean 4.33 behavior, and all earlier source and terminal evidence is retained.
+
+This additional source-only candidate supplies exactly those standard instances
+inside the supported-point norm estimate. It first proves the fully typed
+bilinear-map cancellation equality by evaluation on two vectors, definitional
+pointwise operations and real polynomial arithmetic, then rewrites with that
+local equality before applying `norm_smul`. No global instance or declaration,
+new hypothesis, smoothness order, positive-rank premise, norm definition,
+coercivity bound, F/V/P/D value definition or theorem signature is changed.
+The rank-zero branch and the nonsupported-point proof are unchanged.
+
+Only the PositiveFrozen authored-source digest is updated. Inherited sources,
+workflows, existing probes, pins, contract and canonical-gate semantics remain
+unchanged. The new patch and prepared isolated baseline/repair probes have not
+been compiled. Independent source review, separate admission for any new
+cached-development execution, and a complete new exact-head Lean 4.33 run
+remain required. Merge only after every required verification and review gate
+passes. Point 4 remains **OPEN**.
+
 ## Remaining mathematical gaps
 
 This local constructor does not discharge anisotropic inverse-Gram heat

@@ -22,7 +22,7 @@ MODULES = {
     PREFIX + 'Analysis/CompactlySupportedC2Jet.lean': '3dfa3d8bd3cea730bf08afc91fd8dd759ba3c0365790072ee0b52f5844dc997f',
     PREFIX + 'Analysis/FiniteCoordinateBilinear.lean': '1983651e92f98f5c7358e57508432d6aa8db503389c36ef1faef73dde0d96b59',
     PREFIX + 'Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2Localization.lean': '0a9d069693a71982da3903af6d6357bc4a29b97d700d049e93d8203c0e6eac57',
-    PREFIX + 'Geometry/Manifold/RicciFlow/AnalyticPDE/PositiveFrozenC2Localization.lean': '329f5b1a8f3066e1af3d3a80ef6b13bdca8ecd09d181a3fe8d9c8ca1a9dc644e',
+    PREFIX + 'Geometry/Manifold/RicciFlow/AnalyticPDE/PositiveFrozenC2Localization.lean': 'c70003ee2f7ebe8b64bb8e85a0161528fccad656f85ded0aedfb3ac9e2ef974c',
     PREFIX + 'Geometry/Manifold/RicciFlow/AnalyticPDE/BoundarylessInitialMetricLocalization.lean': 'b2334e88fb307d3978be6605f753046fe4d30db9102df71cf25800a99c29b424',
 }
 PROBE = 'curvature/scripts/point4_c2_metric_localization_probe.lean'

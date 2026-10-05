@@ -96,8 +96,17 @@ theorem exists_positiveFrozenC2Bilinear
       by_cases hx : x ∈ tsupport χ
       · have hnorm : ‖F x - F x₀‖ < c / 2 := by
           simpa only [mem_ball, dist_eq_norm] using (hχV hx).2
-        rw [add_sub_cancel_left, norm_smul, Real.norm_eq_abs,
-          abs_of_nonneg (hχIcc x).1]
+        letI : NormedSpace ℝ (E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+        letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) := ContinuousLinearMap.toNormedSpace
+        letI : NormSMulClass ℝ (E →L[ℝ] E →L[ℝ] ℝ) :=
+          NormedSpace.toNormSMulClass (𝕜 := ℝ) (E := E →L[ℝ] E →L[ℝ] ℝ)
+        have hcancel : (F x₀ + χ x • (F x - F x₀)) - F x₀ =
+            χ x • (F x - F x₀) := by
+          ext u w
+          change F x₀ u w + χ x * (F x u w - F x₀ u w) - F x₀ u w =
+            χ x * (F x u w - F x₀ u w)
+          ring
+        rw [hcancel, norm_smul, Real.norm_eq_abs, abs_of_nonneg (hχIcc x).1]
         calc
           χ x * ‖F x - F x₀‖ ≤ 1 * ‖F x - F x₀‖ :=
             mul_le_mul_of_nonneg_right (hχIcc x).2 (norm_nonneg _)
