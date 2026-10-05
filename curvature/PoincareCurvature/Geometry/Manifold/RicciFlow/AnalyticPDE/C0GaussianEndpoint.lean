@@ -53,7 +53,8 @@ lemma continuousAt_gaussianPath_zero {n : ℕ}
   have ht : ContinuousAt smoothingTime 0 := continuous_smoothingTime.continuousAt
   have houter : ContinuousAt (heatFlowPathBcf f) (smoothingTime 0) := by
     simpa only [smoothingTime_zero] using h
-  simpa only [gaussianPath] using houter.comp ht
+  change ContinuousAt (heatFlowPathBcf f ∘ smoothingTime) 0
+  exact houter.comp ht
 
 lemma norm_gaussianPath_le {n : ℕ}
     (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) (h : ℝ) :
@@ -66,15 +67,20 @@ lemma norm_gaussianPath_le {n : ℕ}
 lemma abs_gaussianPath_apply_le {n : ℕ}
     (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) (h : ℝ) (z : Fin n → ℝ) :
     |gaussianPath f h z| ≤ ‖f‖ := by
-  exact (by simpa only [Real.norm_eq_abs] using
-    (gaussianPath f h).norm_coe_le_norm z).trans (norm_gaussianPath_le f h)
+  have habs : |gaussianPath f h z| ≤ ‖gaussianPath f h‖ := by
+    simpa only [Real.norm_eq_abs] using (gaussianPath f h).norm_coe_le_norm z
+  exact habs.trans (norm_gaussianPath_le f h)
 
 lemma contDiff_two_gaussianPath {n : ℕ}
     (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) {h : ℝ} (hh : h ≠ 0) :
     ContDiff ℝ 2 (gaussianPath f h : (Fin n → ℝ) → ℝ) := by
   rw [gaussianPath_of_ne_zero f hh]
-  simpa only [heatSemigroupNDbcf_apply] using
-    contDiff_two_heatSemigroupND (smoothingTime_pos hh) f
+  have hcoe : (heatSemigroupNDbcf (smoothingTime_pos hh) f : (Fin n → ℝ) → ℝ) =
+      heatSemigroupND (smoothingTime h) f := by
+    funext z
+    exact heatSemigroupNDbcf_apply (smoothingTime_pos hh) f z
+  rw [hcoe]
+  exact contDiff_two_heatSemigroupND (smoothingTime_pos hh) f
 
 /-- A mere continuous coefficient multiplied by its signed time variable
 has the expected ordinary derivative. No derivative of the coefficient is
@@ -84,8 +90,8 @@ lemma hasDerivAt_time_mul_of_continuousAt {a : ℝ → ℝ}
     HasDerivAt (fun h : ℝ => h * a h) (a 0) 0 := by
   apply hasDerivAt_iff_tendsto.mpr
   have hlim : Tendsto (fun h : ℝ => ‖a h - a 0‖) (𝓝 0) (𝓝 0) := by
-    simpa only [sub_self, norm_zero] using
-      (ha.sub continuousAt_const).norm.tendsto
+    simpa only [Pi.sub_apply, sub_self, norm_zero] using
+      (ha.sub (continuousAt_const : ContinuousAt (fun _ : ℝ => a 0) 0)).norm.tendsto
   apply squeeze_zero (fun h => mul_nonneg (inv_nonneg.2 (norm_nonneg _)) (norm_nonneg _))
     (fun h => ?_) hlim
   by_cases hh : h = 0
@@ -95,6 +101,7 @@ lemma hasDerivAt_time_mul_of_continuousAt {a : ℝ → ℝ}
       ring
     rw [heq, sub_zero, norm_mul]
     simp only [← mul_assoc, inv_mul_cancel₀ (norm_ne_zero_iff.mpr hh), one_mul]
+    exact le_rfl
 
 lemma hasDerivAt_time_mul_gaussianPath {n : ℕ}
     (f : BoundedContinuousFunction (Fin n → ℝ) ℝ)

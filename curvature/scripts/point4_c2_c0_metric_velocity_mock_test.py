@@ -217,6 +217,33 @@ class MetricVelocityReleaseGuardTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             release.check_unit_blob('unknown.lean', b'')
 
+    def test_five_count_one_proof_repairs_reverse_to_complete_approved_source(self):
+        actual = (release.ROOT / release.PROOF_REPAIR_PATH).read_bytes()
+        original = release.git('show', f'{release.PROOF_REPAIR_PARENT}:{release.PROOF_REPAIR_PATH}')
+        self.assertEqual(len(release.PROOF_REPAIR_TRANSFORMS), 5)
+        self.assertEqual(release.adapted_gaussian_proofs(original), actual)
+        self.assertEqual(release.restored_gaussian_proofs(actual), original)
+        for before, after in release.PROOF_REPAIR_TRANSFORMS:
+            wrong_sources = (original.replace(before, b'', 1), original + before,
+                             original.replace(before, after, 1))
+            for wrong in wrong_sources:
+                with self.assertRaises(AssertionError):
+                    release.adapted_gaussian_proofs(wrong)
+            wrong_sources = (actual.replace(after, b'', 1), actual + after,
+                             actual.replace(after, before, 1))
+            for wrong in wrong_sources:
+                with self.assertRaises(AssertionError):
+                    release.restored_gaussian_proofs(wrong)
+        for before, after in ((b'def smoothingTime', b'def changedTime'),
+                              (b'UniformContinuous', b'Continuous'),
+                              (b'HasDerivAt', b'HasDerivWithinAt'),
+                              ('ContDiff ℝ 2'.encode(), 'ContDiff ℝ 1'.encode())):
+            self.assertIn(before, actual)
+            with self.assertRaises(AssertionError):
+                release.restored_gaussian_proofs(actual.replace(before, after, 1))
+        with self.assertRaises(AssertionError):
+            release.restored_gaussian_proofs(actual + b'\naxiom hidden : False\n')
+
     def test_reviewed_module_bytes_and_source_closure(self):
         release.check_source_closure()
         frozen = release.json.loads((release.ROOT / release.DOSSIER / 'FINAL-SOURCE-MANIFEST.json').read_text())
@@ -225,6 +252,8 @@ class MetricVelocityReleaseGuardTests(unittest.TestCase):
         for row in frozen['current_files']:
             path = release.MODULE_PREFIX + row['file']
             data = (release.ROOT / path).read_bytes()
+            if path == release.PROOF_REPAIR_PATH:
+                data = release.restored_gaussian_proofs(data)
             self.assertEqual(release.sha256(data), row['sha256'])
             self.assertEqual(release.git_blob_identity(data), row['git_blob_sha1'])
         closure = release.json.loads((release.ROOT / release.CLOSURE_MANIFEST).read_text())
@@ -690,6 +719,267 @@ class MetricVelocityReleaseGuardTests(unittest.TestCase):
             gate['status'] = 'PASS'
         with self.assertRaises(AssertionError):
             self.guard.check_audit(wrong, 0)
+
+
+    def test_exact_primary_workflow_checkpoints_preserve_every_original_byte_and_gate(self):
+        actual = (release.ROOT / release.EXACT_HEAD_WORKFLOW_PATH).read_bytes()
+        original = release.git('show', release.EXACT_HEAD_WORKFLOW_BASE + ':' + release.EXACT_HEAD_WORKFLOW_PATH)
+        self.assertEqual(release.restored_exact_head_workflow(actual), original)
+        self.assertEqual(release.adapted_exact_head_workflow(original), actual)
+        self.assertEqual(release.sha256(actual), release.EXACT_HEAD_WORKFLOW_SHA256)
+        parsed = release.parse_workflow(actual.decode())
+        old = release.parse_workflow(original.decode())
+        steps = parsed['jobs'][release.EXACT_HEAD_WORKFLOW_JOB]['steps']
+        self.assertEqual(steps[1]['env'], {
+            'GIT_NO_LAZY_FETCH': '1',
+            'EXPECTED_SHA': '${{ github.event.pull_request.head.sha || github.sha }}'})
+        self.assertNotIn('if', steps[1])
+        self.assertEqual(steps[-2]['if'], 'always()')
+        steps.pop(-2); steps.pop(1)
+        self.assertEqual(parsed, old)
+        for wrong in (
+                original + b'\n', actual,
+                original.replace(release.EXACT_HEAD_BEFORE_ANCHOR.encode(), b''),
+                original + release.EXACT_HEAD_AFTER_ANCHOR.encode()):
+            with self.subTest(original=release.sha256(wrong)), self.assertRaises(AssertionError):
+                release.adapted_exact_head_workflow(wrong)
+        for wrong in (
+                original, actual + b'\n',
+                actual.replace(release.EXACT_HEAD_PREFLIGHT.encode(), b'', 1),
+                actual.replace(release.EXACT_HEAD_POSTFLIGHT.encode(), b'', 1),
+                actual.replace(release.EXACT_HEAD_POSTFLIGHT.encode(), release.EXACT_HEAD_POSTFLIGHT.encode() * 2, 1),
+                actual.replace(b'--cached', b'--quiet', 1),
+                actual.replace(b'set -euo pipefail', b'set +e', 1),
+                actual.replace(b'contents: read', b'contents: write', 1),
+                actual.replace(b'        if: always()\n        env:\n          GIT_NO_LAZY_FETCH:', b'        if: success()\n        env:\n          GIT_NO_LAZY_FETCH:', 1)):
+            with self.subTest(actual=release.sha256(wrong)), self.assertRaises(AssertionError):
+                release.restored_exact_head_workflow(wrong)
+
+    def test_real_committed_self_blob_mode_index_binding_and_actual_source_failure(self):
+        # A separate committed checkout and independent index preserve the release.
+        # Comments are harmless; this exercises source identity, not Lean validity.
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory) / 'candidate'
+            env = dict(os.environ, GIT_NO_LAZY_FETCH='1', PYTHONDONTWRITEBYTECODE='1')
+            subprocess.run(['git', 'clone', '--quiet', '--shared', '--no-checkout', str(release.ROOT), str(root)], env=env, check=True)
+            head = release.git('rev-parse', 'HEAD').decode().strip()
+            subprocess.run(['git', '-C', str(root), 'checkout', '--quiet', '--detach', head], env=env, check=True)
+            def local_git(*args):
+                return subprocess.check_output(['git', '-C', str(root), *args], env=env)
+            guard_path = pathlib.Path(release.__file__).resolve().relative_to(release.ROOT).as_posix()
+            with mock.patch.object(release, 'ROOT', root):
+                release.check_release_self_sources()
+                for path in sorted(release.SELF_PATHS):
+                    physical = root / path
+                    before = physical.read_bytes()
+                    for mutation in ('unstaged_comment', 'staged_comment', 'unstaged_mode', 'staged_mode'):
+                        if mutation.endswith('comment'):
+                            physical.write_bytes(before + b'\n# Benign exact-head self-source regression.\n')
+                        else:
+                            physical.chmod(0o755)
+                        if mutation.startswith('staged_'):
+                            local_git('add', '--', path)
+                        with self.subTest(path=path, mutation=mutation), self.assertRaises(AssertionError):
+                            release.check_release_self_sources()
+                        self.assertEqual(local_git('rev-parse', 'HEAD').decode().strip(), head)
+                        if mutation == 'staged_comment':
+                            # The actual current source-gate process must reject;
+                            # no mocked successful source result substitutes for it.
+                            result = subprocess.run([release.sys.executable, guard_path], cwd=root, env=env,
+                                                    capture_output=True, text=True, timeout=180)
+                            self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                            self.assertIn('Self index/committed HEAD blob or mode mismatch', result.stderr)
+                            self.assertEqual(physical.read_bytes(), before + b'\n# Benign exact-head self-source regression.\n')
+                        physical.write_bytes(before); physical.chmod(0o644)
+                        local_git('reset', '--quiet', 'HEAD', '--', path)
+                        release.check_release_self_sources()
+                self.assertFalse(local_git('status', '--porcelain=v1', '--untracked-files=all'))
+
+    def test_real_independent_workflow_pre_post_cleanliness_and_failure_propagation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            container = pathlib.Path(directory)
+            root = container / ('campaign' if '-C campaign' in release.EXACT_HEAD_PREFLIGHT else 'candidate')
+            env = dict(os.environ, GIT_NO_LAZY_FETCH='1', PYTHONDONTWRITEBYTECODE='1')
+            subprocess.run(['git', 'clone', '--quiet', '--shared', '--no-checkout', str(release.ROOT), str(root)], env=env, check=True)
+            head = release.git('rev-parse', 'HEAD').decode().strip()
+            subprocess.run(['git', '-C', str(root), 'checkout', '--quiet', '--detach', head], env=env, check=True)
+            env.update(EXPECTED_SHA=head, CHECKPOINT_LOG=str(container / 'failed-gate.log'),
+                       CHECKPOINT_RECEIPT=str(container / 'unexpected-success'))
+            cwd = container if root.name == 'campaign' else root
+            before = release.parse_workflow('steps:\n' + release.EXACT_HEAD_PREFLIGHT)['steps'][0]['run']
+            after = release.parse_workflow('steps:\n' + release.EXACT_HEAD_POSTFLIGHT)['steps'][0]['run']
+            def shell(code):
+                return subprocess.run(['bash', '--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', code],
+                                      cwd=cwd, env=env, capture_output=True, text=True, timeout=30)
+            def local_git(*args):
+                return subprocess.check_output(['git', '-C', str(root), *args], env=env)
+            for code in (before, after):
+                result = shell(code)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            path = sorted(release.SELF_PATHS)[0]; physical = root / path; original = physical.read_bytes()
+            for stage in (False, True):
+                physical.write_bytes(original + b'\n# Benign independent workflow dirty-source control.\n')
+                if stage:
+                    local_git('add', '--', path)
+                for code in (before, after):
+                    result = shell(code)
+                    self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(local_git('rev-parse', 'HEAD').decode().strip(), head)
+                physical.write_bytes(original); local_git('reset', '--quiet', 'HEAD', '--', path)
+            # A candidate-owned gate that exits successfully after staging a
+            # comment cannot turn dirty source into exact-head qualification.
+            gate = 'printf "\\n# Benign mutation during candidate gate.\\n" >> ' + str(physical) + '\ngit -C ' + str(root) + ' add -- ' + path
+            self.assertEqual(shell(before).returncode, 0)
+            self.assertEqual(shell(gate).returncode, 0)
+            self.assertNotEqual(shell(after).returncode, 0)
+            physical.write_bytes(original); local_git('reset', '--quiet', 'HEAD', '--', path)
+            # GitHub's pinned bash -e/pipefail run behavior must propagate a
+            # failing producer through tee, even with a clean post-check body.
+            gate = 'python3 -c "raise SystemExit(9)" | tee "$CHECKPOINT_LOG"'
+            result = shell(before + '\n' + gate + '\n' + after + '\ntouch "$CHECKPOINT_RECEIPT"')
+            self.assertEqual(result.returncode, 9, result.stdout + result.stderr)
+            self.assertFalse((container / 'unexpected-success').exists())
+            self.assertEqual(shell(after).returncode, 0)
+            # A clean index/worktree at a different HEAD is still the wrong release.
+            local_git('-c', 'user.name=Owned regression', '-c', 'user.email=owned-regression@example.invalid',
+                      'commit', '--quiet', '--allow-empty', '-m', 'Owned wrong-HEAD regression')
+            for code in (before, after):
+                self.assertNotEqual(shell(code).returncode, 0)
+            local_git('reset', '--hard', '--quiet', head)
+            self.assertFalse(local_git('status', '--porcelain=v1', '--untracked-files=all'))
+
+
+
+    def test_independent_workflow_physical_identity_cannot_be_hidden_by_git_index_flags(self):
+        with tempfile.TemporaryDirectory() as directory:
+            container = pathlib.Path(directory)
+            root = container / ('campaign' if '-C campaign' in release.EXACT_HEAD_PREFLIGHT else 'candidate')
+            env = dict(os.environ, GIT_NO_LAZY_FETCH='1', PYTHONDONTWRITEBYTECODE='1')
+            subprocess.run(['git', 'clone', '--quiet', '--shared', '--no-checkout', str(release.ROOT), str(root)], env=env, check=True)
+            head = release.git('rev-parse', 'HEAD').decode().strip()
+            subprocess.run(['git', '-C', str(root), 'checkout', '--quiet', '--detach', head], env=env, check=True)
+            env['EXPECTED_SHA'] = head
+            cwd = container if root.name == 'campaign' else root
+            checks = [release.parse_workflow('steps:\n' + step)['steps'][0]['run']
+                      for step in (release.EXACT_HEAD_PREFLIGHT, release.EXACT_HEAD_POSTFLIGHT)]
+            path = sorted(release.SELF_PATHS)[0]; physical = root / path; original = physical.read_bytes()
+            for flag in ('--assume-unchanged', '--skip-worktree'):
+                subprocess.run(['git', '-C', str(root), 'update-index', flag, path], env=env, check=True)
+                physical.write_bytes(original + b'\n# Benign source hidden from Git stat/diff shortcuts.\n')
+                # Confirm the regression reproduces a real Git diff blind spot.
+                result = subprocess.run(['git', '-C', str(root), 'diff', '--exit-code', '--', path], env=env, capture_output=True)
+                self.assertEqual(result.returncode, 0)
+                for code in checks:
+                    result = subprocess.run(['bash', '--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', code],
+                                            cwd=cwd, env=env, capture_output=True, text=True, timeout=30)
+                    self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                    self.assertIn('Independent tracked physical/HEAD blob mismatch:', result.stderr)
+                self.assertEqual(physical.read_bytes(), original + b'\n# Benign source hidden from Git stat/diff shortcuts.\n')
+                self.assertEqual(subprocess.check_output(['git', '-C', str(root), 'rev-parse', 'HEAD'], env=env).decode().strip(), head)
+                physical.write_bytes(original)
+                subprocess.run(['git', '-C', str(root), 'update-index', '--no-assume-unchanged', '--no-skip-worktree', path], env=env, check=True)
+            for code in checks:
+                self.assertEqual(subprocess.run(['bash', '--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', code], cwd=cwd, env=env).returncode, 0)
+
+
+    def test_expected_release_head_is_bound_with_real_clean_head_shift_and_path_spoof(self):
+        with tempfile.TemporaryDirectory() as directory:
+            container = pathlib.Path(directory)
+            root = container / ('campaign' if '-C campaign' in release.EXACT_HEAD_PREFLIGHT else 'candidate')
+            env = dict(os.environ, GIT_NO_LAZY_FETCH='1', PYTHONDONTWRITEBYTECODE='1')
+            subprocess.run(['/usr/bin/git', 'clone', '--quiet', '--shared', '--no-checkout', str(release.ROOT), str(root)], env=env, check=True)
+            expected = release.git('rev-parse', 'HEAD').decode().strip()
+            subprocess.run(['/usr/bin/git', '-C', str(root), 'checkout', '--quiet', '--detach', expected], env=env, check=True)
+            env['EXPECTED_SHA'] = expected
+            cwd = container if root.name == 'campaign' else root
+            checks = [release.parse_workflow('steps:\n' + step)['steps'][0]['run']
+                      for step in (release.EXACT_HEAD_PREFLIGHT, release.EXACT_HEAD_POSTFLIGHT)]
+            isolated = [code[code.index('/usr/bin/python3 -I -B -'):] for code in checks]
+            def shell(code):
+                return subprocess.run(['bash', '--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', code], cwd=cwd, env=env, capture_output=True, text=True, timeout=30)
+            for code in checks + isolated:
+                result = shell(code)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            # A real clean checkout at the old source head reproduces the
+            # independent reviewer's attack without modifying any Lean source.
+            actual = release.EXACT_HEAD_WORKFLOW_BASE
+            self.assertNotEqual(actual, expected)
+            subprocess.run(['/usr/bin/git', '-C', str(root), 'checkout', '--quiet', '--detach', actual], env=env, check=True)
+            self.assertFalse(subprocess.check_output(['/usr/bin/git', '-C', str(root), 'status', '--porcelain=v1', '--untracked-files=all'], env=env))
+            fake_bin = container / 'fake-bin'; fake_bin.mkdir()
+            fake = fake_bin / 'git'
+            fake.write_text('#!/bin/sh\ncase "$*" in\n  "rev-parse HEAD"|"-C campaign rev-parse HEAD") printf "%s\n" "$EXPECTED_SHA" ;;\n  *) exec /usr/bin/git "$@" ;;\nesac\n')
+            fake.chmod(0o755)
+            env['PATH'] = str(fake_bin) + os.pathsep + env['PATH']
+            prefix = ['-C', 'campaign'] if root.name == 'campaign' else []
+            spoofed = subprocess.check_output(['git', *prefix, 'rev-parse', 'HEAD'], cwd=cwd, env=env).decode().strip()
+            self.assertEqual(spoofed, expected)
+            self.assertEqual(subprocess.check_output(['/usr/bin/git', '-C', str(root), 'rev-parse', 'HEAD'], env=env).decode().strip(), actual)
+            for code in checks:
+                result = shell(code)
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+            # The isolated Python check also rejects independently, even when
+            # the shell HEAD check is not included in this fixture invocation.
+            for code in isolated:
+                result = shell(code)
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn('Independent expected release HEAD mismatch', result.stderr)
+            subprocess.run(['/usr/bin/git', '-C', str(root), 'checkout', '--quiet', '--detach', expected], env=env, check=True)
+            for code in checks + isolated:
+                result = shell(code)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+
+    def test_raw_source_identity_rejects_replace_refs_and_custom_replace_namespace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            container = pathlib.Path(directory)
+            root = container / ('campaign' if '-C campaign' in release.EXACT_HEAD_PREFLIGHT else 'candidate')
+            env = dict(os.environ, GIT_NO_LAZY_FETCH='1', PYTHONDONTWRITEBYTECODE='1')
+            env.pop('GIT_REPLACE_REF_BASE', None)
+            subprocess.run(['/usr/bin/git', '--no-replace-objects', 'clone', '--quiet', '--shared', '--no-checkout', str(release.ROOT), str(root)], env=env, check=True)
+            expected = release.raw_git('rev-parse', 'HEAD').decode().strip()
+            subprocess.run(['/usr/bin/git', '--no-replace-objects', '-C', str(root), 'checkout', '--quiet', '--detach', expected], env=env, check=True)
+            env['EXPECTED_SHA'] = expected
+            cwd = container if root.name == 'campaign' else root
+            checks = [release.parse_workflow('steps:\n' + step)['steps'][0]['run']
+                      for step in (release.EXACT_HEAD_PREFLIGHT, release.EXACT_HEAD_POSTFLIGHT)]
+            isolated = [code[code.index('/usr/bin/python3 -I -B -'):] for code in checks]
+            def git(*args, raw=False):
+                prefix = ['/usr/bin/git'] + (['--no-replace-objects'] if raw else [])
+                return subprocess.check_output(prefix + ['-C', str(root), *args], env=env)
+            path = sorted(release.SELF_PATHS)[0]
+            source = root / path; original = source.read_bytes()
+            source.write_bytes(original + b'\n# Benign immutable-object replacement control.\n')
+            git('add', '--', path, raw=True)
+            tree = git('write-tree', raw=True).decode().strip()
+            command = ['/usr/bin/git', '--no-replace-objects', '-C', str(root), '-c', 'user.name=Owned replacement regression', '-c', 'user.email=owned-replacement@example.invalid', 'commit-tree', tree, '-p', expected]
+            replacement = subprocess.check_output(command, input=b'Owned immutable-object replacement regression\n', env=env).decode().strip()
+            for namespace in ('refs/replace/', 'refs/owned-replacement-control/'):
+                git('reset', '--hard', '--quiet', expected, raw=True)
+                if namespace == 'refs/replace/':
+                    env.pop('GIT_REPLACE_REF_BASE', None)
+                else:
+                    env['GIT_REPLACE_REF_BASE'] = namespace
+                git('update-ref', namespace + expected, replacement, raw=True)
+                git('reset', '--hard', '--quiet', expected)
+                self.assertEqual(git('rev-parse', 'HEAD').decode().strip(), expected)
+                self.assertFalse(git('status', '--porcelain=v1', '--untracked-files=all'))
+                self.assertEqual(source.read_bytes(), original + b'\n# Benign immutable-object replacement control.\n')
+                self.assertNotEqual(git('ls-tree', '-rz', expected, '--', path),
+                                    git('ls-tree', '-rz', expected, '--', path, raw=True))
+                for code in checks + isolated:
+                    result = subprocess.run(['bash', '--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', code], cwd=cwd, env=env, capture_output=True, text=True, timeout=30)
+                    self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                with mock.patch.object(release, 'ROOT', root), mock.patch.object(release, 'ENV', env):
+                    with self.assertRaises(AssertionError):
+                        (release.check_self_sources if hasattr(release, 'check_self_sources') else release.check_release_self_sources)()
+                self.assertEqual(source.read_bytes(), original + b'\n# Benign immutable-object replacement control.\n')
+                git('update-ref', '-d', namespace + expected, raw=True)
+                git('reset', '--hard', '--quiet', expected, raw=True)
+            env.pop('GIT_REPLACE_REF_BASE', None)
+            for code in checks + isolated:
+                result = subprocess.run(['bash', '--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', code], cwd=cwd, env=env, capture_output=True, text=True, timeout=30)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 if __name__ == '__main__':

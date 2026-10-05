@@ -1,3 +1,31 @@
+## Active proof repair after hosted elaboration failure
+
+The current Gaussian source is a SOURCE-ONLY, COMPILER-UNVERIFIED proof repair
+of public head `6d8482764236bb71b101d313669b5271f4597d00` (tree
+`9152e53e5f79165dc89b1b651baade914484a2a7`). Its SHA-256 is
+`122a2a7631e85adcf031894226a0237e8791770ebb4f784b8af4b57a38e010ea`. The retained frozen-003 source identity,
+manifests and approval reports below are historical. They are not approval or
+compiler evidence for this repair. The other three Lean modules, every public
+header, all definitions, hypotheses, metric/velocity data and canonical target
+remain byte-identical to that head.
+
+Hosted run 37312195967, job 111770070201, failed at exactly five Gaussian
+proof elaborations under official Lean 4.33 and Mathlib db584: composition
+normalization, an untyped dependent bound, a bundled function coercion,
+an unresolved scalar constant in a limit and a residual reflexive inequality.
+Only those proof fragments change. The strict guard records count-one forward
+and reverse substitutions and checks reverse-normalized bytes against the
+original frozen-003 full-source manifest and retained historical source.
+
+The unchanged inherited guard, schema, adversarial tests, complete source
+closure and mandatory hosted compiler/probe/library/kernel gates still apply.
+No local Lean or Lake invocation, installation, dependency/cache expansion,
+publication, registry, credential or security action is performed here.
+The general endpoint leaf remains independently useful; it does not solve a
+Ricci PDE or resume the stopped universal-C2 existence closure. Point 4 is OPEN.
+
+Historical integration dossier follows unchanged.
+
 # Literal-C2 metric family with C0 ordinary endpoint velocity
 
 Status: reviewed mathematical source, uncompiled draft integration. This leaf
