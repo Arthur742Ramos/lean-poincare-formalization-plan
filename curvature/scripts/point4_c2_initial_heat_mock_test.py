@@ -35,6 +35,43 @@ class C2IntegrationGuardTests(unittest.TestCase):
             with self.subTest(before=before), self.assertRaises(AssertionError):
                 guard.check_workflow(workflow.replace(before, after))
 
+    def test_tracked_cache_is_never_exempted(self):
+        expected = set(self.expected)
+        valid = expected | guard.EDITABLE | guard.ADDED
+        generated = 'curvature/scripts/__pycache__/point4_scan.cpython-311.pyc'
+        self.assertEqual(guard.public_paths(valid, {generated}), valid)
+        for bad in (generated, '__pycache__/arbitrary.txt', 'curvature/scripts/__pycache__/hidden.lean', '__pycache__/nested\npublic.bin'):
+            with self.subTest(path=bad), self.assertRaises(AssertionError):
+                guard.check_public_paths(guard.public_paths(valid | {bad}, set()), expected)
+        for bad in ('__pycache__/arbitrary.txt', 'curvature/scripts/__pycache__/hidden.lean', '__pycache__/unknown.pyc'):
+            with self.subTest(path=bad), self.assertRaises(AssertionError):
+                guard.check_public_paths(guard.public_paths(valid, {bad}), expected)
+        self.assertEqual(guard.nul_paths(b'a\nname\0second\0'), {'a\nname', 'second'})
+        with self.assertRaises(AssertionError):
+            guard.nul_paths(b'not terminated')
+
+    def test_duplicate_yaml_keys_and_parsed_provenance_drift(self):
+        relationship = '    relationship: "builds-on"\n'
+        start = self.metadata.index('related_formalizations:\n')
+        provenance = self.metadata[start:]
+        first_id = next(line for line in provenance.splitlines() if line.startswith('  - id:'))
+        note = '    note: >-\n'
+        cases = (
+            self.metadata.replace(relationship, relationship + '    relationship: "independent"\n', 1),
+            self.metadata.replace(first_id + '\n', first_id + '\n' + '    id: "https://example.invalid/wrong"\n', 1),
+            self.metadata.replace(note, '    note: "overwritten note"\n' + note, 1),
+            self.metadata.replace(relationship, relationship + '    unexpected: "field"\n', 1),
+            self.metadata.replace(relationship, '    relationship: "independent"\n', 1),
+            self.metadata.replace(first_id, '  - id: ["not-a-string"]', 1),
+            self.metadata.replace('version: "v0.4"\n', 'version: "v0.4"\nversion: "v0.3"\n', 1),
+        )
+        for bad in cases:
+            with self.assertRaises(AssertionError):
+                guard.check_metadata(bad)
+        # Quoted spellings cannot hide a duplicate key from parsed validation.
+        with self.assertRaises(AssertionError):
+            guard.parse_metadata('key: value\n"key": replacement\n')
+
     def test_root_union_and_each_missing_import(self):
         guard.check_imports(self.root)
         for line in self.root.splitlines():

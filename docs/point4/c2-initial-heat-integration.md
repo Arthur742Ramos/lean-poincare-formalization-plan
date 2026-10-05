@@ -2,7 +2,7 @@
 
 **Supporting integration only. Point 4 remains OPEN.**
 
-This milestone joins the qualified PR124/127 stack to the current-master
+This milestone joins the fully qualified PR124 and primary-qualified PR127 stack to the current-master
 linear-heat geometry milestone by a real merge. It adds no mathematical proof
 body, no new selected registry result and no intake. Parent-head verification
 is historical evidence; fresh exact combined-head hosted Lean 4.33 checks and
@@ -82,17 +82,23 @@ certifies the new combined head.
 
 ## Precise source-guard integration scope
 
-Every inherited workflow is unchanged, including the original combined
-linear-heat geometry, C² heat trace, weighted certificate and closed-contract
-workflows. Every original proof/probe, current pin, full auditor, contract
+The C² heat trace, closed-contract and every other inherited workflow remain
+byte-identical except the original combined linear-heat geometry and weighted
+certificate workflows. Those two receive only one precisely pinned dependency
+step, installing `PyYAML==6.0.2` from the official Python package registry
+before their adapted source guards. Every original step remains byte-preserved.
+The new combined workflow has the same explicit dependency step. No Lean
+dependency, toolchain, action pin, permission or mathematical scope changes. Every original proof/probe, current pin, full auditor, contract
 fingerprint and positive/negative kernel fixture remains unchanged.
 
-Only two inherited source guards receive exact adapter blocks:
+Only two inherited source guards receive exact adapter blocks, and exactly
+their two inherited workflows receive the parser-only insertion above:
 
 1. `point4_linear_heat_geometry_source_test.py`: its original source/evidence
    checker and every original mock fixture are retained. The adapter delegates
    only expected-source union, root imports, metadata and audit checks to the
-   new stricter combined guard. Its original eleven-probe/127-occurrence checks
+   new stricter combined guard. Its duplicate-key-rejecting `SafeLoader` validates
+   parsed provenance entries, not first textual matches, and rejects extra fields. Its original eleven-probe/127-occurrence checks
    and boundaryless type checks remain operative
 2. `point4_weighted_initial_heat_guard.py`: its original standalone checker
    remains intact below an adapter to the shared combined guard. The old
@@ -103,11 +109,16 @@ Only two inherited source guards receive exact adapter blocks:
 
 The [central guard](../../curvature/scripts/point4_c2_initial_heat_source_test.py)
 checks those exact transformations from the immutable original guard blobs.
-It protects the entire inherited public tree, not merely selected proof paths.
+It pins the two workflow insertions as exact transforms from immutable original
+workflow blobs and protects the entire inherited public tree. All unknown
+tracked paths are rejected, including `__pycache__` blobs; only genuine
+untracked interpreter `.cpython-*.pyc` cache files are ignored. NUL-delimited
+Git inventories preserve newline-containing path identities.
 Allowed inherited edits are exhaustively `curvature/PoincareCurvature.lean`
 (exact import union), `curvature/formalization.yaml` (complete provenance union),
 `docs/status.md` and `docs/point4/README.md` (current integration summary), plus
-the two precisely checked adapters. No inherited path is deleted.
+the two precisely checked guard adapters and two parser-only workflow
+insertions. No inherited path is deleted.
 
 The input stack adds exactly these eleven paths relative to current master:
 
@@ -148,7 +159,8 @@ All inherited applicable workflows remain independently mandatory.
 [Adversarial fixtures](../../curvature/scripts/point4_c2_initial_heat_mock_test.py)
 reject every protected-blob mutation, each missing root import, extra/duplicate
 imports, hidden declarations/options, missing/extra/duplicate provenance,
-selected metadata changes, missing/extra/duplicate actual axiom reports,
+selected metadata changes, duplicate YAML mapping keys and parsed provenance
+drift, tracked-cache path bypasses, missing/extra/duplicate actual axiom reports,
 nonstandard axioms, boundaryless scope drift, skipped builds/gates and false
 CLOSED claims. The original geometry fixtures are also still run. Mock evidence
 is not presented as actual Lean output.
@@ -160,6 +172,13 @@ hygiene. No local Lean 4.33 installation, cache download or full build is run.
 The complete official schema is pinned at upstream commit
 `99c678e569c7c4c0772db297c5ddd5e4c9b6322e`, `schema/v0.4.schema.json`, SHA256
 `25ff6b25ca4511635aff4443cf20480c15e59dddf19591c730950b442ea54fce`.
+Historical integration head `23825c20db385f6c9b0fd4f041a97fe85104aeee` passed
+its initial source-only fixtures but independent review found duplicate-YAML-key
+acceptance and an overbroad tracked-cache exception. That head and its backup
+artifacts remain historical failures of integration preflight, never relabeled
+successful. The corrected guard, parsed-data adversarial fixtures, NUL-safe
+public inventory and two explicit parser-only workflow insertions require
+fresh exact-head independent review. No mathematical proof or probe changes.
 Fresh exact combined-head hosted verification and independent full-stack
 review remain pending. A successful supporting milestone still leaves Point 4
 OPEN and creates no registry submission.

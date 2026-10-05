@@ -230,7 +230,7 @@ related_formalizations:
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/4c488607b92421e8e85e0d4911556e8a40e294b4/curvature"
     relationship: "builds-on"
     note: >-
-      Qualified actual compatible weighted C2-alpha Gaussian datum and vanishing weighted Holder certificate; exact proof source and documentation correction are retained.
+      Primary-qualified actual compatible weighted C2-alpha Gaussian datum and vanishing weighted Holder certificate; exact proof source and documentation correction are retained.
 
 status:
   scope: >-

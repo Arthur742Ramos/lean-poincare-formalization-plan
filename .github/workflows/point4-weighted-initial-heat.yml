@@ -31,6 +31,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
           fetch-depth: 0
+      - name: Install pinned safe YAML parser from the official package registry
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2
       - name: Preserve inherited proof blobs and canonical contracts
         run: python3 curvature/scripts/point4_weighted_initial_heat_guard.py | tee /tmp/point4-weighted-initial-heat-source-guard.log
       - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9

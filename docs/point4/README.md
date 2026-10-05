@@ -72,10 +72,11 @@ nonlinear PDE solver or canonical target is constructed. Point 4 remains OPEN.
 ## Combined supporting C² initial heat
 
 The [combined C² initial-heat milestone](c2-initial-heat-integration.md) joins
-qualified PR124/127 by real ancestry to the merged linear-heat geometry and
-approved canonical contract. Exact mathematical proof/probe blobs and every
-original workflow are preserved; two precisely reviewed source-guard adapters
-protect the complete pinned parent union. Earlier candidate wording below is
+fully qualified PR124 and primary-qualified PR127 by real ancestry to the merged linear-heat geometry and
+approved canonical contract. Exact mathematical proof/probe blobs and all original workflow steps are
+preserved; two precise source-guard adapters and parser-only dependency
+insertions protect the complete pinned parent union. PR127 inherited checks
+remain pending; its actual primary qualification is separate. Earlier candidate wording below is
 historical. Fresh exact combined-head full compilation, all thirteen axiom/type
 surfaces, canonical contract/kernel regressions, unchanged full audit and
 independent full-stack review remain required. Compact localization,

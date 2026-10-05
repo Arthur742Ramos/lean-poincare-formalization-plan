@@ -32,6 +32,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
           fetch-depth: 0
+      - name: Install pinned safe YAML parser from the official package registry
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2
       - name: Check exact identity, pinned source union and adversarial fixtures
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}

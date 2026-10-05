@@ -8,6 +8,7 @@ import os
 import pathlib
 import re
 import subprocess
+import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 MASTER = '0ae19db1b5f423e6c5db9b8199948769102c03c2'
@@ -22,7 +23,7 @@ GEOMETRY_GUARD = 'curvature/scripts/point4_linear_heat_geometry_source_test.py'
 WEIGHTED_GUARD = 'curvature/scripts/point4_weighted_initial_heat_guard.py'
 WEIGHTED_PROOF = 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatWeightedInitialHolder.lean'
 WEIGHTED_SHA256 = 'a1ca6c80dabcc0f9df8d788870869bc0a5eff453752e8fef1379cc8a2d0dca23'
-WORKFLOW_SHA256 = 'ef766da73c4c7cbf98fa20ef4c9c95f968e5fff33c2fb2f8f5bd051ae3ba8a45'
+WORKFLOW_SHA256 = 'bb3efbcc8a477181aea2857a002f2d5eb7b7670ad34527dd231d9cfa5c543f3d'
 SCHEMA_SHA256 = '25ff6b25ca4511635aff4443cf20480c15e59dddf19591c730950b442ea54fce'
 # Exact inherited source files exempted only for the documented import union,
 # provenance union and current-status integration summary. No proof is exempt.
@@ -41,6 +42,9 @@ PROBES = (
 )
 ENV = dict(os.environ, GIT_NO_LAZY_FETCH='1')
 
+YAML_STEP = '      - name: Install pinned safe YAML parser from the official package registry\n        run: |\n          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2\n'
+YAML_WORKFLOWS = {'.github/workflows/point4-linear-heat-geometry.yml': ('0ae19db1b5f423e6c5db9b8199948769102c03c2', '      - name: Preserve immutable source identity and reject integration drift\n'), '.github/workflows/point4-weighted-initial-heat.yml': ('4c488607b92421e8e85e0d4911556e8a40e294b4', '      - name: Preserve inherited proof blobs and canonical contracts\n')}
+
 GEOMETRY_ADAPTER = "\n# Reviewed combined C2 integration adapter. The immutable legacy guard remains\n# above; the shared guard pins this precise adapter and the full parent union.\nif (ROOT / 'curvature/scripts/point4_c2_initial_heat_source_test.py').is_file():\n    import point4_c2_initial_heat_source_test as _c2_union\n    expected_sources = _c2_union.expected_sources\n    check_imports = _c2_union.check_imports\n    check_metadata = _c2_union.check_metadata\n    check_audit = _c2_union.check_audit\n\n"
 WEIGHTED_ADAPTER = "\n# Reviewed combined C2 integration adapter. The original standalone checks\n# below remain historical; the shared guard pins this exact adapter and union.\nif (ROOT / 'curvature/scripts/point4_c2_initial_heat_source_test.py').is_file():\n    import point4_c2_initial_heat_source_test as _c2_union\n    _c2_union.main(['--schema', sys.argv[1]] if len(sys.argv) == 2 else [])\n    sys.exit(0)\n\n"
 
@@ -49,7 +53,7 @@ def git(*args: str) -> bytes:
 
 
 def tracked(sha: str) -> set[str]:
-    return set(git('ls-tree', '-r', '--name-only', sha).decode().splitlines())
+    return nul_paths(git('ls-tree', '-rz', '--name-only', sha))
 
 
 def blob(sha: str, path: str) -> bytes:
@@ -67,7 +71,7 @@ def expected_sources() -> dict[str, tuple[str, bytes]]:
     check_ancestry()
     master_paths, weighted_paths = tracked(MASTER), tracked(WEIGHTED)
     expected = {p: (MASTER, blob(MASTER, p)) for p in master_paths if p not in EDITABLE}
-    changed = set(git('diff', '--name-only', OLD_MASTER, WEIGHTED).decode().splitlines())
+    changed = nul_paths(git('diff', '--name-only', '-z', OLD_MASTER, WEIGHTED))
     for path in changed - EDITABLE:
         assert path in weighted_paths, f'Input deletes inherited path: {path}'
         assert path not in expected, f'Overlapping pinned source requires review: {path}'
@@ -79,7 +83,25 @@ def expected_sources() -> dict[str, tuple[str, bytes]]:
     original = blob(WEIGHTED, WEIGHTED_GUARD).decode()
     assert original.count('\ndef git(*args):') == 1
     expected[WEIGHTED_GUARD] = (WEIGHTED, original.replace('\ndef git(*args):', WEIGHTED_ADAPTER + '\ndef git(*args):').encode())
+    # Exactly two legacy workflows gain only the reviewed parser-install step.
+    for path, (sha, anchor) in YAML_WORKFLOWS.items():
+        original = blob(sha, path).decode()
+        assert original.count(anchor) == 1
+        expected[path] = (sha, original.replace(anchor, YAML_STEP + anchor, 1).encode())
     return expected
+
+
+def nul_paths(output: bytes) -> set[str]:
+    assert not output or output.endswith(b'\0'), 'Git path inventory must be NUL-terminated'
+    return {p.decode() for p in output.split(b'\0') if p}
+
+
+def public_paths(tracked_paths: set[str], untracked_paths: set[str]) -> set[str]:
+    # Never filter tracked blobs. Ignore only genuine untracked interpreter caches.
+    def generated_cache(path: str) -> bool:
+        p = pathlib.PurePosixPath(path)
+        return '__pycache__' in p.parts and re.fullmatch(r'[^/]+\.cpython-\d+(?:\.opt-\d+)?\.pyc', p.name) is not None
+    return tracked_paths | {p for p in untracked_paths if not generated_cache(p)}
 
 
 def check_public_paths(actual: set[str], expected: set[str]) -> None:
@@ -108,34 +130,59 @@ def check_imports(actual: bytes) -> None:
     assert other_content(actual) == other_content(sources[0]), 'Unexpected root declaration/option/content'
 
 
+class StrictSafeLoader(yaml.SafeLoader):
+    """Safe YAML construction with duplicate mapping keys rejected everywhere."""
+    def construct_mapping(self, node, deep=False):
+        self.flatten_mapping(node)
+        mapping = {}
+        for key_node, value_node in node.value:
+            key = self.construct_object(key_node, deep=deep)
+            assert isinstance(key, str), 'Metadata mapping keys must be strings'
+            assert key not in mapping, f'Duplicate YAML mapping key: {key}'
+            mapping[key] = self.construct_object(value_node, deep=deep)
+        return mapping
+
+
+def parse_metadata(source: str) -> dict:
+    data = yaml.load(source, Loader=StrictSafeLoader)
+    assert isinstance(data, dict), 'Metadata must be a mapping'
+    return data
+
+
 def metadata_entries(source: str) -> dict[str, tuple[str, str]]:
-    related = source.split('related_formalizations:\n', 1)[1].split('\nstatus:', 1)[0]
+    data = parse_metadata(source)
+    related = data['related_formalizations']
+    assert isinstance(related, list), 'Provenance must be a list'
     result = {}
-    for entry in re.findall(r'  - id:.*?(?=  - id:|\Z)', related, re.S):
-        identity = re.search(r'  - id: "([^"]+)"', entry)[1]
-        assert identity not in result, 'Duplicate provenance identity'
-        relationship = re.search(r'    relationship: "([^"]+)"', entry)[1]
-        note = ' '.join(entry.split('    note: >-\n', 1)[1].split())
-        result[identity] = (relationship, note)
+    for entry in related:
+        assert isinstance(entry, dict) and set(entry) == {'id', 'relationship', 'note'}, 'Missing/extra provenance fields'
+        identity, relationship, note = entry['id'], entry['relationship'], entry['note']
+        assert all(isinstance(value, str) and value for value in (identity, relationship, note)), 'Provenance values must be nonempty strings'
+        assert identity not in result, 'Duplicate parsed provenance identity'
+        result[identity] = (relationship, ' '.join(note.split()))
     return result
 
 
 def check_metadata(source: str) -> None:
     actual = metadata_entries(source)
-    parents = [metadata_entries(blob(s, METADATA).decode()) for s in (MASTER, TRACE, WEIGHTED)]
+    parent_sources = [blob(s, METADATA).decode() for s in (MASTER, TRACE, WEIGHTED)]
+    parents = [metadata_entries(s) for s in parent_sources]
     want = set.union(*(set(p) for p in parents)) | {
         f'https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/{s}/curvature'
         for s in (MASTER, TRACE, WEIGHTED)
     }
-    assert set(actual) == want, 'Missing/extra structured provenance'
-    assert all(v[0] == 'builds-on' for v in actual.values())
+    assert set(actual) == want, 'Missing/extra parsed structured provenance'
+    assert all(v[0] == 'builds-on' for v in actual.values()), 'Changed parsed provenance relationship'
     for parent in parents:
         for identity, (relationship, note) in parent.items():
-            assert actual[identity][0] == relationship and note in actual[identity][1], 'Dropped/changed inherited provenance'
+            assert actual[identity][0] == relationship and note in actual[identity][1], 'Dropped/changed parsed inherited provenance'
+    parsed = parse_metadata(source); original = parse_metadata(parent_sources[0])
+    del parsed['related_formalizations']; del original['related_formalizations']
+    assert parsed == original, 'Changed parsed selected artifact metadata'
     def outside_related(s: str) -> str:
         a = s.index('related_formalizations:\n'); b = s.index('\nstatus:', a)
         return s[:a] + s[b:]
-    assert outside_related(source) == outside_related(blob(MASTER, METADATA).decode()), 'Changed selected artifact/authorship/license/model history'
+    assert outside_related(source) == outside_related(parent_sources[0]), 'Changed selected artifact/authorship/license/model history'
 
 
 def probe_names(source: str) -> list[str]:
@@ -187,8 +234,8 @@ def main(argv=None) -> None:
     for path, (_, wanted) in expected.items():
         check_equal(path, (ROOT / path).read_bytes(), wanted)
     # Entire tracked public tree is pinned except four enumerated new integration paths.
-    actual = set(git('ls-files', '--cached', '--others', '--exclude-standard').decode().splitlines())
-    actual = {p for p in actual if '__pycache__' not in pathlib.PurePosixPath(p).parts}
+    actual = public_paths(nul_paths(git('ls-files', '-z', '--cached')),
+                          nul_paths(git('ls-files', '-z', '--others', '--exclude-standard')))
     check_public_paths(actual, set(expected))
     check_workflow((ROOT / '.github/workflows/point4-c2-initial-heat.yml').read_bytes())
     physical_lean = {p.relative_to(ROOT).as_posix() for p in ROOT.rglob('*.lean') if not {'.git', '.lake', '.toolchain'} & set(p.parts)}
@@ -197,10 +244,10 @@ def main(argv=None) -> None:
     metadata = (ROOT / METADATA).read_text(); check_metadata(metadata)
     assert hashlib.sha256((ROOT / WEIGHTED_PROOF).read_bytes()).hexdigest() == WEIGHTED_SHA256
     if args.schema:
-        import jsonschema, yaml
+        import jsonschema
         schema = args.schema.read_bytes()
         assert hashlib.sha256(schema).hexdigest() == SCHEMA_SHA256, 'Full official schema identity changed'
-        jsonschema.validate(yaml.safe_load(metadata), json.loads(schema))
+        jsonschema.validate(parse_metadata(metadata), json.loads(schema))
     if args.axiom_dir:
         assert {p.name for p in args.axiom_dir.iterdir()} == {p + '.log' for p in PROBES}, 'Missing/extra probe evidence files'
         total, distinct = 0, set()
@@ -214,8 +261,8 @@ def main(argv=None) -> None:
         assert args.audit_rc is not None
         check_audit(json.loads(args.audit_json.read_text()), args.audit_rc)
     assert args.audit_json or args.audit_rc is None, 'Audit exit status without audit evidence'
-    print(f'Pinned combined public source union passed: {len(expected)} preserved paths; exact two reviewed guard adapters')
-    print('No proof deleted/modified; inherited workflows, probes, canonical contract/negative fixtures, auditor, pins and notices retained')
+    print(f'Pinned combined public source union passed: {len(expected)} preserved paths; exact two reviewed guard adapters and two parser-only workflow insertions')
+    print('No proof deleted/modified; inherited workflow bodies, probes, canonical contract/negative fixtures, auditor, pins and notices retained')
     print('Source checks are not kernel certification; exact-head full builds and independent review remain mandatory; Point 4 OPEN')
 
 
