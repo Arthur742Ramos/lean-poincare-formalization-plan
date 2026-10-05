@@ -163,9 +163,31 @@ It changes no theorem statement or hypothesis, matrix contraction,
 dimension-squared sup-norm bound, inherited source, workflow, pin or canonical
 gate. The new matrix-module hash identifies the authored candidate. A bounded
 Lean 4.35.0-rc2 development run compiled this finite module without raising the
-default heartbeat limit. That is development evidence only. No pinned Lean
-4.33 compiler pass or independent review is claimed; all release gates remain
-required.
+default heartbeat limit. That is development evidence only; it did not establish
+a pinned Lean 4.33 compiler pass or independent review. The subsequent exact-head
+run is recorded below. All release gates remain required.
+
+## Historical frozen-constant derivative failure and narrow repair
+
+Exact source-reviewed draft `b20e28ddb995f40e79b6a7b4b4003958e18602f7`
+failed focused Lean 4.33 CI run `37263905782`. Both generic modules compiled,
+and the actual compiler and Mathlib checkout matched the unchanged pins. The
+metric-localization build then failed at `EuclideanC2Localization.lean:46`:
+unrestricted simplification reduced the target by the constant-add derivative
+equivalence but left the source as a pointwise function sum. The remaining
+three metric modules, full signatures, ten new axiom surfaces, 150 inherited
+axiom occurrences and full canonical audit were not verified by that run.
+The exact b20 source and failed result remain historical, alongside the earlier
+b293 and e023 failures and all development logs.
+
+The narrow proof repair explicitly changes the goal to the constant-plus-value
+coordinate curve, then applies the pinned Mathlib `hasDerivAt_const_add_iff`
+equivalence without simplification. The value, first and second fields, every
+theorem signature and hypothesis, and the derivative meaning are unchanged.
+Only the Euclidean module's new authored-source hash is updated. No inherited
+source, workflow, contract, pin or canonical gate changes. This repaired source
+has not been compiled; fresh independent review and a complete exact-head
+Lean 4.33 run remain required before qualification.
 
 ## Remaining mathematical gaps
 

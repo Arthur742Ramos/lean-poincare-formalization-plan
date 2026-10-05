@@ -43,7 +43,8 @@ def addConst {n : ℕ} (D : EuclideanBoundedC2Data n) (c : ℝ) :
   second := D.second
   hasDeriv_value := by
     intro k x
-    simpa using (hasDerivAt_const (x k) c).add (D.hasDeriv_value k x)
+    change HasDerivAt (fun a => c + D.value (Function.update x k a)) (D.first k x) (x k)
+    exact (hasDerivAt_const_add_iff c).2 (D.hasDeriv_value k x)
   hasDeriv_first := D.hasDeriv_first
 
 theorem uniformContinuous_second_ofCompactSupport
