@@ -120,7 +120,7 @@ module or source finding recorded. It did not reach the endpoint probe. The
 historical complete `7e9f36a7` certificate remains valid for its exact immutable
 upstream source; it cannot be relabeled as passing current-head CI.
 
-The new audit plumbing reduces repeated Lake graph planning while retaining
+The prior bounded-batch audit plumbing reduced repeated Lake graph planning while retaining
 Lake's own original module configuration, dependency resolution, setup files,
 and ordinary Lean compiler/kernel invocation. It partitions the 2,270-module
 source DAG into batches covered by at most two explicit direct-import chains.
@@ -222,14 +222,141 @@ regressions send actual SIGTERM to disposable Python mocks, including a child
 and grandchild that ignore SIGTERM. Another actual-process regression checks
 owners that exit first with code zero, code seven, or SIGKILL while leaving
 living descendants. These tests execute no Lean build.
-A fresh complete hosted run is still required to verify this new audit code.
-Point 4 remains **OPEN**; no canonical contract or semantic bridge was changed.
+A fresh complete hosted run was still required to verify that audit code.
+Point 4 remained **OPEN**; no canonical contract or semantic bridge was changed.
+
+## Current source-only persistent-plan optimization
+
+Candidate `44fad5fc56c5b3a9b9e0303554920d1c50c699fc` did not obtain a
+complete certificate. Its [run 37234261245](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37234261245)
+was cancelled at the unchanged 350-minute limit after **1,728 of 2,270** actual
+project compiler exits succeeded. The other 542 project sources and the two
+endpoint probes remained unchecked. No source/trust defect or failed source
+compiler was found. Repeated verbose cached-job replay contributed roughly
+483 MB of aggregate logs. The historical complete certificate above remains
+historical and does not qualify this candidate or this new implementation.
+
+The focused optimization adds `build-hamilton-batches.lean`, an audit-owned
+orchestration driver using the public APIs of official Lean/Lake 4.29.0 at
+[`98dc76e3c0a9b856c9b98726b713fb04fab16740`](https://github.com/leanprover/lean4/tree/98dc76e3c0a9b856c9b98726b713fb04fab16740).
+It loads the official workspace once and calls `Workspace.runFetchM` once.
+Within that call, it fetches only the current bounded chain batch, waits for
+its official Lake job, and then advances. The same 347 two-chain batches, or
+705 one-chain fallback batches, remain; only each chain's tip is requested,
+since direct imports reach all earlier members. A persistent official
+`BuildStore` retains completed jobs and graph work within this fresh build.
+It does not import prior-run project objects, an upstream artifact cache, or
+an alternate source closure. Every module still requires its own new observed
+compiler invocation and object hash.
+
+The official implementation establishes this store lifetime:
+[`Workspace.startBuild` and `runFetchM`](https://github.com/leanprover/lean4/blob/98dc76e3c0a9b856c9b98726b713fb04fab16740/src/lake/Lake/Build/Run.lean#L324-L359)
+create one fresh store for the entire action;
+[`FetchM`](https://github.com/leanprover/lean4/blob/98dc76e3c0a9b856c9b98726b713fb04fab16740/src/lake/Lake/Build/Fetch.lean#L47-L103)
+keeps its reference across sequential fetches.
+[`buildSpecs` and target parsing](https://github.com/leanprover/lean4/blob/98dc76e3c0a9b856c9b98726b713fb04fab16740/src/lake/Lake/CLI/Build.lean#L54-L55)
+use the same target/facet machinery as the CLI;
+[`Job.await`](https://github.com/leanprover/lean4/blob/98dc76e3c0a9b856c9b98726b713fb04fab16740/src/lake/Lake/Build/Job/Monad.lean#L190-L193)
+waits for actual job completion and throws on failure. Neither a hand-built
+compiler command nor a reconstructed setup file is introduced.
+
+### Quiet frontend, unchanged compiler boundary
+
+`BuildConfig` explicitly uses quiet verbosity, warning output, error failure
+threshold, and no ANSI. Official Lake still retains and reports failing jobs;
+individual compiler logs remain lossless evidence independent of the frontend.
+The driver does not spawn all 2,270 targets at once or rely on an undocumented
+concurrency option. Only two chain tips are fetched at a time, and every later
+chain member directly depends on its predecessor. The existing real-compiler
+file locks remain a second independent worker bound. An atomic active-batch
+permit rejects compilations outside the current planned batch and is hashed
+into each compiler record; changing it during a compilation fails the audit.
+
+The frontend is the actual pinned compiler running the reviewed driver with
+its official `libLake_shared.so` plugin. The complete frontend argv and plugin
+hash are recorded; the plugin loads official Lake native functions and
+initializers, as specified by
+[Lean's loader](https://github.com/leanprover/lean4/blob/98dc76e3c0a9b856c9b98726b713fb04fab16740/src/Lean/LoadDynlib.lean#L92-L103)
+and [Lake's installation paths](https://github.com/leanprover/lean4/blob/98dc76e3c0a9b856c9b98726b713fb04fab16740/src/lake/Lake/Config/InstallPath.lean#L151-L160).
+This affects only orchestration. Each project compilation still invokes the
+same actual compiler with unchanged Lake-generated argv, `LEAN_PATH`, original
+options, and untouched `--setup` JSON through the existing observation shim.
+
+`Env.compute ... (some true)` is exactly the official no-cache switch:
+[`Env.compute`](https://github.com/leanprover/lean4/blob/98dc76e3c0a9b856c9b98726b713fb04fab16740/src/lake/Lake/Config/Env.lean#L163-L175)
+sets `noCache=true`, disabling automatic package release/cache retrieval.
+`LAKE_ARTIFACT_CACHE=false` and empty `LAKE_CACHE_DIR` still disable root
+artifact caching and the system artifact cache. The audited immutable TOML has
+no package-level cache override. Workspace loading explicitly forbids
+requested dependency/toolchain updates; the resolved manifest already exists
+and is checked before the driver starts. Official pinned Mathlib dependency
+objects retain the same separate permitted cache boundary.
+
+### Lossless logs, actual resources, and cancellation
+
+The observer sends actual compiler stdout/stderr directly into indexed files,
+then forwards the same bytes to Lake using at most 1 MiB Python copy buffers.
+Hashes are also calculated in bounded chunks. This removes Python's complete
+per-compiler output capture and the parent audit's bulk frontend-log read/replay.
+Lake's own internal job logging is unchanged. One lossless quiet frontend log
+replaces repeated verbose batch logs; it is hashed and retained, while console
+updates contain compact actual-success counts.
+
+There remain at most two real compiler workers plus one persistent Lake
+frontend, with small observation launchers. The second compiler still requires
+8 GiB available memory; every launch still requires 1 GiB free disk, and smaller
+machines still use one compiler. Launch observations record those quantities.
+Linux reaped-child resource accounting records actual compiler user/system CPU
+and maximum RSS. Periodic `/proc` snapshots record frontend CPU/thread count and
+frontend/group RSS. Group RSS is a sum, so shared pages can be counted more than
+once, and snapshots can miss short-lived peaks. These are observed resources
+and enforced worker/launch-floor bounds, **not** hard CPU or resident-memory caps
+or a wall-time guarantee. No compiler memory flag, VM cap, thread-count change,
+runner upgrade, extra cache, or timeout extension is introduced.
+
+Source compilation and the unchanged actual two-endpoint signature/axiom probe
+both use the existing bounded process-group cancellation cleanup. Signals during
+spawn remain deferred until the cleanup handle exists. Cleanup retains partial
+files and refreshes records before propagating interruption. Waiting, running,
+interrupted, missing-log, resource-blocked, or nonzero results remain
+inconclusive or failed; they cannot become successful compiler exits.
+
+### Acceptance gates and verification limits
+
+A batch record contains `lake_job_success`, not an invented per-batch process
+exit: all batches share one frontend process. Passing requires that actual
+frontend process to exit zero, all indexed batch jobs to finish successfully,
+and every expected module to have its own successful real compiler record
+bound to the correct batch. Lake monitor failure remains decisive even if
+batch job completion succeeded. The original source/setup/log/object hashes,
+exact pins, source/trust scans, fresh-project-object checks, clean tracked
+sources, complete module set, and both actual endpoint signatures and allowed
+axioms are still required. Driver, plugin, and plan hashes must remain unchanged.
+
+Thirty-four Python regressions pass without executing Lean or upstream code.
+New coverage includes lossless multi-megabyte/binary mock-child output, bounded
+log reads, missing stream logs, partial logs on interruption, active-batch
+mutation, cancellation while waiting for a worker slot, per-batch completeness
+and target/index tampering, adversarial dependency completion order, actual
+frontend process-resource sampling, and invalid launch-resource evidence.
+Existing actual SIGTERM/spawn-race/dead-owner descendant cleanup tests remain.
+The static driver contract test is **not** an API typecheck or kernel certificate.
+
+The new driver is source-reviewed, but exact 4.29 elaboration and runtime
+execution have not yet been performed. CI now typechecks only the audit driver
+against the pinned official Lake plugin before starting the expensive source
+rebuild. A fresh complete hosted run plus independent artifact review is still
+required before this audit implementation can pass. A typecheck alone does not
+establish runtime throughput, a complete source rebuild, or either endpoint.
+Point 4 remains **OPEN**, with its canonical contract and missing semantic
+bridge unchanged.
 
 ## Running the audit
 
 The workflow `Point-4 upstream Hamilton release audit` performs the pinned
 checkout, source preflight, official Mathlib cache setup, bounded-chain
-source compilation with real compiler observation, and final signature/axiom probe. The local audit entry point
+source compilation with one quiet persistent official Lake plan and real
+compiler observation, and final signature/axiom probe. The local audit entry point
 is `scripts/point4/audit-hamilton-release.py`; it requires a fresh exact upstream
 checkout and the upstream pinned Lean/Mathlib environment. It intentionally does
 not invoke the upstream umbrella library target.

@@ -356,6 +356,243 @@ class CompilerObserverTests(unittest.TestCase):
                 self.assertEqual(argv, [str(self.compiler), query])
                 self.assertEqual(env["LEAN_SYSROOT"], self.control["sysroot"])
 
+    def test_lossless_file_spooling_real_mock_child_and_resource_evidence(self):
+        """Python fixture only: exercise real file descriptors, wait and logs."""
+        import hashlib, io, subprocess
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        self.compiler.write_text(
+            "#!/usr/bin/env python3\nimport pathlib, sys\n"
+            "pathlib.Path(sys.argv[sys.argv.index('-o')+1]).write_bytes(b'mock object')\n"
+            "sys.stdout.buffer.write(b'a' * (2 * 1024 * 1024) + b'\\x00tail\\n')\n"
+            "sys.stderr.buffer.write(b'actual mock stderr\\n')\n")
+        self.compiler.chmod(0o755)
+        self.control['compiler_sha256'] = self.observer.digest(self.compiler)
+        stdout, stderr = io.BytesIO(), io.BytesIO()
+        with patch.object(self.observer.sys, 'stdout', SimpleNamespace(buffer=stdout)), \
+             patch.object(self.observer.sys, 'stderr', SimpleNamespace(buffer=stderr)):
+            self.assertEqual(self.invoke(run=subprocess.run), 0)
+        expected = b'a' * (2 * 1024 * 1024) + b'\x00tail\n'
+        self.assertEqual(stdout.getvalue(), expected)
+        self.assertEqual(stderr.getvalue(), b'actual mock stderr\n')
+        self.assertEqual((self.evidence / 'module-build-logs/0001.stdout.log').read_bytes(), expected)
+        result = self.record()
+        self.assertEqual(result['stdout_sha256'], hashlib.sha256(expected).hexdigest())
+        self.assertGreater(result['resources']['child_maximum_rss_bytes'], 0)
+        self.assertGreaterEqual(result['resources']['child_user_cpu_seconds'], 0)
+        self.assertGreaterEqual(result['resources']['child_system_cpu_seconds'], 0)
+        audit.compiler_records(self.evidence, self.control['modules'], required=True)
+
+    def test_log_copy_and_hash_use_bounded_reads(self):
+        import io, hashlib
+        from unittest.mock import patch
+        data = b'z' * (3 * 1024 * 1024 + 7)
+        class BoundedReader(io.BytesIO):
+            def read(self, size=-1):
+                self_size = size
+                if not 0 < self_size <= 1024 * 1024:
+                    raise AssertionError('Unbounded log read')
+                return super().read(size)
+        sink = io.BytesIO()
+        with patch.object(pathlib.Path, 'open', side_effect=lambda *a, **k: BoundedReader(data)):
+            self.observer.forward_log('mock', sink)
+            self.assertEqual(self.observer.digest('mock'), hashlib.sha256(data).hexdigest())
+            self.assertEqual(audit.file_digest('mock'), hashlib.sha256(data).hexdigest())
+        self.assertEqual(sink.getvalue(), data)
+
+    def test_partial_logs_survive_interruption_without_a_successful_exit(self):
+        def interrupted(command, **kwargs):
+            kwargs['stdout'].write(b'partial stdout\n')
+            kwargs['stderr'].write(b'partial stderr\n')
+            raise KeyboardInterrupt('mock cancellation')
+        with self.assertRaises(KeyboardInterrupt):
+            self.invoke(run=interrupted)
+        self.assertEqual(self.record()['status'], 'inconclusive')
+        self.assertNotIn('exit_code', self.record())
+        self.assertEqual((self.evidence / 'module-build-logs/0001.stdout.log').read_bytes(), b'partial stdout\n')
+        self.assertEqual((self.evidence / 'module-build-logs/0001.stderr.log').read_bytes(), b'partial stderr\n')
+        with self.assertRaises(AssertionError):
+            audit.compiler_records(self.evidence, self.control['modules'], required=True)
+
+    def test_missing_stream_logs_are_not_certified(self):
+        self.invoke()
+        for stream in ('stdout', 'stderr'):
+            path = self.evidence / f'module-build-logs/0001.{stream}.log'
+            path.unlink()
+            with self.assertRaises(FileNotFoundError):
+                audit.compiler_records(self.evidence, self.control['modules'], required=True)
+            path.write_bytes(b'')
+
+    def test_active_batch_rejects_unscheduled_source_and_mid_compile_change(self):
+        import json
+        path = self.evidence / 'active-batch.json'
+        self.control['active_batch_path'] = str(path)
+        path.write_text(json.dumps({'batch': 1, 'allowed_modules': []}))
+        with self.assertRaisesRegex(AssertionError, 'outside the active'):
+            self.invoke()
+        (self.evidence / 'compiler-stop.json').unlink()
+        path.write_text(json.dumps({'batch': 1, 'allowed_modules': [self.module]}))
+        def changed(command, **kwargs):
+            result = self.fake_run(command, **kwargs)
+            path.write_text(json.dumps({'batch': 2, 'allowed_modules': [self.module]}))
+            return result
+        with self.assertRaisesRegex(AssertionError, 'Active batch changed'):
+            self.invoke(run=changed)
+        self.assertEqual(self.record()['batch'], 1)
+        self.assertEqual(self.record()['exit_code'], 0)
+        self.assertEqual(self.record()['status'], 'inconclusive')
+
+    def test_waiting_observer_sigterm_does_not_claim_a_compiler_exit(self):
+        import fcntl, json, os, signal, subprocess, sys
+        held = [(self.evidence / f'compiler-slot-{index}.lock').open('a') for index in range(2)]
+        for stream in held:
+            fcntl.flock(stream, fcntl.LOCK_EX)
+        path = self.evidence / 'control.json'
+        path.write_text(json.dumps(self.control))
+        env = dict(os.environ, HAMILTON_COMPILER_CONTROL=str(path))
+        process = subprocess.Popen([sys.executable, str(pathlib.Path(self.observer.__file__)), *self.args],
+                                   cwd=self.root, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            deadline = time.monotonic() + 3
+            record_path = self.evidence / 'compiler-records/0001.json'
+            while not record_path.exists() and time.monotonic() < deadline and process.poll() is None:
+                time.sleep(0.01)
+            self.assertTrue(record_path.exists())
+            self.assertEqual(self.record()['status'], 'waiting')
+            os.kill(process.pid, signal.SIGTERM)
+            self.assertEqual(process.wait(timeout=3), -signal.SIGTERM)
+            self.assertEqual(self.record()['status'], 'waiting')
+            self.assertNotIn('exit_code', self.record())
+            self.assertFalse(self.olean.exists())
+            with self.assertRaises(AssertionError):
+                audit.compiler_records(self.evidence, self.control['modules'], required=True)
+        finally:
+            if process.poll() is None:
+                process.kill()
+            process.wait(timeout=3)
+            for stream in held:
+                stream.close()
+        lease = self.observer.take_slot(self.control, available=lambda: 9 * self.observer.GIB,
+                                        disk_free=lambda: 2 * self.observer.GIB)
+        self.assertEqual(lease.audit_launch_resources['active_compiler_leases_before'], 0)
+        lease.close()
+
+
+class PersistentBatchGateTests(unittest.TestCase):
+    def test_missing_interrupted_failed_changed_and_misindexed_batches_rejected(self):
+        import json, tempfile
+        batches = [{'modules': ['A', 'B'], 'chains': [['A', 'B']]},
+                   {'modules': ['C'], 'chains': [['C']]}]
+        with tempfile.TemporaryDirectory() as tmp:
+            output = pathlib.Path(tmp)
+            (output / 'batch-results').mkdir()
+            paths = [output / f'batch-results/{index:04d}.json' for index in (1, 2)]
+            valid = [{'batch': index, 'targets': ['+' + tip + ':olean'],
+                      'status': 'finished', 'lake_job_success': True}
+                     for index, tip in ((1, 'B'), (2, 'C'))]
+            with self.assertRaises(AssertionError):
+                audit.batch_records(output, batches, required=True)
+            for path, value in zip(paths, valid):
+                path.write_text(json.dumps(value))
+            self.assertEqual(audit.batch_records(output, batches, required=True), valid)
+            for mutation in ({'status': 'running'}, {'lake_job_success': False},
+                             {'targets': ['+A:olean']}, {'batch': True}, {'batch': 99}):
+                paths[0].write_text(json.dumps(dict(valid[0], **mutation)))
+                with self.assertRaises(AssertionError):
+                    audit.batch_records(output, batches, required=True)
+            paths[0].write_text(json.dumps(valid[0]))
+            paths[0].rename(paths[0].with_name('0099.json'))
+            with self.assertRaises(AssertionError):
+                audit.batch_records(output, batches, required=True)
+
+    def test_resource_summary_rejects_missing_or_violated_launch_evidence(self):
+        value = {'launch_resources': {'active_compiler_leases_before': 1,
+                                      'available_memory_bytes': 8 * 1024 ** 3,
+                                      'free_disk_bytes': 1024 ** 3},
+                 'resources': {'child_user_cpu_seconds': 2.5,
+                               'child_system_cpu_seconds': 0.5,
+                               'child_maximum_rss_bytes': 4096}}
+        summary = audit.resource_summary({'M': value}, 2)
+        self.assertEqual(summary['measured_compilers'], 1)
+        self.assertEqual(summary['recorded_peak_compiler_leases_at_launch'], 2)
+        self.assertFalse(summary['hard_cpu_or_memory_cap'])
+        for key, replacement in (('active_compiler_leases_before', 2),
+                                 ('available_memory_bytes', 8 * 1024 ** 3 - 1),
+                                 ('free_disk_bytes', 1024 ** 3 - 1)):
+            original = value['launch_resources'][key]
+            value['launch_resources'][key] = replacement
+            with self.assertRaises(AssertionError):
+                audit.resource_summary({'M': value}, 2)
+            value['launch_resources'][key] = original
+        value['launch_resources'].pop('available_memory_bytes')
+        with self.assertRaises(KeyError):
+            audit.resource_summary({'M': value}, 2)
+
+    def test_frontend_resource_sampling_is_observed_and_not_a_hard_cap(self):
+        import os, sys, tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            samples = audit.ProcessGroupSamples()
+            with (pathlib.Path(tmp) / 'frontend.log').open('wb') as stream:
+                code = audit.run_batch([sys.executable, '-c', 'import time; time.sleep(0.12)'],
+                                       root=tmp, env=os.environ.copy(), stream=stream,
+                                       refresh=lambda: None, sample=samples, poll_seconds=0.01,
+                                       grace_seconds=0.1, kill_seconds=1)
+            self.assertEqual(code, 0)
+            self.assertGreater(samples.value['samples'], 0)
+            self.assertGreater(samples.value['sampled_peak_group_rss_bytes'], 0)
+            self.assertGreaterEqual(samples.value['sampled_peak_group_processes'], 1)
+            self.assertGreaterEqual(samples.value['sampled_peak_frontend_threads'], 1)
+            self.assertIn('not a hard', samples.value['measurement'])
+
+    def test_source_owned_driver_is_one_store_quiet_and_awaits_before_advancing(self):
+        # Static contract regression only, deliberately not an API typecheck.
+        # Exact official Lake compilation remains a separate hosted gate.
+        driver = pathlib.Path(__file__).with_name('build-hamilton-batches.lean').read_text()
+        self.assertEqual(driver.count('ws.runFetchM '), 1)
+        self.assertIn('let job ← buildSpecs specs', driver)
+        self.assertIn('let _ ← job.await', driver)
+        self.assertIn('verbosity := .quiet', driver)
+        self.assertIn('updateDeps := false, updateToolchain := false', driver)
+        self.assertNotIn('compileLeanModule', driver)
+        self.assertNotIn('IO.Process.spawn', driver)
+        workflow = pathlib.Path(audit.__file__).parents[2] / '.github/workflows/point4-hamilton-release-audit.yml'
+        self.assertIn('lake env lean --plugin', workflow.read_text())
+        self.assertIn('../campaign/scripts/point4/build-hamilton-batches.lean', workflow.read_text())
+
+    def test_chain_tips_reach_every_scheduled_module_and_ready_width_is_bounded(self):
+        order = [f'M{index}' for index in range(40)]
+        graph = {module: [parent for j, parent in enumerate(order[:i])
+                          if j == i - 1 or (i * 7 + j) % 11 == 0]
+                 for i, module in enumerate(order)}
+        graph['M10'] = ['M2', 'M5']
+        graph['M20'] = ['M4', 'M8', 'M12']
+        graph['M30'] = ['M11', 'M19', 'M27']
+        for jobs in (1, 2):
+            built = set()
+            for batch in audit.chain_batches(order, graph, jobs):
+                scheduled = set(batch['modules'])
+                reached = set()
+                def visit(module):
+                    if module in built or module in reached:
+                        return
+                    self.assertIn(module, scheduled)
+                    reached.add(module)
+                    for parent in graph[module]:
+                        visit(parent)
+                for chain in batch['chains']:
+                    visit(chain[-1])
+                self.assertEqual(reached, scheduled)
+                pending = set(scheduled)
+                while pending:
+                    ready = [m for m in pending if set(graph[m]) <= built]
+                    self.assertTrue(ready)
+                    self.assertLessEqual(len(ready), jobs)
+                    # Adversarially complete just one ready source at a time.
+                    chosen = sorted(ready)[-1]
+                    pending.remove(chosen)
+                    built.add(chosen)
+            self.assertEqual(built, set(order))
+
 
 class EndpointGateTests(unittest.TestCase):
     def test_signatures_and_standard_axioms_still_required(self):

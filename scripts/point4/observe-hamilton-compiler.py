@@ -13,6 +13,7 @@ import gzip
 import json
 import os
 import pathlib
+import resource
 import shutil
 import subprocess
 import sys
@@ -23,7 +24,18 @@ INFO_QUERIES = {"--githash", "--version", "--print-prefix"}
 
 
 def digest(path):
-    return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+    value = hashlib.sha256()
+    with pathlib.Path(path).open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            value.update(block)
+    return value.hexdigest()
+
+
+def forward_log(path, stream):
+    """Replay only this real compiler's output with bounded Python buffering."""
+    with pathlib.Path(path).open("rb") as source:
+        shutil.copyfileobj(source, stream, length=1024 * 1024)
+    stream.flush()
 
 
 def atomic_json(path, value):
@@ -51,6 +63,9 @@ def inspect_invocation(control, args, cwd):
     relative = source.relative_to(root).as_posix()
     module = relative[:-5].replace("/", ".")
     assert module in control["allowed_modules"], "Unexpected project/dependency compilation"
+    if control.get("active_batch_path"):
+        active = json.loads(pathlib.Path(control["active_batch_path"]).read_text())
+        assert module in active["allowed_modules"], "Project compilation outside the active bounded batch"
     expected = control["modules"][module]
     assert digest(source) == expected["source_sha256"], "Source changed before compilation"
     stem = module.replace(".", "/")
@@ -83,7 +98,8 @@ def take_slot(control, *, available=memory_available, disk_free=None, pause=time
         with (evidence / "compiler-slots.lock").open("a") as mutex:
             fcntl.flock(mutex, fcntl.LOCK_EX)
             assert not (evidence / "compiler-stop.json").exists(), "Previous audit compiler failure"
-            assert disk_free() >= GIB, "Less than 1 GiB free at compiler launch"
+            free_disk_bytes = disk_free()
+            assert free_disk_bytes >= GIB, "Less than 1 GiB free at compiler launch"
             leases = []
             for index in range(control["jobs"]):
                 stream = (evidence / f"compiler-slot-{index}.lock").open("a")
@@ -93,8 +109,15 @@ def take_slot(control, *, available=memory_available, disk_free=None, pause=time
                 except BlockingIOError:
                     stream.close()
             active = control["jobs"] - len(leases)
-            if leases and (not active or available() >= 8 * GIB):
+            available_bytes = available()
+            if leases and (not active or available_bytes >= 8 * GIB):
                 chosen = leases.pop(0)
+                chosen.audit_launch_resources = {
+                    "active_compiler_leases_before": active,
+                    "available_memory_bytes": available_bytes,
+                    "free_disk_bytes": free_disk_bytes,
+                    "second_compiler_memory_floor_bytes": 8 * GIB,
+                }
                 for stream in leases:
                     stream.close()
                 return chosen
@@ -117,6 +140,9 @@ def observe(control, args, *, run=subprocess.run, cwd=None, acquire=take_slot):
         with record_path.with_suffix(".reserved").open("x"):
             pass
         reserved = True
+        if control.get("active_batch_path"):
+            active = json.loads(pathlib.Path(control["active_batch_path"]).read_text())
+            record.update(batch=active["batch"], active_batch_sha256=digest(control["active_batch_path"]))
         record.update(module=module, source_sha256=digest(source), status="waiting",
                       setup_sha256=digest(outputs["--setup"]), compiler=control["compiler"],
                       compiler_sha256=control["compiler_sha256"],
@@ -130,24 +156,35 @@ def observe(control, args, *, run=subprocess.run, cwd=None, acquire=take_slot):
         assert digest(control["compiler"]) == control["compiler_sha256"], "Compiler changed"
         lease = acquire(control)
         record["status"] = "running"
+        record["launch_resources"] = getattr(lease, "audit_launch_resources", {})
         atomic_json(record_path, record)
         started = time.monotonic()
+        before = resource.getrusage(resource.RUSAGE_CHILDREN)
         env = os.environ.copy()
         # Restore the real installation for Lean itself; preserve Lake's LEAN_PATH
         # and all compilation arguments and the untouched setup file.
         env.update(LEAN_SYSROOT=control["sysroot"], LEAN=control["compiler"])
-        result = run([control["compiler"], *args], cwd=control["root"], env=env,
-                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         log = evidence / "module-build-logs" / f"{position:04d}"
-        log.with_suffix(".stdout.log").write_bytes(result.stdout)
-        log.with_suffix(".stderr.log").write_bytes(result.stderr)
-        sys.stdout.buffer.write(result.stdout)
-        sys.stderr.buffer.write(result.stderr)
+        stdout_path, stderr_path = log.with_suffix(".stdout.log"), log.with_suffix(".stderr.log")
+        # The real compiler writes to lossless files. Neither Python nor the
+        # parent audit retains the complete compiler output in memory.
+        with stdout_path.open("wb") as stdout, stderr_path.open("wb") as stderr:
+            result = run([control["compiler"], *args], cwd=control["root"], env=env,
+                         stdout=stdout, stderr=stderr)
+        after = resource.getrusage(resource.RUSAGE_CHILDREN)
         record.update(exit_code=result.returncode, elapsed_seconds=time.monotonic() - started,
-                      status="finished", stdout_sha256=hashlib.sha256(result.stdout).hexdigest(),
-                      stderr_sha256=hashlib.sha256(result.stderr).hexdigest())
+                      status="finished", stdout_sha256=digest(stdout_path),
+                      stderr_sha256=digest(stderr_path),
+                      resources={"child_user_cpu_seconds": after.ru_utime - before.ru_utime,
+                                 "child_system_cpu_seconds": after.ru_stime - before.ru_stime,
+                                 "child_maximum_rss_bytes": after.ru_maxrss * 1024,
+                                 "measurement": "Linux wait4 RUSAGE_CHILDREN; one real compiler child"})
+        forward_log(stdout_path, sys.stdout.buffer)
+        forward_log(stderr_path, sys.stderr.buffer)
         assert digest(source) == record["source_sha256"], "Source changed during compilation"
         assert digest(outputs["--setup"]) == record["setup_sha256"], "Lake setup changed"
+        if control.get("active_batch_path"):
+            assert digest(control["active_batch_path"]) == record["active_batch_sha256"], "Active batch changed during compilation"
         if result.returncode == 0:
             assert outputs["-o"].is_file(), "Successful compiler produced no project object"
             record["olean_sha256"] = digest(outputs["-o"])

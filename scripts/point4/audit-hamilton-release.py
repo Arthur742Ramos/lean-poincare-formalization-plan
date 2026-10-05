@@ -174,10 +174,57 @@ def compiler_records(output, modules, *, required=False):
         for module, value in records.items():
             position = modules[module]["position"]
             for stream in ("stdout", "stderr"):
-                assert hashlib.sha256((output / "module-build-logs" / f"{position:04d}.{stream}.log").read_bytes()).hexdigest() == value[f"{stream}_sha256"], "Compiler log hash mismatch"
+                assert file_digest(output / "module-build-logs" / f"{position:04d}.{stream}.log") == value[f"{stream}_sha256"], "Compiler log hash mismatch"
             setup_bytes = gzip.decompress((output / "module-setups" / f"{position:04d}.json.gz").read_bytes())
             assert hashlib.sha256(setup_bytes).hexdigest() == value["setup_sha256"], "Lake setup evidence mismatch"
     return records
+
+
+def batch_records(output, batches, *, required=False):
+    """The persistent official-Lake frontend cannot certify a partial plan."""
+    records = {}
+    for path in sorted((output / "batch-results").glob("*.json")):
+        value = json.loads(path.read_text())
+        index = value["batch"]
+        assert type(index) is int and 1 <= index <= len(batches), "Unexpected batch index"
+        assert path.name == f"{index:04d}.json" and index not in records, "Duplicate/misindexed batch"
+        expected = ["+" + chain[-1] + ":olean" for chain in batches[index - 1]["chains"]]
+        assert value["targets"] == expected, "Lake batch targets changed"
+        assert value["status"] in ("running", "finished"), "Unexpected batch state"
+        records[index] = value
+    if required:
+        assert set(records) == set(range(1, len(batches) + 1)), "Incomplete official Lake batch plan"
+        assert all(v["status"] == "finished" and v.get("lake_job_success") is True
+                   for v in records.values()), "Failed or interrupted official Lake batch"
+    return [records[i] for i in sorted(records)]
+
+
+def resource_summary(records, jobs):
+    """Summarize real child accounting and enforced launch floors, not caps."""
+    assert jobs in (1, 2)
+    second = []
+    peak_workers, total_user, total_system, peak_rss = 0, 0.0, 0.0, 0
+    for value in records.values():
+        launch, measured = value["launch_resources"], value["resources"]
+        active = launch["active_compiler_leases_before"]
+        assert type(active) is int and 0 <= active < jobs, "Invalid compiler lease evidence"
+        assert launch["free_disk_bytes"] >= 1024 ** 3, "Compiler launch violated disk floor"
+        if active:
+            assert launch["available_memory_bytes"] >= 8 * 1024 ** 3, "Second compiler violated memory launch floor"
+            second.append(launch["available_memory_bytes"])
+        peak_workers = max(peak_workers, active + 1)
+        user, system, rss = (measured["child_user_cpu_seconds"],
+                             measured["child_system_cpu_seconds"], measured["child_maximum_rss_bytes"])
+        assert user >= 0 and system >= 0 and rss >= 0, "Invalid measured compiler resources"
+        total_user += user
+        total_system += system
+        peak_rss = max(peak_rss, rss)
+    return {"measured_compilers": len(records), "recorded_peak_compiler_leases_at_launch": peak_workers,
+            "minimum_second_compiler_available_memory_bytes": min(second) if second else None,
+            "total_child_user_cpu_seconds": total_user,
+            "total_child_system_cpu_seconds": total_system,
+            "largest_child_maximum_rss_bytes": peak_rss,
+            "hard_cpu_or_memory_cap": False}
 
 
 def endpoint_output(stdout, code):
@@ -246,7 +293,7 @@ def drain_process_group(process, *, grace_seconds=30, kill_seconds=5):
         signal.signal(signal.SIGTERM, previous)
 
 
-def run_batch(command, *, root, env, stream, refresh, poll_seconds=2,
+def run_batch(command, *, root, env, stream, refresh, sample=lambda process: None, poll_seconds=2,
               grace_seconds=30, kill_seconds=5):
     """Run unchanged Lake arguments with signal-safe, bounded group cleanup."""
     # Close the spawn/assignment race without passing a blocked signal mask to
@@ -261,8 +308,10 @@ def run_batch(command, *, root, env, stream, refresh, poll_seconds=2,
         signal.signal(signal.SIGTERM, previous)
         if pending:
             raise AuditInterrupted("Audit received SIGTERM while spawning Lake")
+        sample(process)
         while process.poll() is None:
             time.sleep(poll_seconds)
+            sample(process)
             refresh()
         # Capture the actual Lake exit before cleanup. Once Lake exits, no
         # valid compiler work should remain in its owned process group.
@@ -272,8 +321,65 @@ def run_batch(command, *, root, env, stream, refresh, poll_seconds=2,
             if process is not None:
                 drain_process_group(process, grace_seconds=grace_seconds,
                                     kill_seconds=kill_seconds)
+                # Retain records written during bounded cancellation cleanup.
+                refresh()
         finally:
             signal.signal(signal.SIGTERM, previous)
+
+
+def file_digest(path):
+    value = hashlib.sha256()
+    with pathlib.Path(path).open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            value.update(block)
+    return value.hexdigest()
+
+
+class ProcessGroupSamples:
+    """Sample Linux process-group RSS/CPU; these are observations, not caps.
+
+    Short-lived processes can be missed. Per-module compiler CPU and maximum
+    RSS come separately from the observer's reaped-child resource accounting.
+    """
+    def __init__(self):
+        self.value = {"samples": 0, "sampled_peak_group_rss_bytes": 0,
+                      "sampled_peak_group_processes": 0,
+                      "sampled_peak_frontend_rss_bytes": 0,
+                      "sampled_peak_frontend_threads": 0,
+                      "sampled_frontend_cpu_seconds": 0.0,
+                      "measurement": "Linux /proc snapshots; RSS is a sum with shared pages counted per process; not a hard memory or CPU limit"}
+
+    def __call__(self, process):
+        ticks, page = os.sysconf("SC_CLK_TCK"), os.sysconf("SC_PAGE_SIZE")
+        group_rss, count = 0, 0
+        for path in pathlib.Path("/proc").glob("[0-9]*/stat"):
+            try:
+                fields = path.read_text().rpartition(")")[2].split()
+                if int(fields[2]) != process.pid or fields[0] == "Z":
+                    continue
+                rss = max(0, int(fields[21])) * page
+                group_rss += rss
+                count += 1
+                if path.parent.name == str(process.pid):
+                    status = (path.parent / "status").read_text()
+                    threads = next(int(line.split()[1]) for line in status.splitlines()
+                                   if line.startswith("Threads:"))
+                    self.value["sampled_peak_frontend_threads"] = max(
+                        self.value["sampled_peak_frontend_threads"], threads)
+                    self.value["sampled_peak_frontend_rss_bytes"] = max(
+                        self.value["sampled_peak_frontend_rss_bytes"], rss)
+                    self.value["sampled_frontend_cpu_seconds"] = max(
+                        self.value["sampled_frontend_cpu_seconds"],
+                        (int(fields[11]) + int(fields[12])) / ticks)
+            except (OSError, ValueError, IndexError, StopIteration):
+                # Races with real process exit are expected; absent observations
+                # are never substituted for compiler exits or resource bounds.
+                continue
+        self.value["samples"] += 1
+        self.value["sampled_peak_group_rss_bytes"] = max(
+            self.value["sampled_peak_group_rss_bytes"], group_rss)
+        self.value["sampled_peak_group_processes"] = max(
+            self.value["sampled_peak_group_processes"], count)
 
 
 def main() -> None:
@@ -358,6 +464,8 @@ def main() -> None:
         "audit_commit_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=here, text=True).strip(),
         "audit_script_sha256": hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest(),
         "observer_script_sha256": hashlib.sha256(pathlib.Path(__file__).with_name("observe-hamilton-compiler.py").read_bytes()).hexdigest(),
+        "lake_driver_sha256": file_digest(pathlib.Path(__file__).with_name("build-hamilton-batches.lean")),
+        "lake_api_reference_sha": "98dc76e3c0a9b856c9b98726b713fb04fab16740",
         "mathlib_sha": MATHLIB_SHA,
         "targets": TARGETS,
         "source_closure_modules": len(order),
@@ -396,9 +504,9 @@ def main() -> None:
         ["git", "rev-parse", "HEAD"], cwd=root / ".lake/packages/mathlib", text=True).strip()
     assert resolved == MATHLIB_SHA, "Resolved Mathlib checkout disagrees with manifest"
 
-    # One official Lake plan per bounded direct-import-chain batch. The audit
-    # observer retains actual compiler exits and performs resource checks at
-    # every compiler launch, rather than deriving exits from a batch result.
+    # One persistent official Lake FetchM store, fetching and awaiting only
+    # one bounded direct-import-chain batch at a time. Compiler evidence remains
+    # independent of Lake job status and the aggregate frontend process exit.
     memory = {}
     if pathlib.Path("/proc/meminfo").is_file():
         memory = {line.split(':')[0]: int(line.split()[1]) * 1024
@@ -409,10 +517,15 @@ def main() -> None:
     positions = {module: i + 1 for i, module in enumerate(order)}
     report.update(kernel_audit_status="RUNNING: source closure incomplete",
                   source_compile_workers=jobs, initial_memory_bytes=memory,
-                  build_mode="official Lake bounded-chain batches with real compiler observation",
+                  build_mode="persistent official Lake FetchM store; bounded-chain batches; quiet frontend; real compiler observation",
                   compiler_results={}, batch_plan=batches, batch_results=[],
-                  project_artifact_cache_enabled=False)
-    for name in ("module-build-logs", "compiler-records", "module-setups", "batch-build-logs"):
+                  project_artifact_cache_enabled=False,
+                  resource_bounds={"maximum_real_compiler_workers": jobs,
+                                   "second_compiler_available_memory_floor_bytes": 8 * 1024 ** 3,
+                                   "free_disk_launch_floor_bytes": 1024 ** 3,
+                                   "persistent_lake_frontends": 1,
+                                   "hard_cpu_or_memory_cap": False})
+    for name in ("module-build-logs", "compiler-records", "module-setups", "frontend-build-logs", "batch-results"):
         directory = output / name
         directory.mkdir(exist_ok=True)
         assert not list(directory.iterdir()), "Audit evidence directory is not fresh: " + name
@@ -430,7 +543,9 @@ def main() -> None:
                    "project_imports": graph[m]} for m in order}
     control = {"root": str(root), "evidence": str(output), "sysroot": str(sysroot),
                "compiler": str(compiler), "compiler_sha256": report["compiler_sha256"],
-               "jobs": jobs, "modules": modules, "allowed_modules": []}
+               "jobs": jobs, "modules": modules, "allowed_modules": order,
+               "active_batch_path": str(output / "active-batch.json")}
+    assert not pathlib.Path(control["active_batch_path"]).exists(), "Active batch evidence is not fresh"
     control_path = output / "compiler-control.json"
     control_path.write_text(json.dumps(control, indent=2) + "\n")
     observer = pathlib.Path(__file__).with_name("observe-hamilton-compiler.py")
@@ -441,9 +556,14 @@ def main() -> None:
     save()
 
     record_mtimes = {}
+    sampler = ProcessGroupSamples()
+    report["frontend_resource_samples"] = sampler.value
 
     def refresh():
-        changed = False
+        current_batches = batch_records(output, batches)
+        changed = current_batches != report["batch_results"]
+        previous_batches = {value["batch"]: value for value in report["batch_results"]}
+        report["batch_results"] = current_batches
         for path in (output / "compiler-records").glob("*.json"):
             mtime = path.stat().st_mtime_ns
             if record_mtimes.get(path) != mtime:
@@ -461,34 +581,49 @@ def main() -> None:
                            and report["compiler_results"][m].get("olean_sha256")]
         report["failed_modules"] = [m for m, v in report["compiler_results"].items()
                                     if v.get("status") == "finished" and v.get("exit_code") != 0]
+        for value in current_batches:
+            if value["status"] == "finished" and value.get("lake_job_success") is True:
+                index = value["batch"]
+                assert all(m in report["built"] for m in batches[index - 1]["modules"]), "Lake job success without every real compiler success"
+                assert all(report["compiler_results"][m].get("batch") == index
+                           for m in batches[index - 1]["modules"]), "Compiler evidence belongs to another batch"
+                if previous_batches.get(index, {}).get("status") != "finished":
+                    print(f"BATCH {index}/{len(batches)} complete; {len(report['built'])}/{len(order)} actual source compiler successes", flush=True)
         save()
 
+    plan_path = output / "lake-batch-plan.json"
+    plan_path.write_text(json.dumps({"batches": batches}, indent=2) + "\n")
+    report["lake_batch_plan_sha256"] = file_digest(plan_path)
+    driver = pathlib.Path(__file__).with_name("build-hamilton-batches.lean")
+    plugin = sysroot / "lib/lean/libLake_shared.so"
+    assert plugin.is_file(), "Pinned official Lake shared library unavailable"
+    report["frontend_plugin_sha256"] = file_digest(plugin)
+    command = [str(compiler), "--plugin", str(plugin), "--run", str(driver),
+               str(plan_path), str(output)]
+    report["lake_frontend_command"] = command
+    save()
+
     with audit_execution(report, save):
-        for index, batch in enumerate(batches, 1):
-            assert all(set(graph[m]) <= set(report["built"]) | set(batch["modules"])
-                       for m in batch["modules"])
-            control["allowed_modules"] = batch["modules"]
-            control_path.write_text(json.dumps(control, indent=2) + "\n")
-            command = ["lake", "--no-cache", "--no-ansi", "--verbose", "build",
-                       *["+" + m + ":olean" for m in batch["modules"]]]
-            started = time.monotonic()
-            print(f"BATCH {index}/{len(batches)} START ({len(batch['modules'])} source modules)", flush=True)
-            path = output / "batch-build-logs" / f"{index:04d}.log"
-            with path.open("w") as stream:
-                code = run_batch(command, root=root, env=env, stream=stream, refresh=refresh)
-            refresh()
-            report["batch_results"].append({"batch": index, "command": command, "exit_code": code,
-                                            "elapsed_seconds": time.monotonic() - started})
-            print(path.read_text(), end="", flush=True)
-            print(f"BATCH {index}/{len(batches)} EXIT {code}; {len(report['built'])}/{len(order)} actual source compiler successes", flush=True)
-            if code != 0:
-                report["kernel_audit_status"] = "BUILD FAILED: batch or real compiler/observer failure"
-                save()
-                raise SystemExit(code if code > 0 else 1)
-            assert all(m in report["built"] for m in batch["modules"]), "Batch success without every real compiler success"
-            assert not (output / "compiler-stop.json").exists(), "Compiler observer failed"
+        started = time.monotonic()
+        path = output / "frontend-build-logs" / "lake.log"
+        with path.open("wb") as stream:
+            code = run_batch(command, root=root, env=env, stream=stream,
+                             refresh=refresh, sample=sampler)
+        refresh()
+        report["lake_frontend_result"] = {"command": command, "exit_code": code,
+                                          "elapsed_seconds": time.monotonic() - started,
+                                          "log_sha256": file_digest(path)}
+        print(f"Lake frontend EXIT {code}; {len(report['built'])}/{len(order)} actual source compiler successes", flush=True)
+        if code != 0:
+            report["kernel_audit_status"] = "BUILD FAILED: official Lake frontend or real compiler/observer failure"
             save()
-        compiler_records(output, modules, required=True)
+            raise SystemExit(code if code > 0 else 1)
+        assert file_digest(plugin) == report["frontend_plugin_sha256"], "Official Lake frontend plugin changed"
+        assert file_digest(driver) == report["lake_driver_sha256"], "Audit driver changed during execution"
+        batch_records(output, batches, required=True)
+        records = compiler_records(output, modules, required=True)
+        report["compiler_resource_summary"] = resource_summary(records, jobs)
+        assert file_digest(plan_path) == report["lake_batch_plan_sha256"], "Lake batch plan changed"
         assert report["built"] == order, "Incomplete source closure"
         for m in order:
             assert hashlib.sha256((root / (m.replace('.', '/') + '.lean')).read_bytes()).hexdigest() == report["source_sha256"][m]
@@ -504,14 +639,19 @@ def main() -> None:
         [command + theorem for theorem in TARGETS.values()
          for command in ("#check @", "#print axioms ")] + [""]))
     try:
-        command = ["lake", "env", "lean", str(probe)]
-        result = subprocess.run(command, cwd=root,
-                                text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        (output / "endpoint-probe.log").write_text(result.stdout)
-        print(result.stdout, flush=True)
-        report["endpoint_probe_result"] = {"command": command, "exit_code": result.returncode,
-                                            "log_sha256": hashlib.sha256(result.stdout.encode()).hexdigest()}
-        report["endpoint_axioms"] = endpoint_output(result.stdout, result.returncode)
+        with audit_execution(report, save):
+            command = ["lake", "env", "lean", str(probe)]
+            path = output / "endpoint-probe.log"
+            endpoint_samples = ProcessGroupSamples()
+            report["endpoint_resource_samples"] = endpoint_samples.value
+            with path.open("wb") as stream:
+                code = run_batch(command, root=root, env=os.environ.copy(), stream=stream,
+                                 refresh=lambda: None, sample=endpoint_samples)
+            stdout = path.read_text()
+            print(stdout, flush=True)
+            report["endpoint_probe_result"] = {"command": command, "exit_code": code,
+                                                "log_sha256": file_digest(path)}
+            report["endpoint_axioms"] = endpoint_output(stdout, code)
     except BaseException:
         report["kernel_audit_status"] = "INCONCLUSIVE: endpoint signature/axiom audit failed or interrupted"
         save()

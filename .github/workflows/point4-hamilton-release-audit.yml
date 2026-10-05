@@ -5,6 +5,7 @@ on:
     paths:
       - "scripts/point4/audit-hamilton-release.py"
       - "scripts/point4/observe-hamilton-compiler.py"
+      - "scripts/point4/build-hamilton-batches.lean"
       - "scripts/point4/test_audit_hamilton_release.py"
       - ".github/workflows/point4-hamilton-release-audit.yml"
   workflow_dispatch:
@@ -42,7 +43,7 @@ jobs:
           persist-credentials: false
       - name: Check pin and inspect focused source closure before compilation
         run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --plan-only
-      - name: Test bounded batches and compiler observation without executing upstream code
+      - name: Test persistent-plan gates, bounded observation, logs, and cancellation
         run: python3 campaign/scripts/point4/test_audit_hamilton_release.py
       - name: Install checksum-pinned official elan
         run: |
@@ -72,6 +73,13 @@ jobs:
           assert actual == expected, actual
           PY
           lake exe cache get
+      - name: Typecheck audit-owned driver against exact official Lake APIs
+        working-directory: upstream
+        run: |
+          # This elaborates only the reviewed driver, not any upstream source.
+          # No --run, project build, or project object is requested here.
+          lake env lean --plugin "$(lean --print-prefix)/lib/lean/libLake_shared.so" \
+            ../campaign/scripts/point4/build-hamilton-batches.lean
       - name: Compile exact endpoint import closure and inspect axioms
         run: |
           python3 campaign/scripts/point4/audit-hamilton-release.py upstream | tee hamilton-release-audit/build.log
