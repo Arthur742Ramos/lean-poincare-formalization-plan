@@ -19,6 +19,7 @@ MODULES = ('BoundarylessTensorHeatCoefficients.lean',
 PROBE = 'curvature/scripts/point4_manifold_heat_probe.lean'
 sys.path.insert(0, str(ROOT / 'curvature/scripts'))
 from point4_scan import strip_comments
+import point4_two_sided_heat_source_guard as _joint_release
 
 
 def git(repo: pathlib.Path, *args: str) -> bytes:
@@ -29,11 +30,13 @@ def check_sources(repo: pathlib.Path) -> dict:
     inherited = git(repo, 'ls-tree', '-r', '--name-only', BASE).decode().splitlines()
     for path in inherited:
         wanted = git(repo, 'show', f'{BASE}:{path}')
-        # The release permits exactly one inherited source-guard transformation.
+        # Exactly one C2 guard and three startup workflows are reconstructed.
         # It is reconstructed from its digest-pinned master blob, never waived.
         if path == 'curvature/scripts/point4_c2_initial_heat_source_test.py':
             from point4_manifold_heat_release_guard import adapted_c2_guard
             wanted = adapted_c2_guard(wanted)
+        elif path in _joint_release.STARTUP_WORKFLOWS:
+            wanted = _joint_release.adapted_startup_workflow(path, wanted)
         assert (ROOT / path).read_bytes() == wanted, \
             f'Inherited source/workflow/pin/contract/auditor changed: {path}'
     codes = {name: '\n'.join(strip_comments((ROOT / (PREFIX + name)).read_text()))
@@ -82,8 +85,9 @@ def check_sources(repo: pathlib.Path) -> dict:
     assert 'relationship: "builds-on"' in metadata
     assert 'pending' in metadata and 'OPEN' in metadata
     return {'baseline': BASE, 'historical_producer': HISTORICAL_PRODUCER,
-            'inherited_files_unchanged': len(inherited) - 1,
+            'inherited_files_unchanged': len(inherited) - 4,
             'exact_inherited_guard_adapters': 1,
+            'exact_inherited_startup_adapters': 3,
             'module_sha256': {n: hashlib.sha256((ROOT / (PREFIX + n)).read_bytes()).hexdigest() for n in MODULES},
             'lean_verified': False, 'point4': 'OPEN'}
 
