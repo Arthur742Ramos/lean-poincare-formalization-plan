@@ -17,7 +17,8 @@ class GateTests(unittest.TestCase):
         cls.troot = guard.blob(guard.INTEGRATION_PARENT, 'curvature/PoincareCurvature.lean')
         cls.root = (guard.ROOT / 'curvature/PoincareCurvature.lean').read_bytes()
         cls.axioms = '\n'.join(f"'{n}' depends on axioms: [propext, Classical.choice, Quot.sound]" for n in sorted(guard.SURFACES)) + '\nBoundarylessManifold\n'
-        cls.audit = {'build_run': True, 'verdict': 'OPEN', 'gates': {
+        cls.audit = {'build_run': True, 'verdict': 'OPEN',
+            'target_base': 'intrinsicLocalExistenceUniquenessFamily_pointFour', 'fqn': '', 'gates': {
             'G1_sorry_free': {'status': 'PASS'}, 'G2_build_green': {'status': 'PASS'},
             'G3_unconditional': {'status': 'FAIL', 'note': 'target not found in source'},
             'G4_axiom_clean': {'status': 'FAIL', 'note': 'target missing'},
@@ -57,6 +58,16 @@ class GateTests(unittest.TestCase):
     def test_changed_author(self):
         data = guard.strict_yaml(self.current); data['project']['authors'] = ['replacement']
         self.reject(guard.check_metadata, yaml.safe_dump(data).encode(), self.master, self.trace)
+
+    def test_exact_nonprovenance_spelling(self):
+        changed = self.current.replace(b'version: "v0.4"', b'version: v0.4', 1)
+        self.assertNotEqual(changed, self.current)
+        self.reject(guard.check_metadata, changed, self.master, self.trace)
+
+    def test_exact_nonprovenance_numeric_type(self):
+        changed = self.current.replace(b'sorry_count: 7\n', b'sorry_count: 7.0\n', 1)
+        self.assertNotEqual(changed, self.current)
+        self.reject(guard.check_metadata, changed, self.master, self.trace)
 
     def test_unrequested_provenance_identity(self):
         data = guard.strict_yaml(self.current)
@@ -114,6 +125,9 @@ class GateTests(unittest.TestCase):
     def test_nonstandard_axiom(self):
         self.reject(guard.check_axioms, self.axioms.replace('propext', 'sorryAx', 1))
 
+    def test_duplicate_axiom_inside_record(self):
+        self.reject(guard.check_axioms, self.axioms.replace('propext', 'propext, propext', 1))
+
     def test_malformed_extra_axiom(self):
         self.reject(guard.check_axioms, self.axioms + "'Unknown.extra' depends on axioms: [truncated\n")
 
@@ -134,6 +148,18 @@ class GateTests(unittest.TestCase):
         data = copy.deepcopy(self.audit); data['verdict'] = 'CLOSED'
         self.reject(guard.check_audit, data, 0)
         self.reject(guard.check_audit, self.audit, 0)
+
+    def test_wrong_canonical_target(self):
+        data = copy.deepcopy(self.audit); data['target_base'] = 'alternate_target'
+        self.reject(guard.check_audit, data, 1)
+
+    def test_nonempty_canonical_fqn(self):
+        data = copy.deepcopy(self.audit); data['fqn'] = 'RicciFlow.bad_target'
+        self.reject(guard.check_audit, data, 1)
+
+    def test_extra_canonical_audit_gate(self):
+        data = copy.deepcopy(self.audit); data['gates']['G6_extra'] = {'status': 'PASS'}
+        self.reject(guard.check_audit, data, 1)
 
 if __name__ == '__main__':
     unittest.main()

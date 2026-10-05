@@ -168,6 +168,11 @@ def entries(data: dict) -> dict[str, dict]:
     return out
 
 def check_metadata(raw: bytes, master: bytes, trace: bytes) -> None:
+    def outside_related(text: bytes) -> bytes:
+        start = text.index(b'related_formalizations:\n')
+        end = text.index(b'\nstatus:', start)
+        return text[:start] + text[end:]
+    assert outside_related(raw) == outside_related(master), 'Non-provenance metadata bytes drift'
     current, old, heat = map(strict_yaml, (raw, master, trace))
     assert {k: v for k, v in current.items() if k != 'related_formalizations'} == {
         k: v for k, v in old.items() if k != 'related_formalizations'}
@@ -204,14 +209,20 @@ def check_axioms(output: str) -> None:
     assert len(names) == len(set(names)), 'Duplicate axiom result'
     assert set(names) == SURFACES, f'Missing/extra axiom surfaces: {set(names) ^ SURFACES}'
     for name, raw in found:
-        actual = {a.strip() for a in raw.split(',') if a.strip()}
-        assert actual <= AXIOMS, (name, actual)
+        fields = [a.strip() for a in raw.split(',') if a.strip()]
+        assert len(fields) == len(set(fields)), 'Duplicate axiom within record'
+        assert set(fields) <= AXIOMS, (name, fields)
     assert 'BoundarylessManifold' in output, 'Missing full endpoint type'
     assert 'ModelWithCorners.Boundaryless' not in output and 'I.Boundaryless' not in output
 
 def check_audit(data: dict, rc: int) -> None:
     assert data['build_run'] is True, 'Fast audit cannot qualify'
     assert data['verdict'] == 'OPEN' and rc == 1, (data, rc)
+    assert data['target_base'] == 'intrinsicLocalExistenceUniquenessFamily_pointFour', data
+    assert data.get('fqn', '') == '', 'Canonical target must remain absent'
+    assert set(data['gates']) == {
+        'G1_sorry_free', 'G2_build_green', 'G3_unconditional', 'G4_axiom_clean', 'G5_faithful_type'
+    }, 'Missing/extra canonical audit gates'
     assert data['gates']['G1_sorry_free']['status'] == 'PASS', data
     assert data['gates']['G2_build_green']['status'] == 'PASS', data
     for gate in ('G3_unconditional', 'G4_axiom_clean', 'G5_faithful_type'):

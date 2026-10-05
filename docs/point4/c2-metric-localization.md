@@ -100,8 +100,11 @@ import/provenance/README integration surfaces, the five new proof-module hashes,
 the full-signature probe, original toolchain/Mathlib manifest, and original
 contract/auditor source. The one allowed inherited guard transformation is
 reconstructed from the exact PR129 input; arbitrary guard or workflow drift is
-rejected. It rejects duplicate YAML/provenance identities,
-tracked compiled caches, unexpected imports and any canonical target. The original twenty plus three adapter/provenance tests distinguish the intentional missing-target
+rejected. Exact metadata bytes outside the provenance list are retained, even
+when a changed spelling or numeric type would parse to an equal value.
+It rejects duplicate YAML/provenance identities, tracked compiled caches,
+unexpected imports and any canonical target. The original twenty plus nine
+adapter/provenance/evidence tests distinguish the intentional missing-target
 OPEN verdict from a bad newly introduced target or a failed/fast build.
 
 The new focused workflow records exact HEAD/parents, an all-source SHA256
