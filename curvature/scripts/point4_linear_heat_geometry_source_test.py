@@ -208,5 +208,15 @@ def main() -> None:
     print('Source checks do not certify Lean compilation or Point-4 completion')
 
 
+
+# Reviewed combined C2 integration adapter. The immutable legacy guard remains
+# above; the shared guard pins this precise adapter and the full parent union.
+if (ROOT / 'curvature/scripts/point4_c2_initial_heat_source_test.py').is_file():
+    import point4_c2_initial_heat_source_test as _c2_union
+    expected_sources = _c2_union.expected_sources
+    check_imports = _c2_union.check_imports
+    check_metadata = _c2_union.check_metadata
+    check_audit = _c2_union.check_audit
+
 if __name__ == '__main__':
     main()

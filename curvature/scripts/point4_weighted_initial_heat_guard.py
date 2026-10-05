@@ -20,6 +20,14 @@ ROOT_PATH = 'curvature/PoincareCurvature.lean'
 GUARD_PATH = 'curvature/scripts/point4_weighted_initial_heat_guard.py'
 ENV = dict(os.environ, GIT_NO_LAZY_FETCH='1')
 
+# Reviewed combined C2 integration adapter. The original standalone checks
+# below remain historical; the shared guard pins this exact adapter and union.
+if (ROOT / 'curvature/scripts/point4_c2_initial_heat_source_test.py').is_file():
+    import point4_c2_initial_heat_source_test as _c2_union
+    _c2_union.main(['--schema', sys.argv[1]] if len(sys.argv) == 2 else [])
+    sys.exit(0)
+
+
 def git(*args):
     return subprocess.check_output(['git', '-C', str(ROOT), *args], env=ENV)
 

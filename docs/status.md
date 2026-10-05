@@ -180,6 +180,23 @@ regressions and full-stack review remain pending. Mathematical proof blobs,
 requirements and individual verification gates are preserved. The integration
 adds no PDE solver or canonical theorem and leaves milestone 4 **Open**.
 
+## Latest supporting C² initial-heat integration
+
+The [combined C² initial-heat milestone](point4/c2-initial-heat-integration.md)
+adds the independently qualified exact PR124 Gaussian local/global C² initial
+traces and right generator, and PR127 actual compatible weighted C²,α heat
+datum with vanishing `t^(α/2)` Hölder constant, to current-master actual
+linear-heat geometry through real ancestry. Global Hessian trace/decay requires
+only initial Hessian uniform continuity; no positive initial Hölder premise
+is added. The generator remains a right derivative on `Ici 0`, rather than an
+ordinary endpoint derivative. Earlier candidate wording is historical.
+Exact combined-head hosted compilation, all inherited/current/heat axiom/type
+surfaces, full contract/kernel negative fixtures, unchanged full audit and
+independent full-stack review remain pending. Proofs, workflows and requirement
+interfaces are preserved; the canonical target remains absent and milestone 4
+is **Open**. Compact localization, anisotropic transport and nonlinear closure
+remain separate open obligations.
+
 ## Updating this page
 
 When implementation changes:

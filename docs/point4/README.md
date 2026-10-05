@@ -69,6 +69,18 @@ The preferred frame now has manifold-boundaryless scope; its existing frozen,
 weak, chosen-LC and gauge consumers retain their stronger model scope. No
 nonlinear PDE solver or canonical target is constructed. Point 4 remains OPEN.
 
+## Combined supporting C² initial heat
+
+The [combined C² initial-heat milestone](c2-initial-heat-integration.md) joins
+qualified PR124/127 by real ancestry to the merged linear-heat geometry and
+approved canonical contract. Exact mathematical proof/probe blobs and every
+original workflow are preserved; two precisely reviewed source-guard adapters
+protect the complete pinned parent union. Earlier candidate wording below is
+historical. Fresh exact combined-head full compilation, all thirteen axiom/type
+surfaces, canonical contract/kernel regressions, unchanged full audit and
+independent full-stack review remain required. Compact localization,
+anisotropic transport, nonlinear closure and the canonical target remain open.
+
 ## Current verdict
 
 The fast audit run on 2026-09-11 passed the forbidden-term scan but did not find
