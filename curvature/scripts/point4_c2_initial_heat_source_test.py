@@ -266,11 +266,23 @@ def main(argv=None) -> None:
     print('Source checks are not kernel certification; exact-head full builds and independent review remain mandatory; Point 4 OPEN')
 
 
+import sys as _joint_release_sys
+_joint_release_sys.dont_write_bytecode = True
+
 # Reviewed manifold-only release inventory adapter. All inherited gate bodies
 # remain unchanged; the release guard pins this count-one transform and union.
 if (ROOT / 'curvature/scripts/point4_manifold_heat_release_guard.py').is_file():
     import point4_manifold_heat_release_guard as _manifold_release
     _manifold_release.install_c2_inventory_adapter(globals())
+
+
+# Reviewed two-sided heat inventory adapter. All inherited gate bodies remain
+# unchanged; the source guard pins this count-one insertion and exact union.
+if (ROOT / 'curvature/scripts/point4_two_sided_heat_source_guard.py').is_file():
+    import sys as _two_sided_sys
+    _two_sided_sys.dont_write_bytecode = True
+    import point4_two_sided_heat_source_guard as _two_sided_release
+    _two_sided_release.install_c2_inventory_adapter(globals())
 
 if __name__ == '__main__':
     main()

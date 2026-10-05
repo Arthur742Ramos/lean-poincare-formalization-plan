@@ -3,6 +3,8 @@
 import copy
 import stat
 import unittest
+import sys
+sys.dont_write_bytecode = True
 import point4_manifold_heat_release_guard as release
 
 
@@ -32,10 +34,7 @@ class ManifoldReleaseGuardTests(unittest.TestCase):
                 self.guard.check_equal(release.C2_GUARD, wrong, expected)
 
     def test_legacy_reconstruction_runs_and_gate_functions_are_untouched(self):
-        namespace = vars(self.guard).copy()
-        original = namespace.pop('_manifold_release_original_expected_sources')
-        namespace['expected_sources'] = original
-        namespace['ADDED'] = namespace['ADDED'] - release.SELF_PATHS
+        namespace = release._joint_release().joint_reset_c2_namespace(vars(self.guard), install_manifold=False)
         names = ('main', 'check_imports', 'check_metadata', 'check_axiom_output',
                  'check_boundaryless_types', 'check_audit', 'check_workflow',
                  'check_public_paths', 'public_paths', 'nul_paths')
@@ -46,10 +45,7 @@ class ManifoldReleaseGuardTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             release.install_c2_inventory_adapter(namespace)
         for key in ('EDITABLE', 'ADDED'):
-            wrong = vars(self.guard).copy()
-            wrong.pop('_manifold_release_original_expected_sources')
-            wrong['expected_sources'] = original
-            wrong['ADDED'] = wrong['ADDED'] - release.SELF_PATHS
+            wrong = release._joint_release().joint_reset_c2_namespace(vars(self.guard), install_manifold=False)
             wrong[key] = set(wrong[key]) | {'arbitrary/exception.lean'}
             with self.subTest(key=key), self.assertRaises(AssertionError):
                 release.install_c2_inventory_adapter(wrong)
@@ -57,7 +53,8 @@ class ManifoldReleaseGuardTests(unittest.TestCase):
     def test_every_inherited_file_and_r2_proof_probe_and_fixture_is_pinned(self):
         self.assertEqual(len(self.baseline), 1641)
         for path, (_, original) in self.baseline.items():
-            wanted = release.adapted_c2_guard(original) if path == release.C2_GUARD else original
+            wanted = (release.adapted_c2_guard(original) if path == release.C2_GUARD else
+                      release._joint_release().adapted_startup_workflow(path, original) if path in release._joint_release().STARTUP_WORKFLOWS else original)
             with self.subTest(path=path):
                 self.assertEqual((release.ROOT / path).read_bytes(), wanted)
                 with self.assertRaises(AssertionError):
@@ -96,7 +93,7 @@ class ManifoldReleaseGuardTests(unittest.TestCase):
 
     def test_precise_public_union_no_missing_or_arbitrary_extra_path(self):
         valid = release.public_paths()
-        self.assertEqual(len(valid), 1653)
+        self.assertEqual(len(valid), 1661)
         release.check_public_paths(valid)
         for path in valid:
             with self.subTest(path=path), self.assertRaises(AssertionError):

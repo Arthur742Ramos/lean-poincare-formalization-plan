@@ -240,17 +240,50 @@ def main(argv=None) -> None:
         jsonschema.validate(guard.parse_metadata(metadata), json.loads(schema))
     source_guard = importlib.import_module('point4_manifold_heat_source_test')
     source_report = source_guard.check_sources(ROOT)
-    assert source_report['inherited_files_unchanged'] == 1640
+    assert source_report['inherited_files_unchanged'] == 1637
     assert source_report['exact_inherited_guard_adapters'] == 1
     if args.probe_log:
         check_new_probe(args.probe_log.read_text())
     print(json.dumps({'baseline': BASE, 'public_paths': len(public_paths()),
-                      'inherited_files_byte_identical': 1640, 'exact_inherited_guard_adapters': 1,
+                      'inherited_files_byte_identical': 1637, 'exact_inherited_guard_adapters': 1,
+                      'exact_inherited_startup_adapters': 3,
                       'r2_proof_blobs_unchanged': True, 'exact_probe_printer_option_replacements': 1,
                       'root_imports_and_metadata_byte_identical': True,
                       'lean_verified': False, 'point4': 'OPEN'}, indent=2))
     print('Source-only release checks passed; exact Lean 4.33 producer/probes/full-build/kernel gates remain separate')
 
+
+# Preserve the original PR131 constructors and checks behind the exact joint union.
+_joint_original_adapted_c2_guard = adapted_c2_guard
+_joint_original_check_unit_blob = check_unit_blob
+_joint_original_installer = install_c2_inventory_adapter
+
+
+def _joint_release():
+    return importlib.import_module('point4_two_sided_heat_source_guard')
+
+
+def adapted_c2_guard(original: bytes) -> bytes:
+    return _joint_release().adapted_c2_guard(original)
+
+
+def check_unit_blob(path: str, actual: bytes) -> None:
+    if path == SOURCE_GUARD:
+        _joint_release().joint_check_manifold_source(actual)
+    else:
+        _joint_original_check_unit_blob(path, actual)
+
+
+def expected_sources() -> dict[str, tuple[str, bytes]]:
+    return _joint_release().expected_sources()
+
+
+def public_paths() -> set[str]:
+    return _joint_release().public_paths()
+
+
+def install_c2_inventory_adapter(namespace: dict) -> None:
+    _joint_release().joint_install_manifold_adapter(namespace, _joint_original_installer)
 
 if __name__ == '__main__':
     main()

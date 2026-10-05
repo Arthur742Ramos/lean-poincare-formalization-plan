@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Supporting two-sided ordinary initial heat derivative"
+  description: >-
+    An additive source-only supporting linear Euclidean construction. The
+    nonnegative branch is the inherited actual heat path; the negative branch
+    is f plus t times heat(-t) applied to the trace of the actual stored Hessian.
+    It proves an ordinary pointwise initial time derivative with bounded actual
+    C2 fixed slices, including rank zero. This is not backward heat, nonlinear
+    or manifold existence, canonical Point-4 closure, or a registry submission.
+    Exact Lean 4.33 compilation and mechanical qualification remain pending.
+  authors:
+    - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arthur Freitas Ramos"
+
+sources:
+  - title: "Verified bounded actual C2 initial heat trace and Gaussian smoothing"
+    id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/e6b54dd0d7e73a51eb8efb083764b68ae8305a5a/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE"
+    type: "formalization-source"
+    relationship: "adapts"
+    location: "EuclideanHeatInitialTrace.lean and EuclideanHeatHessianSemigroup.lean"
+    note: >-
+      Uses the actual right initial generator, Gaussian approximate identity,
+      positive-time derivative witnesses and maximum principle without changing
+      their proofs. The new left branch joins the right derivative to ordinary
+      HasDerivAt at zero; no derivative of the generator, C3 regularity or
+      positive initial Holder exponent is assumed.
+    license: "Apache-2.0"
+    author_endorsement: "n/a"
+  - title: "Pinned real derivative and slope interfaces"
+    id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/Calculus/Deriv"
+    type: "formalization-source"
+    relationship: "adapts"
+    location: "Basic.lean and Slope.lean"
+    note: >-
+      Uses ordinary and within derivative interfaces and the one-sided slope
+      limit equivalence to join the two sides. Mathlib source and contributor
+      notices remain unchanged; this source-only adaptation still needs
+      compilation against the exact pinned toolchain and Mathlib revision.
+    license: "Apache-2.0"
+    author_endorsement: "n/a"
+
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/e6b54dd0d7e73a51eb8efb083764b68ae8305a5a/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository curvature subproject at full commit
+      e6b54dd0d7e73a51eb8efb083764b68ae8305a5a. Reuses the actual bounded-C2
+      data structure, EuclideanHeatInitialTrace.lean, Gaussian approximate
+      identity and EuclideanHeatHessianSemigroup.lean smoothing constructor.
+      All inherited proofs, root imports, root metadata, pins, workflows,
+      contract, auditor and contributor notices remain byte/mode-identical.
+      The sole inherited change is the digest-pinned count-one insertion in
+      scripts/point4_c2_initial_heat_source_test.py, exactly reconstructed by
+      scripts/point4_two_sided_heat_source_guard.py. It admits only this explicit
+      additive release union; every inherited evidence gate remains mandatory.
+  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis"
+    relationship: "builds-on"
+    note: >-
+      Immutable pinned Mathlib source at full commit
+      db584cd6d46c92f209a44c0f1c829460d327499d, source path Mathlib/Analysis.
+      Uses real calculus, within/ordinary derivatives, slopes, bounded continuous
+      functions and filter limits through inherited imports and Deriv.Slope.
+      No Mathlib source, pin or contributor notice was modified.
+
+status:
+  scope: >-
+    Supporting linear Euclidean scope only. Literal bounded actual C2 data,
+    the genuine nonnegative heat path and ordinary HasDerivAt at zero are
+    preserved. Fixed-slice C2 regularity does not establish negative-Hessian
+    norm continuity, two-sided C2 path continuity, global positivity or cutoff.
+    No canonical nonlinear/manifold or gauge theorem is claimed. Point 4 is OPEN.
+    The isolated R1 mathematical/source review is conditional on Lean checking.
+    This release repairs source inventories only, preserving R1 math/probe bytes.
+    Exact Lean 4.33 module/probe/full-build/axiom/kernel/audit gates remain pending.
+  main_results: []
+
+automation:
+  methods:
+    - method: "agent"
+      framework: "Codex"
+      tool_setup: >-
+        Immutable-source/API inspection, additive supporting Lean authoring,
+        source/provenance checks, adversarial validator fixtures and prepared
+        exact-head type/axiom probes. No local Lean process, toolchain/cache
+        expansion, remote mutation, publication or registry action was performed
+        while preparing this source-only release.
+      prompting_notes: >-
+        Preserve f plus t times positive-heat smoothing of the actual generator
+        for negative t, genuine ordinary initial time derivative and actual C2
+        fixed slices including rank zero. Avoid C3/positive-Holder premises and
+        any canonical completion claim.
+
+review:
+  status: "pending"
+  notes: >-
+    The isolated supporting construction received mathematical/source approval
+    conditional on Lean verification. Fresh independent review of this additive
+    guard integration and all exact-head mechanical gates are required before
+    merging. Source-only checks and inherited verification do not certify this
+    new module; this dossier is not an intake or a new submission identity.
+
+acknowledgements: >-
+  The repository's human authors and inherited contributors, and the Mathlib
+  authors and contributors. Existing selected-artifact identities and metadata
+  remain unchanged; no registry action is authorized or performed by this dossier.
