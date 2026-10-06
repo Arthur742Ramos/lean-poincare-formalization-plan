@@ -90,6 +90,15 @@ jobs:
             /usr/bin/python3 curvature/scripts/chart_port_ci.py \
               --expected-sha "$EXPECTED_SHA" --expected-tree "$EXPECTED_TREE" \
               --evidence "$evidence"
+      - name: Preserve small first compiler failure summary independently
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: local-chart-first-compiler-failure-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/local-chart-connection-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}/first-compiler-failure.json
+            ${{ runner.temp }}/local-chart-connection-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}/first-compiler-failure.sha256
+          if-no-files-found: ignore
       - name: Preserve exact candidate source and build receipts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

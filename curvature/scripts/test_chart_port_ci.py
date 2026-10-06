@@ -1,6 +1,6 @@
 """Ordinary driver tests with finite fixtures; no Lean, Lake or workflow execution."""
 from pathlib import Path
-import ast, hashlib, json, os, signal, stat, tempfile, types, unittest
+import ast, hashlib, io, json, os, signal, stat, tempfile, types, unittest
 from unittest.mock import patch
 import chart_port_candidate_check as admission
 
@@ -89,7 +89,8 @@ class DriverControls(unittest.TestCase):
                 os=types.SimpleNamespace(sched_getaffinity=lambda _: {0, 1, 2},
                     sched_setaffinity=lambda _, cpus: trace['affinity'].append(cpus), environ={}, pathsep=';'),
                 subprocess=types.SimpleNamespace(check_output=git), run=run, digest=digest, admit=admit,
-                tree_entries=lambda *args: {}, package_root_relationships=roots, artifact_status=lambda *args: {'ready': True},
+                tree_entries=lambda *args: {}, package_root_relationships=roots,
+                compiler_run=lambda argv,label,source,module,env=None: run(argv,label,env=env), artifact_status=lambda *args: {'ready': True},
                 serial_compile=lambda *args: trace['compile'].append(args), imports=lambda _: [],
                 check_probe=check_probe, time=types.SimpleNamespace(time=lambda: 0),
                 resource=types.SimpleNamespace(RLIMIT_AS=1, setrlimit=lambda *a: self.fail('Virtual-address ceiling restored')))
@@ -239,7 +240,7 @@ class OwnedResourceMonitor(unittest.TestCase):
             root = Path(temp); source = root / 'Fixture/Source.lean'; source.parent.mkdir()
             source.write_text('module\n')
             calls = []
-            ns = dict(Path=Path, run=lambda argv, *args, **kwargs: calls.append(argv),
+            ns = dict(Path=Path, compiler_run=lambda argv, *args, **kwargs: calls.append(argv),
                 artifact_status=lambda *args: {'ready': False})
             with self.assertRaisesRegex(AssertionError, 'required Lean 4.33 import companions'):
                 function('serial_compile', ns)('Fixture.Source', source, root / 'outputs', 'lean', {}, 'compile')
@@ -746,6 +747,154 @@ class RootRelationshipControls(unittest.TestCase):
             self.assertEqual(bytes.fromhex(row['root']['raw_link_hex']),os.fsencode(target))
             self.assertEqual(row['root']['resolved_path'],str(target.resolve()))
             self.assertFalse(receipt['root_link_exceptions_granted'])
+
+
+class FirstCompilerFailureLogging(unittest.TestCase):
+    def fixture(self, root, *, exception=None, source_missing=False, cleanup=None):
+        source=root/'Fixture/Source.lean'; source.parent.mkdir()
+        if not source_missing: source.write_bytes(b'finite source bytes; never compiled\n')
+        stdout=b'error: finite first stdout diagnostic\n'+b'a'*70000+b'\xfflast stdout byte\n'
+        stderr=b'finite first stderr diagnostic\n'+b'b'*70000+b'last stderr byte\n'
+        output=io.BytesIO(); saved=[]
+        receipt=dict(candidate_sha='a'*40,candidate_tree='b'*40,stages=[],owner_pid=42,
+            memory_limit_bytes=LIMIT,cpu_affinity=[0,1],cgroup='/finite/owned/cgroup')
+        argv=['finite-compiler','-j1','-M5632','-DautoImplicit=false','-DmaxSynthPendingDepth=3',str(source)]
+        def run(argv,label,env=None):
+            (root/(label+'.stdout')).write_bytes(stdout); (root/(label+'.stderr')).write_bytes(stderr)
+            stage=dict(argv=argv,cwd=str(root),status='FAILED' if exception else 'SUCCEEDED',exit_code=1 if exception else 0,
+                timeout_seconds=600,peak_rss_bytes=4096,owner_reaped=True,remaining_session_pids=[],
+                stdout_sha256=digest(stdout),stderr_sha256=digest(stderr))
+            if cleanup:
+                stage.update(cleanup)
+                if cleanup.get('owner_reaped') is None: stage.pop('owner_reaped')
+            receipt['stages'].append(stage)
+            if exception: raise exception
+            return stdout
+        ns=dict(Path=Path,EVIDENCE=root,receipt=receipt,json=json,hashlib=hashlib,digest=digest,
+            sys=types.SimpleNamespace(stdout=types.SimpleNamespace(buffer=output)),
+            run=run,save=lambda:saved.append(True),
+            print=lambda value,**kw:output.write((str(value)+'\n').encode()))
+        execute_nodes([next(n for n in TREE.body if isinstance(n,ast.FunctionDef) and n.name==name)
+            for name in ('compiler_log_identity','record_first_compiler_failure','compiler_run')],ns)
+        return ns,source,argv,receipt,output,stdout,stderr,saved
+
+    def test_success_does_not_create_or_emit_failure_evidence(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); ns,source,argv,receipt,output,stdout,*_=self.fixture(root)
+            self.assertEqual(ns['compiler_run'](argv,'local-0',source,'Fixture.Source'),stdout)
+            self.assertFalse((root/'first-compiler-failure.json').exists())
+            self.assertEqual(output.getvalue(),b'')
+            self.assertNotIn('first_compiler_failure',receipt)
+
+    def test_actual_failure_streams_complete_raw_logs_and_binds_source_stage_and_summary(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); failure=AssertionError('finite owned stage failed')
+            ns,source,argv,receipt,output,stdout,stderr,saved=self.fixture(root,exception=failure)
+            with self.assertRaises(AssertionError) as raised: ns['compiler_run'](argv,'local-0',source,'Fixture.Source')
+            self.assertIs(raised.exception,failure)
+            self.assertEqual(output.getvalue(),b'\n=== first failed compiler stage local-0: stdout ===\n'+stdout+
+                b'\n=== first failed compiler stage local-0: stderr ===\n'+stderr)
+            raw=(root/'first-compiler-failure.json').read_bytes(); summary=json.loads(raw)
+            self.assertLess(len(raw),16384)  # The raw logs belong to retained files/job output, not this small summary.
+            self.assertEqual((root/'first-compiler-failure.sha256').read_text(),digest(raw)+'  first-compiler-failure.json\n')
+            self.assertEqual(summary['stage'],'local-0'); self.assertEqual(summary['argv'],argv)
+            self.assertEqual(summary['source_identity']['sha256'],digest(source.read_bytes()))
+            self.assertTrue(summary['source_identity']['observed_before_owned_stage'])
+            self.assertEqual(summary['failure_exception'],{'type':'AssertionError','message':str(failure)})
+            self.assertEqual(summary['owned_stage_receipt'],receipt['stages'][-1])
+            self.assertEqual(summary['driver_resource_receipt']['memory_limit_bytes'],LIMIT)
+            self.assertEqual(summary['owned_stage_receipt']['remaining_session_pids'],[])
+            for suffix,data in (('stdout',stdout),('stderr',stderr)):
+                self.assertEqual(summary['logs'][suffix]['sha256'],digest(data))
+                self.assertEqual(summary['logs'][suffix]['bytes'],len(data))
+                self.assertEqual((root/('local-0.'+suffix)).read_bytes(),data)
+            self.assertEqual(receipt['first_compiler_failure']['summary_sha256'],digest(raw))
+            self.assertEqual(saved,[True])
+
+    def test_later_failure_never_replaces_first_summary_or_its_hash(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); ns,source,argv,receipt,output,*_=self.fixture(root,exception=RuntimeError('first'))
+            for label in ('local-0','local-1'):
+                with self.assertRaises(RuntimeError): ns['compiler_run'](argv,label,source,'Fixture.Source')
+                if label=='local-0':
+                    first=(root/'first-compiler-failure.json').read_bytes()
+                    companion=(root/'first-compiler-failure.sha256').read_bytes(); emitted=output.getvalue()
+            self.assertEqual((root/'first-compiler-failure.json').read_bytes(),first)
+            self.assertEqual((root/'first-compiler-failure.sha256').read_bytes(),companion)
+            self.assertEqual(output.getvalue(),emitted)
+            self.assertEqual(receipt['first_compiler_failure']['stage'],'local-0')
+            self.assertTrue((root/'local-1.stdout').exists())
+
+    def test_exception_and_incomplete_cleanup_remain_visible_without_forged_completion(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); failure=TimeoutError('finite compiler deadline')
+            ns,source,argv,receipt,output,*_=self.fixture(root,exception=failure,
+                cleanup={'owner_reaped':None,'remaining_session_pids':[123],'exception_type':'TimeoutError'})
+            with self.assertRaises(TimeoutError): ns['compiler_run'](argv,'local-0',source,'Fixture.Source')
+            summary=json.loads((root/'first-compiler-failure.json').read_text())
+            self.assertEqual(summary['failure_exception']['type'],'TimeoutError')
+            self.assertEqual(summary['owned_stage_receipt']['remaining_session_pids'],[123])
+            self.assertNotIn('owner_reaped',summary['owned_stage_receipt'])
+
+    def test_source_identity_unavailable_is_explicit(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); ns,source,argv,*_=self.fixture(root,exception=RuntimeError('finite failure'),source_missing=True)
+            with self.assertRaises(RuntimeError): ns['compiler_run'](argv,'local-0',source,'Fixture.Source')
+            identity=json.loads((root/'first-compiler-failure.json').read_text())['source_identity']
+            self.assertEqual(identity['identity_read_exception'],'FileNotFoundError')
+            self.assertNotIn('sha256',identity)
+
+    def test_reporting_write_error_preserves_original_exception_and_emits_retained_logs(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); failure=RuntimeError('original finite compiler failure')
+            ns,source,argv,receipt,output,stdout,stderr,_=self.fixture(root,exception=failure)
+            ordinary_open=Path.open
+            def open_path(path,*args,**kwargs):
+                if path==root/'first-compiler-failure.json' and args and args[0]=='xb':
+                    raise OSError('finite summary-write failure')
+                return ordinary_open(path,*args,**kwargs)
+            with patch.object(Path,'open',open_path):
+                with self.assertRaises(RuntimeError) as raised: ns['compiler_run'](argv,'local-0',source,'Fixture.Source')
+            self.assertIs(raised.exception,failure)
+            self.assertIn(stdout,output.getvalue()); self.assertIn(stderr,output.getvalue())
+            self.assertEqual(receipt['first_compiler_failure_reporting_error']['type'],'OSError')
+
+    def test_reporting_and_fallback_output_failure_preserve_identical_original_exception(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); failure=RuntimeError('identical original finite compiler failure')
+            ns,source,argv,receipt,output,stdout,stderr,_=self.fixture(root,exception=failure)
+            attempts=[]
+            class FailedJobOutput:
+                def write(self, data):
+                    attempts.append('reporting output')
+                    raise BrokenPipeError('finite reporting output failure')
+                def flush(self):
+                    raise BrokenPipeError('finite reporting flush failure')
+            ns['sys'].stdout.buffer=FailedJobOutput()
+            def fallback_print(*args, **kwargs):
+                attempts.append('fallback output')
+                raise BrokenPipeError('finite fallback output failure')
+            ns['print']=fallback_print
+            with self.assertRaises(RuntimeError) as raised:
+                ns['compiler_run'](argv,'local-0',source,'Fixture.Source')
+            self.assertIs(raised.exception,failure)
+            self.assertEqual(attempts,['reporting output','fallback output'])
+            self.assertEqual(receipt['first_compiler_failure_reporting_error']['type'],'BrokenPipeError')
+            self.assertEqual((root/'local-0.stdout').read_bytes(),stdout)
+            self.assertEqual((root/'local-0.stderr').read_bytes(),stderr)
+
+    def test_small_summary_upload_is_separate_and_complete_archive_guard_is_retained(self):
+        workflow=(HERE.parents[1]/'.github/workflows/point4-local-chart-connection.yml').read_text()
+        small=workflow.split('      - name: Preserve small first compiler failure summary independently\n')[1]
+        small,complete=small.split('      - name: Preserve exact candidate source and build receipts\n')
+        self.assertIn('if: always()',small)
+        self.assertIn('local-chart-first-compiler-failure-',small)
+        self.assertIn('/first-compiler-failure.json',small); self.assertIn('/first-compiler-failure.sha256',small)
+        self.assertNotIn('.stdout',small); self.assertNotIn('.stderr',small)
+        self.assertIn('if-no-files-found: error',complete)
+        serial=ast.get_source_segment(SOURCE,next(n for n in TREE.body if isinstance(n,ast.FunctionDef) and n.name=='serial_compile'))
+        self.assertIn('compiler_run(argv, label, source, name, env=env)',serial)
+        self.assertIn("'full-type-proof-axiom-probe', source, row['module'], env=env",SOURCE)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

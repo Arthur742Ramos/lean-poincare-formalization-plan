@@ -94,6 +94,71 @@ def run(argv, label, cwd=PKG, env=None, timeout=600):
     assert not stage['remaining_session_pids'], 'Owned session not drained'
     return (EVIDENCE / (label + '.stdout')).read_bytes()
 
+def compiler_log_identity(path):
+    h = hashlib.sha256(); size = 0
+    try:
+        with path.open('rb') as stream:
+            while data := stream.read(65536):
+                h.update(data); size += len(data)
+    except OSError as exc:
+        return dict(path=str(path), available=False, exception_type=type(exc).__name__, error=str(exc))
+    return dict(path=str(path), available=True, bytes=size, sha256=h.hexdigest())
+
+def record_first_compiler_failure(label, argv, source_identity, stage, failure):
+    summary = EVIDENCE / 'first-compiler-failure.json'
+    if summary.exists():
+        return  # Keep the original first failure and its independently bound bytes.
+    logs = {suffix: compiler_log_identity(EVIDENCE / (label + '.' + suffix)) for suffix in ('stdout', 'stderr')}
+    payload = dict(schema_version=1, candidate_sha=receipt['candidate_sha'], candidate_tree=receipt['candidate_tree'],
+        stage=label, argv=list(argv), source_identity=source_identity,
+        failure_exception=dict(type=type(failure).__name__, message=str(failure)),
+        owned_stage_receipt=dict(stage), logs=logs,
+        driver_resource_receipt={k:receipt[k] for k in ('owner_pid', 'memory_limit_bytes', 'cpu_affinity', 'cgroup') if k in receipt},
+        point4='OPEN', full_candidate_qualification='NOT_RUN')
+    data = (json.dumps(payload, indent=2, ensure_ascii=True) + '\n').encode('utf8')
+    try:
+        with summary.open('xb') as stream:
+            stream.write(data)
+        identity = digest(data)
+        with (EVIDENCE / 'first-compiler-failure.sha256').open('x', encoding='ascii') as stream:
+            stream.write(identity + '  first-compiler-failure.json\n')
+        receipt['first_compiler_failure'] = dict(stage=label, summary=str(summary), summary_sha256=identity)
+        save()
+    finally:
+        # Stream both complete retained logs to the job output. No diagnostic
+        # text is truncated, decoded, filtered or rewritten; raw files stay put.
+        for suffix in ('stdout', 'stderr'):
+            sys.stdout.buffer.write(('\n=== first failed compiler stage ' + label + ': ' + suffix + ' ===\n').encode())
+            try:
+                with (EVIDENCE / (label + '.' + suffix)).open('rb') as stream:
+                    while chunk := stream.read(65536):
+                        sys.stdout.buffer.write(chunk)
+            except OSError as exc:
+                sys.stdout.buffer.write(('\nRaw log unavailable: ' + type(exc).__name__ + ': ' + str(exc) + '\n').encode())
+            sys.stdout.buffer.flush()
+
+def compiler_run(argv, label, source, module, env=None):
+    source_identity = dict(path=str(source), module=module, observed_before_owned_stage=True)
+    try:
+        data = source.read_bytes()
+        source_identity.update(bytes=len(data), sha256=digest(data),
+            git_blob_sha=hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest())
+    except OSError as exc:
+        source_identity.update(identity_read_exception=type(exc).__name__, identity_read_error=str(exc))
+    try:
+        return run(argv, label, env=env)
+    except BaseException as exc:
+        stage = receipt['stages'][-1] if receipt['stages'] and receipt['stages'][-1].get('argv') == argv else {}
+        try:
+            record_first_compiler_failure(label, argv, source_identity, stage, exc)
+        except BaseException as reporting_error:
+            receipt['first_compiler_failure_reporting_error'] = dict(type=type(reporting_error).__name__, message=str(reporting_error))
+            try:
+                print('First compiler failure reporting error: ' + repr(reporting_error), flush=True)
+            except BaseException:
+                pass  # Best-effort output must preserve the original compiler exception.
+        raise
+
 def serial_compile(name, source, output_root, lean, env, label, strict=True):
     output = output_root / (name.replace('.', '/') + '.olean')
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -105,7 +170,7 @@ def serial_compile(name, source, output_root, lean, env, label, strict=True):
     argv += ['-R', str(package_root)]
     # Emitting C also emits IR used by interpreted Cache code and metaprograms.
     argv += ['-o', str(output), '-c', str(output.with_suffix('.c')), str(source)]
-    run(argv, label, env=env)
+    compiler_run(argv, label, source, name, env=env)
     status = artifact_status(name, [output_root], source.read_bytes())
     assert status['ready'], ('Compiler did not emit required Lean 4.33 import companions', status)
     receipt['stages'][-1].update(source=str(source), source_sha256=digest(source.read_bytes()),
@@ -248,8 +313,8 @@ try:
         source = ROOT / row['path']
         assert digest(source.read_bytes()) == row['sha256']
         if row['module'] == 'ChartPort.ChartIdentityEvidence':
-            probe = run([lean, '-j1', '-M5632', '-DautoImplicit=false', '-DmaxSynthPendingDepth=3', str(source)],
-                        'full-type-proof-axiom-probe', env=env)
+            probe = compiler_run([lean, '-j1', '-M5632', '-DautoImplicit=false', '-DmaxSynthPendingDepth=3', str(source)],
+                        'full-type-proof-axiom-probe', source, row['module'], env=env)
             result = check_probe(probe)
             (EVIDENCE / 'probe-verdict.json').write_text(json.dumps(result, indent=2) + '\n')
         else:
