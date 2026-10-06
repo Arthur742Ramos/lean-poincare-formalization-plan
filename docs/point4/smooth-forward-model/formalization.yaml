@@ -1,0 +1,96 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/v0.4.schema.json
+version: "v0.4"
+project:
+  name: "Smooth forward Ricci-flow contract and supporting restrictions"
+  description: >-
+    A separately named strong smooth solution and competitor interface, with
+    proved C2 downgrade, chart regularity restrictions, solution restriction,
+    and the empty-manifold existence/uniqueness case. The positive-dimensional
+    compact boundaryless general existence/uniqueness declaration is absent
+    and OPEN. The original canonical C2 contract and obstruction are unchanged.
+  authors:
+    - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arthur Freitas Ramos"
+sources:
+  - title: "Inherited intrinsic Ricci tensor and original Point-4 contract"
+    id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/a0132cd55e2540b2fd26adecea9a07b51f1b8292/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow"
+    type: "formalization-source"
+    relationship: "adapts"
+    location: "LocalExistence.lean and its intrinsicRicciTensor dependency spine"
+    note: >-
+      Reuses the actual intrinsic Ricci tensor after an explicit smooth-to-C2
+      metric downgrade. Adds a different strong forward contract; preserves
+      every original definition, theorem, contributor notice and completion gate.
+    license: "Apache-2.0"
+    author_endorsement: "n/a"
+  - title: "Qualified Hamilton endpoint signatures"
+    id: "https://github.com/qinz1yang/differential-geometry/tree/8bd406e35c33a200e9b88895cf11ee8429194e15"
+    type: "formalization-source"
+    relationship: "adapts"
+    location: "Qualified short-time Hamilton existence and uniqueness endpoint signatures"
+    note: >-
+      Used to select a strong chart-smooth solution and competitor interface
+      with a forward derivative convention. No upstream theorem or compiled
+      artifact is imported as a native Lean 4.33 bridge. The qualified source
+      uses Lean 4.29 and an earlier Mathlib; native port and Ricci identification
+      remain explicit dependencies. Historical verification does not close this target.
+    license: "Apache-2.0"
+    author_endorsement: "n/a"
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/a0132cd55e2540b2fd26adecea9a07b51f1b8292/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable complete master after PR131. Uses its intrinsic Ricci tensor,
+      original LocalExistence contract, audits and exact inventory/provenance
+      validators. All inherited files remain byte-identical except one reviewed
+      count-one inventory hook in point4_manifold_heat_release_guard.py.
+      The original C2 guard, root imports, root metadata and workflows are unchanged.
+  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold"
+    relationship: "builds-on"
+    note: >-
+      Reuses pinned Riemannian metric, tangent trivialization, ContMDiffOn,
+      manifold and forward derivative APIs. No Mathlib source is modified.
+      Existing dependency object files used locally are not source-binding evidence.
+  - id: "https://github.com/qinz1yang/differential-geometry/tree/8bd406e35c33a200e9b88895cf11ee8429194e15"
+    relationship: "builds-on"
+    note: >-
+      Qualified upstream Hamilton endpoint signatures guide the separately
+      scoped interface. Historical all-2270-module evidence applies only to
+      those qualified Lean 4.29 signatures. It does not establish an import
+      bridge, native Lean 4.33 construction or general target closure.
+status:
+  scope: >-
+    Supporting smooth interface and six standard-axiom supporting surfaces.
+    The general smooth forward target is OPEN and its declaration is absent.
+    Canonical Point-4 remains OPEN; uniqueness against its weak competitors,
+    rank-zero models, original closed terminal time and ordinary initial
+    derivative are not claimed. The empty-manifold case is proved separately.
+    Exact-head full build, complete inherited gates and source-binding remain required.
+  main_results: []
+automation:
+  methods:
+    - method: "agent"
+      models: ["GPT-6.1"]
+      framework: "Codex"
+      tool_setup: >-
+        Immutable public source/API review, additive Lean authoring and bounded
+        owned desktop Lean 4.33 checks with copied dependency artifacts. Source
+        blobs were compared to pinned trees; native object source-binding is
+        pending. No toolchain install, registry submission or security setting change.
+      prompting_notes: >-
+        Independently select a standard strong smooth competitor class while
+        retaining the original C2 contract, obstruction and all canonical gates.
+review:
+  status: "pending"
+  notes: >-
+    The seven support/interface files received independent source review for
+    draft publication. The complete inventory adapter requires its own review,
+    and exact-head compilation/source-binding and merge approval remain separate.
+acknowledgements: >-
+  The repository's human authors and inherited contributors, the Mathlib
+  contributors and the qualified upstream differential-geometry contributors.
+  This supporting dossier does not register a new artifact or reuse a registry ID.

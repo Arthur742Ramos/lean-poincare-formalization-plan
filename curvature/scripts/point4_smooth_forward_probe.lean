@@ -1,0 +1,14 @@
+import PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardContract
+
+#check @RicciFlow.SmoothForward.PointFourSmoothForwardModelContract
+#print RicciFlow.SmoothForward.PointFourSmoothForwardModelContract
+#print RicciFlow.SmoothForward.StrongSolution
+#print RicciFlow.SmoothForward.JointlySmoothOn
+#print RicciFlow.SmoothForward.ForwardEquation
+#print RicciFlow.SmoothForward.ExistenceUniquenessFamily
+#print axioms RicciFlow.SmoothForward.toC2_inner
+#print axioms RicciFlow.SmoothForward.JointlySmoothOn.restrict
+#print axioms RicciFlow.SmoothForward.JointlySmoothOn.chart_continuous
+#print axioms RicciFlow.SmoothForward.StrongSolution.restrict
+#print axioms RicciFlow.SmoothForward.strongSolutionOfIsEmpty
+#print axioms RicciFlow.SmoothForward.existenceUniquenessFamilyOfIsEmpty
