@@ -3254,7 +3254,7 @@
   "proof_packet_library_version": 3,
   "historical_source_binding": "PENDING",
   "full_master_admission": "PENDING",
-  "candidate_build": "Published ac2163 focused run failed during Lake environment setup before port modules; repaired candidate UNRUN",
+  "candidate_build": "Published 8537 configured dependency inventory rejected the pinned Batteries documentation link before port/probe; finite-link correction hosted UNRUN",
   "point4": "OPEN",
   "general_targets": "OPEN",
   "scope": "constant downgraded smooth metric, actual chart good set, differentiable section at evaluation",
@@ -3343,6 +3343,80 @@
     ],
     "lean_sources_and_probe": "all 57 mathematical modules, original probe and 13 inherited sources unchanged",
     "full_master_artifact_admission": "separate PENDING blocker",
+    "point4": "OPEN",
+    "general_targets": "OPEN"
+  },
+  "pinned_batteries_documentation_link_repair": {
+    "base_commit": "8537da8908d0024c1ef0571748e95cb010c42935",
+    "base_tree": "38cc783897e4b9c6fbc4560a3f1f417811dda5c9",
+    "failed_run": 37451063539,
+    "failed_job": 112227475124,
+    "failed_artifact": 11406817794,
+    "failed_artifact_parent_reported_bytes": 11652,
+    "failed_artifact_parent_reported_sha256": "283061ea0b9280ec791fc85f9d688eb3125c9e092678f798e76ef4c3b49fcbdb",
+    "artifact_bytes_verified_locally": false,
+    "fresh_port_modules_started": 0,
+    "fresh_probe_started": 0,
+    "package": "leanprover-community/batteries",
+    "pin": "4488d40d070b9700d4d5a6aa342f0d40c31b2a2d",
+    "catalog": [
+      {
+        "path": "docs/README.md",
+        "mode": "120000",
+        "type": "blob",
+        "git_blob_sha": "32d46ee883b58d6a383eed06eb98f33aa6530ded",
+        "raw_bytes": 12,
+        "raw_text": "../README.md",
+        "target": "README.md",
+        "target_mode": "100644",
+        "target_type": "blob",
+        "target_bytes": 5427,
+        "target_git_blob_sha": "4cd48268d7a14d8f5867862c549534cac08ebd45"
+      }
+    ],
+    "checks": [
+      "actual HEAD pin and exact pinned tree inventory",
+      "finite declared link path/mode/blob",
+      "raw os.readlink bytes without following",
+      "exact link text and Git blob",
+      "same-package declared regular target verified in complete physical file inventory"
+    ],
+    "undeclared_public_and_code_links": "rejected",
+    "replace_objects": "disabled per Git identity command",
+    "source_build_probe_and_resource_gates": "preserved; resource monitor and serial compiler functions unchanged bytes",
+    "ordinary_tests": {
+      "path": "curvature/scripts/test_chart_port_ci.py",
+      "discovered": 20,
+      "passed": 19,
+      "skipped": 1,
+      "old_driver_and_resource_controls_passed": 10,
+      "new_finite_catalog_and_integrity_controls_passed": 9,
+      "genuine_Unix_link_behavior": "UNRUN on Windows",
+      "actual_Lean_Lake_cgroup_workflow_execution": false
+    },
+    "ordinary_source_bindings": [
+      {
+        "path": "curvature/scripts/chart_port_candidate_check.py",
+        "bytes": 17859,
+        "sha256": "8cdc5b0e6d8cb3d38076ea8cb79547d082c45b07c2ef91072dce5e92d97f18c0",
+        "git_blob_sha": "4bda67d54c7e6ed74c765040a53efc3b53f3cebb"
+      },
+      {
+        "path": "curvature/scripts/chart_port_ci.py",
+        "bytes": 15441,
+        "sha256": "3aaafd12da605713e2f045adc743c6201f1e862c40487d878d32f54f8a3deb89",
+        "git_blob_sha": "62fe4f1754e87761aa72eccb7455913f23b30108"
+      },
+      {
+        "path": "curvature/scripts/test_chart_port_ci.py",
+        "bytes": 29030,
+        "sha256": "49f91240cc7ec2c8407117149c52cec2347310174fc37d54a08f3c5270dc4549",
+        "git_blob_sha": "6ee5a9cd69761a592e961974d96a95df60e6adf1"
+      }
+    ],
+    "setup_replay": "UNRUN",
+    "full_candidate_qualification": "UNRUN",
+    "task8_review": "PENDING",
     "point4": "OPEN",
     "general_targets": "OPEN"
   }

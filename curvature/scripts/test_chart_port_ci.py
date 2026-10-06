@@ -1,6 +1,8 @@
 """Ordinary driver tests with finite fixtures; no Lean, Lake or workflow execution."""
 from pathlib import Path
-import ast, hashlib, json, signal, tempfile, types, unittest
+import ast, hashlib, json, os, signal, tempfile, types, unittest
+from unittest.mock import patch
+import chart_port_candidate_check as admission
 
 HERE = Path(__file__).resolve().parent
 SOURCE = (HERE / 'chart_port_ci.py').read_text()
@@ -225,6 +227,243 @@ class OwnedResourceMonitor(unittest.TestCase):
             with self.assertRaisesRegex(AssertionError, 'required Lean 4.33 import companions'):
                 function('serial_compile', ns)('Fixture.Source', source, root / 'outputs', 'lean', {}, 'compile')
             self.assertEqual(calls[0][1:5], ['-j1', '-M5632', '-DautoImplicit=false', '-DmaxSynthPendingDepth=3'])
+
+
+# Exact public documentation blob from the fixed Batteries pin. No code is loaded.
+BATTERIES_README = (
+    b'# Batteries\n'
+    b'\n'
+    b'The "batteries included" extended library for Lean 4. This is a collection of data structures and tactics intended for use by both computer-science applications and mathematics applications of Lean 4.\n'
+    b'\n'
+    b'# Using `batteries`\n'
+    b'\n'
+    b'To use `batteries` in your project, add the following to your `lakefile.lean`:\n'
+    b'```lean\n'
+    b'require "leanprover-community" / "batteries" @ git "main"\n'
+    b'```\n'
+    b'Or add the following to your `lakefile.toml`:\n'
+    b'```toml\n'
+    b'[[require]]\n'
+    b'name = "batteries"\n'
+    b'scope = "leanprover-community"\n'
+    b'rev = "main"\n'
+    b'```\n'
+    b'\n'
+    b"Additionally, please make sure that you're using the version of Lean that the current version of `batteries` expects. The easiest way to do this is to copy the [`lean-toolchain`](./lean-toolchain) file from this repository to your project. Once you've added the dependency declaration, the command `lake update` checks out the current version of `batteries` and writes it to the Lake manifest file. Don't run this command again unless you're prepared to potentially also update your Lean compiler version, as it will retrieve the latest version of dependencies and add them to the manifest.\n"
+    b'\n'
+    b'# Build instructions\n'
+    b'\n'
+    b'* Get the newest version of `elan`. If you already have installed a version of Lean, you can run\n'
+    b'  ```sh\n'
+    b'  elan self update\n'
+    b'  ```\n'
+    b'  If the above command fails, or if you need to install `elan`, run\n'
+    b'  ```sh\n'
+    b'  curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh\n'
+    b'  ```\n'
+    b'  If this also fails, follow the instructions under `Regular install` [here](https://leanprover-community.github.io/get_started.html).\n'
+    b'* To build `batteries` run `lake build`.\n'
+    b'* To build and run all tests, run `lake test`.\n'
+    b'* To run the environment linter, run `lake lint`.\n'
+    b'* If you added a new file, run the command `scripts/updateBatteries.sh` to update the imports.\n'
+    b'\n'
+    b'# Documentation\n'
+    b'\n'
+    b'You can generate `batteries` documentation with\n'
+    b'\n'
+    b'```sh\n'
+    b'cd docs\n'
+    b'lake build Batteries:docs\n'
+    b'```\n'
+    b'\n'
+    b'The top-level HTML file will be located at `docs/doc/index.html`, though to actually expose the\n'
+    b'documentation you need to run an HTTP server (e.g. `python3 -m http.server`) in the `docs/doc` directory.\n'
+    b'\n'
+    b'Note that documentation for the latest nightly of `batteries` is also available as part of [the Mathlib 4\n'
+    b'documentation][mathlib4 docs].\n'
+    b'\n'
+    b'[mathlib4 docs]: https://leanprover-community.github.io/mathlib4_docs/Batteries.html\n'
+    b'\n'
+    b'# Contributing\n'
+    b'\n'
+    b'The first step to contribute is to create a fork of Batteries.\n'
+    b'Then add your contributions to a branch of your fork and make a PR to Batteries.\n'
+    b'Do not make your changes to the main branch of your fork, that may lead to complications on your end.\n'
+    b'\n'
+    b'Every pull request should have exactly one of the status labels `awaiting-review`, `awaiting-author`\n'
+    b'or `WIP` (in progress).\n'
+    b'To change the status label of a pull request, add a comment containing one of these options and\n'
+    b'_nothing else_.\n'
+    b'This will remove the previous label and replace it by the requested status label.\n'
+    b'These labels are used for triage.\n'
+    b'\n'
+    b'One of the easiest ways to contribute is to find a missing proof and complete it. The\n'
+    b'[`proof_wanted`](https://github.com/search?q=repo%3Aleanprover-community%2Fbatteries+language%3ALean+%2F^proof_wanted%2F&type=code)\n'
+    b'declaration documents statements that have been identified as being useful, but that have not yet\n'
+    b'been proven.\n'
+    b'\n'
+    b'### Mathlib Adaptations\n'
+    b'\n'
+    b'Batteries PRs often affect Mathlib, a key component of the Lean ecosystem.\n'
+    b'When Batteries changes in a significant way, Mathlib must adapt promptly.\n'
+    b'When necessary, Batteries contributors are expected to either create an adaptation PR on Mathlib, or ask for assistance for and to collaborate with this necessary process.\n'
+    b'\n'
+    b'Every Batteries PR has an automatically created [Mathlib Nightly Testing](https://github.com/leanprover-community/mathlib4-nightly-testing/) branch called `batteries-pr-testing-N` where `N` is the number of the Batteries PR.\n'
+    b'This is a clone of Mathlib where the Batteries requirement points to the Batteries PR branch instead of the main branch.\n'
+    b'Batteries uses this branch to check whether the Batteries PR needs Mathlib adaptations.\n'
+    b'A tag `builds-mathlib` will be issued when this branch needs no adaptation; a tag `breaks-mathlib` will be issued when the branch does need an adaptation.\n'
+    b'\n'
+    b'The first step in creating an adaptation PR is to switch to the `batteries-pr-testing-N` branch and push changes to that branch until the Mathlib CI process works.\n'
+    b'You may need to ask for write access to [Mathlib Nightly Testing](https://github.com/leanprover-community/mathlib4-nightly-testing/) to do that.\n'
+    b'Changes to the Batteries PR will be integrated automatically as you work on this process.\n'
+    b'Do not redirect the Batteries requirement to main until the Batteries PR is merged.\n'
+    b'Please ask questions to Batteries and Mathlib maintainers if you run into issues with this process.\n'
+    b'\n'
+    b'When everything works, create an adaptation PR on Mathlib from the `batteries-pr-testing-N` branch.\n'
+    b"You may need to ping a Mathlib maintainer to review the PR, ask if you don't know who to ping.\n"
+    b"Once the Mathlib adaptation PR and the original Batteries PR have been reviewed and accepted, the Batteries PR will be merged first. Then, the Mathlib PR's lakefile needs to be repointed to the Batteries main branch: change the Batteries line to\n"
+    b'```lean\n'
+    b'require "leanprover-community" / "batteries" @ git "main"\n'
+    b'```\n'
+    b'Once CI once again checks out on Mathlib, the adaptation PR can be merged using the regular Mathlib process.\n'
+)
+
+class PinnedDependencyLinkControls(unittest.TestCase):
+    def entries(self):
+        path, link_blob, _, target, target_blob, _ = admission.BATTERIES_LINK
+        return {path: ('120000', 'blob', link_blob), target: ('100644', 'blob', target_blob)}
+
+    def catalog(self, entries=None, pin=None, dep=None):
+        entries = self.entries() if entries is None else entries
+        dep = admission.BATTERIES_ROOT if dep is None else dep
+        with patch.object(admission, 'git', return_value=((pin or admission.BATTERIES_PIN)+'\n').encode()), \
+             patch.object(admission, 'tree_entries', return_value=entries):
+            return admission.dependency_links(Path('fixture'), {dep: entries})
+
+    def test_catalog_binds_exact_public_pin_modes_blobs_and_documentation_bytes(self):
+        self.assertEqual(admission.BATTERIES_PIN, '4488d40d070b9700d4d5a6aa342f0d40c31b2a2d')
+        self.assertEqual(admission.BATTERIES_LINK, ('docs/README.md', '32d46ee883b58d6a383eed06eb98f33aa6530ded',
+            b'../README.md', 'README.md', '4cd48268d7a14d8f5867862c549534cac08ebd45', 5427))
+        self.assertEqual(len(BATTERIES_README), 5427)
+        self.assertEqual(hashlib.sha1(b'blob 5427\0'+BATTERIES_README).hexdigest(), admission.BATTERIES_LINK[4])
+        self.assertEqual(set(self.catalog()), {admission.BATTERIES_ROOT+'/docs/README.md'})
+        self.assertEqual(admission.dependency_links(Path('fixture'), {}), {})
+
+    def test_wrong_pin_and_pinned_tree_inventory_are_rejected(self):
+        with self.assertRaisesRegex(AssertionError, 'pin differs'):
+            self.catalog(pin='0'*40)
+        with patch.object(admission, 'git', return_value=(admission.BATTERIES_PIN+'\n').encode()), \
+             patch.object(admission, 'tree_entries', return_value={}):
+            with self.assertRaisesRegex(AssertionError, 'inventory differs'):
+                admission.dependency_links(Path('fixture'), {admission.BATTERIES_ROOT: self.entries()})
+
+    def test_link_and_regular_target_declarations_are_exact(self):
+        cases = []
+        for path in ('docs/README.md', 'README.md'):
+            for entry in [('100755', 'blob', self.entries()[path][2]),
+                          (self.entries()[path][0], 'tree', self.entries()[path][2]),
+                          (self.entries()[path][0], 'blob', '0'*40)]:
+                entries = self.entries(); entries[path] = entry; cases.append(entries)
+            entries = self.entries(); del entries[path]; cases.append(entries)
+        entries = self.entries(); entries['README.md'] = self.entries()['docs/README.md']; cases.append(entries)
+        for entries in cases:
+            with self.subTest(entries=entries), self.assertRaises(AssertionError):
+                self.catalog(entries)
+
+    def test_additional_code_documentation_or_other_package_links_are_rejected(self):
+        for name in ('Batteries/Fixture.lean', 'docs/OTHER.md'):
+            entries = self.entries(); entries[name] = entries['docs/README.md']
+            with self.subTest(name=name), self.assertRaisesRegex(AssertionError, 'catalog differs'):
+                self.catalog(entries)
+        with self.assertRaisesRegex(AssertionError, 'Undeclared dependency link'):
+            self.catalog(dep='curvature/.lake/packages/other')
+
+    def exercise(self, *, raw=b'../README.md', target_data=BATTERIES_README, virtual=True,
+                 omit_link=False, omit_target=False, extra_link=None, target_link=False,
+                 public_link=False, regular_link=False):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); dep = root/admission.BATTERIES_ROOT
+            (dep/'docs').mkdir(parents=True)
+            link = dep/'docs/README.md'; target = dep/'README.md'
+            if not omit_target: target.write_bytes(target_data)
+            if not omit_link:
+                if virtual or regular_link: link.write_bytes(b'finite placeholder, never followed')
+                else: os.symlink(raw, os.fsencode(link))
+            public = {}
+            extra = root/extra_link if extra_link else None
+            if extra:
+                extra.parent.mkdir(parents=True, exist_ok=True)
+                extra.write_bytes(b'finite placeholder, never followed')
+                if public_link: public[extra_link] = self.entries()['docs/README.md']
+            virtual_paths = ({link} if virtual and not omit_link and not regular_link else set())
+            if target_link and not omit_target: virtual_paths.add(target)
+            if extra: virtual_paths.add(extra)
+            real_scandir = os.scandir
+            def scan(directory):
+                items = list(real_scandir(directory))
+                return [types.SimpleNamespace(path=i.path, is_symlink=lambda: True)
+                        if Path(i.path) in virtual_paths else i for i in items]
+            reads = []
+            def readlink(path):
+                self.assertIsInstance(path, bytes)
+                self.assertEqual(path, os.fsencode(link))
+                reads.append(path); return raw
+            with patch.object(admission, 'configuration_outputs', return_value=set()), \
+                 patch.object(admission, 'git', return_value=(admission.BATTERIES_PIN+'\n').encode()), \
+                 patch.object(admission, 'tree_entries', return_value=self.entries()), \
+                 patch.object(admission.os, 'scandir', side_effect=scan):
+                if virtual:
+                    with patch.object(admission.os, 'readlink', side_effect=readlink):
+                        result = admission.physical_inventory(root, public, {admission.BATTERIES_ROOT: self.entries()})
+                    self.assertEqual(len(reads), 1)
+                else:
+                    result = admission.physical_inventory(root, public, {admission.BATTERIES_ROOT: self.entries()})
+            return result
+
+    def test_finite_physical_link_is_accounted_with_raw_and_regular_target_identities(self):
+        receipt = self.exercise()
+        self.assertEqual(receipt['dependency_files'], 2)
+        self.assertEqual(receipt['declared_build_outputs'], [])
+        self.assertTrue(receipt['full_physical_inventory_checked'])
+        self.assertFalse(receipt['local_project_cache_admitted'])
+        self.assertEqual(receipt['declared_source_links'], [dict(path=admission.BATTERIES_ROOT+'/docs/README.md',
+            pin=admission.BATTERIES_PIN, link_blob=admission.BATTERIES_LINK[1], raw_bytes=12,
+            raw_sha256=digest(b'../README.md'), target=admission.BATTERIES_ROOT+'/README.md',
+            target_blob=admission.BATTERIES_LINK[4])])
+
+    def test_changed_raw_link_text_and_target_documentation_are_rejected(self):
+        for raw in (b'../README.md\n', b'../OTHER.md', b'../../README.md', b'/README.md'):
+            with self.subTest(raw=raw), self.assertRaisesRegex(AssertionError, 'link text differs'):
+                self.exercise(raw=raw)
+        for data in (b'changed documentation', b'!'+BATTERIES_README[1:]):
+            with self.subTest(size=len(data)), self.assertRaises(AssertionError):
+                self.exercise(target_data=data)
+
+    def test_missing_link_target_and_regularized_link_are_rejected(self):
+        for options in ({'omit_link': True}, {'omit_target': True}, {'regular_link': True}, {'target_link': True}):
+            with self.subTest(options=options), self.assertRaises(AssertionError):
+                self.exercise(**options)
+
+    def test_undeclared_public_and_code_physical_links_are_rejected(self):
+        for options in ({'extra_link': 'curvature/Fixture.lean', 'public_link': True},
+                        {'extra_link': admission.BATTERIES_ROOT+'/Batteries/Fixture.lean'},
+                        {'extra_link': admission.BATTERIES_ROOT+'/docs/OTHER.md'}):
+            with self.subTest(options=options), self.assertRaisesRegex(AssertionError, 'Physical symlink|Unexpected physical directory'):
+                self.exercise(**options)
+
+    def test_identity_git_reads_disable_replace_objects_per_command(self):
+        with patch.object(admission.subprocess, 'check_output', return_value=b'identity') as read:
+            self.assertEqual(admission.git(Path('fixture'), 'rev-parse', 'HEAD'), b'identity')
+        read.assert_called_once_with(['git', '--no-replace-objects', '-C', 'fixture', 'rev-parse', 'HEAD'])
+        for node in ast.walk(TREE):
+            if isinstance(node, ast.List) and node.elts and isinstance(node.elts[0], ast.Constant) and node.elts[0].value == 'git':
+                self.assertEqual(node.elts[1].value, '--no-replace-objects')
+
+    @unittest.skipUnless(os.name == 'posix', 'Genuine Unix symlink behavior UNRUN on Windows; no link-creation workaround')
+    def test_genuine_unix_link_and_raw_bytes(self):
+        self.assertEqual(len(self.exercise(virtual=False)['declared_source_links']), 1)
+        with self.assertRaisesRegex(AssertionError, 'link text differs'):
+            self.exercise(virtual=False, raw=b'../README.md\n')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

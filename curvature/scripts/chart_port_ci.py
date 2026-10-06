@@ -142,17 +142,17 @@ try:
     env_raw = run(['lake', 'env', 'python3', '-c', 'import json,os;print(json.dumps({k:os.environ.get(k, "") for k in ("LEAN_PATH", "LEAN_SRC_PATH")}))'], 'lake-environment', env=env)
     env.update(json.loads(env_raw))
     mathlib = PKG / '.lake/packages/mathlib'
-    actual_pin = subprocess.check_output(['git', '-C', str(mathlib), 'rev-parse', 'HEAD']).decode().strip()
+    actual_pin = subprocess.check_output(['git', '--no-replace-objects', '-C', str(mathlib), 'rev-parse', 'HEAD']).decode().strip()
     assert actual_pin == 'db584cd6d46c92f209a44c0f1c829460d327499d'
-    assert not subprocess.check_output(['git', '-C', str(mathlib), 'status', '--porcelain', '--untracked-files=no'])
+    assert not subprocess.check_output(['git', '--no-replace-objects', '-C', str(mathlib), 'status', '--porcelain', '--untracked-files=no'])
     manifest = json.loads((PKG / 'lake-manifest.json').read_text())
     dependency_roots = []
     dependency_inventory = {}
     for package in manifest['packages']:
         if package['type'] == 'git':
             dep = PKG / manifest['packagesDir'] / package['name']
-            assert subprocess.check_output(['git', '-C', str(dep), 'rev-parse', 'HEAD']).decode().strip() == package['rev']
-            assert not subprocess.check_output(['git', '-C', str(dep), 'status', '--porcelain', '--untracked-files=no'])
+            assert subprocess.check_output(['git', '--no-replace-objects', '-C', str(dep), 'rev-parse', 'HEAD']).decode().strip() == package['rev']
+            assert not subprocess.check_output(['git', '--no-replace-objects', '-C', str(dep), 'status', '--porcelain', '--untracked-files=no'])
             dependency_roots.append(dep.resolve())
             dependency_inventory[dep.relative_to(ROOT).as_posix()] = tree_entries(dep, 'HEAD')
     configured_admission = admit(ROOT, args.expected_sha, args.expected_tree, dependency_inventory)
@@ -191,7 +191,7 @@ try:
     def verify_dependency_source(source):
         dep = next(p for p in dependency_roots if source.is_relative_to(p))
         rel = source.relative_to(dep).as_posix()
-        blob = subprocess.check_output(['git', '-C', str(dep), 'rev-parse', 'HEAD:' + rel]).decode().strip()
+        blob = subprocess.check_output(['git', '--no-replace-objects', '-C', str(dep), 'rev-parse', 'HEAD:' + rel]).decode().strip()
         data = source.read_bytes()
         assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == blob
     cache_order, seen, active = [], set(), set()
@@ -250,7 +250,7 @@ try:
     final = admit(ROOT, args.expected_sha, args.expected_tree, dependency_inventory)
     assert {k:v for k,v in final.items() if k != 'physical_inventory'} == {k:v for k,v in admission.items() if k != 'physical_inventory'}
     (EVIDENCE / 'final-physical-admission.json').write_text(json.dumps(final, indent=2) + '\n')
-    assert not subprocess.check_output(['git', '-C', str(mathlib), 'status', '--porcelain', '--untracked-files=no'])
+    assert not subprocess.check_output(['git', '--no-replace-objects', '-C', str(mathlib), 'status', '--porcelain', '--untracked-files=no'])
     receipt.update(build='PASSED', full_candidate_qualification='PASSED', fresh_local_modules=70, fresh_probe=1, fallback_mathlib_modules=len(missing_order),
                    ordinary_dependency_artifacts='pinned cache imports; not a full dependency rebuild',
                    cgroup_peak_memory_bytes=int((cgroup / 'memory.peak').read_text()), owner_completion='all child stages reaped and drained')
