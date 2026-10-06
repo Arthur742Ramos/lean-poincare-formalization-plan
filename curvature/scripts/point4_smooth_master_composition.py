@@ -32,6 +32,8 @@ MOCK_ROUTE_PARENT = '22f0f8a3c353f22600f94370a505bde0d10ea2c4'
 MOCK_ROUTE_TREE = 'd48ce9af6ee5cfecf3bda717b6ede24942225cd2'
 LOCALIZATION_MOCK_COMMAND = '          python3 curvature/scripts/point4_c2_metric_localization_mock_test.py 2>&1 | tee /tmp/point4-c2-metric-localization-adversarial.log\n'
 LOCALIZATION_MOCK_ROUTE_COMMAND = '          python3 curvature/scripts/point4_c2_metric_localization_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json --historical-localization-mocks 2>&1 | tee /tmp/point4-c2-metric-localization-adversarial.log\n'
+LOCALIZATION_PROBE_COMMAND = '          lake env lean scripts/point4_c2_metric_localization_probe.lean 2>&1 | tee /tmp/point4-c2-metric-localization-axioms.log\n'
+LOCALIZATION_CONTRACT_BUILD_COMMAND = '          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.PointFourContract 2>&1 | tee /tmp/point4-c2-metric-localization-contract-build.log\n'
 STARTUP_REPAIR_PARENT = '1664872ce762ee027b76cb515befb0ae829b2711'
 STARTUP_REPAIR_TREE = '6d74e9612cf6e16f2d027012cede68e5e0a23483'
 STARTUP_ANCHOR = '    timeout-minutes: 350\n    steps:\n'
@@ -133,6 +135,8 @@ def transform(path, original, helper_sha, fixture_sha=None, workflow_sha=None):
         assert source.count(STARTUP_ANCHOR) == 1 and 'PYTHONDONTWRITEBYTECODE' not in source
         assert source.count(LOCALIZATION_MOCK_COMMAND) == 1 and LOCALIZATION_MOCK_FLAG not in source
         source=source.replace(LOCALIZATION_MOCK_COMMAND,LOCALIZATION_MOCK_ROUTE_COMMAND,1)
+        assert source.count(LOCALIZATION_PROBE_COMMAND) == 1 and LOCALIZATION_CONTRACT_BUILD_COMMAND not in source
+        source=source.replace(LOCALIZATION_PROBE_COMMAND,LOCALIZATION_CONTRACT_BUILD_COMMAND+LOCALIZATION_PROBE_COMMAND,1)
         return source.replace(STARTUP_ANCHOR, STARTUP_ANCHOR.replace('    steps:\n', STARTUP_ENV+'    steps:\n'), 1).encode()
     if path == WORKFLOW:
         assert source.count(WF_ANCHOR) == 1 and WF_STEP not in source

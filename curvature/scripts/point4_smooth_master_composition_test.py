@@ -55,7 +55,7 @@ class OrdinaryCompositionTests(unittest.TestCase):
                 if path==comp.WORKFLOW:
                     self.assertEqual(changed.replace(comp.WF_STEP.encode(),b'',1).replace(comp.STARTUP_ENV.encode(),b'',1),original)
                 elif path==comp.LOCALIZATION_WORKFLOW:
-                    self.assertEqual(changed.replace(comp.STARTUP_ENV.encode(),b'',1).replace(comp.LOCALIZATION_MOCK_ROUTE_COMMAND.encode(),comp.LOCALIZATION_MOCK_COMMAND.encode(),1),original)
+                    self.assertEqual(changed.replace(comp.LOCALIZATION_CONTRACT_BUILD_COMMAND.encode(),b'',1).replace(comp.STARTUP_ENV.encode(),b'',1).replace(comp.LOCALIZATION_MOCK_ROUTE_COMMAND.encode(),comp.LOCALIZATION_MOCK_COMMAND.encode(),1),original)
                 else:
                     hook=comp.bootstrap(path,helper_sha).encode()
                     self.assertEqual(changed.count(hook),1)
@@ -82,7 +82,7 @@ class OrdinaryCompositionTests(unittest.TestCase):
         original=read(comp.LOCALIZATION_WORKFLOW)
         self.assertEqual(comp.blob_id(original),master[comp.LOCALIZATION_WORKFLOW][1])
         changed=comp.transform(comp.LOCALIZATION_WORKFLOW,original,'0'*64)
-        self.assertEqual(changed.replace(comp.STARTUP_ENV.encode(),b'',1).replace(comp.LOCALIZATION_MOCK_ROUTE_COMMAND.encode(),comp.LOCALIZATION_MOCK_COMMAND.encode(),1),original)
+        self.assertEqual(changed.replace(comp.LOCALIZATION_CONTRACT_BUILD_COMMAND.encode(),b'',1).replace(comp.STARTUP_ENV.encode(),b'',1).replace(comp.LOCALIZATION_MOCK_ROUTE_COMMAND.encode(),comp.LOCALIZATION_MOCK_COMMAND.encode(),1),original)
         self.assertEqual(changed.count(comp.STARTUP_ENV.encode()),1)
         self.assertLess(changed.index(comp.STARTUP_ENV.encode()),changed.index(b'    steps:\n'))
         self.assertLess(changed.index(comp.STARTUP_ENV.encode()),changed.index(b'python3 curvature/scripts/'))

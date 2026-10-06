@@ -85,6 +85,7 @@ jobs:
         working-directory: curvature
         run: |
           set -o pipefail
+          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.PointFourContract 2>&1 | tee /tmp/point4-c2-metric-localization-contract-build.log
           lake env lean scripts/point4_c2_metric_localization_probe.lean 2>&1 | tee /tmp/point4-c2-metric-localization-axioms.log
           python3 - <<'PY_CHECK'
           import pathlib, sys

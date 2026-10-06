@@ -509,7 +509,7 @@ class RealComposedGateTests(unittest.TestCase):
 import hashlib as _composition_hashlib, pathlib as _composition_pathlib, stat as _composition_stat, sys as _composition_sys
 _composition_file = _composition_pathlib.Path(__file__).resolve().parents[2] / 'curvature/scripts/point4_smooth_master_composition.py'
 assert _composition_stat.S_ISREG(_composition_file.lstat().st_mode) and not _composition_file.lstat().st_mode & 0o111
-assert _composition_hashlib.sha256(_composition_file.read_bytes()).hexdigest() == '20472b3e418bd38ce2449d42750da757a489dc09552c387d42ccc2368f10bf2d', 'Composition executable binding changed'
+assert _composition_hashlib.sha256(_composition_file.read_bytes()).hexdigest() == '7cfdfab8b5127134fae5864843bf6d5eb3369bfcc62ab7aa9b728b63b3ea8d25', 'Composition executable binding changed'
 import point4_smooth_master_composition as _smooth_master
 if __name__ == '__main__':
     _smooth_master.run_support_fixtures(sys.argv[1:])
