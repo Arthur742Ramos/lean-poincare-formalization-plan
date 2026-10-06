@@ -3254,7 +3254,7 @@
   "proof_packet_library_version": 3,
   "historical_source_binding": "PENDING",
   "full_master_admission": "PENDING",
-  "candidate_build": "Published a36 passed source admission, all 25 Linux driver tests and official Lean 4.33 setup; failed owned compiler local-0; actual diagnostic unavailable; logging correction hosted UNRUN",
+  "candidate_build": "Published 31dddda passed all 33 Linux ordinary tests/source admission/official Lean 4.33 setup, then failed cache-bootstrap-4 with an unclassified second Lean image; identity snapshot and exact query predicate proposal hosted UNRUN",
   "point4": "OPEN",
   "general_targets": "OPEN",
   "scope": "constant downgraded smooth metric, actual chart good set, differentiable section at evaluation",
@@ -3774,6 +3774,78 @@
     ],
     "unchanged": "resource monitor, strict flags, validation functions, source admission, Lean proof bytes, full archive step and setup workflow",
     "task8_review": "PENDING through parent",
+    "hosted_replay": "UNRUN",
+    "full_candidate_qualification": "UNRUN",
+    "point4": "OPEN",
+    "general_targets": "OPEN"
+  },
+  "owned_process_identity_and_prefix_query_proposal": {
+    "base_commit": "31dddda498a4ba9972f62416a42f7fb9c8cb5554",
+    "base_tree": "caf12a95a380f604c14c8e11ded065fdab744bae",
+    "parent_reconciled_review": {
+      "pure_predicate": "Previously source-approved within sampling limits; byte-identical",
+      "prior_combined_integration": "WITHHELD for two races",
+      "corrected_integration": "PENDING independent task8 review through parent"
+    },
+    "correction": "Retain recheck executable before later cmdline read; count Lean from either initial or recheck executable observation",
+    "reproduced_before_correction": {
+      "discovered": 48,
+      "failures": 1,
+      "errors": 1,
+      "skipped": 2,
+      "exit_code": 1
+    },
+    "native_failure": {
+      "run": 37483377428,
+      "stage": "cache-bootstrap-4",
+      "module": "Cache.Hashing",
+      "exit_code": -9,
+      "error": "More than one Lean compiler in an owned stage",
+      "actual_counted_PID_argv_identity": "UNKNOWN"
+    },
+    "diagnostic": "Before cleanup retain all observed owned PID/starttime/executable/image SHA256/full NUL argv/PPID/pgrp/session/state/RSS/timestamps and identity recheck; explicit read errors and races",
+    "predicate": "Separately reviewable; only stable exact two-argument --print-prefix process using the same verified official compiler binary, direct parentage and owned session/group; compilation owner argv must match actual stage",
+    "query_argv0_spellings": [
+      "lean",
+      "exact verified compiler_path"
+    ],
+    "fail_closed": "Wrong argv, wrong binary/hash/image identity/parentage, missing owner, pre-exec inherited compiler argv, unknown identity and races cannot earn exemption; other Lean images remain counted",
+    "source_basis": {
+      "mathlib_pin": "db584cd6d46c92f209a44c0f1c829460d327499d",
+      "cache_initializer": "Cache/IO.lean:97-98",
+      "official_Lean_commit": "d8b18978322de05a8f3dba51ef03cf5461676c17",
+      "official_Lean_query": "src/Lean/Shell.lean:470-472"
+    },
+    "unchanged": "RSS counts every owned process; cgroup CPU/memory, stage deadlines/cleanup, strict compiler flags, proof/admission/source pins and all Lean files",
+    "ordinary_tests": {
+      "discovered": 48,
+      "passed": 46,
+      "skipped": 2,
+      "scope": "Finite ordinary synthetic fixtures and existing driver controls",
+      "real_Linux_process_behavior": "UNRUN on Windows",
+      "compiler_Lake_workflow_execution": false,
+      "source_bindings": [
+        {
+          "path": "curvature/scripts/chart_port_candidate_check.py",
+          "bytes": 22641,
+          "sha256": "022bc37173feed547d805432a835b9e9960e44357f918dfee6bdaac0de6b76f6",
+          "git_blob": "b815d534ae1811364fc8564a8a475c109795b111"
+        },
+        {
+          "path": "curvature/scripts/chart_port_ci.py",
+          "bytes": 24539,
+          "sha256": "5cd2160296cabe0aca5f20038c957a67aae70e2042afeb496a2c4ca2b683070a",
+          "git_blob": "b2bdafd05b9a8cf71258c708e46a47f83bc2c2bd"
+        },
+        {
+          "path": "curvature/scripts/test_chart_port_ci.py",
+          "bytes": 68702,
+          "sha256": "379137720b1c21d58459885c9cb792ff58f597a5df04639acd395b2f604e3f0e",
+          "git_blob": "33313d2b49727141b76903ea275fabc1a658d853"
+        }
+      ]
+    },
+    "task8_review": "Corrected snapshot/counting integration PENDING through parent; previously source-approved predicate byte-identical",
     "hosted_replay": "UNRUN",
     "full_candidate_qualification": "UNRUN",
     "point4": "OPEN",

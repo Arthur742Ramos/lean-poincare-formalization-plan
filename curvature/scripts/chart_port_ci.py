@@ -27,6 +27,67 @@ class _SetupOnlyComplete(Exception):
 def save():
     (EVIDENCE / 'run.json').write_text(json.dumps(receipt, indent=2) + '\n')
 
+def owned_process_identity(p, initial_stat):
+    # Diagnostic reads precede cleanup. A failed/raced read never earns an exemption.
+    row = dict(pid=int(p.name), observed_at=time.time(), state=initial_stat[0],
+        ppid=int(initial_stat[1]), pgrp=int(initial_stat[2]), session=int(initial_stat[3]),
+        starttime_ticks=int(initial_stat[19]), rss_bytes=int(initial_stat[21]) * os.sysconf('SC_PAGE_SIZE'),
+        stable=False, errors=[])
+    try:
+        row['exe'] = os.readlink(p / 'exe')
+        image = (p / 'exe').stat()
+        row['image_identity'] = [image.st_dev, image.st_ino, image.st_size, image.st_mtime_ns, image.st_ctime_ns]
+        raw = (p / 'cmdline').read_bytes()
+        row['cmdline_hex'] = raw.hex()
+        if not raw or not raw.endswith(b'\0'):
+            raise ValueError('Empty or unterminated process argv')
+        row['argv'] = [arg.decode('utf8') for arg in raw[:-1].split(b'\0')]
+        if Path(row['exe']).name == 'lean':
+            row['exe_sha256'] = digest((p / 'exe').read_bytes())
+        again = (p / 'stat').read_text().rsplit(')', 1)[1].split()
+        row['recheck'] = dict(state=again[0], ppid=int(again[1]), pgrp=int(again[2]),
+            session=int(again[3]), starttime_ticks=int(again[19]))
+        # Retain each observed field before attempting the next fallible read.
+        row['recheck']['exe'] = os.readlink(p / 'exe')
+        row['recheck']['cmdline_hex'] = (p / 'cmdline').read_bytes().hex()
+        image = (p / 'exe').stat()
+        row['recheck']['image_identity'] = [image.st_dev, image.st_ino, image.st_size, image.st_mtime_ns, image.st_ctime_ns]
+        keys = ('ppid', 'pgrp', 'session', 'starttime_ticks', 'exe', 'cmdline_hex', 'image_identity')
+        row['stable'] = all(row[k] == row['recheck'][k] for k in keys)
+        if not row['stable']:
+            row['errors'].append(dict(type='IdentityRace', message='Process identity changed during observation'))
+    except (OSError, ValueError, UnicodeError, IndexError) as exc:
+        row['errors'].append(dict(type=type(exc).__name__, message=str(exc)))
+    row['rechecked_at'] = time.time()
+    return row
+
+def is_exact_official_prefix_query(row, owner, stage_argv, official):
+    # Independently reviewable predicate: setting this to False retains diagnostics
+    # and the original strict compiler count. No grace period or pre-exec exclusion.
+    try:
+        if official['compiler_commit'] != 'd8b18978322de05a8f3dba51ef03cf5461676c17':
+            return False
+        path, identity = official['compiler_path'], official['compiler_sha256']
+        if stage_argv[0] != path or not all(flag in stage_argv for flag in ('-j1', '-M5632', '-o', '-c')):
+            return False
+        if not stage_argv[-1].endswith('.lean'):
+            return False
+        for process in (row, owner):
+            if not process['stable'] or process['errors'] or process['state'] not in ('R', 'S', 'D', 'I'):
+                return False
+            if process['recheck']['state'] not in ('R', 'S', 'D', 'I'):
+                return False
+            if process['exe'] != path or process['exe_sha256'] != identity:
+                return False
+        return (row['pid'] != owner['pid'] and row['ppid'] == owner['pid']
+            and row['session'] == row['pgrp'] == owner['session'] == owner['pgrp'] == owner['pid']
+            and row['starttime_ticks'] >= owner['starttime_ticks']
+            and row['image_identity'] == owner['image_identity']
+            and owner['argv'] == list(stage_argv)
+            and row['argv'] in (['lean', '--print-prefix'], [path, '--print-prefix']))
+    except (KeyError, TypeError, IndexError):
+        return False
+
 def run(argv, label, cwd=PKG, env=None, timeout=600):
     stage = dict(argv=argv, cwd=str(cwd), timeout_seconds=timeout, started=time.time(), status='STARTING', peak_rss_bytes=0)
     receipt['stages'].append(stage)
@@ -39,7 +100,7 @@ def run(argv, label, cwd=PKG, env=None, timeout=600):
             stage.update(pid=proc.pid, status='RUNNING')
             save()
             while proc.poll() is None:
-                rss, compilers = 0, 0
+                rss, compilers, identities = 0, 0, []
                 for p in Path('/proc').iterdir():
                     if not p.name.isdigit():
                         continue
@@ -48,13 +109,25 @@ def run(argv, label, cwd=PKG, env=None, timeout=600):
                         if int(stat[3]) != proc.pid:  # session ID, not command text
                             continue
                         rss += int(stat[21]) * os.sysconf('SC_PAGE_SIZE')
-                        exe = os.readlink(p / 'exe')
-                        compilers += Path(exe).name == 'lean'
+                        identities.append(owned_process_identity(p, stat))
                     except (FileNotFoundError, ProcessLookupError, PermissionError):
-                        continue
+                        continue  # No owned identity was observed by this stat read.
+                owner = next((row for row in identities if row['pid'] == proc.pid), {})
+                for row in identities:
+                    # An unreadable executable is conservatively counted. Once a
+                    # Lean image was observed, disappearance/race still counts it.
+                    counted = 'exe' not in row or any(Path(exe).name == 'lean'
+                        for exe in (row.get('exe'), row.get('recheck', {}).get('exe')) if exe is not None)
+                    query = counted and is_exact_official_prefix_query(row, owner, argv, receipt)
+                    row.update(counted_compiler=bool(counted and not query), exact_official_prefix_query=bool(query))
+                    compilers += row['counted_compiler']
+                stage['owned_process_snapshot'] = dict(observed_at=time.time(),
+                    owner_pid=proc.pid, counted_compilers=compilers, processes=identities)
                 stage['peak_rss_bytes'] = max(stage['peak_rss_bytes'], rss)
                 if compilers > 1:
                     raise RuntimeError('More than one Lean compiler in an owned stage')
+                if identities and not owner:
+                    raise RuntimeError('Owned process identities observed without compiler owner identity')
                 if rss > LIMIT:
                     raise RuntimeError('Owned process tree exceeds 6 GiB RSS')
                 if time.monotonic() - start > timeout:

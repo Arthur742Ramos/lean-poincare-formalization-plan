@@ -207,6 +207,8 @@ class OwnedResourceMonitor(unittest.TestCase):
                 os=types.SimpleNamespace(sysconf=lambda _: 4096, killpg=kill,
                     readlink=lambda p: '/bin/lean' if extra_compiler or Path(p).parent.name == '100' else '/bin/child'))
             failure = None
+            function('owned_process_identity', ns)
+            function('is_exact_official_prefix_query', ns)
             try: function('run', ns)(['fixture'], 'stage')
             except BaseException as exc: failure = exc
             return receipt['stages'][0], events, failure
@@ -895,6 +897,230 @@ class FirstCompilerFailureLogging(unittest.TestCase):
         serial=ast.get_source_segment(SOURCE,next(n for n in TREE.body if isinstance(n,ast.FunctionDef) and n.name=='serial_compile'))
         self.assertIn('compiler_run(argv, label, source, name, env=env)',serial)
         self.assertIn("'full-type-proof-axiom-probe', source, row['module'], env=env",SOURCE)
+
+class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
+    path = '/official/bin/lean'
+    stage_argv = [path, '-j1', '-M5632', '-o', 'fresh.olean', '-c', 'fresh.c', 'fixture.lean']
+
+    def rows(self):
+        import copy
+        owner = dict(pid=100, ppid=50, pgrp=100, session=100, starttime_ticks=20,
+            exe=self.path, exe_sha256='a'*64, argv=list(self.stage_argv),
+            image_identity=[1,2,3,4,5], stable=True, errors=[], state='R', recheck=dict(state='S'))
+        query = copy.deepcopy(owner)
+        query.update(pid=101, ppid=100, starttime_ticks=21, argv=['lean','--print-prefix'])
+        official = dict(compiler_path=self.path, compiler_sha256='a'*64,
+            compiler_commit='d8b18978322de05a8f3dba51ef03cf5461676c17')
+        return query, owner, official
+
+    def classify(self, query, owner, official, argv=None):
+        return function('is_exact_official_prefix_query', {})(query, owner,
+            self.stage_argv if argv is None else argv, official)
+
+    def test_exact_executed_same_official_binary_query_only(self):
+        query,owner,official=self.rows()
+        self.assertTrue(self.classify(query,owner,official))
+        query['argv']=[self.path,'--print-prefix']
+        self.assertTrue(self.classify(query,owner,official))
+
+    def test_actual_second_compiler_and_inherited_preexec_image_count(self):
+        query,owner,official=self.rows()
+        for argv in (list(self.stage_argv), [self.path,'second.lean'], ['lean','--print-prefix','extra'],
+                ['unknown','--print-prefix'], ['lean','--version'], []):
+            with self.subTest(argv=argv):
+                query['argv']=argv
+                self.assertFalse(self.classify(query,owner,official))
+
+    def test_wrong_executable_hash_image_or_official_commit_reject(self):
+        for key,value in (('exe','/other/bin/lean'),('exe_sha256','b'*64),('image_identity',[9,2,3,4,5])):
+            query,owner,official=self.rows();query[key]=value
+            self.assertFalse(self.classify(query,owner,official),key)
+        query,owner,official=self.rows();official['compiler_commit']='wrong'
+        self.assertFalse(self.classify(query,owner,official))
+
+    def test_wrong_parentage_session_group_or_reused_pid_reject(self):
+        for key,value in (('pid',100),('ppid',99),('session',200),('pgrp',200),('starttime_ticks',19)):
+            query,owner,official=self.rows();query[key]=value
+            self.assertFalse(self.classify(query,owner,official),key)
+        query,owner,official=self.rows();owner['argv']=['other']
+        self.assertFalse(self.classify(query,owner,official))
+
+    def test_unknown_raced_disappeared_or_zombie_identity_reject(self):
+        for target in ('query','owner'):
+            for key,value in (('stable',False),('errors',[dict(type='FileNotFoundError')]),
+                    ('state','Z'),('recheck',dict(state='Z'))):
+                query,owner,official=self.rows();(query if target=='query' else owner)[key]=value
+                self.assertFalse(self.classify(query,owner,official),(target,key))
+        query,owner,official=self.rows()
+        del query['exe_sha256']
+        self.assertFalse(self.classify(query,owner,official))
+        self.assertFalse(self.classify({},owner,official))
+        self.assertFalse(self.classify(owner,{},{}))
+
+    def test_noncompiler_or_unverified_stage_cannot_exempt(self):
+        query,owner,official=self.rows()
+        for argv in ([self.path,'--print-prefix'], ['lean']+self.stage_argv[1:],
+                self.stage_argv[:-1]+['not-source'], []):
+            self.assertFalse(self.classify(query,owner,official,argv))
+        self.assertFalse(self.classify(query,owner,{}))
+
+    def exercise(self, *, child_argv=None, race=False, disappear=False, unknown=False, snapshot_only=False, pages=2, overdue=False, missing_owner=False, exe_race=False, reverse_exe_race=False):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);procdir=root/'proc';procdir.mkdir()
+            image_bytes=b'finite synthetic executed official executable identity'
+            image=root/'official-image';image.write_bytes(image_bytes)
+            def stat(pid, session=100):
+                fields=['S']+['0']*50;fields[1]='50' if pid==100 else '100'
+                fields[2]=str(session);fields[3]=str(session);fields[19]=str(20 if pid==100 else 21);fields[21]=str(pages)
+                (procdir/str(pid)/'stat').write_text(str(pid)+' (fixture) '+' '.join(fields))
+            for pid,args in ((100,self.stage_argv),(101,['lean','--print-prefix'] if child_argv is None else child_argv)):
+                if missing_owner and pid==100:continue
+                p=procdir/str(pid);p.mkdir();stat(pid)
+                (p/'cmdline').write_bytes(b'\0'.join(x.encode() for x in args)+b'\0')
+                (p/'exe').write_bytes(image_bytes)
+            receipt=dict(stages=[],compiler_path=self.path,compiler_sha256=hashlib.sha256(image_bytes).hexdigest(),
+                compiler_commit='d8b18978322de05a8f3dba51ef03cf5461676c17')
+            events=[]
+            class Proc:
+                pid=100;returncode=0;polls=0
+                def poll(self):
+                    self.polls+=1
+                    return None if self.polls==1 else 0
+                def wait(self,timeout):events.append(('wait',timeout));return self.returncode
+            def kill(pid,sig):
+                events.append(('kill',pid,sig))
+                for n in (100,101):
+                    if (procdir/str(n)).exists():stat(n,0)
+            exe_reads=0
+            def readlink(p):
+                nonlocal exe_reads
+                if Path(p).parent.name=='101':
+                    exe_reads+=1
+                    if unknown:raise PermissionError('finite unreadable executable')
+                    if exe_race and exe_reads==1:return '/official/bin/helper'
+                    if reverse_exe_race and exe_reads==2:return '/official/bin/helper'
+                return self.path
+            clock=iter([0,601,602] if overdue else [0,1,2])
+            ns=dict(Path=lambda p:procdir if str(p)=='/proc' else Path(p),EVIDENCE=root,PKG=root,
+                LIMIT=6*1024**3,receipt=receipt,save=lambda:None,
+                subprocess=types.SimpleNamespace(Popen=lambda *a,**kw:Proc()),
+                signal=types.SimpleNamespace(SIGKILL=9),digest=lambda b:hashlib.sha256(b).hexdigest(),
+                time=types.SimpleNamespace(time=lambda:123,monotonic=lambda:next(clock),sleep=lambda _:None),
+                os=types.SimpleNamespace(readlink=readlink,killpg=kill,sysconf=lambda _:4096))
+            function('owned_process_identity',ns);function('is_exact_official_prefix_query',ns)
+            original_stat,original_read=Path.stat,Path.read_bytes
+            reads=0
+            def image_stat(p,*a,**kw):
+                return original_stat(image) if p.name=='exe' else original_stat(p,*a,**kw)
+            def cmdline_read(p):
+                nonlocal reads
+                if p.name=='cmdline' and p.parent.name=='101':
+                    reads+=1
+                    if reads==2:
+                        if disappear:raise FileNotFoundError('finite process disappeared before recheck')
+                        if race:return b'lean\0second.lean\0'
+                return original_read(p)
+            failure=None
+            with patch.object(Path,'stat',image_stat),patch.object(Path,'read_bytes',cmdline_read):
+                if snapshot_only:
+                    fields=(procdir/'101/stat').read_text().rsplit(')',1)[1].split()
+                    return ns['owned_process_identity'](procdir/'101',fields)
+                try:function('run',ns)(list(self.stage_argv),'fixture')
+                except BaseException as exc:failure=exc
+            return receipt['stages'][0],events,failure
+
+    def test_snapshot_contains_full_identity_rechecks_and_raw_argv(self):
+        row=self.exercise(snapshot_only=True)
+        self.assertTrue(row['stable']);self.assertEqual(row['errors'],[])
+        self.assertEqual(row['argv'],['lean','--print-prefix'])
+        self.assertEqual(row['cmdline_hex'],b'lean\0--print-prefix\0'.hex())
+        for field in ('pid','starttime_ticks','exe','exe_sha256','ppid','pgrp','session','state',
+                'observed_at','rechecked_at','rss_bytes','image_identity','recheck'):
+            self.assertIn(field,row)
+
+    def test_legitimate_query_classified_but_rss_and_cleanup_include_it(self):
+        stage,events,failure=self.exercise()
+        self.assertIsNone(failure);self.assertEqual(stage['peak_rss_bytes'],4*4096)
+        snap=stage['owned_process_snapshot'];self.assertEqual(snap['counted_compilers'],1)
+        self.assertEqual([r['exact_official_prefix_query'] for r in snap['processes']],[False,True])
+        self.assertTrue(stage['owner_reaped']);self.assertEqual(stage['remaining_session_pids'],[])
+        self.assertEqual(events,[('kill',100,9),('wait',10)])
+
+    def test_query_remains_subject_to_rss_limit_and_stage_timeout(self):
+        for kwargs,exception in ((dict(pages=10**9),RuntimeError),(dict(overdue=True),TimeoutError)):
+            stage,events,failure=self.exercise(**kwargs)
+            self.assertIsInstance(failure,exception)
+            self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],1)
+            self.assertTrue(stage['owned_process_snapshot']['processes'][1]['exact_official_prefix_query'])
+            self.assertTrue(stage['owner_reaped']);self.assertEqual(len(events),2)
+
+    def test_missing_owner_identity_cannot_admit_observed_child(self):
+        stage,_,failure=self.exercise(missing_owner=True)
+        self.assertIsInstance(failure,RuntimeError)
+        self.assertEqual(str(failure),'Owned process identities observed without compiler owner identity')
+        self.assertFalse(stage['owned_process_snapshot']['processes'][0]['exact_official_prefix_query'])
+
+    def test_actual_second_compiler_rejects_with_snapshot_before_cleanup(self):
+        stage,events,failure=self.exercise(child_argv=[self.path,'second.lean'])
+        self.assertIsInstance(failure,RuntimeError)
+        self.assertEqual(str(failure),'More than one Lean compiler in an owned stage')
+        self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],2)
+        self.assertEqual(stage['owned_process_snapshot']['processes'][1]['argv'],[self.path,'second.lean'])
+        self.assertEqual(stage['error'],str(failure));self.assertEqual(stage['exception_type'],'RuntimeError')
+        self.assertTrue(stage['owner_reaped']);self.assertEqual(len(events),2)
+        self.assertEqual(stage['stdout_sha256'],hashlib.sha256(b'').hexdigest())
+        self.assertEqual(stage['stderr_sha256'],hashlib.sha256(b'').hexdigest())
+
+    def test_nonlean_to_lean_recheck_race_is_counted_and_rejected(self):
+        stage,events,failure=self.exercise(exe_race=True)
+        self.assertIsInstance(failure,RuntimeError)
+        self.assertEqual(str(failure),'More than one Lean compiler in an owned stage')
+        row=stage['owned_process_snapshot']['processes'][1]
+        self.assertEqual(row['exe'],'/official/bin/helper')
+        self.assertEqual(row['recheck']['exe'],self.path)
+        self.assertEqual(row['errors'][0]['type'],'IdentityRace')
+        self.assertFalse(row['stable']);self.assertFalse(row['exact_official_prefix_query'])
+        self.assertTrue(row['counted_compiler'])
+        self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],2)
+        self.assertTrue(stage['owner_reaped']);self.assertEqual(events,[('kill',100,9),('wait',10)])
+
+    def test_recheck_lean_survives_later_cmdline_read_error_and_is_counted(self):
+        row=self.exercise(exe_race=True,disappear=True,snapshot_only=True)
+        self.assertEqual(row['exe'],'/official/bin/helper')
+        self.assertEqual(row['recheck']['exe'],self.path)
+        self.assertNotIn('cmdline_hex',row['recheck'])
+        self.assertEqual(row['errors'][0]['type'],'FileNotFoundError')
+        self.assertFalse(row['stable'])
+        stage,events,failure=self.exercise(exe_race=True,disappear=True)
+        self.assertIsInstance(failure,RuntimeError)
+        self.assertEqual(str(failure),'More than one Lean compiler in an owned stage')
+        row=stage['owned_process_snapshot']['processes'][1]
+        self.assertEqual(row['recheck']['exe'],self.path)
+        self.assertTrue(row['counted_compiler']);self.assertFalse(row['exact_official_prefix_query'])
+        self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],2)
+        self.assertEqual(stage['error'],str(failure));self.assertEqual(stage['exception_type'],'RuntimeError')
+        self.assertEqual(stage['stdout_sha256'],hashlib.sha256(b'').hexdigest())
+        self.assertEqual(stage['stderr_sha256'],hashlib.sha256(b'').hexdigest())
+        self.assertTrue(stage['owner_reaped']);self.assertEqual(events,[('kill',100,9),('wait',10)])
+
+    def test_initial_lean_remains_counted_after_nonlean_recheck(self):
+        stage,_,failure=self.exercise(reverse_exe_race=True)
+        self.assertIsInstance(failure,RuntimeError)
+        row=stage['owned_process_snapshot']['processes'][1]
+        self.assertEqual(row['exe'],self.path)
+        self.assertEqual(row['recheck']['exe'],'/official/bin/helper')
+        self.assertTrue(row['counted_compiler']);self.assertFalse(row['exact_official_prefix_query'])
+        self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],2)
+
+    def test_race_disappearance_unknown_and_preexec_fail_conservatively(self):
+        for kwargs in (dict(race=True),dict(disappear=True),dict(unknown=True),dict(child_argv=self.stage_argv)):
+            with self.subTest(kwargs=kwargs):
+                stage,_,failure=self.exercise(**kwargs)
+                self.assertIsInstance(failure,RuntimeError)
+                self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],2)
+                row=stage['owned_process_snapshot']['processes'][1]
+                self.assertFalse(row['exact_official_prefix_query'])
+                if not 'child_argv' in kwargs:self.assertTrue(row['errors'])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
