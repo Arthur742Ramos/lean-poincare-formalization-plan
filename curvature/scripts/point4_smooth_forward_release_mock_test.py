@@ -18,6 +18,8 @@ import unittest
 from unittest.mock import patch
 import point4_smooth_forward_release_guard as smooth
 
+NEWLY_ADMITTED_MATH_PATHS = ('curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/IntrinsicRicciReindex.lean', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardBasis.lean', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardTimeTranslate.lean', 'curvature/TimeTranslateVerification.lean', 'curvature/Verification.lean', 'curvature/scripts/point4_smooth_forward_basis_probe.lean', 'docs/point4/smooth-forward-finite-basis.md')
+
 
 class SmoothReleaseTests(unittest.TestCase):
     @classmethod
@@ -122,7 +124,7 @@ class SmoothReleaseTests(unittest.TestCase):
         self.ns['main'](['--schema', 'schema.json'])
         first_history = self.trace.index(('historical',))
         modes = [item for item in self.trace[:first_history] if item[0] == 'mode']
-        self.assertEqual(len(modes), 1665)
+        self.assertEqual(len(modes), 1672)
         self.assertEqual(self.trace[-1], ('body', ['--schema', 'schema.json']))
         self.run.assert_called_once_with(['git', '-C', str(self.root), 'merge-base', '--is-ancestor', smooth.BASE, 'HEAD'], check=True, env={})
         self.assert_restored()
@@ -310,6 +312,49 @@ class SmoothReleaseTests(unittest.TestCase):
                 smooth.check_smooth_audit_open(wrong, 1)
         with self.assertRaises(AssertionError):
             smooth.check_smooth_audit_open(report, 0)
+
+    def test_newly_admitted_math_paths_have_exact_reviewed_hashes(self):
+        self.assertEqual(len(NEWLY_ADMITTED_MATH_PATHS), 7)
+        for path in NEWLY_ADMITTED_MATH_PATHS:
+            file = self.root/path
+            original = file.read_bytes()
+            self.assertEqual(smooth.sha256(original), smooth.FILE_SHA256[path])
+            file.write_bytes(original+b'\nunauthorized mathematical source edit\n')
+            try:
+                self.trace.clear()
+                with self.subTest(path=path), self.assertRaises(AssertionError):
+                    self.ns['main']()
+                self.assertNotIn(('historical',), self.trace)
+                self.assert_restored()
+            finally:
+                file.write_bytes(original)
+
+    def test_newly_admitted_math_path_omissions_fail_before_reconstruction(self):
+        for path in NEWLY_ADMITTED_MATH_PATHS:
+            self.cached.remove(path)
+            try:
+                self.trace.clear()
+                with self.subTest(path=path), self.assertRaises(AssertionError):
+                    self.ns['main']()
+                self.assertNotIn(('historical',), self.trace)
+                self.assert_restored()
+            finally:
+                self.cached.add(path)
+
+    def test_newly_admitted_math_path_mode_drift_fails_before_reconstruction(self):
+        real_stat = pathlib.Path.lstat
+        for target in NEWLY_ADMITTED_MATH_PATHS:
+            def executable_mode(path):
+                if path == self.root/target:
+                    return types.SimpleNamespace(st_mode=stat.S_IFREG | 0o755)
+                return real_stat(path)
+            self.trace.clear()
+            with patch.object(pathlib.Path, 'lstat', executable_mode), \
+                 self.subTest(path=target), self.assertRaises(AssertionError):
+                self.ns['main']()
+            self.assertNotIn(('historical',), self.trace)
+            self.assert_restored()
+
 
     def test_six_support_axiom_surfaces_use_unchanged_inherited_parser(self):
         # Execute only the unchanged parser functions from the pinned C2 source;
