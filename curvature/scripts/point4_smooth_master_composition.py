@@ -26,6 +26,12 @@ SMOOTH = 'curvature/scripts/point4_smooth_forward_release_guard.py'
 FIXTURE = 'curvature/scripts/point4_smooth_forward_release_mock_test.py'
 WORKFLOW = '.github/workflows/point4-smooth-forward-support.yml'
 LOCALIZATION_WORKFLOW = '.github/workflows/point4-c2-metric-localization.yml'
+LOCALIZATION_MOCK = 'curvature/scripts/point4_c2_metric_localization_mock_test.py'
+LOCALIZATION_MOCK_FLAG = '--historical-localization-mocks'
+MOCK_ROUTE_PARENT = '22f0f8a3c353f22600f94370a505bde0d10ea2c4'
+MOCK_ROUTE_TREE = 'd48ce9af6ee5cfecf3bda717b6ede24942225cd2'
+LOCALIZATION_MOCK_COMMAND = '          python3 curvature/scripts/point4_c2_metric_localization_mock_test.py 2>&1 | tee /tmp/point4-c2-metric-localization-adversarial.log\n'
+LOCALIZATION_MOCK_ROUTE_COMMAND = '          python3 curvature/scripts/point4_c2_metric_localization_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json --historical-localization-mocks 2>&1 | tee /tmp/point4-c2-metric-localization-adversarial.log\n'
 STARTUP_REPAIR_PARENT = '1664872ce762ee027b76cb515befb0ae829b2711'
 STARTUP_REPAIR_TREE = '6d74e9612cf6e16f2d027012cede68e5e0a23483'
 STARTUP_ANCHOR = '    timeout-minutes: 350\n    steps:\n'
@@ -60,7 +66,7 @@ WEIGHTED_MISSING = {'.github/workflows/point4-c2-metric-localization.yml',
 ENV = dict(os.environ, GIT_NO_LAZY_FETCH='1', PYTHONDONTWRITEBYTECODE='1')
 ENTRY = "\nif __name__ == '__main__':"
 WF_ANCHOR = '      - name: Preserve exact-head evidence\n'
-WF_STEP = "      - name: Check ordinary current composition and real historical validator routes\n        env:\n          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}\n        run: |\n          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_smooth_master_composition_test.py --real-runtime --schema /tmp/point4-manifold-heat-official-schema.json\n"
+WF_STEP = '      - name: Check ordinary current composition and real historical validator routes\n        timeout-minutes: 125\n        env:\n          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}\n        run: |\n          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_smooth_master_composition_test.py --real-runtime --schema /tmp/point4-manifold-heat-official-schema.json\n'
 _owner = None
 _depth = 0
 
@@ -125,6 +131,8 @@ def transform(path, original, helper_sha, fixture_sha=None, workflow_sha=None):
     assert '_smooth_master.' not in source, 'Previously transformed source is not an input'
     if path == LOCALIZATION_WORKFLOW:
         assert source.count(STARTUP_ANCHOR) == 1 and 'PYTHONDONTWRITEBYTECODE' not in source
+        assert source.count(LOCALIZATION_MOCK_COMMAND) == 1 and LOCALIZATION_MOCK_FLAG not in source
+        source=source.replace(LOCALIZATION_MOCK_COMMAND,LOCALIZATION_MOCK_ROUTE_COMMAND,1)
         return source.replace(STARTUP_ANCHOR, STARTUP_ANCHOR.replace('    steps:\n', STARTUP_ENV+'    steps:\n'), 1).encode()
     if path == WORKFLOW:
         assert source.count(WF_ANCHOR) == 1 and WF_STEP not in source
@@ -171,6 +179,10 @@ def map_record(expected, originals, changes):
     master,support=parent_tree(MASTER),parent_tree(SUPPORT)
     return {'parents':{MASTER:TREES[MASTER],SUPPORT:TREES[SUPPORT]},
         'paths':len(expected),'canonical_point4':'OPEN','smooth_general_target':'OPEN',
+        'localization_mock_route':{'parent':MOCK_ROUTE_PARENT,'parent_tree':MOCK_ROUTE_TREE,
+            'failed_workflow_run':37450437571,'flag':LOCALIZATION_MOCK_FLAG,
+            'historical_commit':LOCALIZATION,'historical_path':LOCALIZATION_MOCK,'historical_test_count':29,
+            'current_coverage':'Complete source identity and localization semantic/import/canonical/schema PRE/POST checks; historical mock coverage stays historical.'},
         'ordinary_startup_repair':{'parent':STARTUP_REPAIR_PARENT,'parent_tree':STARTUP_REPAIR_TREE,
             'failed_workflow_run':37417941512,'failed_smooth_workflow_run':37417941491,
             'workflows':[LOCALIZATION_WORKFLOW,WORKFLOW],
@@ -189,7 +201,7 @@ def verify_current():
     head = git('rev-parse','HEAD').decode().strip()
     assert re.fullmatch(r'[0-9a-f]{40}',head)
     if os.environ.get('EXPECTED_SHA'):assert head==os.environ['EXPECTED_SHA'], 'External expected HEAD drift'
-    for commit in (MASTER,SUPPORT,STARTUP_REPAIR_PARENT):
+    for commit in (MASTER,SUPPORT,STARTUP_REPAIR_PARENT,MOCK_ROUTE_PARENT):
         subprocess.run(['git','--no-replace-objects','-C',str(ROOT),'merge-base','--is-ancestor',commit,'HEAD'],check=True,env=ENV)
     expected,originals,changes=expected_identity()
     committed=parse_tree(git('ls-tree','-rz','HEAD'))
@@ -468,13 +480,20 @@ def install_localization(namespace):
     assert '_composition_original_main' not in namespace
     namespace['_composition_original_main']=namespace['main']
     def main(argv=None):
-        parser=argparse.ArgumentParser()
+        parser=argparse.ArgumentParser(allow_abbrev=False)
         parser.add_argument('--schema',type=pathlib.Path,required=True);parser.add_argument('--manifest',type=pathlib.Path)
+        parser.add_argument(LOCALIZATION_MOCK_FLAG,action='store_true')
         args=absolute_arguments(sys.argv[1:] if argv is None else argv);parsed=parser.parse_args(args)
+        if args.count(LOCALIZATION_MOCK_FLAG)>1:parser.error('Historical localization mock flag must occur once')
+        source_args=[arg for arg in args if arg!=LOCALIZATION_MOCK_FLAG]
         verify_current();localization_current(namespace,parsed.schema)
         # Historical manifest output remains external and is not relabelled current.
-        historical(LOCALIZATION,LOCAL,args)
-        verify_current();localization_current(namespace,parsed.schema)
+        try:
+            historical(LOCALIZATION,LOCAL,source_args)
+            if parsed.historical_localization_mocks:
+                historical(LOCALIZATION,LOCALIZATION_MOCK,[])
+        finally:
+            verify_current();localization_current(namespace,parsed.schema)
         if parsed.manifest:
             parsed.manifest.write_text(json.dumps({'candidate':git('rev-parse','HEAD').decode().strip(),
                 'parents':[MASTER,SUPPORT],'source_only':True,'point4':'OPEN',

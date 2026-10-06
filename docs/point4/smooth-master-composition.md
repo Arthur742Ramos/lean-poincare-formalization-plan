@@ -33,6 +33,22 @@ cache created by nested audit Python. The separate smooth audit and mandatory
 genuine composition step18 were skipped. These historical partial results do
 not qualify the updated candidate's genuine runtime routes.
 
+Localization mock coverage runs through the trusted source entry point with
+`--historical-localization-mocks`. The wrapper strips that flag before calling
+the original source main, then runs all 29 original tests in a verified
+checkout of `6cdbc00828607d80e180a9cffc0cc3376b3b7e42`. Current source identity,
+imports, canonical checks and root schema validation run before and after the
+historical calls. The interface accepts no alternate test path or commit.
+The workflow keeps its separate adversarial log. That log includes historical
+tests and repeated current checks; the 29 tests describe the historical tree.
+
+This route addresses run `37450437571` at published head
+`22f0f8a3c353f22600f94370a505bde0d10ea2c4`. Its direct mock invocation ran
+29 tests, with two failures because assertions expected the original workflow
+and localization hook. The original source main and current closed-contract
+checks passed. Lean stages were skipped. Updated historical-mock entry execution
+still requires genuine Linux, Git history and the official schema.
+
 ## Current and historical validation
 
 Current weighted checks are leaves: they verify the complete candidate identity,
@@ -74,6 +90,47 @@ master identity, with original, reverse-transform and final records for the
 two edited checkers. Exactly three root artifacts differ from the older
 weighted baseline. Current root semantics are validated using the original
 PR130 localization functions, not by changing their historical inputs.
+
+## Complete positive-route budget
+
+The original historical controls and `required_process` retain their 120-second
+bounds. Four named current full positive routes use a separate fixed 1200-second
+owner budget: weighted, localization with manifest, smooth with complete actual
+evidence, and localization with all 29 authenticated historical mocks. Their
+original arguments, validators and assertions remain. No inventory cache or
+rehash exemption is introduced. Consistency, unsupported-option checks and
+in-process mutation/restoration controls retain their existing behavior.
+
+Public head `22f0f8a3c353f22600f94370a505bde0d10ea2c4`, run `37450437467`,
+passed steps 1–17, including the precise canonical and smooth OPEN audits.
+Its last step had 20 passes and three 120-second positive-route timeouts.
+Those failures remain historical. Its actual current smooth body took 506.070
+seconds, including 14.476 seconds for historical weighted replay. The subsequent
+historical smooth replay took 11.106 seconds. The complete smooth guard finished
+within a 669.715-second interval. A 70-percent allowance plus 60 seconds, rounded
+to a whole minute, selects 1200 seconds; this is an engineering budget, not a
+runtime pass or mathematical bound.
+
+Positive children run serially in owned Linux process groups, restricted to two
+available CPUs. A sampled live group RSS above 6 GiB stops the route. Receipts
+label sampled RSS and observed owner VmHWM accurately. Raw combined output and
+exclusive owner receipts use the existing `/tmp/point4-smooth-forward-*.log`
+artifact wildcard. TERM3/KILL3 cleanup separates requests, root reaping and
+observed group drain. Timeout remains an exception, a primary exception retains
+its identity, and even zero owner exit cannot pass with an undrained group.
+
+The existing composition step has a 125-minute aggregate platform timeout;
+the job remains at 350 minutes. The measured planning total with four full
+positive allocations and cleanup is approximately 120.886 minutes (120.89),
+correcting the earlier 120.99 estimate. The platform timeout is not an observed
+group-drain receipt. Missing or interrupted owner receipts cannot qualify a
+route. No observation-only build or extra observer gate is added.
+
+Actual full Linux/Git/schema/evidence routes remain UNRUN for this new source
+until its exact-head CI completes. Ordinary controller controls qualify only
+their finite adapters and source wiring. Independent exact implementation
+review remains required before publication; fresh master and required exact-head
+checks remain required before merge. Neither OPEN target changes status.
 
 ## Qualification status
 

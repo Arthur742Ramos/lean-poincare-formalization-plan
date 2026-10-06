@@ -43,7 +43,7 @@ jobs:
           git show -s --format=%P HEAD | tee /tmp/point4-c2-metric-localization-parents.log
           curl --fail --location --retry 2 https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/99c678e569c7c4c0772db297c5ddd5e4c9b6322e/schema/v0.4.schema.json --output /tmp/point4-c2-metric-localization-schema.json
           python3 curvature/scripts/point4_c2_metric_localization_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json --manifest /tmp/point4-c2-metric-localization-source-manifest.json 2>&1 | tee /tmp/point4-c2-metric-localization-source-gate.log
-          python3 curvature/scripts/point4_c2_metric_localization_mock_test.py 2>&1 | tee /tmp/point4-c2-metric-localization-adversarial.log
+          python3 curvature/scripts/point4_c2_metric_localization_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json --historical-localization-mocks 2>&1 | tee /tmp/point4-c2-metric-localization-adversarial.log
           python3 curvature/scripts/point4_c2_initial_heat_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-integration-source.log
           python3 curvature/scripts/point4_c2_initial_heat_mock_test.py 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-nine-tests.log
           python3 curvature/scripts/point4_linear_heat_geometry_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-geometry-source.log

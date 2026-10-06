@@ -154,6 +154,7 @@ jobs:
           set -e
           PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_smooth_forward_release_guard.py --smooth-probe-log /tmp/point4-smooth-forward-support-probe.log --smooth-completion-log /tmp/point4-smooth-forward-completion.log --smooth-completion-rc "$(cat /tmp/point4-smooth-forward-completion.rc)" --smooth-audit-json /tmp/point4-smooth-forward-audit/verdict.json --smooth-audit-rc "$smooth_rc" --probe-log /tmp/point4-manifold-heat-probe.log --axiom-dir /tmp/point4-manifold-heat-inherited-probes --audit-json /tmp/point4-manifold-heat-full-audit.json --audit-rc "$(cat /tmp/point4-manifold-heat-full-audit.rc)" --schema /tmp/point4-manifold-heat-official-schema.json
       - name: Check ordinary current composition and real historical validator routes
+        timeout-minutes: 125
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
