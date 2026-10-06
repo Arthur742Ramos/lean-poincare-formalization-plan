@@ -40,27 +40,101 @@ IMPORT_SUFFIXES = ('.olean', '.olean.server', '.olean.private', '.ir', '.ir.sig'
 
 BATTERIES_ROOT = 'curvature/.lake/packages/batteries'
 BATTERIES_PIN = '4488d40d070b9700d4d5a6aa342f0d40c31b2a2d'
-# The pinned tree has exactly one documentation link. This is a finite source
-# catalog, independent of build-output admission; no code link is admitted.
+# The Batteries pin has exactly one documentation link. Its identity is
+# retained in the complete fixed dependency catalog below.
 BATTERIES_LINK = ('docs/README.md', '32d46ee883b58d6a383eed06eb98f33aa6530ded',
                   b'../README.md', 'README.md', '4cd48268d7a14d8f5867862c549534cac08ebd45', 5427)
 
+PINNED_GIT_DEPENDENCIES = {
+    'mathlib': 'db584cd6d46c92f209a44c0f1c829460d327499d',
+    'plausible': 'b7eb3304aeae834b12dda98993a37f6a41f6f0bb',
+    'LeanSearchClient': '5f4d51b81cbd3f6b32b156bfad9056621a040404',
+    'importGraph': '16f02aa7642864af59f1ff0e384a015994db9118',
+    'proofwidgets': '4be2e3d5087eeb272cf5a8853b8f9dd025ef5957',
+    'aesop': '3448c0bcc5ce01b2d1546e483ec3620e32df3d0e',
+    'Qq': '92c15be17b7caf78c2ad767ec40f89052d908d81',
+    'batteries': BATTERIES_PIN,
+    'Cli': '6130a47896ce867c6a4a55373441e59e565bad0f'}
+# Complete mode-120000 catalogs of all nine immutable Git trees: three aliases
+# total. The two archived benchmark aliases and targets are checked as bytes;
+# neither executing benchmarks nor other code links is authorized here.
+PINNED_DEPENDENCY_LINKS = {name: () for name in PINNED_GIT_DEPENDENCIES}
+PINNED_DEPENDENCY_LINKS['batteries'] = (
+    (*BATTERIES_LINK[:4], '100644', *BATTERIES_LINK[4:]),)
+PINNED_DEPENDENCY_LINKS['mathlib'] = (
+    ('scripts/bench/build/fake-root/bin/lean.py', '819298943e1a8c331413fb55e2c4bbc98d05e562',
+     b'lean', 'scripts/bench/build/fake-root/bin/lean', '100755', '2ce14c08b2c7ba3d38c6e552e1c5d25de7f1a527', 2336),
+    ('scripts/bench/size/run.py', 'e5224d533ef27b001224859a9b36696846a7e7fe',
+     b'run', 'scripts/bench/size/run', '100755', '38bea958139cfd9297e73219d509adb63c811eb3', 1545))
+
 def dependency_links(root, dependencies):
     links = {}
+    if dependencies:
+        assert set(dependencies) == {'curvature/.lake/packages/' + name for name in PINNED_GIT_DEPENDENCIES}, 'Pinned dependency root inventory differs'
     for dep_rel, entries in dependencies.items():
+        name = dep_rel.rsplit('/', 1)[1]
+        pin = PINNED_GIT_DEPENDENCIES[name]
+        assert git(root / dep_rel, 'rev-parse', 'HEAD').decode().strip() == pin, 'Pinned dependency pin differs: ' + name
+        assert tree_entries(root / dep_rel, pin) == entries, 'Dependency inventory differs from pinned tree: ' + name
         declared = {p for p, (mode, _, _) in entries.items() if mode == '120000'}
-        if dep_rel == BATTERIES_ROOT:
-            assert git(root / dep_rel, 'rev-parse', 'HEAD').decode().strip() == BATTERIES_PIN, 'Batteries pin differs'
-            assert tree_entries(root / dep_rel, BATTERIES_PIN) == entries, 'Batteries inventory differs from pinned tree'
-            path, link_blob, raw, target, target_blob, target_bytes = BATTERIES_LINK
-            assert declared == {path}, 'Batteries link catalog differs'
-            assert entries[path] == ('120000', 'blob', link_blob), 'Batteries link declaration differs'
-            assert entries.get(target) == ('100644', 'blob', target_blob), 'Batteries regular target declaration differs'
-            # Exact ../README.md from docs/ names this same-package regular file.
-            links[dep_rel + '/' + path] = (link_blob, raw, dep_rel + '/' + target, target_blob, target_bytes)
-        else:
-            assert not declared, 'Undeclared dependency link: ' + dep_rel
+        catalog = PINNED_DEPENDENCY_LINKS[name]
+        assert declared == {r[0] for r in catalog}, 'Pinned dependency link catalog differs: ' + name
+        for path, link_blob, raw, target, target_mode, target_blob, target_bytes in catalog:
+            assert entries[path] == ('120000', 'blob', link_blob), 'Pinned link declaration differs: ' + dep_rel + '/' + path
+            assert entries.get(target) == (target_mode, 'blob', target_blob), 'Pinned regular target declaration differs: ' + dep_rel + '/' + target
+            # Catalog targets are fixed same-package paths: README.md or the
+            # same-directory executable source. No physical link is followed.
+            links[dep_rel + '/' + path] = (link_blob, raw, dep_rel + '/' + target, target_mode, target_blob, target_bytes, pin)
     return links
+
+def package_root_relationships(root, pkg, manifest, env):
+    """Bounded observations before admission; these grant no root exceptions."""
+    def observe(path):
+        row = dict(declared_path=str(path))
+        try:
+            mode = os.lstat(path).st_mode
+        except FileNotFoundError:
+            row.update(node_kind='missing', exists=False)
+        else:
+            kind = ('symlink' if stat.S_ISLNK(mode) else 'directory' if stat.S_ISDIR(mode)
+                    else 'regular_file' if stat.S_ISREG(mode) else 'other')
+            row.update(node_kind=kind, exists=True)
+            if kind == 'symlink':
+                raw = os.readlink(os.fsencode(path))
+                row.update(raw_link_bytes=len(raw), raw_link_hex=raw.hex(), raw_link_text=os.fsdecode(raw))
+        resolved = path.resolve(strict=False)
+        row.update(resolved_path=str(resolved), resolved_within_checkout=resolved.is_relative_to(root.resolve()))
+        return row
+    rows = []
+    for package in manifest['packages']:
+        name, kind = package['name'], package['type']
+        if kind == 'git':
+            declared = pkg / manifest['packagesDir'] / name
+            node = observe(declared)
+            actual = None; pin_error = None
+            if node['exists']:
+                try:
+                    actual = git(declared, 'rev-parse', 'HEAD').decode().strip()
+                except subprocess.CalledProcessError as exc:
+                    pin_error = dict(exit_code=exc.returncode, action='git --no-replace-objects rev-parse HEAD')
+            rows.append(dict(name=name, manifest_type=kind, root=node,
+                manifest_pin=package['rev'], expected_pin=PINNED_GIT_DEPENDENCIES.get(name), actual_pin=actual,
+                pin_read_error=pin_error, pins_match=actual == package['rev'] == PINNED_GIT_DEPENDENCIES.get(name)))
+        elif kind == 'path':
+            declared = pkg / package['dir']; node = observe(declared)
+            expected = root / 'hamilton-ivey-reaction'
+            rows.append(dict(name=name, manifest_type=kind, manifest_dir=package['dir'], root=node,
+                expected_checkout_relative_root='hamilton-ivey-reaction',
+                observed_expected_root_relationship=node['exists'] and node['resolved_path'] == str(expected.resolve()),
+                expected_pin=None, actual_pin=None, pin_relation='committed public source; not a Git dependency pin',
+                generated_package_mirror=observe(pkg / manifest['packagesDir'] / name)))
+    paths = {}
+    for key in ('LEAN_SRC_PATH', 'LEAN_PATH'):
+        values = [p for p in env.get(key, '').split(os.pathsep) if p]
+        paths[key] = dict(truncated=len(values) > 128, observations=[observe(p if p.is_absolute() else pkg / p)
+            for p in map(Path, values[:128])])
+    return dict(diagnostic_only=True, root_link_exceptions_granted=False, packages=rows, configured_paths=paths,
+        declared_relationship_source='Lean d8b18978322de05a8f3dba51ef03cf5461676c17 Lake/Load/Materialize.lean PackageEntry.materialize')
 
 def physical_inventory(root, public_entries, dependencies=None):
     """Enumerate actual files/directories, including ignored and untracked ones."""
@@ -95,7 +169,7 @@ def physical_inventory(root, public_entries, dependencies=None):
             rel = Path(item.path).relative_to(root).as_posix()
             if item.is_symlink():
                 assert rel in links and rel not in public_entries, 'Physical symlink: ' + rel
-                link_blob, raw, target, target_blob, target_bytes = links[rel]
+                link_blob, raw, target, target_mode, target_blob, target_bytes, pin = links[rel]
                 assert expected[rel] == ('120000', 'blob', link_blob)
                 # Passing a bytes path returns the raw link bytes without following it.
                 data = os.readlink(os.fsencode(item.path))
@@ -103,7 +177,7 @@ def physical_inventory(root, public_entries, dependencies=None):
                 actual_blob = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
                 assert actual_blob == link_blob, 'Physical link blob differs: ' + rel
                 observed[rel] = ('120000', 'blob', actual_blob)
-                observed_links.append(dict(path=rel, pin=BATTERIES_PIN, link_blob=actual_blob,
+                observed_links.append(dict(path=rel, pin=pin, link_blob=actual_blob,
                     raw_bytes=len(data), raw_sha256=digest(data), target=target, target_blob=target_blob))
                 continue
             if rel in git_dirs:
@@ -119,7 +193,7 @@ def physical_inventory(root, public_entries, dependencies=None):
                     observed_outputs.append(rel)
                     continue
                 data = Path(item.path).read_bytes()
-                for _, _, target, _, target_bytes in links.values():
+                for _, _, target, _, _, target_bytes, _ in links.values():
                     if rel == target:
                         assert len(data) == target_bytes, 'Physical link target size differs: ' + rel
                 mode, kind, blob = expected[rel]
@@ -133,8 +207,8 @@ def physical_inventory(root, public_entries, dependencies=None):
     visit(root)
     assert set(observed) == set(expected), 'Missing physical public/dependency file'
     assert {r['path'] for r in observed_links} == set(links), 'Missing physical declared link'
-    for _, _, target, target_blob, _ in links.values():
-        assert observed[target] == ('100644', 'blob', target_blob), 'Physical regular link target differs'
+    for _, _, target, target_mode, target_blob, _, _ in links.values():
+        assert observed[target] == (target_mode, 'blob', target_blob), 'Physical regular link target differs'
     return dict(public_files=len(public_entries), dependency_files=len(expected)-len(public_entries),
                 declared_build_outputs=sorted(observed_outputs), public_identity_sha256=digest(json.dumps(observed, sort_keys=True).encode()),
                 declared_source_links=sorted(observed_links, key=lambda r:r['path']),

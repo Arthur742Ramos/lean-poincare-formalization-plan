@@ -1,7 +1,7 @@
 """Rebuild the admitted chart closure serially; never substitute old receipts."""
 from pathlib import Path
 import argparse, hashlib, json, os, re, signal, subprocess, sys, time
-from chart_port_candidate_check import admit, check_probe, digest, imports, tree_entries
+from chart_port_candidate_check import admit, check_probe, digest, imports, tree_entries, package_root_relationships
 from chart_port_artifacts import artifact_status, required_import_files
 
 LIMIT = 6 * 1024 ** 3
@@ -146,6 +146,13 @@ try:
     assert actual_pin == 'db584cd6d46c92f209a44c0f1c829460d327499d'
     assert not subprocess.check_output(['git', '--no-replace-objects', '-C', str(mathlib), 'status', '--porcelain', '--untracked-files=no'])
     manifest = json.loads((PKG / 'lake-manifest.json').read_text())
+    # Observe actual roots before any dependency link/admission failure. This
+    # receipt is diagnostic and does not permit symlinked package roots.
+    root_receipt = package_root_relationships(ROOT, PKG, manifest, env)
+    root_receipt_path = EVIDENCE / 'package-root-relationships.json'
+    root_receipt_path.write_text(json.dumps(root_receipt, indent=2) + '\n')
+    receipt['package_root_relationships_sha256'] = digest(root_receipt_path.read_bytes())
+    save()
     dependency_roots = []
     dependency_inventory = {}
     for package in manifest['packages']:

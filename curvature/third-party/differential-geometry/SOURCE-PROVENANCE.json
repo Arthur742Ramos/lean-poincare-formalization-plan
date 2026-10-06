@@ -3254,7 +3254,7 @@
   "proof_packet_library_version": 3,
   "historical_source_binding": "PENDING",
   "full_master_admission": "PENDING",
-  "candidate_build": "Published 8537 configured dependency inventory rejected the pinned Batteries documentation link before port/probe; finite-link correction hosted UNRUN",
+  "candidate_build": "Published 2ef2 Lake environment succeeded; configured catalog rejected Mathlib tracked aliases before physical traversal or proof compilation; next correction hosted UNRUN",
   "point4": "OPEN",
   "general_targets": "OPEN",
   "scope": "constant downgraded smooth metric, actual chart good set, differentiable section at evaluation",
@@ -3417,6 +3417,163 @@
     "setup_replay": "UNRUN",
     "full_candidate_qualification": "UNRUN",
     "task8_review": "PENDING",
+    "point4": "OPEN",
+    "general_targets": "OPEN"
+  },
+  "three_pinned_dependency_alias_catalog_repair": {
+    "base_commit": "2ef2de2c994bbb390cb03b446ed32ae2ffe31150",
+    "base_tree": "d746d6d05629bc53f9d2ff0ab97af11edaea3f35",
+    "native_verified_failure": {
+      "run": 37458168511,
+      "job": 112250801734,
+      "artifact": 11410761639,
+      "bytes": 11656,
+      "sha256": "5429597524948f9e53d1c3082f559542fdaea005472c29101d96b4926b2c55b9",
+      "lake_exit_code": 0,
+      "lake_elapsed_seconds": 47.245,
+      "lake_peak_rss_bytes": 976429056,
+      "lake_owner_reaped": true,
+      "lake_remaining_session_pids": [],
+      "before_physical_traversal": true
+    },
+    "desktop_artifact_verification": false,
+    "complete_untruncated_pinned_Git_trees": 9,
+    "total_tracked_aliases": 3,
+    "pin_catalog": [
+      {
+        "name": "mathlib",
+        "pin": "db584cd6d46c92f209a44c0f1c829460d327499d",
+        "declared_links": 2,
+        "complete_table_sha256": "15af8b27b7be7285dccef0a5d56e6d9f5314a189eec8e575e54277510465b5c6"
+      },
+      {
+        "name": "plausible",
+        "pin": "b7eb3304aeae834b12dda98993a37f6a41f6f0bb",
+        "declared_links": 0,
+        "complete_table_sha256": "1c36d26eeaf5c353cba9a9c4675f2d2b11763229e903476b22a3047c07d0fde5"
+      },
+      {
+        "name": "LeanSearchClient",
+        "pin": "5f4d51b81cbd3f6b32b156bfad9056621a040404",
+        "declared_links": 0,
+        "complete_table_sha256": "77fcf04add3fc93f45defbd3e3011634ab607319a5eefeb71197e0a8f157c4e9"
+      },
+      {
+        "name": "importGraph",
+        "pin": "16f02aa7642864af59f1ff0e384a015994db9118",
+        "declared_links": 0,
+        "complete_table_sha256": "8760849898b43db97ff0f00bc29ccbec697fd7817bea5fee184ea01104d9cb87"
+      },
+      {
+        "name": "proofwidgets",
+        "pin": "4be2e3d5087eeb272cf5a8853b8f9dd025ef5957",
+        "declared_links": 0,
+        "complete_table_sha256": "9a65e6fe1e6ffff6ac8b8d01b470484e30c24f09d15ab26b560d9ef590bd89f6"
+      },
+      {
+        "name": "aesop",
+        "pin": "3448c0bcc5ce01b2d1546e483ec3620e32df3d0e",
+        "declared_links": 0,
+        "complete_table_sha256": "290c26d4e29315cd7c3d1399038c77e84ee08d407681037a4777cf33a596dfcb"
+      },
+      {
+        "name": "Qq",
+        "pin": "92c15be17b7caf78c2ad767ec40f89052d908d81",
+        "declared_links": 0,
+        "complete_table_sha256": "732caad29ee24c9831e44d9726736318421581dc79046b647668c5d1fb3f91a0"
+      },
+      {
+        "name": "batteries",
+        "pin": "4488d40d070b9700d4d5a6aa342f0d40c31b2a2d",
+        "declared_links": 1,
+        "complete_table_sha256": "eae5f8c96f01062dc26d85e42ff6a251cdb0c00ae1f918859465efa4810cd528"
+      },
+      {
+        "name": "Cli",
+        "pin": "6130a47896ce867c6a4a55373441e59e565bad0f",
+        "declared_links": 0,
+        "complete_table_sha256": "cd6a693b5ae2d291aa565a107db049ecc002e325b092e409af1bfb950ee94c33"
+      }
+    ],
+    "new_Mathlib_aliases": [
+      {
+        "path": "scripts/bench/build/fake-root/bin/lean.py",
+        "mode": "120000",
+        "git_blob": "819298943e1a8c331413fb55e2c4bbc98d05e562",
+        "raw_text": "lean",
+        "raw_bytes": 4,
+        "target": "scripts/bench/build/fake-root/bin/lean",
+        "target_mode": "100755",
+        "target_git_blob": "2ce14c08b2c7ba3d38c6e552e1c5d25de7f1a527",
+        "target_bytes": 2336
+      },
+      {
+        "path": "scripts/bench/size/run.py",
+        "mode": "120000",
+        "git_blob": "e5224d533ef27b001224859a9b36696846a7e7fe",
+        "raw_text": "run",
+        "raw_bytes": 3,
+        "target": "scripts/bench/size/run",
+        "target_mode": "100755",
+        "target_git_blob": "38bea958139cfd9297e73219d509adb63c811eb3",
+        "target_bytes": 1545
+      }
+    ],
+    "existing_Batteries_alias": "same exact mode/blob/raw target catalog retained",
+    "admission": "Exact nine roots and pins, exact pinned tree tables, complete per-pin alias sets, raw readlink bytes, separate regular target mode/blob/size checks",
+    "benchmark_source_fixture_license": "Apache-2.0; inert bytes only; full license already distributed in third-party/differential-geometry/LICENSE",
+    "benchmark_source_repository": "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d/scripts/bench",
+    "package_root_relationships": {
+      "receipt": "package-root-relationships.json",
+      "written_before_configured_admission": true,
+      "diagnostic_only": true,
+      "exceptions_granted": false,
+      "live_hosted_roots": "UNOBSERVED in preceding alias failure",
+      "HamiltonIveyReaction": "committed ../hamilton-ivey-reaction path dependency; generated package mirror is diagnostic only",
+      "observed_fields": [
+        "declared path",
+        "lstat node kind",
+        "raw root link text/bytes when present",
+        "resolved path and checkout relationship",
+        "expected/manifest/actual pins",
+        "configured source and artifact paths"
+      ],
+      "configured_path_observation_limit_per_kind": 128,
+      "official_Lake_source": "leanprover/lean4 d8b18978322de05a8f3dba51ef03cf5461676c17 src/lake/Lake/Load/Materialize.lean PackageEntry.materialize"
+    },
+    "public_Lean_guard_loader_unlisted_and_generated_root_links": "rejected; no root exceptions",
+    "build_output_catalog_and_loader": "unchanged",
+    "resource_monitor_and_serial_compiler": "unchanged bytes",
+    "ordinary_tests": {
+      "discovered": 25,
+      "passed": 23,
+      "skipped": 2,
+      "genuine_Unix_alias_and_root_controls": "UNRUN on Windows",
+      "actual_benchmark_Lean_Lake_cache_loader_or_workflow_execution": false
+    },
+    "ordinary_source_bindings": [
+      {
+        "path": "curvature/scripts/chart_port_candidate_check.py",
+        "bytes": 22641,
+        "sha256": "022bc37173feed547d805432a835b9e9960e44357f918dfee6bdaac0de6b76f6",
+        "git_blob": "b815d534ae1811364fc8564a8a475c109795b111"
+      },
+      {
+        "path": "curvature/scripts/chart_port_ci.py",
+        "bytes": 15938,
+        "sha256": "3e0021f1480e2a815ea3c6d86d29f18545eb584c0535d2b3d1985d3b15d92cbb",
+        "git_blob": "29139349858cca417c76bb33a0fac7130299cb92"
+      },
+      {
+        "path": "curvature/scripts/test_chart_port_ci.py",
+        "bytes": 43651,
+        "sha256": "cbfeecc41e6ded63e1edb62c42c9702a7776694ee100a960b2a844d13780a256",
+        "git_blob": "f33b1066887d09b52ce4febecf70a61b00d82402"
+      }
+    ],
+    "task8_review": "PENDING",
+    "hosted_setup_replay": "UNRUN",
+    "full_candidate_qualification": "UNRUN",
     "point4": "OPEN",
     "general_targets": "OPEN"
   }

@@ -1,6 +1,6 @@
 """Ordinary driver tests with finite fixtures; no Lean, Lake or workflow execution."""
 from pathlib import Path
-import ast, hashlib, json, os, signal, tempfile, types, unittest
+import ast, hashlib, json, os, signal, stat, tempfile, types, unittest
 from unittest.mock import patch
 import chart_port_candidate_check as admission
 
@@ -22,7 +22,7 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 class DriverControls(unittest.TestCase):
-    def model(self, setup_only, *, memory=LIMIT, quota=200000, invalid_pin=False, reject_probe=False):
+    def model(self, setup_only, *, memory=LIMIT, quota=200000, invalid_pin=False, reject_probe=False, reject_configured=False):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             pkg, evidence, prefix, src = [root / p for p in ('curvature', 'evidence', 'compiler', 'sources')]
@@ -53,7 +53,7 @@ class DriverControls(unittest.TestCase):
                 p.write_bytes(b'fixture source, not compiled\n')
                 closure.append(dict(module=name, path=path, sha256=digest(p.read_bytes())))
             admission = dict(closure=closure, external_mathlib_roots=[], physical_inventory={})
-            trace = dict(run=[], compile=[], admit=[], affinity=[])
+            trace = dict(run=[], compile=[], admit=[], affinity=[], roots=[], root_receipt_written_before_admit=False)
             receipt = dict(source_admission='PENDING', build='RUNNING', environment_setup='PENDING',
                            full_candidate_qualification='NOT_RUN', stages=[], point4='OPEN', general_targets='OPEN')
             def fake_path(value):
@@ -62,6 +62,9 @@ class DriverControls(unittest.TestCase):
                 return Path(value)
             def admit(*args):
                 trace['admit'].append(args)
+                if len(args) == 4:
+                    trace['root_receipt_written_before_admit'] = (evidence / 'package-root-relationships.json').is_file()
+                    if reject_configured: raise AssertionError('Finite configured admission rejection')
                 return admission
             def run(argv, label, **kwargs):
                 trace['run'].append((argv, label, kwargs))
@@ -74,6 +77,9 @@ class DriverControls(unittest.TestCase):
             def git(argv):
                 if 'rev-parse' in argv: return (('0' * 40 if invalid_pin else PIN) + '\n').encode()
                 return b''
+            def roots(*args):
+                trace['roots'].append(args)
+                return {'diagnostic_only': True, 'root_link_exceptions_granted': False}
             def check_probe(data):
                 if reject_probe: raise AssertionError('Rejected fixture probe')
                 return {'fixture_probe': True}
@@ -83,7 +89,7 @@ class DriverControls(unittest.TestCase):
                 os=types.SimpleNamespace(sched_getaffinity=lambda _: {0, 1, 2},
                     sched_setaffinity=lambda _, cpus: trace['affinity'].append(cpus), environ={}, pathsep=';'),
                 subprocess=types.SimpleNamespace(check_output=git), run=run, digest=digest, admit=admit,
-                tree_entries=lambda *args: {}, artifact_status=lambda *args: {'ready': True},
+                tree_entries=lambda *args: {}, package_root_relationships=roots, artifact_status=lambda *args: {'ready': True},
                 serial_compile=lambda *args: trace['compile'].append(args), imports=lambda _: [],
                 check_probe=check_probe, time=types.SimpleNamespace(time=lambda: 0),
                 resource=types.SimpleNamespace(RLIMIT_AS=1, setrlimit=lambda *a: self.fail('Virtual-address ceiling restored')))
@@ -105,6 +111,17 @@ class DriverControls(unittest.TestCase):
         self.assertEqual(trace['compile'], [])
         self.assertEqual([r[1] for r in trace['run']], ['compiler-version', 'compiler-commit', 'compiler-prefix', 'lake-environment'])
         self.assertEqual(trace['affinity'], [[0, 1]])
+
+    def test_root_receipt_is_saved_before_configured_admission_failure(self):
+        receipt, trace, failure = self.model(True, reject_configured=True)
+        self.assertIsInstance(failure, AssertionError)
+        self.assertEqual(receipt['build'], 'FAILED')
+        self.assertEqual(receipt['full_candidate_qualification'], 'NOT_RUN')
+        self.assertTrue(trace['root_receipt_written_before_admit'])
+        self.assertEqual(len(trace['roots']), 1)
+        self.assertEqual(len(trace['admit']), 2)
+        self.assertEqual(trace['compile'], [])
+        self.assertIn('package_root_relationships_sha256', receipt)
 
     def test_default_full_mode_requires_all_70_sources_and_probe(self):
         receipt, trace, failure = self.model(False)
@@ -328,142 +345,407 @@ BATTERIES_README = (
     b'Once CI once again checks out on Mathlib, the adaptation PR can be merged using the regular Mathlib process.\n'
 )
 
+
+# Authenticated archived benchmark targets are finite byte fixtures, never executed.
+BENCH_LEAN = (
+    b'#!/usr/bin/env python3\n'
+    b'\n'
+    b'import argparse\n'
+    b'import json\n'
+    b'import os\n'
+    b'import re\n'
+    b'import subprocess\n'
+    b'import sys\n'
+    b'from pathlib import Path\n'
+    b'\n'
+    b'# Global paths\n'
+    b'BENCH_DIR = Path(os.environ["BENCH_DIR"])\n'
+    b'WRAPPER_OUT = Path(os.environ["WRAPPER_OUT"])\n'
+    b'WRAPPER_PREFIX = Path(os.environ["WRAPPER_PREFIX"])\n'
+    b'\n'
+    b'# Other config\n'
+    b'BENCHMARK = "build"\n'
+    b'\n'
+    b'sys.path.append(str(BENCH_DIR))\n'
+    b'import measure  # noqa: E402\n'
+    b'\n'
+    b'\n'
+    b'def save_measurement(metric: str, value: float, unit: str | None = None) -> None:\n'
+    b'    data = {"metric": metric, "value": value}\n'
+    b'    if unit is not None:\n'
+    b'        data["unit"] = unit\n'
+    b'    with open(WRAPPER_OUT, "a") as f:\n'
+    b'        f.write(f"{json.dumps(data)}\\n")\n'
+    b'\n'
+    b'\n'
+    b'def run(*command: str) -> None:\n'
+    b'    result = subprocess.run(command)\n'
+    b'    if result.returncode != 0:\n'
+    b'        sys.exit(result.returncode)\n'
+    b'\n'
+    b'\n'
+    b'def get_module(setup: Path) -> str:\n'
+    b'    with open(setup) as f:\n'
+    b'        return json.load(f)["name"]\n'
+    b'\n'
+    b'\n'
+    b'def count_lines(module: str, path: Path) -> None:\n'
+    b'    with open(path) as f:\n'
+    b'        lines = sum(1 for _ in f)\n'
+    b'    save_measurement(f"{BENCHMARK}/module/{module}//lines", lines)\n'
+    b'\n'
+    b'\n'
+    b'def run_lean(module: str) -> None:\n'
+    b'    _, stderr = measure.main(\n'
+    b'        cmd=["lean", "--profile", "-Dprofiler.threshold=9999999", *sys.argv[1:]],\n'
+    b'        output=WRAPPER_OUT,\n'
+    b'        topics=[f"{BENCHMARK}/module/{module}"],\n'
+    b'        metrics={"instructions"},\n'
+    b'        append=True,\n'
+    b'        capture=True,\n'
+    b'    )\n'
+    b'\n'
+    b'    # Output of `lean --profile`\n'
+    b'    # See timeit.cpp for the time format\n'
+    b'    for line in stderr.splitlines():\n'
+    b'        if match := re.fullmatch(r"\\t(.*) ([\\d.]+)(m?s)", line):\n'
+    b'            name = match.group(1)\n'
+    b'            seconds = float(match.group(2))\n'
+    b'            if match.group(3) == "ms":\n'
+    b'                seconds = seconds / 1000\n'
+    b'            save_measurement(f"{BENCHMARK}/profile/{name}//wall-clock", seconds, "s")\n'
+    b'\n'
+    b'\n'
+    b'def main() -> None:\n'
+    b'    if sys.argv[1:] == ["--print-prefix"]:\n'
+    b'        print(WRAPPER_PREFIX)\n'
+    b'        return\n'
+    b'\n'
+    b'    if sys.argv[1:] == ["--githash"]:\n'
+    b'        run("lean", "--githash")\n'
+    b'        return\n'
+    b'\n'
+    b'    parser = argparse.ArgumentParser()\n'
+    b'    parser.add_argument("lean", type=Path)\n'
+    b'    parser.add_argument("--setup", type=Path)\n'
+    b'    args, _ = parser.parse_known_args()\n'
+    b'\n'
+    b'    lean: Path = args.lean\n'
+    b'    setup: Path = args.setup\n'
+    b'\n'
+    b'    module = get_module(setup)\n'
+    b'    count_lines(module, lean)\n'
+    b'    run_lean(module)\n'
+    b'\n'
+    b'\n'
+    b'if __name__ == "__main__":\n'
+    b'    main()\n'
+)
+BENCH_RUN = (
+    b'#!/usr/bin/env python3\n'
+    b'\n'
+    b'import json\n'
+    b'import os\n'
+    b'from pathlib import Path\n'
+    b'from typing import Generator\n'
+    b'\n'
+    b'OUTFILE = Path(os.environ["OUTPUT_FILE"])\n'
+    b'\n'
+    b'\n'
+    b'def output_result(\n'
+    b'    topic: str,\n'
+    b'    category: str,\n'
+    b'    value: float,\n'
+    b'    unit: str | None = None,\n'
+    b') -> None:\n'
+    b'    data = {"metric": f"{topic}//{category}", "value": value}\n'
+    b'    if unit is not None:\n'
+    b'        data["unit"] = unit\n'
+    b'    with open(OUTFILE, "a") as f:\n'
+    b'        f.write(f"{json.dumps(data)}\\n")\n'
+    b'\n'
+    b'\n'
+    b'def find_lean_files() -> Generator[Path, None, None]:\n'
+    b'    for p in Path().iterdir():\n'
+    b'        if p.name.startswith("."):\n'
+    b'            continue\n'
+    b'        elif p.is_dir():\n'
+    b'            yield from p.glob("**/*.lean")\n'
+    b'        elif p.name.endswith(".lean"):\n'
+    b'            yield p\n'
+    b'\n'
+    b'\n'
+    b'def measure_lines(topic: str, *paths: Path) -> None:\n'
+    b'    for path in paths:\n'
+    b'        if path.is_file():\n'
+    b'            lines = len(path.read_text().splitlines())\n'
+    b'            output_result(topic, "lines", lines)\n'
+    b'            output_result(topic, "files", 1)\n'
+    b'\n'
+    b'\n'
+    b'def measure_bytes(topic: str, *paths: Path) -> None:\n'
+    b'    for path in paths:\n'
+    b'        if path.is_file():\n'
+    b'            bytes = path.stat().st_size\n'
+    b'            output_result(topic, "bytes", bytes, "B")\n'
+    b'            output_result(topic, "files", 1)\n'
+    b'\n'
+    b'\n'
+    b'if __name__ == "__main__":\n'
+    b'    measure_lines("size/.lean", *find_lean_files())\n'
+    b'    measure_bytes("size/.olean", *Path().glob(".lake/build/**/*.olean"))\n'
+    b'    measure_bytes("size/.olean.server", *Path().glob(".lake/build/**/*.olean.server"))\n'
+    b'    measure_bytes("size/.olean.private", *Path().glob(".lake/build/**/*.olean.private"))\n'
+)
+
 class PinnedDependencyLinkControls(unittest.TestCase):
     def entries(self):
-        path, link_blob, _, target, target_blob, _ = admission.BATTERIES_LINK
-        return {path: ('120000', 'blob', link_blob), target: ('100644', 'blob', target_blob)}
+        result = {name: {} for name in admission.PINNED_GIT_DEPENDENCIES}
+        for name, records in admission.PINNED_DEPENDENCY_LINKS.items():
+            for path, link_blob, _, target, target_mode, target_blob, _ in records:
+                result[name][path] = ('120000', 'blob', link_blob)
+                result[name][target] = (target_mode, 'blob', target_blob)
+        return result
 
-    def catalog(self, entries=None, pin=None, dep=None):
+    def dependencies(self, entries):
+        return {'curvature/.lake/packages/'+name: rows for name, rows in entries.items()}
+
+    def catalog(self, entries=None, wrong_pin=None, tree_override=None):
         entries = self.entries() if entries is None else entries
-        dep = admission.BATTERIES_ROOT if dep is None else dep
-        with patch.object(admission, 'git', return_value=((pin or admission.BATTERIES_PIN)+'\n').encode()), \
-             patch.object(admission, 'tree_entries', return_value=entries):
-            return admission.dependency_links(Path('fixture'), {dep: entries})
+        def git(path, *args):
+            name = Path(path).name
+            return (('0'*40 if name == wrong_pin else admission.PINNED_GIT_DEPENDENCIES[name])+'\n').encode()
+        def tree(path, ref):
+            name = Path(path).name
+            self.assertEqual(ref, admission.PINNED_GIT_DEPENDENCIES[name])
+            return tree_override if tree_override is not None else entries[name]
+        with patch.object(admission, 'git', side_effect=git), patch.object(admission, 'tree_entries', side_effect=tree):
+            return admission.dependency_links(Path('fixture'), self.dependencies(entries))
 
-    def test_catalog_binds_exact_public_pin_modes_blobs_and_documentation_bytes(self):
-        self.assertEqual(admission.BATTERIES_PIN, '4488d40d070b9700d4d5a6aa342f0d40c31b2a2d')
+    def records(self):
+        for name, records in admission.PINNED_DEPENDENCY_LINKS.items():
+            for row in records: yield name, row
+
+    def target_data(self, name, path):
+        return BATTERIES_README if name == 'batteries' else BENCH_LEAN if path.endswith('/lean') else BENCH_RUN
+
+    def test_complete_catalog_has_only_the_three_authenticated_alias_records(self):
+        self.assertEqual(len(admission.PINNED_GIT_DEPENDENCIES), 9)
+        manifest = json.loads((HERE.parents[1] / 'curvature/lake-manifest.json').read_text())
+        self.assertEqual(admission.PINNED_GIT_DEPENDENCIES,
+            {p['name']: p['rev'] for p in manifest['packages'] if p['type'] == 'git'})
         self.assertEqual(admission.BATTERIES_LINK, ('docs/README.md', '32d46ee883b58d6a383eed06eb98f33aa6530ded',
             b'../README.md', 'README.md', '4cd48268d7a14d8f5867862c549534cac08ebd45', 5427))
-        self.assertEqual(len(BATTERIES_README), 5427)
-        self.assertEqual(hashlib.sha1(b'blob 5427\0'+BATTERIES_README).hexdigest(), admission.BATTERIES_LINK[4])
-        self.assertEqual(set(self.catalog()), {admission.BATTERIES_ROOT+'/docs/README.md'})
+        self.assertEqual(admission.PINNED_DEPENDENCY_LINKS['mathlib'], (
+            ('scripts/bench/build/fake-root/bin/lean.py', '819298943e1a8c331413fb55e2c4bbc98d05e562', b'lean',
+             'scripts/bench/build/fake-root/bin/lean', '100755', '2ce14c08b2c7ba3d38c6e552e1c5d25de7f1a527', 2336),
+            ('scripts/bench/size/run.py', 'e5224d533ef27b001224859a9b36696846a7e7fe', b'run',
+             'scripts/bench/size/run', '100755', '38bea958139cfd9297e73219d509adb63c811eb3', 1545)))
+        expected = set()
+        for name, (path, link_blob, raw, target, _, target_blob, size) in self.records():
+            data = self.target_data(name, target)
+            self.assertEqual(len(data), size)
+            self.assertEqual(hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest(), link_blob)
+            self.assertEqual(hashlib.sha1(b'blob '+str(size).encode()+b'\0'+data).hexdigest(), target_blob)
+            expected.add('curvature/.lake/packages/'+name+'/'+path)
+        self.assertEqual(set(self.catalog()), expected)
+        self.assertEqual(len(expected), 3)
         self.assertEqual(admission.dependency_links(Path('fixture'), {}), {})
 
-    def test_wrong_pin_and_pinned_tree_inventory_are_rejected(self):
-        with self.assertRaisesRegex(AssertionError, 'pin differs'):
-            self.catalog(pin='0'*40)
-        with patch.object(admission, 'git', return_value=(admission.BATTERIES_PIN+'\n').encode()), \
-             patch.object(admission, 'tree_entries', return_value={}):
-            with self.assertRaisesRegex(AssertionError, 'inventory differs'):
-                admission.dependency_links(Path('fixture'), {admission.BATTERIES_ROOT: self.entries()})
-
-    def test_link_and_regular_target_declarations_are_exact(self):
-        cases = []
-        for path in ('docs/README.md', 'README.md'):
-            for entry in [('100755', 'blob', self.entries()[path][2]),
-                          (self.entries()[path][0], 'tree', self.entries()[path][2]),
-                          (self.entries()[path][0], 'blob', '0'*40)]:
-                entries = self.entries(); entries[path] = entry; cases.append(entries)
-            entries = self.entries(); del entries[path]; cases.append(entries)
-        entries = self.entries(); entries['README.md'] = self.entries()['docs/README.md']; cases.append(entries)
-        for entries in cases:
-            with self.subTest(entries=entries), self.assertRaises(AssertionError):
+    def test_all_nine_pins_and_exact_tree_inventories_are_required(self):
+        for name in admission.PINNED_GIT_DEPENDENCIES:
+            with self.subTest(name=name), self.assertRaisesRegex(AssertionError, 'pin differs'):
+                self.catalog(wrong_pin=name)
+        with self.assertRaisesRegex(AssertionError, 'inventory differs'):
+            self.catalog(tree_override={})
+        for name in admission.PINNED_GIT_DEPENDENCIES:
+            entries = self.entries(); del entries[name]
+            with self.subTest(missing=name), self.assertRaisesRegex(AssertionError, 'root inventory differs'):
                 self.catalog(entries)
 
-    def test_additional_code_documentation_or_other_package_links_are_rejected(self):
-        for name in ('Batteries/Fixture.lean', 'docs/OTHER.md'):
-            entries = self.entries(); entries[name] = entries['docs/README.md']
-            with self.subTest(name=name), self.assertRaisesRegex(AssertionError, 'catalog differs'):
-                self.catalog(entries)
-        with self.assertRaisesRegex(AssertionError, 'Undeclared dependency link'):
-            self.catalog(dep='curvature/.lake/packages/other')
+    def test_each_declared_link_and_regular_target_mode_kind_blob_is_exact(self):
+        for name, (path, _, _, target, _, _, _) in self.records():
+            for chosen in (path, target):
+                entry = self.entries()[name][chosen]
+                alternatives = [('100644' if entry[0] != '100644' else '100755', entry[1], entry[2]),
+                    (entry[0], 'tree', entry[2]), (entry[0], entry[1], '0'*40), None]
+                for replacement in alternatives:
+                    entries = self.entries()
+                    if replacement is None: del entries[name][chosen]
+                    else: entries[name][chosen] = replacement
+                    with self.subTest(path=chosen, replacement=replacement), self.assertRaises(AssertionError):
+                        self.catalog(entries)
+            entries = self.entries(); entries[name][target] = entries[name][path]
+            with self.subTest(target_link=target), self.assertRaises(AssertionError): self.catalog(entries)
 
-    def exercise(self, *, raw=b'../README.md', target_data=BATTERIES_README, virtual=True,
-                 omit_link=False, omit_target=False, extra_link=None, target_link=False,
-                 public_link=False, regular_link=False):
+    def test_unlisted_Lean_guard_loader_and_other_package_aliases_are_rejected(self):
+        for name in admission.PINNED_GIT_DEPENDENCIES:
+            for path in ('Mathlib/Fixture.lean', 'scripts/chart_port_candidate_check.py', 'Cache/Main.lean', 'docs/OTHER.md'):
+                entries = self.entries(); entries[name][path] = ('120000','blob',admission.BATTERIES_LINK[1])
+                with self.subTest(name=name,path=path), self.assertRaisesRegex(AssertionError,'link catalog differs'):
+                    self.catalog(entries)
+
+    def exercise(self, *, virtual=True, changed_raw=None, changed_target=None, omit=None,
+                 regular_alias=None, target_alias=None, extra_link=None, public_link=False):
+        entries = self.entries()
         with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp); dep = root/admission.BATTERIES_ROOT
-            (dep/'docs').mkdir(parents=True)
-            link = dep/'docs/README.md'; target = dep/'README.md'
-            if not omit_target: target.write_bytes(target_data)
-            if not omit_link:
-                if virtual or regular_link: link.write_bytes(b'finite placeholder, never followed')
-                else: os.symlink(raw, os.fsencode(link))
+            root = Path(temp); virtual_nodes = set(); raw_links = {}
+            for name in entries: (root/'curvature/.lake/packages'/name).mkdir(parents=True)
+            for name, (path, _, raw, target, target_mode, _, _) in self.records():
+                prefix = 'curvature/.lake/packages/'+name+'/'
+                link = root/(prefix+path); dest = root/(prefix+target)
+                link.parent.mkdir(parents=True,exist_ok=True); dest.parent.mkdir(parents=True,exist_ok=True)
+                if omit != prefix+target:
+                    data = self.target_data(name,target)
+                    if changed_target == prefix+target: data = b'!'+data[1:]
+                    dest.write_bytes(data)
+                    if os.name == 'posix': dest.chmod(0o755 if target_mode == '100755' else 0o644)
+                if omit != prefix+path:
+                    data = raw+b'\n' if changed_raw == prefix+path else raw
+                    raw_links[os.fsencode(link)] = data
+                    if virtual or regular_alias == prefix+path:
+                        link.write_bytes(b'finite placeholder, never followed')
+                        if regular_alias != prefix+path: virtual_nodes.add(link)
+                    else: os.symlink(data, os.fsencode(link))
+                if target_alias == prefix+target: virtual_nodes.add(dest)
             public = {}
-            extra = root/extra_link if extra_link else None
-            if extra:
-                extra.parent.mkdir(parents=True, exist_ok=True)
-                extra.write_bytes(b'finite placeholder, never followed')
-                if public_link: public[extra_link] = self.entries()['docs/README.md']
-            virtual_paths = ({link} if virtual and not omit_link and not regular_link else set())
-            if target_link and not omit_target: virtual_paths.add(target)
-            if extra: virtual_paths.add(extra)
-            real_scandir = os.scandir
+            if extra_link:
+                node = root/extra_link
+                if not node.exists():
+                    node.parent.mkdir(parents=True,exist_ok=True); node.write_bytes(b'finite placeholder, never followed')
+                virtual_nodes.add(node)
+                if public_link: public[extra_link] = ('120000','blob',admission.BATTERIES_LINK[1])
+            real_scandir = os.scandir; reads = []
             def scan(directory):
-                items = list(real_scandir(directory))
-                return [types.SimpleNamespace(path=i.path, is_symlink=lambda: True)
-                        if Path(i.path) in virtual_paths else i for i in items]
-            reads = []
+                with real_scandir(directory) as iterator: items = list(iterator)
+                return [types.SimpleNamespace(path=i.path,is_symlink=lambda:True) if Path(i.path) in virtual_nodes else i for i in items]
             def readlink(path):
-                self.assertIsInstance(path, bytes)
-                self.assertEqual(path, os.fsencode(link))
-                reads.append(path); return raw
-            with patch.object(admission, 'configuration_outputs', return_value=set()), \
-                 patch.object(admission, 'git', return_value=(admission.BATTERIES_PIN+'\n').encode()), \
-                 patch.object(admission, 'tree_entries', return_value=self.entries()), \
-                 patch.object(admission.os, 'scandir', side_effect=scan):
+                self.assertIsInstance(path,bytes); reads.append(path); return raw_links[path]
+            def git(path,*args): return (admission.PINNED_GIT_DEPENDENCIES[Path(path).name]+'\n').encode()
+            def tree(path,ref): return entries[Path(path).name]
+            with patch.object(admission,'configuration_outputs',return_value=set()), \
+                 patch.object(admission,'git',side_effect=git), patch.object(admission,'tree_entries',side_effect=tree), \
+                 patch.object(admission.os,'scandir',side_effect=scan):
                 if virtual:
-                    with patch.object(admission.os, 'readlink', side_effect=readlink):
-                        result = admission.physical_inventory(root, public, {admission.BATTERIES_ROOT: self.entries()})
-                    self.assertEqual(len(reads), 1)
-                else:
-                    result = admission.physical_inventory(root, public, {admission.BATTERIES_ROOT: self.entries()})
+                    with patch.object(admission.os,'readlink',side_effect=readlink):
+                        result = admission.physical_inventory(root,public,self.dependencies(entries))
+                    self.assertEqual(len(reads),3)
+                else: result = admission.physical_inventory(root,public,self.dependencies(entries))
             return result
 
-    def test_finite_physical_link_is_accounted_with_raw_and_regular_target_identities(self):
+    def test_all_three_physical_aliases_and_regular_targets_are_in_exact_inventory(self):
         receipt = self.exercise()
-        self.assertEqual(receipt['dependency_files'], 2)
-        self.assertEqual(receipt['declared_build_outputs'], [])
+        self.assertEqual(receipt['dependency_files'],6)
+        self.assertEqual(receipt['declared_build_outputs'],[])
         self.assertTrue(receipt['full_physical_inventory_checked'])
         self.assertFalse(receipt['local_project_cache_admitted'])
-        self.assertEqual(receipt['declared_source_links'], [dict(path=admission.BATTERIES_ROOT+'/docs/README.md',
-            pin=admission.BATTERIES_PIN, link_blob=admission.BATTERIES_LINK[1], raw_bytes=12,
-            raw_sha256=digest(b'../README.md'), target=admission.BATTERIES_ROOT+'/README.md',
-            target_blob=admission.BATTERIES_LINK[4])])
+        self.assertEqual(len(receipt['declared_source_links']),3)
+        for row in receipt['declared_source_links']:
+            name = row['path'].split('/')[3]
+            self.assertEqual(row['pin'],admission.PINNED_GIT_DEPENDENCIES[name])
+            record = next(r for r in admission.PINNED_DEPENDENCY_LINKS[name] if row['path'].endswith('/'+r[0]))
+            self.assertEqual(row['link_blob'],record[1]); self.assertEqual(row['raw_bytes'],len(record[2]))
+            self.assertEqual(row['raw_sha256'],digest(record[2])); self.assertEqual(row['target_blob'],record[5])
 
-    def test_changed_raw_link_text_and_target_documentation_are_rejected(self):
-        for raw in (b'../README.md\n', b'../OTHER.md', b'../../README.md', b'/README.md'):
-            with self.subTest(raw=raw), self.assertRaisesRegex(AssertionError, 'link text differs'):
-                self.exercise(raw=raw)
-        for data in (b'changed documentation', b'!'+BATTERIES_README[1:]):
-            with self.subTest(size=len(data)), self.assertRaises(AssertionError):
-                self.exercise(target_data=data)
+    def test_changed_raw_alias_bytes_and_regular_target_bytes_are_rejected(self):
+        for name, (path, _, _, target, _, _, _) in self.records():
+            prefix = 'curvature/.lake/packages/'+name+'/'
+            with self.subTest(alias=path), self.assertRaisesRegex(AssertionError,'link text differs'):
+                self.exercise(changed_raw=prefix+path)
+            with self.subTest(target=target), self.assertRaisesRegex(AssertionError,'Physical bytes differ'):
+                self.exercise(changed_target=prefix+target)
 
-    def test_missing_link_target_and_regularized_link_are_rejected(self):
-        for options in ({'omit_link': True}, {'omit_target': True}, {'regular_link': True}, {'target_link': True}):
-            with self.subTest(options=options), self.assertRaises(AssertionError):
-                self.exercise(**options)
+    def test_missing_regularized_and_nonregular_alias_targets_are_rejected(self):
+        for name, (path, _, _, target, _, _, _) in self.records():
+            prefix = 'curvature/.lake/packages/'+name+'/'
+            for options in ({'omit':prefix+path},{'omit':prefix+target},{'regular_alias':prefix+path},{'target_alias':prefix+target}):
+                with self.subTest(options=options), self.assertRaises(AssertionError): self.exercise(**options)
 
-    def test_undeclared_public_and_code_physical_links_are_rejected(self):
-        for options in ({'extra_link': 'curvature/Fixture.lean', 'public_link': True},
-                        {'extra_link': admission.BATTERIES_ROOT+'/Batteries/Fixture.lean'},
-                        {'extra_link': admission.BATTERIES_ROOT+'/docs/OTHER.md'}):
-            with self.subTest(options=options), self.assertRaisesRegex(AssertionError, 'Physical symlink|Unexpected physical directory'):
-                self.exercise(**options)
+    def test_public_unlisted_and_generated_package_root_links_are_rejected(self):
+        paths = ['curvature/Fixture.lean','curvature/.lake/packages/mathlib/Mathlib/Fixture.lean',
+            'curvature/.lake/packages/mathlib/Cache/Main.lean','curvature/.lake/packages/mathlib',
+            'curvature/.lake/packages/HamiltonIveyReaction']
+        for path in paths:
+            with self.subTest(path=path), self.assertRaisesRegex(AssertionError,'Physical symlink|Unexpected physical directory'):
+                self.exercise(extra_link=path,public_link=path == 'curvature/Fixture.lean')
 
-    def test_identity_git_reads_disable_replace_objects_per_command(self):
-        with patch.object(admission.subprocess, 'check_output', return_value=b'identity') as read:
-            self.assertEqual(admission.git(Path('fixture'), 'rev-parse', 'HEAD'), b'identity')
-        read.assert_called_once_with(['git', '--no-replace-objects', '-C', 'fixture', 'rev-parse', 'HEAD'])
+    def test_git_identity_reads_keep_command_scoped_no_replace_objects(self):
+        with patch.object(admission.subprocess,'check_output',return_value=b'identity') as read:
+            self.assertEqual(admission.git(Path('fixture'),'rev-parse','HEAD'),b'identity')
+        read.assert_called_once_with(['git','--no-replace-objects','-C','fixture','rev-parse','HEAD'])
         for node in ast.walk(TREE):
-            if isinstance(node, ast.List) and node.elts and isinstance(node.elts[0], ast.Constant) and node.elts[0].value == 'git':
-                self.assertEqual(node.elts[1].value, '--no-replace-objects')
+            if isinstance(node,ast.List) and node.elts and isinstance(node.elts[0],ast.Constant) and node.elts[0].value == 'git':
+                self.assertEqual(node.elts[1].value,'--no-replace-objects')
 
-    @unittest.skipUnless(os.name == 'posix', 'Genuine Unix symlink behavior UNRUN on Windows; no link-creation workaround')
-    def test_genuine_unix_link_and_raw_bytes(self):
-        self.assertEqual(len(self.exercise(virtual=False)['declared_source_links']), 1)
-        with self.assertRaisesRegex(AssertionError, 'link text differs'):
-            self.exercise(virtual=False, raw=b'../README.md\n')
+    @unittest.skipUnless(os.name == 'posix','Genuine Unix alias behavior UNRUN on Windows; no workaround')
+    def test_genuine_unix_three_aliases_and_changed_raw_bytes(self):
+        self.assertEqual(len(self.exercise(virtual=False)['declared_source_links']),3)
+        for name,(path,*_) in self.records():
+            with self.subTest(path=path), self.assertRaisesRegex(AssertionError,'link text differs'):
+                self.exercise(virtual=False,changed_raw='curvature/.lake/packages/'+name+'/'+path)
+
+class RootRelationshipControls(unittest.TestCase):
+    def fixture(self,root,*,missing=False):
+        pkg = root/'curvature'; pkg.mkdir()
+        (root/'hamilton-ivey-reaction').mkdir()
+        packages = [dict(name=name,type='git',rev=pin) for name,pin in admission.PINNED_GIT_DEPENDENCIES.items()]
+        for p in packages:
+            if not (missing and p['name'] == 'mathlib'): (pkg/'.lake/packages'/p['name']).mkdir(parents=True)
+        packages.insert(0,dict(name='HamiltonIveyReaction',type='path',dir='../hamilton-ivey-reaction'))
+        return pkg, dict(packagesDir='.lake/packages',packages=packages)
+
+    def test_actual_regular_roots_and_path_dependency_relationship_are_diagnostic(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); pkg,manifest = self.fixture(root)
+            artifact = root/'fixture-artifacts'; artifact.mkdir()
+            def git(path,*args): return (admission.PINNED_GIT_DEPENDENCIES[Path(path).name]+'\n').encode()
+            with patch.object(admission,'git',side_effect=git):
+                receipt = admission.package_root_relationships(root,pkg,manifest,
+                    {'LEAN_SRC_PATH':str(root/'hamilton-ivey-reaction'),'LEAN_PATH':str(artifact)})
+            self.assertTrue(receipt['diagnostic_only']); self.assertFalse(receipt['root_link_exceptions_granted'])
+            self.assertEqual(len(receipt['packages']),10)
+            path = receipt['packages'][0]
+            self.assertEqual(path['manifest_type'],'path'); self.assertTrue(path['observed_expected_root_relationship'])
+            self.assertEqual(path['root']['node_kind'],'directory')
+            self.assertEqual(path['generated_package_mirror']['node_kind'],'missing')
+            for row in receipt['packages'][1:]:
+                self.assertTrue(row['pins_match']); self.assertEqual(row['root']['node_kind'],'directory')
+                self.assertNotIn('raw_link_text',row['root'])
+            self.assertEqual(receipt['configured_paths']['LEAN_PATH']['observations'][0]['resolved_path'],str(artifact.resolve()))
+
+    def test_missing_root_and_wrong_observed_pin_are_recorded_without_admission(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); pkg,manifest = self.fixture(root,missing=True)
+            with patch.object(admission,'git',return_value=('0'*40+'\n').encode()):
+                receipt = admission.package_root_relationships(root,pkg,manifest,{})
+            mathlib = next(r for r in receipt['packages'] if r['name'] == 'mathlib')
+            self.assertEqual(mathlib['root']['node_kind'],'missing'); self.assertIsNone(mathlib['actual_pin'])
+            self.assertFalse(mathlib['pins_match'])
+            self.assertFalse(next(r for r in receipt['packages'] if r['name'] == 'batteries')['pins_match'])
+            self.assertFalse(receipt['root_link_exceptions_granted'])
+
+    def test_configured_path_observations_are_bounded(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); pkg,manifest=self.fixture(root)
+            with patch.object(admission,'git',return_value=('0'*40+'\n').encode()):
+                receipt=admission.package_root_relationships(root,pkg,manifest,
+                    {'LEAN_PATH':os.pathsep.join('finite'+str(i) for i in range(129))})
+            self.assertTrue(receipt['configured_paths']['LEAN_PATH']['truncated'])
+            self.assertEqual(len(receipt['configured_paths']['LEAN_PATH']['observations']),128)
+
+    @unittest.skipUnless(os.name == 'posix','Genuine Unix root lstat/readlink behavior UNRUN on Windows')
+    def test_genuine_unix_root_link_is_observed_without_exception_grant(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); pkg,manifest=self.fixture(root,missing=True)
+            target=root/'finite-mathlib-source'; target.mkdir()
+            path=pkg/'.lake/packages/mathlib'; os.symlink(os.fsencode(target),os.fsencode(path))
+            with patch.object(admission,'git',return_value=(admission.PINNED_GIT_DEPENDENCIES['mathlib']+'\n').encode()):
+                receipt=admission.package_root_relationships(root,pkg,manifest,{})
+            row=next(r for r in receipt['packages'] if r['name']=='mathlib')
+            self.assertEqual(row['root']['node_kind'],'symlink')
+            self.assertEqual(bytes.fromhex(row['root']['raw_link_hex']),os.fsencode(target))
+            self.assertEqual(row['root']['resolved_path'],str(target.resolve()))
+            self.assertFalse(receipt['root_link_exceptions_granted'])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
