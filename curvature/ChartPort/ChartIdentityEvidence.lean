@@ -1,0 +1,18 @@
+import ChartPort.ChartIdentity
+
+set_option pp.universes true in
+#print ChartPort.projectChosen_eq_chartLeviCivita
+set_option pp.universes true in
+#print DifferentialGeometry.Geometry.Connection.chartLeviCivita
+set_option pp.universes true in
+#print DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet
+set_option pp.universes true in
+#print DifferentialGeometry.Geometry.Connection.chartLeviCivita_torsion_free_on
+set_option pp.universes true in
+#print DifferentialGeometry.Geometry.Connection.chartLeviCivita_isMetricCompatibleOn
+#print axioms ChartPort.projectChosen_eq_chartLeviCivita
+#print axioms DifferentialGeometry.Geometry.Connection.chartLeviCivita_torsion_free_on
+#print axioms DifferentialGeometry.Geometry.Connection.chartLeviCivita_isMetricCompatibleOn
+#print axioms DifferentialGeometry.Geometry.Connection.koszul_local_uniqueness
+#print axioms ContMDiffSection.exists_eq_at
+#print axioms RicciFlow.SmoothForward.toC2

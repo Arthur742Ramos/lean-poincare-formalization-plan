@@ -1,0 +1,3274 @@
+{
+  "schema_version": 1,
+  "repository": "Arthur742Ramos/lean-poincare-formalization-plan",
+  "base_commit": "1664872ce762ee027b76cb515befb0ae829b2711",
+  "base_tree": "6d74e9612cf6e16f2d027012cede68e5e0a23483",
+  "upstream_repository": "qinz1yang/differential-geometry",
+  "upstream_commit": "8bd406e35c33a200e9b88895cf11ee8429194e15",
+  "lean_toolchain": "leanprover/lean4:v4.33.0",
+  "mathlib_commit": "db584cd6d46c92f209a44c0f1c829460d327499d",
+  "upstream_original_sources": [
+    {
+      "path": "DifferentialGeometry/Geometry/Metric/Basic.lean",
+      "bytes": 1097,
+      "sha256": "312ca68ba869a912e03d49f19cb8b25d52e8d0d4ebf298d1da17a310eb90bd70",
+      "git_blob": "266f36b1f6e34bd2de70e7b8eb1ee61df8380e92",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Metric/Basic.lean",
+      "filtered_differential_geometry_imports": [],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Metric/ChartGram.lean",
+      "bytes": 12770,
+      "sha256": "139a63e1ab6442b297bfe857bc9c8d55521d8889c829dbfdeb56eec2136c96e7",
+      "git_blob": "8da98c3e14e51361e537bd0fdf1b64730110b4aa",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Metric/ChartGram.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Metric.Basic"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Metric.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.Geometry.Manifold.Algebra.Monoid",
+        "Mathlib.Geometry.Manifold.Algebra.Structures",
+        "Mathlib.LinearAlgebra.Matrix.PosDef",
+        "Mathlib.LinearAlgebra.Dimension.Free",
+        "Mathlib.LinearAlgebra.Basis.Basic",
+        "Mathlib.Topology.Algebra.Module.Equiv",
+        "Mathlib.Analysis.Matrix.PosDef",
+        "Mathlib.Data.Matrix.Mul",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.Analysis.InnerProductSpace.EuclideanDist",
+        "Mathlib.Analysis.InnerProductSpace.PiL2",
+        "Mathlib.MeasureTheory.Measure.WithDensity",
+        "Mathlib.MeasureTheory.Measure.Map",
+        "Mathlib.MeasureTheory.Measure.Haar.OfBasis",
+        "Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace",
+        "Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar",
+        "Mathlib.MeasureTheory.Constructions.BorelSpace.Basic"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/ChartDensity.lean",
+      "bytes": 5043,
+      "sha256": "20cf207779ecc54da497035e993a8dbfd5b836eaf50b41076fba1651a136a6b9",
+      "git_blob": "fe8f0950f244084996b31d3c404be8ce820a2721",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/Measure/ChartDensity.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Metric.ChartGram"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.Geometry.Manifold.Algebra.Monoid",
+        "Mathlib.Geometry.Manifold.Algebra.Structures",
+        "Mathlib.LinearAlgebra.Matrix.PosDef",
+        "Mathlib.LinearAlgebra.Dimension.Free",
+        "Mathlib.LinearAlgebra.Basis.Basic",
+        "Mathlib.Topology.Algebra.Module.Equiv",
+        "Mathlib.Analysis.Matrix.PosDef",
+        "Mathlib.Data.Matrix.Mul",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.Analysis.InnerProductSpace.EuclideanDist",
+        "Mathlib.Analysis.InnerProductSpace.PiL2",
+        "Mathlib.MeasureTheory.Measure.WithDensity",
+        "Mathlib.MeasureTheory.Measure.Map",
+        "Mathlib.MeasureTheory.Measure.Haar.OfBasis",
+        "Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace",
+        "Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar",
+        "Mathlib.MeasureTheory.Constructions.BorelSpace.Basic",
+        "DifferentialGeometry.Geometry.Metric.ChartGram"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/LeviCivita/MetricCompatible.lean",
+      "bytes": 6642,
+      "sha256": "fd68e9a9c67efe4ea5933e4f1bb4f8b9678f30b1ce48fd7083b0d40fd7ef7244",
+      "git_blob": "ba390a82c5b95f03e7348e0a1e71a8f343146c59",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Connection/LeviCivita/MetricCompatible.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Bundle/Zero.lean",
+      "bytes": 1435,
+      "sha256": "1e428f25ad3d2b7a826255b28987df161f2552836834664720fbaef05abadba3",
+      "git_blob": "6146c3038955e3c12c26f8dfa274cfb418d804e1",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Bundle/Zero.lean",
+      "filtered_differential_geometry_imports": [],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Topology.VectorBundle.Basic"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Bundle/Equiv.lean",
+      "bytes": 57712,
+      "sha256": "ed1cabd339d88b209e4e8884d5eb6fe54b9a2ff73d181476fafddbc486833459",
+      "git_blob": "1efdef28f9aec561a43cd7b020f06b1c862ae85b",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Bundle/Equiv.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Bundle.Zero"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Topology.VectorBundle.Basic",
+        "Mathlib.Geometry.Manifold.Diffeomorph",
+        "Mathlib.Analysis.Normed.Module.FiniteDimension",
+        "DifferentialGeometry.Bundle.Zero",
+        "Mathlib.Geometry.Manifold.VectorBundle.Basic"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Bundle/Frame.lean",
+      "bytes": 2166,
+      "sha256": "c7d46baf8130d2551c65cbd41b62fc94a4440cc8423a96e6a5b37e31dd20bcc0",
+      "git_blob": "c42b9be9f40b3b09bc96c5a91f072bc504a473ba",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Bundle/Frame.lean",
+      "filtered_differential_geometry_imports": [],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+        "Mathlib.Geometry.Manifold.BumpFunction"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Bundle/Section.lean",
+      "bytes": 31023,
+      "sha256": "4efa7a245d4abd0f9e0b123c40374c2817c97c5cc2257d82d3670db350ce7831",
+      "git_blob": "a4e510eb262f8bde98d4541d886598113a036fd1",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Bundle/Section.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Bundle.Equiv",
+        "DifferentialGeometry.Bundle.Frame"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.Geometry.Manifold.Algebra.SmoothFunctions",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+        "DifferentialGeometry.Bundle.Equiv",
+        "DifferentialGeometry.Bundle.Frame"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/LeviCivita/Koszul.lean",
+      "bytes": 9591,
+      "sha256": "e98d41173000254332e6c4b1b4878f111239427d1725efd8c0905cd0d3761ea9",
+      "git_blob": "a44bdca69fc5912231deb8f30826b0f07b4a2c4a",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Connection/LeviCivita/Koszul.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible",
+        "DifferentialGeometry.Bundle.Section"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+        "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible",
+        "DifferentialGeometry.Bundle.Section"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/RiemannianMeasure.lean",
+      "bytes": 3931,
+      "sha256": "6b32e1d0ff10c7a017d63aca8f53497224742934daff74d18e638db6d7823d28",
+      "git_blob": "574c6feff6497b5e657812227d7ce5e75f37f236",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/Measure/RiemannianMeasure.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "Mathlib.Geometry.Manifold.PartitionOfUnity",
+        "Mathlib.MeasureTheory.Measure.WithDensity",
+        "Mathlib.MeasureTheory.Integral.Lebesgue.Basic"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/Invariance.lean",
+      "bytes": 49702,
+      "sha256": "513f80da30d3610efe63411105eb833c151b60219443b8bf6a3e65f0437bf9dd",
+      "git_blob": "429f793453572e0c6c31addb4556226fe822ccbd",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/Measure/Invariance.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+        "Mathlib.MeasureTheory.Function.Jacobian",
+        "Mathlib.MeasureTheory.Measure.Haar.Basic",
+        "Mathlib.MeasureTheory.Measure.Restrict",
+        "Mathlib.MeasureTheory.Measure.WithDensity",
+        "Mathlib.MeasureTheory.Measure.Map",
+        "Mathlib.MeasureTheory.Integral.Lebesgue.Map",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.LinearAlgebra.Matrix.ToLin",
+        "Mathlib.LinearAlgebra.Matrix.Determinant.Basic"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/Properties.lean",
+      "bytes": 31332,
+      "sha256": "d2591996124472057d93a8ad6c5ce6c28f7a570656e00e3636816e4cbba37829",
+      "git_blob": "53a3f956d50138eee7c97ac3f6c2083153f9f532",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/Measure/Properties.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+        "DifferentialGeometry.Analysis.Integration.Measure.Invariance"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+        "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+        "Mathlib.MeasureTheory.Measure.Typeclasses.Finite",
+        "Mathlib.MeasureTheory.Measure.Typeclasses.SFinite",
+        "Mathlib.MeasureTheory.Measure.OpenPos",
+        "Mathlib.MeasureTheory.Measure.Haar.Basic",
+        "Mathlib.Topology.Compactness.LocallyFinite",
+        "Mathlib.Topology.Algebra.Support",
+        "Mathlib.MeasureTheory.Measure.Regular",
+        "Mathlib.Geometry.Manifold.Metrizable",
+        "Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Tensor/Multilinear/Comp.lean",
+      "bytes": 4590,
+      "sha256": "e1171836d1f4918b1dfb98a089939f319313e690203d2bd7fca8be77e6320848",
+      "git_blob": "bf7c2de5a454c34ce11d72e97163db7e5c2711a5",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Tensor/Multilinear/Comp.lean",
+      "filtered_differential_geometry_imports": [],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Analysis.Calculus.ContDiff.CPolynomial",
+        "Mathlib.Analysis.Calculus.ContDiff.Basic",
+        "Mathlib.Analysis.Calculus.ContDiff.Operations",
+        "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Calculus/AnalyticTransfer.lean",
+      "bytes": 17069,
+      "sha256": "fb682573de38aae70b4b2674558a0e7f500a8e5c3ff94b02e636c89fcce8fa46",
+      "git_blob": "5e7e3b00715cfd8f010c6610d279381e7bcd0d97",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Calculus/AnalyticTransfer.lean",
+      "filtered_differential_geometry_imports": [],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Analysis.Calculus.ContDiff.CPolynomial",
+        "Mathlib.Analysis.Calculus.ContDiff.Basic",
+        "Mathlib.Analysis.Analytic.IteratedFDeriv",
+        "Mathlib.Analysis.Normed.Group.Real",
+        "Mathlib.Analysis.Normed.Operator.LinearIsometry"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Tensor/Auxiliary/LinearIsometryContDiff.lean",
+      "bytes": 1244,
+      "sha256": "fd7c582dabe8e1c4fcc4c6ed4dd2630271edd4111e04e4c7af9f06ca0aaab7d1",
+      "git_blob": "da7b1980310990293d944dc1f384e93ca8d59897",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Tensor/Auxiliary/LinearIsometryContDiff.lean",
+      "filtered_differential_geometry_imports": [],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Analysis.Calculus.ContDiff.Basic",
+        "Mathlib.Analysis.Calculus.ContDiff.Comp",
+        "Mathlib.Analysis.Normed.Module.FiniteDimension",
+        "Mathlib.Analysis.Normed.Module.Alternating.Basic",
+        "Mathlib.RingTheory.Finiteness.Defs"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Tensor/Alternating/Comp.lean",
+      "bytes": 31065,
+      "sha256": "010fb27574e33ac62ab891e6a6f269ed6815457635142f8fdb6b5a979300cd92",
+      "git_blob": "b62fcdab11a421e4d699ba4d9c668c5f4d5ecbd5",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Tensor/Alternating/Comp.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Comp",
+        "DifferentialGeometry.Analysis.Calculus.AnalyticTransfer",
+        "DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Comp",
+        "DifferentialGeometry.Analysis.Calculus.AnalyticTransfer",
+        "DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff",
+        "Mathlib.Analysis.Normed.Module.Alternating.Basic",
+        "Mathlib.Analysis.Calculus.ContDiff.CPolynomial",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Tensor/Multilinear/Bundle.lean",
+      "bytes": 11541,
+      "sha256": "8212664389296d1d64b42abb481ae188b8603618bd547bdc5cc2168caf3a69eb",
+      "git_blob": "ea3f650971b064bd90ec521988561f3d2f8a3cbf",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Tensor/Multilinear/Bundle.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Tensor.Alternating.Comp"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Tensor.Alternating.Comp",
+        "Mathlib.Geometry.Manifold.VectorBundle.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Data.Bundle"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Tensor/Multilinear/Basis.lean",
+      "bytes": 7162,
+      "sha256": "a154d2dcb91c46c2db0a585a395761660eb6ba959e53293e9a92c85f3e13be0b",
+      "git_blob": "6dd585728b9e561797b554dae7d7dc8cc1479aba",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Tensor/Multilinear/Basis.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Bundle"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Bundle",
+        "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas",
+        "Mathlib.LinearAlgebra.Dimension.Free",
+        "Mathlib.Topology.Algebra.Module.FiniteDimension"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Tensor/Multilinear/Fiber.lean",
+      "bytes": 13706,
+      "sha256": "9c799ed107a681d267233ddb508e8adf26c86d8bf74fa0cd3a3b81d7ccdf1a90",
+      "git_blob": "55628c77595688d243eb710b50f0d9a39e304f97",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Tensor/Multilinear/Fiber.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Bundle",
+        "DifferentialGeometry.Tensor.Multilinear.Basis"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Bundle",
+        "DifferentialGeometry.Tensor.Multilinear.Basis"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Tensor/Multilinear/Curry.lean",
+      "bytes": 2516,
+      "sha256": "237f3be6f6202761ec8b31e83e43aae917e6aff3e123d5fc3cdf43072c0770d1",
+      "git_blob": "364f5e55c72c4fe24021731499ab29f6e0f79b72",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Tensor/Multilinear/Curry.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Bundle"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Bundle"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Tensor/RSTensor/Defs.lean",
+      "bytes": 30362,
+      "sha256": "dc610d02af1fba39100eb9fa1f282f7ecf36a117692062dbf0a2d6a57a347664",
+      "git_blob": "b5566c30bdb145fb892a512949e57a5546000e01",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Tensor/RSTensor/Defs.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Fiber",
+        "DifferentialGeometry.Tensor.Multilinear.Curry"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Fiber",
+        "DifferentialGeometry.Tensor.Multilinear.Curry",
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/Realization/Basic.lean",
+      "bytes": 3605,
+      "sha256": "c8bbc0b9bf5f0f068270591bc9c24bd55851b9eac4e6067927079899d376294b",
+      "git_blob": "52fcb26c3922070a63ffff37deb9c467ce3c8126",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Connection/Realization/Basic.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Bundle.Section",
+        "DifferentialGeometry.Tensor.RSTensor.Defs"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.DerivationBundle",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+        "Mathlib.LinearAlgebra.Trace",
+        "Mathlib.Analysis.InnerProductSpace.Dual",
+        "DifferentialGeometry.Bundle.Section",
+        "DifferentialGeometry.Tensor.RSTensor.Defs"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/Realization/Embedding.lean",
+      "bytes": 24242,
+      "sha256": "8c682300193773fb06229007dfa32f8f1d2894c6a638cd6d0766d869225ba92f",
+      "git_blob": "1b01a6a52655962902ac4e7ce79cb2b8b2b5562c",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Connection/Realization/Embedding.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Connection.Realization.Basic"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Connection.Realization.Basic",
+        "Mathlib.Geometry.Manifold.MFDeriv.NormedSpace",
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.RingTheory.Derivation.Lie"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/Realization/Connection.lean",
+      "bytes": 5357,
+      "sha256": "4550765bb5ff6bdfb6f55b1f9650f9c82d5cc64b0d89327ccbc87e62d54d6610",
+      "git_blob": "30d1e36de2780c893eb2adbae4c773ea2c05efef",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Connection/Realization/Connection.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Connection.Realization.Embedding"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Connection.Realization.Embedding",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/L2/Basic.lean",
+      "bytes": 7180,
+      "sha256": "1e88c37e3e55fc5f6572a5e7737ff9c29f44bb3a119403f340d27a9bcefacf99",
+      "git_blob": "0d82d4c6d61088eac8e7737a5c3ba42ef221cb5d",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/L2/Basic.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "Mathlib.MeasureTheory.Integral.Bochner.Basic",
+        "Mathlib.MeasureTheory.Integral.Lebesgue.Basic",
+        "Mathlib.MeasureTheory.Integral.Lebesgue.Add",
+        "Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic",
+        "Mathlib.MeasureTheory.Function.StronglyMeasurable.AEStronglyMeasurable",
+        "Mathlib.MeasureTheory.Function.L1Space.Integrable",
+        "Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm",
+        "Mathlib.MeasureTheory.Function.LocallyIntegrable",
+        "Mathlib.Topology.Algebra.Support"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/L2/CompactSupport.lean",
+      "bytes": 26146,
+      "sha256": "30b39140ebcdafb083973b106428cd5dd56b06c2d49b9314653ed58af610df39",
+      "git_blob": "9e42aa831401f611849be9fd4f49160488846cc6",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/L2/CompactSupport.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Connection.Realization.Embedding",
+        "DifferentialGeometry.Geometry.Connection.Realization.Connection",
+        "DifferentialGeometry.Analysis.Integration.L2.Basic",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Connection.Realization.Embedding",
+        "DifferentialGeometry.Geometry.Connection.Realization.Connection",
+        "DifferentialGeometry.Analysis.Integration.L2.Basic",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "Mathlib.Topology.Algebra.Support",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.Geometry.Manifold.ContMDiffMap",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.SmoothApprox",
+        "Mathlib.MeasureTheory.Function.SimpleFuncDenseLp",
+        "Mathlib.MeasureTheory.Function.ContinuousMapDense",
+        "Mathlib.MeasureTheory.Function.LpSpace.Basic",
+        "Mathlib.MeasureTheory.Function.LpSpace.Indicator"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/DivergenceTheorem/LocalFormula.lean",
+      "bytes": 18559,
+      "sha256": "3682d714d502faa6a3378875f923456fa94599c103aa5b33a51c6f0032ae6624",
+      "git_blob": "2b6e37f57ba74532474df94e0f23ccea9f4d83cf",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/LocalFormula.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "DifferentialGeometry.Analysis.Integration.L2.CompactSupport"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "DifferentialGeometry.Analysis.Integration.L2.CompactSupport",
+        "Mathlib.Analysis.Calculus.FDeriv.Basic",
+        "Mathlib.Analysis.Calculus.FDeriv.Comp",
+        "Mathlib.Analysis.Calculus.FDeriv.Equiv",
+        "Mathlib.Analysis.Calculus.ContDiff.Basic",
+        "Mathlib.Analysis.Calculus.LineDeriv.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.MFDeriv.Atlas",
+        "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.LinearAlgebra.Matrix.Trace",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartCoeffPullback.lean",
+      "bytes": 2916,
+      "sha256": "38242f6bec59be2b470f00295522c022a5f8f4f0a9492d7b6f4e6cce5471e61e",
+      "git_blob": "5db90208be43299a0f0f81550b093241d207c580",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartCoeffPullback.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/DivergenceTheorem/TangentAction.lean",
+      "bytes": 20048,
+      "sha256": "bf1c0322aa23ac49c865233263633f9c723ff3371b6bb339fe2279dddabd6347",
+      "git_blob": "8dfc2225afc794deaf402a86bf250f1943ac85f0",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/TangentAction.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartCoeffPullback"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartCoeffPullback",
+        "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+        "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+        "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+        "Mathlib.Geometry.Manifold.MFDeriv.Atlas",
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.Analysis.Calculus.FDeriv.Comp",
+        "Mathlib.Analysis.Calculus.FDeriv.Basic",
+        "Mathlib.Analysis.Calculus.LineDeriv.Basic"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/Gradient.lean",
+      "bytes": 43231,
+      "sha256": "becd86307f0c445b1601a5a101fc0108b2890143028b729ec4d47b7207332502",
+      "git_blob": "534c8e099c8c72cedb72e532479c78c588d48c65",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Operator/Gradient.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "Mathlib.Analysis.Calculus.FDeriv.Basic",
+        "Mathlib.Analysis.Calculus.FDeriv.Equiv",
+        "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.LinearAlgebra.Dual.Lemmas",
+        "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.LinearAlgebra.Matrix.Adjugate"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/JacobiFormula.lean",
+      "bytes": 10894,
+      "sha256": "cd9a7cf2d1479d7acc5b466b28e27090b2436d8e6a2954aa76a4950ab51c268c",
+      "git_blob": "382bbbc627b3fd4a1975da3edacc5ec51831427e",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/Measure/JacobiFormula.lean",
+      "filtered_differential_geometry_imports": [],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Analysis.Calculus.Deriv.Mul",
+        "Mathlib.Analysis.Calculus.Deriv.Add",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.LinearAlgebra.Matrix.Adjugate",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.LinearAlgebra.Matrix.Trace",
+        "Mathlib.LinearAlgebra.Matrix.PosDef"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Bundle/PartialMfderiv.lean",
+      "bytes": 1985,
+      "sha256": "5d2b9ef59a8375722780ddb32e9d930b3f56c9002a09a70bad584d7add19ef47",
+      "git_blob": "925e408170916f3d00f8b08a6fbbde6573704069",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Bundle/PartialMfderiv.lean",
+      "filtered_differential_geometry_imports": [],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+        "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+        "Mathlib.Geometry.Manifold.ContMDiffMap",
+        "Mathlib.Analysis.Calculus.Deriv.Basic"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/FamilyDefs.lean",
+      "bytes": 10603,
+      "sha256": "056e8bfb37c4336209b34f3e318f09b462829f4952a8c28d854acd23cd4b9581",
+      "git_blob": "cebef6adc6a06ccbf4b5888b36fa64e7df46b0c1",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/Measure/FamilyDefs.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+        "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "DifferentialGeometry.Analysis.Integration.Measure.JacobiFormula",
+        "DifferentialGeometry.Bundle.PartialMfderiv"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+        "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "DifferentialGeometry.Analysis.Integration.Measure.JacobiFormula",
+        "DifferentialGeometry.Bundle.PartialMfderiv",
+        "Mathlib.Analysis.Calculus.Deriv.Mul",
+        "Mathlib.Analysis.Calculus.Deriv.Add",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.LinearAlgebra.Matrix.Adjugate",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.LinearAlgebra.Matrix.Trace",
+        "Mathlib.LinearAlgebra.Matrix.PosDef"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/FamilyDecomposition.lean",
+      "bytes": 31161,
+      "sha256": "368be73c67c8c42b1afcac833e51de62df69b6d2ae531f5e48443354de4984a3",
+      "git_blob": "7319edd68bb29b1f42a7653847d3520b9ac1db47",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/Measure/FamilyDecomposition.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.FamilyDefs"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.FamilyDefs",
+        "Mathlib.Analysis.Calculus.Deriv.Mul",
+        "Mathlib.Analysis.Calculus.Deriv.Add",
+        "Mathlib.Analysis.Calculus.ParametricIntegral",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.LinearAlgebra.Matrix.Adjugate",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.LinearAlgebra.Matrix.Trace",
+        "Mathlib.LinearAlgebra.Matrix.PosDef",
+        "Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap",
+        "Mathlib.MeasureTheory.Integral.Bochner.Set",
+        "Mathlib.MeasureTheory.Integral.Bochner.SumMeasure",
+        "Mathlib.Topology.Compactness.LocallyFinite"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/Family.lean",
+      "bytes": 52030,
+      "sha256": "e25adebb0d316448ef45d6264e04608bb262d1e5046454d3e192ee9ca28bc5a1",
+      "git_blob": "e0da8658b442d01553f68c2702cb9fbf95249de5",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/Measure/Family.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition",
+        "Mathlib.Analysis.Calculus.Deriv.Mul",
+        "Mathlib.Analysis.Calculus.Deriv.Add",
+        "Mathlib.Analysis.Calculus.ParametricIntegral",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.LinearAlgebra.Matrix.Adjugate",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.LinearAlgebra.Matrix.Trace",
+        "Mathlib.LinearAlgebra.Matrix.PosDef",
+        "Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap",
+        "Mathlib.MeasureTheory.Integral.Bochner.Set",
+        "Mathlib.MeasureTheory.Integral.Bochner.SumMeasure",
+        "Mathlib.Topology.Compactness.LocallyFinite"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Calculus/Cutoff.lean",
+      "bytes": 2236,
+      "sha256": "f2a08215694935a73d10be3a09262954540dd9fb1deb5c61cbaabc27e85587d2",
+      "git_blob": "4b67e4575026b40d99f81c0d42b713bbe6cd2826",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Calculus/Cutoff.lean",
+      "filtered_differential_geometry_imports": [],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.PartitionOfUnity"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Calculus/CompactCutoff.lean",
+      "bytes": 2858,
+      "sha256": "39cfb2bce9a1c14cefefc6967998d5005f879729a15deb2473257b2f0a97cf35",
+      "git_blob": "bc9d9ace442477e60ea8ba908419f68ce71e7804",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Calculus/CompactCutoff.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Calculus.Cutoff"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Calculus.Cutoff",
+        "Mathlib.Geometry.Manifold.Metrizable"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartLocalIbp.lean",
+      "bytes": 68343,
+      "sha256": "60e7afef440477dc4100dd6b102182705ad04991c3273066fb6f2e2d73132750",
+      "git_blob": "cccb3fe4a086934a2bc8099be964d269f237a655",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartLocalIbp.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartCoeffPullback",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Analysis.Calculus.CompactCutoff"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartCoeffPullback",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Analysis.Calculus.CompactCutoff",
+        "Mathlib.Analysis.Calculus.Rademacher",
+        "Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts",
+        "Mathlib.Analysis.Calculus.FDeriv.Basic",
+        "Mathlib.Analysis.Calculus.FDeriv.Mul",
+        "Mathlib.MeasureTheory.Integral.Bochner.Set",
+        "Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap",
+        "Mathlib.Geometry.Manifold.PartitionOfUnity",
+        "Mathlib.Topology.Algebra.Support"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartInvariance.lean",
+      "bytes": 33204,
+      "sha256": "e7fb9b372ad96d3ba49602fc9fe5e2bf439b129501c8264beb7cd37a6585a269",
+      "git_blob": "c093bc27bd071255ce6e5deca13c5d666ecd7b70",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartInvariance.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartLocalIbp",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartLocalIbp",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "Mathlib.Geometry.Manifold.PartitionOfUnity",
+        "Mathlib.Geometry.Manifold.BumpFunction",
+        "Mathlib.MeasureTheory.Function.AEEqOfIntegral",
+        "Mathlib.MeasureTheory.Measure.OpenPos",
+        "Mathlib.Data.ENNReal.Basic"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/DivergenceTheorem/POUReduction.lean",
+      "bytes": 26886,
+      "sha256": "7e23a2688783bf60a44c32ac27e6c8bcd1f6c63bb9b11cca51e7000acd009cc6",
+      "git_blob": "a8c9c39ed93a144a48fc589393fcfac7aa4aaf37",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/POUReduction.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartLocalIbp",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartLocalIbp",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+        "Mathlib.Analysis.Calculus.FDeriv.Mul",
+        "Mathlib.Analysis.Calculus.FDeriv.Basic",
+        "Mathlib.Geometry.Manifold.PartitionOfUnity",
+        "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/Laplacian.lean",
+      "bytes": 5304,
+      "sha256": "7a20a6d6f9a9bd5f25e11f12425ff0184ddf82dca4404e70f124d256628a0c5d",
+      "git_blob": "642fd6a33edd8a997870cd001dc0f2f1427a027c",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Operator/Laplacian.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Geometry.Operator.Gradient",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Geometry.Operator.Gradient",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/Hessian.lean",
+      "bytes": 23229,
+      "sha256": "a52c337257549d3033baa7eabcf833ab35b6972e343839b7aeb1cbcd9894c3f8",
+      "git_blob": "ecc9afc7b90ba96928d94e3b9632bb18ac0f318d",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Operator/Hessian.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Operator.Gradient",
+        "DifferentialGeometry.Geometry.Operator.Laplacian"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Operator.Gradient",
+        "DifferentialGeometry.Geometry.Operator.Laplacian",
+        "Mathlib.Algebra.Order.Chebyshev",
+        "Mathlib.LinearAlgebra.Dimension.Free",
+        "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/VossWeyl.lean",
+      "bytes": 10761,
+      "sha256": "3fe2727b6f377d4f2216765be54eba673677bc7df3ef970042f68da94b7428de",
+      "git_blob": "15acbf8ef4090e54ae0dc37f734d44c44c0b9777",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Operator/VossWeyl.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Operator.Laplacian",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Operator.Laplacian",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/HessianTraceChartGramRegularity.lean",
+      "bytes": 18755,
+      "sha256": "21fdac38ed405ebbbe59b6a7242fcb548429e304ee3c881d17e00c65fc9725e0",
+      "git_blob": "397062f773600a323e8cf985a7e99b0a9739f5b8",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Operator/HessianTraceChartGramRegularity.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/HessianTraceChartDensityJacobiDerivative.lean",
+      "bytes": 11622,
+      "sha256": "b1a00cd4615ab6ef8c89459a9e092b08b1e486d4d5e042cf61e2669ca8cd7f98",
+      "git_blob": "6be4ade69e6f25e35581492dfc9dbef15dc6d8e3",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Operator/HessianTraceChartDensityJacobiDerivative.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/HessianTraceChartInverseGramDerivative.lean",
+      "bytes": 36871,
+      "sha256": "1226f6aa8ec352bc8130c7191c2431619849ea205f68d60273e8a5c6e3e5d987",
+      "git_blob": "de63c87fc67abe6c2b0822e0f64095c3eab996ae",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Operator/HessianTraceChartInverseGramDerivative.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/HessianTrace.lean",
+      "bytes": 82541,
+      "sha256": "52bb4d4d8ad0dc0c9ce2b9c3b45189cd6e43394a4e4cad941a068e21250a9429",
+      "git_blob": "992751b32e8786970d5ec919270944342519f923",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Operator/HessianTrace.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartDensityJacobiDerivative",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartDensityJacobiDerivative",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Curvature/Riemann/Defs.lean",
+      "bytes": 7971,
+      "sha256": "3c8c026d9f57089526fb0833b6aae8bc3749ceebaf0386a13607b83061258f6d",
+      "git_blob": "ae74331301dbd524eac509438775b25c1fbecc42",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Curvature/Riemann/Defs.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Curvature/Riemann/Ricci.lean",
+      "bytes": 52958,
+      "sha256": "cb36001932c1220f1484dabf5abde4bdfd1d07749cdbecbbaf92833a3182aa1b",
+      "git_blob": "ffaa40d89cef883429b92f753af19704d6bc0300",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Curvature/Riemann/Ricci.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Curvature.Riemann.Defs",
+        "DifferentialGeometry.Geometry.Operator.HessianTrace",
+        "DifferentialGeometry.Geometry.Operator.Gradient",
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Curvature.Riemann.Defs",
+        "DifferentialGeometry.Geometry.Operator.HessianTrace",
+        "DifferentialGeometry.Geometry.Operator.Gradient",
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/ChartFrame/ChartMetric.lean",
+      "bytes": 14348,
+      "sha256": "11e7d1e6633aba7f095557423b600727cfd0ad0af11e6fde94a74666bf1b97c9",
+      "git_blob": "82bce66b5350e6e3de17bbd1842ec040eabd69ae",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Connection/ChartFrame/ChartMetric.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.HessianTrace",
+        "DifferentialGeometry.Geometry.Curvature.Riemann.Ricci"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.HessianTrace",
+        "DifferentialGeometry.Geometry.Curvature.Riemann.Ricci"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/ChartFrame/ChartSection.lean",
+      "bytes": 18073,
+      "sha256": "e11bf9b21b41ed66abe0044bda25104e6d81e952fd7f726fe53116ccef2197b2",
+      "git_blob": "d39dc3f985b36ffaa80f9f21b9c964c5997e0275",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Connection/ChartFrame/ChartSection.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+        "Mathlib.Geometry.Manifold.MFDeriv.Atlas",
+        "Mathlib.Geometry.Manifold.ContMDiff.Atlas",
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartLocal.lean",
+      "bytes": 23129,
+      "sha256": "81d36316e3a38526d04c1d5d0affa9aceaf7eb28284946bb1f9cff8fe86f279f",
+      "git_blob": "714c4180a6688157ce0dddd56b34eccacf606170",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartLocal.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric",
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Analysis.Calculus.FDeriv.Add",
+        "Mathlib.Analysis.Calculus.FDeriv.Mul",
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric",
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/ChartFrame/ChartLieBracket.lean",
+      "bytes": 27655,
+      "sha256": "c1b46c24c551214be49887a9ab06342b8007b6085728000a5c178d4fb0b6b9bb",
+      "git_blob": "cf31879a89d23182077b6e3bde2e6765529b06ee",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Connection/ChartFrame/ChartLieBracket.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartTorsion.lean",
+      "bytes": 4022,
+      "sha256": "7b64d5bd4fd2c06c6c2d4ea3c53ea19635b681d2eb48cf210a65188e1de9bf21",
+      "git_blob": "4b6cff16cef6b23e76aa6532a4c055cb94770f6c",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartTorsion.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal",
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal",
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket"
+      ]
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartMetric.lean",
+      "bytes": 47772,
+      "sha256": "54966fc7ff7988d37740f3a52ed87a0173508ce91266c9fe12be0603f03570c1",
+      "git_blob": "c172ae5c7fe9b46848f174d46300f658e9c4ddb5",
+      "url": "https://raw.githubusercontent.com/qinz1yang/differential-geometry/8bd406e35c33a200e9b88895cf11ee8429194e15/DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartMetric.lean",
+      "filtered_differential_geometry_imports": [
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible"
+      ],
+      "import_metadata_scope": "filtered DifferentialGeometry dependencies only; full imports recorded separately in complete_imports",
+      "complete_imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Analysis.Calculus.FDeriv.Add",
+        "Mathlib.Analysis.Calculus.FDeriv.Mul",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible"
+      ]
+    }
+  ],
+  "port_differences": [
+    {
+      "path": "DifferentialGeometry/Geometry/Metric/ChartGram.lean",
+      "original_sha256": "139a63e1ab6442b297bfe857bc9c8d55521d8889c829dbfdeb56eec2136c96e7",
+      "ported_sha256": "5ae483637842cdab099f205ed189e1bb78ffaf2c0892c11fb4cddc4f6925fd85",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Bundle/Section.lean",
+      "original_sha256": "4efa7a245d4abd0f9e0b123c40374c2817c97c5cc2257d82d3670db350ce7831",
+      "ported_sha256": "e17d014654b024373d8b517590d41ea7cb849acac504f74d0774b07990425a2f",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartLocal.lean",
+      "original_sha256": "81d36316e3a38526d04c1d5d0affa9aceaf7eb28284946bb1f9cff8fe86f279f",
+      "ported_sha256": "9df609117ddcbad8468a84c092210c78bf4c5f7eb44fbb0f300d1ecef8877871",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 516
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/ChartFrame/ChartMetric.lean",
+      "original_sha256": "11e7d1e6633aba7f095557423b600727cfd0ad0af11e6fde94a74666bf1b97c9",
+      "ported_sha256": "71c5f7a7367f203c422ba804017df58fc6a6a4a66dfb632f0ceabb42ee076d34",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 346
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/Hessian.lean",
+      "original_sha256": "a52c337257549d3033baa7eabcf833ab35b6972e343839b7aeb1cbcd9894c3f8",
+      "ported_sha256": "71cb74a0528f89af936db308447a7806d4c11f33168cab74f3a55a1df309f929",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 557
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/Gradient.lean",
+      "original_sha256": "becd86307f0c445b1601a5a101fc0108b2890143028b729ec4d47b7207332502",
+      "ported_sha256": "cbe25c7543f28928244d5052d195ebfafaa28e9413c3ac8a04ea2259c6c0bfc7",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/Invariance.lean",
+      "original_sha256": "513f80da30d3610efe63411105eb833c151b60219443b8bf6a3e65f0437bf9dd",
+      "ported_sha256": "f33caf5f641d60dd5d18b204553580cc3a4984894ea4878ee5fbc2e15715fa05",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/Properties.lean",
+      "original_sha256": "d2591996124472057d93a8ad6c5ce6c28f7a570656e00e3636816e4cbba37829",
+      "ported_sha256": "ecec52063f158ba4037e7b34a6a7984e26b5a18a93fc17c2212983ca9bfc8f01",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/L2/CompactSupport.lean",
+      "original_sha256": "30b39140ebcdafb083973b106428cd5dd56b06c2d49b9314653ed58af610df39",
+      "ported_sha256": "ff28d18d8c9779d4d6c24c276b3135f025db197414c606b133f4acfc65fc881a",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/Realization/Embedding.lean",
+      "original_sha256": "8c682300193773fb06229007dfa32f8f1d2894c6a638cd6d0766d869225ba92f",
+      "ported_sha256": "f20cd9432d3e141f7d49d1e660daf27873f37876ea0316d3b5773ae1f2d9f877",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Tensor/Multilinear/Fiber.lean",
+      "original_sha256": "9c799ed107a681d267233ddb508e8adf26c86d8bf74fa0cd3a3b81d7ccdf1a90",
+      "ported_sha256": "73ded87168147048fb7179d674741fc87b97a58ca9c030ca8cc271c93af1c806",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Tensor/Multilinear/Bundle.lean",
+      "original_sha256": "8212664389296d1d64b42abb481ae188b8603618bd547bdc5cc2168caf3a69eb",
+      "ported_sha256": "dfd5ff7c5851b7462d8429de0edda12ae6dfa16230b9fd4bbdbb1bd2cda245c9",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Tensor/Alternating/Comp.lean",
+      "original_sha256": "010fb27574e33ac62ab891e6a6f269ed6815457635142f8fdb6b5a979300cd92",
+      "ported_sha256": "41de3de64876e1b67f3a14ab6caf130d4a7097be2406ef76f1886bb72cea8d7c",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Calculus/AnalyticTransfer.lean",
+      "original_sha256": "fb682573de38aae70b4b2674558a0e7f500a8e5c3ff94b02e636c89fcce8fa46",
+      "ported_sha256": "5b9cc8ec064bccebecce818dd27148e7da18eb6f573372a68948b6ce839f1563",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/DivergenceTheorem/TangentAction.lean",
+      "original_sha256": "bf1c0322aa23ac49c865233263633f9c723ff3371b6bb339fe2279dddabd6347",
+      "ported_sha256": "dd6252642b63422eca689ac9972b01b299b4f608a86312ddbf86e205927f21e2",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/Laplacian.lean",
+      "original_sha256": "7a20a6d6f9a9bd5f25e11f12425ff0184ddf82dca4404e70f124d256628a0c5d",
+      "ported_sha256": "aabbc08d1a66fcb6a948263c1c681b12f3634ed07a6e34b38213b36ce7a09f8c",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 123
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/DivergenceTheorem/POUReduction.lean",
+      "original_sha256": "7e23a2688783bf60a44c32ac27e6c8bcd1f6c63bb9b11cca51e7000acd009cc6",
+      "ported_sha256": "71d93cea1d07f043f8f8e5c5f92e0d24c5be475f723cc987faff344b13c4bdd2",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 587
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartLocalIbp.lean",
+      "original_sha256": "60e7afef440477dc4100dd6b102182705ad04991c3273066fb6f2e2d73132750",
+      "ported_sha256": "1958d7c2b41f008b354e3a04314a3e9ad10638e5358f561439f2e947e06ce133",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 1434
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/Family.lean",
+      "original_sha256": "e25adebb0d316448ef45d6264e04608bb262d1e5046454d3e192ee9ca28bc5a1",
+      "ported_sha256": "0c438a447b6691b8332398de78d1436ff09a7c9781b40cf6ab5cce5f996f37b1",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 1065
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/FamilyDefs.lean",
+      "original_sha256": "056e8bfb37c4336209b34f3e318f09b462829f4952a8c28d854acd23cd4b9581",
+      "ported_sha256": "472c0b042a25668291d1e90c3546d7755552ba66e345f78bb1e73cc0bb30d99e",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 247
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/Measure/JacobiFormula.lean",
+      "original_sha256": "cd9a7cf2d1479d7acc5b466b28e27090b2436d8e6a2954aa76a4950ab51c268c",
+      "ported_sha256": "34a334e7c453d309a05ce86a0e3bf517cc5d67286e8a9883c6773f06040e3882",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Bundle/PartialMfderiv.lean",
+      "original_sha256": "5d2b9ef59a8375722780ddb32e9d930b3f56c9002a09a70bad584d7add19ef47",
+      "ported_sha256": "08ecb31b33d8846e4659452571c10ffcca6be41974b5db2de4134f6b646e24df",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 0
+    },
+    {
+      "path": "DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartInvariance.lean",
+      "original_sha256": "e7fb9b372ad96d3ba49602fc9fe5e2bf439b129501c8264beb7cd37a6585a269",
+      "ported_sha256": "c426909aa63198ab8ec021320329aa7d050462cd0f30b3b66744566e5b6729c4",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 620
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Operator/VossWeyl.lean",
+      "original_sha256": "3fe2727b6f377d4f2216765be54eba673677bc7df3ef970042f68da94b7428de",
+      "ported_sha256": "91dad048b1e301e1fb16c10cc730cc9b9d257179d79a336edceff53135fb13bf",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 247
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Curvature/Riemann/Defs.lean",
+      "original_sha256": "3c8c026d9f57089526fb0833b6aae8bc3749ceebaf0386a13607b83061258f6d",
+      "ported_sha256": "4aed0634813a700cbadef21b838e9919aa5453ecd6396e6eec241d44e7280aac",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 219
+    },
+    {
+      "path": "DifferentialGeometry/Geometry/Connection/ChartFrame/ChartLieBracket.lean",
+      "original_sha256": "c1b46c24c551214be49887a9ab06342b8007b6085728000a5c178d4fb0b6b9bb",
+      "ported_sha256": "74cdf64592c9fadc124321f39532c921e099925ccab5b70c9721f51cb316326c",
+      "original_crlf_count": 0,
+      "ported_crlf_count": 514
+    }
+  ],
+  "new_sources": [
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Metric/Basic.lean",
+      "module": "DifferentialGeometry.Geometry.Metric.Basic",
+      "bytes": 1097,
+      "sha256": "312ca68ba869a912e03d49f19cb8b25d52e8d0d4ebf298d1da17a310eb90bd70",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Metric/ChartGram.lean",
+      "module": "DifferentialGeometry.Geometry.Metric.ChartGram",
+      "bytes": 12732,
+      "sha256": "5ae483637842cdab099f205ed189e1bb78ffaf2c0892c11fb4cddc4f6925fd85",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Metric.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.Geometry.Manifold.Algebra.Monoid",
+        "Mathlib.Geometry.Manifold.Algebra.Structures",
+        "Mathlib.LinearAlgebra.Matrix.PosDef",
+        "Mathlib.LinearAlgebra.Dimension.Free",
+        "Mathlib.LinearAlgebra.Basis.Basic",
+        "Mathlib.Topology.Algebra.Module.Equiv",
+        "Mathlib.Analysis.Matrix.PosDef",
+        "Mathlib.Data.Matrix.Mul",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.Analysis.InnerProductSpace.EuclideanDist",
+        "Mathlib.Analysis.InnerProductSpace.PiL2",
+        "Mathlib.MeasureTheory.Measure.WithDensity",
+        "Mathlib.MeasureTheory.Measure.Map",
+        "Mathlib.MeasureTheory.Measure.Haar.OfBasis",
+        "Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace",
+        "Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar",
+        "Mathlib.MeasureTheory.Constructions.BorelSpace.Basic"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/Measure/ChartDensity.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+      "bytes": 5043,
+      "sha256": "20cf207779ecc54da497035e993a8dbfd5b836eaf50b41076fba1651a136a6b9",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.Geometry.Manifold.Algebra.Monoid",
+        "Mathlib.Geometry.Manifold.Algebra.Structures",
+        "Mathlib.LinearAlgebra.Matrix.PosDef",
+        "Mathlib.LinearAlgebra.Dimension.Free",
+        "Mathlib.LinearAlgebra.Basis.Basic",
+        "Mathlib.Topology.Algebra.Module.Equiv",
+        "Mathlib.Analysis.Matrix.PosDef",
+        "Mathlib.Data.Matrix.Mul",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.Analysis.InnerProductSpace.EuclideanDist",
+        "Mathlib.Analysis.InnerProductSpace.PiL2",
+        "Mathlib.MeasureTheory.Measure.WithDensity",
+        "Mathlib.MeasureTheory.Measure.Map",
+        "Mathlib.MeasureTheory.Measure.Haar.OfBasis",
+        "Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace",
+        "Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar",
+        "Mathlib.MeasureTheory.Constructions.BorelSpace.Basic",
+        "DifferentialGeometry.Geometry.Metric.ChartGram"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Connection/LeviCivita/MetricCompatible.lean",
+      "module": "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible",
+      "bytes": 6642,
+      "sha256": "fd68e9a9c67efe4ea5933e4f1bb4f8b9678f30b1ce48fd7083b0d40fd7ef7244",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity"
+      ]
+    },
+    {
+      "path": "curvature/ChartPort/MetricAPI.lean",
+      "module": "ChartPort.MetricAPI",
+      "bytes": 2761,
+      "sha256": "901a67d9478274a964a821233fbaea39e05934fc430cfa77e29676905646e006",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardRegularity",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Bundle/Zero.lean",
+      "module": "DifferentialGeometry.Bundle.Zero",
+      "bytes": 1435,
+      "sha256": "1e428f25ad3d2b7a826255b28987df161f2552836834664720fbaef05abadba3",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Topology.VectorBundle.Basic"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Bundle/Equiv.lean",
+      "module": "DifferentialGeometry.Bundle.Equiv",
+      "bytes": 57712,
+      "sha256": "ed1cabd339d88b209e4e8884d5eb6fe54b9a2ff73d181476fafddbc486833459",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Topology.VectorBundle.Basic",
+        "Mathlib.Geometry.Manifold.Diffeomorph",
+        "Mathlib.Analysis.Normed.Module.FiniteDimension",
+        "DifferentialGeometry.Bundle.Zero",
+        "Mathlib.Geometry.Manifold.VectorBundle.Basic"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Bundle/Frame.lean",
+      "module": "DifferentialGeometry.Bundle.Frame",
+      "bytes": 2166,
+      "sha256": "c7d46baf8130d2551c65cbd41b62fc94a4440cc8423a96e6a5b37e31dd20bcc0",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+        "Mathlib.Geometry.Manifold.BumpFunction"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Bundle/Section.lean",
+      "module": "DifferentialGeometry.Bundle.Section",
+      "bytes": 31024,
+      "sha256": "e17d014654b024373d8b517590d41ea7cb849acac504f74d0774b07990425a2f",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.Geometry.Manifold.Algebra.SmoothFunctions",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+        "DifferentialGeometry.Bundle.Equiv",
+        "DifferentialGeometry.Bundle.Frame"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Connection/LeviCivita/Koszul.lean",
+      "module": "DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul",
+      "bytes": 9591,
+      "sha256": "e98d41173000254332e6c4b1b4878f111239427d1725efd8c0905cd0d3761ea9",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+        "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible",
+        "DifferentialGeometry.Bundle.Section"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/Measure/RiemannianMeasure.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+      "bytes": 3931,
+      "sha256": "6b32e1d0ff10c7a017d63aca8f53497224742934daff74d18e638db6d7823d28",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "Mathlib.Geometry.Manifold.PartitionOfUnity",
+        "Mathlib.MeasureTheory.Measure.WithDensity",
+        "Mathlib.MeasureTheory.Integral.Lebesgue.Basic"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/Measure/Invariance.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+      "bytes": 49900,
+      "sha256": "f33caf5f641d60dd5d18b204553580cc3a4984894ea4878ee5fbc2e15715fa05",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+        "Mathlib.MeasureTheory.Function.Jacobian",
+        "Mathlib.MeasureTheory.Measure.Haar.Basic",
+        "Mathlib.MeasureTheory.Measure.Restrict",
+        "Mathlib.MeasureTheory.Measure.WithDensity",
+        "Mathlib.MeasureTheory.Measure.Map",
+        "Mathlib.MeasureTheory.Integral.Lebesgue.Map",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.LinearAlgebra.Matrix.ToLin",
+        "Mathlib.LinearAlgebra.Matrix.Determinant.Basic"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/Measure/Properties.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+      "bytes": 31328,
+      "sha256": "ecec52063f158ba4037e7b34a6a7984e26b5a18a93fc17c2212983ca9bfc8f01",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+        "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+        "Mathlib.MeasureTheory.Measure.Typeclasses.Finite",
+        "Mathlib.MeasureTheory.Measure.Typeclasses.SFinite",
+        "Mathlib.MeasureTheory.Measure.OpenPos",
+        "Mathlib.MeasureTheory.Measure.Haar.Basic",
+        "Mathlib.Topology.Compactness.LocallyFinite",
+        "Mathlib.Topology.Algebra.Support",
+        "Mathlib.MeasureTheory.Measure.Regular",
+        "Mathlib.Geometry.Manifold.Metrizable",
+        "Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Tensor/Multilinear/Comp.lean",
+      "module": "DifferentialGeometry.Tensor.Multilinear.Comp",
+      "bytes": 4590,
+      "sha256": "e1171836d1f4918b1dfb98a089939f319313e690203d2bd7fca8be77e6320848",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Analysis.Calculus.ContDiff.CPolynomial",
+        "Mathlib.Analysis.Calculus.ContDiff.Basic",
+        "Mathlib.Analysis.Calculus.ContDiff.Operations",
+        "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Calculus/AnalyticTransfer.lean",
+      "module": "DifferentialGeometry.Analysis.Calculus.AnalyticTransfer",
+      "bytes": 17049,
+      "sha256": "5b9cc8ec064bccebecce818dd27148e7da18eb6f573372a68948b6ce839f1563",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Analysis.Calculus.ContDiff.CPolynomial",
+        "Mathlib.Analysis.Calculus.ContDiff.Basic",
+        "Mathlib.Analysis.Analytic.IteratedFDeriv",
+        "Mathlib.Analysis.Normed.Group.Real",
+        "Mathlib.Analysis.Normed.Operator.LinearIsometry"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Tensor/Auxiliary/LinearIsometryContDiff.lean",
+      "module": "DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff",
+      "bytes": 1244,
+      "sha256": "fd7c582dabe8e1c4fcc4c6ed4dd2630271edd4111e04e4c7af9f06ca0aaab7d1",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Analysis.Calculus.ContDiff.Basic",
+        "Mathlib.Analysis.Calculus.ContDiff.Comp",
+        "Mathlib.Analysis.Normed.Module.FiniteDimension",
+        "Mathlib.Analysis.Normed.Module.Alternating.Basic",
+        "Mathlib.RingTheory.Finiteness.Defs"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Tensor/Alternating/Comp.lean",
+      "module": "DifferentialGeometry.Tensor.Alternating.Comp",
+      "bytes": 31075,
+      "sha256": "41de3de64876e1b67f3a14ab6caf130d4a7097be2406ef76f1886bb72cea8d7c",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Comp",
+        "DifferentialGeometry.Analysis.Calculus.AnalyticTransfer",
+        "DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff",
+        "Mathlib.Analysis.Normed.Module.Alternating.Basic",
+        "Mathlib.Analysis.Calculus.ContDiff.CPolynomial",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Tensor/Multilinear/Bundle.lean",
+      "module": "DifferentialGeometry.Tensor.Multilinear.Bundle",
+      "bytes": 11568,
+      "sha256": "dfd5ff7c5851b7462d8429de0edda12ae6dfa16230b9fd4bbdbb1bd2cda245c9",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Tensor.Alternating.Comp",
+        "Mathlib.Geometry.Manifold.VectorBundle.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Data.Bundle"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Tensor/Multilinear/Basis.lean",
+      "module": "DifferentialGeometry.Tensor.Multilinear.Basis",
+      "bytes": 7162,
+      "sha256": "a154d2dcb91c46c2db0a585a395761660eb6ba959e53293e9a92c85f3e13be0b",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Bundle",
+        "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas",
+        "Mathlib.LinearAlgebra.Dimension.Free",
+        "Mathlib.Topology.Algebra.Module.FiniteDimension"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Tensor/Multilinear/Fiber.lean",
+      "module": "DifferentialGeometry.Tensor.Multilinear.Fiber",
+      "bytes": 13872,
+      "sha256": "73ded87168147048fb7179d674741fc87b97a58ca9c030ca8cc271c93af1c806",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Bundle",
+        "DifferentialGeometry.Tensor.Multilinear.Basis"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Tensor/Multilinear/Curry.lean",
+      "module": "DifferentialGeometry.Tensor.Multilinear.Curry",
+      "bytes": 2516,
+      "sha256": "237f3be6f6202761ec8b31e83e43aae917e6aff3e123d5fc3cdf43072c0770d1",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Bundle"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Tensor/RSTensor/Defs.lean",
+      "module": "DifferentialGeometry.Tensor.RSTensor.Defs",
+      "bytes": 30362,
+      "sha256": "dc610d02af1fba39100eb9fa1f282f7ecf36a117692062dbf0a2d6a57a347664",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Tensor.Multilinear.Fiber",
+        "DifferentialGeometry.Tensor.Multilinear.Curry",
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Connection/Realization/Basic.lean",
+      "module": "DifferentialGeometry.Geometry.Connection.Realization.Basic",
+      "bytes": 3605,
+      "sha256": "c8bbc0b9bf5f0f068270591bc9c24bd55851b9eac4e6067927079899d376294b",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.DerivationBundle",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+        "Mathlib.LinearAlgebra.Trace",
+        "Mathlib.Analysis.InnerProductSpace.Dual",
+        "DifferentialGeometry.Bundle.Section",
+        "DifferentialGeometry.Tensor.RSTensor.Defs"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Connection/Realization/Embedding.lean",
+      "module": "DifferentialGeometry.Geometry.Connection.Realization.Embedding",
+      "bytes": 23544,
+      "sha256": "f20cd9432d3e141f7d49d1e660daf27873f37876ea0316d3b5773ae1f2d9f877",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Connection.Realization.Basic",
+        "Mathlib.Geometry.Manifold.MFDeriv.NormedSpace",
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.RingTheory.Derivation.Lie"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Connection/Realization/Connection.lean",
+      "module": "DifferentialGeometry.Geometry.Connection.Realization.Connection",
+      "bytes": 5357,
+      "sha256": "4550765bb5ff6bdfb6f55b1f9650f9c82d5cc64b0d89327ccbc87e62d54d6610",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Connection.Realization.Embedding",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/L2/Basic.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.L2.Basic",
+      "bytes": 7180,
+      "sha256": "1e88c37e3e55fc5f6572a5e7737ff9c29f44bb3a119403f340d27a9bcefacf99",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "Mathlib.MeasureTheory.Integral.Bochner.Basic",
+        "Mathlib.MeasureTheory.Integral.Lebesgue.Basic",
+        "Mathlib.MeasureTheory.Integral.Lebesgue.Add",
+        "Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic",
+        "Mathlib.MeasureTheory.Function.StronglyMeasurable.AEStronglyMeasurable",
+        "Mathlib.MeasureTheory.Function.L1Space.Integrable",
+        "Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm",
+        "Mathlib.MeasureTheory.Function.LocallyIntegrable",
+        "Mathlib.Topology.Algebra.Support"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/L2/CompactSupport.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.L2.CompactSupport",
+      "bytes": 26116,
+      "sha256": "ff28d18d8c9779d4d6c24c276b3135f025db197414c606b133f4acfc65fc881a",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Connection.Realization.Embedding",
+        "DifferentialGeometry.Geometry.Connection.Realization.Connection",
+        "DifferentialGeometry.Analysis.Integration.L2.Basic",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "Mathlib.Topology.Algebra.Support",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.Geometry.Manifold.ContMDiffMap",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.SmoothApprox",
+        "Mathlib.MeasureTheory.Function.SimpleFuncDenseLp",
+        "Mathlib.MeasureTheory.Function.ContinuousMapDense",
+        "Mathlib.MeasureTheory.Function.LpSpace.Basic",
+        "Mathlib.MeasureTheory.Function.LpSpace.Indicator"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/LocalFormula.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+      "bytes": 18559,
+      "sha256": "3682d714d502faa6a3378875f923456fa94599c103aa5b33a51c6f0032ae6624",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "DifferentialGeometry.Analysis.Integration.L2.CompactSupport",
+        "Mathlib.Analysis.Calculus.FDeriv.Basic",
+        "Mathlib.Analysis.Calculus.FDeriv.Comp",
+        "Mathlib.Analysis.Calculus.FDeriv.Equiv",
+        "Mathlib.Analysis.Calculus.ContDiff.Basic",
+        "Mathlib.Analysis.Calculus.LineDeriv.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.MFDeriv.Atlas",
+        "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.LinearAlgebra.Matrix.Trace",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartCoeffPullback.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartCoeffPullback",
+      "bytes": 2916,
+      "sha256": "38242f6bec59be2b470f00295522c022a5f8f4f0a9492d7b6f4e6cce5471e61e",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/TangentAction.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+      "bytes": 20054,
+      "sha256": "dd6252642b63422eca689ac9972b01b299b4f608a86312ddbf86e205927f21e2",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartCoeffPullback",
+        "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+        "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+        "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+        "Mathlib.Geometry.Manifold.MFDeriv.Atlas",
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.Analysis.Calculus.FDeriv.Comp",
+        "Mathlib.Analysis.Calculus.FDeriv.Basic",
+        "Mathlib.Analysis.Calculus.LineDeriv.Basic"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Operator/Gradient.lean",
+      "module": "DifferentialGeometry.Geometry.Operator.Gradient",
+      "bytes": 43278,
+      "sha256": "cbe25c7543f28928244d5052d195ebfafaa28e9413c3ac8a04ea2259c6c0bfc7",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "Mathlib.Analysis.Calculus.FDeriv.Basic",
+        "Mathlib.Analysis.Calculus.FDeriv.Equiv",
+        "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.LinearAlgebra.Dual.Lemmas",
+        "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.LinearAlgebra.Matrix.Adjugate"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/Measure/JacobiFormula.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.Measure.JacobiFormula",
+      "bytes": 10850,
+      "sha256": "34a334e7c453d309a05ce86a0e3bf517cc5d67286e8a9883c6773f06040e3882",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Analysis.Calculus.Deriv.Mul",
+        "Mathlib.Analysis.Calculus.Deriv.Add",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.LinearAlgebra.Matrix.Adjugate",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.LinearAlgebra.Matrix.Trace",
+        "Mathlib.LinearAlgebra.Matrix.PosDef"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Bundle/PartialMfderiv.lean",
+      "module": "DifferentialGeometry.Bundle.PartialMfderiv",
+      "bytes": 2029,
+      "sha256": "08ecb31b33d8846e4659452571c10ffcca6be41974b5db2de4134f6b646e24df",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+        "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+        "Mathlib.Geometry.Manifold.ContMDiffMap",
+        "Mathlib.Analysis.Calculus.Deriv.Basic"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/Measure/FamilyDefs.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.Measure.FamilyDefs",
+      "bytes": 10829,
+      "sha256": "472c0b042a25668291d1e90c3546d7755552ba66e345f78bb1e73cc0bb30d99e",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+        "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "DifferentialGeometry.Analysis.Integration.Measure.JacobiFormula",
+        "DifferentialGeometry.Bundle.PartialMfderiv",
+        "Mathlib.Analysis.Calculus.Deriv.Mul",
+        "Mathlib.Analysis.Calculus.Deriv.Add",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.LinearAlgebra.Matrix.Adjugate",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.LinearAlgebra.Matrix.Trace",
+        "Mathlib.LinearAlgebra.Matrix.PosDef"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/Measure/FamilyDecomposition.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition",
+      "bytes": 31161,
+      "sha256": "368be73c67c8c42b1afcac833e51de62df69b6d2ae531f5e48443354de4984a3",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.FamilyDefs",
+        "Mathlib.Analysis.Calculus.Deriv.Mul",
+        "Mathlib.Analysis.Calculus.Deriv.Add",
+        "Mathlib.Analysis.Calculus.ParametricIntegral",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.LinearAlgebra.Matrix.Adjugate",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.LinearAlgebra.Matrix.Trace",
+        "Mathlib.LinearAlgebra.Matrix.PosDef",
+        "Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap",
+        "Mathlib.MeasureTheory.Integral.Bochner.Set",
+        "Mathlib.MeasureTheory.Integral.Bochner.SumMeasure",
+        "Mathlib.Topology.Compactness.LocallyFinite"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/Measure/Family.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.Measure.Family",
+      "bytes": 53120,
+      "sha256": "0c438a447b6691b8332398de78d1436ff09a7c9781b40cf6ab5cce5f996f37b1",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition",
+        "Mathlib.Analysis.Calculus.Deriv.Mul",
+        "Mathlib.Analysis.Calculus.Deriv.Add",
+        "Mathlib.Analysis.Calculus.ParametricIntegral",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.LinearAlgebra.Matrix.Adjugate",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.LinearAlgebra.Matrix.Trace",
+        "Mathlib.LinearAlgebra.Matrix.PosDef",
+        "Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap",
+        "Mathlib.MeasureTheory.Integral.Bochner.Set",
+        "Mathlib.MeasureTheory.Integral.Bochner.SumMeasure",
+        "Mathlib.Topology.Compactness.LocallyFinite"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Calculus/Cutoff.lean",
+      "module": "DifferentialGeometry.Analysis.Calculus.Cutoff",
+      "bytes": 2236,
+      "sha256": "f2a08215694935a73d10be3a09262954540dd9fb1deb5c61cbaabc27e85587d2",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.PartitionOfUnity"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Calculus/CompactCutoff.lean",
+      "module": "DifferentialGeometry.Analysis.Calculus.CompactCutoff",
+      "bytes": 2858,
+      "sha256": "39cfb2bce9a1c14cefefc6967998d5005f879729a15deb2473257b2f0a97cf35",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Calculus.Cutoff",
+        "Mathlib.Geometry.Manifold.Metrizable"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartLocalIbp.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartLocalIbp",
+      "bytes": 70012,
+      "sha256": "1958d7c2b41f008b354e3a04314a3e9ad10638e5358f561439f2e947e06ce133",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartCoeffPullback",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Analysis.Calculus.CompactCutoff",
+        "Mathlib.Analysis.Calculus.Rademacher",
+        "Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts",
+        "Mathlib.Analysis.Calculus.FDeriv.Basic",
+        "Mathlib.Analysis.Calculus.FDeriv.Mul",
+        "Mathlib.MeasureTheory.Integral.Bochner.Set",
+        "Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap",
+        "Mathlib.Geometry.Manifold.PartitionOfUnity",
+        "Mathlib.Topology.Algebra.Support"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartInvariance.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance",
+      "bytes": 33822,
+      "sha256": "c426909aa63198ab8ec021320329aa7d050462cd0f30b3b66744566e5b6729c4",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartLocalIbp",
+        "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+        "Mathlib.Geometry.Manifold.PartitionOfUnity",
+        "Mathlib.Geometry.Manifold.BumpFunction",
+        "Mathlib.MeasureTheory.Function.AEEqOfIntegral",
+        "Mathlib.MeasureTheory.Measure.OpenPos",
+        "Mathlib.Data.ENNReal.Basic"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/POUReduction.lean",
+      "module": "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction",
+      "bytes": 27464,
+      "sha256": "71d93cea1d07f043f8f8e5c5f92e0d24c5be475f723cc987faff344b13c4bdd2",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartLocalIbp",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance",
+        "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+        "Mathlib.Analysis.Calculus.FDeriv.Mul",
+        "Mathlib.Analysis.Calculus.FDeriv.Basic",
+        "Mathlib.Geometry.Manifold.PartitionOfUnity",
+        "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Operator/Laplacian.lean",
+      "module": "DifferentialGeometry.Geometry.Operator.Laplacian",
+      "bytes": 5450,
+      "sha256": "aabbc08d1a66fcb6a948263c1c681b12f3634ed07a6e34b38213b36ce7a09f8c",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+        "DifferentialGeometry.Geometry.Operator.Gradient",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Operator/Hessian.lean",
+      "module": "DifferentialGeometry.Geometry.Operator.Hessian",
+      "bytes": 24069,
+      "sha256": "71cb74a0528f89af936db308447a7806d4c11f33168cab74f3a55a1df309f929",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Operator.Gradient",
+        "DifferentialGeometry.Geometry.Operator.Laplacian",
+        "Mathlib.Algebra.Order.Chebyshev",
+        "Mathlib.LinearAlgebra.Dimension.Free",
+        "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Operator/VossWeyl.lean",
+      "module": "DifferentialGeometry.Geometry.Operator.VossWeyl",
+      "bytes": 10945,
+      "sha256": "91dad048b1e301e1fb16c10cc730cc9b9d257179d79a336edceff53135fb13bf",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Operator.Laplacian",
+        "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Operator/HessianTraceChartGramRegularity.lean",
+      "module": "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity",
+      "bytes": 18755,
+      "sha256": "21fdac38ed405ebbbe59b6a7242fcb548429e304ee3c881d17e00c65fc9725e0",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Operator/HessianTraceChartDensityJacobiDerivative.lean",
+      "module": "DifferentialGeometry.Geometry.Operator.HessianTraceChartDensityJacobiDerivative",
+      "bytes": 11622,
+      "sha256": "b1a00cd4615ab6ef8c89459a9e092b08b1e486d4d5e042cf61e2669ca8cd7f98",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Operator/HessianTraceChartInverseGramDerivative.lean",
+      "module": "DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative",
+      "bytes": 36871,
+      "sha256": "1226f6aa8ec352bc8130c7191c2431619849ea205f68d60273e8a5c6e3e5d987",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Operator/HessianTrace.lean",
+      "module": "DifferentialGeometry.Geometry.Operator.HessianTrace",
+      "bytes": 82541,
+      "sha256": "52bb4d4d8ad0dc0c9ce2b9c3b45189cd6e43394a4e4cad941a068e21250a9429",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl",
+        "DifferentialGeometry.Analysis.Integration.Measure.Family",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartDensityJacobiDerivative",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Curvature/Riemann/Defs.lean",
+      "module": "DifferentialGeometry.Geometry.Curvature.Riemann.Defs",
+      "bytes": 8458,
+      "sha256": "4aed0634813a700cbadef21b838e9919aa5453ecd6396e6eec241d44e7280aac",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Curvature/Riemann/Ricci.lean",
+      "module": "DifferentialGeometry.Geometry.Curvature.Riemann.Ricci",
+      "bytes": 52958,
+      "sha256": "cb36001932c1220f1484dabf5abde4bdfd1d07749cdbecbbaf92833a3182aa1b",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Curvature.Riemann.Defs",
+        "DifferentialGeometry.Geometry.Operator.HessianTrace",
+        "DifferentialGeometry.Geometry.Operator.Gradient",
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity",
+        "DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative",
+        "DifferentialGeometry.Geometry.Operator.VossWeyl"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Connection/ChartFrame/ChartMetric.lean",
+      "module": "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric",
+      "bytes": 14722,
+      "sha256": "71c5f7a7367f203c422ba804017df58fc6a6a4a66dfb632f0ceabb42ee076d34",
+      "role": "mathematical source",
+      "imports": [
+        "DifferentialGeometry.Geometry.Operator.Hessian",
+        "DifferentialGeometry.Geometry.Operator.HessianTrace",
+        "DifferentialGeometry.Geometry.Curvature.Riemann.Ricci"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Connection/ChartFrame/ChartSection.lean",
+      "module": "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection",
+      "bytes": 18073,
+      "sha256": "e11bf9b21b41ed66abe0044bda25104e6d81e952fd7f726fe53116ccef2197b2",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+        "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+        "Mathlib.Geometry.Manifold.MFDeriv.Atlas",
+        "Mathlib.Geometry.Manifold.ContMDiff.Atlas",
+        "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartLocal.lean",
+      "module": "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal",
+      "bytes": 23648,
+      "sha256": "9df609117ddcbad8468a84c092210c78bf4c5f7eb44fbb0f300d1ecef8877871",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Analysis.Calculus.FDeriv.Add",
+        "Mathlib.Analysis.Calculus.FDeriv.Mul",
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric",
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Connection/ChartFrame/ChartLieBracket.lean",
+      "module": "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket",
+      "bytes": 28241,
+      "sha256": "74cdf64592c9fadc124321f39532c921e099925ccab5b70c9721f51cb316326c",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartTorsion.lean",
+      "module": "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsion",
+      "bytes": 4022,
+      "sha256": "7b64d5bd4fd2c06c6c2d4ea3c53ea19635b681d2eb48cf210a65188e1de9bf21",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal",
+        "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket"
+      ]
+    },
+    {
+      "path": "curvature/DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartMetric.lean",
+      "module": "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartMetric",
+      "bytes": 47772,
+      "sha256": "54966fc7ff7988d37740f3a52ed87a0173508ce91266c9fe12be0603f03570c1",
+      "role": "mathematical source",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Analysis.Calculus.FDeriv.Add",
+        "Mathlib.Analysis.Calculus.FDeriv.Mul",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible"
+      ]
+    },
+    {
+      "path": "curvature/ChartPort/ChartIdentity.lean",
+      "module": "ChartPort.ChartIdentity",
+      "bytes": 2526,
+      "sha256": "3886216bc4100d3a4af52906a77c430ef4615509a39e2d0d4924d83c4f873355",
+      "role": "mathematical source",
+      "imports": [
+        "ChartPort.MetricAPI",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsion",
+        "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartMetric"
+      ]
+    },
+    {
+      "path": "curvature/ChartPort/ChartIdentityEvidence.lean",
+      "module": "ChartPort.ChartIdentityEvidence",
+      "bytes": 944,
+      "sha256": "179790a61849fa1d18b1cd7b79e17d37f4e80470e25f45ca2755d1a8b63ef9ba",
+      "role": "probe",
+      "imports": [
+        "ChartPort.ChartIdentity"
+      ]
+    }
+  ],
+  "inherited_sources": [
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardRegularity.lean",
+      "base_git_blob_sha": "85c16e0c0d319bb84480317538a5b8484ba31908",
+      "literal_local_blob_matches_base": true,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "2e46cea0e6587f803e7d01cda26ea5bdb439d6216ec44b574a87dcae414607a6",
+      "public_base_sha256": "2e46cea0e6587f803e7d01cda26ea5bdb439d6216ec44b574a87dcae414607a6"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/ContinuousSection.lean",
+      "base_git_blob_sha": "5d8a958fbaeb2613f1bfe2e6e6eb020f01adbe00",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "4396ae6ab8ad43c32c895e3a7fefeeaf34878d953e77bf4acf09f785260e6f32",
+      "public_base_sha256": "9647f6cf3b0ace2e27de2ce45a149b32cdd0833541b425727baffa2e7723e208"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Along.lean",
+      "base_git_blob_sha": "2cb0c3d13e7d871936b06934ab0524bc4b729fcb",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "a66e3ef6673565648cb151b97b9afe185b149c7728f1abe80abb86be01047101",
+      "public_base_sha256": "68cef5bdf39e72ad12e1b61898a7adff522f3c6f46ca699244f3daf3b3ccdfac"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Bianchi.lean",
+      "base_git_blob_sha": "d1d0440d6558225e0881c37e811a2afc0158c8d2",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "5cc06e14c445230a15812b94e17d4e6a4c49bbeac43072bb3f9fb6314475f738",
+      "public_base_sha256": "6db9a50be9f45e78c0f8af1cbad4fb5116bdd3672e3e4fee5158905d9c2105ec"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Contractions.lean",
+      "base_git_blob_sha": "bdd0708ef3bd896028b000907c5c7e801f1f6834",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "142056706a85c73020468d9307880b81f33063423dabd7d83b2b591953837b84",
+      "public_base_sha256": "3df47636448080a16a25cedb3f68e67434082fbcbf395b278fbd1fa42354e377"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Raw.lean",
+      "base_git_blob_sha": "a9bbfe8933a38543c3568f185d219a7917032e26",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "01e4437f9b236b90d9ce489473888dbbf6ccdcd598a3d2e23ab9b4ea770f2761",
+      "public_base_sha256": "2f2fb93364159b6cce4fbdac62e502bab18d4f5cc1f053437a815447b67fd0e7"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Sectional.lean",
+      "base_git_blob_sha": "a92f67c5b271d398532722c13cb6b5a345a80fe1",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "6f7bdba0adfde69985a37977dc415eec32de455ead820a087993dc7689c9f020",
+      "public_base_sha256": "14b828a0c69a58f260eac1c3597672c542db1835bc0d5e079698e59b9031ed6c"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Tensor.lean",
+      "base_git_blob_sha": "4b887b01c3d90ef1a2b645610f281829c12808a9",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "65cd3b132dd3e8da1fb8cad9879ba1c5c05404d56fb4e968f4b194f166030c01",
+      "public_base_sha256": "518928ccf224355a1a755e2477710f1c26b0662e2675ccab2c6913b10ba9f61b"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Existence.lean",
+      "base_git_blob_sha": "398ca2aa3cd1d3d5d4a1f000b6f4d693a634f19a",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "ce040840b97ca39d9af7d27ed905370de5077e50601bd497a9a6888f8023835c",
+      "public_base_sha256": "eba90d5a299f5e4e5ef8ce3cde1c49042f13563fef9ab7ee88d4f2a098449494"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean",
+      "base_git_blob_sha": "a112fd1e9144c14303a5b7ad44f628c4ad6a1913",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "02138c762b8ae974113ae68f75eb6ffdd096f9a386a18f7d2d1147c93aa427f4",
+      "public_base_sha256": "74aa40955d9b5b57373dc1a4715efa555142052313b3271f3bf23afa66c4f6fd"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Metric.lean",
+      "base_git_blob_sha": "61c3753bed4bae6d19225c6a46cc1ad7864443b7",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "bbb862c81c6911074d8aed4926e139a70cc442393c2883e7e0d2a87b82c2d29a",
+      "public_base_sha256": "477daa95da19d0e5d72f1fa1f78f18513207ee20e619f2ff9d0181c047497d2b"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TimeDependent.lean",
+      "base_git_blob_sha": "23d11ea8d2b19bafc1c758ce3107a908486ff1a2",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "c01bbc1f5cc7a92a8cacaf2285b2202fa6984ec81b3d06031fef192977e7ef82",
+      "public_base_sha256": "f7d94bc70f0445019dc88bfa3f5ee5d0d6f577d2b57ebeb102e15b6e94aae004"
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean",
+      "base_git_blob_sha": "f250764aa6e576e55a1183e71ca8eafc3f3cfc8c",
+      "literal_local_blob_matches_base": false,
+      "newline_normalized_local_blob_matches_base": true,
+      "action": "retain existing base source; do not copy or replace",
+      "development_copy_sha256": "0dd39f6428666e6300e8b64ae1142ed673dbdc36476bfca67dc5fa4f8fa71e2a",
+      "public_base_sha256": "01f0eac5a417b2d243b0071643c90c3114a85c2016be4d72416d7cfe640351b2"
+    }
+  ],
+  "import_graph": {
+    "ChartPort.ChartIdentity": [
+      "ChartPort.MetricAPI",
+      "DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul",
+      "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsion",
+      "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartMetric"
+    ],
+    "ChartPort.MetricAPI": [
+      "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible",
+      "PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardRegularity",
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent"
+    ],
+    "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible": [
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+      "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+      "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity"
+    ],
+    "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity": [
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+      "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+      "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+      "Mathlib.Geometry.Manifold.Algebra.Monoid",
+      "Mathlib.Geometry.Manifold.Algebra.Structures",
+      "Mathlib.LinearAlgebra.Matrix.PosDef",
+      "Mathlib.LinearAlgebra.Dimension.Free",
+      "Mathlib.LinearAlgebra.Basis.Basic",
+      "Mathlib.Topology.Algebra.Module.Equiv",
+      "Mathlib.Analysis.Matrix.PosDef",
+      "Mathlib.Data.Matrix.Mul",
+      "Mathlib.Analysis.SpecialFunctions.Sqrt",
+      "Mathlib.Analysis.InnerProductSpace.EuclideanDist",
+      "Mathlib.Analysis.InnerProductSpace.PiL2",
+      "Mathlib.MeasureTheory.Measure.WithDensity",
+      "Mathlib.MeasureTheory.Measure.Map",
+      "Mathlib.MeasureTheory.Measure.Haar.OfBasis",
+      "Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace",
+      "Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar",
+      "Mathlib.MeasureTheory.Constructions.BorelSpace.Basic",
+      "DifferentialGeometry.Geometry.Metric.ChartGram"
+    ],
+    "DifferentialGeometry.Geometry.Metric.ChartGram": [
+      "DifferentialGeometry.Geometry.Metric.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+      "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+      "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+      "Mathlib.Geometry.Manifold.Algebra.Monoid",
+      "Mathlib.Geometry.Manifold.Algebra.Structures",
+      "Mathlib.LinearAlgebra.Matrix.PosDef",
+      "Mathlib.LinearAlgebra.Dimension.Free",
+      "Mathlib.LinearAlgebra.Basis.Basic",
+      "Mathlib.Topology.Algebra.Module.Equiv",
+      "Mathlib.Analysis.Matrix.PosDef",
+      "Mathlib.Data.Matrix.Mul",
+      "Mathlib.Analysis.SpecialFunctions.Sqrt",
+      "Mathlib.Analysis.InnerProductSpace.EuclideanDist",
+      "Mathlib.Analysis.InnerProductSpace.PiL2",
+      "Mathlib.MeasureTheory.Measure.WithDensity",
+      "Mathlib.MeasureTheory.Measure.Map",
+      "Mathlib.MeasureTheory.Measure.Haar.OfBasis",
+      "Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace",
+      "Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar",
+      "Mathlib.MeasureTheory.Constructions.BorelSpace.Basic"
+    ],
+    "DifferentialGeometry.Geometry.Metric.Basic": [
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent"
+    ],
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardRegularity": [
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+      "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent": [
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions",
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Sectional",
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions": [
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi",
+      "Mathlib.Analysis.InnerProductSpace.Trace",
+      "Mathlib.Geometry.Manifold.Riemannian.Basic",
+      "Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition",
+      "Mathlib.LinearAlgebra.Trace"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi": [
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor": [
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Raw",
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita",
+      "Mathlib.Geometry.Manifold.BumpFunction",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+      "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+      "Mathlib.Analysis.InnerProductSpace.Dual",
+      "Mathlib.Analysis.InnerProductSpace.Trace"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Raw": [
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along",
+      "Mathlib.Geometry.Manifold.VectorField.LieBracket"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along": [
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.Hom"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita": [
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection",
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Existence",
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Metric",
+      "Mathlib.Analysis.InnerProductSpace.Dual",
+      "Mathlib.Geometry.Manifold.BumpFunction",
+      "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+      "Mathlib.Geometry.Manifold.Algebra.LieGroup",
+      "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+      "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection": [
+      "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Topology.VectorBundle.FiniteDimensional",
+      "Mathlib.Analysis.Normed.Module.FiniteDimension",
+      "Mathlib.Analysis.Normed.Module.RCLike.Real",
+      "Mathlib.Analysis.Normed.Operator.NormedSpace",
+      "Mathlib.Topology.ContinuousMap.Compact",
+      "Mathlib.Topology.ContinuousMap.Bounded.Basic",
+      "Mathlib.Topology.MetricSpace.ProperSpace",
+      "Mathlib.Topology.Order.Compact",
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection": [
+      "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+      "Mathlib.Topology.VectorBundle.Hom",
+      "Mathlib.Analysis.Normed.Operator.Basic",
+      "Mathlib.Analysis.Normed.Group.Submodule",
+      "Mathlib.Analysis.Normed.Module.TransferInstance",
+      "Mathlib.Topology.ContinuousMap.Compact"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Existence": [
+      "Mathlib.Geometry.Manifold.PartitionOfUnity",
+      "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+      "Mathlib.LinearAlgebra.Basis.VectorSpace",
+      "Mathlib.Topology.VectorBundle.Constructions"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Metric": [
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along",
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian"
+    ],
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Sectional": [
+      "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor",
+      "Mathlib.Geometry.Manifold.Riemannian.Basic"
+    ],
+    "DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul": [
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+      "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+      "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+      "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible",
+      "DifferentialGeometry.Bundle.Section"
+    ],
+    "DifferentialGeometry.Bundle.Section": [
+      "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+      "Mathlib.Geometry.Manifold.Algebra.SmoothFunctions",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+      "DifferentialGeometry.Bundle.Equiv",
+      "DifferentialGeometry.Bundle.Frame"
+    ],
+    "DifferentialGeometry.Bundle.Equiv": [
+      "Mathlib.Topology.VectorBundle.Basic",
+      "Mathlib.Geometry.Manifold.Diffeomorph",
+      "Mathlib.Analysis.Normed.Module.FiniteDimension",
+      "DifferentialGeometry.Bundle.Zero",
+      "Mathlib.Geometry.Manifold.VectorBundle.Basic"
+    ],
+    "DifferentialGeometry.Bundle.Zero": [
+      "Mathlib.Topology.VectorBundle.Basic"
+    ],
+    "DifferentialGeometry.Bundle.Frame": [
+      "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+      "Mathlib.Geometry.Manifold.BumpFunction"
+    ],
+    "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsion": [
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+      "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal",
+      "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket"
+    ],
+    "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal": [
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+      "Mathlib.Analysis.Calculus.FDeriv.Add",
+      "Mathlib.Analysis.Calculus.FDeriv.Mul",
+      "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric",
+      "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection"
+    ],
+    "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric": [
+      "DifferentialGeometry.Geometry.Operator.Hessian",
+      "DifferentialGeometry.Geometry.Operator.HessianTrace",
+      "DifferentialGeometry.Geometry.Curvature.Riemann.Ricci"
+    ],
+    "DifferentialGeometry.Geometry.Operator.Hessian": [
+      "DifferentialGeometry.Geometry.Operator.Gradient",
+      "DifferentialGeometry.Geometry.Operator.Laplacian",
+      "Mathlib.Algebra.Order.Chebyshev",
+      "Mathlib.LinearAlgebra.Dimension.Free",
+      "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas"
+    ],
+    "DifferentialGeometry.Geometry.Operator.Gradient": [
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+      "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+      "Mathlib.Analysis.Calculus.FDeriv.Basic",
+      "Mathlib.Analysis.Calculus.FDeriv.Equiv",
+      "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+      "Mathlib.LinearAlgebra.Dual.Lemmas",
+      "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas",
+      "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+      "Mathlib.LinearAlgebra.Matrix.Adjugate"
+    ],
+    "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula": [
+      "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+      "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+      "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+      "DifferentialGeometry.Analysis.Integration.L2.CompactSupport",
+      "Mathlib.Analysis.Calculus.FDeriv.Basic",
+      "Mathlib.Analysis.Calculus.FDeriv.Comp",
+      "Mathlib.Analysis.Calculus.FDeriv.Equiv",
+      "Mathlib.Analysis.Calculus.ContDiff.Basic",
+      "Mathlib.Analysis.Calculus.LineDeriv.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+      "Mathlib.Geometry.Manifold.MFDeriv.Atlas",
+      "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+      "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+      "Mathlib.LinearAlgebra.Matrix.Trace",
+      "Mathlib.LinearAlgebra.Matrix.NonsingularInverse"
+    ],
+    "DifferentialGeometry.Analysis.Integration.Measure.Invariance": [
+      "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+      "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+      "Mathlib.MeasureTheory.Function.Jacobian",
+      "Mathlib.MeasureTheory.Measure.Haar.Basic",
+      "Mathlib.MeasureTheory.Measure.Restrict",
+      "Mathlib.MeasureTheory.Measure.WithDensity",
+      "Mathlib.MeasureTheory.Measure.Map",
+      "Mathlib.MeasureTheory.Integral.Lebesgue.Map",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+      "Mathlib.LinearAlgebra.Matrix.ToLin",
+      "Mathlib.LinearAlgebra.Matrix.Determinant.Basic"
+    ],
+    "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure": [
+      "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+      "Mathlib.Geometry.Manifold.PartitionOfUnity",
+      "Mathlib.MeasureTheory.Measure.WithDensity",
+      "Mathlib.MeasureTheory.Integral.Lebesgue.Basic"
+    ],
+    "DifferentialGeometry.Analysis.Integration.Measure.Properties": [
+      "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+      "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+      "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+      "Mathlib.MeasureTheory.Measure.Typeclasses.Finite",
+      "Mathlib.MeasureTheory.Measure.Typeclasses.SFinite",
+      "Mathlib.MeasureTheory.Measure.OpenPos",
+      "Mathlib.MeasureTheory.Measure.Haar.Basic",
+      "Mathlib.Topology.Compactness.LocallyFinite",
+      "Mathlib.Topology.Algebra.Support",
+      "Mathlib.MeasureTheory.Measure.Regular",
+      "Mathlib.Geometry.Manifold.Metrizable",
+      "Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary"
+    ],
+    "DifferentialGeometry.Analysis.Integration.L2.CompactSupport": [
+      "DifferentialGeometry.Geometry.Connection.Realization.Embedding",
+      "DifferentialGeometry.Geometry.Connection.Realization.Connection",
+      "DifferentialGeometry.Analysis.Integration.L2.Basic",
+      "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+      "Mathlib.Topology.Algebra.Support",
+      "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+      "Mathlib.Geometry.Manifold.ContMDiffMap",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+      "Mathlib.Geometry.Manifold.SmoothApprox",
+      "Mathlib.MeasureTheory.Function.SimpleFuncDenseLp",
+      "Mathlib.MeasureTheory.Function.ContinuousMapDense",
+      "Mathlib.MeasureTheory.Function.LpSpace.Basic",
+      "Mathlib.MeasureTheory.Function.LpSpace.Indicator"
+    ],
+    "DifferentialGeometry.Geometry.Connection.Realization.Embedding": [
+      "DifferentialGeometry.Geometry.Connection.Realization.Basic",
+      "Mathlib.Geometry.Manifold.MFDeriv.NormedSpace",
+      "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+      "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+      "Mathlib.RingTheory.Derivation.Lie"
+    ],
+    "DifferentialGeometry.Geometry.Connection.Realization.Basic": [
+      "Mathlib.Geometry.Manifold.DerivationBundle",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+      "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+      "Mathlib.LinearAlgebra.Trace",
+      "Mathlib.Analysis.InnerProductSpace.Dual",
+      "DifferentialGeometry.Bundle.Section",
+      "DifferentialGeometry.Tensor.RSTensor.Defs"
+    ],
+    "DifferentialGeometry.Tensor.RSTensor.Defs": [
+      "DifferentialGeometry.Tensor.Multilinear.Fiber",
+      "DifferentialGeometry.Tensor.Multilinear.Curry",
+      "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+      "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional"
+    ],
+    "DifferentialGeometry.Tensor.Multilinear.Fiber": [
+      "DifferentialGeometry.Tensor.Multilinear.Bundle",
+      "DifferentialGeometry.Tensor.Multilinear.Basis"
+    ],
+    "DifferentialGeometry.Tensor.Multilinear.Bundle": [
+      "DifferentialGeometry.Tensor.Alternating.Comp",
+      "Mathlib.Geometry.Manifold.VectorBundle.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+      "Mathlib.Data.Bundle"
+    ],
+    "DifferentialGeometry.Tensor.Alternating.Comp": [
+      "DifferentialGeometry.Tensor.Multilinear.Comp",
+      "DifferentialGeometry.Analysis.Calculus.AnalyticTransfer",
+      "DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff",
+      "Mathlib.Analysis.Normed.Module.Alternating.Basic",
+      "Mathlib.Analysis.Calculus.ContDiff.CPolynomial",
+      "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+      "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional"
+    ],
+    "DifferentialGeometry.Tensor.Multilinear.Comp": [
+      "Mathlib.Analysis.Calculus.ContDiff.CPolynomial",
+      "Mathlib.Analysis.Calculus.ContDiff.Basic",
+      "Mathlib.Analysis.Calculus.ContDiff.Operations",
+      "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional"
+    ],
+    "DifferentialGeometry.Analysis.Calculus.AnalyticTransfer": [
+      "Mathlib.Analysis.Calculus.ContDiff.CPolynomial",
+      "Mathlib.Analysis.Calculus.ContDiff.Basic",
+      "Mathlib.Analysis.Analytic.IteratedFDeriv",
+      "Mathlib.Analysis.Normed.Group.Real",
+      "Mathlib.Analysis.Normed.Operator.LinearIsometry"
+    ],
+    "DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff": [
+      "Mathlib.Analysis.Calculus.ContDiff.Basic",
+      "Mathlib.Analysis.Calculus.ContDiff.Comp",
+      "Mathlib.Analysis.Normed.Module.FiniteDimension",
+      "Mathlib.Analysis.Normed.Module.Alternating.Basic",
+      "Mathlib.RingTheory.Finiteness.Defs"
+    ],
+    "DifferentialGeometry.Tensor.Multilinear.Basis": [
+      "DifferentialGeometry.Tensor.Multilinear.Bundle",
+      "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas",
+      "Mathlib.LinearAlgebra.Dimension.Free",
+      "Mathlib.Topology.Algebra.Module.FiniteDimension"
+    ],
+    "DifferentialGeometry.Tensor.Multilinear.Curry": [
+      "DifferentialGeometry.Tensor.Multilinear.Bundle"
+    ],
+    "DifferentialGeometry.Geometry.Connection.Realization.Connection": [
+      "DifferentialGeometry.Geometry.Connection.Realization.Embedding",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion"
+    ],
+    "DifferentialGeometry.Analysis.Integration.L2.Basic": [
+      "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+      "Mathlib.MeasureTheory.Integral.Bochner.Basic",
+      "Mathlib.MeasureTheory.Integral.Lebesgue.Basic",
+      "Mathlib.MeasureTheory.Integral.Lebesgue.Add",
+      "Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic",
+      "Mathlib.MeasureTheory.Function.StronglyMeasurable.AEStronglyMeasurable",
+      "Mathlib.MeasureTheory.Function.L1Space.Integrable",
+      "Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm",
+      "Mathlib.MeasureTheory.Function.LocallyIntegrable",
+      "Mathlib.Topology.Algebra.Support"
+    ],
+    "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction": [
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartCoeffPullback",
+      "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+      "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+      "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+      "Mathlib.Geometry.Manifold.MFDeriv.Atlas",
+      "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+      "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+      "Mathlib.Analysis.Calculus.FDeriv.Comp",
+      "Mathlib.Analysis.Calculus.FDeriv.Basic",
+      "Mathlib.Analysis.Calculus.LineDeriv.Basic"
+    ],
+    "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartCoeffPullback": [
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula"
+    ],
+    "DifferentialGeometry.Geometry.Operator.Laplacian": [
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+      "DifferentialGeometry.Geometry.Operator.Gradient",
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction"
+    ],
+    "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction": [
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartLocalIbp",
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance",
+      "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+      "Mathlib.Analysis.Calculus.FDeriv.Mul",
+      "Mathlib.Analysis.Calculus.FDeriv.Basic",
+      "Mathlib.Geometry.Manifold.PartitionOfUnity",
+      "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+      "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection"
+    ],
+    "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartLocalIbp": [
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartCoeffPullback",
+      "DifferentialGeometry.Analysis.Integration.Measure.Family",
+      "DifferentialGeometry.Analysis.Calculus.CompactCutoff",
+      "Mathlib.Analysis.Calculus.Rademacher",
+      "Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts",
+      "Mathlib.Analysis.Calculus.FDeriv.Basic",
+      "Mathlib.Analysis.Calculus.FDeriv.Mul",
+      "Mathlib.MeasureTheory.Integral.Bochner.Set",
+      "Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap",
+      "Mathlib.Geometry.Manifold.PartitionOfUnity",
+      "Mathlib.Topology.Algebra.Support"
+    ],
+    "DifferentialGeometry.Analysis.Integration.Measure.Family": [
+      "DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition",
+      "Mathlib.Analysis.Calculus.Deriv.Mul",
+      "Mathlib.Analysis.Calculus.Deriv.Add",
+      "Mathlib.Analysis.Calculus.ParametricIntegral",
+      "Mathlib.Analysis.SpecialFunctions.Sqrt",
+      "Mathlib.LinearAlgebra.Matrix.Adjugate",
+      "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+      "Mathlib.LinearAlgebra.Matrix.Trace",
+      "Mathlib.LinearAlgebra.Matrix.PosDef",
+      "Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap",
+      "Mathlib.MeasureTheory.Integral.Bochner.Set",
+      "Mathlib.MeasureTheory.Integral.Bochner.SumMeasure",
+      "Mathlib.Topology.Compactness.LocallyFinite"
+    ],
+    "DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition": [
+      "DifferentialGeometry.Analysis.Integration.Measure.FamilyDefs",
+      "Mathlib.Analysis.Calculus.Deriv.Mul",
+      "Mathlib.Analysis.Calculus.Deriv.Add",
+      "Mathlib.Analysis.Calculus.ParametricIntegral",
+      "Mathlib.Analysis.SpecialFunctions.Sqrt",
+      "Mathlib.LinearAlgebra.Matrix.Adjugate",
+      "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+      "Mathlib.LinearAlgebra.Matrix.Trace",
+      "Mathlib.LinearAlgebra.Matrix.PosDef",
+      "Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap",
+      "Mathlib.MeasureTheory.Integral.Bochner.Set",
+      "Mathlib.MeasureTheory.Integral.Bochner.SumMeasure",
+      "Mathlib.Topology.Compactness.LocallyFinite"
+    ],
+    "DifferentialGeometry.Analysis.Integration.Measure.FamilyDefs": [
+      "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity",
+      "DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure",
+      "DifferentialGeometry.Analysis.Integration.Measure.Invariance",
+      "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+      "DifferentialGeometry.Analysis.Integration.Measure.JacobiFormula",
+      "DifferentialGeometry.Bundle.PartialMfderiv",
+      "Mathlib.Analysis.Calculus.Deriv.Mul",
+      "Mathlib.Analysis.Calculus.Deriv.Add",
+      "Mathlib.Analysis.SpecialFunctions.Sqrt",
+      "Mathlib.LinearAlgebra.Matrix.Adjugate",
+      "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+      "Mathlib.LinearAlgebra.Matrix.Trace",
+      "Mathlib.LinearAlgebra.Matrix.PosDef"
+    ],
+    "DifferentialGeometry.Analysis.Integration.Measure.JacobiFormula": [
+      "Mathlib.Analysis.Calculus.Deriv.Mul",
+      "Mathlib.Analysis.Calculus.Deriv.Add",
+      "Mathlib.Analysis.SpecialFunctions.Sqrt",
+      "Mathlib.LinearAlgebra.Matrix.Adjugate",
+      "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+      "Mathlib.LinearAlgebra.Matrix.Trace",
+      "Mathlib.LinearAlgebra.Matrix.PosDef"
+    ],
+    "DifferentialGeometry.Bundle.PartialMfderiv": [
+      "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+      "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+      "Mathlib.Geometry.Manifold.ContMDiffMap",
+      "Mathlib.Analysis.Calculus.Deriv.Basic"
+    ],
+    "DifferentialGeometry.Analysis.Calculus.CompactCutoff": [
+      "DifferentialGeometry.Analysis.Calculus.Cutoff",
+      "Mathlib.Geometry.Manifold.Metrizable"
+    ],
+    "DifferentialGeometry.Analysis.Calculus.Cutoff": [
+      "Mathlib.Geometry.Manifold.PartitionOfUnity"
+    ],
+    "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance": [
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula",
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction",
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartLocalIbp",
+      "DifferentialGeometry.Analysis.Integration.Measure.Properties",
+      "Mathlib.Geometry.Manifold.PartitionOfUnity",
+      "Mathlib.Geometry.Manifold.BumpFunction",
+      "Mathlib.MeasureTheory.Function.AEEqOfIntegral",
+      "Mathlib.MeasureTheory.Measure.OpenPos",
+      "Mathlib.Data.ENNReal.Basic"
+    ],
+    "DifferentialGeometry.Geometry.Operator.HessianTrace": [
+      "DifferentialGeometry.Geometry.Operator.Hessian",
+      "DifferentialGeometry.Geometry.Operator.VossWeyl",
+      "DifferentialGeometry.Analysis.Integration.Measure.Family",
+      "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity",
+      "DifferentialGeometry.Geometry.Operator.HessianTraceChartDensityJacobiDerivative",
+      "DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative"
+    ],
+    "DifferentialGeometry.Geometry.Operator.VossWeyl": [
+      "DifferentialGeometry.Geometry.Operator.Laplacian",
+      "DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance"
+    ],
+    "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity": [
+      "DifferentialGeometry.Geometry.Operator.Hessian",
+      "DifferentialGeometry.Geometry.Operator.VossWeyl",
+      "DifferentialGeometry.Analysis.Integration.Measure.Family"
+    ],
+    "DifferentialGeometry.Geometry.Operator.HessianTraceChartDensityJacobiDerivative": [
+      "DifferentialGeometry.Geometry.Operator.Hessian",
+      "DifferentialGeometry.Geometry.Operator.VossWeyl",
+      "DifferentialGeometry.Analysis.Integration.Measure.Family",
+      "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity"
+    ],
+    "DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative": [
+      "DifferentialGeometry.Geometry.Operator.Hessian",
+      "DifferentialGeometry.Geometry.Operator.VossWeyl",
+      "DifferentialGeometry.Analysis.Integration.Measure.Family",
+      "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity"
+    ],
+    "DifferentialGeometry.Geometry.Curvature.Riemann.Ricci": [
+      "DifferentialGeometry.Geometry.Curvature.Riemann.Defs",
+      "DifferentialGeometry.Geometry.Operator.HessianTrace",
+      "DifferentialGeometry.Geometry.Operator.Gradient",
+      "DifferentialGeometry.Geometry.Operator.Hessian",
+      "DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity",
+      "DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative",
+      "DifferentialGeometry.Geometry.Operator.VossWeyl"
+    ],
+    "DifferentialGeometry.Geometry.Curvature.Riemann.Defs": [
+      "DifferentialGeometry.Geometry.Operator.Hessian"
+    ],
+    "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection": [
+      "Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable",
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+      "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+      "Mathlib.Geometry.Manifold.MFDeriv.Atlas",
+      "Mathlib.Geometry.Manifold.ContMDiff.Atlas",
+      "DifferentialGeometry.Analysis.Integration.Measure.ChartDensity"
+    ],
+    "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket": [
+      "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+      "DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection"
+    ],
+    "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartMetric": [
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+      "Mathlib.Analysis.Calculus.FDeriv.Add",
+      "Mathlib.Analysis.Calculus.FDeriv.Mul",
+      "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal",
+      "DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible"
+    ],
+    "ChartPort.ChartIdentityEvidence": [
+      "ChartPort.ChartIdentity"
+    ]
+  },
+  "external_mathlib_roots": [
+    "Mathlib.Algebra.Order.Chebyshev",
+    "Mathlib.Analysis.Analytic.IteratedFDeriv",
+    "Mathlib.Analysis.Calculus.ContDiff.Basic",
+    "Mathlib.Analysis.Calculus.ContDiff.CPolynomial",
+    "Mathlib.Analysis.Calculus.ContDiff.Comp",
+    "Mathlib.Analysis.Calculus.ContDiff.Operations",
+    "Mathlib.Analysis.Calculus.Deriv.Add",
+    "Mathlib.Analysis.Calculus.Deriv.Basic",
+    "Mathlib.Analysis.Calculus.Deriv.Mul",
+    "Mathlib.Analysis.Calculus.FDeriv.Add",
+    "Mathlib.Analysis.Calculus.FDeriv.Basic",
+    "Mathlib.Analysis.Calculus.FDeriv.Comp",
+    "Mathlib.Analysis.Calculus.FDeriv.Equiv",
+    "Mathlib.Analysis.Calculus.FDeriv.Mul",
+    "Mathlib.Analysis.Calculus.LineDeriv.Basic",
+    "Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts",
+    "Mathlib.Analysis.Calculus.ParametricIntegral",
+    "Mathlib.Analysis.Calculus.Rademacher",
+    "Mathlib.Analysis.InnerProductSpace.Dual",
+    "Mathlib.Analysis.InnerProductSpace.EuclideanDist",
+    "Mathlib.Analysis.InnerProductSpace.PiL2",
+    "Mathlib.Analysis.InnerProductSpace.Trace",
+    "Mathlib.Analysis.Matrix.PosDef",
+    "Mathlib.Analysis.Normed.Group.Real",
+    "Mathlib.Analysis.Normed.Group.Submodule",
+    "Mathlib.Analysis.Normed.Module.Alternating.Basic",
+    "Mathlib.Analysis.Normed.Module.FiniteDimension",
+    "Mathlib.Analysis.Normed.Module.RCLike.Real",
+    "Mathlib.Analysis.Normed.Module.TransferInstance",
+    "Mathlib.Analysis.Normed.Operator.Basic",
+    "Mathlib.Analysis.Normed.Operator.LinearIsometry",
+    "Mathlib.Analysis.Normed.Operator.NormedSpace",
+    "Mathlib.Analysis.SpecialFunctions.Sqrt",
+    "Mathlib.Data.Bundle",
+    "Mathlib.Data.ENNReal.Basic",
+    "Mathlib.Data.Matrix.Mul",
+    "Mathlib.Geometry.Manifold.Algebra.LieGroup",
+    "Mathlib.Geometry.Manifold.Algebra.Monoid",
+    "Mathlib.Geometry.Manifold.Algebra.SmoothFunctions",
+    "Mathlib.Geometry.Manifold.Algebra.Structures",
+    "Mathlib.Geometry.Manifold.BumpFunction",
+    "Mathlib.Geometry.Manifold.ContMDiff.Atlas",
+    "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+    "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+    "Mathlib.Geometry.Manifold.ContMDiffMap",
+    "Mathlib.Geometry.Manifold.DerivationBundle",
+    "Mathlib.Geometry.Manifold.Diffeomorph",
+    "Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary",
+    "Mathlib.Geometry.Manifold.MFDeriv.Atlas",
+    "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+    "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+    "Mathlib.Geometry.Manifold.MFDeriv.NormedSpace",
+    "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+    "Mathlib.Geometry.Manifold.Metrizable",
+    "Mathlib.Geometry.Manifold.PartitionOfUnity",
+    "Mathlib.Geometry.Manifold.Riemannian.Basic",
+    "Mathlib.Geometry.Manifold.SmoothApprox",
+    "Mathlib.Geometry.Manifold.VectorBundle.Basic",
+    "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+    "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+    "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+    "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+    "Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable",
+    "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+    "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+    "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+    "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+    "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+    "Mathlib.LinearAlgebra.Basis.Basic",
+    "Mathlib.LinearAlgebra.Basis.VectorSpace",
+    "Mathlib.LinearAlgebra.Dimension.Free",
+    "Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition",
+    "Mathlib.LinearAlgebra.Dual.Lemmas",
+    "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas",
+    "Mathlib.LinearAlgebra.Matrix.Adjugate",
+    "Mathlib.LinearAlgebra.Matrix.Determinant.Basic",
+    "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+    "Mathlib.LinearAlgebra.Matrix.PosDef",
+    "Mathlib.LinearAlgebra.Matrix.ToLin",
+    "Mathlib.LinearAlgebra.Matrix.Trace",
+    "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional",
+    "Mathlib.LinearAlgebra.Trace",
+    "Mathlib.MeasureTheory.Constructions.BorelSpace.Basic",
+    "Mathlib.MeasureTheory.Function.AEEqOfIntegral",
+    "Mathlib.MeasureTheory.Function.ContinuousMapDense",
+    "Mathlib.MeasureTheory.Function.Jacobian",
+    "Mathlib.MeasureTheory.Function.L1Space.Integrable",
+    "Mathlib.MeasureTheory.Function.LocallyIntegrable",
+    "Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm",
+    "Mathlib.MeasureTheory.Function.LpSpace.Basic",
+    "Mathlib.MeasureTheory.Function.LpSpace.Indicator",
+    "Mathlib.MeasureTheory.Function.SimpleFuncDenseLp",
+    "Mathlib.MeasureTheory.Function.StronglyMeasurable.AEStronglyMeasurable",
+    "Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic",
+    "Mathlib.MeasureTheory.Integral.Bochner.Basic",
+    "Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap",
+    "Mathlib.MeasureTheory.Integral.Bochner.Set",
+    "Mathlib.MeasureTheory.Integral.Bochner.SumMeasure",
+    "Mathlib.MeasureTheory.Integral.Lebesgue.Add",
+    "Mathlib.MeasureTheory.Integral.Lebesgue.Basic",
+    "Mathlib.MeasureTheory.Integral.Lebesgue.Map",
+    "Mathlib.MeasureTheory.Measure.Haar.Basic",
+    "Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace",
+    "Mathlib.MeasureTheory.Measure.Haar.OfBasis",
+    "Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar",
+    "Mathlib.MeasureTheory.Measure.Map",
+    "Mathlib.MeasureTheory.Measure.OpenPos",
+    "Mathlib.MeasureTheory.Measure.Regular",
+    "Mathlib.MeasureTheory.Measure.Restrict",
+    "Mathlib.MeasureTheory.Measure.Typeclasses.Finite",
+    "Mathlib.MeasureTheory.Measure.Typeclasses.SFinite",
+    "Mathlib.MeasureTheory.Measure.WithDensity",
+    "Mathlib.RingTheory.Derivation.Lie",
+    "Mathlib.RingTheory.Finiteness.Defs",
+    "Mathlib.Topology.Algebra.Module.Equiv",
+    "Mathlib.Topology.Algebra.Module.FiniteDimension",
+    "Mathlib.Topology.Algebra.Support",
+    "Mathlib.Topology.Compactness.LocallyFinite",
+    "Mathlib.Topology.ContinuousMap.Bounded.Basic",
+    "Mathlib.Topology.ContinuousMap.Compact",
+    "Mathlib.Topology.MetricSpace.ProperSpace",
+    "Mathlib.Topology.Order.Compact",
+    "Mathlib.Topology.VectorBundle.Basic",
+    "Mathlib.Topology.VectorBundle.Constructions",
+    "Mathlib.Topology.VectorBundle.FiniteDimensional",
+    "Mathlib.Topology.VectorBundle.Hom"
+  ],
+  "mathlib_support_sources": [
+    {
+      "module": "Mathlib.MeasureTheory.Function.ContinuousMapDense",
+      "path": "Mathlib/MeasureTheory/Function/ContinuousMapDense.lean",
+      "bytes": 20163,
+      "sha256": "cfc609acec4ddfb845c07c6628ddb6b67d6114899ef6080a560144608dde245a",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional",
+      "path": "Mathlib/LinearAlgebra/Multilinear/FiniteDimensional.lean",
+      "bytes": 2768,
+      "sha256": "4c72a9a908596d142427040700e304719842fe05728adb4f6f72e8b52730c9ef",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Geometry.Manifold.SmoothApprox",
+      "path": "Mathlib/Geometry/Manifold/SmoothApprox.lean",
+      "bytes": 7335,
+      "sha256": "adc0125f2975143ad6e639c2e025db3d9500b1989260e42a0fd75973f62ce6b8",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Geometry.Manifold.Metrizable",
+      "path": "Mathlib/Geometry/Manifold/Metrizable.lean",
+      "bytes": 1240,
+      "sha256": "563faa5fc9997b676e5dd7fb8671d9e9c76a9352b7aabb0b3c35cf2c67bbee3e",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Geometry.Manifold.DerivationBundle",
+      "path": "Mathlib/Geometry/Manifold/DerivationBundle.lean",
+      "bytes": 7043,
+      "sha256": "54762205df08fd11b51b5733b7171d7a8aa8275571dbdd839c873680223fcff9",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Calculus.Rademacher",
+      "path": "Mathlib/Analysis/Calculus/Rademacher.lean",
+      "bytes": 22918,
+      "sha256": "5fc79ee3c9c5a0fc17fed09487b6b54dcad3b7d27e4e92880e18300a3f47a7cf",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.MeasureTheory.Measure.Haar.Disintegration",
+      "path": "Mathlib/MeasureTheory/Measure/Haar/Disintegration.lean",
+      "bytes": 8428,
+      "sha256": "0ffbaf26f51087bb77f30feda8e7509e370eb434d20a97910f5053b2f743db2d",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Distribution.AEEqOfIntegralContDiff",
+      "path": "Mathlib/Analysis/Distribution/AEEqOfIntegralContDiff.lean",
+      "bytes": 11196,
+      "sha256": "626e88cc762fe508d78e07923fdb29ab8b5c47e932b30e43e3cc352c0fee9eb2",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.BoundedVariation",
+      "path": "Mathlib/Analysis/BoundedVariation.lean",
+      "bytes": 12781,
+      "sha256": "4b339ac9774705efe8256ed8a7bf060a6642f76876d355a4ae9e3e1338ec306c",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Calculus.Monotone",
+      "path": "Mathlib/Analysis/Calculus/Monotone.lean",
+      "bytes": 13985,
+      "sha256": "2b43d564515e799360926eebddd9b8780bd8d3213873c3138bfab94eff907150",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Order.Monotone.Extension",
+      "path": "Mathlib/Order/Monotone/Extension.lean",
+      "bytes": 2435,
+      "sha256": "04346ced0c72f802c5a3973d1c2b2b45b5abec4d35cf084e1bef65815bf2a472",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.MeasureTheory.Covering.OneDim",
+      "path": "Mathlib/MeasureTheory/Covering/OneDim.lean",
+      "bytes": 2245,
+      "sha256": "4dc8cbdda13dd66c6fd01c0ae738b0853be3fe2c1370940a1d31f2e403201cc7",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.MeasureTheory.Covering.DensityTheorem",
+      "path": "Mathlib/MeasureTheory/Covering/DensityTheorem.lean",
+      "bytes": 8369,
+      "sha256": "bbedeeeb77e88645fa9e63c20000c80cca23f2814a1b5714763c8238cc8247c2",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.MeasureTheory.Covering.Vitali",
+      "path": "Mathlib/MeasureTheory/Covering/Vitali.lean",
+      "bytes": 28880,
+      "sha256": "4b08e030036bf9beaf31a6d9424b4dec727bf898a5d3c1227b7272316af3c595",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Calculus.LineDeriv.Measurable",
+      "path": "Mathlib/Analysis/Calculus/LineDeriv/Measurable.lean",
+      "bytes": 5069,
+      "sha256": "a52147c8cdccf915ade5cfa42ce5c469ba5a7b9d170b0279b3f94cbd1ace6a65",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Calculus.LineDeriv.Basic",
+      "path": "Mathlib/Analysis/Calculus/LineDeriv/Basic.lean",
+      "bytes": 27197,
+      "sha256": "3bcb8d5619558932430cb095b9cf022c62e87705e5fa9a7bbb40a797bbf79473",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts",
+      "path": "Mathlib/Analysis/Calculus/LineDeriv/IntegrationByParts.lean",
+      "bytes": 13024,
+      "sha256": "37f8b789e35db498bbc477cfbf12a4e91d52f09acbaf0a379f4094480b3a9962",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.MeasureTheory.Integral.IntegralEqImproper",
+      "path": "Mathlib/MeasureTheory/Integral/IntegralEqImproper.lean",
+      "bytes": 77011,
+      "sha256": "9b23ece88109c97647472e92ac73478da988c81436efc63e17a2acfb2db15353",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts",
+      "path": "Mathlib/MeasureTheory/Integral/IntervalIntegral/IntegrationByParts.lean",
+      "bytes": 30962,
+      "sha256": "848ba7260b6e8b0734dc3e9fef185865f3f4d185b4db9e67c22b847ee063eabb",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.SpecialFunctions.Pow.Deriv",
+      "path": "Mathlib/Analysis/SpecialFunctions/Pow/Deriv.lean",
+      "bytes": 36036,
+      "sha256": "1c42da13b6121a76de1ec5cbc49833cbdaa71901c7c9d5e3b44bdf33b2c1c481",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv",
+      "path": "Mathlib/Analysis/SpecialFunctions/Complex/LogDeriv.lean",
+      "bytes": 6002,
+      "sha256": "042bb8ecd1a35bc5ab78ddbfd3e84f917827d7926253df7c5e647a5ab21903fa",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Meromorphic.Basic",
+      "path": "Mathlib/Analysis/Meromorphic/Basic.lean",
+      "bytes": 36295,
+      "sha256": "e19e607a18ea73cad89401592f3db84c763c2b4336ded68881c8f4c57b039cac",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Analytic.Order",
+      "path": "Mathlib/Analysis/Analytic/Order.lean",
+      "bytes": 36978,
+      "sha256": "d76ba1534b9d8ddc0e1d9a47e488f9745d7b789937ac2b955bb030a222a3f372",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Calculus.InverseFunctionTheorem.Analytic",
+      "path": "Mathlib/Analysis/Calculus/InverseFunctionTheorem/Analytic.lean",
+      "bytes": 1958,
+      "sha256": "8bc773e676614de12826826893be1fa56661fc4f0f2c806cbf59d6f558a0de61",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Calculus.InverseFunctionTheorem.Deriv",
+      "path": "Mathlib/Analysis/Calculus/InverseFunctionTheorem/Deriv.lean",
+      "bytes": 2103,
+      "sha256": "94e360f67c6ba0edbf4ded7d8aa183d9d214bd480eb038766753911ffdb415ce",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv",
+      "path": "Mathlib/Analysis/SpecialFunctions/Trigonometric/Deriv.lean",
+      "bytes": 27194,
+      "sha256": "acb42335608f66556d2683f07b390999b415d6be4e779904ba829275a1042f41",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Calculus.Deriv.Prod",
+      "path": "Mathlib/Analysis/Calculus/Deriv/Prod.lean",
+      "bytes": 7705,
+      "sha256": "2099adbec4d11f09e97f3066411ce105de9b4e5d56e0240ed596b579e6d6bfd0",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Analysis.Calculus.FDeriv.Extend",
+      "path": "Mathlib/Analysis/Calculus/FDeriv/Extend.lean",
+      "bytes": 11495,
+      "sha256": "1d665dafc00e148c660327f60480385d7133d2d3903988e9bba929e469cc253e",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Algebra.Order.Chebyshev",
+      "path": "Mathlib/Algebra/Order/Chebyshev.lean",
+      "bytes": 7695,
+      "sha256": "bac7317f48b4fd16d47ea7201d729f9154981d6eaa6464522eb0c9b6cf9e7f92",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Algebra.Order.Rearrangement",
+      "path": "Mathlib/Algebra/Order/Rearrangement.lean",
+      "bytes": 29449,
+      "sha256": "c68d73a17308a652e000322f7b242d85ce0ed093acee2b202a0ff53307ffc11a",
+      "unchanged_original_source": true
+    },
+    {
+      "module": "Mathlib.Geometry.Manifold.Algebra.SmoothFunctions",
+      "path": "Mathlib/Geometry/Manifold/Algebra/SmoothFunctions.lean",
+      "bytes": 13954,
+      "sha256": "7464e3d74a98a0af5fbb6d9ddbe83b726e121782808d2913b1bc35fe613cb6a6",
+      "unchanged_original_source": true,
+      "reason": "qualify original module name under new owned Mathlib cache; previously qualified unchanged relocated source retained"
+    }
+  ],
+  "mathlib_source_modifications": 0,
+  "original_patch_sha256": "4a4da180bc43a9537b019ed23c3a2cfacea293785ac0fd3364560f7b684c3737",
+  "proof_packet_sha256": "5573537f795972af559fe43c040a45fdf89aae3629ad9a215642ac49944e2768",
+  "proof_packet_library_version": 3,
+  "historical_source_binding": "PENDING",
+  "full_master_admission": "PENDING",
+  "candidate_build": "UNRUN",
+  "point4": "OPEN",
+  "general_targets": "OPEN",
+  "scope": "constant downgraded smooth metric, actual chart good set, differentiable section at evaluation",
+  "previous_candidate_base": "93ed035498e0bf02096202d2f2895d906fb88234",
+  "previous_candidate_base_tree": "51b59d500108f632e3fa7d7993d14d74fd1491a7",
+  "current_composition_map": {
+    "path": "docs/point4/smooth-master-composition/identity-map.json",
+    "git_blob_sha": "2c22865b8b3fa34a6f5dc817ae5da162339b7f83",
+    "action": "retain exact current base bytes"
+  },
+  "current_composition_dispatcher": {
+    "path": "curvature/scripts/point4_smooth_master_composition.py",
+    "git_blob_sha": "b98805baa97c91f2227bd7d747117b514b5d86db",
+    "action": "retain exact current base bytes; no source body inspection or changes"
+  },
+  "unpublished_startup_repair": "not included"
+}
