@@ -3254,7 +3254,7 @@
   "proof_packet_library_version": 3,
   "historical_source_binding": "PENDING",
   "full_master_admission": "PENDING",
-  "candidate_build": "UNRUN",
+  "candidate_build": "Published ac2163 focused run failed during Lake environment setup before port modules; repaired candidate UNRUN",
   "point4": "OPEN",
   "general_targets": "OPEN",
   "scope": "constant downgraded smooth metric, actual chart good set, differentiable section at evaluation",
@@ -3270,5 +3270,80 @@
     "git_blob_sha": "b98805baa97c91f2227bd7d747117b514b5d86db",
     "action": "retain exact current base bytes; no source body inspection or changes"
   },
-  "unpublished_startup_repair": "not included"
+  "unpublished_startup_repair": "not included",
+  "ci_resource_driver_repair": {
+    "base_commit": "ac21638c8f97909b663e0bb46aed7d938dde43fe",
+    "base_tree": "b0b781050efa129c7d5ea667fed6e7ab5dcceddd",
+    "failed_run": 37434352741,
+    "failed_artifact": 11397838956,
+    "failed_artifact_parent_verified_bytes": 10912,
+    "failed_artifact_parent_verified_sha256": "d93f1f0fb0bc1d1f0fad9486b209db4f0c1596a084611d50ed3b9d82afb1753d",
+    "failed_stage": "lake-environment",
+    "failed_stage_exit_code": -6,
+    "failed_stage_peak_rss_bytes": 857325568,
+    "failure": "libc++abi: uncaught lean::exception: failed to create thread",
+    "diagnosis": "Resource diagnosis; not a mathematical failure or a confirmed repaired runtime result",
+    "change": "Remove only the per-process RLIMIT_AS virtual-address ceiling; retain existing physical resource enforcement",
+    "resource_monitor_and_serial_compile_functions": "unchanged bytes",
+    "retained_limits": {
+      "cgroup_memory_max_bytes": 6442450944,
+      "cgroup_memory_swap_max_bytes": 0,
+      "cpu_quota_percent_max": 200,
+      "owned_session_rss_bytes": 6442450944,
+      "compiler_threads": 1,
+      "lean_heap_megabytes": 5632,
+      "compiler_stage_timeout_seconds": 600,
+      "cache_read_timeout_seconds": 1800,
+      "owned_stage_wait_timeout_seconds": 10,
+      "owned_session_survivors": "rejected"
+    },
+    "focused_setup_control": {
+      "workflow": ".github/workflows/point4-local-chart-environment-setup.yml",
+      "job": "chart_environment_setup",
+      "trigger": "workflow_dispatch only",
+      "driver_argument": "--setup-only",
+      "receipt_build": "SETUP_ONLY_PASSED",
+      "full_candidate_qualification": "NOT_RUN",
+      "cache_or_proof_work": 0,
+      "full_candidate_qualification_still_required": true,
+      "shared_candidate_concurrency_group": "local-chart-connection-<candidate SHA>",
+      "actual_hosted_execution": "UNRUN"
+    },
+    "ordinary_regression_tests": {
+      "path": "curvature/scripts/test_chart_port_ci.py",
+      "local_result": "10 tests passed; finite fixtures; no actual Lean, Lake, cgroup or workflow execution",
+      "actual_Linux_runtime_tests": "UNRUN"
+    },
+    "ordinary_source_bindings": [
+      {
+        "path": ".github/workflows/point4-local-chart-connection.yml",
+        "bytes": 4317,
+        "sha256": "613f25f0c2fec4495743f4fb619c75c93c20cd1f9f50cdf7282f04731b0379de"
+      },
+      {
+        "path": ".github/workflows/point4-local-chart-environment-setup.yml",
+        "bytes": 3686,
+        "sha256": "c02f062b07924c532789499a8ed6a5e7df7b1074cdcdf61792bd5ab6f76acbbc"
+      },
+      {
+        "path": "curvature/scripts/chart_port_candidate_check.py",
+        "bytes": 14655,
+        "sha256": "c4c67968b94ccd93c934611f675ae227352a050942f20e45a46c7a179b4ee876"
+      },
+      {
+        "path": "curvature/scripts/chart_port_ci.py",
+        "bytes": 15297,
+        "sha256": "fca26f694865cf35a68bbec3219636842c94c5cb46c6bd2e48437be98b936db5"
+      },
+      {
+        "path": "curvature/scripts/test_chart_port_ci.py",
+        "bytes": 13595,
+        "sha256": "9bc05619cae901f058537801a81560503fbc9ab02378153d776125abaae4df5b"
+      }
+    ],
+    "lean_sources_and_probe": "all 57 mathematical modules, original probe and 13 inherited sources unchanged",
+    "full_master_artifact_admission": "separate PENDING blocker",
+    "point4": "OPEN",
+    "general_targets": "OPEN"
+  }
 }

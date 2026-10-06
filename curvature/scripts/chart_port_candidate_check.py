@@ -10,6 +10,8 @@ EXTRA = {META + x for x in ('LICENSE', 'NOTICE', 'README.upstream.md', 'SOURCE-P
 EXTRA |= {'docs/point4/local-chart-connection.md', '.github/workflows/point4-local-chart-connection.yml',
           'curvature/scripts/chart_port_candidate_check.py', 'curvature/scripts/chart_port_ci.py'}
 EXTRA.add('curvature/scripts/chart_port_artifacts.py')
+EXTRA |= {'curvature/scripts/test_chart_port_ci.py',
+          '.github/workflows/point4-local-chart-environment-setup.yml'}
 
 # Finite output names follow the pinned Lake 4.33 module layout. Local proof
 # outputs are outside the checkout, so no local .lake/build files are admitted.

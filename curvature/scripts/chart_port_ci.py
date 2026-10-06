@@ -1,6 +1,6 @@
 """Rebuild the admitted chart closure serially; never substitute old receipts."""
 from pathlib import Path
-import argparse, hashlib, json, os, re, resource, signal, subprocess, sys, time
+import argparse, hashlib, json, os, re, signal, subprocess, sys, time
 from chart_port_candidate_check import admit, check_probe, digest, imports, tree_entries
 from chart_port_artifacts import artifact_status, required_import_files
 
@@ -11,11 +11,18 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--expected-sha', required=True)
 ap.add_argument('--expected-tree', required=True)
 ap.add_argument('--evidence', type=Path, required=True)
+ap.add_argument('--setup-only', action='store_true',
+                help='Check pinned environment setup only; full qualification remains required')
 args = ap.parse_args()
 args.evidence.mkdir(parents=True, exist_ok=False)
 EVIDENCE = args.evidence.resolve()
 receipt = dict(owner_pid=os.getpid(), candidate_sha=args.expected_sha, candidate_tree=args.expected_tree,
-               source_admission='PENDING', build='RUNNING', point4='OPEN', general_targets='OPEN', stages=[])
+               source_admission='PENDING', build='RUNNING', point4='OPEN', general_targets='OPEN', stages=[],
+               mode='SETUP_ONLY' if args.setup_only else 'FULL_QUALIFICATION',
+               environment_setup='PENDING', full_candidate_qualification='NOT_RUN')
+
+class _SetupOnlyComplete(Exception):
+    pass
 
 def save():
     (EVIDENCE / 'run.json').write_text(json.dumps(receipt, indent=2) + '\n')
@@ -116,7 +123,6 @@ try:
     cpus = sorted(os.sched_getaffinity(0))[:2]
     assert cpus
     os.sched_setaffinity(0, cpus)
-    resource.setrlimit(resource.RLIMIT_AS, (LIMIT, LIMIT))
     receipt.update(cpu_affinity=cpus, memory_limit_bytes=LIMIT, cgroup=str(cgroup))
     admission = admit(ROOT, args.expected_sha, args.expected_tree)
     (EVIDENCE / 'admission.json').write_text(json.dumps(admission, indent=2) + '\n')
@@ -151,6 +157,13 @@ try:
             dependency_inventory[dep.relative_to(ROOT).as_posix()] = tree_entries(dep, 'HEAD')
     configured_admission = admit(ROOT, args.expected_sha, args.expected_tree, dependency_inventory)
     (EVIDENCE / 'configured-admission.json').write_text(json.dumps(configured_admission, indent=2) + '\n')
+    receipt['environment_setup'] = 'PASSED'
+    save()
+    if args.setup_only:
+        receipt.update(build='SETUP_ONLY_PASSED', fresh_local_modules=0, fresh_probe=0,
+                       cgroup_peak_memory_bytes=int((cgroup / 'memory.peak').read_text()),
+                       owner_completion='all setup child stages reaped and drained')
+        raise _SetupOnlyComplete
     # All fallback outputs and cache downloads stay under this owned evidence root.
     bootstrap, support, local = [EVIDENCE / p / 'lib/lean' for p in ('cache-bootstrap', 'pinned-support', 'local-rebuild')]
     for p in (bootstrap, support, local):
@@ -238,9 +251,11 @@ try:
     assert {k:v for k,v in final.items() if k != 'physical_inventory'} == {k:v for k,v in admission.items() if k != 'physical_inventory'}
     (EVIDENCE / 'final-physical-admission.json').write_text(json.dumps(final, indent=2) + '\n')
     assert not subprocess.check_output(['git', '-C', str(mathlib), 'status', '--porcelain', '--untracked-files=no'])
-    receipt.update(build='PASSED', fresh_local_modules=70, fresh_probe=1, fallback_mathlib_modules=len(missing_order),
+    receipt.update(build='PASSED', full_candidate_qualification='PASSED', fresh_local_modules=70, fresh_probe=1, fallback_mathlib_modules=len(missing_order),
                    ordinary_dependency_artifacts='pinned cache imports; not a full dependency rebuild',
                    cgroup_peak_memory_bytes=int((cgroup / 'memory.peak').read_text()), owner_completion='all child stages reaped and drained')
+except _SetupOnlyComplete:
+    pass
 except BaseException as exc:
     receipt.update(build='FAILED', exception_type=type(exc).__name__, error=str(exc))
     raise
