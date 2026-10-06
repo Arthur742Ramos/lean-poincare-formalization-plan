@@ -33,7 +33,7 @@ ORIGINAL_SHA256 = '713af9477a3595655ddbd2cde6dd4dfc5ce7230f4310b28593171407e33ab
 ADAPTER_TEMPLATE = "\n# Reviewed smooth-forward inventory adapter. Gate bodies remain unchanged.\n_smooth_guard_path = ROOT / 'curvature/scripts/point4_smooth_forward_release_guard.py'\nassert stat.S_ISREG(_smooth_guard_path.lstat().st_mode) and not (_smooth_guard_path.lstat().st_mode & 0o111), 'Smooth guard mode changed'\nassert hashlib.sha256(_smooth_guard_path.read_bytes()).hexdigest() == '{guard_sha256}', 'Reviewed smooth executable changed'\nsys.modules.setdefault('point4_manifold_heat_release_guard', sys.modules[__name__])\nimport point4_smooth_forward_release_guard as _smooth_release\n_smooth_release.install_release_adapter(globals(), '{guard_sha256}')\n\n"
 # Every non-self addition is pinned. This guard body still requires independent
 # review; hashing itself would not establish trust. Paths and modes are exact.
-FILE_SHA256 = {'.github/workflows/point4-smooth-forward-support.yml': '425e2c575361602f5b676a33f28e6977a5ba16986d75fdbd10b85e85390a1910', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardContract.lean': 'b096fe0ff63b6adc19c344a2239183b3fdb0921cef5a128c30e5cac49da47e30', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardRegularity.lean': '2e46cea0e6587f803e7d01cda26ea5bdb439d6216ec44b574a87dcae414607a6', 'curvature/scripts/point4_smooth_forward_audit.py': '358affd9a9f7c567ba8d01b05bea981b844f692c9acdcb2b728852d304bffcf2', 'curvature/scripts/point4_smooth_forward_completion.lean': '644d4fb1a354e11ef5e730652559f815c43ae5a13f8753708a0b19cfaafdd07d', 'curvature/scripts/point4_smooth_forward_interface_sha256.json': '6d4bf424f368d00c151a05c37ad56b52cf82bfb3e56c7e48a467d80eea0019a5', 'curvature/scripts/point4_smooth_forward_probe.lean': '24490add867b9e60adc1deeb52b6dfc347788f453727617ea7ef1be20f163821', 'curvature/scripts/point4_smooth_forward_release_mock_test.py': '94f90deab86e2b47a030bd8146b2bc5d0e0c02ac4e13f0c918b26e459733184b', 'docs/point4/smooth-forward-model-contract.md': '43749ea7bffea985011b397433eb6ba404de8345ab617f7f7864374da5e37093', 'docs/point4/smooth-forward-model/formalization.yaml': '5ad59f77a615dd6d77ed284e97b1d4eadc9b6efd76caae221cbcf2dd4545f7af', 'docs/point4/smooth-forward-release-integration.md': '8f8bcf4c250499d7c90c69fe49cd26fb029e8e81b2680dcab444c0454e508c8e'}
+FILE_SHA256 = {'.github/workflows/point4-smooth-forward-support.yml': '6dd978cb98f15274c3f843621e46c9f9a90b4327f376a5543db34508190d4a16', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardContract.lean': 'b096fe0ff63b6adc19c344a2239183b3fdb0921cef5a128c30e5cac49da47e30', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardRegularity.lean': '2e46cea0e6587f803e7d01cda26ea5bdb439d6216ec44b574a87dcae414607a6', 'curvature/scripts/point4_smooth_forward_audit.py': '358affd9a9f7c567ba8d01b05bea981b844f692c9acdcb2b728852d304bffcf2', 'curvature/scripts/point4_smooth_forward_completion.lean': '644d4fb1a354e11ef5e730652559f815c43ae5a13f8753708a0b19cfaafdd07d', 'curvature/scripts/point4_smooth_forward_interface_sha256.json': '6d4bf424f368d00c151a05c37ad56b52cf82bfb3e56c7e48a467d80eea0019a5', 'curvature/scripts/point4_smooth_forward_probe.lean': '24490add867b9e60adc1deeb52b6dfc347788f453727617ea7ef1be20f163821', 'curvature/scripts/point4_smooth_forward_release_mock_test.py': 'b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6', 'docs/point4/smooth-forward-model-contract.md': '43749ea7bffea985011b397433eb6ba404de8345ab617f7f7864374da5e37093', 'docs/point4/smooth-forward-model/formalization.yaml': '5ad59f77a615dd6d77ed284e97b1d4eadc9b6efd76caae221cbcf2dd4545f7af', 'docs/point4/smooth-forward-release-integration.md': '8f8bcf4c250499d7c90c69fe49cd26fb029e8e81b2680dcab444c0454e508c8e', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/IntrinsicRicciReindex.lean': 'ef9d583295c0a686e352e90b79d1bdfb14b7ad7ebc8450483424f21b852d6c58', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardBasis.lean': '30e8451702e8dba230299613def494a49c839f8e54424573ee8805469c41ecba', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/SmoothForwardTimeTranslate.lean': '1aed107075356aa2d7963ae65a56d8e9234ce79b09301fa2c20cc54f3f6e04e8', 'curvature/TimeTranslateVerification.lean': '52af9c3c59779129f8ade8ef90877c1fd96f4d03c27eda43d2da770d8dbbed98', 'curvature/Verification.lean': 'b545fe4883b5d9d3a9279dbd42b9e3d579b0a38803b244b3a4e5f5bba482a446', 'curvature/scripts/point4_smooth_forward_basis_probe.lean': '68eb6f85d35d8c61edf224171aaea1c80559dc86d8399bcf19da58f6e8915448', 'docs/point4/smooth-forward-finite-basis.md': '488042961cfdabaf7585ff5037879efe9424d2bce06c5533770713290bfb83c7'}
 ADDED = frozenset(FILE_SHA256) | {GUARD}
 _depth = 0
 _active_namespace = None
@@ -93,7 +93,7 @@ def expected_sources(namespace: dict) -> dict[str, tuple[str, bytes]]:
     subprocess.run(['git', '-C', str(ROOT), 'merge-base', '--is-ancestor', BASE, 'HEAD'],
                    check=True, env=namespace['ENV'])
     inventory = parse_tree(namespace['git']('ls-tree', '-rz', BASE))
-    assert not ADDED & set(inventory) and len(ADDED) == 12, 'Reviewed smooth addition inventory changed'
+    assert not ADDED & set(inventory) and len(ADDED) == 19, 'Reviewed smooth addition inventory changed'
     original_guard = namespace['git']('show', f'{BASE}:{LEGACY_GUARD}')
     adapted = adapted_release_guard(original_guard, namespace['_smooth_guard_sha256'])
     # Validate the complete physical/public composed inventory before historical
@@ -121,7 +121,7 @@ def expected_sources(namespace: dict) -> dict[str, tuple[str, bytes]]:
     expected = {path: (BASE, data) for path, (_, data) in baseline.items()}
     expected[LEGACY_GUARD] = BASE, adapted
     assert not ADDED & set(baseline), 'Smooth support overlaps fresh master'
-    assert len(ADDED) == 12, 'Reviewed smooth addition inventory changed'
+    assert len(ADDED) == 19, 'Reviewed smooth addition inventory changed'
     for path in ADDED:
         data = (ROOT / path).read_bytes()
         if path != GUARD:
@@ -265,7 +265,7 @@ def main(argv=None) -> None:
     assert (args.smooth_audit_json is None) == (args.smooth_audit_rc is None)
     if args.smooth_audit_json:
         check_smooth_audit_open(json.loads(args.smooth_audit_json.read_text()), args.smooth_audit_rc)
-    print(json.dumps({'base': BASE, 'public_paths': 1665, 'exact_inherited_release_adapters': 1,
+    print(json.dumps({'base': BASE, 'public_paths': 1672, 'exact_inherited_release_adapters': 1,
                       'smooth_support_proofs': 'separate exact-head gates required',
                       'smooth_general_target': 'OPEN', 'canonical_point4': 'OPEN'}, indent=2))
 

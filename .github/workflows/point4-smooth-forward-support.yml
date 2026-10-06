@@ -78,6 +78,37 @@ jobs:
           lake build PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardRegularity PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardContract
           lake env lean scripts/point4_smooth_forward_probe.lean 2>&1 | tee /tmp/point4-smooth-forward-support-probe.log
           PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_smooth_forward_release_guard.py --smooth-probe-log /tmp/point4-smooth-forward-support-probe.log
+      - name: Compile and probe the seven reviewed mathematical additions
+        working-directory: curvature
+        run: |
+          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardBasis PoincareCurvature.Geometry.Manifold.RicciFlow.IntrinsicRicciReindex PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardTimeTranslate
+          lake env lean scripts/point4_smooth_forward_basis_probe.lean 2>&1 | tee /tmp/point4-smooth-forward-basis.log
+          lake env lean Verification.lean 2>&1 | tee /tmp/point4-smooth-forward-ricci-reindex.log
+          lake env lean TimeTranslateVerification.lean 2>&1 | tee /tmp/point4-smooth-forward-time-translate.log
+          PYTHONDONTWRITEBYTECODE=1 python3 - <<'PY'
+          from pathlib import Path
+          import re, sys
+          sys.path.insert(0, 'scripts')
+          from point4_c2_initial_heat_source_test import check_axiom_output
+          probes = (
+              ('scripts/point4_smooth_forward_basis_probe.lean', '/tmp/point4-smooth-forward-basis.log', 2),
+              ('Verification.lean', '/tmp/point4-smooth-forward-ricci-reindex.log', 5),
+              ('TimeTranslateVerification.lean', '/tmp/point4-smooth-forward-time-translate.log', 11),
+          )
+          for probe, log, count in probes:
+              source = Path(probe).read_text()
+              if probe == 'TimeTranslateVerification.lean':
+                  for name in ('time_add_preimage_Ici', 'time_add_preimage_Ico', 'ForwardEquation.timeTranslate', 'JointlySmoothOn.timeTranslate', 'StrongSolution.timeTranslate'):
+                      command = '#print axioms ' + name + '\n'
+                      assert source.count(command) == 1
+                      source = source.replace(command, '#print axioms RicciFlow.SmoothForward.' + name + '\n', 1)
+              raw = Path(log).read_text()
+              # Preserve raw logs; remove only standard-axiom universe print suffixes.
+              normalized = re.sub(r'\b(propext|Classical\.choice|Quot\.sound)\.\{[^{}]*\}', r'\1', raw)
+              names = check_axiom_output(source, normalized)
+              assert len(names) == count, (probe, names)
+              print(f'Actual reviewed mathematical axiom evidence: {probe}: {count} declarations')
+          PY
       - name: Require the absent general smooth target to fail only at the frozen target references
         working-directory: curvature
         run: |
