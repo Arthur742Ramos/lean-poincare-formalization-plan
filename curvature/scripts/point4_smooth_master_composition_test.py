@@ -53,7 +53,9 @@ class OrdinaryCompositionTests(unittest.TestCase):
                 original=read(path)
                 changed=comp.transform(path,original,helper_sha,comp.sha256(mock),comp.sha256(workflow))
                 if path==comp.WORKFLOW:
-                    self.assertEqual(changed.replace(comp.WF_STEP.encode(),b'',1),original)
+                    self.assertEqual(changed.replace(comp.WF_STEP.encode(),b'',1).replace(comp.STARTUP_ENV.encode(),b'',1),original)
+                elif path==comp.LOCALIZATION_WORKFLOW:
+                    self.assertEqual(changed.replace(comp.STARTUP_ENV.encode(),b'',1),original)
                 else:
                     hook=comp.bootstrap(path,helper_sha).encode()
                     self.assertEqual(changed.count(hook),1)
@@ -65,7 +67,7 @@ class OrdinaryCompositionTests(unittest.TestCase):
                         aa=new.index('FILE_SHA256 = ');bb=new.index('\nADDED = ',aa)
                         self.assertEqual(new[:aa]+old[a:b]+new[bb:],old)
                 with self.assertRaises(AssertionError):comp.transform(path,changed,helper_sha,comp.sha256(mock),comp.sha256(workflow))
-                anchor=comp.WF_ANCHOR if path==comp.WORKFLOW else comp.ENTRY
+                anchor=comp.STARTUP_ANCHOR if path==comp.LOCALIZATION_WORKFLOW else comp.WF_ANCHOR if path==comp.WORKFLOW else comp.ENTRY
                 for bad in (original.decode().replace(anchor,'',1),original.decode()+anchor):
                     with self.assertRaises(AssertionError):comp.transform(path,bad.encode(),helper_sha,comp.sha256(mock),comp.sha256(workflow))
 
@@ -74,6 +76,42 @@ class OrdinaryCompositionTests(unittest.TestCase):
         self.assertEqual(comp.parse_tree(good),{'a.lean':('100644','a'*40)})
         for bad in (good[:-1],good+good,good.replace(b'100644',b'120000'),good.replace(b'a.lean',b'../a.lean'),good.replace(b'a'*40,b'z'*40)):
             with self.assertRaises(AssertionError):comp.parse_tree(bad)
+
+    def test_localization_startup_env_is_job_scoped_and_exactly_reversible(self):
+        master,_,read=parent_inputs()
+        original=read(comp.LOCALIZATION_WORKFLOW)
+        self.assertEqual(comp.blob_id(original),master[comp.LOCALIZATION_WORKFLOW][1])
+        changed=comp.transform(comp.LOCALIZATION_WORKFLOW,original,'0'*64)
+        self.assertEqual(changed.replace(comp.STARTUP_ENV.encode(),b'',1),original)
+        self.assertEqual(changed.count(comp.STARTUP_ENV.encode()),1)
+        self.assertLess(changed.index(comp.STARTUP_ENV.encode()),changed.index(b'    steps:\n'))
+        self.assertLess(changed.index(comp.STARTUP_ENV.encode()),changed.index(b'python3 curvature/scripts/'))
+        for bad in (original.replace(b'timeout-minutes: 350',b'timeout-minutes: 349'),
+                    original.replace(b'    steps:\n',comp.STARTUP_ENV.encode()+b'    steps:\n',1)):
+            with self.assertRaises(AssertionError):comp.transform(comp.LOCALIZATION_WORKFLOW,bad,'0'*64)
+
+    def test_actual_python_startup_env_disables_bytecode_before_composition_import(self):
+        # Actual ordinary interpreter startup, deliberately without -B. This
+        # is not a simulated Git/schema check or a cache admission fixture.
+        env=os.environ.copy()
+        env['PYTHONDONTWRITEBYTECODE']='1'
+        env['PYTHONPATH']=str(comp.ROOT/'curvature/scripts')
+        result=subprocess.run([sys.executable,'-c',
+            'import sys; assert sys.dont_write_bytecode; import point4_smooth_master_composition; assert sys.dont_write_bytecode'],
+            cwd=comp.ROOT,env=env,capture_output=True,text=True,timeout=120)
+        self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_smooth_startup_env_covers_nested_audit_without_changing_commands(self):
+        _,_,read=parent_inputs()
+        original=read(comp.WORKFLOW)
+        changed=comp.transform(comp.WORKFLOW,original,'0'*64)
+        self.assertEqual(changed.replace(comp.WF_STEP.encode(),b'',1).replace(comp.STARTUP_ENV.encode(),b'',1),original)
+        self.assertEqual(changed.count(comp.STARTUP_ENV.encode()),1)
+        self.assertLess(changed.index(comp.STARTUP_ENV.encode()),changed.index(b'    steps:\n'))
+        self.assertLess(changed.index(comp.STARTUP_ENV.encode()),changed.index(b'bash scripts/point4_audit.sh'))
+        for bad in (original.replace(b'timeout-minutes: 350',b'timeout-minutes: 349'),
+                    original.replace(b'    steps:\n',comp.STARTUP_ENV.encode()+b'    steps:\n',1)):
+            with self.assertRaises(AssertionError):comp.transform(comp.WORKFLOW,bad,'0'*64)
 
     def test_callback_failure_nested_ownership_and_restoration(self):
         original=object();namespace={'value':original};other={'value':original}

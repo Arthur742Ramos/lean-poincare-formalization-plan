@@ -15,6 +15,24 @@ transform code, complete committed HEAD/index/physical identities and an
 independently reviewed external head establish the source boundary. No map
 record authorizes an arbitrary transformation or self-certifies new code.
 
+The ordinary localization startup repair is based on published draft head
+`1664872ce762ee027b76cb515befb0ae829b2711`, whose tree is
+`6d74e9612cf6e16f2d027012cede68e5e0a23483`. Workflow run `37417941512` failed
+before Lean when a repository import created an interpreter cache rejected by
+the unchanged inventory classifier. One count-one reversible transformation
+sets `PYTHONDONTWRITEBYTECODE: "1"` at localization job scope before all steps.
+The descriptive map records that parent and failure. No cache is deleted or
+admitted; validator bodies, source controls and deadlines remain unchanged.
+
+The same job-scoped setting also covers the smooth workflow and its nested
+audit Python. Historical smooth run `37417941491` passed the full library,
+all 150 inherited axiom/type surfaces, and canonical contract/kernel negatives.
+Its canonical audit produced the expected OPEN pattern: G1/G2 PASS and
+missing-target G3/G4/G5 FAIL. The following current guard rejected an interpreter
+cache created by nested audit Python. The separate smooth audit and mandatory
+genuine composition step18 were skipped. These historical partial results do
+not qualify the updated candidate's genuine runtime routes.
+
 ## Current and historical validation
 
 Current weighted checks are leaves: they verify the complete candidate identity,

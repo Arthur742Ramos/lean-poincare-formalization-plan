@@ -25,7 +25,12 @@ CONSISTENCY = 'curvature/scripts/point4_pr130_pr133_inventory.py'
 SMOOTH = 'curvature/scripts/point4_smooth_forward_release_guard.py'
 FIXTURE = 'curvature/scripts/point4_smooth_forward_release_mock_test.py'
 WORKFLOW = '.github/workflows/point4-smooth-forward-support.yml'
-EDITED = {WEIGHTED, LOCAL, CONSISTENCY, SMOOTH, FIXTURE, WORKFLOW}
+LOCALIZATION_WORKFLOW = '.github/workflows/point4-c2-metric-localization.yml'
+STARTUP_REPAIR_PARENT = '1664872ce762ee027b76cb515befb0ae829b2711'
+STARTUP_REPAIR_TREE = '6d74e9612cf6e16f2d027012cede68e5e0a23483'
+STARTUP_ANCHOR = '    timeout-minutes: 350\n    steps:\n'
+STARTUP_ENV = '    env:\n      PYTHONDONTWRITEBYTECODE: "1"\n'
+EDITED = {WEIGHTED, LOCAL, CONSISTENCY, SMOOTH, FIXTURE, WORKFLOW, LOCALIZATION_WORKFLOW}
 SHARED = {'.github/workflows/point4-c2-initial-heat.yml',
  '.github/workflows/point4-linear-heat-geometry.yml',
  '.github/workflows/point4-weighted-initial-heat.yml',
@@ -118,9 +123,14 @@ def bootstrap(path, helper_sha):
 def transform(path, original, helper_sha, fixture_sha=None, workflow_sha=None):
     source = original.decode()
     assert '_smooth_master.' not in source, 'Previously transformed source is not an input'
+    if path == LOCALIZATION_WORKFLOW:
+        assert source.count(STARTUP_ANCHOR) == 1 and 'PYTHONDONTWRITEBYTECODE' not in source
+        return source.replace(STARTUP_ANCHOR, STARTUP_ANCHOR.replace('    steps:\n', STARTUP_ENV+'    steps:\n'), 1).encode()
     if path == WORKFLOW:
         assert source.count(WF_ANCHOR) == 1 and WF_STEP not in source
-        return source.replace(WF_ANCHOR, WF_STEP+WF_ANCHOR, 1).encode()
+        assert source.count(STARTUP_ANCHOR) == 1 and STARTUP_ENV not in source
+        source=source.replace(WF_ANCHOR, WF_STEP+WF_ANCHOR, 1)
+        return source.replace(STARTUP_ANCHOR, STARTUP_ANCHOR.replace('    steps:\n', STARTUP_ENV+'    steps:\n'), 1).encode()
     if path == SMOOTH:
         assert fixture_sha and workflow_sha
         # Replace only the two selected FILE_SHA256 values, never other code.
@@ -161,6 +171,10 @@ def map_record(expected, originals, changes):
     master,support=parent_tree(MASTER),parent_tree(SUPPORT)
     return {'parents':{MASTER:TREES[MASTER],SUPPORT:TREES[SUPPORT]},
         'paths':len(expected),'canonical_point4':'OPEN','smooth_general_target':'OPEN',
+        'ordinary_startup_repair':{'parent':STARTUP_REPAIR_PARENT,'parent_tree':STARTUP_REPAIR_TREE,
+            'failed_workflow_run':37417941512,'failed_smooth_workflow_run':37417941491,
+            'workflows':[LOCALIZATION_WORKFLOW,WORKFLOW],
+            'note':'Job-scoped bytecode suppression before repository imports and nested audit Python; cache rejection and original validator bodies preserved. Prior smooth real runtime step18 was skipped.'},
         'provenance':[{'id':'https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/'+c+'/curvature',
             'relationship':'builds-on','note':'Exact inherited mathematical/probe source; only finite validator composition is new.'} for c in (MASTER,SUPPORT)],
         'weighted_missing_master':{p:list(master[p]) for p in sorted(WEIGHTED_MISSING)},
@@ -175,7 +189,7 @@ def verify_current():
     head = git('rev-parse','HEAD').decode().strip()
     assert re.fullmatch(r'[0-9a-f]{40}',head)
     if os.environ.get('EXPECTED_SHA'):assert head==os.environ['EXPECTED_SHA'], 'External expected HEAD drift'
-    for commit in (MASTER,SUPPORT):
+    for commit in (MASTER,SUPPORT,STARTUP_REPAIR_PARENT):
         subprocess.run(['git','--no-replace-objects','-C',str(ROOT),'merge-base','--is-ancestor',commit,'HEAD'],check=True,env=ENV)
     expected,originals,changes=expected_identity()
     committed=parse_tree(git('ls-tree','-rz','HEAD'))

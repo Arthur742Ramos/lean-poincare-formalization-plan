@@ -6,6 +6,17 @@
   "paths": 1727,
   "canonical_point4": "OPEN",
   "smooth_general_target": "OPEN",
+  "ordinary_startup_repair": {
+    "parent": "1664872ce762ee027b76cb515befb0ae829b2711",
+    "parent_tree": "6d74e9612cf6e16f2d027012cede68e5e0a23483",
+    "failed_workflow_run": 37417941512,
+    "failed_smooth_workflow_run": 37417941491,
+    "workflows": [
+      ".github/workflows/point4-c2-metric-localization.yml",
+      ".github/workflows/point4-smooth-forward-support.yml"
+    ],
+    "note": "Job-scoped bytecode suppression before repository imports and nested audit Python; cache rejection and original validator bodies preserved. Prior smooth real runtime step18 was skipped."
+  },
   "provenance": [
     {
       "id": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/e883681caa862277857ee825a547502e8f3ec036/curvature",
@@ -13740,12 +13751,21 @@
     }
   },
   "transforms": {
+    ".github/workflows/point4-c2-metric-localization.yml": {
+      "parent": "e883681caa862277857ee825a547502e8f3ec036",
+      "original_blob": "e9523d47e3a5f27e9a04a3669fc6e5772f907b6f",
+      "original_sha256": "b1bf9f625961ee949606ffcc745e12bd99153df65ce0ef254bf23cfe8800d632",
+      "final_blob": "f3b4a4ebfeaf1a9dad5204e6feb2f817c7ff9d92",
+      "final_sha256": "4fdf3bc99be17e822b62da3512adec9b2dca8a609180782bb69e809df21c147b",
+      "mode": "100644",
+      "count": 1
+    },
     ".github/workflows/point4-smooth-forward-support.yml": {
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "e6dd3e63c9d8bd3a2b3937f4ab495468d2e22e92",
       "original_sha256": "6dd978cb98f15274c3f843621e46c9f9a90b4327f376a5543db34508190d4a16",
-      "final_blob": "7354f389937a023008fd082fb4876da24399099e",
-      "final_sha256": "56b334e16c8cbb12a8b8c1acf0879b878989236dfd8d2d38d4caa701b6749227",
+      "final_blob": "487c57f4af56a8d1b6333a77a1496c64a0f98b74",
+      "final_sha256": "141e740d2c6cc6cc73dbf1d0a2fec861c44ac305f7932dc1124559ddaf1a0f4d",
       "mode": "100644",
       "count": 1
     },
@@ -13753,8 +13773,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "235568ff1e92530a77b1385d3ce638532de33810",
-      "final_sha256": "da9633c563a9cb544a636057070e7d13d4351659697589609bfb00d037f0ad12",
+      "final_blob": "3f8fd4ed3099ef27011c3b49123d40dc5388befd",
+      "final_sha256": "e693d021043cda061096c934df8da12c0f5593e029130fc9a923f64d4822e857",
       "mode": "100644",
       "count": 1
     },
@@ -13762,8 +13782,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "089d88517f294830242575187726af508d320284",
-      "final_sha256": "fe2d4368f3392f1e65322cdb62754d0e0dfd5a54c2277e1eb81876ab9bd83fa6",
+      "final_blob": "8a1d385cdb601a554e79abe4972507df9125d6b8",
+      "final_sha256": "59d24541b1bd14e79007cbd3ee37cfe98925cba152374b538995cc64bfcd6fe0",
       "mode": "100644",
       "count": 1
     },
@@ -13771,8 +13791,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "c4c0c317c3916014c96e880c9f83c71caf73ad1b",
-      "final_sha256": "d6faf0195a09dfa37c6dff4d6ded81c20f9bd9f4997a198d657e4ba1929d1e83",
+      "final_blob": "a28a0bf7a3512eeaeea5c59a19ade684199d2a11",
+      "final_sha256": "84ed2abcee9f9fe77c9005b3d6e150fe0ddeb5b09249466c3d97ed86abb8b185",
       "mode": "100644",
       "count": 1
     },
@@ -13780,8 +13800,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "17aef4f7e46692f1d02bb46b33bd613b36906a0e",
-      "final_sha256": "fda8cdd9d6b40cfcc4060a04adaaa2da16f63d66db6370d2efd699e7a4f0b07e",
+      "final_blob": "28d1916770644079ae91fb6eecdb8f1d00d45b2f",
+      "final_sha256": "4c3a5e6151faea9e1bcd7620a1b13d2ed38a13524c7f38b7904ca340b799b0b9",
       "mode": "100644",
       "count": 1
     },
@@ -13789,8 +13809,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "03e507f47c4df955305625345bf4cb86f8c49fa9",
-      "final_sha256": "9038f192fed87e4f3ddd7eb242c811f7799e899a2fc575c5815f42076f435691",
+      "final_blob": "f874ec87b4530459781a07ea275298040d639e8f",
+      "final_sha256": "6ffb035da668c92dceb890afe72b7fa550338a7e6e1c6f5790f014f442b4f859",
       "mode": "100644",
       "count": 1
     }
@@ -13846,7 +13866,7 @@
     ],
     ".github/workflows/point4-c2-metric-localization.yml": [
       "100644",
-      "e9523d47e3a5f27e9a04a3669fc6e5772f907b6f"
+      "f3b4a4ebfeaf1a9dad5204e6feb2f817c7ff9d92"
     ],
     ".github/workflows/point4-chosen-lc-coordinate.yml": [
       "100644",
@@ -13894,7 +13914,7 @@
     ],
     ".github/workflows/point4-smooth-forward-support.yml": [
       "100644",
-      "7354f389937a023008fd082fb4876da24399099e"
+      "487c57f4af56a8d1b6333a77a1496c64a0f98b74"
     ],
     ".github/workflows/point4-standard-coordinate-operator.yml": [
       "100644",
@@ -17346,7 +17366,7 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "235568ff1e92530a77b1385d3ce638532de33810"
+      "3f8fd4ed3099ef27011c3b49123d40dc5388befd"
     ],
     "curvature/scripts/point4_chosen_lc_coordinate_probe.lean": [
       "100644",
@@ -17430,7 +17450,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "089d88517f294830242575187726af508d320284"
+      "8a1d385cdb601a554e79abe4972507df9125d6b8"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -17466,19 +17486,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "c4c0c317c3916014c96e880c9f83c71caf73ad1b"
+      "a28a0bf7a3512eeaeea5c59a19ade684199d2a11"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "17aef4f7e46692f1d02bb46b33bd613b36906a0e"
+      "28d1916770644079ae91fb6eecdb8f1d00d45b2f"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "b98805baa97c91f2227bd7d747117b514b5d86db"
+      "bdde6485ce47ff47cbed7206ad0c06bafb08dbc5"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "af3d6c027b6817845fddc74eb25af14255928ec5"
+      "b002af18afd4af136011443c387551d17bfb7f6c"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -17498,7 +17518,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "03e507f47c4df955305625345bf4cb86f8c49fa9"
+      "f874ec87b4530459781a07ea275298040d639e8f"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -17654,7 +17674,7 @@
     ],
     "docs/point4/smooth-master-composition.md": [
       "100644",
-      "0acb7f14409401308b5b58a760181b63e67fc0b3"
+      "c56b31f2aa22f27d0ace23629334c07aa962cd54"
     ],
     "docs/point4/smooth-master-composition/identity-map.json": [
       "100644",
