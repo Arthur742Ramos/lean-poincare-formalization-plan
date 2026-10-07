@@ -58,6 +58,55 @@ class OrdinaryCompositionTests(unittest.TestCase):
         self.assertEqual((helper.check_imports,helper.check_metadata),slots)
         self.assertEqual(comp._depth,0);self.assertIsNone(comp._owner)
 
+    def test_heat_default_git_reader_survives_reentrant_mock(self):
+        # Exercise the real default path against actual owned Git objects. This
+        # cannot be covered by the offline parent-file adapter alone.
+        with tempfile.TemporaryDirectory(prefix='point4-heat-reader-',dir=pathlib.Path.cwd()) as directory:
+            root=pathlib.Path(directory).resolve()
+            self.assertEqual(root.parent,pathlib.Path.cwd().resolve())
+            env=dict(comp.ENV,GIT_AUTHOR_NAME='Point4 regression fixture',
+                GIT_AUTHOR_EMAIL='fixture@example.invalid',GIT_COMMITTER_NAME='Point4 regression fixture',
+                GIT_COMMITTER_EMAIL='fixture@example.invalid')
+            def actual_git(*args,data=None):
+                return subprocess.check_output(['git','--no-replace-objects','-C',str(root),*args],input=data,env=env)
+            actual_git('init','--quiet')
+            values=[b'owned authentic parent fixture\n',b'owned authentic source fixture\n']
+            commits=[];trees=[];objects=[]
+            for index,value in enumerate(values):
+                oid=actual_git('hash-object','-w','--stdin',data=value).decode().strip()
+                tree=actual_git('mktree',data=('100644 blob '+oid+'\tordinary.txt\n').encode()).decode().strip()
+                commit=actual_git('commit-tree',tree,data=('owned regression '+str(index)+'\n').encode()).decode().strip()
+                commits.append(commit);trees.append(tree);objects.append(oid)
+            case=OrdinaryCompositionTests(methodName='test_heat_current_body_failure_is_propagated')
+            with patch.dict(globals(),{'HEAT_FIXTURES':None,'OFFLINE':None,'CONTRACTION_FIXTURES':None}),patch.object(comp,'ROOT',root),\
+                 patch.object(comp,'HEAT_PARENT',commits[0]),patch.object(comp,'HEAT_SOURCE',commits[1]),\
+                 patch.dict(comp.TREES,dict(zip(commits,trees))):
+                base,source,reader=case.heat_inputs()
+                self.assertEqual(base,{'ordinary.txt':('100644',objects[0])})
+                self.assertEqual(source,{'ordinary.txt':('100644',objects[1])})
+                # The side effect reproduces the real controls' reentrant shape.
+                # Capturing the unmocked reader must break that recursion while
+                # still executing actual Git show, not synthetic file bytes.
+                with patch.object(comp,'git',side_effect=lambda command,name:reader(*name.split(':',1))) as mocked:
+                    self.assertEqual(comp.git('show',commits[0]+':ordinary.txt'),values[0])
+                    self.assertEqual(comp.git('show',commits[1]+':ordinary.txt'),values[1])
+                    self.assertEqual(mocked.call_count,2)
+
+    def test_heat_default_reader_calls_captured_original_once_and_restores(self):
+        before_git=comp.git;before_owner=comp._owner;before_depth=comp._depth
+        data=b'controlled actual default factory\n';events=[]
+        def source_git(*args):events.append(args);return data
+        snapshot={'ordinary.txt':('100644',comp.blob_id(data))}
+        with patch.dict(globals(),{'HEAT_FIXTURES':None,'OFFLINE':None,'CONTRACTION_FIXTURES':None}),\
+             patch.object(comp,'parent_tree',return_value=snapshot),patch.object(comp,'git',source_git):
+            base,source,reader=self.heat_inputs()
+            self.assertEqual(base,snapshot);self.assertEqual(source,snapshot)
+            with patch.object(comp,'git',side_effect=lambda command,name:reader(*name.split(':',1))) as mocked:
+                self.assertEqual(comp.git('show',comp.HEAT_PARENT+':ordinary.txt'),data)
+                mocked.assert_called_once_with('show',comp.HEAT_PARENT+':ordinary.txt')
+            self.assertIs(comp.git,source_git)
+            self.assertEqual(events,[('show',comp.HEAT_PARENT+':ordinary.txt')])
+        self.assertIs(comp.git,before_git);self.assertIs(comp._owner,before_owner);self.assertEqual(comp._depth,before_depth)
     def heat_inputs(self):
         if HEAT_FIXTURES:
             data=json.loads((HEAT_FIXTURES/'sources/master-tree.json').read_text(encoding='utf8'))
@@ -71,7 +120,8 @@ class OrdinaryCompositionTests(unittest.TestCase):
                 return data
         else:
             base,source=comp.parent_tree(comp.HEAT_PARENT),comp.parent_tree(comp.HEAT_SOURCE)
-            read=lambda commit,path:comp.git('show',commit+':'+path)
+            git_read=comp.git
+            read=lambda commit,path:git_read('show',commit+':'+path)
         return base,source,read
 
     def test_heat_root_provenance_and_scope_transforms_are_count_one_and_reversible(self):
