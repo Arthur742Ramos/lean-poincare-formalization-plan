@@ -964,7 +964,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
             self.assertFalse(self.classify(query,owner,official,argv))
         self.assertFalse(self.classify(query,owner,{}))
 
-    def exercise(self, *, child_argv=None, race=False, disappear=False, unknown=False, snapshot_only=False, pages=2, overdue=False, missing_owner=False, exe_race=False, reverse_exe_race=False):
+    def exercise(self, *, child_argv=None, race=False, disappear=False, unknown=False, snapshot_only=False, pages=2, overdue=False, missing_owner=False, exe_race=False, reverse_exe_race=False, reverse_order=False):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);procdir=root/'proc';procdir.mkdir()
             image_bytes=b'finite synthetic executed official executable identity'
@@ -1001,7 +1001,11 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
                     if reverse_exe_race and exe_reads==2:return '/official/bin/helper'
                 return self.path
             clock=iter([0,601,602] if overdue else [0,1,2])
-            ns=dict(Path=lambda p:procdir if str(p)=='/proc' else Path(p),EVIDENCE=root,PKG=root,
+            def proc_entries():
+                entries=sorted(procdir.iterdir(),key=lambda p:int(p.name))
+                return iter(list(reversed(entries)) if reverse_order else entries)
+            fixture_proc=types.SimpleNamespace(iterdir=proc_entries)
+            ns=dict(Path=lambda p:fixture_proc if str(p)=='/proc' else Path(p),EVIDENCE=root,PKG=root,
                 LIMIT=6*1024**3,receipt=receipt,save=lambda:None,
                 subprocess=types.SimpleNamespace(Popen=lambda *a,**kw:Proc()),
                 signal=types.SimpleNamespace(SIGKILL=9),digest=lambda b:hashlib.sha256(b).hexdigest(),
@@ -1029,6 +1033,49 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
                 except BaseException as exc:failure=exc
             return receipt['stages'][0],events,failure
 
+    def process(self,stage,pid):
+        rows=[row for row in stage['owned_process_snapshot']['processes'] if row['pid']==pid]
+        self.assertEqual(len(rows),1,'Exact fixture PID must have one observed identity')
+        row=rows[0]
+        self.assertEqual(row['session'],100);self.assertEqual(row['pgrp'],100)
+        if pid==101:self.assertEqual(row['ppid'],100)
+        return row
+
+    def test_both_enumeration_orders_preserve_query_compiler_race_and_resource_assertions(self):
+        cases=[(dict(),1,True,None),
+            (dict(child_argv=[self.path,'second.lean']),2,False,RuntimeError),
+            (dict(child_argv=self.stage_argv),2,False,RuntimeError),
+            (dict(child_argv=['lean','--print-prefix','extra']),2,False,RuntimeError),
+            (dict(exe_race=True),2,False,RuntimeError),
+            (dict(exe_race=True,disappear=True),2,False,RuntimeError),
+            (dict(reverse_exe_race=True),2,False,RuntimeError),
+            (dict(race=True),2,False,RuntimeError),
+            (dict(disappear=True),2,False,RuntimeError),
+            (dict(unknown=True),2,False,RuntimeError),
+            (dict(pages=10**9),1,True,RuntimeError),
+            (dict(overdue=True),1,True,TimeoutError),
+            (dict(missing_owner=True),1,False,RuntimeError)]
+        for reverse in (False,True):
+            for kwargs,count,query,exception in cases:
+                with self.subTest(reverse_order=reverse,kwargs=kwargs):
+                    stage,events,failure=self.exercise(reverse_order=reverse,**kwargs)
+                    snapshot=stage['owned_process_snapshot']
+                    expected=[101] if kwargs.get('missing_owner') else ([101,100] if reverse else [100,101])
+                    self.assertEqual([row['pid'] for row in snapshot['processes']],expected)
+                    self.assertEqual(snapshot['counted_compilers'],count)
+                    child=self.process(stage,101)
+                    self.assertEqual(child['exact_official_prefix_query'],query)
+                    self.assertEqual(child['counted_compiler'],not query)
+                    if exception:self.assertIsInstance(failure,exception)
+                    else:self.assertIsNone(failure)
+                    if any(kwargs.get(k) for k in ('exe_race','reverse_exe_race','race','disappear','unknown')):
+                        self.assertTrue(child['errors']);self.assertFalse(child['stable'])
+                    if kwargs.get('exe_race'):
+                        self.assertEqual(child['exe'],'/official/bin/helper')
+                        self.assertEqual(child['recheck']['exe'],self.path)
+                    self.assertTrue(stage['owner_reaped']);self.assertEqual(stage['remaining_session_pids'],[])
+                    self.assertEqual(events,[('kill',100,9),('wait',10)])
+
     def test_snapshot_contains_full_identity_rechecks_and_raw_argv(self):
         row=self.exercise(snapshot_only=True)
         self.assertTrue(row['stable']);self.assertEqual(row['errors'],[])
@@ -1042,7 +1089,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
         stage,events,failure=self.exercise()
         self.assertIsNone(failure);self.assertEqual(stage['peak_rss_bytes'],4*4096)
         snap=stage['owned_process_snapshot'];self.assertEqual(snap['counted_compilers'],1)
-        self.assertEqual([r['exact_official_prefix_query'] for r in snap['processes']],[False,True])
+        self.assertEqual([(pid,self.process(stage,pid)['exact_official_prefix_query']) for pid in (100,101)],[(100,False),(101,True)])
         self.assertTrue(stage['owner_reaped']);self.assertEqual(stage['remaining_session_pids'],[])
         self.assertEqual(events,[('kill',100,9),('wait',10)])
 
@@ -1051,21 +1098,21 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
             stage,events,failure=self.exercise(**kwargs)
             self.assertIsInstance(failure,exception)
             self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],1)
-            self.assertTrue(stage['owned_process_snapshot']['processes'][1]['exact_official_prefix_query'])
+            self.assertTrue(self.process(stage,101)['exact_official_prefix_query'])
             self.assertTrue(stage['owner_reaped']);self.assertEqual(len(events),2)
 
     def test_missing_owner_identity_cannot_admit_observed_child(self):
         stage,_,failure=self.exercise(missing_owner=True)
         self.assertIsInstance(failure,RuntimeError)
         self.assertEqual(str(failure),'Owned process identities observed without compiler owner identity')
-        self.assertFalse(stage['owned_process_snapshot']['processes'][0]['exact_official_prefix_query'])
+        self.assertFalse(self.process(stage,101)['exact_official_prefix_query'])
 
     def test_actual_second_compiler_rejects_with_snapshot_before_cleanup(self):
         stage,events,failure=self.exercise(child_argv=[self.path,'second.lean'])
         self.assertIsInstance(failure,RuntimeError)
         self.assertEqual(str(failure),'More than one Lean compiler in an owned stage')
         self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],2)
-        self.assertEqual(stage['owned_process_snapshot']['processes'][1]['argv'],[self.path,'second.lean'])
+        self.assertEqual(self.process(stage,101)['argv'],[self.path,'second.lean'])
         self.assertEqual(stage['error'],str(failure));self.assertEqual(stage['exception_type'],'RuntimeError')
         self.assertTrue(stage['owner_reaped']);self.assertEqual(len(events),2)
         self.assertEqual(stage['stdout_sha256'],hashlib.sha256(b'').hexdigest())
@@ -1075,7 +1122,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
         stage,events,failure=self.exercise(exe_race=True)
         self.assertIsInstance(failure,RuntimeError)
         self.assertEqual(str(failure),'More than one Lean compiler in an owned stage')
-        row=stage['owned_process_snapshot']['processes'][1]
+        row=self.process(stage,101)
         self.assertEqual(row['exe'],'/official/bin/helper')
         self.assertEqual(row['recheck']['exe'],self.path)
         self.assertEqual(row['errors'][0]['type'],'IdentityRace')
@@ -1094,7 +1141,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
         stage,events,failure=self.exercise(exe_race=True,disappear=True)
         self.assertIsInstance(failure,RuntimeError)
         self.assertEqual(str(failure),'More than one Lean compiler in an owned stage')
-        row=stage['owned_process_snapshot']['processes'][1]
+        row=self.process(stage,101)
         self.assertEqual(row['recheck']['exe'],self.path)
         self.assertTrue(row['counted_compiler']);self.assertFalse(row['exact_official_prefix_query'])
         self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],2)
@@ -1106,7 +1153,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
     def test_initial_lean_remains_counted_after_nonlean_recheck(self):
         stage,_,failure=self.exercise(reverse_exe_race=True)
         self.assertIsInstance(failure,RuntimeError)
-        row=stage['owned_process_snapshot']['processes'][1]
+        row=self.process(stage,101)
         self.assertEqual(row['exe'],self.path)
         self.assertEqual(row['recheck']['exe'],'/official/bin/helper')
         self.assertTrue(row['counted_compiler']);self.assertFalse(row['exact_official_prefix_query'])
@@ -1118,7 +1165,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
                 stage,_,failure=self.exercise(**kwargs)
                 self.assertIsInstance(failure,RuntimeError)
                 self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],2)
-                row=stage['owned_process_snapshot']['processes'][1]
+                row=self.process(stage,101)
                 self.assertFalse(row['exact_official_prefix_query'])
                 if not 'child_argv' in kwargs:self.assertTrue(row['errors'])
 
