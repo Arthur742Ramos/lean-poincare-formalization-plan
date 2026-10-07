@@ -58,6 +58,23 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/58c6fc21bafeb8a659d6751a1a9db7a74127a300/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable PR126 source for TensorHeatFixedBackgroundProducer.lean,
+      scripts/point4_fixed_background_heat_probe.lean, the original source
+      regression, proof workflow and precise fixed-background heat scope.
+      The literal supplied C2 metric, constructed global auxiliary connection,
+      actual coefficient regularity, scale-correct localized zero-trace
+      right-inverse, proofs and contributor notices are inherited unchanged.
+      Finite source composition, import/provenance reconciliation and bounded
+      regression routing are the integration additions. The newer baseline
+      TensorHeatGeometricRegularity.lean is preserved and needs focused native
+      qualification against its actual bytes. No nonlinear Ricci-flow solver,
+      Hamilton identification, gauge or uniqueness bridge is constructed.
+      Historical source-head proof evidence does not qualify the combined
+      checkout. Both Point-4 targets remain OPEN; registry selection is unchanged.
+
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/93aa44010811b9145d6ff79abac3ed506ad51c29/curvature"
     relationship: "builds-on"
     note: >-

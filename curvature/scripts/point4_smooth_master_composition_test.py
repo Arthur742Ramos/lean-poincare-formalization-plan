@@ -14,6 +14,7 @@ import point4_smooth_master_composition as comp
 OFFLINE=None
 HEAT_FIXTURES=None
 CONTRACTION_FIXTURES=None
+FIXED_FIXTURES=None
 REAL=False
 SCHEMA=None
 
@@ -404,7 +405,7 @@ class OrdinaryCompositionTests(unittest.TestCase):
         before=dict(namespace)
         def failing(schema):
             changed=namespace['historical_c2']()
-            with patch.object(comp,'contraction_check_imports') as imports,patch.object(comp,'contraction_check_metadata') as metadata:
+            with patch.object(comp,'fixed_check_imports') as imports,patch.object(comp,'fixed_check_metadata') as metadata:
                 changed.check_imports(b'current import bytes')
                 changed.check_metadata('current metadata bytes')
                 imports.assert_called_once_with(local,b'current import bytes')
@@ -1081,6 +1082,8 @@ class ContractionCompositionTests(unittest.TestCase):
             trees={c:{p:tuple(v) for p,v in rows.items()} for c,rows in fixture['trees'].items()}
             heat=pathlib.Path(fixture['heat_root']);legacy=pathlib.Path(fixture['legacy_root']);design=pathlib.Path(fixture['design_root'])
             def source_bytes(commit,path):
+                if FIXED_FIXTURES and commit in {comp.FIXED_PARENT,comp.FIXED_SOURCE,comp.FIXED_BASE,FIXED_SEMANTIC_PARENT}:
+                    return fixed_fixture_read(commit,path)
                 if commit==comp.CONTRACTION_PARENT:
                     file=heat/'candidate'/path
                     if not file.exists():
@@ -1110,13 +1113,13 @@ class ContractionCompositionTests(unittest.TestCase):
     def test_full_finite_identity_and_selected_source_bytes(self):
         with self.sources() as (trees,read):
             expected,originals,changes=comp.expected_identity()
-            self.assertEqual(len(expected),1732)
+            self.assertEqual(len(expected),1737)
             for path in comp.CONTRACTION_ADDED|comp.CONTRACTION_REPLACED:
                 self.assertEqual(changes[path],read(comp.CONTRACTION_SOURCE,path))
                 self.assertEqual(expected[path],trees[comp.CONTRACTION_SOURCE][path])
             for path in comp.CONTRACTION_ROOTS:
-                self.assertEqual(comp.contraction_inverse(path,changes[path]),read(comp.CONTRACTION_PARENT,path))
-            unchanged=set(trees[comp.CONTRACTION_PARENT])-comp.EDITED-comp.NEW-comp.CONTRACTION_ROOTS-comp.CONTRACTION_REPLACED
+                self.assertEqual(comp.contraction_inverse(path,comp.fixed_inverse(path,changes[path])),read(comp.CONTRACTION_PARENT,path))
+            unchanged=set(trees[comp.CONTRACTION_PARENT])-comp.EDITED-comp.NEW-comp.CONTRACTION_ROOTS-comp.CONTRACTION_REPLACED-comp.FIXED_ROOTS
             self.assertTrue(all(expected[p]==trees[comp.CONTRACTION_PARENT][p] for p in unchanged))
             self.assertEqual(json.loads((comp.ROOT/comp.MAP).read_bytes()),comp.map_record(expected,originals,changes))
 
@@ -1157,7 +1160,7 @@ class ContractionCompositionTests(unittest.TestCase):
             local=types.SimpleNamespace(INTEGRATION_PARENT='semantic-base',blob=lambda commit,path:read(comp.HEAT_PARENT,path),
                 legacy_check_imports=lambda raw:events.append(raw),
                 check_imports=lambda *args:(_ for _ in ()).throw(primary))
-            actual=(comp.ROOT/comp.HEAT_ROOT).read_bytes()
+            actual=comp.fixed_inverse(comp.HEAT_ROOT,(comp.ROOT/comp.HEAT_ROOT).read_bytes())
             with self.assertRaises(RuntimeError) as error:comp.contraction_check_imports(local,actual)
             self.assertIs(error.exception,primary)
             self.assertEqual(events,[read(comp.HEAT_PARENT,comp.HEAT_ROOT)])
@@ -1166,7 +1169,7 @@ class ContractionCompositionTests(unittest.TestCase):
         with self.sources():
             events=[]
             local=types.SimpleNamespace(legacy_check_imports=lambda *a:events.append('legacy'),check_imports=lambda *a:events.append('actual'))
-            with self.assertRaises(AssertionError):comp.contraction_check_imports(local,(comp.ROOT/comp.HEAT_ROOT).read_bytes()+b'\nextra\n')
+            with self.assertRaises(AssertionError):comp.contraction_check_imports(local,comp.fixed_inverse(comp.HEAT_ROOT,(comp.ROOT/comp.HEAT_ROOT).read_bytes())+b'\nextra\n')
             self.assertEqual(events,[])
 
     def test_source_omission_mode_blob_and_extra_branch_path_are_rejected(self):
@@ -1197,17 +1200,349 @@ class ContractionCompositionTests(unittest.TestCase):
             with patch.object(comp,'parent_tree',side_effect=lambda c:bad if c==comp.CONTRACTION_BASE else trees[c]),self.assertRaises(AssertionError):
                 comp.expected_identity()
 
+from pathlib import Path
+import runpy
+ROOT=comp.ROOT
+FIXED_PARENT_PIN=comp.FIXED_PARENT
+FIXED_SEMANTIC_PARENT='fe921dbc34918d22389e87f30bdffb73ed7ebeb9'
+
+def fixed_fixture_read(commit,path):
+    fixture=json.loads((FIXED_FIXTURES/'SOURCE-FIXTURES.json').read_bytes())
+    roots={k:pathlib.Path(v) for k,v in fixture['fixed_roots'].items()}
+    if commit==FIXED_PARENT_PIN:
+        file=roots['fixed_parent']/'candidate'/path
+        if not file.exists():
+            assert path=='docs/status.md';file=roots['design']/'sources/master79'/path
+    elif commit==comp.FIXED_SOURCE:file=roots['preflight']/'sources/pr126'/path
+    elif commit==comp.FIXED_BASE:file=roots['preflight']/'sources/base126'/path
+    elif commit==FIXED_SEMANTIC_PARENT:file=roots['semantic']/path
+    elif commit==comp.CONTRACTION_PARENT:
+        file=roots['heat']/'candidate'/path
+        if not file.exists():
+            assert path in comp.CONTRACTION_REPLACED
+            file=roots['repair']/'sources/predecessor'/path
+    elif commit==comp.CONTRACTION_SOURCE:file=roots['design']/'sources/pr115'/path
+    elif commit==comp.CONTRACTION_BASE:file=roots['design']/'sources/base115'/path
+    elif commit==comp.HEAT_PARENT:file=roots['heat']/'sources/master110'/path
+    elif commit==comp.HEAT_SOURCE:file=roots['heat']/'sources/pr110'/path
+    else:
+        assert commit in [comp.MASTER,comp.SUPPORT]
+        file=roots['legacy']/'parent-sources'/('master' if commit==comp.MASTER else 'support')/path
+    data=file.read_bytes()
+    assert comp.blob_id(data)==fixture['trees'][commit][path][1]
+    return data
+
+@contextlib.contextmanager
+def fixed_sources():
+    if FIXED_FIXTURES:
+        fixture=json.loads((FIXED_FIXTURES/'SOURCE-FIXTURES.json').read_bytes())
+        trees={c:{p:tuple(v) for p,v in rows.items()} for c,rows in fixture['trees'].items()}
+        head=json.loads((FIXED_FIXTURES/'CANDIDATE-RECIPE.json').read_bytes())['identity']
+        def source_git(*args):
+            if args==('ls-tree','-rz','HEAD'):
+                return b''.join(mode.encode()+b' blob '+oid.encode()+b'\t'+p.encode()+b'\0' for p,(mode,oid) in sorted(head.items()))
+            assert len(args)==2 and args[0]=='show'
+            return fixed_fixture_read(*args[1].split(':',1))
+        with patch.object(comp,'parent_tree',side_effect=lambda c:trees[c]),patch.object(comp,'git',side_effect=source_git):
+            yield trees,fixed_fixture_read
+    else:
+        names=('MASTER','SUPPORT','HEAT_PARENT','HEAT_SOURCE','CONTRACTION_PARENT','CONTRACTION_SOURCE','CONTRACTION_BASE','FIXED_PARENT','FIXED_SOURCE','FIXED_BASE')
+        trees={getattr(comp,name):comp.parent_tree(getattr(comp,name)) for name in names}
+        captured_git=comp.git
+        reader=lambda commit,path:captured_git('show',commit+':'+path)
+        yield trees,reader
+
+def fixed_semantic_blob(commit,path):
+    assert commit==FIXED_SEMANTIC_PARENT
+    return comp.git('show',commit+':'+path)
+
+def fixed_semantic_local():
+    # Compile the original function bodies, constants and strict YAML parser;
+    # avoid executing the guard's release/bootstrap entry point in this unit.
+    import re,hashlib,yaml
+    tree=ast.parse((comp.ROOT/comp.LOCAL).read_bytes())
+    namespace={'re':re,'hashlib':hashlib,'yaml':yaml,'blob':fixed_semantic_blob}
+    for name in ['PREFIX','MODULES','INTEGRATION_PARENT','PARENT_NOTE_SHA256']:
+        node=next(n for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id==name for t in n.targets))
+        exec(compile(ast.Module(body=[node],type_ignores=[]),'exact_original_semantic_constant','exec'),namespace)
+    nodes=[n for n in tree.body if isinstance(n,(ast.ClassDef,ast.FunctionDef)) and n.name in
+        ['StrictLoader','unique_mapping','strict_yaml','check_imports','entries','check_metadata','legacy_check_imports','legacy_check_metadata']]
+    constructor=next(n for n in tree.body if isinstance(n,ast.Expr) and isinstance(n.value,ast.Call)
+        and isinstance(n.value.func,ast.Attribute) and n.value.func.attr=='add_constructor')
+    nodes.insert(2,constructor)
+    exec(compile(ast.Module(body=nodes,type_ignores=[]),'exact_original_semantic_bodies','exec'),namespace)
+    return types.SimpleNamespace(**namespace)
+
+class FixedBackgroundCompositionTests(unittest.TestCase):
+
+    def tearDown(self):
+        self.assertEqual(comp.FIXED_PARENT,FIXED_PARENT_PIN)
+        self.assertIsNone(comp._owner)
+        self.assertEqual(comp._depth, 0)
+
+    def test_missing_and_malformed_pin_fail_before_git_or_parent_reads(self):
+        for bad in [None, '', 'f' * 39, 'g' * 40, 'F' * 40, 'f' * 40 + '\n']:
+            with patch.object(comp, 'FIXED_PARENT', bad), patch.object(comp, 'git') as git, patch.object(comp, 'parent_tree') as parent, patch.object(comp.subprocess, 'run') as process:
+                for function, args in [(comp.verify_current, ()), (comp.fixed_identity, ({}, {}, {})), (comp.fixed_inverse, (comp.HEAT_ROOT, b'candidate'))]:
+                    with self.assertRaisesRegex(AssertionError, 'pin|^$'):
+                        function(*args)
+                git.assert_not_called()
+                parent.assert_not_called()
+                process.assert_not_called()
+
+    def test_full_controlled_identity_and_unchanged_selected_mathematics(self):
+        with fixed_sources() as (trees, reader):
+            expected, originals, changes = comp.expected_identity()
+            self.assertEqual(expected, comp.parse_tree(comp.git('ls-tree','-rz','HEAD')))
+            self.assertEqual(len(expected), 1737)
+            for path in comp.FIXED_ADDED:
+                self.assertEqual(changes[path], reader(comp.FIXED_SOURCE, path))
+                self.assertEqual(expected[path], trees[comp.FIXED_SOURCE][path])
+            self.assertEqual(json.loads((comp.ROOT/comp.MAP).read_bytes()), comp.map_record(expected, originals, changes))
+            unchanged = set(trees[FIXED_PARENT_PIN]) - comp.EDITED - comp.NEW - comp.FIXED_ROOTS
+            self.assertTrue(all((expected[p] == trees[FIXED_PARENT_PIN][p] for p in unchanged)))
+
+    def test_all_four_exact_transforms_and_inverses(self):
+        with fixed_sources() as (_, reader):
+            for path in comp.FIXED_ROOTS:
+                original = reader(FIXED_PARENT_PIN, path)
+                actual = comp.fixed_transform(path, original)
+                self.assertEqual(comp.fixed_inverse(path, actual), original)
+                self.assertEqual(actual, (comp.ROOT / path).read_bytes())
+
+    def test_missing_extra_and_duplicate_transform_rejected(self):
+        with fixed_sources() as (_, reader):
+            for path in comp.FIXED_ROOTS:
+                original = reader(FIXED_PARENT_PIN, path)
+                actual = comp.fixed_transform(path, original)
+                for bad in [original, actual + b'\nextra\n']:
+                    with self.assertRaises(AssertionError):
+                        comp.fixed_inverse(path, bad)
+                with self.assertRaises(AssertionError):
+                    comp.fixed_transform(path, actual)
+
+    def test_status_is_exactly_bound_instead_of_whitelisted(self):
+        with fixed_sources() as (_, reader):
+            original = reader(FIXED_PARENT_PIN, comp.FIXED_STATUS)
+            actual = comp.fixed_transform(comp.FIXED_STATUS, original)
+            for bad in [actual.replace(b'OPEN', b'CLOSED', 1), actual + b'\nunchecked status\n']:
+                with self.assertRaises(AssertionError):
+                    comp.fixed_inverse(comp.FIXED_STATUS, bad)
+
+    def test_structured_provenance_count_and_method_preservation(self):
+        with fixed_sources() as (_, reader):
+            actual = comp.fixed_transform(comp.HEAT_METADATA, reader(FIXED_PARENT_PIN, comp.HEAT_METADATA))
+            self.assertEqual(actual.count(comp.FIXED_SOURCE.encode()), 1)
+            self.assertEqual(actual.count(comp.FIXED_BASE.encode()), 1)
+            self.assertEqual(actual.count(comp.FIXED_METADATA_NOTE.encode()), 1)
+            self.assertEqual(actual.count(b'    - method: "agent"'), 1)
+            self.assertNotIn(b'    - method: "agent-assisted"', actual)
+            self.assertEqual(comp.fixed_inverse(comp.HEAT_METADATA, actual), reader(FIXED_PARENT_PIN, comp.HEAT_METADATA))
+
+    def test_source_omission_mode_blob_extra_path_rejected(self):
+        with fixed_sources() as (trees, _):
+            path = sorted(comp.FIXED_ADDED)[0]
+            for mutation in ['omit', 'mode', 'blob', 'extra']:
+                bad = dict(trees[comp.FIXED_SOURCE])
+                if mutation == 'omit':
+                    bad.pop(path)
+                elif mutation == 'mode':
+                    bad[path] = ('100755', bad[path][1])
+                elif mutation == 'blob':
+                    bad[path] = ('100644', '0' * 40)
+                else:
+                    bad['unexpected.lean'] = ('100644', '0' * 40)
+                with patch.object(comp, 'parent_tree', side_effect=lambda c: bad if c == comp.FIXED_SOURCE else trees[c]), self.assertRaises(AssertionError):
+                    comp.expected_identity()
+
+    def test_complete_predecessor_policy_rejects_drift(self):
+        with fixed_sources() as (trees, _):
+            path = 'curvature/lean-toolchain'
+            for mutation in ['omit', 'mode', 'blob']:
+                bad = dict(trees[FIXED_PARENT_PIN])
+                if mutation == 'omit':
+                    bad.pop(path)
+                elif mutation == 'mode':
+                    bad[path] = ('100755', bad[path][1])
+                else:
+                    bad[path] = ('100644', '0' * 40)
+                with patch.object(comp, 'parent_tree', side_effect=lambda c: bad if c == FIXED_PARENT_PIN else trees[c]), self.assertRaises(AssertionError):
+                    comp.expected_identity()
+
+    def test_merge_base_drift_does_not_expand_nine_path_scope(self):
+        with fixed_sources() as (trees, _):
+            bad = dict(trees[comp.FIXED_BASE])
+            bad['curvature/lean-toolchain'] = ('100644', '0' * 40)
+            with patch.object(comp, 'parent_tree', side_effect=lambda c: bad if c == comp.FIXED_BASE else trees[c]), self.assertRaises(AssertionError):
+                comp.expected_identity()
+
+    def test_actual_original_import_bodies_accept_actual_expanded_bytes(self):
+        with fixed_sources():
+            local = fixed_semantic_local()
+            calls = []
+            for name in ['legacy_check_imports', 'check_imports']:
+                original = getattr(local, name)
+                setattr(local, name, lambda *args, name=name, original=original: (calls.append((name, args)), original(*args))[1])
+            actual = (comp.ROOT / comp.HEAT_ROOT).read_bytes()
+            comp.fixed_check_imports(local, actual)
+            self.assertEqual([name for name, _ in calls], ['legacy_check_imports', 'check_imports'])
+            master = comp.fixed_transform(comp.HEAT_ROOT, comp.contraction_transform(comp.HEAT_ROOT, comp.heat_transform(comp.HEAT_ROOT, fixed_semantic_blob(local.INTEGRATION_PARENT, comp.HEAT_ROOT))))
+            self.assertEqual(calls[1][1], (actual, master, fixed_semantic_blob(local.INTEGRATION_PARENT, comp.HEAT_ROOT)))
+
+    def test_actual_original_parsed_metadata_bodies_accept_expanded_bytes(self):
+        with fixed_sources():
+            comp.fixed_check_metadata(fixed_semantic_local(), (comp.ROOT / comp.HEAT_METADATA).read_bytes().decode())
+
+    def test_metadata_callback_routing_uses_actual_bytes_and_exact_inverse(self):
+        with fixed_sources() as (_, reader):
+            events = []
+            local = types.SimpleNamespace(INTEGRATION_PARENT='controlled-semantic-base', blob=lambda commit, path: reader(comp.HEAT_PARENT, path), legacy_check_metadata=lambda raw: events.append(('legacy', raw)), check_metadata=lambda *args: events.append(('current', args)))
+            actual = (comp.ROOT / comp.HEAT_METADATA).read_bytes()
+            comp.fixed_check_metadata(local, actual.decode())
+            prior = reader(comp.HEAT_PARENT, comp.HEAT_METADATA)
+            self.assertEqual(events, [('legacy', prior.decode()), ('current', (actual, actual, prior))])
+
+    def test_original_source_provenance_regression_runs_on_actual_fixture(self):
+        runpy.run_path(str(comp.ROOT/'curvature/scripts/point4_fixed_background_heat_source_test.py'), run_name='__main__')
+
+    def test_bad_inverse_prevents_both_import_and_metadata_bodies(self):
+        with fixed_sources():
+            events = []
+            local = types.SimpleNamespace(legacy_check_imports=lambda *a: events.append('old-import'), check_imports=lambda *a: events.append('current-import'), legacy_check_metadata=lambda *a: events.append('old-metadata'), check_metadata=lambda *a: events.append('current-metadata'))
+            for path, callback in [(comp.HEAT_ROOT, comp.fixed_check_imports), (comp.HEAT_METADATA, comp.fixed_check_metadata)]:
+                with self.assertRaises(AssertionError):
+                    callback(local, (comp.ROOT / path).read_bytes() + b'\nextra\n')
+            self.assertEqual(events, [])
+
+    def test_current_import_primary_exception_identity_preserved(self):
+        with fixed_sources():
+            local = fixed_semantic_local()
+            primary = RuntimeError('actual current import failure')
+            original = local.check_imports
+            events = []
+
+            def fail(*args):
+                original(*args)
+                events.append('actual body passed')
+                raise primary
+            local.check_imports = fail
+            with self.assertRaises(RuntimeError) as error:
+                comp.fixed_check_imports(local, (comp.ROOT / comp.HEAT_ROOT).read_bytes())
+            self.assertIs(error.exception, primary)
+            self.assertEqual(events, ['actual body passed'])
+
+    def test_legacy_failure_stops_current_body(self):
+        with fixed_sources():
+            primary = RuntimeError('legacy body failure')
+            events = []
+            local = types.SimpleNamespace(legacy_check_imports=lambda *a: (_ for _ in ()).throw(primary), check_imports=lambda *a: events.append('current'))
+            with self.assertRaises(RuntimeError) as error:
+                comp.fixed_check_imports(local, (comp.ROOT / comp.HEAT_ROOT).read_bytes())
+            self.assertIs(error.exception, primary)
+            self.assertEqual(events, [])
+
+    def test_weighted_new_callback_failure_runs_post_and_restores_slots(self):
+        with fixed_sources():
+            local = fixed_semantic_local()
+            primary = RuntimeError('fixed current semantic failure')
+            original = local.check_imports
+
+            def fail(*args):
+                original(*args)
+                raise primary
+            local.check_imports = fail
+            helper = types.SimpleNamespace(check_imports=object(), check_metadata=object())
+            slots = (helper.check_imports, helper.check_metadata)
+            events = []
+            namespace = {'expected_sources': lambda: {}, 'public_paths': lambda: set(), 'historical_c2': lambda: helper, '_composition_original_public_paths': lambda: set(), 'restored_exact_head_workflow': object(), 'UNIT_FILE_SHA256': {}}
+
+            def current(schema):
+                namespace['historical_c2']().check_imports((comp.ROOT / comp.HEAT_ROOT).read_bytes())
+            namespace['_composition_original_check_current'] = current
+            before = dict(namespace)
+            with patch.object(comp, 'verify_current', side_effect=lambda: (events.append('identity'), comp.parse_tree(comp.git('ls-tree','-rz','HEAD')))[1]), patch.object(comp.importlib, 'import_module', return_value=local):
+                with self.assertRaises(RuntimeError) as error:
+                    comp.weighted_leaf(namespace)
+            self.assertIs(error.exception, primary)
+            self.assertEqual(events, ['identity', 'identity'])
+            self.assertEqual((helper.check_imports, helper.check_metadata), slots)
+            for name in before:
+                self.assertIs(namespace[name], before[name])
+
+    def test_new_default_factory_captures_original_exactly_once_and_restores(self):
+        global FIXED_FIXTURES
+        events = []
+        data = b'controlled fixed-background default reader\n'
+        before = comp.git
+        old_fixture = FIXED_FIXTURES
+        FIXED_FIXTURES = None
+
+        def original(*args):
+            events.append(args)
+            return data
+        try:
+            with patch.object(comp, 'parent_tree', return_value={'reader.txt': ('100644', comp.blob_id(data))}), patch.object(comp, 'git', original):
+                with fixed_sources() as (_, reader):
+                    with patch.object(comp, 'git', side_effect=lambda cmd, name: reader(*name.split(':', 1))) as forward:
+                        self.assertEqual(comp.git('show', comp.FIXED_SOURCE + ':reader.txt'), data)
+                        forward.assert_called_once_with('show', comp.FIXED_SOURCE + ':reader.txt')
+                self.assertIs(comp.git, original)
+            self.assertEqual(events, [('show', comp.FIXED_SOURCE + ':reader.txt')])
+            self.assertIs(comp.git, before)
+        finally:
+            FIXED_FIXTURES = old_fixture
+
+    def test_new_default_factory_uses_owned_genuine_git_with_fixture_flags_cleared(self):
+        global FIXED_FIXTURES
+        old_fixture = FIXED_FIXTURES
+        FIXED_FIXTURES = None
+        try:
+            with tempfile.TemporaryDirectory(prefix='fixed-reader-', dir=ROOT) as directory:
+                actual = Path(directory).resolve()
+                self.assertEqual(actual.parent, ROOT.resolve())
+                env = dict(comp.ENV, GIT_AUTHOR_NAME='Controlled fixture', GIT_AUTHOR_EMAIL='fixture@example.invalid', GIT_COMMITTER_NAME='Controlled fixture', GIT_COMMITTER_EMAIL='fixture@example.invalid')
+
+                def git(*args, data=None):
+                    return subprocess.check_output(['git', '--no-replace-objects', '-C', str(actual), *args], input=data, env=env)
+                git('init', '--quiet')
+                data = b'actual owned fixed default Git bytes\n'
+                oid = git('hash-object', '-w', '--stdin', data=data).decode().strip()
+                tree = git('mktree', data=f'100644 blob {oid}\treader.txt\n'.encode()).decode().strip()
+                commit = git('commit-tree', tree, data=b'Owned fixture only\n').decode().strip()
+                with contextlib.ExitStack() as stack:
+                    stack.enter_context(patch.object(comp, 'ROOT', actual))
+                    stack.enter_context(patch.dict(comp.TREES, {commit: tree}))
+                    for name in ['MASTER', 'SUPPORT', 'HEAT_PARENT', 'HEAT_SOURCE', 'CONTRACTION_PARENT', 'CONTRACTION_SOURCE', 'CONTRACTION_BASE', 'FIXED_PARENT', 'FIXED_SOURCE', 'FIXED_BASE']:
+                        stack.enter_context(patch.object(comp, name, commit))
+                    stack.enter_context(patch.dict(globals(), {'OFFLINE': None, 'HEAT_FIXTURES': None, 'CONTRACTION_FIXTURES': None}))
+                    with fixed_sources() as (trees, reader):
+                        self.assertEqual(trees, {commit: {'reader.txt': ('100644', oid)}})
+                        with patch.object(comp, 'git', side_effect=lambda cmd, name: reader(*name.split(':', 1))) as forward:
+                            self.assertEqual(comp.git('show', commit + ':reader.txt'), data)
+                            forward.assert_called_once_with('show', commit + ':reader.txt')
+        finally:
+            FIXED_FIXTURES = old_fixture
+
+    def test_deliberately_uncaptured_reader_mutation_reproduces_recursion(self):
+        data = b'mutation control\n'
+        with patch.object(comp, 'git', return_value=data):
+            bad = lambda commit, path: comp.git('show', commit + ':' + path)
+            with patch.object(comp, 'git', side_effect=lambda cmd, name: bad(*name.split(':', 1))):
+                with self.assertRaises(RecursionError):
+                    comp.git('show', comp.FIXED_SOURCE + ':reader.txt')
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--real-runtime',action='store_true');parser.add_argument('--schema',type=pathlib.Path)
     parser.add_argument('--parent-fixtures',type=pathlib.Path)
     parser.add_argument('--support110-fixtures',type=pathlib.Path)
     parser.add_argument('--support115-fixtures',type=pathlib.Path)
-    args=parser.parse_args();CONTRACTION_FIXTURES=args.support115_fixtures;OFFLINE=args.parent_fixtures;HEAT_FIXTURES=args.support110_fixtures;SCHEMA=args.schema;REAL=args.real_runtime
+    parser.add_argument('--support126-fixtures',type=pathlib.Path)
+    args=parser.parse_args();FIXED_FIXTURES=args.support126_fixtures;CONTRACTION_FIXTURES=args.support115_fixtures;OFFLINE=args.parent_fixtures;HEAT_FIXTURES=args.support110_fixtures;SCHEMA=args.schema;REAL=args.real_runtime
     assert not REAL or (sys.platform.startswith('linux') and SCHEMA and SCHEMA.is_file()), 'Actual Linux/schema input required'
     suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromTestCase(OrdinaryCompositionTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(PositiveControllerTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(ContractionCompositionTests))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(FixedBackgroundCompositionTests))
     if REAL:suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(RealValidatorTests))
     result=unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(0 if result.wasSuccessful() else 1)
