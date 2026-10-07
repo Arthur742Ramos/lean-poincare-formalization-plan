@@ -1,8 +1,8 @@
 # Point 4: Ricci-flow local existence and uniqueness
 
 Point 4 aims to prove short-time existence and uniqueness of Ricci flow for
-general initial data on a compact smooth manifold. It is the first open
-dependency in the [Poincaré roadmap](../roadmap.md).
+every spatially C² initial metric on a compact smooth manifold without boundary.
+It is the first open dependency in the [Poincaré roadmap](../roadmap.md).
 
 This file records the current boundary and next work. The long chronological
 development record has moved to
@@ -21,16 +21,121 @@ The audit requires:
    `native_decide`, and `decide!` after comments and strings are removed;
 2. a successful `lake build`;
 3. an unconditional theorem constructing
-   `IntrinsicLocalExistenceUniquenessFamily` on a general compact manifold;
+   `IntrinsicLocalExistenceUniquenessFamily` on a general compact manifold
+   without boundary;
 4. an axiom set contained in `propext`, `Classical.choice`, and `Quot.sound`;
-5. an elaborated theorem type with no empty, subsingleton, rank, preconstructed
-   chart, or preconstructed closure-data restriction.
+5. a kernel-checked assignment to `PointFourClosedManifoldContract` and mandatory
+   preserved-interface fingerprint checks, retaining
+   the existing exact IVP/candidate/family interfaces and excluding every added
+   analytic, solver, package, empty, subsingleton, rank, preconstructed chart,
+   closure-data or stronger global model-boundary restriction.
 
 The canonical declaration is named by
 [`curvature/scripts/point4_target.txt`](../../curvature/scripts/point4_target.txt),
-currently `intrinsicLocalExistenceUniquenessFamily_pointFour`.
+with fixed identity `RicciFlow.intrinsicLocalExistenceUniquenessFamily_pointFour`.
+An alternate name, namespace or completion package cannot close this goal.
+The full expected type is recorded in
+[`PointFourContract.lean`](../../curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/PointFourContract.lean).
+It has no inhabitant supplied here. The only approved scope correction is the
+geometric `BoundarylessManifold I M` premise; see the distinct
+[closed-manifold contract milestone](closed-contract.md). All C² data, current
+weak candidate regularity, ordinary initial derivatives and common closed
+intervals remain required. The eight fingerprints guard selected declaration
+bodies and the expected expression, not every unlisted dependency body; no
+current dependency mutation is part of this milestone, and independent
+exact-head source and mathematical review remains required. `--no-build`
+always leaves the completion verdict open.
+
+## Heat-invariant closure on independent jet fields
+
+The PR110 supporting theorem fixes the Euclidean section under componentwise
+heat propagation, preserves its centered closed ball, derives the compact
+fiber-range premise from the small-ball bound, and packages the reaction in
+the little-Hölder carrier with a full-norm Lipschitz estimate. Its source is
+[`GenuineRicciDeTurckHeatInvariantClosure.lean`](../../curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/GenuineRicciDeTurckHeatInvariantClosure.lean).
+It retains `0 < α < 1`, `0 < R`,
+`2 * jet2LipConst d d * R < phiRDRadius d`, and the supplied fixed coordinate
+background coefficients. The eight-declaration probe and original supporting
+workflow remain attached to this result.
+
+Three distinctions delimit what this closure proves:
+
+1. `UsesChosenBackground` chooses the Levi–Civita connection of the evolving
+   metric itself. The existing
+   `intrinsicRicciDeTurckRHS_chosenLeviCivitaFamily_eq_intrinsicRicciFlowRHS`
+   removes the DeTurck correction for that choice. Those conditional packages
+   do not construct the strictly parabolic fixed-background DeTurck equation.
+2. `Jet2Section` is a product of independent little-Hölder component fields.
+   It does not require first slots to differentiate the value field, or
+   second slots to differentiate first slots. Evaluating supplied components
+   with `jet2OfSection` does not establish derivative compatibility.
+3. `phiRDOfJet` is the full coordinate right-hand side `-2 Ric + Lie_W g`.
+   It is not the remainder after subtracting a frozen heat generator.
+   Propagating the independent fields with heat and reaction `(phiRD, 0, 0)`
+   does not identify an auxiliary product-space equation with the geometric PDE.
+
+The canonical target still requires spatially C² initial data, its existing
+weak competitor class, ordinary initial derivatives, and a common closed
+time interval under the approved `BoundarylessManifold I M` premise. The
+separately named smooth forward target retains its own contract and audit.
+This closure proves neither target. Derivative-compatible spaces, the
+generator/remainder identity, quasilinear existence, positivity, intrinsic
+identification, gauge regularity, and uniqueness remain separate obligations.
+
+The inherited PR110 source is
+[`0fce83f00a2e8832e5098ee43d8f260f3a98e9c9`](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/0fce83f00a2e8832e5098ee43d8f260f3a98e9c9/curvature).
+Its successful [historical focused run](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37181895941)
+qualifies that old checkout. The integration starts from master
+`5286f8e76fe26c56eea662552e4591ef2d227da7`; fresh compilation, the eight
+standard-axiom records, root elaboration, relevant audits, and independent
+review of the combined head remain pending. Point 4 and the smooth target
+remain **OPEN**.
+
+
+## Boundaryless chart transport
+
+The supporting [boundaryless-chart/frame milestone](boundaryless-chart-frames.md)
+proves openness of each preferred chart target and local ordinary derivative
+and vector-field pullback transport from `BoundarylessManifold I M`. The actual
+preferred-frame constant pullback, scalar derivative and commuting-bracket
+identities now use that theorem-level hypothesis. No global model-range
+identity, supplied chart, germ or commuting certificate is required. The
+chosen-LC and analytic consumers are unchanged; quantitative norm/heat/PDE
+transport and the canonical Point-4 theorem remain open.
+
+## Combined supporting linear-heat geometry
+
+The [combined milestone](linear-heat-geometry.md) retains real merge ancestry
+for qualified PR122/123/125 together with current-master actual conventional
+W/Lie/Ricci RHS and the approved closed-manifold contract. Exact mathematical
+proof blobs and original verification workflows are preserved. Individual-head
+qualification is historical evidence; fresh combined-head full compilation,
+all axiom/type/audit gates and independent full-stack review are still required.
+The preferred frame now has manifold-boundaryless scope; its existing frozen,
+weak, chosen-LC and gauge consumers retain their stronger model scope. No
+nonlinear PDE solver or canonical target is constructed. Point 4 remains OPEN.
+
+## Combined supporting C² initial heat
+
+The [combined C² initial-heat milestone](c2-initial-heat-integration.md) joins
+fully qualified PR124 and primary-qualified PR127 by real ancestry to the merged linear-heat geometry and
+approved canonical contract. Exact mathematical proof/probe blobs and all original workflow steps are
+preserved; two precise source-guard adapters and parser-only dependency
+insertions protect the complete pinned parent union. PR127 inherited checks
+remain pending; its actual primary qualification is separate. Earlier candidate wording below is
+historical. Fresh exact combined-head full compilation, all thirteen axiom/type
+surfaces, canonical contract/kernel regressions, unchanged full audit and
+independent full-stack review remain required. Compact localization,
+anisotropic transport, nonlinear closure and the canonical target remain open.
 
 ## Current verdict
+
+The [literal C² initial metric localization candidate](c2-metric-localization.md)
+constructs actual bounded coordinate heat data with a symmetric positive frozen
+exterior and uniformly continuous Hessian entries. Its mathematical source
+review is positive, but exact compilation and the complete inherited/new
+release gates remain pending. This local construction adds no Ricci-flow solver
+or canonical theorem and leaves Point 4 OPEN.
 
 The fast audit run on 2026-09-11 passed the forbidden-term scan but did not find
 the canonical target. The build gate was intentionally skipped in that fast
@@ -38,56 +143,25 @@ run. Gates 3–5 therefore failed and the verdict remained `POINT 4 OPEN`.
 
 See [Current formalization status](../status.md) for the repository-wide dashboard.
 
-## Correctness boundaries for the next campaign
+The bounded-C² initial-face supporting candidate is recorded in
+[`c2-heat-initial-trace.md`](c2-heat-initial-trace.md). It adds the Gaussian
+approximate identity with an arbitrary continuity modulus, local-uniform
+actual gradient/Hessian traces, global C² trace under uniform continuity only
+of Hessian entries, and the right initial generator. Historical head
+`591c25914c80366d619ece00da204997ee2a65d7` passed its actual Lean-4.33
+type/axiom and full build gates. This current-master integration is UNVERIFIED
+until fresh exact-head hosted gates and independent review pass. It does not construct compact-manifold localization,
+an ordinary endpoint derivative, a weighted nonlinear solver, or Point-4
+closure.
 
-The current source has three important distinctions that must be preserved
-when selecting the next proof milestones:
-
-1. `UsesChosenBackground` chooses the Levi--Civita connection of the evolving
-   metric itself. The proved
-   `intrinsicRicciDeTurckRHS_chosenLeviCivitaFamily_eq_intrinsicRicciFlowRHS`
-   shows that this choice removes the DeTurck correction. The corresponding
-   closure packages are conditional Ricci-flow packages; they are not a
-   construction of the strictly parabolic fixed-background DeTurck equation.
-2. `Jet2Section` is a complete product of independent little-Hölder component
-   fields. It does not impose that the first slots are derivatives of the value
-   field or that the second slots are derivatives of the first slots.
-   `jet2OfSection` evaluates supplied components; a derivative-compatible
-   `C^{2,α}` function space remains to be constructed.
-3. `phiRDOfJet` is the full coordinate right-hand side `-2 Ric + Lie_W g`.
-   It is not a remainder after subtraction of a frozen heat generator. A
-   Duhamel equation using heat propagation and `(phiRD, 0, 0)` is therefore an
-   auxiliary product-space equation. It does not establish the geometric
-   Ricci--DeTurck PDE or preservation of derivative compatibility.
-
-These distinctions do not invalidate the proved component-space Hölder
-estimates. They prohibit identifying those estimates alone with the missing
-quasilinear parabolic solver.
-
-The intended next supporting result is in
-`GenuineRicciDeTurckHeatInvariantClosure.lean`: heat fixes the Euclidean
-section, its contraction bound preserves the Euclidean-centered small ball,
-and the existing compact-jet range theorem then supplies the formerly explicit
-heat-path range premise. The reaction is packaged in the little-Hölder carrier
-with a full-norm closed-ball Lipschitz estimate. The theorem retains
-`0 < α < 1`, `0 < R`,
-`2 * jet2LipConst d d * R < phiRDRadius d`, and the fixed coordinate background
-coefficients. It makes no Duhamel or geometric PDE existence claim.
-
-There is also a target-scope review obligation. The current
-`IntrinsicLocalExistenceUniquenessFamily` permits arbitrary `ModelWithCorners`
-without an explicit boundaryless assumption, all spatially `C²` initial
-metrics, and uniqueness against slice-wise `C²` candidates with pointwise
-time derivatives. The intended closed-manifold smooth Hamilton--DeTurck
-argument must justify those exact hypotheses or obtain an explicit reviewed
-scope decision before changing them. The canonical target and completion
-auditor are unchanged; this warning is not a claimed counterexample.
-
-The next genuine PDE milestones should address derivative-compatible spaces,
-the frozen-generator/remainder identity, local quasilinear parabolic estimates
-and existence, positive-metric preservation, intrinsic coordinate
-identification, actual gauge regularity, and uniqueness for the target's
-candidate class. Interfaces assuming those results do not discharge them.
+The next supporting initial-face candidate constructs actual compatible
+positive-time C²,α Gaussian data with an explicit Hölder certificate whose
+`t^(α/2)` weight tends to zero, using only uniform continuity of the initial
+Hessian entries. It uses the actual heat approximation error at scale `√t`
+and the genuine semigroup, with no initial positive-exponent Hölder premise.
+Exact Lean-4.33 verification is pending. See
+[`weighted-initial-heat.md`](weighted-initial-heat.md). Compact localization,
+weighted nonlinear estimates and the canonical Point-4 theorem remain open.
 
 The preceding supporting PDE milestone is the genuine Ricci--DeTurck
 Hölder-seminorm difference estimate in
@@ -426,6 +500,18 @@ maps, evaluates them on local frames, and supplies the scalar premises used
 by the lowering bridge. This is an interface reduction only: the joint
 geometric section regularity remains an explicit Point 4 gate.
 
+The candidate algebraic principal/remainder milestone is packaged in
+`RicciDeTurckPrincipalRemainder.lean`. It derives an exact finite reaction split
+from the actual Ricci and conventional DeTurck coordinate formulas, exposes
+both Hessian-slot symmetries, and isolates a truly Hessian-independent
+lower-order reaction. It also adds the two missing background-first-jet Lie
+contributions with their negative sign and proves the corrected frozen
+coefficient remainder identity and a coefficient-error bound. It constructs no
+holonomic jets or PDE solution, and does not identify this algebraic contraction
+with the manifold tensor-heat generator. No compilation of this candidate has
+been run yet. See [principal/remainder scope](principal-remainder.md) for the
+precise statement, derivative-compatibility boundary, and verification gates.
+
 ## Proved architecture
 
 The implementation already provides a real conditional route:
@@ -530,3 +616,70 @@ historical records:
 Those files contain useful theorem names, failed approaches, performance notes,
 and intermediate milestones. Their locally dated "next" statements are not
 current-status claims.
+
+The next candidate supplies an actual C² coordinate-jet producer in the
+Mathlib-only `Analysis/CoordinateMatrixJet.lean`, then instantiates the
+principal/remainder identities in `CoordinateJetPrincipalRemainder.lean`.
+Derivative-slot symmetry follows from Schwarz and tensor-slot symmetry from
+twice differentiating the actual local component equality. Open-domain C²
+regularity and invertibility remain explicit, distinct hypotheses. See
+[`coordinate-jet.md`](coordinate-jet.md) for the API map and remaining chart
+identifications. Exact Lean-4.33 verification is pending; Point 4 remains open.
+
+The following candidate localizes the actual matrix-inverse derivative to
+invertibility at the selected point, then derives the coordinate inverse and
+Christoffel Fréchet derivatives from the actual C² matrix field.
+`CoordinateJetConnectionDerivative.lean` identifies these derivatives with the
+existing finite-jet formulas, without assuming inverse derivative data. See
+[`coordinate-connection.md`](coordinate-connection.md). Exact Lean-4.33
+verification and the manifold curvature identification remain pending.
+
+The next coordinate-operator candidate differentiates the actual positive
+conventional W against an actual C¹ background coefficient array. Its Ricci
+and Lie readouts use actual Fréchet derivatives and are identified with the
+corrected produced-jet RHS, then split into the inverse-metric principal part
+and an explicit frozen-coefficient remainder. See
+[`coordinate-operator.md`](coordinate-operator.md) for the hypotheses and
+remaining manifold/generator/PDE boundaries. The generic rc2 development check
+passed; exact Lean-4.33 verification remains pending and Point 4 stays open.
+
+The chosen-LC coordinate candidate supplies an actual fixed preferred chart
+frame, derives its commutation and scalar derivative transport, and constructs
+the metric's C² symmetric invertible coordinate matrix. Pointwise geometric
+Koszul and inverse-Gram reconstruction identify the actual chosen LC
+coefficients and their derivatives with the coordinate Christoffel formulas.
+See [`chosen-lc-coordinate.md`](chosen-lc-coordinate.md). The generic frame
+check passed in rc2 development; exact Lean-4.33 geometric verification remains
+pending. The curvature/Lie/PDE boundaries and Point-4 OPEN verdict remain.
+
+The next supporting source candidate adds actual chosen-LC curvature and
+intrinsic Ricci coordinate readouts in
+`ChosenLeviCivitaCoordinateCurvature.lean`. Genuine local C¹ covariant-derivative
+and scalar coefficient regularity supplies the derivative transport; the
+existing local-to-bundled-curvature theorem supplies actual curvature.
+Lower Christoffel-slot symmetry is differentiated on an open neighborhood,
+and the ordinary basis trace's transpose is resolved separately by actual
+intrinsic Ricci symmetry. See [curvature/Ricci scope](chosen-lc-curvature.md).
+Exact Lean-4.33 compilation is pending; the Lie/DeTurck, analytic and PDE
+boundaries and the Point-4 **OPEN** verdict remain.
+
+The next supporting source candidate supplies the actual conventional
+StandardDeTurck background/W coordinate producers, genuine derivative
+transport, actual torsion/metric-compatible Lie correction and intrinsic RHS
+identification. It then specializes the corrected jet, principal and frozen
+remainder identities to that same actual geometric RHS. Exact Lean-4.33
+verification is pending; no local compiler was run for this unit. See
+[actual standard coordinate-operator scope](standard-coordinate-operator.md).
+The heat-generator, analytic, PDE and canonical Point-4 **OPEN** boundaries
+remain unchanged.
+## Actual frozen metric principal and holonomic action
+
+The next supporting candidate identifies the existing geometric frozen
+tensor-heat principal coefficient with the actual preferred-frame inverse
+metric and proves its genuine finite-cylinder coordinate Cauchy action.
+See [the exact theorem and verification boundary](frozen-metric-principal.md).
+This does not construct the general manifold encoding, nonlinear solver,
+metric preservation, realization or uniqueness. Point 4 remains open.
+The [weak-regularity actual tensor-Laplacian proof unit](weak-laplacian.md)
+removes the unnecessary C² connection/induced-three oracle from a new local
+adapter. Authored source awaits exact Lean 4.33.0 verification; Point 4 stays open.

@@ -1,0 +1,12 @@
+{
+  "historical_original_sha256": "065d29c14f3f6c2c966939d968f0ac93c5ed90de723f518d81cae5a7c97e2384",
+  "historical_original_status": "REJECTED_UNRESOLVED_IMPLICIT_INITIAL_TIME",
+  "accepted_replacement_sha256": "64f8f5bc8cfd468fe9b46b60be39c5686dec4b870b481b766403d9e52cda9d33",
+  "replacement_delta": "Exactly seven explicit named initial-time arguments; independently delta-reviewed",
+  "author_repair_patch_sha256": "6514089db5eaa198f7e4500671ecfc33ef9218335c86745717dfc1ede28bd8d2",
+  "optional_frechet_trace_sha256": "3af628927dd651ea247f07159243a8dd100267bdabcaabb06fb9263882ff7b08",
+  "source_review_status": "APPROVED_SOURCE_ONLY_UNCOMPILED",
+  "independent_report_sha256": "ec6e7c034511c2d1d8da976265a2f1cdb0fcf1bd6992789d2efb151952371536",
+  "original_rejected_bytes_preserved_in_separate_frozen_history": true,
+  "point4": "OPEN"
+}

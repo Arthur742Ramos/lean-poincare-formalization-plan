@@ -1,0 +1,178 @@
+name: Point-4 smooth forward support and unchanged canonical gates
+
+on:
+  pull_request:
+    paths:
+      - "curvature/**"
+      - "docs/point4/smooth-forward-model**"
+      - "docs/point4/smooth-forward-release-integration.md"
+      - ".github/workflows/point4-smooth-forward-support.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smooth_forward_support:
+    name: Exact-head smooth support with both targets explicitly OPEN
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Read immutable historical producer source
+        run: |
+          historical=58c6fc21bafeb8a659d6751a1a9db7a74127a300
+          if ! git cat-file -e "$historical^{commit}"; then
+            git fetch --no-tags origin "$historical"
+          fi
+      - name: Install pinned safe YAML parser from the official package registry
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0
+      - name: Read full official metadata schema with exact digest checked by source guard
+        run: |
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/v0.4.schema.json -o /tmp/point4-manifold-heat-official-schema.json
+      - name: Check exact release union and all inherited and new adversarial fixtures
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          git rev-parse HEAD | tee /tmp/point4-manifold-heat-sha.log
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_smooth_forward_release_guard.py --schema /tmp/point4-manifold-heat-official-schema.json | tee /tmp/point4-manifold-heat-source.log
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_c2_initial_heat_mock_test.py
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_linear_heat_geometry_mock_test.py
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_manifold_heat_mock_test.py
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_manifold_heat_release_mock_test.py
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_smooth_forward_release_mock_test.py --real-composed
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_weighted_initial_heat_guard.py
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_closed_contract_source_test.py
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/check-doc-links.py
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Compile manifold-only literal-metric producer
+        working-directory: curvature
+        run: lake build PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.BoundarylessTensorHeatFixedBackground
+      - name: Check full theorem types and all axiom surfaces
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_manifold_heat_probe.lean | tee /tmp/point4-manifold-heat-probe.log
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_manifold_heat_release_guard.py --probe-log /tmp/point4-manifold-heat-probe.log
+      - name: Compile actual smooth interface and supporting proofs
+        working-directory: curvature
+        run: |
+          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardRegularity PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardContract
+          lake env lean scripts/point4_smooth_forward_probe.lean 2>&1 | tee /tmp/point4-smooth-forward-support-probe.log
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_smooth_forward_release_guard.py --smooth-probe-log /tmp/point4-smooth-forward-support-probe.log
+      - name: Compile and probe the seven reviewed mathematical additions
+        working-directory: curvature
+        run: |
+          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardBasis PoincareCurvature.Geometry.Manifold.RicciFlow.IntrinsicRicciReindex PoincareCurvature.Geometry.Manifold.RicciFlow.SmoothForwardTimeTranslate
+          lake env lean scripts/point4_smooth_forward_basis_probe.lean 2>&1 | tee /tmp/point4-smooth-forward-basis.log
+          lake env lean Verification.lean 2>&1 | tee /tmp/point4-smooth-forward-ricci-reindex.log
+          lake env lean TimeTranslateVerification.lean 2>&1 | tee /tmp/point4-smooth-forward-time-translate.log
+          PYTHONDONTWRITEBYTECODE=1 python3 - <<'PY'
+          from pathlib import Path
+          import re, sys
+          sys.path.insert(0, 'scripts')
+          from point4_c2_initial_heat_source_test import check_axiom_output
+          probes = (
+              ('scripts/point4_smooth_forward_basis_probe.lean', '/tmp/point4-smooth-forward-basis.log', 2),
+              ('Verification.lean', '/tmp/point4-smooth-forward-ricci-reindex.log', 5),
+              ('TimeTranslateVerification.lean', '/tmp/point4-smooth-forward-time-translate.log', 11),
+          )
+          for probe, log, count in probes:
+              source = Path(probe).read_text()
+              if probe == 'TimeTranslateVerification.lean':
+                  for name in ('time_add_preimage_Ici', 'time_add_preimage_Ico', 'ForwardEquation.timeTranslate', 'JointlySmoothOn.timeTranslate', 'StrongSolution.timeTranslate'):
+                      command = '#print axioms ' + name + '\n'
+                      assert source.count(command) == 1
+                      source = source.replace(command, '#print axioms RicciFlow.SmoothForward.' + name + '\n', 1)
+              raw = Path(log).read_text()
+              # Preserve raw logs; remove only standard-axiom universe print suffixes.
+              normalized = re.sub(r'\b(propext|Classical\.choice|Quot\.sound)\.\{[^{}]*\}', r'\1', raw)
+              names = check_axiom_output(source, normalized)
+              assert len(names) == count, (probe, names)
+              print(f'Actual reviewed mathematical axiom evidence: {probe}: {count} declarations')
+          PY
+      - name: Require the absent general smooth target to fail only at the frozen target references
+        working-directory: curvature
+        run: |
+          set +e
+          lake env lean scripts/point4_smooth_forward_completion.lean 2>&1 | tee /tmp/point4-smooth-forward-completion.log
+          completion_rc=${PIPESTATUS[0]}
+          set -e
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_smooth_forward_release_guard.py --smooth-completion-log /tmp/point4-smooth-forward-completion.log --smooth-completion-rc "$completion_rc"
+          printf '%s\n' "$completion_rc" > /tmp/point4-smooth-forward-completion.rc
+      - name: Compile unchanged full library before inherited evidence probes
+        working-directory: curvature
+        run: lake build 2>&1 | tee /tmp/point4-manifold-heat-inherited-build.log
+      - name: Preserve all 150 inherited axiom occurrences and seven boundaryless types
+        working-directory: curvature
+        run: |
+          mkdir -p /tmp/point4-manifold-heat-inherited-probes
+          for probe in contraction coordinate_connection coordinate_jet coordinate_operator principal_remainder chosen_lc_coordinate chosen_lc_curvature standard_coordinate_operator frozen_metric_principal weak_laplacian boundaryless_chart_frames c2_heat_trace weighted_initial_heat; do
+            lake env lean "scripts/point4_${probe}_probe.lean" 2>&1 | tee "/tmp/point4-manifold-heat-inherited-probes/${probe}.log"
+          done
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_manifold_heat_release_guard.py --axiom-dir /tmp/point4-manifold-heat-inherited-probes
+      - name: Recheck unchanged canonical contract and kernel negative fixtures
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_closed_contract_probe.lean 2>&1 | tee /tmp/point4-manifold-heat-contract.log
+          lake env lean scripts/point4_closed_contract_regression.lean 2>&1 | tee /tmp/point4-manifold-heat-regression.log
+      - name: Run unchanged full Point-4 completion audit
+        working-directory: curvature
+        run: |
+          set +e
+          bash scripts/point4_audit.sh --json /tmp/point4-manifold-heat-full-audit.json | tee /tmp/point4-manifold-heat-full-audit.log
+          audit_rc=${PIPESTATUS[0]}
+          set -e
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_manifold_heat_release_guard.py --probe-log /tmp/point4-manifold-heat-probe.log --axiom-dir /tmp/point4-manifold-heat-inherited-probes --audit-json /tmp/point4-manifold-heat-full-audit.json --audit-rc "$audit_rc"
+          printf '%s\n' "$audit_rc" > /tmp/point4-manifold-heat-full-audit.rc
+      - name: Run the separate full smooth completion audit and require its precise OPEN pattern
+        working-directory: curvature
+        run: |
+          set +e
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_smooth_forward_audit.py --output /tmp/point4-smooth-forward-audit 2>&1 | tee /tmp/point4-smooth-forward-audit.log
+          smooth_rc=${PIPESTATUS[0]}
+          set -e
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_smooth_forward_release_guard.py --smooth-probe-log /tmp/point4-smooth-forward-support-probe.log --smooth-completion-log /tmp/point4-smooth-forward-completion.log --smooth-completion-rc "$(cat /tmp/point4-smooth-forward-completion.rc)" --smooth-audit-json /tmp/point4-smooth-forward-audit/verdict.json --smooth-audit-rc "$smooth_rc" --probe-log /tmp/point4-manifold-heat-probe.log --axiom-dir /tmp/point4-manifold-heat-inherited-probes --audit-json /tmp/point4-manifold-heat-full-audit.json --audit-rc "$(cat /tmp/point4-manifold-heat-full-audit.rc)" --schema /tmp/point4-manifold-heat-official-schema.json
+      - name: Check ordinary current composition and real historical validator routes
+        timeout-minutes: 125
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_smooth_master_composition_test.py --real-runtime --schema /tmp/point4-manifold-heat-official-schema.json
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-smooth-forward-support-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-manifold-heat-*.log
+            /tmp/point4-manifold-heat-inherited-probes/*.log
+            /tmp/point4-manifold-heat-full-audit.json
+            /tmp/point4-manifold-heat-official-schema.json
+            /tmp/point4-manifold-heat-full-audit.log
+            /tmp/point4_build.log
+            /tmp/point4-smooth-forward-*.log
+            /tmp/point4-smooth-forward-audit/
+            /tmp/point4-smooth-forward-completion.rc
+            /tmp/point4-manifold-heat-full-audit.rc
+          if-no-files-found: error

@@ -1,0 +1,111 @@
+name: Point-4 coordinate connection derivatives
+
+on:
+  pull_request:
+    paths:
+      - "curvature/**"
+      - ".github/workflows/point4-coordinate-connection.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coordinate_connection:
+    name: Exact-head actual coordinate connection derivatives and unchanged full audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Compile localized actual inverse derivative
+        working-directory: curvature
+        run: lake build PoincareCurvature.Analysis.LocalMatrixInverseDerivative
+      - name: Compile actual coordinate inverse and Christoffel derivatives
+        working-directory: curvature
+        run: lake build PoincareCurvature.Analysis.CoordinateMatrixConnection
+      - name: Compile actual-coordinate-connection jet derivative adapter
+        working-directory: curvature
+        run: lake build PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateJetConnectionDerivative
+      - name: Check actual inverse/Christoffel derivative theorem axioms
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_coordinate_connection_probe.lean | tee /tmp/point4-coordinate-connection-axioms.log
+          python3 - <<'PY'
+          import pathlib, re
+          output = pathlib.Path('/tmp/point4-coordinate-connection-axioms.log').read_text()
+          entries = re.findall(r"'([^']+)' depends on axioms:\s*\[([^]]*)\]", output)
+          clean = re.findall(r"'([^']+)' does not depend on any axioms?", output)
+          expected = {
+            'PoincareCurvature.hasDerivAt_nonsing_inv_entry_of_det_ne_zero',
+            'PoincareCurvature.CoordinateMatrixJet.hasDerivAt_coordinateLine',
+            'PoincareCurvature.CoordinateMatrixJet.hasDerivAt_comp_coordinateLine',
+            'PoincareCurvature.CoordinateMatrixJet.differentiableAt_inverse_entry',
+            'PoincareCurvature.CoordinateMatrixJet.fderiv_inverse_apply',
+            'PoincareCurvature.CoordinateMatrixJet.inverseFirst_eq_sum',
+            'PoincareCurvature.CoordinateMatrixJet.differentiableAt_christoffel',
+            'PoincareCurvature.CoordinateMatrixJet.fderiv_christoffel_apply',
+            'RicciFlow.AnalyticPDE.GenuinePhiRD.invMetricOfJet_coordinateJet_eq_inverse',
+            'RicciFlow.AnalyticPDE.GenuinePhiRD.derivInvMetricOfJet_coordinateJet_eq_inverseFirst',
+            'RicciFlow.AnalyticPDE.GenuinePhiRD.fderiv_invMetricOfJet_coordinateJet_apply',
+            'RicciFlow.AnalyticPDE.GenuinePhiRD.christoffelOfJet_coordinateJet_eq_christoffel',
+            'RicciFlow.AnalyticPDE.GenuinePhiRD.derivChristoffelOfJet_coordinateJet_eq_christoffelFirst',
+            'RicciFlow.AnalyticPDE.GenuinePhiRD.fderiv_christoffelOfJet_coordinateJet_apply',
+          }
+          assert {n for n, _ in entries} | set(clean) == expected, output
+          allowed = {'propext', 'Classical.choice', 'Quot.sound'}
+          for name, axioms in entries:
+            actual = {a.strip() for a in axioms.split(',') if a.strip()}
+            assert actual <= allowed, (name, actual)
+          print('All fourteen actual inverse/Christoffel derivative axiom surfaces passed')
+          PY
+      - name: Run unchanged full Point-4 completion audit
+        working-directory: curvature
+        run: |
+          set +e
+          bash scripts/point4_audit.sh --json /tmp/point4-coordinate-connection-full-audit.json | tee /tmp/point4-coordinate-connection-full-audit.log
+          audit_rc=${PIPESTATUS[0]}
+          set -e
+          export POINT4_AUDIT_RC="$audit_rc"
+          python3 - <<'PY'
+          import json, os, pathlib
+          data = json.loads(pathlib.Path('/tmp/point4-coordinate-connection-full-audit.json').read_text())
+          assert data['build_run'] is True, data
+          assert data['gates']['G1_sorry_free']['status'] == 'PASS', data
+          assert data['gates']['G2_build_green']['status'] == 'PASS', data
+          if data['verdict'] == 'CLOSED':
+            assert os.environ['POINT4_AUDIT_RC'] == '0', data
+            assert all(g['status'] == 'PASS' for g in data['gates'].values()), data
+          else:
+            assert data['verdict'] == 'OPEN', data
+            assert os.environ['POINT4_AUDIT_RC'] == '1', data
+            print('POINT 4 OPEN: the actual coordinate connection derivatives do not close the canonical theorem')
+          PY
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-coordinate-connection-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-coordinate-connection-axioms.log
+            /tmp/point4-coordinate-connection-full-audit.json
+            /tmp/point4-coordinate-connection-full-audit.log
+            /tmp/point4_build.log
+          if-no-files-found: ignore

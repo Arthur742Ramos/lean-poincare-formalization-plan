@@ -1,0 +1,114 @@
+name: Point-4 vanishing weighted initial heat Holder certificates
+
+on:
+  pull_request:
+    paths:
+      - "curvature/**"
+      - ".github/workflows/point4-weighted-initial-heat.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  weighted_initial_heat:
+    name: Exact-head weighted heat certificate with unchanged full audit
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Install pinned safe YAML parser from the official package registry
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2
+      - name: Preserve inherited proof blobs and canonical contracts
+        run: python3 curvature/scripts/point4_weighted_initial_heat_guard.py | tee /tmp/point4-weighted-initial-heat-source-guard.log
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Compile Mathlib-only compact ambient modulus and finite moments
+        working-directory: curvature
+        run: lake build PoincareCurvature.Analysis.CompactUniformModulus PoincareCurvature.Analysis.FiniteMomentApproximation
+      - name: Compile actual weighted initial heat Holder certificate
+        working-directory: curvature
+        run: lake build PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatWeightedInitialHolder
+      - name: Check exact weighted certificate types and axioms
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_weighted_initial_heat_probe.lean | tee /tmp/point4-weighted-initial-heat-axioms.log
+          python3 - <<'PY'
+          import pathlib, re
+          output = pathlib.Path('/tmp/point4-weighted-initial-heat-axioms.log').read_text()
+          entries = re.findall(r"'([^']+)' depends on axioms:\s*\[([^]]*)\]", output)
+          clean = re.findall(r"'([^']+)' does not depend on any axioms?", output)
+          prefix = 'RicciFlow.AnalyticPDE.'
+          expected = {prefix + n for n in (
+            'abs_heatSemigroupNDbcf_spatial_holder_le',
+            'heatSemigroupNDbcf_split_initial_error',
+            'initialHeatHolderConstant_nonneg',
+            'abs_heatSemigroupNDbcf_sub_le_initialHeatHolderConstant',
+            'initialHeatHolderConstant_weight_identity',
+            'tendsto_weighted_initialHeatHolderConstant_zero',
+            'heatEvolvedWeightedC2AlphaData',
+            'heatEvolvedWeightedC2AlphaData_base_eq',
+            'heatEvolvedWeightedC2AlphaData_holderConstant_eq',
+            'EuclideanBoundedC2Data.tendsto_weighted_initialHessianHolderConstant_zero',
+            'EuclideanBoundedC2Data.tendsto_weighted_heatEvolvedWeightedC2AlphaData_zero',
+          )}
+          assert {n for n, _ in entries} | set(clean) == expected, output
+          allowed = {'propext', 'Classical.choice', 'Quot.sound'}
+          for name, axioms in entries:
+            actual = {a.strip() for a in axioms.split(',') if a.strip()}
+            assert actual <= allowed, (name, actual)
+          print('All eleven actual weighted initial heat certificate axiom surfaces passed')
+          PY
+      - name: Run unchanged full Point-4 completion audit
+        working-directory: curvature
+        run: |
+          set +e
+          bash scripts/point4_audit.sh --json /tmp/point4-weighted-initial-heat-full-audit.json | tee /tmp/point4-weighted-initial-heat-full-audit.log
+          audit_rc=${PIPESTATUS[0]}
+          set -e
+          export POINT4_AUDIT_RC="$audit_rc"
+          python3 - <<'PY'
+          import json, os, pathlib
+          data = json.loads(pathlib.Path('/tmp/point4-weighted-initial-heat-full-audit.json').read_text())
+          assert data['build_run'] is True, data
+          assert data['gates']['G1_sorry_free']['status'] == 'PASS', data
+          assert data['gates']['G2_build_green']['status'] == 'PASS', data
+          if data['verdict'] == 'CLOSED':
+            assert os.environ['POINT4_AUDIT_RC'] == '0', data
+            assert all(g['status'] == 'PASS' for g in data['gates'].values()), data
+          else:
+            assert data['verdict'] == 'OPEN', data
+            assert os.environ['POINT4_AUDIT_RC'] == '1', data
+            print('POINT 4 OPEN: the weighted flat initial heat certificate does not close the canonical theorem')
+          PY
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-weighted-initial-heat-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-weighted-initial-heat-source-guard.log
+            /tmp/point4-weighted-initial-heat-axioms.log
+            /tmp/point4-weighted-initial-heat-full-audit.json
+            /tmp/point4-weighted-initial-heat-full-audit.log
+            /tmp/point4_build.log
+          if-no-files-found: ignore

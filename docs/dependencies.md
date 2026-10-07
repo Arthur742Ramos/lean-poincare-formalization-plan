@@ -42,8 +42,9 @@ existence, and time-dependent geometric structures. They are proved in the
 ## Layer 2: Ricci-flow foundations
 
 Milestone 4 must produce genuine short-time existence and uniqueness on compact
-manifolds. Milestone 5 then develops evolution equations and maximum principles
-on those solutions.
+manifolds without boundary, for every spatially C² initial metric and every
+candidate in the existing weak solution class. Milestone 5 then develops
+evolution equations and maximum principles on those solutions.
 
 This is the current frontier. Conditional Ricci–DeTurck bridges and special-case
 solutions do not unlock the layer by themselves. See the
@@ -86,3 +87,11 @@ Useful parallel work that does not overstate dependency completion includes:
 Every such contribution should name the theorem it proves and the assumptions
 it retains. It should not claim to close a downstream milestone merely because
 its interface has been designed.
+
+## Weak-regularity Laplacian proof unit
+
+The [base-C¹, local-C² actual tensor-Laplacian adapter](point4/weak-laplacian.md)
+has been authored and awaits independent source review and exact Lean 4.33.0
+hosted verification. It constructs coordinate certificates internally and
+preserves the actual operator and reversed tensor-output convention. It does
+not provide Hölder coefficient bounds or close the canonical Point-4 target.
