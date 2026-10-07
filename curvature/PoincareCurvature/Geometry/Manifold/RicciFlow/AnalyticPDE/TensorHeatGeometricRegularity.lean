@@ -229,6 +229,45 @@ theorem contDiffOn_fderivWithin_range_succ
     (s := Set.range I) (x := z)
     (mem_of_superset (hs.mem_nhds hz) hsrange)
 
+/- The C¹ version is sufficient for the actual Laplacian identity.  It does
+not assert C¹ regularity of the assembled zeroth-order coefficient. -/
+set_option backward.isDefEq.respectTransparency true in
+theorem contMDiffOn_localTwoTensorConnectionCoefficient_one
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative (E := E) (I := I) (M := M) cov) 1]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    (b : Module.Basis ι ℝ E) (out input : ι × ι) (i : ι) :
+    ContMDiffOn I 𝓘(ℝ) 1
+      (localTwoTensorConnectionCoefficient (I := I) cov e b out input i)
+      e.baseSet := by
+  let e₂ := localTwoTensorTrivialization (I := I) e
+  let b₂ := continuousTwoTensorBasis b
+  have hframe2 := e₂.contMDiffOn_localFrame_baseSet
+    (I := I) (n := (2 : WithTop ℕ∞)) b₂ input
+  have hlocal1 :=
+    contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one
+      (I := I)
+      (cov := covariantTwoTensorCovariantDerivative
+        (E := E) (I := I) (M := M) cov) e₂.open_baseSet
+  have hcov1 := hlocal1.contMDiff hframe2
+  have he₂ : e₂.baseSet = e.baseSet := by
+    ext x
+    simp [e₂, localTwoTensorTrivialization,
+      localCovectorTrivialization, localRealLineTrivialization]
+  rw [he₂] at hcov1
+  have hframe1 := e.contMDiffOn_localFrame_baseSet (I := I)
+    (n := (1 : WithTop ℕ∞)) b i
+  have happ := hcov1.clm_bundle_apply hframe1
+  have hcoeff := contMDiffOn_localFrameCoeff
+    (I := I) (e := e₂) (b := b₂)
+    (t := e.baseSet) e.open_baseSet (by
+      intro x hx
+      simp [e₂, localTwoTensorTrivialization,
+        localCovectorTrivialization, localRealLineTrivialization, hx]) happ out
+  convert hcoeff using 1 <;> rfl
+
 set_option backward.isDefEq.respectTransparency true in
 theorem contMDiffOn_localTwoTensorConnectionCoefficient
     (cov : CovariantDerivative I E TM)
@@ -306,6 +345,24 @@ theorem contMDiffOn_localThreeTensorConnectionCoefficient
   convert hcoeff using 1 <;> rfl
 
 set_option backward.isDefEq.respectTransparency true
+
+theorem contDiffOn_localTwoTensorConnectionCoefficientInChart_one
+    (cov : CovariantDerivative I E TM)
+    [ContMDiffCovariantDerivative
+      (covariantTwoTensorCovariantDerivative (E := E) (I := I) (M := M) cov) 1]
+    (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e]
+    (b : Module.Basis ι ℝ E) (out input : ι × ι) (i : ι) :
+    ContDiffOn ℝ 1
+      (localTwoTensorConnectionCoefficientInChart (I := I)
+        cov p e b out input i)
+      ((extChartAt I p).target ∩ (extChartAt I p).symm ⁻¹' e.baseSet) := by
+  apply contDiffOn_writtenInExtChartAt_of_contMDiffOn (I := I) (p := p)
+    (contMDiffOn_localTwoTensorConnectionCoefficient_one (I := I) cov e b out input i)
+  · exact Set.inter_subset_left
+  intro z hz
+  exact hz.2
 
 theorem contDiffOn_localTwoTensorConnectionCoefficientInChart
     (cov : CovariantDerivative I E TM)

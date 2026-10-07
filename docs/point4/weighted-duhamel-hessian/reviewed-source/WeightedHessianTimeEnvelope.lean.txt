@@ -1,0 +1,45 @@
+module
+
+public import WeightedTimeKernel
+
+/-!
+Source-only scalar bridge. This module does not import a Gaussian helper,
+assume its estimate, or assert differentiation of a Duhamel potential.
+The definition is the same one appearing in the original integrand artifact.
+-/
+
+@[expose] public noncomputable section
+
+open Real Set MeasureTheory
+open scoped Real Interval
+
+namespace RicciFlow
+namespace AnalyticPDE
+
+/-- The actual two-endpoint time envelope in the Gaussian integrand helper. -/
+def weightedHessianTimeEnvelope (t₀ t α s : ℝ) : ℝ :=
+  (t - s) ^ (-1 + α / 2) * (s - t₀) ^ (-(α / 2))
+
+theorem weightedHessianTimeEnvelope_eq_weightedTimeKernel (t₀ t α : ℝ) :
+    weightedHessianTimeEnvelope t₀ t α = weightedTimeKernel t₀ t (α / 2) := by
+  funext s
+  simp only [weightedHessianTimeEnvelope, weightedTimeKernel]
+  rw [show -1 + α / 2 = α / 2 - 1 by ring]
+
+/-- Genuine envelope integrability, with scalar exponent conditions only. -/
+theorem intervalIntegrable_weightedHessianTimeEnvelope
+    {t₀ t α : ℝ} (ht : t₀ < t) (hα : 0 < α) (hα2 : α < 2) :
+    IntervalIntegrable (weightedHessianTimeEnvelope t₀ t α) volume t₀ t := by
+  rw [weightedHessianTimeEnvelope_eq_weightedTimeKernel]
+  exact intervalIntegrable_weightedTimeKernel ht (by linarith) (by linarith)
+
+/-- The weighted time envelope has a bound independent of interval length. -/
+theorem integral_weightedHessianTimeEnvelope_le
+    {t₀ t α : ℝ} (ht : t₀ < t) (hα : 0 < α) (hα2 : α < 2) :
+    (∫ s in t₀..t, weightedHessianTimeEnvelope t₀ t α s) ≤
+      1 / (α / 2) + 1 / (1 - α / 2) := by
+  rw [weightedHessianTimeEnvelope_eq_weightedTimeKernel]
+  exact integral_weightedTimeKernel_le ht (by linarith) (by linarith)
+
+end AnalyticPDE
+end RicciFlow

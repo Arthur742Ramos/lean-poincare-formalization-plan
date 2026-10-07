@@ -1,0 +1,135 @@
+name: Point-4 literal C2 initial metric localization
+
+on:
+  pull_request:
+    paths:
+      - "curvature/**"
+      - ".github/workflows/point4-c2-metric-localization.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  c2_metric_localization:
+    name: Exact-head literal metric localization with unchanged full audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Install pinned evidence parsers from official registry
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0
+      - name: Preserve immutable parents, sources, provenance and canonical audit
+        run: |
+          set -o pipefail
+          git rev-parse HEAD | tee /tmp/point4-c2-metric-localization-head.log
+          git show -s --format=%P HEAD | tee /tmp/point4-c2-metric-localization-parents.log
+          curl --fail --location --retry 2 https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/99c678e569c7c4c0772db297c5ddd5e4c9b6322e/schema/v0.4.schema.json --output /tmp/point4-c2-metric-localization-schema.json
+          python3 curvature/scripts/point4_c2_metric_localization_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json --manifest /tmp/point4-c2-metric-localization-source-manifest.json 2>&1 | tee /tmp/point4-c2-metric-localization-source-gate.log
+          python3 curvature/scripts/point4_c2_metric_localization_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json --historical-localization-mocks 2>&1 | tee /tmp/point4-c2-metric-localization-adversarial.log
+          python3 curvature/scripts/point4_c2_initial_heat_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-integration-source.log
+          python3 curvature/scripts/point4_c2_initial_heat_mock_test.py 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-nine-tests.log
+          python3 curvature/scripts/point4_linear_heat_geometry_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-geometry-source.log
+          python3 curvature/scripts/point4_linear_heat_geometry_mock_test.py 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-thirteen-tests.log
+          python3 curvature/scripts/point4_weighted_initial_heat_guard.py /tmp/point4-c2-metric-localization-schema.json 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-weighted-source.log
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Record and validate actual pinned compiler
+        working-directory: curvature
+        run: |
+          set -o pipefail
+          lake env lean --version 2>&1 | tee /tmp/point4-c2-metric-localization-compiler.log
+          python3 - <<'PY_PIN'
+          import pathlib, re
+          actual = pathlib.Path('/tmp/point4-c2-metric-localization-compiler.log').read_text()
+          assert re.search(r'Lean \(version 4\.33\.0(?:,|\))', actual), actual
+          PY_PIN
+      - name: Compile actual compact C2 derivatives and finite norm adapter
+        working-directory: curvature
+        run: |
+          set -o pipefail
+          lake build PoincareCurvature.Analysis.CompactlySupportedC2Jet PoincareCurvature.Analysis.FiniteCoordinateBilinear 2>&1 | tee /tmp/point4-c2-metric-localization-derivative-build.log
+      - name: Record and validate actual pinned Mathlib checkout
+        working-directory: curvature
+        run: |
+          set -o pipefail
+          git -C .lake/packages/mathlib rev-parse HEAD | tee /tmp/point4-c2-metric-localization-mathlib.log
+          test "$(cat /tmp/point4-c2-metric-localization-mathlib.log)" = db584cd6d46c92f209a44c0f1c829460d327499d
+          cmp lean-toolchain .lake/packages/mathlib/lean-toolchain
+          cp lake-manifest.json /tmp/point4-c2-metric-localization-lake-manifest.json
+      - name: Compile literal initial metric localization
+        working-directory: curvature
+        run: |
+          set -o pipefail
+          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.BoundarylessInitialMetricLocalization 2>&1 | tee /tmp/point4-c2-metric-localization-metric-build.log
+      - name: Check canonical-context specialization and genuine derivative axioms
+        working-directory: curvature
+        run: |
+          set -o pipefail
+          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.PointFourContract 2>&1 | tee /tmp/point4-c2-metric-localization-contract-build.log
+          lake env lean scripts/point4_c2_metric_localization_probe.lean 2>&1 | tee /tmp/point4-c2-metric-localization-axioms.log
+          python3 - <<'PY_CHECK'
+          import pathlib, sys
+          sys.path.insert(0, 'scripts')
+          import point4_c2_metric_localization_source_test as guard
+          guard.check_axioms(pathlib.Path('/tmp/point4-c2-metric-localization-axioms.log').read_text())
+          print('Ten actual derivative/coercivity/metric axiom surfaces and exact full-function assignment passed')
+          PY_CHECK
+      - name: Run unchanged full Point-4 completion audit
+        working-directory: curvature
+        run: |
+          set +e
+          bash scripts/point4_audit.sh --json /tmp/point4-c2-metric-localization-full-audit.json | tee /tmp/point4-c2-metric-localization-full-audit.log
+          audit_rc=${PIPESTATUS[0]}
+          set -e
+          export POINT4_AUDIT_RC="$audit_rc"
+          python3 - <<'PY_AUDIT'
+          import json, os, pathlib, sys
+          sys.path.insert(0, 'scripts')
+          import point4_c2_metric_localization_source_test as guard
+          data = json.loads(pathlib.Path('/tmp/point4-c2-metric-localization-full-audit.json').read_text())
+          guard.check_audit(data, int(os.environ['POINT4_AUDIT_RC']))
+          print('POINT 4 OPEN: exact expected missing target; full library build and preserved contract passed')
+          PY_AUDIT
+      - name: Recheck all150 inherited axiom occurrences and seven boundaryless types
+        working-directory: curvature
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/point4-c2-metric-localization-inherited-probes
+          for probe in contraction coordinate_connection coordinate_jet coordinate_operator principal_remainder chosen_lc_coordinate chosen_lc_curvature standard_coordinate_operator frozen_metric_principal weak_laplacian boundaryless_chart_frames c2_heat_trace weighted_initial_heat; do
+            lake env lean "scripts/point4_${probe}_probe.lean" 2>&1 | tee "/tmp/point4-c2-metric-localization-inherited-probes/${probe}.log"
+          done
+          python3 scripts/point4_c2_initial_heat_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json --axiom-dir /tmp/point4-c2-metric-localization-inherited-probes 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-axiom-gate.log
+          python3 scripts/point4_linear_heat_geometry_source_test.py --axiom-dir /tmp/point4-c2-metric-localization-inherited-probes 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-geometry-axiom-gate.log
+          lake env lean scripts/point4_closed_contract_probe.lean 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-contract.log
+          lake env lean scripts/point4_closed_contract_regression.lean 2>&1 | tee /tmp/point4-c2-metric-localization-inherited-regressions.log
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-c2-metric-localization-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-c2-metric-localization-*.log
+            /tmp/point4-c2-metric-localization-*.json
+            /tmp/point4-c2-metric-localization-inherited-probes/*.log
+            /tmp/point4_build.log
+          if-no-files-found: ignore

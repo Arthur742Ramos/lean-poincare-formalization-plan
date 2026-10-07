@@ -135,6 +135,69 @@ see [the precise candidate boundary](point4/chosen-lc-curvature.md). It does
 not supply the conventional Lie/DeTurck, heat-generator or PDE bridges and
 does not change the Point-4 **Open** status.
 
+The weighted initial-face supporting source candidate constructs actual
+compatible positive-time C²,α heat data with an explicit Hessian Hölder constant
+whose `t^(α/2)` weight vanishes, under uniform continuity only of the initial
+Hessian entries. It now builds on exact unmerged integrated PR124 head
+`ba47fe1f4d8efad8bad68c61b4d25d0d8ff5387e`, preserving the weighted API repair from
+`f908454fac787a720239e04feee6d61a9f9ab202`. The historical `633ec144`
+weighted run failed compilation; the current integrated head is UNVERIFIED
+until fresh actual Lean-4.33 gates and independent review pass.
+No initial positive-exponent Hessian Hölder hypothesis is introduced. See
+[the weighted initial heat boundary](point4/weighted-initial-heat.md).
+Compact localization, weighted nonlinear evolution and Point 4 remain open.
+
+The next supporting source candidate supplies the actual conventional
+StandardDeTurck background/W coordinate producers, genuine derivative
+transport, actual torsion/metric-compatible Lie correction and intrinsic RHS
+identification. It then specializes the corrected jet, principal and frozen
+remainder identities to that same actual geometric RHS. Exact Lean-4.33
+verification is pending; no local compiler was run for this unit. See
+[actual standard coordinate-operator scope](point4/standard-coordinate-operator.md).
+The heat-generator, analytic, PDE and canonical Point-4 **OPEN** boundaries
+remain unchanged.
+
+A further supporting source candidate identifies the actual preferred-frame
+frozen metric inverse with the existing geometric tensor-heat principal
+coefficient and evaluates its bounded finite-cylinder Cauchy operator using
+genuine coordinate derivatives from the proved compatible derivative graph.
+It preserves tensor output `(j,i)`, uses actual time differentiation only on
+the open time interval, and requires no added candidate regularity or
+principal-identification premise. Exact Lean-4.33 verification is pending;
+see [the precise candidate boundary](point4/frozen-metric-principal.md).
+This is differential-operator identification only. Point 4 remains **Open**.
+
+## Latest supporting integration boundary
+
+The [combined linear-heat geometry milestone](point4/linear-heat-geometry.md)
+combines the independently qualified exact PR122 frozen actual-metric/holonomic
+action, PR123 weak actual Laplacian and PR125 manifold-boundaryless chart/frame
+proofs with current-master actual conventional W/Lie/Ricci RHS and the approved
+closed-manifold contract. Their preparation-time candidate wording above and
+in focused pages is historical. Exact combined-head Lean 4.33 full compilation,
+all inherited/current/focused axiom and type checks, canonical contract
+regressions and full-stack review remain pending. Mathematical proof blobs,
+requirements and individual verification gates are preserved. The integration
+adds no PDE solver or canonical theorem and leaves milestone 4 **Open**.
+
+## Latest supporting C² initial-heat integration
+
+The [combined C² initial-heat milestone](point4/c2-initial-heat-integration.md)
+adds the independently qualified exact PR124 Gaussian local/global C² initial
+traces and right generator, and the primary-qualified PR127 actual compatible weighted C²,α heat
+datum with vanishing `t^(α/2)` Hölder constant, to current-master actual
+linear-heat geometry through real ancestry. Global Hessian trace/decay requires
+only initial Hessian uniform continuity; no positive initial Hölder premise
+is added. The generator remains a right derivative on `Ici 0`, rather than an
+ordinary endpoint derivative. Earlier candidate wording is historical.
+Exact combined-head hosted compilation, all inherited/current/heat axiom/type
+surfaces, full contract/kernel negative fixtures, unchanged full audit and
+independent full-stack review remain pending. Proofs, workflows and requirement
+interfaces are preserved, with only two exact parser-dependency workflow
+insertions; PR127 inherited checks remain pending. The canonical target remains absent and milestone 4
+is **Open**. Compact localization, anisotropic transport and nonlinear closure
+remain separate open obligations.
+
 ## Updating this page
 
 When implementation changes:
@@ -145,6 +208,14 @@ When implementation changes:
 4. keep publication status in the submission portfolio;
 5. preserve partial or failed approaches in `docs/history/` only when they are
    useful research records.
+
+## Weak-regularity Laplacian proof unit
+
+The [base-C¹, local-C² actual tensor-Laplacian adapter](point4/weak-laplacian.md)
+has been authored and awaits independent source review and exact Lean 4.33.0
+hosted verification. It constructs coordinate certificates internally and
+preserves the actual operator and reversed tensor-output convention. It does
+not provide Hölder coefficient bounds or close the canonical Point-4 target.
 
 The fixed-background local-heat candidate composes the existing global C²
 auxiliary-connection constructor with actual coefficient regularity and

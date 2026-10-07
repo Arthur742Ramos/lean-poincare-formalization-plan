@@ -1,0 +1,108 @@
+name: Point-4 boundaryless chart and preferred-frame transport
+
+on:
+  pull_request:
+    paths:
+      - "curvature/**"
+      - ".github/workflows/point4-boundaryless-chart-frames.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  boundaryless_chart_frames:
+    name: Exact-head boundaryless chart/frame transport and unchanged full audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Compile local boundaryless chart transport first
+        working-directory: curvature
+        run: lake build PoincareCurvature.Analysis.BoundarylessChartTransport
+      - name: Compile actual preferred coordinate frames
+        working-directory: curvature
+        run: lake build PoincareCurvature.Analysis.PreferredCoordinateFrame
+      - name: Check boundaryless transport and preferred-frame axioms and compatibility
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_boundaryless_chart_frames_probe.lean | tee /tmp/point4-boundaryless-chart-frames-axioms.log
+          python3 - <<'PY'
+          import pathlib, re
+          output = pathlib.Path('/tmp/point4-boundaryless-chart-frames-axioms.log').read_text()
+          entries = re.findall(r"'([^']+)' depends on axioms:\s*\[([^]]*)\]", output)
+          clean = re.findall(r"'([^']+)' does not depend on any axioms?", output)
+          expected = {
+            'PoincareCurvature.BoundarylessChartTransport.isOpen_extChartAt_target',
+            'PoincareCurvature.BoundarylessChartTransport.extChartAt_target_subset_interior_range',
+            'PoincareCurvature.BoundarylessChartTransport.mfderivWithin_extChartAt_symm_eq_mfderiv',
+            'PoincareCurvature.BoundarylessChartTransport.mpullbackWithin_extChartAt_symm_eq_mpullback',
+            'PoincareCurvature.PreferredCoordinateFrame.frame_eq_inverseChart_derivative',
+            'PoincareCurvature.PreferredCoordinateFrame.mpullback_frame_eq_const',
+            'PoincareCurvature.PreferredCoordinateFrame.mvfderiv_frame_eq_fderiv',
+            'PoincareCurvature.PreferredCoordinateFrame.mlieBracket_frame_eq_zero',
+            'PoincareCurvature.PreferredCoordinateFrame.toModel_coordinateVector',
+            'PoincareCurvature.PreferredCoordinateFrame.fderiv_comp_toModel_coordinateVector',
+          }
+          assert {n for n, _ in entries} | set(clean) == expected, output
+          allowed = {'propext', 'Classical.choice', 'Quot.sound'}
+          for name, axioms in entries:
+            actual = {a.strip() for a in axioms.split(',') if a.strip()}
+            assert actual <= allowed, (name, actual)
+          types = output.split('BOUNDARYLESS_TYPES_BEGIN', 1)[1].split('BOUNDARYLESS_TYPES_END', 1)[0]
+          assert types.count('BoundarylessManifold') == 7, types
+          assert 'ModelWithCorners.Boundaryless' not in types, types
+          assert 'I.Boundaryless' not in types, types
+          print('Ten axiom surfaces, seven manifold-boundaryless types and model compatibility passed')
+          PY
+      - name: Run unchanged full Point-4 completion audit
+        working-directory: curvature
+        run: |
+          set +e
+          bash scripts/point4_audit.sh --json /tmp/point4-boundaryless-chart-frames-full-audit.json | tee /tmp/point4-boundaryless-chart-frames-full-audit.log
+          audit_rc=${PIPESTATUS[0]}
+          set -e
+          export POINT4_AUDIT_RC="$audit_rc"
+          python3 - <<'PY'
+          import json, os, pathlib
+          data = json.loads(pathlib.Path('/tmp/point4-boundaryless-chart-frames-full-audit.json').read_text())
+          assert data['build_run'] is True, data
+          assert data['gates']['G1_sorry_free']['status'] == 'PASS', data
+          assert data['gates']['G2_build_green']['status'] == 'PASS', data
+          if data['verdict'] == 'CLOSED':
+            assert os.environ['POINT4_AUDIT_RC'] == '0', data
+            assert all(g['status'] == 'PASS' for g in data['gates'].values()), data
+          else:
+            assert data['verdict'] == 'OPEN', data
+            assert os.environ['POINT4_AUDIT_RC'] == '1', data
+            print('POINT 4 OPEN: boundaryless chart/frame transport does not close the canonical theorem')
+          PY
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-boundaryless-chart-frames-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-boundaryless-chart-frames-axioms.log
+            /tmp/point4-boundaryless-chart-frames-full-audit.json
+            /tmp/point4-boundaryless-chart-frames-full-audit.log
+            /tmp/point4_build.log
+          if-no-files-found: ignore

@@ -1,6 +1,7 @@
 /-
 Copyright (c) 2026 Poincaré formalization project. All rights reserved.
 -/
+import PoincareCurvature.Analysis.BoundarylessChartTransport
 import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
@@ -27,7 +28,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [CompleteSpace E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-    [IsManifold I ∞ M] [I.Boundaryless]
+    [IsManifold I ∞ M] [BoundarylessManifold I M]
     [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
 
 local notation "TM" => (TangentSpace I : M → Type _)
@@ -71,7 +72,7 @@ theorem mpullback_frame_eq_const {z : E} (hz : z ∈ (extChartAt I p).target) (i
     mfderivWithin_univ]
   rw [hframe]
   have hInv := isInvertible_mfderivWithin_extChartAt_symm (I := I) hz
-  rw [ModelWithCorners.Boundaryless.range_eq_univ, mfderivWithin_univ] at hInv ⊢
+  rw [BoundarylessChartTransport.mfderivWithin_extChartAt_symm_eq_mfderiv (I := I) p hz] at hInv ⊢
   exact ContinuousLinearMap.IsInvertible.inverse_apply_self hInv _
 
 /-- A scalar manifold derivative along the actual coordinate frame is the
@@ -87,12 +88,15 @@ theorem mvfderiv_frame_eq_fderiv {f : M → ℝ} {x : M}
     (I.uniqueDiffOn.uniqueDiffWithinAt
       (extChartAt_target_subset_range p hz)).uniqueMDiffWithinAt
     ((extChartAt I p).left_inv hx)
-  rw [ModelWithCorners.Boundaryless.range_eq_univ, mfderivWithin_univ,
+  have hrange : range I ∈ 𝓝 (extChartAt I p x) :=
+    mem_interior_iff_mem_nhds.1
+      (BoundarylessChartTransport.extChartAt_target_subset_interior_range (I := I) p hz)
+  rw [mfderivWithin_of_mem_nhds hrange, mfderivWithin_of_mem_nhds hrange,
     mfderiv_eq_fderiv] at hchain
   simp only [mfderivWithin_univ, Function.comp_apply, (extChartAt I p).left_inv hx] at hchain
   rw [frame_eq_inverseChart_derivative (I := I) p b hx i]
   unfold mvfderiv scalarReadout
-  rw [ModelWithCorners.Boundaryless.range_eq_univ, mfderivWithin_univ]
+  rw [BoundarylessChartTransport.mfderivWithin_extChartAt_symm_eq_mfderiv (I := I) p hz]
   have h := congrArg
     (fun L => (NormedSpace.fromTangentSpace (𝕜 := ℝ) (f x))
       (L ((NormedSpace.fromTangentSpace (𝕜 := ℝ) (extChartAt I p x)).symm (b i)))) hchain
@@ -112,7 +116,7 @@ theorem mlieBracket_frame_eq_zero {x : M}
       ((trivialization (I := I) p).open_baseSet.mem_nhds hbase) |>.mdifferentiableAt (by norm_num)
   have hinv : ContMDiffAt 𝓘(ℝ, E) I 2 (extChartAt I p).symm z :=
     (contMDiffWithinAt_extChartAt_symm_target p hz).contMDiffAt
-      ((isOpen_extChartAt_target p).mem_nhds hz)
+      ((BoundarylessChartTransport.isOpen_extChartAt_target (I := I) p).mem_nhds hz)
   haveI : IsManifold I (minSmoothness ℝ 2) M := by
     have hsmooth : minSmoothness ℝ 2 ≤ (∞ : WithTop ℕ∞) := by
       simpa [minSmoothness] using
@@ -125,7 +129,7 @@ theorem mlieBracket_frame_eq_zero {x : M}
   have hconst (k : ι) :
       VectorField.mpullback 𝓘(ℝ, E) I (extChartAt I p).symm (frame (I := I) p b k)
         =ᶠ[𝓝 z] (fun y => (NormedSpace.fromTangentSpace (𝕜 := ℝ) y).symm (b k)) := by
-    filter_upwards [(isOpen_extChartAt_target p).mem_nhds hz] with y hy
+    filter_upwards [(BoundarylessChartTransport.isOpen_extChartAt_target (I := I) p).mem_nhds hz] with y hy
     exact mpullback_frame_eq_const (I := I) p b hy k
   have hzero : VectorField.mlieBracket 𝓘(ℝ, E)
       (VectorField.mpullback 𝓘(ℝ, E) I (extChartAt I p).symm (frame (I := I) p b i))
@@ -137,7 +141,7 @@ theorem mlieBracket_frame_eq_zero {x : M}
     simp [VectorField.lieBracketWithin]
   rw [hzero] at hbr
   have hInv := isInvertible_mfderivWithin_extChartAt_symm (I := I) hz
-  rw [ModelWithCorners.Boundaryless.range_eq_univ, mfderivWithin_univ] at hInv
+  rw [BoundarylessChartTransport.mfderivWithin_extChartAt_symm_eq_mfderiv (I := I) p hz] at hInv
   have h := (ContinuousLinearMap.IsInvertible.inverse_apply_eq hInv).1 hbr
   simp only [map_zero] at h
   change VectorField.mlieBracket I (frame (I := I) p b i)
