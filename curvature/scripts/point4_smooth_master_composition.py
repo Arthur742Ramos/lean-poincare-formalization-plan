@@ -5,7 +5,7 @@ Current weighted checks are leaves. Historical subprocesses execute immutable
 original entry points; no current adapter is installed in their checkouts.
 """
 from __future__ import annotations
-import argparse, contextlib, functools, hashlib, importlib, json, os
+import argparse, base64, contextlib, functools, hashlib, importlib, json, os
 import pathlib, re, stat, subprocess, sys, tempfile, types
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -551,6 +551,10 @@ def map_record(expected, originals, changes):
         'inherited_linear':[127,121],'current_linear':[134,128],
         'exact_appended_endpoints':list(CONTRACTION_AXIOM_ADDITIONS),
         'policy':'Preserve every inherited per-probe occurrence and append exactly seven authenticated contraction endpoints; original actual-output and standard-axiom checker unchanged'}
+    record['historical_axiom_routing']={'weighted_validator':'3a8ed697d1f0366f8370efb2fa9e524b68d27e97',
+        'smooth_validator':SUPPORT,'probe_surface':MASTER,
+        'policy':'Verify complete current output first; execute the authenticated immutable six-entry contraction probe under current Lean 4.33; reuse other raw logs only for byte-identical probe sources; check both input sets after the immutable validator',
+        'evidence':'Raw contraction bytes, commands, observed compiler ID and exit codes, current/historical hashes in scoped uploaded routing receipts; current compiled sources, not a historical Lean rebuild'}
     return record
 
 
@@ -806,6 +810,106 @@ def current_evidence(path,args):
         function=module.check_new_probe if 'release_guard' in path else module.check_probe
         function(parsed.probe_log.read_text())
 
+def axiom_argument(args):
+    slots=[(i,False) for i,a in enumerate(args) if a=='--axiom-dir']
+    slots += [(i,True) for i,a in enumerate(args) if a.startswith('--axiom-dir=')]
+    assert len(slots)<=1, 'Duplicate axiom directory argument'
+    if not slots:return None
+    i,inline=slots[0]
+    assert inline or i+1<len(args), 'Missing axiom directory argument'
+    return i,inline,pathlib.Path(args[i].split('=',1)[1] if inline else args[i+1]).resolve()
+
+def raw_axiom_files(folder):
+    assert stat.S_ISDIR(folder.lstat().st_mode) and not folder.is_symlink(), 'Invalid axiom directory'
+    files={}
+    for file in folder.iterdir():
+        assert stat.S_ISREG(file.lstat().st_mode) and not file.is_symlink(), 'Invalid axiom evidence file'
+        files[file.name]=file.read_bytes()
+    assert set(files) in ({n+'.log' for n in INHERITED_AXIOM_PROBES},
+                         {n+'.log' for n in INHERITED_AXIOM_PROBES[:11]}), 'Missing/extra axiom files'
+    return files
+
+def routing_receipt_path(folder):
+    # The weighted immutable inventory allows only its original files. Append
+    # the receipt to its existing guard log, never to an actual axiom log.
+    if folder.parent.name=='point4-weighted-hessian-evidence':
+        return folder.parent/'source.log'
+    # All other inherited workflows upload their scoped /tmp/<prefix>-*.log.
+    return folder.with_name(folder.name+'-historical-routing.log')
+
+@contextlib.contextmanager
+def historical_axiom_arguments(commit,path,args):
+    """Replay an authenticated historical probe against current compiled sources.
+
+    Current logs remain complete and unchanged. Raw historical outputs are
+    separate; no declaration record is selected, truncated or manufactured.
+    """
+    slot=axiom_argument(args)
+    if slot is None:
+        yield list(args)
+        return
+    i,inline,folder=slot
+    evidence_path=path if path!=SMOOTH else 'curvature/scripts/point4_manifold_heat_release_guard.py'
+    current_evidence(evidence_path,['--axiom-dir',str(folder)])
+    before=raw_axiom_files(folder)
+    tree=parent_tree(commit)
+    module=importlib.import_module(pathlib.PurePosixPath(evidence_path).stem)
+    checker=module.c2_guard() if 'manifold_heat_release' in evidence_path else module
+    sources={}
+    for name in sorted(before):
+        probe='curvature/scripts/point4_'+name.removesuffix('.log')+'_probe.lean'
+        source=git('show',commit+':'+probe)
+        assert blob_id(source)==tree[probe][1], 'Historical probe provenance drift'
+        if name!='contraction.log':
+            assert (ROOT/probe).read_bytes()==source, 'Unsupported inherited probe byte drift: '+name
+        else:
+            baseline=git('show',MASTER+':'+probe)
+            assert blob_id(baseline)==parent_tree(MASTER)[probe][1] and source==baseline, 'Historical contraction probe drift'
+        sources[name]=(probe,source)
+    receipt={'head':git('rev-parse','HEAD').decode().strip(),'historical_validator':commit,
+        'scope':'Pinned historical probe surface evaluated against current compiled sources; no historical Lean rebuild',
+        'current_sha256':{n:sha256(b) for n,b in before.items()},
+        'probe_sources':{n:{'path':p,'blob':blob_id(b),'sha256':sha256(b)} for n,(p,b) in sources.items()}}
+    with tempfile.TemporaryDirectory(prefix='point4-historical-axioms-') as directory:
+        root=pathlib.Path(directory);view=root/'logs';view.mkdir()
+        probe=root/'contraction.lean';probe.write_bytes(sources['contraction.log'][1])
+        version_command=['lake','env','lean','--version']
+        command=['lake','env','lean',str(probe)]
+        receipt.update({'compiler_command':version_command,'probe_command':command,'cwd':str(ROOT/'curvature')})
+        try:
+            version=subprocess.run(version_command,cwd=ROOT/'curvature',capture_output=True,env=ENV)
+            receipt.update({'compiler_exit':version.returncode,'compiler_stdout_base64':base64.b64encode(version.stdout).decode(),
+                            'compiler_stderr_base64':base64.b64encode(version.stderr).decode()})
+            assert version.returncode==0 and version.stdout.startswith(b'Lean (version 4.33.0,'), 'Current Lean compiler identity drift'
+            result=subprocess.run(command,cwd=ROOT/'curvature',stdout=subprocess.PIPE,stderr=subprocess.STDOUT,env=ENV)
+            receipt.update({'probe_exit':result.returncode,'raw_contraction_base64':base64.b64encode(result.stdout).decode(),
+                            'historical_contraction_sha256':sha256(result.stdout)})
+            assert result.returncode==0, 'Historical contraction probe failed in current environment'
+            assert len(checker.check_axiom_output(sources['contraction.log'][1].decode('utf8'),result.stdout.decode('utf8')))==6, 'Historical six-entry surface drift'
+            historical_files=dict(before);historical_files['contraction.log']=result.stdout
+            for name,data in historical_files.items():(view/name).write_bytes(data)
+            # Check the full immutable occurrence surface, not only contraction.
+            for name in checker.PROBES:
+                checker.check_axiom_output(sources[name+'.log'][1].decode('utf8'),historical_files[name+'.log'].decode('utf8'))
+            checker.check_boundaryless_types(historical_files['boundaryless_chart_frames.log'].decode('utf8'))
+            receipt['historical_sha256']={n:sha256(b) for n,b in historical_files.items()}
+            routed=list(args)
+            routed[i if inline else i+1]=('--axiom-dir=' if inline else '')+str(view)
+            try:
+                yield routed
+            finally:
+                assert probe.read_bytes()==sources['contraction.log'][1], 'Historical probe input mutation'
+                assert raw_axiom_files(view)==historical_files, 'Historical axiom input mutation'
+        finally:
+            # Preserve raw probe bytes and provenance on success and failure.
+            receipt_path=routing_receipt_path(folder)
+            if receipt_path.exists() or receipt_path.is_symlink():
+                assert stat.S_ISREG(receipt_path.lstat().st_mode) and not receipt_path.is_symlink(), 'Invalid routing receipt file'
+            with receipt_path.open('ab') as output:
+                output.write(b'\nHISTORICAL_AXIOM_ROUTING_RECEIPT '+json.dumps(receipt,sort_keys=True).encode()+b'\n')
+            assert raw_axiom_files(folder)==before, 'Current axiom input mutation'
+            current_evidence(evidence_path,['--axiom-dir',str(folder)])
+
 def current_root_schema(schema,local=None):
     local=local or importlib.import_module('point4_c2_metric_localization_source_test')
     raw=pathlib.Path(schema).read_bytes()
@@ -868,7 +972,8 @@ def current_smooth_evidence(namespace,args):
 def weighted_execution(namespace):
     def historical_gate(path,args):
         print('HISTORICAL_WEIGHTED_BASE_BEGIN',namespace['BASE'],path,flush=True)
-        namespace['_composition_original_historical_gate'](path,args)
+        with historical_axiom_arguments(namespace['BASE'],path,args) as routed:
+            namespace['_composition_original_historical_gate'](path,routed)
         print('HISTORICAL_WEIGHTED_BASE_END',namespace['BASE'],path,flush=True)
     with replacements(namespace,{'check_current':lambda schema=None:weighted_leaf(namespace,schema),
                                  'historical_gate':historical_gate}):yield
@@ -974,7 +1079,8 @@ def install_smooth(namespace):
         print('CURRENT_SMOOTH_SEMANTIC_BODY_BEGIN: original inventory counters are historical shape; current identity is '+str(len(current_identity))+' paths',flush=True)
         original(args) # current real smooth metadata/schema/probe/completion/audit gates
         print('CURRENT_SMOOTH_SEMANTIC_BODY_END',flush=True)
-        historical(SUPPORT,SMOOTH,args) # original scoped route; no current hooks
+        with historical_axiom_arguments(SUPPORT,SMOOTH,args) as routed:
+            historical(SUPPORT,SMOOTH,routed) # original scoped route; no current hooks
         current_smooth_evidence(namespace,args)
         if any(a=='--smooth-audit-rc' or a.startswith('--smooth-audit-rc=') for a in args):
             # Retain the caller's observed auditor status, after both real routes

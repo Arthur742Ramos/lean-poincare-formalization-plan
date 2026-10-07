@@ -949,7 +949,11 @@ class RealValidatorTests(unittest.TestCase):
         self.assertIn('Closed-contract source invariants passed',output)
 
     def test_genuine_weighted_base_route(self):
-        code,output=positive_route_process('weighted-full',['--schema',str(SCHEMA)])
+        actual=current_smooth_arguments()
+        args=[]
+        for flag in ('--schema','--axiom-dir','--audit-json','--audit-rc'):
+            args.extend([flag,actual[actual.index(flag)+1]])
+        code,output=positive_route_process('weighted-full',args)
         self.assertEqual(code,0,output)
         self.assertIn('Source-only integration checks passed',output)
         self.assertIn('OPEN',output)
@@ -1680,6 +1684,148 @@ class CurrentAxiomInventoryTests(unittest.TestCase):
         with self.sources():
             self.inherited.PROBES=self.inherited.PROBES[:-1]
             with self.assertRaises(AssertionError):comp.current_axiom_inventory('curvature/scripts/point4_c2_initial_heat_source_test.py',self.inherited)
+
+    @contextlib.contextmanager
+    def historical_controls(self,output=None,exit_code=0,version_exit=0,version_output=b'Lean (version 4.33.0, fixture)\n'):
+        # Source/control fixture only: actual checker bodies and owned Git probe
+        # blobs, mocked compiler execution. Hosted argument-bearing positives
+        # below are separately required to establish real replay evidence.
+        originals={p:self.original_git('show',comp.MASTER+':'+p) for p in self.master}
+        source=originals['curvature/scripts/point4_contraction_probe.lean'].decode()
+        names=self.inherited.probe_names(source)
+        records={m.group(1):m.group() for m in comp.re.finditer(
+            r"'([^']+)' (?:depends on axioms:\s*\[[^]]*\]|does not depend on any axioms?)",
+            AXIOM_INVENTORY_FIXTURE['outputs']['contraction'])}
+        self.historical_output=('\n'.join(records[n] for n in names)+'\n').encode()
+        chosen=self.historical_output if output is None else output
+        module=types.SimpleNamespace(c2_guard=lambda:self.inherited)
+        def read(*args):
+            self.assertEqual(args[0],'show');commit,path=args[1].split(':',1)
+            self.assertIn(commit,(comp.MASTER,comp.SUPPORT))
+            return originals[path]
+        def run(command,**kwargs):
+            self.assertEqual(kwargs['cwd'],self.root/'curvature')
+            self.assertEqual(command[:3],['lake','env','lean'])
+            if command[-1]=='--version':
+                return subprocess.CompletedProcess(command,version_exit,version_output,b'')
+            self.assertEqual(pathlib.Path(command[-1]).read_bytes(),source.encode())
+            return subprocess.CompletedProcess(command,exit_code,chosen)
+        with patch.object(comp,'ROOT',self.root),patch.object(comp,'parent_tree',return_value=self.master),\
+             patch.object(comp,'git',side_effect=lambda *a: b'0'*40+b'\n' if a==('rev-parse','HEAD') else read(*a)),\
+             patch.object(comp,'verify_current',return_value={}),patch.object(comp.importlib,'import_module',return_value=module),\
+             patch.object(comp.subprocess,'run',side_effect=run) as runner:
+            yield runner
+
+    def test_historical_argument_route_preserves_complete_current_logs_and_raw_receipt(self):
+        before=comp.raw_axiom_files(self.folder)
+        for inline in (False,True):
+            args=['--axiom-dir='+str(self.folder)] if inline else ['--axiom-dir',str(self.folder)]
+            args+=['--audit-rc','1']
+            with self.historical_controls() as runner:
+                with comp.historical_axiom_arguments(comp.MASTER,'curvature/scripts/point4_manifold_heat_release_guard.py',args) as routed:
+                    slot=comp.axiom_argument(routed);view=slot[2]
+                    self.assertNotEqual(view,self.folder)
+                    self.assertEqual((view/'contraction.log').read_bytes(),self.historical_output)
+                    self.assertEqual(len(self.inherited.check_axiom_output(
+                        AXIOM_INVENTORY_FIXTURE['sources']['contraction'],self.historical_output.decode())),6)
+                    self.assertEqual(routed[-2:],['--audit-rc','1'])
+                self.assertEqual(runner.call_count,2)
+            self.assertEqual(comp.raw_axiom_files(self.folder),before)
+        lines=comp.routing_receipt_path(self.folder).read_text().splitlines()
+        receipt=json.loads(next(x.split(' ',1)[1] for x in lines if x.startswith('HISTORICAL_AXIOM_ROUTING_RECEIPT ')))
+        self.assertEqual(comp.base64.b64decode(receipt['raw_contraction_base64']),self.historical_output)
+        self.assertEqual(receipt['probe_exit'],0)
+        self.assertEqual(receipt['current_sha256']['contraction.log'],comp.sha256(before['contraction.log']))
+
+    def test_both_argument_bearing_wrappers_route_separate_historical_inputs(self):
+        args=['--axiom-dir',str(self.folder)]
+        events=[]
+        def gate(path,routed):
+            view=comp.axiom_argument(routed)[2]
+            self.assertNotEqual(view,self.folder)
+            self.assertEqual((view/'contraction.log').read_bytes(),self.historical_output)
+            events.append(path)
+        namespace={'BASE':comp.MASTER,'_composition_original_historical_gate':gate,
+                   'check_current':object(),'historical_gate':object()}
+        with self.historical_controls(),comp.weighted_execution(namespace):
+            namespace['historical_gate']('curvature/scripts/point4_manifold_heat_release_guard.py',args)
+        smooth={'main':lambda actual:events.append(('current',actual))}
+        comp.install_smooth(smooth)
+        with self.historical_controls(),patch.object(comp,'current_smooth_evidence'),\
+             patch.object(comp,'historical',side_effect=lambda commit,path,actual:gate(path,actual)):
+            smooth['main'](args)
+        self.assertEqual(events[0],'curvature/scripts/point4_manifold_heat_release_guard.py')
+        self.assertEqual(events[1],('current',args))
+        self.assertEqual(events[2],comp.SMOOTH)
+
+    def test_historical_bad_raw_records_and_compiler_failure_are_rejected(self):
+        with self.historical_controls():good=self.historical_output
+        records=list(comp.re.finditer(rb"'[^']+' depends on axioms:\s*\[[^]]*\]",good))
+        self.assertTrue(records)
+        bads=(good[:records[0].start()]+good[records[0].end():],good+b'\n'+records[0].group(),
+              good+b"\n'RicciFlow.Extra' depends on axioms: []\n",good.replace(b'propext',b'sorryAx',1),
+              AXIOM_INVENTORY_FIXTURE['outputs']['contraction'].encode())
+        for output in bads:
+            with self.historical_controls(output),self.assertRaises(AssertionError):
+                with comp.historical_axiom_arguments(comp.MASTER,'curvature/scripts/point4_manifold_heat_release_guard.py',
+                    ['--axiom-dir',str(self.folder)]):self.fail('Bad historical output reached validator')
+        with self.historical_controls(exit_code=1),self.assertRaises(AssertionError):
+            with comp.historical_axiom_arguments(comp.MASTER,'curvature/scripts/point4_manifold_heat_release_guard.py',
+                ['--axiom-dir',str(self.folder)]):self.fail('Failed compiler reached validator')
+
+    def test_historical_prevalidation_rejects_each_added_forbidden_record(self):
+        file=self.folder/'contraction.log';original=file.read_bytes()
+        for name in comp.CONTRACTION_AXIOM_ADDITIONS:
+            record=comp.re.search(rb"'"+comp.re.escape(name.encode())+rb"' depends on axioms:\s*\[[^]]*\]",original)
+            self.assertIsNotNone(record)
+            bad=original[:record.start()]+b"'"+name.encode()+b"' depends on axioms: [sorryAx]"+original[record.end():]
+            file.write_bytes(bad)
+            try:
+                with self.historical_controls() as runner,self.assertRaises(AssertionError):
+                    with comp.historical_axiom_arguments(comp.MASTER,'curvature/scripts/point4_manifold_heat_release_guard.py',
+                        ['--axiom-dir',str(self.folder)]):self.fail('Untrusted current addition reached history')
+                runner.assert_not_called()
+            finally:file.write_bytes(original)
+
+    def test_historical_probe_provenance_drift_is_rejected_before_lean(self):
+        with self.historical_controls() as runner:
+            tree=dict(self.master);tree['curvature/scripts/point4_contraction_probe.lean']=('100644','0'*40)
+            with patch.object(comp,'parent_tree',return_value=tree),self.assertRaises(AssertionError):
+                with comp.historical_axiom_arguments(comp.MASTER,'curvature/scripts/point4_manifold_heat_release_guard.py',
+                    ['--axiom-dir',str(self.folder)]):self.fail('Bad pinned blob reached history')
+            runner.assert_not_called()
+
+    def test_historical_compiler_identity_is_exact_and_successful(self):
+        for status,output in ((1,b'Lean (version 4.33.0, fixture)\n'),
+                              (0,b'Lean (version 4.33.01, fixture)\n'),
+                              (0,b'unapproved prefix version 4.33.0\n')):
+            with self.historical_controls(version_exit=status,version_output=output) as runner,self.assertRaisesRegex(AssertionError,'compiler identity'):
+                with comp.historical_axiom_arguments(comp.MASTER,'curvature/scripts/point4_manifold_heat_release_guard.py',
+                    ['--axiom-dir',str(self.folder)]):self.fail('Wrong compiler reached validator')
+            self.assertEqual(runner.call_count,1)
+
+    def test_historical_route_rejects_byte_drift_swapped_dirs_and_mutation(self):
+        target=self.root/'curvature/scripts/point4_coordinate_jet_probe.lean';original=target.read_bytes()
+        target.write_bytes(original+b'\n-- Unapproved comment drift\n')
+        try:
+            with self.historical_controls(),self.assertRaisesRegex(AssertionError,'byte drift'):
+                with comp.historical_axiom_arguments(comp.MASTER,'curvature/scripts/point4_manifold_heat_release_guard.py',
+                    ['--axiom-dir',str(self.folder)]):self.fail('Drift reached validator')
+        finally:target.write_bytes(original)
+        for which in ('current','historical'):
+            with self.historical_controls(),self.assertRaisesRegex(AssertionError,'input mutation'):
+                with comp.historical_axiom_arguments(comp.MASTER,'curvature/scripts/point4_manifold_heat_release_guard.py',
+                    ['--axiom-dir',str(self.folder)]) as routed:
+                    view=comp.axiom_argument(routed)[2]
+                    folder=self.folder if which=='current' else view
+                    (folder/'coordinate_jet.log').write_bytes((folder/'coordinate_jet.log').read_bytes()+b'\nchanged\n')
+            (self.folder/'coordinate_jet.log').write_bytes(AXIOM_INVENTORY_FIXTURE['outputs']['coordinate_jet'].encode())
+        with self.historical_controls():
+            with comp.historical_axiom_arguments(comp.MASTER,'curvature/scripts/point4_manifold_heat_release_guard.py',
+                ['--axiom-dir',str(self.folder)]) as routed:
+                with self.assertRaises(AssertionError):
+                    comp.current_evidence('curvature/scripts/point4_manifold_heat_release_guard.py',routed)
+
 
 
 

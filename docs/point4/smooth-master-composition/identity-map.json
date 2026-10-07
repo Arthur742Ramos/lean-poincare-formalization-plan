@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "2ee5c45b80835f6782168c31939f66386c8f843c",
-      "final_sha256": "fbb81f3b1206a19dd4af95fc5ad84afdd3db47ae7168acfb5a44c72addffc7c2",
+      "final_blob": "209163a27fc8d1b604c9728c313562d6a74346bf",
+      "final_sha256": "13c2332696c778278109c544f4a6ada8ce67e8b24b2c52f11732cb0e57b45da3",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "3665238865ae0c40a2961916cbb621f5896a71d8",
-      "final_sha256": "69b6d1bd6b5ef582d5669ecfaed8744743488b342c52dd9f539f07e2b5a9b525",
+      "final_blob": "8d136ec22e3ae0d268f5d2598d92505f82af57ca",
+      "final_sha256": "f7892ac5e1efee69471eb0d9f9f1b41a778d808cb32b0e8a49c9f2982eed7f5a",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "fc1443919c74f80f967c3de852ded09ddb459a72",
-      "final_sha256": "9772e2e1ada75b2760f7bd8921952e93b6b5eabd87f09a480218622571e35df6",
+      "final_blob": "a20111341623b6cc69ea37981ea8493e3d447079",
+      "final_sha256": "917f1c2fd557de28d7a627549c5c295ad6d2b9ede4cbd1e258a50236abe6ee8c",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "62d18722cb22198a20653d1c132487a89d9f6c7b",
-      "final_sha256": "6f6e32ae18f2d5ea61bd1c8132e996c8d8774706545cf053c73476ee1ee0960e",
+      "final_blob": "36b7592c0cbcb59704190149067666d29c50b59f",
+      "final_sha256": "5dcfba0215aa923c85849010bf893ffab3bc67e5cb8dddf2fc49e74d35a9273b",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "0a521f8e86683487b5bdfa9391e8194eb9156b0d",
-      "final_sha256": "c3e5aadfc4fedcc39f6c01eb788bd4f856d825b0f589ebaefe557d3d29028768",
+      "final_blob": "4c6c28aee8307b779b09dea18f7cbba8bf99f5da",
+      "final_sha256": "ef54647cea67846667f42bf49c18a6f765e203ad43abf63c91b8e359a1df9cd1",
       "mode": "100644",
       "count": 1
     }
@@ -30635,7 +30635,7 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "2ee5c45b80835f6782168c31939f66386c8f843c"
+      "209163a27fc8d1b604c9728c313562d6a74346bf"
     ],
     "curvature/scripts/point4_chosen_lc_coordinate_probe.lean": [
       "100644",
@@ -30731,7 +30731,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "3665238865ae0c40a2961916cbb621f5896a71d8"
+      "8d136ec22e3ae0d268f5d2598d92505f82af57ca"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -30767,19 +30767,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "fc1443919c74f80f967c3de852ded09ddb459a72"
+      "a20111341623b6cc69ea37981ea8493e3d447079"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "62d18722cb22198a20653d1c132487a89d9f6c7b"
+      "36b7592c0cbcb59704190149067666d29c50b59f"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "b5b48d5e7336a045e2d71cc3647a36026f456aa8"
+      "241b4baeb6e6bf04f18cedd7a1230898d2b31afd"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "ac07304666f137d0ede41c06cc3e01bc3a8587f1"
+      "e4b957ecacbd202ad11b33e7ec030150b11cc737"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -30799,7 +30799,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "0a521f8e86683487b5bdfa9391e8194eb9156b0d"
+      "4c6c28aee8307b779b09dea18f7cbba8bf99f5da"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -30959,7 +30959,7 @@
     ],
     "docs/point4/smooth-master-composition.md": [
       "100644",
-      "242f78fbf18f5e47eb40525f5126cb543059393a"
+      "92a685d9379010de1967137d3374df3880eded09"
     ],
     "docs/point4/smooth-master-composition/identity-map.json": [
       "100644",
@@ -73400,5 +73400,12 @@
       "RicciFlow.contMDiff_metricContractedDeTurckVectorField_of_joint_correctionFunctional"
     ],
     "policy": "Preserve every inherited per-probe occurrence and append exactly seven authenticated contraction endpoints; original actual-output and standard-axiom checker unchanged"
+  },
+  "historical_axiom_routing": {
+    "weighted_validator": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
+    "smooth_validator": "93ed035498e0bf02096202d2f2895d906fb88234",
+    "probe_surface": "e883681caa862277857ee825a547502e8f3ec036",
+    "policy": "Verify complete current output first; execute the authenticated immutable six-entry contraction probe under current Lean 4.33; reuse other raw logs only for byte-identical probe sources; check both input sets after the immutable validator",
+    "evidence": "Raw contraction bytes, commands, observed compiler ID and exit codes, current/historical hashes in scoped uploaded routing receipts; current compiled sources, not a historical Lean rebuild"
   }
 }
