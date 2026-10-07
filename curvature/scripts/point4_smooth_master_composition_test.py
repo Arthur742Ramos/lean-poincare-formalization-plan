@@ -13,6 +13,7 @@ import point4_smooth_master_composition as comp
 
 OFFLINE=None
 HEAT_FIXTURES=None
+CONTRACTION_FIXTURES=None
 REAL=False
 SCHEMA=None
 
@@ -58,6 +59,55 @@ class OrdinaryCompositionTests(unittest.TestCase):
         self.assertEqual((helper.check_imports,helper.check_metadata),slots)
         self.assertEqual(comp._depth,0);self.assertIsNone(comp._owner)
 
+    def test_heat_default_git_reader_survives_reentrant_mock(self):
+        # Exercise the real default path against actual owned Git objects. This
+        # cannot be covered by the offline parent-file adapter alone.
+        with tempfile.TemporaryDirectory(prefix='point4-heat-reader-',dir=pathlib.Path.cwd()) as directory:
+            root=pathlib.Path(directory).resolve()
+            self.assertEqual(root.parent,pathlib.Path.cwd().resolve())
+            env=dict(comp.ENV,GIT_AUTHOR_NAME='Point4 regression fixture',
+                GIT_AUTHOR_EMAIL='fixture@example.invalid',GIT_COMMITTER_NAME='Point4 regression fixture',
+                GIT_COMMITTER_EMAIL='fixture@example.invalid')
+            def actual_git(*args,data=None):
+                return subprocess.check_output(['git','--no-replace-objects','-C',str(root),*args],input=data,env=env)
+            actual_git('init','--quiet')
+            values=[b'owned authentic parent fixture\n',b'owned authentic source fixture\n']
+            commits=[];trees=[];objects=[]
+            for index,value in enumerate(values):
+                oid=actual_git('hash-object','-w','--stdin',data=value).decode().strip()
+                tree=actual_git('mktree',data=('100644 blob '+oid+'\tordinary.txt\n').encode()).decode().strip()
+                commit=actual_git('commit-tree',tree,data=('owned regression '+str(index)+'\n').encode()).decode().strip()
+                commits.append(commit);trees.append(tree);objects.append(oid)
+            case=OrdinaryCompositionTests(methodName='test_heat_current_body_failure_is_propagated')
+            with patch.dict(globals(),{'HEAT_FIXTURES':None,'OFFLINE':None,'CONTRACTION_FIXTURES':None}),patch.object(comp,'ROOT',root),\
+                 patch.object(comp,'HEAT_PARENT',commits[0]),patch.object(comp,'HEAT_SOURCE',commits[1]),\
+                 patch.dict(comp.TREES,dict(zip(commits,trees))):
+                base,source,reader=case.heat_inputs()
+                self.assertEqual(base,{'ordinary.txt':('100644',objects[0])})
+                self.assertEqual(source,{'ordinary.txt':('100644',objects[1])})
+                # The side effect reproduces the real controls' reentrant shape.
+                # Capturing the unmocked reader must break that recursion while
+                # still executing actual Git show, not synthetic file bytes.
+                with patch.object(comp,'git',side_effect=lambda command,name:reader(*name.split(':',1))) as mocked:
+                    self.assertEqual(comp.git('show',commits[0]+':ordinary.txt'),values[0])
+                    self.assertEqual(comp.git('show',commits[1]+':ordinary.txt'),values[1])
+                    self.assertEqual(mocked.call_count,2)
+
+    def test_heat_default_reader_calls_captured_original_once_and_restores(self):
+        before_git=comp.git;before_owner=comp._owner;before_depth=comp._depth
+        data=b'controlled actual default factory\n';events=[]
+        def source_git(*args):events.append(args);return data
+        snapshot={'ordinary.txt':('100644',comp.blob_id(data))}
+        with patch.dict(globals(),{'HEAT_FIXTURES':None,'OFFLINE':None,'CONTRACTION_FIXTURES':None}),\
+             patch.object(comp,'parent_tree',return_value=snapshot),patch.object(comp,'git',source_git):
+            base,source,reader=self.heat_inputs()
+            self.assertEqual(base,snapshot);self.assertEqual(source,snapshot)
+            with patch.object(comp,'git',side_effect=lambda command,name:reader(*name.split(':',1))) as mocked:
+                self.assertEqual(comp.git('show',comp.HEAT_PARENT+':ordinary.txt'),data)
+                mocked.assert_called_once_with('show',comp.HEAT_PARENT+':ordinary.txt')
+            self.assertIs(comp.git,source_git)
+            self.assertEqual(events,[('show',comp.HEAT_PARENT+':ordinary.txt')])
+        self.assertIs(comp.git,before_git);self.assertIs(comp._owner,before_owner);self.assertEqual(comp._depth,before_depth)
     def heat_inputs(self):
         if HEAT_FIXTURES:
             data=json.loads((HEAT_FIXTURES/'sources/master-tree.json').read_text(encoding='utf8'))
@@ -71,7 +121,8 @@ class OrdinaryCompositionTests(unittest.TestCase):
                 return data
         else:
             base,source=comp.parent_tree(comp.HEAT_PARENT),comp.parent_tree(comp.HEAT_SOURCE)
-            read=lambda commit,path:comp.git('show',commit+':'+path)
+            git_read=comp.git
+            read=lambda commit,path:git_read('show',commit+':'+path)
         return base,source,read
 
     def test_heat_root_provenance_and_scope_transforms_are_count_one_and_reversible(self):
@@ -353,7 +404,7 @@ class OrdinaryCompositionTests(unittest.TestCase):
         before=dict(namespace)
         def failing(schema):
             changed=namespace['historical_c2']()
-            with patch.object(comp,'heat_check_imports') as imports,patch.object(comp,'heat_check_metadata') as metadata:
+            with patch.object(comp,'contraction_check_imports') as imports,patch.object(comp,'contraction_check_metadata') as metadata:
                 changed.check_imports(b'current import bytes')
                 changed.check_metadata('current metadata bytes')
                 imports.assert_called_once_with(local,b'current import bytes')
@@ -983,15 +1034,180 @@ class RealValidatorTests(unittest.TestCase):
             code,output=required_process(path,['--unsupported-composition-option'])
             self.assertNotEqual(code,0,output)
 
+class ContractionCompositionTests(unittest.TestCase):
+    def test_metric_default_reader_calls_captured_original_once_and_restores(self):
+        before_git=comp.git;before_owner=comp._owner;before_depth=comp._depth
+        data=b'controlled metric default factory\n';events=[]
+        def source_git(*args):events.append(args);return data
+        snapshot={'ordinary.txt':('100644',comp.blob_id(data))}
+        with patch.dict(globals(),{'HEAT_FIXTURES':None,'OFFLINE':None,'CONTRACTION_FIXTURES':None}),\
+             patch.object(comp,'parent_tree',return_value=snapshot),patch.object(comp,'git',source_git):
+            with self.sources() as (trees,reader):
+                self.assertTrue(all(value==snapshot for value in trees.values()))
+                with patch.object(comp,'git',side_effect=lambda command,name:reader(*name.split(':',1))) as mocked:
+                    self.assertEqual(comp.git('show',comp.CONTRACTION_SOURCE+':ordinary.txt'),data)
+                    mocked.assert_called_once_with('show',comp.CONTRACTION_SOURCE+':ordinary.txt')
+                self.assertIs(comp.git,source_git)
+                self.assertEqual(events,[('show',comp.CONTRACTION_SOURCE+':ordinary.txt')])
+        self.assertIs(comp.git,before_git);self.assertIs(comp._owner,before_owner);self.assertEqual(comp._depth,before_depth)
+
+    def test_metric_default_git_reader_survives_reentrant_mock(self):
+        with tempfile.TemporaryDirectory(prefix='point4-metric-reader-',dir=pathlib.Path.cwd()) as directory:
+            root=pathlib.Path(directory).resolve();self.assertEqual(root.parent,pathlib.Path.cwd().resolve())
+            env=dict(comp.ENV,GIT_AUTHOR_NAME='Point4 regression fixture',GIT_AUTHOR_EMAIL='fixture@example.invalid',
+                GIT_COMMITTER_NAME='Point4 regression fixture',GIT_COMMITTER_EMAIL='fixture@example.invalid')
+            def actual_git(*args,data=None):
+                return subprocess.check_output(['git','--no-replace-objects','-C',str(root),*args],input=data,env=env)
+            actual_git('init','--quiet');value=b'owned genuine metric Git fixture\n'
+            oid=actual_git('hash-object','-w','--stdin',data=value).decode().strip()
+            tree=actual_git('mktree',data=('100644 blob '+oid+'\tordinary.txt\n').encode()).decode().strip()
+            commit=actual_git('commit-tree',tree,data=b'owned metric regression\n').decode().strip()
+            names=('MASTER','SUPPORT','HEAT_PARENT','HEAT_SOURCE','CONTRACTION_PARENT','CONTRACTION_SOURCE','CONTRACTION_BASE')
+            with contextlib.ExitStack() as stack:
+                stack.enter_context(patch.dict(globals(),{'HEAT_FIXTURES':None,'OFFLINE':None,'CONTRACTION_FIXTURES':None}))
+                stack.enter_context(patch.object(comp,'ROOT',root))
+                stack.enter_context(patch.dict(comp.TREES,{commit:tree}))
+                for name in names:stack.enter_context(patch.object(comp,name,commit))
+                with self.sources() as (trees,reader):
+                    self.assertEqual(trees,{commit:{'ordinary.txt':('100644',oid)}})
+                    with patch.object(comp,'git',side_effect=lambda command,name:reader(*name.split(':',1))) as mocked:
+                        self.assertEqual(comp.git('show',commit+':ordinary.txt'),value)
+                        mocked.assert_called_once_with('show',commit+':ordinary.txt')
+
+    @contextlib.contextmanager
+    def sources(self):
+        if CONTRACTION_FIXTURES:
+            fixture=json.loads((CONTRACTION_FIXTURES/'SOURCE-FIXTURES.json').read_bytes())
+            trees={c:{p:tuple(v) for p,v in rows.items()} for c,rows in fixture['trees'].items()}
+            heat=pathlib.Path(fixture['heat_root']);legacy=pathlib.Path(fixture['legacy_root']);design=pathlib.Path(fixture['design_root'])
+            def source_bytes(commit,path):
+                if commit==comp.CONTRACTION_PARENT:
+                    file=heat/'candidate'/path
+                    if not file.exists():
+                        self.assertIn(path,comp.CONTRACTION_REPLACED)
+                        self.assertEqual(trees[commit][path],trees[comp.CONTRACTION_BASE][path])
+                        file=CONTRACTION_FIXTURES/'sources/predecessor'/path
+                elif commit==comp.CONTRACTION_SOURCE:file=design/'sources/pr115'/path
+                elif commit==comp.CONTRACTION_BASE:file=design/'sources/base115'/path
+                elif commit==comp.HEAT_PARENT:file=heat/'sources/master110'/path
+                elif commit==comp.HEAT_SOURCE:file=heat/'sources/pr110'/path
+                else:file=legacy/'parent-sources'/('master' if commit==comp.MASTER else 'support')/path
+                data=file.read_bytes();self.assertEqual(comp.blob_id(data),trees[commit][path][1])
+                return data
+            head=json.loads((CONTRACTION_FIXTURES/'CANDIDATE-RECIPE.json').read_bytes())['identity']
+            def git(*args):
+                if args==('ls-tree','-rz','HEAD'):
+                    return b''.join(mode.encode()+b' blob '+oid.encode()+b'\t'+p.encode()+b'\0' for p,(mode,oid) in sorted(head.items()))
+                self.assertEqual(args[0],'show');self.assertEqual(len(args),2)
+                return source_bytes(*args[1].split(':',1))
+            with patch.object(comp,'parent_tree',side_effect=lambda c:trees[c]),patch.object(comp,'git',side_effect=git):
+                yield trees,source_bytes
+        else:
+            trees={c:comp.parent_tree(c) for c in (comp.MASTER,comp.SUPPORT,comp.HEAT_PARENT,comp.HEAT_SOURCE,comp.CONTRACTION_PARENT,comp.CONTRACTION_SOURCE,comp.CONTRACTION_BASE)}
+            source_git=comp.git
+            yield trees,lambda commit,path:source_git('show',commit+':'+path)
+
+    def test_full_finite_identity_and_selected_source_bytes(self):
+        with self.sources() as (trees,read):
+            expected,originals,changes=comp.expected_identity()
+            self.assertEqual(len(expected),1732)
+            for path in comp.CONTRACTION_ADDED|comp.CONTRACTION_REPLACED:
+                self.assertEqual(changes[path],read(comp.CONTRACTION_SOURCE,path))
+                self.assertEqual(expected[path],trees[comp.CONTRACTION_SOURCE][path])
+            for path in comp.CONTRACTION_ROOTS:
+                self.assertEqual(comp.contraction_inverse(path,changes[path]),read(comp.CONTRACTION_PARENT,path))
+            unchanged=set(trees[comp.CONTRACTION_PARENT])-comp.EDITED-comp.NEW-comp.CONTRACTION_ROOTS-comp.CONTRACTION_REPLACED
+            self.assertTrue(all(expected[p]==trees[comp.CONTRACTION_PARENT][p] for p in unchanged))
+            self.assertEqual(json.loads((comp.ROOT/comp.MAP).read_bytes()),comp.map_record(expected,originals,changes))
+
+    def test_exact_inverse_rejects_missing_extra_and_duplicate_transform(self):
+        with self.sources() as (_,read):
+            for path in comp.CONTRACTION_ROOTS:
+                original=read(comp.CONTRACTION_PARENT,path)
+                actual=comp.contraction_transform(path,original)
+                self.assertEqual(comp.contraction_inverse(path,actual),original)
+                for bad in (original,actual+b'\nextra unreviewed content\n'):
+                    with self.assertRaises(AssertionError):comp.contraction_inverse(path,bad)
+                with self.assertRaises(AssertionError):comp.contraction_transform(path,actual)
+
+    def test_original_semantic_bodies_receive_the_actual_expanded_union(self):
+        with self.sources() as (_,read):
+            events=[]
+            local=types.SimpleNamespace(INTEGRATION_PARENT='semantic-base',blob=lambda commit,path:read(comp.HEAT_PARENT,path),
+                legacy_check_imports=lambda raw:events.append(('old-imports',raw)),
+                legacy_check_metadata=lambda raw:events.append(('old-metadata',raw)),
+                check_imports=lambda *args:events.append(('actual-imports',args)),
+                check_metadata=lambda *args:events.append(('actual-metadata',args)))
+            for path in (comp.HEAT_ROOT,comp.HEAT_METADATA):
+                old=read(comp.HEAT_PARENT,path)
+                actual=comp.contraction_transform(path,comp.heat_transform(path,old))
+                if path==comp.HEAT_ROOT:
+                    comp.contraction_check_imports(local,actual)
+                    self.assertEqual(events,[('old-imports',old),('actual-imports',(actual,actual,old))])
+                else:
+                    comp.contraction_check_metadata(local,actual.decode())
+                    self.assertEqual(events,[('old-metadata',old.decode()),('actual-metadata',(actual,actual,old))])
+                    self.assertEqual(actual.count(comp.CONTRACTION_METADATA_NOTE.encode()),1)
+                    self.assertEqual(actual.count(comp.HEAT_METADATA_NOTE.encode()),1)
+                events.clear()
+
+    def test_current_semantic_body_failure_is_not_converted_to_success(self):
+        with self.sources() as (_,read):
+            primary=RuntimeError('actual expanded current semantic failure');events=[]
+            local=types.SimpleNamespace(INTEGRATION_PARENT='semantic-base',blob=lambda commit,path:read(comp.HEAT_PARENT,path),
+                legacy_check_imports=lambda raw:events.append(raw),
+                check_imports=lambda *args:(_ for _ in ()).throw(primary))
+            actual=(comp.ROOT/comp.HEAT_ROOT).read_bytes()
+            with self.assertRaises(RuntimeError) as error:comp.contraction_check_imports(local,actual)
+            self.assertIs(error.exception,primary)
+            self.assertEqual(events,[read(comp.HEAT_PARENT,comp.HEAT_ROOT)])
+
+    def test_bad_inverse_stops_before_both_semantic_bodies(self):
+        with self.sources():
+            events=[]
+            local=types.SimpleNamespace(legacy_check_imports=lambda *a:events.append('legacy'),check_imports=lambda *a:events.append('actual'))
+            with self.assertRaises(AssertionError):comp.contraction_check_imports(local,(comp.ROOT/comp.HEAT_ROOT).read_bytes()+b'\nextra\n')
+            self.assertEqual(events,[])
+
+    def test_source_omission_mode_blob_and_extra_branch_path_are_rejected(self):
+        with self.sources() as (trees,read):
+            module=sorted(comp.CONTRACTION_ADDED)[0]
+            for mutation in ('omit','mode','blob','extra'):
+                bad=dict(trees[comp.CONTRACTION_SOURCE])
+                if mutation=='omit':bad.pop(module)
+                elif mutation=='mode':bad[module]=('100755',bad[module][1])
+                elif mutation=='blob':bad[module]=('100644','0'*40)
+                else:bad['unexpected-new-path.lean']=('100644','0'*40)
+                with patch.object(comp,'parent_tree',side_effect=lambda c:bad if c==comp.CONTRACTION_SOURCE else trees[c]),self.assertRaises(AssertionError):
+                    comp.expected_identity()
+
+    def test_predecessor_drift_is_not_absorbed_into_current_recipe(self):
+        with self.sources() as (trees,read):
+            for mutation in ('omit','blob','mode'):
+                bad=dict(trees[comp.CONTRACTION_PARENT]);path='curvature/lean-toolchain'
+                if mutation=='omit':bad.pop(path)
+                elif mutation=='blob':bad[path]=('100644','0'*40)
+                else:bad[path]=('100755',bad[path][1])
+                with patch.object(comp,'parent_tree',side_effect=lambda c:bad if c==comp.CONTRACTION_PARENT else trees[c]),self.assertRaises(AssertionError):
+                    comp.expected_identity()
+
+    def test_merge_base_drift_cannot_broaden_the_fixed_seven_path_scope(self):
+        with self.sources() as (trees,read):
+            bad=dict(trees[comp.CONTRACTION_BASE]);bad['curvature/lean-toolchain']=('100644','0'*40)
+            with patch.object(comp,'parent_tree',side_effect=lambda c:bad if c==comp.CONTRACTION_BASE else trees[c]),self.assertRaises(AssertionError):
+                comp.expected_identity()
+
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--real-runtime',action='store_true');parser.add_argument('--schema',type=pathlib.Path)
     parser.add_argument('--parent-fixtures',type=pathlib.Path)
     parser.add_argument('--support110-fixtures',type=pathlib.Path)
-    args=parser.parse_args();OFFLINE=args.parent_fixtures;HEAT_FIXTURES=args.support110_fixtures;SCHEMA=args.schema;REAL=args.real_runtime
+    parser.add_argument('--support115-fixtures',type=pathlib.Path)
+    args=parser.parse_args();CONTRACTION_FIXTURES=args.support115_fixtures;OFFLINE=args.parent_fixtures;HEAT_FIXTURES=args.support110_fixtures;SCHEMA=args.schema;REAL=args.real_runtime
     assert not REAL or (sys.platform.startswith('linux') and SCHEMA and SCHEMA.is_file()), 'Actual Linux/schema input required'
     suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromTestCase(OrdinaryCompositionTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(PositiveControllerTests))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(ContractionCompositionTests))
     if REAL:suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(RealValidatorTests))
     result=unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(0 if result.wasSuccessful() else 1)

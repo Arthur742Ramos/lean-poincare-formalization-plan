@@ -276,6 +276,99 @@ def heat_check_metadata(local, actual):
 TREES.update({HEAT_PARENT: HEAT_PARENT_TREE, HEAT_SOURCE: HEAT_SOURCE_TREE})
 
 
+CONTRACTION_PARENT = 'e303730173222d39da842f7831372ddd001f6874'
+CONTRACTION_PARENT_TREE = 'f358da765aedb8eb05fb7d844e0048048f59c9b3'
+CONTRACTION_SOURCE = '93aa44010811b9145d6ff79abac3ed506ad51c29'
+CONTRACTION_SOURCE_TREE = 'd3e7c360e957a54dfa51acd8959c27c0d080507a'
+CONTRACTION_BASE = 'a0f0fafc2505f1db28c2b9f9b00ce11384f69c39'
+CONTRACTION_BASE_TREE = 'f89511410ec16639199609238ba435fd64f9b16e'
+CONTRACTION_ADDED = {'curvature/PoincareCurvature/Analysis/TimeDependentMetricContraction.lean',
+    'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/MetricContractedDeTurckJointRegularity.lean'}
+CONTRACTION_REPLACED = {'.github/workflows/point4-contraction.yml',
+    'curvature/scripts/point4_contraction_probe.lean', 'docs/point4/contraction-repair.md'}
+CONTRACTION_ROOTS = {HEAT_ROOT, HEAT_METADATA, HEAT_DOC}
+CONTRACTION_PATHS = CONTRACTION_ADDED | CONTRACTION_REPLACED | {HEAT_ROOT, HEAT_DOC}
+CONTRACTION_OPERATIONS = {'curvature/PoincareCurvature.lean': [{'old_utf8': '', 'new_utf8': 'import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.MetricContractedDeTurckJointRegularity\n', 'anchor_utf8': 'import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.RicciDeTurckPrincipalRemainder\n'}], 'docs/point4/README.md': [{'old_utf8': '', 'new_utf8': 'The conventional two-input-slot DeTurck repair now has a candidate joint-field\nfollow-up in `MetricContractedDeTurckJointRegularity.lean`. From a jointly smooth\nmetric representative agreeing with the defining metric and the actual jointly\nsmooth Levi--Civita correction tensor, it proves the conventional inverse-Gram\nvector formula and joint smoothness of the positive field and negative recovery\ngauge. The correction-functional corollary derives the tensor premise by the\nexisting geometric Gram/Riesz reconstruction, and a conditional compact-flow\nwrapper uses this same conventional gauge. These are explicit geometric\nregularity hypotheses, not assumptions about the final contracted field or a\nclaim of PDE existence. The generic contraction passed exact Lean-4.33 compilation; final\nverification of the new geometric adapter remains pending. See [contraction repair](contraction-repair.md) for the\nfield distinction and verification boundary. Point 4 remains OPEN.\n\n', 'anchor_utf8': 'The candidate algebraic principal/remainder milestone is packaged in\n`RicciDeTurckPrincipalRemainder.lean`. It derives an exact finite reaction split\n'}, {'old_utf8': 'with the manifold tensor-heat generator. No compilation of this candidate has\nbeen run yet. See [principal/remainder scope](principal-remainder.md) for the\n', 'new_utf8': 'with the manifold tensor-heat generator. Its exact Lean-4.33 full build and eleven standard-only axiom probes\npassed before the principal milestone was merged into master. See [principal/remainder scope](principal-remainder.md) for the\n', 'anchor_utf8': ''}]}
+CONTRACTION_METADATA_NOTE = '  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/93aa44010811b9145d6ff79abac3ed506ad51c29/curvature"\n    relationship: "builds-on"\n    note: >-\n      Immutable PR115 source for Analysis/TimeDependentMetricContraction.lean,\n      Geometry/Manifold/RicciFlow/GaugeReduction/MetricContractedDeTurckJointRegularity.lean,\n      scripts/point4_contraction_probe.lean and the contraction proof workflow.\n      The inherited mathematical declarations, smooth-metric and correction-tensor\n      regularity hypotheses, compact boundaryless nonempty flow scope, proofs,\n      thirteen-declaration probe and contributor notices are preserved.\n      The integration adds an exact root import, structured provenance and finite\n      source composition; it constructs no geometric PDE solution, Hamilton\n      identification or uniqueness bridge. Both Point-4 targets remain OPEN.\n      Historical source-head verification is distinct from combined-head\n      compilation, standard-axiom checks, completion audits and review.\n\n'
+TREES.update({CONTRACTION_PARENT:CONTRACTION_PARENT_TREE,
+              CONTRACTION_SOURCE:CONTRACTION_SOURCE_TREE, CONTRACTION_BASE:CONTRACTION_BASE_TREE})
+
+def contraction_transform(path, original):
+    assert path in CONTRACTION_ROOTS
+    if path == HEAT_METADATA:
+        anchor, addition = b'related_formalizations:\n', CONTRACTION_METADATA_NOTE.encode()
+        assert original.count(anchor) == 1 and CONTRACTION_SOURCE.encode() not in original, 'Contraction provenance anchor drift'
+        return original.replace(anchor, anchor+addition, 1)
+    data = original
+    for operation in CONTRACTION_OPERATIONS[path]:
+        old, new = operation['old_utf8'].encode(), operation['new_utf8'].encode()
+        if old:
+            assert data.count(old) == 1, 'Contraction replacement anchor drift: '+path
+            data = data.replace(old, new, 1)
+        else:
+            anchor = operation['anchor_utf8'].encode()
+            assert data.count(anchor) == 1 and new not in data, 'Contraction insertion anchor drift: '+path
+            data = data.replace(anchor, new+anchor, 1)
+    return data
+
+def contraction_inverse(path, actual):
+    assert path in CONTRACTION_ROOTS
+    original = git('show', CONTRACTION_PARENT+':'+path)
+    assert blob_id(original) == parent_tree(CONTRACTION_PARENT)[path][1]
+    assert actual == contraction_transform(path, original), 'Exact contraction root/provenance/scope drift: '+path
+    return original
+
+def contraction_identity(expected, originals, changes):
+    base, source, merge_base = (parent_tree(c) for c in (CONTRACTION_PARENT, CONTRACTION_SOURCE, CONTRACTION_BASE))
+    assert len(base) == 1730 and len(source) == 1570 and len(merge_base) == 1568
+    assert {p for p in set(source)|set(merge_base) if source.get(p)!=merge_base.get(p)} == CONTRACTION_PATHS
+    # Reconstruct all of the approved predecessor policy with its authentic old
+    # digest before extending it. The new current helper cannot certify its base.
+    old_helper = git('show', CONTRACTION_PARENT+':'+HELPER)
+    assert blob_id(old_helper) == base[HELPER][1]
+    old_digest = sha256(old_helper)
+    prior_changes = {p:transform(p,originals[p],old_digest) for p in EDITED-{SMOOTH}}
+    prior_changes[SMOOTH] = transform(SMOOTH,originals[SMOOTH],old_digest,
+        sha256(prior_changes[FIXTURE]),sha256(prior_changes[WORKFLOW]))
+    prior = resolve_union(parent_tree(MASTER),parent_tree(SUPPORT))
+    prior.update({p:('100644',blob_id(b)) for p,b in prior_changes.items()})
+    prior, _, _ = heat_identity(prior,dict(originals),dict(prior_changes))
+    for p in NEW:prior[p]=base[p]
+    assert prior == base, 'Published PR110 predecessor policy drift'
+    assert not CONTRACTION_ADDED & set(base)
+    for path in sorted(CONTRACTION_ADDED|CONTRACTION_REPLACED):
+        assert source[path][0] == '100644'
+        if path in CONTRACTION_REPLACED:
+            assert base[path] == merge_base[path], 'Contraction replacement base drift: '+path
+        else:
+            assert path not in expected and path not in merge_base
+        data = git('show',CONTRACTION_SOURCE+':'+path)
+        assert blob_id(data) == source[path][1], 'Contraction source bytes drift: '+path
+        expected[path] = source[path]; changes[path] = data
+    for path in sorted(CONTRACTION_ROOTS):
+        original = git('show',CONTRACTION_PARENT+':'+path)
+        assert base[path] == ('100644',blob_id(original))
+        assert changes[path] == original, 'Prior heat root reconstruction drift: '+path
+        changes[path] = contraction_transform(path,original)
+        expected[path] = '100644',blob_id(changes[path])
+    assert len(expected) == 1728  # Two additions before the four NEW paths.
+    return expected, originals, changes
+
+def contraction_check_imports(local, actual):
+    prior = contraction_inverse(HEAT_ROOT,actual)
+    local.legacy_check_imports(heat_inverse(HEAT_ROOT,prior))
+    base = local.blob(local.INTEGRATION_PARENT,HEAT_ROOT)
+    local.check_imports(actual,contraction_transform(HEAT_ROOT,heat_transform(HEAT_ROOT,base)),base)
+
+def contraction_check_metadata(local, actual):
+    raw = actual.encode() if isinstance(actual,str) else actual
+    prior = contraction_inverse(HEAT_METADATA,raw)
+    local.legacy_check_metadata(heat_inverse(HEAT_METADATA,prior).decode())
+    base = local.blob(local.INTEGRATION_PARENT,HEAT_METADATA)
+    # Add both new entries only to the master input; keep literal notes unique.
+    local.check_metadata(raw,contraction_transform(HEAT_METADATA,heat_transform(HEAT_METADATA,base)),base)
+
+
 def expected_identity():
     master, support = parent_tree(MASTER), parent_tree(SUPPORT)
     union = resolve_union(master, support)
@@ -287,6 +380,7 @@ def expected_identity():
     expected = dict(union)
     for path,data in changes.items():expected[path]='100644',blob_id(data)
     expected, originals, changes = heat_identity(expected, originals, changes)
+    expected, originals, changes = contraction_identity(expected, originals, changes)
     # New code/docs are bound to the exact committed HEAD/index/physical bytes.
     # Independent review must approve that external head; this is no self-review.
     head = parse_tree(git('ls-tree','-rz','HEAD'))
@@ -295,7 +389,7 @@ def expected_identity():
         expected[path]=head[path]
     return expected, originals, changes
 
-def map_record(expected, originals, changes):
+def prior_map_record(expected, originals, changes):
     master,support=parent_tree(MASTER),parent_tree(SUPPORT)
     return {'parents':{c:TREES[c] for c in (MASTER,SUPPORT,HEAT_PARENT,HEAT_SOURCE)},
         'heat_invariant_integration':{'base':HEAT_PARENT,'source':HEAT_SOURCE,
@@ -303,8 +397,8 @@ def map_record(expected, originals, changes):
             'source_identity':{p:list(parent_tree(HEAT_SOURCE)[p]) for p in sorted(parent_tree(HEAT_SOURCE))},
             'base_identity':{p:list(parent_tree(HEAT_PARENT)[p]) for p in sorted(parent_tree(HEAT_PARENT))},
             'fixed_source_paths':{p:list(parent_tree(HEAT_SOURCE)[p]) for p in sorted(HEAT_ADDED|{HEAT_DOMAIN})},
-            'transforms':{p:{'original_blob':blob_id(originals[p]),'final_blob':blob_id(changes[p]),
-                'original_sha256':sha256(originals[p]),'final_sha256':sha256(changes[p]),'count':1} for p in sorted(HEAT_ROOTS)},
+            'transforms':{p:{'original_blob':blob_id(originals[p]),'final_blob':blob_id(contraction_inverse(p,changes[p])),
+                'original_sha256':sha256(originals[p]),'final_sha256':sha256(contraction_inverse(p,changes[p])),'count':1} for p in sorted(HEAT_ROOTS)},
             'historical_run':37181895941,'scope':'Independent jet-field heat/reaction closure only; combined-head proof checks UNRUN; both targets OPEN'},
         'paths':len(expected),'canonical_point4':'OPEN','smooth_general_target':'OPEN',
         'localization_mock_route':{'parent':MOCK_ROUTE_PARENT,'parent_tree':MOCK_ROUTE_TREE,
@@ -325,11 +419,29 @@ def map_record(expected, originals, changes):
             'mode':'100644','count':1} for p in sorted(EDITED)},
         'identity':{p:([expected[p][0],'<committed-HEAD>'] if p==MAP else list(expected[p])) for p in sorted(expected)}}
 
+def map_record(expected, originals, changes):
+    record = prior_map_record(expected, originals, changes)
+    record['parents'].update({c:TREES[c] for c in (CONTRACTION_PARENT,CONTRACTION_SOURCE,CONTRACTION_BASE)})
+    record['metric_contraction_integration'] = {
+        'base':CONTRACTION_PARENT,'base_tree':CONTRACTION_PARENT_TREE,
+        'source':CONTRACTION_SOURCE,'source_tree':CONTRACTION_SOURCE_TREE,
+        'merge_base':CONTRACTION_BASE,'merge_base_tree':CONTRACTION_BASE_TREE,
+        'base_identity':{p:list(parent_tree(CONTRACTION_PARENT)[p]) for p in sorted(parent_tree(CONTRACTION_PARENT))},
+        'source_identity':{p:list(parent_tree(CONTRACTION_SOURCE)[p]) for p in sorted(parent_tree(CONTRACTION_SOURCE))},
+        'merge_base_identity':{p:list(parent_tree(CONTRACTION_BASE)[p]) for p in sorted(parent_tree(CONTRACTION_BASE))},
+        'fixed_source_paths':{p:list(parent_tree(CONTRACTION_SOURCE)[p]) for p in sorted(CONTRACTION_ADDED|CONTRACTION_REPLACED)},
+        'transforms':{p:{'original_blob':parent_tree(CONTRACTION_PARENT)[p][1],
+            'final_blob':blob_id(changes[p]),'count':1} for p in sorted(CONTRACTION_ROOTS)},
+        'historical_run':37202841805,
+        'scope':'Smooth metric contraction and conditional compact gauge flow only; combined-head checks UNRUN; both targets OPEN'}
+    return record
+
+
 def verify_current():
     head = git('rev-parse','HEAD').decode().strip()
     assert re.fullmatch(r'[0-9a-f]{40}',head)
     if os.environ.get('EXPECTED_SHA'):assert head==os.environ['EXPECTED_SHA'], 'External expected HEAD drift'
-    for commit in (MASTER,SUPPORT,STARTUP_REPAIR_PARENT,MOCK_ROUTE_PARENT,WEIGHTED_MOCK_PARENT,HEAT_PARENT,HEAT_SOURCE):
+    for commit in (MASTER,SUPPORT,STARTUP_REPAIR_PARENT,MOCK_ROUTE_PARENT,WEIGHTED_MOCK_PARENT,HEAT_PARENT,HEAT_SOURCE,CONTRACTION_PARENT,CONTRACTION_SOURCE,CONTRACTION_BASE):
         subprocess.run(['git','--no-replace-objects','-C',str(ROOT),'merge-base','--is-ancestor',commit,'HEAD'],check=True,env=ENV)
     expected,originals,changes=expected_identity()
     committed=parse_tree(git('ls-tree','-rz','HEAD'))
@@ -388,8 +500,8 @@ def weighted_leaf(namespace, schema=None):
         before=module.check_imports,module.check_metadata
         touched.append((module,before))
         # These genuine functions keep their own exact INTEGRATION_PARENT blobs.
-        module.check_imports=lambda actual:heat_check_imports(local,actual)
-        module.check_metadata=lambda actual:heat_check_metadata(local,actual)
+        module.check_imports=lambda actual:contraction_check_imports(local,actual)
+        module.check_metadata=lambda actual:contraction_check_metadata(local,actual)
         return module
     def composed_sources():
         inherited=original_expected() # original ancestry/transform/self/workflow validation
@@ -400,6 +512,9 @@ def weighted_leaf(namespace, schema=None):
             elif path == HEAT_DOMAIN:
                 assert blob_id(data) == parent_tree(HEAT_PARENT)[path][1], 'Inherited domain source drift'
                 assert (ROOT/path).read_bytes() == git('show',HEAT_SOURCE+':'+path), 'Exact comment-only domain transform drift'
+            elif path in CONTRACTION_REPLACED:
+                assert blob_id(data) == parent_tree(CONTRACTION_PARENT)[path][1], 'Inherited contraction predecessor drift: '+path
+                assert (ROOT/path).read_bytes() == git('show',CONTRACTION_SOURCE+':'+path), 'Exact contraction replacement drift: '+path
             elif path not in ROOT_CHANGES:
                 assert blob_id(data)==expected[path][1], 'Inherited weighted reconstruction drift: '+path
         return {p:('current-finite-composition',(ROOT/p).read_bytes()) for p in expected}
@@ -628,9 +743,9 @@ def install_weighted(namespace):
 
 def localization_current(namespace,schema):
     namespace['check_ancestry']()
-    heat_check_imports(types.SimpleNamespace(**namespace),(ROOT/'curvature/PoincareCurvature.lean').read_bytes())
+    contraction_check_imports(types.SimpleNamespace(**namespace),(ROOT/'curvature/PoincareCurvature.lean').read_bytes())
     raw=(ROOT/'curvature/formalization.yaml').read_text()
-    heat_check_metadata(types.SimpleNamespace(**namespace),raw)
+    contraction_check_metadata(types.SimpleNamespace(**namespace),raw)
     schema=pathlib.Path(schema)
     assert sha256(schema.read_bytes())==namespace['SCHEMA_SHA256']
     import jsonschema

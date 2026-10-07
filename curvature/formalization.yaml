@@ -58,6 +58,21 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/93aa44010811b9145d6ff79abac3ed506ad51c29/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable PR115 source for Analysis/TimeDependentMetricContraction.lean,
+      Geometry/Manifold/RicciFlow/GaugeReduction/MetricContractedDeTurckJointRegularity.lean,
+      scripts/point4_contraction_probe.lean and the contraction proof workflow.
+      The inherited mathematical declarations, smooth-metric and correction-tensor
+      regularity hypotheses, compact boundaryless nonempty flow scope, proofs,
+      thirteen-declaration probe and contributor notices are preserved.
+      The integration adds an exact root import, structured provenance and finite
+      source composition; it constructs no geometric PDE solution, Hamilton
+      identification or uniqueness bridge. Both Point-4 targets remain OPEN.
+      Historical source-head verification is distinct from combined-head
+      compilation, standard-axiom checks, completion audits and review.
+
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/0fce83f00a2e8832e5098ee43d8f260f3a98e9c9/curvature"
     relationship: "builds-on"
     note: >-

@@ -276,7 +276,7 @@ def main(argv=None) -> None:
 import hashlib as _composition_hashlib, pathlib as _composition_pathlib, stat as _composition_stat, sys as _composition_sys
 _composition_file = _composition_pathlib.Path(__file__).resolve().parents[2] / 'curvature/scripts/point4_smooth_master_composition.py'
 assert _composition_stat.S_ISREG(_composition_file.lstat().st_mode) and not _composition_file.lstat().st_mode & 0o111
-assert _composition_hashlib.sha256(_composition_file.read_bytes()).hexdigest() == 'a353de33a0b3207ec304dc82f363f2b8b2e4dc2507219e139ebf899bd2eac362', 'Composition executable binding changed'
+assert _composition_hashlib.sha256(_composition_file.read_bytes()).hexdigest() == '8f0c45796f20be5b110b3a05c2fb055f3c9e8ec8e76ee88297a0f8b27303abf5', 'Composition executable binding changed'
 import point4_smooth_master_composition as _smooth_master
 _smooth_master.install_localization(globals())
 
