@@ -740,5 +740,14 @@ def main(argv=None):
 
 EVIDENCE_PATHS = {'inherited-probes/contraction.log', 'inherited-probes/chosen_lc_curvature.log', 'inherited-build.log', 'inherited-probes/weighted_initial_heat.log', 'sha.log', 'source.log', 'inherited-probes/weak_laplacian.log', 'inherited-probes/frozen_metric_principal.log', 'audit.json', 'inherited-probes/principal_remainder.log', 'inherited-probes/standard_coordinate_operator.log', 'audit.log', 'audit-build.log', 'inherited-probes/chosen_lc_coordinate.log', 'inherited-probes/boundaryless_chart_frames.log', 'probe.log', 'inherited-probes/c2_heat_trace.log', 'compile.log', 'inherited-probes/coordinate_connection.log', 'manifold-probe.log', 'regression.log', 'contract.log', 'inherited-probes/coordinate_operator.log', 'official-schema.json', 'inherited-probes/coordinate_jet.log'}
 
+# Reviewed finite smooth/master composition; original validator bodies survive.
+import hashlib as _composition_hashlib, pathlib as _composition_pathlib, stat as _composition_stat, sys as _composition_sys
+_composition_file = _composition_pathlib.Path(__file__).resolve().parents[2] / 'curvature/scripts/point4_smooth_master_composition.py'
+assert _composition_stat.S_ISREG(_composition_file.lstat().st_mode) and not _composition_file.lstat().st_mode & 0o111
+assert _composition_hashlib.sha256(_composition_file.read_bytes()).hexdigest() == '7cfdfab8b5127134fae5864843bf6d5eb3369bfcc62ab7aa9b728b63b3ea8d25', 'Composition executable binding changed'
+_composition_sys.modules.setdefault('point4_weighted_hessian_release_guard', _composition_sys.modules[__name__])
+import point4_smooth_master_composition as _smooth_master
+_smooth_master.install_weighted(globals())
+
 if __name__ == '__main__':
     main()
