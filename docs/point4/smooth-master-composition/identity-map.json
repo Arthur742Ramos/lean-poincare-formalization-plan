@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "faed18c2fd81df2212ae83738dce7ccf7dd4c8a0",
-      "final_sha256": "f945585a3e1fe630fbc5cbd87846090d7714596a2e88ca0e7e8648c30c79c88e",
+      "final_blob": "2ee5c45b80835f6782168c31939f66386c8f843c",
+      "final_sha256": "fbb81f3b1206a19dd4af95fc5ad84afdd3db47ae7168acfb5a44c72addffc7c2",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "b59b15ea5faef9a9483a2dff965afeb52c394ee1",
-      "final_sha256": "1d2d0c2cc63812c74e878f9d95da4ecdb1ed962828a904a4530d4fda06fea09c",
+      "final_blob": "3665238865ae0c40a2961916cbb621f5896a71d8",
+      "final_sha256": "69b6d1bd6b5ef582d5669ecfaed8744743488b342c52dd9f539f07e2b5a9b525",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "f9cd2abb2c89e9046a0505056ef0190249aa8178",
-      "final_sha256": "dee596e454d518c9e11841285d4ea73134d0c944b8498fdcab43842f6342a64c",
+      "final_blob": "fc1443919c74f80f967c3de852ded09ddb459a72",
+      "final_sha256": "9772e2e1ada75b2760f7bd8921952e93b6b5eabd87f09a480218622571e35df6",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "e4dbc87453895c2f654f13059e6c35487e632ae6",
-      "final_sha256": "4c97208f79c0a9dd34157a2c663548771db5aec2cdbce02bc834cac413d0ca6d",
+      "final_blob": "62d18722cb22198a20653d1c132487a89d9f6c7b",
+      "final_sha256": "6f6e32ae18f2d5ea61bd1c8132e996c8d8774706545cf053c73476ee1ee0960e",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "483354055a2a928de30b8ec72a53335fc3aaae4b",
-      "final_sha256": "836639a96b29f29a9a7887d1c35ca4ba77f54883a6488c0dcefc9b70986d791c",
+      "final_blob": "0a521f8e86683487b5bdfa9391e8194eb9156b0d",
+      "final_sha256": "c3e5aadfc4fedcc39f6c01eb788bd4f856d825b0f589ebaefe557d3d29028768",
       "mode": "100644",
       "count": 1
     }
@@ -30635,7 +30635,7 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "faed18c2fd81df2212ae83738dce7ccf7dd4c8a0"
+      "2ee5c45b80835f6782168c31939f66386c8f843c"
     ],
     "curvature/scripts/point4_chosen_lc_coordinate_probe.lean": [
       "100644",
@@ -30731,7 +30731,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "b59b15ea5faef9a9483a2dff965afeb52c394ee1"
+      "3665238865ae0c40a2961916cbb621f5896a71d8"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -30767,19 +30767,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "f9cd2abb2c89e9046a0505056ef0190249aa8178"
+      "fc1443919c74f80f967c3de852ded09ddb459a72"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "e4dbc87453895c2f654f13059e6c35487e632ae6"
+      "62d18722cb22198a20653d1c132487a89d9f6c7b"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "9ec5cd6a283eee2ef9020540ba097263b8d2f28c"
+      "b5b48d5e7336a045e2d71cc3647a36026f456aa8"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "cdf6c2bb67426d96303a5008e923e879841c7a0b"
+      "ac07304666f137d0ede41c06cc3e01bc3a8587f1"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -30799,7 +30799,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "483354055a2a928de30b8ec72a53335fc3aaae4b"
+      "0a521f8e86683487b5bdfa9391e8194eb9156b0d"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -73369,5 +73369,36 @@
     "historical_run": 37233402239,
     "changed_dependency": "TensorHeatGeometricRegularity.lean newer baseline preserved; focused native qualification required",
     "scope": "Literal C2 metric local linear zero-trace right-inverse only; combined-head proof gates UNRUN; both targets OPEN"
+  },
+  "current_axiom_inventory": {
+    "immutable_predecessor": "e883681caa862277857ee825a547502e8f3ec036",
+    "contraction_source": "93aa44010811b9145d6ff79abac3ed506ad51c29",
+    "probe": "contraction",
+    "inherited_combined": [
+      150,
+      144
+    ],
+    "current_combined": [
+      157,
+      151
+    ],
+    "inherited_linear": [
+      127,
+      121
+    ],
+    "current_linear": [
+      134,
+      128
+    ],
+    "exact_appended_endpoints": [
+      "PoincareCurvature.ParametrizedInner.contMDiffOn_timeDependentMetricContraction",
+      "PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg",
+      "RicciFlow.metricContractedDeTurckVectorField_eq_sum_inverseGram_correction",
+      "RicciFlow.contMDiff_metricContractedDeTurckVectorField_of_joint_correction",
+      "RicciFlow.contMDiff_metricContractedDeTurckGaugeField_of_joint_correction",
+      "RicciFlow.exists_pos_metricContractedDiffeomorph3GaugeFlowOn_of_joint_correction",
+      "RicciFlow.contMDiff_metricContractedDeTurckVectorField_of_joint_correctionFunctional"
+    ],
+    "policy": "Preserve every inherited per-probe occurrence and append exactly seven authenticated contraction endpoints; original actual-output and standard-axiom checker unchanged"
   }
 }

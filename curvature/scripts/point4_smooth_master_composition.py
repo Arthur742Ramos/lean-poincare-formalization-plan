@@ -545,6 +545,12 @@ def map_record(expected, originals, changes):
         'historical_run':37233402239,
         'changed_dependency':'TensorHeatGeometricRegularity.lean newer baseline preserved; focused native qualification required',
         'scope':'Literal C2 metric local linear zero-trace right-inverse only; combined-head proof gates UNRUN; both targets OPEN'}
+    record['current_axiom_inventory']={'immutable_predecessor':MASTER,
+        'contraction_source':CONTRACTION_SOURCE,'probe':'contraction',
+        'inherited_combined':[150,144],'current_combined':[157,151],
+        'inherited_linear':[127,121],'current_linear':[134,128],
+        'exact_appended_endpoints':list(CONTRACTION_AXIOM_ADDITIONS),
+        'policy':'Preserve every inherited per-probe occurrence and append exactly seven authenticated contraction endpoints; original actual-output and standard-axiom checker unchanged'}
     return record
 
 
@@ -726,6 +732,52 @@ def evidence_parser(path):
     if 'audit-json' in common:parser.add_argument('--audit-rc',type=int)
     return parser
 
+INHERITED_AXIOM_PROBES = (
+    'contraction', 'coordinate_connection', 'coordinate_jet', 'coordinate_operator',
+    'principal_remainder', 'chosen_lc_coordinate', 'chosen_lc_curvature',
+    'standard_coordinate_operator', 'frozen_metric_principal', 'weak_laplacian',
+    'boundaryless_chart_frames', 'c2_heat_trace', 'weighted_initial_heat',
+)
+CONTRACTION_AXIOM_ADDITIONS = (
+    'PoincareCurvature.ParametrizedInner.contMDiffOn_timeDependentMetricContraction',
+    'PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg',
+    'RicciFlow.metricContractedDeTurckVectorField_eq_sum_inverseGram_correction',
+    'RicciFlow.contMDiff_metricContractedDeTurckVectorField_of_joint_correction',
+    'RicciFlow.contMDiff_metricContractedDeTurckGaugeField_of_joint_correction',
+    'RicciFlow.exists_pos_metricContractedDiffeomorph3GaugeFlowOn_of_joint_correction',
+    'RicciFlow.contMDiff_metricContractedDeTurckVectorField_of_joint_correctionFunctional',
+)
+
+def current_axiom_inventory(path, inherited):
+    """Preserve the immutable occurrence surface and allow one exact extension."""
+    def probe_names(source):
+        names = re.findall(r'^#print axioms (\S+)', source, re.M)
+        if 'open RicciFlow.AnalyticPDE' in source:
+            names = [n if n.startswith(('PoincareCurvature.', 'RicciFlow.')) else 'RicciFlow.AnalyticPDE.' + n for n in names]
+        assert names and len(names) == len(set(names)), 'Empty/duplicate source axiom surface'
+        return names
+    combined = 'c2_initial' in path or 'manifold_heat_release' in path
+    probes = INHERITED_AXIOM_PROBES if combined else INHERITED_AXIOM_PROBES[:11]
+    assert tuple(inherited.PROBES) == probes, 'Inherited axiom probe inventory drift'
+    master = parent_tree(MASTER)
+    inventory = {}; original_occurrences = []; current_occurrences = []
+    for name in probes:
+        source_path = f'curvature/scripts/point4_{name}_probe.lean'
+        original = original_bytes(source_path, master, {}).decode('utf8')
+        before = tuple(probe_names(original))
+        source = (ROOT / source_path).read_text(encoding='utf8')
+        after = tuple(probe_names(source))
+        expected = before + CONTRACTION_AXIOM_ADDITIONS if name == 'contraction' else before
+        assert after == expected, 'Changed inherited occurrence or unapproved endpoint: ' + name
+        inventory[name] = source, expected
+        original_occurrences.extend(before); current_occurrences.extend(after)
+    assert (len(original_occurrences), len(set(original_occurrences))) == ((150,144) if combined else (127,121)), 'Immutable predecessor occurrence surface drift'
+    assert len(CONTRACTION_AXIOM_ADDITIONS) == len(set(CONTRACTION_AXIOM_ADDITIONS)) == 7
+    assert not set(CONTRACTION_AXIOM_ADDITIONS) & set(original_occurrences), 'Extension repeats inherited declaration'
+    assert (len(current_occurrences), len(set(current_occurrences))) == ((157,151) if combined else (134,128)), 'Exact seven-endpoint extension drift'
+    return inventory
+
+
 def current_evidence(path,args):
     verify_current()
     parser=evidence_parser(path)
@@ -738,13 +790,14 @@ def current_evidence(path,args):
         folder=parsed.axiom_dir
         if 'c2_initial' in path or 'manifold_heat_release' in path:
             assert {p.name for p in folder.iterdir()}=={p+'.log' for p in inherited.PROBES}
+        inventory=current_axiom_inventory(path,inherited)
         total=0;distinct=set()
-        for name in inherited.PROBES:
-            source=(ROOT/f'curvature/scripts/point4_{name}_probe.lean').read_text()
+        for name,(source,expected_names) in inventory.items():
             names=inherited.check_axiom_output(source,(folder/(name+'.log')).read_text())
+            assert names==set(expected_names), 'Current axiom endpoint evidence drift: '+name
             total+=len(names);distinct|=names
-        assert total==(150 if 'c2_initial' in path or 'manifold_heat_release' in path else 127)
-        if 'c2_initial' in path or 'manifold_heat_release' in path:assert len(distinct)==144
+        combined='c2_initial' in path or 'manifold_heat_release' in path
+        assert (total,len(distinct))==((157,151) if combined else (134,128))
         inherited.check_boundaryless_types((folder/'boundaryless_chart_frames.log').read_text())
     if getattr(parsed,'audit_json',None):
         assert parsed.audit_rc is not None
