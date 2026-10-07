@@ -105,3 +105,91 @@ Historical source binding and full master admission remain pending.
 Point4 and both general targets remain OPEN. Global chart coverage,
 evolving-family comparison, upstream global chosen-connection equality,
 curvature and Ricci comparisons, and PDE existence remain OPEN.
+
+
+## Geometric Ricci extension on PR138
+
+This extension starts from published PR138 head `3818bef6722e8c9810739a9fce26b5ec07bec98a`,
+tree `990d9fbe4fc8994c9dbafe278bbc1ccc71371f7b`, sole parent
+`9e24ec38b8f11d8720a8c1bce638cdb54bbec0d2`. Its corrected finite tests are
+preserved byte for byte. The 13 inherited project sources match PR135 support
+`90322f1d63e4798afa385fa2c160edf07365191b`, tree
+`1379f674eafee5e4545b5ea80cf940e43ac47f09`. PR135 merged at
+`79ac3111a438dee1bf3b800e403e1c1a7824046a`; that commit is the future master
+destination. Integration onto master remains UNRUN.
+
+The 23 added Lean files are 13 proof sources and 10 probes. Their reviewed
+bytes identify the actual chosen connection, curvature components and Ricci
+trace in the chart frame. On the genuine `chartLeviCivitaGoodSet`,
+`ChartPort.chartRicciTensor_eq_timeFamilyChosen_ricciCurvature` identifies
+`chartRicciTensor (g t) α i k` at the chart coordinate of `x` with actual
+chosen `ricciCurvature x (frame i x) (frame k x)`. The retained transposed
+trace theorem supplies arguments `k,i`; genuine project Levi-Civita Ricci
+symmetry gives the same-order result. Every metric and regularity instance
+comes from the exact `g t` through the existing proved `SmoothForward.toC2`
+and chosen family. The good-set and M-scoped boundarylessness premises
+remain explicit; there is no `NeZero`, unrelated ambient metric, assumed
+compatibility, curvature or symmetry certificate.
+
+The reviewed desktop evidence uses official Lean 4.33 and Mathlib `db584`.
+Rank-zero, actual zero trace for arbitrary tangent vectors, empty-manifold,
+metric-C2 and chosen-Levi-Civita probes passed with standard axioms only.
+These retained identities authorize reuse of the mathematical bytes.
+Hosted qualification of this dependent draft remains **UNRUN**.
+
+The original 70-source rebuild and `ChartIdentityEvidence` gate remain
+required. CI then rebuilds all 13 added proof sources and executes all 10
+added probes with exact per-probe declaration and axiom contracts. The
+admitted union is 94 modules; successful compilation requires 83 source
+emits and 11 probes. Legacy and extension verdicts are recorded separately,
+and combined success follows the final exact physical admission. The
+terminal-process correction changes `owned_process_identity` and `run`.
+All other original helper bodies, deadlines, strict flags, dependency pins,
+artifact validation and first-failure reporting remain unchanged. The
+original finite 31-source fallback remains; a missing import outside it
+still stops the build explicitly.
+
+Existing `DifferentialGeometry` and `ChartPort` Lake registrations cover all
+new paths. Their strict options and default targets are unchanged. A named
+ordinary target is `lake build +ChartPort.ChosenChartRicciSameOrder:olean`.
+That normal-Lake build is unrun; focused CI uses the existing owned serial
+compiler in the actual admitted Lake environment.
+
+Published `9e24ec3` had eight positional fixture failures. The reviewed
+PID-order correction is published at `3818bef` on existing PR138.
+Run `37554812585`, job `112578498292`, passed ordinary controls, source
+admission and official setup, then failed at `cache-bootstrap-4` with
+"More than one Lean compiler in an owned stage". The old fixture failure
+is resolved. That run supplies no current port proof pass.
+
+The finite model explicitly supplies the mandatory extension fields,
+13 synthetic source rows and ten synthetic probe rows. Every old assertion
+and the published PID-order fix is retained. Seven schema controls cover
+complete execution, missing fields/contracts, incomplete counts, changed
+source bytes, rejected probes and setup-only mode. These synthetic fixtures
+are ordinary driver controls, not Lean mathematical evidence.
+
+The separately frozen terminal-process correction is composed here. The
+authenticated native snapshot reported a child in state Z with zero RSS,
+an absent executable and no observed argv. This does not establish that
+child's executable or purpose. `owned_process_identity` now performs a
+second stat read for an initially Z row. Both observations must retain
+Z, matching PID, parent, group, session and start time, equal group/session,
+and zero RSS. A failed or malformed read or any mismatch retains the
+conservative compiler count. `run` excludes only that verified terminal
+row from the current count. The exact prefix-query predicate is unchanged.
+
+All owned rows remain in snapshots and RSS accounting. The one-compiler
+limit, two CPUs, 6 GiB RSS, zero swap, -j1/-M5632 heap/thread flags,
+deadlines, kill/reap and survivor rejection remain required. A surviving
+zombie still fails cleanup. Alive, unreadable, raced and pre-exec images
+retain conservative counting. Linux process semantics are documented at
+https://docs.kernel.org/filesystems/proc.html and
+https://man7.org/linux/man-pages/man2/wait.2.html .
+
+The combined candidate passes 62 ordinary controls locally: 60 passed,
+two genuine Unix checks remain UNRUN on Windows. No Lean compiler ran.
+Both separate packets and all failure history remain preserved. Independent
+task8 review precedes a source-only draft update to existing PR138. Hosted
+new qualification, master integration, Point4 and both general targets
+remain OPEN or UNRUN. Merged master79ac is a future destination.

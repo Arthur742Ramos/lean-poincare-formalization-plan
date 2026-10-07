@@ -6,6 +6,15 @@ BASE = '1664872ce762ee027b76cb515befb0ae829b2711'
 BASE_TREE = '6d74e9612cf6e16f2d027012cede68e5e0a23483'
 META = 'curvature/third-party/differential-geometry/'
 APPROVED_SOURCE_TABLE_SHA256 = '69f2b44e5fdd6cde1d4173e1282eb7d422aea6026e53909eaa7057d8f10a712e'
+RICCI_DRAFT_BASE = '3818bef6722e8c9810739a9fce26b5ec07bec98a'
+RICCI_DRAFT_BASE_TREE = '990d9fbe4fc8994c9dbafe278bbc1ccc71371f7b'
+APPROVED_RICCI_SOURCE_TABLE_SHA256 = '04749486e28c3270c2429026e2b53e4db2fe57adbd96d6ec422fbf063c2f2114'
+APPROVED_RICCI_PROBE_CONTRACTS_SHA256 = '00c985f73d88685daa6f99d730e1b8efa5e31820821501feccddfb0d1295d780'
+RICCI_MODIFIED_PATHS = {'curvature/scripts/chart_port_candidate_check.py',
+                        'curvature/scripts/chart_port_ci.py',
+                        'curvature/scripts/test_chart_port_ci.py',
+                        'curvature/third-party/differential-geometry/SOURCE-PROVENANCE.json',
+                        'docs/point4/local-chart-connection.md'}
 EXTRA = {META + x for x in ('LICENSE', 'NOTICE', 'README.upstream.md', 'SOURCE-PROVENANCE.json', 'minimal-upstream-port.patch')}
 EXTRA |= {'docs/point4/local-chart-connection.md', '.github/workflows/point4-local-chart-connection.yml',
           'curvature/scripts/chart_port_candidate_check.py', 'curvature/scripts/chart_port_ci.py'}
@@ -275,6 +284,25 @@ def check_probe(data):
     return dict(axiom_declarations=names, allowed_axioms=['propext', 'Classical.choice', 'Quot.sound'],
                 full_printed_type_and_proof=True, raw_log_sha256=digest(data))
 
+def check_ricci_extension_probe(data, contract):
+    text = data.decode('utf8')
+    assert 'sorryAx' not in text and 'error:' not in text
+    pattern = r"'([^']+)' (?:depends on axioms:\s*\[([^\]]*)\]|does not depend on any axioms)"
+    rows = []
+    for match in re.finditer(pattern, text):
+        body = re.sub(r'\b(propext|Classical\.choice|Quot\.sound)\.\{[^{}]*\}', r'\1', match.group(2) or '')
+        values = [value.strip() for value in body.split(',') if value.strip()]
+        assert set(values) <= {'propext', 'Classical.choice', 'Quot.sound'}, match.group(1)
+        rows.append([match.group(1), values])
+    assert rows == contract['axiom_rows'], 'Missing, duplicate, reordered or changed extension axiom evidence'
+    assert rows and contract['full_printed_declarations'], 'Empty extension evidence contract'
+    for name in contract['full_printed_declarations']:
+        pattern = r'(?m)^(?:@\[[^\n]*\]\s*)*(?:theorem|def|opaque|abbrev|axiom|instance|structure|class)\s+' + re.escape(name) + r'(?=\.\{|\s|:|$)'
+        assert re.search(pattern, text), 'Missing full extension declaration: ' + name
+    return dict(module=contract['module'], axiom_rows=rows,
+                full_printed_type_and_proof=True, raw_log_sha256=digest(data))
+
+
 def admit(root, expected_sha, expected_tree, dependencies=None):
     assert re.fullmatch('[0-9a-f]{40}', expected_sha)
     assert re.fullmatch('[0-9a-f]{40}', expected_tree)
@@ -305,14 +333,37 @@ def admit(root, expected_sha, expected_tree, dependencies=None):
     assert sum(p.startswith('curvature/DifferentialGeometry/') for p in new_paths) == 55
     assert {p for p in new_paths if p.startswith('curvature/ChartPort/')} == {
         'curvature/ChartPort/MetricAPI.lean', 'curvature/ChartPort/ChartIdentity.lean', 'curvature/ChartPort/ChartIdentityEvidence.lean'}
+    extension = prov['geometric_ricci_extension']
+    assert extension['schema_version'] == 1
+    assert extension['dependent_base_sha'] == RICCI_DRAFT_BASE
+    assert extension['dependent_base_tree'] == RICCI_DRAFT_BASE_TREE
+    assert git(root, 'rev-parse', RICCI_DRAFT_BASE + '^{tree}').decode().strip() == RICCI_DRAFT_BASE_TREE
+    subprocess.run(['git', '--no-replace-objects', '-C', str(root), 'merge-base', '--is-ancestor', RICCI_DRAFT_BASE, expected_sha], check=True)
+    extension_rows = extension['sources']
+    keys = ('module', 'path', 'bytes', 'sha256', 'git_blob', 'mode', 'imports', 'role')
+    bound_rows = [{key: row[key] for key in keys} for row in extension_rows]
+    assert digest(json.dumps(sorted(bound_rows, key=lambda row: row['path']), sort_keys=True, separators=(',', ':')).encode()) == APPROVED_RICCI_SOURCE_TABLE_SHA256
+    assert extension['source_table_sha256'] == APPROVED_RICCI_SOURCE_TABLE_SHA256
+    extension_paths = {row['path'] for row in extension_rows}
+    assert len(extension_rows) == len(extension_paths) == 23
+    assert sum(row['role'] == 'mathematical source' for row in extension_rows) == 13
+    assert sum(row['role'] == 'probe' for row in extension_rows) == 10
+    contracts = extension['probe_contracts']
+    assert digest(json.dumps(contracts, sort_keys=True, separators=(',', ':')).encode()) == APPROVED_RICCI_PROBE_CONTRACTS_SHA256
+    assert extension['probe_contracts_sha256'] == APPROVED_RICCI_PROBE_CONTRACTS_SHA256
+    assert len(contracts) == 10 and {row['module'] for row in contracts} == {row['module'] for row in extension_rows if row['role'] == 'probe'}
+    dependent = tree_entries(root, RICCI_DRAFT_BASE)
+    assert set(dependent) <= set(current), 'Dependent base path deletion'
+    assert set(current) - set(dependent) == extension_paths, 'Unexpected dependent draft additions'
+    assert {path for path in dependent if dependent[path] != current[path]} == RICCI_MODIFIED_PATHS, 'Unexpected dependent base change'
     assert set(base) <= set(current), 'Base path deletion'
-    assert set(current) - set(base) == new_paths | EXTRA, 'Unexpected added paths'
+    assert set(current) - set(base) == new_paths | EXTRA | extension_paths, 'Unexpected added paths'
     assert len({p.casefold() for p in current}) == len(current), 'Case-fold path collision'
     assert [p for p in base if base[p] != current[p]] == ['curvature/lakefile.toml'], 'Inherited path/hash/mode change'
     config = git(root, 'show', BASE + ':curvature/lakefile.toml')
     addition = b'\n[[lean_lib]]\nname = "DifferentialGeometry"\nmoreLeanArgs = ["-j1", "-M5632", "-DautoImplicit=false", "-DmaxSynthPendingDepth=3"]\n\n[[lean_lib]]\nname = "ChartPort"\nmoreLeanArgs = ["-j1", "-M5632", "-DautoImplicit=false", "-DmaxSynthPendingDepth=3"]\n'
     assert (root / 'curvature/lakefile.toml').read_bytes() == config + addition
-    for p in new_paths | EXTRA | {'curvature/lakefile.toml'}:
+    for p in new_paths | EXTRA | extension_paths | {'curvature/lakefile.toml'}:
         mode, kind, blob = current[p]
         assert (mode, kind) == ('100644', 'blob'), (p, mode, kind)
         data = (root / p).read_bytes()
@@ -352,11 +403,32 @@ def admit(root, expected_sha, expected_tree, dependencies=None):
     assert sorted(external) == prov['external_mathlib_roots']
     assert len(prov['mathlib_support_sources']) == 31 and prov['mathlib_source_modifications'] == 0
     assert digest((root / (META + 'minimal-upstream-port.patch')).read_bytes()) == prov['original_patch_sha256']
+    legacy_closure = list(ordered)
+    legacy_external = sorted(external)
+    for row in extension_rows:
+        assert row['module'] not in modules
+        data = (root / row['path']).read_bytes()
+        assert len(data) == row['bytes'] and digest(data) == row['sha256'], row['path']
+        assert imports(data) == row['imports']
+        assert current[row['path']] == (row['mode'], 'blob', row['git_blob'])
+        modules[row['module']] = row
+    for contract in contracts:
+        assert modules[contract['module']]['sha256'] == contract['source_sha256']
+    for row in extension_rows:
+        visit(row['module'])
+    assert len(ordered) == 94 and visited == set(modules)
+    assert sorted(external) == extension['external_mathlib_roots']
+    extension_closure = ordered[71:]
+    assert len(extension_closure) == 23 and {row['module'] for row in extension_closure} == {row['module'] for row in extension_rows}
     return dict(candidate_sha=expected_sha, candidate_tree=expected_tree, base=BASE, base_tree=BASE_TREE,
-                additions=len(new_paths | EXTRA), modified_paths=['curvature/lakefile.toml'],
+                additions=len(new_paths | EXTRA | extension_paths), modified_paths=['curvature/lakefile.toml'],
                 inherited_paths=len(base), all_inherited_validators_unchanged=True,
                 physical_inventory=physical,
-                closure=ordered, external_mathlib_roots=sorted(external), point4='OPEN', general_targets='OPEN')
+                closure=legacy_closure, legacy_external_mathlib_roots=legacy_external,
+                extension_closure=extension_closure, extension_probe_contracts=contracts,
+                dependent_base=RICCI_DRAFT_BASE, dependent_base_tree=RICCI_DRAFT_BASE_TREE,
+                dependent_modified_paths=sorted(RICCI_MODIFIED_PATHS),
+                external_mathlib_roots=sorted(external), point4='OPEN', general_targets='OPEN')
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()

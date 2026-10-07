@@ -1,7 +1,7 @@
 """Rebuild the admitted chart closure serially; never substitute old receipts."""
 from pathlib import Path
 import argparse, hashlib, json, os, re, signal, subprocess, sys, time
-from chart_port_candidate_check import admit, check_probe, digest, imports, tree_entries, package_root_relationships
+from chart_port_candidate_check import admit, check_probe, check_ricci_extension_probe, digest, imports, tree_entries, package_root_relationships
 from chart_port_artifacts import artifact_status, required_import_files
 
 LIMIT = 6 * 1024 ** 3
@@ -32,7 +32,7 @@ def owned_process_identity(p, initial_stat):
     row = dict(pid=int(p.name), observed_at=time.time(), state=initial_stat[0],
         ppid=int(initial_stat[1]), pgrp=int(initial_stat[2]), session=int(initial_stat[3]),
         starttime_ticks=int(initial_stat[19]), rss_bytes=int(initial_stat[21]) * os.sysconf('SC_PAGE_SIZE'),
-        stable=False, errors=[])
+        stable=False, errors=[], verified_terminated_zombie=False)
     try:
         row['exe'] = os.readlink(p / 'exe')
         image = (p / 'exe').stat()
@@ -58,6 +58,28 @@ def owned_process_identity(p, initial_stat):
             row['errors'].append(dict(type='IdentityRace', message='Process identity changed during observation'))
     except (OSError, ValueError, UnicodeError, IndexError) as exc:
         row['errors'].append(dict(type=type(exc).__name__, message=str(exc)))
+    if row['state'] == 'Z':
+        # A terminal state is not an executable/query exemption. Verify the
+        # same kernel identity remains Z after all fallible image reads.
+        row['terminal_errors'] = []
+        try:
+            raw_stat = (p / 'stat').read_text()
+            terminal = raw_stat.rsplit(')', 1)[1].split()
+            row['terminal_recheck'] = dict(pid=int(raw_stat.split(' ', 1)[0]),
+                state=terminal[0], ppid=int(terminal[1]), pgrp=int(terminal[2]),
+                session=int(terminal[3]), starttime_ticks=int(terminal[19]),
+                rss_bytes=int(terminal[21]) * os.sysconf('SC_PAGE_SIZE'))
+            check = row['terminal_recheck']
+            keys = ('pid', 'ppid', 'pgrp', 'session', 'starttime_ticks')
+            row['verified_terminated_zombie'] = (check['state'] == 'Z'
+                and row['rss_bytes'] == check['rss_bytes'] == 0
+                and row['pgrp'] == row['session']
+                and all(row[key] == check[key] for key in keys))
+            if not row['verified_terminated_zombie']:
+                row['terminal_errors'].append(dict(type='TerminalIdentityMismatch',
+                    message='Terminal state or kernel process identity changed'))
+        except (OSError, ValueError, UnicodeError, IndexError) as exc:
+            row['terminal_errors'].append(dict(type=type(exc).__name__, message=str(exc)))
     row['rechecked_at'] = time.time()
     return row
 
@@ -119,7 +141,10 @@ def run(argv, label, cwd=PKG, env=None, timeout=600):
                     counted = 'exe' not in row or any(Path(exe).name == 'lean'
                         for exe in (row.get('exe'), row.get('recheck', {}).get('exe')) if exe is not None)
                     query = counted and is_exact_official_prefix_query(row, owner, argv, receipt)
-                    row.update(counted_compiler=bool(counted and not query), exact_official_prefix_query=bool(query))
+                    terminal = row.get('verified_terminated_zombie') is True
+                    row.update(counted_compiler=bool(counted and not query and not terminal),
+                        exact_official_prefix_query=bool(query),
+                        conservative_executable_count=bool(counted))
                     compilers += row['counted_compiler']
                 stage['owned_process_snapshot'] = dict(observed_at=time.time(),
                     owner_pid=proc.pid, counted_compilers=compilers, processes=identities)
@@ -392,11 +417,35 @@ try:
             (EVIDENCE / 'probe-verdict.json').write_text(json.dumps(result, indent=2) + '\n')
         else:
             serial_compile(row['module'], source, local, lean, env, 'local-' + str(i), True)
+    receipt.update(legacy_geometric_gate='PASSED', fresh_local_modules=70, fresh_probe=1,
+                   ricci_extension_gate='RUNNING', fresh_extension_modules=0, fresh_extension_probes=0)
+    save()
+    contracts = {row['module']: row for row in admission['extension_probe_contracts']}
+    extension_emits, extension_probes = 0, 0
+    for i, row in enumerate(admission['extension_closure']):
+        source = ROOT / row['path']
+        assert digest(source.read_bytes()) == row['sha256']
+        if row['role'] == 'probe':
+            probe = compiler_run([lean, '-j1', '-M5632', '-DautoImplicit=false', '-DmaxSynthPendingDepth=3', str(source)],
+                                 'ricci-extension-probe-' + str(i), source, row['module'], env=env)
+            result = check_ricci_extension_probe(probe, contracts[row['module']])
+            (EVIDENCE / ('ricci-extension-probe-' + str(i) + '-verdict.json')).write_text(json.dumps(result, indent=2) + '\n')
+            extension_probes += 1
+        else:
+            serial_compile(row['module'], source, local, lean, env, 'ricci-extension-local-' + str(i), True)
+            extension_emits += 1
+        receipt.update(fresh_extension_modules=extension_emits, fresh_extension_probes=extension_probes)
+        save()
+    assert extension_emits == 13 and extension_probes == 10
+    receipt['ricci_extension_gate'] = 'PASSED'
+    save()
     final = admit(ROOT, args.expected_sha, args.expected_tree, dependency_inventory)
     assert {k:v for k,v in final.items() if k != 'physical_inventory'} == {k:v for k,v in admission.items() if k != 'physical_inventory'}
     (EVIDENCE / 'final-physical-admission.json').write_text(json.dumps(final, indent=2) + '\n')
     assert not subprocess.check_output(['git', '--no-replace-objects', '-C', str(mathlib), 'status', '--porcelain', '--untracked-files=no'])
     receipt.update(build='PASSED', full_candidate_qualification='PASSED', fresh_local_modules=70, fresh_probe=1, fallback_mathlib_modules=len(missing_order),
+                   fresh_combined_modules=83, fresh_combined_probes=11,
+                   admitted_local_modules=94,
                    ordinary_dependency_artifacts='pinned cache imports; not a full dependency rebuild',
                    cgroup_peak_memory_bytes=int((cgroup / 'memory.peak').read_text()), owner_completion='all child stages reaped and drained')
 except _SetupOnlyComplete:

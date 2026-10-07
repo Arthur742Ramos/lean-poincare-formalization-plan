@@ -22,7 +22,7 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 class DriverControls(unittest.TestCase):
-    def model(self, setup_only, *, memory=LIMIT, quota=200000, invalid_pin=False, reject_probe=False, reject_configured=False):
+    def model(self, setup_only, *, memory=LIMIT, quota=200000, invalid_pin=False, reject_probe=False, reject_configured=False, missing_extension_field=None, missing_extension_contract=False, short_extension=False, changed_extension_source=False, reject_extension_probe=False):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             pkg, evidence, prefix, src = [root / p for p in ('curvature', 'evidence', 'compiler', 'sources')]
@@ -52,8 +52,27 @@ class DriverControls(unittest.TestCase):
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_bytes(b'fixture source, not compiled\n')
                 closure.append(dict(module=name, path=path, sha256=digest(p.read_bytes())))
-            admission = dict(closure=closure, external_mathlib_roots=[], physical_inventory={})
-            trace = dict(run=[], compile=[], admit=[], affinity=[], roots=[], root_receipt_written_before_admit=False)
+            extension_closure = []
+            extension_contracts = []
+            for i in range(23):
+                name = f'ChartPort.ExtensionFixture{i}'
+                path = 'curvature/' + name.replace('.', '/') + '.lean'
+                p = root / path
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_bytes(b'extension fixture source, not compiled\n')
+                role = 'mathematical source' if i < 13 else 'probe'
+                row = dict(module=name, path=path, sha256=digest(p.read_bytes()), role=role)
+                extension_closure.append(row)
+                if role == 'probe':
+                    extension_contracts.append(dict(module=name, source_sha256=row['sha256']))
+            if short_extension: extension_closure.pop()
+            if missing_extension_contract: extension_contracts.pop()
+            if changed_extension_source:
+                (root / extension_closure[0]['path']).write_bytes(b'changed extension fixture source\n')
+            admission = dict(closure=closure, external_mathlib_roots=[], physical_inventory={},
+                extension_closure=extension_closure, extension_probe_contracts=extension_contracts)
+            if missing_extension_field is not None: del admission[missing_extension_field]
+            trace = dict(run=[], compile=[], extension_compile=[], extension_probe=[], admit=[], affinity=[], roots=[], root_receipt_written_before_admit=False)
             receipt = dict(source_admission='PENDING', build='RUNNING', environment_setup='PENDING',
                            full_candidate_qualification='NOT_RUN', stages=[], point4='OPEN', general_targets='OPEN')
             def fake_path(value):
@@ -83,6 +102,15 @@ class DriverControls(unittest.TestCase):
             def check_probe(data):
                 if reject_probe: raise AssertionError('Rejected fixture probe')
                 return {'fixture_probe': True}
+            def serial_compile(*args):
+                target = 'extension_compile' if args[5].startswith('ricci-extension-local-') else 'compile'
+                trace[target].append(args)
+            def check_extension_probe(data, contract):
+                self.assertEqual(data, b'fixture log')
+                self.assertEqual(contract['source_sha256'], next(row['sha256'] for row in extension_closure if row['module'] == contract['module']))
+                trace['extension_probe'].append(contract['module'])
+                if reject_extension_probe: raise AssertionError('Rejected finite extension probe')
+                return {'fixture_extension_probe': contract['module']}
             ns = dict(Path=fake_path, LIMIT=LIMIT, ROOT=root, PKG=pkg, EVIDENCE=evidence,
                 args=types.SimpleNamespace(expected_sha='a' * 40, expected_tree='b' * 40, setup_only=setup_only),
                 receipt=receipt, save=lambda: None, json=json, hashlib=hashlib,
@@ -91,8 +119,8 @@ class DriverControls(unittest.TestCase):
                 subprocess=types.SimpleNamespace(check_output=git), run=run, digest=digest, admit=admit,
                 tree_entries=lambda *args: {}, package_root_relationships=roots,
                 compiler_run=lambda argv,label,source,module,env=None: run(argv,label,env=env), artifact_status=lambda *args: {'ready': True},
-                serial_compile=lambda *args: trace['compile'].append(args), imports=lambda _: [],
-                check_probe=check_probe, time=types.SimpleNamespace(time=lambda: 0),
+                serial_compile=serial_compile, imports=lambda _: [],
+                check_probe=check_probe, check_ricci_extension_probe=check_extension_probe, time=types.SimpleNamespace(time=lambda: 0),
                 resource=types.SimpleNamespace(RLIMIT_AS=1, setrlimit=lambda *a: self.fail('Virtual-address ceiling restored')))
             failure = None
             try:
@@ -174,6 +202,82 @@ class DriverControls(unittest.TestCase):
             for bound in ('MemoryMax=6442450944', 'MemorySwapMax=0', 'CPUQuota=200%',
                           'OOMPolicy=kill', 'KillMode=control-group', 'PYTHONDONTWRITEBYTECODE=1'):
                 self.assertIn(bound, workflow)
+
+    def test_extension_model_requires_all_13_sources_and10_probes(self):
+        receipt, trace, failure = self.model(False)
+        self.assertIsNone(failure)
+        self.assertEqual(len(trace['compile']), 70)
+        self.assertEqual(len(trace['extension_compile']), 13)
+        self.assertTrue(all(call[-1] is True for call in trace['extension_compile']))
+        self.assertEqual(len(trace['extension_probe']), 10)
+        self.assertEqual(len(set(trace['extension_probe'])), 10)
+        self.assertEqual(receipt['legacy_geometric_gate'], 'PASSED')
+        self.assertEqual(receipt['ricci_extension_gate'], 'PASSED')
+        self.assertEqual((receipt['fresh_local_modules'], receipt['fresh_probe']), (70, 1))
+        self.assertEqual((receipt['fresh_extension_modules'], receipt['fresh_extension_probes']), (13, 10))
+        self.assertEqual((receipt['fresh_combined_modules'], receipt['fresh_combined_probes']), (83, 11))
+        self.assertEqual(receipt['admitted_local_modules'], 94)
+        self.assertEqual(receipt['full_candidate_qualification'], 'PASSED')
+        probes = [row for row in trace['run'] if row[1].startswith('ricci-extension-probe-')]
+        self.assertEqual(len(probes), 10)
+        self.assertTrue(all(row[0][1:5] == ['-j1', '-M5632', '-DautoImplicit=false', '-DmaxSynthPendingDepth=3'] for row in probes))
+
+    def test_missing_extension_schema_fields_cannot_qualify(self):
+        for field in ('extension_probe_contracts', 'extension_closure'):
+            with self.subTest(field=field):
+                receipt, trace, failure = self.model(False, missing_extension_field=field)
+                self.assertIsInstance(failure, KeyError)
+                self.assertEqual(failure.args, (field,))
+                self.assertEqual(len(trace['compile']), 70)
+                self.assertEqual(trace['extension_compile'], [])
+                self.assertEqual(trace['extension_probe'], [])
+                self.assertEqual(receipt['build'], 'FAILED')
+                self.assertEqual(receipt['full_candidate_qualification'], 'NOT_RUN')
+                self.assertNotEqual(receipt['ricci_extension_gate'], 'PASSED')
+
+    def test_missing_extension_contract_cannot_qualify(self):
+        receipt, trace, failure = self.model(False, missing_extension_contract=True)
+        self.assertIsInstance(failure, KeyError)
+        self.assertEqual(len(trace['extension_compile']), 13)
+        self.assertEqual(len(trace['extension_probe']), 9)
+        self.assertEqual(receipt['build'], 'FAILED')
+        self.assertEqual(receipt['full_candidate_qualification'], 'NOT_RUN')
+        self.assertNotEqual(receipt['ricci_extension_gate'], 'PASSED')
+
+    def test_incomplete_extension_counts_cannot_qualify(self):
+        receipt, trace, failure = self.model(False, short_extension=True)
+        self.assertIsInstance(failure, AssertionError)
+        self.assertEqual(len(trace['extension_compile']), 13)
+        self.assertEqual(len(trace['extension_probe']), 9)
+        self.assertEqual(receipt['build'], 'FAILED')
+        self.assertEqual(receipt['full_candidate_qualification'], 'NOT_RUN')
+        self.assertNotEqual(receipt['ricci_extension_gate'], 'PASSED')
+
+    def test_changed_extension_source_cannot_qualify(self):
+        receipt, trace, failure = self.model(False, changed_extension_source=True)
+        self.assertIsInstance(failure, AssertionError)
+        self.assertEqual(len(trace['compile']), 70)
+        self.assertEqual(trace['extension_compile'], [])
+        self.assertEqual(trace['extension_probe'], [])
+        self.assertEqual(receipt['build'], 'FAILED')
+        self.assertEqual(receipt['full_candidate_qualification'], 'NOT_RUN')
+
+    def test_rejected_extension_probe_cannot_qualify(self):
+        receipt, trace, failure = self.model(False, reject_extension_probe=True)
+        self.assertIsInstance(failure, AssertionError)
+        self.assertEqual(str(failure), 'Rejected finite extension probe')
+        self.assertEqual(len(trace['extension_compile']), 13)
+        self.assertEqual(len(trace['extension_probe']), 1)
+        self.assertEqual(receipt['build'], 'FAILED')
+        self.assertEqual(receipt['full_candidate_qualification'], 'NOT_RUN')
+        self.assertNotEqual(receipt['ricci_extension_gate'], 'PASSED')
+
+    def test_setup_only_runs_no_extension_stage(self):
+        receipt, trace, failure = self.model(True)
+        self.assertIsNone(failure)
+        self.assertEqual(trace['extension_compile'], [])
+        self.assertEqual(trace['extension_probe'], [])
+        self.assertEqual(receipt['full_candidate_qualification'], 'NOT_RUN')
 
 class OwnedResourceMonitor(unittest.TestCase):
     def exercise(self, *, pages=1, extra_compiler=False, overdue=False, survivor=False):
@@ -964,7 +1068,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
             self.assertFalse(self.classify(query,owner,official,argv))
         self.assertFalse(self.classify(query,owner,{}))
 
-    def exercise(self, *, child_argv=None, race=False, disappear=False, unknown=False, snapshot_only=False, pages=2, overdue=False, missing_owner=False, exe_race=False, reverse_exe_race=False, reverse_order=False):
+    def exercise(self, *, child_argv=None, race=False, disappear=False, unknown=False, snapshot_only=False, pages=2, overdue=False, missing_owner=False, exe_race=False, reverse_exe_race=False, reverse_order=False, child_state=None, terminal_change=None, terminal_read_error=None, zombie_survivor=False):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);procdir=root/'proc';procdir.mkdir()
             image_bytes=b'finite synthetic executed official executable identity'
@@ -972,6 +1076,9 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
             def stat(pid, session=100):
                 fields=['S']+['0']*50;fields[1]='50' if pid==100 else '100'
                 fields[2]=str(session);fields[3]=str(session);fields[19]=str(20 if pid==100 else 21);fields[21]=str(pages)
+                if pid==101 and child_state is not None:
+                    fields[0]=child_state
+                    if child_state=='Z':fields[21]='0'
                 (procdir/str(pid)/'stat').write_text(str(pid)+' (fixture) '+' '.join(fields))
             for pid,args in ((100,self.stage_argv),(101,['lean','--print-prefix'] if child_argv is None else child_argv)):
                 if missing_owner and pid==100:continue
@@ -990,12 +1097,13 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
             def kill(pid,sig):
                 events.append(('kill',pid,sig))
                 for n in (100,101):
-                    if (procdir/str(n)).exists():stat(n,0)
+                    if (procdir/str(n)).exists() and not (zombie_survivor and n==101):stat(n,0)
             exe_reads=0
             def readlink(p):
                 nonlocal exe_reads
                 if Path(p).parent.name=='101':
                     exe_reads+=1
+                    if child_state=='Z':raise FileNotFoundError('finite zombie executable absent')
                     if unknown:raise PermissionError('finite unreadable executable')
                     if exe_race and exe_reads==1:return '/official/bin/helper'
                     if reverse_exe_race and exe_reads==2:return '/official/bin/helper'
@@ -1013,6 +1121,23 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
                 os=types.SimpleNamespace(readlink=readlink,killpg=kill,sysconf=lambda _:4096))
             function('owned_process_identity',ns);function('is_exact_official_prefix_query',ns)
             original_stat,original_read=Path.stat,Path.read_bytes
+            original_text=Path.read_text;stat_reads=0
+            def terminal_stat_read(p,*args,**kwargs):
+                nonlocal stat_reads
+                raw=original_text(p,*args,**kwargs)
+                if p.name=='stat' and p.parent.name=='101':
+                    stat_reads+=1
+                    if child_state=='Z' and stat_reads==2:
+                        if terminal_read_error:raise terminal_read_error('finite terminal stat read failed')
+                        if terminal_change:
+                            pid_part,tail=raw.rsplit(')',1);fields=tail.split()
+                            indices={'state':0,'ppid':1,'pgrp':2,'session':3,'starttime_ticks':19,'rss_bytes':21}
+                            if terminal_change=='pid':pid_part='102 (fixture'
+                            else:
+                                index=indices[terminal_change]
+                                fields[index]='R' if terminal_change=='state' else str(int(fields[index])+1)
+                            raw=pid_part+') '+' '.join(fields)
+                return raw
             reads=0
             def image_stat(p,*a,**kw):
                 return original_stat(image) if p.name=='exe' else original_stat(p,*a,**kw)
@@ -1025,7 +1150,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
                         if race:return b'lean\0second.lean\0'
                 return original_read(p)
             failure=None
-            with patch.object(Path,'stat',image_stat),patch.object(Path,'read_bytes',cmdline_read):
+            with patch.object(Path,'stat',image_stat),patch.object(Path,'read_bytes',cmdline_read),patch.object(Path,'read_text',terminal_stat_read):
                 if snapshot_only:
                     fields=(procdir/'101/stat').read_text().rsplit(')',1)[1].split()
                     return ns['owned_process_identity'](procdir/'101',fields)
@@ -1168,6 +1293,73 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
                 row=self.process(stage,101)
                 self.assertFalse(row['exact_official_prefix_query'])
                 if not 'child_argv' in kwargs:self.assertTrue(row['errors'])
+
+    def test_verified_terminal_zombie_is_not_currently_compiling(self):
+        for reverse in (False, True):
+            with self.subTest(reverse_order=reverse):
+                stage, events, failure = self.exercise(child_state='Z', reverse_order=reverse)
+                self.assertIsNone(failure)
+                row = self.process(stage,101)
+                self.assertEqual(row['state'], 'Z')
+                self.assertEqual(row['terminal_recheck']['state'], 'Z')
+                self.assertTrue(row['verified_terminated_zombie'])
+                self.assertEqual(row['terminal_errors'], [])
+                self.assertTrue(row['conservative_executable_count'])
+                self.assertFalse(row['counted_compiler'])
+                self.assertFalse(row['exact_official_prefix_query'])
+                self.assertNotIn('exe', row); self.assertNotIn('argv', row)
+                self.assertEqual(row['errors'][0]['type'], 'FileNotFoundError')
+                self.assertEqual(stage['owned_process_snapshot']['counted_compilers'], 1)
+                self.assertEqual(stage['peak_rss_bytes'], 2*4096)
+                self.assertTrue(stage['owner_reaped']); self.assertEqual(stage['remaining_session_pids'], [])
+                self.assertEqual(events, [('kill',100,9),('wait',10)])
+
+    def test_terminal_identity_changes_still_count_conservatively(self):
+        for field in ('pid','state','ppid','pgrp','session','starttime_ticks','rss_bytes'):
+            with self.subTest(field=field):
+                stage, _, failure = self.exercise(child_state='Z', terminal_change=field)
+                self.assertIsInstance(failure, RuntimeError)
+                self.assertEqual(str(failure), 'More than one Lean compiler in an owned stage')
+                row=self.process(stage,101)
+                self.assertFalse(row['verified_terminated_zombie'])
+                self.assertTrue(row['terminal_errors']); self.assertTrue(row['counted_compiler'])
+                self.assertEqual(stage['owned_process_snapshot']['counted_compilers'], 2)
+
+    def test_terminal_read_errors_still_count_conservatively(self):
+        for exception in (FileNotFoundError, PermissionError, ValueError, IndexError):
+            with self.subTest(exception=exception):
+                stage, _, failure=self.exercise(child_state='Z', terminal_read_error=exception)
+                self.assertIsInstance(failure, RuntimeError)
+                row=self.process(stage,101)
+                self.assertFalse(row['verified_terminated_zombie']); self.assertTrue(row['counted_compiler'])
+                self.assertEqual(row['terminal_errors'][0]['type'], exception.__name__)
+                self.assertEqual(stage['owned_process_snapshot']['counted_compilers'], 2)
+
+    def test_alive_unreadable_and_preexec_images_still_count(self):
+        for kwargs in (dict(unknown=True),dict(child_argv=self.stage_argv),dict(child_argv=[self.path,'second.lean'])):
+            with self.subTest(kwargs=kwargs):
+                stage, _, failure=self.exercise(**kwargs)
+                self.assertIsInstance(failure, RuntimeError)
+                row=self.process(stage,101)
+                self.assertFalse(row['verified_terminated_zombie']); self.assertTrue(row['counted_compiler'])
+                self.assertEqual(stage['owned_process_snapshot']['counted_compilers'], 2)
+
+    def test_terminal_zombie_does_not_waive_rss_or_deadline(self):
+        for kwargs,exception in ((dict(pages=10**9),RuntimeError),(dict(overdue=True),TimeoutError)):
+            with self.subTest(kwargs=kwargs):
+                stage, events, failure=self.exercise(child_state='Z',**kwargs)
+                self.assertIsInstance(failure,exception)
+                self.assertTrue(self.process(stage,101)['verified_terminated_zombie'])
+                self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],1)
+                self.assertTrue(stage['owner_reaped']); self.assertEqual(events,[('kill',100,9),('wait',10)])
+
+    def test_terminal_zombie_survivor_still_fails_cleanup(self):
+        stage,events,failure=self.exercise(child_state='Z',zombie_survivor=True)
+        self.assertIsInstance(failure,AssertionError)
+        self.assertEqual(str(failure),'Owned session not drained')
+        self.assertEqual(stage['remaining_session_pids'],[101])
+        self.assertTrue(self.process(stage,101)['verified_terminated_zombie'])
+        self.assertTrue(stage['owner_reaped']); self.assertEqual(events,[('kill',100,9),('wait',10)])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

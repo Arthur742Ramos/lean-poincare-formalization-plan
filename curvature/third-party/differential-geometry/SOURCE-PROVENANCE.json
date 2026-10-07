@@ -3254,7 +3254,7 @@
   "proof_packet_library_version": 3,
   "historical_source_binding": "PENDING",
   "full_master_admission": "PENDING",
-  "candidate_build": "Published 9e24ec3 failed ordinary Linux tests: 48 discovered, 8 positional fixture failures; toolchain/build skipped. Order-independent test/provenance-only correction hosted UNRUN",
+  "candidate_build": "Published3818 passed ordinary Linux controls/source admission/official setup; failed cache-bootstrap-4 after conservatively counting an observed terminalZ child with absentexe. Verified-terminal source correction hosted UNRUN; no currentportproofpass.",
   "point4": "OPEN",
   "general_targets": "OPEN",
   "scope": "constant downgraded smooth metric, actual chart good set, differentiable section at evaluation",
@@ -3904,5 +3904,2200 @@
     "full_candidate_qualification": "UNRUN",
     "point4": "OPEN",
     "general_targets": "OPEN"
+  },
+  "geometric_ricci_extension": {
+    "schema_version": 1,
+    "dependent_base_sha": "3818bef6722e8c9810739a9fce26b5ec07bec98a",
+    "dependent_base_tree": "990d9fbe4fc8994c9dbafe278bbc1ccc71371f7b",
+    "current_support_reference": {
+      "commit": "90322f1d63e4798afa385fa2c160edf07365191b",
+      "tree": "1379f674eafee5e4545b5ea80cf940e43ac47f09",
+      "qualification": "PR135 merged at 79ac3111a438dee1bf3b800e403e1c1a7824046a; future master destination, integration UNRUN"
+    },
+    "sources": [
+      {
+        "module": "ChartPort.BoundarylessChartCoverage",
+        "path": "curvature/ChartPort/BoundarylessChartCoverage.lean",
+        "bytes": 2746,
+        "sha256": "9ab5d5ea9248d9afa465b16d70d787da683b34e929d787eb4ad4950c6074eabe",
+        "git_blob": "bfa4fb58c93084d78782bc2a6b8b40008d030b9b",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.TimeFamilyChartIdentity",
+          "Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.BoundarylessChartCoverageEvidenceExplicit",
+        "path": "curvature/ChartPort/BoundarylessChartCoverageEvidenceExplicit.lean",
+        "bytes": 6605,
+        "sha256": "fac6954478e376e826c1b352d49bfd6aafc88572296f234d8e160d357001de5c",
+        "git_blob": "12aa59903cc0dd224debb81c72489d68ea03e338",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.BoundarylessChartCoverage"
+        ],
+        "role": "probe"
+      },
+      {
+        "module": "ChartPort.ChosenBundledCurvatureChartBridge",
+        "path": "curvature/ChartPort/ChosenBundledCurvatureChartBridge.lean",
+        "bytes": 2264,
+        "sha256": "40d040a8314c08ceb3c37301e998f84ed8c60f88f3f7226da3b29cc3208fd0d9",
+        "git_blob": "e8238890824b32b84e3ebe55a02a91501c1932ad",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.SourceLocalCurvature",
+          "ChartPort.LocalBundledCurvatureBridge"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.ChosenBundledCurvatureChartBridgeEvidence",
+        "path": "curvature/ChartPort/ChosenBundledCurvatureChartBridgeEvidence.lean",
+        "bytes": 5508,
+        "sha256": "d7da7cf883946115771639c72f3f2832bd8cd70fc3ca5923e90fb4d5d5697499",
+        "git_blob": "90633253156b73671a2eeda1b58090f3e746fc1c",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.ChosenBundledCurvatureChartBridge"
+        ],
+        "role": "probe"
+      },
+      {
+        "module": "ChartPort.ChosenChartConnectionCoefficients",
+        "path": "curvature/ChartPort/ChosenChartConnectionCoefficients.lean",
+        "bytes": 8122,
+        "sha256": "0d58ccbd9bffe7569ec4b9e9ac6352587a1b13a901c6a6f97be408f390af38e9",
+        "git_blob": "291c233c791f95dc41946c292887f29bce4bdc2c",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.BoundarylessChartCoverage",
+          "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.ChosenChartConnectionCoefficientsEvidence",
+        "path": "curvature/ChartPort/ChosenChartConnectionCoefficientsEvidence.lean",
+        "bytes": 4349,
+        "sha256": "c7652a2b488a406070bbbdbec4a8a2da8b647b45d59efd77b42bff590dd2335e",
+        "git_blob": "3f337e4d2d9ff33de91987a35a837d6186a7ede8",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.ChosenChartConnectionCoefficients"
+        ],
+        "role": "probe"
+      },
+      {
+        "module": "ChartPort.ChosenChartRicciSameOrder",
+        "path": "curvature/ChartPort/ChosenChartRicciSameOrder.lean",
+        "bytes": 3668,
+        "sha256": "d9e307900f71646c8fc4aa9f6b70062bf26073a1ec80dd680a51f59dee93f998",
+        "git_blob": "2e38d8bfcdf42380d06daaf3b93d5fb936a4cb37",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.ChosenChartRicciTrace"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.ChosenChartRicciSameOrderEvidence",
+        "path": "curvature/ChartPort/ChosenChartRicciSameOrderEvidence.lean",
+        "bytes": 7386,
+        "sha256": "6feed1d3ff55099de7b7bd4a2bf23df70ab63ef43f51cafb526a45b57f9109ac",
+        "git_blob": "b04f26b094c91df6f93592f90f12ff45404f730c",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.ChosenChartRicciSameOrder"
+        ],
+        "role": "probe"
+      },
+      {
+        "module": "ChartPort.ChosenChartRicciTrace",
+        "path": "curvature/ChartPort/ChosenChartRicciTrace.lean",
+        "bytes": 2048,
+        "sha256": "a926fd79fa58bc700c6d735956620b414555698f394d84e06675432111083d48",
+        "git_blob": "51df625b9978d5db67052fd7d8e60cb9894b3079",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.SourceLocalRicciTrace",
+          "ChartPort.ChosenChartRiemannComponents"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.ChosenChartRicciTraceEvidence",
+        "path": "curvature/ChartPort/ChosenChartRicciTraceEvidence.lean",
+        "bytes": 5981,
+        "sha256": "3ff5f1f351dae070264d625814bd1763ea353d40eb8f3ebf9ef384b343db4fb7",
+        "git_blob": "49cef8c4738a9631cfb5bea40c65705814bebdee",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.ChosenChartRicciTrace"
+        ],
+        "role": "probe"
+      },
+      {
+        "module": "ChartPort.ChosenChartRiemannComponents",
+        "path": "curvature/ChartPort/ChosenChartRiemannComponents.lean",
+        "bytes": 13074,
+        "sha256": "3bb26af9656f4cf8426d49330309c3d479382f3c0a5333559d60878d4b031ad8",
+        "git_blob": "47be0db8fe9194b59127579ec3757489a22c9c5a",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.ChosenChartConnectionCoefficients",
+          "ChartPort.ChosenBundledCurvatureChartBridge",
+          "DifferentialGeometry.Geometry.Curvature.Riemann.Defs"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.ChosenChartRiemannComponentsEvidence",
+        "path": "curvature/ChartPort/ChosenChartRiemannComponentsEvidence.lean",
+        "bytes": 5895,
+        "sha256": "c7387dab73a3423c96a4877edb4d069f066fe79b68af696f3f940b2ea111ec2d",
+        "git_blob": "2cbec924683fe8cdf0eab6609d3f5134fc2a606a",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.ChosenChartRiemannComponents"
+        ],
+        "role": "probe"
+      },
+      {
+        "module": "ChartPort.ChosenSliceSmoothness",
+        "path": "curvature/ChartPort/ChosenSliceSmoothness.lean",
+        "bytes": 2372,
+        "sha256": "3ca78fc00346db848dd0198f064dec1938deb8a0771ca6ee1433564d3b6684df",
+        "git_blob": "77bd7430ce2c52911037b8df49edda45c3804ab4",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.BoundarylessChartCoverage",
+          "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.ChosenSliceSmoothnessEvidence",
+        "path": "curvature/ChartPort/ChosenSliceSmoothnessEvidence.lean",
+        "bytes": 7663,
+        "sha256": "1a25b61f406ce943e266d49284957a8399bb2fa5637c11854dfd1d85c695d18d",
+        "git_blob": "783e5838704a7ea17f5c6e7fe7757b87837901ee",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.ChosenSliceSmoothness"
+        ],
+        "role": "probe"
+      },
+      {
+        "module": "ChartPort.LocalBundledCurvatureBridge",
+        "path": "curvature/ChartPort/LocalBundledCurvatureBridge.lean",
+        "bytes": 7557,
+        "sha256": "23636c0e20ea72b91da54966d7b471b836e48e9de4135465e3d6a0f8e661c60e",
+        "git_blob": "9985d597973c28122f755aa36ce8d82394dad09f",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.LocalRawCurvatureBridge",
+          "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.LocalBundledCurvatureBridgeEvidence",
+        "path": "curvature/ChartPort/LocalBundledCurvatureBridgeEvidence.lean",
+        "bytes": 2397,
+        "sha256": "bb5b4dc884c193f09cf9ec0cd6cc1e0cf6df9fc21dbbd52e4a8a47b5ec9cbfcf",
+        "git_blob": "9b3f986d2de6d167d6c429ae418f300222e6e16d",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.LocalBundledCurvatureBridge"
+        ],
+        "role": "probe"
+      },
+      {
+        "module": "ChartPort.LocalRawCurvatureBridge",
+        "path": "curvature/ChartPort/LocalRawCurvatureBridge.lean",
+        "bytes": 7610,
+        "sha256": "ffb1f0ae52d903c48df324eee885811f80e73847b2ce7662b565f27c065fab11",
+        "git_blob": "f24c4a570c982643781dad229cc9291212452d23",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.ChosenSliceSmoothness",
+          "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Raw"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.LocalRawCurvatureBridgeEvidence",
+        "path": "curvature/ChartPort/LocalRawCurvatureBridgeEvidence.lean",
+        "bytes": 5173,
+        "sha256": "2fb0dcd05a63e47c62a50b9e982874617fa1c2939e4c97a58baa77a37bbe90f9",
+        "git_blob": "384b8ab9c638937d5d1fda226518b6a3f054f7b3",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.LocalRawCurvatureBridge"
+        ],
+        "role": "probe"
+      },
+      {
+        "module": "ChartPort.SourceLocalCurvature",
+        "path": "curvature/ChartPort/SourceLocalCurvature.lean",
+        "bytes": 11985,
+        "sha256": "5f82b78fedd18190ec51d710cab79f49f4d0b3c7d663d5bc34c07ad5f8e1499f",
+        "git_blob": "348c70fdb5dd9378d2d2e9e8c77daf9646ee28ff",
+        "mode": "100644",
+        "imports": [
+          "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor",
+          "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along",
+          "Mathlib.Geometry.Manifold.BumpFunction",
+          "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.SourceLocalRicciTrace",
+        "path": "curvature/ChartPort/SourceLocalRicciTrace.lean",
+        "bytes": 2926,
+        "sha256": "5bb0ae2ecfcdc28b8e468b21fb1e5b48f78a9a5cff02d7e306fb78ee95f2780f",
+        "git_blob": "e7ff86a3c8fe08faa7679fe4ac768032d5188056",
+        "mode": "100644",
+        "imports": [
+          "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions",
+          "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.TimeFamilyChartIdentity",
+        "path": "curvature/ChartPort/TimeFamilyChartIdentity.lean",
+        "bytes": 3581,
+        "sha256": "b7a5cf8ebbf2a7da58c8fcb0966cb1bb2bd12f189862328f0fc24fff961a476c",
+        "git_blob": "881d194b4b1a15b324679c78eea947c73a5ba921",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.ChartIdentity"
+        ],
+        "role": "mathematical source"
+      },
+      {
+        "module": "ChartPort.TimeFamilyChartIdentityEvidenceExplicit",
+        "path": "curvature/ChartPort/TimeFamilyChartIdentityEvidenceExplicit.lean",
+        "bytes": 5093,
+        "sha256": "ed1a0e4afc7893a351d3d466443a933e5e3621a0cfcd8c9ca2b3912546dfd595",
+        "git_blob": "86a990a1056bf786adc5def46afa25ab13ae9e44",
+        "mode": "100644",
+        "imports": [
+          "ChartPort.TimeFamilyChartIdentity"
+        ],
+        "role": "probe"
+      },
+      {
+        "module": "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth",
+        "path": "curvature/DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartSmooth.lean",
+        "bytes": 18673,
+        "sha256": "c11ad968d10d0a15644f9174e32b44087f085628ba903534e78294d89e721436",
+        "git_blob": "2d479c2597f0d985ee9aea7f45b8c4ea1c0f4435",
+        "mode": "100644",
+        "imports": [
+          "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+          "Mathlib.Analysis.Calculus.FDeriv.Add",
+          "Mathlib.Analysis.Calculus.FDeriv.Mul",
+          "DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal"
+        ],
+        "role": "mathematical source"
+      }
+    ],
+    "source_table_sha256": "04749486e28c3270c2429026e2b53e4db2fe57adbd96d6ec422fbf063c2f2114",
+    "probe_contracts": [
+      {
+        "module": "ChartPort.BoundarylessChartCoverageEvidenceExplicit",
+        "source_sha256": "fac6954478e376e826c1b352d49bfd6aafc88572296f234d8e160d357001de5c",
+        "axiom_rows": [
+          [
+            "ChartPort.self_mem_chartLeviCivitaGoodSet",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartLeviCivitaGoodSet_mem_nhds",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_eq_pointChartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.eventually_timeFamilyChosen_eq_chartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.BoundarylessCoverageEvidence.actualFamilySlice_eq_pointChartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.BoundarylessCoverageEvidence.eventually_actualFamilySlice_eq_chartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.BoundarylessCoverageEvidence.rankZero_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.BoundarylessCoverageEvidence.emptyCoverage_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.BoundarylessCoverageEvidence.emptyPoint_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.BoundarylessCoverageEvidence.emptyNeighborhood_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ModelWithCorners.isInteriorPoint_iff",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "BoundarylessManifold.isInteriorPoint",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.mem_chartLeviCivitaGoodSet_iff",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet_isOpen",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_eq_chartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ]
+        ],
+        "full_printed_declarations": [
+          "ChartPort.self_mem_chartLeviCivitaGoodSet",
+          "ChartPort.chartLeviCivitaGoodSet_mem_nhds",
+          "ChartPort.timeFamilyChosen_eq_pointChartLeviCivita",
+          "ChartPort.eventually_timeFamilyChosen_eq_chartLeviCivita",
+          "ChartPort.BoundarylessCoverageEvidence.actualFamilySlice_eq_pointChartLeviCivita",
+          "ChartPort.BoundarylessCoverageEvidence.eventually_actualFamilySlice_eq_chartLeviCivita",
+          "ChartPort.BoundarylessCoverageEvidence.rankZero_case",
+          "ChartPort.BoundarylessCoverageEvidence.emptyCoverage_case",
+          "ChartPort.BoundarylessCoverageEvidence.emptyPoint_case",
+          "ChartPort.BoundarylessCoverageEvidence.emptyNeighborhood_case",
+          "BoundarylessManifold",
+          "ModelWithCorners.isInteriorPoint_iff",
+          "BoundarylessManifold.isInteriorPoint",
+          "ChartPort.downgradedC2Family",
+          "ChartPort.timeFamilyChosen",
+          "DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet"
+        ]
+      },
+      {
+        "module": "ChartPort.ChosenBundledCurvatureChartBridgeEvidence",
+        "source_sha256": "d7da7cf883946115771639c72f3f2832bd8cd70fc3ca5923e90fb4d5d5697499",
+        "axiom_rows": [
+          [
+            "ChartPort.SourceLocalCurvature.curvatureAux_apply_eq_of_eventuallyEq_fields",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.SourceLocalCurvature.curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_curvatureTensor_eq_chartCommutator",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenBundledCurvatureChartBridgeEvidence.localRawTensor_noBoundaryless",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenBundledCurvatureChartBridgeEvidence.rankZero",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenBundledCurvatureChartBridgeEvidence.empty",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative_one",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_curvatureAux_eq_chartCommutator",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.curvatureTensor",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "RicciFlow.SmoothForward.toC2",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ]
+        ],
+        "full_printed_declarations": [
+          "ChartPort.SourceLocalCurvature.curvatureAux_apply_eq_of_eventuallyEq_fields",
+          "ChartPort.SourceLocalCurvature.curvatureAux_apply_eq_curvatureTensor_of_contMDiffOn_frame",
+          "ChartPort.timeFamilyChosen_curvatureTensor_eq_chartCommutator",
+          "ChartPort.ChosenBundledCurvatureChartBridgeEvidence.localRawTensor_noBoundaryless",
+          "ChartPort.ChosenBundledCurvatureChartBridgeEvidence.rankZero",
+          "ChartPort.ChosenBundledCurvatureChartBridgeEvidence.empty",
+          "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative_one",
+          "ChartPort.timeFamilyChosen_curvatureAux_eq_chartCommutator",
+          "CovariantDerivative.curvatureTensor",
+          "ChartPort.chartCurvatureCommutator",
+          "ChartPort.chartAlong",
+          "RicciFlow.SmoothForward.toC2"
+        ]
+      },
+      {
+        "module": "ChartPort.ChosenChartConnectionCoefficientsEvidence",
+        "source_sha256": "c7652a2b488a406070bbbdbec4a8a2da8b647b45d59efd77b42bff590dd2335e",
+        "axiom_rows": [
+          [
+            "ChartPort.chartLocalFrame",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartLocalFrame_eq_chartBasisVecFiber",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartLocalFrame_contMDiffOn_baseSet",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartLocalFrame_repr_of_mem",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.eventually_chartLocalFrame_pullback_constant",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartLocalFrame_pullback_fderiv_zero",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.christoffelCorrection_chartLocalFrame",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartLeviCivita_chartLocalFrame_apply",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartLocalFrameCoeff_eq_modelRepr",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_chartLocalFrame_apply",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosenChartCoefficient",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosenChartCoefficient_eq_chartChristoffel",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartConnectionCoefficientsEvidence.rankZero",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartConnectionCoefficientsEvidence.empty",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Operator.chartChristoffel",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "Bundle.Trivialization.localFrameCoeff",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "RicciFlow.SmoothForward.toC2",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_eq_chartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ]
+        ],
+        "full_printed_declarations": [
+          "ChartPort.chartLocalFrame",
+          "ChartPort.chartLocalFrame_eq_chartBasisVecFiber",
+          "ChartPort.chartLocalFrame_contMDiffOn_baseSet",
+          "ChartPort.chartLocalFrame_repr_of_mem",
+          "ChartPort.eventually_chartLocalFrame_pullback_constant",
+          "ChartPort.chartLocalFrame_pullback_fderiv_zero",
+          "ChartPort.christoffelCorrection_chartLocalFrame",
+          "ChartPort.chartLeviCivita_chartLocalFrame_apply",
+          "ChartPort.chartLocalFrameCoeff_eq_modelRepr",
+          "ChartPort.timeFamilyChosen_chartLocalFrame_apply",
+          "ChartPort.timeFamilyChosenChartCoefficient",
+          "ChartPort.timeFamilyChosenChartCoefficient_eq_chartChristoffel",
+          "ChartPort.ChosenChartConnectionCoefficientsEvidence.rankZero",
+          "ChartPort.ChosenChartConnectionCoefficientsEvidence.empty",
+          "DifferentialGeometry.Geometry.Operator.chartChristoffel",
+          "DifferentialGeometry.Geometry.Connection.chartLeviCivita",
+          "DifferentialGeometry.Geometry.Connection.chartLeviCivita_apply",
+          "Bundle.Trivialization.localFrameCoeff",
+          "RicciFlow.SmoothForward.toC2",
+          "ChartPort.timeFamilyChosen_eq_chartLeviCivita"
+        ]
+      },
+      {
+        "module": "ChartPort.ChosenChartRicciSameOrderEvidence",
+        "source_sha256": "6feed1d3ff55099de7b7bd4a2bf23df70ab63ef43f51cafb526a45b57f9109ac",
+        "axiom_rows": [
+          [
+            "ChartPort.timeFamilyChosen_ricciCurvature_symm",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartRicciTensor_eq_timeFamilyChosen_ricciCurvature",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartRicciSameOrderEvidence.rankZero",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartRicciSameOrderEvidence.rankZeroTrace",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartRicciSameOrderEvidence.empty",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartRicciSameOrderEvidence.metricRegularity",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartRicciSameOrderEvidence.chosenLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.ricciCurvature_symm_of_isLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_isLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.ricciCurvature",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "RicciFlow.SmoothForward.toC2",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative_one",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartRicciTensor_eq_timeFamilyChosen_ricciCurvature_transposed",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ]
+        ],
+        "full_printed_declarations": [
+          "ChartPort.timeFamilyChosen_ricciCurvature_symm",
+          "ChartPort.chartRicciTensor_eq_timeFamilyChosen_ricciCurvature",
+          "ChartPort.ChosenChartRicciSameOrderEvidence.rankZero",
+          "ChartPort.ChosenChartRicciSameOrderEvidence.rankZeroTrace",
+          "ChartPort.ChosenChartRicciSameOrderEvidence.empty",
+          "ChartPort.ChosenChartRicciSameOrderEvidence.metricRegularity",
+          "ChartPort.ChosenChartRicciSameOrderEvidence.chosenLeviCivita",
+          "CovariantDerivative.ricciCurvature_symm_of_isLeviCivita",
+          "CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_isLeviCivita",
+          "CovariantDerivative.ricciCurvature",
+          "RicciFlow.SmoothForward.toC2",
+          "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative_one",
+          "ChartPort.chartRicciTensor_eq_timeFamilyChosen_ricciCurvature_transposed",
+          "Bundle.ContMDiffRiemannianMetric.toRiemannianMetric",
+          "ChartPort.timeFamilyChosen",
+          "ChartPort.downgradedC2Family"
+        ]
+      },
+      {
+        "module": "ChartPort.ChosenChartRicciTraceEvidence",
+        "source_sha256": "3ff5f1f351dae070264d625814bd1763ea353d40eb8f3ebf9ef384b343db4fb7",
+        "axiom_rows": [
+          [
+            "ChartPort.SourceLocalRicciTrace.repr_basisAt_eq_localFrameCoeff",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.SourceLocalRicciTrace.ricciCurvature_eq_sum_localFrameCoeff",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartRicciTensor_eq_timeFamilyChosen_ricciCurvature_transposed",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartRicciTraceEvidence.rankZero",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartRicciTraceEvidence.rankZeroTrace",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartRicciTraceEvidence.empty",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.ricciCurvature",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.ricciEndomorphism",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.curvatureTensor",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Integral.DivergenceTheorem.chartRicciTensor",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Integral.DivergenceTheorem.chartRiemannTensor",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "Bundle.Trivialization.localFrameCoeff",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "LinearMap.trace",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "LinearMap.trace_eq_matrix_trace",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "RicciFlow.SmoothForward.toC2",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative_one",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosenChartCurvatureComponent_eq_chartRiemannTensor",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ]
+        ],
+        "full_printed_declarations": [
+          "ChartPort.SourceLocalRicciTrace.repr_basisAt_eq_localFrameCoeff",
+          "ChartPort.SourceLocalRicciTrace.ricciCurvature_eq_sum_localFrameCoeff",
+          "ChartPort.chartRicciTensor_eq_timeFamilyChosen_ricciCurvature_transposed",
+          "ChartPort.ChosenChartRicciTraceEvidence.rankZero",
+          "ChartPort.ChosenChartRicciTraceEvidence.rankZeroTrace",
+          "ChartPort.ChosenChartRicciTraceEvidence.empty",
+          "CovariantDerivative.ricciCurvature",
+          "CovariantDerivative.ricciCurvature_apply",
+          "CovariantDerivative.ricciEndomorphism",
+          "CovariantDerivative.ricciEndomorphism_apply",
+          "CovariantDerivative.curvatureTensor",
+          "DifferentialGeometry.Integral.DivergenceTheorem.chartRicciTensor",
+          "DifferentialGeometry.Integral.DivergenceTheorem.chartRiemannTensor",
+          "Bundle.Trivialization.localFrameCoeff",
+          "LinearMap.trace",
+          "LinearMap.trace_eq_matrix_trace",
+          "RicciFlow.SmoothForward.toC2",
+          "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative_one",
+          "ChartPort.timeFamilyChosenChartCurvatureComponent",
+          "ChartPort.timeFamilyChosenChartCurvatureComponent_eq_chartRiemannTensor"
+        ]
+      },
+      {
+        "module": "ChartPort.ChosenChartRiemannComponentsEvidence",
+        "source_sha256": "c7387dab73a3423c96a4877edb4d069f066fe79b68af696f3f940b2ea111ec2d",
+        "axiom_rows": [
+          [
+            "ChartPort.chartLocalFrame_contMDiffOn_goodSet",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartLocalFrame_mlieBracket_zero",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.christoffelCorrection_frameDirection_component",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartLeviCivita_frameDirection_component",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartLeviCivita_frame_repr_component",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.eventually_chartLeviCivita_frame_pullback_component",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartLeviCivita_frame_pullback_partialDeriv",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartAlong_nested_frame_component",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartCurvatureCommutator_frame_component_eq_chartRiemannTensor",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosenChartCurvatureComponent",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosenChartCurvatureComponent_eq_chartRiemannTensor",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartRiemannComponentsEvidence.localBracket",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartRiemannComponentsEvidence.rankZero",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenChartRiemannComponentsEvidence.empty",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Operator.chartChristoffel",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Integral.DivergenceTheorem.chartRiemannTensor",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.curvatureTensor",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.curvatureAux",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "Bundle.Trivialization.localFrameCoeff",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "RicciFlow.SmoothForward.toC2",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_eq_chartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_curvatureTensor_eq_chartCommutator",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosenChartCoefficient_eq_chartChristoffel",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ]
+        ],
+        "full_printed_declarations": [
+          "ChartPort.chartLocalFrame_contMDiffOn_goodSet",
+          "ChartPort.chartLocalFrame_mlieBracket_zero",
+          "ChartPort.christoffelCorrection_frameDirection_component",
+          "ChartPort.chartLeviCivita_frameDirection_component",
+          "ChartPort.chartLeviCivita_frame_repr_component",
+          "ChartPort.eventually_chartLeviCivita_frame_pullback_component",
+          "ChartPort.chartLeviCivita_frame_pullback_partialDeriv",
+          "ChartPort.chartAlong_nested_frame_component",
+          "ChartPort.chartCurvatureCommutator_frame_component_eq_chartRiemannTensor",
+          "ChartPort.timeFamilyChosenChartCurvatureComponent",
+          "ChartPort.timeFamilyChosenChartCurvatureComponent_eq_chartRiemannTensor",
+          "ChartPort.ChosenChartRiemannComponentsEvidence.localBracket",
+          "ChartPort.ChosenChartRiemannComponentsEvidence.rankZero",
+          "ChartPort.ChosenChartRiemannComponentsEvidence.empty",
+          "DifferentialGeometry.Geometry.Operator.chartChristoffel",
+          "DifferentialGeometry.Integral.DivergenceTheorem.chartRiemannTensor",
+          "DifferentialGeometry.Geometry.Operator.chartChristoffel_symm",
+          "DifferentialGeometry.Integral.DivergenceTheorem.partialDeriv",
+          "CovariantDerivative.curvatureTensor",
+          "CovariantDerivative.curvatureAux",
+          "ChartPort.chartCurvatureCommutator",
+          "DifferentialGeometry.Geometry.Connection.chartLeviCivita",
+          "DifferentialGeometry.Geometry.Connection.chartLeviCivita_apply",
+          "Bundle.Trivialization.localFrameCoeff",
+          "RicciFlow.SmoothForward.toC2",
+          "ChartPort.timeFamilyChosen_eq_chartLeviCivita",
+          "ChartPort.timeFamilyChosen_curvatureTensor_eq_chartCommutator",
+          "ChartPort.timeFamilyChosenChartCoefficient_eq_chartChristoffel"
+        ]
+      },
+      {
+        "module": "ChartPort.ChosenSliceSmoothnessEvidence",
+        "source_sha256": "1a25b61f406ce943e266d49284957a8399bb2fa5637c11854dfd1d85c695d18d",
+        "axiom_rows": [
+          [
+            "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenSliceSmoothnessEvidence.actualFamilySlice_contMDiffCovariantDerivative",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenSliceSmoothnessEvidence.chartRankZero_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenSliceSmoothnessEvidence.chosenRankZero_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenSliceSmoothnessEvidence.rankZero_values_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenSliceSmoothnessEvidence.emptyChosen_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.ChosenSliceSmoothnessEvidence.emptyChart_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.eventually_timeFamilyChosen_eq_chartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_eq_chartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "RicciFlow.SmoothForward.toC2",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet_image_isOpen",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.christoffelBlockCLM",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.christoffelCorrectionCLM",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.christoffelCorrectionCLM_apply",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.christoffelCorrection_eq_christoffelCorrectionCLM",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartE_pullback_contDiffOn_goodSet",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartE_section_repr_contMDiffOn_goodSet",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartE_section_repr_basis_component_contMDiffOn",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartChristoffel_contMDiffOn_goodSet",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.christoffelCorrectionCLM_contMDiffOn",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.fderiv_chartE_pullback_contDiffOn_goodSet",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.fderiv_chartE_pullback_contMDiffOn",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.inCoordinates_chartLeviCivita_eq",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartLeviCivita_contMDiffCovariantDerivativeOn",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ]
+        ],
+        "full_printed_declarations": [
+          "ContMDiffCovariantDerivativeOn",
+          "CovariantDerivative.ContMDiffCovariantDerivative",
+          "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative",
+          "ChartPort.ChosenSliceSmoothnessEvidence.actualFamilySlice_contMDiffCovariantDerivative",
+          "ChartPort.ChosenSliceSmoothnessEvidence.chartRankZero_case",
+          "ChartPort.ChosenSliceSmoothnessEvidence.chosenRankZero_case",
+          "ChartPort.ChosenSliceSmoothnessEvidence.rankZero_values_case",
+          "ChartPort.ChosenSliceSmoothnessEvidence.emptyChosen_case",
+          "ChartPort.ChosenSliceSmoothnessEvidence.emptyChart_case",
+          "ChartPort.downgradedC2Family",
+          "ChartPort.timeFamilyChosen",
+          "ChartPort.eventually_timeFamilyChosen_eq_chartLeviCivita",
+          "DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet_image_isOpen",
+          "DifferentialGeometry.Geometry.Connection.christoffelBlockCLM",
+          "DifferentialGeometry.Geometry.Connection.christoffelCorrectionCLM",
+          "DifferentialGeometry.Geometry.Connection.christoffelCorrectionCLM_apply",
+          "DifferentialGeometry.Geometry.Connection.christoffelCorrection_eq_christoffelCorrectionCLM",
+          "DifferentialGeometry.Geometry.Connection.chartE_pullback_contDiffOn_goodSet",
+          "DifferentialGeometry.Geometry.Connection.chartE_section_repr_contMDiffOn_goodSet",
+          "DifferentialGeometry.Geometry.Connection.chartE_section_repr_basis_component_contMDiffOn",
+          "DifferentialGeometry.Geometry.Connection.chartChristoffel_contMDiffOn_goodSet",
+          "DifferentialGeometry.Geometry.Connection.christoffelCorrectionCLM_contMDiffOn",
+          "DifferentialGeometry.Geometry.Connection.fderiv_chartE_pullback_contDiffOn_goodSet",
+          "DifferentialGeometry.Geometry.Connection.fderiv_chartE_pullback_contMDiffOn",
+          "DifferentialGeometry.Geometry.Connection.inCoordinates_chartLeviCivita_eq",
+          "DifferentialGeometry.Geometry.Connection.chartLeviCivita_contMDiffCovariantDerivativeOn"
+        ]
+      },
+      {
+        "module": "ChartPort.LocalBundledCurvatureBridgeEvidence",
+        "source_sha256": "bb5b4dc884c193f09cf9ec0cd6cc1e0cf6df9fc21dbbd52e4a8a47b5ec9cbfcf",
+        "axiom_rows": [
+          [
+            "ChartPort.timeFamilyChosen_contMDiffCovariantDerivativeOn_infinity",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative_one",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.LocalBundledCurvatureBridgeEvidence.rankZero_one",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.LocalBundledCurvatureBridgeEvidence.empty_one",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_curvatureAux_eq_chartCommutator",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.curvatureTensor",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "RicciFlow.SmoothForward.toC2",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ]
+        ],
+        "full_printed_declarations": [
+          "ChartPort.timeFamilyChosen_contMDiffCovariantDerivativeOn_infinity",
+          "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative_one",
+          "ChartPort.LocalBundledCurvatureBridgeEvidence.rankZero_one",
+          "ChartPort.LocalBundledCurvatureBridgeEvidence.empty_one",
+          "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative",
+          "ChartPort.timeFamilyChosen_curvatureAux_eq_chartCommutator",
+          "CovariantDerivative.curvatureTensor",
+          "ChartPort.timeFamilyChosen",
+          "RicciFlow.SmoothForward.toC2"
+        ]
+      },
+      {
+        "module": "ChartPort.LocalRawCurvatureBridgeEvidence",
+        "source_sha256": "2fb0dcd05a63e47c62a50b9e982874617fa1c2939e4c97a58baa77a37bbe90f9",
+        "axiom_rows": [
+          [
+            "ChartPort.chartAlong",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartCurvatureCommutator",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_along_contMDiff",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.chartAlong_contMDiffOn_goodSet",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.eventually_timeFamilyChosen_along_eq_chartAlong",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_nestedAlong_eq_chartAlong",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_curvatureAux_eq_chartCommutator",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.LocalRawCurvatureBridgeEvidence.rankZero_bridge",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.LocalRawCurvatureBridgeEvidence.empty_bridge",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.LocalRawCurvatureBridgeEvidence.actual_curvatureAux_definition",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.curvatureAux",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "IsCovariantDerivativeOn.congr_of_eventuallyEq",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartLeviCivita_contMDiffCovariantDerivativeOn",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "RicciFlow.SmoothForward.toC2",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ]
+        ],
+        "full_printed_declarations": [
+          "CovariantDerivative.curvatureAux",
+          "ChartPort.chartAlong",
+          "ChartPort.chartCurvatureCommutator",
+          "ChartPort.timeFamilyChosen_along_contMDiff",
+          "ChartPort.chartAlong_contMDiffOn_goodSet",
+          "ChartPort.eventually_timeFamilyChosen_along_eq_chartAlong",
+          "ChartPort.timeFamilyChosen_nestedAlong_eq_chartAlong",
+          "ChartPort.timeFamilyChosen_curvatureAux_eq_chartCommutator",
+          "ChartPort.LocalRawCurvatureBridgeEvidence.rankZero_bridge",
+          "ChartPort.LocalRawCurvatureBridgeEvidence.empty_bridge",
+          "ChartPort.LocalRawCurvatureBridgeEvidence.actual_curvatureAux_definition",
+          "IsCovariantDerivativeOn.congr_of_eventuallyEq",
+          "ChartPort.timeFamilyChosen_contMDiffCovariantDerivative",
+          "DifferentialGeometry.Geometry.Connection.chartLeviCivita_contMDiffCovariantDerivativeOn",
+          "ChartPort.timeFamilyChosen",
+          "ChartPort.downgradedC2Family",
+          "RicciFlow.SmoothForward.toC2"
+        ]
+      },
+      {
+        "module": "ChartPort.TimeFamilyChartIdentityEvidenceExplicit",
+        "source_sha256": "ed1a0e4afc7893a351d3d466443a933e5e3621a0cfcd8c9ca2b3912546dfd595",
+        "axiom_rows": [
+          [
+            "ChartPort.timeFamilyChosen_torsion",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_metricCompatible",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.timeFamilyChosen_eq_chartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.TimeFamilyEvidence.actualFamilySlice_eq_chartLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.TimeFamilyEvidence.rankZero_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.TimeFamilyEvidence.emptyFamily_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.TimeFamilyEvidence.emptyLocal_case",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_isLeviCivita",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ChartPort.metricCompatible_iff",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartLeviCivita_torsion_free_on",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.chartLeviCivita_isMetricCompatibleOn",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "DifferentialGeometry.Geometry.Connection.koszul_local_uniqueness",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "ContMDiffSection.exists_eq_at",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ],
+          [
+            "RicciFlow.SmoothForward.toC2",
+            [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ]
+          ]
+        ],
+        "full_printed_declarations": [
+          "ChartPort.downgradedC2Family",
+          "ChartPort.timeFamilyChosen",
+          "ChartPort.timeFamilyChosen_torsion",
+          "ChartPort.timeFamilyChosen_metricCompatible",
+          "ChartPort.timeFamilyChosen_eq_chartLeviCivita",
+          "ChartPort.TimeFamilyEvidence.actualFamilySlice_eq_chartLeviCivita",
+          "ChartPort.TimeFamilyEvidence.rankZero_case",
+          "ChartPort.TimeFamilyEvidence.emptyFamily_case",
+          "ChartPort.TimeFamilyEvidence.emptyLocal_case",
+          "CovariantDerivative.TimeDependentRiemannianMetric.IsLeviCivita",
+          "CovariantDerivative.TimeDependentRiemannianMetric.someContMDiffLeviCivitaConnection_isLeviCivita"
+        ]
+      }
+    ],
+    "probe_contracts_sha256": "00c985f73d88685daa6f99d730e1b8efa5e31820821501feccddfb0d1295d780",
+    "external_mathlib_roots": [
+      "Mathlib.Algebra.Order.Chebyshev",
+      "Mathlib.Analysis.Analytic.IteratedFDeriv",
+      "Mathlib.Analysis.Calculus.ContDiff.Basic",
+      "Mathlib.Analysis.Calculus.ContDiff.CPolynomial",
+      "Mathlib.Analysis.Calculus.ContDiff.Comp",
+      "Mathlib.Analysis.Calculus.ContDiff.Operations",
+      "Mathlib.Analysis.Calculus.Deriv.Add",
+      "Mathlib.Analysis.Calculus.Deriv.Basic",
+      "Mathlib.Analysis.Calculus.Deriv.Mul",
+      "Mathlib.Analysis.Calculus.FDeriv.Add",
+      "Mathlib.Analysis.Calculus.FDeriv.Basic",
+      "Mathlib.Analysis.Calculus.FDeriv.Comp",
+      "Mathlib.Analysis.Calculus.FDeriv.Equiv",
+      "Mathlib.Analysis.Calculus.FDeriv.Mul",
+      "Mathlib.Analysis.Calculus.LineDeriv.Basic",
+      "Mathlib.Analysis.Calculus.LineDeriv.IntegrationByParts",
+      "Mathlib.Analysis.Calculus.ParametricIntegral",
+      "Mathlib.Analysis.Calculus.Rademacher",
+      "Mathlib.Analysis.InnerProductSpace.Dual",
+      "Mathlib.Analysis.InnerProductSpace.EuclideanDist",
+      "Mathlib.Analysis.InnerProductSpace.PiL2",
+      "Mathlib.Analysis.InnerProductSpace.Trace",
+      "Mathlib.Analysis.Matrix.PosDef",
+      "Mathlib.Analysis.Normed.Group.Real",
+      "Mathlib.Analysis.Normed.Group.Submodule",
+      "Mathlib.Analysis.Normed.Module.Alternating.Basic",
+      "Mathlib.Analysis.Normed.Module.FiniteDimension",
+      "Mathlib.Analysis.Normed.Module.RCLike.Real",
+      "Mathlib.Analysis.Normed.Module.TransferInstance",
+      "Mathlib.Analysis.Normed.Operator.Basic",
+      "Mathlib.Analysis.Normed.Operator.LinearIsometry",
+      "Mathlib.Analysis.Normed.Operator.NormedSpace",
+      "Mathlib.Analysis.SpecialFunctions.Sqrt",
+      "Mathlib.Data.Bundle",
+      "Mathlib.Data.ENNReal.Basic",
+      "Mathlib.Data.Matrix.Mul",
+      "Mathlib.Geometry.Manifold.Algebra.LieGroup",
+      "Mathlib.Geometry.Manifold.Algebra.Monoid",
+      "Mathlib.Geometry.Manifold.Algebra.SmoothFunctions",
+      "Mathlib.Geometry.Manifold.Algebra.Structures",
+      "Mathlib.Geometry.Manifold.BumpFunction",
+      "Mathlib.Geometry.Manifold.ContMDiff.Atlas",
+      "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+      "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+      "Mathlib.Geometry.Manifold.ContMDiffMap",
+      "Mathlib.Geometry.Manifold.DerivationBundle",
+      "Mathlib.Geometry.Manifold.Diffeomorph",
+      "Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary",
+      "Mathlib.Geometry.Manifold.MFDeriv.Atlas",
+      "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+      "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+      "Mathlib.Geometry.Manifold.MFDeriv.NormedSpace",
+      "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+      "Mathlib.Geometry.Manifold.Metrizable",
+      "Mathlib.Geometry.Manifold.PartitionOfUnity",
+      "Mathlib.Geometry.Manifold.Riemannian.Basic",
+      "Mathlib.Geometry.Manifold.SmoothApprox",
+      "Mathlib.Geometry.Manifold.VectorBundle.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+      "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+      "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+      "Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable",
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tangent",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+      "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+      "Mathlib.LinearAlgebra.Basis.Basic",
+      "Mathlib.LinearAlgebra.Basis.VectorSpace",
+      "Mathlib.LinearAlgebra.Dimension.Free",
+      "Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition",
+      "Mathlib.LinearAlgebra.Dual.Lemmas",
+      "Mathlib.LinearAlgebra.FiniteDimensional.Lemmas",
+      "Mathlib.LinearAlgebra.Matrix.Adjugate",
+      "Mathlib.LinearAlgebra.Matrix.Determinant.Basic",
+      "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+      "Mathlib.LinearAlgebra.Matrix.PosDef",
+      "Mathlib.LinearAlgebra.Matrix.ToLin",
+      "Mathlib.LinearAlgebra.Matrix.Trace",
+      "Mathlib.LinearAlgebra.Multilinear.FiniteDimensional",
+      "Mathlib.LinearAlgebra.Trace",
+      "Mathlib.MeasureTheory.Constructions.BorelSpace.Basic",
+      "Mathlib.MeasureTheory.Function.AEEqOfIntegral",
+      "Mathlib.MeasureTheory.Function.ContinuousMapDense",
+      "Mathlib.MeasureTheory.Function.Jacobian",
+      "Mathlib.MeasureTheory.Function.L1Space.Integrable",
+      "Mathlib.MeasureTheory.Function.LocallyIntegrable",
+      "Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm",
+      "Mathlib.MeasureTheory.Function.LpSpace.Basic",
+      "Mathlib.MeasureTheory.Function.LpSpace.Indicator",
+      "Mathlib.MeasureTheory.Function.SimpleFuncDenseLp",
+      "Mathlib.MeasureTheory.Function.StronglyMeasurable.AEStronglyMeasurable",
+      "Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic",
+      "Mathlib.MeasureTheory.Integral.Bochner.Basic",
+      "Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap",
+      "Mathlib.MeasureTheory.Integral.Bochner.Set",
+      "Mathlib.MeasureTheory.Integral.Bochner.SumMeasure",
+      "Mathlib.MeasureTheory.Integral.Lebesgue.Add",
+      "Mathlib.MeasureTheory.Integral.Lebesgue.Basic",
+      "Mathlib.MeasureTheory.Integral.Lebesgue.Map",
+      "Mathlib.MeasureTheory.Measure.Haar.Basic",
+      "Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace",
+      "Mathlib.MeasureTheory.Measure.Haar.OfBasis",
+      "Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar",
+      "Mathlib.MeasureTheory.Measure.Map",
+      "Mathlib.MeasureTheory.Measure.OpenPos",
+      "Mathlib.MeasureTheory.Measure.Regular",
+      "Mathlib.MeasureTheory.Measure.Restrict",
+      "Mathlib.MeasureTheory.Measure.Typeclasses.Finite",
+      "Mathlib.MeasureTheory.Measure.Typeclasses.SFinite",
+      "Mathlib.MeasureTheory.Measure.WithDensity",
+      "Mathlib.RingTheory.Derivation.Lie",
+      "Mathlib.RingTheory.Finiteness.Defs",
+      "Mathlib.Topology.Algebra.Module.Equiv",
+      "Mathlib.Topology.Algebra.Module.FiniteDimension",
+      "Mathlib.Topology.Algebra.Support",
+      "Mathlib.Topology.Compactness.LocallyFinite",
+      "Mathlib.Topology.ContinuousMap.Bounded.Basic",
+      "Mathlib.Topology.ContinuousMap.Compact",
+      "Mathlib.Topology.MetricSpace.ProperSpace",
+      "Mathlib.Topology.Order.Compact",
+      "Mathlib.Topology.VectorBundle.Basic",
+      "Mathlib.Topology.VectorBundle.Constructions",
+      "Mathlib.Topology.VectorBundle.FiniteDimensional",
+      "Mathlib.Topology.VectorBundle.Hom"
+    ],
+    "actual_chart_smooth_original": {
+      "repository": "qinz1yang/differential-geometry",
+      "commit": "8bd406e35c33a200e9b88895cf11ee8429194e15",
+      "path": "DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartSmooth.lean",
+      "bytes": 18673,
+      "sha256": "c11ad968d10d0a15644f9174e32b44087f085628ba903534e78294d89e721436",
+      "git_blob": "2d479c2597f0d985ee9aea7f45b8c4ea1c0f4435",
+      "port_diff_bytes": 0,
+      "historical_toolchain": "Lean4.29; current port compiled under official4.33/db584"
+    },
+    "source_local_helpers": {
+      "repository": "Arthur742Ramos/lean-poincare-formalization-plan",
+      "commit": "5185c1abd500e997414401af3fe6a533dd3a3b47",
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/DeTurckCorrectionRegularity.lean",
+      "bytes": 99723,
+      "sha256": "c10688e076f6de045998a5e18a555816ba1f5536b2b32e7404f7ed7d4c5a30fd",
+      "git_blob": "39181a8c54985a4fab4d6db4a414d9eb3e26971b",
+      "ported_namespaces": [
+        "ChartPort.SourceLocalCurvature",
+        "ChartPort.SourceLocalRicciTrace"
+      ],
+      "audit": "Exact original statements and source-qualified proof adaptations retained in independently reviewed mathematical capsules; only selected helpers imported"
+    },
+    "local_development_evidence": "Frozen reviewed math identities; imported desktop artifacts do not qualify the hosted candidate",
+    "legacy_gate": {
+      "source_emits": 70,
+      "probe": "ChartPort.ChartIdentityEvidence",
+      "required": true
+    },
+    "extension_gate": {
+      "source_emits": 13,
+      "probes": 10,
+      "required": true
+    },
+    "combined": {
+      "admitted_modules": 94,
+      "source_emits": 83,
+      "probes": 11
+    },
+    "existing_public_test_gate": "Actual3818 public ordinary/source/setup passed; cache-bootstrap-4 resource monitor failed. Combined candidate62 local ordinary controls pass (60pass,2Unix-only skips); hosted new qualification UNRUN.",
+    "hostedqualification": "UNRUN",
+    "point4": "OPEN",
+    "source_composition": {
+      "historical_reviewed_geometry_tree": "d22cc1b7b32975fa0bf38dac559afc13cee79e0a",
+      "published_fixture_commit": "3818bef6722e8c9810739a9fce26b5ec07bec98a",
+      "published_fixture_tree": "990d9fbe4fc8994c9dbafe278bbc1ccc71371f7b",
+      "sole_parent": "9e24ec38b8f11d8720a8c1bce638cdb54bbec0d2",
+      "published_fixture_test": {
+        "bytes": 71646,
+        "sha256": "2cf2e51b5553e42beafd4382468d806ac9c6d00656c8f6b4cf038656c937a61e",
+        "git_blob": "60946f628a571d8ba1b80caa9843cab2f7dc645c",
+        "mode": "100644"
+      },
+      "preservation": "All23 mathematical source bytes/10 probe contracts/17 helpers unchanged; all271 old assertions and all old test methods except extended model unchanged; published PID-order fix unchanged",
+      "fixture_authority": "Parent explicitly renewed and published separately on existing PR138; prior cancelled transfer receipt remains historical",
+      "hosted_new_geometry_qualification": "UNRUN",
+      "independent_composition_review": "PENDING through parent/task8",
+      "point4": "OPEN",
+      "general_targets": "OPEN",
+      "corrected_extension_model_test": {
+        "bytes": 84329,
+        "sha256": "9a3bb59f2f78fc85846c8afbc7daf4a349939b029925d478c8b4656bdaf2a830",
+        "git_blob": "597bbfd3b8166f9f3afaa89a0881cfe62f1f43f6",
+        "mode": "100644"
+      },
+      "schema_model_authority": "Parent renewed minimal truthful finite-model adaptation for existing PR138",
+      "local_ordinary_tests": {
+        "discovered": 62,
+        "passed": 60,
+        "skipped": 2,
+        "exit_code": 0,
+        "genuine_Unix": "UNRUN on Windows",
+        "stage": "ordinary-test-stages/stage-01/record.json",
+        "owner_pid": 35696,
+        "owner_reaped": true,
+        "CPUaffinity": [
+          0,
+          1
+        ],
+        "peak_owner_RSS_bytes": 37470208,
+        "aggregate_resource_or_descendant_drain_certification": false,
+        "actual_Lean_or_Lake_or_workflow": false
+      },
+      "current_public_run": {
+        "run": 37554812585,
+        "job": 112578498292,
+        "ordinary_controls": "PASSED by independent GitHub job-step metadata; parent reports48 Unix controls passed",
+        "source_setup": "PASSED",
+        "failed_stage": "cache-bootstrap-4",
+        "failure": "More than one Lean compiler in an owned stage",
+        "current_port_proof_pass": false,
+        "infrastructure_repair": "Separately scoped; this geometric packet changes no compiler monitor"
+      },
+      "combined_source_correction": {
+        "geometric_tree": "8624f7c2bc72836ffc1518ce01d2fc4e469ea291",
+        "infrastructure_tree": "f64dede1938370a3a044ae4bae3e1359952749c1",
+        "exact_public_parent": "3818bef6722e8c9810739a9fce26b5ec07bec98a",
+        "exact_public_parent_tree": "990d9fbe4fc8994c9dbafe278bbc1ccc71371f7b",
+        "shared_driver": "Geometry top-level mandatory gates plus only two infrastructure function bodies",
+        "shared_tests": "Geometry DriverControls.model+seven schema controls; infrastructure exercise+six terminal controls; all271 old assertions/PID-order fix preserved",
+        "shared_provenance": "Exact public object plus both separately frozen additive records; candidate_build from infrastructure; no overwrite of either shared whole file",
+        "resource_functions_changed": [
+          "owned_process_identity",
+          "run"
+        ],
+        "all_other_original_helper_bodies_unchanged": true,
+        "mathematical_source_or_probe_contract_changes": 0,
+        "ordinary_combined_replay": "PASSED62 controls:60pass,2Unix-only skips",
+        "hostedqualification": "UNRUN",
+        "exact_driver": {
+          "bytes": 27688,
+          "sha256": "ecd9b1b1cb1ea44d960d8ba2e9c6c72ebfa7b2817c7a2864ab3b3726046ca3e8",
+          "git_blob": "7c401669c323d4ad1b3bbf13dd9af5cd1113d49d",
+          "mode": "100644"
+        },
+        "exact_tests": {
+          "bytes": 84329,
+          "sha256": "9a3bb59f2f78fc85846c8afbc7daf4a349939b029925d478c8b4656bdaf2a830",
+          "git_blob": "597bbfd3b8166f9f3afaa89a0881cfe62f1f43f6",
+          "mode": "100644"
+        },
+        "exact_guard": {
+          "bytes": 27872,
+          "sha256": "9545874bf139dbbaa7e6c18dc2323a490ccbc77f24ee895d289ea7811a6a00be",
+          "git_blob": "52315520155dde9be3a5f024eb9787858c44b052",
+          "mode": "100644"
+        }
+      },
+      "historical_geometry_model_test": {
+        "bytes": 78336,
+        "sha256": "dcdbbf97b565d25595fd021f322972c9ba08b63a9f170e8eb9a86101921136de",
+        "git_blob": "0fdf11126f8a8914b9fada043a03f50d6283a24b",
+        "mode": "100644"
+      },
+      "historical_geometry_ordinary_tests": {
+        "discovered": 56,
+        "passed": 54,
+        "skipped": 2,
+        "exit_code": 0,
+        "genuine_Unix_checks": "UNRUN on Windows",
+        "source_bound_stage": "ordinary-test-stages/stage-02/record.json"
+      }
+    }
+  },
+  "owned_process_terminal_zombie_correction": {
+    "base_commit": "3818bef6722e8c9810739a9fce26b5ec07bec98a",
+    "base_tree": "990d9fbe4fc8994c9dbafe278bbc1ccc71371f7b",
+    "historical_candidate_build": "Published 9e24ec3 failed ordinary Linux tests: 48 discovered, 8 positional fixture failures; toolchain/build skipped. Order-independent test/provenance-only correction hosted UNRUN",
+    "actual_run": 37554812585,
+    "actual_job": 112578498292,
+    "ordinary_and_source_setup": "PASSED",
+    "native_diagnostic_authority": "Parent-authenticated selected run.json/first-failure JSON from official digest-matched artifacts; field transcript, not original diagnostic bytes",
+    "failed_stage": "cache-bootstrap-4",
+    "observed_child_state": "Z",
+    "observed_child_RSS": 0,
+    "observed_child_exe_or_argv": "NONE; no query/preexec inference",
+    "source_predicate": "InitialZ and secondstatZ, matching PID/PPID/PGRP/SID/start ticks, equal group/session, zero RSS in both reads; failed read, malformed data, nonterminal state or mismatch gives no terminal exclusion",
+    "source_urls": [
+      "https://docs.kernel.org/filesystems/proc.html",
+      "https://man7.org/linux/man-pages/man2/wait.2.html"
+    ],
+    "compiler_count_limit": 1,
+    "memory_limit_bytes": 6442450944,
+    "CPUQuota": "200%",
+    "swap_limit": 0,
+    "unchanged": "All geometry/proof sources and pins, exact prefix query predicate, RSS/deadline/kill/reap/survivor gates, workflows, physical/source admission and compiler strict flags",
+    "tests": {
+      "discovered": 55,
+      "passed": 53,
+      "skipped": 2,
+      "exit_code": 0,
+      "genuine_Unix": "UNRUN on Windows"
+    },
+    "exact_local_driver": {
+      "bytes": 26152,
+      "sha256": "36ae3571176f15ffcd5bd07e8b04775645f2bc8234d46d6e6842a185e8fd0d28",
+      "git_blob": "81933927ede10fc24e95e1f0aea3fc1edcb832a1",
+      "mode": "100644"
+    },
+    "exact_local_tests": {
+      "bytes": 77639,
+      "sha256": "c1c1d7fee03514450b8e6a8bd0c8642b72a7d32869630f5cd3b0a60ba7470ad3",
+      "git_blob": "ba233fd31d9133fb2cddcd0be1b8efecfedbe38c",
+      "mode": "100644"
+    },
+    "independent_review": "PENDING through parent/task8",
+    "hosted_replay": "UNRUN",
+    "full_candidate_qualification": "UNRUN",
+    "point4": "OPEN",
+    "general_targets": "OPEN",
+    "combined_candidate_bindings": {
+      "driver": {
+        "bytes": 27688,
+        "sha256": "ecd9b1b1cb1ea44d960d8ba2e9c6c72ebfa7b2817c7a2864ab3b3726046ca3e8",
+        "git_blob": "7c401669c323d4ad1b3bbf13dd9af5cd1113d49d",
+        "mode": "100644"
+      },
+      "tests": {
+        "bytes": 84329,
+        "sha256": "9a3bb59f2f78fc85846c8afbc7daf4a349939b029925d478c8b4656bdaf2a830",
+        "git_blob": "597bbfd3b8166f9f3afaa89a0881cfe62f1f43f6",
+        "mode": "100644"
+      },
+      "local_ordinary_tests": {
+        "discovered": 62,
+        "passed": 60,
+        "skipped": 2,
+        "exit_code": 0,
+        "genuine_Unix": "UNRUN on Windows",
+        "stage": "ordinary-test-stages/stage-01/record.json",
+        "owner_pid": 35696,
+        "owner_reaped": true,
+        "CPUaffinity": [
+          0,
+          1
+        ],
+        "peak_owner_RSS_bytes": 37470208,
+        "aggregate_resource_or_descendant_drain_certification": false,
+        "actual_Lean_or_Lake_or_workflow": false
+      },
+      "historical_separate_source_record": "Existing exact_local_driver/tests and55-test record bind preserved f64 infrastructure proposal; combined fields bind this candidate",
+      "geometric_regular_sources_changed": false,
+      "hostedqualification": "UNRUN"
+    }
   }
 }
