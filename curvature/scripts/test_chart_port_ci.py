@@ -30,6 +30,8 @@ class DriverControls(unittest.TestCase):
                 p.mkdir(parents=True, exist_ok=True)
             (prefix / 'bin/lean').write_bytes(b'fixture compiler identity')
             (src / 'Cache/Main.lean').write_bytes(b'module\n')
+            (src / 'Mathlib').mkdir()
+            (src / 'Mathlib/Fixture.lean').write_bytes(b'finite external source, never compiled\n')
             (pkg / 'lean-toolchain').write_text('leanprover/lean4:v4.33.0\n')
             dep = pkg / '.lake/packages/mathlib'
             dep.mkdir(parents=True)
@@ -69,7 +71,7 @@ class DriverControls(unittest.TestCase):
             if missing_extension_contract: extension_contracts.pop()
             if changed_extension_source:
                 (root / extension_closure[0]['path']).write_bytes(b'changed extension fixture source\n')
-            admission = dict(closure=closure, external_mathlib_roots=[], physical_inventory={},
+            admission = dict(closure=closure, external_mathlib_roots=['Mathlib.Fixture'], physical_inventory={},
                 extension_closure=extension_closure, extension_probe_contracts=extension_contracts)
             if missing_extension_field is not None: del admission[missing_extension_field]
             trace = dict(run=[], compile=[], extension_compile=[], extension_probe=[], admit=[], affinity=[], roots=[], root_receipt_written_before_admit=False)
@@ -118,6 +120,8 @@ class DriverControls(unittest.TestCase):
                     sched_setaffinity=lambda _, cpus: trace['affinity'].append(cpus), environ={}, pathsep=';'),
                 subprocess=types.SimpleNamespace(check_output=git), run=run, digest=digest, admit=admit,
                 tree_entries=lambda *args: {}, package_root_relationships=roots,
+                pinned_cache_query_context=lambda mathlib,names: dict(finite_synthetic_source_context=True,
+                    package_root=str(mathlib),admitted_roots=list(names)),
                 compiler_run=lambda argv,label,source,module,env=None: run(argv,label,env=env), artifact_status=lambda *args: {'ready': True},
                 serial_compile=serial_compile, imports=lambda _: [],
                 check_probe=check_probe, check_ricci_extension_probe=check_extension_probe, time=types.SimpleNamespace(time=lambda: 0),
@@ -1068,7 +1072,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
             self.assertFalse(self.classify(query,owner,official,argv))
         self.assertFalse(self.classify(query,owner,{}))
 
-    def exercise(self, *, child_argv=None, race=False, disappear=False, unknown=False, snapshot_only=False, pages=2, overdue=False, missing_owner=False, exe_race=False, reverse_exe_race=False, reverse_order=False, child_state=None, terminal_change=None, terminal_read_error=None, zombie_survivor=False):
+    def exercise(self, *, child_argv=None, race=False, disappear=False, unknown=False, snapshot_only=False, pages=2, overdue=False, missing_owner=False, exe_race=False, reverse_exe_race=False, reverse_order=False, child_state=None, terminal_change=None, terminal_read_error=None, zombie_survivor=False, owner_argv=None, cache_context=None):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);procdir=root/'proc';procdir.mkdir()
             image_bytes=b'finite synthetic executed official executable identity'
@@ -1080,7 +1084,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
                     fields[0]=child_state
                     if child_state=='Z':fields[21]='0'
                 (procdir/str(pid)/'stat').write_text(str(pid)+' (fixture) '+' '.join(fields))
-            for pid,args in ((100,self.stage_argv),(101,['lean','--print-prefix'] if child_argv is None else child_argv)):
+            for pid,args in ((100,self.stage_argv if owner_argv is None else owner_argv),(101,['lean','--print-prefix'] if child_argv is None else child_argv)):
                 if missing_owner and pid==100:continue
                 p=procdir/str(pid);p.mkdir();stat(pid)
                 (p/'cmdline').write_bytes(b'\0'.join(x.encode() for x in args)+b'\0')
@@ -1154,7 +1158,8 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
                 if snapshot_only:
                     fields=(procdir/'101/stat').read_text().rsplit(')',1)[1].split()
                     return ns['owned_process_identity'](procdir/'101',fields)
-                try:function('run',ns)(list(self.stage_argv),'fixture')
+                try:function('run',ns)(list(self.stage_argv if owner_argv is None else owner_argv),'fixture',
+                    **({} if cache_context is None else dict(cache_query_context=cache_context)))
                 except BaseException as exc:failure=exc
             return receipt['stages'][0],events,failure
 
@@ -1360,6 +1365,150 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
         self.assertEqual(stage['remaining_session_pids'],[101])
         self.assertTrue(self.process(stage,101)['verified_terminated_zombie'])
         self.assertTrue(stage['owner_reaped']); self.assertEqual(events,[('kill',100,9),('wait',10)])
+
+    def cache_context(self):
+        context=dict(mathlib_pin=PIN,package_root='/finite/curvature/.lake/packages/mathlib',
+            source='/finite/curvature/.lake/packages/mathlib/Cache/Main.lean',source_sha256='dccffca32f05fa9d2e8880a928c170e5cae52376a5c94966cef770e1fc5f5044',
+            initializer='/finite/curvature/.lake/packages/mathlib/Cache/IO.lean',initializer_sha256='8457b0e2b404ae2a7c7e02d9e264f9d8c1e72935178e7dda1fae95424b022c82',
+            admitted_roots=['Mathlib.Fixture','Mathlib.OtherFixture'])
+        argv=[self.path,'-j1','-M5632','-R',context['package_root'],'--run',context['source'],'get',*context['admitted_roots']]
+        query,owner,official=self.rows();owner['argv']=argv
+        return context,argv,query,owner,official
+
+    def cache_classify(self, context, argv, query, owner, official):
+        return function('is_exact_official_prefix_query',{})(query,owner,argv,official,context)
+
+    def test_pinned_cache_helper_reads_both_exact_sources_and_rejects_changed_or_missing_bytes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);(root/'Cache').mkdir()
+            source=root/'Cache/Main.lean';io_source=root/'Cache/IO.lean'
+            source.write_bytes(b'finite Cache.Main source');io_source.write_bytes(b'finite Cache.IO source')
+            # Explicit source-hash fixture; real pinned source verification is
+            # separately logged by the local source preflight, never inferred here.
+            hashes={b'finite Cache.Main source':'dccffca32f05fa9d2e8880a928c170e5cae52376a5c94966cef770e1fc5f5044',b'finite Cache.IO source':'8457b0e2b404ae2a7c7e02d9e264f9d8c1e72935178e7dda1fae95424b022c82'}
+            reads=[]
+            def finite_digest(data):reads.append(data);return hashes.get(data,digest(data))
+            helper=function('pinned_cache_query_context',dict(digest=finite_digest))
+            context=helper(root,['Mathlib.Fixture'])
+            self.assertEqual(reads,[b'finite Cache.Main source',b'finite Cache.IO source'])
+            self.assertEqual(context['mathlib_pin'],PIN)
+            self.assertEqual(context['admitted_roots'],['Mathlib.Fixture'])
+            self.assertEqual(context['source'],str(source));self.assertEqual(context['initializer'],str(io_source))
+            for target,original in ((source,b'finite Cache.Main source'),(io_source,b'finite Cache.IO source')):
+                target.write_bytes(b'changed finite source')
+                with self.assertRaises(AssertionError):helper(root,['Mathlib.Fixture'])
+                target.unlink()
+                with self.assertRaises(FileNotFoundError):helper(root,['Mathlib.Fixture'])
+                target.write_bytes(original)
+            for roots in ([],None,(),['Mathlib'],['Mathlib.Foo','--scope=HEAD'],['Batteries.Foo'],['Mathlib.Foo/Bar'],[3]):
+                with self.subTest(roots=roots):
+                    with self.assertRaises(AssertionError):helper(root,roots)
+
+    def test_pinned_cache_context_accepts_only_exact_executed_prefix_query(self):
+        context,argv,query,owner,official=self.cache_context()
+        self.assertFalse(function('is_exact_official_prefix_query',{})(query,owner,argv,official))
+        for child_argv in (['lean','--print-prefix'],[self.path,'--print-prefix']):
+            query['argv']=child_argv
+            self.assertTrue(self.cache_classify(context,argv,query,owner,official))
+        self.assertFalse(self.cache_classify(context,argv,owner,owner,official))
+        for child_argv in (argv,[self.path,'second.lean'],['lean','--print-prefix','extra'],['lean','--version'],[]):
+            query['argv']=child_argv
+            self.assertFalse(self.cache_classify(context,argv,query,owner,official))
+
+    def test_cache_context_rejects_other_source_pin_hash_roots_commands_flags_and_missing_fields(self):
+        import copy
+        context,argv,query,owner,official=self.cache_context()
+        for key in context:
+            altered=copy.deepcopy(context);del altered[key]
+            self.assertFalse(self.cache_classify(altered,argv,query,owner,official),key)
+        for key,value in (('mathlib_pin','0'*40),('source','/other/Main.lean'),('initializer','/other/IO.lean'),
+                ('source_sha256','0'*64),('initializer_sha256','0'*64),('package_root','/other'),
+                ('admitted_roots',[]),('admitted_roots',None),('admitted_roots',['Mathlib']),
+                ('admitted_roots',['Mathlib.Fixture','--scope=HEAD']),('admitted_roots',['Mathlib.Added'])):
+            altered=copy.deepcopy(context);altered[key]=value
+            self.assertFalse(self.cache_classify(altered,argv,query,owner,official),(key,value))
+        for altered in (argv+['Mathlib.Added'],argv[:-1],argv[:7]+['get!']+argv[8:],
+                argv[:7]+['query']+argv[8:],argv[:7]+['put']+argv[8:],
+                [self.path,'--run',context['source'],'get',*context['admitted_roots']],
+                [self.path,'--print-prefix'],['lean']+argv[1:]):
+            owner['argv']=altered
+            self.assertFalse(self.cache_classify(context,altered,query,owner,official),altered)
+
+    def test_cache_context_preserves_all_existing_process_identity_requirements(self):
+        import copy
+        context,argv,query,owner,official=self.cache_context()
+        mutations=[('stable',False),('errors',[dict(type='FileNotFoundError')]),('state','Z'),
+            ('recheck',dict(state='Z')),('exe','/other/bin/lean'),('exe_sha256','0'*64),
+            ('image_identity',[9,2,3,4,5])]
+        for target in ('query','owner'):
+            for key,value in mutations:
+                q,o=copy.deepcopy(query),copy.deepcopy(owner);(q if target=='query' else o)[key]=value
+                self.assertFalse(self.cache_classify(context,argv,q,o,official),(target,key))
+        for key,value in (('pid',100),('ppid',99),('session',200),('pgrp',200),('starttime_ticks',19)):
+            q=copy.deepcopy(query);q[key]=value
+            self.assertFalse(self.cache_classify(context,argv,q,owner,official),key)
+        wrong=copy.deepcopy(official);wrong['compiler_commit']='wrong'
+        self.assertFalse(self.cache_classify(context,argv,query,owner,wrong))
+        wrong_owner=copy.deepcopy(owner);wrong_owner['argv']=argv+['Mathlib.Added']
+        self.assertFalse(self.cache_classify(context,argv,query,wrong_owner,official))
+
+    def test_cache_stage_caller_passes_only_admitted_context_and_preserves_full_geometry_gates(self):
+        receipt,trace,failure=DriverControls().model(False)
+        self.assertIsNone(failure)
+        cache=[row for row in trace['run'] if row[1]=='ordinary-pinned-cache-read']
+        self.assertEqual(len(cache),1)
+        argv,label,kwargs=cache[0];context=kwargs['cache_query_context']
+        self.assertTrue(context['finite_synthetic_source_context'])
+        self.assertEqual(argv[3:8],['-R',context['package_root'],'--run',str(Path(context['package_root'])/'Cache/Main.lean'),'get'])
+        self.assertEqual(argv[8:],context['admitted_roots'])
+        self.assertEqual(kwargs['timeout'],1800)
+        self.assertEqual((receipt['fresh_combined_modules'],receipt['fresh_combined_probes']),(83,11))
+        self.assertTrue(all('cache_query_context' not in row[2] for row in trace['run'] if row[1]!=label))
+
+    def test_cache_query_both_enumeration_orders_include_rss_and_cleanup_without_exempting_owner(self):
+        context,argv,*_=self.cache_context()
+        for reverse in (False,True):
+            for child in (['lean','--print-prefix'],[self.path,'--print-prefix']):
+                stage,events,failure=self.exercise(owner_argv=argv,cache_context=context,child_argv=child,reverse_order=reverse)
+                self.assertIsNone(failure)
+                self.assertEqual(stage['cache_query_context'],context)
+                self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],1)
+                self.assertFalse(self.process(stage,100)['exact_official_prefix_query'])
+                self.assertTrue(self.process(stage,100)['counted_compiler'])
+                self.assertTrue(self.process(stage,101)['exact_official_prefix_query'])
+                self.assertEqual(stage['peak_rss_bytes'],4*4096)
+                self.assertTrue(stage['owner_reaped']);self.assertEqual(stage['remaining_session_pids'],[])
+                self.assertEqual(events,[('kill',100,9),('wait',10)])
+
+    def test_cache_query_duplicate_ambiguous_preexec_and_contextless_processes_still_reject(self):
+        context,argv,*_=self.cache_context()
+        cases=[dict(child_argv=[self.path,'second.lean']),dict(child_argv=argv),
+            dict(child_argv=['lean','--print-prefix','extra']),dict(exe_race=True),dict(reverse_exe_race=True),
+            dict(race=True),dict(disappear=True),dict(unknown=True),dict(missing_owner=True)]
+        for reverse in (False,True):
+            for options in cases:
+                with self.subTest(reverse=reverse,options=options):
+                    stage,events,failure=self.exercise(owner_argv=argv,cache_context=context,reverse_order=reverse,**options)
+                    self.assertIsInstance(failure,RuntimeError)
+                    self.assertFalse(self.process(stage,101)['exact_official_prefix_query'])
+                    self.assertTrue(self.process(stage,101)['counted_compiler'])
+                    self.assertTrue(stage['owner_reaped']);self.assertEqual(stage['remaining_session_pids'],[])
+                    self.assertEqual(events,[('kill',100,9),('wait',10)])
+        stage,_,failure=self.exercise(owner_argv=argv)
+        self.assertIsInstance(failure,RuntimeError)
+        self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],2)
+
+    def test_cache_query_retains_rss_timeout_and_survivor_failures(self):
+        context,argv,*_=self.cache_context()
+        for options,exception in ((dict(pages=10**9),RuntimeError),(dict(overdue=True),TimeoutError)):
+            stage,events,failure=self.exercise(owner_argv=argv,cache_context=context,**options)
+            self.assertIsInstance(failure,exception)
+            self.assertTrue(self.process(stage,101)['exact_official_prefix_query'])
+            self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],1)
+            self.assertTrue(stage['owner_reaped']);self.assertEqual(events,[('kill',100,9),('wait',10)])
+        stage,events,failure=self.exercise(owner_argv=argv,cache_context=context,child_state='Z',zombie_survivor=True)
+        self.assertIsInstance(failure,AssertionError);self.assertEqual(str(failure),'Owned session not drained')
+        self.assertEqual(stage['remaining_session_pids'],[101]);self.assertTrue(stage['owner_reaped'])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

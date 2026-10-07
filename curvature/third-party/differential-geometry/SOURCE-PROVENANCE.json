@@ -3254,7 +3254,7 @@
   "proof_packet_library_version": 3,
   "historical_source_binding": "PENDING",
   "full_master_admission": "PENDING",
-  "candidate_build": "Published3818 passed ordinary Linux controls/source admission/official setup; failed cache-bootstrap-4 after conservatively counting an observed terminalZ child with absentexe. Verified-terminal source correction hosted UNRUN; no currentportproofpass.",
+  "candidate_build": "Exact f45 source admission/ordinary Unix controls/official setup and all cache bootstrap modules passed; ordinary-pinned-cache-read failed its compile-only owner query gate. Source-bound Cache.Main get context correction hosted UNRUN; no port proof started.",
   "point4": "OPEN",
   "general_targets": "OPEN",
   "scope": "constant downgraded smooth metric, actual chart good set, differentiable section at evaluation",
@@ -6099,5 +6099,49 @@
       "geometric_regular_sources_changed": false,
       "hostedqualification": "UNRUN"
     }
+  },
+  "owned_cache_prefix_query_context_correction": {
+    "base_commit": "f45cd3699321e27ff70174768ee15fb5e2a61b1c",
+    "base_tree": "0700bbd9acce2f602a08b1dcef14e1495e8300e3",
+    "historical_candidate_build": "Published3818 passed ordinary Linux controls/source admission/official setup; failed cache-bootstrap-4 after conservatively counting an observed terminalZ child with absentexe. Verified-terminal source correction hosted UNRUN; no currentportproofpass.",
+    "run": 37565057751,
+    "job": 112610753635,
+    "failed_stage": "ordinary-pinned-cache-read",
+    "observed_child": "Stable fully executed same official SDK lean --print-prefix; old compile-only owner gate rejected interpreted cache get owner",
+    "main_source": {
+      "pin": "db584cd6d46c92f209a44c0f1c829460d327499d",
+      "path": "Cache/Main.lean",
+      "sha256": "dccffca32f05fa9d2e8880a928c170e5cae52376a5c94966cef770e1fc5f5044"
+    },
+    "initializer_source": {
+      "path": "Cache/IO.lean",
+      "sha256": "8457b0e2b404ae2a7c7e02d9e264f9d8c1e72935178e7dda1fae95424b022c82"
+    },
+    "predicate": "Verified exact pinned Main/IO bytes before stage; exact official -j1 -M5632 -R mathlib --run mathlib/Cache/Main.lean get admitted roots argv; original executed SDK/hash/image/parent/session/starttime/repeated-identity/query requirements remain",
+    "root_utility_is_counted": true,
+    "arbitrary_query_or_preexec_exemption": false,
+    "resource_and_cleanup_limits": "UNCHANGED",
+    "driver": {
+      "bytes": 30085,
+      "sha256": "c743f21f493541ac0dd36a46162bb9a8421fac43eb6ce200b413fa76a8f6129c",
+      "git_blob": "a41c81e58588fa0a8e14138e92cad28f4dcd2d7d"
+    },
+    "tests": {
+      "bytes": 95523,
+      "sha256": "709b20d7045df66a3e46369407975400b65d387684165cc2a6db4cd0eaba64e5",
+      "git_blob": "6ade74e9d0d513bfdced2af7652ab08215d0ae93"
+    },
+    "ordinary_tests": {
+      "discovered": 70,
+      "passed": 68,
+      "skipped": 2,
+      "exit_code": 0,
+      "genuine_Unix": "UNRUN on Windows"
+    },
+    "independent_review": "PENDING through parent/task8",
+    "hosted_replay": "UNRUN",
+    "full_candidate_qualification": "UNRUN",
+    "point4": "OPEN",
+    "general_targets": "OPEN"
   }
 }

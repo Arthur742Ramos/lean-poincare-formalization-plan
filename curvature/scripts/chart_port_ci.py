@@ -83,16 +83,40 @@ def owned_process_identity(p, initial_stat):
     row['rechecked_at'] = time.time()
     return row
 
-def is_exact_official_prefix_query(row, owner, stage_argv, official):
+def pinned_cache_query_context(mathlib, roots):
+    # These exact pinned sources execute Cache.IO's leantar prefix initializer.
+    source, initializer = mathlib / 'Cache/Main.lean', mathlib / 'Cache/IO.lean'
+    assert digest(source.read_bytes()) == 'dccffca32f05fa9d2e8880a928c170e5cae52376a5c94966cef770e1fc5f5044', 'Pinned Cache.Main source changed'
+    assert digest(initializer.read_bytes()) == '8457b0e2b404ae2a7c7e02d9e264f9d8c1e72935178e7dda1fae95424b022c82', 'Pinned Cache.IO initializer changed'
+    assert isinstance(roots, list) and roots and all(isinstance(name, str)
+        and name.startswith('Mathlib.') and all(part.isidentifier() for part in name.split('.')) for name in roots)
+    return dict(mathlib_pin='db584cd6d46c92f209a44c0f1c829460d327499d',
+        package_root=str(mathlib), source=str(source), source_sha256='dccffca32f05fa9d2e8880a928c170e5cae52376a5c94966cef770e1fc5f5044',
+        initializer=str(initializer), initializer_sha256='8457b0e2b404ae2a7c7e02d9e264f9d8c1e72935178e7dda1fae95424b022c82', admitted_roots=list(roots))
+
+def is_exact_official_prefix_query(row, owner, stage_argv, official, cache_context=None):
     # Independently reviewable predicate: setting this to False retains diagnostics
     # and the original strict compiler count. No grace period or pre-exec exclusion.
     try:
         if official['compiler_commit'] != 'd8b18978322de05a8f3dba51ef03cf5461676c17':
             return False
         path, identity = official['compiler_path'], official['compiler_sha256']
-        if stage_argv[0] != path or not all(flag in stage_argv for flag in ('-j1', '-M5632', '-o', '-c')):
-            return False
-        if not stage_argv[-1].endswith('.lean'):
+        compile_owner = (stage_argv[0] == path
+            and all(flag in stage_argv for flag in ('-j1', '-M5632', '-o', '-c'))
+            and stage_argv[-1].endswith('.lean'))
+        cache_owner = False
+        if cache_context is not None:
+            context = cache_context
+            root, roots = context['package_root'], context['admitted_roots']
+            cache_owner = (context['mathlib_pin'] == 'db584cd6d46c92f209a44c0f1c829460d327499d'
+                and context['source'] == root + '/Cache/Main.lean'
+                and context['source_sha256'] == 'dccffca32f05fa9d2e8880a928c170e5cae52376a5c94966cef770e1fc5f5044'
+                and context['initializer'] == root + '/Cache/IO.lean'
+                and context['initializer_sha256'] == '8457b0e2b404ae2a7c7e02d9e264f9d8c1e72935178e7dda1fae95424b022c82'
+                and isinstance(roots, list) and bool(roots) and all(isinstance(name, str)
+                    and name.startswith('Mathlib.') and all(part.isidentifier() for part in name.split('.')) for name in roots)
+                and list(stage_argv) == [path, '-j1', '-M5632', '-R', root, '--run', context['source'], 'get', *roots])
+        if not (compile_owner or cache_owner):
             return False
         for process in (row, owner):
             if not process['stable'] or process['errors'] or process['state'] not in ('R', 'S', 'D', 'I'):
@@ -110,8 +134,10 @@ def is_exact_official_prefix_query(row, owner, stage_argv, official):
     except (KeyError, TypeError, IndexError):
         return False
 
-def run(argv, label, cwd=PKG, env=None, timeout=600):
+def run(argv, label, cwd=PKG, env=None, timeout=600, cache_query_context=None):
     stage = dict(argv=argv, cwd=str(cwd), timeout_seconds=timeout, started=time.time(), status='STARTING', peak_rss_bytes=0)
+    if cache_query_context is not None:
+        stage['cache_query_context'] = cache_query_context
     receipt['stages'].append(stage)
     save()
     start = time.monotonic()
@@ -140,7 +166,7 @@ def run(argv, label, cwd=PKG, env=None, timeout=600):
                     # Lean image was observed, disappearance/race still counts it.
                     counted = 'exe' not in row or any(Path(exe).name == 'lean'
                         for exe in (row.get('exe'), row.get('recheck', {}).get('exe')) if exe is not None)
-                    query = counted and is_exact_official_prefix_query(row, owner, argv, receipt)
+                    query = counted and is_exact_official_prefix_query(row, owner, argv, receipt, cache_query_context)
                     terminal = row.get('verified_terminated_zombie') is True
                     row.update(counted_compiler=bool(counted and not query and not terminal),
                         exact_official_prefix_query=bool(query),
@@ -383,8 +409,9 @@ try:
     for i, (name, source) in enumerate(cache_order):
         serial_compile(name, source, bootstrap, lean, env, 'cache-bootstrap-' + str(i), name.startswith('Cache.'))
     # The real pinned cache CLI runs interpreted, so Lake cannot spawn a parallel build.
+    cache_query_context = pinned_cache_query_context(mathlib, admission['external_mathlib_roots'])
     run([lean, '-j1', '-M5632', '-R', str(mathlib), '--run', str(mathlib / 'Cache/Main.lean'), 'get', *admission['external_mathlib_roots']],
-        'ordinary-pinned-cache-read', env=env, timeout=1800)
+        'ordinary-pinned-cache-read', env=env, timeout=1800, cache_query_context=cache_query_context)
     prov = json.loads((PKG / 'third-party/differential-geometry/SOURCE-PROVENANCE.json').read_text())
     allowed = {r['module']: r for r in prov['mathlib_support_sources']}
     missing_order, seen, active = [], set(), set()
