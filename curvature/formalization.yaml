@@ -58,6 +58,20 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/0fce83f00a2e8832e5098ee43d8f260f3a98e9c9/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable PR110 source for AnalyticPDE/GenuineRicciDeTurckHeatInvariantClosure.lean,
+      scripts/point4_heat_invariant_probe.lean and the supporting proof workflow.
+      The exact eight-declaration proof/probe source and contributor notice are
+      preserved. Jet2Section remains an independent product of little-Holder
+      fields; the inherited domain edit corrects comments without changing
+      mathematical code. The new integration adds a root import, scoped status
+      discussion and finite source composition. It proves no derivative-compatible
+      geometric PDE solver, nonlinear Ricci-DeTurck existence, canonical Point-4
+      completion or smooth-target completion. Historical source-head verification
+      is distinct from fresh combined-head compilation, axioms and review.
+
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/60b6f8ef9d37d1fc5fac1f6113584e1b16370016/curvature"
     relationship: "builds-on"
     note: >-

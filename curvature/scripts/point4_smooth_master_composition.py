@@ -6,7 +6,7 @@ original entry points; no current adapter is installed in their checkouts.
 """
 from __future__ import annotations
 import argparse, contextlib, functools, hashlib, importlib, json, os
-import pathlib, re, stat, subprocess, sys, tempfile
+import pathlib, re, stat, subprocess, sys, tempfile, types
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 MASTER = 'e883681caa862277857ee825a547502e8f3ec036'
@@ -175,6 +175,107 @@ def original_bytes(path, master, support):
     assert blob_id(data) == (master if parent == MASTER else support)[path][1]
     return data
 
+# First approved remaining-PR integration: finite sources, not a prefix grant.
+HEAT_PARENT = '5286f8e76fe26c56eea662552e4591ef2d227da7'
+HEAT_PARENT_TREE = '615db704840b205c64d299a3420520fbb4c96786'
+HEAT_SOURCE = '0fce83f00a2e8832e5098ee43d8f260f3a98e9c9'
+HEAT_SOURCE_TREE = 'd684b93cc338201628a9bcd6ac6c461c9975404d'
+HEAT_ROOT = 'curvature/PoincareCurvature.lean'
+HEAT_METADATA = 'curvature/formalization.yaml'
+HEAT_DOC = 'docs/point4/README.md'
+HEAT_DOMAIN = 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/GenuineC2AlphaDomain.lean'
+HEAT_MODULE = 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/GenuineRicciDeTurckHeatInvariantClosure.lean'
+HEAT_PROBE = 'curvature/scripts/point4_heat_invariant_probe.lean'
+HEAT_WORKFLOW = '.github/workflows/point4-support.yml'
+HEAT_ADDED = {HEAT_MODULE, HEAT_PROBE, HEAT_WORKFLOW}
+HEAT_ROOTS = {HEAT_ROOT, HEAT_METADATA, HEAT_DOC}
+HEAT_IMPORT_ANCHOR = 'import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GenuineRicciDeTurckMatrixLittleHolderClosure\n'
+HEAT_IMPORT = 'import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GenuineRicciDeTurckHeatInvariantClosure\n'
+HEAT_METADATA_NOTE = '  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/0fce83f00a2e8832e5098ee43d8f260f3a98e9c9/curvature"\n    relationship: "builds-on"\n    note: >-\n      Immutable PR110 source for AnalyticPDE/GenuineRicciDeTurckHeatInvariantClosure.lean,\n      scripts/point4_heat_invariant_probe.lean and the supporting proof workflow.\n      The exact eight-declaration proof/probe source and contributor notice are\n      preserved. Jet2Section remains an independent product of little-Holder\n      fields; the inherited domain edit corrects comments without changing\n      mathematical code. The new integration adds a root import, scoped status\n      discussion and finite source composition. It proves no derivative-compatible\n      geometric PDE solver, nonlinear Ricci-DeTurck existence, canonical Point-4\n      completion or smooth-target completion. Historical source-head verification\n      is distinct from fresh combined-head compilation, axioms and review.\n\n'
+HEAT_DOC_BLOCK = '\n## Heat-invariant closure on independent jet fields\n\nThe PR110 supporting theorem fixes the Euclidean section under componentwise\nheat propagation, preserves its centered closed ball, derives the compact\nfiber-range premise from the small-ball bound, and packages the reaction in\nthe little-Hölder carrier with a full-norm Lipschitz estimate. Its source is\n[`GenuineRicciDeTurckHeatInvariantClosure.lean`](../../curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/GenuineRicciDeTurckHeatInvariantClosure.lean).\nIt retains `0 < α < 1`, `0 < R`,\n`2 * jet2LipConst d d * R < phiRDRadius d`, and the supplied fixed coordinate\nbackground coefficients. The eight-declaration probe and original supporting\nworkflow remain attached to this result.\n\nThree distinctions delimit what this closure proves:\n\n1. `UsesChosenBackground` chooses the Levi–Civita connection of the evolving\n   metric itself. The existing\n   `intrinsicRicciDeTurckRHS_chosenLeviCivitaFamily_eq_intrinsicRicciFlowRHS`\n   removes the DeTurck correction for that choice. Those conditional packages\n   do not construct the strictly parabolic fixed-background DeTurck equation.\n2. `Jet2Section` is a product of independent little-Hölder component fields.\n   It does not require first slots to differentiate the value field, or\n   second slots to differentiate first slots. Evaluating supplied components\n   with `jet2OfSection` does not establish derivative compatibility.\n3. `phiRDOfJet` is the full coordinate right-hand side `-2 Ric + Lie_W g`.\n   It is not the remainder after subtracting a frozen heat generator.\n   Propagating the independent fields with heat and reaction `(phiRD, 0, 0)`\n   does not identify an auxiliary product-space equation with the geometric PDE.\n\nThe canonical target still requires spatially C² initial data, its existing\nweak competitor class, ordinary initial derivatives, and a common closed\ntime interval under the approved `BoundarylessManifold I M` premise. The\nseparately named smooth forward target retains its own contract and audit.\nThis closure proves neither target. Derivative-compatible spaces, the\ngenerator/remainder identity, quasilinear existence, positivity, intrinsic\nidentification, gauge regularity, and uniqueness remain separate obligations.\n\nThe inherited PR110 source is\n[`0fce83f00a2e8832e5098ee43d8f260f3a98e9c9`](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/0fce83f00a2e8832e5098ee43d8f260f3a98e9c9/curvature).\nIts successful [historical focused run](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37181895941)\nqualifies that old checkout. The integration starts from master\n`5286f8e76fe26c56eea662552e4591ef2d227da7`; fresh compilation, the eight\nstandard-axiom records, root elaboration, relevant audits, and independent\nreview of the combined head remain pending. Point 4 and the smooth target\nremain **OPEN**.\n\n'
+HEAT_DOC_ANCHOR = '\n## Boundaryless chart transport\n'
+
+
+def heat_transform(path, original):
+    if path == HEAT_ROOT:
+        anchor, addition = HEAT_IMPORT_ANCHOR.encode(), HEAT_IMPORT.encode()
+        assert original.count(anchor) == 1 and addition not in original, 'Heat import anchor drift'
+        return original.replace(anchor, anchor + addition, 1)
+    if path == HEAT_METADATA:
+        anchor, addition = b'related_formalizations:\n', HEAT_METADATA_NOTE.encode()
+        assert original.count(anchor) == 1 and HEAT_SOURCE.encode() not in original, 'Heat provenance anchor drift'
+        return original.replace(anchor, anchor + addition, 1)
+    assert path == HEAT_DOC
+    anchor, addition = HEAT_DOC_ANCHOR.encode(), HEAT_DOC_BLOCK.encode()
+    assert original.count(anchor) == 1 and addition not in original, 'Heat scope anchor drift'
+    return original.replace(anchor, addition + anchor, 1)
+
+
+def heat_inverse(path, actual):
+    assert path in HEAT_ROOTS
+    original = git('show', HEAT_PARENT + ':' + path)
+    assert blob_id(original) == parent_tree(HEAT_PARENT)[path][1]
+    assert actual == heat_transform(path, original), 'Exact heat root/provenance/scope drift: ' + path
+    return original
+
+
+def heat_identity(expected, originals, changes):
+    # Independently authenticate the complete landed base, including its legacy
+    # dispatch/environment repair. Reconstruct its old digest-bound transforms
+    # before applying this one integration, rather than trusting a new map.
+    base, source = parent_tree(HEAT_PARENT), parent_tree(HEAT_SOURCE)
+    assert len(base) == 1727 and len(source) == 1562
+    assert set(base) == set(resolve_union(parent_tree(MASTER), parent_tree(SUPPORT))) | NEW
+    old_helper = git('show', HEAT_PARENT + ':' + HELPER)
+    assert blob_id(old_helper) == base[HELPER][1]
+    old_digest = sha256(old_helper)
+    prior = {p: transform(p, originals[p], old_digest) for p in EDITED - {SMOOTH}}
+    prior[SMOOTH] = transform(SMOOTH, originals[SMOOTH], old_digest,
+                             sha256(prior[FIXTURE]), sha256(prior[WORKFLOW]))
+    for p, identity in expected.items():
+        assert base[p] == (('100644', blob_id(prior[p])) if p in EDITED else identity), 'Landed base policy drift: ' + p
+    assert not HEAT_ADDED & set(base)
+    for p in sorted(HEAT_ADDED | {HEAT_DOMAIN}):
+        assert source[p][0] == '100644'
+        data = git('show', HEAT_SOURCE + ':' + p)
+        assert blob_id(data) == source[p][1]
+        if p == HEAT_DOMAIN:
+            assert base[p][0] == '100644'
+        else:
+            assert p not in expected
+        expected[p] = source[p]
+        changes[p] = data
+    for p in sorted(HEAT_ROOTS):
+        original = git('show', HEAT_PARENT + ':' + p)
+        assert blob_id(original) == base[p][1]
+        originals[p] = original
+        changes[p] = heat_transform(p, original)
+        expected[p] = '100644', blob_id(changes[p])
+    assert len(expected) == 1726  # Three fixed additions before the four NEW paths.
+    return expected, originals, changes
+
+
+def heat_check_imports(local, actual):
+    original = heat_inverse(HEAT_ROOT, actual)
+    local.legacy_check_imports(original)
+    base = local.blob(local.INTEGRATION_PARENT, HEAT_ROOT)
+    # Run the original semantic body against the actual current import union;
+    # the one additional import is reconstructed from an authenticated source.
+    local.check_imports(actual, heat_transform(HEAT_ROOT, base), base)
+
+
+def heat_check_metadata(local, actual):
+    raw = actual.encode() if isinstance(actual, str) else actual
+    original = heat_inverse(HEAT_METADATA, raw)
+    local.legacy_check_metadata(original.decode())
+    base = local.blob(local.INTEGRATION_PARENT, HEAT_METADATA)
+    # Only the master input receives the new entry, preventing duplicate-note
+    # union semantics from changing the inherited entries or the literal note.
+    local.check_metadata(raw, heat_transform(HEAT_METADATA, base), base)
+
+TREES.update({HEAT_PARENT: HEAT_PARENT_TREE, HEAT_SOURCE: HEAT_SOURCE_TREE})
+
+
 def expected_identity():
     master, support = parent_tree(MASTER), parent_tree(SUPPORT)
     union = resolve_union(master, support)
@@ -185,6 +286,7 @@ def expected_identity():
         sha256(changes[FIXTURE]),sha256(changes[WORKFLOW]))
     expected = dict(union)
     for path,data in changes.items():expected[path]='100644',blob_id(data)
+    expected, originals, changes = heat_identity(expected, originals, changes)
     # New code/docs are bound to the exact committed HEAD/index/physical bytes.
     # Independent review must approve that external head; this is no self-review.
     head = parse_tree(git('ls-tree','-rz','HEAD'))
@@ -195,7 +297,15 @@ def expected_identity():
 
 def map_record(expected, originals, changes):
     master,support=parent_tree(MASTER),parent_tree(SUPPORT)
-    return {'parents':{MASTER:TREES[MASTER],SUPPORT:TREES[SUPPORT]},
+    return {'parents':{c:TREES[c] for c in (MASTER,SUPPORT,HEAT_PARENT,HEAT_SOURCE)},
+        'heat_invariant_integration':{'base':HEAT_PARENT,'source':HEAT_SOURCE,
+            'base_tree':HEAT_PARENT_TREE,'source_tree':HEAT_SOURCE_TREE,
+            'source_identity':{p:list(parent_tree(HEAT_SOURCE)[p]) for p in sorted(parent_tree(HEAT_SOURCE))},
+            'base_identity':{p:list(parent_tree(HEAT_PARENT)[p]) for p in sorted(parent_tree(HEAT_PARENT))},
+            'fixed_source_paths':{p:list(parent_tree(HEAT_SOURCE)[p]) for p in sorted(HEAT_ADDED|{HEAT_DOMAIN})},
+            'transforms':{p:{'original_blob':blob_id(originals[p]),'final_blob':blob_id(changes[p]),
+                'original_sha256':sha256(originals[p]),'final_sha256':sha256(changes[p]),'count':1} for p in sorted(HEAT_ROOTS)},
+            'historical_run':37181895941,'scope':'Independent jet-field heat/reaction closure only; combined-head proof checks UNRUN; both targets OPEN'},
         'paths':len(expected),'canonical_point4':'OPEN','smooth_general_target':'OPEN',
         'localization_mock_route':{'parent':MOCK_ROUTE_PARENT,'parent_tree':MOCK_ROUTE_TREE,
             'failed_workflow_run':37450437571,'flag':LOCALIZATION_MOCK_FLAG,
@@ -219,7 +329,7 @@ def verify_current():
     head = git('rev-parse','HEAD').decode().strip()
     assert re.fullmatch(r'[0-9a-f]{40}',head)
     if os.environ.get('EXPECTED_SHA'):assert head==os.environ['EXPECTED_SHA'], 'External expected HEAD drift'
-    for commit in (MASTER,SUPPORT,STARTUP_REPAIR_PARENT,MOCK_ROUTE_PARENT,WEIGHTED_MOCK_PARENT):
+    for commit in (MASTER,SUPPORT,STARTUP_REPAIR_PARENT,MOCK_ROUTE_PARENT,WEIGHTED_MOCK_PARENT,HEAT_PARENT,HEAT_SOURCE):
         subprocess.run(['git','--no-replace-objects','-C',str(ROOT),'merge-base','--is-ancestor',commit,'HEAD'],check=True,env=ENV)
     expected,originals,changes=expected_identity()
     committed=parse_tree(git('ls-tree','-rz','HEAD'))
@@ -278,8 +388,8 @@ def weighted_leaf(namespace, schema=None):
         before=module.check_imports,module.check_metadata
         touched.append((module,before))
         # These genuine functions keep their own exact INTEGRATION_PARENT blobs.
-        module.check_imports=local.legacy_check_imports
-        module.check_metadata=local.legacy_check_metadata
+        module.check_imports=lambda actual:heat_check_imports(local,actual)
+        module.check_metadata=lambda actual:heat_check_metadata(local,actual)
         return module
     def composed_sources():
         inherited=original_expected() # original ancestry/transform/self/workflow validation
@@ -287,6 +397,9 @@ def weighted_leaf(namespace, schema=None):
         for path,(_,data) in inherited.items():
             if path == MANIFOLD_WORKFLOW:
                 assert transform(path,data,sha256((ROOT/HELPER).read_bytes())) == (ROOT/path).read_bytes(), 'Exact manifold workflow startup transform drift'
+            elif path == HEAT_DOMAIN:
+                assert blob_id(data) == parent_tree(HEAT_PARENT)[path][1], 'Inherited domain source drift'
+                assert (ROOT/path).read_bytes() == git('show',HEAT_SOURCE+':'+path), 'Exact comment-only domain transform drift'
             elif path not in ROOT_CHANGES:
                 assert blob_id(data)==expected[path][1], 'Inherited weighted reconstruction drift: '+path
         return {p:('current-finite-composition',(ROOT/p).read_bytes()) for p in expected}
@@ -304,13 +417,24 @@ def weighted_leaf(namespace, schema=None):
              'public_paths':lambda:set(expected),'historical_c2':helpers,
              'UNIT_FILE_SHA256':units,'restored_exact_head_workflow':workflow}):
             report=namespace['_composition_original_check_current'](schema)
-        verify_current()
-        if schema:current_root_schema(schema,local)
         return {'scope':'current master/smooth composition', 'public_paths':len(expected),
             'master_root_imports_provenance_validated':True,'canonical_point4':'OPEN','smooth_general_target':'OPEN',
             'lean_verified':False,'original_weighted_report_historical_inventory_shape_only':report}
     finally:
         for module,before in reversed(touched):module.check_imports,module.check_metadata=before
+        primary = sys.exception()
+        postchecks = [verify_current]
+        if schema:postchecks.append(lambda:current_root_schema(schema,local))
+        post_failures = []
+        for check in postchecks:
+            try:check()
+            except BaseException as error:post_failures.append(error)
+        if post_failures:
+            if primary is None:
+                primary = post_failures.pop(0)
+                for error in post_failures:primary.add_note('Additional current POST check failure: '+repr(error))
+                raise primary
+            for error in post_failures:primary.add_note('Current POST check failure during unwind: '+repr(error))
 
 PATH_FLAGS={'--schema','--probe-log','--axiom-dir','--audit-json','--compile-log',
  '--evidence-dir','--smooth-probe-log','--smooth-completion-log','--smooth-audit-json','--baseline-repo','--manifest'}
@@ -504,9 +628,9 @@ def install_weighted(namespace):
 
 def localization_current(namespace,schema):
     namespace['check_ancestry']()
-    namespace['legacy_check_imports']((ROOT/'curvature/PoincareCurvature.lean').read_bytes())
+    heat_check_imports(types.SimpleNamespace(**namespace),(ROOT/'curvature/PoincareCurvature.lean').read_bytes())
     raw=(ROOT/'curvature/formalization.yaml').read_text()
-    namespace['legacy_check_metadata'](raw)
+    heat_check_metadata(types.SimpleNamespace(**namespace),raw)
     schema=pathlib.Path(schema)
     assert sha256(schema.read_bytes())==namespace['SCHEMA_SHA256']
     import jsonschema
@@ -562,8 +686,8 @@ def install_smooth(namespace):
     @functools.wraps(original)
     def main(argv=None):
         args=absolute_arguments(sys.argv[1:] if argv is None else argv)
-        verify_current()
-        print('CURRENT_SMOOTH_SEMANTIC_BODY_BEGIN: original inventory counters are historical shape; current identity is 1727 paths',flush=True)
+        current_identity=verify_current()
+        print('CURRENT_SMOOTH_SEMANTIC_BODY_BEGIN: original inventory counters are historical shape; current identity is '+str(len(current_identity))+' paths',flush=True)
         original(args) # current real smooth metadata/schema/probe/completion/audit gates
         print('CURRENT_SMOOTH_SEMANTIC_BODY_END',flush=True)
         historical(SUPPORT,SMOOTH,args) # original scoped route; no current hooks

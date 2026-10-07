@@ -12,6 +12,7 @@ from unittest.mock import patch
 import point4_smooth_master_composition as comp
 
 OFFLINE=None
+HEAT_FIXTURES=None
 REAL=False
 SCHEMA=None
 
@@ -31,6 +32,114 @@ def parent_inputs():
     return master,support,read
 
 class OrdinaryCompositionTests(unittest.TestCase):
+    def test_heat_weighted_failure_runs_all_postchecks_and_preserves_primary(self):
+        _,_,read=parent_inputs()
+        helper=types.SimpleNamespace(check_imports=object(),check_metadata=object())
+        local=types.SimpleNamespace(legacy_check_imports=object(),legacy_check_metadata=object())
+        primary=RuntimeError('actual semantic primary failure')
+        namespace={'expected_sources':lambda:{},'public_paths':lambda:set(),
+            'historical_c2':lambda:helper,'_composition_original_public_paths':lambda:set(),
+            'restored_exact_head_workflow':object(),'UNIT_FILE_SHA256':{},
+            '_composition_original_check_current':lambda schema:(_ for _ in ()).throw(primary)}
+        before=dict(namespace);slots=helper.check_imports,helper.check_metadata;events=[]
+        def identity():
+            events.append('identity')
+            if len(events)>2:raise RuntimeError('POST identity failure')
+            return {}
+        def schema(*args):
+            events.append('schema')
+            if len(events)>2:raise RuntimeError('POST schema failure')
+        with patch.object(comp,'verify_current',side_effect=identity),patch.object(comp,'current_root_schema',side_effect=schema),patch.object(comp.importlib,'import_module',return_value=local):
+            with self.assertRaises(RuntimeError) as error:comp.weighted_leaf(namespace,pathlib.Path('schema.json'))
+        self.assertIs(error.exception,primary)
+        self.assertEqual(events,['identity','schema','identity','schema'])
+        self.assertEqual(len(primary.__notes__),2)
+        for name in before:self.assertIs(namespace[name],before[name])
+        self.assertEqual((helper.check_imports,helper.check_metadata),slots)
+        self.assertEqual(comp._depth,0);self.assertIsNone(comp._owner)
+
+    def heat_inputs(self):
+        if HEAT_FIXTURES:
+            data=json.loads((HEAT_FIXTURES/'sources/master-tree.json').read_text(encoding='utf8'))
+            base={r['path']:(r['mode'],r['sha']) for r in data['tree'] if r['type']=='blob'}
+            data=json.loads((HEAT_FIXTURES/'sources/pr110-tree.json').read_text(encoding='utf8'))
+            source={r['path']:(r['mode'],r['sha']) for r in data['tree'] if r['type']=='blob'}
+            def read(commit,path):
+                label='master110' if commit==comp.HEAT_PARENT else 'pr110'
+                data=(HEAT_FIXTURES/'sources'/label/path).read_bytes()
+                self.assertEqual(comp.blob_id(data),(base if label=='master110' else source)[path][1])
+                return data
+        else:
+            base,source=comp.parent_tree(comp.HEAT_PARENT),comp.parent_tree(comp.HEAT_SOURCE)
+            read=lambda commit,path:comp.git('show',commit+':'+path)
+        return base,source,read
+
+    def test_heat_root_provenance_and_scope_transforms_are_count_one_and_reversible(self):
+        base,source,read=self.heat_inputs()
+        with patch.object(comp,'git',side_effect=lambda command,object_name:read(*object_name.split(':',1))),patch.object(comp,'parent_tree',side_effect=lambda c:base if c==comp.HEAT_PARENT else source):
+            for path in comp.HEAT_ROOTS:
+                original=read(comp.HEAT_PARENT,path)
+                changed=comp.heat_transform(path,original)
+                self.assertEqual(comp.heat_inverse(path,changed),original)
+                for bad in (changed+b'\nextra unreviewed root content\n',original):
+                    with self.assertRaises(AssertionError):comp.heat_inverse(path,bad)
+                with self.assertRaises(AssertionError):comp.heat_transform(path,changed)
+                anchor=comp.HEAT_IMPORT_ANCHOR if path==comp.HEAT_ROOT else 'related_formalizations:\n' if path==comp.HEAT_METADATA else comp.HEAT_DOC_ANCHOR
+                for bad in (original.replace(anchor.encode(),b'',1),original+anchor.encode()):
+                    with self.assertRaises(AssertionError):comp.heat_transform(path,bad)
+
+    def test_heat_current_semantics_run_actual_bodies_after_exact_inverse(self):
+        base,source,read=self.heat_inputs();events=[]
+        local=types.SimpleNamespace(INTEGRATION_PARENT='semantic-base',blob=lambda commit,path:read(comp.HEAT_PARENT,path),
+            legacy_check_imports=lambda raw:events.append(('old-imports',raw)),
+            legacy_check_metadata=lambda raw:events.append(('old-metadata',raw)),
+            check_imports=lambda *args:events.append(('current-imports',args)),
+            check_metadata=lambda *args:events.append(('current-metadata',args)))
+        with patch.object(comp,'git',side_effect=lambda command,object_name:read(*object_name.split(':',1))),patch.object(comp,'parent_tree',return_value=base):
+            old=read(comp.HEAT_PARENT,comp.HEAT_ROOT);new=comp.heat_transform(comp.HEAT_ROOT,old)
+            comp.heat_check_imports(local,new)
+            self.assertEqual(events,[('old-imports',old),('current-imports',(new,new,old))])
+            events.clear();old=read(comp.HEAT_PARENT,comp.HEAT_METADATA);new=comp.heat_transform(comp.HEAT_METADATA,old)
+            comp.heat_check_metadata(local,new.decode())
+            self.assertEqual(events,[('old-metadata',old.decode()),('current-metadata',(new,new,old))])
+            events.clear()
+            with self.assertRaises(AssertionError):comp.heat_check_metadata(local,new.decode()+'\nextra metadata\n')
+            self.assertEqual(events,[])
+
+    def test_heat_current_body_failure_is_propagated(self):
+        base,_,read=self.heat_inputs();events=[]
+        local=types.SimpleNamespace(INTEGRATION_PARENT='semantic-base',blob=lambda commit,path:read(comp.HEAT_PARENT,path),
+            legacy_check_imports=lambda raw:events.append('historical-shape'),
+            check_imports=lambda *args:(_ for _ in ()).throw(RuntimeError('actual current body failure')))
+        with patch.object(comp,'git',side_effect=lambda command,object_name:read(*object_name.split(':',1))),patch.object(comp,'parent_tree',return_value=base):
+            raw=comp.heat_transform(comp.HEAT_ROOT,read(comp.HEAT_PARENT,comp.HEAT_ROOT))
+            with self.assertRaisesRegex(RuntimeError,'actual current body failure'):comp.heat_check_imports(local,raw)
+        self.assertEqual(events,['historical-shape'])
+
+    def test_heat_finite_source_inventory_and_base_drift_rejection(self):
+        base,source,read=self.heat_inputs();master,support,parent_read=parent_inputs()
+        legacy=comp.resolve_union(master,support);digest=comp.sha256(read(comp.HEAT_PARENT,comp.HELPER))
+        def parents(commit):
+            return master if commit==comp.MASTER else support if commit==comp.SUPPORT else base if commit==comp.HEAT_PARENT else source
+        originals={p:parent_read(p) for p in comp.EDITED}
+        with patch.object(comp,'parent_tree',side_effect=parents):
+            changes={p:comp.transform(p,originals[p],digest) for p in comp.EDITED-{comp.SMOOTH}}
+            changes[comp.SMOOTH]=comp.transform(comp.SMOOTH,originals[comp.SMOOTH],digest,comp.sha256(changes[comp.FIXTURE]),comp.sha256(changes[comp.WORKFLOW]))
+            expected=dict(legacy);expected.update({p:('100644',comp.blob_id(b)) for p,b in changes.items()})
+            with patch.object(comp,'git',side_effect=lambda command,object_name:read(*object_name.split(':',1))):
+                final,_,_=comp.heat_identity(dict(expected),dict(originals),dict(changes))
+                self.assertEqual(len(final),1726)
+                for path in comp.HEAT_ADDED|{comp.HEAT_DOMAIN}:self.assertEqual(final[path],source[path])
+                untouched=set(legacy)-comp.EDITED-comp.HEAT_ROOTS-{comp.HEAT_DOMAIN}
+                self.assertTrue(all(final[p]==base[p] for p in untouched))
+                bad=dict(base);bad.pop(next(iter(untouched)))
+                with patch.object(comp,'parent_tree',side_effect=lambda c:bad if c==comp.HEAT_PARENT else parents(c)),self.assertRaises(AssertionError):
+                    comp.heat_identity(dict(expected),dict(originals),dict(changes))
+                for mode,blob in [('100755',source[comp.HEAT_MODULE][1]),('100644','0'*40)]:
+                    bad=dict(source);bad[comp.HEAT_MODULE]=(mode,blob)
+                    with patch.object(comp,'parent_tree',side_effect=lambda c:bad if c==comp.HEAT_SOURCE else parents(c)),self.assertRaises(AssertionError):
+                        comp.heat_identity(dict(expected),dict(originals),dict(changes))
+
     def weighted_mock_namespace(self,events):
         namespace={'main':lambda args:events.append(('main',args)), 'run_inherited':object(),
             'check_current':object(), 'public_paths':object(), 'historical_gate':object(), 'BASE':'ordinary-only'}
@@ -244,8 +353,11 @@ class OrdinaryCompositionTests(unittest.TestCase):
         before=dict(namespace)
         def failing(schema):
             changed=namespace['historical_c2']()
-            self.assertIs(changed.check_imports,local.legacy_check_imports)
-            self.assertIs(changed.check_metadata,local.legacy_check_metadata)
+            with patch.object(comp,'heat_check_imports') as imports,patch.object(comp,'heat_check_metadata') as metadata:
+                changed.check_imports(b'current import bytes')
+                changed.check_metadata('current metadata bytes')
+                imports.assert_called_once_with(local,b'current import bytes')
+                metadata.assert_called_once_with(local,'current metadata bytes')
             raise RuntimeError('ordinary callback body failure')
         namespace['_composition_original_check_current']=failing
         with patch.object(comp,'verify_current',return_value={}),patch.object(comp.importlib,'import_module',return_value=local):
@@ -875,7 +987,8 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--real-runtime',action='store_true');parser.add_argument('--schema',type=pathlib.Path)
     parser.add_argument('--parent-fixtures',type=pathlib.Path)
-    args=parser.parse_args();OFFLINE=args.parent_fixtures;SCHEMA=args.schema;REAL=args.real_runtime
+    parser.add_argument('--support110-fixtures',type=pathlib.Path)
+    args=parser.parse_args();OFFLINE=args.parent_fixtures;HEAT_FIXTURES=args.support110_fixtures;SCHEMA=args.schema;REAL=args.real_runtime
     assert not REAL or (sys.platform.startswith('linux') and SCHEMA and SCHEMA.is_file()), 'Actual Linux/schema input required'
     suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromTestCase(OrdinaryCompositionTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(PositiveControllerTests))
