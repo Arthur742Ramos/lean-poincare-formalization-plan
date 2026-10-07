@@ -96,7 +96,7 @@ jobs:
           python3 curvature/scripts/point4_linear_heat_geometry_mock_test.py
           python3 curvature/scripts/point4_manifold_heat_mock_test.py
           python3 curvature/scripts/point4_manifold_heat_release_mock_test.py
-          python3 curvature/scripts/point4_weighted_hessian_release_mock_test.py
+          python3 curvature/scripts/point4_weighted_hessian_release_guard.py --schema /tmp/point4-weighted-hessian-evidence/official-schema.json --historical-weighted-mocks
           python3 curvature/scripts/point4_weighted_initial_heat_guard.py
           python3 curvature/scripts/point4_closed_contract_source_test.py
           python3 scripts/check-doc-links.py

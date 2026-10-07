@@ -31,6 +31,47 @@ def parent_inputs():
     return master,support,read
 
 class OrdinaryCompositionTests(unittest.TestCase):
+    def weighted_mock_namespace(self,events):
+        namespace={'main':lambda args:events.append(('main',args)), 'run_inherited':object(),
+            'check_current':object(), 'public_paths':object(), 'historical_gate':object(), 'BASE':'ordinary-only'}
+        comp.install_weighted(namespace)
+        return namespace
+
+    def test_weighted_mock_dispatch_failure_keeps_current_pre_post_and_original_main(self):
+        events=[];namespace=self.weighted_mock_namespace(events)
+        def history(commit,path,args):
+            self.assertEqual((commit,path,args),(comp.WEIGHTED_MOCK_PARENT,comp.WEIGHTED_MOCK,[]))
+            events.append(('history',args))
+            raise RuntimeError('ordinary authentic weighted mock dispatch failure')
+        with (patch.object(comp,'weighted_current_inherited_evidence',side_effect=lambda ns,args:events.append(('schema',args))),
+              patch.object(comp,'weighted_execution',side_effect=lambda ns:contextlib.nullcontext()),
+              patch.object(comp,'weighted_leaf',side_effect=lambda ns,schema:events.append(('leaf',str(schema)))),
+              patch.object(comp,'historical',side_effect=history)):
+            with self.assertRaisesRegex(RuntimeError,'authentic weighted mock dispatch failure'):
+                namespace['main'](['--schema','schema.json',comp.WEIGHTED_MOCK_FLAG])
+        schema=str(pathlib.Path('schema.json').resolve())
+        self.assertEqual(events,[('schema',['--schema',schema]),('main',['--schema',schema]),
+            ('schema',['--schema',schema]),('history',[]),('leaf',schema),('schema',['--schema',schema])])
+
+    def test_weighted_mock_argument_dispatch_rejects_missing_schema_extra_and_duplicate_flag(self):
+        cases=([comp.WEIGHTED_MOCK_FLAG],['--schema','schema.json',comp.WEIGHTED_MOCK_FLAG,comp.WEIGHTED_MOCK_FLAG],
+            ['--schema','schema.json',comp.WEIGHTED_MOCK_FLAG,'--commit','arbitrary'],
+            ['--schema','schema.json',comp.WEIGHTED_MOCK_FLAG,'--historical-path','arbitrary.py'])
+        for args in cases:
+            namespace=self.weighted_mock_namespace([])
+            with (contextlib.redirect_stderr(io.StringIO()),patch.object(comp,'weighted_current_inherited_evidence') as current,
+                  patch.object(comp,'historical') as history,self.assertRaises((AssertionError,SystemExit))):
+                namespace['main'](args)
+            current.assert_not_called();history.assert_not_called()
+
+    def test_manifold_env_precedes_every_repo_import_and_duplicate_env_rejected(self):
+        _,_,read=parent_inputs();original=read(comp.MANIFOLD_WORKFLOW)
+        changed=comp.transform(comp.MANIFOLD_WORKFLOW,original,'0'*64)
+        self.assertEqual(changed.replace(comp.STARTUP_ENV.encode(),b'',1),original)
+        self.assertLess(changed.index(comp.STARTUP_ENV.encode()),changed.index(b'python3 curvature/scripts/'))
+        self.assertIn(b'bash scripts/point4_audit.sh',changed)
+        with self.assertRaises(AssertionError):comp.transform(comp.MANIFOLD_WORKFLOW,changed,'0'*64)
+
     def test_exact_parent_resolution_and_omission_controls(self):
         master,support,_=parent_inputs()
         union=comp.resolve_union(master,support)
@@ -56,6 +97,10 @@ class OrdinaryCompositionTests(unittest.TestCase):
                     self.assertEqual(changed.replace(comp.WF_STEP.encode(),b'',1).replace(comp.STARTUP_ENV.encode(),b'',1),original)
                 elif path==comp.LOCALIZATION_WORKFLOW:
                     self.assertEqual(changed.replace(comp.LOCALIZATION_CONTRACT_BUILD_COMMAND.encode(),b'',1).replace(comp.STARTUP_ENV.encode(),b'',1).replace(comp.LOCALIZATION_MOCK_ROUTE_COMMAND.encode(),comp.LOCALIZATION_MOCK_COMMAND.encode(),1),original)
+                elif path==comp.WEIGHTED_WORKFLOW:
+                    self.assertEqual(changed.replace(comp.WEIGHTED_MOCK_ROUTE_COMMAND.encode(),comp.WEIGHTED_MOCK_COMMAND.encode(),1),original)
+                elif path==comp.MANIFOLD_WORKFLOW:
+                    self.assertEqual(changed.replace(comp.STARTUP_ENV.encode(),b'',1),original)
                 else:
                     hook=comp.bootstrap(path,helper_sha).encode()
                     self.assertEqual(changed.count(hook),1)
@@ -67,7 +112,7 @@ class OrdinaryCompositionTests(unittest.TestCase):
                         aa=new.index('FILE_SHA256 = ');bb=new.index('\nADDED = ',aa)
                         self.assertEqual(new[:aa]+old[a:b]+new[bb:],old)
                 with self.assertRaises(AssertionError):comp.transform(path,changed,helper_sha,comp.sha256(mock),comp.sha256(workflow))
-                anchor=comp.STARTUP_ANCHOR if path==comp.LOCALIZATION_WORKFLOW else comp.WF_ANCHOR if path==comp.WORKFLOW else comp.ENTRY
+                anchor=comp.WEIGHTED_MOCK_COMMAND if path==comp.WEIGHTED_WORKFLOW else comp.STARTUP_ANCHOR if path in (comp.LOCALIZATION_WORKFLOW,comp.MANIFOLD_WORKFLOW) else comp.WF_ANCHOR if path==comp.WORKFLOW else comp.ENTRY
                 for bad in (original.decode().replace(anchor,'',1),original.decode()+anchor):
                     with self.assertRaises(AssertionError):comp.transform(path,bad.encode(),helper_sha,comp.sha256(mock),comp.sha256(workflow))
 
@@ -194,7 +239,8 @@ class OrdinaryCompositionTests(unittest.TestCase):
         helper=types.SimpleNamespace(check_imports=before_imports,check_metadata=before_metadata)
         local=types.SimpleNamespace(legacy_check_imports=object(),legacy_check_metadata=object())
         namespace={'expected_sources':lambda:{},'public_paths':lambda:set(),
-            'historical_c2':lambda:helper,'_composition_original_public_paths':lambda:set()}
+            'historical_c2':lambda:helper,'_composition_original_public_paths':lambda:set(),
+            'restored_exact_head_workflow':object(),'UNIT_FILE_SHA256':{}}
         before=dict(namespace)
         def failing(schema):
             changed=namespace['historical_c2']()

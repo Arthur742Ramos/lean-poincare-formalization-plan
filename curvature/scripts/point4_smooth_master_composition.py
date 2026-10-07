@@ -12,8 +12,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 MASTER = 'e883681caa862277857ee825a547502e8f3ec036'
 SUPPORT = '93ed035498e0bf02096202d2f2895d906fb88234'
 LOCALIZATION = '6cdbc00828607d80e180a9cffc0cc3376b3b7e42'
+WEIGHTED_MOCK_PARENT = 'f59fb6799f77d5d9cc298fef2632e8ebf887b97b'
 TREES = {MASTER: '10740092a77d5457a981154ea0d75a11120c54dd',
-         SUPPORT: '51b59d500108f632e3fa7d7993d14d74fd1491a7'}
+         SUPPORT: '51b59d500108f632e3fa7d7993d14d74fd1491a7',
+         WEIGHTED_MOCK_PARENT: '9ab0bbc6ba97352e903a0489cf89fddb97757a17'}
 HELPER = 'curvature/scripts/point4_smooth_master_composition.py'
 TEST = 'curvature/scripts/point4_smooth_master_composition_test.py'
 MAP = 'docs/point4/smooth-master-composition/identity-map.json'
@@ -34,11 +36,17 @@ LOCALIZATION_MOCK_COMMAND = '          python3 curvature/scripts/point4_c2_metri
 LOCALIZATION_MOCK_ROUTE_COMMAND = '          python3 curvature/scripts/point4_c2_metric_localization_source_test.py --schema /tmp/point4-c2-metric-localization-schema.json --historical-localization-mocks 2>&1 | tee /tmp/point4-c2-metric-localization-adversarial.log\n'
 LOCALIZATION_PROBE_COMMAND = '          lake env lean scripts/point4_c2_metric_localization_probe.lean 2>&1 | tee /tmp/point4-c2-metric-localization-axioms.log\n'
 LOCALIZATION_CONTRACT_BUILD_COMMAND = '          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.PointFourContract 2>&1 | tee /tmp/point4-c2-metric-localization-contract-build.log\n'
+WEIGHTED_WORKFLOW = '.github/workflows/point4-weighted-duhamel-hessian.yml'
+MANIFOLD_WORKFLOW = '.github/workflows/point4-manifold-only-fixed-background-heat.yml'
+WEIGHTED_MOCK = 'curvature/scripts/point4_weighted_hessian_release_mock_test.py'
+WEIGHTED_MOCK_FLAG = '--historical-weighted-mocks'
+WEIGHTED_MOCK_COMMAND = '          python3 curvature/scripts/point4_weighted_hessian_release_mock_test.py\n'
+WEIGHTED_MOCK_ROUTE_COMMAND = '          python3 curvature/scripts/point4_weighted_hessian_release_guard.py --schema /tmp/point4-weighted-hessian-evidence/official-schema.json --historical-weighted-mocks\n'
 STARTUP_REPAIR_PARENT = '1664872ce762ee027b76cb515befb0ae829b2711'
 STARTUP_REPAIR_TREE = '6d74e9612cf6e16f2d027012cede68e5e0a23483'
 STARTUP_ANCHOR = '    timeout-minutes: 350\n    steps:\n'
 STARTUP_ENV = '    env:\n      PYTHONDONTWRITEBYTECODE: "1"\n'
-EDITED = {WEIGHTED, LOCAL, CONSISTENCY, SMOOTH, FIXTURE, WORKFLOW, LOCALIZATION_WORKFLOW}
+EDITED = {WEIGHTED, LOCAL, CONSISTENCY, SMOOTH, FIXTURE, WORKFLOW, LOCALIZATION_WORKFLOW, WEIGHTED_WORKFLOW, MANIFOLD_WORKFLOW}
 SHARED = {'.github/workflows/point4-c2-initial-heat.yml',
  '.github/workflows/point4-linear-heat-geometry.yml',
  '.github/workflows/point4-weighted-initial-heat.yml',
@@ -131,6 +139,12 @@ def bootstrap(path, helper_sha):
 def transform(path, original, helper_sha, fixture_sha=None, workflow_sha=None):
     source = original.decode()
     assert '_smooth_master.' not in source, 'Previously transformed source is not an input'
+    if path == WEIGHTED_WORKFLOW:
+        assert source.count(WEIGHTED_MOCK_COMMAND) == 1 and WEIGHTED_MOCK_FLAG not in source
+        return source.replace(WEIGHTED_MOCK_COMMAND,WEIGHTED_MOCK_ROUTE_COMMAND,1).encode()
+    if path == MANIFOLD_WORKFLOW:
+        assert source.count(STARTUP_ANCHOR) == 1 and 'PYTHONDONTWRITEBYTECODE' not in source[:source.index('    steps:\n')]
+        return source.replace(STARTUP_ANCHOR,STARTUP_ANCHOR.replace('    steps:\n',STARTUP_ENV+'    steps:\n'),1).encode()
     if path == LOCALIZATION_WORKFLOW:
         assert source.count(STARTUP_ANCHOR) == 1 and 'PYTHONDONTWRITEBYTECODE' not in source
         assert source.count(LOCALIZATION_MOCK_COMMAND) == 1 and LOCALIZATION_MOCK_FLAG not in source
@@ -205,7 +219,7 @@ def verify_current():
     head = git('rev-parse','HEAD').decode().strip()
     assert re.fullmatch(r'[0-9a-f]{40}',head)
     if os.environ.get('EXPECTED_SHA'):assert head==os.environ['EXPECTED_SHA'], 'External expected HEAD drift'
-    for commit in (MASTER,SUPPORT,STARTUP_REPAIR_PARENT,MOCK_ROUTE_PARENT):
+    for commit in (MASTER,SUPPORT,STARTUP_REPAIR_PARENT,MOCK_ROUTE_PARENT,WEIGHTED_MOCK_PARENT):
         subprocess.run(['git','--no-replace-objects','-C',str(ROOT),'merge-base','--is-ancestor',commit,'HEAD'],check=True,env=ENV)
     expected,originals,changes=expected_identity()
     committed=parse_tree(git('ls-tree','-rz','HEAD'))
@@ -271,12 +285,24 @@ def weighted_leaf(namespace, schema=None):
         inherited=original_expected() # original ancestry/transform/self/workflow validation
         assert set(parent_tree(MASTER))-namespace['_composition_original_public_paths']()==WEIGHTED_MISSING
         for path,(_,data) in inherited.items():
-            if path not in ROOT_CHANGES:
+            if path == MANIFOLD_WORKFLOW:
+                assert transform(path,data,sha256((ROOT/HELPER).read_bytes())) == (ROOT/path).read_bytes(), 'Exact manifold workflow startup transform drift'
+            elif path not in ROOT_CHANGES:
                 assert blob_id(data)==expected[path][1], 'Inherited weighted reconstruction drift: '+path
         return {p:('current-finite-composition',(ROOT/p).read_bytes()) for p in expected}
+    original_workflow=namespace['restored_exact_head_workflow']
+    original_units=namespace['UNIT_FILE_SHA256']
+    units=dict(original_units)
+    units[WEIGHTED_WORKFLOW]=sha256((ROOT/WEIGHTED_WORKFLOW).read_bytes())
+    def workflow(actual):
+        original=git('show',MASTER+':'+WEIGHTED_WORKFLOW)
+        assert blob_id(original)==parent_tree(MASTER)[WEIGHTED_WORKFLOW][1]
+        assert actual==transform(WEIGHTED_WORKFLOW,original,sha256((ROOT/HELPER).read_bytes())), 'Exact weighted mock workflow transform drift'
+        return original_workflow(original)
     try:
         with replacements(namespace,{'expected_sources':composed_sources,
-             'public_paths':lambda:set(expected),'historical_c2':helpers}):
+             'public_paths':lambda:set(expected),'historical_c2':helpers,
+             'UNIT_FILE_SHA256':units,'restored_exact_head_workflow':workflow}):
             report=namespace['_composition_original_check_current'](schema)
         verify_current()
         if schema:current_root_schema(schema,local)
@@ -457,7 +483,24 @@ def install_weighted(namespace):
         with weighted_execution(namespace):result=original_main(args)
         weighted_current_inherited_evidence(namespace,args)
         return result
-    namespace['run_inherited']=run;namespace['main']=main
+    def dispatch(argv=None):
+        args=absolute_arguments(sys.argv[1:] if argv is None else argv)
+        if WEIGHTED_MOCK_FLAG in args:
+            assert args.count(WEIGHTED_MOCK_FLAG)==1, 'Duplicate weighted mock route flag'
+            parser=argparse.ArgumentParser(allow_abbrev=False)
+            parser.add_argument('--schema',type=pathlib.Path,required=True)
+            parser.add_argument(WEIGHTED_MOCK_FLAG,action='store_true',required=True)
+            parsed=parser.parse_args(args)
+            current_args=['--schema',str(parsed.schema)]
+            try:
+                main(current_args)
+                historical(WEIGHTED_MOCK_PARENT,WEIGHTED_MOCK,[])
+            finally:
+                weighted_leaf(namespace,parsed.schema)
+                weighted_current_inherited_evidence(namespace,current_args)
+            return
+        return main(args)
+    namespace['run_inherited']=run;namespace['main']=dispatch
 
 def localization_current(namespace,schema):
     namespace['check_ancestry']()
