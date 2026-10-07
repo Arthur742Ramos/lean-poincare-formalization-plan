@@ -1,0 +1,78 @@
+{
+  "base": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
+  "adapters": {
+    "curvature/scripts/point4_c2_initial_heat_source_test.py": {
+      "original_sha256": "9a484a27c196b4ed7cd12fe2bd9691d0d53744e96b254d9f9d0fd174b015fc3e",
+      "transformed_sha256": "42c20dad9dcaf0c85e11bb95baabcaa7e52dbf2b0d7c2377caa5dc5532bb6f50",
+      "before": "\nif __name__ == '__main__':\n    main()\n",
+      "after": "\n# Exact weighted-Hessian inventory dispatch. The original semantic gate body\n# above is replayed from its byte/mode-pinned historical source reconstruction;\n# current physical source and evidence checks are independently mandatory.\n_weighted_hessian_historical_main = main\ndef main(argv=None):\n    from point4_weighted_hessian_release_guard import run_inherited\n    run_inherited('curvature/scripts/point4_c2_initial_heat_source_test.py', argv)\n\nif __name__ == '__main__':\n    main()\n",
+      "count": 1
+    },
+    "curvature/scripts/point4_linear_heat_geometry_source_test.py": {
+      "original_sha256": "81b3042b0b9530da4a0099946ecce363cca1309435a5c4d7f57f31b25c7ae605",
+      "transformed_sha256": "7ec0e2e917c63a4d13ff93745b21106ff03bbb575e2a7f819297d89d446b9cbc",
+      "before": "\nif __name__ == '__main__':\n    main()\n",
+      "after": "\n# Exact weighted-Hessian inventory dispatch. The original semantic gate body\n# above is replayed from its byte/mode-pinned historical source reconstruction;\n# current physical source and evidence checks are independently mandatory.\n_weighted_hessian_historical_main = main\ndef main(argv=None):\n    from point4_weighted_hessian_release_guard import run_inherited\n    run_inherited('curvature/scripts/point4_linear_heat_geometry_source_test.py', argv)\n\nif __name__ == '__main__':\n    main()\n",
+      "count": 1
+    },
+    "curvature/scripts/point4_manifold_heat_source_test.py": {
+      "original_sha256": "7bf46239191c67066bee4576c309daed6535cde2234b2dd4c4f8b5146c327f78",
+      "transformed_sha256": "a7dc3291f2fccf8ecd05c56018a07d1ec5cc1b74efeb972bf2d13581afacc31d",
+      "before": "\nif __name__ == '__main__':\n    main()\n",
+      "after": "\n# Exact weighted-Hessian inventory dispatch. The original semantic gate body\n# above is replayed from its byte/mode-pinned historical source reconstruction;\n# current physical source and evidence checks are independently mandatory.\n_weighted_hessian_historical_main = main\ndef main(argv=None):\n    from point4_weighted_hessian_release_guard import run_inherited\n    run_inherited('curvature/scripts/point4_manifold_heat_source_test.py', argv)\n\nif __name__ == '__main__':\n    main()\n",
+      "count": 1
+    },
+    "curvature/scripts/point4_manifold_heat_release_guard.py": {
+      "original_sha256": "713af9477a3595655ddbd2cde6dd4dfc5ce7230f4310b28593171407e33ab734",
+      "transformed_sha256": "18fe3f2ed8e5eab9d0877923a3ea9d78d6cf6fc64d395c205311cc93e77f6324",
+      "before": "\nif __name__ == '__main__':\n    main()\n",
+      "after": "\n# Exact weighted-Hessian inventory dispatch. The original semantic gate body\n# above is replayed from its byte/mode-pinned historical source reconstruction;\n# current physical source and evidence checks are independently mandatory.\n_weighted_hessian_historical_main = main\ndef main(argv=None):\n    from point4_weighted_hessian_release_guard import run_inherited\n    run_inherited('curvature/scripts/point4_manifold_heat_release_guard.py', argv)\n\nif __name__ == '__main__':\n    main()\n",
+      "count": 1
+    },
+    "curvature/scripts/point4_c2_initial_heat_mock_test.py": {
+      "original_sha256": "2098f1bcb384441b72f7a0c4d51a5ec76be2852bb439ebb905c9e36e28c6e95d",
+      "transformed_sha256": "0a78c31845f3f49806a179aec824157337ef99ae04fb134dd2b4d1329761c19b",
+      "before": "\nif __name__ == '__main__':\n    unittest.main()\n",
+      "after": "\nif __name__ == '__main__':\n    from point4_weighted_hessian_release_guard import run_inherited\n    run_inherited('curvature/scripts/point4_c2_initial_heat_mock_test.py')\n",
+      "count": 1
+    },
+    "curvature/scripts/point4_linear_heat_geometry_mock_test.py": {
+      "original_sha256": "07a32f50e2a9cfffad5a4d323d3d6f0f4148a568ef510113498b1b1ef5b8bafd",
+      "transformed_sha256": "cff0ae655b013c4a890ba712c3ce939aa373e4287b40468c6018b20518861a47",
+      "before": "\nif __name__ == '__main__':\n    unittest.main()\n",
+      "after": "\nif __name__ == '__main__':\n    from point4_weighted_hessian_release_guard import run_inherited\n    run_inherited('curvature/scripts/point4_linear_heat_geometry_mock_test.py')\n",
+      "count": 1
+    },
+    "curvature/scripts/point4_manifold_heat_release_mock_test.py": {
+      "original_sha256": "76fad58a146bd02c4e62ecd5c091366365a9bbb346214ad4c84d5cc95d632b08",
+      "transformed_sha256": "dd93a958b6859980430465a75f8bec3ef8ab3e040742b79ea1345de14759f3af",
+      "before": "\nif __name__ == '__main__':\n    unittest.main()\n",
+      "after": "\nif __name__ == '__main__':\n    from point4_weighted_hessian_release_guard import run_inherited\n    run_inherited('curvature/scripts/point4_manifold_heat_release_mock_test.py')\n",
+      "count": 1
+    },
+    ".github/workflows/point4-linear-heat-geometry.yml": {
+      "original_sha256": "2cfd17bf27e5e5983bf8a524948382a1965dcd7f6a44a5a5efe44bae91dbf582",
+      "transformed_sha256": "d8c230b25fbe73c88b1608ed6f331337214cb3fa6baa849f48a45c904332285d",
+      "before": "  linear_heat_geometry:\n    name: Exact-head combined source, all 127 axiom occurrences, closed contract and full audit\n",
+      "after": "  linear_heat_geometry:\n    name: Exact-head combined source, all 127 axiom occurrences, closed contract and full audit\n    env:\n      PYTHONDONTWRITEBYTECODE: '1'\n",
+      "count": 1,
+      "startup_job": "linear_heat_geometry"
+    },
+    ".github/workflows/point4-c2-initial-heat.yml": {
+      "original_sha256": "bb3efbcc8a477181aea2857a002f2d5eb7b7670ad34527dd231d9cfa5c543f3d",
+      "transformed_sha256": "86578f0d1696866e5837aa147c7e5033367a7b271b4e4c9998b130064810cbe8",
+      "before": "  c2_initial_heat:\n    name: Exact-head C2 union, all 150 axiom occurrences, current contract and full audit\n",
+      "after": "  c2_initial_heat:\n    name: Exact-head C2 union, all 150 axiom occurrences, current contract and full audit\n    env:\n      PYTHONDONTWRITEBYTECODE: '1'\n",
+      "count": 1,
+      "startup_job": "c2_initial_heat"
+    },
+    ".github/workflows/point4-weighted-initial-heat.yml": {
+      "original_sha256": "3b52ebefb56317864cc95ba9dacf8276776d51d82e25f5ad83e2083638f4be8a",
+      "transformed_sha256": "32ac8f1eb4af03a715002cbefbfb67d9f37fc4bb8fb951a1738dcd5b11ec6f4f",
+      "before": "  weighted_initial_heat:\n    name: Exact-head weighted heat certificate with unchanged full audit\n",
+      "after": "  weighted_initial_heat:\n    name: Exact-head weighted heat certificate with unchanged full audit\n    env:\n      PYTHONDONTWRITEBYTECODE: '1'\n",
+      "count": 1,
+      "startup_job": "weighted_initial_heat"
+    }
+  }
+}

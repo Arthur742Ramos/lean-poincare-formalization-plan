@@ -1,0 +1,304 @@
+module
+
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianDerivative
+public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelFrechet
+public import Mathlib.Analysis.Calculus.ContDiff.Defs
+
+/-!
+# Genuine fixed-time spatial Fréchet C² under weighted forcing control
+
+Source-only candidate. This is a finite-dimensional assembly of actual
+derivatives of the raw Gaussian Duhamel potential. It neither assumes a
+derivative witness nor identifies a solver output with that potential.
+No strong C² time trace, evolution equation, or manifold theorem is claimed.
+-/
+
+@[expose] public noncomputable section
+
+set_option maxHeartbeats 800000
+
+open Real Set MeasureTheory Metric
+open scoped Real BigOperators Interval Topology
+
+namespace RicciFlow
+namespace AnalyticPDE
+
+local instance weightedCoordinateDualNormedAddCommGroup {n : ℕ} :
+    NormedAddCommGroup ((Fin n → ℝ) →L[ℝ] ℝ) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+local instance weightedCoordinateBilinearNormedAddCommGroup {n : ℕ} :
+    NormedAddCommGroup ((Fin n → ℝ) →L[ℝ] ((Fin n → ℝ) →L[ℝ] ℝ)) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+local instance weightedCoordinateBilinearContinuousAdd {n : ℕ} :
+    ContinuousAdd ((Fin n → ℝ) →L[ℝ] ((Fin n → ℝ) →L[ℝ] ℝ)) :=
+  IsTopologicalAddGroup.toContinuousAdd
+
+/-- Evaluating the first argument on a coordinate unit vector gives exactly
+the corresponding row functional. This explicit equality avoids a broad
+simplifier conversion beneath `HasFDerivAt`. -/
+theorem coordinateHessianCLM_single_left {n : ℕ}
+    (A : Fin n → Fin n → ℝ) (j : Fin n) :
+    coordinateHessianCLM A (Pi.single j 1) =
+      coordinateLinearFunctional (fun k => A j k) := by
+  classical
+  ext w
+  rw [coordinateHessianCLM_apply, coordinateLinearFunctional_apply,
+    Finset.sum_eq_single j]
+  · simp
+  · intro i _ hij
+    simp [Pi.single_apply, hij]
+  · intro hj
+    exact (hj (Finset.mem_univ j)).elim
+
+/-- The raw integrated Gaussian matrix as a curried continuous bilinear
+operator. Its definition contains no regularity or solver certificate. -/
+def weightedHeatDuhamelHessianCLM {n : ℕ} (t₀ t : ℝ)
+    (q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (x : Fin n → ℝ) :
+    (Fin n → ℝ) →L[ℝ] ((Fin n → ℝ) →L[ℝ] ℝ) :=
+  coordinateHessianCLM (fun j k => heatDuhamelHessianEntryND t₀ t q j k x)
+
+@[simp] theorem weightedHeatDuhamelHessianCLM_apply {n : ℕ} (t₀ t : ℝ)
+    (q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (x v w : Fin n → ℝ) :
+    weightedHeatDuhamelHessianCLM t₀ t q x v w =
+      ∑ j : Fin n, ∑ k : Fin n,
+        heatDuhamelHessianEntryND t₀ t q j k x * (v j * w k) := by
+  exact coordinateHessianCLM_apply _ _ _
+
+/-- The actual weighted Gaussian Hessian operator is continuous in space. -/
+theorem continuous_weightedHeatDuhamelHessianCLM
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hL : 0 ≤ L) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s ∈ Ioo t₀ t, ∀ x y, |q s y - q s x| ≤
+      (L * (s - t₀) ^ (-(α / 2))) *
+        ∑ ell : Fin n, |(x - y) ell| ^ α) :
+    Continuous (weightedHeatDuhamelHessianCLM t₀ t q) := by
+  unfold weightedHeatDuhamelHessianCLM coordinateHessianCLM
+  apply continuous_finsetSum
+  intro j _
+  apply continuous_finsetSum
+  intro k _
+  exact (continuous_heatDuhamelHessianEntryND_of_weighted
+    ht hα hα1 hq hL hqb hqholder j k).smul continuous_const
+
+/-- Each gradient coordinate has the actual integrated Hessian column as
+its genuine Fréchet derivative. -/
+theorem hasFDerivAt_heatDuhamelGradientCoordND_of_weighted
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hL : 0 ≤ L) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s ∈ Ioo t₀ t, ∀ x y, |q s y - q s x| ≤
+      (L * (s - t₀) ^ (-(α / 2))) *
+        ∑ ell : Fin n, |(x - y) ell| ^ α)
+    (k : Fin n) (x : Fin n → ℝ) :
+    HasFDerivAt (heatDuhamelGradientCoordND t₀ t q k)
+      (coordinateLinearFunctional (fun j =>
+        heatDuhamelHessianEntryND t₀ t q j k x)) x := by
+  classical
+  refine hasFDerivAt_of_continuous_coordinate_derivatives
+    (heatDuhamelGradientCoordND t₀ t q k)
+    (fun z => coordinateLinearFunctional (fun j =>
+      heatDuhamelHessianEntryND t₀ t q j k z)) ?_ ?_ x
+  · unfold coordinateLinearFunctional
+    apply continuous_finsetSum
+    intro j _
+    exact (continuous_heatDuhamelHessianEntryND_of_weighted
+      ht hα hα1 hq hL hqb hqholder j k).smul continuous_const
+  · intro z j
+    rw [coordinateLinearFunctional_single]
+    exact (hasDerivAt_heatDuhamelGradientCoordND_entry_of_weighted
+      ht hα hα1 hq hL hqb hqholder z j k).hasFDerivAt
+
+/-- The unchanged operator-valued gradient of the raw Duhamel potential is
+continuous under the weighted forcing hypotheses. -/
+theorem continuous_heatDuhamelGradientCLM_of_weighted
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hL : 0 ≤ L) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s ∈ Ioo t₀ t, ∀ x y, |q s y - q s x| ≤
+      (L * (s - t₀) ^ (-(α / 2))) *
+        ∑ ell : Fin n, |(x - y) ell| ^ α) :
+    Continuous (heatDuhamelGradientCLM t₀ t q) := by
+  unfold heatDuhamelGradientCLM coordinateLinearFunctional
+  apply continuous_finsetSum
+  intro k _
+  exact (continuous_iff_continuousAt.mpr fun x =>
+    (hasFDerivAt_heatDuhamelGradientCoordND_of_weighted
+      ht hα hα1 hq hL hqb hqholder k x).continuousAt).smul continuous_const
+
+/-- The actual first Fréchet derivative of the raw Duhamel potential is the
+unchanged Gaussian gradient, with no uniform unweighted Hölder constant. -/
+theorem hasFDerivAt_heatDuhamelND_of_weighted
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hL : 0 ≤ L) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s ∈ Ioo t₀ t, ∀ x y, |q s y - q s x| ≤
+      (L * (s - t₀) ^ (-(α / 2))) *
+        ∑ ell : Fin n, |(x - y) ell| ^ α)
+    (x : Fin n → ℝ) :
+    HasFDerivAt (fun z : Fin n → ℝ => ∫ s in t₀..t,
+      heatSemigroupND (t - s) (q s) z)
+      (heatDuhamelGradientCLM t₀ t q x) x := by
+  classical
+  apply hasFDerivAt_of_continuous_coordinate_derivatives
+  · exact continuous_heatDuhamelGradientCLM_of_weighted
+      ht hα hα1 hq hL hqb hqholder
+  · intro z k
+    have h := (hasDerivAt_heatDuhamelND_coord ht.le hq hqb z k).hasFDerivAt
+    have hval : heatDuhamelGradientCLM t₀ t q z (Pi.single k 1) =
+        heatDuhamelGradientCoordND t₀ t q k z :=
+      coordinateLinearFunctional_single _ k
+    rw [hval]
+    simpa only [heatDuhamelGradientCoordND] using h
+
+/-- The actual Fréchet derivative of the operator-valued Gaussian gradient
+is the full weighted time-integrated Gaussian Hessian. -/
+theorem hasFDerivAt_heatDuhamelGradientCLM_of_weighted
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hL : 0 ≤ L) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s ∈ Ioo t₀ t, ∀ x y, |q s y - q s x| ≤
+      (L * (s - t₀) ^ (-(α / 2))) *
+        ∑ ell : Fin n, |(x - y) ell| ^ α)
+    (x : Fin n → ℝ) :
+    HasFDerivAt (heatDuhamelGradientCLM t₀ t q)
+      (weightedHeatDuhamelHessianCLM t₀ t q x) x := by
+  classical
+  apply hasFDerivAt_of_continuous_coordinate_derivatives
+  · exact continuous_weightedHeatDuhamelHessianCLM
+      ht hα hα1 hq hL hqb hqholder
+  · intro z j
+    have hderiv : HasDerivAt
+        (fun a => heatDuhamelGradientCLM t₀ t q (Function.update z j a))
+        (∑ k : Fin n, heatDuhamelHessianEntryND t₀ t q j k z •
+          (ContinuousLinearMap.proj k : (Fin n → ℝ) →L[ℝ] ℝ)) (z j) := by
+      unfold heatDuhamelGradientCLM coordinateLinearFunctional
+      have hfun : (fun a => ∑ k : Fin n,
+          heatDuhamelGradientCoordND t₀ t q k (Function.update z j a) •
+            (ContinuousLinearMap.proj k : (Fin n → ℝ) →L[ℝ] ℝ)) =
+          ∑ k : Fin n, fun a => heatDuhamelGradientCoordND t₀ t q k
+            (Function.update z j a) •
+              (ContinuousLinearMap.proj k : (Fin n → ℝ) →L[ℝ] ℝ) := by
+        funext a
+        simp only [Finset.sum_apply]
+      rw [hfun]
+      exact HasDerivAt.sum (u := Finset.univ) fun k _ =>
+        (hasDerivAt_heatDuhamelGradientCoordND_entry_of_weighted
+          ht hα hα1 hq hL hqb hqholder z j k).smul_const
+            (ContinuousLinearMap.proj k : (Fin n → ℝ) →L[ℝ] ℝ)
+    rw [weightedHeatDuhamelHessianCLM, coordinateHessianCLM_single_left]
+    exact hderiv.hasFDerivAt
+
+/-- The second Fréchet derivative of the raw potential itself is the
+actual weighted time-integrated Gaussian Hessian. The intervening gradient
+identity is proved pointwise from the genuine first-derivative theorem. -/
+theorem hasFDerivAt_fderiv_heatDuhamelND_of_weighted
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hL : 0 ≤ L) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s ∈ Ioo t₀ t, ∀ x y, |q s y - q s x| ≤
+      (L * (s - t₀) ^ (-(α / 2))) *
+        ∑ ell : Fin n, |(x - y) ell| ^ α)
+    (x : Fin n → ℝ) :
+    HasFDerivAt
+      (fderiv ℝ (fun z : Fin n → ℝ => ∫ s in t₀..t,
+        heatSemigroupND (t - s) (q s) z))
+      (weightedHeatDuhamelHessianCLM t₀ t q x) x := by
+  have hgrad : fderiv ℝ (fun z : Fin n → ℝ => ∫ s in t₀..t,
+      heatSemigroupND (t - s) (q s) z) = heatDuhamelGradientCLM t₀ t q := by
+    funext z
+    exact (hasFDerivAt_heatDuhamelND_of_weighted
+      ht hα hα1 hq hL hqb hqholder z).fderiv
+  rw [hgrad]
+  exact hasFDerivAt_heatDuhamelGradientCLM_of_weighted
+    ht hα hα1 hq hL hqb hqholder x
+
+/-- Equality of the actual twice-iterated Fréchet derivative with the raw
+weighted Gaussian Hessian operator. -/
+theorem fderiv_fderiv_heatDuhamelND_eq_of_weighted
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hL : 0 ≤ L) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s ∈ Ioo t₀ t, ∀ x y, |q s y - q s x| ≤
+      (L * (s - t₀) ^ (-(α / 2))) *
+        ∑ ell : Fin n, |(x - y) ell| ^ α)
+    (x : Fin n → ℝ) :
+    fderiv ℝ (fderiv ℝ (fun z : Fin n → ℝ => ∫ s in t₀..t,
+      heatSemigroupND (t - s) (q s) z)) x =
+      weightedHeatDuhamelHessianCLM t₀ t q x := by
+  exact (hasFDerivAt_fderiv_heatDuhamelND_of_weighted
+    ht hα hα1 hq hL hqb hqholder x).fderiv
+
+/-- At every fixed final time `t > t₀`, the raw Euclidean Duhamel potential
+is genuinely twice continuously Fréchet differentiable in space. -/
+theorem contDiff_two_heatDuhamelND_of_weighted
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hL : 0 ≤ L) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s ∈ Ioo t₀ t, ∀ x y, |q s y - q s x| ≤
+      (L * (s - t₀) ^ (-(α / 2))) *
+        ∑ ell : Fin n, |(x - y) ell| ^ α) :
+    ContDiff ℝ 2 (fun z : Fin n → ℝ => ∫ s in t₀..t,
+      heatSemigroupND (t - s) (q s) z) := by
+  apply (contDiff_succ_iff_hasFDerivAt (n := 1)).mpr
+  refine ⟨heatDuhamelGradientCLM t₀ t q, ?_,
+    hasFDerivAt_heatDuhamelND_of_weighted ht hα hα1 hq hL hqb hqholder⟩
+  exact contDiff_one_iff_hasFDerivAt.mpr
+    ⟨weightedHeatDuhamelHessianCLM t₀ t q,
+      continuous_weightedHeatDuhamelHessianCLM ht hα hα1 hq hL hqb hqholder,
+      hasFDerivAt_heatDuhamelGradientCLM_of_weighted ht hα hα1 hq hL hqb hqholder⟩
+
+/-- The operator norm bound is derived from the actual Gaussian-entry
+estimates. It is a conclusion, never a derivative or solver assumption. -/
+theorem norm_weightedHeatDuhamelHessianCLM_le
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hL : 0 ≤ L) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hqholder : ∀ s ∈ Ioo t₀ t, ∀ x y, |q s y - q s x| ≤
+      (L * (s - t₀) ^ (-(α / 2))) *
+        ∑ ell : Fin n, |(x - y) ell| ^ α)
+    (x : Fin n → ℝ) :
+    ‖weightedHeatDuhamelHessianCLM t₀ t q x‖ ≤
+      ∑ j : Fin n, ∑ k : Fin n,
+        heatHessianEntryHolderMoment n α j k * L *
+          (1 / (α / 2) + 1 / (1 - α / 2)) := by
+  apply (norm_coordinateHessianCLM_le (fun j k =>
+    heatDuhamelHessianEntryND t₀ t q j k x)).trans
+  apply Finset.sum_le_sum
+  intro j _
+  apply Finset.sum_le_sum
+  intro k _
+  exact abs_heatDuhamelHessianEntryND_le_weighted
+    ht hα hα1 hq hL hqb hqholder x j k
+
+/-- Symmetry of the actual Gaussian Hessian persists under the weighted
+assembly and is independent of any claimed differentiability. -/
+theorem weightedHeatDuhamelHessianCLM_comm {n : ℕ} (t₀ t : ℝ)
+    (q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (x v w : Fin n → ℝ) :
+    weightedHeatDuhamelHessianCLM t₀ t q x v w =
+      weightedHeatDuhamelHessianCLM t₀ t q x w v := by
+  simp only [weightedHeatDuhamelHessianCLM_apply]
+  rw [Finset.sum_comm]
+  apply Finset.sum_congr rfl
+  intro j _
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [heatDuhamelHessianEntryND_comm]
+  ring
+
+end AnalyticPDE
+end RicciFlow

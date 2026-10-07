@@ -1,0 +1,125 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Manifold-only literal-C2 fixed-background local tensor heat"
+  description: >-
+    An additive supporting proof milestone deriving actual C1 tensor-heat
+    coefficients and scale-correct local zero-trace right inverses for the
+    supplied literal C2 metric under BoundarylessManifold I M. A single global
+    auxiliary C2 affine connection and its induced tensor regularity are
+    constructed internally. This is local linear tensor heat, not nonlinear
+    Ricci-DeTurck existence, initial-C2 global gluing, canonical Point-4 closure,
+    or a registry submission. Exact Lean 4.33 verification and review are pending.
+  authors:
+    - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arthur Freitas Ramos"
+
+sources:
+  - title: "Verified literal-C2 fixed-background tensor-heat producer"
+    id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/58c6fc21bafeb8a659d6751a1a9db7a74127a300/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatFixedBackgroundProducer.lean"
+    type: "formalization-source"
+    relationship: "adapts"
+    location: "exists_fixedBackground_actualLocalTensorHeat and its auxiliary-connection construction"
+    note: >-
+      Reuses the historical proved construction while generalizing only the
+      model-boundaryless scope through the independently proved local chart
+      transport. This is an uncompiled supporting adaptation, not a new
+      mathematical-discovery claim or canonical Ricci-flow existence theorem.
+    license: "Apache-2.0"
+    author_endorsement: "n/a"
+  - title: "Pinned actual tensor-heat coefficients and zero-trace analytic inverse"
+    id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/e6b54dd0d7e73a51eb8efb083764b68ae8305a5a/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE"
+    type: "formalization-source"
+    relationship: "adapts"
+    location: "TensorHeatGeometricRegularity.lean and TensorHeatCoefficientLocalization.lean"
+    note: >-
+      New namespaces adapt the geometric coefficient and point-centered wrapper
+      proofs under BoundarylessManifold I M, invoking the analytic right inverse
+      unchanged. Original modules, formulas and contributor notices are retained.
+    license: "Apache-2.0"
+    author_endorsement: "n/a"
+
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/e6b54dd0d7e73a51eb8efb083764b68ae8305a5a/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository curvature subproject at full commit
+      e6b54dd0d7e73a51eb8efb083764b68ae8305a5a. Preserves all proof source,
+      workflows, pins, contracts, auditors, attribution and root metadata.
+      The sole inherited change is the digest-pinned, count-one inventory
+      adapter in scripts/point4_c2_initial_heat_source_test.py, reconstructed
+      and checked by scripts/point4_manifold_heat_release_guard.py. It admits
+      only this enumerated release union; no existing evidence gate is waived.
+      In particular it uses
+      Analysis/BoundarylessChartTransport.lean, actual tensor-heat coordinate
+      definitions and the existing analytic localization/inverse construction.
+      The coefficient dependency spine from
+      Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatGeometricRegularity.lean
+      and the point-centered localization wrapper from TensorHeatCoefficientLocalization.lean
+      are adapted in new namespaces and modules; local target openness replaces
+      the global model-boundaryless premise. The original files are not edited.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/58c6fc21bafeb8a659d6751a1a9db7a74127a300/curvature"
+    relationship: "builds-on"
+    note: >-
+      Historical verified PR126 source at full commit
+      58c6fc21bafeb8a659d6751a1a9db7a74127a300, source path
+      Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatFixedBackgroundProducer.lean.
+      Reuses its actual auxiliary affine-connection construction, induced
+      two-/three-tensor regularity and literal-metric norm stabilization.
+      The new producer is a distinct manifold-only theorem in the
+      RicciFlow.AnalyticPDE.ManifoldBoundaryless namespace. The historical
+      I.Boundaryless hypothesis, tests, workflow and verification remain
+      historical; they are not verification of this new uncompiled source.
+  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold"
+    relationship: "builds-on"
+    note: >-
+      Immutable pinned Mathlib source at full commit
+      db584cd6d46c92f209a44c0f1c829460d327499d. Reuses manifold boundarylessness,
+      preferred-chart inverse smoothness, actual pullback regularity, bundle
+      local frames, derivatives, partitions of unity and real calculus through
+      the repository's inherited imports. Pinned ContMDiff/Atlas.lean and
+      VectorField/Pullback.lean APIs were inspected read-only. No Mathlib source
+      was modified, and inherited contributor notices remain intact.
+
+status:
+  scope: >-
+    Supporting local linear-heat scope only. Literal C2 metric and manifold-only
+    boundarylessness are preserved; no analytic oracle is an input. The
+    canonical Point-4 theorem remains absent and OPEN. Weak-candidate uniqueness,
+    nonlinear estimates, common closed-interval construction and ordinary
+    initial derivatives are unchanged goals, not claims of this milestone.
+    Exact Lean 4.33 compilation, type/axiom probes, full build/audit and
+    independent review are pending. No local Lean process was run.
+  main_results: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["GPT-6.1"]
+      framework: "Codex"
+      tool_setup: >-
+        Read-only immutable-source/API inspection, additive Lean authoring,
+        source/provenance checks and prepared exact-head type/axiom probes.
+        No local Lean process, toolchain installation, shared cache expansion,
+        remote mutation or registry action was performed.
+      prompting_notes: >-
+        The approved campaign requires BoundarylessManifold I M, literal C2
+        metric and actual constructed coefficients/right inverses, without
+        a stronger global boundaryless model or a canonical-completion claim.
+
+review:
+  status: "pending"
+  notes: >-
+    Independent mathematical/source review is required before the new focused
+    CI workflow is published. Compiler and axiom evidence for the historical
+    producer does not apply to this additive manifold-only adaptation.
+
+acknowledgements: >-
+  The repository's human authors and inherited contributors, and the Mathlib
+  authors and contributors. This dossier preserves the selected identities of
+  existing registry artifacts and does not constitute a new submission.

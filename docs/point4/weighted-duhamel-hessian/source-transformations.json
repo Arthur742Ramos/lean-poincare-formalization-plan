@@ -1,0 +1,141 @@
+{
+  "base": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
+  "source_status": "NARROW_REGULARIZER_PROOF_REPAIR_PENDING_INDEPENDENT_REVIEW_UNCOMPILED",
+  "point4": "OPEN",
+  "modules": {
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedTimeKernel.lean": {
+      "original_path": "docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedTimeKernel.lean.txt",
+      "original_sha256": "20ceba4efe5d3c2d0d302220e94db8394496be16ee336382c4d1049b470fc3a5",
+      "integrated_sha256": "20ceba4efe5d3c2d0d302220e94db8394496be16ee336382c4d1049b470fc3a5",
+      "transformations": []
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedHessianTimeEnvelope.lean": {
+      "original_path": "docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedHessianTimeEnvelope.lean.txt",
+      "original_sha256": "4283e582912f8556266e2944e9453a2ed475522e8d4e95a5cba19ec39deb070d",
+      "integrated_sha256": "120930e97935c4c86c0dd26aa2340aafde77bb33c8ba0002bbcd48b8c7365699",
+      "transformations": [
+        {
+          "before": "public import WeightedTimeKernel\n",
+          "after": "public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedTimeKernel\n",
+          "count": 1
+        }
+      ]
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelIntegrand.lean": {
+      "original_path": "docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelIntegrand.lean.txt",
+      "original_sha256": "77da0c8aaad5fc44aae5dfd9bb9958da90528112d93eedba7082647f64d4a577",
+      "integrated_sha256": "f8d067d0bcf72973693e59ed0b8c6d0b716aa72e0f9a6baa9c4f3f023f9fd372",
+      "transformations": [
+        {
+          "before": "import WeightedHessianTimeEnvelope\n",
+          "after": "import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope\n",
+          "count": 1
+        },
+        {
+          "before": "import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian\nimport PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope\n",
+          "after": "module\n\npublic import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian\npublic import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedHessianTimeEnvelope\n",
+          "count": 1
+        },
+        {
+          "before": "\nnoncomputable section\n",
+          "after": "\n@[expose] public noncomputable section\n",
+          "count": 1
+        }
+      ]
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianIntegral.lean": {
+      "original_path": "docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianIntegral.lean.txt",
+      "original_sha256": "84ff76aeee604c8824d2daa226f2b876d6146b14e5a292f37f18693c4c9fd8f2",
+      "integrated_sha256": "e87862d112c345e5a5ae18759962445c542777a6e81f2350be0f3558c4f584c5",
+      "transformations": [
+        {
+          "before": "public import WeightedDuhamelIntegrand\n",
+          "after": "public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelIntegrand\n",
+          "count": 1
+        }
+      ]
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianDerivative.lean": {
+      "original_path": "docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianDerivative.lean.txt",
+      "original_sha256": "19e8ec44954e3c1ad6b75042465a2251de48124ab0ea923a1b90dd24e422a381",
+      "integrated_sha256": "b26e872c205995c466fb371b6a54e28e5df2ab646edb81b41dca84bca7dfadd6",
+      "transformations": [
+        {
+          "before": "public import WeightedDuhamelHessianIntegral\n",
+          "after": "public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianIntegral\n",
+          "count": 1
+        }
+      ]
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelFrechet.lean": {
+      "original_path": "docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelFrechet.lean.txt",
+      "original_sha256": "a817cc34a6be25422e6bef2f30faaba65aaccea706b0204eab671b5e9b02c900",
+      "integrated_sha256": "e88a56c21d0f04ab9a106a2f380be7cef982afb3a990a2ccbff7c6cd91fedd00",
+      "transformations": [
+        {
+          "before": "public import WeightedDuhamelHessianDerivative\n",
+          "after": "public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianDerivative\n",
+          "count": 1
+        }
+      ]
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianTrace.lean": {
+      "original_path": "docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianTrace.lean.txt",
+      "original_sha256": "64f8f5bc8cfd468fe9b46b60be39c5686dec4b870b481b766403d9e52cda9d33",
+      "integrated_sha256": "026f7f603a567f54e3e55a36b8378400714c00b92c4f7346627303c53b8b449b",
+      "transformations": [
+        {
+          "before": "public import WeightedDuhamelHessianIntegral\n",
+          "after": "public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianIntegral\n",
+          "count": 1
+        }
+      ]
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/WeightedDuhamelHessianFrechetTrace.lean": {
+      "original_path": "docs/point4/weighted-duhamel-hessian/reviewed-source/WeightedDuhamelHessianFrechetTrace.lean.txt",
+      "original_sha256": "3af628927dd651ea247f07159243a8dd100267bdabcaabb06fb9263882ff7b08",
+      "integrated_sha256": "d391d949ceec351ecb52c4c55d2a14d252eeb92e9d1009e047e6c50f5a9b8c7e",
+      "transformations": [
+        {
+          "before": "public import WeightedDuhamelHessianTrace\n",
+          "after": "public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelHessianTrace\n",
+          "count": 1
+        },
+        {
+          "before": "public import WeightedDuhamelFrechet\n",
+          "after": "public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.WeightedDuhamelFrechet\n",
+          "count": 1
+        }
+      ]
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatRegularizerC2Trace.lean": {
+      "original_path": "docs/point4/weighted-duhamel-hessian/reviewed-source/EuclideanHeatRegularizerC2Trace.lean.txt",
+      "original_sha256": "ca8598bd4eddf118a7bf2afa097e232cd872e8ffc7f3b2b9fe76bdf913531f44",
+      "integrated_sha256": "688c4879791b4afd629eaf29ab2fcdf2d8821ed7ce255986ee225906fd9fd96b",
+      "transformations": [
+        {
+          "before": "public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialTrace\n",
+          "after": "public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatFrechet\npublic import PoincareCurvature.Analysis.FiniteMomentApproximation\npublic import Mathlib.Topology.UniformSpace.UniformConvergence\n",
+          "count": 1
+        },
+        {
+          "before": "    simp only [heatHessianMajorantFirstMoment, if_pos rfl]\n",
+          "after": "    simp only [heatHessianMajorantFirstMoment, \u2193reduceIte]\n",
+          "count": 1
+        },
+        {
+          "before": "    simpa only [M, mul_add] using\n      (integrable_abs_coord_mul_heatHessianMajorantND hh ell j).add\n        (integrable_abs_coord_mul_heatHessianMajorantND hh ell k)\n",
+          "after": "    have hsum : Integrable (fun z : Fin n \u2192 \u211d =>\n        |z ell| * heatHessianMajorantND h z j +\n          |z ell| * heatHessianMajorantND h z k)\n        (volume : Measure (Fin n \u2192 \u211d)) :=\n      (integrable_abs_coord_mul_heatHessianMajorantND hh ell j).fun_add\n        (integrable_abs_coord_mul_heatHessianMajorantND hh ell k)\n    exact hsum.congr (Eventually.of_forall fun z => by\n      dsimp only [M]\n      rw [mul_add])\n",
+          "count": 1
+        },
+        {
+          "before": "      time_mul_integral_abs_coord_heatHessianMajorantND hh ell j,\n      time_mul_integral_abs_coord_heatHessianMajorantND hh ell k]\n    ring\n  have htransWi : \u2200 ell : Fin n,\n",
+          "after": "      time_mul_integral_abs_coord_heatHessianMajorantND hh ell j,\n      time_mul_integral_abs_coord_heatHessianMajorantND hh ell k]\n  have htransWi : \u2200 ell : Fin n,\n",
+          "count": 1
+        }
+      ],
+      "pre_proof_repair_commit": "24a0b6532304116ff25f1c793a4dbc6696251b9e",
+      "pre_proof_repair_sha256": "177fdfdf992c95c77f8211f331379f92b58163764d91a8bd48678640715870b5"
+    }
+  }
+}
