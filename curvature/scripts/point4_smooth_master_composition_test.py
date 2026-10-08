@@ -1492,6 +1492,101 @@ class CurrentAxiomInventoryTests(unittest.TestCase):
                 ['--axiom-dir',str(self.folder)]) as routed:
                 with self.assertRaises(AssertionError):
                     comp.current_evidence('curvature/scripts/point4_manifold_heat_release_guard.py',routed)
+
+class MapConstructionSnapshotTests(unittest.TestCase):
+    """Map equivalence and authentication scope against the published route fix."""
+    PUBLISHED='6d4641a980dc2d56ee17f8e809c95e845ff12d8a'
+
+    @classmethod
+    def setUpClass(cls):
+        cls.original_ast=ast.parse(comp.git('show',cls.PUBLISHED+':'+comp.HELPER))
+        cls.functions={'prior_map_record','map_record'}
+        if hasattr(comp,'contraction_map_record'):cls.functions.add('contraction_map_record')
+        namespace=dict(comp.__dict__)
+        selected=[copy.deepcopy(node) for node in cls.original_ast.body
+                  if isinstance(node,ast.FunctionDef) and node.name in cls.functions]
+        exec(compile(ast.Module(body=selected,type_ignores=[]),'published-map-reference','exec'),namespace)
+        cls.reference_namespace=namespace
+        cls.inputs=comp.expected_identity()
+        cls.pins=[comp.MASTER,comp.SUPPORT,comp.HEAT_PARENT,comp.HEAT_SOURCE,
+                  comp.CONTRACTION_PARENT,comp.CONTRACTION_SOURCE,comp.CONTRACTION_BASE]
+        if hasattr(comp,'FIXED_PARENT'):
+            cls.pins.extend([comp.FIXED_PARENT,comp.FIXED_SOURCE,comp.FIXED_BASE])
+        cls.snapshots={commit:comp.parent_tree(commit) for commit in cls.pins}
+
+    def evaluate(self,reference=False,mutate=None):
+        calls=[]
+        def read(commit):
+            frame=sys._getframe(1)
+            if frame.f_code.co_name in ('<dictcomp>','<setcomp>','<listcomp>'):
+                frame=frame.f_back
+            calls.append((frame.f_code.co_name,commit))
+            tree=dict(self.snapshots[commit])
+            if mutate:mutate(commit,tree)
+            return tree
+        previous=self.reference_namespace['parent_tree']
+        self.reference_namespace['parent_tree']=read
+        try:
+            with patch.object(comp,'parent_tree',read):
+                function=self.reference_namespace['map_record'] if reference else comp.map_record
+                result=function(*self.inputs)
+            return result,calls
+        finally:self.reference_namespace['parent_tree']=previous
+
+    def test_full_record_matches_published_unbatched_reference(self):
+        original,old_calls=self.evaluate(reference=True)
+        current,new_calls=self.evaluate()
+        self.assertEqual(current,original)
+        required={'prior_map_record':{comp.MASTER,comp.SUPPORT,comp.HEAT_PARENT,comp.HEAT_SOURCE},
+                  'contraction_map_record' if hasattr(comp,'contraction_map_record') else 'map_record':
+                      {comp.CONTRACTION_PARENT,comp.CONTRACTION_SOURCE,comp.CONTRACTION_BASE}}
+        if hasattr(comp,'FIXED_PARENT'):
+            required['map_record']={comp.FIXED_PARENT,comp.FIXED_SOURCE,comp.FIXED_BASE}
+        for name,pins in required.items():
+            direct=[commit for caller,commit in new_calls if caller==name]
+            self.assertEqual(set(direct),pins)
+            self.assertEqual(len(direct),len(pins))
+        self.assertGreater(len(old_calls),len(new_calls))
+
+    def test_second_construction_reauthenticates_and_observes_drift(self):
+        first,first_calls=self.evaluate()
+        def changed(commit,tree):
+            if commit==comp.HEAT_SOURCE:
+                tree[comp.HEAT_DOMAIN]=('100755','0'*40)
+        second,second_calls=self.evaluate(mutate=changed)
+        self.assertIn(('prior_map_record',comp.HEAT_SOURCE),first_calls)
+        self.assertIn(('prior_map_record',comp.HEAT_SOURCE),second_calls)
+        self.assertNotEqual(first,second)
+        self.assertEqual(second['heat_invariant_integration']['fixed_source_paths'][comp.HEAT_DOMAIN],
+                         ['100755','0'*40])
+        def missing(commit,tree):
+            if commit==comp.HEAT_SOURCE:tree.pop(comp.HEAT_DOMAIN)
+        with self.assertRaises(KeyError):self.evaluate(mutate=missing)
+        # Authentication failure must also propagate on a later construction.
+        with patch.object(comp,'parent_tree',side_effect=AssertionError('fresh pinned tree drift')):
+            with self.assertRaisesRegex(AssertionError,'fresh pinned tree drift'):
+                comp.map_record(*self.inputs)
+
+    def test_authentication_rejects_changed_pinned_tree_before_enumeration(self):
+        for commit in self.pins:
+            with patch.object(comp,'git',return_value=b'0'*40+b'\n') as reader:
+                # Use the unchanged actual authenticator, not a tree stub.
+                original=[node for node in self.original_ast.body
+                          if isinstance(node,ast.FunctionDef) and node.name=='parent_tree'][0]
+                namespace=dict(comp.__dict__)
+                exec(compile(ast.Module(body=[copy.deepcopy(original)],type_ignores=[]),
+                             'published-parent-authenticator','exec'),namespace)
+                with self.assertRaises(AssertionError):namespace['parent_tree'](commit)
+                reader.assert_called_once_with('rev-parse',commit+'^{tree}')
+
+    def test_all_other_helper_guards_and_module_state_are_unchanged(self):
+        current=ast.parse((comp.ROOT/comp.HELPER).read_bytes())
+        def guards(module):
+            return ast.dump(ast.Module(body=[node for node in module.body
+                if not (isinstance(node,ast.FunctionDef) and node.name in self.functions)],
+                type_ignores=[]),include_attributes=False)
+        self.assertEqual(guards(current),guards(self.original_ast))
+
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--real-runtime',action='store_true');parser.add_argument('--schema',type=pathlib.Path)
@@ -1504,6 +1599,7 @@ if __name__=='__main__':
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(PositiveControllerTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(ContractionCompositionTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(CurrentAxiomInventoryTests))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(MapConstructionSnapshotTests))
     if REAL:suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(RealValidatorTests))
     result=unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(0 if result.wasSuccessful() else 1)

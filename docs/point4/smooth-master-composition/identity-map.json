@@ -27015,8 +27015,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "0942f4327ebf8231c64419bda1949d6ef2c62ee7",
-      "final_sha256": "b982332030f2e7ae5b4944ca913bae850cf30b37545c12b2c8cdb530154b7bcc",
+      "final_blob": "01b759dab4466ef8d73709e516ffe2d70434b0c0",
+      "final_sha256": "63907f16264aab93ef58fa01b7b18c5e27c1481ed348985feecb80bacb7e8011",
       "mode": "100644",
       "count": 1
     },
@@ -27024,8 +27024,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "c669e32d6324f2a7760eeb997df0880cce49ccb3",
-      "final_sha256": "dfb725326432cebc4cf8f45ef5408c6b6129739a01c551ef6779e045fe360f0f",
+      "final_blob": "d9ea32958ad82e2cb75ed4b0256dee683de4076e",
+      "final_sha256": "608d0be5fa9ed3afa35ba34edeae5915915c92057fc21e5cf4c59bed36c5cb9b",
       "mode": "100644",
       "count": 1
     },
@@ -27033,8 +27033,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "207cf05efae51853dd6694b696f7cd8c58fa7523",
-      "final_sha256": "45f5c0964bdb249055a55b597bf2d8cee2019d8ff1a3300b437409519ddbb6fe",
+      "final_blob": "8ad6e96928a07707fc4e315add49699ffa6a71bc",
+      "final_sha256": "649113f473a81050340e6a0156adfc52e89d95b86e829a914f7784ac1fc349d8",
       "mode": "100644",
       "count": 1
     },
@@ -27042,8 +27042,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "5d0fe1ae752728b5bebcb345989dde087008aebe",
-      "final_sha256": "84a9068fcacf9ddccf6aa17e8f67bb58456180d1c217b19b2f3b5ef065bc2017",
+      "final_blob": "5196e088db2bab996dd30fe318cac3b4b90d1fc4",
+      "final_sha256": "4c22c345fa508dbb318ef491e9c3292a1bfee6e513a1ea7bdae344d3178d8ec0",
       "mode": "100644",
       "count": 1
     },
@@ -27051,8 +27051,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "4d2e6226cdb084bbd70b015d2c6e8f7fbe5aa513",
-      "final_sha256": "306a6bd76d46009e4d71d491a2e278f0b13d1987aca41a56028a9acfba317d99",
+      "final_blob": "2f353ac3f13d3cf1680ba121253d32cd4552ed8f",
+      "final_sha256": "b15d22db13c832f92b996b8c64f90e15f3cc9c18114a4ab2e5c5d7e03ae2ff32",
       "mode": "100644",
       "count": 1
     }
@@ -30624,7 +30624,7 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "0942f4327ebf8231c64419bda1949d6ef2c62ee7"
+      "01b759dab4466ef8d73709e516ffe2d70434b0c0"
     ],
     "curvature/scripts/point4_chosen_lc_coordinate_probe.lean": [
       "100644",
@@ -30712,7 +30712,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "c669e32d6324f2a7760eeb997df0880cce49ccb3"
+      "d9ea32958ad82e2cb75ed4b0256dee683de4076e"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -30748,19 +30748,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "207cf05efae51853dd6694b696f7cd8c58fa7523"
+      "8ad6e96928a07707fc4e315add49699ffa6a71bc"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "5d0fe1ae752728b5bebcb345989dde087008aebe"
+      "5196e088db2bab996dd30fe318cac3b4b90d1fc4"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "eb98d9c5cfd643e51d648c2b5deba6e92c26a7e6"
+      "3e4be208e524ed8c075d264a64a4f2b88a30adb6"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "caad099efe5fc53b4472e664b26347f223137310"
+      "c0da79ec490399536b99f8eb7e7a24a3ed6e9b65"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -30780,7 +30780,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "4d2e6226cdb084bbd70b015d2c6e8f7fbe5aa513"
+      "2f353ac3f13d3cf1680ba121253d32cd4552ed8f"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
