@@ -303,7 +303,7 @@ theorem contMDiffOn_localThreeTensorConnectionCoefficient
       simp [e₃, localThreeTensorTrivialization,
         localTwoTensorTrivialization, localCovectorTrivialization,
         localRealLineTrivialization, hx]) happ out
-  convert hcoeff using 1 <;> rfl
+  exact hcoeff
 
 set_option backward.isDefEq.respectTransparency true
 
@@ -531,7 +531,7 @@ theorem contDiffOn_localTensorCoordinates_of_contMDiff_two
     have hc := contMDiffOn_baseSet_localFrameCoeff
       (I := I) (e := e₂) (b := b₂) hhOn out
     rw [he₂] at hc
-    convert hc using 1 <;> rfl
+    exact hc
   rw [contDiffOn_pi]
   intro out
   apply CovariantDerivative.contDiffOn_writtenInExtChartAt_of_contMDiffOn
@@ -608,7 +608,7 @@ theorem connectionLaplacian_apply_eq_localTensorHeatSecondOrder_of_contMDiff_two
     have hc := mdifferentiableAt_localFrameCoeff
       (I := I) (e := e₂) (b := b₂) (s := h)
       hz₂ (hregFrame z hz) out
-    convert hc using 1 <;> rfl
+    exact hc
   have hhOn : ContMDiffOn I
       (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) (1 + 1)
       (fun x => TotalSpace.mk'

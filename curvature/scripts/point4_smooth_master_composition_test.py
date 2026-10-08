@@ -1116,16 +1116,16 @@ class ContractionCompositionTests(unittest.TestCase):
 
     def test_full_finite_identity_and_selected_source_bytes(self):
         with self.sources() as (trees,read):
-            expected,originals,changes=comp.expected_identity()
-            self.assertEqual(len(expected),1737)
+            expected,originals,changes=comp.tensor_identity(*comp.expected_identity())
+            self.assertEqual(len(expected),1920)
             for path in comp.CONTRACTION_ADDED|comp.CONTRACTION_REPLACED:
                 self.assertEqual(changes[path],read(comp.CONTRACTION_SOURCE,path))
                 self.assertEqual(expected[path],trees[comp.CONTRACTION_SOURCE][path])
             for path in comp.CONTRACTION_ROOTS:
                 self.assertEqual(comp.contraction_inverse(path,comp.fixed_inverse(path,changes[path])),read(comp.CONTRACTION_PARENT,path))
-            unchanged=set(trees[comp.CONTRACTION_PARENT])-comp.EDITED-comp.NEW-comp.CONTRACTION_ROOTS-comp.CONTRACTION_REPLACED-comp.FIXED_ROOTS
+            unchanged=set(trees[comp.CONTRACTION_PARENT])-comp.EDITED-comp.NEW-comp.CONTRACTION_ROOTS-comp.CONTRACTION_REPLACED-comp.FIXED_ROOTS-comp.TENSOR_PATHS
             self.assertTrue(all(expected[p]==trees[comp.CONTRACTION_PARENT][p] for p in unchanged))
-            self.assertEqual(json.loads((comp.ROOT/comp.MAP).read_bytes()),comp.map_record(expected,originals,changes))
+            self.assertEqual(comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()),comp.tensor_map_record(expected,originals,changes))
 
     def test_exact_inverse_rejects_missing_extra_and_duplicate_transform(self):
         with self.sources() as (_,read):
@@ -1296,14 +1296,14 @@ class FixedBackgroundCompositionTests(unittest.TestCase):
 
     def test_full_controlled_identity_and_unchanged_selected_mathematics(self):
         with fixed_sources() as (trees, reader):
-            expected, originals, changes = comp.expected_identity()
+            expected, originals, changes = comp.tensor_identity(*comp.expected_identity())
             self.assertEqual(expected, comp.parse_tree(comp.git('ls-tree','-rz','HEAD')))
-            self.assertEqual(len(expected), 1737)
+            self.assertEqual(len(expected), 1920)
             for path in comp.FIXED_ADDED:
                 self.assertEqual(changes[path], reader(comp.FIXED_SOURCE, path))
                 self.assertEqual(expected[path], trees[comp.FIXED_SOURCE][path])
-            self.assertEqual(json.loads((comp.ROOT/comp.MAP).read_bytes()), comp.map_record(expected, originals, changes))
-            unchanged = set(trees[FIXED_PARENT_PIN]) - comp.EDITED - comp.NEW - comp.FIXED_ROOTS
+            self.assertEqual(comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()), comp.tensor_map_record(expected, originals, changes))
+            unchanged = set(trees[FIXED_PARENT_PIN]) - comp.EDITED - comp.NEW - comp.FIXED_ROOTS - comp.TENSOR_PATHS
             self.assertTrue(all((expected[p] == trees[FIXED_PARENT_PIN][p] for p in unchanged)))
 
     def test_all_four_exact_transforms_and_inverses(self):
@@ -1922,13 +1922,120 @@ class MapConstructionSnapshotTests(unittest.TestCase):
                 reader.assert_called_once_with('rev-parse',commit+'^{tree}')
 
     def test_all_other_helper_guards_and_module_state_are_unchanged(self):
-        current=ast.parse((comp.ROOT/comp.HELPER).read_bytes())
+        current=ast.parse(comp.tensor_helper_inverse((comp.ROOT/comp.HELPER).read_bytes()))
         def guards(module):
             return ast.dump(ast.Module(body=[node for node in module.body
                 if not (isinstance(node,ast.FunctionDef) and node.name in self.functions)],
                 type_ignores=[]),include_attributes=False)
         self.assertEqual(guards(current),guards(self.original_ast))
 
+# BEGIN authenticated finite tensor tests
+class TensorCompositionTests(unittest.TestCase):
+    def inputs(self):
+        return comp.tensor_identity(*comp.expected_identity())
+
+    def test_entire_predecessor_helper_and_test_are_recovered(self):
+        for path,inverse in ((comp.HELPER,comp.tensor_helper_inverse),(comp.TEST,comp.tensor_test_inverse)):
+            raw=(comp.ROOT/path).read_bytes()
+            self.assertEqual(inverse(raw),comp.git('show',comp.TENSOR_PARENT+':'+path))
+            for bad in (raw+b'\nchanged',raw.replace(b'# BEGIN authenticated finite tensor',b'# EXTRA authenticated finite tensor',1)):
+                with self.assertRaises(AssertionError):inverse(bad)
+
+    def test_all_237_records_and_selected_sources_are_exact(self):
+        expected,originals,changes=self.inputs()
+        pins=comp.tensor_pins();delta=comp.tensor_delta(pins)
+        self.assertEqual(len(expected),1920)
+        self.assertEqual(set(delta),comp.TENSOR_PATHS)
+        for p in comp.TENSOR_RETAINED:self.assertEqual(expected[p],pins[comp.TENSOR_PARENT][p])
+        for p in comp.TENSOR_PATHS-comp.TENSOR_RETAINED:
+            if p==comp.TENSOR_PACKAGE:
+                original=comp.git('show',comp.TENSOR_SOURCE+':'+p)
+                self.assertEqual(comp.tensor_package_inverse(changes[p]),original)
+                self.assertEqual(expected[p],('100644',comp.blob_id(changes[p])))
+            elif p==comp.TENSOR_BOUNDARY_WORKFLOW:
+                original=comp.git('show',comp.TENSOR_SOURCE+':'+p)
+                self.assertEqual(comp.tensor_boundary_inverse(changes[p]),original)
+                self.assertEqual(expected[p],('100644',comp.blob_id(changes[p])))
+            else:
+                self.assertEqual(expected[p],pins[comp.TENSOR_SOURCE][p])
+                self.assertEqual(changes[p],comp.git('show',comp.TENSOR_SOURCE+':'+p))
+        self.assertEqual(comp.tensor_map_record(expected,originals,changes),comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()))
+
+    def test_missing_extra_modified_mode_and_source_records_are_rejected(self):
+        original=comp.tensor_pins()
+        example=next(p for p in comp.TENSOR_PATHS if p!=comp.TENSOR_MECHANICAL)
+        for action in ('missing','extra','mode','blob'):
+            snapshots={c:dict(rows) for c,rows in original.items()}
+            rows=snapshots[comp.TENSOR_SOURCE]
+            if action=='missing':rows.pop(example)
+            elif action=='extra':rows['unreviewed.lean']=('100644','0'*40)
+            elif action=='mode':rows[example]=('100755',rows[example][1])
+            else:rows[example]=('100644','0'*40)
+            with self.assertRaises(AssertionError):
+                # Physical immutable bytes and pinned source maps both matter.
+                with patch.object(comp,'tensor_pins',return_value=snapshots):comp.tensor_identity(*self.inputs())
+
+    def test_immutable_pin_drift_precedes_affected_tree_enumeration(self):
+        actual_git=comp.git;actual_parent=comp.parent_tree
+        pins=[comp.TENSOR_PARENT,comp.TENSOR_SOURCE,comp.TENSOR_BASE,comp.TENSOR_DEPENDENCY]
+        for i,c in enumerate(pins):
+            def read(*args):
+                if args==('rev-parse',c+'^{tree}'):return b'0'*40+b'\n'
+                return actual_git(*args)
+            with patch.object(comp,'git',side_effect=read),patch.object(comp,'parent_tree',wraps=actual_parent) as parent:
+                with self.assertRaises(AssertionError):comp.tensor_pins()
+                self.assertEqual([call.args[0] for call in parent.call_args_list],pins[:i])
+
+    def test_duplicate_identity_records_rejected(self):
+        for raw in (b'{"tensor":1,"tensor":1}',b'{"tensor":{"path":1,"path":1}}'):
+            with self.assertRaisesRegex(AssertionError,'Duplicate'):comp.tensor_strict_json(raw)
+
+    def test_predecessor_map_and_mechanical_mutations_rejected(self):
+        expected,originals,changes=self.inputs()
+        snapshots=comp.tensor_pins()
+        for p in {comp.MAP}|comp.TENSOR_RETAINED:
+            altered={c:dict(rows) for c,rows in snapshots.items()}
+            altered[comp.TENSOR_PARENT][p]=('100644','0'*40)
+            with self.assertRaises(AssertionError):comp.tensor_predecessor(expected,originals,changes,altered)
+    def test_exact_package_guard_repair_preserves_all_original_checks(self):
+        original=comp.git('show',comp.TENSOR_SOURCE+':'+comp.TENSOR_PACKAGE)
+        actual=(comp.ROOT/comp.TENSOR_PACKAGE).read_bytes()
+        self.assertEqual(comp.tensor_package_inverse(actual),original)
+        for bad in (original,actual+b'\nchanged',actual.replace(b'exact qualified-master',b'changed guard',1)):
+            with self.assertRaises(AssertionError):comp.tensor_package_inverse(bad)
+        with self.assertRaises(AssertionError):comp.tensor_package_transform(actual)
+
+    def test_boundary_workflow_inverse_hooks_deadline_and_compiler_separation(self):
+        import yaml
+        actual=(comp.ROOT/comp.TENSOR_BOUNDARY_WORKFLOW).read_bytes()
+        original=comp.git('show',comp.TENSOR_SOURCE+':'+comp.TENSOR_BOUNDARY_WORKFLOW)
+        self.assertEqual(comp.tensor_boundary_inverse(actual),original)
+        workflow=yaml.safe_load(actual);baseline=yaml.safe_load(original)
+        job=workflow['jobs']['candidate-boundary']
+        self.assertEqual(job['timeout-minutes'],90)
+        self.assertEqual(workflow['jobs']['current-mechanical']['needs'],'candidate-boundary')
+        reusable=dict(workflow['jobs']['current-mechanical']);reusable.pop('needs')
+        self.assertEqual(reusable,baseline['jobs']['current-mechanical'])
+        self.assertEqual({k:v for k,v in workflow.items() if k!='jobs'},{k:v for k,v in baseline.items() if k!='jobs'})
+        commands=[step['run'] for step in job['steps'] if 'run' in step]
+        compiler=next(run for run in commands if 'lake exe cache get' in run)
+        for required in ('leanprover/lean4:v4.35.0-rc2','065356127b1dc0016f66b7283ce0ce2c4055aa55',
+                         'lake build TensorHeatChallenge','python scripts/check-challenge-boundary.py',
+                         'lake env lean scripts/check-closed-statement.lean'):
+            self.assertIn(required,compiler)
+        bindings=[run for run in commands if "git('ls-tree'" in run]
+        self.assertEqual(len(bindings),2)
+        def source_check(run):
+            script=run[run.index('import hashlib,'):run.rindex('\nPY')]
+            return ast.dump(ast.parse(script),include_attributes=False)
+        self.assertEqual(source_check(bindings[0]),source_check(bindings[1]))
+        for token in (b'timeout-minutes: 90',b'needs: candidate-boundary',b'check-challenge-boundary.py',
+                      b'check-closed-statement.lean',b'065356127b1dc0016f66b7283ce0ce2c4055aa55',
+                      b'persist-credentials: false',b"assert index == entries"):
+            with self.assertRaises(AssertionError):comp.tensor_boundary_inverse(actual.replace(token,b'changed',1))
+        with self.assertRaises(AssertionError):comp.tensor_boundary_transform(actual)
+
+# END authenticated finite tensor tests
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--real-runtime',action='store_true');parser.add_argument('--schema',type=pathlib.Path)
@@ -1944,6 +2051,7 @@ if __name__=='__main__':
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(FixedBackgroundCompositionTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(CurrentAxiomInventoryTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(MapConstructionSnapshotTests))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TensorCompositionTests))
     if REAL:suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(RealValidatorTests))
     result=unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(0 if result.wasSuccessful() else 1)

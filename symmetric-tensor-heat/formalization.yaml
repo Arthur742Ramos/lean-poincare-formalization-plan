@@ -4,21 +4,30 @@ version: "v0.4"
 project:
   name: "Short-time well-posedness for the symmetric tensor heat equation"
   description: >-
-    Formalizes a finite-atlas Schauder-class existence, uniqueness and a priori
+    Formalizes a finite-atlas Schauder-class existence, fixed-representative
+    geometric uniqueness and a priori
     estimate theorem for the inhomogeneous heat equation on symmetric covariant
     two-tensors over a nonempty closed smooth Riemannian manifold. The equation
     uses the actual Levi-Civita rough Laplacian tr_g(nabla^2 u), expanded in the
     Mathlib-only Challenge through induced tensor connections and an
     orthonormal trace. The selected statement exposes its finite nonempty
     atlas, partition weights and spanning frames, exact local-to-global data,
-    solution and time-derivative reconstruction, faithful nontrivial
-    coefficient representatives, genuine derivative and Holder bounds, and
-    the norms used by the estimate. For every
+    solution and time-derivative reconstruction, faithful coefficient readouts,
+    coverage of all bounded spatial C2-alpha atlas jet families and parabolic
+    C-alpha source families with explicit chartwise norm budgets, genuine
+    derivative and Holder bounds, and the norms used by the estimate. For every
     represented symmetric C^{2+alpha} initial datum and represented symmetric
     C^{alpha,alpha/2} source, the theorem constructs a positive time interval
-    and a unique atlas coefficient witness whose geometric readout is
-    symmetric, has the correct initial trace, solves the tensor heat equation,
-    and obeys a global finite-atlas C^{2+alpha,1+alpha/2} estimate.
+    and an atlas coefficient witness whose geometric readout is symmetric, has
+    the correct initial trace, solves the tensor heat equation, and obeys a
+    global finite-atlas C^{2+alpha,1+alpha/2} estimate. The statement does not
+    claim uniqueness of the proof-chosen coefficient class.
+    Every represented solution has the displayed genuine time derivative.
+    For each fixed initial representative D and source representative f, any
+    two represented geometric readouts also agree when both satisfy the
+    displayed trace and heat equation, without a matching-chartwise-trace
+    premise. The statement does not identify different atlas representatives
+    of the same global tensors.
   authors:
     - "Arthur Freitas Ramos"
     - "David Barros Hulak"
@@ -79,23 +88,55 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
-  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/d6ef7f253bb95fa44d1fe61c9b1a52e061ca0951/curvature"
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/13fa15d6a8352ed08bf71b3533b1c2e922c21388/curvature"
     relationship: "builds-on"
     note: >-
-      Immutable same-repository source subproject reused through an exact
-      mechanically extracted snapshot under vendor/curvature so the focused
+      Immutable same-repository source subproject reused through a mechanically
+      extracted baseline under vendor/curvature so the focused
       project is self-contained. The snapshot is compiled as a root library,
       with no nested Lake path dependency, so every generated file remains
       beneath the single writable package build root used by Palomar.
-      All vendored implementation sources and contributor notices are checked
-      byte-for-byte against this commit. The selected implementation theorem is
+      Contributor notices and unchanged vendored implementation sources are
+      checked byte-for-byte against this commit. Explicit Lean 4.35
+      compatibility adaptations and hash-pinned proof-support changes are
+      separately documented. The split extracts the tangent-space instances,
+      metric extensionality, the BilinearFormBundle abbreviation, and the
+      preferred bilinear-form coordinate evaluation identity into
+      RiemannianSectionCore.lean. This lets TensorDivergence compile without
+      importing the large RiemannianSection module, so the heat build avoids
+      unrelated section-space results and its ContinuousSection dependency.
+      The short-time commutator retains its explicit
+      TensorHeatAtlasCommutatorLift import because the Solution build uses its
+      atlas source-space and coordinate declarations. Its reachable roots
+      therefore remain in the exact closure. A separate import cleanup removes
+      the unused standalone ParabolicInterpolation import from finite-cylinder
+      interpolation; the selected finite-cylinder theorem still compiles.
+      Parabolic/BanachSpace.lean also drops an unused direct
+      Mathlib.Analysis.Normed.Group.SeparationQuotient import after a
+      declaration-aware import audit and a successful full-file compile.
+      The fiberwise linearity lemma for bilinear-form trivializations is
+      factored into RiemannianSectionCore.lean and imported directly by
+      TensorHeatAtlasClosedReconstruction.lean, avoiding a dependency on the
+      wider section-space API. No theorem statement or mathematical condition
+      changes. A profile-guided proof pass also replaces three broad
+      simplifier calls in LeviCivita.lean with restricted rewrites and direct
+      normalization; the baseline simplifier cost was 86.2 seconds, and the
+      focused replay of two replacements took 103 milliseconds of tactic time.
+      Three coefficient-regularity conversions in
+      TensorHeatGeometricRegularity.lean are replaced by direct proof terms.
+      These edits do not change theorem statements or hypotheses.
+      The selected implementation theorem is
       curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasSymmetricWellPosedness.lean.
-      The curvature tree at this
-      commit is preserved byte-for-byte; this new entry contributes a focused
-      Mathlib-only Challenge, matching Solution bridge, Comparator identity and
-      Palomar metadata, rather than claiming the inherited tensor-heat
-      development as new work.
-  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d"
+      The baseline curvature tree is preserved as the provenance reference. The
+      inherited code supplies finite-atlas heat estimates, reconstruction,
+      tensor energy continuity, represented zero-data uniqueness, and the
+      compact cutoff proof pattern adapted from
+      curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ModelManifoldGaugeFlow.lean.
+      This focused entry selects an unprojected reconstructed tensor theorem with
+      symmetry derived from geometric uniqueness, plus a Mathlib-only
+      Challenge and matching Solution bridge. It does not claim those
+      inherited proofs as new formal code.
+  - id: "https://github.com/leanprover-community/mathlib4/tree/065356127b1dc0016f66b7283ce0ce2c4055aa55"
     relationship: "builds-on"
     note: >-
       Pinned Mathlib foundations for manifolds, Riemannian bundles, covariant
@@ -114,16 +155,24 @@ status:
     local frames, normalized coordinates and time, positive source rescaling,
     exact local-to-global initial/source/solution/time-derivative reconstruction
     and local-frame coefficient identities. Initial/source/solution readouts
-    are injective and realize every atlas-wide constant matrix family. Their
-    displayed norms
-    control genuine spatial C2-alpha and parabolic C-alpha/C2-alpha derivative
-    and Holder bounds. It then proves existence and uniqueness of the solution
-    coefficient witness in the constructed classical class, fiberwise
+    are injective. The initial and source carriers cover every bounded spatial
+    C2-alpha jet family and parabolic C-alpha source family satisfying the
+    displayed conditions, with initial size equal to an explicit finite-atlas
+    norm sum and source norm bounded by the supplied chartwise budgets.
+    Constant-matrix witnesses independently certify nontriviality. The
+    displayed norms control genuine spatial C2-alpha and parabolic
+    C-alpha/C2-alpha derivative and Holder bounds. It then proves existence
+    of a solution coefficient witness in the constructed
+    classical class, fiberwise
     symmetry, initial trace, the componentwise inhomogeneous tensor heat
     equation, and an estimate of solution norm by initial size plus source
-    norm. It does not prove that every bare intrinsic tensor section admits the
-    constructed atlas representation, uniqueness outside the represented
-    coefficient class, a prescribed arbitrary final time, nonlinear
+    norm. The displayed time derivative is genuine for every represented
+    solution, including the pair quantified in the uniqueness clause. For each
+    fixed D and f, it also proves equality of represented geometric readouts
+    under the displayed trace and PDE. It does not
+    prove that every bare intrinsic tensor section admits the constructed
+    atlas representation, uniqueness outside the represented class, a
+    prescribed arbitrary final time, nonlinear
     Ricci-DeTurck well-posedness, or mathematical novelty.
   sorry_count: 0
   sorry_in_definitions: 0
@@ -135,19 +184,22 @@ status:
       axioms: ["propext", "Classical.choice", "Quot.sound"]
       note: >-
         Comparator-selected Mathlib-facing theorem for short-time existence,
-        coefficient-class uniqueness, symmetry, initial trace, the genuine
-        connection-rough-Laplacian equation and the global finite-atlas
-        Schauder estimate. Unlike the historical rejected statement, this
+        existence of an analytic-class witness, symmetry derived from
+        geometric uniqueness, initial trace, the genuine connection-rough-
+        Laplacian equation, fixed-representative geometric uniqueness,
+        and the global finite-atlas Schauder estimate. Unlike the historical
+        rejected statement, this
         selected proposition itself constrains the atlas reconstruction of
-        data, solution and time derivative, coefficient representations,
-        derivative fields, Holder bounds and norm control enough to exclude
-        singleton/all-zero carriers.
+        data, solution and time derivative, all admissible represented initial
+        jets and sources with explicit input norm budgets, derivative fields,
+        Holder bounds and norm control enough to exclude singleton/all-zero
+        carriers.
 
 automation:
   methods:
     - method: "agent"
-      models: ["OpenAI GPT-5"]
-      framework: "Codex with Lean 4.33.0 and pinned Mathlib"
+      models: ["OpenAI GPT-5", "OpenAI GPT-6"]
+      framework: "Codex with Lean 4.35.0-rc2 and pinned Mathlib"
       tool_setup: >-
         AI-assisted theorem design, proof engineering, literature and registry
         overlap audit, Challenge/Solution bridging, provenance packaging,
@@ -156,7 +208,7 @@ automation:
       cost:
         wall_time: "not tracked"
         spend_usd: "subscription-based"
-        hardware: "local Apple silicon machine"
+        hardware: "local Apple silicon and Windows machines; hosted Linux runners"
       prompting_notes: >-
         The maintainer first requested the geometric tensor-heat theorem and
         subsequently requested preparation of a distinct new Palomar entry.
@@ -181,9 +233,12 @@ fidelity:
   divergences: >-
     The classical vector-bundle theorem is represented through explicitly
     constructed finite-atlas coefficient spaces. Initial data and sources are
-    quantified through those representations, and uniqueness is for the
-    higher-coefficient witness satisfying the constructed classical-solution
-    predicate. The Challenge now exposes exact atlas reconstruction of data,
+    quantified through those representations. The theorem asserts existence
+    of a higher-coefficient witness satisfying the constructed
+    classical-solution predicate. For fixed initial and source representatives,
+    it also compares represented geometric readouts with the same global trace
+    and source that solve the equation. The Challenge exposes exact atlas
+    reconstruction of data,
     solution and time derivative, active
     spanning frames, nontrivial injective coefficient readouts, derivative
     identities, Holder bounds, geometric readouts, symmetry, the initial trace
@@ -200,14 +255,15 @@ review:
   status: "self-assessed"
   reviewers: []
   notes: >-
-    Mathematical repair is required before intake. The selected readout is
-    symmetrized by construction, and coefficient uniqueness for fixed local
-    traces has not been extended to geometric uniqueness for the ordinary
-    reconstructed field. Data coverage also remains to be established. The
-    historical candidate's editorial rejection is acknowledged rather than
-    treated as fixed by metadata or mechanical checks. No independent human
-    line-by-line proof review, Palomar editorial acceptance, fresh intake or
-    registration is claimed.
+    The selected readout is the ordinary atlas field. Represented geometric
+    zero-data uniqueness now proves its symmetry and fixed-representative
+    geometric uniqueness, independently of matching chartwise traces.
+    Coverage of every
+    intrinsic Holder section remains unproved, and exact-commit renderer and
+    mechanical gates plus editorial assessment remain pending. The historical
+    candidate's rejection is not treated as fixed by metadata or mechanical
+    checks. No independent human line-by-line proof review, Palomar editorial
+    acceptance, fresh intake or registration is claimed.
 
 alignment:
   namespace: "SymmetricTensorHeatEntry Challenge/Solution surface; RicciFlow.AnalyticPDE implementation"
@@ -219,8 +275,8 @@ alignment:
       note: >-
         Specializes the classical theory to the Levi-Civita rough Laplacian on
         symmetric covariant two-tensors, with represented finite-atlas data,
-        actual geometric readouts, short-time existence, coefficient-class
-        uniqueness and a Schauder estimate.
+        actual geometric readouts, short-time existence, fixed-representative
+        geometric uniqueness and a Schauder estimate.
 
 acknowledgements: >-
   Hong Huang for a direct closed-manifold vector-bundle formulation of linear

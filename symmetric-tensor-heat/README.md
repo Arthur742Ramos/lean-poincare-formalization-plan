@@ -1,13 +1,12 @@
 # Symmetric tensor heat equation
 
-**Review status: mathematical repair required.** The current selected
-statement now ties its coordinates to actual extended charts and requires
-smooth subordinate weights, chart coverage, positive radii, and explicit
-parabolic scaling. It also identifies each frame with a tangent-bundle
-trivialization. Its solution readout remains symmetrized by construction.
-The geometric well-posedness and research-interest claims below
-are development targets, not established submission claims. See
-[the remediation requirements](REVIEW_REMEDIATION.md).
+**Review status: selected theorem under verification.** The current statement
+ties its coordinates to actual extended charts, smooth subordinate weights,
+positive radii, parabolic scaling, and tangent-bundle frames. It uses the
+ordinary, unprojected atlas reconstruction. Symmetry follows from a proved
+zero-data uniqueness argument for represented geometric solutions. The
+remaining release gates and editorial assessment are recorded in
+[the verification record](VERIFICATION.md).
 
 This focused Lean package prepares a new Palomar entry for short-time
 well-posedness of the inhomogeneous heat equation on symmetric covariant
@@ -16,6 +15,10 @@ two-tensors over a closed smooth Riemannian manifold.
 The selected theorem is
 `SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed`. It constructs
 a positive time interval and finite-atlas initial, source, and solution spaces.
+Comparator selects this theorem and its single `completeStatement : Prop`;
+the norm and regularity predicates used below are local definitions within
+that complete statement. A compiled-body audit rejects reachable
+candidate-defined mathematical data.
 The compared proposition now exposes the analytic representation itself:
 
 - a finite nonempty chart index;
@@ -24,21 +27,34 @@ The compared proposition now exposes the analytic representation itself:
 - exact finite-sum reconstruction of the global initial tensor, source,
   solution, and solution time derivative from their local tensors, together
   with equations identifying the local-frame coefficients with the displayed
-  matrix representatives;
-- injective initial, source, and solution coefficient readouts and witnesses
-  for every atlas-wide family of constant matrices, which rule out singleton
-  or all-zero coefficient carriers; and
+  matrix representatives; the displayed time derivative is the actual
+  derivative for every represented solution, including those compared for
+  uniqueness;
+- injective initial, source, and solution coefficient readouts; coverage of
+  every bounded spatial `C^{2,alpha}` atlas jet family with its actual first
+  and second derivatives, and every parabolic `C^{alpha,alpha/2}` atlas source
+  family satisfying the displayed norm bound; the selected coverage witnesses
+  have an exact finite-atlas spatial size and a source norm bounded by the sum
+  of the supplied chartwise budgets; constant-matrix witnesses also make
+  nontriviality explicit; and
 - explicit spatial `C^{2,alpha}`, parabolic `C^{alpha,alpha/2}`, and solution
   `C^{2+alpha,1+alpha/2}` derivative and Hölder certificates controlled by the
   same sizes and norms used in the Schauder estimate.
 
-For symmetric represented data it then proves existence and uniqueness of a
-coefficient witness whose **symmetrized** geometric readout:
+For symmetric represented data it then proves existence of a coefficient
+witness whose ordinary geometric readout:
 
 - is fiberwise symmetric;
 - has the prescribed initial trace;
 - satisfies `partial_t u - tr_g(nabla^2 u) = f`; and
 - obeys a global finite-atlas `C^{2+alpha,1+alpha/2}` estimate.
+
+For each fixed pair of initial and source representatives `D` and `f`, it
+also proves that any two represented solution readouts agree throughout the
+interval when both satisfy the displayed trace and geometric heat equation.
+This comparison does not assume matching chartwise coefficients, but it does
+not identify solutions attached to different representatives of the same
+global tensors.
 
 The Mathlib-only [TensorHeatChallenge.lean](TensorHeatChallenge.lean) expands
 the induced two- and three-tensor connections and takes the orthonormal trace
@@ -50,11 +66,40 @@ repository's `curvature/` project.
 ## Scope boundary
 
 The theorem is deliberately about the constructed finite-atlas Holder class.
+The selected coverage clauses characterize its coefficient inputs directly:
+bounded continuous spatial values and jets with a common Holder constant and
+their stated Frechet derivatives, plus parabolically bounded Holder sources
+on the normalized cylinder. These inputs are independent of the
+proof-selected carriers. The geometric data are their weighted atlas
+reconstructions.
 It does not claim that every bare intrinsic tensor section has a coefficient
-representation, nor uniqueness outside the represented classical class. It
+representation, coefficient-witness uniqueness for the proof-chosen
+`coordinateClass`, or uniqueness outside the represented classical class. It
 constructs a short endpoint rather than solving to an arbitrary prescribed
 final time. This is a formalization of classical mathematics, not a novelty or
 priority claim.
+
+## Research interest and literature comparison
+
+[Huang, Theorems 2.3 and 2.4](https://arxiv.org/html/1506.05030v8#S2)
+prove a global Schauder estimate and existence and uniqueness for linear
+strongly parabolic systems on vector bundles over closed manifolds. The
+selected result specializes this classical theory to the Levi-Civita rough
+Laplacian on covariant two-tensors. Its checked mathematical conclusion joins
+an ordinary atlas reconstruction, the intrinsic tensor heat equation,
+represented-data existence, fixed-representative geometric uniqueness,
+symmetry preservation, and a finite-atlas Schauder estimate. Those links form
+a coherent subject for a serious formalized-mathematics research note.
+
+A credible audience is researchers in geometric analysis and parabolic PDE
+who use connection heat equations as linear models for geometric flows, along
+with mathematicians formalizing geometric analysis who need a checked tensor
+heat and finite-atlas Schauder foundation. The actual theorem uses
+constructed represented data and an existential short interval; Huang's
+result covers all data in its intrinsic Hölder spaces and a prescribed finite
+interval. We claim neither that broader theorem nor mathematical novelty.
+The [research-interest account](RESEARCH_INTEREST.md) explains the proof
+architecture and this scope boundary in more detail.
 
 ## Verification
 
@@ -72,9 +117,10 @@ lake env lean scripts/check-closed-statement.lean
 PALOMAR_ALLOW_UNSANDBOXED_LOCAL=1 bash scripts/verify-comparator.sh  # macOS
 ```
 
-The hosted workflows run both the pinned renderer and the complete unmodified
-Palomar mechanical verifier with real Linux Landrun. The package has no Lake
-path dependencies: its unchanged vendored proof development is a library in
+The hosted workflows replay the pinned Landrun renderer and also the current
+production Palomar renderer and mechanical verifier under Linux bubblewrap.
+The package has no Lake
+path dependencies: its attributed vendored proof development is a library in
 the root project, so all sandbox writes stay under the root build directory.
 Preparation and verification do not authorize Palomar intake or registration.
 
