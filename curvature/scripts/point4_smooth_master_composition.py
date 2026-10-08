@@ -482,12 +482,15 @@ def expected_identity():
 
 def prior_map_record(expected, originals, changes):
     master,support=parent_tree(MASTER),parent_tree(SUPPORT)
+    # Authenticate immutable snapshots for this record construction.
+    heat_parent_tree=parent_tree(HEAT_PARENT)
+    heat_source_tree=parent_tree(HEAT_SOURCE)
     return {'parents':{c:TREES[c] for c in (MASTER,SUPPORT,HEAT_PARENT,HEAT_SOURCE)},
         'heat_invariant_integration':{'base':HEAT_PARENT,'source':HEAT_SOURCE,
             'base_tree':HEAT_PARENT_TREE,'source_tree':HEAT_SOURCE_TREE,
-            'source_identity':{p:list(parent_tree(HEAT_SOURCE)[p]) for p in sorted(parent_tree(HEAT_SOURCE))},
-            'base_identity':{p:list(parent_tree(HEAT_PARENT)[p]) for p in sorted(parent_tree(HEAT_PARENT))},
-            'fixed_source_paths':{p:list(parent_tree(HEAT_SOURCE)[p]) for p in sorted(HEAT_ADDED|{HEAT_DOMAIN})},
+            'source_identity':{p:list(heat_source_tree[p]) for p in sorted(heat_source_tree)},
+            'base_identity':{p:list(heat_parent_tree[p]) for p in sorted(heat_parent_tree)},
+            'fixed_source_paths':{p:list(heat_source_tree[p]) for p in sorted(HEAT_ADDED|{HEAT_DOMAIN})},
             'transforms':{p:{'original_blob':blob_id(originals[p]),'final_blob':blob_id(contraction_inverse(p,fixed_inverse(p,changes[p]))),
                 'original_sha256':sha256(originals[p]),'final_sha256':sha256(contraction_inverse(p,fixed_inverse(p,changes[p]))),'count':1} for p in sorted(HEAT_ROOTS)},
             'historical_run':37181895941,'scope':'Independent jet-field heat/reaction closure only; combined-head proof checks UNRUN; both targets OPEN'},
@@ -512,16 +515,20 @@ def prior_map_record(expected, originals, changes):
 
 def contraction_map_record(expected, originals, changes):
     record = prior_map_record(expected, originals, changes)
+    # Authenticate immutable snapshots for this record construction.
+    contraction_parent_tree=parent_tree(CONTRACTION_PARENT)
+    contraction_source_tree=parent_tree(CONTRACTION_SOURCE)
+    contraction_base_tree=parent_tree(CONTRACTION_BASE)
     record['parents'].update({c:TREES[c] for c in (CONTRACTION_PARENT,CONTRACTION_SOURCE,CONTRACTION_BASE)})
     record['metric_contraction_integration'] = {
         'base':CONTRACTION_PARENT,'base_tree':CONTRACTION_PARENT_TREE,
         'source':CONTRACTION_SOURCE,'source_tree':CONTRACTION_SOURCE_TREE,
         'merge_base':CONTRACTION_BASE,'merge_base_tree':CONTRACTION_BASE_TREE,
-        'base_identity':{p:list(parent_tree(CONTRACTION_PARENT)[p]) for p in sorted(parent_tree(CONTRACTION_PARENT))},
-        'source_identity':{p:list(parent_tree(CONTRACTION_SOURCE)[p]) for p in sorted(parent_tree(CONTRACTION_SOURCE))},
-        'merge_base_identity':{p:list(parent_tree(CONTRACTION_BASE)[p]) for p in sorted(parent_tree(CONTRACTION_BASE))},
-        'fixed_source_paths':{p:list(parent_tree(CONTRACTION_SOURCE)[p]) for p in sorted(CONTRACTION_ADDED|CONTRACTION_REPLACED)},
-        'transforms':{p:{'original_blob':parent_tree(CONTRACTION_PARENT)[p][1],
+        'base_identity':{p:list(contraction_parent_tree[p]) for p in sorted(contraction_parent_tree)},
+        'source_identity':{p:list(contraction_source_tree[p]) for p in sorted(contraction_source_tree)},
+        'merge_base_identity':{p:list(contraction_base_tree[p]) for p in sorted(contraction_base_tree)},
+        'fixed_source_paths':{p:list(contraction_source_tree[p]) for p in sorted(CONTRACTION_ADDED|CONTRACTION_REPLACED)},
+        'transforms':{p:{'original_blob':contraction_parent_tree[p][1],
             'final_blob':blob_id(fixed_inverse(p,changes[p])),'count':1} for p in sorted(CONTRACTION_ROOTS)},
         'historical_run':37202841805,
         'scope':'Smooth metric contraction and conditional compact gauge flow only; combined-head checks UNRUN; both targets OPEN'}
@@ -530,16 +537,20 @@ def contraction_map_record(expected, originals, changes):
 
 def map_record(expected, originals, changes):
     record=contraction_map_record(expected,originals,changes)
+    # Authenticate immutable snapshots for this record construction.
+    fixed_parent_tree=parent_tree(FIXED_PARENT)
+    fixed_source_tree=parent_tree(FIXED_SOURCE)
+    fixed_base_tree=parent_tree(FIXED_BASE)
     record['parents'].update({c:TREES[c] for c in (FIXED_PARENT,FIXED_SOURCE,FIXED_BASE)})
     record['fixed_background_heat_integration']={
         'base':FIXED_PARENT,'base_tree':FIXED_PARENT_TREE,
         'source':FIXED_SOURCE,'source_tree':FIXED_SOURCE_TREE,
         'merge_base':FIXED_BASE,'merge_base_tree':FIXED_BASE_TREE,
-        'base_identity':{p:list(parent_tree(FIXED_PARENT)[p]) for p in sorted(parent_tree(FIXED_PARENT))},
-        'source_identity':{p:list(parent_tree(FIXED_SOURCE)[p]) for p in sorted(parent_tree(FIXED_SOURCE))},
-        'merge_base_identity':{p:list(parent_tree(FIXED_BASE)[p]) for p in sorted(parent_tree(FIXED_BASE))},
-        'fixed_source_paths':{p:list(parent_tree(FIXED_SOURCE)[p]) for p in sorted(FIXED_ADDED)},
-        'transforms':{p:{'original_blob':parent_tree(FIXED_PARENT)[p][1],
+        'base_identity':{p:list(fixed_parent_tree[p]) for p in sorted(fixed_parent_tree)},
+        'source_identity':{p:list(fixed_source_tree[p]) for p in sorted(fixed_source_tree)},
+        'merge_base_identity':{p:list(fixed_base_tree[p]) for p in sorted(fixed_base_tree)},
+        'fixed_source_paths':{p:list(fixed_source_tree[p]) for p in sorted(FIXED_ADDED)},
+        'transforms':{p:{'original_blob':fixed_parent_tree[p][1],
             'final_blob':blob_id(changes[p]),'original_sha256':sha256(fixed_inverse(p,changes[p])),
             'final_sha256':sha256(changes[p]),'count':1} for p in sorted(FIXED_ROOTS)},
         'historical_run':37233402239,
