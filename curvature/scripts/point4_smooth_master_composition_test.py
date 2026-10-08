@@ -2035,6 +2035,69 @@ class TensorCompositionTests(unittest.TestCase):
             with self.assertRaises(AssertionError):comp.tensor_boundary_inverse(actual.replace(token,b'changed',1))
         with self.assertRaises(AssertionError):comp.tensor_boundary_transform(actual)
 
+    def test_genuine_weighted_reconstruction_positive_and_adversarial_records(self):
+        import point4_weighted_hessian_release_guard as weighted
+        import stat
+        self.assertEqual(weighted.ROOT,comp.ROOT)
+        expected,originals,changes=self.inputs()
+        captured=[]
+        original=comp.tensor_reconstructed_sources
+        physical_stat=pathlib.Path.lstat
+        def committed_mode_fixture(physical,*args,**kwargs):
+            actual=physical_stat(physical,*args,**kwargs)
+            try:relative=physical.relative_to(comp.ROOT).as_posix()
+            except ValueError:return actual
+            if relative not in expected:return actual
+            self.assertTrue(stat.S_ISREG(actual.st_mode))
+            self.assertEqual(comp.blob_id(physical.read_bytes()),expected[relative][1])
+            fields=list(actual)
+            fields[0]=(fields[0]&~0o111)|(0o111 if expected[relative][0]=='100755' else 0)
+            return os.stat_result(fields)
+        def observe(namespace,inherited,actual):
+            captured.append(dict(inherited))
+            return original(namespace,inherited,actual)
+        # Exercise genuine inherited expected_sources and the genuine original
+        # weighted check_current, not a fake successful body. Immutable identity
+        # fixtures isolate platform executable-mode checks; hosted PRE/POST runs
+        # authenticate actual Linux modes, HEAD, index and all physical bytes.
+        schemas=[None]+([SCHEMA] if SCHEMA else [])
+        for schema in schemas:
+            with patch.object(comp,'verify_current',return_value=expected) as verify, \
+                 patch.object(comp,'tensor_reconstructed_sources',side_effect=observe), \
+                 patch.object(pathlib.Path,'lstat',committed_mode_fixture if sys.platform=='win32' else physical_stat), \
+                 patch.dict(weighted.__dict__,{'raw_git':comp.git} if sys.platform=='win32' else {}):
+                report=comp.weighted_leaf(weighted.__dict__,schema)
+            self.assertEqual(report['public_paths'],1920)
+            self.assertEqual(verify.call_count,2)
+        inherited=captured[0]
+        self.assertEqual(len(inherited),1686)
+        path=next(p for p in inherited if p in comp.TENSOR_PATHS-comp.TENSOR_RETAINED)
+        for action in ('missing','extra','predecessor','provenance','final-mode','final-blob','current-bytes'):
+            rows=dict(inherited);final=dict(expected)
+            if action=='missing':rows.pop(path)
+            elif action=='extra':rows['unreviewed.lean']=('unreviewed',b'')
+            elif action=='predecessor':rows[path]=(rows[path][0],rows[path][1]+b'changed')
+            elif action=='provenance':rows[path]=('unreviewed origin',rows[path][1])
+            elif action=='final-mode':final[path]=('100755' if final[path][0]=='100644' else '100644',final[path][1])
+            elif action=='final-blob':final[path]=(final[path][0],'0'*40)
+            if action=='current-bytes':
+                read=pathlib.Path.read_bytes
+                def changed(physical):
+                    data=read(physical)
+                    return data+b'changed' if physical==comp.ROOT/path else data
+                with patch.object(pathlib.Path,'read_bytes',changed):
+                    with self.assertRaises(AssertionError):original(weighted.__dict__,rows,final)
+            else:
+                with self.assertRaises(AssertionError):original(weighted.__dict__,rows,final)
+        # Verify that a mutation detected after the original body cannot return
+        # a success report. This sequence shares the actual positive route above.
+        with patch.object(comp,'verify_current',side_effect=[expected,AssertionError('POST input mutation')]), \
+             patch.dict(weighted.__dict__,{'_composition_original_check_current':lambda schema: {}}), \
+             patch.object(pathlib.Path,'lstat',committed_mode_fixture if sys.platform=='win32' else physical_stat), \
+             patch.dict(weighted.__dict__,{'raw_git':comp.git} if sys.platform=='win32' else {}):
+            with self.assertRaisesRegex(AssertionError,'POST input mutation'):
+                comp.weighted_leaf(weighted.__dict__)
+
 # END authenticated finite tensor tests
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
