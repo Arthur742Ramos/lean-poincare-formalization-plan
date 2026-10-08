@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   contraction:
-    name: Exact-head metric contraction, frame bridge, regression, and full audit
+    name: Exact-head contraction, joint regularity, conditional flow, and full audit
     runs-on: ubuntu-latest
     timeout-minutes: 350
     steps:
@@ -41,6 +41,9 @@ jobs:
       - name: Compile actual connection-difference frame bridge
         working-directory: curvature
         run: lake build PoincareCurvature.Geometry.Manifold.RicciFlow.MetricContractedDeTurckField
+      - name: Compile joint metric contraction and the conventional field regularity bridge
+        working-directory: curvature
+        run: lake build PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.MetricContractedDeTurckJointRegularity
       - name: Check metric-contraction theorem axioms
         working-directory: curvature
         run: |
@@ -57,13 +60,20 @@ jobs:
             'CovariantDerivative.metricConnectionDifferenceVector_eq_zero_of_isLeviCivita',
             'RicciFlow.metricContractedDeTurckVectorField_eq_zero_of_isLeviCivita',
             'RicciFlow.metricContractedDeTurckVectorField_eq_standardDeTurckVectorField',
+            'PoincareCurvature.ParametrizedInner.contMDiffOn_timeDependentMetricContraction',
+            'PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg',
+            'RicciFlow.metricContractedDeTurckVectorField_eq_sum_inverseGram_correction',
+            'RicciFlow.contMDiff_metricContractedDeTurckVectorField_of_joint_correction',
+            'RicciFlow.contMDiff_metricContractedDeTurckGaugeField_of_joint_correction',
+            'RicciFlow.exists_pos_metricContractedDiffeomorph3GaugeFlowOn_of_joint_correction',
+            'RicciFlow.contMDiff_metricContractedDeTurckVectorField_of_joint_correctionFunctional',
           }
           assert {n for n, _ in entries} | set(clean) == expected, output
           allowed = {'propext', 'Classical.choice', 'Quot.sound'}
           for name, axioms in entries:
             actual = {a.strip() for a in axioms.split(',') if a.strip()}
             assert actual <= allowed, (name, actual)
-          print('All six contraction/bridge/comparison/regression axiom surfaces passed')
+          print('All thirteen contraction/comparison/regularity/flow/regression axiom surfaces passed')
           PY
       - name: Run unchanged full Point-4 completion audit
         working-directory: curvature

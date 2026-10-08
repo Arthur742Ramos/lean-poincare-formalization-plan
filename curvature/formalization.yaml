@@ -58,6 +58,52 @@ sources:
     author_endorsement: "not-contacted"
 
 related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/58c6fc21bafeb8a659d6751a1a9db7a74127a300/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable PR126 source for TensorHeatFixedBackgroundProducer.lean,
+      scripts/point4_fixed_background_heat_probe.lean, the original source
+      regression, proof workflow and precise fixed-background heat scope.
+      The literal supplied C2 metric, constructed global auxiliary connection,
+      actual coefficient regularity, scale-correct localized zero-trace
+      right-inverse, proofs and contributor notices are inherited unchanged.
+      Finite source composition, import/provenance reconciliation and bounded
+      regression routing are the integration additions. The newer baseline
+      TensorHeatGeometricRegularity.lean is preserved and needs focused native
+      qualification against its actual bytes. No nonlinear Ricci-flow solver,
+      Hamilton identification, gauge or uniqueness bridge is constructed.
+      Historical source-head proof evidence does not qualify the combined
+      checkout. Both Point-4 targets remain OPEN; registry selection is unchanged.
+
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/93aa44010811b9145d6ff79abac3ed506ad51c29/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable PR115 source for Analysis/TimeDependentMetricContraction.lean,
+      Geometry/Manifold/RicciFlow/GaugeReduction/MetricContractedDeTurckJointRegularity.lean,
+      scripts/point4_contraction_probe.lean and the contraction proof workflow.
+      The inherited mathematical declarations, smooth-metric and correction-tensor
+      regularity hypotheses, compact boundaryless nonempty flow scope, proofs,
+      thirteen-declaration probe and contributor notices are preserved.
+      The integration adds an exact root import, structured provenance and finite
+      source composition; it constructs no geometric PDE solution, Hamilton
+      identification or uniqueness bridge. Both Point-4 targets remain OPEN.
+      Historical source-head verification is distinct from combined-head
+      compilation, standard-axiom checks, completion audits and review.
+
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/0fce83f00a2e8832e5098ee43d8f260f3a98e9c9/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable PR110 source for AnalyticPDE/GenuineRicciDeTurckHeatInvariantClosure.lean,
+      scripts/point4_heat_invariant_probe.lean and the supporting proof workflow.
+      The exact eight-declaration proof/probe source and contributor notice are
+      preserved. Jet2Section remains an independent product of little-Holder
+      fields; the inherited domain edit corrects comments without changing
+      mathematical code. The new integration adds a root import, scoped status
+      discussion and finite source composition. It proves no derivative-compatible
+      geometric PDE solver, nonlinear Ricci-DeTurck existence, canonical Point-4
+      completion or smooth-target completion. Historical source-head verification
+      is distinct from fresh combined-head compilation, axioms and review.
+
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/60b6f8ef9d37d1fc5fac1f6113584e1b16370016/curvature"
     relationship: "builds-on"
     note: >-
@@ -155,6 +201,20 @@ related_formalizations:
       or a Ricci-flow local-existence claim.
       Immutable same-repository source for AnalyticPDE/HeatKernel1D.lean, EuclideanHeatInitialC2.lean, EuclideanHeatFrechet.lean, FiniteCoordinateFrechet.lean and EuclideanDuhamelTime.lean, including the actual normalized Gaussian, coordinate first moments, homogeneous kernel derivatives, actual bounded-C2 derivative commutation and positive-time generator. The new supporting modules Analysis/CompactUniformModulus.lean, Analysis/FiniteMomentApproximation.lean and AnalyticPDE/EuclideanHeatInitialTrace.lean add ambient compact continuity moduli, the arbitrary-modulus Gaussian approximate identity, genuine local-uniform C2 traces, the global C2 trace under uniform continuity only of initial Hessian entries, and the right initial generator. Inherited implementation and contributor notices are preserved. This is not a new selected registry entry, a compact-manifold localization producer, an ordinary endpoint derivative, or Point4 closure.
 
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/99aa49484f8decc5a6344591d5e319011ebea73b/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable same-repository source for the existing global C2 affine
+      connection constructor in CovariantDerivative/LeviCivita.lean, induced
+      tensor-connection regularity in InducedHomRegularity.lean, actual
+      geometric tensor-heat coefficient regularity, and scale-correct
+      zero-trace local right-inverse in TensorHeatCoefficientLocalization.lean.
+      The new TensorHeatFixedBackgroundProducer.lean composes those actual
+      constructors for the literal supplied arbitrary C2 metric and chooses
+      one global auxiliary connection before all chart/interval choices.
+      Existing implementation, contributor notices and registry selection
+      remain unchanged. This is supporting local linear theory, not a new
+      selected registry entry or a Ricci-flow/PDE existence claim.
   - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/73212853b1c48e5fea511191e89072dd003b2d0a/curvature"
     relationship: "builds-on"
     note: >-
