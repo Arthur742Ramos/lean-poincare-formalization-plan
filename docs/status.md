@@ -216,3 +216,12 @@ has been authored and awaits independent source review and exact Lean 4.33.0
 hosted verification. It constructs coordinate certificates internally and
 preserves the actual operator and reversed tensor-output convention. It does
 not provide Hölder coefficient bounds or close the canonical Point-4 target.
+
+The fixed-background local-heat candidate composes the existing global C²
+auxiliary-connection constructor with actual coefficient regularity and
+scale-correct zero-trace local right-inverses for the literal arbitrary C²
+metric. No connection, induced-regularity, coefficient-regularity or solver
+witness is an input. Its stronger `I.Boundaryless` and unweighted Hölder source
+scope remain explicit; exact Lean-4.33 verification is pending. See
+[the precise local linear boundary](point4/fixed-background-heat.md).
+The canonical Point-4 theorem and **OPEN** verdict remain unchanged.

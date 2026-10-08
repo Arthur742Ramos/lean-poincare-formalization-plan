@@ -500,6 +500,19 @@ maps, evaluates them on local frames, and supplies the scalar premises used
 by the lowering bridge. This is an interface reduction only: the joint
 geometric section regularity remains an explicit Point 4 gate.
 
+The conventional two-input-slot DeTurck repair now has a candidate joint-field
+follow-up in `MetricContractedDeTurckJointRegularity.lean`. From a jointly smooth
+metric representative agreeing with the defining metric and the actual jointly
+smooth Levi--Civita correction tensor, it proves the conventional inverse-Gram
+vector formula and joint smoothness of the positive field and negative recovery
+gauge. The correction-functional corollary derives the tensor premise by the
+existing geometric Gram/Riesz reconstruction, and a conditional compact-flow
+wrapper uses this same conventional gauge. These are explicit geometric
+regularity hypotheses, not assumptions about the final contracted field or a
+claim of PDE existence. The generic contraction passed exact Lean-4.33 compilation; final
+verification of the new geometric adapter remains pending. See [contraction repair](contraction-repair.md) for the
+field distinction and verification boundary. Point 4 remains OPEN.
+
 The candidate algebraic principal/remainder milestone is packaged in
 `RicciDeTurckPrincipalRemainder.lean`. It derives an exact finite reaction split
 from the actual Ricci and conventional DeTurck coordinate formulas, exposes
@@ -508,8 +521,8 @@ lower-order reaction. It also adds the two missing background-first-jet Lie
 contributions with their negative sign and proves the corrected frozen
 coefficient remainder identity and a coefficient-error bound. It constructs no
 holonomic jets or PDE solution, and does not identify this algebraic contraction
-with the manifold tensor-heat generator. No compilation of this candidate has
-been run yet. See [principal/remainder scope](principal-remainder.md) for the
+with the manifold tensor-heat generator. Its exact Lean-4.33 full build and eleven standard-only axiom probes
+passed before the principal milestone was merged into master. See [principal/remainder scope](principal-remainder.md) for the
 precise statement, derivative-compatibility boundary, and verification gates.
 
 ## Proved architecture
@@ -683,3 +696,12 @@ metric preservation, realization or uniqueness. Point 4 remains open.
 The [weak-regularity actual tensor-Laplacian proof unit](weak-laplacian.md)
 removes the unnecessary C² connection/induced-three oracle from a new local
 adapter. Authored source awaits exact Lean 4.33.0 verification; Point 4 stays open.
+
+The fixed-background local-heat candidate composes the existing global C²
+auxiliary-connection constructor with actual coefficient regularity and
+scale-correct zero-trace local right-inverses for the literal arbitrary C²
+metric. No connection, induced-regularity, coefficient-regularity or solver
+witness is an input. Its stronger `I.Boundaryless` and unweighted Hölder source
+scope remain explicit; exact Lean-4.33 verification is pending. See
+[the precise local linear boundary](fixed-background-heat.md).
+The canonical Point-4 theorem and **OPEN** verdict remain unchanged.

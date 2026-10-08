@@ -180,6 +180,7 @@ import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GenuineRicciDeT
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.GenuineRicciDeTurckHeatInvariantClosure
 import PoincareCurvature.Geometry.Manifold.RicciFlow.ResearchTheorems
 import PoincareCurvature.Geometry.Manifold.RicciFlow.MetricContractedDeTurckField
+import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.MetricContractedDeTurckJointRegularity
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.RicciDeTurckPrincipalRemainder
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.CoordinateJetPrincipalRemainder
 import PoincareCurvature.Geometry.Manifold.RicciFlow.PointFourContract
@@ -201,3 +202,5 @@ import PoincareCurvature.Analysis.FiniteCoordinateBilinear
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanC2Localization
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.PositiveFrozenC2Localization
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.BoundarylessInitialMetricLocalization
+
+import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatFixedBackgroundProducer

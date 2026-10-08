@@ -5,7 +5,7 @@ Current weighted checks are leaves. Historical subprocesses execute immutable
 original entry points; no current adapter is installed in their checkouts.
 """
 from __future__ import annotations
-import argparse, contextlib, functools, hashlib, importlib, json, os
+import argparse, base64, contextlib, functools, hashlib, importlib, json, os
 import pathlib, re, stat, subprocess, sys, tempfile, types
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -276,6 +276,189 @@ def heat_check_metadata(local, actual):
 TREES.update({HEAT_PARENT: HEAT_PARENT_TREE, HEAT_SOURCE: HEAT_SOURCE_TREE})
 
 
+CONTRACTION_PARENT = 'e303730173222d39da842f7831372ddd001f6874'
+CONTRACTION_PARENT_TREE = 'f358da765aedb8eb05fb7d844e0048048f59c9b3'
+CONTRACTION_SOURCE = '93aa44010811b9145d6ff79abac3ed506ad51c29'
+CONTRACTION_SOURCE_TREE = 'd3e7c360e957a54dfa51acd8959c27c0d080507a'
+CONTRACTION_BASE = 'a0f0fafc2505f1db28c2b9f9b00ce11384f69c39'
+CONTRACTION_BASE_TREE = 'f89511410ec16639199609238ba435fd64f9b16e'
+CONTRACTION_ADDED = {'curvature/PoincareCurvature/Analysis/TimeDependentMetricContraction.lean',
+    'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/MetricContractedDeTurckJointRegularity.lean'}
+CONTRACTION_REPLACED = {'.github/workflows/point4-contraction.yml',
+    'curvature/scripts/point4_contraction_probe.lean', 'docs/point4/contraction-repair.md'}
+CONTRACTION_ROOTS = {HEAT_ROOT, HEAT_METADATA, HEAT_DOC}
+CONTRACTION_PATHS = CONTRACTION_ADDED | CONTRACTION_REPLACED | {HEAT_ROOT, HEAT_DOC}
+CONTRACTION_OPERATIONS = {'curvature/PoincareCurvature.lean': [{'old_utf8': '', 'new_utf8': 'import PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.MetricContractedDeTurckJointRegularity\n', 'anchor_utf8': 'import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.RicciDeTurckPrincipalRemainder\n'}], 'docs/point4/README.md': [{'old_utf8': '', 'new_utf8': 'The conventional two-input-slot DeTurck repair now has a candidate joint-field\nfollow-up in `MetricContractedDeTurckJointRegularity.lean`. From a jointly smooth\nmetric representative agreeing with the defining metric and the actual jointly\nsmooth Levi--Civita correction tensor, it proves the conventional inverse-Gram\nvector formula and joint smoothness of the positive field and negative recovery\ngauge. The correction-functional corollary derives the tensor premise by the\nexisting geometric Gram/Riesz reconstruction, and a conditional compact-flow\nwrapper uses this same conventional gauge. These are explicit geometric\nregularity hypotheses, not assumptions about the final contracted field or a\nclaim of PDE existence. The generic contraction passed exact Lean-4.33 compilation; final\nverification of the new geometric adapter remains pending. See [contraction repair](contraction-repair.md) for the\nfield distinction and verification boundary. Point 4 remains OPEN.\n\n', 'anchor_utf8': 'The candidate algebraic principal/remainder milestone is packaged in\n`RicciDeTurckPrincipalRemainder.lean`. It derives an exact finite reaction split\n'}, {'old_utf8': 'with the manifold tensor-heat generator. No compilation of this candidate has\nbeen run yet. See [principal/remainder scope](principal-remainder.md) for the\n', 'new_utf8': 'with the manifold tensor-heat generator. Its exact Lean-4.33 full build and eleven standard-only axiom probes\npassed before the principal milestone was merged into master. See [principal/remainder scope](principal-remainder.md) for the\n', 'anchor_utf8': ''}]}
+CONTRACTION_METADATA_NOTE = '  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/93aa44010811b9145d6ff79abac3ed506ad51c29/curvature"\n    relationship: "builds-on"\n    note: >-\n      Immutable PR115 source for Analysis/TimeDependentMetricContraction.lean,\n      Geometry/Manifold/RicciFlow/GaugeReduction/MetricContractedDeTurckJointRegularity.lean,\n      scripts/point4_contraction_probe.lean and the contraction proof workflow.\n      The inherited mathematical declarations, smooth-metric and correction-tensor\n      regularity hypotheses, compact boundaryless nonempty flow scope, proofs,\n      thirteen-declaration probe and contributor notices are preserved.\n      The integration adds an exact root import, structured provenance and finite\n      source composition; it constructs no geometric PDE solution, Hamilton\n      identification or uniqueness bridge. Both Point-4 targets remain OPEN.\n      Historical source-head verification is distinct from combined-head\n      compilation, standard-axiom checks, completion audits and review.\n\n'
+TREES.update({CONTRACTION_PARENT:CONTRACTION_PARENT_TREE,
+              CONTRACTION_SOURCE:CONTRACTION_SOURCE_TREE, CONTRACTION_BASE:CONTRACTION_BASE_TREE})
+
+def contraction_transform(path, original):
+    assert path in CONTRACTION_ROOTS
+    if path == HEAT_METADATA:
+        anchor, addition = b'related_formalizations:\n', CONTRACTION_METADATA_NOTE.encode()
+        assert original.count(anchor) == 1 and CONTRACTION_SOURCE.encode() not in original, 'Contraction provenance anchor drift'
+        return original.replace(anchor, anchor+addition, 1)
+    data = original
+    for operation in CONTRACTION_OPERATIONS[path]:
+        old, new = operation['old_utf8'].encode(), operation['new_utf8'].encode()
+        if old:
+            assert data.count(old) == 1, 'Contraction replacement anchor drift: '+path
+            data = data.replace(old, new, 1)
+        else:
+            anchor = operation['anchor_utf8'].encode()
+            assert data.count(anchor) == 1 and new not in data, 'Contraction insertion anchor drift: '+path
+            data = data.replace(anchor, new+anchor, 1)
+    return data
+
+def contraction_inverse(path, actual):
+    assert path in CONTRACTION_ROOTS
+    original = git('show', CONTRACTION_PARENT+':'+path)
+    assert blob_id(original) == parent_tree(CONTRACTION_PARENT)[path][1]
+    assert actual == contraction_transform(path, original), 'Exact contraction root/provenance/scope drift: '+path
+    return original
+
+def contraction_identity(expected, originals, changes):
+    base, source, merge_base = (parent_tree(c) for c in (CONTRACTION_PARENT, CONTRACTION_SOURCE, CONTRACTION_BASE))
+    assert len(base) == 1730 and len(source) == 1570 and len(merge_base) == 1568
+    assert {p for p in set(source)|set(merge_base) if source.get(p)!=merge_base.get(p)} == CONTRACTION_PATHS
+    # Reconstruct all of the approved predecessor policy with its authentic old
+    # digest before extending it. The new current helper cannot certify its base.
+    old_helper = git('show', CONTRACTION_PARENT+':'+HELPER)
+    assert blob_id(old_helper) == base[HELPER][1]
+    old_digest = sha256(old_helper)
+    prior_changes = {p:transform(p,originals[p],old_digest) for p in EDITED-{SMOOTH}}
+    prior_changes[SMOOTH] = transform(SMOOTH,originals[SMOOTH],old_digest,
+        sha256(prior_changes[FIXTURE]),sha256(prior_changes[WORKFLOW]))
+    prior = resolve_union(parent_tree(MASTER),parent_tree(SUPPORT))
+    prior.update({p:('100644',blob_id(b)) for p,b in prior_changes.items()})
+    prior, _, _ = heat_identity(prior,dict(originals),dict(prior_changes))
+    for p in NEW:prior[p]=base[p]
+    assert prior == base, 'Published PR110 predecessor policy drift'
+    assert not CONTRACTION_ADDED & set(base)
+    for path in sorted(CONTRACTION_ADDED|CONTRACTION_REPLACED):
+        assert source[path][0] == '100644'
+        if path in CONTRACTION_REPLACED:
+            assert base[path] == merge_base[path], 'Contraction replacement base drift: '+path
+        else:
+            assert path not in expected and path not in merge_base
+        data = git('show',CONTRACTION_SOURCE+':'+path)
+        assert blob_id(data) == source[path][1], 'Contraction source bytes drift: '+path
+        expected[path] = source[path]; changes[path] = data
+    for path in sorted(CONTRACTION_ROOTS):
+        original = git('show',CONTRACTION_PARENT+':'+path)
+        assert base[path] == ('100644',blob_id(original))
+        assert changes[path] == original, 'Prior heat root reconstruction drift: '+path
+        changes[path] = contraction_transform(path,original)
+        expected[path] = '100644',blob_id(changes[path])
+    assert len(expected) == 1728  # Two additions before the four NEW paths.
+    return expected, originals, changes
+
+def contraction_check_imports(local, actual):
+    prior = contraction_inverse(HEAT_ROOT,actual)
+    local.legacy_check_imports(heat_inverse(HEAT_ROOT,prior))
+    base = local.blob(local.INTEGRATION_PARENT,HEAT_ROOT)
+    local.check_imports(actual,contraction_transform(HEAT_ROOT,heat_transform(HEAT_ROOT,base)),base)
+
+def contraction_check_metadata(local, actual):
+    raw = actual.encode() if isinstance(actual,str) else actual
+    prior = contraction_inverse(HEAT_METADATA,raw)
+    local.legacy_check_metadata(heat_inverse(HEAT_METADATA,prior).decode())
+    base = local.blob(local.INTEGRATION_PARENT,HEAT_METADATA)
+    # Add both new entries only to the master input; keep literal notes unique.
+    local.check_metadata(raw,contraction_transform(HEAT_METADATA,heat_transform(HEAT_METADATA,base)),base)
+
+
+FIXED_PARENT = '5185860656456a078acef144772511b6f21428f6'
+FIXED_PARENT_TREE = '1ef8247dd73c8c2baf1527cff36a78df06c7ac98'
+FIXED_SOURCE = '58c6fc21bafeb8a659d6751a1a9db7a74127a300'
+FIXED_SOURCE_TREE = '83037024feb3b82499385632c3eb535fca1cdcb7'
+FIXED_BASE = '99aa49484f8decc5a6344591d5e319011ebea73b'
+FIXED_BASE_TREE = 'dbb6b63ffcceed96ac133bc4f5e835e33fda2518'
+FIXED_STATUS = 'docs/status.md'
+FIXED_ADDED = {'curvature/scripts/point4_fixed_background_heat_probe.lean', 'docs/point4/fixed-background-heat.md', 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatFixedBackgroundProducer.lean', '.github/workflows/point4-fixed-background-heat.yml', 'curvature/scripts/point4_fixed_background_heat_source_test.py'}
+FIXED_ROOTS = {HEAT_ROOT,HEAT_METADATA,HEAT_DOC,FIXED_STATUS}
+FIXED_PATHS = FIXED_ADDED | FIXED_ROOTS
+FIXED_OPERATIONS = {'curvature/PoincareCurvature.lean': [{'kind': 'append-exact-branch-suffix', 'new_utf8': '\nimport PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatFixedBackgroundProducer\n', 'count': 1, 'authenticated_old_context_utf8': '\nimport PoincareCurvature.Geometry.Manifold.RicciFlow.ChosenLeviCivitaCoordinateCurvature\n'}], 'curvature/formalization.yaml': [{'kind': 'insert-before-anchor', 'anchor_utf8': '  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/73212853b1c48e5fea511191e89072dd003b2d0a/curvature"\n    relationship: "builds-on"\n', 'new_utf8': '  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/99aa49484f8decc5a6344591d5e319011ebea73b/curvature"\n    relationship: "builds-on"\n    note: >-\n      Immutable same-repository source for the existing global C2 affine\n      connection constructor in CovariantDerivative/LeviCivita.lean, induced\n      tensor-connection regularity in InducedHomRegularity.lean, actual\n      geometric tensor-heat coefficient regularity, and scale-correct\n      zero-trace local right-inverse in TensorHeatCoefficientLocalization.lean.\n      The new TensorHeatFixedBackgroundProducer.lean composes those actual\n      constructors for the literal supplied arbitrary C2 metric and chooses\n      one global auxiliary connection before all chart/interval choices.\n      Existing implementation, contributor notices and registry selection\n      remain unchanged. This is supporting local linear theory, not a new\n      selected registry entry or a Ricci-flow/PDE existence claim.\n', 'count': 1}, {'kind': 'already-applied', 'old_utf8': '    - method: "agent-assisted"\n', 'new_utf8': '    - method: "agent"\n', 'count': 1}], 'docs/point4/README.md': [{'kind': 'append-exact-branch-suffix', 'new_utf8': '\nThe fixed-background local-heat candidate composes the existing global C²\nauxiliary-connection constructor with actual coefficient regularity and\nscale-correct zero-trace local right-inverses for the literal arbitrary C²\nmetric. No connection, induced-regularity, coefficient-regularity or solver\nwitness is an input. Its stronger `I.Boundaryless` and unweighted Hölder source\nscope remain explicit; exact Lean-4.33 verification is pending. See\n[the precise local linear boundary](fixed-background-heat.md).\nThe canonical Point-4 theorem and **OPEN** verdict remain unchanged.\n', 'count': 1, 'authenticated_old_context_utf8': 'Exact Lean-4.33 compilation is pending; the Lie/DeTurck, analytic and PDE\nboundaries and the Point-4 **OPEN** verdict remain.\n'}], 'docs/status.md': [{'kind': 'append-exact-branch-suffix', 'new_utf8': '\nThe fixed-background local-heat candidate composes the existing global C²\nauxiliary-connection constructor with actual coefficient regularity and\nscale-correct zero-trace local right-inverses for the literal arbitrary C²\nmetric. No connection, induced-regularity, coefficient-regularity or solver\nwitness is an input. Its stronger `I.Boundaryless` and unweighted Hölder source\nscope remain explicit; exact Lean-4.33 verification is pending. See\n[the precise local linear boundary](point4/fixed-background-heat.md).\nThe canonical Point-4 theorem and **OPEN** verdict remain unchanged.\n', 'count': 1, 'authenticated_old_context_utf8': '5. preserve partial or failed approaches in `docs/history/` only when they are\n   useful research records.\n'}]}
+FIXED_METADATA_NOTE = '  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/58c6fc21bafeb8a659d6751a1a9db7a74127a300/curvature"\n    relationship: "builds-on"\n    note: >-\n      Immutable PR126 source for TensorHeatFixedBackgroundProducer.lean,\n      scripts/point4_fixed_background_heat_probe.lean, the original source\n      regression, proof workflow and precise fixed-background heat scope.\n      The literal supplied C2 metric, constructed global auxiliary connection,\n      actual coefficient regularity, scale-correct localized zero-trace\n      right-inverse, proofs and contributor notices are inherited unchanged.\n      Finite source composition, import/provenance reconciliation and bounded\n      regression routing are the integration additions. The newer baseline\n      TensorHeatGeometricRegularity.lean is preserved and needs focused native\n      qualification against its actual bytes. No nonlinear Ricci-flow solver,\n      Hamilton identification, gauge or uniqueness bridge is constructed.\n      Historical source-head proof evidence does not qualify the combined\n      checkout. Both Point-4 targets remain OPEN; registry selection is unchanged.\n\n'
+TREES.update({FIXED_PARENT:FIXED_PARENT_TREE,FIXED_SOURCE:FIXED_SOURCE_TREE,FIXED_BASE:FIXED_BASE_TREE})
+
+def fixed_transform(path, original):
+    assert path in FIXED_ROOTS
+    data=original
+    for op in FIXED_OPERATIONS[path]:
+        new=op['new_utf8'].encode()
+        if op['kind']=='already-applied':
+            assert op['old_utf8'].encode() not in data and data.count(new)==1, 'Fixed-background method drift'
+        elif op['kind']=='append-exact-branch-suffix':
+            assert data.endswith(b'\n') and new not in data, 'Fixed-background suffix drift: '+path
+            data+=new
+        else:
+            assert op['kind']=='insert-before-anchor'
+            anchor=op['anchor_utf8'].encode()
+            assert anchor and data.count(anchor)==1 and new not in data, 'Fixed-background provenance anchor drift'
+            data=data.replace(anchor,new+anchor,1)
+    if path==HEAT_METADATA:
+        anchor=b'related_formalizations:\n';note=FIXED_METADATA_NOTE.encode()
+        assert data.count(anchor)==1 and FIXED_SOURCE.encode() not in data, 'Fixed-background source provenance drift'
+        data=data.replace(anchor,anchor+note,1)
+    return data
+
+def fixed_inverse(path, actual):
+    assert path in FIXED_ROOTS and re.fullmatch(r'[0-9a-f]{40}',FIXED_PARENT or '')
+    original=git('show',FIXED_PARENT+':'+path)
+    assert parent_tree(FIXED_PARENT)[path]==('100644',blob_id(original))
+    assert actual==fixed_transform(path,original), 'Exact fixed-background root/provenance/scope drift: '+path
+    return original
+
+def fixed_identity(expected, originals, changes):
+    assert re.fullmatch(r'[0-9a-f]{40}',FIXED_PARENT or ''), 'Actual repaired PR115 commit pin is required'
+    base,source,merge_base=(parent_tree(c) for c in (FIXED_PARENT,FIXED_SOURCE,FIXED_BASE))
+    assert len(base)==1732 and len(source)==1607 and len(merge_base)==1602
+    assert {p for p in set(source)|set(merge_base) if source.get(p)!=merge_base.get(p)}==FIXED_PATHS
+    old_helper=git('show',FIXED_PARENT+':'+HELPER)
+    assert base[HELPER]==('100644',blob_id(old_helper))
+    old_digest=sha256(old_helper)
+    prior_changes={p:transform(p,originals[p],old_digest) for p in EDITED-{SMOOTH}}
+    prior_changes[SMOOTH]=transform(SMOOTH,originals[SMOOTH],old_digest,
+        sha256(prior_changes[FIXTURE]),sha256(prior_changes[WORKFLOW]))
+    prior=resolve_union(parent_tree(MASTER),parent_tree(SUPPORT))
+    prior.update({p:('100644',blob_id(b)) for p,b in prior_changes.items()})
+    prior,prior_originals,prior_final_changes=heat_identity(prior,dict(originals),dict(prior_changes))
+    prior,_,_=contraction_identity(prior,prior_originals,prior_final_changes)
+    for p in NEW:prior[p]=base[p]
+    assert prior==base,'Repaired PR115 complete predecessor policy drift'
+    assert not FIXED_ADDED&set(base)
+    for path in sorted(FIXED_ADDED):
+        assert path not in expected and path not in merge_base and source[path][0]=='100644'
+        data=git('show',FIXED_SOURCE+':'+path)
+        assert blob_id(data)==source[path][1], 'Fixed-background branch bytes drift: '+path
+        changes[path]=data;expected[path]=source[path]
+    for path in sorted(FIXED_ROOTS):
+        original=git('show',FIXED_PARENT+':'+path)
+        assert base[path]==('100644',blob_id(original))
+        if path!=FIXED_STATUS:assert changes[path]==original, 'Prior contraction root reconstruction drift: '+path
+        else:assert expected[path]==base[path], 'Fixed-background status predecessor drift'
+        changes[path]=fixed_transform(path,original)
+        expected[path]='100644',blob_id(changes[path])
+    assert len(expected)==1733 # Five additions before the four externally bound NEW paths.
+    return expected,originals,changes
+
+def fixed_check_imports(local, actual):
+    prior=fixed_inverse(HEAT_ROOT,actual)
+    local.legacy_check_imports(heat_inverse(HEAT_ROOT,contraction_inverse(HEAT_ROOT,prior)))
+    base=local.blob(local.INTEGRATION_PARENT,HEAT_ROOT)
+    local.check_imports(actual,fixed_transform(HEAT_ROOT,
+        contraction_transform(HEAT_ROOT,heat_transform(HEAT_ROOT,base))),base)
+
+def fixed_check_metadata(local, actual):
+    raw=actual.encode() if isinstance(actual,str) else actual
+    prior=fixed_inverse(HEAT_METADATA,raw)
+    local.legacy_check_metadata(heat_inverse(HEAT_METADATA,contraction_inverse(HEAT_METADATA,prior)).decode())
+    base=local.blob(local.INTEGRATION_PARENT,HEAT_METADATA)
+    local.check_metadata(raw,fixed_transform(HEAT_METADATA,
+        contraction_transform(HEAT_METADATA,heat_transform(HEAT_METADATA,base))),base)
+
 def expected_identity():
     master, support = parent_tree(MASTER), parent_tree(SUPPORT)
     union = resolve_union(master, support)
@@ -287,6 +470,8 @@ def expected_identity():
     expected = dict(union)
     for path,data in changes.items():expected[path]='100644',blob_id(data)
     expected, originals, changes = heat_identity(expected, originals, changes)
+    expected, originals, changes = contraction_identity(expected, originals, changes)
+    expected, originals, changes = fixed_identity(expected, originals, changes)
     # New code/docs are bound to the exact committed HEAD/index/physical bytes.
     # Independent review must approve that external head; this is no self-review.
     head = parse_tree(git('ls-tree','-rz','HEAD'))
@@ -295,16 +480,19 @@ def expected_identity():
         expected[path]=head[path]
     return expected, originals, changes
 
-def map_record(expected, originals, changes):
+def prior_map_record(expected, originals, changes):
     master,support=parent_tree(MASTER),parent_tree(SUPPORT)
+    # Authenticate immutable snapshots for this record construction.
+    heat_parent_tree=parent_tree(HEAT_PARENT)
+    heat_source_tree=parent_tree(HEAT_SOURCE)
     return {'parents':{c:TREES[c] for c in (MASTER,SUPPORT,HEAT_PARENT,HEAT_SOURCE)},
         'heat_invariant_integration':{'base':HEAT_PARENT,'source':HEAT_SOURCE,
             'base_tree':HEAT_PARENT_TREE,'source_tree':HEAT_SOURCE_TREE,
-            'source_identity':{p:list(parent_tree(HEAT_SOURCE)[p]) for p in sorted(parent_tree(HEAT_SOURCE))},
-            'base_identity':{p:list(parent_tree(HEAT_PARENT)[p]) for p in sorted(parent_tree(HEAT_PARENT))},
-            'fixed_source_paths':{p:list(parent_tree(HEAT_SOURCE)[p]) for p in sorted(HEAT_ADDED|{HEAT_DOMAIN})},
-            'transforms':{p:{'original_blob':blob_id(originals[p]),'final_blob':blob_id(changes[p]),
-                'original_sha256':sha256(originals[p]),'final_sha256':sha256(changes[p]),'count':1} for p in sorted(HEAT_ROOTS)},
+            'source_identity':{p:list(heat_source_tree[p]) for p in sorted(heat_source_tree)},
+            'base_identity':{p:list(heat_parent_tree[p]) for p in sorted(heat_parent_tree)},
+            'fixed_source_paths':{p:list(heat_source_tree[p]) for p in sorted(HEAT_ADDED|{HEAT_DOMAIN})},
+            'transforms':{p:{'original_blob':blob_id(originals[p]),'final_blob':blob_id(contraction_inverse(p,fixed_inverse(p,changes[p]))),
+                'original_sha256':sha256(originals[p]),'final_sha256':sha256(contraction_inverse(p,fixed_inverse(p,changes[p]))),'count':1} for p in sorted(HEAT_ROOTS)},
             'historical_run':37181895941,'scope':'Independent jet-field heat/reaction closure only; combined-head proof checks UNRUN; both targets OPEN'},
         'paths':len(expected),'canonical_point4':'OPEN','smooth_general_target':'OPEN',
         'localization_mock_route':{'parent':MOCK_ROUTE_PARENT,'parent_tree':MOCK_ROUTE_TREE,
@@ -325,11 +513,68 @@ def map_record(expected, originals, changes):
             'mode':'100644','count':1} for p in sorted(EDITED)},
         'identity':{p:([expected[p][0],'<committed-HEAD>'] if p==MAP else list(expected[p])) for p in sorted(expected)}}
 
+def contraction_map_record(expected, originals, changes):
+    record = prior_map_record(expected, originals, changes)
+    # Authenticate immutable snapshots for this record construction.
+    contraction_parent_tree=parent_tree(CONTRACTION_PARENT)
+    contraction_source_tree=parent_tree(CONTRACTION_SOURCE)
+    contraction_base_tree=parent_tree(CONTRACTION_BASE)
+    record['parents'].update({c:TREES[c] for c in (CONTRACTION_PARENT,CONTRACTION_SOURCE,CONTRACTION_BASE)})
+    record['metric_contraction_integration'] = {
+        'base':CONTRACTION_PARENT,'base_tree':CONTRACTION_PARENT_TREE,
+        'source':CONTRACTION_SOURCE,'source_tree':CONTRACTION_SOURCE_TREE,
+        'merge_base':CONTRACTION_BASE,'merge_base_tree':CONTRACTION_BASE_TREE,
+        'base_identity':{p:list(contraction_parent_tree[p]) for p in sorted(contraction_parent_tree)},
+        'source_identity':{p:list(contraction_source_tree[p]) for p in sorted(contraction_source_tree)},
+        'merge_base_identity':{p:list(contraction_base_tree[p]) for p in sorted(contraction_base_tree)},
+        'fixed_source_paths':{p:list(contraction_source_tree[p]) for p in sorted(CONTRACTION_ADDED|CONTRACTION_REPLACED)},
+        'transforms':{p:{'original_blob':contraction_parent_tree[p][1],
+            'final_blob':blob_id(fixed_inverse(p,changes[p])),'count':1} for p in sorted(CONTRACTION_ROOTS)},
+        'historical_run':37202841805,
+        'scope':'Smooth metric contraction and conditional compact gauge flow only; combined-head checks UNRUN; both targets OPEN'}
+    return record
+
+
+def map_record(expected, originals, changes):
+    record=contraction_map_record(expected,originals,changes)
+    # Authenticate immutable snapshots for this record construction.
+    fixed_parent_tree=parent_tree(FIXED_PARENT)
+    fixed_source_tree=parent_tree(FIXED_SOURCE)
+    fixed_base_tree=parent_tree(FIXED_BASE)
+    record['parents'].update({c:TREES[c] for c in (FIXED_PARENT,FIXED_SOURCE,FIXED_BASE)})
+    record['fixed_background_heat_integration']={
+        'base':FIXED_PARENT,'base_tree':FIXED_PARENT_TREE,
+        'source':FIXED_SOURCE,'source_tree':FIXED_SOURCE_TREE,
+        'merge_base':FIXED_BASE,'merge_base_tree':FIXED_BASE_TREE,
+        'base_identity':{p:list(fixed_parent_tree[p]) for p in sorted(fixed_parent_tree)},
+        'source_identity':{p:list(fixed_source_tree[p]) for p in sorted(fixed_source_tree)},
+        'merge_base_identity':{p:list(fixed_base_tree[p]) for p in sorted(fixed_base_tree)},
+        'fixed_source_paths':{p:list(fixed_source_tree[p]) for p in sorted(FIXED_ADDED)},
+        'transforms':{p:{'original_blob':fixed_parent_tree[p][1],
+            'final_blob':blob_id(changes[p]),'original_sha256':sha256(fixed_inverse(p,changes[p])),
+            'final_sha256':sha256(changes[p]),'count':1} for p in sorted(FIXED_ROOTS)},
+        'historical_run':37233402239,
+        'changed_dependency':'TensorHeatGeometricRegularity.lean newer baseline preserved; focused native qualification required',
+        'scope':'Literal C2 metric local linear zero-trace right-inverse only; combined-head proof gates UNRUN; both targets OPEN'}
+    record['current_axiom_inventory']={'immutable_predecessor':MASTER,
+        'contraction_source':CONTRACTION_SOURCE,'probe':'contraction',
+        'inherited_combined':[150,144],'current_combined':[157,151],
+        'inherited_linear':[127,121],'current_linear':[134,128],
+        'exact_appended_endpoints':list(CONTRACTION_AXIOM_ADDITIONS),
+        'policy':'Preserve every inherited per-probe occurrence and append exactly seven authenticated contraction endpoints; original actual-output and standard-axiom checker unchanged'}
+    record['historical_axiom_routing']={'weighted_validator':'3a8ed697d1f0366f8370efb2fa9e524b68d27e97',
+        'smooth_validator':SUPPORT,'probe_surface':MASTER,
+        'policy':'Verify complete current output first; execute the authenticated immutable six-entry contraction probe under current Lean 4.33; reuse other raw logs only for byte-identical probe sources; check both input sets after the immutable validator',
+        'evidence':'Raw contraction bytes, commands, observed compiler ID and exit codes, current/historical hashes in scoped uploaded routing receipts; current compiled sources, not a historical Lean rebuild'}
+    return record
+
+
 def verify_current():
+    assert re.fullmatch(r'[0-9a-f]{40}',FIXED_PARENT or ''), 'Actual repaired PR115 commit pin is required'
     head = git('rev-parse','HEAD').decode().strip()
     assert re.fullmatch(r'[0-9a-f]{40}',head)
     if os.environ.get('EXPECTED_SHA'):assert head==os.environ['EXPECTED_SHA'], 'External expected HEAD drift'
-    for commit in (MASTER,SUPPORT,STARTUP_REPAIR_PARENT,MOCK_ROUTE_PARENT,WEIGHTED_MOCK_PARENT,HEAT_PARENT,HEAT_SOURCE):
+    for commit in (MASTER,SUPPORT,STARTUP_REPAIR_PARENT,MOCK_ROUTE_PARENT,WEIGHTED_MOCK_PARENT,HEAT_PARENT,HEAT_SOURCE,CONTRACTION_PARENT,CONTRACTION_SOURCE,CONTRACTION_BASE,FIXED_PARENT,FIXED_SOURCE,FIXED_BASE):
         subprocess.run(['git','--no-replace-objects','-C',str(ROOT),'merge-base','--is-ancestor',commit,'HEAD'],check=True,env=ENV)
     expected,originals,changes=expected_identity()
     committed=parse_tree(git('ls-tree','-rz','HEAD'))
@@ -388,8 +633,8 @@ def weighted_leaf(namespace, schema=None):
         before=module.check_imports,module.check_metadata
         touched.append((module,before))
         # These genuine functions keep their own exact INTEGRATION_PARENT blobs.
-        module.check_imports=lambda actual:heat_check_imports(local,actual)
-        module.check_metadata=lambda actual:heat_check_metadata(local,actual)
+        module.check_imports=lambda actual:fixed_check_imports(local,actual)
+        module.check_metadata=lambda actual:fixed_check_metadata(local,actual)
         return module
     def composed_sources():
         inherited=original_expected() # original ancestry/transform/self/workflow validation
@@ -400,6 +645,13 @@ def weighted_leaf(namespace, schema=None):
             elif path == HEAT_DOMAIN:
                 assert blob_id(data) == parent_tree(HEAT_PARENT)[path][1], 'Inherited domain source drift'
                 assert (ROOT/path).read_bytes() == git('show',HEAT_SOURCE+':'+path), 'Exact comment-only domain transform drift'
+            elif path in CONTRACTION_REPLACED:
+                assert blob_id(data) == parent_tree(CONTRACTION_PARENT)[path][1], 'Inherited contraction predecessor drift: '+path
+                assert (ROOT/path).read_bytes() == git('show',CONTRACTION_SOURCE+':'+path), 'Exact contraction replacement drift: '+path
+            elif path == FIXED_STATUS:
+                assert blob_id(data) == parent_tree(FIXED_PARENT)[path][1], 'Inherited fixed-background status predecessor drift'
+                original = git('show',FIXED_PARENT+':'+path)
+                assert (ROOT/path).read_bytes() == fixed_transform(path,original), 'Exact fixed-background status transform drift'
             elif path not in ROOT_CHANGES:
                 assert blob_id(data)==expected[path][1], 'Inherited weighted reconstruction drift: '+path
         return {p:('current-finite-composition',(ROOT/p).read_bytes()) for p in expected}
@@ -495,6 +747,52 @@ def evidence_parser(path):
     if 'audit-json' in common:parser.add_argument('--audit-rc',type=int)
     return parser
 
+INHERITED_AXIOM_PROBES = (
+    'contraction', 'coordinate_connection', 'coordinate_jet', 'coordinate_operator',
+    'principal_remainder', 'chosen_lc_coordinate', 'chosen_lc_curvature',
+    'standard_coordinate_operator', 'frozen_metric_principal', 'weak_laplacian',
+    'boundaryless_chart_frames', 'c2_heat_trace', 'weighted_initial_heat',
+)
+CONTRACTION_AXIOM_ADDITIONS = (
+    'PoincareCurvature.ParametrizedInner.contMDiffOn_timeDependentMetricContraction',
+    'PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg',
+    'RicciFlow.metricContractedDeTurckVectorField_eq_sum_inverseGram_correction',
+    'RicciFlow.contMDiff_metricContractedDeTurckVectorField_of_joint_correction',
+    'RicciFlow.contMDiff_metricContractedDeTurckGaugeField_of_joint_correction',
+    'RicciFlow.exists_pos_metricContractedDiffeomorph3GaugeFlowOn_of_joint_correction',
+    'RicciFlow.contMDiff_metricContractedDeTurckVectorField_of_joint_correctionFunctional',
+)
+
+def current_axiom_inventory(path, inherited):
+    """Preserve the immutable occurrence surface and allow one exact extension."""
+    def probe_names(source):
+        names = re.findall(r'^#print axioms (\S+)', source, re.M)
+        if 'open RicciFlow.AnalyticPDE' in source:
+            names = [n if n.startswith(('PoincareCurvature.', 'RicciFlow.')) else 'RicciFlow.AnalyticPDE.' + n for n in names]
+        assert names and len(names) == len(set(names)), 'Empty/duplicate source axiom surface'
+        return names
+    combined = 'c2_initial' in path or 'manifold_heat_release' in path
+    probes = INHERITED_AXIOM_PROBES if combined else INHERITED_AXIOM_PROBES[:11]
+    assert tuple(inherited.PROBES) == probes, 'Inherited axiom probe inventory drift'
+    master = parent_tree(MASTER)
+    inventory = {}; original_occurrences = []; current_occurrences = []
+    for name in probes:
+        source_path = f'curvature/scripts/point4_{name}_probe.lean'
+        original = original_bytes(source_path, master, {}).decode('utf8')
+        before = tuple(probe_names(original))
+        source = (ROOT / source_path).read_text(encoding='utf8')
+        after = tuple(probe_names(source))
+        expected = before + CONTRACTION_AXIOM_ADDITIONS if name == 'contraction' else before
+        assert after == expected, 'Changed inherited occurrence or unapproved endpoint: ' + name
+        inventory[name] = source, expected
+        original_occurrences.extend(before); current_occurrences.extend(after)
+    assert (len(original_occurrences), len(set(original_occurrences))) == ((150,144) if combined else (127,121)), 'Immutable predecessor occurrence surface drift'
+    assert len(CONTRACTION_AXIOM_ADDITIONS) == len(set(CONTRACTION_AXIOM_ADDITIONS)) == 7
+    assert not set(CONTRACTION_AXIOM_ADDITIONS) & set(original_occurrences), 'Extension repeats inherited declaration'
+    assert (len(current_occurrences), len(set(current_occurrences))) == ((157,151) if combined else (134,128)), 'Exact seven-endpoint extension drift'
+    return inventory
+
+
 def current_evidence(path,args):
     verify_current()
     parser=evidence_parser(path)
@@ -507,13 +805,14 @@ def current_evidence(path,args):
         folder=parsed.axiom_dir
         if 'c2_initial' in path or 'manifold_heat_release' in path:
             assert {p.name for p in folder.iterdir()}=={p+'.log' for p in inherited.PROBES}
+        inventory=current_axiom_inventory(path,inherited)
         total=0;distinct=set()
-        for name in inherited.PROBES:
-            source=(ROOT/f'curvature/scripts/point4_{name}_probe.lean').read_text()
+        for name,(source,expected_names) in inventory.items():
             names=inherited.check_axiom_output(source,(folder/(name+'.log')).read_text())
+            assert names==set(expected_names), 'Current axiom endpoint evidence drift: '+name
             total+=len(names);distinct|=names
-        assert total==(150 if 'c2_initial' in path or 'manifold_heat_release' in path else 127)
-        if 'c2_initial' in path or 'manifold_heat_release' in path:assert len(distinct)==144
+        combined='c2_initial' in path or 'manifold_heat_release' in path
+        assert (total,len(distinct))==((157,151) if combined else (134,128))
         inherited.check_boundaryless_types((folder/'boundaryless_chart_frames.log').read_text())
     if getattr(parsed,'audit_json',None):
         assert parsed.audit_rc is not None
@@ -521,6 +820,106 @@ def current_evidence(path,args):
     if getattr(parsed,'probe_log',None):
         function=module.check_new_probe if 'release_guard' in path else module.check_probe
         function(parsed.probe_log.read_text())
+
+def axiom_argument(args):
+    slots=[(i,False) for i,a in enumerate(args) if a=='--axiom-dir']
+    slots += [(i,True) for i,a in enumerate(args) if a.startswith('--axiom-dir=')]
+    assert len(slots)<=1, 'Duplicate axiom directory argument'
+    if not slots:return None
+    i,inline=slots[0]
+    assert inline or i+1<len(args), 'Missing axiom directory argument'
+    return i,inline,pathlib.Path(args[i].split('=',1)[1] if inline else args[i+1]).resolve()
+
+def raw_axiom_files(folder):
+    assert stat.S_ISDIR(folder.lstat().st_mode) and not folder.is_symlink(), 'Invalid axiom directory'
+    files={}
+    for file in folder.iterdir():
+        assert stat.S_ISREG(file.lstat().st_mode) and not file.is_symlink(), 'Invalid axiom evidence file'
+        files[file.name]=file.read_bytes()
+    assert set(files) in ({n+'.log' for n in INHERITED_AXIOM_PROBES},
+                         {n+'.log' for n in INHERITED_AXIOM_PROBES[:11]}), 'Missing/extra axiom files'
+    return files
+
+def routing_receipt_path(folder):
+    # The weighted immutable inventory allows only its original files. Append
+    # the receipt to its existing guard log, never to an actual axiom log.
+    if folder.parent.name=='point4-weighted-hessian-evidence':
+        return folder.parent/'source.log'
+    # All other inherited workflows upload their scoped /tmp/<prefix>-*.log.
+    return folder.with_name(folder.name+'-historical-routing.log')
+
+@contextlib.contextmanager
+def historical_axiom_arguments(commit,path,args):
+    """Replay an authenticated historical probe against current compiled sources.
+
+    Current logs remain complete and unchanged. Raw historical outputs are
+    separate; no declaration record is selected, truncated or manufactured.
+    """
+    slot=axiom_argument(args)
+    if slot is None:
+        yield list(args)
+        return
+    i,inline,folder=slot
+    evidence_path=path if path!=SMOOTH else 'curvature/scripts/point4_manifold_heat_release_guard.py'
+    current_evidence(evidence_path,['--axiom-dir',str(folder)])
+    before=raw_axiom_files(folder)
+    tree=parent_tree(commit)
+    module=importlib.import_module(pathlib.PurePosixPath(evidence_path).stem)
+    checker=module.c2_guard() if 'manifold_heat_release' in evidence_path else module
+    sources={}
+    for name in sorted(before):
+        probe='curvature/scripts/point4_'+name.removesuffix('.log')+'_probe.lean'
+        source=git('show',commit+':'+probe)
+        assert blob_id(source)==tree[probe][1], 'Historical probe provenance drift'
+        if name!='contraction.log':
+            assert (ROOT/probe).read_bytes()==source, 'Unsupported inherited probe byte drift: '+name
+        else:
+            baseline=git('show',MASTER+':'+probe)
+            assert blob_id(baseline)==parent_tree(MASTER)[probe][1] and source==baseline, 'Historical contraction probe drift'
+        sources[name]=(probe,source)
+    receipt={'head':git('rev-parse','HEAD').decode().strip(),'historical_validator':commit,
+        'scope':'Pinned historical probe surface evaluated against current compiled sources; no historical Lean rebuild',
+        'current_sha256':{n:sha256(b) for n,b in before.items()},
+        'probe_sources':{n:{'path':p,'blob':blob_id(b),'sha256':sha256(b)} for n,(p,b) in sources.items()}}
+    with tempfile.TemporaryDirectory(prefix='point4-historical-axioms-') as directory:
+        root=pathlib.Path(directory);view=root/'logs';view.mkdir()
+        probe=root/'contraction.lean';probe.write_bytes(sources['contraction.log'][1])
+        version_command=['lake','env','lean','--version']
+        command=['lake','env','lean',str(probe)]
+        receipt.update({'compiler_command':version_command,'probe_command':command,'cwd':str(ROOT/'curvature')})
+        try:
+            version=subprocess.run(version_command,cwd=ROOT/'curvature',capture_output=True,env=ENV)
+            receipt.update({'compiler_exit':version.returncode,'compiler_stdout_base64':base64.b64encode(version.stdout).decode(),
+                            'compiler_stderr_base64':base64.b64encode(version.stderr).decode()})
+            assert version.returncode==0 and version.stdout.startswith(b'Lean (version 4.33.0,'), 'Current Lean compiler identity drift'
+            result=subprocess.run(command,cwd=ROOT/'curvature',stdout=subprocess.PIPE,stderr=subprocess.STDOUT,env=ENV)
+            receipt.update({'probe_exit':result.returncode,'raw_contraction_base64':base64.b64encode(result.stdout).decode(),
+                            'historical_contraction_sha256':sha256(result.stdout)})
+            assert result.returncode==0, 'Historical contraction probe failed in current environment'
+            assert len(checker.check_axiom_output(sources['contraction.log'][1].decode('utf8'),result.stdout.decode('utf8')))==6, 'Historical six-entry surface drift'
+            historical_files=dict(before);historical_files['contraction.log']=result.stdout
+            for name,data in historical_files.items():(view/name).write_bytes(data)
+            # Check the full immutable occurrence surface, not only contraction.
+            for name in checker.PROBES:
+                checker.check_axiom_output(sources[name+'.log'][1].decode('utf8'),historical_files[name+'.log'].decode('utf8'))
+            checker.check_boundaryless_types(historical_files['boundaryless_chart_frames.log'].decode('utf8'))
+            receipt['historical_sha256']={n:sha256(b) for n,b in historical_files.items()}
+            routed=list(args)
+            routed[i if inline else i+1]=('--axiom-dir=' if inline else '')+str(view)
+            try:
+                yield routed
+            finally:
+                assert probe.read_bytes()==sources['contraction.log'][1], 'Historical probe input mutation'
+                assert raw_axiom_files(view)==historical_files, 'Historical axiom input mutation'
+        finally:
+            # Preserve raw probe bytes and provenance on success and failure.
+            receipt_path=routing_receipt_path(folder)
+            if receipt_path.exists() or receipt_path.is_symlink():
+                assert stat.S_ISREG(receipt_path.lstat().st_mode) and not receipt_path.is_symlink(), 'Invalid routing receipt file'
+            with receipt_path.open('ab') as output:
+                output.write(b'\nHISTORICAL_AXIOM_ROUTING_RECEIPT '+json.dumps(receipt,sort_keys=True).encode()+b'\n')
+            assert raw_axiom_files(folder)==before, 'Current axiom input mutation'
+            current_evidence(evidence_path,['--axiom-dir',str(folder)])
 
 def current_root_schema(schema,local=None):
     local=local or importlib.import_module('point4_c2_metric_localization_source_test')
@@ -584,7 +983,8 @@ def current_smooth_evidence(namespace,args):
 def weighted_execution(namespace):
     def historical_gate(path,args):
         print('HISTORICAL_WEIGHTED_BASE_BEGIN',namespace['BASE'],path,flush=True)
-        namespace['_composition_original_historical_gate'](path,args)
+        with historical_axiom_arguments(namespace['BASE'],path,args) as routed:
+            namespace['_composition_original_historical_gate'](path,routed)
         print('HISTORICAL_WEIGHTED_BASE_END',namespace['BASE'],path,flush=True)
     with replacements(namespace,{'check_current':lambda schema=None:weighted_leaf(namespace,schema),
                                  'historical_gate':historical_gate}):yield
@@ -628,9 +1028,9 @@ def install_weighted(namespace):
 
 def localization_current(namespace,schema):
     namespace['check_ancestry']()
-    heat_check_imports(types.SimpleNamespace(**namespace),(ROOT/'curvature/PoincareCurvature.lean').read_bytes())
+    fixed_check_imports(types.SimpleNamespace(**namespace),(ROOT/'curvature/PoincareCurvature.lean').read_bytes())
     raw=(ROOT/'curvature/formalization.yaml').read_text()
-    heat_check_metadata(types.SimpleNamespace(**namespace),raw)
+    fixed_check_metadata(types.SimpleNamespace(**namespace),raw)
     schema=pathlib.Path(schema)
     assert sha256(schema.read_bytes())==namespace['SCHEMA_SHA256']
     import jsonschema
@@ -690,7 +1090,8 @@ def install_smooth(namespace):
         print('CURRENT_SMOOTH_SEMANTIC_BODY_BEGIN: original inventory counters are historical shape; current identity is '+str(len(current_identity))+' paths',flush=True)
         original(args) # current real smooth metadata/schema/probe/completion/audit gates
         print('CURRENT_SMOOTH_SEMANTIC_BODY_END',flush=True)
-        historical(SUPPORT,SMOOTH,args) # original scoped route; no current hooks
+        with historical_axiom_arguments(SUPPORT,SMOOTH,args) as routed:
+            historical(SUPPORT,SMOOTH,routed) # original scoped route; no current hooks
         current_smooth_evidence(namespace,args)
         if any(a=='--smooth-audit-rc' or a.startswith('--smooth-audit-rc=') for a in args):
             # Retain the caller's observed auditor status, after both real routes
