@@ -2401,6 +2401,141 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                 self.check_namespace(number,module.__dict__)
             self.assertEqual(comp.verify_current(),self.model)
 
+    def test_genuine_module_and_dictionary_startups_preserve_all_five_bindings(self):
+        import builtins
+        with self.modes():
+            for binding in (builtins,builtins.__dict__):
+                for number,name in self.units.items():
+                    path='curvature/scripts/'+name+'.py'
+                    namespace={'__file__':str(comp.ROOT/path),'__name__':'genuine_builtins_startup_control',
+                               '__builtins__':binding}
+                    library=comp.curvature_embedded_module('curvature_leaf_binding' if number in (111,132,134) else 'curvature_auxiliary_binding')
+                    before=comp._curvature_registration_seals
+                    try:
+                        exec(compile((comp.ROOT/path).read_bytes(),str(comp.ROOT/path),'exec',dont_inherit=True),namespace)
+                        self.assertIs(namespace['__builtins__'],binding)
+                        self.check_namespace(number,namespace)
+                        entry=namespace['admit' if number==138 else 'main'].__wrapped__
+                        self.assertIs(entry.__builtins__,builtins.__dict__)
+                        self.assertEqual(comp.verify_current(),self.model)
+                    finally:
+                        library._BINDINGS.pop(id(namespace),None)
+                        comp._curvature_registration_seals=before
+                    comp.curvature_registration_check(library.__name__,library._BINDINGS)
+
+    def test_foreign_builtin_objects_rejected_before_any_five_registration(self):
+        import builtins,types
+        fake=types.ModuleType('builtins');fake.__dict__.update(builtins.__dict__)
+        with self.modes():
+            for binding in (dict(builtins.__dict__),fake):
+                for number,name in self.units.items():
+                    path='curvature/scripts/'+name+'.py'
+                    namespace={'__file__':str(comp.ROOT/path),'__name__':'foreign_builtins_startup_control',
+                               '__builtins__':binding}
+                    library=comp.curvature_embedded_module('curvature_leaf_binding' if number in (111,132,134) else 'curvature_auxiliary_binding')
+                    before=comp._curvature_registration_seals;keys=set(library._BINDINGS)
+                    with self.assertRaisesRegex(AssertionError,'genuine builtins identity drift'):
+                        exec(compile((comp.ROOT/path).read_bytes(),str(comp.ROOT/path),'exec',dont_inherit=True),namespace)
+                    self.assertIs(namespace['__builtins__'],binding)
+                    self.assertEqual(comp._curvature_registration_seals,before)
+                    self.assertEqual(set(library._BINDINGS),keys)
+                    self.assertIsNone(comp._curvature_install_owner)
+            # A foreign sys.modules alias must not authenticate itself through
+            # a property exposing the genuine dictionary.
+            canonical=builtins
+            class Proxy:
+                @property
+                def __dict__(self):return canonical.__dict__
+            class ModuleSubclass(types.ModuleType):
+                @property
+                def __dict__(self):return canonical.__dict__
+            library=comp.curvature_embedded_module('curvature_leaf_binding')
+            reference={'__builtins__':canonical.__dict__}
+            namespace={'__builtins__':canonical.__dict__}
+            code=compile('def sample(): return len(())\n','canonical_function_before_foreign_alias','exec')
+            exec(code,reference);exec(code,namespace)
+            before=comp._curvature_registration_seals;keys=set(library._BINDINGS)
+            for foreign in (Proxy(),ModuleSubclass('builtins')):
+                namespace['__builtins__']=foreign
+                self.assertIs(namespace['sample'].__builtins__,canonical.__dict__)
+                try:
+                    sys.modules['builtins']=foreign
+                    with self.assertRaisesRegex(AssertionError,'builtins identity drift'):
+                        library.authenticate_builtins(foreign,canonical.__dict__)
+                finally:sys.modules['builtins']=canonical
+                self.assertIs(namespace['__builtins__'],foreign)
+                self.assertEqual(comp._curvature_registration_seals,before)
+                self.assertEqual(set(library._BINDINGS),keys)
+                self.assertIsNone(comp._curvature_install_owner)
+            # The canonical module anchor must remain authoritative even if
+            # both import aliases and the mutable metatype attribute change.
+            native_module_type=types.ModuleType
+            for foreign in (Proxy(),ModuleSubclass('builtins')):
+                namespace['__builtins__']=foreign
+                self.assertIs(namespace['sample'].__builtins__,canonical.__dict__)
+                try:
+                    types.ModuleType=type(foreign)
+                    sys.modules['builtins']=foreign
+                    with self.assertRaisesRegex(AssertionError,'genuine builtins identity drift'):
+                        library.authenticate_builtins(foreign,canonical.__dict__)
+                    for genuine in (canonical,canonical.__dict__):
+                        library.authenticate_builtins(genuine,canonical.__dict__)
+                finally:
+                    sys.modules['builtins']=canonical
+                    types.ModuleType=native_module_type
+                self.assertIs(namespace['__builtins__'],foreign)
+                self.assertEqual(comp._curvature_registration_seals,before)
+                self.assertEqual(set(library._BINDINGS),keys)
+                self.assertIsNone(comp._curvature_install_owner)
+            self.assertEqual(comp.verify_current(),self.model)
+
+    def test_cached_foreign_function_builtins_and_registered_form_switch_rejected(self):
+        import builtins
+        library=comp.curvature_embedded_module('curvature_leaf_binding')
+        code=compile('def sample(): return len(())\n','genuine_function_builtin_control','exec')
+        reference={'__builtins__':builtins.__dict__};exec(code,reference)
+        namespace={'__builtins__':dict(builtins.__dict__)};exec(code,namespace)
+        cached=namespace['sample'].__builtins__
+        namespace['__builtins__']=builtins.__dict__
+        self.assertIsNot(cached,builtins.__dict__)
+        with self.assertRaisesRegex(AssertionError,'function builtins identity drift'):
+            library.initial_chain(namespace['sample'],reference['sample'],namespace,reference)
+        with self.modes():
+            for number,module in self.registered().items():
+                namespace=module.__dict__;original=namespace['__builtins__']
+                replacements=(builtins if original is builtins.__dict__ else builtins.__dict__,dict(builtins.__dict__))
+                for replacement in replacements:
+                    try:
+                        namespace['__builtins__']=replacement
+                        with self.assertRaisesRegex(AssertionError,'namespace identity drift: __builtins__'):
+                            self.check_namespace(number,namespace)
+                    finally:namespace['__builtins__']=original
+                    self.check_namespace(number,namespace)
+            self.assertEqual(comp.verify_current(),self.model)
+
+    def test_genuine_direct_interpreter_and_runpy_builtin_forms(self):
+        import tempfile
+        raw=comp.CURVATURE_EMBEDDED_SOURCES['curvature_leaf_binding']
+        node=next(node for node in ast.parse(raw).body if isinstance(node,ast.FunctionDef) and node.name=='authenticate_builtins')
+        source=ast.get_source_segment(raw,node)
+        program='import types\n'+source+'''\nimport builtins,runpy
+authenticate_builtins(__builtins__,builtins.__dict__)
+if __name__=='__main__':
+    assert __builtins__ is builtins
+    result=runpy.run_path(__file__,run_name='genuine_runpy_builtin_control')
+    assert result['__builtins__'] is builtins.__dict__
+    print('GENUINE_DIRECT_MODULE_AND_RUNPY_DICTIONARY_PASS')
+else:
+    assert __builtins__ is builtins.__dict__
+'''
+        with tempfile.TemporaryDirectory(prefix='point4-genuine-builtins-') as directory:
+            path=pathlib.Path(directory)/'actual_builtin_entry.py';path.write_bytes(program.encode())
+            result=subprocess.run([sys.executable,'-B','-X','utf8',str(path)],
+                                  stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False,timeout=30)
+            self.assertEqual(result.returncode,0,result.stderr.decode())
+            self.assertEqual(result.stdout.decode().splitlines(),['GENUINE_DIRECT_MODULE_AND_RUNPY_DICTIONARY_PASS'])
+            self.assertEqual(path.read_bytes(),program.encode())
+
 # END authenticated finite curvature tests
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
