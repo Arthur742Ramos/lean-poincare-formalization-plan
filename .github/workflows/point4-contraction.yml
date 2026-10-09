@@ -1,0 +1,110 @@
+name: Point-4 metric contraction repair
+
+on:
+  pull_request:
+    paths:
+      - "curvature/**"
+      - ".github/workflows/point4-contraction.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contraction:
+    name: Exact-head contraction, joint regularity, conditional flow, and full audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Compile basis-independent contraction and conformal regression
+        working-directory: curvature
+        run: lake build PoincareCurvature.Analysis.MetricBilinearContraction
+      - name: Compile actual connection-difference frame bridge
+        working-directory: curvature
+        run: lake build PoincareCurvature.Geometry.Manifold.RicciFlow.MetricContractedDeTurckField
+      - name: Compile joint metric contraction and the conventional field regularity bridge
+        working-directory: curvature
+        run: lake build PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.MetricContractedDeTurckJointRegularity
+      - name: Check metric-contraction theorem axioms
+        working-directory: curvature
+        run: |
+          lake env lean scripts/point4_contraction_probe.lean | tee /tmp/point4-contraction-axioms.log
+          python3 - <<'PY'
+          import pathlib, re
+          output = pathlib.Path('/tmp/point4-contraction-axioms.log').read_text()
+          entries = re.findall(r"'([^']+)' depends on axioms:\s*\[([^]]*)\]", output)
+          clean = re.findall(r"'([^']+)' does not depend on any axioms?", output)
+          expected = {
+            'PoincareCurvature.metricBilinearContraction_eq_sum_inverseGram',
+            'PoincareCurvature.metricContractSymbol_ne_ordinaryTraceRaisedSymbol_conformal_two',
+            'CovariantDerivative.metricConnectionDifferenceVector_localFrameCoeff',
+            'CovariantDerivative.metricConnectionDifferenceVector_eq_zero_of_isLeviCivita',
+            'RicciFlow.metricContractedDeTurckVectorField_eq_zero_of_isLeviCivita',
+            'RicciFlow.metricContractedDeTurckVectorField_eq_standardDeTurckVectorField',
+            'PoincareCurvature.ParametrizedInner.contMDiffOn_timeDependentMetricContraction',
+            'PoincareCurvature.ParametrizedInner.contMDiff_paramSection_neg',
+            'RicciFlow.metricContractedDeTurckVectorField_eq_sum_inverseGram_correction',
+            'RicciFlow.contMDiff_metricContractedDeTurckVectorField_of_joint_correction',
+            'RicciFlow.contMDiff_metricContractedDeTurckGaugeField_of_joint_correction',
+            'RicciFlow.exists_pos_metricContractedDiffeomorph3GaugeFlowOn_of_joint_correction',
+            'RicciFlow.contMDiff_metricContractedDeTurckVectorField_of_joint_correctionFunctional',
+          }
+          assert {n for n, _ in entries} | set(clean) == expected, output
+          allowed = {'propext', 'Classical.choice', 'Quot.sound'}
+          for name, axioms in entries:
+            actual = {a.strip() for a in axioms.split(',') if a.strip()}
+            assert actual <= allowed, (name, actual)
+          print('All thirteen contraction/comparison/regularity/flow/regression axiom surfaces passed')
+          PY
+      - name: Run unchanged full Point-4 completion audit
+        working-directory: curvature
+        run: |
+          set +e
+          bash scripts/point4_audit.sh --json /tmp/point4-contraction-full-audit.json | tee /tmp/point4-contraction-full-audit.log
+          audit_rc=${PIPESTATUS[0]}
+          set -e
+          export POINT4_AUDIT_RC="$audit_rc"
+          python3 - <<'PY'
+          import json, os, pathlib
+          data = json.loads(pathlib.Path('/tmp/point4-contraction-full-audit.json').read_text())
+          assert data['build_run'] is True, data
+          assert data['gates']['G1_sorry_free']['status'] == 'PASS', data
+          assert data['gates']['G2_build_green']['status'] == 'PASS', data
+          if data['verdict'] == 'CLOSED':
+            assert os.environ['POINT4_AUDIT_RC'] == '0', data
+            assert all(g['status'] == 'PASS' for g in data['gates'].values()), data
+          else:
+            assert data['verdict'] == 'OPEN', data
+            assert os.environ['POINT4_AUDIT_RC'] == '1', data
+            print('POINT 4 OPEN: the field repair does not close the canonical theorem')
+          PY
+      - name: Preserve exact-head evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-contraction-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-contraction-axioms.log
+            /tmp/point4-contraction-full-audit.json
+            /tmp/point4-contraction-full-audit.log
+            /tmp/point4_build.log
+          if-no-files-found: ignore

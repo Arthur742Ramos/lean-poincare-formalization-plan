@@ -1,0 +1,11 @@
+{
+  "source_commit": "c72c7e35282f6697e5911464a8c043e0e3c26d11",
+  "source_repository": "Arthur742Ramos/lean-poincare-formalization-plan",
+  "source_path": "curvature/scripts/point4_two_sided_heat_source_guard.py",
+  "fragment_sha256": "41e5e5e853d8dd79ead807f76124d5bdaec723548493a4b6540b5de90515b6c2",
+  "fragment_start": "LAKE_ROOTS =",
+  "fragment_end_before": "def install_c2_inventory_adapter",
+  "read_only": true,
+  "fingerprint": "179e66574f04806e",
+  "no_mathlib_cache_write": true
+}

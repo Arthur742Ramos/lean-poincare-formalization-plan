@@ -12,6 +12,7 @@ Run directly in an environment with the two dependencies above, or use
 """
 
 from pathlib import Path
+import hashlib
 import json
 import re
 import subprocess
@@ -234,11 +235,16 @@ def main() -> None:
     }
     for name, path in workflows.items():
         require(path.is_file() and not path.is_symlink(), f"missing regular {name} workflow")
-        require("  push:" not in path.read_text(encoding="utf-8"),
-                f"duplicate push trigger in {name} workflow")
+        if name in {"mechanical", "renderer"}:
+            expected_hashes = {'mechanical': 'aa67ea8abed6e5189fb49f92ec02b8b5812020ad306e8772c3ecafe678ebb319', 'renderer': '15b28d6b108ded509cec5bf8fd0ece125429609243b3640bbedf3863fb057c45'}
+            require(hashlib.sha256(path.read_bytes()).hexdigest() == expected_hashes[name],
+                    f"exact qualified-master automatic {name} workflow drift")
+        else:
+            require("  push:" not in path.read_text(encoding="utf-8"),
+                    f"duplicate push trigger in {name} workflow")
     mechanical = workflows["mechanical"].read_text(encoding="utf-8")
-    require("  pull_request:" not in mechanical and "  workflow_dispatch:" in mechanical,
-            "historical mechanical replay must be manual only")
+    require(hashlib.sha256(workflows["mechanical"].read_bytes()).hexdigest() == 'aa67ea8abed6e5189fb49f92ec02b8b5812020ad306e8772c3ecafe678ebb319',
+            "exact qualified-master automatic mechanical workflow drift")
     for required_text in (
         PALOMAR, COMPARATOR, NANODA, LANDRUN, CACHE_ACTION,
         "verify_submission.py prepare", "verify_submission.py execute",

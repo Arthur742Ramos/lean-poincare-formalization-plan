@@ -1,0 +1,277 @@
+module
+
+public import WeightedDuhamelHessianIntegral
+public import Mathlib.Analysis.Normed.Group.Constructions
+public import Mathlib.Analysis.Normed.Group.Continuity
+public import Mathlib.Topology.Constructions
+public import Mathlib.Topology.MetricSpace.Pseudo.Defs
+public import Mathlib.Topology.ContinuousMap.Bounded.Normed
+
+/-!
+# Strong zero trace of the actual weighted Gaussian Hessian-entry integral
+
+SOURCE ONLY, UNCOMPILED. The forcing assumption below is an actual little
+weighted coordinate-Hölder condition. No trace, time-power decay, integrability,
+solution estimate, or inverse-operator estimate is assumed.
+
+The BCF field is locally identified with the existing raw Gaussian time
+integral. Its right trace and finite-entry sup-norm trace are proved here.
+Identification with the actual second Fréchet derivative is a separate leaf;
+this file does not claim full C², the parabolic equation, or Point 4 closure.
+-/
+
+@[expose] public noncomputable section
+
+open Real Set MeasureTheory Metric Filter
+open scoped Real BigOperators Interval Topology
+
+namespace RicciFlow
+namespace AnalyticPDE
+
+/-- Actual weighted spatial domination only at strictly interior source times. -/
+def HasWeightedSpatialHolderOn {n : ℕ}
+    (q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (t₀ t α L : ℝ) : Prop :=
+  ∀ s ∈ Ioo t₀ t, ∀ x y, |q s y - q s x| ≤
+    (L * (s - t₀) ^ (-(α / 2))) *
+      ∑ ell : Fin n, |(x - y) ell| ^ α
+
+/-- The genuine little weighted forcing condition, with an arbitrarily small
+coefficient on a sufficiently short initial interval. No initial-face Hölder
+regularity or chosen rate of decay is included. -/
+def LittleWeightedSpatialHolder {n : ℕ}
+    (q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ)
+    (t₀ α : ℝ) : Prop :=
+  ∀ ε : ℝ, 0 < ε → ∃ δ : ℝ, 0 < δ ∧
+    HasWeightedSpatialHolderOn q t₀ (t₀ + δ) α ε
+
+/-- The actual Gaussian moment times the derived two-endpoint scalar bound. -/
+def weightedHessianEntryTraceConstant (n : ℕ) (α : ℝ) (j k : Fin n) : ℝ :=
+  heatHessianEntryHolderMoment n α j k *
+    (1 / (α / 2) + 1 / (1 - α / 2))
+
+lemma weightedHessianEntryTraceConstant_nonneg
+    {n : ℕ} {α : ℝ} (hα : 0 < α) (hα1 : α < 1) (j k : Fin n) :
+    0 ≤ weightedHessianEntryTraceConstant n α j k := by
+  unfold weightedHessianEntryTraceConstant
+  exact mul_nonneg (heatHessianEntryHolderMoment_nonneg n α j k)
+    (add_nonneg (div_nonneg zero_le_one (by linarith))
+      (div_nonneg zero_le_one (by linarith)))
+
+lemma HasWeightedSpatialHolderOn.mono_right
+    {n : ℕ} {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ}
+    {t₀ t T α L : ℝ} (h : HasWeightedSpatialHolderOn q t₀ T α L)
+    (ht : t ≤ T) : HasWeightedSpatialHolderOn q t₀ t α L := by
+  intro s hs x y
+  exact h s ⟨hs.1, lt_of_lt_of_le hs.2 ht⟩ x y
+
+/-- The explicit epsilon/delta bound: an epsilon forcing coefficient on
+`Ioo t₀ (t₀+δ)` gives `Kjk*ε` for every earlier final time and every spatial
+point. Actual interval integrability is established by the imported theorem. -/
+theorem abs_heatDuhamelHessianEntryND_le_on_initial_interval
+    {n : ℕ} {t₀ t δ α ε C : ℝ}
+    (ht : t ∈ Ioo t₀ (t₀ + δ))
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hε : 0 ≤ ε) (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hholder : HasWeightedSpatialHolderOn q t₀ (t₀ + δ) α ε)
+    (j k : Fin n) (x : Fin n → ℝ) :
+    |heatDuhamelHessianEntryND t₀ t q j k x| ≤
+      weightedHessianEntryTraceConstant n α j k * ε := by
+  have h := abs_heatDuhamelHessianEntryND_le_weighted ht.1 hα hα1 hq hε hqb
+    (hholder.mono_right ht.2.le) x j k
+  calc
+    |heatDuhamelHessianEntryND t₀ t q j k x| ≤
+      heatHessianEntryHolderMoment n α j k * ε *
+        (1 / (α / 2) + 1 / (1 - α / 2)) := h
+    _ = weightedHessianEntryTraceConstant n α j k * ε := by
+      unfold weightedHessianEntryTraceConstant
+      ring
+
+/-- The same delta supplied by the little forcing condition works for all
+entries and all spatial points. The coefficient retains the explicit moment. -/
+theorem exists_initial_interval_heatDuhamelHessianEntryND_le_of_little
+    {n : ℕ} {t₀ α C : ℝ} (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hsmall : LittleWeightedSpatialHolder q t₀ α)
+    (ε : ℝ) (hε : 0 < ε) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ t ∈ Ioo t₀ (t₀ + δ),
+      ∀ (j k : Fin n) (x : Fin n → ℝ),
+        |heatDuhamelHessianEntryND t₀ t q j k x| ≤
+          weightedHessianEntryTraceConstant n α j k * ε := by
+  rcases hsmall ε hε with ⟨δ, hδ, hholder⟩
+  refine ⟨δ, hδ, ?_⟩
+  intro t ht j k x
+  exact abs_heatDuhamelHessianEntryND_le_on_initial_interval
+    ht hα hα1 hq hε.le hqb hholder j k x
+
+/-- Genuine uniform-in-space vanishing of the existing raw integral.
+For a target tolerance eta, use the forcing coefficient `eta/(Kjk+1)`.
+There is no BCF constructor or initial-time totalization in this proof. -/
+theorem exists_initial_interval_heatDuhamelHessianEntryND_lt_of_little
+    {n : ℕ} {t₀ α C : ℝ} (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hsmall : LittleWeightedSpatialHolder q t₀ α)
+    (j k : Fin n) (η : ℝ) (hη : 0 < η) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ t ∈ Ioo t₀ (t₀ + δ), ∀ x : Fin n → ℝ,
+      |heatDuhamelHessianEntryND t₀ t q j k x| < η := by
+  let K := weightedHessianEntryTraceConstant n α j k
+  have hK : 0 ≤ K := weightedHessianEntryTraceConstant_nonneg hα hα1 j k
+  have hK1 : 0 < K + 1 := by linarith
+  let ε : ℝ := η / (K + 1)
+  have hε : 0 < ε := div_pos hη hK1
+  have hscale : ε * (K + 1) = η := div_mul_cancel₀ η (ne_of_gt hK1)
+  have hlt : K * ε < η := by nlinarith
+  rcases exists_initial_interval_heatDuhamelHessianEntryND_le_of_little
+    hα hα1 hq hqb hsmall ε hε with ⟨δ, hδ, hbound⟩
+  refine ⟨δ, hδ, ?_⟩
+  intro t ht x
+  exact (hbound t ht j k x).trans_lt hlt
+
+/-- A globally defined BCF field for the raw entry. At positive times with
+actual weighted spatial domination it is exactly the existing integral.
+Elsewhere it is zero. The little forcing condition proves that the former
+branch applies throughout a punctured initial interval; the fallback branch
+is not used to obtain any positive-time trace estimate. -/
+def littleWeightedHeatDuhamelHessianEntryNDbcf
+    {n : ℕ} {t₀ α C : ℝ} (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C) (t : ℝ) (j k : Fin n) :
+    BoundedContinuousFunction (Fin n → ℝ) ℝ := by
+  classical
+  exact if h : t₀ < t ∧ ∃ L : ℝ, 0 ≤ L ∧
+      HasWeightedSpatialHolderOn q t₀ t α L then
+    weightedHeatDuhamelHessianEntryNDbcf h.1 hα hα1 hq
+      (Classical.choose_spec h.2).1 hqb (Classical.choose_spec h.2).2 j k
+  else 0
+
+/-- Actual-integral identification is independent of the coefficient chosen
+in the BCF constructor, so later estimates may use arbitrarily smaller ones. -/
+theorem littleWeightedHeatDuhamelHessianEntryNDbcf_apply
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C) (hL : 0 ≤ L)
+    (hholder : HasWeightedSpatialHolderOn q t₀ t α L)
+    (j k : Fin n) (x : Fin n → ℝ) :
+    littleWeightedHeatDuhamelHessianEntryNDbcf (t₀ := t₀) hα hα1 hq hqb t j k x =
+      heatDuhamelHessianEntryND t₀ t q j k x := by
+  classical
+  rw [littleWeightedHeatDuhamelHessianEntryNDbcf,
+    dif_pos ⟨ht, L, hL, hholder⟩]
+  rfl
+
+@[simp] theorem littleWeightedHeatDuhamelHessianEntryNDbcf_initial
+    {n : ℕ} {t₀ α C : ℝ} (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C) (j k : Fin n) :
+    littleWeightedHeatDuhamelHessianEntryNDbcf (t₀ := t₀) hα hα1 hq hqb t₀ j k = 0 := by
+  classical
+  have hnot : ¬ (t₀ < t₀ ∧ ∃ L : ℝ, 0 ≤ L ∧
+      HasWeightedSpatialHolderOn q t₀ t₀ α L) := by
+    rintro ⟨ht, _⟩
+    exact lt_irrefl t₀ ht
+  rw [littleWeightedHeatDuhamelHessianEntryNDbcf, dif_neg hnot]
+
+/-- Genuine BCF norm domination, using the actual integral identified above. -/
+theorem norm_littleWeightedHeatDuhamelHessianEntryNDbcf_le
+    {n : ℕ} {t₀ t α L C : ℝ} (ht : t₀ < t)
+    (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C) (hL : 0 ≤ L)
+    (hholder : HasWeightedSpatialHolderOn q t₀ t α L) (j k : Fin n) :
+    ‖littleWeightedHeatDuhamelHessianEntryNDbcf (t₀ := t₀) hα hα1 hq hqb t j k‖ ≤
+      weightedHessianEntryTraceConstant n α j k * L := by
+  refine (BoundedContinuousFunction.norm_le
+    (mul_nonneg (weightedHessianEntryTraceConstant_nonneg hα hα1 j k) hL)).2 ?_
+  intro x
+  rw [littleWeightedHeatDuhamelHessianEntryNDbcf_apply
+    ht hα hα1 hq hqb hL hholder j k x, Real.norm_eq_abs]
+  have h := abs_heatDuhamelHessianEntryND_le_weighted
+    ht hα hα1 hq hL hqb hholder x j k
+  calc
+    |heatDuhamelHessianEntryND t₀ t q j k x| ≤
+      heatHessianEntryHolderMoment n α j k * L *
+        (1 / (α / 2) + 1 / (1 - α / 2)) := h
+    _ = weightedHessianEntryTraceConstant n α j k * L := by
+      unfold weightedHessianEntryTraceConstant
+      ring
+
+/-- Explicit strict uniform norm zero trace: choose the forcing coefficient
+`η/(Kjk+1)` and the delta given by the actual little forcing condition. -/
+theorem exists_initial_interval_littleWeightedHessian_norm_lt
+    {n : ℕ} {t₀ α C : ℝ} (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hsmall : LittleWeightedSpatialHolder q t₀ α)
+    (j k : Fin n) (η : ℝ) (hη : 0 < η) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ t ∈ Ioo t₀ (t₀ + δ),
+      ‖littleWeightedHeatDuhamelHessianEntryNDbcf (t₀ := t₀) hα hα1 hq hqb t j k‖ < η := by
+  let K := weightedHessianEntryTraceConstant n α j k
+  have hK : 0 ≤ K := weightedHessianEntryTraceConstant_nonneg hα hα1 j k
+  have hK1 : 0 < K + 1 := by linarith
+  let ε : ℝ := η / (K + 1)
+  have hε : 0 < ε := div_pos hη hK1
+  have hscale : ε * (K + 1) = η := div_mul_cancel₀ η (ne_of_gt hK1)
+  have hlt : K * ε < η := by nlinarith
+  rcases hsmall ε hε with ⟨δ, hδ, hholder⟩
+  refine ⟨δ, hδ, ?_⟩
+  intro t ht
+  exact (norm_littleWeightedHeatDuhamelHessianEntryNDbcf_le
+    ht.1 hα hα1 hq hqb hε.le (hholder.mono_right ht.2.le) j k).trans_lt hlt
+
+/-- Strong right trace of the actual BCF entry, rather than merely pointwise
+spatial convergence or a totalized-integral convention at the initial face. -/
+theorem tendsto_littleWeightedHeatDuhamelHessianEntryNDbcf_zero
+    {n : ℕ} {t₀ α C : ℝ} (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hsmall : LittleWeightedSpatialHolder q t₀ α) (j k : Fin n) :
+    Tendsto (fun t => littleWeightedHeatDuhamelHessianEntryNDbcf (t₀ := t₀)
+      hα hα1 hq hqb t j k) (𝓝[Ioi t₀] t₀) (𝓝 0) := by
+  refine Metric.tendsto_nhdsWithin_nhds.2 ?_
+  intro η hη
+  rcases exists_initial_interval_littleWeightedHessian_norm_lt
+    hα hα1 hq hqb hsmall j k η hη with ⟨δ, hδ, hbound⟩
+  refine ⟨δ, hδ, ?_⟩
+  intro t ht hdist
+  have hsub : t - t₀ < δ :=
+    lt_of_le_of_lt (le_abs_self _) (by simpa only [Real.dist_eq] using hdist)
+  have ht' : t ∈ Ioo t₀ (t₀ + δ) := ⟨ht, by linarith⟩
+  simpa only [dist_zero_right] using hbound t ht'
+
+/-- The whole finite raw Hessian-entry family has a strong zero trace.
+Finite-product topology here is the topology of its ordinary sup norm. -/
+theorem tendsto_littleWeightedHeatDuhamelHessianEntries_zero
+    {n : ℕ} {t₀ α C : ℝ} (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hsmall : LittleWeightedSpatialHolder q t₀ α) :
+    Tendsto (fun t => fun j k : Fin n =>
+      littleWeightedHeatDuhamelHessianEntryNDbcf (t₀ := t₀) hα hα1 hq hqb t j k)
+      (𝓝[Ioi t₀] t₀)
+      (𝓝 (0 : Fin n → Fin n → BoundedContinuousFunction (Fin n → ℝ) ℝ)) := by
+  exact tendsto_pi_nhds.2 fun j => tendsto_pi_nhds.2 fun k =>
+    tendsto_littleWeightedHeatDuhamelHessianEntryNDbcf_zero
+      hα hα1 hq hqb hsmall j k
+
+/-- A scalar formulation of the strong finite-entry sup-norm trace.
+This norm is not asserted to be the full Fréchet-C² solution norm. -/
+theorem tendsto_littleWeightedHeatDuhamelHessianEntries_norm_zero
+    {n : ℕ} {t₀ α C : ℝ} (hα : 0 < α) (hα1 : α < 1)
+    {q : ℝ → BoundedContinuousFunction (Fin n → ℝ) ℝ} (hq : Continuous q)
+    (hqb : ∀ s y, ‖q s y‖ ≤ C)
+    (hsmall : LittleWeightedSpatialHolder q t₀ α) :
+    Tendsto (fun t => ‖fun j k : Fin n =>
+      littleWeightedHeatDuhamelHessianEntryNDbcf (t₀ := t₀) hα hα1 hq hqb t j k‖)
+      (𝓝[Ioi t₀] t₀) (𝓝 (0 : ℝ)) := by
+  simpa only [Function.comp_def, norm_zero] using
+    (continuous_norm.tendsto
+      (0 : Fin n → Fin n → BoundedContinuousFunction (Fin n → ℝ) ℝ)).comp
+        (tendsto_littleWeightedHeatDuhamelHessianEntries_zero
+          hα hα1 hq hqb hsmall)
+
+end AnalyticPDE
+end RicciFlow

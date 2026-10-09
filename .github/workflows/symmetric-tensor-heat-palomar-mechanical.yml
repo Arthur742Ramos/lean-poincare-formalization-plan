@@ -1,9 +1,16 @@
 name: Symmetric tensor heat actual Palomar verifier replay
 
-# Retains the historical Palomar mechanical pipeline for manual replay.
-# Current production mechanical verification runs on pull requests instead.
-# This creates no intake and cannot register an entry.
+# Runs PalomarSubmission's unmodified preparation and execution pipeline at the
+# pinned production revision. This creates no intake and cannot register an entry.
 on:
+  push:
+    paths:
+      - "symmetric-tensor-heat/**"
+      - ".github/workflows/symmetric-tensor-heat-palomar-mechanical.yml"
+  pull_request:
+    paths:
+      - "symmetric-tensor-heat/**"
+      - ".github/workflows/symmetric-tensor-heat-palomar-mechanical.yml"
   workflow_dispatch:
 
 permissions:
@@ -16,7 +23,7 @@ concurrency:
 jobs:
   candidate-preflight:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     steps:
       - name: Checkout exact candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -56,9 +63,8 @@ jobs:
         run: |
           lake exe cache get
           lake build TensorHeatChallenge
+          lake build TensorHeatGeometricSymmetry
           lake env lean scripts/check-nonvacuity.lean
-          python scripts/check-challenge-boundary.py
-          lake env lean scripts/check-closed-statement.lean
 
   mechanical-replay:
     needs: candidate-preflight

@@ -43,9 +43,9 @@ stated cleanly.
 
 ### 4. Ricci-flow local existence and uniqueness
 
-Prove short-time existence and uniqueness of Ricci flow from general initial
-data on a compact smooth manifold. The planned route is the Hamilton–DeTurck
-argument: solve a strictly parabolic Ricci–DeTurck equation, construct the gauge
+Prove short-time existence and uniqueness of Ricci flow from every spatially C²
+initial metric on a compact smooth manifold without boundary. The planned route
+is the Hamilton–DeTurck argument: solve a strictly parabolic Ricci–DeTurck equation, construct the gauge
 flow, and transport the result back to intrinsic Ricci flow.
 
 **Current state:** open. The repository contains substantial proof-bearing
@@ -162,3 +162,11 @@ separate until their actual Lean dependencies justify combining them.
 The milestone count is not a percentage-of-effort estimate. Although three of
 fifteen milestones are proved, the major quasilinear PDE, singularity-analysis,
 surgery, and extinction arguments remain ahead.
+
+## Weak-regularity Laplacian proof unit
+
+The [base-C¹, local-C² actual tensor-Laplacian adapter](point4/weak-laplacian.md)
+has been authored and awaits independent source review and exact Lean 4.33.0
+hosted verification. It constructs coordinate certificates internally and
+preserves the actual operator and reversed tensor-output convention. It does
+not provide Hölder coefficient bounds or close the canonical Point-4 target.
