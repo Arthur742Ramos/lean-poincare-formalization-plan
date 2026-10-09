@@ -1297,13 +1297,14 @@ class FixedBackgroundCompositionTests(unittest.TestCase):
     def test_full_controlled_identity_and_unchanged_selected_mathematics(self):
         with fixed_sources() as (trees, reader):
             expected, originals, changes = comp.tensor_identity(*comp.expected_identity())
+            expected = comp.curvature_identity(expected,originals,changes)[0]
             self.assertEqual(expected, comp.parse_tree(comp.git('ls-tree','-rz','HEAD')))
-            self.assertEqual(len(expected), 1920)
+            self.assertEqual(len(expected), 2139)
             for path in comp.FIXED_ADDED:
                 self.assertEqual(changes[path], reader(comp.FIXED_SOURCE, path))
                 self.assertEqual(expected[path], trees[comp.FIXED_SOURCE][path])
             self.assertEqual(comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()), comp.tensor_map_record(expected, originals, changes))
-            unchanged = set(trees[FIXED_PARENT_PIN]) - comp.EDITED - comp.NEW - comp.FIXED_ROOTS - comp.TENSOR_PATHS
+            unchanged = set(trees[FIXED_PARENT_PIN]) - comp.EDITED - comp.NEW - comp.FIXED_ROOTS - comp.TENSOR_PATHS - set(comp.CURVATURE_SELECTED)
             self.assertTrue(all((expected[p] == trees[FIXED_PARENT_PIN][p] for p in unchanged)))
 
     def test_all_four_exact_transforms_and_inverses(self):
@@ -2039,7 +2040,7 @@ class TensorCompositionTests(unittest.TestCase):
         import point4_weighted_hessian_release_guard as weighted
         import stat
         self.assertEqual(weighted.ROOT,comp.ROOT)
-        expected,originals,changes=self.inputs()
+        expected,originals,changes=comp.curvature_identity(*self.inputs())
         captured=[]
         original=comp.tensor_reconstructed_sources
         physical_stat=pathlib.Path.lstat
@@ -2067,7 +2068,7 @@ class TensorCompositionTests(unittest.TestCase):
                  patch.object(pathlib.Path,'lstat',committed_mode_fixture if sys.platform=='win32' else physical_stat), \
                  patch.dict(weighted.__dict__,{'raw_git':comp.git} if sys.platform=='win32' else {}):
                 report=comp.weighted_leaf(weighted.__dict__,schema)
-            self.assertEqual(report['public_paths'],1920)
+            self.assertEqual(report['public_paths'],2139)
             self.assertEqual(verify.call_count,2)
         inherited=captured[0]
         self.assertEqual(len(inherited),1686)
@@ -2099,6 +2100,308 @@ class TensorCompositionTests(unittest.TestCase):
                 comp.weighted_leaf(weighted.__dict__)
 
 # END authenticated finite tensor tests
+# BEGIN authenticated finite curvature tests
+class CurvatureCompositionTests(unittest.TestCase):
+    def test_actual_current_verifier_owned_namespace_and_exception_unwind(self):
+        import point4_weighted_hessian_release_guard as weighted
+        import stat
+        committed=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
+        self.assertEqual(len(committed),2139)
+        physical_stat=pathlib.Path.lstat
+        def committed_modes(physical,*args,**kwargs):
+            actual=physical_stat(physical,*args,**kwargs)
+            try:relative=physical.relative_to(comp.ROOT).as_posix()
+            except ValueError:return actual
+            if relative not in committed:return actual
+            self.assertTrue(stat.S_ISREG(actual.st_mode))
+            self.assertEqual(comp.blob_id(physical.read_bytes()),committed[relative][1])
+            fields=list(actual)
+            fields[0]=(fields[0]&~0o111)|(0o111 if committed[relative][0]=='100755' else 0)
+            return os.stat_result(fields)
+        # Actual immutable HEAD/index/ancestry/physical bytes and original full
+        # verifier execute; Windows only models committed executable modes and
+        # routes the unchanged Git calls to the genuine installed Git binary.
+        with patch.object(pathlib.Path,'lstat',committed_modes if sys.platform=='win32' else physical_stat), \
+             patch.dict(weighted.__dict__,{'raw_git':comp.git} if sys.platform=='win32' else {}):
+            self.assertEqual(comp.verify_current(),committed)
+        self.assertFalse(comp._curvature_verification_active)
+        self.assertIsNone(comp._owner)
+        self.assertEqual(comp._depth,0)
+        primary=RuntimeError('genuine verifier failure')
+        with patch.object(comp,'_curvature_original_verify_current',side_effect=primary):
+            with self.assertRaises(RuntimeError) as observed:comp.verify_current()
+        self.assertIs(observed.exception,primary)
+        self.assertFalse(comp._curvature_verification_active)
+        with patch.object(comp,'_curvature_verification_active',True),patch.object(comp,'git') as read:
+            with self.assertRaisesRegex(AssertionError,'Recursive'):comp.verify_current()
+            read.assert_not_called()
+        with patch.object(pathlib.Path,'lstat',committed_modes if sys.platform=='win32' else physical_stat), \
+             patch.dict(weighted.__dict__,{'raw_git':comp.git} if sys.platform=='win32' else {}):
+            self.assertEqual(comp.verify_current(),committed)
+        self.assertFalse(comp._curvature_verification_active)
+        self.assertIsNone(comp._owner)
+        self.assertEqual(comp._depth,0)
+
+    def test_full_legacy_recovery_and_exact_2139_current_input_namespace(self):
+        legacy,originals,changes=comp.tensor_identity(*comp.expected_identity())
+        self.assertEqual(len(legacy),1920)
+        snapshots=comp.curvature_pins()
+        self.assertEqual(comp.curvature_predecessor(legacy,originals,changes,snapshots),snapshots[comp.CURVATURE_PARENT])
+        complete,_,_=comp.curvature_identity(legacy,originals,changes)
+        self.assertEqual(len(complete),2139)
+        self.assertEqual(set(complete)-set(legacy),set(comp.CURVATURE_SELECTED)-{'curvature/lakefile.toml'})
+        self.assertEqual(comp.tensor_map_record(complete,originals,changes),comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()))
+        for path,marker in ((comp.HELPER,'extension'),(comp.TEST,'tests')):
+            raw=(comp.ROOT/path).read_bytes()
+            self.assertEqual(comp.curvature_section_inverse(raw,path,marker),comp.git('show',comp.CURVATURE_PARENT+':'+path))
+            with self.assertRaises(AssertionError):comp.curvature_section_inverse(raw+b'changed',path,marker)
+
+    def test_finite_origin_source_identity_and_current_input_mutation_reject(self):
+        selected=json.loads(json.dumps(comp.CURVATURE_SELECTED))
+        path=next(iter(selected))
+        for mutation in ('missing','extra','origin','blob'):
+            modified=json.loads(json.dumps(selected))
+            if mutation=='missing':modified.pop(path)
+            elif mutation=='extra':modified['invented.lean']=modified[path]
+            elif mutation=='origin':modified[path]['origins'][0]['head']=comp.CURVATURE_PARENT
+            else:modified[path]['mode_blob'][1]='0'*40
+            with patch.object(comp,'CURVATURE_SELECTED',modified):
+                with self.assertRaises(AssertionError):comp.curvature_pins()
+        raw=(comp.ROOT/path).read_bytes()
+        try:
+            (comp.ROOT/path).write_bytes(raw+b'current source mutation')
+            with self.assertRaises(AssertionError):comp.curvature_identity(*comp.tensor_identity(*comp.expected_identity()))
+        finally:(comp.ROOT/path).write_bytes(raw)
+        comp.curvature_identity(*comp.tensor_identity(*comp.expected_identity()))
+class CurvatureProductionNamespaceTests(unittest.TestCase):
+    """Actual-current startup/source controls; no original-main/native claims."""
+    @classmethod
+    def setUpClass(cls):
+        cls.model=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
+        assert len(cls.model)==2139
+        cls.modules={}
+        cls.physical_stat=pathlib.Path.lstat
+        cls.units={132:'point4_two_sided_heat_source_guard',
+            134:'point4_c2_c0_metric_velocity_source_guard',111:'point4_hamilton_native_source_guard',
+            136:'point4_c2_resonance_guard',138:'chart_port_candidate_check'}
+
+    @staticmethod
+    def committed_modes(physical,*args,**kwargs):
+        import stat
+        actual=CurvatureProductionNamespaceTests.physical_stat(physical,*args,**kwargs)
+        try:relative=physical.relative_to(comp.ROOT).as_posix()
+        except ValueError:return actual
+        model=CurvatureProductionNamespaceTests.model
+        if relative not in model:return actual
+        assert stat.S_ISREG(actual.st_mode) and comp.blob_id(physical.read_bytes())==model[relative][1]
+        fields=list(actual);fields[0]=(fields[0]&~0o111)|(0o111 if model[relative][0]=='100755' else 0)
+        return os.stat_result(fields)
+
+    def modes(self):
+        import point4_weighted_hessian_release_guard as weighted
+        import contextlib
+        stack=contextlib.ExitStack()
+        if sys.platform=='win32':
+            stack.enter_context(patch.object(pathlib.Path,'lstat',self.committed_modes))
+            stack.enter_context(patch.dict(weighted.__dict__,{'raw_git':comp.git}))
+        return stack
+
+    def registered(self):
+        import importlib
+        for number,name in self.units.items():
+            if number not in self.modules:
+                self.modules[number]=importlib.import_module(name)
+            module=self.modules[number]
+            self.assertEqual(pathlib.Path(module.__file__).resolve(),comp.ROOT/('curvature/scripts/'+name+'.py'))
+            self.assertIs(module._curvature_comp,comp)
+            self.check_namespace(number,module.__dict__)
+        return self.modules
+
+    def check_namespace(self,number,namespace):
+        if number in (132,134,111):comp.curvature_leaf_namespace_binding(namespace,number)
+        elif number==136:comp.curvature_scalar_namespace_binding(namespace)
+        else:comp.curvature_chart_namespace_binding(namespace)
+
+    def test_genuine_current_five_namespace_hooks_and_original_entry_bodies(self):
+        with self.modes():
+            self.assertEqual(comp.verify_current(),self.model)
+            modules=self.registered()
+            for number,module in modules.items():
+                path='curvature/scripts/'+self.units[number]+'.py'
+                head=next(row['head'] for row in comp.CURVATURE_SELECTED[path]['origins'])
+                raw=comp.git('show',head+':'+path)
+                reference={'__file__':str(comp.ROOT/path),'__name__':'immutable_entry_body_reference_only'}
+                exec(compile(raw,str(comp.ROOT/path),'exec',dont_inherit=True),reference)
+                name='admit' if number==138 else 'main'
+                self.assertEqual(getattr(module,name).__wrapped__.__code__,reference[name].__code__)
+            self.assertEqual(comp.verify_current(),self.model)
+
+    def test_each_current_namespace_policy_body_and_bootstrap_mutation_rejected(self):
+        with self.modes():
+            modules=self.registered()
+            for number,module in modules.items():
+                namespace=module.__dict__
+                for key,replacement in (('BASE','0'*40),('_curvature_helper',pathlib.Path('foreign-helper'))):
+                    old=namespace[key]
+                    try:
+                        namespace[key]=replacement
+                        with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
+                    finally:namespace[key]=old
+                name='admit' if number==138 else 'main'
+                original=namespace[name].__wrapped__;old=original.__code__
+                try:
+                    original.__code__=(lambda *args,**kwargs:True).__code__
+                    with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
+                finally:original.__code__=old
+                self.check_namespace(number,namespace)
+            self.assertEqual(comp.verify_current(),self.model)
+
+    def test_failed_current_five_startups_restore_hooks_and_registry(self):
+        with self.modes():
+            self.registered()
+            for number,name in self.units.items():
+                path='curvature/scripts/'+name+'.py'
+                namespace={'__file__':str(comp.ROOT/path),'__name__':'actual_current_startup_failure_control'}
+                library=comp.curvature_embedded_module('curvature_leaf_binding' if number in (132,134,111) else 'curvature_auxiliary_binding')
+                before=set(library._BINDINGS);primary=RuntimeError('current startup verification failure')
+                with patch.object(comp,'verify_current',side_effect=primary):
+                    with self.assertRaises(RuntimeError) as caught:
+                        exec(compile((comp.ROOT/path).read_bytes(),str(comp.ROOT/path),'exec',dont_inherit=True),namespace)
+                self.assertIs(caught.exception,primary)
+                self.assertEqual(set(library._BINDINGS),before)
+                entry=namespace['admit' if number==138 else 'main']
+                self.assertFalse(hasattr(entry,'__wrapped__'))
+            self.assertEqual(comp.verify_current(),self.model)
+
+    def test_embedded_runtime_code_policy_and_foreign_keys_rejected(self):
+        with self.modes():
+            self.registered()
+            execution=comp.curvature_embedded_module('curvature_leaf_execution')
+            original=execution.run_leaf.__code__
+            try:
+                execution.run_leaf.__code__=(lambda *args,**kwargs:True).__code__
+                with self.assertRaisesRegex(AssertionError,'runtime code/policy drift'):
+                    comp.curvature_embedded_module('curvature_leaf_execution')
+            finally:execution.run_leaf.__code__=original
+            records=comp.curvature_embedded_module('curvature_incoming_source_records')
+            original=records.RULES[134]['paths']
+            try:
+                records.RULES[134]['paths']=original+1
+                with self.assertRaisesRegex(AssertionError,'runtime code/policy drift'):
+                    comp.curvature_embedded_module('curvature_leaf_execution')
+            finally:records.RULES[134]['paths']=original
+            execution.foreign_runtime_key=True
+            try:
+                with self.assertRaisesRegex(AssertionError,'runtime namespace keys drift'):
+                    comp.curvature_embedded_module('curvature_leaf_execution')
+            finally:del execution.foreign_runtime_key
+            comp.curvature_embedded_module('curvature_leaf_execution')
+            self.assertEqual(comp.verify_current(),self.model)
+
+    def test_all_five_registry_entries_and_coordinated_hook_rewrites_rejected(self):
+        import functools,types
+        with self.modes():
+            modules=self.registered()
+            for number,module in modules.items():
+                library=comp.curvature_embedded_module('curvature_leaf_binding' if number in (111,132,134) else 'curvature_auxiliary_binding')
+                namespace=module.__dict__;identifier=id(namespace);record=library._BINDINGS[identifier]
+                self.assertIs(type(record),types.MappingProxyType)
+                self.assertIs(type(record['bindings']),types.MappingProxyType)
+                self.assertIs(type(record['originals']),types.MappingProxyType)
+                with self.assertRaises(TypeError):record['number']=0
+                with self.assertRaises(TypeError):record['bindings']['BASE']=('data','forged')
+                with self.assertRaises(TypeError):record['originals'][next(iter(record['originals']))]=lambda:True
+                name='admit' if number==138 else 'main';hook=namespace[name];executed=[]
+                @functools.wraps(hook.__wrapped__)
+                def foreign(*args,**kwargs):executed.append('foreign target executed');return True
+                for kind in ('add','delete','replace','number','coordinated'):
+                    try:
+                        replacement=dict(record)
+                        if kind=='add':library._BINDINGS[identifier+1]=record
+                        elif kind=='delete':library._BINDINGS.pop(identifier)
+                        elif kind=='number':
+                            replacement['number']=0;library._BINDINGS[identifier]=types.MappingProxyType(replacement)
+                        elif kind=='coordinated':
+                            namespace[name]=foreign
+                            replacement['bindings']=types.MappingProxyType({key:library.snapshot(value,key) for key,value in namespace.items()})
+                            originals=dict(record['originals']);originals[name]=foreign.__wrapped__
+                            replacement['originals']=types.MappingProxyType(originals)
+                            library._BINDINGS[identifier]=types.MappingProxyType(replacement)
+                        else:library._BINDINGS[identifier]=types.MappingProxyType(replacement)
+                        with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
+                        self.assertEqual(executed,[])
+                    finally:
+                        library._BINDINGS.pop(identifier+1,None)
+                        library._BINDINGS[identifier]=record;namespace[name]=hook
+                    self.check_namespace(number,namespace)
+            self.assertEqual(comp.verify_current(),self.model)
+
+    def test_auxiliary_direct_saved_function_closure_cells_reject_changed_targets(self):
+        import functools
+        with self.modes():
+            modules=self.registered()
+            for number,name,variable in ((136,'main','original_main'),(138,'check_probe','original_probe')):
+                namespace=modules[number].__dict__;hook=namespace[name]
+                cells=dict(zip(hook.__code__.co_freevars,hook.__closure__))
+                self.assertIn(variable,cells);self.assertNotIn('saved',cells)
+                cell=cells[variable];original=cell.cell_contents;executed=[]
+                @functools.wraps(original)
+                def foreign(*args,**kwargs):executed.append('foreign closure executed');return True
+                try:
+                    cell.cell_contents=foreign
+                    with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
+                    self.assertEqual(executed,[])
+                finally:cell.cell_contents=original
+                self.check_namespace(number,namespace)
+            self.assertEqual(comp.verify_current(),self.model)
+
+    def test_failed_all_five_startups_restore_seals_and_allow_same_namespace_registration(self):
+        with self.modes():
+            self.registered()
+            for number,name in self.units.items():
+                path='curvature/scripts/'+name+'.py';source=(comp.ROOT/path).read_bytes()
+                namespace={'__file__':str(comp.ROOT/path),'__name__':'actual_current_registration_retry_control'}
+                library=comp.curvature_embedded_module('curvature_leaf_binding' if number in (111,132,134) else 'curvature_auxiliary_binding')
+                before=comp._curvature_registration_seals;primary=RuntimeError('owned registration retry failure')
+                with patch.object(comp,'verify_current',side_effect=primary):
+                    with self.assertRaises(RuntimeError) as caught:
+                        exec(compile(source,str(comp.ROOT/path),'exec',dont_inherit=True),namespace)
+                self.assertIs(caught.exception,primary)
+                self.assertEqual(comp._curvature_registration_seals,before)
+                self.assertNotIn(id(namespace),library._BINDINGS)
+                try:
+                    exec(compile(source,str(comp.ROOT/path),'exec',dont_inherit=True),namespace)
+                    self.check_namespace(number,namespace)
+                finally:
+                    # Restore only this test-owned successful extra namespace;
+                    # production add/rollback APIs remain transaction-restricted.
+                    library._BINDINGS.pop(id(namespace),None)
+                    comp._curvature_registration_seals=before
+                comp.curvature_registration_check(library.__name__,library._BINDINGS)
+                self.assertEqual(comp._curvature_registration_seals,before)
+            self.assertEqual(comp.verify_current(),self.model)
+
+    def test_forged_fresh_registration_and_foreign_rollback_entry_points_rejected(self):
+        import types
+        with self.modes():
+            modules=self.registered()
+            for number,module in modules.items():
+                library=comp.curvature_embedded_module('curvature_leaf_binding' if number in (111,132,134) else 'curvature_auxiliary_binding')
+                record=library._BINDINGS[id(module.__dict__)];foreign=dict(module.__dict__)
+                replacement=dict(record);replacement['namespace']=foreign
+                forged=types.MappingProxyType(replacement);before=comp._curvature_registration_seals
+                keys=set(library._BINDINGS)
+                with self.assertRaisesRegex(AssertionError,'Foreign registration transaction'):
+                    comp.curvature_registration_add(library.__name__,library._BINDINGS,forged)
+                with self.assertRaisesRegex(AssertionError,'Foreign registry rollback transaction'):
+                    comp.curvature_registration_rollback(library.__name__,library._BINDINGS,dict(before)[library.__name__])
+                self.assertEqual(set(library._BINDINGS),keys)
+                self.assertEqual(comp._curvature_registration_seals,before)
+                self.assertIsNone(comp._curvature_install_owner)
+                self.check_namespace(number,module.__dict__)
+            self.assertEqual(comp.verify_current(),self.model)
+
+# END authenticated finite curvature tests
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--real-runtime',action='store_true');parser.add_argument('--schema',type=pathlib.Path)
@@ -2115,6 +2418,8 @@ if __name__=='__main__':
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(CurrentAxiomInventoryTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(MapConstructionSnapshotTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TensorCompositionTests))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(CurvatureCompositionTests))
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(CurvatureProductionNamespaceTests))
     if REAL:suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(RealValidatorTests))
     result=unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(0 if result.wasSuccessful() else 1)

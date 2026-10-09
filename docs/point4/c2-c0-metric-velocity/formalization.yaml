@@ -1,0 +1,132 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/v0.4.schema.json
+version: "v0.4"
+
+project:
+  name: "Supporting literal-C2 metric endpoint extension with continuous velocity"
+  description: >-
+    A source-reviewed, uncompiled endpoint construction on a compact smooth
+    boundaryless manifold with arbitrary finite-dimensional model. A literal
+    C2 initial Riemannian metric and an actual continuous symmetric tensor
+    velocity yield an all-real-time positive C2 MetricFamily with exact initial
+    value and ordinary two-sided HasDerivAt of fixed tangent components at the
+    endpoint. Finite preferred cover, compact C2 buffers, actual uniformly
+    continuous Gaussian smoothing, symmetric reconstruction and compact
+    positivity reserve are constructed internally. It is not a PDE solution,
+    a uniqueness theorem, a canonical Point-4 closure or a registry submission.
+  authors:
+    - "Arthur Freitas Ramos"
+    - "David Barros Hulak"
+    - "Ruy J. G. B. de Queiroz"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arthur Freitas Ramos"
+
+sources:
+  - title: "Immutable actual Gaussian and preferred-frame source closure"
+    id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/e6b54dd0d7e73a51eb8efb083764b68ae8305a5a/curvature"
+    type: "formalization-source"
+    relationship: "adapts"
+    location: "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE and preferred tangent-frame transport"
+    license: "Apache-2.0"
+    author_endorsement: "n/a"
+    note: >-
+      All 59 reachable inherited project modules match the reviewed immutable
+      90cc closure byte-for-byte. Uses genuine Gaussian smoothing, finite
+      preferred covers, actual tensor/frame reconstruction and metric-cone
+      positivity. The four new proof files are exactly frozen-003, not a
+      replacement by a supplied smoothing, density, atlas or solver witness.
+  - title: "Pinned Mathlib tensor, compactness and ordinary calculus interfaces"
+    id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib"
+    type: "formalization-source"
+    relationship: "adapts"
+    location: "Analysis, Geometry/Manifold, Topology/VectorBundle and compact support interfaces"
+    license: "Apache-2.0"
+    author_endorsement: "n/a"
+    note: >-
+      Exact-pin API byte receipts support source review only. Complete external
+      source graph and compiled elaboration remain pending. No Mathlib source,
+      package pin or inherited contributor notice changes.
+
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/e6b54dd0d7e73a51eb8efb083764b68ae8305a5a/curvature"
+    relationship: "builds-on"
+    note: >-
+      Verified master baseline at full commit e6b54dd0d7e73a51eb8efb083764b68ae8305a5a,
+      source project curvature. All 1641 inherited paths and modes are retained;
+      1637 remain byte-identical. Precisely one guard gains the count-one
+      inventory adapter and three workflows gain interpreter-startup bytecode
+      suppression only. Every original source/evidence gate runs unchanged on
+      its exact reconstructed baseline, with strict additional inventory checks.
+      Root imports and root metadata remain byte-identical; legacy new modules
+      are compiled explicitly and are not added to the modern aggregate.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/90cc7ebed996f28acb57ef9948d37f114088bd4d/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable source-review baseline at full commit
+      90cc7ebed996f28acb57ef9948d37f114088bd4d, source project curvature.
+      MASTER-CLOSURE-MANIFEST.json binds all 59 inherited modules and proves
+      their byte equality on e6b54dd, so no unverified source stack is needed.
+      The independent source review includes 63 project modules and records
+      its 93-module external frontier as unexpanded, not compiler-qualified.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable exact-contract comparison at full commit
+      3a8ed697d1f0366f8370efb2fa9e524b68d27e97, source project curvature.
+      LocalExistence and TimeDependent bytes used by the candidate agree with
+      that contract and are unchanged on master. This provenance reference
+      does not stack, promote or merge its unverified branch or PR.
+  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib"
+    relationship: "builds-on"
+    note: >-
+      Immutable pinned Mathlib at full commit
+      db584cd6d46c92f209a44c0f1c829460d327499d, source path Mathlib.
+      Reuses tensor-bundle topology, compact cutoffs, real derivative composition
+      and continuous bilinear forms through the exact inherited package pin.
+      API inspection is source evidence; official Lean 4.33/db584 qualification
+      is a separate mandatory final gate.
+
+status:
+  scope: >-
+    Supporting metric endpoint only. Actual continuous symmetric velocity and
+    literal C2 initial metric are the mathematical inputs. BoundarylessManifold
+    I M is retained; global model boundarylessness, positive rank, C3,
+    initialHolder and supplied regularizer/density/solver assumptions are absent.
+    Empty manifold and rank-zero cases use the same actual construction.
+    Frozen-001 was source-rejected, frozen-002 source-approved then superseded,
+    and frozen-003 is the final source-approved identity. All remain uncompiled.
+    Fresh integration review and exact Lean 4.33/db584 qualification are pending.
+    No forward nonlinear PDE or weak-competitor uniqueness is claimed. Point 4 is OPEN.
+  main_results: []
+
+automation:
+  methods:
+    - method: "agent"
+      framework: "Codex"
+      tool_setup: >-
+        Immutable-source comparison, approved-source overlay, exact baseline
+        guard adapters, source/schema inventory and adversarial checks only.
+        Compiler/runtime execution, toolchain installation, dependency cache
+        expansion, remote mutation and registry actions are outside this
+        source-only integration preparation.
+      prompting_notes: >-
+        Preserve all reviewed mathematical bytes, exact inherited gates,
+        ordinary HasDerivAt, literal C2 g0, manifold-only boundarylessness and
+        canonical OPEN status. Prepare mandatory explicit compile and complete
+        type/axiom/context probes without reporting them as already run.
+
+review:
+  status: "pending"
+  notes: >-
+    Frozen-003 received sealed independent SOURCE-ONLY APPROVE; report SHA-256
+    07c9bce974d0fe9b4bf4d7044263bdf520dfeecc018873078674c4481ee4c5fa.
+    This does not certify Lean elaboration or the new release integration.
+    Fresh independent integration review and all mandatory exact-head compiler,
+    axiom, rank-zero/context, inherited150/144, seven boundaryless types, full
+    build, closed-contract12-negatives and unchanged full OPEN audit gates
+    remain pending. No registry or submission identity is created.
+
+acknowledgements: >-
+  The project's human authors and all inherited contributors, and Mathlib's
+  authors and contributors. Original author snapshots and rejected/superseded/
+  approved reports are retained. Existing selected-artifact metadata is unchanged.

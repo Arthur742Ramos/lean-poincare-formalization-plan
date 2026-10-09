@@ -1,0 +1,897 @@
+--- a/DifferentialGeometry/Geometry/Metric/ChartGram.lean
++++ b/DifferentialGeometry/Geometry/Metric/ChartGram.lean
+@@ -107,20 +107,14 @@
+         ((trivializationAt E (TangentSpace I) α).symmL ℝ b
+           (chartModelBasis E i)))
+       (chartAt H α).source := by
+-  have h_funext :
+-      (fun b : M => TotalSpace.mk' E b
+-          ((trivializationAt E (TangentSpace I) α).symmL ℝ b
+-            (chartModelBasis E i)))
+-        = chartBasisVec (I := I) α i := by
+-    funext b
+-    rfl
+-  rw [h_funext]
+   have h_base := chartBasisVec_contMDiffOn (I := I) α i
+-  have h_baseSet :
+-      (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
+-    TangentBundle.trivializationAt_baseSet (I := I) α
+-  rw [h_baseSet] at h_base
+-  exact h_base
++  rw [TangentBundle.trivializationAt_baseSet (I := I) α] at h_base
++  refine h_base.congr ?_
++  intro b hb
++  have hb' : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
++    simpa only [TangentBundle.trivializationAt_baseSet] using hb
++  exact congrArg (fun v : TangentSpace I b => TotalSpace.mk' E b v)
++    ((trivializationAt E (TangentSpace I) α).symmL_apply hb' (chartModelBasis E i))
+ 
+ def chartBasisFamily (x₀ : M) {x : M}
+     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
+--- a/DifferentialGeometry/Bundle/Section.lean
++++ b/DifferentialGeometry/Bundle/Section.lean
+@@ -286,11 +286,11 @@
+       (fun x => χ x • hframe.coeff i x (τ x)) := by
+     intro i
+     have hsmooth_lfc : ContMDiff I 𝓘(ℝ) (↑n)
+-        (fun x => χ x • e.localFrame_coeff I b i x (τ x)) := by
++        (fun x => χ x • e.localFrameCoeff I b i x (τ x)) := by
+       intro x
+       by_cases hx : x ∈ tsupport (χ : M → ℝ)
+       · exact (χ.contMDiff.of_le (WithTop.coe_le_coe.mpr le_top)).contMDiffAt.smul
+-          (contMDiffAt_localFrame_coeff b (hχsupp hx) τ.contMDiff.contMDiffAt i)
++          (contMDiffAt_localFrameCoeff b (hχsupp hx) τ.contMDiff.contMDiffAt i)
+       · have hχ_zero : ∀ᶠ y in nhds x, (χ : M → ℝ) y = 0 := by
+           apply Filter.Eventually.mono
+             ((isClosed_tsupport (χ : M → ℝ)).isOpen_compl.mem_nhds hx)
+@@ -304,9 +304,9 @@
+         ext j; simp [IsLocalFrameOn.toBasisAt, Trivialization.localFrame,
+           Trivialization.basisAt, hx]
+       simp only [hframe.coeff_apply_of_mem hx,
+-        e.localFrame_coeff_apply_of_mem_baseSet b hx, hbasis]
++        e.localFrameCoeff_apply_of_mem_baseSet b hx τ i, hbasis]
+     · simp [hframe.coeff_apply_of_notMem hx,
+-        e.localFrame_coeff_apply_of_notMem_baseSet b hx]
++        e.localFrameCoeff_apply_of_notMem_baseSet b hx i]
+   let u' : Fin (Module.finrank ℝ F₁) → C^n⟮I, M; ℝ⟯ := fun i =>
+     ⟨fun x => χ x • hframe.coeff i x (τ x), hcoeff_smooth i⟩
+   have hu'_zero : ∀ i, (u' i) p = 0 := by
+@@ -391,7 +391,7 @@
+           simp [ContMDiffSection.coe_smul, Pi.smul_apply, hv]
+         let c' : C^n⟮I, M; ℝ⟯ := ⟨fun _ => c, contMDiff_const⟩
+         have hc_eq : c • σ_v = c' • σ_v := by
+-          ext y; simp [ContMDiffSection.coe_smulContMDiffMap, ContMDiffSection.coe_smul, c']
++          ext y; change c • σ_v y = c • σ_v y; rfl
+         calc (F σ_cv) x
+             = (F (c • σ_v)) x := acts_pointwise σ_cv (c • σ_v) x
+                 ((exists_section x (c • v)).choose_spec ▸ h_smul ▸ rfl)
+@@ -445,7 +445,7 @@
+       refine ContMDiffAt.congr_of_eventuallyEq ?_ hφ_eq
+       apply ContMDiffAt.sum
+       intro i _
+-      apply ContMDiffAt.smul
++      apply ContMDiffAt.smul (I := 𝓘(ℝ))
+       · have h_e₁_snd : ContMDiffAt (I.prod 𝓘(ℝ, F₁)) 𝓘(ℝ, F₁) (↑n)
+             (fun x => (e₁ x).2) p₀ :=
+           (contMDiffAt_totalSpace (f := _root_.id)).mp contMDiffAt_id |>.2
+@@ -585,7 +585,7 @@
+     refine ContMDiffAt.congr_of_eventuallyEq ?_ hφ_eq
+     apply ContMDiffAt.sum
+     intro i _
+-    apply ContMDiffAt.smul
++    apply ContMDiffAt.smul (I := 𝓘(ℝ))
+     · have h_e₁_snd : ContMDiffAt (I.prod 𝓘(ℝ, F₁)) 𝓘(ℝ, F₁) (↑n)
+           (fun x => (e₁ x).2) p₀ :=
+         (contMDiffAt_totalSpace (f := _root_.id)).mp contMDiffAt_id |>.2
+--- a/DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartLocal.lean
++++ b/DifferentialGeometry/Geometry/Connection/LeviCivita/LeviCivitaChartLocal.lean
+@@ -348,7 +348,7 @@
+     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+     chartLeviCivita (I := I) g α (f • σ) x =
+       f x • chartLeviCivita (I := I) g α σ x +
+-        (extDerivFun f x).smulRight (σ x) := by
++        (mvfderiv (I := I) f x).smulRight (σ x) := by
+   classical
+   apply ContinuousLinearMap.ext
+   intro v
+@@ -477,7 +477,7 @@
+           (trivToE (I := I) α x v) :=
+     mfderiv_scalar_eq_chart_fderiv (I := I) α f hxsrc_chart hxint hf v
+   have hextDeriv :
+-      extDerivFun (I := I) f x v = (mfderiv I 𝓘(ℝ) f x) v := rfl
++      mvfderiv (I := I) f x v = (mfderiv I 𝓘(ℝ) f x) v := rfl
+   rw [hLfd_apply, hChristoffel_lhs]
+   have hreorg :
+       (f x • fderiv ℝ (chartE_section_repr (I := I) α σ ∘ (extChartAt I α).symm)
+--- a/DifferentialGeometry/Geometry/Connection/ChartFrame/ChartMetric.lean
++++ b/DifferentialGeometry/Geometry/Connection/ChartFrame/ChartMetric.lean
+@@ -55,7 +55,8 @@
+   rw [hsymm_apply] at hsymm_sum
+   rw [map_sum] at hsymm_sum
+   have hbasis : ∀ i, T.symmL ℝ x (b i) = chartBasisVecFiber (I := I) α i x := by
+-    intro i; rfl
++    intro i
++    exact T.symmL_apply hx (b i)
+   rw [hsymm_sum]
+   refine Finset.sum_congr rfl (fun i _ => ?_)
+   rw [map_smul, hbasis i]
+--- a/DifferentialGeometry/Geometry/Operator/Hessian.lean
++++ b/DifferentialGeometry/Geometry/Operator/Hessian.lean
+@@ -292,16 +292,15 @@
+ 
+ def hessFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
+     pointwiseBilin (M := M) I :=
+-  fun x => LinearMap.mk₂ ℝ
++  fun x => LinearMap.mk₂ ℝ (M := E) (Nₗ := E)
+     (fun v w =>
+       ∑ i : Fin (Module.finrank ℝ E),
+         ∑ j : Fin (Module.finrank ℝ E),
+           ((chartModelBasis E).repr v) i *
+             ((chartModelBasis E).repr w) j *
+             chartHessianTensor (I := I) g x f i j x)
+-    (fun v₁ v₂ w => by
++    (fun (v₁ v₂ w : E) => by
+       classical
+-      dsimp only
+       have hrepr : (chartModelBasis E).repr (v₁ + v₂) =
+           (chartModelBasis E).repr v₁ + (chartModelBasis E).repr v₂ := map_add _ _ _
+       rw [hrepr]
+@@ -313,9 +312,8 @@
+       intro j _
+       simp only [Finsupp.coe_add, Pi.add_apply]
+       ring)
+-    (fun c v w => by
++    (fun (c : ℝ) (v w : E) => by
+       classical
+-      dsimp only
+       have hrepr : (chartModelBasis E).repr (c • v) =
+           c • (chartModelBasis E).repr v := map_smul _ _ _
+       rw [hrepr]
+@@ -327,9 +325,8 @@
+       refine Finset.sum_congr rfl ?_
+       intro j _
+       ring)
+-    (fun v w₁ w₂ => by
++    (fun (v w₁ w₂ : E) => by
+       classical
+-      dsimp only
+       have hrepr : (chartModelBasis E).repr (w₁ + w₂) =
+           (chartModelBasis E).repr w₁ + (chartModelBasis E).repr w₂ := map_add _ _ _
+       rw [hrepr]
+@@ -341,9 +338,8 @@
+       intro j _
+       simp only [Finsupp.coe_add, Pi.add_apply]
+       ring)
+-    (fun c v w => by
++    (fun (c : ℝ) (v w : E) => by
+       classical
+-      dsimp only
+       have hrepr : (chartModelBasis E).repr (c • w) =
+           c • (chartModelBasis E).repr w := map_smul _ _ _
+       rw [hrepr]
+@@ -435,7 +431,12 @@
+         ((chartModelBasis E) i) ((chartModelBasis E) j) =
+       chartHessianTensor (I := I) g x f i j x := by
+   classical
+-  rw [hessFun_apply]
++  change (∑ i' : Fin (Module.finrank ℝ E),
++    ∑ j' : Fin (Module.finrank ℝ E),
++      ((chartModelBasis E).repr ((chartModelBasis E) i)) i' *
++        ((chartModelBasis E).repr ((chartModelBasis E) j)) j' *
++        chartHessianTensor (I := I) g x f i' j' x) =
++    chartHessianTensor (I := I) g x f i j x
+   conv_lhs => rw [show
+       (∑ i' : Fin (Module.finrank ℝ E),
+         ∑ j' : Fin (Module.finrank ℝ E),
+--- a/DifferentialGeometry/Geometry/Operator/Gradient.lean
++++ b/DifferentialGeometry/Geometry/Operator/Gradient.lean
+@@ -135,12 +135,11 @@
+     (g : SmoothRiemannianMetric I M) (f : M → ℝ) {x : M}
+     (hf : mfderiv I 𝓘(ℝ, ℝ) f x = 0) :
+     gradFun (I := I) g f x = (0 : TangentSpace I x) := by
+-  rw [gradFun_def, metricSharp_def]
+   have htoLM : (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap =
+       (0 : TangentSpace I x →ₗ[ℝ] ℝ) := by
+-    rw [hf]; rfl
+-  rw [htoLM]
+-  exact LinearEquiv.map_zero _
++    exact congrArg (fun L => L.toLinearMap) hf
++  exact (congrArg (metricFlatMap (I := I) g x).symm htoLM).trans
++    (LinearEquiv.map_zero _)
+ 
+ def chartInvGramMatrix (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
+     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+@@ -375,7 +374,7 @@
+           = (chartModelBasis E) i := by
+       have heqsymm : T.symm x ((chartModelBasis E) i)
+             = T.symmL ℝ x ((chartModelBasis E) i) := by
+-        rw [Trivialization.symmL_apply]
++        exact (T.symmL_apply hbase _).symm
+       rw [heqsymm, Trivialization.continuousLinearMapAt_symmL T (b := x) hbase]
+     exact h_apply
+   change fderiv ℝ (scalarOnE (I := I) α f) (φ x)
+--- a/DifferentialGeometry/Analysis/Integration/Measure/Invariance.lean
++++ b/DifferentialGeometry/Analysis/Integration/Measure/Invariance.lean
+@@ -205,13 +205,17 @@
+         ⟨hx1', hx0'⟩ _
+   rw [hdef1, hequiv, hcc, tangentCoordChange_chartModelBasis_eq_sum (I := I) x₀ x₁ x i]
+   have hsymmL : (T₀.symm x : E → TangentSpace I x) =
+-      (T₀.symmL ℝ x : E →L[ℝ] TangentSpace I x) := rfl
++      (T₀.symmL ℝ x : E →L[ℝ] TangentSpace I x) := by
++    funext w
++    exact (T₀.symmL_apply hx0' w).symm
+   rw [hsymmL]
+   rw [map_sum]
+   refine Finset.sum_congr rfl ?_
+   intro k _
+   rw [map_smul]
+-  rfl
++  exact congrArg (fun w : TangentSpace I x =>
++    transitionMatrix (I := I) x₀ x₁ x k i • w)
++    (T₀.symmL_apply hx0' ((chartModelBasis E) k))
+ 
+ lemma chartGramMatrix_pullback_eq_sum
+     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M) {x : M}
+--- a/DifferentialGeometry/Analysis/Integration/Measure/Properties.lean
++++ b/DifferentialGeometry/Analysis/Integration/Measure/Properties.lean
+@@ -464,7 +464,7 @@
+       ∫⁻ y in W, ENNReal.ofReal (chartDensity g α ((extChartAt I α).symm y)) *
+           V.indicator (fun _ => (1 : ℝ≥0∞)) ((extChartAt I α).symm y)
+             ∂(modelHaar (E := E)) = 0 :=
+-    le_antisymm (not_lt.mp h0') (zero_le _)
++    le_antisymm (not_lt.mp h0') zero_le
+   have haem_integrand :
+       AEMeasurable
+         (fun y : E => ENNReal.ofReal
+--- a/DifferentialGeometry/Analysis/Integration/L2/CompactSupport.lean
++++ b/DifferentialGeometry/Analysis/Integration/L2/CompactSupport.lean
+@@ -169,7 +169,8 @@
+   by_contra hXx
+   apply hx
+   have : X x = 0 := by
+-    simpa using hXx
++    by_contra hne
++    exact hXx hne
+   exact vectorFieldAction_eq_zero_of_vectorField_eq_zero X f this
+ 
+ omit [Module.Finite ℝ E] [T2Space M] [SigmaCompactSpace M] in
+@@ -192,11 +193,11 @@
+     notMem_tsupport_iff_eventuallyEq.mp hxnot
+   have hmfd : mfderiv I 𝓘(ℝ, ℝ) (f : M → ℝ) x = mfderiv I 𝓘(ℝ, ℝ) (fun _ : M => (0 : ℝ)) x :=
+     hfEq.mfderiv_eq
+-  have : extDerivFun (I := I) (f : M → ℝ) x (X x) = 0 := by
++  have : mvfderiv (I := I) (f : M → ℝ) x (X x) = 0 := by
+     have hmfd_zero : mfderiv I 𝓘(ℝ, ℝ) (f : M → ℝ) x = 0 := by
+       rw [hmfd]
+       exact mfderiv_const
+-    simp [extDerivFun, hmfd_zero]
++    simp [mvfderiv, hmfd_zero]
+   simpa [vectorFieldAction] using this
+ 
+ end DirectionalDerivative
+@@ -219,7 +220,9 @@
+   intro x hx
+   by_contra hXx
+   apply hx
+-  have hXx' : X x = 0 := by simpa using hXx
++  have hXx' : X x = 0 := by
++    by_contra hne
++    exact hXx hne
+   change ((concreteConn I M cov X Y) x : E) = 0
+   have : (concreteConn I M cov X Y) x = 0 := by
+     simp [concreteConn_apply, hXx']
+@@ -244,8 +247,7 @@
+   have hY_eq_dep : (fun x : M => Y x) =ᶠ[𝓝 x]
+       (fun x : M => (0 : TangentSpace I x)) := by
+     filter_upwards [hY_eq_E] with y hy
+-    have : (Y y : E) = (0 : E) := by simpa using hy
+-    exact this
++    exact hy
+   have hY_diff : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+       (fun x : M => (TotalSpace.mk' E x (Y x) : TangentBundle I M)) x :=
+     Y.mdifferentiableAt
+@@ -392,16 +394,16 @@
+     by_cases hfactor_zero : factor = 0
+     · exact ⟨1, zero_lt_one, by
+         rw [hfactor_zero, zero_mul]
+-        exact zero_le _⟩
++        exact zero_le⟩
+     have hfactor_pos : 0 < factor := by
+-      exact lt_of_le_of_ne (zero_le _) (Ne.symm hfactor_zero)
++      exact lt_of_le_of_ne (zero_le) (Ne.symm hfactor_zero)
+     by_cases hε_top : ε = ⊤
+     · refine ⟨1, zero_lt_one, ?_⟩
+       rw [hε_top]; exact le_top
+     · have hε_lt : ε < ⊤ := lt_top_iff_ne_top.mpr hε_top
+       have hε_toReal_pos : 0 < ε.toReal := by
+         rw [ENNReal.toReal_pos_iff]
+-        exact ⟨lt_of_le_of_ne (zero_le _) (Ne.symm hε), hε_lt⟩
++        exact ⟨lt_of_le_of_ne (zero_le) (Ne.symm hε), hε_lt⟩
+       have hfactor_toReal_pos : 0 < factor.toReal := by
+         rw [ENNReal.toReal_pos_iff]
+         exact ⟨hfactor_pos, lt_top_iff_ne_top.mpr hfactor_ne_top⟩
+--- a/DifferentialGeometry/Geometry/Connection/Realization/Embedding.lean
++++ b/DifferentialGeometry/Geometry/Connection/Realization/Embedding.lean
+@@ -25,7 +25,7 @@
+ 
+ noncomputable def vectorFieldAction
+     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : C^∞⟮I, M; ℝ⟯) : M → ℝ :=
+-  fun x => extDerivFun (I := I) f x (X x)
++  fun x => mvfderiv (I := I) f x (X x)
+ 
+ noncomputable def vectorFieldActionSmooth
+     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : C^∞⟮I, M; ℝ⟯) : C^∞⟮I, M; ℝ⟯ :=
+@@ -43,7 +43,7 @@
+     obtain ⟨_, hfiber⟩ := hcomp
+     convert hfiber using 1
+     ext x
+-    simp only [vectorFieldAction, extDerivFun, tangentMap,
++    simp only [vectorFieldAction, mvfderiv, tangentMap,
+       trivializationAt_model_space_apply]
+     rfl⟩
+ 
+@@ -64,7 +64,7 @@
+     vectorFieldAction I M X f x + vectorFieldAction I M X g x
+   unfold vectorFieldAction
+   rw [show ((f + g : C^∞⟮I, M; ℝ⟯) : M → ℝ) = (f : M → ℝ) + (g : M → ℝ) from rfl]
+-  rw [extDerivFun_add (contMDiffMap_mdifferentiableAt I M f x)
++  rw [mvfderiv_add (contMDiffMap_mdifferentiableAt I M f x)
+     (contMDiffMap_mdifferentiableAt I M g x)]
+   simp [ContinuousLinearMap.add_apply]
+ 
+@@ -82,12 +82,7 @@
+   have hf := contMDiffMap_mdifferentiableAt I M f x
+   have hmfderiv : mfderiv I 𝓘(ℝ, ℝ) (c • (f : M → ℝ)) x = c • mfderiv I 𝓘(ℝ, ℝ) f x :=
+     (hf.hasMFDerivAt.const_smul c).mfderiv
+-  simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe,
+-    hmfderiv]
+-  change (NormedSpace.fromTangentSpace _) ((c • mfderiv I 𝓘(ℝ, ℝ) (f : M → ℝ) x) (X x)) =
+-    c * (NormedSpace.fromTangentSpace _) ((mfderiv I 𝓘(ℝ, ℝ) (f : M → ℝ) x) (X x))
+-  simp only [NormedSpace.fromTangentSpace, ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk]
+-  exact smul_eq_mul c _
++  exact congrArg (fun L => L (X x)) hmfderiv
+ 
+ omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+ theorem vectorFieldActionSmooth_leibniz
+@@ -104,14 +99,8 @@
+   have hg := contMDiffMap_mdifferentiableAt I M g x
+   rw [show ((f * g : C^∞⟮I, M; ℝ⟯) : M → ℝ) = (f : M → ℝ) • (g : M → ℝ) from by
+     ext y; simp [Pi.mul_apply, smul_eq_mul]]
+-  have h := fromTangentSpace_mfderiv_smul_apply (I := I) hf hg (X x)
+-  change (extDerivFun (I := I) ((f : M → ℝ) • (g : M → ℝ)) x) (X x) =
+-    (f : M → ℝ) x * (extDerivFun (I := I) (g : M → ℝ) x) (X x) +
+-    (g : M → ℝ) x * (extDerivFun (I := I) (f : M → ℝ) x) (X x)
+-  simp only [smul_eq_mul] at h
+-  exact h.trans (by
+-    simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
+-    ring)
++  simpa only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul] using
++    congrArg (fun L => L (X x)) (mvfderiv_mul (I := I) hf hg)
+ 
+ omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+ theorem vectorFieldActionSmooth_map_one_eq_zero
+@@ -121,7 +110,7 @@
+   change vectorFieldAction I M X 1 x = 0
+   unfold vectorFieldAction
+   rw [show ((1 : C^∞⟮I, M; ℝ⟯) : M → ℝ) = fun (_ : M) => (1 : ℝ) from by ext; simp]
+-  rw [show extDerivFun (I := I) (fun (_ : M) => (1 : ℝ)) x (X x) =
++  rw [show mvfderiv (I := I) (fun (_ : M) => (1 : ℝ)) x (X x) =
+     ((NormedSpace.fromTangentSpace (1 : ℝ)).toContinuousLinearMap ∘L
+       mfderiv I 𝓘(ℝ, ℝ) (fun (_ : M) => (1 : ℝ)) x) (X x) from rfl]
+   simp [mfderiv_const]
+@@ -166,7 +155,7 @@
+   rw [show (φ • X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x = φ x • X x from by
+     simp [ContMDiffSection.coe_smulContMDiffMap]]
+   rw [ContinuousLinearMap.map_smul]
+-  change φ x • extDerivFun (I := I) f x (X x) =
++  change φ x • mvfderiv (I := I) f x (X x) =
+     ((φ • embedDeriv I M X) f : M → ℝ) x
+   simp only [Derivation.coe_smul, Pi.smul_apply, smul_eq_mul]
+   rfl
+@@ -262,8 +251,8 @@
+     have h1 : mfderiv I 𝓘(ℝ, ℝ) (f : M → ℝ) x₀ = mfderiv I 𝓘(ℝ, ℝ) g x₀ := hf_mfderiv
+     rw [h1, h_mfderiv_g]
+     rfl
+-  change extDerivFun (I := I) (f : M → ℝ) x₀ ((X - Y) x₀) = 0 at h_zero
+-  rw [show extDerivFun (I := I) (f : M → ℝ) x₀ ((X - Y) x₀) =
++  change mvfderiv (I := I) (f : M → ℝ) x₀ ((X - Y) x₀) = 0 at h_zero
++  rw [show mvfderiv (I := I) (f : M → ℝ) x₀ ((X - Y) x₀) =
+     (NormedSpace.fromTangentSpace ((f : M → ℝ) x₀))
+       (mfderiv I 𝓘(ℝ, ℝ) (f : M → ℝ) x₀ v) from rfl] at h_zero
+   rw [hf_mfderiv_v] at h_zero
+@@ -305,7 +294,7 @@
+     vectorFieldAction I M X (vectorFieldActionSmooth I M Y f) x₀ -
+     vectorFieldAction I M Y (vectorFieldActionSmooth I M X f) x₀
+   simp only [vectorFieldAction, mlieBracketSection, ContMDiffSection.coeFn_mk]
+-  simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
++  simp only [mvfderiv, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
+   simp only [NormedSpace.fromTangentSpace, ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk]
+   set φ := extChartAt I x₀ with hφ
+   set y₀ := φ x₀ with hy₀
+@@ -426,10 +415,10 @@
+     exact ContinuousLinearMap.inverse_eq
+       (mfderivWithin_extChartAt_symm_comp_mfderiv_extChartAt (I := I) hy)
+       (mfderiv_extChartAt_comp_mfderivWithin_extChartAt_symm (I := I) hy)
+-  have extDerivFun_eq_mfderiv : ∀ (x : M) (v : TangentSpace I x),
+-      extDerivFun (I := I) (f : M → ℝ) x v = mfderiv I 𝓘(ℝ, ℝ) (f : M → ℝ) x v := by
++  have mvfderiv_eq_mfderiv : ∀ (x : M) (v : TangentSpace I x),
++      mvfderiv (I := I) (f : M → ℝ) x v = mfderiv I 𝓘(ℝ, ℝ) (f : M → ℝ) x v := by
+     intro x v
+-    simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
++    simp only [mvfderiv, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
+     simp only [NormedSpace.fromTangentSpace, ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk]
+     rfl
+   have hYf_eq : (↑(vectorFieldActionSmooth I M Y f) ∘ ↑φ.symm) =ᶠ[𝓝[s] y₀]
+@@ -437,7 +426,7 @@
+     filter_upwards [extChartAt_target_mem_nhdsWithin_of_mem hmem_tgt] with y hy
+     simp only [Function.comp_def, vectorFieldActionSmooth, ContMDiffMap.coeFn_mk,
+       vectorFieldAction]
+-    rw [extDerivFun_eq_mfderiv]
++    rw [mvfderiv_eq_mfderiv]
+     have hy_src : φ.symm y ∈ φ.source := φ.map_target hy
+     have h1 := mfderiv_fderivWithin_chain (φ.symm y) hy_src
+     have h2 : mfderiv I 𝓘(ℝ, ℝ) (f : M → ℝ) (φ.symm y) (Y (φ.symm y)) =
+@@ -449,7 +438,7 @@
+     filter_upwards [extChartAt_target_mem_nhdsWithin_of_mem hmem_tgt] with y hy
+     simp only [Function.comp_def, vectorFieldActionSmooth, ContMDiffMap.coeFn_mk,
+       vectorFieldAction]
+-    rw [extDerivFun_eq_mfderiv]
++    rw [mvfderiv_eq_mfderiv]
+     have hy_src : φ.symm y ∈ φ.source := φ.map_target hy
+     have h1 := mfderiv_fderivWithin_chain (φ.symm y) hy_src
+     have h2 : mfderiv I 𝓘(ℝ, ℝ) (f : M → ℝ) (φ.symm y) (X (φ.symm y)) =
+--- a/DifferentialGeometry/Tensor/Multilinear/Fiber.lean
++++ b/DifferentialGeometry/Tensor/Multilinear/Fiber.lean
+@@ -46,10 +46,10 @@
+     (fun _ => e.continuousLinearMapAt 𝕜 x) with hg'_def
+   have hx : x ∈ e.baseSet := mem_baseSet_trivializationAt F E x
+   have hleft : Function.LeftInverse g' g := by
+-    intro L; ext v; dsimp [g, g']
++    intro L; apply ContinuousMultilinearMap.ext; intro v; dsimp [g, g', ContinuousMultilinearMap.compContinuousLinearMapL]
+     congr 1; funext i; exact e.symmₗ_linearMapAt hx (v i)
+   have hright : Function.RightInverse g' g := by
+-    intro M; ext v; dsimp [g, g']
++    intro M; apply ContinuousMultilinearMap.ext; intro v; dsimp [g, g', ContinuousMultilinearMap.compContinuousLinearMapL]
+     congr 1; funext i; exact e.linearMapAt_symmₗ hx (v i)
+   exact (Homeomorph.mk ⟨g, g', hleft, hright⟩
+     g.continuous g'.continuous).isInducing.eq_induced.symm
+@@ -148,7 +148,7 @@
+   have hbase : x ∈ e.baseSet := hx
+   have hsymmL : (e.symmL 𝕜 x ω₀ : Bundle.continuousMultilinearMap 𝕜 0 F E x) =
+       e.symm x ω₀ := by
+-    simp [Trivialization.symmL_apply]
++    exact e.symmL_apply hbase _
+   rw [hsymmL]
+   have h1 := triv_zero_apply_eq (F := F) (E := E) x₀ x (e.symm x ω₀) 0
+   have h2 : (e ⟨x, e.symm x ω₀⟩ : B × _) = (x, ω₀) :=
+@@ -169,7 +169,7 @@
+   have hbase : x ∈ e.baseSet := hx
+   have hsymmL : (e.symmL 𝕜 x T : Bundle.continuousMultilinearMap 𝕜 s F E x) =
+       e.symm x T := by
+-    simp [Trivialization.symmL_apply]
++    exact e.symmL_apply hbase _
+   rw [hsymmL]
+   apply Bundle.continuousMultilinearMap.ext
+   intro v
+--- a/DifferentialGeometry/Tensor/Multilinear/Bundle.lean
++++ b/DifferentialGeometry/Tensor/Multilinear/Bundle.lean
+@@ -144,6 +144,7 @@
+     continuousMultilinearMap_apply, continuousMultilinearMap_symm_apply' _ _ _ hb.1]
+   congr 1; funext i
+   erw [Trivialization.coordChangeL_apply (R := 𝕜) e' e ⟨hb.2, hb.1⟩]
++  rw [e'.symmL_apply hb.2]
+   exact (congr_fun (e.coe_linearMapAt_of_mem (R := 𝕜) hb.1) _).symm
+ 
+ end Pretrivialization
+--- a/DifferentialGeometry/Tensor/Alternating/Comp.lean
++++ b/DifferentialGeometry/Tensor/Alternating/Comp.lean
+@@ -36,7 +36,6 @@
+       simp only [ContinuousAlternatingMap.map_update_add, map_add]
+       congr)
+     (map_update_smul' := fun m i c x => by
+-      dsimp
+       rw [ContinuousAlternatingMap.map_update_smul, ContinuousLinearMap.map_smul]
+       congr)
+   let F₂ : ContinuousMultilinearMap 𝕜 (fun _ ↦ M) (M' [⋀^ι']→L[𝕜] N'') :=
+@@ -248,11 +247,13 @@
+           (F₁ [⋀^ι]→L[ℝ] F₂) →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : ι => F₁) F₂)) := by
+       fun_prop
+     convert h₂.comp h₁ using 1
++    ext p A v
++    rfl
+   have heψ : IsClosed (Set.range (ψ : F₁ [⋀^ι]→L[ℝ] F₂ →
+       ContinuousMultilinearMap ℝ (fun _ : ι => F₁) F₂)) := by
+     exact (isClosedEmbedding_toContinuousMultilinearMap (𝕜 := ℝ) (E := F₁) (F := F₂)).isClosed_range
+   have heΦ : IsClosed (Set.range Φ) := by
+-    simpa [Φ] using DifferentialGeometry.AnalyticTransfer.isClosed_range_comp ψ heψ
++    exact DifferentialGeometry.AnalyticTransfer.isClosed_range_comp ψ heψ
+   exact DifferentialGeometry.AnalyticTransfer.contDiff_of_comp_linearIsometry_omega Φ heΦ hh
+ 
+ theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff_real :
+@@ -289,6 +290,8 @@
+           (F₁' [⋀^ι]→L[ℝ] F₂) →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : ι => F₁) F₂)) := by
+       fun_prop
+     convert h₂.comp h₁ using 1
++    ext p A v
++    rfl
+   have heψ : IsClosed (Set.range (ψ : F₁' [⋀^ι]→L[ℝ] F₂ →
+       ContinuousMultilinearMap ℝ (fun _ : ι => F₁') F₂)) := by
+     exact (isClosedEmbedding_toContinuousMultilinearMap (𝕜 := ℝ) (E := F₁')
+@@ -297,7 +300,7 @@
+       ContinuousMultilinearMap ℝ (fun _ : ι => F₁) F₂)) := by
+     exact (isClosedEmbedding_toContinuousMultilinearMap (𝕜 := ℝ) (E := F₁) (F := F₂)).isClosed_range
+   have heΦ : IsClosed (Set.range Φ) := by
+-    simpa [Φ] using DifferentialGeometry.AnalyticTransfer.isClosed_range_comp ψ₀ heψ₀
++    exact DifferentialGeometry.AnalyticTransfer.isClosed_range_comp ψ₀ heψ₀
+   exact DifferentialGeometry.AnalyticTransfer.contDiff_of_comp_linearIsometry_omega Φ heΦ hh
+ 
+ theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff_of_space_real
+--- a/DifferentialGeometry/Analysis/Calculus/AnalyticTransfer.lean
++++ b/DifferentialGeometry/Analysis/Calculus/AnalyticTransfer.lean
+@@ -22,8 +22,8 @@
+   have hlim : Tendsto (fun t : 𝕜 => t⁻¹ • (f (x + (t⁻¹)⁻¹ • v) - f x))
+       (𝓝[≠] (0 : 𝕜)) (𝓝 (f' v)) := by
+     exact hf.lim v (l := 𝓝[≠] (0 : 𝕜)) (c := fun t : 𝕜 => t⁻¹) (by
+-      convert (tendsto_norm_cobounded_atTop (E := 𝕜)).comp
+-        (tendsto_inv₀_nhdsNE_zero (α := 𝕜)) using 1)
++      exact (tendsto_norm_cobounded_atTop (E := 𝕜)).comp
++        (tendsto_inv₀_nhdsNE_zero (α := 𝕜)))
+   convert hlim using 1
+   ext t
+   rw [inv_inv]
+@@ -289,7 +289,7 @@
+   intro x hx
+   let S : Submodule ℝ F := e.toLinearMap.range
+   have heS : IsClosed (S : Set F) := by
+-    simpa [S] using he
++    exact he
+   have h₁ : AnalyticOnNhd ℝ (fun x : X => ⟨e (g x),
+     LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x)⟩ : X → S)
+       Set.univ := by
+--- a/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/TangentAction.lean
++++ b/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/TangentAction.lean
+@@ -137,7 +137,7 @@
+           (chartModelBasis E) i := by
+       have : T.symm x ((chartModelBasis E) i) =
+           T.symmL ℝ x ((chartModelBasis E) i) := by
+-        rw [Trivialization.symmL_apply]
++        exact (T.symmL_apply hbase _).symm
+       rw [this, Trivialization.continuousLinearMapAt_symmL T (b := x) hbase]
+     exact h_apply
+   change fderiv ℝ (scalarOnE (I := I) α f) (φ x)
+@@ -212,7 +212,7 @@
+           = (chartModelBasis E) i := by
+       have : T.symm x ((chartModelBasis E) i)
+             = T.symmL ℝ x ((chartModelBasis E) i) := by
+-        rw [Trivialization.symmL_apply]
++        exact (T.symmL_apply hbase _).symm
+       rw [this, Trivialization.continuousLinearMapAt_symmL T (b := x) hbase]
+     exact h_apply
+   change fderiv ℝ (scalarOnE (I := I) α f) (φ x)
+--- a/DifferentialGeometry/Geometry/Operator/Laplacian.lean
++++ b/DifferentialGeometry/Geometry/Operator/Laplacian.lean
+@@ -113,11 +113,10 @@
+       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) =
+       (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) := by
+     ext y
+-    rw [grad_g_apply]
+     change gradFun (I := I) g (fun _ : M => c) y = (0 : TangentSpace I y)
+     exact gradFun_const (I := I) g c y
+-  rw [Δ_g_def, hsection_eq]
+-  exact divergence_g_zero (I := I) g x
++  exact (congrArg (fun Z => divergence_g (I := I) g Z x) hsection_eq).trans
++    (divergence_g_zero (I := I) g x)
+ 
+ end Operator
+ end Geometry
+--- a/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/POUReduction.lean
++++ b/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/POUReduction.lean
+@@ -239,14 +239,14 @@
+       ∑ α ∈ s, tangentSectionAction (I := I) X (f α) x := by
+   classical
+   have heq : ∀ g : M → ℝ, ∀ y : M, ∀ v : TangentSpace I y,
+-      (mfderiv I 𝓘(ℝ, ℝ) g y) v = extDerivFun (I := I) g y v := by
++      (mfderiv I 𝓘(ℝ, ℝ) g y) v = mvfderiv (I := I) g y v := by
+     intro g y v
+     rfl
+   simp only [tangentSectionAction_def, heq]
+   induction s using Finset.induction_on with
+   | empty =>
+     simp only [Finset.sum_empty]
+-    change (extDerivFun (I := I) (fun _ : M => (0 : ℝ)) x) (X x) = 0
++    change (mvfderiv (I := I) (fun _ : M => (0 : ℝ)) x) (X x) = 0
+     change (((NormedSpace.fromTangentSpace ((fun _ : M => (0 : ℝ)) x)).toContinuousLinearMap ∘L
+         (mfderiv I 𝓘(ℝ, ℝ) (fun _ : M => (0 : ℝ)) x)) (X x) : ℝ) = 0
+     rw [mfderiv_const]
+@@ -274,7 +274,7 @@
+           rw [Finset.sum_insert hγ]
+           exact (ht γ hmem_γ).add (ih' ht_rest)
+       exact aux s hmem_rest
+-    rw [extDerivFun_add (hf α hmem_α) hsum_diff]
++    rw [mvfderiv_add (hf α hmem_α) hsum_diff]
+     rw [ContinuousLinearMap.add_apply]
+     rw [ih_eq]
+ 
+--- a/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartLocalIbp.lean
++++ b/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartLocalIbp.lean
+@@ -616,7 +616,7 @@
+         (vwIntegrandOnE_contDiffOn_target (I := I) g α X i)
+     simpa only [q, smul_eq_mul] using hsmul
+   have hq_compact : HasCompactSupport q := by
+-    simpa only [q] using hχ_compact.mul_right
++    exact hχ_compact.mul_right
+   obtain ⟨D, hq_lip⟩ : ∃ D, LipschitzWith D q :=
+     ContDiff.lipschitzWith_of_hasCompactSupport hq_compact hq_smooth (by simp)
+   let v : E := (chartModelBasis E) i
+@@ -712,9 +712,13 @@
+   have hleft0 : Integrable
+       (fun y => lineDeriv ℝ (phiOnE (I := I) α φ) y v * q y)
+       (modelHaar (E := E)) := by
+-    simpa only [smul_eq_mul, mul_comm] using
+-      hq_int.smul_of_top_left
+-        (hφ_lip.memLp_lineDeriv (μ := modelHaar (E := E)) v)
++    have hint := hq_int.smul_of_top_left
++      (hφ_lip.memLp_lineDeriv (μ := modelHaar (E := E)) v)
++    apply hint.congr
++    filter_upwards [] with y
++    change q y * lineDeriv ℝ (phiOnE (I := I) α φ) y v =
++      lineDeriv ℝ (phiOnE (I := I) α φ) y v * q y
++    exact mul_comm _ _
+   have hrhs : Integrable
+       (fun y => vwIntegrandOnE (I := I) g α X i y *
+         lineDeriv ℝ (phiOnE (I := I) α φ) y v)
+@@ -723,9 +727,13 @@
+   have hright0 : Integrable
+       (fun y => lineDeriv ℝ q y (-v) * phiOnE (I := I) α φ y)
+       (modelHaar (E := E)) := by
+-    simpa only [smul_eq_mul, mul_comm] using
+-      hphi_int.smul_of_top_left
+-        (hq_lip.memLp_lineDeriv (μ := modelHaar (E := E)) (-v))
++    have hint := hphi_int.smul_of_top_left
++      (hq_lip.memLp_lineDeriv (μ := modelHaar (E := E)) (-v))
++    apply hint.congr
++    filter_upwards [] with y
++    change phiOnE (I := I) α φ y * lineDeriv ℝ q y (-v) =
++      lineDeriv ℝ q y (-v) * phiOnE (I := I) α φ y
++    exact mul_comm _ _
+   have hneg_lhs : Integrable
+       (fun y => -(partialDeriv (E := E) i
+         (vwIntegrandOnE (I := I) g α X i) y * phiOnE (I := I) α φ y))
+@@ -735,7 +743,7 @@
+       (fun y => partialDeriv (E := E) i
+         (vwIntegrandOnE (I := I) g α X i) y * phiOnE (I := I) α φ y)
+       (modelHaar (E := E)) :=
+-    integrable_neg_iff.mp (by simpa only [Pi.neg_apply] using hneg_lhs)
++    integrable_neg_iff.mp hneg_lhs
+   refine ⟨heq, hlhs, ?_⟩
+   simpa only [v] using hrhs
+ 
+@@ -1019,7 +1027,7 @@
+       (fun y => ∑ i : Fin (Module.finrank ℝ E),
+         vwIntegrandOnE (I := I) g α X i y *
+           lineDeriv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i)) μ₀ := by
+-    simpa only [μ₀] using hsum.integrableOn
++    exact hsum.integrableOn
+   have hweighted : Integrable
+       (fun y => (w y).toReal •
+         chartActionM (I := I) α X φ ((extChartAt I α).symm y)) μ₀ := by
+--- a/DifferentialGeometry/Analysis/Integration/Measure/Family.lean
++++ b/DifferentialGeometry/Analysis/Integration/Measure/Family.lean
+@@ -618,7 +618,7 @@
+   have hballs_nhd : ball_s ∈ 𝓝 t := Metric.ball_mem_nhds _ one_pos
+   have hballs_sub_I₁ : ball_s ⊆ I₁ := by
+     intro s hs
+-    have hs' : |s - t| < 1 := by simpa [Real.dist_eq, Real.norm_eq_abs] using hs
++    have hs' : |s - t| < 1 := by simpa [ball_s, Metric.mem_ball, Real.dist_eq, Real.norm_eq_abs] using hs
+     refine ⟨?_, ?_⟩
+     · have := (abs_lt.mp hs').1; linarith
+     · have := (abs_lt.mp hs').2; linarith
+--- a/DifferentialGeometry/Analysis/Integration/Measure/FamilyDefs.lean
++++ b/DifferentialGeometry/Analysis/Integration/Measure/FamilyDefs.lean
+@@ -95,8 +95,7 @@
+       contMDiff_iff_contDiff.mp
+         (hf.comp (contMDiff_id.prodMk contMDiff_const))
+     exact (htime.differentiable (by norm_num)).differentiableAt.hasDerivAt
+-  · simpa only [F] using
+-      (DifferentialGeometry.contMDiff_partial_deriv_fst I F).continuous
++  · exact (DifferentialGeometry.contMDiff_partial_deriv_fst I F).continuous
+ 
+ section ChartDensityFamily
+ 
+--- a/DifferentialGeometry/Analysis/Integration/Measure/JacobiFormula.lean
++++ b/DifferentialGeometry/Analysis/Integration/Measure/JacobiFormula.lean
+@@ -240,7 +240,7 @@
+   have hsqrt : HasDerivAt Real.sqrt (1 / (2 * Real.sqrt (G t).det)) (G t).det :=
+     Real.hasDerivAt_sqrt hne
+   have hcomp := hsqrt.comp t hdet
+-  simpa [Function.comp] using hcomp
++  exact hcomp
+ 
+ theorem hasDerivAt_sqrt_det_eq_half_trace_inv_mul
+     (G : ℝ → Matrix n n ℝ) (G' : Matrix n n ℝ) (t : ℝ)
+@@ -269,7 +269,7 @@
+           rw [hdiv]
+       _ = (1 / 2) * trace ((G t)⁻¹ * G') * Real.sqrt (G t).det := by ring
+   rw [hkey] at hcomp
+-  simpa [Function.comp] using hcomp
++  exact hcomp
+ 
+ end Jacobi
+ 
+--- a/DifferentialGeometry/Bundle/PartialMfderiv.lean
++++ b/DifferentialGeometry/Bundle/PartialMfderiv.lean
+@@ -20,7 +20,6 @@
+     funext p
+     rw [mfderiv_eq_fderiv]
+     exact (fderiv_apply_one_eq_deriv (f := fun t => F (t, p.2)) (x := p.1)).symm
+-  rw [hrw]
+   rw [contMDiff_infty]
+   intro n p₀
+   have harg : ContMDiff ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod I) ∞
+@@ -43,6 +42,7 @@
+       contMDiffAt_id
+       contMDiffAt_const
+       le_rfl
+-  simpa [inTangentCoordinates_model_space] using h_apply
++  simpa only [inTangentCoordinates_model_space, mfderiv_eq_fderiv,
++    fderiv_apply_one_eq_deriv] using h_apply
+ 
+ end DifferentialGeometry
+--- a/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartInvariance.lean
++++ b/DifferentialGeometry/Analysis/Integration/DivergenceTheorem/ChartInvariance.lean
+@@ -162,7 +162,7 @@
+   have h0_eq : ∫⁻ y in W, ENNReal.ofReal (chartDensity g α ((extChartAt I α).symm y)) *
+         V.indicator (fun _ => (1 : ℝ≥0∞)) ((extChartAt I α).symm y)
+           ∂(modelHaar (E := E)) = 0 :=
+-    le_antisymm h0 (zero_le _)
++    le_antisymm h0 (zero_le)
+   have hT_meas : MeasurableSet (extChartAt I α).target :=
+     measurableSet_extChartAt_target (I := I) α
+   have haem_density_T : AEMeasurable
+--- a/DifferentialGeometry/Geometry/Operator/VossWeyl.lean
++++ b/DifferentialGeometry/Geometry/Operator/VossWeyl.lean
+@@ -41,7 +41,7 @@
+     rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
+     rwa [trivializationAt_baseSet_eq_chartAt_source]
+   have hpos := chartGramMatrix_posDef (I := I) g α hbase
+-  simpa only [chartInvGramOnE_def, chartInvGramMatrix] using hpos.inv
++  exact hpos.inv
+ 
+ def gradChartCoeffOnE (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
+     (i : Fin (Module.finrank ℝ E)) : E → ℝ :=
+@@ -220,9 +220,9 @@
+     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+     {x : M} (hx : x ∈ (chartAt H α).source) :
+     Δ_g (I := I) g ⟨_, hf⟩ x = chartVossWeylLaplacian (I := I) g α f x := by
+-  rw [Δ_g_def]
+-  rw [voss_weyl_divergence_formula (I := I) g α (grad_g (I := I) g ⟨_, hf⟩) hx]
+-  exact localDivergence_grad_g_eq_chartVossWeylLaplacian (I := I) g α hf hx
++  exact (voss_weyl_divergence_formula (I := I) g α
++    (grad_g (I := I) g ⟨_, hf⟩) hx).trans
++    (localDivergence_grad_g_eq_chartVossWeylLaplacian (I := I) g α hf hx)
+ 
+ theorem laplacian_eq_chartVossWeyl_of_sigmaCompact
+     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+@@ -230,9 +230,9 @@
+     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+     {x : M} (hx : x ∈ (chartAt H α).source) :
+     Δ_g (I := I) g ⟨_, hf⟩ x = chartVossWeylLaplacian (I := I) g α f x := by
+-  rw [Δ_g_def]
+-  rw [voss_weyl_divergence_formula (I := I) g α (grad_g (I := I) g ⟨_, hf⟩) hx]
+-  exact localDivergence_grad_g_eq_chartVossWeylLaplacian (I := I) g α hf hx
++  exact (voss_weyl_divergence_formula (I := I) g α
++    (grad_g (I := I) g ⟨_, hf⟩) hx).trans
++    (localDivergence_grad_g_eq_chartVossWeylLaplacian (I := I) g α hf hx)
+ 
+ theorem voss_weyl_laplacian_formula_pointwise
+     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+--- a/DifferentialGeometry/Geometry/Curvature/Riemann/Defs.lean
++++ b/DifferentialGeometry/Geometry/Curvature/Riemann/Defs.lean
+@@ -82,7 +82,7 @@
+ 
+ def ricciFun (g : SmoothRiemannianMetric I M) :
+     pointwiseBilin (M := M) I :=
+-  fun x => LinearMap.mk₂ ℝ
++  fun x => LinearMap.mk₂ ℝ (M := E) (Nₗ := E)
+     (fun v w =>
+       ∑ i : Fin (Module.finrank ℝ E),
+         ∑ k : Fin (Module.finrank ℝ E),
+@@ -91,7 +91,6 @@
+             chartRicciTensor (I := I) g x i k (extChartAt I x x))
+     (fun v₁ v₂ w => by
+       classical
+-      dsimp only
+       have hrepr : (chartModelBasis E).repr (v₁ + v₂) =
+           (chartModelBasis E).repr v₁ + (chartModelBasis E).repr v₂ := map_add _ _ _
+       rw [hrepr]
+@@ -105,7 +104,6 @@
+       ring)
+     (fun c v w => by
+       classical
+-      dsimp only
+       have hrepr : (chartModelBasis E).repr (c • v) =
+           c • (chartModelBasis E).repr v := map_smul _ _ _
+       rw [hrepr]
+@@ -119,7 +117,6 @@
+       ring)
+     (fun v w₁ w₂ => by
+       classical
+-      dsimp only
+       have hrepr : (chartModelBasis E).repr (w₁ + w₂) =
+           (chartModelBasis E).repr w₁ + (chartModelBasis E).repr w₂ := map_add _ _ _
+       rw [hrepr]
+@@ -133,7 +130,6 @@
+       ring)
+     (fun c v w => by
+       classical
+-      dsimp only
+       have hrepr : (chartModelBasis E).repr (c • w) =
+           c • (chartModelBasis E).repr w := map_smul _ _ _
+       rw [hrepr]
+@@ -165,7 +161,12 @@
+         ((chartModelBasis E) i) ((chartModelBasis E) k) =
+       chartRicciTensor (I := I) g x i k (extChartAt I x x) := by
+   classical
+-  rw [ricciFun_apply]
++  change (∑ i' : Fin (Module.finrank ℝ E),
++    ∑ k' : Fin (Module.finrank ℝ E),
++      ((chartModelBasis E).repr ((chartModelBasis E) i)) i' *
++        ((chartModelBasis E).repr ((chartModelBasis E) k)) k' *
++        chartRicciTensor (I := I) g x i' k' (extChartAt I x x)) =
++    chartRicciTensor (I := I) g x i k (extChartAt I x x)
+   conv_lhs => rw [show
+       (∑ i' : Fin (Module.finrank ℝ E),
+         ∑ k' : Fin (Module.finrank ℝ E),
+--- a/DifferentialGeometry/Geometry/Connection/ChartFrame/ChartLieBracket.lean
++++ b/DifferentialGeometry/Geometry/Connection/ChartFrame/ChartLieBracket.lean
+@@ -400,9 +400,9 @@
+     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x)
+     {f : M → ℝ} (hf : ContMDiffAt I 𝓘(ℝ) 2 f x)
+     (hx_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E)) :
+-    extDerivFun f x (VectorField.mlieBracket I X Y x) =
+-      extDerivFun (fun b => extDerivFun f b (Y b)) x (X x) -
+-        extDerivFun (fun b => extDerivFun f b (X b)) x (Y x) := by
++    mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x) =
++      mvfderiv (I := I) (fun b => mvfderiv (I := I) f b (Y b)) x (X x) -
++        mvfderiv (I := I) (fun b => mvfderiv (I := I) f b (X b)) x (Y x) := by
+   classical
+   set φ := extChartAt I x with hφ
+   set ftilde : E → ℝ := f ∘ φ.symm with hftilde
+@@ -466,7 +466,7 @@
+   have hsub_X : (X x : E) = Xchart (φ x) := hXchart_at.symm
+   have hsub_Y : (Y x : E) = Ychart (φ x) := hYchart_at.symm
+   have hLHS_chart :
+-      extDerivFun f x (VectorField.mlieBracket I X Y x) =
++      mvfderiv (I := I) f x (VectorField.mlieBracket I X Y x) =
+         fderiv ℝ ftilde (φ x) (VectorField.mlieBracket I X Y x) := by
+     change (NormedSpace.fromTangentSpace (f x))
+         (mfderiv I 𝓘(ℝ) f x (VectorField.mlieBracket I X Y x)) =
+@@ -474,16 +474,16 @@
+     rw [mfderiv_scalar_eq_chart_fderiv (I := I) x f hsrc_chart hx_int hf_mdiff
+         (VectorField.mlieBracket I X Y x), htriv_id]
+     rfl
+-  have hg_eq_Y : (fun b => extDerivFun f b (Y b)) = (fun b => mfderiv I 𝓘(ℝ) f b (Y b)) := by
++  have hg_eq_Y : (fun b => mvfderiv (I := I) f b (Y b)) = (fun b => mfderiv I 𝓘(ℝ) f b (Y b)) := by
+     funext b
+     change (NormedSpace.fromTangentSpace _) (mfderiv I 𝓘(ℝ) f b (Y b)) = _
+     rfl
+-  have hg_eq_X : (fun b => extDerivFun f b (X b)) = (fun b => mfderiv I 𝓘(ℝ) f b (X b)) := by
++  have hg_eq_X : (fun b => mvfderiv (I := I) f b (X b)) = (fun b => mfderiv I 𝓘(ℝ) f b (X b)) := by
+     funext b
+     change (NormedSpace.fromTangentSpace _) (mfderiv I 𝓘(ℝ) f b (X b)) = _
+     rfl
+   have hRHS_chart_Y :
+-      extDerivFun (fun b => extDerivFun f b (Y b)) x (X x) =
++      mvfderiv (I := I) (fun b => mvfderiv (I := I) f b (Y b)) x (X x) =
+         fderiv ℝ (fun y => fderiv ℝ ftilde y (Ychart y)) (φ x) (Xchart (φ x)) := by
+     rw [hg_eq_Y]
+     change (NormedSpace.fromTangentSpace _)
+@@ -492,7 +492,7 @@
+     rw [hkey, hXchart_at]
+     rfl
+   have hRHS_chart_X :
+-      extDerivFun (fun b => extDerivFun f b (X b)) x (Y x) =
++      mvfderiv (I := I) (fun b => mvfderiv (I := I) f b (X b)) x (Y x) =
+         fderiv ℝ (fun y => fderiv ℝ ftilde y (Xchart y)) (φ x) (Ychart (φ x)) := by
+     rw [hg_eq_X]
+     change (NormedSpace.fromTangentSpace _)

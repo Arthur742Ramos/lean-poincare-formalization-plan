@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+project:
+  name: "Scalar logarithmic resonance identities"
+  description: >-
+    Four unconditional real-calculus lemmas with explicit nonzero logarithmic
+    radius and positive perturbation conditions. This supporting milestone
+    does not formalize a geometric existence obstruction; canonical Point 4
+    remains OPEN. Exact committed-head hosted verification remains pending.
+  authors: ["Arthur Freitas Ramos", "David Barros Hulak", "Ruy J. G. B. de Queiroz"]
+  license: "Apache-2.0"
+  responsible_maintainers: ["Arthur Freitas Ramos"]
+sources:
+  - title: "Pinned Mathlib real-logarithm and inverse derivative APIs"
+    id: "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/SpecialFunctions/Log/Deriv.lean"
+    type: "formalization-source"
+    relationship: "background"
+    location: "Real.hasDerivAt_log and Real.tendsto_log_atTop"
+    note: >-
+      Reuses proved real-calculus APIs through unchanged pinned imports.
+      No external PDE estimate is postulated or encoded as an axiom.
+    license: "Apache-2.0"
+    author_endorsement: "n/a"
+related_formalizations:
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/a0132cd55e2540b2fd26adecea9a07b51f1b8292/curvature"
+    relationship: "builds-on"
+    note: >-
+      Immutable source at full commit a0132cd55e2540b2fd26adecea9a07b51f1b8292. Adds only a separately enumerated
+      supporting scalar unit. Root imports, metadata, original contracts,
+      contributor notices and inherited source/evidence gates are retained.
+  - id: "https://github.com/leanprover-community/mathlib4/tree/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis"
+    relationship: "builds-on"
+    note: >-
+      Immutable source at full commit db584cd6d46c92f209a44c0f1c829460d327499d; reuses real calculus,
+      logarithm, filters and proof tactics, preserving contributor notices.
+  - id: "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/229533f83c83e45e8b7725adda50b53d88699aba/curvature"
+    relationship: "builds-on"
+    note: >-
+      Published draft PR135 supporting dependency at full commit 229533f83c83e45e8b7725adda50b53d88699aba,
+      tree 5aa2971a0b54b77aaa1bc711b435795d86db6467. Reuses the bounded inventory adapter in
+      scripts/point4_smooth_forward_release_guard.py while retaining its
+      pre-import executable binding, actual-main fixtures and inherited gates.
+      This dependency was published as a draft and is not assumed merged.
+status:
+  scope: >-
+    Supporting scalar identities only; no PDE hypotheses or geometric
+    construction. Canonical Point 4 remains OPEN. Author exact 4.33 compilation
+    passed; independent source review approved the exact module. A fresh
+    reviewer probe timed out after 120 seconds without output and is not an
+    independent build pass. Exact committed-head hosted gates remain pending.
+  main_results: []
+automation:
+  methods:
+    - method: "agent"
+      models: ["GPT-6.1"]
+      framework: "Codex"
+      tool_setup: >-
+        Owned serial Lean 4.33 compiler, at most two CPUs and six GiB RSS,
+        recorded source/toolchain identities and termination; exact rational
+        arithmetic symbolic checks and immutable public-source inspection.
+      prompting_notes: >-
+        Formalize small analytic identities with actual proofs and standard
+        axioms while retaining all canonical and regression gates.
+review:
+  status: "pending"
+  notes: >-
+    Exact scalar source review approved; integration adapter and committed
+    head require separate independent review and hosted evidence before merge.
+acknowledgements: >-
+  The repository human authors, inherited contributors, and Mathlib authors
+  and contributors. No selected registry artifact identity is changed.

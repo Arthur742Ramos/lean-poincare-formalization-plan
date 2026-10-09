@@ -1,0 +1,42 @@
+This directory records the provenance of the 55 DifferentialGeometry Lean
+sources used by the local chart connection proof.
+
+The originals are from qinz1yang/differential-geometry at
+8bd406e35c33a200e9b88895cf11ee8429194e15 and are released under the Apache
+License 2.0. LICENSE and README.upstream.md are copied from that commit.
+Contributor notices remain in the sources, including Jack McCarthy and
+Ziyang Qin notices. The upstream README describes its historical setup;
+the present package uses official Lean 4.33.0 and Mathlib
+db584cd6d46c92f209a44c0f1c829460d327499d.
+
+The port changes 26 upstream files for those APIs. Definitions and statements
+are not all preserved literally. The actual chartLeviCivita,
+chartLeviCivitaInnerCLM and chartLeviCivitaGoodSet definitions match the
+original source text after newline normalization. SOURCE-PROVENANCE.json
+records every original and ported source hash and the import graph.
+minimal-upstream-port.patch retains the reviewed source delta.
+MetricCompatible retains its original ChartDensity import, and Section
+retains its original Mathlib.Geometry.Manifold.Algebra.SmoothFunctions import.
+
+ChartPort/MetricAPI.lean and ChartPort/ChartIdentity.lean are new local work.
+They reuse the project's existing RicciFlow.SmoothForward.toC2 and chosen
+Levi-Civita connection. The comparison uses the upstream chart construction,
+its proved torsion and metric compatibility, local Koszul uniqueness and a
+smooth section through a tangent vector. It applies to the constant downgraded
+family, points in the actual chart good set and sections differentiable at
+the evaluation point. Its finite-dimensional complete real tangent model,
+smooth manifold, T2Space and SigmaCompactSpace premises are retained.
+
+The 13 inherited project modules remain the exact public base files. Twelve
+earlier desktop copies differ only by CRLF/LF encoding; those evidence bytes
+remain historical and do not replace the public files. The 31 Mathlib support
+sources are unchanged pinned originals addressing missing artifacts; they
+are not vendored here or modified in the Mathlib package.
+
+The mathematical proof packet has independent review approval. This concrete
+candidate has not yet been compiled or qualified by its proposed focused CI.
+Copied development imports and prior receipts do not qualify a new candidate.
+Historical source binding and full master inventory admission remain pending.
+Point4 and both general targets remain OPEN. Global chart coverage,
+evolving-family comparison, upstream global chosen-connection equality,
+curvature and Ricci comparisons, and PDE existence remain separate work.

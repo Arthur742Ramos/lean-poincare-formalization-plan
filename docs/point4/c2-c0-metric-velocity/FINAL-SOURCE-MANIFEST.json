@@ -1,0 +1,72 @@
+{
+  "artifact": "C2 metric endpoint extension with C0 prescribed velocity",
+  "current_source_identity": "frozen-003",
+  "status": "SOURCE-ONLY APPROVE; uncompiled; no kernel or exact4.33 verification",
+  "date": "2026-10-05",
+  "contract_project_commit": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
+  "inherited_source_commit": "90cc7ebed996f28acb57ef9948d37f114088bd4d",
+  "mathlib_commit": "db584cd6d46c92f209a44c0f1c829460d327499d",
+  "lean_requested": "leanprover/lean4:v4.33.0",
+  "current_files": [
+    {
+      "file": "C0EndpointCompactPositivity.lean",
+      "bytes": 14511,
+      "sha256": "45261b684e7add6c9e83eca9266777b8d12b6c7c598084d1d9e10b74f7867274",
+      "git_blob_sha1": "8ccc3b69623eb04e51c5245eddcbf28c7d94ced2",
+      "lines": 286
+    },
+    {
+      "file": "C0FiniteAtlasGaussian.lean",
+      "bytes": 20949,
+      "sha256": "474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f",
+      "git_blob_sha1": "b992548e1168157fdaa77e9c59a070cd75965392",
+      "lines": 403
+    },
+    {
+      "file": "C0GaussianEndpoint.lean",
+      "bytes": 4776,
+      "sha256": "dd5dcbe309cc2e41eb60c7ed6e95a4e87161272abdc207658ff249f1cb077fa8",
+      "git_blob_sha1": "1c2f70c3a83e1f32193593ac0dd76181be66ee4f",
+      "lines": 108
+    },
+    {
+      "file": "C2MetricVelocityExtension.lean",
+      "bytes": 9800,
+      "sha256": "0c6c921536d3cade268948431dd254dd7c602cc04f2d8d4aa7365ab6c39793b7",
+      "git_blob_sha1": "4bc0ef189f561fb4d8278273b3f6361048e115cf",
+      "lines": 196
+    }
+  ],
+  "independent_review": {
+    "status": "SOURCE-ONLY APPROVE",
+    "report": "source-only-review-frozen-003/REVIEW.md",
+    "sha256": "07c9bce974d0fe9b4bf4d7044263bdf520dfeecc018873078674c4481ee4c5fa",
+    "forward_reverse_replay": "zero-fuzz exact byte reconstruction reported independently"
+  },
+  "historical_identity": {
+    "source": "frozen-001",
+    "status": "SOURCE REJECT; two composition-basepoint defects",
+    "report": "historical-review-001/REVIEW.md",
+    "sha256": "fe937c82aee7f994a5fef19a0d54cfb789988fb2f8df3b9900d66d8290e359a1"
+  },
+  "qualification": {
+    "project_import_graph_complete": true,
+    "project_modules": 63,
+    "modern_to_legacy_project_edges": 0,
+    "external_import_graph_complete": false,
+    "external_frontier_modules": 93,
+    "official_exact_pin_source_receipts": 16,
+    "all_official_source_blobs_match": true,
+    "strong_C2_time_trace": "not claimed",
+    "Point4": "OPEN; no PDE solution or weak-competitor uniqueness is asserted"
+  },
+  "scope": "No supplied regularizer/density/solver witness; actual finite Gaussian smoothing, symmetric tensor reconstruction, compact positivity control, clamped amplitude and ordinary endpoint component derivative",
+  "worker_actions": "Only new artifact-directory source/provenance/package writes; no Lean/compiler/toolchain/cache/dependency download, no Lean execution, no existing source tree mutation, no publication or CI edits",
+  "historical_source_approved_002": {
+    "source": "frozen-002",
+    "status": "SOURCE-ONLY APPROVE; subsequently superseded by final source-approved003",
+    "report": "historical-source-approved-review-002/REVIEW.md",
+    "sha256": "bf0f8e8e03ed5760ceadeed4edacb506f165b5ffb0befd1257d6a02337b9dc03",
+    "exact4.33_verified": false
+  }
+}
