@@ -2535,6 +2535,64 @@ else:
             self.assertEqual(result.returncode,0,result.stderr.decode())
             self.assertEqual(result.stdout.decode().splitlines(),['GENUINE_DIRECT_MODULE_AND_RUNPY_DICTIONARY_PASS'])
             self.assertEqual(path.read_bytes(),program.encode())
+        # Authenticate the real direct interpreter context before exercising
+        # each complete current bootstrap, not just its builtins helper.
+        context_program = '''import json
+print(json.dumps({'main': __name__ == '__main__',
+                  'annotation_type': type(__annotations__).__name__,
+                  'annotations_empty': __annotations__ == {}}))
+'''
+        result=subprocess.run([sys.executable,'-B','-X','utf8','-c',context_program],
+                              stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False,timeout=30)
+        self.assertEqual(result.returncode,0,result.stderr.decode())
+        self.assertEqual(json.loads(result.stdout),{'main':True,'annotation_type':'dict','annotations_empty':True})
+        import builtins
+        class ForeignAnnotations(dict):pass
+        with self.modes():
+            for number,name in self.units.items():
+                path='curvature/scripts/'+name+'.py'
+                raw=(comp.ROOT/path).read_bytes()
+                terminal=ast.parse(raw).body[-1]
+                self.assertIsInstance(terminal,ast.If)
+                self.assertEqual(ast.dump(terminal.test),ast.dump(ast.parse("__name__ == '__main__'",mode='eval').body))
+                prefix=b''.join(raw.splitlines(keepends=True)[:terminal.lineno-1])
+                code=compile(prefix,str(comp.ROOT/path),'exec',dont_inherit=True)
+                library=comp.curvature_embedded_module('curvature_leaf_binding' if number in (111,132,134) else 'curvature_auxiliary_binding')
+                for context,annotations in (('__main__',{'foreign':True}),
+                                             ('__main__',ForeignAnnotations()),
+                                             ('foreign_annotation_context',{})):
+                    namespace={'__file__':str(comp.ROOT/path),'__name__':context,
+                               '__builtins__':builtins,'__annotations__':annotations}
+                    before=comp._curvature_registration_seals;keys=set(library._BINDINGS)
+                    with self.assertRaisesRegex(AssertionError,'initial main annotations drift'):
+                        exec(code,namespace)
+                    self.assertIs(namespace['__annotations__'],annotations)
+                    self.assertEqual(comp._curvature_registration_seals,before)
+                    self.assertEqual(set(library._BINDINGS),keys)
+                    self.assertIsNone(comp._curvature_install_owner)
+                annotations={}
+                namespace={'__file__':str(comp.ROOT/path),'__name__':'__main__',
+                           '__builtins__':builtins,'__annotations__':annotations}
+                before=comp._curvature_registration_seals
+                try:
+                    exec(code,namespace)
+                    self.assertIs(namespace['__annotations__'],annotations)
+                    self.check_namespace(number,namespace)
+                    annotations['foreign']=True
+                    try:
+                        with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
+                    finally:annotations.clear()
+                    self.check_namespace(number,namespace)
+                    del namespace['__annotations__']
+                    try:
+                        with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
+                    finally:namespace['__annotations__']=annotations
+                    self.check_namespace(number,namespace)
+                    self.assertEqual(comp.verify_current(),self.model)
+                finally:
+                    library._BINDINGS.pop(id(namespace),None)
+                    comp._curvature_registration_seals=before
+                comp.curvature_registration_check(library.__name__,library._BINDINGS)
 
 # END authenticated finite curvature tests
 if __name__=='__main__':
