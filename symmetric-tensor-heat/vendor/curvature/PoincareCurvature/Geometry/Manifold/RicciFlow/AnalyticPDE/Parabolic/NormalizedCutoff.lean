@@ -1,5 +1,5 @@
-import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ModelManifoldGaugeFlow
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.LocalizedCoefficientScaling
+import Mathlib.Geometry.Manifold.PartitionOfUnity
 
 /-!
 # Quantitative smooth normalized cutoffs
@@ -14,10 +14,32 @@ noncomputable section
 set_option linter.unusedSectionVars false
 
 open Set
-open scoped Manifold ContDiff
+open scoped Topology Manifold ContDiff
 
 namespace RicciFlow
 namespace AnalyticPDE
+
+/-- A compact subset of an open set in a finite-dimensional real normed space
+has a smooth cutoff equal to one near the compact set. -/
+private theorem exists_contDiff_cutoff_one_nhdsSet_of_isCompact_for_heat
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
+    {n : ℕ∞} {K U : Set F} (hK : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U) :
+    ∃ χ : F → ℝ, ContDiff ℝ n χ ∧ HasCompactSupport χ ∧ tsupport χ ⊆ U ∧
+      (∀ᶠ x in 𝓝ˢ K, χ x = 1) ∧ ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1 := by
+  obtain ⟨L, hLc, hKL, hLU⟩ := exists_compact_between hK hU hKU
+  obtain ⟨f, h1, h0, hIcc⟩ :=
+    exists_contMDiffMap_one_nhds_of_subset_interior 𝓘(ℝ, F) hK.isClosed hKL (n := n)
+  have hsupp : Function.support (f : F → ℝ) ⊆ L := by
+    intro x hx
+    by_contra hxL
+    exact hx (h0 x hxL)
+  have hcs : HasCompactSupport (f : F → ℝ) :=
+    HasCompactSupport.of_support_subset_isCompact hLc hsupp
+  refine ⟨(f : F → ℝ), contMDiff_iff_contDiff.mp f.contMDiff, hcs, ?_, h1, hIcc⟩
+  calc tsupport (f : F → ℝ) = closure (Function.support (f : F → ℝ)) := rfl
+    _ ⊆ closure L := closure_mono hsupp
+    _ = L := hLc.isClosed.closure_eq
+    _ ⊆ U := hLU
 
 /-- Quantitative data attached to a smooth compactly supported cutoff on a
 finite-dimensional real normed space. -/
@@ -61,7 +83,7 @@ theorem exists_normalizedCutoffControl_one_nhdsSet_of_isCompact
       (∀ᶠ x in nhdsSet K, χ.cutoff x = 1) ∧
       ∀ x, χ.cutoff x ∈ Icc (0 : ℝ) 1 := by
   obtain ⟨f, hf, hfc, hfsupp, hfOne, hfIcc⟩ :=
-    SmoothDependenceCk.exists_contDiff_cutoff_one_nhdsSet_of_isCompact
+    exists_contDiff_cutoff_one_nhdsSet_of_isCompact_for_heat
       (n := 3) hK hU hKU
   have hf1 : ContDiff ℝ 1 f := hf.of_le (by simp)
   obtain ⟨L, hL0, hL⟩ :=

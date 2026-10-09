@@ -242,6 +242,69 @@ theorem contMDiffOn_frameCovariantDerivativeTangent_of_level {n : WithTop ℕ∞
       exact contMDiffOn_smulRightSection_of_level (I := I) hu hext hframe)
 
 /-- Tangent-bundle copy of
+`CovariantDerivative.contMDiffCovariantDerivativeOn_two_of_contMDiffCovariantDerivative_two`: a
+globally `C²` covariant derivative on the tangent bundle restricts to a `C²` covariant derivative on
+every open set (needs no Π fiber-norm). -/
+theorem contMDiffCovariantDerivativeOn_two_of_contMDiffCovariantDerivative_two
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
+    {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
+    [ContMDiffCovariantDerivative cov 2]
+    {u : Set M} (hu : IsOpen u) :
+    ContMDiffCovariantDerivativeOn E 2 cov.toFun u := by
+  refine { contMDiff := ?_ }
+  intro σ hσ
+  apply contMDiffOn_of_locally_contMDiffOn
+  intro x hx
+  have hux : u ∈ nhds x := hu.mem_nhds hx
+  obtain ⟨ψ, hψtsupp, hψsupp⟩ :=
+    (SmoothBumpFunction.nhds_basis_support (I := I) (c := x) hux).mem_iff.mp hux
+  have hψ : ContMDiff I 𝓘(ℝ) 3 ψ :=
+    ψ.contMDiff.of_le (show (3 : WithTop ℕ∞) ≤ ∞ by decide)
+  let τ : Π y : M, TangentSpace I y := fun y ↦ ψ y • σ y
+  have hτ : ContMDiff I (I.prod 𝓘(ℝ, E)) 3 (T% τ) := by
+    simpa [τ] using
+      (ContMDiffOn.smul_section_of_tsupport (I := I) (F := E)
+        (V := (TangentSpace I : M → Type _)) (u := u)
+        (n := (3 : WithTop ℕ∞)) (ψ := ψ) hψ.contMDiffOn hu hψtsupp hσ)
+  have hcovτ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) 2
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) y (cov τ y)) := by
+    have hτOn : ContMDiffOn I (I.prod 𝓘(ℝ, E)) 3 (T% τ) Set.univ := by
+      simpa [contMDiffOn_univ] using hτ
+    simpa [contMDiffOn_univ] using
+      ((inferInstance : ContMDiffCovariantDerivative cov 2).contMDiff.contMDiff hτOn)
+  have hψeq1 : {y : M | ψ y = 1} ∈ nhds x := by
+    filter_upwards [ψ.eventuallyEq_one] with y hy
+    simpa using hy
+  rcases mem_nhds_iff.mp hψeq1 with ⟨w, hwsub, hwopen, hxw⟩
+  have hwu : w ⊆ u := by
+    intro y hy
+    have hy1 : ψ y = 1 := hwsub hy
+    have hysupp : y ∈ Function.support ψ := by
+      simpa [Function.support] using show ψ y ≠ 0 by rw [hy1]; norm_num
+    exact hψsupp hysupp
+  have hEq : ∀ y ∈ w, cov σ y = cov τ y := by
+    intro y hy
+    have hyu : y ∈ u := hwu hy
+    have hσy : MDiffAt (T% σ) y :=
+      (((hσ y hyu).contMDiffAt (hu.mem_nhds hyu)).of_le
+        (by simp : (1 : WithTop ℕ∞) ≤ 3)).mdifferentiableAt one_ne_zero
+    have hτy : MDiffAt (T% τ) y :=
+      (hτ.contMDiffAt.of_le (by simp : (1 : WithTop ℕ∞) ≤ 3)).mdifferentiableAt one_ne_zero
+    exact (cov.isCovariantDerivativeOn (s := w)).congr_of_eqOn hσy hτy (hwopen.mem_nhds hy)
+      (fun z hz ↦ by
+        have hz1 : ψ z = 1 := hwsub hz
+        calc
+          σ z = 1 • σ z := by simpa using (one_smul ℝ (σ z)).symm
+          _ = ψ z • σ z := by simpa [hz1])
+  have hcovσw : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] E)) 2
+      (fun y ↦ TotalSpace.mk' (E →L[ℝ] E) (E := THom) y (cov σ y)) w := by
+    refine ContMDiffOn.congr hcovτ.contMDiffOn ?_
+    intro y hy
+    exact congrArg (fun A ↦ TotalSpace.mk' (E := THom) (E →L[ℝ] E) y A) (hEq y hy)
+  refine ⟨w, hwopen, hxw, ?_⟩
+  simpa [Set.inter_eq_right.mpr hwu] using hcovσw
+
+/-- Tangent-bundle copy of
 `CovariantDerivative.contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one`: a
 globally `C¹` covariant derivative on the tangent bundle restricts to a `C¹` covariant derivative on
 every open set (needs no Π fiber-norm). -/

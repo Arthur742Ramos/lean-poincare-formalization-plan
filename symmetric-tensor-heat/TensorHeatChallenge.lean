@@ -15,15 +15,17 @@ development.  The rough Laplacian is the orthonormal trace of the second
 covariant derivative, expanded using Mathlib's manifold derivative and the
 given tangent connection.  The conclusion constructs finite-atlas coefficient
 spaces and their geometric readouts.  For every represented symmetric spatial
-datum and symmetric parabolic source, there is a unique coefficient witness
-whose readout has the asserted initial trace, is fiberwise symmetric, solves
-the actual tensor heat equation, and satisfies a global finite-atlas Schauder
-estimate.
+datum and symmetric parabolic source, there is a coefficient witness whose
+readout has the asserted initial trace, is fiberwise symmetric, solves the
+actual tensor heat equation, and satisfies a global finite-atlas Schauder
+estimate.  The statement does not claim uniqueness of the coefficient
+witness.
 
 This is deliberately a theorem for the constructed finite-atlas Holder data
 class.  It does not assert that every bare intrinsic section has such a
-coefficient representation, and uniqueness is of the atlas coefficient
-witness in the constructed classical class.
+coefficient representation.  Its geometric uniqueness clause compares
+readouts for fixed initial and source representatives `D` and `f`; it does
+not identify different atlas representatives of the same global data.
 -/
 
 @[expose] public noncomputable section
@@ -59,6 +61,7 @@ local notation "T₃" => (fun x : M => TM x →L[ℝ] T₂ x)
     NormedAddCommGroup (T₂ x) := inferInstance
 @[reducible] local instance challengeTwoFiberNormedSpace (x : M) :
     NormedSpace ℝ (T₂ x) := inferInstance
+
 local instance challengeTwoTotalSpaceTopology :
     TopologicalSpace (TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) T₂) :=
   Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
@@ -227,9 +230,11 @@ def HasParabolicC2AlphaNormLe {X : Type u} {V : Type v}
 
 /-- The complete Mathlib-facing statement.  The existential types are the
 finite-atlas initial, source, and higher-coefficient spaces constructed by the
-proof.  Their readout maps expose every geometric conclusion, while
-`coordinateClass` records the precise unique atlas solution class rather than
-claiming uniqueness among unrepresented bare fields. -/
+proof.  Their readout maps expose every geometric conclusion.  The
+proof-chosen `coordinateClass` records which represented witnesses receive the
+analytic estimate; no coefficient-witness uniqueness is asserted.  The
+geometric uniqueness clause is explicitly for fixed initial and source
+representatives. -/
 def completeStatement : Prop :=
   ∀ {E : Type u} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [CompleteSpace E] [Nontrivial E]
@@ -239,8 +244,55 @@ def completeStatement : Prop :=
     [I.Boundaryless] [Nonempty M]
     [RiemannianBundle (TangentSpace I : M → Type _)]
     [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
-    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
-    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I],
+    let tangent := (TangentSpace I : M → Type _)
+    let twoTensor := fun x : M => tangent x →L[ℝ] tangent x →L[ℝ] ℝ
+    letI (V : Type u) [NormedAddCommGroup V] [NormedSpace ℝ V] :
+        NormedAddCommGroup (V →L[ℝ] V →L[ℝ] ℝ) :=
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI (V : Type u) [NormedAddCommGroup V] [NormedSpace ℝ V] :
+        NormedSpace ℝ (V →L[ℝ] V →L[ℝ] ℝ) :=
+      ContinuousLinearMap.toNormedSpace
+    letI (x : M) : NormedAddCommGroup (twoTensor x) := inferInstance
+    letI (x : M) : NormedSpace ℝ (twoTensor x) := inferInstance
+    letI : TopologicalSpace (TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) twoTensor) :=
+      Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
+        (RingHom.id ℝ) E tangent (E →L[ℝ] ℝ)
+        (fun x => tangent x →L[ℝ] ℝ)
+    letI : FiberBundle (E →L[ℝ] E →L[ℝ] ℝ) twoTensor :=
+      Bundle.ContinuousLinearMap.fiberBundle
+        (RingHom.id ℝ) E tangent (E →L[ℝ] ℝ)
+        (fun x => tangent x →L[ℝ] ℝ)
+    letI : VectorBundle ℝ (E →L[ℝ] E →L[ℝ] ℝ) twoTensor :=
+      Bundle.ContinuousLinearMap.vectorBundle
+        (RingHom.id ℝ) E tangent (E →L[ℝ] ℝ)
+        (fun x => tangent x →L[ℝ] ℝ)
+    letI threeModelNormedAddCommGroup (V : Type u)
+        [NormedAddCommGroup V] [NormedSpace ℝ V] :
+        NormedAddCommGroup (V →L[ℝ] V →L[ℝ] V →L[ℝ] ℝ) :=
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI threeModelNormedSpace (V : Type u)
+        [NormedAddCommGroup V] [NormedSpace ℝ V] :
+        NormedSpace ℝ (V →L[ℝ] V →L[ℝ] V →L[ℝ] ℝ) :=
+      ContinuousLinearMap.toNormedSpace
+    letI (x : M) : NormedAddCommGroup (tangent x →L[ℝ] twoTensor x) :=
+      threeModelNormedAddCommGroup (tangent x)
+    letI (x : M) : NormedSpace ℝ (tangent x →L[ℝ] twoTensor x) :=
+      threeModelNormedSpace (tangent x)
+    letI : TopologicalSpace (TotalSpace
+        (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
+        (fun x : M => tangent x →L[ℝ] twoTensor x)) :=
+      Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
+        (RingHom.id ℝ) E tangent (E →L[ℝ] E →L[ℝ] ℝ) twoTensor
+    letI : FiberBundle (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
+        (fun x : M => tangent x →L[ℝ] twoTensor x) :=
+      Bundle.ContinuousLinearMap.fiberBundle
+        (RingHom.id ℝ) E tangent (E →L[ℝ] E →L[ℝ] ℝ) twoTensor
+    letI : VectorBundle ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
+        (fun x : M => tangent x →L[ℝ] twoTensor x) :=
+      Bundle.ContinuousLinearMap.vectorBundle
+        (RingHom.id ℝ) E tangent (E →L[ℝ] E →L[ℝ] ℝ) twoTensor
+    ∀ (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [cov.ContMDiffCovariantDerivative 1]
     (cov₂ : CovariantDerivative I
       (E →L[ℝ] E →L[ℝ] ℝ)
@@ -320,6 +372,55 @@ def completeStatement : Prop :=
           mvfderiv (I := I) (fun y => inner ℝ (U y) (V y)) x w =
             inner ℝ (cov U x w) (V x) + inner ℝ (U x) (cov V x w)
     let leviCivita : Prop := cov.torsion = 0 ∧ metricCompatible
+    let Matrix := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ
+    letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] Matrix) :=
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] Matrix) :=
+      ContinuousLinearMap.toNormedSpace
+    let parabolicMetric := fun (p q : ℝ × E) =>
+      max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2)
+    let hasParabolicC0 := fun (S N : ℝ) (f : ℝ × E → Matrix) =>
+      ∃ B ≥ 0, ∃ H ≥ 0, B + H ≤ N ∧
+        (∀ z, z.1 ∈ Ioc t₀ S → ‖f z‖ ≤ B) ∧
+        ∀ p, p.1 ∈ Ioc t₀ S → ∀ q, q.1 ∈ Ioc t₀ S →
+          ‖f p - f q‖ ≤ H * parabolicMetric p q ^ α
+    let hasParabolicC0First := fun (S N : ℝ)
+        (f : ℝ × E → E →L[ℝ] Matrix) =>
+      ∃ B ≥ 0, ∃ H ≥ 0, B + H ≤ N ∧
+        (∀ z, z.1 ∈ Ioc t₀ S → ‖f z‖ ≤ B) ∧
+        ∀ p, p.1 ∈ Ioc t₀ S → ∀ q, q.1 ∈ Ioc t₀ S →
+          ‖f p - f q‖ ≤ H * parabolicMetric p q ^ α
+    let hasParabolicC0Second := fun (S N : ℝ)
+        (f : ℝ × E → E →L[ℝ] E →L[ℝ] Matrix) =>
+      ∃ B ≥ 0, ∃ H ≥ 0, B + H ≤ N ∧
+        (∀ z, z.1 ∈ Ioc t₀ S → ‖f z‖ ≤ B) ∧
+        ∀ p, p.1 ∈ Ioc t₀ S → ∀ q, q.1 ∈ Ioc t₀ S →
+          ‖f p - f q‖ ≤ H * parabolicMetric p q ^ α
+    let hasSpatialC2 := fun (N : ℝ) (f : E → Matrix)
+        (df : E → E →L[ℝ] Matrix)
+        (d2f : E → E →L[ℝ] E →L[ℝ] Matrix) =>
+      0 ≤ N ∧
+        (∀ x, ‖f x‖ ≤ N) ∧ (∀ x, ‖df x‖ ≤ N) ∧
+        (∀ x, ‖d2f x‖ ≤ N) ∧
+        (∀ x y, ‖f x - f y‖ ≤ N * dist x y ^ α) ∧
+        (∀ x y, ‖df x - df y‖ ≤ N * dist x y ^ α) ∧
+        (∀ x y, ‖d2f x - d2f y‖ ≤ N * dist x y ^ α) ∧
+        (∀ x, HasFDerivAt f (df x) x) ∧
+        ∀ x, HasFDerivAt df (d2f x) x
+    let hasParabolicC2 := fun (S N : ℝ) (f : ℝ × E → Matrix)
+        (df : ℝ × E → E →L[ℝ] Matrix)
+        (d2f : ℝ × E → E →L[ℝ] E →L[ℝ] Matrix)
+        (dtf : ℝ × E → Matrix) =>
+      hasParabolicC0 S N f ∧
+        hasParabolicC0First S N df ∧
+        hasParabolicC0Second S N d2f ∧
+        hasParabolicC0 S N dtf ∧
+        (∀ t, t ∈ Ioc t₀ S → ∀ x,
+          HasFDerivAt (fun y => f (t, y)) (df (t, x)) x) ∧
+        (∀ t, t ∈ Ioc t₀ S → ∀ x,
+          HasFDerivAt (fun y => df (t, y)) (d2f (t, x)) x) ∧
+        ∀ t, t ∈ Ioo t₀ S → ∀ x,
+          HasDerivAt (fun s => f (s, x)) (dtf (t, x)) t
     leviCivita → inducedTwo → inducedThree →
     0 < α → α < 1 →
     ∃ (S : ℝ), t₀ < S ∧
@@ -401,12 +502,10 @@ def completeStatement : Prop :=
         (∀ f t x, sourceTensor f t x = ∑ᶠ i, sourceLocalTensor f i t x) ∧
         (∀ q t, t ∈ Ioc t₀ S → ∀ x a b,
           solutionTensor q t x a b =
-            ((∑ᶠ i, solutionLocalTensor q i t x a b) +
-              ∑ᶠ i, solutionLocalTensor q i t x b a) / 2) ∧
+            ∑ᶠ i, solutionLocalTensor q i t x a b) ∧
         (∀ q t, t ∈ Ioo t₀ S → ∀ x a b,
           solutionTimeDerivative q t x a b =
-            ((∑ᶠ i, solutionLocalTimeDerivative q i t x a b) +
-              ∑ᶠ i, solutionLocalTimeDerivative q i t x b a) / 2) ∧
+            ∑ᶠ i, solutionLocalTimeDerivative q i t x a b) ∧
         (∀ D i x, atlasWeight i x = 0 → initialLocalTensor D i x = 0) ∧
         (∀ f i t x, atlasWeight i x = 0 → sourceLocalTensor f i t x = 0) ∧
         (∀ q i t x, atlasWeight i x = 0 → solutionLocalTensor q i t x = 0) ∧
@@ -438,6 +537,30 @@ def completeStatement : Prop :=
         Function.Injective (fun q =>
           (solutionValue q, solutionSpaceDeriv q,
             solutionSpaceSecondDeriv q, solutionTimeDerivCoordinate q)) ∧
+        (∀ (v : Index → BoundedContinuousFunction E Matrix)
+            (dv : Index → BoundedContinuousFunction E (E →L[ℝ] Matrix))
+            (d2v : Index → BoundedContinuousFunction E
+              (E →L[ℝ] E →L[ℝ] Matrix))
+            (H : Index → ℝ),
+          (∀ i, 0 ≤ H i) →
+          (∀ i x y, ‖v i x - v i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x y, ‖dv i x - dv i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x y, ‖d2v i x - d2v i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x, HasFDerivAt (v i) (dv i x) x) →
+          (∀ i x, HasFDerivAt (dv i) (d2v i x) x) →
+          ∃ D : Initial,
+            (∀ i x, initialValue D i x = v i x) ∧
+            (∀ i x, initialSpaceDeriv D i x = dv i x) ∧
+            (∀ i x, initialSpaceSecondDeriv D i x = d2v i x) ∧
+            (∀ i, initialHolderConstant D i = H i) ∧
+            initialSize D = ∑ᶠ i,
+              max (‖v i‖ + H i)
+                (max (‖dv i‖ + H i) (‖d2v i‖ + H i))) ∧
+        (∀ (c : Index → ℝ × E → Matrix) (N : Index → ℝ),
+          (∀ i, hasParabolicC0 Tcoord (N i) (c i)) →
+          ∃ f : Source,
+            (∀ i z, z.1 ∈ Ioc t₀ Tcoord → sourceValue f i z = c i z) ∧
+            sourceNorm f ≤ ∑ᶠ i, N i) ∧
         (∀ c : Index →
             (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ),
           ∃ D, ∀ i x, initialValue D i x = c i) ∧
@@ -447,30 +570,31 @@ def completeStatement : Prop :=
         (∀ c : Index →
             (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ),
           ∃ q, ∀ i z, z.1 ∈ Ioc t₀ Tcoord → solutionValue q i z = c i) ∧
-        (∀ D i, HasSpatialC2AlphaNormLe (X := E)
-          (V := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ)
-          α (initialSize D)
+        (∀ D i, hasSpatialC2 (initialSize D)
           (initialValue D i) (initialSpaceDeriv D i)
           (initialSpaceSecondDeriv D i)) ∧
-        (∀ f i, HasParabolicC0AlphaNormLe (X := E)
-          (V := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ)
-          t₀ Tcoord α (sourceNorm f)
+        (∀ f i, hasParabolicC0 Tcoord (sourceNorm f)
           (sourceValue f i)) ∧
         (∀ D, 0 ≤ initialSize D) ∧ (∀ f, 0 ≤ sourceNorm f) ∧
+        (∀ q, timeDerivative S (solutionTensor q) (solutionTimeDerivative q)) ∧
         (∀ D f,
           symmetric (initialTensor D) →
           (∀ t, t ∈ Ioo t₀ S → symmetric (sourceTensor f t)) →
-          ∃! q : Solution,
+          ∃ q : Solution,
             coordinateClass D f q ∧
             timeDerivative S (solutionTensor q) (solutionTimeDerivative q) ∧
             initialTrace S (solutionTensor q) (initialTensor D) ∧
             (∀ t, t ∈ Ioc t₀ S →
               symmetric (solutionTensor q t)) ∧
             solves S (solutionTensor q) (solutionTimeDerivative q) (sourceTensor f)) ∧
+        (∀ D f q r,
+          initialTrace S (solutionTensor q) (initialTensor D) →
+          initialTrace S (solutionTensor r) (initialTensor D) →
+          solves S (solutionTensor q) (solutionTimeDerivative q) (sourceTensor f) →
+          solves S (solutionTensor r) (solutionTimeDerivative r) (sourceTensor f) →
+          ∀ t, t ∈ Ioc t₀ S → solutionTensor q t = solutionTensor r t) ∧
         (∀ D f q, coordinateClass D f q →
-          (∀ i, HasParabolicC2AlphaNormLe (X := E)
-            (V := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ)
-            t₀ Tcoord α (solutionNorm q)
+          (∀ i, hasParabolicC2 Tcoord (solutionNorm q)
             (solutionValue q i) (solutionSpaceDeriv q i)
             (solutionSpaceSecondDeriv q i) (solutionTimeDerivCoordinate q i)) ∧
           solutionNorm q ≤ C * (initialSize D + sourceNorm f))

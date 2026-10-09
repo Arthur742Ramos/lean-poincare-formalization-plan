@@ -1,0 +1,175 @@
+name: Symmetric tensor heat current Palomar preflight
+
+# Calls Palomar's production verifier at an exact upstream commit. This is a
+# mechanical preflight only; it creates no intake or registry entry.
+on:
+  pull_request:
+    paths:
+      - "symmetric-tensor-heat/**"
+      - ".github/workflows/symmetric-tensor-heat-palomar-current.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  candidate-boundary:
+    name: Exact tensor 4.35 dependency boundary and compiled statement closure
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact tensor candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Authenticate complete tracked source before compiler checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/tensor-boundary"
+          python3 -I -B - <<'PY' | tee "$RUNNER_TEMP/tensor-boundary/source-before.json"
+          import hashlib, json, os, pathlib, re, stat, subprocess
+          root = pathlib.Path('.').absolute()
+          def git(*args):
+              return subprocess.check_output(['git', '--no-replace-objects', '-C', str(root), *args])
+          head = os.environ['EXPECTED_SHA']
+          assert re.fullmatch(r'[0-9a-f]{40}', head)
+          assert git('rev-parse', 'HEAD').decode().strip() == head
+          entries = {}
+          for row in git('ls-tree', '-rz', head).split(b'\0')[:-1]:
+              descriptor, name = row.split(b'\t', 1)
+              mode, kind, oid = descriptor.decode().split()
+              path = name.decode()
+              assert kind == 'blob' and mode in {'100644', '100755'} and path not in entries
+              assert not pathlib.PurePosixPath(path).is_absolute() and '..' not in pathlib.PurePosixPath(path).parts
+              entries[path] = (mode, oid)
+          index = {}
+          for row in git('ls-files', '--stage', '-z').split(b'\0')[:-1]:
+              descriptor, name = row.split(b'\t', 1)
+              mode, oid, stage = descriptor.decode().split()
+              path = name.decode()
+              assert stage == '0' and path not in index
+              index[path] = (mode, oid)
+          assert index == entries, 'Complete tensor source index drift'
+          for path, (mode, oid) in entries.items():
+              file = root / path
+              for parent in file.parents:
+                  assert stat.S_ISDIR(parent.lstat().st_mode), 'Tensor source directory/symlink drift'
+                  if parent == root:
+                      break
+              actual_mode = file.lstat().st_mode
+              assert stat.S_ISREG(actual_mode) and bool(actual_mode & 0o111) == (mode == '100755'), 'Tensor source mode drift'
+              data = file.read_bytes()
+              assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == oid, 'Tensor source blob drift: ' + path
+          assert git('rev-parse', 'HEAD').decode().strip() == head
+          print(json.dumps({'head': head, 'tree': git('rev-parse', head+'^{tree}').decode().strip(), 'tracked_paths': len(entries), 'source_checked': True}, sort_keys=True))
+          PY
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.11.10'
+      - name: Check actual tensor package and immutable provenance
+        working-directory: symmetric-tensor-heat
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check jsonschema==4.26.0 PyYAML==6.0.3
+          python scripts/check-package.py 2>&1 | tee "$RUNNER_TEMP/tensor-boundary/package.log"
+          python scripts/check-provenance.py 2>&1 | tee "$RUNNER_TEMP/tensor-boundary/provenance.log"
+      - name: Install the unchanged pinned elan distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/elan.tar.gz" \
+            https://github.com/leanprover/elan/releases/download/v4.2.3/elan-x86_64-unknown-linux-gnu.tar.gz
+          echo "df0b2b3a439961ffcbb3985214365ffe40f49bc871df04dff268c7d8e21ca8b2  $RUNNER_TEMP/elan.tar.gz" | sha256sum --check
+          mkdir "$RUNNER_TEMP/tensor-boundary-elan"
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP/tensor-boundary-elan"
+          "$RUNNER_TEMP/tensor-boundary-elan/elan-init" -y --no-modify-path --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile only the selected Challenge and run both original kernel guards
+        working-directory: symmetric-tensor-heat
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0-rc2
+          lake exe cache get 2>&1 | tee "$RUNNER_TEMP/tensor-boundary/dependency-cache.log"
+          lake env lean --version | tee "$RUNNER_TEMP/tensor-boundary/compiler.log"
+          grep -Eq '^Lean \(version 4\.35\.0-rc2,' "$RUNNER_TEMP/tensor-boundary/compiler.log"
+          test "$(git -C .lake/packages/mathlib rev-parse HEAD)" = 065356127b1dc0016f66b7283ce0ce2c4055aa55
+          lake build TensorHeatChallenge 2>&1 | tee "$RUNNER_TEMP/tensor-boundary/challenge-build.log"
+          python scripts/check-challenge-boundary.py 2>&1 | tee "$RUNNER_TEMP/tensor-boundary/dependency-only-boundary.log"
+          lake env lean scripts/check-closed-statement.lean 2>&1 | tee "$RUNNER_TEMP/tensor-boundary/compiled-statement-closure.log"
+      - name: Authenticate complete tracked source after compiler checks
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/tensor-boundary"
+          python3 -I -B - <<'PY' | tee "$RUNNER_TEMP/tensor-boundary/source-after.json"
+          import hashlib, json, os, pathlib, re, stat, subprocess
+          root = pathlib.Path('.').absolute()
+          def git(*args):
+              return subprocess.check_output(['git', '--no-replace-objects', '-C', str(root), *args])
+          head = os.environ['EXPECTED_SHA']
+          assert re.fullmatch(r'[0-9a-f]{40}', head)
+          assert git('rev-parse', 'HEAD').decode().strip() == head
+          entries = {}
+          for row in git('ls-tree', '-rz', head).split(b'\0')[:-1]:
+              descriptor, name = row.split(b'\t', 1)
+              mode, kind, oid = descriptor.decode().split()
+              path = name.decode()
+              assert kind == 'blob' and mode in {'100644', '100755'} and path not in entries
+              assert not pathlib.PurePosixPath(path).is_absolute() and '..' not in pathlib.PurePosixPath(path).parts
+              entries[path] = (mode, oid)
+          index = {}
+          for row in git('ls-files', '--stage', '-z').split(b'\0')[:-1]:
+              descriptor, name = row.split(b'\t', 1)
+              mode, oid, stage = descriptor.decode().split()
+              path = name.decode()
+              assert stage == '0' and path not in index
+              index[path] = (mode, oid)
+          assert index == entries, 'Complete tensor source index drift'
+          for path, (mode, oid) in entries.items():
+              file = root / path
+              for parent in file.parents:
+                  assert stat.S_ISDIR(parent.lstat().st_mode), 'Tensor source directory/symlink drift'
+                  if parent == root:
+                      break
+              actual_mode = file.lstat().st_mode
+              assert stat.S_ISREG(actual_mode) and bool(actual_mode & 0o111) == (mode == '100755'), 'Tensor source mode drift'
+              data = file.read_bytes()
+              assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == oid, 'Tensor source blob drift: ' + path
+          assert git('rev-parse', 'HEAD').decode().strip() == head
+          print(json.dumps({'head': head, 'tree': git('rev-parse', head+'^{tree}').decode().strip(), 'tracked_paths': len(entries), 'source_checked': True}, sort_keys=True))
+          PY
+      - name: Preserve exact tensor boundary and compiler evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: tensor-boundary-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/tensor-boundary
+          if-no-files-found: error
+          retention-days: 90
+
+  current-mechanical:
+    needs: candidate-boundary
+    uses: PalomarRegistry/PalomarSubmission/.github/workflows/submission.yml@1703d7babd984ccc3831cdf89c28221abe34808f
+    with:
+      repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+      commit: ${{ github.event.pull_request.head.sha || github.sha }}
+      pipeline_commit: 1703d7babd984ccc3831cdf89c28221abe34808f
+      request_id: heatcheck01x
+      mode: full
+      execution_profile: palomar-standard-v1
+      options: '{"project_path":"symmetric-tensor-heat","comparator_config_path":"symmetric-tensor-heat/comparator.json","formalization_metadata_path":"symmetric-tensor-heat/formalization.yaml","authorization_relationship":"I am a responsible author or maintainer"}'

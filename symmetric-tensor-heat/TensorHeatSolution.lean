@@ -5,6 +5,7 @@ import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatAtlasSymmetricWellPosedness
+import TensorHeatGeometricSymmetry
 
 /-!
 # Short-time heat well-posedness for symmetric covariant two-tensors
@@ -14,15 +15,17 @@ development.  The rough Laplacian is the orthonormal trace of the second
 covariant derivative, expanded using Mathlib's manifold derivative and the
 given tangent connection.  The conclusion constructs finite-atlas coefficient
 spaces and their geometric readouts.  For every represented symmetric spatial
-datum and symmetric parabolic source, there is a unique coefficient witness
-whose readout has the asserted initial trace, is fiberwise symmetric, solves
-the actual tensor heat equation, and satisfies a global finite-atlas Schauder
-estimate.
+datum and symmetric parabolic source, there is a coefficient witness whose
+readout has the asserted initial trace, is fiberwise symmetric, solves the
+actual tensor heat equation, and satisfies a global finite-atlas Schauder
+estimate.  The statement does not claim uniqueness of the coefficient
+witness.
 
 This is deliberately a theorem for the constructed finite-atlas Holder data
 class.  It does not assert that every bare intrinsic section has such a
-coefficient representation, and uniqueness is of the atlas coefficient
-witness in the constructed classical class.
+coefficient representation.  Its geometric uniqueness clause compares
+readouts for fixed initial and source representatives `D` and `f`; it does
+not identify different atlas representatives of the same global data.
 -/
 
 @[expose] public noncomputable section
@@ -60,6 +63,7 @@ local notation "T₃" => (fun x : M => TM x →L[ℝ] T₂ x)
     NormedAddCommGroup (T₂ x) := inferInstance
 @[reducible] local instance challengeTwoFiberNormedSpace (x : M) :
     NormedSpace ℝ (T₂ x) := inferInstance
+
 local instance challengeTwoTotalSpaceTopology :
     TopologicalSpace (TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) T₂) :=
   Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
@@ -229,9 +233,11 @@ def HasParabolicC2AlphaNormLe {X : Type u} {V : Type v}
 
 /-- The complete Mathlib-facing statement.  The existential types are the
 finite-atlas initial, source, and higher-coefficient spaces constructed by the
-proof.  Their readout maps expose every geometric conclusion, while
-`coordinateClass` records the precise unique atlas solution class rather than
-claiming uniqueness among unrepresented bare fields. -/
+proof.  Their readout maps expose every geometric conclusion.  The
+proof-chosen `coordinateClass` records which represented witnesses receive the
+analytic estimate; no coefficient-witness uniqueness is asserted.  The
+geometric uniqueness clause is explicitly for fixed initial and source
+representatives. -/
 def completeStatement : Prop :=
   ∀ {E : Type u} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [CompleteSpace E] [Nontrivial E]
@@ -241,8 +247,55 @@ def completeStatement : Prop :=
     [I.Boundaryless] [Nonempty M]
     [RiemannianBundle (TangentSpace I : M → Type _)]
     [IsContMDiffRiemannianBundle I 2 E (TangentSpace I : M → Type _)]
-    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I]
-    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffVectorBundle 3 E (TangentSpace I : M → Type _) I],
+    let tangent := (TangentSpace I : M → Type _)
+    let twoTensor := fun x : M => tangent x →L[ℝ] tangent x →L[ℝ] ℝ
+    letI (V : Type u) [NormedAddCommGroup V] [NormedSpace ℝ V] :
+        NormedAddCommGroup (V →L[ℝ] V →L[ℝ] ℝ) :=
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI (V : Type u) [NormedAddCommGroup V] [NormedSpace ℝ V] :
+        NormedSpace ℝ (V →L[ℝ] V →L[ℝ] ℝ) :=
+      ContinuousLinearMap.toNormedSpace
+    letI (x : M) : NormedAddCommGroup (twoTensor x) := inferInstance
+    letI (x : M) : NormedSpace ℝ (twoTensor x) := inferInstance
+    letI : TopologicalSpace (TotalSpace (E →L[ℝ] E →L[ℝ] ℝ) twoTensor) :=
+      Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
+        (RingHom.id ℝ) E tangent (E →L[ℝ] ℝ)
+        (fun x => tangent x →L[ℝ] ℝ)
+    letI : FiberBundle (E →L[ℝ] E →L[ℝ] ℝ) twoTensor :=
+      Bundle.ContinuousLinearMap.fiberBundle
+        (RingHom.id ℝ) E tangent (E →L[ℝ] ℝ)
+        (fun x => tangent x →L[ℝ] ℝ)
+    letI : VectorBundle ℝ (E →L[ℝ] E →L[ℝ] ℝ) twoTensor :=
+      Bundle.ContinuousLinearMap.vectorBundle
+        (RingHom.id ℝ) E tangent (E →L[ℝ] ℝ)
+        (fun x => tangent x →L[ℝ] ℝ)
+    letI threeModelNormedAddCommGroup (V : Type u)
+        [NormedAddCommGroup V] [NormedSpace ℝ V] :
+        NormedAddCommGroup (V →L[ℝ] V →L[ℝ] V →L[ℝ] ℝ) :=
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI threeModelNormedSpace (V : Type u)
+        [NormedAddCommGroup V] [NormedSpace ℝ V] :
+        NormedSpace ℝ (V →L[ℝ] V →L[ℝ] V →L[ℝ] ℝ) :=
+      ContinuousLinearMap.toNormedSpace
+    letI (x : M) : NormedAddCommGroup (tangent x →L[ℝ] twoTensor x) :=
+      threeModelNormedAddCommGroup (tangent x)
+    letI (x : M) : NormedSpace ℝ (tangent x →L[ℝ] twoTensor x) :=
+      threeModelNormedSpace (tangent x)
+    letI : TopologicalSpace (TotalSpace
+        (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
+        (fun x : M => tangent x →L[ℝ] twoTensor x)) :=
+      Bundle.ContinuousLinearMap.topologicalSpaceTotalSpace
+        (RingHom.id ℝ) E tangent (E →L[ℝ] E →L[ℝ] ℝ) twoTensor
+    letI : FiberBundle (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
+        (fun x : M => tangent x →L[ℝ] twoTensor x) :=
+      Bundle.ContinuousLinearMap.fiberBundle
+        (RingHom.id ℝ) E tangent (E →L[ℝ] E →L[ℝ] ℝ) twoTensor
+    letI : VectorBundle ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
+        (fun x : M => tangent x →L[ℝ] twoTensor x) :=
+      Bundle.ContinuousLinearMap.vectorBundle
+        (RingHom.id ℝ) E tangent (E →L[ℝ] E →L[ℝ] ℝ) twoTensor
+    ∀ (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [cov.ContMDiffCovariantDerivative 1]
     (cov₂ : CovariantDerivative I
       (E →L[ℝ] E →L[ℝ] ℝ)
@@ -322,6 +375,55 @@ def completeStatement : Prop :=
           mvfderiv (I := I) (fun y => inner ℝ (U y) (V y)) x w =
             inner ℝ (cov U x w) (V x) + inner ℝ (U x) (cov V x w)
     let leviCivita : Prop := cov.torsion = 0 ∧ metricCompatible
+    let Matrix := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ
+    letI : NormedAddCommGroup (E →L[ℝ] E →L[ℝ] Matrix) :=
+      ContinuousLinearMap.toNormedAddCommGroup
+    letI : NormedSpace ℝ (E →L[ℝ] E →L[ℝ] Matrix) :=
+      ContinuousLinearMap.toNormedSpace
+    let parabolicMetric := fun (p q : ℝ × E) =>
+      max (Real.sqrt |p.1 - q.1|) (dist p.2 q.2)
+    let hasParabolicC0 := fun (S N : ℝ) (f : ℝ × E → Matrix) =>
+      ∃ B ≥ 0, ∃ H ≥ 0, B + H ≤ N ∧
+        (∀ z, z.1 ∈ Ioc t₀ S → ‖f z‖ ≤ B) ∧
+        ∀ p, p.1 ∈ Ioc t₀ S → ∀ q, q.1 ∈ Ioc t₀ S →
+          ‖f p - f q‖ ≤ H * parabolicMetric p q ^ α
+    let hasParabolicC0First := fun (S N : ℝ)
+        (f : ℝ × E → E →L[ℝ] Matrix) =>
+      ∃ B ≥ 0, ∃ H ≥ 0, B + H ≤ N ∧
+        (∀ z, z.1 ∈ Ioc t₀ S → ‖f z‖ ≤ B) ∧
+        ∀ p, p.1 ∈ Ioc t₀ S → ∀ q, q.1 ∈ Ioc t₀ S →
+          ‖f p - f q‖ ≤ H * parabolicMetric p q ^ α
+    let hasParabolicC0Second := fun (S N : ℝ)
+        (f : ℝ × E → E →L[ℝ] E →L[ℝ] Matrix) =>
+      ∃ B ≥ 0, ∃ H ≥ 0, B + H ≤ N ∧
+        (∀ z, z.1 ∈ Ioc t₀ S → ‖f z‖ ≤ B) ∧
+        ∀ p, p.1 ∈ Ioc t₀ S → ∀ q, q.1 ∈ Ioc t₀ S →
+          ‖f p - f q‖ ≤ H * parabolicMetric p q ^ α
+    let hasSpatialC2 := fun (N : ℝ) (f : E → Matrix)
+        (df : E → E →L[ℝ] Matrix)
+        (d2f : E → E →L[ℝ] E →L[ℝ] Matrix) =>
+      0 ≤ N ∧
+        (∀ x, ‖f x‖ ≤ N) ∧ (∀ x, ‖df x‖ ≤ N) ∧
+        (∀ x, ‖d2f x‖ ≤ N) ∧
+        (∀ x y, ‖f x - f y‖ ≤ N * dist x y ^ α) ∧
+        (∀ x y, ‖df x - df y‖ ≤ N * dist x y ^ α) ∧
+        (∀ x y, ‖d2f x - d2f y‖ ≤ N * dist x y ^ α) ∧
+        (∀ x, HasFDerivAt f (df x) x) ∧
+        ∀ x, HasFDerivAt df (d2f x) x
+    let hasParabolicC2 := fun (S N : ℝ) (f : ℝ × E → Matrix)
+        (df : ℝ × E → E →L[ℝ] Matrix)
+        (d2f : ℝ × E → E →L[ℝ] E →L[ℝ] Matrix)
+        (dtf : ℝ × E → Matrix) =>
+      hasParabolicC0 S N f ∧
+        hasParabolicC0First S N df ∧
+        hasParabolicC0Second S N d2f ∧
+        hasParabolicC0 S N dtf ∧
+        (∀ t, t ∈ Ioc t₀ S → ∀ x,
+          HasFDerivAt (fun y => f (t, y)) (df (t, x)) x) ∧
+        (∀ t, t ∈ Ioc t₀ S → ∀ x,
+          HasFDerivAt (fun y => df (t, y)) (d2f (t, x)) x) ∧
+        ∀ t, t ∈ Ioo t₀ S → ∀ x,
+          HasDerivAt (fun s => f (s, x)) (dtf (t, x)) t
     leviCivita → inducedTwo → inducedThree →
     0 < α → α < 1 →
     ∃ (S : ℝ), t₀ < S ∧
@@ -403,12 +505,10 @@ def completeStatement : Prop :=
         (∀ f t x, sourceTensor f t x = ∑ᶠ i, sourceLocalTensor f i t x) ∧
         (∀ q t, t ∈ Ioc t₀ S → ∀ x a b,
           solutionTensor q t x a b =
-            ((∑ᶠ i, solutionLocalTensor q i t x a b) +
-              ∑ᶠ i, solutionLocalTensor q i t x b a) / 2) ∧
+            ∑ᶠ i, solutionLocalTensor q i t x a b) ∧
         (∀ q t, t ∈ Ioo t₀ S → ∀ x a b,
           solutionTimeDerivative q t x a b =
-            ((∑ᶠ i, solutionLocalTimeDerivative q i t x a b) +
-              ∑ᶠ i, solutionLocalTimeDerivative q i t x b a) / 2) ∧
+            ∑ᶠ i, solutionLocalTimeDerivative q i t x a b) ∧
         (∀ D i x, atlasWeight i x = 0 → initialLocalTensor D i x = 0) ∧
         (∀ f i t x, atlasWeight i x = 0 → sourceLocalTensor f i t x = 0) ∧
         (∀ q i t x, atlasWeight i x = 0 → solutionLocalTensor q i t x = 0) ∧
@@ -440,6 +540,30 @@ def completeStatement : Prop :=
         Function.Injective (fun q =>
           (solutionValue q, solutionSpaceDeriv q,
             solutionSpaceSecondDeriv q, solutionTimeDerivCoordinate q)) ∧
+        (∀ (v : Index → BoundedContinuousFunction E Matrix)
+            (dv : Index → BoundedContinuousFunction E (E →L[ℝ] Matrix))
+            (d2v : Index → BoundedContinuousFunction E
+              (E →L[ℝ] E →L[ℝ] Matrix))
+            (H : Index → ℝ),
+          (∀ i, 0 ≤ H i) →
+          (∀ i x y, ‖v i x - v i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x y, ‖dv i x - dv i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x y, ‖d2v i x - d2v i y‖ ≤ H i * dist x y ^ α) →
+          (∀ i x, HasFDerivAt (v i) (dv i x) x) →
+          (∀ i x, HasFDerivAt (dv i) (d2v i x) x) →
+          ∃ D : Initial,
+            (∀ i x, initialValue D i x = v i x) ∧
+            (∀ i x, initialSpaceDeriv D i x = dv i x) ∧
+            (∀ i x, initialSpaceSecondDeriv D i x = d2v i x) ∧
+            (∀ i, initialHolderConstant D i = H i) ∧
+            initialSize D = ∑ᶠ i,
+              max (‖v i‖ + H i)
+                (max (‖dv i‖ + H i) (‖d2v i‖ + H i))) ∧
+        (∀ (c : Index → ℝ × E → Matrix) (N : Index → ℝ),
+          (∀ i, hasParabolicC0 Tcoord (N i) (c i)) →
+          ∃ f : Source,
+            (∀ i z, z.1 ∈ Ioc t₀ Tcoord → sourceValue f i z = c i z) ∧
+            sourceNorm f ≤ ∑ᶠ i, N i) ∧
         (∀ c : Index →
             (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ),
           ∃ D, ∀ i x, initialValue D i x = c i) ∧
@@ -449,30 +573,31 @@ def completeStatement : Prop :=
         (∀ c : Index →
             (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ),
           ∃ q, ∀ i z, z.1 ∈ Ioc t₀ Tcoord → solutionValue q i z = c i) ∧
-        (∀ D i, HasSpatialC2AlphaNormLe (X := E)
-          (V := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ)
-          α (initialSize D)
+        (∀ D i, hasSpatialC2 (initialSize D)
           (initialValue D i) (initialSpaceDeriv D i)
           (initialSpaceSecondDeriv D i)) ∧
-        (∀ f i, HasParabolicC0AlphaNormLe (X := E)
-          (V := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ)
-          t₀ Tcoord α (sourceNorm f)
+        (∀ f i, hasParabolicC0 Tcoord (sourceNorm f)
           (sourceValue f i)) ∧
         (∀ D, 0 ≤ initialSize D) ∧ (∀ f, 0 ≤ sourceNorm f) ∧
+        (∀ q, timeDerivative S (solutionTensor q) (solutionTimeDerivative q)) ∧
         (∀ D f,
           symmetric (initialTensor D) →
           (∀ t, t ∈ Ioo t₀ S → symmetric (sourceTensor f t)) →
-          ∃! q : Solution,
+          ∃ q : Solution,
             coordinateClass D f q ∧
             timeDerivative S (solutionTensor q) (solutionTimeDerivative q) ∧
             initialTrace S (solutionTensor q) (initialTensor D) ∧
             (∀ t, t ∈ Ioc t₀ S →
               symmetric (solutionTensor q t)) ∧
             solves S (solutionTensor q) (solutionTimeDerivative q) (sourceTensor f)) ∧
+        (∀ D f q r,
+          initialTrace S (solutionTensor q) (initialTensor D) →
+          initialTrace S (solutionTensor r) (initialTensor D) →
+          solves S (solutionTensor q) (solutionTimeDerivative q) (sourceTensor f) →
+          solves S (solutionTensor r) (solutionTimeDerivative r) (sourceTensor f) →
+          ∀ t, t ∈ Ioc t₀ S → solutionTensor q t = solutionTensor r t) ∧
         (∀ D f q, coordinateClass D f q →
-          (∀ i, HasParabolicC2AlphaNormLe (X := E)
-            (V := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) → ℝ)
-            t₀ Tcoord α (solutionNorm q)
+          (∀ i, hasParabolicC2 Tcoord (solutionNorm q)
             (solutionValue q i) (solutionSpaceDeriv q i)
             (solutionSpaceSecondDeriv q i) (solutionTimeDerivCoordinate q i)) ∧
           solutionNorm q ≤ C * (initialSize D + sourceNorm f))
@@ -782,10 +907,10 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
     fun f t => A.physicalAtlasSourceSlice cov f t
   let solutionTensor : Solution → ℝ → ∀ x : M,
       TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
-    fun q => (A.symmetrizedAtlasField cov q).toFun
+    fun q => (A.atlasFieldOfHigher cov q).toFun
   let solutionTimeDerivative : Solution → ℝ → ∀ x : M,
       TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
-    fun q => (A.symmetrizedAtlasField cov q).timeDerivative
+    fun q => (A.atlasFieldOfHigher cov q).timeDerivative
   let initialLocalTensor : Initial → Index → ∀ x : M,
       TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
     fun D i => RicciFlow.AnalyticPDE.cutoffLocalTensorOfMatrix (I := I)
@@ -865,7 +990,7 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
   refine ⟨⟨fun _ => zeroSpatialData⟩, ⟨0⟩, ⟨0⟩,
     strongAtlasSchauderConstant_nonneg cov Hlift, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
     ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
-    ?_, ?_, ?_, ?_, ?_, ?_⟩
+    ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · -- The displayed coordinates and weights retain their geometric origin.
     have hsub : ∀ i : Index, tsupport (atlasWeight i) ⊆
         (extChartAt I (i : M)).source := by
@@ -921,33 +1046,23 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
     dsimp [sourceTensor, sourceLocalTensor]
     unfold RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.physicalAtlasSourceSlice
     rw [finsum_eq_sum_of_fintype]
-  · -- The geometric solution is the symmetrized sum of its local jets.
+  · -- The geometric solution is the ordinary sum of its local jets.
     intro q t ht x a b'
-    change (A.symmetrizedAtlasField cov q).toFun t x a b' = _
-    rw [A.symmetrizedAtlasField_toFun cov q t]
-    simp only [Pi.smul_apply, Pi.add_apply, _root_.smul_apply, add_apply,
-      smul_eq_mul]
-    rw [A.atlasFieldOfHigher_transpose_toFun cov q t ht x a b']
+    change (A.atlasFieldOfHigher cov q).toFun t x a b' = _
     rw [A.atlasFieldOfHigher_toFun cov q t x]
     dsimp [solutionLocalTensor]
-    rw [finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype]
+    rw [finsum_eq_sum_of_fintype]
     simp only [_root_.sum_apply]
-    rw [Finset.attach_eq_univ]
-    ring
+    rfl
   · -- Its displayed time derivative is reconstructed from the same local jets.
     intro q t ht x a b'
-    change (A.symmetrizedAtlasField cov q).timeDerivative t x a b' = _
-    rw [A.symmetrizedAtlasField_timeDerivative cov q t]
-    simp only [Pi.smul_apply, Pi.add_apply, _root_.smul_apply, add_apply,
-      smul_eq_mul]
-    rw [A.atlasFieldOfHigher_transpose_timeDerivative cov q t ht x a b']
+    change (A.atlasFieldOfHigher cov q).timeDerivative t x a b' = _
     unfold RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.atlasFieldOfHigher
     simp only [CovariantDerivative.FiniteClassicalTensorHeatField.finsetSum_timeDerivative,
       _root_.sum_apply]
     dsimp [solutionLocalTimeDerivative]
-    rw [finsum_eq_sum_of_fintype, finsum_eq_sum_of_fintype]
+    rw [finsum_eq_sum_of_fintype]
     rw [Finset.attach_eq_univ]
-    ring
   · -- A zero chart weight removes the corresponding initial tensor summand.
     intro D i x hweight
     dsimp [initialLocalTensor, atlasWeight] at hweight ⊢
@@ -1142,6 +1257,63 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
     apply RicciFlow.AnalyticPDE.FiniteParabolicC2AlphaBanach.ext_value hα A.time_lt
     intro z _hz
     exact congrFun (congrFun hv i) z
+  · -- Every bounded spatial C²ᵅ atlas jet family is represented.
+    intro v dv d2v H hH hv hdv hd2v hderiv hderiv₂
+    let D : Initial := fun i => {
+      value := v i
+      spaceDeriv := dv i
+      spaceSecondDeriv := d2v i
+      holderConstant := H i
+      holderConstant_nonneg := hH i
+      value_holder := hv i
+      spaceDeriv_holder := hdv i
+      spaceSecondDeriv_holder := hd2v i
+      hasFDerivAt_value := hderiv i
+      hasFDerivAt_spaceDeriv := hderiv₂ i }
+    refine ⟨D, ?_, ?_, ?_, ?_, ?_⟩
+    · intro i x; rfl
+    · intro i x; rfl
+    · intro i x; rfl
+    · intro i; rfl
+    · change (∑ i : Index, (D i).normRadius) = _
+      rw [finsum_eq_sum_of_fintype]
+      rfl
+  · -- Every parabolic C⁰ᵅ atlas source family is represented on the cylinder.
+    intro c N hc
+    have hnormle (i : Index) :
+        RicciFlow.AnalyticPDE.ParabolicC0AlphaNormLe (N i) α (c i)
+          (RicciFlow.AnalyticPDE.parabolicFiniteCylinder E t₀ Sraw) := by
+      rcases hc i with ⟨B, hB, H, hH, _hN, hbound, hholder⟩
+      refine ⟨B, hB, H, hH, _hN, ?_, ?_⟩
+      · intro z hz
+        exact hbound z (by simpa [RicciFlow.AnalyticPDE.parabolicFiniteCylinder] using hz)
+      · intro p hp q hq
+        exact hholder p
+          (by simpa [RicciFlow.AnalyticPDE.parabolicFiniteCylinder] using hp) q
+          (by simpa [RicciFlow.AnalyticPDE.parabolicFiniteCylinder] using hq)
+    let g : Source := fun i =>
+      RicciFlow.AnalyticPDE.ParabolicC0AlphaBanach.mk
+        (RicciFlow.AnalyticPDE.ParabolicC0AlphaSpace.ofSubmodule
+          ⟨c i, (hnormle i).c0AlphaOn⟩)
+    refine ⟨g, ?_, ?_⟩
+    · intro i z hz
+      dsimp [sourceValue, g]
+      exact RicciFlow.AnalyticPDE.ParabolicC0AlphaBanach.representative_mk_eq _ z
+        (by simpa [RicciFlow.AnalyticPDE.parabolicFiniteCylinder] using hz)
+    · have hN (i : Index) : 0 ≤ N i := (hnormle i).nonneg
+      have hsum : 0 ≤ ∑ i : Index, N i :=
+        Finset.sum_nonneg fun i _hi => hN i
+      change ‖g‖ ≤ ∑ᶠ i, N i
+      rw [finsum_eq_sum_of_fintype]
+      apply (pi_norm_le_iff_of_nonneg hsum).2
+      intro i
+      calc
+        ‖g i‖ ≤ N i := by
+          dsimp [g]
+          rw [RicciFlow.AnalyticPDE.ParabolicC0AlphaBanach.norm_mk_ofSubmodule]
+          exact RicciFlow.AnalyticPDE.parabolicC0AlphaNorm_le_of_normLe (hnormle i)
+        _ ≤ ∑ j : Index, N j :=
+          Finset.single_le_sum (fun j _hj => hN j) (Finset.mem_univ i)
   · -- Every atlas-wide family of constant spatial matrices is represented.
     intro c
     refine ⟨fun i => constSpatialData (c i), ?_⟩
@@ -1194,7 +1366,6 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
     have hHR : Di.holderConstant ≤ Di.normRadius := by
       exact (le_add_of_nonneg_left (norm_nonneg Di.value)).trans
         (le_max_left _ _)
-    unfold HasSpatialC2AlphaNormLe
     refine ⟨A.spatialInitialSize_nonneg cov D, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
     · intro x
       exact (Di.value.norm_coe_le_norm x).trans (hvR.trans hRi)
@@ -1221,6 +1392,9 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
     exact A.spatialInitialSize_nonneg cov D
   · intro f
     exact norm_nonneg f
+  · -- Every represented tensor readout has the displayed time derivative.
+    intro q
+    exact (A.atlasFieldOfHigher cov q).hasTimeDerivative
   · intro D f hD hf
     have hD' :
         RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.AtlasSpatialInitialData.IsSymmetric
@@ -1230,29 +1404,73 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
         RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.SourceSpace.IsSymmetric
           cov f := by
       exact hf
-    obtain ⟨q, hq, huniq⟩ := (hwell D f hD' hf').1
-    refine ⟨q, ⟨hq, ?_, hq.2.1, hq.2.2.1, ?_⟩, ?_⟩
-    · exact (A.symmetrizedAtlasField cov q).hasTimeDerivative
+    obtain ⟨q, hq, _⟩ := (hwell D f hD' hf').1
+    have hzero := A.hasRepresentedZeroDataUniqueness cov hLevi'.2
+    have hgeom :
+        RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.GeometricAtlasCauchySolution cov A
+          (RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.spatialInitialTensor cov A D)
+          (fun t => A.physicalAtlasSourceSlice cov f t) q :=
+      ⟨hq.1.2.1, hq.1.2.2⟩
+    refine ⟨q, ⟨hq, ?_, hq.1.2.1, ?_, ?_⟩⟩
+    · exact (A.atlasFieldOfHigher cov q).hasTimeDerivative
     · intro t ht x a c
-      have hP := hq.2.2.2 t ht x
+      exact A.geometricAtlasCauchySolution_symmetric_of_zeroData
+        cov hzero _ _ q hD (fun t ht x v w => hf t ht x w v)
+        hgeom t ht x a c
+    · intro t ht x a c
+      have hP := hq.1.2.2 t ht x
       have hPeval := congrArg
         (fun k : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ => k a c) hP
       have hlap := connectionLaplacianApply_eq_canonical cov cov₂ cov₃
         hcov₂ hcov₃
-        ((A.symmetrizedAtlasField cov q).slice cov t ⟨ht.1, ht.2.le⟩) x a c
+        ((A.atlasFieldOfHigher cov q).slice cov t ⟨ht.1, ht.2.le⟩) x a c
       have hlap' : connectionLaplacianApply cov₂ cov₃
-          ((A.symmetrizedAtlasField cov q).toFun t) x a c =
+          ((A.atlasFieldOfHigher cov q).toFun t) x a c =
           _root_.CovariantDerivative.connectionLaplacian cov
-            ((A.symmetrizedAtlasField cov q).toFun t) x a c := hlap
+            ((A.atlasFieldOfHigher cov q).toFun t) x a c := hlap
       change
-        (A.symmetrizedAtlasField cov q).timeDerivative t x a c -
+        (A.atlasFieldOfHigher cov q).timeDerivative t x a c -
           connectionLaplacianApply cov₂ cov₃
-            ((A.symmetrizedAtlasField cov q).toFun t) x a c =
+            ((A.atlasFieldOfHigher cov q).toFun t) x a c =
           A.physicalAtlasSourceSlice cov f t x a c
       rw [hlap']
       exact hPeval
-    · intro q' hq'
-      exact huniq q' hq'.1
+  · -- For fixed representatives D and f, represented geometric solutions agree.
+    intro D f q r htraceq htracer hsolveq hsolver t ht
+    have hzero := A.hasRepresentedZeroDataUniqueness cov hLevi'.2
+    have hgeom (w : Solution)
+        (htrace : CovariantDerivative.FiniteClassicalTensorHeatField.HasInitialTrace
+          cov (A.atlasFieldOfHigher cov w)
+          (RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.spatialInitialTensor
+            cov A D))
+        (hsolve : ∀ s (hs : s ∈ Ioo t₀ S) (x : M)
+          (a c : TangentSpace I x),
+          (A.atlasFieldOfHigher cov w).timeDerivative s x a c -
+            connectionLaplacianApply cov₂ cov₃
+              ((A.atlasFieldOfHigher cov w).toFun s) x a c =
+            A.physicalAtlasSourceSlice cov f s x a c) :
+        RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.GeometricAtlasCauchySolution
+          cov A
+          (RicciFlow.AnalyticPDE.FiniteTensorHeatParametrixAtlas.spatialInitialTensor
+            cov A D)
+          (fun s => A.physicalAtlasSourceSlice cov f s) w := by
+      constructor
+      · exact htrace
+      · intro s hs x
+        ext a c
+        have hEq := hsolve s hs x a c
+        have hlap := connectionLaplacianApply_eq_canonical cov cov₂ cov₃
+          hcov₂ hcov₃
+          ((A.atlasFieldOfHigher cov w).slice cov s ⟨hs.1, hs.2.le⟩) x a c
+        have hlap' : connectionLaplacianApply cov₂ cov₃
+            ((A.atlasFieldOfHigher cov w).toFun s) x a c =
+            _root_.CovariantDerivative.connectionLaplacian cov
+              ((A.atlasFieldOfHigher cov w).toFun s) x a c := hlap
+        rw [hlap'] at hEq
+        exact hEq
+    exact A.geometricAtlasCauchySolution_unique_of_zeroData
+      cov hzero _ _ q r (hgeom q htraceq hsolveq)
+      (hgeom r htracer hsolver) t ht
   · intro D f q hq
     refine ⟨?_, A.norm_le_strongAtlasSchauderConstant_mul_symmetricData
       cov hunique Hlift D f q hq⟩
@@ -1276,7 +1494,6 @@ theorem symmetricTensorHeatShortTimeWellPosed : completeStatement := by
       change ‖qi.1.2.2.2‖ ≤ ‖qi.1‖
       rw [Prod.norm_def, Prod.norm_def, Prod.norm_def]
       exact (le_max_right _ _).trans ((le_max_right _ _).trans (le_max_right _ _))
-    unfold HasParabolicC2AlphaNormLe
     refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
     · change HasParabolicC0AlphaNormLe t₀ Sraw α ‖q‖
         (RicciFlow.AnalyticPDE.FiniteParabolicC2AlphaBanach.value qi)

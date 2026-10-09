@@ -1,7 +1,6 @@
 module
 
 public import PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FunctionSpace
-public import Mathlib.Analysis.Normed.Group.SeparationQuotient
 public import Mathlib.Topology.UniformSpace.UniformEmbedding
 public import Mathlib.Topology.Algebra.SeparationQuotient.Section
 public import Mathlib.Topology.MetricSpace.Contracting

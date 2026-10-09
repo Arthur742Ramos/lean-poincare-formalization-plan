@@ -171,6 +171,8 @@ theorem mvfderiv_eq_of_eventuallyEq
     mvfderiv (I := I) f x = mvfderiv (I := I) g x := by
   unfold mvfderiv
   rw [hfg.eq_of_nhds, hfg.mfderiv_eq]
+  ext v
+  rfl
 
 /-- The trivial real-line chart used to induce dual and tensor charts. -/
 noncomputable def localRealLineTrivialization :
