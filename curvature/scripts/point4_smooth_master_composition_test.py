@@ -255,6 +255,9 @@ class OrdinaryCompositionTests(unittest.TestCase):
                 original=read(path)
                 changed=comp.transform(path,original,helper_sha,comp.sha256(mock),comp.sha256(workflow))
                 if path==comp.WORKFLOW:
+                    for bad_workflow in (changed[:-1],changed+changed,changed.replace(b'ordinary_current_composition:',b'ordinary_current_composition_drift:',1),changed.replace(b' --real-only ',b' ',1)):
+                        with self.assertRaises(AssertionError):comp.curvature_smooth_split_workflow_inverse(bad_workflow)
+                    changed=comp.curvature_smooth_split_workflow_inverse(changed)
                     self.assertEqual(changed.replace(comp.WF_STEP.encode(),b'',1).replace(comp.STARTUP_ENV.encode(),b'',1),original)
                 elif path==comp.LOCALIZATION_WORKFLOW:
                     self.assertEqual(changed.replace(comp.LOCALIZATION_CONTRACT_BUILD_COMMAND.encode(),b'',1).replace(comp.STARTUP_ENV.encode(),b'',1).replace(comp.LOCALIZATION_MOCK_ROUTE_COMMAND.encode(),comp.LOCALIZATION_MOCK_COMMAND.encode(),1),original)
@@ -2598,11 +2601,13 @@ print(json.dumps({'main': __name__ == '__main__',
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--real-runtime',action='store_true');parser.add_argument('--schema',type=pathlib.Path)
+    parser.add_argument('--real-only',action='store_true',help='Run all eight real routes; ordinary controls remain a separate required CI job')
     parser.add_argument('--parent-fixtures',type=pathlib.Path)
     parser.add_argument('--support110-fixtures',type=pathlib.Path)
     parser.add_argument('--support115-fixtures',type=pathlib.Path)
     parser.add_argument('--support126-fixtures',type=pathlib.Path)
     args=parser.parse_args();FIXED_FIXTURES=args.support126_fixtures;CONTRACTION_FIXTURES=args.support115_fixtures;OFFLINE=args.parent_fixtures;HEAT_FIXTURES=args.support110_fixtures;SCHEMA=args.schema;REAL=args.real_runtime
+    if args.real_only and not REAL:parser.error('--real-only requires --real-runtime')
     assert not REAL or (sys.platform.startswith('linux') and SCHEMA and SCHEMA.is_file()), 'Actual Linux/schema input required'
     suite=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromTestCase(OrdinaryCompositionTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(PositiveControllerTests))
@@ -2613,6 +2618,12 @@ if __name__=='__main__':
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TensorCompositionTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(CurvatureCompositionTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(CurvatureProductionNamespaceTests))
-    if REAL:suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(RealValidatorTests))
+    assert suite.countTestCases()==121, 'Complete ordinary suite selection drift'
+    if args.real_only:suite=unittest.TestSuite()
+    if REAL:
+        real_suite=unittest.defaultTestLoader.loadTestsFromTestCase(RealValidatorTests)
+        assert real_suite.countTestCases()==8, 'Complete real route selection drift'
+        suite.addTests(real_suite)
+    assert suite.countTestCases()==(8 if args.real_only else 129 if REAL else 121), 'Exact selected suite drift'
     result=unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(0 if result.wasSuccessful() else 1)

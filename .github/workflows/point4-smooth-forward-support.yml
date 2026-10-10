@@ -153,12 +153,12 @@ jobs:
           smooth_rc=${PIPESTATUS[0]}
           set -e
           PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_smooth_forward_release_guard.py --smooth-probe-log /tmp/point4-smooth-forward-support-probe.log --smooth-completion-log /tmp/point4-smooth-forward-completion.log --smooth-completion-rc "$(cat /tmp/point4-smooth-forward-completion.rc)" --smooth-audit-json /tmp/point4-smooth-forward-audit/verdict.json --smooth-audit-rc "$smooth_rc" --probe-log /tmp/point4-manifold-heat-probe.log --axiom-dir /tmp/point4-manifold-heat-inherited-probes --audit-json /tmp/point4-manifold-heat-full-audit.json --audit-rc "$(cat /tmp/point4-manifold-heat-full-audit.rc)" --schema /tmp/point4-manifold-heat-official-schema.json
-      - name: Check ordinary current composition and real historical validator routes
+      - name: Check all eight real historical validator routes
         timeout-minutes: 125
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_smooth_master_composition_test.py --real-runtime --schema /tmp/point4-manifold-heat-official-schema.json
+          PYTHONDONTWRITEBYTECODE=1 python3 curvature/scripts/point4_smooth_master_composition_test.py --real-runtime --real-only --schema /tmp/point4-manifold-heat-official-schema.json
       - name: Preserve exact-head evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -175,4 +175,46 @@ jobs:
             /tmp/point4-smooth-forward-audit/
             /tmp/point4-smooth-forward-completion.rc
             /tmp/point4-manifold-heat-full-audit.rc
+          if-no-files-found: error
+  ordinary_current_composition:
+    name: Exact-head ordinary composition controls (121)
+    runs-on: ubuntu-latest
+    timeout-minutes: 125
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Read immutable historical producer source
+        run: |
+          historical=58c6fc21bafeb8a659d6751a1a9db7a74127a300
+          if ! git cat-file -e "$historical^{commit}"; then
+            git fetch --no-tags origin "$historical"
+          fi
+      - name: Install pinned safe YAML parser from the official package registry
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0
+      - name: Read full official metadata schema with exact digest checked by source guard
+        run: |
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/v0.4.schema.json -o /tmp/point4-manifold-heat-official-schema.json
+      - name: Check all 121 ordinary current composition controls
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          git rev-parse HEAD | tee /tmp/point4-smooth-composition-ordinary-sha.log
+          python3 curvature/scripts/point4_smooth_master_composition_test.py --schema /tmp/point4-manifold-heat-official-schema.json 2>&1 | tee /tmp/point4-smooth-composition-ordinary.log
+      - name: Preserve exact-head ordinary evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-smooth-composition-ordinary-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            /tmp/point4-smooth-composition-ordinary*.log
+            /tmp/point4-manifold-heat-official-schema.json
           if-no-files-found: error

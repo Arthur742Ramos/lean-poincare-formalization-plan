@@ -1312,6 +1312,7 @@ def curvature_pins():
     return snapshots
 
 def curvature_section_inverse(raw, path, marker):
+    if path==TEST:raw=curvature_smooth_split_test_inverse(raw)
     start = ('# BEGIN authenticated finite curvature '+marker+'\n').encode()
     end = ('# END authenticated finite curvature '+marker+'\n').encode()
     assert raw.count(start) == raw.count(end) == 1, 'Curvature extension boundary drift'
@@ -1409,6 +1410,7 @@ def tensor_map_record(expected, originals, changes):
         'complete_input_paths':2139,'current_incoming_guard_wiring':'UNQUALIFIED finite executable adapters',
         'native_qualification':'UNRUN','point4':'OPEN',
         'executable_transforms':sorted(CURVATURE_EXECUTABLE_PATHS),
+        'smooth_required_job_split':{'workflow': '.github/workflows/point4-smooth-forward-support.yml', 'ordinary_controls': 121, 'real_routes': 8, 'default_ordinary': 121, 'default_real_runtime': 129, 'ordinary_job': 'ordinary_current_composition', 'native_job': 'smooth_forward_support', 'native_job_timeout_minutes': 350, 'native_step_timeout_minutes': 125, 'ordinary_job_timeout_minutes': 125, 'all129_test_method_AST_restored_by_exact_inverse': True, 'mechanically_adapted_test_method': 'test_every_finite_transform_and_reverse_identity', 'ordinary_required': True, 'real_required': True, 'native_qualification': 'UNRUN', 'original_workflow_sha256': '1c0941635dff686521a611db268489fbff8ed098bb91655024c633ae86d6f5c2', 'current_workflow_sha256': '94a280206133cf38ec665b03359b91ac3519a89d01e89cd03b50ddca2113b0c2'},
         'scalar_audit_bytecode_prevention':{'workflow': '.github/workflows/point4-c2-resonance.yml', 'original_sha256': 'e4f39177d37c5edba8815c97c5d348f4341fe6db9363484f20b326db1978ae74', 'current_sha256': '2a359ac08705e13d41054eb472fad1980f4ec08e3ff6b9a946de82c23d1de0fb', 'audit_body_unchanged': True, 'inventory_guard_body_unchanged': True, 'native_qualification': 'UNRUN'},
         'scope':'Original mathematical inputs recovered exactly; one finite same-statement C0 endpoint API/proof correction and executable adapters require separate current/Linux/native qualification.',
         'endpoint_API_proof_transform':{'path': 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean', 'original_sha256': '474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f', 'current_sha256': '1ef0a488bdc050c05469e94bd75586807d7f2cd31b6c047563c6e46f84d93424', 'finite_edits_sha256': '81c06a7d283c534deef94f0e1fb4060f3cfad4d5deb07e4e2910b7c67ee884fd', 'declaration_headers_byte_identical': True, 'native_qualification': 'UNRUN'}}
@@ -1846,4 +1848,49 @@ def curvature_chart_current(namespace,root,expected_sha,expected_tree,dependenci
             if primary is None:raise
             primary.add_note('Current chart POST also failed: '+repr(error))
 # END exact current curvature chart admission
+def curvature_smooth_split_test_inverse(raw):
+    replacements=[(b"    parser.add_argument('--real-runtime',action='store_true');parser.add_argument('--schema',type=pathlib.Path)\n", b"    parser.add_argument('--real-runtime',action='store_true');parser.add_argument('--schema',type=pathlib.Path)\n    parser.add_argument('--real-only',action='store_true',help='Run all eight real routes; ordinary controls remain a separate required CI job')\n"), (b"    assert not REAL or (sys.platform.startswith('linux') and SCHEMA and SCHEMA.is_file()), 'Actual Linux/schema input required'\n", b"    if args.real_only and not REAL:parser.error('--real-only requires --real-runtime')\n    assert not REAL or (sys.platform.startswith('linux') and SCHEMA and SCHEMA.is_file()), 'Actual Linux/schema input required'\n"), (b'    if REAL:suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(RealValidatorTests))\n', b"    assert suite.countTestCases()==121, 'Complete ordinary suite selection drift'\n    if args.real_only:suite=unittest.TestSuite()\n    if REAL:\n        real_suite=unittest.defaultTestLoader.loadTestsFromTestCase(RealValidatorTests)\n        assert real_suite.countTestCases()==8, 'Complete real route selection drift'\n        suite.addTests(real_suite)\n    assert suite.countTestCases()==(8 if args.real_only else 129 if REAL else 121), 'Exact selected suite drift'\n"), (b"                if path==comp.WORKFLOW:\n                    self.assertEqual(changed.replace(comp.WF_STEP.encode(),b'',1).replace(comp.STARTUP_ENV.encode(),b'',1),original)\n", b"                if path==comp.WORKFLOW:\n                    for bad_workflow in (changed[:-1],changed+changed,changed.replace(b'ordinary_current_composition:',b'ordinary_current_composition_drift:',1),changed.replace(b' --real-only ',b' ',1)):\n                        with self.assertRaises(AssertionError):comp.curvature_smooth_split_workflow_inverse(bad_workflow)\n                    changed=comp.curvature_smooth_split_workflow_inverse(changed)\n                    self.assertEqual(changed.replace(comp.WF_STEP.encode(),b'',1).replace(comp.STARTUP_ENV.encode(),b'',1),original)\n")]
+    for before,after in reversed(replacements):
+        assert raw.count(after)==1, 'Exact smooth suite selector inverse drift'
+        raw=raw.replace(after,before,1)
+    return raw
+
+def curvature_smooth_split_workflow_inverse(current):
+    assert sha256(current)=='94a280206133cf38ec665b03359b91ac3519a89d01e89cd03b50ddca2113b0c2', 'Complete split smooth workflow source drift'
+    ordinary=b'  ordinary_current_composition:\n    name: Exact-head ordinary composition controls (121)\n    runs-on: ubuntu-latest\n    timeout-minutes: 125\n    env:\n      PYTHONDONTWRITEBYTECODE: "1"\n      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}\n    steps:\n      - name: Checkout exact candidate\n        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1\n        with:\n          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}\n          ref: ${{ github.event.pull_request.head.sha || github.sha }}\n          persist-credentials: false\n          fetch-depth: 0\n      - name: Read immutable historical producer source\n        run: |\n          historical=58c6fc21bafeb8a659d6751a1a9db7a74127a300\n          if ! git cat-file -e "$historical^{commit}"; then\n            git fetch --no-tags origin "$historical"\n          fi\n      - name: Install pinned safe YAML parser from the official package registry\n        run: |\n          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0\n      - name: Read full official metadata schema with exact digest checked by source guard\n        run: |\n          curl --fail --location --silent --show-error https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/v0.4.schema.json -o /tmp/point4-manifold-heat-official-schema.json\n      - name: Check all 121 ordinary current composition controls\n        run: |\n          set -euo pipefail\n          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"\n          git rev-parse HEAD | tee /tmp/point4-smooth-composition-ordinary-sha.log\n          python3 curvature/scripts/point4_smooth_master_composition_test.py --schema /tmp/point4-manifold-heat-official-schema.json 2>&1 | tee /tmp/point4-smooth-composition-ordinary.log\n      - name: Preserve exact-head ordinary evidence\n        if: always()\n        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a\n        with:\n          name: point4-smooth-composition-ordinary-${{ github.event.pull_request.head.sha || github.sha }}\n          path: |\n            /tmp/point4-smooth-composition-ordinary*.log\n            /tmp/point4-manifold-heat-official-schema.json\n          if-no-files-found: error\n'
+    replacements=[(b'      - name: Check ordinary current composition and real historical validator routes\n', b'      - name: Check all eight real historical validator routes\n'), (b' --real-runtime --schema /tmp/point4-manifold-heat-official-schema.json\n', b' --real-runtime --real-only --schema /tmp/point4-manifold-heat-official-schema.json\n')]
+    assert current.count(ordinary)==1 and current.endswith(ordinary), 'Required ordinary job inverse drift'
+    restored=current[:-len(ordinary)]
+    for before,after in reversed(replacements):
+        assert restored.count(after)==1 and before not in restored, 'Exact real route inverse drift'
+        restored=restored.replace(after,before,1)
+    assert sha256(restored)=='1c0941635dff686521a611db268489fbff8ed098bb91655024c633ae86d6f5c2', 'Original smooth workflow provenance drift'
+    return restored
+
+def curvature_smooth_split_workflow(original):
+    assert sha256(original)=='1c0941635dff686521a611db268489fbff8ed098bb91655024c633ae86d6f5c2', 'Original smooth workflow provenance drift'
+    replacements=[(b'      - name: Check ordinary current composition and real historical validator routes\n', b'      - name: Check all eight real historical validator routes\n'), (b' --real-runtime --schema /tmp/point4-manifold-heat-official-schema.json\n', b' --real-runtime --real-only --schema /tmp/point4-manifold-heat-official-schema.json\n')]
+    current=original
+    for before,after in replacements:
+        assert current.count(before)==1 and after not in current, 'Exact smooth route command drift'
+        current=current.replace(before,after,1)
+    ordinary=b'  ordinary_current_composition:\n    name: Exact-head ordinary composition controls (121)\n    runs-on: ubuntu-latest\n    timeout-minutes: 125\n    env:\n      PYTHONDONTWRITEBYTECODE: "1"\n      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}\n    steps:\n      - name: Checkout exact candidate\n        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1\n        with:\n          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}\n          ref: ${{ github.event.pull_request.head.sha || github.sha }}\n          persist-credentials: false\n          fetch-depth: 0\n      - name: Read immutable historical producer source\n        run: |\n          historical=58c6fc21bafeb8a659d6751a1a9db7a74127a300\n          if ! git cat-file -e "$historical^{commit}"; then\n            git fetch --no-tags origin "$historical"\n          fi\n      - name: Install pinned safe YAML parser from the official package registry\n        run: |\n          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0\n      - name: Read full official metadata schema with exact digest checked by source guard\n        run: |\n          curl --fail --location --silent --show-error https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/v0.4.schema.json -o /tmp/point4-manifold-heat-official-schema.json\n      - name: Check all 121 ordinary current composition controls\n        run: |\n          set -euo pipefail\n          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"\n          git rev-parse HEAD | tee /tmp/point4-smooth-composition-ordinary-sha.log\n          python3 curvature/scripts/point4_smooth_master_composition_test.py --schema /tmp/point4-manifold-heat-official-schema.json 2>&1 | tee /tmp/point4-smooth-composition-ordinary.log\n      - name: Preserve exact-head ordinary evidence\n        if: always()\n        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a\n        with:\n          name: point4-smooth-composition-ordinary-${{ github.event.pull_request.head.sha || github.sha }}\n          path: |\n            /tmp/point4-smooth-composition-ordinary*.log\n            /tmp/point4-manifold-heat-official-schema.json\n          if-no-files-found: error\n'
+    assert ordinary not in current
+    current+=ordinary
+    restored=current[:-len(ordinary)]
+    for before,after in reversed(replacements):
+        assert restored.count(after)==1
+        restored=restored.replace(after,before,1)
+    assert restored==original, 'Whole smooth workflow inverse drift'
+    assert sha256(current)=='94a280206133cf38ec665b03359b91ac3519a89d01e89cd03b50ddca2113b0c2', 'Complete split smooth workflow source drift'
+    assert curvature_smooth_split_workflow_inverse(current)==original, 'Exact exposed workflow inverse drift'
+    return current
+
+_curvature_unsplit_transform=transform
+def transform(path,original,helper_sha,fixture_sha=None,workflow_sha=None):
+    current=_curvature_unsplit_transform(path,original,helper_sha,fixture_sha,workflow_sha)
+    if path==WORKFLOW and helper_sha==sha256((ROOT/HELPER).read_bytes()):
+        return curvature_smooth_split_workflow(current)
+    return current
+
 # END authenticated finite curvature extension
