@@ -98,7 +98,7 @@ jobs:
         working-directory: curvature
         run: |
           set +e
-          bash scripts/point4_audit.sh --json /tmp/point4-manifold-heat-full-audit.json | tee /tmp/point4-manifold-heat-full-audit.log
+          PYTHONDONTWRITEBYTECODE=1 bash scripts/point4_audit.sh --json /tmp/point4-manifold-heat-full-audit.json | tee /tmp/point4-manifold-heat-full-audit.log
           audit_rc=${PIPESTATUS[0]}
           set -e
           PYTHONDONTWRITEBYTECODE=1 python3 scripts/point4_manifold_heat_release_guard.py --probe-log /tmp/point4-manifold-heat-probe.log --axiom-dir /tmp/point4-manifold-heat-inherited-probes --audit-json /tmp/point4-manifold-heat-full-audit.json --audit-rc "$audit_rc"
