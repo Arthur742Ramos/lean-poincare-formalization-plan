@@ -399,12 +399,19 @@ try:
         active.add(name)
         source = source_path(name)
         verify_dependency_source(source)
-        for dep in imports(source.read_bytes()):
+        for dep in cache_bootstrap_imports(source.read_bytes()):
             bootstrap_visit(dep)
         active.remove(name)
         seen.add(name)
         cache_order.append((name, source))
         assert len(cache_order) <= 200, 'Cache bootstrap exceeded finite source bound'
+    def cache_bootstrap_imports(data):
+        # Normalize only a canonical combined header for the unchanged parser.
+        # Dependency source authentication and compilation retain original bytes.
+        normalized = re.sub(rb'(?m)^([ \t]*)public[ \t]+meta[ \t]+import(?=[ \t])',
+                            rb'\1meta import', data)
+        return imports(normalized)
+
     # The selected pinned Mathlib closure needs Batteries.Logic even when
     # Cache.Main's own import closure does not. Keep its output under this
     # owned bootstrap root and use the existing serial, bounded traversal.
