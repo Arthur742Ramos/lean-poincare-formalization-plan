@@ -137,6 +137,7 @@ class DriverControls(unittest.TestCase):
                 tree_entries=lambda *args: {}, package_root_relationships=roots,
                 pinned_cache_query_context=lambda mathlib,names: dict(finite_synthetic_source_context=True,
                     package_root=str(mathlib),admitted_roots=list(names)),
+                materialize_pinned_mathlib_cache=lambda *args: dict(finite_synthetic_copy=True),
                 compiler_run=lambda argv,label,source,module,env=None: run(argv,label,env=env), artifact_status=lambda *args: {'ready': True},
                 serial_compile=serial_compile, imports=lambda _: [],
                 check_probe=check_probe, check_ricci_extension_probe=check_extension_probe, time=types.SimpleNamespace(time=lambda: 0),
@@ -1636,6 +1637,108 @@ class CombinedBootstrapImportControls(unittest.TestCase):
             finally:
                 alias.write_bytes(original)
             self.assertEqual(alias.read_bytes(), original)
+
+
+import pathlib
+from chart_port_artifacts import materialize_pinned_mathlib_cache as materialize
+
+class CoherentNamespaceTests(unittest.TestCase):
+ def fixture(self, root):
+  source=root/'mathlib';cached=source/'.lake/build/lib/lean';owned=root/'owned';owned.mkdir()
+  src=source/'Mathlib/Fixture/Module.lean';src.parent.mkdir(parents=True);raw=b'module\nimport Lean\n';src.write_bytes(raw)
+  catalog={'Mathlib/Fixture/Module.lean':('100644','blob',hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest())}
+  files={}
+  for suffix in ('.olean','.olean.private','.olean.server','.ir.sig','.ir','.trace'):
+   p=cached/('Mathlib/Fixture/Module'+suffix);p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(suffix.encode());files[p]=p.read_bytes()
+  return source,cached,owned,src,catalog,files
+
+ def test_exact_cached_companions_and_input_bytes_retained_with_zero_fresh_build_credit(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   source,cache,owned,src,catalog,files=self.fixture(pathlib.Path(tmp))
+   result=materialize(cache,owned,source,catalog)
+   self.assertEqual(result['fresh_local_compilations'],0)
+   self.assertEqual(len(result['cached_companions']),5)
+   self.assertFalse((owned/'Mathlib/Fixture/Module.trace').exists())
+   for path,raw in files.items():
+    self.assertEqual(path.read_bytes(),raw)
+    if path.suffix!='.trace':self.assertEqual((owned/path.relative_to(cache)).read_bytes(),raw)
+
+ def test_source_corruption_and_unknown_cached_module_fail_before_qualification(self):
+  for mode in ('source','unknown'):
+   with tempfile.TemporaryDirectory() as tmp:
+    source,cache,owned,src,catalog,_=self.fixture(pathlib.Path(tmp))
+    if mode=='source':src.write_bytes(src.read_bytes()+b'changed')
+    else:(cache/'Mathlib/Unknown.olean').write_bytes(b'unknown')
+    with self.assertRaises(AssertionError):materialize(cache,owned,source,catalog)
+
+ def test_added_metadata_deleted_companion_and_added_directory_are_input_mutation(self):
+  for mode in ('extra_metadata','deleted_companion','extra_directory'):
+   with tempfile.TemporaryDirectory() as tmp:
+    source,cache,owned,src,catalog,_=self.fixture(pathlib.Path(tmp));original=pathlib.Path.open;fired=[]
+    def opened(path,*args,**kwargs):
+     if args and args[0]=='xb' and not fired:
+      fired.append(True)
+      if mode=='extra_metadata':(cache/'Mathlib/Unexpected.trace').write_bytes(b'new')
+      elif mode=='deleted_companion':(cache/'Mathlib/Fixture/Module.olean.server').unlink()
+      else:(cache/'Mathlib/Unexpected').mkdir()
+     return original(path,*args,**kwargs)
+    with patch.object(pathlib.Path,'open',opened):
+     with self.assertRaises((AssertionError,FileNotFoundError)):materialize(cache,owned,source,catalog)
+    self.assertTrue(fired)
+
+ def test_source_catalog_mutation_and_extra_owned_file_are_rejected(self):
+  for mode in ('catalog','owned'):
+   with tempfile.TemporaryDirectory() as tmp:
+    source,cache,owned,src,catalog,_=self.fixture(pathlib.Path(tmp));original=pathlib.Path.open;fired=[]
+    def opened(path,*args,**kwargs):
+     if args and args[0]=='xb' and not fired:
+      fired.append(True)
+      if mode=='catalog':catalog['Mathlib/Added.lean']=('100644','blob','0'*40)
+      else:(owned/'Mathlib/Unexpected.olean').write_bytes(b'extra')
+     return original(path,*args,**kwargs)
+    with patch.object(pathlib.Path,'open',opened):
+     with self.assertRaises(AssertionError):materialize(cache,owned,source,catalog)
+    self.assertTrue(fired)
+
+ def test_cached_and_owned_ancestor_link_types_fail_closed(self):
+  import os,stat
+  for relative in ('.lake/build/lib','Mathlib/Fixture'):
+   with tempfile.TemporaryDirectory() as tmp:
+    source,cache,owned,src,catalog,_=self.fixture(pathlib.Path(tmp));original=pathlib.Path.lstat
+    target=source/relative if relative.startswith('.') else cache/relative
+    def lstat(path,*args,**kwargs):
+     if path==target:
+      actual=original(path,*args,**kwargs);values=list(actual);values[0]=stat.S_IFLNK|0o777;return os.stat_result(values)
+     return original(path,*args,**kwargs)
+    with patch.object(pathlib.Path,'lstat',lstat):
+     with self.assertRaises(AssertionError):materialize(cache,owned,source,catalog)
+
+
+class PackageRootResolutionTests(unittest.TestCase):
+    def test_first_package_root_hides_a_later_complete_leaf(self):
+        from chart_port_artifacts import artifact_status
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);first=root/'first';second=root/'second'
+            (first/'Batteries').mkdir(parents=True)
+            later=second/'Batteries/Lean/Position.olean';later.parent.mkdir(parents=True);later.write_bytes(b'fixture')
+            result=artifact_status('Batteries.Lean.Position',[first,second],b'import Lean\n')
+            self.assertFalse(result['ready'])
+            self.assertEqual(result['selected_olean'],str(first/'Batteries/Lean/Position.olean'))
+            self.assertEqual(artifact_status('Batteries.Lean.Position',[second],b'import Lean\n')['ready'],True)
+
+    def test_all_module_companions_and_earlier_partial_root_remain_required(self):
+        from chart_port_artifacts import artifact_status
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);first=root/'first';second=root/'second'
+            for directory in (first,second):
+                p=directory/'Mathlib/Fixture.olean';p.parent.mkdir(parents=True)
+                for suffix in ('.olean','.olean.private','.olean.server','.ir.sig','.ir'):
+                    p.with_name('Fixture'+suffix).write_bytes(b'fixture')
+            for suffix in ('.olean','.olean.private','.olean.server','.ir.sig','.ir'):
+                p=first/'Mathlib'/('Fixture'+suffix);p.unlink()
+                self.assertFalse(artifact_status('Mathlib.Fixture',[first,second],b'module\n')['ready'])
+                p.write_bytes(b'fixture')
+            self.assertTrue(artifact_status('Mathlib.Fixture',[first,second],b'module\n')['ready'])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

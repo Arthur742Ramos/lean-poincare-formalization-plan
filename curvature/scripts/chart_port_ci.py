@@ -2,7 +2,7 @@
 from pathlib import Path
 import argparse, hashlib, json, os, re, signal, subprocess, sys, time
 from chart_port_candidate_check import admit, check_probe, check_ricci_extension_probe, digest, imports, tree_entries, package_root_relationships
-from chart_port_artifacts import artifact_status, required_import_files
+from chart_port_artifacts import artifact_status, required_import_files, materialize_pinned_mathlib_cache
 
 LIMIT = 6 * 1024 ** 3
 ROOT = Path(__file__).resolve().parents[2]
@@ -434,6 +434,19 @@ try:
     cache_query_context = pinned_cache_query_context(mathlib, admission['external_mathlib_roots'])
     run([lean, '-j1', '-M5632', '-R', str(mathlib), '--run', str(mathlib / 'Cache/Main.lean'), 'get', *admission['external_mathlib_roots']],
         'ordinary-pinned-cache-read', env=env, timeout=1800, cache_query_context=cache_query_context)
+    # Bootstrap packages serve Cache.get only. Lean resolves an entire package
+    # at its first search root, so partial bootstrap roots must not shadow the
+    # genuine cached dependency packages during the source/probe compilation.
+    env['LEAN_PATH'] = os.pathsep.join(map(str, (local, support))) + os.pathsep + old_path
+    artifact_dirs = [Path(p) for p in env['LEAN_PATH'].split(os.pathsep) if p]
+    artifact_dirs = [p if p.is_absolute() else PKG / p for p in artifact_dirs]
+    artifact_dirs.append(prefix)
+    materialized = materialize_pinned_mathlib_cache(mathlib / '.lake/build/lib/lean', support,
+        mathlib, dependency_inventory[mathlib.relative_to(ROOT).as_posix()])
+    materialized_path = EVIDENCE / 'coherent-pinned-Mathlib-cache.json'
+    materialized_path.write_text(json.dumps(materialized, indent=2) + '\n')
+    receipt['coherent_pinned_cache_sha256'] = digest(materialized_path.read_bytes())
+    save()
     prov = json.loads((PKG / 'third-party/differential-geometry/SOURCE-PROVENANCE.json').read_text())
     allowed = {r['module']: r for r in prov['mathlib_support_sources']}
     missing_order, seen, active = [], set(), set()

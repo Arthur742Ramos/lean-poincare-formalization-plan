@@ -74,7 +74,7 @@ lemma continuousOn_velocityComponent
     (I := I) (e := trivialization (I := I) p) (n := (2 : ℕ∞ω)) b k).continuousOn
   have h := v.continuous.continuousOn.clm_bundle_apply₂ hj hk
   have hprod := (Bundle.Trivial.homeomorphProd M ℝ).continuous.comp_continuousOn h
-  simpa only [velocityComponent, frame, Bundle.Trivial.homeomorphProd_apply,
+  simpa only [Function.comp_apply, velocityComponent, frame, Bundle.Trivial.homeomorphProd_apply,
     TotalSpace.toProd] using hprod.snd
 
 def velocityCoordinates (v : ContinuousSymmetricVelocity (I := I) (M := M))
@@ -241,8 +241,9 @@ lemma contMDiffOn_gaussianMatrixOnManifold
     contMDiff_iff_contDiff.mpr ((contDiff_two_gaussianMatrix v C b i hh).comp
       (toModel b).symm.contDiff)
   exact hmodel.comp_contMDiffOn
-    ((contMDiffOn_extChartAt (I := I) (H := H) (n := 2) (x := (i : M))).mono
-      inter_subset_left)
+    ((contMDiffOn_extChartAt (I := I) (H := H) (n := 2) (x := (i : M))).mono (by
+      rw [preferredAnalysisDomain, extChartAt_source]
+      exact inter_subset_left))
 
 /-- The actual tensor approximant, assembled with the fixed original atlas
 and its finite smooth partition. The value h = 0 is a C0 tensor and is used
@@ -280,7 +281,8 @@ lemma contMDiff_two_gaussianTensor
       (gaussianMatrixOnManifold v C b i h)
       (isOpen_preferredAnalysisDomain I (F := E) (V := TM) (i : M))
       inter_subset_right ((C.partition i).contMDiff.of_le (by
-        exact_mod_cast (show (2 : ℕ∞) ≤ ⊤ from le_top)))
+        change ((2 : ℕ∞) : ℕ∞ω) ≤ ((⊤ : ℕ∞) : ℕ∞ω)
+        exact WithTop.coe_le_coe.mpr le_top)))
       (C.pieces_subset_preferredAnalysisDomain i)
       (contMDiffOn_gaussianMatrixOnManifold v C b i hh)
   simpa only [gaussianTensor] using
@@ -382,7 +384,7 @@ lemma continuousAt_gaussianTensor_component_zero
       (chartCoordinate (I := I) (i : M) b x)
     have heval := (cutoffLocalTensorEvaluationSynthesisAt
       (C.trivialization i) b (C.partition i) x u w).continuous.continuousAt.comp hq
-    simpa only [cutoffLocalTensorEvaluationSynthesisAt_apply,
+    simpa only [Function.comp_apply, cutoffLocalTensorEvaluationSynthesisAt_apply,
       gaussianMatrixOnManifold, cutoffLocalTensorOfMatrix, localTensorOfMatrix] using heval
   simpa only [ContinuousAt, gaussianTensor, _root_.sum_apply] using
     (tendsto_finsetSum Finset.univ fun i _ => hi i)
