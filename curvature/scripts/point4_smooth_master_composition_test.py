@@ -279,6 +279,20 @@ class OrdinaryCompositionTests(unittest.TestCase):
                 anchor=comp.WEIGHTED_MOCK_COMMAND if path==comp.WEIGHTED_WORKFLOW else comp.STARTUP_ANCHOR if path in (comp.LOCALIZATION_WORKFLOW,comp.MANIFOLD_WORKFLOW) else comp.WF_ANCHOR if path==comp.WORKFLOW else comp.ENTRY
                 for bad in (original.decode().replace(anchor,'',1),original.decode()+anchor):
                     with self.assertRaises(AssertionError):comp.transform(path,bad.encode(),helper_sha,comp.sha256(mock),comp.sha256(workflow))
+        rows=comp.CURVATURE_HAMILTON_SOURCE_EDITS
+        saved=dict(rows)
+        current_path='scripts/point4/audit-hamilton-release.py'
+        head=comp.CURVATURE_SELECTED[current_path]['origins'][0]['head']
+        raw=comp.git('show',head+':'+current_path)
+        try:
+            for mutation in ('missing','extra','changed','duplicate'):
+                rows.clear();rows.update(saved)
+                if mutation=='missing':rows.pop(current_path)
+                elif mutation=='extra':rows['foreign-hamilton-path']=saved[current_path]
+                elif mutation=='duplicate':rows[current_path]=saved[current_path]+saved[current_path][:1]
+                else:rows[current_path]=((saved[current_path][0][0],saved[current_path][0][1]+'# drift'),)+saved[current_path][1:]
+                with self.assertRaises(AssertionError):comp.curvature_hamilton_current_source(current_path,raw)
+        finally:rows.clear();rows.update(saved)
 
     def test_tree_records_reject_duplicates_modes_and_truncation(self):
         good=b'100644 blob '+b'a'*40+b'\ta.lean\0'
@@ -2250,6 +2264,27 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                         for bad in (old_raw,raw[:-1],raw+raw,raw.replace(b'namespace',b'namespacE',1)):
                             self.assertNotEqual(bad,raw)
                             with self.assertRaises(AssertionError):module.check_unit_blob('curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean',bad)
+                    if number==111:
+                        reviewed=dict(reference['REVIEWED_FILE_SHA256'])
+                        for current_path,original_digest in comp.CURVATURE_HAMILTON_ORIGINAL_SHA256.items():
+                            self.assertEqual(expected[current_path],original_digest)
+                            self.assertEqual(reviewed[current_path],original_digest)
+                            self.assertEqual(comp.CURVATURE_SELECTED[current_path]['sha256'],original_digest)
+                            current=(comp.ROOT/current_path).read_bytes()
+                            historical=comp.git('show',head+':'+current_path)
+                            self.assertEqual(comp.sha256(historical),original_digest)
+                            self.assertEqual(comp.curvature_hamilton_current_source(current_path,historical),current)
+                            self.assertEqual(comp.curvature_selected_source(current_path,digest='0'*64),historical)
+                            expected[current_path]=reviewed[current_path]=comp.CURVATURE_HAMILTON_SOURCE_SHA256[current_path]
+                            module.check_unit_blob(current_path,current)
+                            for bad in (historical,current[:-1],current+current):
+                                with self.assertRaises(AssertionError):module.check_unit_blob(current_path,bad)
+                            for bad in (historical[:-1],historical+historical):
+                                with self.assertRaises(AssertionError):comp.curvature_hamilton_current_source(current_path,bad)
+                        self.assertEqual(module.REVIEWED_FILE_SHA256,reviewed)
+                        self.assertIsNot(module.REVIEWED_FILE_SHA256,module.UNIT_FILE_SHA256)
+                        self.assertEqual(module.check_reviewed_unit.__code__,reference['check_reviewed_unit'].__code__)
+                        module.check_reviewed_unit()
                     self.assertEqual(module.UNIT_FILE_SHA256,expected)
             self.assertEqual(comp.verify_current(),self.model)
 
@@ -2285,6 +2320,22 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                     finally:
                         namespace['UNIT_FILE_SHA256']=unit
                         unit.clear();unit.update(saved)
+                if number==111:
+                    for key in ('REVIEWED_FILE_SHA256','UNIT_FILE_SHA256'):
+                        unit=namespace[key];saved=dict(unit)
+                        try:
+                            namespace[key]=dict(unit)
+                            with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
+                            namespace[key]=unit
+                            for mutation in ('old','extra','missing'):
+                                unit.clear();unit.update(saved)
+                                current_path='scripts/point4/audit-hamilton-release.py'
+                                if mutation=='old':unit[current_path]=comp.CURVATURE_HAMILTON_ORIGINAL_SHA256[current_path]
+                                elif mutation=='extra':unit['foreign-hamilton-unit']='0'*64
+                                else:unit.pop(current_path)
+                                with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
+                        finally:
+                            namespace[key]=unit;unit.clear();unit.update(saved)
                 self.check_namespace(number,namespace)
             self.assertEqual(comp.verify_current(),self.model)
 
@@ -2301,6 +2352,9 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                     if number==134:
                         self.assertIn(id(namespace),library._BINDINGS)
                         captured.append(namespace['UNIT_FILE_SHA256'])
+                    if number==111:
+                        self.assertIn(id(namespace),library._BINDINGS)
+                        captured.append((namespace['REVIEWED_FILE_SHA256'],namespace['UNIT_FILE_SHA256']))
                     raise primary
                 with patch.object(comp,'verify_current',side_effect=fail_verification):
                     with self.assertRaises(RuntimeError) as caught:
@@ -2316,6 +2370,15 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                     reference={'__file__':str(comp.ROOT/path),'__name__':'rollback_original_unit_policy'}
                     exec(compile(comp.git('show',head+':'+path),str(comp.ROOT/path),'exec',dont_inherit=True),reference)
                     self.assertEqual(namespace['UNIT_FILE_SHA256'],reference['UNIT_FILE_SHA256'])
+                if number==111:
+                    self.assertEqual(len(captured),1)
+                    head=next(row['head'] for row in comp.CURVATURE_SELECTED[path]['origins'])
+                    reference={'__file__':str(comp.ROOT/path),'__name__':'rollback_original_hamilton_policies'}
+                    exec(compile(comp.git('show',head+':'+path),str(comp.ROOT/path),'exec',dont_inherit=True),reference)
+                    for index,key in enumerate(('REVIEWED_FILE_SHA256','UNIT_FILE_SHA256')):
+                        self.assertIs(namespace[key],captured[0][index])
+                        self.assertEqual(namespace[key],reference[key])
+                    self.assertIsNot(namespace['REVIEWED_FILE_SHA256'],namespace['UNIT_FILE_SHA256'])
                 self.assertFalse(hasattr(entry,'__wrapped__'))
             self.assertEqual(comp.verify_current(),self.model)
 

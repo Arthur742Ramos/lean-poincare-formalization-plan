@@ -1026,5 +1026,62 @@ class CancellationTests(unittest.TestCase):
         self.assertTrue(saved[-1]["kernel_audit_status"].startswith("INCONCLUSIVE:"))
 
 
+
+
+class BalancedCurrentChainTests(unittest.TestCase):
+ def assert_plan(self,order,graph,jobs,costs=None):
+  import copy
+  inputs=copy.deepcopy((order,graph,costs));plan=audit.chain_batches(order,graph,jobs,costs)
+  self.assertEqual((order,graph,costs),inputs)
+  built=set()
+  for batch in plan:
+   selected=set(batch['modules']);self.assertEqual(len(selected),len(batch['modules']))
+   self.assertLessEqual(len(batch['chains']),jobs)
+   flattened=[m for chain in batch['chains'] for m in chain]
+   self.assertEqual(len(flattened),len(selected));self.assertEqual(set(flattened),selected)
+   reached=set()
+   def visit(m):
+    if m in built or m in reached:return
+    self.assertIn(m,selected);reached.add(m)
+    for parent in graph[m]:visit(parent)
+   for chain in batch['chains']:
+    self.assertTrue(chain)
+    for a,b in zip(chain,chain[1:]):self.assertIn(a,graph[b])
+    visit(chain[-1])
+   self.assertEqual(reached,selected)
+   # Complete one ready node at a time, adversarially choosing the last name.
+   pending=set(selected)
+   while pending:
+    ready=[m for m in pending if set(graph[m])<=built]
+    self.assertTrue(ready);self.assertLessEqual(len(ready),jobs)
+    m=max(ready);pending.remove(m);built.add(m)
+  self.assertEqual(built,set(order))
+  return plan
+
+
+ def test_fork_join_cross_dependencies_and_deterministic_cost_policy(self):
+  order=list('ABCDEFGH');graph={'A':[],'B':[],'C':['A'],'D':['A'],'E':['B','C'],'F':['D','E'],'G':[],'H':['F','G']}
+  for jobs in (1,2):
+   costs={m:(i+1)*100 for i,m in enumerate(order)}
+   first=self.assert_plan(order,graph,jobs,costs)
+   self.assertEqual(first,audit.chain_batches(order,graph,jobs,costs))
+
+ def test_stalled_slot_refreshes_for_independent_work(self):
+  order=['A','B','C','D','E','F'];graph={'A':[],'B':[],'C':[],'D':['A'],'E':['D'],'F':['E']}
+  plan=self.assert_plan(order,graph,2)
+  self.assertEqual(plan[0]['modules'],['A','B'])
+  self.assertTrue(any('C' in batch['modules'] for batch in plan[1:]))
+
+ def test_missing_duplicate_unknown_cyclic_and_non_topological_graphs_fail(self):
+  cases=[(['A'],{}),(['A','A'],{'A':[]}),(['A'],{'A':['X']}),(['A'],{'A':['A']}),(['B','A'],{'A':[],'B':['A']})]
+  for order,graph in cases:
+   with self.assertRaises(AssertionError):audit.chain_batches(order,graph,2)
+
+ def test_invalid_costs_and_unsupported_worker_counts_fail(self):
+  for costs in ({},{'A':0},{'A':-1},{'A':True},{'A':1.0},{'A':1,'B':1}):
+   with self.assertRaises(AssertionError):audit.chain_batches(['A'],{'A':[]},2,costs)
+  for jobs in (0,3):
+   with self.assertRaises(AssertionError):audit.chain_batches(['A'],{'A':[]},jobs)
+
 if __name__ == "__main__":
     unittest.main()

@@ -94,34 +94,56 @@ def dependency_ready_build(order, graph, build, completed, *, jobs=2,
     return failure
 
 
-def chain_batches(order, graph, jobs):
-    """Partition into explicit direct-import chains, with width at most jobs.
+def chain_batches(order, graph, jobs, costs=None):
+    """Partition source into independent, bounded direct-import chains.
 
-    Off-batch project imports must be in earlier batches. No Lake concurrency
-    flag is assumed: at most jobs chains can have a project compiler ready.
+    Costs order scheduling work only; every module still needs its own genuine
+    compiler record. Immutable batches keep all existing compiler lease guards.
     """
     assert jobs in (1, 2)
     assert len(order) == len(set(order))
     known = set(order)
     assert set(graph) == known
     assert all(set(graph[m]) <= known for m in order)
+    positions = {m:i for i,m in enumerate(order)}
+    assert all(positions[parent] < positions[m] for m in order for parent in graph[m]), 'Incomplete or cyclic source graph'
+    costs = {m:1 for m in order} if costs is None else dict(costs)
+    assert set(costs) == known and all(type(value) is int and value > 0 for value in costs.values()), 'Invalid source scheduling costs'
+    children = {m:[] for m in order}
+    for m in order:
+        for parent in set(graph[m]):
+            children[parent].append(m)
+    critical = {}
+    for m in reversed(order):
+        critical[m] = costs[m] + max((critical[child] for child in children[m]),default=0)
     built, batches = set(), []
     while built != known:
-        batch, selected, chains = [], set(), []
-        for module in order:
-            if module in built or not set(graph[module]) <= built | selected:
-                continue
-            candidates = [i for i, chain in enumerate(chains) if chain[-1] in graph[module]]
-            if candidates:
-                chains[candidates[0]].append(module)
-            elif len(chains) < jobs:
-                chains.append([module])
-            else:
-                continue
-            batch.append(module)
-            selected.add(module)
-        assert batch, "Incomplete or cyclic source graph"
-        batches.append({"modules": batch, "chains": chains})
+        ready = [m for m in order if m not in built and set(graph[m]) <= built]
+        assert ready, 'Incomplete or cyclic source graph'
+        ready.sort(key=lambda m:(-critical[m],positions[m]))
+        chains = [[m] for m in ready[:jobs]]
+        selected = {chain[0] for chain in chains}
+        loads = [costs[chain[0]] for chain in chains]
+        while True:
+            choices = {}
+            for index,chain in enumerate(chains):
+                eligible = [m for m in children[chain[-1]] if m not in built|selected
+                            and set(graph[m]) <= built|set(chain)]
+                if eligible:
+                    choices[index] = min(eligible,key=lambda m:(-critical[m],positions[m]))
+            if not choices:
+                break
+            # A finished chain cannot take a third independent source while
+            # this active batch is immutable. Start a fresh pair instead.
+            independent = any(m not in built|selected and set(graph[m]) <= built for m in order)
+            if len(choices) < jobs and independent:
+                break
+            index = min(choices,key=lambda i:(loads[i],i))
+            module = choices[index];chains[index].append(module)
+            selected.add(module);loads[index] += costs[module]
+        batch = [m for m in order if m in selected]
+        assert batch and len(chains) <= jobs
+        batches.append({'modules':batch,'chains':chains})
         built.update(selected)
     return batches
 
@@ -948,7 +970,23 @@ def main() -> None:
                   for line in pathlib.Path("/proc/meminfo").read_text().splitlines()
                   if line.startswith(("MemTotal:", "MemAvailable:"))}
     jobs = args.jobs if memory.get("MemTotal", 0) >= 14 * 1024 ** 3 else 1
-    batches = chain_batches(order, graph, jobs)
+    # Sizes are deterministic source-authenticated scheduling hints only.
+    # They grant no compiler/kernel credit and never replace native evidence.
+    scheduling_costs = {}
+    for module in order:
+        path = root / (module.replace('.', '/') + '.lean')
+        assert path.is_file() and not path.is_symlink(), 'Scheduling source is not regular'
+        for parent in path.parents:
+            assert parent.is_dir() and not parent.is_symlink(), 'Scheduling source ancestor drift'
+            if parent == root:
+                break
+        raw = path.read_bytes()
+        assert hashlib.sha256(raw).hexdigest() == report['source_sha256'][module], 'Scheduling source bytes drift'
+        scheduling_costs[module] = max(1, len(raw))
+    assert set(scheduling_costs) == set(order)
+    batches = chain_batches(order, graph, jobs, scheduling_costs)
+    report['source_scheduling_cost_bytes'] = scheduling_costs
+    report['source_scheduling_cost_scope'] = 'Pinned raw source sizes, not elapsed compiler predictions or qualification'
     positions = {module: i + 1 for i, module in enumerate(order)}
     report.update(kernel_audit_status="RUNNING: source closure incomplete",
                   source_compile_workers=jobs, initial_memory_bytes=memory,
