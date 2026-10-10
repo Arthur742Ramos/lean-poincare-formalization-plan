@@ -47,9 +47,9 @@ local notation "BilE" => (E →L[ℝ] E →L[ℝ] ℝ)
 @[reducible] local instance endpointTwoModelNormedSpace :
     NormedSpace ℝ BilE := ContinuousLinearMap.toNormedSpace
 @[reducible] local instance endpointTwoFiberNormedAddCommGroup (x : M) :
-    NormedAddCommGroup (T₂ x) := ContinuousLinearMap.toNormedAddCommGroup
+    NormedAddCommGroup (T₂ x) := inferInstance
 @[reducible] local instance endpointTwoFiberNormedSpace (x : M) :
-    NormedSpace ℝ (T₂ x) := ContinuousLinearMap.toNormedSpace
+    NormedSpace ℝ (T₂ x) := inferInstance
 
 /-- Literal C0 regularity in the actual tensor-bundle topology. No positive
 Holder exponent or differentiability assumption occurs in this structure. -/
@@ -69,9 +69,9 @@ lemma continuousOn_velocityComponent
     (p : M) (b : Module.Basis (Fin d) ℝ E) (j k : Fin d) :
     ContinuousOn (velocityComponent v p b j k) (trivialization (I := I) p).baseSet := by
   have hj := (Bundle.Trivialization.contMDiffOn_localFrame_baseSet
-    (I := I) (e := trivialization (I := I) p) (n := (2 : ℕ∞ω)) b j).continuous
+    (I := I) (e := trivialization (I := I) p) (n := (2 : ℕ∞ω)) b j).continuousOn
   have hk := (Bundle.Trivialization.contMDiffOn_localFrame_baseSet
-    (I := I) (e := trivialization (I := I) p) (n := (2 : ℕ∞ω)) b k).continuous
+    (I := I) (e := trivialization (I := I) p) (n := (2 : ℕ∞ω)) b k).continuousOn
   have h := v.continuous.continuousOn.clm_bundle_apply₂ hj hk
   have hprod := (Bundle.Trivial.homeomorphProd M ℝ).continuous.comp_continuousOn h
   simpa only [velocityComponent, frame, Bundle.Trivial.homeomorphProd_apply,
@@ -82,7 +82,8 @@ def velocityCoordinates (v : ContinuousSymmetricVelocity (I := I) (M := M))
   velocityComponent v p b j k ((extChartAt I p).symm (toModel b z))
 
 def coordinateAnalysisDomain (p : M) (b : Module.Basis (Fin d) ℝ E) : Set (Fin d → ℝ) :=
-  (toModel b) ⁻¹' preferredCoordinateAnalysisDomain (I := I) (F := E) (V := TM) p
+  (toModel b) ⁻¹' FiniteSmoothPreferredTrivializingCover.preferredCoordinateAnalysisDomain
+    (I := I) (F := E) (V := TM) p
 
 lemma continuousOn_velocityCoordinates
     (v : ContinuousSymmetricVelocity (I := I) (M := M))
@@ -108,7 +109,8 @@ def preferredCover : Cover := FiniteSmoothPreferredTrivializingCover.chosen
 
 lemma isOpen_coordinateAnalysisDomain (p : M) (b : Module.Basis (Fin d) ℝ E) :
     IsOpen (coordinateAnalysisDomain (I := I) p b) := by
-  have hopen : IsOpen (preferredCoordinateAnalysisDomain (I := I) (F := E) (V := TM) p) :=
+  have hopen : IsOpen (FiniteSmoothPreferredTrivializingCover.preferredCoordinateAnalysisDomain
+      (I := I) (F := E) (V := TM) p) :=
     (continuousOn_extChartAt_symm (I := I) p).isOpen_inter_preimage
       (PoincareCurvature.BoundarylessChartTransport.isOpen_extChartAt_target (I := I) p)
       (trivializationAt E TM p).open_baseSet
@@ -158,7 +160,7 @@ lemma continuous_mul_of_tsupport_subset {X : Type*} [TopologicalSpace X]
   by_cases hx : x ∈ tsupport χ
   · exact hχ.continuousAt.mul ((hq x (hsupp hx)).continuousAt (hU.mem_nhds (hsupp hx)))
   · have hz : χ =ᶠ[𝓝 x] 0 := notMem_tsupport_iff_eventuallyEq.mp hx
-    apply continuousAt_const.congr_of_eventuallyEq
+    apply (continuousAt_const (y := (0 : ℝ))).congr_of_eventuallyEq
     filter_upwards [hz] with y hy
     simp [hy]
 
@@ -238,9 +240,9 @@ lemma contMDiffOn_gaussianMatrixOnManifold
       (fun z : E => gaussianMatrix v C b i h ((toModel b).symm z)) :=
     contMDiff_iff_contDiff.mpr ((contDiff_two_gaussianMatrix v C b i hh).comp
       (toModel b).symm.contDiff)
-  exact hmodel.contMDiffOn.comp
+  exact hmodel.comp_contMDiffOn
     ((contMDiffOn_extChartAt (I := I) (H := H) (n := 2) (x := (i : M))).mono
-      inter_subset_left) (fun _ _ => mem_univ _)
+      inter_subset_left)
 
 /-- The actual tensor approximant, assembled with the fixed original atlas
 and its finite smooth partition. The value h = 0 is a C0 tensor and is used
@@ -277,7 +279,8 @@ lemma contMDiff_two_gaussianTensor
       (i : M) (C.trivialization i) b (C.partition i)
       (gaussianMatrixOnManifold v C b i h)
       (isOpen_preferredAnalysisDomain I (F := E) (V := TM) (i : M))
-      inter_subset_right ((C.partition i).contMDiff.of_le (by simp))
+      inter_subset_right ((C.partition i).contMDiff.of_le (by
+        exact_mod_cast (show (2 : ℕ∞) ≤ ⊤ from le_top)))
       (C.pieces_subset_preferredAnalysisDomain i)
       (contMDiffOn_gaussianMatrixOnManifold v C b i hh)
   simpa only [gaussianTensor] using
@@ -316,7 +319,8 @@ lemma localTensorOfMatrix_eq_at
   have h := localTensorOfMatrix_localFrame e b q hx j k
   rw [hB j k] at h
   simpa only [ContinuousLinearMap.toLinearMap₁₂_apply_apply_apply,
-    Module.Basis.map_apply, e.localFrame_apply_of_mem_baseSet b hx] using h
+    e.localFrame_apply_of_mem_baseSet b hx,
+    _root_.Bundle.Trivialization.basisAt, Module.Basis.map_apply] using h
 
 lemma gaussianMatrixOnManifold_zero_of_mem_piece
     (v : ContinuousSymmetricVelocity (I := I) (M := M))
@@ -332,7 +336,8 @@ lemma gaussianMatrixOnManifold_zero_of_mem_piece
   simp only [gaussianMatrixOnManifold, gaussianMatrix, gaussianPath_zero]
   change (localizedVelocityFunction v C b i j k (chartCoordinate (I := I) (i : M) b x) +
     localizedVelocityFunction v C b i k j (chartCoordinate (I := I) (i : M) b x)) / 2 = _
-  simp only [localizedVelocityFunction, hχ, one_mul, velocityCoordinates, chartCoordinate,
+  simp only [localizedVelocityFunction, hχ, one_mul]
+  simp only [velocityCoordinates, chartCoordinate,
     ContinuousLinearEquiv.apply_symm_apply, (extChartAt I (i : M)).left_inv hxSource]
   have hsym : velocityComponent v (i : M) b k j x = velocityComponent v (i : M) b j k x :=
     v.symmetric x _ _
@@ -355,7 +360,7 @@ lemma gaussianTensor_zero
         (gaussianMatrixOnManifold v C b i 0) x = C.partition i x • v.tensor x := by
     intro i
     by_cases hψ : C.partition i x = 0
-    · simp [hψ]
+    · simp only [hψ, zero_smul]
     · have hx : x ∈ (C.pieces i : Set M) := subset_closure (Function.mem_support.2 hψ)
       have hxBase := C.pieces_subset_baseSet i hx
       congr 1
@@ -373,21 +378,13 @@ lemma continuousAt_gaussianTensor_component_zero
       ContinuousAt (fun h => cutoffLocalTensorOfMatrix (C.trivialization i) b
         (C.partition i) (gaussianMatrixOnManifold v C b i h) x u w) 0 := by
     intro i
-    by_cases hx : x ∈ (C.trivialization i).baseSet
-    · have hq := continuousAt_gaussianMatrix_zero v C b i
-        (chartCoordinate (I := I) (i : M) b x)
-      have hmat := (matrixBilinearSynthesis b).continuous.continuousAt.comp hq
-      have heval := (hmat.clm_apply (continuousAt_const
-        (c := tangentCoordCLM (C.trivialization i) x hx u))).clm_apply
-        (continuousAt_const (c := tangentCoordCLM (C.trivialization i) x hx w))
-      simpa only [cutoffLocalTensorOfMatrix, localTensorOfMatrix, dif_pos hx,
-        ContinuousLinearMap.bilinearComp_apply, matrixBilinearSynthesis_apply,
-        gaussianMatrixOnManifold, _root_.smul_apply, smul_eq_mul] using
-        (continuousAt_const (c := C.partition i x)).mul heval
-    · simpa only [cutoffLocalTensorOfMatrix, localTensorOfMatrix, dif_neg hx,
-        smul_zero, ContinuousLinearMap.zero_apply] using
-        (continuousAt_const (c := (0 : ℝ)))
-  simpa only [gaussianTensor, _root_.sum_apply] using
+    have hq := continuousAt_gaussianMatrix_zero v C b i
+      (chartCoordinate (I := I) (i : M) b x)
+    have heval := (cutoffLocalTensorEvaluationSynthesisAt
+      (C.trivialization i) b (C.partition i) x u w).continuous.continuousAt.comp hq
+    simpa only [cutoffLocalTensorEvaluationSynthesisAt_apply,
+      gaussianMatrixOnManifold, cutoffLocalTensorOfMatrix, localTensorOfMatrix] using heval
+  simpa only [ContinuousAt, gaussianTensor, _root_.sum_apply] using
     (tendsto_finsetSum Finset.univ fun i _ => hi i)
 
 /-- Ordinary two-sided component derivative of the actual finite-atlas

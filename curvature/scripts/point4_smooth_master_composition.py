@@ -1409,7 +1409,8 @@ def tensor_map_record(expected, originals, changes):
         'complete_input_paths':2139,'current_incoming_guard_wiring':'UNQUALIFIED finite executable adapters',
         'native_qualification':'UNRUN','point4':'OPEN',
         'executable_transforms':sorted(CURVATURE_EXECUTABLE_PATHS),
-        'scope':'Original mathematical inputs unchanged; exact reversible executable adapters require separate current/Linux/native qualification.'}
+        'scope':'Original mathematical inputs recovered exactly; one finite same-statement C0 endpoint API/proof correction and executable adapters require separate current/Linux/native qualification.',
+        'endpoint_API_proof_transform':{'path': 'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean', 'original_sha256': '474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f', 'current_sha256': '1ef0a488bdc050c05469e94bd75586807d7f2cd31b6c047563c6e46f84d93424', 'finite_edits_sha256': '81c06a7d283c534deef94f0e1fb4060f3cfad4d5deb07e4e2910b7c67ee884fd', 'declaration_headers_byte_identical': True, 'native_qualification': 'UNRUN'}}
     record['paths'] = len(complete)
     record['identity'] = {path:([complete[path][0],'<committed-HEAD>'] if path==MAP else list(complete[path]))
                           for path in sorted(complete)}
@@ -1642,10 +1643,34 @@ CURVATURE_EXECUTABLE_PATHS={
     'curvature/scripts/chart_port_ci.py':('chart-ci',138),
     'curvature/scripts/test_chart_port_ci.py':('chart-test',138)}
 
+CURVATURE_ENDPOINT_API_EDITS=(('NormedAddCommGroup (T₂ x) := ContinuousLinearMap.toNormedAddCommGroup', 'NormedAddCommGroup (T₂ x) := inferInstance'), ('NormedSpace ℝ (T₂ x) := ContinuousLinearMap.toNormedSpace', 'NormedSpace ℝ (T₂ x) := inferInstance'), ('(n := (2 : ℕ∞ω)) b j).continuous', '(n := (2 : ℕ∞ω)) b j).continuousOn'), ('(n := (2 : ℕ∞ω)) b k).continuous', '(n := (2 : ℕ∞ω)) b k).continuousOn'), ("(toModel b) ⁻¹' preferredCoordinateAnalysisDomain (I := I) (F := E) (V := TM) p", "(toModel b) ⁻¹' FiniteSmoothPreferredTrivializingCover.preferredCoordinateAnalysisDomain\n    (I := I) (F := E) (V := TM) p"), ('have hopen : IsOpen (preferredCoordinateAnalysisDomain (I := I) (F := E) (V := TM) p) :=', 'have hopen : IsOpen (FiniteSmoothPreferredTrivializingCover.preferredCoordinateAnalysisDomain\n      (I := I) (F := E) (V := TM) p) :='), ('    apply continuousAt_const.congr_of_eventuallyEq', '    apply (continuousAt_const (y := (0 : ℝ))).congr_of_eventuallyEq'), ('  exact hmodel.contMDiffOn.comp\n    ((contMDiffOn_extChartAt (I := I) (H := H) (n := 2) (x := (i : M))).mono\n      inter_subset_left) (fun _ _ => mem_univ _)', '  exact hmodel.comp_contMDiffOn\n    ((contMDiffOn_extChartAt (I := I) (H := H) (n := 2) (x := (i : M))).mono\n      inter_subset_left)'), ('inter_subset_right ((C.partition i).contMDiff.of_le (by simp))', 'inter_subset_right ((C.partition i).contMDiff.of_le (by\n        exact_mod_cast (show (2 : ℕ∞) ≤ ⊤ from le_top)))'), ('    Module.Basis.map_apply, e.localFrame_apply_of_mem_baseSet b hx] using h', '    e.localFrame_apply_of_mem_baseSet b hx,\n    _root_.Bundle.Trivialization.basisAt, Module.Basis.map_apply] using h'), ('  simp only [localizedVelocityFunction, hχ, one_mul, velocityCoordinates, chartCoordinate,\n    ContinuousLinearEquiv.apply_symm_apply, (extChartAt I (i : M)).left_inv hxSource]', '  simp only [localizedVelocityFunction, hχ, one_mul]\n  simp only [velocityCoordinates, chartCoordinate,\n    ContinuousLinearEquiv.apply_symm_apply, (extChartAt I (i : M)).left_inv hxSource]'), ('    · simp [hψ]\n    · have hx : x ∈ (C.pieces i : Set M)', '    · simp only [hψ, zero_smul]\n    · have hx : x ∈ (C.pieces i : Set M)'), ('    by_cases hx : x ∈ (C.trivialization i).baseSet\n    · have hq := continuousAt_gaussianMatrix_zero v C b i\n        (chartCoordinate (I := I) (i : M) b x)\n      have hmat := (matrixBilinearSynthesis b).continuous.continuousAt.comp hq\n      have heval := (hmat.clm_apply (continuousAt_const\n        (c := tangentCoordCLM (C.trivialization i) x hx u))).clm_apply\n        (continuousAt_const (c := tangentCoordCLM (C.trivialization i) x hx w))\n      simpa only [cutoffLocalTensorOfMatrix, localTensorOfMatrix, dif_pos hx,\n        ContinuousLinearMap.bilinearComp_apply, matrixBilinearSynthesis_apply,\n        gaussianMatrixOnManifold, _root_.smul_apply, smul_eq_mul] using\n        (continuousAt_const (c := C.partition i x)).mul heval\n    · simpa only [cutoffLocalTensorOfMatrix, localTensorOfMatrix, dif_neg hx,\n        smul_zero, ContinuousLinearMap.zero_apply] using\n        (continuousAt_const (c := (0 : ℝ)))\n  simpa only [gaussianTensor, _root_.sum_apply] using\n    (tendsto_finsetSum Finset.univ fun i _ => hi i)', '    have hq := continuousAt_gaussianMatrix_zero v C b i\n      (chartCoordinate (I := I) (i : M) b x)\n    have heval := (cutoffLocalTensorEvaluationSynthesisAt\n      (C.trivialization i) b (C.partition i) x u w).continuous.continuousAt.comp hq\n    simpa only [cutoffLocalTensorEvaluationSynthesisAt_apply,\n      gaussianMatrixOnManifold, cutoffLocalTensorOfMatrix, localTensorOfMatrix] using heval\n  simpa only [ContinuousAt, gaussianTensor, _root_.sum_apply] using\n    (tendsto_finsetSum Finset.univ fun i _ => hi i)'))
+
+def curvature_endpoint_api_source(original):
+    assert type(CURVATURE_ENDPOINT_API_EDITS) is tuple
+    assert len(CURVATURE_ENDPOINT_API_EDITS)==13
+    assert all(type(row) is tuple and len(row)==2 and all(type(v) is str for v in row)
+               for row in CURVATURE_ENDPOINT_API_EDITS)
+    serial=json.dumps(CURVATURE_ENDPOINT_API_EDITS,ensure_ascii=False,separators=(',',':')).encode()
+    assert sha256(serial)=='81c06a7d283c534deef94f0e1fb4060f3cfad4d5deb07e4e2910b7c67ee884fd', 'Exact finite endpoint API/proof policy drift'
+    assert sha256(original)=='474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f', 'Original endpoint source drift'
+    changed=original.decode('utf8')
+    for before,after in CURVATURE_ENDPOINT_API_EDITS:
+        assert changed.count(before)==1, 'Missing/duplicate endpoint original transform'
+        changed=changed.replace(before,after,1)
+    recovered=changed
+    for before,after in reversed(CURVATURE_ENDPOINT_API_EDITS):
+        assert recovered.count(after)==1, 'Missing/duplicate endpoint current transform'
+        recovered=recovered.replace(after,before,1)
+    assert recovered.encode()==original, 'Complete endpoint original source recovery drift'
+    assert sha256(changed.encode())=='1ef0a488bdc050c05469e94bd75586807d7f2cd31b6c047563c6e46f84d93424', 'Exact endpoint current source drift'
+    assert sha256(json.dumps(CURVATURE_ENDPOINT_API_EDITS,ensure_ascii=False,separators=(',',':')).encode())=='81c06a7d283c534deef94f0e1fb4060f3cfad4d5deb07e4e2910b7c67ee884fd'
+    return changed.encode()
+
 def curvature_selected_source(path,digest=None):
     selected=CURVATURE_SELECTED[path]
     original=git('show',selected['origins'][0]['head']+':'+path)
     assert sha256(original)==selected['sha256'] and blob_id(original)==selected['mode_blob'][1]
+    if path=='curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean':return curvature_endpoint_api_source(original)
     if path not in CURVATURE_EXECUTABLE_PATHS:return original
     if digest is None:digest=sha256((ROOT/HELPER).read_bytes())
     kind,number=CURVATURE_EXECUTABLE_PATHS[path]
