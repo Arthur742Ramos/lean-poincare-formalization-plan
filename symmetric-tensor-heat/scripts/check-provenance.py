@@ -7,8 +7,8 @@ import subprocess
 
 PACKAGE = Path(__file__).resolve().parents[1]
 REPO = PACKAGE.parent
-BASE = "d6ef7f253bb95fa44d1fe61c9b1a52e061ca0951"
-TREE = "a448a1d7d62c04a5ab85ba0d943b67db293e77c2"
+BASE = "13fa15d6a8352ed08bf71b3533b1c2e922c21388"
+TREE = "255c32fa869ec955e7c09b21fb74914b9ce13ec7"
 SOURCE = Path("curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/") / \
     "TensorHeatAtlasSymmetricWellPosedness.lean"
 SOURCE_SHA256 = "beadeb28c37b72ffc0700756ba506e213f97c351fb1ee3125de41667314012a7"
@@ -25,6 +25,52 @@ VENDORED_PATHS = (
     "lake-manifest.json",
     "lean-toolchain",
 )
+ADAPTED_SHA256 = {
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/HeatKernel1D.lean":
+        "824990b4aad942a6f28214d8bc7fd6acb8db85d7921b7a6f861218344ec15246",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/CompactCoefficientExtension.lean":
+        "8e42658d1e53ce7c43afca1f667bc9b34a1685b343d4cd50f674bc8330fa9c92",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/NormalizedCutoff.lean":
+        "8bdc17251cd27da4f63c357947a65b88b4c27f1c2c5f62ea7c669be7f5e40283",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/SmoothDependenceCk.lean":
+        "7390d0367bd2b62c849ad473158111ca863828dcb7925e212b9a015b68c0d1d2",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatEuclidean.lean":
+        "d3e8684dbfc312d9dfc30b4f47a289589cc12e8fee3e049515f569a14551e637",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasClosedReconstruction.lean":
+        "bab1b3e5f95a332c86732f2a88760c6e435ed928de61681a51e2b28ba1d5cb3d",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatGeometricRegularity.lean":
+        "6a6f6d70e9638922f1f10ec582a3af73de6545208061e608a06fbe3348c1b2b4",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/ContinuousSection.lean":
+        "21d6c184331d870d9fdf7666961258a833080ba9b89d645622be47c1f70a912a",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianChart.lean":
+        "3db9f52f16ff40d4262534777f0efc197e03761e5f4ccf82259cabd1fb000033",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianCoordinate.lean":
+        "55446fd439b84183d8f7190edc6fba6b42c2bb430cffcc53650fd3dca7345ac9",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Tensor.lean":
+        "626c9efc0ce0563ef8a6576ec0e3a332eb42c1e2d12614272f54fc7f558510ea",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/EndomorphismTrace.lean":
+        "647ae886731f58c6c3d3bb6f6806db7c4b8c6defe8167c11b9e8508a950ce434",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean":
+        "2418919d2fab4e7c90041d0c7d0e3f354a9d3987b8cc0987f2d8aaf0fd0a8ed4",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/FiniteCylinderInterpolation.lean":
+        "7f86ecba272aae7e510e66c7101c8a7357a642e749cb6faa85d6cdeba3aee9a7",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/BanachSpace.lean":
+        "425d1d2e93476279bfe4ebea9f65ca30d19c7301aa08b53e3e58820b81e0337d",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean":
+        "399a830faea8437e829c6cba4fcd1f3f1143a7425d9f46b5ea4b6b56e71d57ad",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasShortContraction.lean":
+        "a1eb4c6b0415c15a2907d5b6c85c01f488759a153607cab397a6ab424d96fd19",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasShortCommutatorLift.lean":
+        "4a2d709098f719b864424d366699444b068f1f991564edbb9b252cf3b0011bd9",
+    "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatAtlasAffineCorrection.lean":
+        "edc8a176e0895a3a1ff687a205f1f3fbef6b74db81338f51bbc01a95539b6489",
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TensorDivergence.lean":
+        "29a4de07240b29e134f3a96570f7bf8ee442c329980a56304fb333f8dbefb3a8",
+}
+ADDED_ADAPTATION_SHA256 = {
+    "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSectionCore.lean":
+        "71c72712f44ba9a456a2fa4816a2f0809eb0a5c61141c3b99a08fab432c42c9a",
+}
 
 
 def run(*args: str) -> str:
@@ -32,30 +78,45 @@ def run(*args: str) -> str:
 
 
 def git_bytes(object_name: str) -> bytes:
-    return subprocess.check_output(["git", "show", object_name], cwd=REPO)
+    return subprocess.check_output(["git", "cat-file", "blob", object_name], cwd=REPO)
+
+
+def tree_blobs(tree: str) -> dict[str, str]:
+    result = {}
+    for line in run("git", "ls-tree", "-r", tree).splitlines():
+        header, path = line.split("\t", 1)
+        _, kind, object_id = header.split()
+        if kind != "blob":
+            raise SystemExit("non-blob source in disclosed tree: " + path)
+        result[path] = object_id
+    return result
 
 
 def main() -> None:
     if run("git", "rev-parse", f"{BASE}:curvature") != TREE:
         raise SystemExit("recorded baseline curvature tree is incorrect")
+    source_blobs = tree_blobs(f"{BASE}:curvature")
+    vendor_blobs = tree_blobs("HEAD:symmetric-tensor-heat/vendor/curvature")
     # The main curvature subproject continues to evolve. This entry vendors an
     # immutable snapshot, so validate against that commit rather than HEAD.
-    digest = hashlib.sha256(git_bytes(f"{BASE}:{SOURCE.as_posix()}")).hexdigest()
+    source_relative = SOURCE.relative_to("curvature").as_posix()
+    digest = hashlib.sha256(git_bytes(source_blobs[source_relative])).hexdigest()
     if digest != SOURCE_SHA256:
         raise SystemExit("selected inherited theorem source hash changed")
-    expected = set(run(
-        "git", "ls-tree", "-r", "--name-only", f"{BASE}:curvature", "--",
-        *VENDORED_PATHS,
-    ).splitlines())
+    expected = {
+        path for path in source_blobs
+        if any(path == item or path.startswith(item + "/") for item in VENDORED_PATHS)
+    }
     actual = {
         path.relative_to(VENDOR).as_posix()
         for path in VENDOR.rglob("*")
         if path.is_file() and ".lake" not in path.relative_to(VENDOR).parts
     }
     generated = {"LICENSE"}
-    if actual != expected | generated:
-        missing = sorted((expected | generated) - actual)
-        extra = sorted(actual - (expected | generated))
+    added_adaptations = set(ADDED_ADAPTATION_SHA256)
+    if actual != expected | generated | added_adaptations:
+        missing = sorted((expected | generated | added_adaptations) - actual)
+        extra = sorted(actual - (expected | generated | added_adaptations))
         raise SystemExit(f"vendored inventory mismatch; missing={missing}, extra={extra}")
     # Compare committed blobs. Git may materialize CRLF worktree files on
     # Windows even when the immutable source and vendor blobs are identical.
@@ -63,18 +124,57 @@ def main() -> None:
         ["git", "diff", "--quiet", "HEAD", "--", "symmetric-tensor-heat/vendor/curvature"],
         cwd=REPO,
     )
+    if not set(ADAPTED_SHA256) <= expected:
+        raise SystemExit("adapted file is absent from the disclosed source inventory")
+    if set(ADDED_ADAPTATION_SHA256) & expected:
+        raise SystemExit("added adaptation unexpectedly exists in the source inventory")
     for relative in sorted(expected):
-        if git_bytes(f"HEAD:symmetric-tensor-heat/vendor/curvature/{relative}") != \
-                git_bytes(f"{BASE}:curvature/{relative}"):
+        vendor_oid = vendor_blobs.get(relative)
+        if relative in ADAPTED_SHA256:
+            if vendor_oid == source_blobs[relative]:
+                raise SystemExit("stale adaptation entry: " + relative)
+            digest = hashlib.sha256(git_bytes(vendor_oid)).hexdigest()
+            if digest != ADAPTED_SHA256[relative]:
+                raise SystemExit("adapted vendored file hash changed: " + relative)
+        elif vendor_oid != source_blobs[relative]:
             raise SystemExit("vendored file differs from disclosed source: " + relative)
-    if git_bytes("HEAD:symmetric-tensor-heat/vendor/curvature/LICENSE") != \
-            git_bytes(f"{BASE}:LICENSE"):
+    for relative, expected_hash in ADDED_ADAPTATION_SHA256.items():
+        vendor_oid = vendor_blobs.get(relative)
+        if vendor_oid is None:
+            raise SystemExit("missing added source-derived adaptation: " + relative)
+        digest = hashlib.sha256(git_bytes(vendor_oid)).hexdigest()
+        if digest != expected_hash:
+            raise SystemExit("added adaptation hash changed: " + relative)
+        source_section = git_bytes(source_blobs[
+            "PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean"
+        ]).decode("utf-8")
+        core_section = git_bytes(vendor_oid).decode("utf-8")
+        for declaration in (
+            "instNormedAddCommGroupTangentSpace",
+            "instNormedSpaceTangentSpace",
+            "instIsTopologicalAddGroupTangentSpace",
+            "instT2SpaceTangentSpace",
+            "ContMDiffRiemannianMetric.ext",
+            "BilinearFormBundle",
+            "trivializationAt_bilinearFormBundle_apply_eq",
+            "trivializationAt_bilinearFormBundle_isLinear",
+        ):
+            if declaration not in source_section or declaration not in core_section:
+                raise SystemExit("source-derived core declaration missing: " + declaration)
+    if vendor_blobs.get("LICENSE") != run("git", "rev-parse", f"{BASE}:LICENSE"):
         raise SystemExit("vendored repository license differs from disclosed source")
-    metadata = (PACKAGE / "formalization.yaml").read_text(encoding="utf-8")
+    metadata = git_bytes("HEAD:symmetric-tensor-heat/formalization.yaml").decode("utf-8")
     for required in (BASE, SOURCE.as_posix(), "vendor/curvature", "relationship: \"builds-on\""):
         if required not in metadata:
             raise SystemExit("structured provenance is incomplete: " + required)
-    print("Immutable source, exact vendored snapshot, notices, and structured provenance passed.")
+    if "RiemannianSectionCore.lean" not in metadata:
+        raise SystemExit("structured provenance omits the proof-support module split")
+    banach_space = git_bytes(vendor_blobs[
+        "PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/BanachSpace.lean"
+    ]).decode("utf-8")
+    if "import Mathlib.Analysis.Normed.Group.SeparationQuotient" in banach_space:
+        raise SystemExit("unused BanachSpace separation-quotient import was restored")
+    print("Immutable source, exact baseline/adapted vendor inventory, notices, and structured provenance passed.")
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ Run directly in an environment with the two dependencies above, or use
 """
 
 from pathlib import Path
+import hashlib
 import json
 import re
 import subprocess
@@ -25,30 +26,17 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = "https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json"
-MATHLIB = "db584cd6d46c92f209a44c0f1c829460d327499d"
+MATHLIB = "065356127b1dc0016f66b7283ce0ce2c4055aa55"
+CURVATURE_BASE = "13fa15d6a8352ed08bf71b3533b1c2e922c21388"
 THEOREM = "SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed"
-DEFINITIONS = [
-    "SymmetricTensorHeatEntry.IsInducedTwoTensorConnection",
-    "SymmetricTensorHeatEntry.IsInducedThreeTensorConnection",
-    "SymmetricTensorHeatEntry.connectionLaplacianApply",
-    "SymmetricTensorHeatEntry.IsSymmetricSection",
-    "SymmetricTensorHeatEntry.HasInitialTrace",
-    "SymmetricTensorHeatEntry.HasTimeDerivative",
-    "SymmetricTensorHeatEntry.SolvesTensorHeat",
-    "SymmetricTensorHeatEntry.IsMetricCompatibleTangent",
-    "SymmetricTensorHeatEntry.IsLeviCivita",
-    "SymmetricTensorHeatEntry.parabolicDistance",
-    "SymmetricTensorHeatEntry.HasParabolicC0AlphaNormLe",
-    "SymmetricTensorHeatEntry.HasSpatialC2AlphaNormLe",
-    "SymmetricTensorHeatEntry.HasParabolicC2AlphaNormLe",
-    "SymmetricTensorHeatEntry.completeStatement",
-]
+DEFINITIONS = ["SymmetricTensorHeatEntry.completeStatement"]
 ALLOWED_AXIOMS = ["propext", "Quot.sound", "Classical.choice"]
 PALOMAR = "a013555a88a0fc9ec910a09ea833dc9cc338db35"
 COMPARATOR = "575674928e239f5bc452aab72d1dd7b0f1326494"
 NANODA = "68d5ca9db226849b41a6fff59d796ff19d0a8840"
 LANDRUN = "811cfff51ceaf3d9843708aa6d22e9b84ccac8b4"
 CACHE_ACTION = "0400d5f644dc74513175e3cd8d07132dd4860809"
+CURRENT_PALOMAR = "1703d7babd984ccc3831cdf89c28221abe34808f"
 
 
 def require(condition: bool, message: str) -> None:
@@ -74,6 +62,39 @@ def without_comments(source: str) -> str:
             result.append(source[index]); index += 1
     require(depth == 0, "unclosed Lean block comment")
     return "".join(result)
+
+
+def vendored_import_closure() -> set[str]:
+    """Return the vendored modules reachable from the candidate entry points.
+
+    Lake does not infer same-library source modules when a library has an
+    explicit ``roots`` list, so keep that list fail-closed and derive the
+    expected closure from the actual public and private imports.  The parser
+    deliberately accepts ``public import`` as well as ordinary imports.
+    """
+    vendor = ROOT / "vendor/curvature"
+    modules = {
+        ".".join(path.relative_to(vendor).with_suffix("").parts): path
+        for path in vendor.rglob("*.lean")
+    }
+    import_pattern = re.compile(r"^(?:public )?import\s+([A-Za-z0-9_.]+)$",
+                                re.MULTILINE)
+    queue: list[str] = []
+    for entry in (ROOT / "TensorHeatSolution.lean",
+                  ROOT / "TensorHeatGeometricSymmetry.lean"):
+        source = without_comments(entry.read_text(encoding="utf-8"))
+        queue.extend(module for module in import_pattern.findall(source)
+                     if module in modules)
+    closure: set[str] = set()
+    while queue:
+        module = queue.pop()
+        if module in closure:
+            continue
+        closure.add(module)
+        source = without_comments(modules[module].read_text(encoding="utf-8"))
+        queue.extend(imported for imported in import_pattern.findall(source)
+                     if imported in modules and imported not in closure)
+    return closure
 
 
 def statement_block(source: str) -> str:
@@ -149,9 +170,11 @@ def main() -> None:
         "∃ D, ∀ i x",
         "∃ f, ∀ i z",
         "∃ q, ∀ i z",
-        "HasSpatialC2AlphaNormLe",
-        "HasParabolicC0AlphaNormLe",
-        "HasParabolicC2AlphaNormLe",
+        "let hasSpatialC2 :=",
+        "let hasParabolicC0 :=",
+        "let hasParabolicC0First :=",
+        "let hasParabolicC0Second :=",
+        "let hasParabolicC2 :=",
     ):
         require(semantic_guard in statement,
                 "anti-vacuity statement guard missing: " + semantic_guard)
@@ -179,9 +202,12 @@ def main() -> None:
         "name": "mathlib", "scope": "leanprover-community", "rev": MATHLIB,
     }], "Lake must depend directly on the pinned Mathlib revision")
     libraries = {entry["name"]: entry for entry in lakefile["lean_lib"]}
-    require(libraries["PoincareCurvature"].get("srcDir") == "vendor/curvature" and
-            set(libraries["PoincareCurvature"]) == {"name", "srcDir"},
-            "vendored curvature must be a root library, not a nested Lake package")
+    curvature = libraries["PoincareCurvature"]
+    require(curvature.get("srcDir") == "vendor/curvature" and
+            set(curvature) == {"name", "srcDir", "roots"},
+            "vendored curvature must be a rooted library, not a nested Lake package")
+    require(set(curvature["roots"]) == vendored_import_closure(),
+            "vendored curvature roots do not match the candidate import closure")
     require(libraries["TensorHeatChallenge"].get("roots") == ["TensorHeatChallenge"] and
             libraries["TensorHeatSolution"].get("roots") == ["TensorHeatSolution"],
             "Challenge/Solution Lake roots changed")
@@ -198,16 +224,27 @@ def main() -> None:
             mathlib["url"] == "https://github.com/leanprover-community/mathlib4" and
             mathlib["rev"] == MATHLIB and not mathlib["inherited"],
             "direct Mathlib manifest pin changed")
-    require((ROOT / "lean-toolchain").read_text().strip() == "leanprover/lean4:v4.33.0",
+    require((ROOT / "lean-toolchain").read_text().strip() == "leanprover/lean4:v4.35.0-rc2",
             "unsupported Lean toolchain")
 
     workflows = {
         "mechanical": ROOT.parent / ".github/workflows/symmetric-tensor-heat-palomar-mechanical.yml",
         "renderer": ROOT.parent / ".github/workflows/symmetric-tensor-heat-palomar-render.yml",
+        "current-mechanical": ROOT.parent / ".github/workflows/symmetric-tensor-heat-palomar-current.yml",
+        "current-renderer": ROOT.parent / ".github/workflows/symmetric-tensor-heat-palomar-current-render.yml",
     }
     for name, path in workflows.items():
         require(path.is_file() and not path.is_symlink(), f"missing regular {name} workflow")
+        if name in {"mechanical", "renderer"}:
+            expected_hashes = {'mechanical': 'aa67ea8abed6e5189fb49f92ec02b8b5812020ad306e8772c3ecafe678ebb319', 'renderer': '15b28d6b108ded509cec5bf8fd0ece125429609243b3640bbedf3863fb057c45'}
+            require(hashlib.sha256(path.read_bytes()).hexdigest() == expected_hashes[name],
+                    f"exact qualified-master automatic {name} workflow drift")
+        else:
+            require("  push:" not in path.read_text(encoding="utf-8"),
+                    f"duplicate push trigger in {name} workflow")
     mechanical = workflows["mechanical"].read_text(encoding="utf-8")
+    require(hashlib.sha256(workflows["mechanical"].read_bytes()).hexdigest() == 'aa67ea8abed6e5189fb49f92ec02b8b5812020ad306e8772c3ecafe678ebb319',
+            "exact qualified-master automatic mechanical workflow drift")
     for required_text in (
         PALOMAR, COMPARATOR, NANODA, LANDRUN, CACHE_ACTION,
         "verify_submission.py prepare", "verify_submission.py execute",
@@ -223,9 +260,24 @@ def main() -> None:
         require(required_text in mechanical,
                 "complete hosted Palomar verifier workflow changed: " + required_text)
     renderer = workflows["renderer"].read_text(encoding="utf-8")
+    require("  pull_request:" in renderer, "pinned renderer must run on pull requests")
     for required_text in (PALOMAR, LANDRUN, "render_challenge prepare", "render_challenge execute"):
         require(required_text in renderer,
                 "hosted Palomar renderer workflow changed: " + required_text)
+    current_mechanical = workflows["current-mechanical"].read_text(encoding="utf-8")
+    require("  pull_request:" in current_mechanical,
+            "current mechanical preflight must run on pull requests")
+    for required_text in (CURRENT_PALOMAR, "mode: full",
+                          "execution_profile: palomar-standard-v1",
+                          "commit: ${{ github.event.pull_request.head.sha || github.sha }}"):
+        require(required_text in current_mechanical,
+                "current Palomar mechanical workflow changed: " + required_text)
+    current_renderer = workflows["current-renderer"].read_text(encoding="utf-8")
+    require("  pull_request:" in current_renderer,
+            "current renderer must run on pull requests")
+    for required_text in (CURRENT_PALOMAR, "render_challenge prepare", "render_challenge execute", "--bwrap"):
+        require(required_text in current_renderer,
+                "current Palomar renderer workflow changed: " + required_text)
 
     metadata_text = (ROOT / "formalization.yaml").read_text(encoding="utf-8")
     require(len(metadata_text.encode()) <= 256 * 1024, "formalization.yaml too large")
@@ -240,7 +292,7 @@ def main() -> None:
         "Arthur Freitas Ramos", "David Barros Hulak", "Ruy J. G. B. de Queiroz"
     ], "human authorship metadata changed")
     related = {entry["id"] for entry in metadata["related_formalizations"]}
-    require(any("d6ef7f253bb95fa44d1fe61c9b1a52e061ca0951/curvature" in item
+    require(any(f"{CURVATURE_BASE}/curvature" in item
                 for item in related), "same-repository provenance missing")
     require(any(MATHLIB in item for item in related), "Mathlib provenance missing")
     result = metadata["status"]["main_results"]

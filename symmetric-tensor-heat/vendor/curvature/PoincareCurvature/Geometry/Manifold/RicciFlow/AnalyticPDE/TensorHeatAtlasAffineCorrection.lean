@@ -37,6 +37,20 @@ local notation "W₂" => (Fin d × Fin d → ℝ)
 local notation "DW₂" => (E →L[ℝ] W₂)
 local notation "D2W₂" => (E →L[ℝ] E →L[ℝ] W₂)
 
+@[reducible] local instance affineTwoFiberNormedAddCommGroup (x : M) :
+    NormedAddCommGroup (T₂ x) :=
+  CovariantDerivative.coordinateTwoFiberNormedAddCommGroup x
+@[reducible] local instance affineTwoFiberNormedSpace (x : M) :
+    NormedSpace ℝ (T₂ x) :=
+  CovariantDerivative.coordinateTwoFiberNormedSpace x
+
+-- Make the dependent fiber module explicit once.  The generic Pi instance
+-- repeatedly reconstructs this same module family while elaborating the
+-- pointwise tensor identities below.
+local instance affineTwoTensorModuleFamily :
+    ∀ x : M, Module ℝ (T₂ x) := fun x => by
+  infer_instance
+
 @[reducible] local instance affineFirstDerivativeNormedAddCommGroup :
     NormedAddCommGroup DW₂ := ContinuousLinearMap.toNormedAddCommGroup
 @[reducible] local instance affineFirstDerivativeNormedSpace :
@@ -847,9 +861,6 @@ theorem localFieldOfHigher_tensorHeatOperator_eq_source_sub_commutator
     rw [hlap]
     simp [physicalLocalSourceSlice, normalizedTensorHeatTimeDerivative,
       cutoffLocalTensorOfMatrix, hpsi]
-    ext v w
-    simp only [sub_apply, add_apply, smul_apply, smul_eq_mul,
-      zero_mul, mul_zero, zero_sub, zero_add]
   · have hxPiece : x ∈ (A.cover.pieces i : Set M) :=
       subset_closure (by simpa [Function.mem_support] using hpsi)
     have hxPatch := A.cover.pieces_subset_domain i hxPiece

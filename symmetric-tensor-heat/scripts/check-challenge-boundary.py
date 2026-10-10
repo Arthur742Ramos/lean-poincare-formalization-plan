@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 
@@ -10,14 +11,19 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> None:
-    lean = subprocess.check_output(
-        ["lake", "env", "which", "lean"], cwd=ROOT, text=True
-    ).strip()
+    # Windows Lake may report a Cygwin path that CreateProcess cannot open.
+    lean = (shutil.which("lean") if os.name == "nt" else
+            subprocess.check_output(
+                ["lake", "env", "which", "lean"], cwd=ROOT, text=True
+            ).strip())
+    if not lean:
+        raise SystemExit("Lean executable not found")
     paths = sorted((ROOT / ".lake/packages").glob("*/.lake/build/lib/lean"))
     if not paths:
         raise SystemExit("dependency libraries missing; run lake exe cache get")
     env = os.environ.copy()
     env["LEAN_PATH"] = os.pathsep.join(str(path.resolve()) for path in paths)
+    env["ELAN_TOOLCHAIN"] = (ROOT / "lean-toolchain").read_text(encoding="utf-8").strip()
     with tempfile.TemporaryDirectory(prefix="tensor-heat-boundary-") as scratch:
         negative = subprocess.run(
             [lean, "--stdin"], cwd=scratch, env=env, text=True,

@@ -1,0 +1,126 @@
+name: Point-4 upstream Hamilton release audit
+
+on:
+  pull_request:
+    paths:
+      - "scripts/point4/audit-hamilton-release.py"
+      - "scripts/point4/observe-hamilton-compiler.py"
+      - "scripts/point4/build-hamilton-batches.lean"
+      - "scripts/point4/test_audit_hamilton_release.py"
+      - ".github/workflows/point4-hamilton-release-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  upstream-endpoints:
+    name: Immutable upstream closure, signatures, and foundational axioms
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout exact audit candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: campaign
+          persist-credentials: false
+      - name: Check exact current-master source integration before any native work
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git -C campaign rev-parse HEAD)" = "$EXPECTED_SHA"
+          git -C campaign fetch --no-tags --unshallow origin
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.25.1
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/point4-hamilton-official-schema.json" \
+            https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/99c678e569c7c4c0772db297c5ddd5e4c9b6322e/schema/v0.4.schema.json
+          echo "25ff6b25ca4511635aff4443cf20480c15e59dddf19591c730950b442ea54fce  $RUNNER_TEMP/point4-hamilton-official-schema.json" | sha256sum --check
+          cd campaign
+          python3 curvature/scripts/point4_hamilton_native_source_guard.py --schema "$RUNNER_TEMP/point4-hamilton-official-schema.json"
+          python3 curvature/scripts/point4_hamilton_native_mock_test.py
+          python3 curvature/scripts/point4_c2_initial_heat_source_test.py
+          python3 curvature/scripts/point4_c2_initial_heat_mock_test.py
+          python3 curvature/scripts/point4_linear_heat_geometry_source_test.py
+          python3 curvature/scripts/point4_linear_heat_geometry_mock_test.py
+          python3 curvature/scripts/point4_weighted_initial_heat_guard.py
+          python3 curvature/scripts/point4_closed_contract_source_test.py
+          python3 scripts/check-doc-links.py
+      - name: Checkout immutable Apache-2.0 upstream release
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: qinz1yang/differential-geometry
+          ref: 8bd406e35c33a200e9b88895cf11ee8429194e15
+          path: upstream
+          persist-credentials: false
+      - name: Check pin and inspect focused source closure before compilation
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --plan-only
+      - name: Test persistent-plan gates, bounded observation, logs, and cancellation
+        run: python3 campaign/scripts/point4/test_audit_hamilton_release.py
+      - name: Install checksum-pinned official elan
+        run: |
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/elan.tar.gz" \
+            https://github.com/leanprover/elan/releases/download/v4.2.3/elan-x86_64-unknown-linux-gnu.tar.gz
+          echo "df0b2b3a439961ffcbb3985214365ffe40f49bc871df04dff268c7d8e21ca8b2  $RUNNER_TEMP/elan.tar.gz" | sha256sum --check
+          mkdir "$RUNNER_TEMP/elan"
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP/elan"
+          "$RUNNER_TEMP/elan/elan-init" -y --no-modify-path --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve upstream tagged dependencies and fetch official Mathlib cache
+        working-directory: upstream
+        run: |
+          # This source release deliberately does not track lake-manifest.json.
+          # Resolve it under the immutable source's pinned toolchain before any
+          # Lean-action configuration could require the generated manifest.
+          MATHLIB_NO_CACHE_ON_UPDATE=1 lake --keep-toolchain update
+          python3 - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          expected = '8a178386ffc0f5fef0b77738bb5449d50efeea95'
+          manifest = json.loads(Path('lake-manifest.json').read_text())
+          mathlib = next(p for p in manifest['packages'] if p['name'] == 'mathlib')
+          assert mathlib['rev'] == expected, mathlib
+          actual = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd='.lake/packages/mathlib', text=True).strip()
+          assert actual == expected, actual
+          PY
+          lake exe cache get
+      - name: Compile audit-owned native driver with exact official SDK
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --bootstrap-only
+      - name: Check native initialization and observer on bounded local toy
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --native-preflight-only
+      - name: Compile exact endpoint import closure and inspect axioms
+        run: |
+          python3 campaign/scripts/point4/audit-hamilton-release.py upstream | tee hamilton-release-audit/build.log
+      - name: Remove only the audit-local toolchain symlink view
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil
+          shim = Path('hamilton-release-audit/observed-toolchain')
+          if shim.exists():
+              # rmtree unlinks symlink entries, never their official targets.
+              shutil.rmtree(shim)
+          PY
+      - name: Preserve complete audit evidence and unresolved bridge status
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: hamilton-release-audit-${{ github.event.pull_request.head.sha || github.sha }}
+          # Never follow the audit-local symlink view of the official toolchain.
+          path: |
+            hamilton-release-audit/
+            !hamilton-release-audit/observed-toolchain/**
+            !hamilton-release-audit/native-preflight/evidence/observed-toolchain/**
+          if-no-files-found: error

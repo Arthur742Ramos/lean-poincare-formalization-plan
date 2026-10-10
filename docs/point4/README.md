@@ -46,6 +46,52 @@ current dependency mutation is part of this milestone, and independent
 exact-head source and mathematical review remains required. `--no-build`
 always leaves the completion verdict open.
 
+## Heat-invariant closure on independent jet fields
+
+The PR110 supporting theorem fixes the Euclidean section under componentwise
+heat propagation, preserves its centered closed ball, derives the compact
+fiber-range premise from the small-ball bound, and packages the reaction in
+the little-Hölder carrier with a full-norm Lipschitz estimate. Its source is
+[`GenuineRicciDeTurckHeatInvariantClosure.lean`](../../curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/GenuineRicciDeTurckHeatInvariantClosure.lean).
+It retains `0 < α < 1`, `0 < R`,
+`2 * jet2LipConst d d * R < phiRDRadius d`, and the supplied fixed coordinate
+background coefficients. The eight-declaration probe and original supporting
+workflow remain attached to this result.
+
+Three distinctions delimit what this closure proves:
+
+1. `UsesChosenBackground` chooses the Levi–Civita connection of the evolving
+   metric itself. The existing
+   `intrinsicRicciDeTurckRHS_chosenLeviCivitaFamily_eq_intrinsicRicciFlowRHS`
+   removes the DeTurck correction for that choice. Those conditional packages
+   do not construct the strictly parabolic fixed-background DeTurck equation.
+2. `Jet2Section` is a product of independent little-Hölder component fields.
+   It does not require first slots to differentiate the value field, or
+   second slots to differentiate first slots. Evaluating supplied components
+   with `jet2OfSection` does not establish derivative compatibility.
+3. `phiRDOfJet` is the full coordinate right-hand side `-2 Ric + Lie_W g`.
+   It is not the remainder after subtracting a frozen heat generator.
+   Propagating the independent fields with heat and reaction `(phiRD, 0, 0)`
+   does not identify an auxiliary product-space equation with the geometric PDE.
+
+The canonical target still requires spatially C² initial data, its existing
+weak competitor class, ordinary initial derivatives, and a common closed
+time interval under the approved `BoundarylessManifold I M` premise. The
+separately named smooth forward target retains its own contract and audit.
+This closure proves neither target. Derivative-compatible spaces, the
+generator/remainder identity, quasilinear existence, positivity, intrinsic
+identification, gauge regularity, and uniqueness remain separate obligations.
+
+The inherited PR110 source is
+[`0fce83f00a2e8832e5098ee43d8f260f3a98e9c9`](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/tree/0fce83f00a2e8832e5098ee43d8f260f3a98e9c9/curvature).
+Its successful [historical focused run](https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/37181895941)
+qualifies that old checkout. The integration starts from master
+`5286f8e76fe26c56eea662552e4591ef2d227da7`; fresh compilation, the eight
+standard-axiom records, root elaboration, relevant audits, and independent
+review of the combined head remain pending. Point 4 and the smooth target
+remain **OPEN**.
+
+
 ## Boundaryless chart transport
 
 The supporting [boundaryless-chart/frame milestone](boundaryless-chart-frames.md)
@@ -454,6 +500,19 @@ maps, evaluates them on local frames, and supplies the scalar premises used
 by the lowering bridge. This is an interface reduction only: the joint
 geometric section regularity remains an explicit Point 4 gate.
 
+The conventional two-input-slot DeTurck repair now has a candidate joint-field
+follow-up in `MetricContractedDeTurckJointRegularity.lean`. From a jointly smooth
+metric representative agreeing with the defining metric and the actual jointly
+smooth Levi--Civita correction tensor, it proves the conventional inverse-Gram
+vector formula and joint smoothness of the positive field and negative recovery
+gauge. The correction-functional corollary derives the tensor premise by the
+existing geometric Gram/Riesz reconstruction, and a conditional compact-flow
+wrapper uses this same conventional gauge. These are explicit geometric
+regularity hypotheses, not assumptions about the final contracted field or a
+claim of PDE existence. The generic contraction passed exact Lean-4.33 compilation; final
+verification of the new geometric adapter remains pending. See [contraction repair](contraction-repair.md) for the
+field distinction and verification boundary. Point 4 remains OPEN.
+
 The candidate algebraic principal/remainder milestone is packaged in
 `RicciDeTurckPrincipalRemainder.lean`. It derives an exact finite reaction split
 from the actual Ricci and conventional DeTurck coordinate formulas, exposes
@@ -462,8 +521,8 @@ lower-order reaction. It also adds the two missing background-first-jet Lie
 contributions with their negative sign and proves the corrected frozen
 coefficient remainder identity and a coefficient-error bound. It constructs no
 holonomic jets or PDE solution, and does not identify this algebraic contraction
-with the manifold tensor-heat generator. No compilation of this candidate has
-been run yet. See [principal/remainder scope](principal-remainder.md) for the
+with the manifold tensor-heat generator. Its exact Lean-4.33 full build and eleven standard-only axiom probes
+passed before the principal milestone was merged into master. See [principal/remainder scope](principal-remainder.md) for the
 precise statement, derivative-compatibility boundary, and verification gates.
 
 ## Proved architecture
@@ -637,3 +696,12 @@ metric preservation, realization or uniqueness. Point 4 remains open.
 The [weak-regularity actual tensor-Laplacian proof unit](weak-laplacian.md)
 removes the unnecessary C² connection/induced-three oracle from a new local
 adapter. Authored source awaits exact Lean 4.33.0 verification; Point 4 stays open.
+
+The fixed-background local-heat candidate composes the existing global C²
+auxiliary-connection constructor with actual coefficient regularity and
+scale-correct zero-trace local right-inverses for the literal arbitrary C²
+metric. No connection, induced-regularity, coefficient-regularity or solver
+witness is an input. Its stronger `I.Boundaryless` and unweighted Hölder source
+scope remain explicit; exact Lean-4.33 verification is pending. See
+[the precise local linear boundary](fixed-background-heat.md).
+The canonical Point-4 theorem and **OPEN** verdict remain unchanged.

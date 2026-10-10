@@ -1,0 +1,98 @@
+[
+  {
+    "path": "Mathlib/Geometry/Manifold/VectorBundle/Riemannian.lean",
+    "sha": "b5fc92352e7156e1adda4068c258f3e6dcb1d091",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/VectorBundle/Riemannian.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Geometry__Manifold__VectorBundle__Riemannian.lean"
+  },
+  {
+    "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+    "sha": "3d430cddf9790bd71375727570118e3aed74e183",
+    "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/curvature__PoincareCurvature__Geometry__Manifold__RicciFlow__LocalExistence.lean"
+  },
+  {
+    "path": "Mathlib/Topology/ContinuousMap/Bounded/Basic.lean",
+    "sha": "ce9f56fc4406e5eba5c21a655692dc5a9993c0ee",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/ContinuousMap/Bounded/Basic.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__ContinuousMap__Bounded__Basic.lean"
+  },
+  {
+    "path": "Mathlib/Topology/Algebra/Support.lean",
+    "sha": "6724d9a28680cfee734a0e2be71203cd5ca0d9ee",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/Algebra/Support.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__Algebra__Support.lean"
+  },
+  {
+    "path": "Mathlib/Analysis/Calculus/Deriv/Basic.lean",
+    "sha": "99b298181811591362a2467cfd825017ac9d0fef",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/Calculus/Deriv/Basic.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Analysis__Calculus__Deriv__Basic.lean"
+  },
+  {
+    "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/PointFourContract.lean",
+    "sha": "ab4be9d25a9178cb17cb9c1ed67dc60ff10025ec",
+    "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/PointFourContract.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/curvature__PoincareCurvature__Geometry__Manifold__RicciFlow__PointFourContract.lean"
+  },
+  {
+    "path": "Mathlib/Topology/ContinuousMap/BoundedCompactlySupported.lean",
+    "sha": "8e463a392ed21beb3d728ce9c6068a004543692c",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/ContinuousMap/BoundedCompactlySupported.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__ContinuousMap__BoundedCompactlySupported.lean"
+  },
+  {
+    "path": "Mathlib/Topology/VectorBundle/Hom.lean",
+    "sha": "5162b27a435c26918e70ee6b466192e8055504be",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/VectorBundle/Hom.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__VectorBundle__Hom.lean"
+  },
+  {
+    "path": "Mathlib/Analysis/Calculus/Deriv/Mul.lean",
+    "sha": "f688112f3812e3f50cdf169956d6c1323d32c19a",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/Calculus/Deriv/Mul.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Analysis__Calculus__Deriv__Mul.lean"
+  },
+  {
+    "path": "Mathlib/Topology/UniformSpace/HeineCantor.lean",
+    "sha": "a3c9f8490f96b0056785997fc91987e11e587020",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/UniformSpace/HeineCantor.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__UniformSpace__HeineCantor.lean"
+  },
+  {
+    "path": "Mathlib/Geometry/Manifold/VectorBundle/ContMDiffSection.lean",
+    "sha": "a6593d1272ab0bd3e6780cc5573b760e865c5f30",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/VectorBundle/ContMDiffSection.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Geometry__Manifold__VectorBundle__ContMDiffSection.lean"
+  },
+  {
+    "path": "Mathlib/Topology/FiberBundle/Constructions.lean",
+    "sha": "a3a215afae4ff96a725940bd3e131d18b54c5035",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/FiberBundle/Constructions.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__FiberBundle__Constructions.lean"
+  },
+  {
+    "path": "Mathlib/Topology/MetricSpace/Pseudo/Lemmas.lean",
+    "sha": "bd5e7cc7d3820491f99e382c0f3240ee6b99ff03",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/MetricSpace/Pseudo/Lemmas.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__MetricSpace__Pseudo__Lemmas.lean"
+  },
+  {
+    "path": "Mathlib/Geometry/Manifold/PartitionOfUnity.lean",
+    "sha": "e9d0243283efab7d65cd7144ef21bf1b717e5eb0",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/PartitionOfUnity.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Geometry__Manifold__PartitionOfUnity.lean"
+  },
+  {
+    "path": "Mathlib/Topology/Algebra/Module/Spaces/ContinuousLinearMap.lean",
+    "sha": "a59c26385477df5e903b91d26447a03e25f16a6e",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/Algebra/Module/Spaces/ContinuousLinearMap.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__Algebra__Module__Spaces__ContinuousLinearMap.lean"
+  },
+  {
+    "path": "Mathlib/Topology/Algebra/Monoid.lean",
+    "sha": "0dac831950493b3a8af9373f5f9c6cd99b6f4538",
+    "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/Algebra/Monoid.lean",
+    "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__Algebra__Monoid.lean"
+  }
+]

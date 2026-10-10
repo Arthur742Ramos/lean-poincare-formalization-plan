@@ -36,8 +36,8 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
-  [RiemannianBundle (TangentSpace I : M → Type _)]
   [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
+  [RiemannianBundle (TangentSpace I : M → Type _)]
 
 namespace CovariantDerivative
 

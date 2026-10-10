@@ -1,0 +1,27 @@
+--- a/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0GaussianEndpoint.lean
++++ b/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0GaussianEndpoint.lean
+@@ -51,9 +51,7 @@
+     ContinuousAt (gaussianPath f) 0 := by
+   have h := continuousAt_heatFlowPathBcf_zero_of_uniformContinuous f hf
+   have ht : ContinuousAt smoothingTime 0 := continuous_smoothingTime.continuousAt
+-  have houter : ContinuousAt (heatFlowPathBcf f) (smoothingTime 0) := by
+-    simpa only [smoothingTime_zero] using h
+-  simpa only [gaussianPath] using houter.comp ht
++  simpa only [gaussianPath, smoothingTime_zero] using h.comp ht
+ 
+ lemma norm_gaussianPath_le {n : ℕ}
+     (f : BoundedContinuousFunction (Fin n → ℝ) ℝ) (h : ℝ) :
+--- a/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C2MetricVelocityExtension.lean
++++ b/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C2MetricVelocityExtension.lean
+@@ -187,10 +187,7 @@
+       simpa only [sub_zero] using (hasDerivAt_id t₀).sub_const t₀
+     have hcenter' : HasDerivAt
+         (fun t => endpointTensor g₀ v C b δ (t - t₀) x u w) (v.tensor x u w) t₀ := by
+-      have hcenterAt : HasDerivAt (fun h => endpointTensor g₀ v C b δ h x u w)
+-          (v.tensor x u w) (t₀ - t₀) := by
+-        simpa only [sub_self] using hcenter
+-      simpa only [mul_one] using hcenterAt.comp t₀ hshift
++      simpa only [sub_self, mul_one] using hcenter.comp t₀ hshift
+     simpa only [g, RicciFlow.metricTensor, centeredMetric_inner] using hcenter'
+ 
+ end RicciFlow.AnalyticPDE.C0Endpoint

@@ -3,21 +3,99 @@
 Selected theorem:
 `SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed`.
 
-## Current mathematical repair (working tree)
+## Lean 4.35 migration receipt
 
-The chart geometry and frame constraints in the selected Challenge and Solution
-compile. The separate `TensorHeatGeometricSymmetry` module proves the
-unprojected transpose/PDE and initial-trace bridges and a conditional symmetry
-lemma with geometric uniqueness stated explicitly. It also defines the
-global-data `GeometricAtlasCauchySolution` class, proves transposition closure
-for symmetric data, and obtains existence in that class from the strong atlas
-construction. That module passes direct Lean elaboration and its Lake target
-build. It also proves linearity of the intrinsic heat operator under
-subtraction and reduces equal-data uniqueness to a zero-data problem. This
-does not prove the zero-data uniqueness premise, which may need stronger
-uniform regularity than the current classical-field interface records. The
-selected theorem still uses a symmetrized readout; geometric
-uniqueness has not been proved. This is not a candidate for intake.
+The candidate stacked on `2613d7b40d2e8c38126ee040b424d3ca57a86220`
+migrates the focused package to Lean `v4.35.0-rc2` and Mathlib
+`065356127b1dc0016f66b7283ce0ce2c4055aa55`, the current production
+Palomar minimum and its matching Mathlib pin. Ten attributed vendor files
+receive API compatibility edits; the selected Challenge and Solution theorem
+statements remain unchanged. At migration commit
+`b73d71f2af4e6f3c6341a31f9c473e53aefa623b`, the full Lean 4.35 Solution
+build completed 3,877 jobs. The Mathlib-only Challenge boundary and negative
+import control, nonvacuity, compiled closed-statement audit, selected-theorem
+axiom check, exact committed provenance, and package/schema checks passed.
+The closed-body audit found 282 reachable constants, 60 compiler-generated
+proposition proofs, and no candidate-defined mathematical data.
+
+That exact commit also passed the pinned Linux Landrun renderer and
+core-notation audit (run `35878326663`), the current production bubblewrap
+renderer and core-notation audit (run `35878326705`), and current production
+full mechanical verification (run `35878327975`). The current mechanical
+report recorded `status: pass`, `stage: complete`, high Challenge trust, and
+acceptance by protected NanoDa, verified `con-ron`, and Lean's default kernel.
+Its only warning is that the 601-line, 31,831-byte Challenge exceeds Palomar's
+preferred 300-line review surface. The exact selected surface comprises only
+the theorem and `completeStatement`.
+
+These receipts remain historical for any subsequent commit, including a
+documentation-only update. The current candidate SHA and its own receipts
+are tracked in PR #101. There is no active Palomar intake or registration.
+
+## Historical verification of the immediate predecessor
+
+Commit `2613d7b40d2e8c38126ee040b424d3ca57a86220` passed the pinned
+Palomar mechanical replay (GitHub run `35859592079`) and the separate pinned
+Landrun renderer with its core-notation audit (run `35859592105`). The
+mechanical report recorded `status: pass`, `stage: complete`, Comparator and
+NanoDa passes, and high Challenge trust. Its only review warning was that the
+configured Challenge exceeds Palomar's preferred 32 KiB / 300-line review
+surface. These receipts verify that exact predecessor under its historical
+toolchain, not the new 4.35 candidate or the current production pipeline.
+They were verification runs, not Palomar intake or registration.
+
+## Earlier selected repairs
+
+The quantitative follow-on after `5908b028825c76537955118eff76772c3ab4a455`
+adds an exact finite-atlas size formula for each represented spatial jet family
+and bounds the chosen source norm by the sum of the supplied chartwise
+parabolic Hölder budgets. Challenge and independent Solution compiled locally;
+their selected propositions match byte for byte. At that stage, exact-commit
+hosted checks were pending. They later passed at
+`2613d7b40d2e8c38126ee040b424d3ca57a86220`, as recorded above.
+
+The data-coverage extension after `40f66568d51f8424a2d3265cd4c63718e2576515`
+adds selected coverage for every bounded spatial `C^{2,alpha}` atlas jet family
+and every parabolic `C^{alpha,alpha/2}` atlas source family satisfying the
+displayed bounds. The independent Challenge and Solution propositions match
+byte for byte. Both compiled locally, and the closed-statement audit passed
+with 281 reachable constants, 60 compiler-generated proposition proofs, and
+no candidate-defined mathematical data. The nonvacuity check, exact axiom
+query (`propext`, `Classical.choice`, `Quot.sound`), package/schema, and
+structured provenance checks passed locally. Those were working-tree results
+at that stage; later exact-commit receipts are identified above.
+
+The selected Challenge and Solution state ordinary, unprojected atlas
+reconstruction. The curvature subproject at the disclosed source commit proves
+joint space-time continuity of the represented tensor norm and a zero-data
+uniqueness theorem using the genuine tensor connection Laplacian. The local
+`TensorHeatGeometricSymmetry` bridge derives the fixed-representative
+zero-data comparison in the represented geometric class. The selected
+Solution uses that bridge to derive symmetry of the ordinary solution and
+includes a separate uniqueness clause for represented readouts attached to
+the same initial representative `D` and source representative `f`, when they
+satisfy the displayed trace and PDE. It does not claim uniqueness across
+different atlas representatives of equal global tensors. Direct Lean elaboration of the Solution
+passed locally. The Mathlib-only Challenge compiled with its one intentional
+hole; the dependency-only boundary check and negative import control passed;
+the anti-vacuity regression passed; and the package, schema, source-boundary,
+exact vendored snapshot, contributor notices, and structured provenance checks
+passed. The compiled-body audit found 277 constants, 60 compiler-generated
+theorem proofs, and no candidate-defined data or proof-development references.
+These are working-tree results. Exact-commit provenance, the axiom check,
+Comparator, NanoDa, and pinned Linux Palomar renderer/mechanical checks remain
+release gates for this closed-surface commit. There is no active intake for
+this replacement.
+
+The immediate predecessor at commit
+`f91b0e39390091819e3841bc1bf8a2c7a766deb2` passed the exact hosted
+Palomar mechanical replay and the separate pinned Linux renderer, including
+its core-notation audit. Its Comparator surface still selected thirteen helper
+definitions alongside `completeStatement`; those receipts are historical for
+the closed-surface branch and cannot verify a later commit. The mechanical
+report was a verification run, not an intake or registration.
+
+## Historical verification of earlier candidates
 
 Before the subsequent trace-estimate addition, `lake build` completed all 3,242 jobs;
 `scripts/check-challenge-boundary.py` compiled the Challenge using only pinned
@@ -55,12 +133,13 @@ import the Challenge and active proof sources contain no `sorry`, `admit`, or
 `axiom`. The selected theorem is expected to use exactly `propext`,
 `Classical.choice`, and `Quot.sound`.
 
-The closure audit checks the compiled `completeStatement` body and rejects
-candidate proof-development references. Its only candidate-local dependencies
-may be the statement's explicitly enumerated Mathlib-facing semantic helpers,
-their structural bundle instances, and generated proposition proofs. All
-thirteen semantic helper definitions are independently selected by Comparator
-in addition to `completeStatement` itself.
+The current Comparator configuration selects the theorem and only
+`completeStatement`; the mathematical norm and regularity predicates occur as
+local definitions in that proposition. The compiled-body audit rejects every
+candidate-defined data constant reachable from its value, including structural
+instances. It permits a compiler-generated proposition proof only after
+checking that the declaration is a theorem. Its pass must be established on
+the exact candidate commit before intake.
 
 Comparator pins:
 

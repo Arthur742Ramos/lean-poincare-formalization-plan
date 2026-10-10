@@ -49,10 +49,43 @@ identified with this conventional field without a valid theorem. This is an
 additive repair of the field-definition/frame-identification layer; it does not
 claim a completed migration of the existing gauge/PDE interfaces.
 
+## Joint regularity follow-up
+
+The candidate supporting module
+`GaugeReduction/MetricContractedDeTurckJointRegularity.lean` uses the new
+conventional field throughout. Its proof route is:
+
+1. identify its actual chosen/background connection difference with
+   `explicitLeviCivitaCorrection`
+2. derive the local-frame vector formula using the inverse Gram matrix of the
+   defining metric, or an explicitly agreeing smooth metric representative
+3. prove inverse-Gram and bilinear-section contraction regularity in
+   `Analysis/TimeDependentMetricContraction.lean`, with Gram nonsingularity
+   discharged by positive definiteness
+4. globalize that local section and prove joint smoothness of the positive
+   conventional vector and its negative recovery gauge
+5. feed that same negative field to the existing coherent compact-flow theorem
+
+The correction-functional corollary uses the existing genuine Gram/Riesz
+reconstruction of the actual correction tensor. It therefore exposes joint
+metric regularity and local-frame correction-functional section regularity as
+analytic inputs; it does not assume regularity of the final contracted field.
+The compact-flow conclusion is conditional on those smooth geometric data and
+on the existing compact, boundaryless manifold hypotheses. It constructs no
+Ricci--DeTurck PDE solution and supplies no variational recovery theorem.
+
+The generic regularity and parameterized-negation lemmas have a development-only
+Lean-4.35.0-rc2 prototype check. The new geometric adapter and the inherited
+contraction adapter have not yet passed exact Lean-4.33 hosted compilation.
+The exact-head workflow now explicitly compiles the follow-up and checks its
+axiom surfaces before running the unchanged full completion audit. Prototype
+checks are not final verification.
+
 ## Remaining obligations
 
-The conventional field still needs its joint regularity, the associated fixed-
-background parabolic operator and nonlinear construction, intrinsic curvature
+The conventional field still needs the joint geometric regularity hypotheses
+of the supporting bridge to be discharged, the associated fixed-background
+parabolic operator and nonlinear construction, intrinsic curvature
 identification, gauge flow/variational recovery, and uniqueness. A supporting
 smooth closed-manifold endpoint also needs a precise bridge to the canonical
 target's C² initial metrics, weaker candidate regularity, ordinary initial-time

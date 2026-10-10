@@ -350,6 +350,78 @@ def cutoffLocalTensorOfMatrix
     (ψ : M → ℝ) (q : M → ι → ι → ℝ) : ∀ x : M, T₂ x :=
   fun x => ψ x • localTensorOfMatrix e b q x
 
+/-- In the induced tensor trivialization, cutoff reconstruction is precisely
+the scalar cutoff times the synthesized coefficient matrix. -/
+theorem covariantTwoTensorTrivialization_cutoffLocalTensorOfMatrix
+    (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (ψ : M → ℝ) (q : M → ι → ι → ℝ)
+    {x : M} (hx : x ∈ e.baseSet) :
+    ((covariantTwoTensorTrivialization p e)
+      (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) x
+        (cutoffLocalTensorOfMatrix e b ψ q x))).2 =
+      ψ x • matrixBilinearCLM b (q x) := by
+  let e₂ := covariantTwoTensorTrivialization p e
+  have hx₂ : x ∈ e₂.baseSet := by
+    simpa [e₂, covariantTwoTensorTrivialization_baseSet] using hx
+  rw [show cutoffLocalTensorOfMatrix e b ψ q x =
+      ψ x • localTensorOfMatrix e b q x from rfl]
+  rw [e₂.apply_eq_prod_continuousLinearEquivAt ℝ x hx₂]
+  simp only [map_smul]
+  exact congrArg (fun v => ψ x • v)
+    (covariantTwoTensorTrivialization_localTensorOfMatrix p e b q hx)
+
+/-- Joint continuity of cutoff tensor reconstruction on a genuine tensor
+trivialization domain follows from joint continuity of its matrix data. -/
+theorem continuousOn_cutoffLocalTensorOfMatrix_on_patch
+    (p : M)
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E TM → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι ℝ E)
+    (ψ : M → ℝ) (hψ : Continuous ψ)
+    {s : Set M} (hs : s ⊆ e.baseSet)
+    (q : ℝ × M → ι → ι → ℝ)
+    (hq : ContinuousOn q (Set.univ ×ˢ s)) :
+    ContinuousOn
+      (fun z : ℝ × M =>
+        TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) z.2
+          (cutoffLocalTensorOfMatrix e b ψ
+            (fun x => q (z.1, x)) z.2))
+      (Set.univ ×ˢ s) := by
+  let e₂ := covariantTwoTensorTrivialization p e
+  let S : Set (ℝ × M) := Set.univ ×ˢ s
+  have hmat : ContinuousOn
+      (fun z : ℝ × M => matrixBilinearCLM b (q z)) S := by
+    simpa only [Function.comp_def, matrixBilinearSynthesis_apply] using
+      (matrixBilinearSynthesis b).continuous.comp_continuousOn hq
+  have hpsi : ContinuousOn (fun z : ℝ × M => ψ z.2) S :=
+    (hψ.comp continuous_snd).continuousOn
+  have hcoord : ContinuousOn
+      (fun z : ℝ × M => ψ z.2 • matrixBilinearCLM b (q z)) S :=
+    hpsi.smul hmat
+  have hpair : ContinuousOn
+      (fun z : ℝ × M =>
+        (z.2, ψ z.2 • matrixBilinearCLM b (q z))) S :=
+    continuousOn_snd.prodMk hcoord
+  have hsource : ∀ z ∈ S,
+      (z.2, ψ z.2 • matrixBilinearCLM b (q z)) ∈
+        e₂.baseSet ×ˢ (Set.univ : Set (E →L[ℝ] E →L[ℝ] ℝ)) := by
+    intro z hz
+    exact ⟨by simpa [e₂, covariantTwoTensorTrivialization_baseSet] using hs hz.2,
+      Set.mem_univ _⟩
+  have hinverse := e₂.continuousOn_symm.comp hpair hsource
+  refine hinverse.congr ?_
+  intro z hz
+  have hx : z.2 ∈ e.baseSet := hs hz.2
+  have hx₂ : z.2 ∈ e₂.baseSet := by
+    simpa [e₂, covariantTwoTensorTrivialization_baseSet] using hx
+  have hvalue := e₂.symm_apply_apply_mk hx₂
+    (cutoffLocalTensorOfMatrix e b ψ (fun x => q (z.1, x)) z.2)
+  rw [covariantTwoTensorTrivialization_cutoffLocalTensorOfMatrix
+    p e b ψ (fun x => q (z.1, x)) hx] at hvalue
+  exact congrArg (fun v : T₂ z.2 =>
+    TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) (E := T₂) z.2 v) hvalue.symm
+
 /-- Transposing coefficients also flips the slots after multiplication by a
 scalar cutoff. -/
 theorem cutoffLocalTensorOfMatrix_transpose_apply

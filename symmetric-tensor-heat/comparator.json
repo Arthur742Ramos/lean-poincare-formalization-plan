@@ -5,19 +5,6 @@
     "SymmetricTensorHeatEntry.symmetricTensorHeatShortTimeWellPosed"
   ],
   "definition_names": [
-    "SymmetricTensorHeatEntry.IsInducedTwoTensorConnection",
-    "SymmetricTensorHeatEntry.IsInducedThreeTensorConnection",
-    "SymmetricTensorHeatEntry.connectionLaplacianApply",
-    "SymmetricTensorHeatEntry.IsSymmetricSection",
-    "SymmetricTensorHeatEntry.HasInitialTrace",
-    "SymmetricTensorHeatEntry.HasTimeDerivative",
-    "SymmetricTensorHeatEntry.SolvesTensorHeat",
-    "SymmetricTensorHeatEntry.IsMetricCompatibleTangent",
-    "SymmetricTensorHeatEntry.IsLeviCivita",
-    "SymmetricTensorHeatEntry.parabolicDistance",
-    "SymmetricTensorHeatEntry.HasParabolicC0AlphaNormLe",
-    "SymmetricTensorHeatEntry.HasSpatialC2AlphaNormLe",
-    "SymmetricTensorHeatEntry.HasParabolicC2AlphaNormLe",
     "SymmetricTensorHeatEntry.completeStatement"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],

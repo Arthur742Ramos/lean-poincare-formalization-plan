@@ -141,3 +141,31 @@ compilation is not part of this source composition repair. The prior successful
 support workflow is historical support qualification. Both the canonical
 Point4 and separately named general smooth target remain OPEN. This integration
 does not select a new research theorem or authorize publication/registration.
+
+## Historical axiom evidence routing
+
+The complete current contraction log has thirteen entries. The current linear
+and combined guards require 134/128 and 157/151 occurrence/distinct totals,
+respectively. Those full logs are checked before and after historical replay.
+The immutable historical validators retain their six-entry contraction surface
+and 127/121 or 150/144 totals.
+
+For each argument-bearing historical route, the composition executes the
+authenticated pinned six-entry contraction probe under current Lean 4.33 and
+retains its raw output separately. It reuses other current raw logs only after
+their complete probe bytes match the historical source. This evaluates a
+historical probe surface against current compiled sources; it is not a rebuild
+of the historical mathematical library. Neither evidence set is filtered.
+
+Both the weighted historical gate and the separate SUPPORT smooth route use
+this view. Both directories and the replayed probe are checked for mutation.
+Raw replay bytes, commands, observed compiler ID, exit codes and source/output
+hashes are retained in HISTORICAL_AXIOM_ROUTING_RECEIPT records. Ordinary
+source/control tests mock the compiler explicitly; hosted argument-bearing
+weighted and smooth positives must execute the real Lean probe and validators.
+
+The unchanged scoped artifact wildcards include sibling `*-historical-routing.log`
+receipts. The weighted exact inventory instead appends receipts to its existing
+`source.log`, which is explicitly uploaded, without modifying any axiom log or
+adding paths inside that immutable inventory. Native hosted exact-head checks
+and independent review remain required. Both Point-4 targets remain OPEN.

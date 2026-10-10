@@ -1,0 +1,87 @@
+name: Point-4 local chart environment setup
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Independently reviewed full candidate commit SHA
+        required: true
+        type: string
+      expected_tree:
+        description: Independently reviewed full candidate Git tree SHA
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-chart-connection-${{ inputs.candidate_sha }}
+  cancel-in-progress: false
+
+jobs:
+  chart_environment_setup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      EXPECTED_SHA: ${{ inputs.candidate_sha }}
+      EXPECTED_TREE: ${{ inputs.expected_tree }}
+      EVENT_NAME: ${{ github.event_name }}
+    steps:
+      - name: Checkout reviewed candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ inputs.candidate_sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Admit exact candidate tree before running candidate code
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          actual_tree=$(git rev-parse 'HEAD^{tree}')
+          [[ "$EXPECTED_TREE" =~ ^[0-9a-f]{40}$ ]]
+          test "$actual_tree" = "$EXPECTED_TREE"
+          test "$(git rev-parse '1664872ce762ee027b76cb515befb0ae829b2711^{tree}')" = 6d74e9612cf6e16f2d027012cede68e5e0a23483
+          git merge-base --is-ancestor 1664872ce762ee027b76cb515befb0ae829b2711 HEAD
+          python3 curvature/scripts/chart_port_candidate_check.py --expected-sha "$EXPECTED_SHA" --expected-tree "$EXPECTED_TREE"
+      - name: Test chart driver resource and setup controls
+        run: python3 -B curvature/scripts/test_chart_port_ci.py
+      - name: Install the official pinned toolchain without build or caches
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Check pinned environment setup under owned resource limits
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/local-chart-environment-setup-$EXPECTED_SHA"
+          sudo systemd-run --wait --pipe --collect \
+            --unit="chart-port-setup-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+            --uid="$(id -u)" --gid="$(id -g)" \
+            --working-directory="$GITHUB_WORKSPACE" \
+            --property=MemoryMax=6442450944 \
+            --property=MemorySwapMax=0 --property=CPUQuota=200% \
+            --property=OOMPolicy=kill --property=KillMode=control-group \
+            --property=RuntimeMaxSec=1800 \
+            --setenv="PATH=$PATH" \
+            --setenv="ELAN_HOME=${ELAN_HOME:-$HOME/.elan}" \
+            --setenv=PYTHONDONTWRITEBYTECODE=1 \
+            /usr/bin/python3 curvature/scripts/chart_port_ci.py \
+              --expected-sha "$EXPECTED_SHA" --expected-tree "$EXPECTED_TREE" \
+              --evidence "$evidence" --setup-only
+      - name: Preserve setup-only receipts; full qualification remains required
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: local-chart-environment-setup-${{ inputs.candidate_sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/local-chart-environment-setup-${{ inputs.candidate_sha }}
+          if-no-files-found: error

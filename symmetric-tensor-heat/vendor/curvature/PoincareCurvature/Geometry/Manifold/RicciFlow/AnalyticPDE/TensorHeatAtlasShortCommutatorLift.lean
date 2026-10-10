@@ -44,6 +44,16 @@ local notation "W₂" => (Fin d × Fin d → ℝ)
 local notation "DW₂" => (E →L[ℝ] W₂)
 local notation "D2W₂" => (E →L[ℝ] E →L[ℝ] W₂)
 
+@[reducible] local instance shortLiftTwoFiberNormedAddCommGroup (x : M) :
+    NormedAddCommGroup (T₂ x) :=
+  CovariantDerivative.coordinateTwoFiberNormedAddCommGroup x
+@[reducible] local instance shortLiftTwoFiberNormedSpace (x : M) :
+    NormedSpace ℝ (T₂ x) :=
+  CovariantDerivative.coordinateTwoFiberNormedSpace x
+local instance shortLiftTwoTensorModuleFamily :
+    ∀ x : M, Module ℝ (T₂ x) := fun x => by
+  infer_instance
+
 @[reducible] local instance shortLiftFirstDerivativeNormedAddCommGroup :
     NormedAddCommGroup DW₂ := ContinuousLinearMap.toNormedAddCommGroup
 @[reducible] local instance shortLiftFirstDerivativeNormedSpace :
@@ -64,6 +74,11 @@ local notation "D2W₂" => (E →L[ℝ] E →L[ℝ] W₂)
 @[reducible] local instance shortLiftThreeFiberNormedSpace (x : M) :
     NormedSpace ℝ (T₃ x) :=
   CovariantDerivative.coordinateThreeFiberNormedSpace x
+-- Make the dependent tensor-fiber module family explicit. The generic Pi
+-- instance otherwise rebuilds it repeatedly while elaborating the lift.
+local instance shortLiftThreeTensorModuleFamily :
+    ∀ x : M, Module ℝ (T₃ x) := fun x => by
+  infer_instance
 local instance shortLiftThreeTotalSpaceTopology :
     TopologicalSpace (TotalSpace
       (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) T₃) :=
