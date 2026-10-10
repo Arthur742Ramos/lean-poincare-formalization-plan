@@ -2237,6 +2237,20 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                 exec(compile(raw,str(comp.ROOT/path),'exec',dont_inherit=True),reference)
                 name='admit' if number==138 else 'main'
                 self.assertEqual(getattr(module,name).__wrapped__.__code__,reference[name].__code__)
+                if number in (132,134,111):
+                    expected=dict(reference['UNIT_FILE_SHA256'])
+                    if number==134:
+                        self.assertEqual(expected['curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean'],'474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f')
+                        expected['curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean']='1ef0a488bdc050c05469e94bd75586807d7f2cd31b6c047563c6e46f84d93424'
+                        raw=(comp.ROOT/'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean').read_bytes()
+                        self.assertEqual(comp.sha256(raw),'1ef0a488bdc050c05469e94bd75586807d7f2cd31b6c047563c6e46f84d93424')
+                        self.assertEqual(module.check_unit_blob.__code__,reference['check_unit_blob'].__code__)
+                        module.check_unit_blob('curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean',raw)
+                        old_raw=comp.git('show',head+':'+'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean')
+                        for bad in (old_raw,raw[:-1],raw+raw,raw.replace(b'namespace',b'namespacE',1)):
+                            self.assertNotEqual(bad,raw)
+                            with self.assertRaises(AssertionError):module.check_unit_blob('curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean',bad)
+                    self.assertEqual(module.UNIT_FILE_SHA256,expected)
             self.assertEqual(comp.verify_current(),self.model)
 
     def test_each_current_namespace_policy_body_and_bootstrap_mutation_rejected(self):
@@ -2256,6 +2270,21 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                     original.__code__=(lambda *args,**kwargs:True).__code__
                     with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
                 finally:original.__code__=old
+                if number==134:
+                    unit=namespace['UNIT_FILE_SHA256'];saved=dict(unit)
+                    try:
+                        namespace['UNIT_FILE_SHA256']=dict(unit)
+                        with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
+                        namespace['UNIT_FILE_SHA256']=unit
+                        for mutation in ('old','extra','missing'):
+                            unit.clear();unit.update(saved)
+                            if mutation=='old':unit['curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean']='474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f'
+                            elif mutation=='extra':unit['foreign-unit']='0'*64
+                            else:unit.pop('curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean')
+                            with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
+                    finally:
+                        namespace['UNIT_FILE_SHA256']=unit
+                        unit.clear();unit.update(saved)
                 self.check_namespace(number,namespace)
             self.assertEqual(comp.verify_current(),self.model)
 
@@ -2267,12 +2296,26 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                 namespace={'__file__':str(comp.ROOT/path),'__name__':'actual_current_startup_failure_control'}
                 library=comp.curvature_embedded_module('curvature_leaf_binding' if number in (132,134,111) else 'curvature_auxiliary_binding')
                 before=set(library._BINDINGS);primary=RuntimeError('current startup verification failure')
-                with patch.object(comp,'verify_current',side_effect=primary):
+                captured=[]
+                def fail_verification():
+                    if number==134:
+                        self.assertIn(id(namespace),library._BINDINGS)
+                        captured.append(namespace['UNIT_FILE_SHA256'])
+                    raise primary
+                with patch.object(comp,'verify_current',side_effect=fail_verification):
                     with self.assertRaises(RuntimeError) as caught:
                         exec(compile((comp.ROOT/path).read_bytes(),str(comp.ROOT/path),'exec',dont_inherit=True),namespace)
                 self.assertIs(caught.exception,primary)
                 self.assertEqual(set(library._BINDINGS),before)
                 entry=namespace['admit' if number==138 else 'main']
+                if number==134:
+                    self.assertEqual(len(captured),1)
+                    self.assertIs(namespace['UNIT_FILE_SHA256'],captured[0])
+                    path='curvature/scripts/'+name+'.py'
+                    head=next(row['head'] for row in comp.CURVATURE_SELECTED[path]['origins'])
+                    reference={'__file__':str(comp.ROOT/path),'__name__':'rollback_original_unit_policy'}
+                    exec(compile(comp.git('show',head+':'+path),str(comp.ROOT/path),'exec',dont_inherit=True),reference)
+                    self.assertEqual(namespace['UNIT_FILE_SHA256'],reference['UNIT_FILE_SHA256'])
                 self.assertFalse(hasattr(entry,'__wrapped__'))
             self.assertEqual(comp.verify_current(),self.model)
 
