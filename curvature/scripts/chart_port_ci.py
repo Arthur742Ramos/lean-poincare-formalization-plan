@@ -420,6 +420,13 @@ try:
     verify_dependency_source(logic_source)
     assert digest(logic_source.read_bytes()) == 'dcfc3dd1580feebc8a29b6f9d65e32a0eadbce486fd02c5b1ce03c43fcf872ce', 'Pinned Batteries.Logic source drift'
     bootstrap_visit('Batteries.Logic')
+    # The selected cached Mathlib roots also import this pinned support module.
+    # Compile its genuine source and companions through the same bounded DFS.
+    library_note_source = source_path('Batteries.Util.LibraryNote')
+    assert library_note_source == (PKG / '.lake/packages/batteries/Batteries/Util/LibraryNote.lean').resolve(), 'Pinned Batteries.Util.LibraryNote source root drift'
+    verify_dependency_source(library_note_source)
+    assert digest(library_note_source.read_bytes()) == 'ecc6ebe4c32eb3c90bb94d0f4ef9eb8d530d95469ba48c0b1995f7c2172c93d8', 'Pinned Batteries.Util.LibraryNote source drift'
+    bootstrap_visit('Batteries.Util.LibraryNote')
     bootstrap_visit('Cache.Main')
     for i, (name, source) in enumerate(cache_order):
         serial_compile(name, source, bootstrap, lean, env, 'cache-bootstrap-' + str(i), name.startswith('Cache.'))
