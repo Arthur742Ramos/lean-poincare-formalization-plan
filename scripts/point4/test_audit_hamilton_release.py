@@ -687,6 +687,11 @@ lean_init_task_manager();
         self.assertEqual(maximum_seconds, 180)
         self.assertNotIn('--run', command)
         self.assertEqual(command[0], str(self.output / 'native-bootstrap/hamilton-lake-driver'))
+        plan = json.loads(pathlib.Path(command[1]).read_text())
+        self.assertEqual(set(plan), {'batches', 'startBatch'})
+        self.assertIs(type(plan['startBatch']), int)
+        self.assertEqual(plan['startBatch'], 0)
+        self.assertEqual(plan['batches'], [{'modules': ['DifferentialGeometry.NativePreflight'], 'chains': [['DifferentialGeometry.NativePreflight']]}])
         self.assertEqual(len(list(root.glob('audit_dep_*/lakefile.lean'))), 2)
         headers = [audit.lean_source_imports(path.read_text()) for path in sorted(root.glob('audit_dep_*/lakefile.lean'))]
         self.assertEqual(headers, [['Init', 'Lake'], ['Init', 'Lake', 'Lake.CLI.Build']])
@@ -724,6 +729,26 @@ lean_init_task_manager();
         receipt = audit.native_driver_preflight(self.driver, self.sdk, self.output, observer, run=self.mock_preflight)
         self.assertEqual(receipt['status'], 'passed')
         self.assertFalse((self.output / 'native-preflight/evidence/observed-toolchain').exists())
+        self.assertEqual(audit.verify_native_preflight(self.output, audit.verify_native_bootstrap(self.driver, self.sdk, self.output), observer), receipt)
+        import json
+        plan_path = self.output / 'native-preflight/evidence/lake-batch-plan.json'
+        receipt_path = self.output / 'native-preflight/preflight.json'
+        original_plan, original_receipt = plan_path.read_bytes(), receipt_path.read_bytes()
+        for value in ('MISSING', None, -1, True, '0', 1):
+            with self.subTest(startBatch=value):
+                bad_plan = json.loads(original_plan)
+                if value == 'MISSING':
+                    del bad_plan['startBatch']
+                else:
+                    bad_plan['startBatch'] = value
+                plan_path.write_text(json.dumps(bad_plan) + '\n')
+                bad_receipt = json.loads(original_receipt)
+                bad_receipt['plan_sha256'] = audit.file_digest(plan_path)
+                receipt_path.write_text(json.dumps(bad_receipt) + '\n')
+                with self.assertRaisesRegex(AssertionError, 'startBatch must be explicit natural zero'):
+                    audit.verify_native_preflight(self.output, audit.verify_native_bootstrap(self.driver, self.sdk, self.output), observer)
+        plan_path.write_bytes(original_plan)
+        receipt_path.write_bytes(original_receipt)
         self.assertEqual(audit.verify_native_preflight(self.output, audit.verify_native_bootstrap(self.driver, self.sdk, self.output), observer), receipt)
         obj = self.output / 'native-preflight/workspace/.lake/build/lib/lean/DifferentialGeometry/NativePreflight.olean'
         obj.write_bytes(b'changed')

@@ -2264,6 +2264,20 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                         for bad in (old_raw,raw[:-1],raw+raw,raw.replace(b'namespace',b'namespacE',1)):
                             self.assertNotEqual(bad,raw)
                             with self.assertRaises(AssertionError):module.check_unit_blob('curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean',bad)
+                    if number==134:
+                        compact_path='curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0EndpointCompactPositivity.lean'
+                        self.assertEqual(expected[compact_path],'45261b684e7add6c9e83eca9266777b8d12b6c7c598084d1d9e10b74f7867274')
+                        current=(comp.ROOT/compact_path).read_bytes()
+                        historical=comp.git('show',head+':'+compact_path)
+                        self.assertEqual(comp.sha256(historical),expected[compact_path])
+                        self.assertEqual(comp.curvature_hosted_repair_source(compact_path,historical),current)
+                        expected[compact_path]='65c5db90edc42787d886e73f5c812723b4f74381206da78c9d88ecfce4d40505'
+                        self.assertEqual(comp.sha256(current),expected[compact_path])
+                        module.check_unit_blob(compact_path,current)
+                        for bad in (historical,current[:-1],current+current):
+                            with self.assertRaises(AssertionError):module.check_unit_blob(compact_path,bad)
+                        for bad in (historical[:-1],historical+historical):
+                            with self.assertRaises(AssertionError):comp.curvature_hosted_repair_source(compact_path,bad)
                     if number==111:
                         reviewed=dict(reference['REVIEWED_FILE_SHA256'])
                         for current_path,original_digest in comp.CURVATURE_HAMILTON_ORIGINAL_SHA256.items():
@@ -2312,12 +2326,13 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                         namespace['UNIT_FILE_SHA256']=dict(unit)
                         with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
                         namespace['UNIT_FILE_SHA256']=unit
-                        for mutation in ('old','extra','missing'):
-                            unit.clear();unit.update(saved)
-                            if mutation=='old':unit['curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean']='474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f'
-                            elif mutation=='extra':unit['foreign-unit']='0'*64
-                            else:unit.pop('curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean')
-                            with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
+                        for current_path in ('curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean','curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0EndpointCompactPositivity.lean'):
+                            for mutation in ('old','extra','missing'):
+                                unit.clear();unit.update(saved)
+                                if mutation=='old':unit[current_path]=comp.CURVATURE_SELECTED[current_path]['sha256']
+                                elif mutation=='extra':unit['foreign-unit']='0'*64
+                                else:unit.pop(current_path)
+                                with self.assertRaises(AssertionError):self.check_namespace(number,namespace)
                     finally:
                         namespace['UNIT_FILE_SHA256']=unit
                         unit.clear();unit.update(saved)

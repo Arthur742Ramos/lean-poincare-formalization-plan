@@ -24,14 +24,15 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 class DriverControls(unittest.TestCase):
-    def model(self, setup_only, *, memory=LIMIT, quota=200000, invalid_pin=False, reject_probe=False, reject_configured=False, missing_extension_field=None, missing_extension_contract=False, short_extension=False, changed_extension_source=False, reject_extension_probe=False):
+    def model(self, setup_only, *, memory=LIMIT, quota=200000, invalid_pin=False, reject_probe=False, reject_configured=False, missing_extension_field=None, missing_extension_contract=False, short_extension=False, changed_extension_source=False, reject_extension_probe=False, changed_cache_source=False):
+        import re
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             pkg, evidence, prefix, src = [root / p for p in ('curvature', 'evidence', 'compiler', 'sources')]
             for p in (pkg, evidence, prefix / 'bin', src / 'Cache'):
                 p.mkdir(parents=True, exist_ok=True)
             (prefix / 'bin/lean').write_bytes(b'fixture compiler identity')
-            (src / 'Cache/Main.lean').write_bytes(b'module\n')
+            # Cache bootstrap fixtures belong to the admitted dependency root.
             batteries = pkg / '.lake/packages/batteries'
             logic = batteries / 'Batteries/Logic.lean'
             logic.parent.mkdir(parents=True)
@@ -44,6 +45,12 @@ class DriverControls(unittest.TestCase):
             (pkg / 'lean-toolchain').write_text('leanprover/lean4:v4.33.0\n')
             dep = pkg / '.lake/packages/mathlib'
             dep.mkdir(parents=True)
+            (dep / 'Cache').mkdir()
+            cache_originals = {'Cache/Main.lean': b'module\n', 'Cache/IO.lean': b'finite synthetic Cache.IO original; never compiled\n'}
+            for name, data in cache_originals.items():
+                (dep / name).write_bytes(data)
+            if changed_cache_source:
+                (dep / 'Cache/IO.lean').write_bytes(b'changed finite synthetic Cache.IO source\n')
             (pkg / 'lake-manifest.json').write_text(json.dumps({'packagesDir': '.lake/packages',
                 'packages': [{'type': 'git', 'name': 'mathlib', 'rev': PIN},
                              {'type': 'git', 'name': 'batteries', 'rev': '4488d40d070b9700d4d5a6aa342f0d40c31b2a2d'}]}))
@@ -84,7 +91,7 @@ class DriverControls(unittest.TestCase):
             admission = dict(closure=closure, external_mathlib_roots=['Mathlib.Fixture'], physical_inventory={},
                 extension_closure=extension_closure, extension_probe_contracts=extension_contracts)
             if missing_extension_field is not None: del admission[missing_extension_field]
-            trace = dict(run=[], compile=[], extension_compile=[], extension_probe=[], admit=[], affinity=[], roots=[], root_receipt_written_before_admit=False)
+            trace = dict(run=[], compile=[], cache_source_authentication=[], bootstrap_compile=[], extension_compile=[], extension_probe=[], admit=[], affinity=[], roots=[], root_receipt_written_before_admit=False)
             receipt = dict(source_admission='PENDING', build='RUNNING', environment_setup='PENDING',
                            full_candidate_qualification='NOT_RUN', stages=[], point4='OPEN', general_targets='OPEN')
             def fake_path(value):
@@ -103,10 +110,17 @@ class DriverControls(unittest.TestCase):
                 if label == 'compiler-commit': return (COMMIT + '\n').encode()
                 if label == 'compiler-prefix': return (str(prefix) + '\n').encode()
                 if label == 'compiler-libdir': return (str(prefix / 'lib/lean') + '\n').encode()
-                if label == 'lake-environment': return json.dumps({'LEAN_PATH': '', 'LEAN_SRC_PATH': os.pathsep.join((str(src), str(batteries)))}).encode()
+                if label == 'lake-environment': return json.dumps({'LEAN_PATH': '', 'LEAN_SRC_PATH': os.pathsep.join((str(dep), str(src), str(batteries)))}).encode()
                 return b'fixture log'
             def git(argv):
                 if 'rev-parse' in argv:
+                    if argv[-1] in ('HEAD:Cache/IO.lean', 'HEAD:Cache/Main.lean'):
+                        self.assertEqual(argv[argv.index('-C') + 1], str(dep))
+                        name = argv[-1].removeprefix('HEAD:')
+                        source = dep / name
+                        trace['cache_source_authentication'].append((source, digest(source.read_bytes())))
+                        data = cache_originals[name]
+                        return (hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() + '\n').encode()
                     if argv[-1] in ('HEAD:Batteries/Logic.lean', 'HEAD:Batteries/Util/LibraryNote.lean'):
                         data = (logic if argv[-1]=='HEAD:Batteries/Logic.lean' else library_note).read_bytes()
                         return (hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() + '\n').encode()
@@ -120,7 +134,7 @@ class DriverControls(unittest.TestCase):
                 if reject_probe: raise AssertionError('Rejected fixture probe')
                 return {'fixture_probe': True}
             def serial_compile(*args):
-                target = 'extension_compile' if args[5].startswith('ricci-extension-local-') else 'compile'
+                target = 'bootstrap_compile' if args[5].startswith('cache-bootstrap-') else ('extension_compile' if args[5].startswith('ricci-extension-local-') else 'compile')
                 trace[target].append(args)
             def check_extension_probe(data, contract):
                 self.assertEqual(data, b'fixture log')
@@ -128,14 +142,22 @@ class DriverControls(unittest.TestCase):
                 trace['extension_probe'].append(contract['module'])
                 if reject_extension_probe: raise AssertionError('Rejected finite extension probe')
                 return {'fixture_extension_probe': contract['module']}
+            def finite_cache_view(mathlib, compiler_prefix, official, env, owned):
+                derived = owned / 'Cache/IO.lean'
+                derived.parent.mkdir(parents=True)
+                derived.write_bytes(b'finite synthetic derived Cache.IO; never compiled\n')
+                return dict(env, POINT4_AUTHENTICATED_CACHE_LEANTAR='finite-fixture'), {'original': {'path': str(dep / 'Cache/IO.lean')}, 'derived': {'path': str(derived)}, 'finite_synthetic_only': True}
             ns = dict(Path=fake_path, LIMIT=LIMIT, ROOT=root, PKG=pkg, EVIDENCE=evidence,
                 args=types.SimpleNamespace(expected_sha='a' * 40, expected_tree='b' * 40, setup_only=setup_only),
-                receipt=receipt, save=lambda: None, json=json, hashlib=hashlib,
+                receipt=receipt, save=lambda: None, json=json, hashlib=hashlib, re=re,
                 os=types.SimpleNamespace(sched_getaffinity=lambda _: {0, 1, 2},
                     sched_setaffinity=lambda _, cpus: trace['affinity'].append(cpus), environ={}, pathsep=os.pathsep),
                 subprocess=types.SimpleNamespace(check_output=git), run=run, digest=digest, admit=admit,
                 tree_entries=lambda *args: {}, package_root_relationships=roots,
                 pinned_compiler_environment=lambda env,official: dict(env, PATH=str(Path(official['compiler_path']).parent)),
+                prepare_pinned_cache_source_view=finite_cache_view,
+                verify_pinned_cache_source_view=lambda context,env,official: self.assertEqual(env.get('POINT4_AUTHENTICATED_CACHE_LEANTAR'), 'finite-fixture'),
+                ENV_KEY='POINT4_AUTHENTICATED_CACHE_LEANTAR',
                 pinned_cache_query_context=lambda mathlib,names: dict(finite_synthetic_source_context=True,
                     package_root=str(mathlib),admitted_roots=list(names)),
                 materialize_pinned_mathlib_cache=lambda *args: dict(finite_synthetic_copy=True),
@@ -179,11 +201,26 @@ class DriverControls(unittest.TestCase):
         self.assertEqual(receipt['full_candidate_qualification'], 'PASSED')
         self.assertEqual(receipt['build'], 'PASSED')
         self.assertEqual(len(trace['compile']), 70)
+        self.assertEqual([call[0] for call in trace['bootstrap_compile']], ['Cache.IO', 'Cache.Main'])
+        self.assertIn('cache-source-view', str(trace['bootstrap_compile'][0][1]))
+        originals = trace['cache_source_authentication']
+        self.assertEqual([p.name for p, _ in originals], ['IO.lean', 'Main.lean'])
+        self.assertTrue(all(p.parent.parent.name == 'mathlib' for p, _ in originals))
+        self.assertEqual([h for _, h in originals], [digest(b'finite synthetic Cache.IO original; never compiled\n'), digest(b'module\n')])
+        self.assertNotEqual(trace['bootstrap_compile'][0][1], originals[0][0])
+        self.assertEqual(trace['bootstrap_compile'][1][1], originals[1][0])
+        self.assertTrue(receipt['cache_source_view_removed_before_mathematics'])
         self.assertTrue(all(call[-1] is True for call in trace['compile']))
         self.assertEqual(len(trace['admit']), 3)
         probe = [r for r in trace['run'] if r[1] == 'full-type-proof-axiom-probe']
         self.assertEqual(len(probe), 1)
         self.assertEqual(probe[0][0][1:5], ['-j1', '-M5632', '-DautoImplicit=false', '-DmaxSynthPendingDepth=3'])
+        bad_receipt, bad_trace, bad_failure = self.model(False, changed_cache_source=True)
+        self.assertIsInstance(bad_failure, AssertionError)
+        self.assertEqual(bad_receipt['build'], 'FAILED')
+        self.assertEqual(bad_receipt['full_candidate_qualification'], 'NOT_RUN')
+        self.assertEqual(bad_trace['bootstrap_compile'], [])
+        self.assertEqual(bad_trace['compile'], [])
 
     def test_rejected_probe_cannot_qualify(self):
         receipt, trace, failure = self.model(False, reject_probe=True)
@@ -1825,6 +1862,144 @@ class OfficialCompilerPathPrecedenceControls(unittest.TestCase):
             self.assertFalse(any(isinstance(k,ast.Name) and k.id in ('bootstrap_visit','serial_compile','compiler_run') for k in ast.walk(n)))
         self.assertIn("if compilers > 1:",function_source('run'))
         self.assertIn("if not process['stable'] or process['errors']",function_source('is_exact_official_prefix_query'))
+
+def cache_view_module():
+    """Extract only the genuine production source-view helpers, never its driver."""
+    names = {'IO_SHA', 'COMMIT', 'ENV_KEY', 'ORIGINAL', 'REPLACEMENT', 'sha', 'regular_seal',
+             'derive_cache_io', 'verify_pinned_cache_source_view', 'prepare_pinned_cache_source_view'}
+    nodes = [node for node in TREE.body if
+             (isinstance(node, ast.FunctionDef) and node.name in names) or
+             (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id in names for target in node.targets))]
+    self_names = {node.name if isinstance(node, ast.FunctionDef) else node.targets[0].id for node in nodes}
+    assert self_names == names
+    namespace = dict(Path=Path, os=os, stat=stat, hashlib=hashlib)
+    execute_nodes(nodes, namespace)
+    return types.SimpleNamespace(**namespace)
+
+class AuthenticatedCacheSourceViewControls(unittest.TestCase):
+    """Finite source/provenance regressions; no native compilation or SDK credit."""
+    PINNED_IO_GZIP_BASE64 = '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'
+
+    def fixture(self, root):
+        import base64, gzip
+        view = cache_view_module()
+        original = gzip.decompress(base64.b64decode(self.PINNED_IO_GZIP_BASE64))
+        self.assertEqual(digest(original), view.IO_SHA)
+        mathlib, prefix = root / 'mathlib', root / 'observed-official'
+        (mathlib / 'Cache').mkdir(parents=True)
+        (mathlib / 'Cache/IO.lean').write_bytes(original)
+        (mathlib / 'Cache/Main.lean').write_bytes(b'module\npublic import Cache.IO\n')
+        (prefix / 'bin').mkdir(parents=True)
+        for name in ('lean', 'leantar'):
+            path = prefix / 'bin' / name
+            path.write_bytes(('FINITE MOCK SDK IMAGE ' + name).encode())
+            path.chmod(0o755)
+        official = {'compiler_path': str(prefix / 'bin/lean'), 'compiler_sha256': digest((prefix / 'bin/lean').read_bytes()), 'compiler_commit': COMMIT}
+        owned = root / 'owned-source-view'
+        env, context = view.prepare_pinned_cache_source_view(mathlib, prefix, official, {'PATH': 'finite-fixture'}, owned)
+        return view, mathlib, prefix, official, env, context, original
+
+    def test_whole_pinned_inverse_preserves_imports_and_original_bytes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            view, mathlib, prefix, official, env, context, original = self.fixture(Path(temp))
+            derived = Path(context['derived']['path']).read_bytes()
+            self.assertNotEqual(digest(derived), view.IO_SHA)
+            self.assertEqual(derived.replace(view.REPLACEMENT, view.ORIGINAL), original)
+            self.assertEqual(original.count(view.ORIGINAL), 1)
+            self.assertEqual(derived.count(view.REPLACEMENT), 1)
+            self.assertEqual(admission.imports(original), admission.imports(derived))
+            self.assertEqual((mathlib / 'Cache/IO.lean').read_bytes(), original)
+            self.assertEqual(env[view.ENV_KEY], str(prefix / 'bin/leantar'))
+            self.assertIs(view.verify_pinned_cache_source_view(context, env, official), context)
+            self.assertIs(context['compiled_source_is_original'], False)
+            with self.assertRaises(AssertionError):
+                view.derive_cache_io(original + b'\n-- source drift\n')
+
+    def test_every_sealed_input_mutation_and_missing_input_is_rejected(self):
+        for name in ('original', 'derived', 'compiler', 'leantar'):
+            for mutation in ('bytes', 'missing', 'directory'):
+                with self.subTest(input=name, mutation=mutation), tempfile.TemporaryDirectory() as temp:
+                    view, mathlib, prefix, official, env, context, original = self.fixture(Path(temp))
+                    path = Path(context[name]['path'])
+                    if mutation == 'bytes':
+                        path.write_bytes(path.read_bytes() + b'MUTATED')
+                    else:
+                        path.unlink()
+                        if mutation == 'directory':
+                            path.mkdir()
+                    with self.assertRaises((AssertionError, OSError)):
+                        view.verify_pinned_cache_source_view(context, env, official)
+
+    def test_environment_and_provenance_labels_fail_closed(self):
+        import copy
+        with tempfile.TemporaryDirectory() as temp:
+            view, mathlib, prefix, official, env, context, original = self.fixture(Path(temp))
+            for replacement in (None, '', 'relative/leantar', str(prefix / 'bin/lean')):
+                with self.subTest(environment=replacement):
+                    changed = dict(env)
+                    if replacement is None:
+                        del changed[view.ENV_KEY]
+                    else:
+                        changed[view.ENV_KEY] = replacement
+                    with self.assertRaisesRegex(AssertionError, 'controlled environment drift'):
+                        view.verify_pinned_cache_source_view(context, changed, official)
+            for key, value in [('role', 'MATHEMATICS'), ('mathlib_pin', '0' * 40), ('compiled_source_is_original', True), ('point4', 'COMPLETE'), ('policy_sha256', '0' * 64), ('extra', True)]:
+                with self.subTest(field=key):
+                    changed = copy.deepcopy(context)
+                    changed[key] = value
+                    with self.assertRaises(AssertionError):
+                        view.verify_pinned_cache_source_view(changed, env, official)
+
+    def test_owned_namespace_reparse_rejection_precedes_any_write(self):
+        import types
+        view = cache_view_module()
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            original_lstat = Path.lstat
+            def flagged(path):
+                value = original_lstat(path)
+                if path == root:
+                    return types.SimpleNamespace(**{key: getattr(value, key) for key in ('st_mode', 'st_dev', 'st_ino', 'st_size', 'st_mtime_ns', 'st_ctime_ns')}, st_file_attributes=0x400)
+                return value
+            with patch.object(Path, 'lstat', flagged):
+                with self.assertRaisesRegex(AssertionError, 'output ancestor reparse point'):
+                    view.prepare_pinned_cache_source_view(root / 'unused-mathlib', root / 'unused-prefix', {}, {}, root / 'must-not-be-created')
+            self.assertFalse((root / 'must-not-be-created').exists())
+            self.assertEqual(list(root.iterdir()), [])
+
+    def test_existing_owned_output_and_observed_prefix_drift_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            view, mathlib, prefix, official, env, context, original = self.fixture(Path(temp))
+            owned = Path(context['owned_root'])
+            before = {str(path): path.read_bytes() for path in owned.rglob('*') if path.is_file()}
+            with self.assertRaisesRegex(AssertionError, 'output must be fresh and owned'):
+                view.prepare_pinned_cache_source_view(mathlib, prefix, official, env, owned)
+            self.assertEqual(before, {str(path): path.read_bytes() for path in owned.rglob('*') if path.is_file()})
+            with self.assertRaisesRegex(AssertionError, 'observed prefix drift'):
+                view.prepare_pinned_cache_source_view(mathlib, prefix / 'another', official, env, Path(temp) / 'new-owned')
+            self.assertFalse((Path(temp) / 'new-owned').exists())
+
+    def test_actual_bootstrap_dfs_forces_derived_io_and_complete_cache_namespace(self):
+        with tempfile.TemporaryDirectory() as temp:
+            view, mathlib, prefix, official, env, context, original = self.fixture(Path(temp))
+            owner = next(node for node in TREE.body if isinstance(node, ast.Try))
+            definitions = {node.name: node for node in owner.body if isinstance(node, ast.FunctionDef)}
+            namespace = {'Path': Path, 'cache_source_view': context, 'cache_order': [], 'seen': set(), 'active': set(),
+                         'source_path': lambda name: mathlib / (name.replace('.', '/') + '.lean'),
+                         'artifact_exists': lambda name: True,
+                         'verify_dependency_source': lambda source: self.assertEqual(source.read_bytes(), original if source.name == 'IO.lean' else b'module\npublic import Cache.IO\n'),
+                         'cache_bootstrap_imports': lambda raw: ['Cache.IO'] if raw == b'module\npublic import Cache.IO\n' else []}
+            execute_nodes([definitions['bootstrap_visit']], namespace)
+            namespace['bootstrap_visit']('Cache.Main')
+            self.assertEqual(namespace['cache_order'], [('Cache.IO', Path(context['derived']['path'])), ('Cache.Main', mathlib / 'Cache/Main.lean')])
+            self.assertEqual((mathlib / 'Cache/IO.lean').read_bytes(), original)
+            self.assertEqual(namespace['active'], set())
+            body = ast.unparse(owner)
+            self.assertIn("del env[ENV_KEY]", body)
+            self.assertLess(body.index("del env[ENV_KEY]"), body.index("for i, row in enumerate(admission['closure'])"))
+            for name in ('owned_process_identity', 'is_exact_official_prefix_query', 'run', 'compiler_run', 'serial_compile'):
+                self.assertIn(name, SOURCE)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

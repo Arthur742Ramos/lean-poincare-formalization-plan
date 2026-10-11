@@ -691,7 +691,7 @@ def native_driver_preflight(driver, sysroot, output, observer, *, run=run_batch)
     modules = {module: {"position": 1, "source_sha256": file_digest(source), "project_imports": []}}
     batches = [{"modules": [module], "chains": [[module]]}]
     plan = evidence / "lake-batch-plan.json"
-    plan.write_text(json.dumps({"batches": batches}) + "\n")
+    plan.write_text(json.dumps({"batches": batches, "startBatch": 0}) + "\n")
     compiler = sysroot / "bin/lean"
     control = {"root": str(root), "evidence": str(evidence), "sysroot": str(sysroot),
                "compiler": str(compiler), "compiler_sha256": file_digest(compiler),
@@ -761,6 +761,7 @@ def verify_native_preflight(output, bootstrap, observer):
     assert verify_selected_install(evidence, pathlib.Path(bootstrap["executable"]), evidence / "observed-toolchain") == receipt["selected_installation"], "Preflight selected-installation evidence changed"
     control = json.loads((evidence / "compiler-control.json").read_text())
     plan = json.loads((evidence / "lake-batch-plan.json").read_text())
+    assert type(plan.get("startBatch")) is int and plan["startBatch"] == 0, "Native preflight startBatch must be explicit natural zero"
     records = compiler_records(evidence, control["modules"], required=True)
     assert records == receipt["compiler_records"], "Preflight compiler evidence changed"
     assert batch_records(evidence, plan["batches"], required=True) == receipt["batch_records"], "Preflight batch evidence changed"

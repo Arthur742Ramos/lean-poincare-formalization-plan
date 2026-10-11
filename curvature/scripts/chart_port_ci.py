@@ -3,6 +3,162 @@ from pathlib import Path
 import argparse, hashlib, json, os, re, signal, subprocess, sys, time
 from chart_port_candidate_check import admit, check_probe, check_ricci_extension_probe, digest, imports, tree_entries, package_root_relationships
 from chart_port_artifacts import artifact_status, required_import_files, materialize_pinned_mathlib_cache
+"""Authenticated bootstrap-only Cache.IO view; original Mathlib stays immutable."""
+from pathlib import Path
+import hashlib
+import os
+import stat
+
+IO_SHA = '8457b0e2b404ae2a7c7e02d9e264f9d8c1e72935178e7dda1fae95424b022c82'
+COMMIT = 'd8b18978322de05a8f3dba51ef03cf5461676c17'
+ENV_KEY = 'POINT4_AUTHENTICATED_CACHE_LEANTAR'
+ORIGINAL = '''private initialize leantarSysrootBin : String ← do
+  let out ← IO.Process.output { cmd := "lean", args := #["--print-prefix"] }
+  if out.exitCode == 0 then
+    let path : FilePath := out.stdout.trimAscii.toString / "bin" / s!"leantar{EXE}"
+    if ← path.pathExists then return path.toString
+  throw <| IO.userError "leantar not found in Lean sysroot. This toolchain may predate nightly-2026-03-09."
+'''.encode()
+REPLACEMENT = '''private initialize leantarSysrootBin : String ← do
+  let some value ← IO.getEnv "POINT4_AUTHENTICATED_CACHE_LEANTAR"
+    | throw <| IO.userError "Missing authenticated bootstrap leantar path"
+  let path : FilePath := value
+  unless path.isAbsolute && path.fileName == some s!"leantar{EXE}" do
+    throw <| IO.userError "Malformed authenticated bootstrap leantar path"
+  unless ← path.pathExists do
+    throw <| IO.userError "Authenticated bootstrap leantar path disappeared"
+  return value
+'''.encode()
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+def regular_seal(path, *, executable=False):
+    path = Path(path)
+    assert path.is_absolute() and path.resolve(strict=True) == path, 'Cache view path must be canonical'
+    def ancestors():
+        for parent in path.parents:
+            info = parent.lstat()
+            assert stat.S_ISDIR(info.st_mode) and not parent.is_symlink(), 'Cache view ancestor kind/link drift'
+            assert not getattr(info, 'st_file_attributes', 0) & 0x400, 'Cache view ancestor reparse point'
+    def identity(info):
+        return (info.st_dev, info.st_ino, info.st_mode, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+    ancestors()
+    before = path.lstat()
+    assert stat.S_ISREG(before.st_mode) and not path.is_symlink(), 'Cache view input must be a regular file'
+    assert not getattr(before, 'st_file_attributes', 0) & 0x400, 'Cache view input reparse point'
+    if executable:
+        assert os.access(path, os.X_OK), 'Cache view SDK tool is not executable'
+    with path.open('rb') as stream:
+        opened = os.fstat(stream.fileno())
+        if os.name == 'nt':
+            # Windows fstat may omit file identity fields. Cross-bind the two
+            # open handles with the native volume/file ID, then seal each stat.
+            import ctypes
+            import msvcrt
+            class Info(ctypes.Structure):
+                _fields_ = [('attributes', ctypes.c_uint32), ('creation', ctypes.c_uint32 * 2),
+                            ('access', ctypes.c_uint32 * 2), ('write', ctypes.c_uint32 * 2),
+                            ('volume', ctypes.c_uint32), ('size_high', ctypes.c_uint32),
+                            ('size_low', ctypes.c_uint32), ('links', ctypes.c_uint32),
+                            ('index_high', ctypes.c_uint32), ('index_low', ctypes.c_uint32)]
+            def native(fd):
+                value = Info()
+                api = ctypes.WinDLL('kernel32', use_last_error=True).GetFileInformationByHandle
+                api.argtypes = [ctypes.c_void_p, ctypes.POINTER(Info)]
+                api.restype = ctypes.c_int
+                assert api(msvcrt.get_osfhandle(fd), ctypes.byref(value)), 'Cache view native file identity failed'
+                assert ctypes.sizeof(Info) == 52, 'Cache view native identity layout drift'
+                return (value.attributes, tuple(value.creation), tuple(value.write), value.volume,
+                        value.size_high, value.size_low, value.links, value.index_high, value.index_low)
+            native_before = native(stream.fileno())
+            with path.open('rb') as path_stream:
+                assert native(path_stream.fileno()) == native_before, 'Cache view open path identity drift'
+        else:
+            assert identity(opened) == identity(before), 'Cache view open identity drift'
+        data = stream.read()
+        assert identity(os.fstat(stream.fileno())) == identity(opened), 'Cache view read identity drift'
+        if os.name == 'nt':
+            assert native(stream.fileno()) == native_before, 'Cache view native read identity drift'
+            with path.open('rb') as path_stream:
+                assert native(path_stream.fileno()) == native_before, 'Cache view native POST path identity drift'
+    assert identity(path.lstat()) == identity(before), 'Cache view path POST identity drift'
+    ancestors()
+    return data, {'path': str(path), 'identity': list(identity(before)), 'sha256': sha(data)}
+
+def derive_cache_io(original):
+    assert sha(original) == IO_SHA, 'Pinned Cache.IO whole source drift'
+    assert original.count(ORIGINAL) == 1, 'Pinned Cache.IO initializer occurrence drift'
+    derived = original.replace(ORIGINAL, REPLACEMENT)
+    assert derived.count(REPLACEMENT) == 1 and derived.replace(REPLACEMENT, ORIGINAL) == original, 'Cache.IO inverse drift'
+    return derived
+
+def verify_pinned_cache_source_view(context, env, official):
+    assert set(context) == {'role', 'mathlib_pin', 'mathlib', 'compiler_prefix', 'owned_root',
+                            'original', 'derived', 'compiler', 'leantar', 'policy_sha256',
+                            'compiled_source_is_original', 'point4'}, 'Cache view receipt schema drift'
+    assert context['role'] == 'BOOTSTRAP_CACHE_ONLY_AUTHENTICATED_SOURCE_VIEW', 'Cache view role drift'
+    assert context['mathlib_pin'] == 'db584cd6d46c92f209a44c0f1c829460d327499d', 'Cache view Mathlib pin drift'
+    assert context['compiled_source_is_original'] is False and context['point4'] == 'OPEN', 'Cache view provenance label drift'
+    assert official['compiler_commit'] == COMMIT, 'Cache view compiler commit drift'
+    compiler = Path(official['compiler_path'])
+    prefix = Path(context['compiler_prefix'])
+    assert compiler == prefix / 'bin/lean', 'Cache view observed compiler prefix drift'
+    leantar = prefix / 'bin/leantar'
+    assert env.get(ENV_KEY) == str(leantar), 'Cache view controlled environment drift'
+    original_path = Path(context['mathlib']) / 'Cache/IO.lean'
+    derived_path = Path(context['owned_root']) / 'Cache/IO.lean'
+    assert context['original']['path'] == str(original_path), 'Cache view original path drift'
+    assert context['derived']['path'] == str(derived_path), 'Cache view derived path drift'
+    original, original_seal = regular_seal(original_path)
+    derived, derived_seal = regular_seal(derived_path)
+    compiler_data, compiler_seal = regular_seal(compiler, executable=True)
+    _, leantar_seal = regular_seal(leantar, executable=True)
+    assert sha(compiler_data) == official['compiler_sha256'], 'Cache view official compiler image drift'
+    for name, actual in [('original', original_seal), ('derived', derived_seal), ('compiler', compiler_seal), ('leantar', leantar_seal)]:
+        assert context[name] == actual, 'Cache view sealed input drift: ' + name
+    assert derived == derive_cache_io(original), 'Cache view derived source/inverse drift'
+    assert context['policy_sha256'] == sha(ORIGINAL + b'\0' + REPLACEMENT), 'Cache view policy drift'
+    return context
+
+def prepare_pinned_cache_source_view(mathlib, compiler_prefix, official, env, owned_root):
+    mathlib, compiler_prefix, owned_root = map(Path, (mathlib, compiler_prefix, owned_root))
+    assert owned_root.is_absolute() and not owned_root.exists() and not owned_root.is_symlink(), 'Cache view output must be fresh and owned'
+    def owned_namespace(directory):
+        assert directory.resolve(strict=False) == directory, 'Cache view output namespace must be canonical'
+        for parent in (directory, *directory.parents):
+            if parent.exists() or parent.is_symlink():
+                info = parent.lstat()
+                assert stat.S_ISDIR(info.st_mode) and not parent.is_symlink(), 'Cache view output ancestor kind/link drift'
+                assert not getattr(info, 'st_file_attributes', 0) & 0x400, 'Cache view output ancestor reparse point'
+    owned_namespace(owned_root)
+    assert compiler_prefix.is_absolute() and Path(official['compiler_path']) == compiler_prefix / 'bin/lean', 'Cache view observed prefix drift'
+    assert official['compiler_commit'] == COMMIT, 'Cache view compiler commit drift'
+    original, original_seal = regular_seal(mathlib / 'Cache/IO.lean')
+    derived = derive_cache_io(original)
+    compiler_data, compiler_seal = regular_seal(compiler_prefix / 'bin/lean', executable=True)
+    assert sha(compiler_data) == official['compiler_sha256'], 'Cache view official compiler image drift'
+    _, leantar_seal = regular_seal(compiler_prefix / 'bin/leantar', executable=True)
+    owned_namespace(owned_root)
+    owned_root.mkdir()
+    owned_namespace(owned_root)
+    (owned_root / 'Cache').mkdir()
+    owned_namespace(owned_root / 'Cache')
+    derived_path = owned_root / 'Cache/IO.lean'
+    with derived_path.open('xb') as stream:
+        stream.write(derived)
+    _, derived_seal = regular_seal(derived_path)
+    context = {'role': 'BOOTSTRAP_CACHE_ONLY_AUTHENTICATED_SOURCE_VIEW',
+               'mathlib_pin': 'db584cd6d46c92f209a44c0f1c829460d327499d',
+               'mathlib': str(mathlib), 'compiler_prefix': str(compiler_prefix), 'owned_root': str(owned_root),
+               'original': original_seal, 'derived': derived_seal, 'compiler': compiler_seal, 'leantar': leantar_seal,
+               'policy_sha256': sha(ORIGINAL + b'\0' + REPLACEMENT),
+               'compiled_source_is_original': False, 'point4': 'OPEN'}
+    controlled = dict(env)
+    controlled[ENV_KEY] = str(compiler_prefix / 'bin/leantar')
+    verify_pinned_cache_source_view(context, controlled, official)
+    return controlled, context
+
 
 LIMIT = 6 * 1024 ** 3
 ROOT = Path(__file__).resolve().parents[2]
@@ -427,9 +583,12 @@ try:
         blob = subprocess.check_output(['git', '--no-replace-objects', '-C', str(dep), 'rev-parse', 'HEAD:' + rel]).decode().strip()
         data = source.read_bytes()
         assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == blob
+    env, cache_source_view = prepare_pinned_cache_source_view(mathlib, compiler_prefix, receipt, env, EVIDENCE / 'cache-source-view')
+    receipt['cache_source_view'] = cache_source_view
+    save()
     cache_order, seen, active = [], set(), set()
     def bootstrap_visit(name):
-        if name in seen or artifact_exists(name):
+        if name in seen or (not name.startswith('Cache.') and artifact_exists(name)):
             return
         assert name not in active
         assert name.startswith(('Cache.', 'Batteries.', 'Cli.')), 'Unexpected cache bootstrap source ' + name
@@ -440,6 +599,9 @@ try:
             bootstrap_visit(dep)
         active.remove(name)
         seen.add(name)
+        if name == 'Cache.IO':
+            assert str(source) == cache_source_view['original']['path'], 'Cache.IO source namespace drift'
+            source = Path(cache_source_view['derived']['path'])
         cache_order.append((name, source))
         assert len(cache_order) <= 200, 'Cache bootstrap exceeded finite source bound'
     def cache_bootstrap_imports(data):
@@ -464,17 +626,29 @@ try:
     verify_dependency_source(library_note_source)
     assert digest(library_note_source.read_bytes()) == 'ecc6ebe4c32eb3c90bb94d0f4ef9eb8d530d95469ba48c0b1995f7c2172c93d8', 'Pinned Batteries.Util.LibraryNote source drift'
     bootstrap_visit('Batteries.Util.LibraryNote')
+    bootstrap_visit('Cache.IO')
     bootstrap_visit('Cache.Main')
     for i, (name, source) in enumerate(cache_order):
-        serial_compile(name, source, bootstrap, lean, env, 'cache-bootstrap-' + str(i), name.startswith('Cache.'))
+        verify_pinned_cache_source_view(cache_source_view, env, receipt)
+        try:
+            serial_compile(name, source, bootstrap, lean, env, 'cache-bootstrap-' + str(i), name.startswith('Cache.'))
+        finally:
+            verify_pinned_cache_source_view(cache_source_view, env, receipt)
     # The real pinned cache CLI runs interpreted, so Lake cannot spawn a parallel build.
     cache_query_context = pinned_cache_query_context(mathlib, admission['external_mathlib_roots'])
-    run([lean, '-j1', '-M5632', '-R', str(mathlib), '--run', str(mathlib / 'Cache/Main.lean'), 'get', *admission['external_mathlib_roots']],
-        'ordinary-pinned-cache-read', env=env, timeout=1800, cache_query_context=cache_query_context)
+    verify_pinned_cache_source_view(cache_source_view, env, receipt)
+    try:
+        run([lean, '-j1', '-M5632', '-R', str(mathlib), '--run', str(mathlib / 'Cache/Main.lean'), 'get', *admission['external_mathlib_roots']],
+            'ordinary-pinned-cache-read', env=env, timeout=1800, cache_query_context=cache_query_context)
+    finally:
+        verify_pinned_cache_source_view(cache_source_view, env, receipt)
     # Bootstrap packages serve Cache.get only. Lean resolves an entire package
     # at its first search root, so partial bootstrap roots must not shadow the
     # genuine cached dependency packages during the source/probe compilation.
     env['LEAN_PATH'] = os.pathsep.join(map(str, (local, support))) + os.pathsep + old_path
+    del env[ENV_KEY]
+    receipt['cache_source_view_removed_before_mathematics'] = True
+    save()
     artifact_dirs = [Path(p) for p in env['LEAN_PATH'].split(os.pathsep) if p]
     artifact_dirs = [p if p.is_absolute() else PKG / p for p in artifact_dirs]
     artifact_dirs.append(prefix)

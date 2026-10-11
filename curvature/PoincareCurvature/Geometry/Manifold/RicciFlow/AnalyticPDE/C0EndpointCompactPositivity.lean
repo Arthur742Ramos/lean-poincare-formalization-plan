@@ -36,6 +36,11 @@ local notation "T₂" => (fun x : M => TM x →L[ℝ] TM x →L[ℝ] ℝ)
 local notation "BilE" => (E →L[ℝ] E →L[ℝ] ℝ)
 local notation "Cover" => FiniteSmoothPreferredTrivializingCover I (F := E) (V := TM)
 
+@[reducible] local instance compactPositivityModelNormedAddCommGroup :
+    NormedAddCommGroup BilE := ContinuousLinearMap.toNormedAddCommGroup
+@[reducible] local instance compactPositivityModelNormedSpace :
+    NormedSpace ℝ BilE := ContinuousLinearMap.toNormedSpace
+
 variable {d : ℕ}
 
 def coefficientBound (v : ContinuousSymmetricVelocity (I := I) (M := M))
@@ -62,13 +67,24 @@ lemma norm_gaussianMatrix_le
   have hk := abs_gaussianPath_apply_le (localizedVelocityBcf v C b i k j) h z
   have hterm : ‖localizedVelocityBcf v C b i j k‖ + ‖localizedVelocityBcf v C b i k j‖ ≤
       coefficientBound v C b i := by
-    exact (Finset.single_le_sum
-      (fun k _ => add_nonneg (norm_nonneg _) (norm_nonneg _)) (Finset.mem_univ k)).trans
-      (Finset.single_le_sum
-        (fun j _ => Finset.sum_nonneg fun k _ => add_nonneg (norm_nonneg _) (norm_nonneg _))
-        (Finset.mem_univ j))
-  have hsum := (abs_add (gaussianPath (localizedVelocityBcf v C b i j k) h z)
-    (gaussianPath (localizedVelocityBcf v C b i k j) h z)).trans (add_le_add hj hk)
+    let A : Fin d → Fin d → ℝ := fun a l =>
+      ‖localizedVelocityBcf v C b i a l‖ + ‖localizedVelocityBcf v C b i l a‖
+    have hA : ∀ a l, 0 ≤ A a l :=
+      fun a l => add_nonneg (norm_nonneg _) (norm_nonneg _)
+    have hrow : A j k ≤ ∑ l : Fin d, A j l :=
+      Finset.single_le_sum (fun l _ => hA j l) (Finset.mem_univ k)
+    have htotal : (∑ l : Fin d, A j l) ≤ ∑ a : Fin d, ∑ l : Fin d, A a l :=
+      Finset.single_le_sum
+        (fun a _ => Finset.sum_nonneg fun l _ => hA a l) (Finset.mem_univ j)
+    exact hrow.trans htotal
+  have htri : |gaussianPath (localizedVelocityBcf v C b i j k) h z +
+      gaussianPath (localizedVelocityBcf v C b i k j) h z| ≤
+      |gaussianPath (localizedVelocityBcf v C b i j k) h z| +
+      |gaussianPath (localizedVelocityBcf v C b i k j) h z| := by
+    simpa only [Real.norm_eq_abs] using norm_add_le
+      (gaussianPath (localizedVelocityBcf v C b i j k) h z)
+      (gaussianPath (localizedVelocityBcf v C b i k j) h z)
+  have hsum := htri.trans (add_le_add hj hk)
   rw [Real.norm_eq_abs, gaussianMatrix, abs_div, abs_of_pos (by norm_num : (0 : ℝ) < 2)]
   have hdiv : |gaussianPath (localizedVelocityBcf v C b i j k) h z +
       gaussianPath (localizedVelocityBcf v C b i k j) h z| / 2 ≤
@@ -89,9 +105,10 @@ lemma matrixBound_nonneg
 lemma norm_matrixBilinear_gaussianMatrix_le
     (v : ContinuousSymmetricVelocity (I := I) (M := M))
     (C : Cover) (b : Module.Basis (Fin d) ℝ E) (i : C.Index) (h : ℝ) (z : Fin d → ℝ) :
-    ‖matrixBilinearCLM b (gaussianMatrix v C b i h z)‖ ≤ matrixBound v C b i :=
-  ((matrixBilinearSynthesis b).le_opNorm _).trans
-    (mul_le_mul_of_nonneg_left (norm_gaussianMatrix_le v C b i h z) (norm_nonneg _))
+    ‖matrixBilinearCLM b (gaussianMatrix v C b i h z)‖ ≤ matrixBound v C b i := by
+  simpa only [matrixBilinearSynthesis_apply, matrixBound] using
+    ((matrixBilinearSynthesis b).le_opNorm _).trans
+      (mul_le_mul_of_nonneg_left (norm_gaussianMatrix_le v C b i h z) (norm_nonneg _))
 
 def metricVelocity (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM) :
     ContinuousSymmetricVelocity (I := I) (M := M) where
@@ -130,7 +147,8 @@ lemma metricModelForm_eq_bilinearComp
     matrixBilinearCLM_apply_basis, ContinuousLinearMap.bilinearComp_apply,
     velocityComponent, metricVelocity, frame,
     (trivialization (I := I) p).localFrame_apply_of_mem_baseSet b hx,
-    ContinuousLinearEquiv.coe_coe]
+    ContinuousLinearEquiv.coe_coe, _root_.Bundle.Trivialization.basisAt,
+    Module.Basis.map_apply]
 
 lemma metricModelForm_pos
     (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
@@ -141,7 +159,9 @@ lemma metricModelForm_pos
   apply g₀.pos
   intro hzero
   apply hw
-  simpa using congrArg ((trivialization (I := I) p).linearEquivAt ℝ x hx) hzero
+  let e := (trivialization (I := I) p).linearEquivAt ℝ x hx
+  change e.symm w = 0 at hzero
+  exact e.symm.injective (hzero.trans (map_zero e.symm).symm)
 
 /-- The model positivity-radius lemma also covers rank zero and empty
 compact parameter spaces, without inserting a Nontrivial assumption. -/
@@ -161,7 +181,7 @@ lemma exists_uniform_pos_ball_any {X : Type*} [TopologicalSpace X] [CompactSpace
 lemma exists_piece_positivity_radius
     (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
     (C : Cover) (b : Module.Basis (Fin d) ℝ E) (i : C.Index) :
-    ∃ ε > 0, ∀ q : (C.pieces i : Set M) → BilE,
+    ∃ ε > 0, ∀ (q : ((C.pieces i : Set M) → BilE)),
       (∀ x, ‖q x - metricModelForm g₀ (i : M) b x‖ < ε) →
       ∀ x (w : E), w ≠ 0 → 0 < q x w w := by
   letI : CompactSpace (C.pieces i : Set M) :=
@@ -204,7 +224,10 @@ lemma metricModelForm_tangentCoord_apply
       (tangentCoordCLM (trivialization (I := I) p) x hx w) = g₀.inner x u w := by
   rw [metricModelForm_eq_bilinearComp g₀ p b x hx]
   simp only [ContinuousLinearMap.bilinearComp_apply, tangentCoordCLM,
-    ContinuousLinearEquiv.coe_coe, LinearEquiv.symm_apply_apply]
+    ContinuousLinearEquiv.coe_coe]
+  let e := (trivialization (I := I) p).linearEquivAt ℝ x hx
+  change g₀.inner x (e.symm (e u)) (e.symm (e w)) = g₀.inner x u w
+  rw [LinearEquiv.symm_apply_apply, LinearEquiv.symm_apply_apply]
 
 /-- One fixed positive amplitude reserve controls every real Gaussian
 parameter. This is a conclusion from the literal metric and actual C0
