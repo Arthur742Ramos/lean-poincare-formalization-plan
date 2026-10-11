@@ -2268,14 +2268,15 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                         reviewed=dict(reference['REVIEWED_FILE_SHA256'])
                         for current_path,original_digest in comp.CURVATURE_HAMILTON_ORIGINAL_SHA256.items():
                             self.assertEqual(expected[current_path],original_digest)
-                            self.assertEqual(reviewed[current_path],original_digest)
+                            self.assertEqual(reviewed[current_path],'c35493376e81b27036c332a1330a6ad8c324294c6f69d8b14035adeef3359cc5' if current_path=='.github/workflows/point4-hamilton-release-audit.yml' else original_digest)
                             self.assertEqual(comp.CURVATURE_SELECTED[current_path]['sha256'],original_digest)
                             current=(comp.ROOT/current_path).read_bytes()
                             historical=comp.git('show',head+':'+current_path)
                             self.assertEqual(comp.sha256(historical),original_digest)
                             self.assertEqual(comp.curvature_hamilton_current_source(current_path,historical),current)
                             self.assertEqual(comp.curvature_selected_source(current_path,digest='0'*64),historical)
-                            expected[current_path]=reviewed[current_path]=comp.CURVATURE_HAMILTON_SOURCE_SHA256[current_path]
+                            expected[current_path]=comp.CURVATURE_HAMILTON_SOURCE_SHA256[current_path]
+                            reviewed[current_path]='aa4e2fa768e975c178a3b61f22999abed8e75d082fac2d695e3d773261297257' if current_path=='.github/workflows/point4-hamilton-release-audit.yml' else expected[current_path]
                             module.check_unit_blob(current_path,current)
                             for bad in (historical,current[:-1],current+current):
                                 with self.assertRaises(AssertionError):module.check_unit_blob(current_path,bad)

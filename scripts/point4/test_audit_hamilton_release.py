@@ -1083,5 +1083,267 @@ class BalancedCurrentChainTests(unittest.TestCase):
   for jobs in (0,3):
    with self.assertRaises(AssertionError):audit.chain_batches(['A'],{'A':[]},jobs)
 
+class StagedEvidenceTests(unittest.TestCase):
+    """Actual filesystem controls; fixture outputs grant no native credit."""
+    def fixture(self, directory):
+        import gzip, hashlib, json
+        root, output = directory / 'upstream', directory / 'evidence'
+        root.mkdir(); output.mkdir()
+        for name in ('compiler-records', 'batch-results', 'module-build-logs', 'module-setups', 'frontend-build-logs'):
+            (output / name).mkdir()
+        order=['DifferentialGeometry.A','DifferentialGeometry.B']
+        source={m:'a'*64 for m in order}
+        modules={m:dict(position=i+1,source_sha256=source[m],project_imports=[] if i==0 else [order[0]]) for i,m in enumerate(order)}
+        batches=[dict(modules=[m],chains=[[m]]) for m in order]
+        control=dict(root=str(root), evidence=str(output), sysroot='/official', compiler='/official/bin/lean',
+                     compiler_sha256='b'*64, jobs=2, modules=modules, allowed_modules=order,
+                     active_batch_path=str(output/'active-batch.json'))
+        obj=root/'.lake/build/lib/lean/DifferentialGeometry/A.olean'
+        obj.parent.mkdir(parents=True);obj.write_bytes(b'fixture object; no qualification')
+        for suffix in ('.ilean','.trace'):(obj.with_suffix(suffix)).write_bytes(b'fixture companion')
+        for suffix in ('.c','.setup.json'):
+            path=root/'.lake/build/ir/DifferentialGeometry'/('A'+suffix)
+            path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(b'fixture companion')
+        for stream in ('stdout','stderr'):(output/'module-build-logs'/('0001.'+stream+'.log')).write_bytes(b'')
+        setup=b'{}';(output/'module-setups/0001.json.gz').write_bytes(gzip.compress(setup))
+        record=dict(module=order[0],status='finished',exit_code=0,source_sha256=source[order[0]],
+                    olean_sha256=audit.file_digest(obj), stdout_sha256=hashlib.sha256(b'').hexdigest(),
+                    stderr_sha256=hashlib.sha256(b'').hexdigest(),setup_sha256=hashlib.sha256(setup).hexdigest(),batch=1)
+        batch=dict(batch=1,targets=['+'+order[0]+':olean'],status='finished',lake_job_success=True)
+        report=dict(audit_commit_sha='1'*40, audit_script_sha256='2'*64,observer_script_sha256='3'*64,
+                    lake_driver_sha256='4'*64,source_sha=audit.SOURCE_SHA,mathlib_sha=audit.MATHLIB_SHA,
+                    original_lean_sysroot='/official',compiler_sha256='b'*64,lake_batch_plan_sha256='5'*64,
+                    source_sha256=source,graph={order[0]:[],order[1]:[order[0]]},build_order=order,
+                    batch_plan=batches,batch_results=[batch],compiler_results={order[0]:record},built=[order[0]],
+                    source_compile_workers=2,checkpoint_boundary=1,
+                    kernel_audit_status='CHECKPOINT ONLY: full closure and endpoints INCOMPLETE',
+                    point4_status='OPEN: no semantic bridge constructed',
+                    lake_frontend_result=dict(log_sha256=hashlib.sha256(b'').hexdigest()))
+        for path,value in [('compiler-control.json',control),('report.json',report),('compiler-records/0001.json',record),('batch-results/0001.json',batch)]:
+            (output/path).write_text(json.dumps(value)+'\n')
+        (output/'compiler-records/0001.reserved').touch()
+        (output/'frontend-build-logs/lake.log').write_bytes(b'')
+        return root,output,report,control
+
+    def env(self, directory, *, producer=True):
+        from unittest.mock import patch
+        return patch.dict(audit.os.environ,dict(GITHUB_REPOSITORY='Arthur742Ramos/lean-poincare-formalization-plan',
+                    GITHUB_WORKFLOW='Point-4 upstream Hamilton release audit',GITHUB_RUN_ID='123',
+                    GITHUB_RUN_ATTEMPT='1',GITHUB_JOB='upstream-checkpoint' if producer else 'upstream-endpoints',
+                    EXPECTED_SHA='1'*40,GITHUB_OUTPUT=str(directory/'outputs')),clear=False)
+
+    def test_snapshot_keeps_original_bytes_and_no_native_credit(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as name:
+            base=pathlib.Path(name);root,output,report,_=self.fixture(base)
+            original=(output/'report.json').read_bytes()
+            frozen=base/'frozen';result=audit.finalize_evidence(output,frozen,quiescent=lambda _:True)
+            self.assertEqual(result['status'],'COHERENT')
+            self.assertEqual(result['native_qualification'],'NOT GRANTED')
+            self.assertEqual((frozen/'evidence/report.json').read_bytes(),original)
+            self.assertEqual(report['built'],['DifferentialGeometry.A'])
+
+    def test_report_record_and_batch_and_log_disagreement_retained(self):
+        import tempfile,json
+        for kind in ('record','batch','log'):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as name:
+                base=pathlib.Path(name);_,output,report,_=self.fixture(base)
+                if kind=='record':
+                    record=report['compiler_results']['DifferentialGeometry.A'].copy();record['status']='running'
+                    (output/'compiler-records/0001.json').write_text(json.dumps(record))
+                elif kind=='batch':
+                    batch=report['batch_results'][0].copy();batch['status']='running';batch.pop('lake_job_success')
+                    (output/'batch-results/0001.json').write_text(json.dumps(batch))
+                else:(output/'frontend-build-logs/lake.log').write_bytes(b'mutated actual log')
+                result=audit.finalize_evidence(output,base/'frozen',quiescent=lambda _:True)
+                self.assertEqual(result['status'],'INCONSISTENT');self.assertTrue(result['findings'])
+                self.assertEqual((base/'frozen/evidence/report.json').read_bytes(),(output/'report.json').read_bytes())
+
+    def test_live_writer_fails_closed_without_coherent_snapshot(self):
+        import tempfile,json
+        with tempfile.TemporaryDirectory() as name:
+            base=pathlib.Path(name);_,output,_,_=self.fixture(base)
+            with self.assertRaises(RuntimeError):audit.finalize_evidence(output,base/'frozen',wait_seconds=0,quiescent=lambda _:False)
+            result=json.loads((base/'frozen/terminal-finalization.json').read_text())
+            self.assertEqual(result['status'],'INCONCLUSIVE');self.assertFalse(result['complete_snapshot'])
+
+    def test_writer_reappears_during_freeze_fails_closed(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as name:
+            base=pathlib.Path(name);_,output,_,_=self.fixture(base);calls=[]
+            def quiescent(_):calls.append(True);return len(calls)==1
+            with self.assertRaises(AssertionError):audit.finalize_evidence(output,base/'frozen',quiescent=quiescent)
+
+    def test_bound_handle_detects_input_mutation(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as name:
+            base=pathlib.Path(name);path=base/'source';path.write_bytes(b'first')
+            identity=audit.regular_identity(path);path.write_bytes(b'changed')
+            with self.assertRaises(AssertionError):audit.copy_bound_regular(path,base/'target',identity)
+
+    def test_bound_handle_rejects_same_byte_replacement(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as name:
+            base=pathlib.Path(name);path=base/'source';path.write_bytes(b'same')
+            identity=audit.regular_identity(path);other=base/'other';other.write_bytes(b'same');other.replace(path)
+            with self.assertRaises(AssertionError):audit.copy_bound_regular(path,base/'target',identity)
+
+    def test_duplicate_json_keys_rejected(self):
+        for raw in ('{"a":1,"a":2}','{"outer":{"a":1,"a":2}}'):
+            with self.assertRaises(AssertionError):audit.strict_evidence_json(raw)
+
+    def test_checkpoint_prefix_missing_extra_failed_running_and_duplicate_rejected(self):
+        import tempfile,json
+        for kind in ('missing','extra','failed','running','duplicate','gap'):
+            with self.subTest(kind=kind),tempfile.TemporaryDirectory() as name:
+                base=pathlib.Path(name);root,output,report,_=self.fixture(base)
+                path=output/'compiler-records/0001.json'
+                if kind=='missing':path.unlink()
+                elif kind=='extra':
+                    value=report['compiler_results']['DifferentialGeometry.A'].copy();value['module']='Foreign'
+                    (output/'compiler-records/0002.json').write_text(json.dumps(value))
+                elif kind=='duplicate':(output/'compiler-records/duplicate.json').write_bytes(path.read_bytes())
+                elif kind=='gap':report['checkpoint_boundary']=2
+                else:
+                    value=report['compiler_results']['DifferentialGeometry.A'];value['status']='running' if kind=='running' else 'finished';value['exit_code']=7
+                    path.write_text(json.dumps(value))
+                with self.assertRaises(AssertionError):audit.validate_checkpoint_prefix(output,root,report)
+
+    def test_checkpoint_missing_and_foreign_companions_rejected(self):
+        import tempfile
+        for kind in ('missing','foreign'):
+            with self.subTest(kind=kind),tempfile.TemporaryDirectory() as name:
+                base=pathlib.Path(name);root,_,_,_=self.fixture(base)
+                if kind=='missing':(root/'.lake/build/lib/lean/DifferentialGeometry/A.trace').unlink()
+                else:(root/'.lake/build/lib/lean/Foreign.olean').touch()
+                with self.assertRaises(AssertionError):audit.checkpoint_project_inventory(root,{'DifferentialGeometry.A'})
+
+    def export_fixture(self, base):
+        from unittest.mock import patch
+        root,output,report,control=self.fixture(base)
+        snapshot=base/'snapshot'
+        audit.finalize_evidence(output,snapshot,quiescent=lambda _:True)
+        archive=base/'checkpoint.zip'
+        with self.env(base),patch.object(audit,'evidence_writers_quiescent',return_value=True):
+            digest=audit.checkpoint_export(root,output,snapshot,archive)
+        return root,output,report,control,archive,digest
+
+    def test_checkpoint_archive_roundtrip_and_bytes_mutation(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as name:
+            base=pathlib.Path(name);*_,archive,digest=self.export_fixture(base)
+            manifest=audit.checkpoint_archive(archive,digest)
+            self.assertEqual(manifest['identity']['GITHUB_RUN_ID'],'123')
+            with archive.open('ab') as stream:stream.write(b'mutation')
+            with self.assertRaises(AssertionError):audit.checkpoint_archive(archive,digest)
+
+    def test_checkpoint_provenance_drift_rejected_before_project_install(self):
+        import tempfile,shutil
+        for key,value in [('EXPECTED_SHA','9'*40),('GITHUB_RUN_ID','999'),('GITHUB_RUN_ATTEMPT','2'),('GITHUB_REPOSITORY','other/repo'),('GITHUB_WORKFLOW','Other')]:
+            with self.subTest(key=key),tempfile.TemporaryDirectory() as name:
+                base=pathlib.Path(name);root,output,report,control,archive,digest=self.export_fixture(base)
+                shutil.rmtree(root/'.lake/build')
+                with self.env(base,producer=False):
+                    from unittest.mock import patch
+                    with patch.dict(audit.os.environ,{key:value}):
+                        with self.assertRaises(AssertionError):audit.checkpoint_import(archive,digest,'789',root,output,report,control)
+                audit.assert_no_project_objects(root)
+
+    def test_checkpoint_archive_path_duplicate_and_missing_member_rejected(self):
+        import tempfile,zipfile,json
+        for kind in ('traversal','duplicate','missing','symlink','case'):
+            with self.subTest(kind=kind),tempfile.TemporaryDirectory() as name:
+                base=pathlib.Path(name);*_,archive,digest=self.export_fixture(base)
+                altered=base/'altered.zip'
+                with zipfile.ZipFile(archive) as src,zipfile.ZipFile(altered,'x') as dst:
+                    names=src.namelist()
+                    for member in names:
+                        if kind=='missing' and member==names[0]:continue
+                        dst.writestr(member,src.read(member))
+                    if kind=='traversal':dst.writestr('../escape',b'x')
+                    elif kind=='duplicate':dst.writestr(names[0],src.read(names[0]))
+                    elif kind=='case':dst.writestr(names[0].upper(),b'x')
+                    elif kind=='symlink':
+                        info=zipfile.ZipInfo('evidence/link');info.create_system=3;info.external_attr=0o120777<<16;dst.writestr(info,b'target')
+                with self.assertRaises(AssertionError):audit.checkpoint_archive(altered,audit.file_digest(altered))
+
+    def test_existing_project_object_blocks_import_before_extraction(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as name:
+            base=pathlib.Path(name);root,output,report,control,archive,digest=self.export_fixture(base)
+            with self.env(base,producer=False):
+                with self.assertRaises(AssertionError):audit.checkpoint_import(archive,digest,'789',root,output,report,control)
+            self.assertFalse((output/'checkpoint-stage1').exists())
+
+    def test_raw_nul_name_and_ancestor_alias_rejected_before_extraction(self):
+        import tempfile,zipfile
+        for kind in ('nul','ancestor','ancestor-case'):
+            with self.subTest(kind=kind),tempfile.TemporaryDirectory() as name:
+                base=pathlib.Path(name);archive=base/'malformed.zip'
+                with zipfile.ZipFile(archive,'x') as z:
+                    if kind=='nul':z.writestr('evidence/nulXmember',b'x')
+                    elif kind=='ancestor':
+                        z.writestr('evidence/file',b'x');z.writestr('evidence/file/child',b'y')
+                    else:
+                        z.writestr('evidence/Dir/one',b'x');z.writestr('evidence/dir/two',b'y')
+                if kind=='nul':archive.write_bytes(archive.read_bytes().replace(b'evidence/nulXmember',b'evidence/nul\0member'))
+                with self.assertRaises(AssertionError):audit.checkpoint_archive(archive,audit.file_digest(archive))
+
+    def test_toolchain_plan_source_and_control_drift_rejected_before_object_install(self):
+        import tempfile,shutil
+        for key in ('compiler_sha256','lake_driver_sha256','observer_script_sha256','lake_batch_plan_sha256','source_sha256'):
+            with self.subTest(key=key),tempfile.TemporaryDirectory() as name:
+                base=pathlib.Path(name);root,output,report,control,archive,digest=self.export_fixture(base)
+                shutil.rmtree(root/'.lake/build');report=dict(report)
+                report[key]='f'*64 if key!='source_sha256' else dict(report[key],Foreign='f'*64)
+                with self.env(base,producer=False):
+                    with self.assertRaises(AssertionError):audit.checkpoint_import(archive,digest,'789',root,output,report,control)
+                audit.assert_no_project_objects(root)
+
+    def test_import_keeps_exclusive_reservation_and_full_plan(self):
+        import tempfile,shutil
+        with tempfile.TemporaryDirectory() as name:
+            base=pathlib.Path(name);root,output,report,control,archive,digest=self.export_fixture(base)
+            shutil.rmtree(root/'.lake/build')
+            for directory in ('compiler-records','module-build-logs','module-setups','batch-results'):
+                shutil.rmtree(output/directory);(output/directory).mkdir()
+            report=dict(report,compiler_results={},built=[],batch_results=[])
+            with self.env(base,producer=False):
+                self.assertEqual(audit.checkpoint_import(archive,digest,'789',root,output,report,control),1)
+            self.assertTrue((output/'compiler-records/0001.reserved').is_file())
+            self.assertEqual(len(report['batch_plan']),2)
+            self.assertEqual(len(report['built']),1)
+            self.assertFalse((output/'compiler-leases').exists())
+
+    def test_owned_orchestration_keeps_fresh_full_guards_and_offset_only_driver_change(self):
+        source=pathlib.Path(audit.__file__).read_text()
+        self.assertIn('assert report["built"] == order, "Incomplete source closure"',source)
+        self.assertIn('batch_records(output, batches, required=True)',source)
+        self.assertIn('records = compiler_records(output, modules, required=True)',source)
+        driver=pathlib.Path(audit.__file__).with_name('build-hamilton-batches.lean').read_text()
+        self.assertIn('startBatch : Nat := 0',driver)
+        self.assertIn('let mut batchNumber := plan.startBatch',driver)
+        self.assertIn('let job ← buildSpecs specs',driver)
+
+    def test_sigint_and_sigterm_handlers_restore(self):
+        import signal
+        previous={s:signal.getsignal(s) for s in (signal.SIGINT,signal.SIGTERM)}
+        for s in previous:
+            report={'kernel_audit_status':'RUNNING: test'};calls=[]
+            with self.assertRaises(audit.AuditInterrupted):
+                with audit.audit_execution(report,lambda:calls.append(True)):
+                    signal.getsignal(s)(s,None)
+            self.assertEqual({k:signal.getsignal(k) for k in previous},previous)
+            self.assertEqual(len(calls),1)
+            self.assertTrue(report['kernel_audit_status'].startswith('INCONCLUSIVE'))
+
+    def test_unfinished_detached_spawn_never_claims_quiescence(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as name:
+            output=pathlib.Path(name);(output/'writer-owners').mkdir()
+            (output/'writer-owners/spawn-123.pending').write_text('unfinished registration')
+            with self.assertRaises(AssertionError):audit.evidence_writers_quiescent(output)
+
+
 if __name__ == "__main__":
     unittest.main()

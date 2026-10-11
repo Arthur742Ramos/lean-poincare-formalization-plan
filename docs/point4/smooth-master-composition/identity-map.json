@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "d027095e52a74699bfa011a358dda7cb5ab3a246",
-      "final_sha256": "61b3dfc20fb0e7c1b80d41f0ed3739a070b1d4ef58af4ebf1928a483ec83b691",
+      "final_blob": "7a638512ff484278d1712c928e06ccc9270cc6c0",
+      "final_sha256": "5d6722496766a2d294558bda18aa808b7f681a0ab257c51528389d750435ba37",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "611c856d380fd536c3da501d9d27614361102c36",
-      "final_sha256": "5bc8f802e6095d3859f380184d07f4e7b3526ddf275c2b957086be6d9a07bfae",
+      "final_blob": "57c678b9146f91b884753b64c7ffa5f93ce74c72",
+      "final_sha256": "156e4bea1774f2c62874a1d159328e6def80afc86a5ca51292f1e5187ff4cc8a",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "0def256ec184684b3593022f1c7f7b0200bcb743",
-      "final_sha256": "ccfd50efc4b77525f48844cfd747eb6e99a7f752c945c33cd089eacb982e9e5c",
+      "final_blob": "63c7ab0dc3a375cddef1aeddb5d00dcb8288fad2",
+      "final_sha256": "71bb592a741d68002cd0297d42fb5166514182da563285639dfd0701f6d68d42",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "0e6845574e55d9ef7ad64adda0825ee6bd4cd5c3",
-      "final_sha256": "c3ffd52a917bafc28bc98105a98830d4340d888f94bb2d928f8d9799a78b0da5",
+      "final_blob": "3752f4f00a2d2c877c87b20379df0bcb7b2539b3",
+      "final_sha256": "dad6111f78b8ec3598722c201887c1de3cea89e07c9622375df00160814cae9c",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "4148ab27223e2e40118dbd748d7d901c31a3c9f3",
-      "final_sha256": "633285abc716f8ddca2dcc3ee7e1de8106d2908a91230298d56c449b10a4c4df",
+      "final_blob": "4dd243ce6f4276272d60af3697c827d7740596db",
+      "final_sha256": "f6c247c8340fa0f907869fec0f702802b7e3139fe56272b14099c33f867c1df0",
       "mode": "100644",
       "count": 1
     }
@@ -27159,7 +27159,7 @@
     ],
     ".github/workflows/point4-hamilton-release-audit.yml": [
       "100644",
-      "b1656c0b3dec9e74260d812fe3b7c5d59bfa2f1f"
+      "d01da7fcde04da7f1988ca5076afbe45f59dc89a"
     ],
     ".github/workflows/point4-linear-heat-geometry.yml": [
       "100644",
@@ -30983,7 +30983,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "320de8c4a7025419571ae43b5f97c9ab991017e1"
+      "ee29c7f81ea64a7f31a25ac9d61eefe53a1edb0a"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31007,7 +31007,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "83c6373c42a273608b13028413b0dee3ab318fa7"
+      "0627e510375c978adcae9b3060687bcb419726a7"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31015,7 +31015,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "2b2af32325031214e0784ea711b2373c4ccb21bb"
+      "e58ef0ffd668964f7d296e96ef16ca51127c70c2"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31039,15 +31039,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "d027095e52a74699bfa011a358dda7cb5ab3a246"
+      "7a638512ff484278d1712c928e06ccc9270cc6c0"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "6a57093d94b17b33083a3ef44b8e413f3ed25ff6"
+      "9f0dada70257df77eb8494c5ebf0ba7aedf51178"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "43917d1c9c73a59ae7cd8172e0ca9f70b7cf3f3f"
+      "0b61924bda18c1a2c2db46211cd02c39c57fb75a"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31107,11 +31107,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "2782d2f868d5da371cebaea35c210d5354519082"
+      "c86942b62075e6997588dbd61dcfde5346e4bcfd"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "cede8e77107561c3f8c37edf1390f3e81626c92c"
+      "7dfb71217c3726b1f02983db342474f6b8c29967"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31155,7 +31155,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "611c856d380fd536c3da501d9d27614361102c36"
+      "57c678b9146f91b884753b64c7ffa5f93ce74c72"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31191,19 +31191,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "0def256ec184684b3593022f1c7f7b0200bcb743"
+      "63c7ab0dc3a375cddef1aeddb5d00dcb8288fad2"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "0e6845574e55d9ef7ad64adda0825ee6bd4cd5c3"
+      "3752f4f00a2d2c877c87b20379df0bcb7b2539b3"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "eb38ada168bb6b87835cf757b652e6f09e9ef2b5"
+      "bed602cc0fd5d443a838db9337d94d4db46f275e"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "f00c1b49fe58efa74badce0669fb7698f439a311"
+      "ab627f37a69106d5f02f69fe9347143d73ead93f"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -31215,7 +31215,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "d2418fbc21971be7b4354d9521c002c6cde2a18b"
+      "4e53d283203b4af27809369fb442c26c9b6e42bc"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31223,7 +31223,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "6586958a3f6e65cede52ea1ef2f774c0560885c9"
+      "948c9740f3b2f2719d4d77d79a30b763511f7993"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31235,7 +31235,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "4148ab27223e2e40118dbd748d7d901c31a3c9f3"
+      "4dd243ce6f4276272d60af3697c827d7740596db"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -33995,11 +33995,11 @@
     ],
     "scripts/point4/audit-hamilton-release.py": [
       "100644",
-      "db5985aee88948e416b722743ffaa1ed325d0f00"
+      "80bf012504079b6c83ffe87e77ebe15c88fa1f0b"
     ],
     "scripts/point4/build-hamilton-batches.lean": [
       "100644",
-      "ef30eff7c5d0edf3db308a20c62d54093f7362fa"
+      "39c5861822c46cdf096912c6b85cfcbda8d7a121"
     ],
     "scripts/point4/observe-hamilton-compiler.py": [
       "100644",
@@ -34007,7 +34007,7 @@
     ],
     "scripts/point4/test_audit_hamilton_release.py": [
       "100644",
-      "6cf43c7b94dfabf1fb70d58de0b12b61d8f882b8"
+      "deafbf1a781ece83c34df00b24d14dce5b24ea9a"
     ],
     "symmetric-tensor-heat/.gitignore": [
       "100644",
@@ -81156,18 +81156,24 @@
     ],
     "hamilton_source_scheduling_transform": {
       "paths": [
+        ".github/workflows/point4-hamilton-release-audit.yml",
         "scripts/point4/audit-hamilton-release.py",
+        "scripts/point4/build-hamilton-batches.lean",
         "scripts/point4/test_audit_hamilton_release.py"
       ],
       "original_sha256": {
         "scripts/point4/audit-hamilton-release.py": "1380a57af471e0c6b062ab3e381f4c4cae095dfdf4bf1250f16a3fc677c2245e",
-        "scripts/point4/test_audit_hamilton_release.py": "c7cb8aff1fc8277954c36301e6fa2e2e63b50958e2cb163d8dd9d361ae8ddddd"
+        "scripts/point4/test_audit_hamilton_release.py": "c7cb8aff1fc8277954c36301e6fa2e2e63b50958e2cb163d8dd9d361ae8ddddd",
+        "scripts/point4/build-hamilton-batches.lean": "602e3207830355f3f23caf5c2a79ce57fc03442d7cfc245897ae5d179eb3c432",
+        ".github/workflows/point4-hamilton-release-audit.yml": "078fe0190561d9304f26c81268c085e716ee86bd0a362676e1796dc58d03243f"
       },
       "current_sha256": {
-        "scripts/point4/audit-hamilton-release.py": "db696fa0a0359556fda5cebb3f077c2ddbcb9070667f1cf021d92442d6e92f16",
-        "scripts/point4/test_audit_hamilton_release.py": "762e7b0a409f68a19d6bf83e0e8c7a35feb8d1260df38f2e3ff66aca9e13a825"
+        "scripts/point4/audit-hamilton-release.py": "998f8e8c9061fb5eda42074f0d13cc32015d10e0327f31eec6bb3ff07eb429d7",
+        "scripts/point4/test_audit_hamilton_release.py": "b79f197bfc89368727d70ce12ddb6c1d9c6aedac967e3e2c26c38c250060fb20",
+        "scripts/point4/build-hamilton-batches.lean": "4df8942448ba7ad6d5152fb0bcc6e81684cac9241c36e39de0140e60638eb2a7",
+        ".github/workflows/point4-hamilton-release-audit.yml": "1d8849f98be74899334bedc94ed68c46b1270c420e9454f66a27d28e791d4c2d"
       },
-      "finite_policy_sha256": "f5606ca24b34bd703a5e4d7932da76356a903f31c7f730e4e8c54f61df3ee0d1",
+      "finite_policy_sha256": "7a992f09545e0bcee6f9eecbf7d83e7f2a8dcdb0cf0d720141bf1a77829803a1",
       "source_costs": "Positive pinned raw source byte lengths; scheduling hints only",
       "maximum_compiler_leases": 2,
       "active_batch_observer_and_native_compiler_guards_unchanged": true,

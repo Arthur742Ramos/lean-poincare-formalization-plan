@@ -22,7 +22,132 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  upstream-checkpoint:
+    outputs:
+      checkpoint_sha256: ${{ steps.checkpoint.outputs.checkpoint_sha256 }}
+      artifact_id: ${{ steps.upload-checkpoint.outputs.artifact-id }}
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    name: Immutable upstream dependency-closed checkpoint; full audit incomplete
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout exact audit candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: campaign
+          persist-credentials: false
+      - name: Check exact current-master source integration before checkpoint compilation
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git -C campaign rev-parse HEAD)" = "$EXPECTED_SHA"
+          git -C campaign fetch --no-tags --unshallow origin
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.25.1
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/point4-hamilton-official-schema.json" \
+            https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/99c678e569c7c4c0772db297c5ddd5e4c9b6322e/schema/v0.4.schema.json
+          echo "25ff6b25ca4511635aff4443cf20480c15e59dddf19591c730950b442ea54fce  $RUNNER_TEMP/point4-hamilton-official-schema.json" | sha256sum --check
+          cd campaign
+          python3 curvature/scripts/point4_hamilton_native_source_guard.py --schema "$RUNNER_TEMP/point4-hamilton-official-schema.json"
+          python3 curvature/scripts/point4_hamilton_native_mock_test.py
+          python3 curvature/scripts/point4_c2_initial_heat_source_test.py
+          python3 curvature/scripts/point4_c2_initial_heat_mock_test.py
+          python3 curvature/scripts/point4_linear_heat_geometry_source_test.py
+          python3 curvature/scripts/point4_linear_heat_geometry_mock_test.py
+          python3 curvature/scripts/point4_weighted_initial_heat_guard.py
+          python3 curvature/scripts/point4_closed_contract_source_test.py
+          python3 scripts/check-doc-links.py
+      - name: Checkout immutable upstream release for authenticated prefix
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: qinz1yang/differential-geometry
+          ref: 8bd406e35c33a200e9b88895cf11ee8429194e15
+          path: upstream
+          persist-credentials: false
+      - name: Check pin and inspect focused source closure before compilation
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --plan-only
+      - name: Test persistent-plan gates, bounded observation, logs, and cancellation
+        run: python3 campaign/scripts/point4/test_audit_hamilton_release.py
+      - name: Install checksum-pinned official elan
+        run: |
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/elan.tar.gz" \
+            https://github.com/leanprover/elan/releases/download/v4.2.3/elan-x86_64-unknown-linux-gnu.tar.gz
+          echo "df0b2b3a439961ffcbb3985214365ffe40f49bc871df04dff268c7d8e21ca8b2  $RUNNER_TEMP/elan.tar.gz" | sha256sum --check
+          mkdir "$RUNNER_TEMP/elan"
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP/elan"
+          "$RUNNER_TEMP/elan/elan-init" -y --no-modify-path --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve upstream tagged dependencies and fetch official Mathlib cache
+        working-directory: upstream
+        run: |
+          # This source release deliberately does not track lake-manifest.json.
+          # Resolve it under the immutable source's pinned toolchain before any
+          # Lean-action configuration could require the generated manifest.
+          MATHLIB_NO_CACHE_ON_UPDATE=1 lake --keep-toolchain update
+          python3 - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          expected = '8a178386ffc0f5fef0b77738bb5449d50efeea95'
+          manifest = json.loads(Path('lake-manifest.json').read_text())
+          mathlib = next(p for p in manifest['packages'] if p['name'] == 'mathlib')
+          assert mathlib['rev'] == expected, mathlib
+          actual = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd='.lake/packages/mathlib', text=True).strip()
+          assert actual == expected, actual
+          PY
+          lake exe cache get
+      - name: Compile audit-owned native driver with exact official SDK
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --bootstrap-only
+      - name: Check native initialization and observer on bounded local toy
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --native-preflight-only
+      - name: Verify fresh native-store continuation on two bounded toy modules
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --checkpoint-preflight-only
+      - name: Compile dependency-closed prefix; no full-audit qualification
+        run: exec python3 campaign/scripts/point4/audit-hamilton-release.py upstream --checkpoint-prefix
+      - name: Freeze terminal evidence after audit writer and group quiescence
+        if: always()
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --finalize-evidence-only
+      - name: Remove only the audit-local toolchain symlink view
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil
+          shim = Path('hamilton-release-audit/observed-toolchain')
+          if shim.exists():
+              # rmtree unlinks symlink entries, never their official targets.
+              shutil.rmtree(shim)
+          PY
+      - name: Preserve complete audit evidence and unresolved bridge status
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: hamilton-release-checkpoint-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          # Never follow the audit-local symlink view of the official toolchain.
+          path: |
+            hamilton-release-audit-sealed/
+          if-no-files-found: error
+      - name: Package authenticated same-run checkpoint
+        id: checkpoint
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --export-checkpoint-only
+      - name: Publish immutable checkpoint for dependent final-audit job
+        id: upload-checkpoint
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: hamilton-same-run-checkpoint-${{ github.run_id }}-${{ github.run_attempt }}
+          path: hamilton-checkpoint/checkpoint.zip
+          if-no-files-found: error
+          compression-level: 0
   upstream-endpoints:
+    needs: upstream-checkpoint
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     name: Immutable upstream closure, signatures, and foundational axioms
     runs-on: ubuntu-latest
     timeout-minutes: 350
@@ -99,9 +224,22 @@ jobs:
         run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --bootstrap-only
       - name: Check native initialization and observer on bounded local toy
         run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --native-preflight-only
-      - name: Compile exact endpoint import closure and inspect axioms
-        run: |
-          python3 campaign/scripts/point4/audit-hamilton-release.py upstream | tee hamilton-release-audit/build.log
+      - name: Verify fresh native-store continuation on two bounded toy modules
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --checkpoint-preflight-only
+      - name: Download immutable checkpoint from this workflow run
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ needs.upstream-checkpoint.outputs.artifact_id }}
+          path: checkpoint-download
+          merge-multiple: true
+      - name: Compile remaining exact closure and inspect endpoint axioms
+        env:
+          CHECKPOINT_SHA256: ${{ needs.upstream-checkpoint.outputs.checkpoint_sha256 }}
+          CHECKPOINT_ARTIFACT_ID: ${{ needs.upstream-checkpoint.outputs.artifact_id }}
+        run: exec python3 campaign/scripts/point4/audit-hamilton-release.py upstream --resume-checkpoint checkpoint-download/checkpoint.zip --checkpoint-sha256 "$CHECKPOINT_SHA256" --checkpoint-artifact-id "$CHECKPOINT_ARTIFACT_ID"
+      - name: Freeze terminal evidence after audit writer and group quiescence
+        if: always()
+        run: python3 campaign/scripts/point4/audit-hamilton-release.py upstream --finalize-evidence-only
       - name: Remove only the audit-local toolchain symlink view
         if: always()
         run: |
@@ -120,7 +258,5 @@ jobs:
           name: hamilton-release-audit-${{ github.event.pull_request.head.sha || github.sha }}
           # Never follow the audit-local symlink view of the official toolchain.
           path: |
-            hamilton-release-audit/
-            !hamilton-release-audit/observed-toolchain/**
-            !hamilton-release-audit/native-preflight/evidence/observed-toolchain/**
+            hamilton-release-audit-sealed/
           if-no-files-found: error

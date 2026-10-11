@@ -23,6 +23,8 @@ import shutil
 import subprocess
 import sys
 import time
+import stat
+import zipfile
 import tomllib
 
 SOURCE_SHA = "8bd406e35c33a200e9b88895cf11ee8429194e15"
@@ -282,13 +284,13 @@ class AuditInterrupted(RuntimeError):
 
 @contextlib.contextmanager
 def audit_execution(report, save):
-    """Translate SIGTERM only within source execution; restore the old handler."""
-    previous = signal.getsignal(signal.SIGTERM)
+    """Translate SIGINT and SIGTERM only within source execution; restore the old handler."""
+    previous = {s: signal.getsignal(s) for s in (signal.SIGINT, signal.SIGTERM)}
 
     def terminate(signum, frame):
-        raise AuditInterrupted("Audit received SIGTERM")
+        raise AuditInterrupted(f"Audit received signal {signum}")
 
-    signal.signal(signal.SIGTERM, terminate)
+    for s in previous: signal.signal(s, terminate)
     try:
         yield
     except BaseException:
@@ -297,14 +299,14 @@ def audit_execution(report, save):
         save()
         raise
     finally:
-        signal.signal(signal.SIGTERM, previous)
+        for s, handler in previous.items(): signal.signal(s, handler)
 
 
 def drain_process_group(process, *, grace_seconds=30, kill_seconds=5):
     """Bound cancellation of the detached Lake group, including its compilers."""
-    previous = signal.getsignal(signal.SIGTERM)
+    previous = {s: signal.getsignal(s) for s in (signal.SIGINT, signal.SIGTERM)}
     # Repeated cancellation must not interrupt the cleanup itself.
-    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    for s in previous: signal.signal(s, signal.SIG_IGN)
     try:
         try:
             os.killpg(process.pid, signal.SIGTERM)
@@ -322,24 +324,27 @@ def drain_process_group(process, *, grace_seconds=30, kill_seconds=5):
             pass
         process.wait(timeout=kill_seconds)
     finally:
-        signal.signal(signal.SIGTERM, previous)
+        for s, handler in previous.items(): signal.signal(s, handler)
 
 
 def run_batch(command, *, root, env, stream, refresh, sample=lambda process: None, poll_seconds=2,
               grace_seconds=30, kill_seconds=5, maximum_seconds=None):
     """Run unchanged Lake arguments with signal-safe, bounded group cleanup."""
     # Close the spawn/assignment race without passing a blocked signal mask to
-    # the child: defer SIGTERM until the process handle and finally block exist.
-    previous = signal.getsignal(signal.SIGTERM)
+    # the child: defer SIGINT/SIGTERM until the process handle and finally block exist.
+    previous = {s: signal.getsignal(s) for s in (signal.SIGINT, signal.SIGTERM)}
     pending = []
-    signal.signal(signal.SIGTERM, lambda signum, frame: pending.append(signum))
+    for s in previous: signal.signal(s, lambda signum, frame: pending.append(signum))
     process = None
     try:
+        spawn_marker = begin_evidence_spawn()
         process = subprocess.Popen(command, cwd=root, env=env, stdout=stream,
                                    stderr=subprocess.STDOUT, start_new_session=True)
-        signal.signal(signal.SIGTERM, previous)
+        record_evidence_writer(process.pid, group=True)
+        complete_evidence_spawn(spawn_marker)
+        for s, handler in previous.items(): signal.signal(s, handler)
         if pending:
-            raise AuditInterrupted("Audit received SIGTERM while spawning Lake")
+            raise AuditInterrupted("Audit received cancellation while spawning Lake")
         started = time.monotonic()
         sample(process)
         while process.poll() is None:
@@ -359,7 +364,7 @@ def run_batch(command, *, root, env, stream, refresh, sample=lambda process: Non
                 # Retain records written during bounded cancellation cleanup.
                 refresh()
         finally:
-            signal.signal(signal.SIGTERM, previous)
+            for s, handler in previous.items(): signal.signal(s, handler)
 
 
 def file_digest(path):
@@ -813,6 +818,589 @@ class ProcessGroupSamples:
             self.value["sampled_peak_group_processes"], count)
 
 
+# Audit-owned terminal evidence and same-run checkpoint helpers.
+# This template is authored outside the checkout; it grants no native credit.
+_WRITER_EVIDENCE_OUTPUT = None
+
+
+def strict_evidence_json(raw):
+    def pairs(rows):
+        value = {}
+        for key, item in rows:
+            assert key not in value, 'Duplicate evidence JSON key'
+            value[key] = item
+        return value
+    return json.loads(raw, object_pairs_hook=pairs)
+
+
+def process_identity(pid):
+    try:
+        fields = (pathlib.Path('/proc') / str(pid) / 'stat').read_text().rpartition(')')[2].split()
+    except FileNotFoundError:
+        return None
+    assert len(fields) >= 22, 'Incomplete process identity'
+    return dict(pid=pid, state=fields[0], group=int(fields[2]), start=int(fields[19]))
+
+
+def record_evidence_writer(pid, *, group=False):
+    if _WRITER_EVIDENCE_OUTPUT is None:
+        return
+    directory = _WRITER_EVIDENCE_OUTPUT / 'writer-owners'
+    directory.mkdir(exist_ok=True)
+    identity = process_identity(pid)
+    # A reaped owner can still have descendants in its detached group.
+    value = dict(pid=pid, group=pid if group else None, identity=identity)
+    path = directory / f'{pid:010d}.json'
+    temporary = path.with_suffix('.tmp')
+    temporary.write_text(json.dumps(value) + '\n')
+    temporary.replace(path)
+
+
+def begin_evidence_spawn():
+    if _WRITER_EVIDENCE_OUTPUT is None:
+        return None
+    path = _WRITER_EVIDENCE_OUTPUT / 'writer-owners' / f'spawn-{os.getpid()}-{time.time_ns()}.pending'
+    with path.open('x') as stream:
+        stream.write('Unfinished detached child ownership registration; INCONCLUSIVE\n')
+    return path
+
+
+def complete_evidence_spawn(path):
+    if path is not None:
+        assert regular_identity(path)[2] > 0
+        path.unlink()
+
+
+def evidence_writers_quiescent(output):
+    assert not list((output / 'writer-owners').glob('*.pending')), 'Detached spawn registration was interrupted; ownership coverage incomplete'
+    owners = list((output / 'writer-owners').glob('*.json'))
+    assert owners, 'No authenticated audit writer registry'
+    groups = set()
+    for path in owners:
+        value = strict_evidence_json(path.read_bytes())
+        assert type(value['pid']) is int and value['pid'] > 1
+        assert path.name == f"{value['pid']:010d}.json"
+        actual = process_identity(value['pid'])
+        previous = value['identity']
+        if actual is not None and actual['state'] != 'Z':
+            if previous is None or actual['start'] == previous['start']:
+                return False
+        if value['group'] is not None:
+            assert value['group'] == value['pid']
+            groups.add(value['group'])
+    # Do not treat a dead supervising PID or released lock as child quiescence.
+    # A reused group also blocks freezing; this check never signals any process.
+    for path in pathlib.Path('/proc').glob('[0-9]*/stat'):
+        actual = process_identity(int(path.parent.name))
+        if actual is not None and actual['state'] != 'Z' and actual['group'] in groups:
+            return False
+    return True
+
+
+def handle_identity(stream):
+    if os.name == 'nt':
+        # Python's Windows fstat may omit the file ID returned by path stat.
+        # Compare native handle IDs, last-write and creation times consistently.
+        # This is a Windows stable identity, not Linux ctime equivalence.
+        import ctypes, msvcrt
+        from ctypes import wintypes
+        class Basic(ctypes.Structure):
+            _fields_ = [('creation', ctypes.c_longlong), ('access', ctypes.c_longlong),
+                        ('write', ctypes.c_longlong), ('change', ctypes.c_longlong),
+                        ('attributes', wintypes.DWORD)]
+        class Information(ctypes.Structure):
+            _fields_ = [('attributes', wintypes.DWORD), ('creation', wintypes.FILETIME),
+                        ('access', wintypes.FILETIME), ('write', wintypes.FILETIME),
+                        ('volume', wintypes.DWORD), ('sizeHigh', wintypes.DWORD),
+                        ('sizeLow', wintypes.DWORD), ('links', wintypes.DWORD),
+                        ('indexHigh', wintypes.DWORD), ('indexLow', wintypes.DWORD)]
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+        kernel.GetFileInformationByHandle.argtypes = [wintypes.HANDLE, ctypes.POINTER(Information)]
+        kernel.GetFileInformationByHandleEx.argtypes = [wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD]
+        handle = msvcrt.get_osfhandle(stream.fileno())
+        info, basic = Information(), Basic()
+        assert kernel.GetFileInformationByHandle(handle, ctypes.byref(info)), ctypes.get_last_error()
+        assert kernel.GetFileInformationByHandleEx(handle, 0, ctypes.byref(basic), ctypes.sizeof(basic)), ctypes.get_last_error()
+        assert not basic.attributes & (0x10 | 0x400), 'Directory/reparse evidence handle'
+        return (info.volume, (info.indexHigh << 32) | info.indexLow,
+                (info.sizeHigh << 32) | info.sizeLow, basic.write, basic.creation)
+    value = os.fstat(stream.fileno())
+    assert stat.S_ISREG(value.st_mode)
+    return (value.st_dev, value.st_ino, value.st_size, value.st_mtime_ns, value.st_ctime_ns)
+
+
+def regular_identity(path):
+    value = path.lstat()
+    assert stat.S_ISREG(value.st_mode) and not path.is_symlink(), 'Evidence is not a regular file'
+    if os.name == 'nt':
+        with path.open('rb') as stream:
+            return handle_identity(stream)
+    return (value.st_dev, value.st_ino, value.st_size, value.st_mtime_ns, value.st_ctime_ns)
+
+
+def evidence_inventory(root):
+    root = pathlib.Path(root)
+    assert root.is_dir() and not root.is_symlink()
+    excluded = ('observed-toolchain', 'native-preflight/evidence/observed-toolchain')
+    found, folded = {}, set()
+    for directory, dirs, files in os.walk(root, followlinks=False):
+        base = pathlib.Path(directory)
+        retained = []
+        for name in dirs:
+            path = base / name
+            relative = path.relative_to(root).as_posix()
+            if relative in excluded:
+                continue
+            assert path.is_dir() and not path.is_symlink(), 'Unexpected evidence directory link'
+            retained.append(name)
+        dirs[:] = retained
+        for name in files:
+            path = base / name
+            relative = path.relative_to(root).as_posix()
+            assert '\\' not in relative and ':' not in relative and '\0' not in relative
+            assert relative not in found and relative.casefold() not in folded, 'Evidence path collision'
+            folded.add(relative.casefold())
+            found[relative] = regular_identity(path)
+    return found
+
+
+def settled_evidence_inventory(root, *, wait_seconds=5):
+    """Select a stable initial generation; never retry a post-copy mismatch."""
+    deadline = time.monotonic() + wait_seconds
+    previous = evidence_inventory(root)
+    while True:
+        time.sleep(0.5)
+        current = evidence_inventory(root)
+        if current == previous:
+            return current
+        assert time.monotonic() < deadline, 'Evidence metadata never settled'
+        previous = current
+
+
+def hold_evidence_generation(stack, root):
+    """Windows fixture and artifact readers exclude write/delete handles.
+
+    Linux uses its exact path/handle PRE/POST identities and whole hashes.
+    Locks affect only these owned regular files, never SDK or system settings.
+    """
+    if os.name != 'nt':
+        return
+    import ctypes, msvcrt
+    from ctypes import wintypes
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.CreateFileW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                                  ctypes.c_void_p, wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE]
+    kernel.CreateFileW.restype = wintypes.HANDLE
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    deadline = time.monotonic() + 5
+    while True:
+        acquired = contextlib.ExitStack()
+        try:
+            for name in sorted(evidence_inventory(root)):
+                handle = kernel.CreateFileW(str(root / name), 0x80000000, 1, None, 3, 0x00200000, None)
+                if handle == ctypes.c_void_p(-1).value:
+                    raise OSError(ctypes.get_last_error(), 'Cannot bind owned evidence read handle')
+                try:
+                    descriptor = msvcrt.open_osfhandle(handle, os.O_RDONLY | os.O_BINARY)
+                except BaseException:
+                    kernel.CloseHandle(handle)
+                    raise
+                stream = acquired.enter_context(os.fdopen(descriptor, 'rb'))
+                handle_identity(stream)
+            stack.enter_context(acquired.pop_all())
+            return
+        except OSError as error:
+            acquired.close()
+            if error.errno != 32 or time.monotonic() >= deadline:
+                raise
+            time.sleep(0.1)
+        except BaseException:
+            acquired.close()
+            raise
+
+
+def copy_bound_regular(source, target, expected):
+    assert regular_identity(source) == expected, 'Evidence changed before opening'
+    target.parent.mkdir(parents=True, exist_ok=True)
+    digest, size = hashlib.sha256(), 0
+    with source.open('rb') as incoming, target.open('xb') as outgoing:
+        assert handle_identity(incoming) == expected, 'Evidence handle/path mismatch'
+        for block in iter(lambda: incoming.read(1024 * 1024), b''):
+            outgoing.write(block)
+            digest.update(block)
+            size += len(block)
+        assert handle_identity(incoming) == expected, 'Evidence mutated while copying'
+    assert size == expected[2] and regular_identity(source) == expected, 'Evidence changed after copying'
+    assert file_digest(target) == digest.hexdigest(), 'Frozen evidence copy mismatch'
+    return dict(bytes=size, sha256=digest.hexdigest())
+
+
+def report_disk_findings(output):
+    """Validate actual final bytes; retain disagreement rather than rebasing it."""
+    report = strict_evidence_json((output / 'report.json').read_bytes())
+    findings = []
+    control_path = output / 'compiler-control.json'
+    if control_path.exists():
+        control = strict_evidence_json(control_path.read_bytes())
+        records = compiler_records(output, control['modules'])
+        if records != report.get('compiler_results', {}):
+            findings.append('Report/compiler-record snapshot mismatch')
+        built = [m for m in report['build_order'] if records.get(m, {}).get('status') == 'finished'
+                 and records[m].get('exit_code') == 0 and records[m].get('olean_sha256')]
+        if built != report.get('built', []):
+            findings.append('Report/completed compiler count mismatch')
+        for module in built:
+            value = records[module]
+            position = control['modules'][module]['position']
+            for stream in ('stdout', 'stderr'):
+                path = output / 'module-build-logs' / f'{position:04d}.{stream}.log'
+                if file_digest(path) != value[f'{stream}_sha256']:
+                    findings.append(f'Compiler {stream} bytes mismatch: {module}')
+            setup = output / 'module-setups' / f'{position:04d}.json.gz'
+            if hashlib.sha256(gzip.decompress(setup.read_bytes())).hexdigest() != value['setup_sha256']:
+                findings.append(f'Compiler setup bytes mismatch: {module}')
+        batches = report.get('batch_plan', [])
+        if batches and batch_records(output, batches) != report.get('batch_results', []):
+            findings.append('Report/batch-record snapshot mismatch')
+    frontend = report.get('lake_frontend_result')
+    if frontend is not None:
+        log = output / 'frontend-build-logs/lake.log'
+        if file_digest(log) != frontend['log_sha256']:
+            findings.append('Frontend log bytes do not match reported hash')
+    return report, findings
+
+
+def finalize_evidence(output, target, *, wait_seconds=10, quiescent=evidence_writers_quiescent):
+    """Freeze one generation after independent bounded writer quiescence.
+
+    Snapshot coherence is separate from native completeness. Original report
+    bytes and any inconsistency remain visible, never repaired by substitution.
+    """
+    output, target = pathlib.Path(output), pathlib.Path(target)
+    assert not target.exists() and not target.is_symlink(), 'Snapshot target already exists'
+    target.mkdir()
+    result = dict(status='INCONCLUSIVE', native_qualification='NOT GRANTED', point4='OPEN',
+                  findings=[], complete_snapshot=False)
+    handles = contextlib.ExitStack()
+    try:
+        deadline = time.monotonic() + wait_seconds
+        while not quiescent(output):
+            if time.monotonic() >= deadline:
+                raise RuntimeError('Audit/group writers remain live; no coherent snapshot')
+            time.sleep(0.1)
+        hold_evidence_generation(handles, output)
+        before = settled_evidence_inventory(output)
+        assert quiescent(output), 'Writer restarted before finalization generation'
+        assert 'report.json' in before
+        inventory = {name: copy_bound_regular(output / name, target / 'evidence' / name, identity)
+                     for name, identity in sorted(before.items())}
+        assert quiescent(output), 'Writer restarted during finalization'
+        assert evidence_inventory(output) == before, 'Whole evidence inventory changed'
+        for name, row in inventory.items():
+            assert file_digest(output / name) == row['sha256'], 'Evidence bytes changed after freeze'
+        report, findings = report_disk_findings(target / 'evidence')
+        result.update(status='INCONSISTENT' if findings else 'COHERENT', findings=findings,
+                      complete_snapshot=True, inventory=inventory,
+                      audit_commit_sha=report['audit_commit_sha'],
+                      original_kernel_audit_status=report['kernel_audit_status'])
+        return result
+    except BaseException as error:
+        result['findings'].append(f'{type(error).__name__}: {error}')
+        raise
+    finally:
+        handles.close()
+        with (target / 'terminal-finalization.json').open('x') as stream:
+            stream.write(json.dumps(result, indent=2) + '\n')
+
+
+def staged_identity(report):
+    """No tokens or ambient environment are captured in checkpoint provenance."""
+    fields = ('GITHUB_REPOSITORY', 'GITHUB_WORKFLOW', 'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT')
+    values = {name: os.environ[name] for name in fields}
+    assert values['GITHUB_REPOSITORY'] == 'Arthur742Ramos/lean-poincare-formalization-plan'
+    assert values['GITHUB_RUN_ID'].isdigit() and int(values['GITHUB_RUN_ID']) > 0
+    assert values['GITHUB_RUN_ATTEMPT'].isdigit() and int(values['GITHUB_RUN_ATTEMPT']) > 0
+    expected = os.environ['EXPECTED_SHA']
+    assert re.fullmatch('[0-9a-f]{40}', expected) and report['audit_commit_sha'] == expected
+    return dict(values, head=expected, source=SOURCE_SHA, mathlib=MATHLIB_SHA,
+                sdk_tree=SDK_TREE_SHA256, compiler=report['compiler_sha256'],
+                audit_script=report['audit_script_sha256'], observer=report['observer_script_sha256'],
+                driver=report['lake_driver_sha256'], plan=report['lake_batch_plan_sha256'],
+                source_sha256=report['source_sha256'])
+
+
+def checkpoint_prefix(report):
+    batches = report['batch_plan']
+    boundary = len(batches) // 2
+    assert 0 < boundary < len(batches), 'Invalid checkpoint boundary'
+    selected = {m for batch in batches[:boundary] for m in batch['modules']}
+    assert all(set(report['graph'][m]) <= selected for m in selected), 'Checkpoint is not dependency-closed'
+    return boundary, selected
+
+
+def checkpoint_project_inventory(root, selected):
+    """Capture all genuine Lake output/trace companions of completed modules."""
+    allowed = {}
+    for module in selected:
+        stem = module.replace('.', '/')
+        for suffix in ('.olean', '.olean.server', '.olean.private', '.ilean', '.ir', '.trace'):
+            name = '.lake/build/lib/lean/' + stem + suffix
+            allowed[name] = module
+            allowed[name + '.hash'] = module
+        for suffix in ('.c', '.setup.json'):
+            name = '.lake/build/ir/' + stem + suffix
+            allowed[name] = module
+            allowed[name + '.hash'] = module
+    base = root / '.lake/build'
+    actual = {'.lake/build/' + name: identity for name, identity in evidence_inventory(base).items()}
+    assert set(actual) <= set(allowed), 'Unexpected project checkpoint output/trace'
+    for module in selected:
+        stem = module.replace('.', '/')
+        assert all('.lake/build/' + directory + stem + suffix in actual for directory, suffix in
+                   [('lib/lean/', '.olean'), ('lib/lean/', '.ilean'), ('lib/lean/', '.trace'),
+                    ('ir/', '.c'), ('ir/', '.setup.json')]), 'Incomplete Lake output/trace closure'
+    return actual
+
+
+def validate_checkpoint_prefix(output, root, report):
+    boundary, selected = checkpoint_prefix(report)
+    control = strict_evidence_json((output / 'compiler-control.json').read_bytes())
+    assert report['checkpoint_boundary'] == boundary
+    assert report['kernel_audit_status'].startswith('CHECKPOINT ONLY:')
+    assert report['point4_status'] == 'OPEN: no semantic bridge constructed'
+    modules = {m: control['modules'][m] for m in selected}
+    records = compiler_records(output, modules, required=True)
+    positions = {control['modules'][m]['position'] for m in selected}
+    layouts = {
+        'compiler-records': {f'{p:04d}{suffix}' for p in positions for suffix in ('.json', '.reserved')},
+        'module-build-logs': {f'{p:04d}.{stream}.log' for p in positions for stream in ('stdout', 'stderr')},
+        'module-setups': {f'{p:04d}.json.gz' for p in positions},
+        'batch-results': {f'{p:04d}.json' for p in range(1, boundary + 1)},
+    }
+    for name, expected in layouts.items():
+        assert set(evidence_inventory(output / name)) == expected, 'Missing/extra checkpoint ledger or log: ' + name
+    assert records == report['compiler_results']
+    assert report['built'] == [m for m in report['build_order'] if m in selected]
+    assert batch_records(output, report['batch_plan'][:boundary], required=True) == report['batch_results']
+    for module, record in records.items():
+        path = root / '.lake/build/lib/lean' / (module.replace('.', '/') + '.olean')
+        assert file_digest(path) == record['olean_sha256'], 'Checkpoint primary object differs from real compiler'
+    return boundary, selected
+
+
+def checkpoint_export(root, output, snapshot, archive):
+    with contextlib.ExitStack() as handles:
+        hold_evidence_generation(handles, snapshot / 'evidence')
+        hold_evidence_generation(handles, root / '.lake/build')
+        return checkpoint_export_bound(root, output, snapshot, archive)
+
+
+def checkpoint_export_bound(root, output, snapshot, archive):
+    """Only a coherent, completed prefix produced in this run can travel."""
+    terminal = strict_evidence_json((snapshot / 'terminal-finalization.json').read_bytes())
+    assert terminal['status'] == 'COHERENT' and terminal['complete_snapshot']
+    frozen = snapshot / 'evidence'
+    report = strict_evidence_json((frozen / 'report.json').read_bytes())
+    boundary, selected = validate_checkpoint_prefix(frozen, root, report)
+    assert evidence_writers_quiescent(output), 'Checkpoint writers remain live'
+    identity = staged_identity(report)
+    identity.update(producer_job=os.environ['GITHUB_JOB'], boundary=boundary,
+                    root=str(root), sysroot=report['original_lean_sysroot'])
+    assert identity['producer_job'] == 'upstream-checkpoint'
+    before = settled_evidence_inventory(frozen)
+    project_before = settled_evidence_inventory(root / '.lake/build')
+    project = checkpoint_project_inventory(root, selected)
+    assert project_before == {name.removeprefix('.lake/build/'): identity for name, identity in project.items()}, 'Project metadata changed before checkpoint generation'
+    assert set(before) == set(terminal['inventory'])
+    inventory = {}
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(archive, 'x', compression=zipfile.ZIP_DEFLATED, compresslevel=1) as z:
+        for namespace, base, rows in [('evidence', frozen, before), ('project', root, project)]:
+            for name, expected in sorted(rows.items()):
+                source = base / name
+                assert regular_identity(source) == expected
+                raw = source.read_bytes()
+                assert regular_identity(source) == expected
+                key = namespace + '/' + name
+                inventory[key] = dict(bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest())
+                if namespace == 'evidence':
+                    assert inventory[key] == terminal['inventory'][name], 'Frozen checkpoint drift'
+                z.writestr(key, raw)
+        manifest = dict(version=1, qualification='CHECKPOINT ONLY; full closure and endpoints INCOMPLETE',
+                        identity=identity, inventory=inventory)
+        z.writestr('checkpoint.json', json.dumps(manifest, sort_keys=True, indent=2) + '\n')
+    assert evidence_writers_quiescent(output)
+    assert evidence_inventory(frozen) == before and checkpoint_project_inventory(root, selected) == project
+    for key, row in inventory.items():
+        namespace, name = key.split('/', 1)
+        assert file_digest((frozen if namespace == 'evidence' else root) / name) == row['sha256']
+    validate_checkpoint_prefix(frozen, root, report)
+    digest = file_digest(archive)
+    with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+        stream.write('checkpoint_sha256=' + digest + '\n')
+    return digest
+
+
+def checkpoint_archive(archive, expected_sha):
+    """Validate every member before exposing any importable project object."""
+    assert re.fullmatch('[0-9a-f]{64}', expected_sha)
+    assert file_digest(archive) == expected_sha, 'Checkpoint archive digest mismatch'
+    with zipfile.ZipFile(archive) as z:
+        names, folded, size, ancestors, canonical = set(), set(), 0, set(), {}
+        for row in z.infolist():
+            name = row.orig_filename
+            assert name == row.filename, 'Raw checkpoint name was truncated or normalized'
+            path = pathlib.PurePosixPath(name)
+            assert name and '\\' not in name and ':' not in name and '\0' not in name
+            assert not path.is_absolute() and str(path) == name and all(p not in ('', '.', '..') for p in path.parts)
+            for count in range(1, len(path.parts) + 1):
+                part = '/'.join(path.parts[:count])
+                folded_part = part.casefold()
+                assert canonical.get(folded_part, part) == part, 'Checkpoint ancestor case alias'
+                canonical[folded_part] = part
+                if count < len(path.parts): ancestors.add(part)
+            assert name not in names and name.casefold() not in folded, 'Checkpoint member collision'
+            assert not row.is_dir() and stat.S_IFMT(row.external_attr >> 16) in (0, stat.S_IFREG)
+            assert row.file_size <= 256 * 1024 ** 2, 'Oversized checkpoint member'
+            size += row.file_size
+            assert size <= 16 * 1024 ** 3, 'Oversized checkpoint archive'
+            names.add(name); folded.add(name.casefold())
+        assert not names & ancestors, 'Checkpoint file/directory ancestor collision'
+        assert 'checkpoint.json' in names
+        manifest = strict_evidence_json(z.read('checkpoint.json'))
+        assert manifest['version'] == 1
+        assert manifest['qualification'] == 'CHECKPOINT ONLY; full closure and endpoints INCOMPLETE'
+        inventory = manifest['inventory']
+        assert set(inventory) == names - {'checkpoint.json'}, 'Missing/extra checkpoint members'
+        for name, row in inventory.items():
+            assert name.startswith(('project/.lake/build/', 'evidence/'))
+            assert set(row) == {'bytes', 'sha256'} and type(row['bytes']) is int and row['bytes'] >= 0
+            digest, count = hashlib.sha256(), 0
+            with z.open(name) as stream:
+                for block in iter(lambda: stream.read(1024 * 1024), b''):
+                    digest.update(block); count += len(block)
+            assert count == row['bytes'] and digest.hexdigest() == row['sha256'], 'Checkpoint member bytes mismatch'
+        assert file_digest(archive) == expected_sha, 'Checkpoint changed during admission'
+        return manifest
+
+
+def checkpoint_import(archive, expected_sha, artifact_id, root, output, report, control):
+    assert artifact_id.isdigit() and int(artifact_id) > 0, 'Missing immutable checkpoint artifact ID'
+    assert os.environ['GITHUB_JOB'] == 'upstream-endpoints'
+    assert_no_project_objects(root)  # Fresh job before authenticated restoration.
+    manifest = checkpoint_archive(archive, expected_sha)
+    boundary, selected = checkpoint_prefix(report)
+    wanted = staged_identity(report)
+    wanted.update(producer_job='upstream-checkpoint', boundary=boundary,
+                  root=str(root), sysroot=report['original_lean_sysroot'])
+    assert manifest['identity'] == wanted, 'Checkpoint head/run/attempt/toolchain/plan provenance drift'
+    staging = output / 'checkpoint-stage1'
+    assert not staging.exists()
+    staging.mkdir()
+    with zipfile.ZipFile(archive) as z:
+        # All paths and bytes were validated before any object is installed.
+        for name in manifest['inventory']:
+            target = staging / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with z.open(name) as incoming, target.open('xb') as outgoing:
+                shutil.copyfileobj(incoming, outgoing)
+    assert file_digest(archive) == expected_sha
+    frozen = staging / 'evidence'
+    prior, findings = report_disk_findings(frozen)
+    assert not findings, findings
+    for key in ('audit_commit_sha', 'audit_script_sha256', 'observer_script_sha256', 'lake_driver_sha256',
+                'source_sha', 'mathlib_sha', 'source_sha256', 'graph', 'build_order', 'batch_plan',
+                'source_compile_workers', 'compiler_sha256', 'original_lean_sysroot', 'lake_batch_plan_sha256'):
+        assert prior[key] == report[key], 'Checkpoint report provenance mismatch: ' + key
+    old_control = strict_evidence_json((frozen / 'compiler-control.json').read_bytes())
+    assert old_control == control, 'Checkpoint observer control drift'
+    assert validate_checkpoint_prefix(frozen, staging / 'project', prior) == (boundary, selected)
+    project = checkpoint_project_inventory(staging / 'project', selected)
+    assert {'project/' + name for name in project} == {name for name in manifest['inventory'] if name.startswith('project/')}
+    assert_no_project_objects(root)
+    for name in project:
+        source, target = staging / 'project' / name, root / name
+        assert not target.exists() and not target.is_symlink(), 'Existing checkpoint destination object'
+        copy_bound_regular(source, target, regular_identity(source))
+    for directory in ('compiler-records', 'module-build-logs', 'module-setups', 'batch-results'):
+        for name in evidence_inventory(frozen / directory):
+            source, target = frozen / directory / name, output / directory / name
+            copy_bound_regular(source, target, regular_identity(source))
+    # Never import leases, locks, active-batch control or old native bootstrap.
+    for module, record in prior['compiler_results'].items():
+        assert file_digest(root / '.lake/build/lib/lean' / (module.replace('.', '/') + '.olean')) == record['olean_sha256']
+        reserved = output / 'compiler-records' / f"{control['modules'][module]['position']:04d}.reserved"
+        assert reserved.is_file(), 'Missing compiler exclusive reservation'
+    report.update(compiler_results=prior['compiler_results'], built=prior['built'], batch_results=prior['batch_results'],
+                  checkpoint_lineage=dict(artifact_id=artifact_id, archive_sha256=expected_sha,
+                                          identity=manifest['identity'], stage1_report_sha256=file_digest(frozen / 'report.json')))
+    return boundary
+
+
+def native_checkpoint_preflight(driver, sysroot, output, observer):
+    """Two actual modules across separate native FetchM stores; no campaign credit."""
+    bootstrap = verify_native_bootstrap(driver, sysroot, output)
+    base = output / 'checkpoint-preflight'
+    base.mkdir()
+    root, evidence = base / 'workspace', base / 'evidence'
+    root.mkdir(); evidence.mkdir()
+    for name in ('module-build-logs', 'compiler-records', 'module-setups', 'batch-results', 'frontend-build-logs'):
+        (evidence / name).mkdir()
+    (root / 'lakefile.toml').write_text('name = "DifferentialGeometry"\n[[lean_lib]]\nname = "DifferentialGeometry"\n')
+    (root / 'lake-manifest.json').write_text(json.dumps({'version':'1.1.0', 'packagesDir':'.lake/packages', 'packages':[], 'name':'DifferentialGeometry', 'lakeDir':'.lake'}) + '\n')
+    sources = {'DifferentialGeometry.CheckpointFirst':'theorem first : True := True.intro\n',
+               'DifferentialGeometry.CheckpointSecond':'import DifferentialGeometry.CheckpointFirst\ntheorem second : True := first\n'}
+    modules = {}
+    for position, (module, source) in enumerate(sources.items(), 1):
+        path = root / (module.replace('.', '/') + '.lean')
+        path.parent.mkdir(exist_ok=True); path.write_text(source)
+        modules[module] = dict(position=position, source_sha256=file_digest(path),
+                               project_imports=[] if position == 1 else [next(iter(sources))])
+    order = list(sources)
+    batches = [dict(modules=[m], chains=[[m]]) for m in order]
+    compiler = sysroot / 'bin/lean'
+    control = dict(root=str(root), evidence=str(evidence), sysroot=str(sysroot), compiler=str(compiler),
+                   compiler_sha256=file_digest(compiler), jobs=1, modules=modules,
+                   allowed_modules=order, active_batch_path=str(evidence / 'active-batch.json'))
+    control_path = evidence / 'compiler-control.json'
+    control_path.write_text(json.dumps(control) + '\n')
+    env = make_compiler_shim(evidence, sysroot, observer, control_path)
+    receipt = dict(status='inconclusive', campaign_qualification='NONE', point4='OPEN', stages=[])
+    try:
+        assert_no_project_objects(root)
+        for offset in (0, 1):
+            plan = evidence / f'plan-{offset}.json'
+            plan.write_text(json.dumps(dict(batches=[batches[offset]], startBatch=offset)) + '\n')
+            command = [bootstrap['executable'], str(plan), str(evidence)]
+            log = evidence / 'frontend-build-logs' / f'lake-{offset}.log'
+            with log.open('wb') as stream:
+                code = run_batch(command, root=root, env=env, stream=stream, refresh=lambda: None, maximum_seconds=180)
+            assert code == 0, 'Fresh native checkpoint store recompiled or failed'
+            records = compiler_records(evidence, {m:modules[m] for m in order[:offset+1]}, required=True)
+            batch_records(evidence, batches[:offset+1], required=True)
+            receipt['stages'].append(dict(exit_code=code, log_sha256=file_digest(log), records=records))
+            if offset == 0:
+                # Copy exactly the genuine output/trace closure through a fresh
+                # directory and restore it after a fresh project-object check.
+                rows = checkpoint_project_inventory(root, {order[0]})
+                copied = base / 'checkpoint'
+                for name, identity in rows.items():
+                    copy_bound_regular(root / name, copied / name, identity)
+                shutil.rmtree(root / '.lake/build')
+                assert_no_project_objects(root)
+                for name in rows:
+                    copy_bound_regular(copied / name, root / name, regular_identity(copied / name))
+                prior = records[order[0]]
+            else:
+                assert records[order[0]] == prior, 'Prior source was compiled twice'
+        receipt.update(status='passed', observer_sha256=file_digest(observer), driver_sha256=file_digest(driver),
+                       executable_sha256=bootstrap['executable_sha256'], compiler_sha256=file_digest(compiler))
+        return receipt
+    finally:
+        (base / 'preflight.json').write_text(json.dumps(receipt, indent=2) + '\n')
+        shutil.rmtree(evidence / 'observed-toolchain')
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=pathlib.Path)
@@ -821,8 +1409,27 @@ def main() -> None:
     mode.add_argument("--bootstrap-only", action="store_true")
     mode.add_argument("--native-preflight-only", action="store_true")
     parser.add_argument("--jobs", type=int, choices=(1, 2), default=2)
+    mode.add_argument("--checkpoint-prefix", action="store_true")
+    mode.add_argument("--resume-checkpoint", type=pathlib.Path)
+    mode.add_argument("--checkpoint-preflight-only", action="store_true")
+    mode.add_argument("--finalize-evidence-only", action="store_true")
+    mode.add_argument("--export-checkpoint-only", action="store_true")
+    parser.add_argument("--checkpoint-sha256")
+    parser.add_argument("--checkpoint-artifact-id")
     args = parser.parse_args()
     root = args.source.resolve()
+    output = root.parent / "hamilton-release-audit"
+    if args.finalize_evidence_only:
+        result = finalize_evidence(output, root.parent / "hamilton-release-audit-sealed")
+        assert result['status'] == 'COHERENT', result['findings']
+        return
+    if args.export_checkpoint_only:
+        checkpoint_export(root, output, root.parent / "hamilton-release-audit-sealed", root.parent / "hamilton-checkpoint/checkpoint.zip")
+        return
+    global _WRITER_EVIDENCE_OUTPUT
+    _WRITER_EVIDENCE_OUTPUT = output
+    output.mkdir(exist_ok=True)
+    record_evidence_writer(os.getpid())
     here = pathlib.Path(__file__).resolve().parents[2]
     spec = importlib.util.spec_from_file_location(
         "point4_scan", here / "curvature/scripts/point4_scan.py")
@@ -944,19 +1551,30 @@ def main() -> None:
     compiler = sysroot / "bin/lean"
     driver = pathlib.Path(__file__).with_name("build-hamilton-batches.lean")
     observer = pathlib.Path(__file__).with_name("observe-hamilton-compiler.py")
-    if args.bootstrap_only or args.native_preflight_only:
+    if args.bootstrap_only or args.native_preflight_only or args.checkpoint_preflight_only:
         report["kernel_audit_status"] = "RUNNING: audit-owned native bootstrap/preflight only"
         save()
         with audit_execution(report, save):
             if args.bootstrap_only:
                 report["native_bootstrap"] = bootstrap_native_driver(driver, sysroot, output, root=root)
-            else:
+            elif args.native_preflight_only:
                 report["native_preflight"] = native_driver_preflight(driver, sysroot, output, observer)
+            else:
+                report["checkpoint_preflight"] = native_checkpoint_preflight(driver, sysroot, output, observer)
         report["kernel_audit_status"] = "NOT RUN: audit-owned native bootstrap/preflight passed; upstream closure unchecked"
         save()
         return
     bootstrap = verify_native_bootstrap(driver, sysroot, output)
     preflight = verify_native_preflight(output, bootstrap, observer)
+    checkpoint_preflight_path = output / "checkpoint-preflight/preflight.json"
+    if args.checkpoint_prefix or args.resume_checkpoint:
+        checkpoint_preflight = strict_evidence_json(checkpoint_preflight_path.read_bytes())
+        assert checkpoint_preflight["status"] == "passed"
+        assert checkpoint_preflight["observer_sha256"] == file_digest(observer)
+        assert checkpoint_preflight["driver_sha256"] == file_digest(driver)
+        assert checkpoint_preflight["executable_sha256"] == bootstrap["executable_sha256"]
+        assert checkpoint_preflight["compiler_sha256"] == file_digest(compiler)
+        report["checkpoint_preflight_sha256"] = file_digest(checkpoint_preflight_path)
     report.update(native_bootstrap=bootstrap, native_preflight=preflight,
                   native_bootstrap_manifest_sha256=file_digest(output / "native-bootstrap/bootstrap.json"),
                   native_preflight_receipt_sha256=file_digest(output / "native-preflight/preflight.json"))
@@ -1018,9 +1636,26 @@ def main() -> None:
     control_path = output / "compiler-control.json"
     control_path.write_text(json.dumps(control, indent=2) + "\n")
     env = make_compiler_shim(output, sysroot, observer, control_path)
+    full_plan_path = output / "full-lake-batch-plan.json"
+    full_plan_path.write_text(json.dumps({"batches": batches}, indent=2) + "\n")
+    report["lake_batch_plan_sha256"] = file_digest(full_plan_path)
+    boundary = len(batches) // 2
+    start_batch = 0
+    if args.checkpoint_prefix:
+        assert os.environ['GITHUB_JOB'] == 'upstream-checkpoint'
+        staged_identity(report)
+        report['checkpoint_boundary'] = boundary
+        execution_batches = batches[:boundary]
+    elif args.resume_checkpoint:
+        start_batch = checkpoint_import(args.resume_checkpoint, args.checkpoint_sha256,
+                                        args.checkpoint_artifact_id, root, output, report, control)
+        execution_batches = batches[start_batch:]
+    else:
+        execution_batches = batches
     # This second assertion is immediately before the first compilation, after
     # official dependency-cache retrieval and all audit plumbing setup.
-    assert_no_project_objects(root)
+    if not args.resume_checkpoint:
+        assert_no_project_objects(root)
     save()
 
     record_mtimes = {}
@@ -1060,8 +1695,8 @@ def main() -> None:
         save()
 
     plan_path = output / "lake-batch-plan.json"
-    plan_path.write_text(json.dumps({"batches": batches}, indent=2) + "\n")
-    report["lake_batch_plan_sha256"] = file_digest(plan_path)
+    plan_path.write_text(json.dumps({"batches": execution_batches, "startBatch": start_batch}, indent=2) + "\n")
+    report["execution_lake_batch_plan_sha256"] = file_digest(plan_path)
     executable = pathlib.Path(bootstrap["executable"])
     command = [str(executable), str(plan_path), str(output)]
     report["lake_frontend_executable_sha256"] = bootstrap["executable_sha256"]
@@ -1074,7 +1709,8 @@ def main() -> None:
         path = output / "frontend-build-logs" / "lake.log"
         with path.open("wb") as stream:
             code = run_batch(command, root=root, env=env, stream=stream,
-                             refresh=refresh, sample=sampler)
+                             refresh=refresh, sample=sampler, grace_seconds=1, kill_seconds=1)
+        record_mtimes.clear()
         refresh()
         report["lake_frontend_result"] = {"command": command, "exit_code": code,
                                           "elapsed_seconds": time.monotonic() - started,
@@ -1090,10 +1726,26 @@ def main() -> None:
         assert file_digest(output / "native-preflight/preflight.json") == report["native_preflight_receipt_sha256"], "Native preflight receipt changed"
         report["selected_lake_installation"] = verify_selected_install(output, executable, output / "observed-toolchain")
         assert file_digest(driver) == report["lake_driver_sha256"], "Audit driver changed during execution"
+        if args.checkpoint_prefix:
+            selected = {m for batch in execution_batches for m in batch['modules']}
+            batch_records(output, execution_batches, required=True)
+            compiler_records(output, {m: modules[m] for m in selected}, required=True)
+            assert report['built'] == [m for m in order if m in selected]
+            assert file_digest(full_plan_path) == report['lake_batch_plan_sha256']
+            assert file_digest(plan_path) == report['execution_lake_batch_plan_sha256']
+            for m in order:
+                assert file_digest(root / (m.replace('.', '/') + '.lean')) == report['source_sha256'][m]
+            for m in selected:
+                assert file_digest(root / '.lake/build/lib/lean' / (m.replace('.', '/') + '.olean')) == report['compiler_results'][m]['olean_sha256']
+            report['kernel_audit_status'] = 'CHECKPOINT ONLY: dependency-closed prefix compiled; full closure and endpoints INCOMPLETE'
+            save()
+            validate_checkpoint_prefix(output, root, report)
+            return
         batch_records(output, batches, required=True)
         records = compiler_records(output, modules, required=True)
         report["compiler_resource_summary"] = resource_summary(records, jobs)
-        assert file_digest(plan_path) == report["lake_batch_plan_sha256"], "Lake batch plan changed"
+        assert file_digest(full_plan_path) == report["lake_batch_plan_sha256"], "Full Lake batch plan changed"
+        assert file_digest(plan_path) == report["execution_lake_batch_plan_sha256"], "Execution Lake batch plan changed"
         assert report["built"] == order, "Incomplete source closure"
         for m in order:
             assert hashlib.sha256((root / (m.replace('.', '/') + '.lean')).read_bytes()).hexdigest() == report["source_sha256"][m]

@@ -23,6 +23,7 @@ structure HamiltonBatch where
 
 structure HamiltonPlan where
   batches : Array HamiltonBatch
+  startBatch : Nat := 0
   deriving FromJson
 
 private def writeJsonAtomic (path : FilePath) (value : Json) : IO Unit := do
@@ -55,7 +56,7 @@ private def batchTargets (batch : HamiltonBatch) (jobs : Nat) : IO (Array String
 private def runBatches
     (ws : Workspace) (plan : HamiltonPlan) (evidence : FilePath) (jobs : Nat)
     : FetchM Unit := do
-  let mut batchNumber := 0
+  let mut batchNumber := plan.startBatch
   for batch in plan.batches do
     batchNumber := batchNumber + 1
     let targets ← batchTargets batch jobs
