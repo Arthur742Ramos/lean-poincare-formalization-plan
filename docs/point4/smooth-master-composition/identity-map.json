@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "644a70f5fe3bc7fea6906a1f4090ce0e11e80ae5",
-      "final_sha256": "8de566ca28cfd6ea7b005c5289a5b96bbd579cbe1260de58586c01f7c50800bd",
+      "final_blob": "d027095e52a74699bfa011a358dda7cb5ab3a246",
+      "final_sha256": "61b3dfc20fb0e7c1b80d41f0ed3739a070b1d4ef58af4ebf1928a483ec83b691",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "0ff31a98388c91b690d216d126927498dc09ceac",
-      "final_sha256": "f52b0731d2cb46247ac6f0cbee7945ca9436a35c770cafe5d8488d0a9f53e499",
+      "final_blob": "611c856d380fd536c3da501d9d27614361102c36",
+      "final_sha256": "5bc8f802e6095d3859f380184d07f4e7b3526ddf275c2b957086be6d9a07bfae",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "669b13ac9504dd37f1874efb4501c782bb5e9554",
-      "final_sha256": "1fb64ae5ec8b0dfd633038c4eb2bd4cfcb43803c78a12c3038765260e88e00fa",
+      "final_blob": "0def256ec184684b3593022f1c7f7b0200bcb743",
+      "final_sha256": "ccfd50efc4b77525f48844cfd747eb6e99a7f752c945c33cd089eacb982e9e5c",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "0833952819d2487f1de51fa0b29923e25f89bfee",
-      "final_sha256": "648284a4683750969cb34d9c711beb500d881c7356f8f395e7bb0899d9bfb034",
+      "final_blob": "0e6845574e55d9ef7ad64adda0825ee6bd4cd5c3",
+      "final_sha256": "c3ffd52a917bafc28bc98105a98830d4340d888f94bb2d928f8d9799a78b0da5",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "474d33643409bc789a6ab4d9c60540d458b79ee9",
-      "final_sha256": "efe30dd2346ab116a47c43b7993dfe594a06fa2ba793f482237d1d02480e0aac",
+      "final_blob": "4148ab27223e2e40118dbd748d7d901c31a3c9f3",
+      "final_sha256": "633285abc716f8ddca2dcc3ee7e1de8106d2908a91230298d56c449b10a4c4df",
       "mode": "100644",
       "count": 1
     }
@@ -29339,7 +29339,7 @@
     ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean": [
       "100644",
-      "98ae6aa70d5f55a3aabbd9fc305aed4deb86ecef"
+      "b69446ce680472cd54d6fd5c387ba66e5b41551f"
     ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0GaussianEndpoint.lean": [
       "100644",
@@ -30983,11 +30983,11 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "9f6b11c7a2dfbc3dbb6b8087756c0e6fecf58a2f"
+      "320de8c4a7025419571ae43b5f97c9ab991017e1"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
-      "c09432587170bbc5d46a4488d335ff7eabdd39f2"
+      "14985a9f739f97affb31bfd33b6d8c27838c481d"
     ],
     "curvature/scripts/fake-landrun.sh": [
       "100755",
@@ -31007,7 +31007,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "eb7d3fad749eb1222c8520bb223311863bb5bcb1"
+      "83c6373c42a273608b13028413b0dee3ab318fa7"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31015,7 +31015,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "6b99abff83b7fce7a2275e8a3f88f1bc8d8d34b3"
+      "2b2af32325031214e0784ea711b2373c4ccb21bb"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31039,15 +31039,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "644a70f5fe3bc7fea6906a1f4090ce0e11e80ae5"
+      "d027095e52a74699bfa011a358dda7cb5ab3a246"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "1e9492281c7fe9896854c62efb50d3595392a39a"
+      "6a57093d94b17b33083a3ef44b8e413f3ed25ff6"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "44b4b339190d824eb409c351172ef656acc1b493"
+      "43917d1c9c73a59ae7cd8172e0ca9f70b7cf3f3f"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31107,11 +31107,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "ffae76fb3aa2b5077361bae20f21b84cda1dc10b"
+      "2782d2f868d5da371cebaea35c210d5354519082"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "03397373988ae7a3455df20b4fbb1bc1ffbb267f"
+      "cede8e77107561c3f8c37edf1390f3e81626c92c"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31155,7 +31155,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "0ff31a98388c91b690d216d126927498dc09ceac"
+      "611c856d380fd536c3da501d9d27614361102c36"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31191,19 +31191,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "669b13ac9504dd37f1874efb4501c782bb5e9554"
+      "0def256ec184684b3593022f1c7f7b0200bcb743"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "0833952819d2487f1de51fa0b29923e25f89bfee"
+      "0e6845574e55d9ef7ad64adda0825ee6bd4cd5c3"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "9cc6222b735d42cd7953b19b31b8e87eab6224b2"
+      "eb38ada168bb6b87835cf757b652e6f09e9ef2b5"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "800bca222829e5a32afdb7507e446f41107c5acd"
+      "f00c1b49fe58efa74badce0669fb7698f439a311"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -31215,7 +31215,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "2799074ab006f434e1b3ef5154be23cc4450f6dc"
+      "d2418fbc21971be7b4354d9521c002c6cde2a18b"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31223,7 +31223,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "6e61931a91b46701ae330afcfaa71e96ed6478c3"
+      "6586958a3f6e65cede52ea1ef2f774c0560885c9"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31235,7 +31235,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "474d33643409bc789a6ab4d9c60540d458b79ee9"
+      "4148ab27223e2e40118dbd748d7d901c31a3c9f3"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -31251,7 +31251,7 @@
     ],
     "curvature/scripts/test_chart_port_ci.py": [
       "100644",
-      "677ad9149d1cb4c928365d23ac7a2ddf903c2868"
+      "a5f897d5efb461eddfbdbe2a0e0a8e7fb2f5f20f"
     ],
     "curvature/scripts/verify-comparator.sh": [
       "100755",
@@ -81204,8 +81204,8 @@
     "endpoint_API_proof_transform": {
       "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean",
       "original_sha256": "474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f",
-      "current_sha256": "49a3e72d38f45502eeb7525cb061c41f75320c9c85bfb7c929788d6f04b1a6b9",
-      "finite_edits_sha256": "0905ab9b7a5ec578ea852e52c263735a1fb67b5cd797aa9090e48272aaa29d03",
+      "current_sha256": "c887086ba419713560be58da93872c5d1bdc1ac07e8bd1e6a1c90ecc460a7f9a",
+      "finite_edits_sha256": "53ad96e032a8032f557c2c0e9934b883c424917396b6ac30fb5babdedeaa7f15",
       "declaration_headers_byte_identical": true,
       "native_qualification": "UNRUN"
     }

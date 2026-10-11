@@ -2255,9 +2255,9 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                     expected=dict(reference['UNIT_FILE_SHA256'])
                     if number==134:
                         self.assertEqual(expected['curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean'],'474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f')
-                        expected['curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean']='49a3e72d38f45502eeb7525cb061c41f75320c9c85bfb7c929788d6f04b1a6b9'
+                        expected['curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean']='c887086ba419713560be58da93872c5d1bdc1ac07e8bd1e6a1c90ecc460a7f9a'
                         raw=(comp.ROOT/'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean').read_bytes()
-                        self.assertEqual(comp.sha256(raw),'49a3e72d38f45502eeb7525cb061c41f75320c9c85bfb7c929788d6f04b1a6b9')
+                        self.assertEqual(comp.sha256(raw),'c887086ba419713560be58da93872c5d1bdc1ac07e8bd1e6a1c90ecc460a7f9a')
                         self.assertEqual(module.check_unit_blob.__code__,reference['check_unit_blob'].__code__)
                         module.check_unit_blob('curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean',raw)
                         old_raw=comp.git('show',head+':'+'curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean')

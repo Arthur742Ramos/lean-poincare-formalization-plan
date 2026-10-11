@@ -74,8 +74,10 @@ lemma continuousOn_velocityComponent
     (I := I) (e := trivialization (I := I) p) (n := (2 : ℕ∞ω)) b k).continuousOn
   have h := v.continuous.continuousOn.clm_bundle_apply₂ hj hk
   have hprod := (Bundle.Trivial.homeomorphProd M ℝ).continuous.comp_continuousOn h
-  simpa only [Function.comp_apply, velocityComponent, frame, Bundle.Trivial.homeomorphProd_apply,
-    TotalSpace.toProd] using hprod.snd
+  refine hprod.snd.congr ?_
+  intro x hx
+  simp only [Function.comp_apply, velocityComponent, frame, Bundle.Trivial.homeomorphProd_apply,
+    TotalSpace.toProd]
 
 def velocityCoordinates (v : ContinuousSymmetricVelocity (I := I) (M := M))
     (p : M) (b : Module.Basis (Fin d) ℝ E) (j k : Fin d) (z : Fin d → ℝ) : ℝ :=
@@ -282,7 +284,7 @@ lemma contMDiff_two_gaussianTensor
       (isOpen_preferredAnalysisDomain I (F := E) (V := TM) (i : M))
       inter_subset_right ((C.partition i).contMDiff.of_le (by
         change ((2 : ℕ∞) : ℕ∞ω) ≤ ((⊤ : ℕ∞) : ℕ∞ω)
-        exact WithTop.coe_le_coe.mpr le_top)))
+        exact WithTop.coe_le_coe.mpr le_top))
       (C.pieces_subset_preferredAnalysisDomain i)
       (contMDiffOn_gaussianMatrixOnManifold v C b i hh)
   simpa only [gaussianTensor] using
@@ -384,8 +386,10 @@ lemma continuousAt_gaussianTensor_component_zero
       (chartCoordinate (I := I) (i : M) b x)
     have heval := (cutoffLocalTensorEvaluationSynthesisAt
       (C.trivialization i) b (C.partition i) x u w).continuous.continuousAt.comp hq
-    simpa only [Function.comp_apply, cutoffLocalTensorEvaluationSynthesisAt_apply,
-      gaussianMatrixOnManifold, cutoffLocalTensorOfMatrix, localTensorOfMatrix] using heval
+    refine heval.congr (Filter.Eventually.of_forall ?_)
+    intro h
+    simp only [Function.comp_apply, cutoffLocalTensorEvaluationSynthesisAt_apply,
+      gaussianMatrixOnManifold, cutoffLocalTensorOfMatrix, localTensorOfMatrix]
   simpa only [ContinuousAt, gaussianTensor, _root_.sum_apply] using
     (tendsto_finsetSum Finset.univ fun i _ => hi i)
 

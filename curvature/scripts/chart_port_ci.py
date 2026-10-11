@@ -83,6 +83,42 @@ def owned_process_identity(p, initial_stat):
     row['rechecked_at'] = time.time()
     return row
 
+def pinned_compiler_environment(env, official):
+    # Nested Cache initializers invoke bare `lean --print-prefix`. Select the
+    # authenticated official image without relaxing owned-process predicates.
+    import stat
+    assert type(env) is dict and all(type(k) is str and type(v) is str for k, v in env.items())
+    assert official['compiler_commit'] == 'd8b18978322de05a8f3dba51ef03cf5461676c17', 'Official compiler commit drift'
+    path = Path(official['compiler_path'])
+    assert path.is_absolute() and path.resolve(strict=True) == path, 'Official compiler path must be resolved'
+    def authenticate_ancestors():
+        for parent in path.parents:
+            assert not parent.is_symlink() and stat.S_ISDIR(parent.lstat().st_mode), 'Official compiler directory link/kind drift'
+    authenticate_ancestors()
+    before = path.lstat()
+    assert not path.is_symlink() and stat.S_ISREG(before.st_mode), 'Official compiler must be a regular nonlink file'
+    assert os.access(path, os.X_OK), 'Official compiler is not executable'
+    def identity(value):
+        return (value.st_dev, value.st_ino, value.st_mode, value.st_size, value.st_mtime_ns, value.st_ctime_ns)
+    def same_object(value):
+        # Path and handle stat APIs can represent Windows execute bits and
+        # creation/change time differently. Cross-bind the real inode/image;
+        # retain full mode and change-time seals independently within each API.
+        return (value.st_dev, value.st_ino, stat.S_IFMT(value.st_mode), value.st_size, value.st_mtime_ns)
+    with path.open('rb') as stream:
+        opened = os.fstat(stream.fileno())
+        assert same_object(opened) == same_object(before), 'Official compiler open identity drift'
+        data = stream.read()
+        assert identity(os.fstat(stream.fileno())) == identity(opened), 'Official compiler read identity drift'
+    assert digest(data) == official['compiler_sha256'], 'Official compiler image digest drift'
+    assert identity(path.lstat()) == identity(before) and not path.is_symlink(), 'Official compiler identity POST drift'
+    authenticate_ancestors()
+    result = dict(env)
+    previous = result.get('PATH', '')
+    result['PATH'] = str(path.parent) + (os.pathsep + previous if previous else '')
+    return result
+
+
 def pinned_cache_query_context(mathlib, roots):
     # These exact pinned sources execute Cache.IO's leantar prefix initializer.
     source, initializer = mathlib / 'Cache/Main.lean', mathlib / 'Cache/IO.lean'
@@ -330,6 +366,7 @@ try:
     env['MATHLIB_CACHE_DIR'] = str(EVIDENCE / 'ordinary-mathlib-downloads')
     env_raw = run(['lake', 'env', 'python3', '-c', 'import json,os;print(json.dumps({k:os.environ.get(k, "") for k in ("LEAN_PATH", "LEAN_SRC_PATH")}))'], 'lake-environment', env=env)
     env.update(json.loads(env_raw))
+    env = pinned_compiler_environment(env, receipt)
     mathlib = PKG / '.lake/packages/mathlib'
     actual_pin = subprocess.check_output(['git', '--no-replace-objects', '-C', str(mathlib), 'rev-parse', 'HEAD']).decode().strip()
     assert actual_pin == 'db584cd6d46c92f209a44c0f1c829460d327499d'

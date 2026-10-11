@@ -135,6 +135,7 @@ class DriverControls(unittest.TestCase):
                     sched_setaffinity=lambda _, cpus: trace['affinity'].append(cpus), environ={}, pathsep=os.pathsep),
                 subprocess=types.SimpleNamespace(check_output=git), run=run, digest=digest, admit=admit,
                 tree_entries=lambda *args: {}, package_root_relationships=roots,
+                pinned_compiler_environment=lambda env,official: dict(env, PATH=str(Path(official['compiler_path']).parent)),
                 pinned_cache_query_context=lambda mathlib,names: dict(finite_synthetic_source_context=True,
                     package_root=str(mathlib),admitted_roots=list(names)),
                 materialize_pinned_mathlib_cache=lambda *args: dict(finite_synthetic_copy=True),
@@ -1739,6 +1740,91 @@ class PackageRootResolutionTests(unittest.TestCase):
                 self.assertFalse(artifact_status('Mathlib.Fixture',[first,second],b'module\n')['ready'])
                 p.write_bytes(b'fixture')
             self.assertTrue(artifact_status('Mathlib.Fixture',[first,second],b'module\n')['ready'])
+
+def function_source(name):
+    return ast.get_source_segment(SOURCE, next(n for n in TREE.body if isinstance(n, ast.FunctionDef) and n.name == name))
+
+
+class OfficialCompilerPathPrecedenceControls(unittest.TestCase):
+    def helper(self):
+        return function('pinned_compiler_environment', dict(Path=Path, os=os, stat=stat, digest=digest))
+
+    def fixture(self, root):
+        binary = root / 'official/bin' / ('lean.exe' if os.name == 'nt' else 'lean')
+        binary.parent.mkdir(parents=True)
+        binary.write_bytes(b'finite authenticated compiler-image fixture; never executed')
+        binary.chmod(0o755)
+        return binary, dict(compiler_path=str(binary), compiler_sha256=digest(binary.read_bytes()), compiler_commit=COMMIT)
+
+    def test_official_directory_precedes_fake_launcher_without_mutating_environment(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve();binary,official=self.fixture(root)
+            fake=root/'earlier-launcher';fake.mkdir();launcher=fake/binary.name
+            launcher.write_bytes(b'foreign launcher fixture; never executed');launcher.chmod(0o755)
+            original={'PATH':str(fake), 'LEAN_PATH':'pinned-companions', 'LEAN_SRC_PATH':'pinned-sources', 'UNCHANGED':'value'}
+            before=dict(original)
+            self.assertEqual(Path(shutil.which(binary.name,path=original['PATH'])),launcher)
+            self.assertEqual(Path(shutil.which('lean',path=original['PATH'])),launcher)
+            changed=self.helper()(original,official)
+            self.assertEqual(original,before);self.assertIsNot(changed,original)
+            self.assertEqual(changed['PATH'],str(binary.parent)+os.pathsep+str(fake))
+            self.assertEqual(Path(shutil.which(binary.name,path=changed['PATH'])),binary)
+            self.assertEqual(Path(shutil.which('lean',path=changed['PATH'])),binary)
+            self.assertEqual({k:v for k,v in changed.items() if k!='PATH'},{k:v for k,v in before.items() if k!='PATH'})
+            for empty in ({},{'PATH':''}):
+                self.assertEqual(self.helper()(empty,official)['PATH'],str(binary.parent))
+
+    def test_wrong_stale_missing_nonregular_and_linked_compiler_fail_closed(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve();binary,official=self.fixture(root);helper=self.helper()
+            for key,value in (('compiler_commit','wrong'),('compiler_sha256','0'*64),('compiler_path',str(root/'missing')),
+                              ('compiler_path',str(binary.parent)),('compiler_path','relative/lean')):
+                altered=dict(official);altered[key]=value
+                with self.subTest(key=key,value=value),self.assertRaises((AssertionError,OSError)):
+                    helper({'PATH':'unchanged'},altered)
+            raw=binary.read_bytes();binary.write_bytes(raw+b'!')
+            with self.assertRaisesRegex(AssertionError,'digest drift'):helper({},official)
+            binary.write_bytes(raw)
+            real=Path.is_symlink
+            for linked in (binary,binary.parent):
+                # Portable predicate fixture, not a claim that Windows creates
+                # or executes genuine Unix aliases.
+                with patch.object(Path,'is_symlink',lambda p: p==linked or real(p)):
+                    with self.assertRaisesRegex(AssertionError,'link'):helper({},official)
+            with patch.object(os,'access',return_value=False):
+                with self.assertRaisesRegex(AssertionError,'not executable'):helper({},official)
+
+    def test_existing_query_and_monitor_still_reject_races_foreign_images_and_second_compilers(self):
+        checks=OwnedProcessIdentityAndPrefixQuery()
+        query,owner,official=checks.rows()
+        self.assertTrue(checks.classify(query,owner,official))
+        for field,value in (('stable',False),('exe','/foreign/lean'),('exe_sha256','0'*64),('ppid',999),
+                            ('session',999),('argv',list(checks.stage_argv))):
+            bad=dict(query);bad[field]=value
+            self.assertFalse(checks.classify(bad,owner,official),field)
+        for options in (dict(child_argv=list(checks.stage_argv)),dict(exe_race=True),dict(reverse_exe_race=True),
+                        dict(race=True),dict(disappear=True),dict(unknown=True)):
+            with self.subTest(options=options):
+                stage,events,failure=checks.exercise(**options)
+                self.assertIsInstance(failure,RuntimeError)
+                self.assertEqual(stage['owned_process_snapshot']['counted_compilers'],2)
+                self.assertTrue(stage['owner_reaped']);self.assertEqual(stage['remaining_session_pids'],[])
+                self.assertEqual(events,[('kill',100,9),('wait',10)])
+
+    def test_production_environment_is_selected_before_all_owned_bootstrap_and_native_descendants(self):
+        owner=next(n for n in TREE.body if isinstance(n,ast.Try))
+        calls=[(i,n) for i,n in enumerate(owner.body) if isinstance(n,ast.Assign)
+               and isinstance(n.value,ast.Call) and isinstance(n.value.func,ast.Name) and n.value.func.id=='pinned_compiler_environment']
+        self.assertEqual(len(calls),1);index,node=calls[0]
+        self.assertEqual(ast.dump(node,include_attributes=False),ast.dump(ast.parse('env = pinned_compiler_environment(env, receipt)').body[0],include_attributes=False))
+        self.assertTrue(any(isinstance(n,ast.Expr) and isinstance(n.value,ast.Call)
+            and isinstance(n.value.func,ast.Attribute) and isinstance(n.value.func.value,ast.Name)
+            and n.value.func.value.id=='env' and n.value.func.attr=='update' for n in owner.body[:index]))
+        for n in owner.body[:index]:
+            self.assertFalse(any(isinstance(k,ast.Name) and k.id in ('bootstrap_visit','serial_compile','compiler_run') for k in ast.walk(n)))
+        self.assertIn("if compilers > 1:",function_source('run'))
+        self.assertIn("if not process['stable'] or process['errors']",function_source('is_exact_official_prefix_query'))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
