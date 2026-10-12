@@ -1321,7 +1321,10 @@ class FixedBackgroundCompositionTests(unittest.TestCase):
                 self.assertEqual(changes[path], reader(comp.FIXED_SOURCE, path))
                 self.assertEqual(expected[path], trees[comp.FIXED_SOURCE][path])
             self.assertEqual(comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()), comp.tensor_map_record(expected, originals, changes))
-            unchanged = set(trees[FIXED_PARENT_PIN]) - comp.EDITED - comp.NEW - comp.FIXED_ROOTS - comp.TENSOR_PATHS - set(comp.CURVATURE_SELECTED)
+            unchanged = set(trees[FIXED_PARENT_PIN]) - comp.EDITED - comp.NEW - comp.FIXED_ROOTS - comp.TENSOR_PATHS - set(comp.CURVATURE_SELECTED) - {comp.CURVATURE_LEVI_PATH}
+            levi_original=comp.curvature_levi_original_source()
+            self.assertEqual(trees[FIXED_PARENT_PIN][comp.CURVATURE_LEVI_PATH],('100644',comp.blob_id(levi_original)))
+            self.assertEqual(expected[comp.CURVATURE_LEVI_PATH],('100644',comp.blob_id(comp.curvature_levi_current_source(levi_original))))
             self.assertTrue(all((expected[p] == trees[FIXED_PARENT_PIN][p] for p in unchanged)))
 
     def test_all_four_exact_transforms_and_inverses(self):
@@ -2251,6 +2254,18 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                 exec(compile(raw,str(comp.ROOT/path),'exec',dont_inherit=True),reference)
                 name='admit' if number==138 else 'main'
                 self.assertEqual(getattr(module,name).__wrapped__.__code__,reference[name].__code__)
+                if number==138:
+                    original=comp.curvature_levi_original_source()
+                    current=(comp.ROOT/comp.CURVATURE_LEVI_PATH).read_bytes()
+                    self.assertEqual(comp.sha256(original),comp.CURVATURE_LEVI_ORIGINAL_SHA256)
+                    self.assertEqual(comp.sha256(current),comp.CURVATURE_LEVI_CURRENT_SHA256)
+                    self.assertEqual(comp.curvature_levi_current_source(original),current)
+                    historical=json.loads((comp.ROOT/comp.CURVATURE_LEVI_PROVENANCE_PATH).read_bytes())
+                    row,=[r for r in historical['inherited_sources'] if r['path']==comp.CURVATURE_LEVI_PATH]
+                    self.assertEqual(row['public_base_sha256'],comp.sha256(original))
+                    self.assertFalse(row['literal_local_blob_matches_base'])
+                    for bad in (original[:-1],original+original,original+b'extra-record',current):
+                        with self.assertRaises(AssertionError):comp.curvature_levi_current_source(bad)
                 if number in (132,134,111):
                     expected=dict(reference['UNIT_FILE_SHA256'])
                     if number==134:
@@ -2271,7 +2286,7 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                         historical=comp.git('show',head+':'+compact_path)
                         self.assertEqual(comp.sha256(historical),expected[compact_path])
                         self.assertEqual(comp.curvature_hosted_repair_source(compact_path,historical),current)
-                        expected[compact_path]='65c5db90edc42787d886e73f5c812723b4f74381206da78c9d88ecfce4d40505'
+                        expected[compact_path]='7aac8375e02dd947727eec216823019934c91462c1a0830a7477a531416159d9'
                         self.assertEqual(comp.sha256(current),expected[compact_path])
                         module.check_unit_blob(compact_path,current)
                         for bad in (historical,current[:-1],current+current):
@@ -2336,6 +2351,17 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                     finally:
                         namespace['UNIT_FILE_SHA256']=unit
                         unit.clear();unit.update(saved)
+                if number==138:
+                    source=comp.curvature_levi_original_source()
+                    saved=comp.CURVATURE_LEVI_SOURCE_EDITS
+                    try:
+                        for mutation in ('missing','extra','duplicate','changed'):
+                            if mutation=='missing':comp.CURVATURE_LEVI_SOURCE_EDITS=()
+                            elif mutation=='extra':comp.CURVATURE_LEVI_SOURCE_EDITS=saved+(('foreign','extra'),)
+                            elif mutation=='duplicate':comp.CURVATURE_LEVI_SOURCE_EDITS=saved+saved
+                            else:comp.CURVATURE_LEVI_SOURCE_EDITS=((saved[0][0],saved[0][1]+'# drift'),)
+                            with self.assertRaises(AssertionError):comp.curvature_levi_current_source(source)
+                    finally:comp.CURVATURE_LEVI_SOURCE_EDITS=saved
                 if number==111:
                     for key in ('REVIEWED_FILE_SHA256','UNIT_FILE_SHA256'):
                         unit=namespace[key];saved=dict(unit)
