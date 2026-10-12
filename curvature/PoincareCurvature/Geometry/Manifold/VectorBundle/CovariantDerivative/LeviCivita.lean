@@ -1125,9 +1125,10 @@ noncomputable def correctionFunctional (cov : CovariantDerivative I E TM) (x : M
     correctionFunctional cov x v u w =
       (cov.metricDefect x v w u + cov.metricDefect x u w v - cov.metricDefect x u v w -
           ⟪cov.torsion x u v, w⟫ + ⟪cov.torsion x v w, u⟫ - ⟪cov.torsion x w u, v⟫) / 2 := by
-  simp [correctionFunctional, swapFirstTwoMap, reverseArgs, flipLastTwo,
-    torsionInnerFunctional_apply, ContinuousLinearMap.comp_apply, sub_eq_add_neg,
-    smul_eq_mul, div_eq_mul_inv] <;> ring
+  change (1 / 2 : ℝ) * (cov.metricDefect x v w u + cov.metricDefect x u w v - cov.metricDefect x u v w -
+          torsionInnerFunctional (I := I) cov x u v w + torsionInnerFunctional (I := I) cov x v w u - torsionInnerFunctional (I := I) cov x w u v) = _
+  simp only [torsionInnerFunctional_apply]
+  ring
 
 noncomputable def continuousDualBasis {ι : Type*} (b : Module.Basis ι ℝ E) :
     Module.Basis ι ℝ (E →L[ℝ] ℝ) := by
