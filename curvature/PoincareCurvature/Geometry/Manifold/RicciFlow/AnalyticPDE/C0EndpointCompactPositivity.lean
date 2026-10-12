@@ -181,7 +181,7 @@ lemma exists_uniform_pos_ball_any {X : Type*} [TopologicalSpace X] [CompactSpace
 lemma exists_piece_positivity_radius
     (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
     (C : Cover) (b : Module.Basis (Fin d) ℝ E) (i : C.Index) :
-    ∃ ε > 0, ∀ q : (C.pieces i : Set M) → BilE,
+    ∃ ε > 0, ∀ q : ↥(C.pieces i : Set M) → BilE,
       (∀ x, ‖q x - metricModelForm g₀ (i : M) b x‖ < ε) →
       ∀ x (w : E), w ≠ 0 → 0 < q x w w := by
   letI : CompactSpace (C.pieces i : Set M) :=
