@@ -2092,8 +2092,17 @@ class TensorCompositionTests(unittest.TestCase):
             self.assertEqual(verify.call_count,2)
         inherited=captured[0]
         self.assertEqual(len(inherited),1686)
-        path=next(p for p in inherited if p in comp.TENSOR_PATHS-comp.TENSOR_RETAINED)
-        for action in ('missing','extra','predecessor','provenance','final-mode','final-blob','current-bytes'):
+        levi=comp.CURVATURE_LEVI_PATH
+        historical=comp.curvature_levi_original_source()
+        self.assertEqual(inherited[levi],(weighted.BASE,historical))
+        current=comp.curvature_levi_current_source(historical)
+        adapted=original(weighted.__dict__,inherited,expected)
+        self.assertEqual(adapted[levi],('current-curvature-exact-proof-composition',current))
+        self.assertEqual(expected[levi],('100644',comp.blob_id(current)))
+        self.assertEqual((comp.ROOT/levi).read_bytes(),current)
+        tensor=next(p for p in inherited if p in comp.TENSOR_PATHS-comp.TENSOR_RETAINED)
+        for path,action in ((p,a) for p in (tensor,levi) for a in
+                            ('missing','extra','predecessor','provenance','final-mode','final-blob','current-bytes')):
             rows=dict(inherited);final=dict(expected)
             if action=='missing':rows.pop(path)
             elif action=='extra':rows['unreviewed.lean']=('unreviewed',b'')
@@ -2110,6 +2119,11 @@ class TensorCompositionTests(unittest.TestCase):
                     with self.assertRaises(AssertionError):original(weighted.__dict__,rows,final)
             else:
                 with self.assertRaises(AssertionError):original(weighted.__dict__,rows,final)
+        for bad in (historical[:-1],historical+historical,historical+b'extra-record',current):
+            with patch.object(comp,'curvature_levi_original_source',return_value=bad):
+                with self.assertRaises(AssertionError):original(weighted.__dict__,inherited,expected)
+        self.assertIsNone(comp._owner)
+        self.assertEqual(comp._depth,0)
         # Verify that a mutation detected after the original body cannot return
         # a success report. This sequence shares the actual positive route above.
         with patch.object(comp,'verify_current',side_effect=[expected,AssertionError('POST input mutation')]), \
