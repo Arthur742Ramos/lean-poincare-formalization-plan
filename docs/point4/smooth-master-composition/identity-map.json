@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "2b75818c1b0eec1f9d68c7dce2626cb778b7c7af",
-      "final_sha256": "157d012fa508dd4e23cf75eaeed349a20e273da5044ed9003fffb93ec69cd960",
+      "final_blob": "c98b1aef74956b6b5747d9812bb3e2767283575b",
+      "final_sha256": "51d9e3fce252c51961b881727442896cc05b0cd5959d2d9474dd53524ead576d",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "30c0511220b7366d3170dcfca79deb0d01284679",
-      "final_sha256": "79aae1dc794551daffb1dfb2ef3794e147633936ba46e6ad172492933ff8bf10",
+      "final_blob": "ac4820c6dfbef2ce0a09e3f064d87744648061e8",
+      "final_sha256": "bd6e361c9aa0da2efdb37d627abf0785e64b01bcee03a7537b9e854935612b08",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "207979d20e251ad339fb234fb83e622bab60db31",
-      "final_sha256": "abce1ac3f7291ba911e50a2d45b0676e6a339b1caab63c6a4c64fff78b3341cc",
+      "final_blob": "ac1c5e2ed719cb2e8970cd722d57537ee6bfc86c",
+      "final_sha256": "818cf1529ddc2e5444f2263e8ebc13437723dad165c498ebec37e1bfab9e3b26",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "874130a553e207ac63f25443438258c7cc6ca22a",
-      "final_sha256": "073039ca5c9f464f3256c99f0be5a349254aa51114a6255ba84f73d2c329f254",
+      "final_blob": "e8796358f52bb32d876f88f25fa371f1eba12325",
+      "final_sha256": "2a4a1ae7a26aabd4161084a48be00772e59de291e5a65662ba91a9bdf787b2eb",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "6c2c6237ce170da85e5f7a3310a8c3e6f5a7be10",
-      "final_sha256": "7e9ad500a1fde26d5dff862397046df8a6442ff466f752157fd1aaa72dc89266",
+      "final_blob": "c13e2706a779babf79e254d8b49592f63b522270",
+      "final_sha256": "8191d9e6d2ca9e0e51ae374a07163c57842878c971f24280816458702935f88d",
       "mode": "100644",
       "count": 1
     }
@@ -27163,7 +27163,7 @@
     ],
     ".github/workflows/point4-initial-ricci-and-heat.yml": [
       "100644",
-      "ffaec5b5d4175cb8dda4ca262885ec6edb17a8d5"
+      "629dcf28625342781eb1ff3a04501b6c211299c4"
     ],
     ".github/workflows/point4-linear-heat-geometry.yml": [
       "100644",
@@ -30999,7 +30999,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "de208a761bd887fa37c802df6ad235f4ca6ade33"
+      "eddc726f684410c41dcad59f24f3b8a0416b6fb8"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31023,7 +31023,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "821dc138bab8d092135ea7efa194f46ccc93ce1e"
+      "ba483db68815e36c7a79fa3bf44bfafe3b2e1209"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31031,7 +31031,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "d48be480ece87ff6b10a88f3d3242cd13540ff6e"
+      "f8e2c63da85ec69683bbb8eedcc1925f4787da64"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31055,15 +31055,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "2b75818c1b0eec1f9d68c7dce2626cb778b7c7af"
+      "c98b1aef74956b6b5747d9812bb3e2767283575b"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "cce18b6c5d4fa01971e627aee41ea943ac6f3be1"
+      "379c962570526c45b3817f6ac89047e75e7b67af"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "ecf49b00d49c6232a7968dcbb5297cc49080df70"
+      "e776c368056215acd6252f0c24c0c9c242ae4718"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31123,11 +31123,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "1a50b99415ba2a5e3aa29d13c2ada4bae2c4179b"
+      "905dee9215491832862de145afb73630a0b0aeb3"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "0c3eb22291d23215f9902b953ad16453ba6fdecb"
+      "858b7f902554cac6ce0b51beef90f9db362955ee"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31179,7 +31179,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "30c0511220b7366d3170dcfca79deb0d01284679"
+      "ac4820c6dfbef2ce0a09e3f064d87744648061e8"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31215,15 +31215,15 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "207979d20e251ad339fb234fb83e622bab60db31"
+      "ac1c5e2ed719cb2e8970cd722d57537ee6bfc86c"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "874130a553e207ac63f25443438258c7cc6ca22a"
+      "e8796358f52bb32d876f88f25fa371f1eba12325"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "00bd7c73e7fa4b01718af480edf0c4eab4c3a564"
+      "e40d2ba3f8cee27cb1c0b3e1891e1bfd268d94b2"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
@@ -31243,7 +31243,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "3dd8cfdda0dcca8331df5814c56bfb31fa6c4366"
+      "86026481f9e08cc135b28ee501f6922215b4e84a"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31251,7 +31251,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "cab58b59b7a218f9af1d7a9930b4c31ea4f3cdcb"
+      "1444a0f63a5bbcb3862c19105ac4762da4067280"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31263,7 +31263,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "6c2c6237ce170da85e5f7a3310a8c3e6f5a7be10"
+      "c13e2706a779babf79e254d8b49592f63b522270"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -81242,8 +81242,8 @@
       "additions": {
         ".github/workflows/point4-initial-ricci-and-heat.yml": {
           "mode": "100644",
-          "sha256": "03b0de4709da3f2da163163ec1c93c2d9983d74f4e109c6e1c95801d7a170801",
-          "blob": "ffaec5b5d4175cb8dda4ca262885ec6edb17a8d5",
+          "sha256": "528fa62df9572bf507700c29afb11cf63ee40d1fa6004a58eeb2ee66e6369a41",
+          "blob": "629dcf28625342781eb1ff3a04501b6c211299c4",
           "origin": "New focused workflow derived from the existing pinned checkout/toolchain/actions and immutable axiom parser"
         },
         "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C2IntrinsicRicciEndpointThin.lean": {
@@ -81283,7 +81283,7 @@
           "origin": "parallel-c2-thin-intrinsic-ricci-20261013/C2IntrinsicRicciEndpointThinEvidence.lean"
         }
       },
-      "policy_sha256": "21cd6445fc3b05a911e706b845ccd47e7f682594a20e55ea61133e102d789b97",
+      "policy_sha256": "f31a3419f520b62c97d3afe129c8e60f731fdb9d85c746465b3dd1b7fc4bc53e",
       "workflow": ".github/workflows/point4-initial-ricci-and-heat.yml",
       "modules": 3,
       "probe_record_counts": [
