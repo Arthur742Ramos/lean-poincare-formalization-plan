@@ -113,6 +113,7 @@ example (ε B : Fin 0 → ℝ) : ∃ δ > 0, ∀ i : Fin 0, δ * B i < ε i :=
 #print c2C0MetricVelocityRankZeroContext
 #print c2C0MetricVelocityEmptyManifoldContext
 #eval IO.println "C2_C0_METRIC_VELOCITY_TYPES_END"
+set_option pp.universes false
 
 #print axioms RicciFlow.AnalyticPDE.C0Endpoint.gaussianPath_zero
 #print axioms RicciFlow.AnalyticPDE.C0Endpoint.continuousAt_gaussianPath_zero

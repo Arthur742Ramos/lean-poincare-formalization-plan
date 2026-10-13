@@ -2329,7 +2329,7 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                         probe_current=(comp.ROOT/probe_path).read_bytes()
                         self.assertEqual(comp.curvature_public_contract_source(probe_path,probe_historical),probe_current)
                         self.assertEqual(comp.curvature_selected_source(probe_path,digest='0'*64),probe_historical)
-                        expected[probe_path]='9403ba9952638e0a1dd59a3c245b36ee4243cc37363a5b4c20399db0e0c936ad'
+                        expected[probe_path]='96033176eb9cd2fd9b39469b2f6adb9c2d45f9ad11ce4dbeecd47ce835fd11ab'
                         self.assertEqual(comp.sha256(probe_current),expected[probe_path])
                         module.check_unit_blob(probe_path,probe_current)
                         for bad in (probe_historical,probe_current[:-1],probe_current+probe_current):
