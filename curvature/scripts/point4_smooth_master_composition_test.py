@@ -2307,6 +2307,21 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                             with self.assertRaises(AssertionError):module.check_unit_blob(compact_path,bad)
                         for bad in (historical[:-1],historical+historical):
                             with self.assertRaises(AssertionError):comp.curvature_hosted_repair_source(compact_path,bad)
+                    if number==134:
+                        c2_path='curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C2MetricVelocityExtension.lean'
+                        self.assertEqual(expected[c2_path],'0c6c921536d3cade268948431dd254dd7c602cc04f2d8d4aa7365ab6c39793b7')
+                        current=(comp.ROOT/c2_path).read_bytes()
+                        historical=comp.git('show',head+':'+c2_path)
+                        self.assertEqual(comp.sha256(historical),'0c6c921536d3cade268948431dd254dd7c602cc04f2d8d4aa7365ab6c39793b7')
+                        self.assertEqual(comp.curvature_hosted_repair_source(c2_path,historical),current)
+                        self.assertEqual(comp.curvature_selected_source(c2_path,digest='0'*64),historical)
+                        expected[c2_path]='551151dbcf5e8775987bc040b84557b82c8561ef06f3a278171f1ede0a2fb66a'
+                        self.assertEqual(comp.sha256(current),expected[c2_path])
+                        module.check_unit_blob(c2_path,current)
+                        for bad in (historical,current[:-1],current+current,current.replace(b'namespace',b'namespacE',1)):
+                            with self.assertRaises(AssertionError):module.check_unit_blob(c2_path,bad)
+                        for bad in (historical[:-1],historical+historical):
+                            with self.assertRaises(AssertionError):comp.curvature_hosted_repair_source(c2_path,bad)
                     if number==111:
                         reviewed=dict(reference['REVIEWED_FILE_SHA256'])
                         for current_path,original_digest in comp.CURVATURE_HAMILTON_ORIGINAL_SHA256.items():

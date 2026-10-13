@@ -48,7 +48,8 @@ lemma endpointAmplitude_eq_self {δ h : ℝ} (hh : |h| < δ) : endpointAmplitude
 lemma endpointAmplitude_eventually_eq_id {δ : ℝ} (hδ : 0 < δ) :
     endpointAmplitude δ =ᶠ[𝓝 (0 : ℝ)] id := by
   have hb : ∀ᶠ h : ℝ in 𝓝 0, |h| < δ := by
-    simpa only [Metric.mem_ball, Real.dist_eq, sub_zero] using Metric.ball_mem_nhds (0 : ℝ) hδ
+    filter_upwards [Metric.ball_mem_nhds (0 : ℝ) hδ] with h hh
+    simpa only [Metric.mem_ball, Real.dist_eq, sub_zero] using hh
   exact hb.mono fun h hh => endpointAmplitude_eq_self hh
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -77,7 +78,9 @@ def endpointTensor (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
     (C : Cover) (b : Module.Basis (Fin d) ℝ E) {δ : ℝ} (hδ : 0 < δ) :
     endpointTensor g₀ v C b δ 0 = g₀.inner := by
   funext x
-  simp only [endpointTensor, endpointAmplitude_zero hδ, zero_smul, add_zero]
+  ext u w
+  simp only [endpointTensor, endpointAmplitude_zero hδ, ContinuousLinearMap.add_apply,
+    _root_.smul_apply, smul_eq_mul, zero_mul, add_zero]
 
 lemma endpointTensor_symmetric
     (g₀ : Bundle.ContMDiffRiemannianMetric I 2 E TM)
@@ -184,13 +187,14 @@ theorem exists_c2_metricFamily_with_c0_endpoint_velocity
   · intro x u w
     have hcenter := hasDerivAt_endpointTensor_component_zero g₀ v C b hδ x u w
     have hshift : HasDerivAt (fun t : ℝ => t - t₀) 1 t₀ := by
-      simpa only [sub_zero] using (hasDerivAt_id t₀).sub_const t₀
+      simpa only [sub_zero] using! (hasDerivAt_id t₀).sub_const t₀
     have hcenter' : HasDerivAt
         (fun t => endpointTensor g₀ v C b δ (t - t₀) x u w) (v.tensor x u w) t₀ := by
       have hcenterAt : HasDerivAt (fun h => endpointTensor g₀ v C b δ h x u w)
           (v.tensor x u w) (t₀ - t₀) := by
         simpa only [sub_self] using hcenter
-      simpa only [mul_one] using hcenterAt.comp t₀ (h := fun t : ℝ => t - t₀) hshift
+      simpa only [Function.comp_apply, one_smul] using!
+        hcenterAt.scomp t₀ (h := fun t : ℝ => t - t₀) hshift
     simpa only [g, RicciFlow.metricTensor, centeredMetric_inner] using hcenter'
 
 end RicciFlow.AnalyticPDE.C0Endpoint
