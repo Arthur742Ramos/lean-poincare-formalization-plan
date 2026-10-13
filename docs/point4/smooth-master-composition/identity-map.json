@@ -13220,7 +13220,7 @@
     "historical_run": 37181895941,
     "scope": "Independent jet-field heat/reaction closure only; combined-head proof checks UNRUN; both targets OPEN"
   },
-  "paths": 2146,
+  "paths": 2151,
   "canonical_point4": "OPEN",
   "smooth_general_target": "OPEN",
   "localization_mock_route": {
@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "c98b1aef74956b6b5747d9812bb3e2767283575b",
-      "final_sha256": "51d9e3fce252c51961b881727442896cc05b0cd5959d2d9474dd53524ead576d",
+      "final_blob": "f8302b0fac82d6603c9903b358e7e82b921955b1",
+      "final_sha256": "257d31c44dfe8dcd433eacb9df63f11da1625f3c9b2435f932321a7eda1b3fbf",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "ac4820c6dfbef2ce0a09e3f064d87744648061e8",
-      "final_sha256": "bd6e361c9aa0da2efdb37d627abf0785e64b01bcee03a7537b9e854935612b08",
+      "final_blob": "540b9eeff4bc09d695e405cdf4738e21fe37cdca",
+      "final_sha256": "289d23188295e0a88975b1cf134c895004d7caee53db726c28b55fab9931e833",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "ac1c5e2ed719cb2e8970cd722d57537ee6bfc86c",
-      "final_sha256": "818cf1529ddc2e5444f2263e8ebc13437723dad165c498ebec37e1bfab9e3b26",
+      "final_blob": "3ee9024fbe7d384b4e71f56320a8c4862858fb5a",
+      "final_sha256": "6c665a91ef9d1b26dfbb2cb39de33e789d86f518da3ae8c6489d7132d59861e6",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "e8796358f52bb32d876f88f25fa371f1eba12325",
-      "final_sha256": "2a4a1ae7a26aabd4161084a48be00772e59de291e5a65662ba91a9bdf787b2eb",
+      "final_blob": "62f25a24cd33f85771845179fcaad6188cec0149",
+      "final_sha256": "5fb11b4c4921da134ca1948af466b90e21773ace82120ab2fe7a8481d0221171",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "c13e2706a779babf79e254d8b49592f63b522270",
-      "final_sha256": "8191d9e6d2ca9e0e51ae374a07163c57842878c971f24280816458702935f88d",
+      "final_blob": "dd59085866262b98ebbff49a8800139d5b2209ad",
+      "final_sha256": "30d6296f6d76e4b2eb1ab0bc12be87e7878e5f889b0a2def84879f0346865927",
       "mode": "100644",
       "count": 1
     }
@@ -27160,6 +27160,10 @@
     ".github/workflows/point4-hamilton-release-audit.yml": [
       "100644",
       "d01da7fcde04da7f1988ca5076afbe45f59dc89a"
+    ],
+    ".github/workflows/point4-initial-heat-inverse-coefficients.yml": [
+      "100644",
+      "c99fd9d7f14f72b2ca4e7c954b60fc7ecf71fd78"
     ],
     ".github/workflows/point4-initial-ricci-and-heat.yml": [
       "100644",
@@ -29625,6 +29629,14 @@
       "100644",
       "cc7dbcbf9a0947fc8ed1a47e3dcd53031e2f43e7"
     ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InitialMetricHeatInverseControl.lean": [
+      "100644",
+      "271982b43a564a30b04f540e3929a490ab90035f"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InitialMetricHeatInverseFreezing.lean": [
+      "100644",
+      "72caa0969512f34b88a9eacb7943d5ee6f3292b9"
+    ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InterpolationLemma.lean": [
       "100644",
       "fd5afddafbdfb8e23ca6d05a55dfec43c29cb61d"
@@ -30999,7 +31011,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "eddc726f684410c41dcad59f24f3b8a0416b6fb8"
+      "0e5d3ffdc88a09bc11c5a022a237bb24f4dcf408"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31023,7 +31035,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "ba483db68815e36c7a79fa3bf44bfafe3b2e1209"
+      "84fe4ffd1d9f7550de0b798d23221e7e79d9e8c0"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31031,7 +31043,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "f8e2c63da85ec69683bbb8eedcc1925f4787da64"
+      "4cc74579fd87aba61f0f708812e7ee6f2ae632ed"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31055,15 +31067,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "c98b1aef74956b6b5747d9812bb3e2767283575b"
+      "f8302b0fac82d6603c9903b358e7e82b921955b1"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "379c962570526c45b3817f6ac89047e75e7b67af"
+      "193eb55197df8f99773d24e6b47c69cd8d2e5554"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "e776c368056215acd6252f0c24c0c9c242ae4718"
+      "9c44523ffba4d0ac95cf897505c64812ca64ed02"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31123,11 +31135,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "905dee9215491832862de145afb73630a0b0aeb3"
+      "b696cbc627ee78d7f6fecbd054f0e2dad57a40ef"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "858b7f902554cac6ce0b51beef90f9db362955ee"
+      "5f0848425d60a05bed8e1cdd86b0505569aebbc1"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31136,6 +31148,14 @@
     "curvature/scripts/point4_initial_metric_heat_coercivity_probe.lean": [
       "100644",
       "3e5c8c50bdb7dd192664999ff07327f923ca9383"
+    ],
+    "curvature/scripts/point4_initial_metric_heat_inverse_control_probe.lean": [
+      "100644",
+      "073991da8ff6f61979038a31577328e3a905bc75"
+    ],
+    "curvature/scripts/point4_initial_metric_heat_inverse_freezing_probe.lean": [
+      "100644",
+      "2aa70debd3523d4733995656822c4a38351dd138"
     ],
     "curvature/scripts/point4_linear_heat_geometry_mock_test.py": [
       "100644",
@@ -31179,7 +31199,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "ac4820c6dfbef2ce0a09e3f064d87744648061e8"
+      "540b9eeff4bc09d695e405cdf4738e21fe37cdca"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31215,19 +31235,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "ac1c5e2ed719cb2e8970cd722d57537ee6bfc86c"
+      "3ee9024fbe7d384b4e71f56320a8c4862858fb5a"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "e8796358f52bb32d876f88f25fa371f1eba12325"
+      "62f25a24cd33f85771845179fcaad6188cec0149"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "e40d2ba3f8cee27cb1c0b3e1891e1bfd268d94b2"
+      "2a58bc8d1916c6b914a15b5fe62d5e1104ef68f7"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "20b79293eaf377e1919d75f68264f8f65bb84d83"
+      "b515ce5472648de3ff005e2d6f27d344467ffefd"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -31243,7 +31263,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "86026481f9e08cc135b28ee501f6922215b4e84a"
+      "e0c463c63b94967a6154f4374898be574df1bcf1"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31251,7 +31271,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "1444a0f63a5bbcb3862c19105ac4762da4067280"
+      "cc48923800f9513a2eb1b1a3f5922c081cabfbd4"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31263,7 +31283,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "c13e2706a779babf79e254d8b49592f63b522270"
+      "dd59085866262b98ebbff49a8800139d5b2209ad"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -78064,6 +78084,57 @@
     "scope": "Exact cumulative PR103/104/105 tensor source and PR109 compiler ancestry; tensor Lean 4.35rc2 is distinct from curvature Lean 4.33. Compilation, Comparator, kernel and rendering qualification pending; both Point4 targets OPEN."
   },
   "curvature_finite_input_preparation": {
+    "current_initial_heat_inverse_coefficients": {
+      "base_head": "7c6ae414927cb7c61dbcbfef30d5442a21da1720",
+      "base_current_paths": 2146,
+      "new_current_paths": 2151,
+      "additions": {
+        ".github/workflows/point4-initial-heat-inverse-coefficients.yml": {
+          "mode": "100644",
+          "sha256": "5ea1f2929f699f1ba4b35bef1268cacfeaecd07ccaaf5da5bef4190bcdf75bfb",
+          "blob": "c99fd9d7f14f72b2ca4e7c954b60fc7ecf71fd78",
+          "origin": "Exact focused successor of the valid 7c initial-ricci-and-heat workflow; initial heat coefficients only"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InitialMetricHeatInverseControl.lean": {
+          "mode": "100644",
+          "sha256": "07d7bbee8115d857663e5df5cd93df39c9a094cf30fa93abc075fd53002d11f6",
+          "blob": "271982b43a564a30b04f540e3929a490ab90035f",
+          "origin": "parallel-c2-inverse-heat-coefficients-20261014/v3/InitialMetricHeatInverseControl.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InitialMetricHeatInverseFreezing.lean": {
+          "mode": "100644",
+          "sha256": "e738c3125e89b3b704c70728c09fc6f82304b0c00203df1e9e32241de3ec9a83",
+          "blob": "72caa0969512f34b88a9eacb7943d5ee6f3292b9",
+          "origin": "parallel-c2-spatial-inverse-freezing-20261014/v2/InitialMetricHeatInverseFreezing.lean"
+        },
+        "curvature/scripts/point4_initial_metric_heat_inverse_control_probe.lean": {
+          "mode": "100644",
+          "sha256": "5411fff7fa0ab98f6c13d4305008e59b69aaae0cb1c23d63858804df17067c15",
+          "blob": "073991da8ff6f61979038a31577328e3a905bc75",
+          "origin": "parallel-c2-inverse-heat-coefficients-20261014/v3/InitialMetricHeatInverseControlEvidence.lean"
+        },
+        "curvature/scripts/point4_initial_metric_heat_inverse_freezing_probe.lean": {
+          "mode": "100644",
+          "sha256": "4cc1fc370bbe72d1959a7bd0ee287e6aed55e4cf9de87d50da02653eaea469f7",
+          "blob": "2aa70debd3523d4733995656822c4a38351dd138",
+          "origin": "parallel-c2-spatial-inverse-freezing-20261014/v2/InitialMetricHeatInverseFreezingEvidence.lean"
+        }
+      },
+      "policy_sha256": "43afdc6dfd6865125af1a9fbc7eed222fa5232a05d683d0acbc27dcb984cdeda",
+      "workflow": ".github/workflows/point4-initial-heat-inverse-coefficients.yml",
+      "modules": 2,
+      "probe_record_counts": [
+        6,
+        3
+      ],
+      "actual_prior_native_review_sha256": {
+        "parallel-c2-independent-review-20261013/inverse-heat-control-iv3-independent-actual-review.json": "eb083eda86a932dbb9f978c9aa7de1981a6588c1a03290da3e9ae209f400c778",
+        "parallel-c2-independent-review-20261013/spatial-inverse-freezing-sf-independent-actual-review.json": "3ae37703495b38f5d5440434fbb60d731a8eee0169a96e2d568d0f6cf9827ee9"
+      },
+      "scope": "Initial heat inverse coefficient control and spatial freezing only; no nonlinear flow solution or positive-time fixed-point existence",
+      "new_head_hosted_qualification": "UNRUN",
+      "point4": "OPEN"
+    },
     "parent": "bff2bca9d62138392dfe7b4fd5a99403d5377acd",
     "parent_tree": "af058efa266621b51750c7157da231666e0c32b1",
     "source_trees": {
