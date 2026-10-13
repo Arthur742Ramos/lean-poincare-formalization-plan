@@ -5,7 +5,7 @@ set_option autoImplicit false
 set_option pp.proofs false
 set_option pp.universes true
 set_option pp.fullNames true
-set_option pp.width 120
+set_option format.width 120
 
 open Bundle Filter
 open scoped Manifold ContDiff Topology
@@ -52,7 +52,10 @@ theorem c2C0MetricVelocityCanonicalContext
       ∃ g : RicciFlow.MetricFamily (I := I) (M := M),
         g t₀ = g₀ ∧ ∀ x : M, ∀ a b : TangentSpace I x,
           HasDerivAt (fun t => RicciFlow.metricTensor g t x a b) (vel.tensor x a b) t₀ :=
-  RicciFlow.AnalyticPDE.C0Endpoint.exists_c2_metricFamily_with_c0_endpoint_velocity g₀ t₀
+  by
+    dsimp only
+    letI : RiemannianBundle (TangentSpace I : M → Type _) := ⟨g₀.toRiemannianMetric⟩
+    exact RicciFlow.AnalyticPDE.C0Endpoint.exists_c2_metricFamily_with_c0_endpoint_velocity g₀ t₀
 
 -- Zero-dimensional models use the same actual exported construction.
 theorem c2C0MetricVelocityRankZeroContext [Subsingleton E]
@@ -62,7 +65,10 @@ theorem c2C0MetricVelocityRankZeroContext [Subsingleton E]
       ∃ g : RicciFlow.MetricFamily (I := I) (M := M),
         g t₀ = g₀ ∧ ∀ x : M, ∀ a b : TangentSpace I x,
           HasDerivAt (fun t => RicciFlow.metricTensor g t x a b) (vel.tensor x a b) t₀ :=
-  RicciFlow.AnalyticPDE.C0Endpoint.exists_c2_metricFamily_with_c0_endpoint_velocity g₀ t₀
+  by
+    dsimp only
+    letI : RiemannianBundle (TangentSpace I : M → Type _) := ⟨g₀.toRiemannianMetric⟩
+    exact RicciFlow.AnalyticPDE.C0Endpoint.exists_c2_metricFamily_with_c0_endpoint_velocity g₀ t₀
 
 -- Empty manifolds require neither a selected point nor Nonempty M.
 theorem c2C0MetricVelocityEmptyManifoldContext [IsEmpty M]
@@ -72,7 +78,10 @@ theorem c2C0MetricVelocityEmptyManifoldContext [IsEmpty M]
       ∃ g : RicciFlow.MetricFamily (I := I) (M := M),
         g t₀ = g₀ ∧ ∀ x : M, ∀ a b : TangentSpace I x,
           HasDerivAt (fun t => RicciFlow.metricTensor g t x a b) (vel.tensor x a b) t₀ :=
-  RicciFlow.AnalyticPDE.C0Endpoint.exists_c2_metricFamily_with_c0_endpoint_velocity g₀ t₀
+  by
+    dsimp only
+    letI : RiemannianBundle (TangentSpace I : M → Type _) := ⟨g₀.toRiemannianMetric⟩
+    exact RicciFlow.AnalyticPDE.C0Endpoint.exists_c2_metricFamily_with_c0_endpoint_velocity g₀ t₀
 end MinimalGeometricContext
 
 -- Actual scalar zero-rank Gaussian and empty-family reserve specializations.

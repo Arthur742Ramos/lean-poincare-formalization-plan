@@ -52,6 +52,8 @@ lemma endpointAmplitude_eventually_eq_id {δ : ℝ} (hδ : 0 < δ) :
     simpa only [Metric.mem_ball, Real.dist_eq, sub_zero] using hh
   exact hb.mono fun h hh => endpointAmplitude_eq_self hh
 
+section MetricBackground
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -162,6 +164,18 @@ lemma centeredMetric_inner
   by_cases hh : h = 0
   · simp only [hh, centeredMetric_zero, endpointTensor_zero g₀ v C b hδ]
   · simp only [centeredMetric, dif_neg hh]
+
+end MetricBackground
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  [T2Space M] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
+  [ContMDiffVectorBundle 2 E (TangentSpace I : M → Type _) I]
+  [CompactSpace M] [SigmaCompactSpace M] [BoundarylessManifold I M]
+
+local notation "TM" => (TangentSpace I : M → Type _)
+local notation "Cover" => FiniteSmoothPreferredTrivializingCover I (F := E) (V := TM)
 
 /-- Endpoint-only construction with no atlas, smoothing, density, solver,
 rank, or global-model-boundarylessness witness in the exported hypotheses.

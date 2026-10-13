@@ -2315,13 +2315,27 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                         self.assertEqual(comp.sha256(historical),'0c6c921536d3cade268948431dd254dd7c602cc04f2d8d4aa7365ab6c39793b7')
                         self.assertEqual(comp.curvature_hosted_repair_source(c2_path,historical),current)
                         self.assertEqual(comp.curvature_selected_source(c2_path,digest='0'*64),historical)
-                        expected[c2_path]='551151dbcf5e8775987bc040b84557b82c8561ef06f3a278171f1ede0a2fb66a'
+                        expected[c2_path]='4781a676fbcecb44cea4e3b233a0f473c91a437f9ac9d9f013947dd16e57746b'
                         self.assertEqual(comp.sha256(current),expected[c2_path])
                         module.check_unit_blob(c2_path,current)
                         for bad in (historical,current[:-1],current+current,current.replace(b'namespace',b'namespacE',1)):
                             with self.assertRaises(AssertionError):module.check_unit_blob(c2_path,bad)
                         for bad in (historical[:-1],historical+historical):
                             with self.assertRaises(AssertionError):comp.curvature_hosted_repair_source(c2_path,bad)
+                        probe_path='curvature/scripts/point4_c2_c0_metric_velocity_probe.lean'
+                        probe_historical=comp.git('show',head+':'+probe_path)
+                        self.assertEqual(expected[probe_path],'c987c8196eba6c879be41a925571c94cd42cf8b04f55b0ab9cfd8c24293e826b')
+                        self.assertEqual(comp.sha256(probe_historical),'c987c8196eba6c879be41a925571c94cd42cf8b04f55b0ab9cfd8c24293e826b')
+                        probe_current=(comp.ROOT/probe_path).read_bytes()
+                        self.assertEqual(comp.curvature_public_contract_source(probe_path,probe_historical),probe_current)
+                        self.assertEqual(comp.curvature_selected_source(probe_path,digest='0'*64),probe_historical)
+                        expected[probe_path]='9403ba9952638e0a1dd59a3c245b36ee4243cc37363a5b4c20399db0e0c936ad'
+                        self.assertEqual(comp.sha256(probe_current),expected[probe_path])
+                        module.check_unit_blob(probe_path,probe_current)
+                        for bad in (probe_historical,probe_current[:-1],probe_current+probe_current):
+                            with self.assertRaises(AssertionError):module.check_unit_blob(probe_path,bad)
+                        for bad in (probe_historical[:-1],probe_historical+probe_historical):
+                            with self.assertRaises(AssertionError):comp.curvature_public_contract_source(probe_path,bad)
                     if number==111:
                         reviewed=dict(reference['REVIEWED_FILE_SHA256'])
                         for current_path,original_digest in comp.CURVATURE_HAMILTON_ORIGINAL_SHA256.items():
