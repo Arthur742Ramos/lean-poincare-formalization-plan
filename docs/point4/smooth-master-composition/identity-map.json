@@ -13220,7 +13220,7 @@
     "historical_run": 37181895941,
     "scope": "Independent jet-field heat/reaction closure only; combined-head proof checks UNRUN; both targets OPEN"
   },
-  "paths": 2139,
+  "paths": 2146,
   "canonical_point4": "OPEN",
   "smooth_general_target": "OPEN",
   "localization_mock_route": {
@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "ddc858ccfa847dca8a61c7e0a84c1091f18b82a0",
-      "final_sha256": "215e233dff1583c9f4e12f0e72ace8a844e079c9455302cecda992780fcfe1d2",
+      "final_blob": "2b75818c1b0eec1f9d68c7dce2626cb778b7c7af",
+      "final_sha256": "157d012fa508dd4e23cf75eaeed349a20e273da5044ed9003fffb93ec69cd960",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "8c7edaaf773b27c4501d433793805cecd6019f25",
-      "final_sha256": "670e033e34614dd1ad8350ddd3349ed762768f6b02f40f1c0ff533dd2e354a10",
+      "final_blob": "30c0511220b7366d3170dcfca79deb0d01284679",
+      "final_sha256": "79aae1dc794551daffb1dfb2ef3794e147633936ba46e6ad172492933ff8bf10",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "361ab83367eb8f38b34ccb77afd0b86a637f3a5e",
-      "final_sha256": "3b236a9e3718ac763d7c546cf50fb04ba5b56e823eeb7d17d45ccfc7c9753d09",
+      "final_blob": "207979d20e251ad339fb234fb83e622bab60db31",
+      "final_sha256": "abce1ac3f7291ba911e50a2d45b0676e6a339b1caab63c6a4c64fff78b3341cc",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "a5043e521fbcac24160d6a226ee2f6a660492701",
-      "final_sha256": "56eb36c60491aaf25bafdc649408d4ee32ed70b302d495873871e5826349edb0",
+      "final_blob": "874130a553e207ac63f25443438258c7cc6ca22a",
+      "final_sha256": "073039ca5c9f464f3256c99f0be5a349254aa51114a6255ba84f73d2c329f254",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "a2be44128819721d9446652d85c3bf44b23b5d1f",
-      "final_sha256": "cb1312c50dcaf9973cbc1930ee0fda35beda2985647ab06ff3422e7031df4985",
+      "final_blob": "6c2c6237ce170da85e5f7a3310a8c3e6f5a7be10",
+      "final_sha256": "7e9ad500a1fde26d5dff862397046df8a6442ff466f752157fd1aaa72dc89266",
       "mode": "100644",
       "count": 1
     }
@@ -27160,6 +27160,10 @@
     ".github/workflows/point4-hamilton-release-audit.yml": [
       "100644",
       "d01da7fcde04da7f1988ca5076afbe45f59dc89a"
+    ],
+    ".github/workflows/point4-initial-ricci-and-heat.yml": [
+      "100644",
+      "ffaec5b5d4175cb8dda4ca262885ec6edb17a8d5"
     ],
     ".github/workflows/point4-linear-heat-geometry.yml": [
       "100644",
@@ -29345,6 +29349,10 @@
       "100644",
       "add824a4dcfce55e36519dc55a2e00208f56e935"
     ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C2IntrinsicRicciEndpointThin.lean": [
+      "100644",
+      "20aa8740b23704fc3a7502e57c58cd662b5fc4e6"
+    ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C2MetricVelocityExtension.lean": [
       "100644",
       "ea4ac9d2a156f782b94a57612956e5ac1c2b69ac"
@@ -29613,6 +29621,10 @@
       "100644",
       "b8d721ee23ec85f8a9b0c790e8cd03e69c116f51"
     ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InitialMetricHeatCoercivity.lean": [
+      "100644",
+      "cc7dbcbf9a0947fc8ed1a47e3dcd53031e2f43e7"
+    ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InterpolationLemma.lean": [
       "100644",
       "fd5afddafbdfb8e23ca6d05a55dfec43c29cb61d"
@@ -29652,6 +29664,10 @@
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/MatrixAffineInitialOperator.lean": [
       "100644",
       "f621d6159ff68df318e242490cc02d8a188126ad"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/MatrixHeatCoercivity.lean": [
+      "100644",
+      "3723f44195a1229ace76cf395bf0cb540b2079dd"
     ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/MatrixZeroInitialOperator.lean": [
       "100644",
@@ -30983,7 +30999,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "352b3d4e289d6fbfc2209e5fce0eeee927563a10"
+      "de208a761bd887fa37c802df6ad235f4ca6ade33"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31007,7 +31023,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "6b7bc0c3e30ce1cfddffa9a22b98dfb6da23f1a0"
+      "821dc138bab8d092135ea7efa194f46ccc93ce1e"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31015,7 +31031,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "66b70cde03f6c97c273a717188c4478e393999cd"
+      "d48be480ece87ff6b10a88f3d3242cd13540ff6e"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31039,15 +31055,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "ddc858ccfa847dca8a61c7e0a84c1091f18b82a0"
+      "2b75818c1b0eec1f9d68c7dce2626cb778b7c7af"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "b5f3c0813e715700efd5c9d2e4814e97a1378b9b"
+      "cce18b6c5d4fa01971e627aee41ea943ac6f3be1"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "ecf2e63b9d3150aeeb27334b9d0e91f77afe6572"
+      "ecf49b00d49c6232a7968dcbb5297cc49080df70"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31107,15 +31123,19 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "c7b217728a7baadf56316a4596a049ae372c0bcb"
+      "1a50b99415ba2a5e3aa29d13c2ada4bae2c4179b"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "cde6bcb18eb88326f6d8a3e07604004bb84f517c"
+      "0c3eb22291d23215f9902b953ad16453ba6fdecb"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
       "414cac5509f4aba426d6e50bf44ef271ff41f5d4"
+    ],
+    "curvature/scripts/point4_initial_metric_heat_coercivity_probe.lean": [
+      "100644",
+      "3e5c8c50bdb7dd192664999ff07327f923ca9383"
     ],
     "curvature/scripts/point4_linear_heat_geometry_mock_test.py": [
       "100644",
@@ -31145,6 +31165,10 @@
       "100644",
       "531f668632845a01348df181d5112801d80ab3fb"
     ],
+    "curvature/scripts/point4_matrix_heat_coercivity_probe.lean": [
+      "100644",
+      "98bb6ba9f940e631a4f31f81517c08575f7f1ba0"
+    ],
     "curvature/scripts/point4_pr130_pr131_inventory.py": [
       "100644",
       "30ac171c716ad35427ca3f4cb6f230ad7e420bf3"
@@ -31155,7 +31179,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "8c7edaaf773b27c4501d433793805cecd6019f25"
+      "30c0511220b7366d3170dcfca79deb0d01284679"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31191,19 +31215,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "361ab83367eb8f38b34ccb77afd0b86a637f3a5e"
+      "207979d20e251ad339fb234fb83e622bab60db31"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "a5043e521fbcac24160d6a226ee2f6a660492701"
+      "874130a553e207ac63f25443438258c7cc6ca22a"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "d117d2efa9728ba24449f388e5f3f6b24e85c2e3"
+      "00bd7c73e7fa4b01718af480edf0c4eab4c3a564"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "8b5138dfa88f394e7bc403539eaaf1624f040383"
+      "20b79293eaf377e1919d75f68264f8f65bb84d83"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -31213,9 +31237,13 @@
       "100644",
       "bf6f889e65e2e0b3d9b95853484057fb98335b50"
     ],
+    "curvature/scripts/point4_thin_intrinsic_ricci_endpoint_probe.lean": [
+      "100644",
+      "c4f1b6da8dbb4d939cdbc39a50c7475339b153d4"
+    ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "4946e7fb8930049bbc51ac1d24f770d6d19d226b"
+      "3dd8cfdda0dcca8331df5814c56bfb31fa6c4366"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31223,7 +31251,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "43f9de502537e0220668bf95d7469364dad7cef2"
+      "cab58b59b7a218f9af1d7a9930b4c31ea4f3cdcb"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31235,7 +31263,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "a2be44128819721d9446652d85c3bf44b23b5d1f"
+      "6c2c6237ce170da85e5f7a3310a8c3e6f5a7be10"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -81207,6 +81235,65 @@
       "native_qualification": "UNRUN"
     },
     "scope": "Original mathematical inputs recovered by exact inverses. Current endpoint and Levi-Civita proof elaboration requires separate current/Linux/native qualification. Point4 OPEN.",
+    "current_initial_ricci_and_heat_batch": {
+      "base_head": "c46a796c2e50651c69a1df21b4f6a0653dc64017",
+      "base_current_paths": 2139,
+      "new_current_paths": 2146,
+      "additions": {
+        ".github/workflows/point4-initial-ricci-and-heat.yml": {
+          "mode": "100644",
+          "sha256": "03b0de4709da3f2da163163ec1c93c2d9983d74f4e109c6e1c95801d7a170801",
+          "blob": "ffaec5b5d4175cb8dda4ca262885ec6edb17a8d5",
+          "origin": "New focused workflow derived from the existing pinned checkout/toolchain/actions and immutable axiom parser"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C2IntrinsicRicciEndpointThin.lean": {
+          "mode": "100644",
+          "sha256": "48d1c77bffd2dd7a1f8a0ca3033c41e4337e1fea3e2aceb2d2f25e75dc91117f",
+          "blob": "20aa8740b23704fc3a7502e57c58cd662b5fc4e6",
+          "origin": "parallel-c2-thin-intrinsic-ricci-20261013/v4/C2IntrinsicRicciEndpointThin.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InitialMetricHeatCoercivity.lean": {
+          "mode": "100644",
+          "sha256": "eed2e75d5c4ec5477d239489e0d53aa96ec26e4a750724a8e0a19861fd7ee3d1",
+          "blob": "cc7dbcbf9a0947fc8ed1a47e3dcd53031e2f43e7",
+          "origin": "parallel-c2-derivative-20261013/public-contract-repair-v1/full-heat-composition-v1/InitialMetricHeatCoercivity.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/MatrixHeatCoercivity.lean": {
+          "mode": "100644",
+          "sha256": "157e1003a46ccd4ec2a5249c25351115e509531de9cfef0e4804664e6e9440d0",
+          "blob": "3723f44195a1229ace76cf395bf0cb540b2079dd",
+          "origin": "parallel-c2-heat-coercivity-20261013/lowlevel/v3/MatrixHeatCoercivity.lean"
+        },
+        "curvature/scripts/point4_initial_metric_heat_coercivity_probe.lean": {
+          "mode": "100644",
+          "sha256": "1279cc892b2fc9f46d93158d0e2d3f7f5f47a31e6ddac5698e6fd3d40f34e11a",
+          "blob": "3e5c8c50bdb7dd192664999ff07327f923ca9383",
+          "origin": "parallel-c2-heat-coercivity-20261013/InitialMetricHeatCoercivityEvidence.lean"
+        },
+        "curvature/scripts/point4_matrix_heat_coercivity_probe.lean": {
+          "mode": "100644",
+          "sha256": "e658c67402c224237ba0b00045ec5a3ada8eb6581cb4395e81330eeda7e9763c",
+          "blob": "98bb6ba9f940e631a4f31f81517c08575f7f1ba0",
+          "origin": "parallel-c2-heat-coercivity-20261013/lowlevel/MatrixHeatCoercivityEvidence.lean"
+        },
+        "curvature/scripts/point4_thin_intrinsic_ricci_endpoint_probe.lean": {
+          "mode": "100644",
+          "sha256": "8a1a27bca16bd310e666f243d1f73de76a9f62699b8cf3c288851556edcacc0a",
+          "blob": "c4f1b6da8dbb4d939cdbc39a50c7475339b153d4",
+          "origin": "parallel-c2-thin-intrinsic-ricci-20261013/C2IntrinsicRicciEndpointThinEvidence.lean"
+        }
+      },
+      "policy_sha256": "21cd6445fc3b05a911e706b845ccd47e7f682594a20e55ea61133e102d789b97",
+      "workflow": ".github/workflows/point4-initial-ricci-and-heat.yml",
+      "modules": 3,
+      "probe_record_counts": [
+        2,
+        1,
+        4
+      ],
+      "native_qualification": "PENDING; Source routing is not native proof credit",
+      "point4": "OPEN"
+    },
     "hosted_C2_axiom_print_format": {
       "probe_path": "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean",
       "prior_probe_sha256": "9403ba9952638e0a1dd59a3c245b36ee4243cc37363a5b4c20399db0e0c936ad",

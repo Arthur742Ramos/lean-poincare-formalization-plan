@@ -1316,7 +1316,7 @@ class FixedBackgroundCompositionTests(unittest.TestCase):
             expected, originals, changes = comp.tensor_identity(*comp.expected_identity())
             expected = comp.curvature_identity(expected,originals,changes)[0]
             self.assertEqual(expected, comp.parse_tree(comp.git('ls-tree','-rz','HEAD')))
-            self.assertEqual(len(expected), 2139)
+            self.assertEqual(len(expected), 2146)
             for path in comp.FIXED_ADDED:
                 self.assertEqual(changes[path], reader(comp.FIXED_SOURCE, path))
                 self.assertEqual(expected[path], trees[comp.FIXED_SOURCE][path])
@@ -2088,7 +2088,7 @@ class TensorCompositionTests(unittest.TestCase):
                  patch.object(pathlib.Path,'lstat',committed_mode_fixture if sys.platform=='win32' else physical_stat), \
                  patch.dict(weighted.__dict__,{'raw_git':comp.git} if sys.platform=='win32' else {}):
                 report=comp.weighted_leaf(weighted.__dict__,schema)
-            self.assertEqual(report['public_paths'],2139)
+            self.assertEqual(report['public_paths'],2146)
             self.assertEqual(verify.call_count,2)
         inherited=captured[0]
         self.assertEqual(len(inherited),1686)
@@ -2140,7 +2140,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         import point4_weighted_hessian_release_guard as weighted
         import stat
         committed=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
-        self.assertEqual(len(committed),2139)
+        self.assertEqual(len(committed),2146)
         physical_stat=pathlib.Path.lstat
         def committed_modes(physical,*args,**kwargs):
             actual=physical_stat(physical,*args,**kwargs)
@@ -2182,8 +2182,8 @@ class CurvatureCompositionTests(unittest.TestCase):
         snapshots=comp.curvature_pins()
         self.assertEqual(comp.curvature_predecessor(legacy,originals,changes,snapshots),snapshots[comp.CURVATURE_PARENT])
         complete,_,_=comp.curvature_identity(legacy,originals,changes)
-        self.assertEqual(len(complete),2139)
-        self.assertEqual(set(complete)-set(legacy),set(comp.CURVATURE_SELECTED)-{'curvature/lakefile.toml'})
+        self.assertEqual(len(complete),2146)
+        self.assertEqual(set(complete)-set(legacy),set(comp.CURVATURE_SELECTED)-{'curvature/lakefile.toml'} | set(comp.CURVATURE_CURRENT_BATCH))
         self.assertEqual(comp.tensor_map_record(complete,originals,changes),comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()))
         for path,marker in ((comp.HELPER,'extension'),(comp.TEST,'tests')):
             raw=(comp.ROOT/path).read_bytes()
@@ -2207,12 +2207,41 @@ class CurvatureCompositionTests(unittest.TestCase):
             with self.assertRaises(AssertionError):comp.curvature_identity(*comp.tensor_identity(*comp.expected_identity()))
         finally:(comp.ROOT/path).write_bytes(raw)
         comp.curvature_identity(*comp.tensor_identity(*comp.expected_identity()))
+        # Exact new-batch policy and physical Source mutation controls.
+        legacy=comp.tensor_identity(*comp.expected_identity())
+        current=comp.curvature_identity(*legacy)[0]
+        base={p:v for p,v in current.items() if p not in comp.CURVATURE_CURRENT_BATCH}
+        saved=json.loads(json.dumps(comp.CURVATURE_CURRENT_BATCH))
+        selected=next(iter(saved))
+        for kind in ('missing','extra','origin','hash','mode'):
+            changed=json.loads(json.dumps(saved))
+            if kind=='missing':changed.pop(selected)
+            elif kind=='extra':changed['foreign.lean']=changed[selected]
+            elif kind=='origin':changed[selected]['origin']='foreign provenance'
+            elif kind=='hash':changed[selected]['sha256']='0'*64
+            else:changed[selected]['mode']='100755'
+            with patch.object(comp,'CURVATURE_CURRENT_BATCH',changed):
+                with self.assertRaises(AssertionError):comp.curvature_current_batch_extend(base)
+        read=pathlib.Path.read_bytes
+        def changed_bytes(file):
+            value=read(file)
+            return value+b'current batch mutation' if file==comp.ROOT/selected else value
+        with patch.object(pathlib.Path,'read_bytes',changed_bytes):
+            with self.assertRaises(AssertionError):comp.curvature_current_batch_extend(base)
+        altered=json.loads(json.dumps(saved))
+        def mutate_during_read(file):
+            value=read(file)
+            if file==comp.ROOT/selected:altered[selected]['origin']='POST mutation'
+            return value
+        with patch.object(comp,'CURVATURE_CURRENT_BATCH',altered),patch.object(pathlib.Path,'read_bytes',mutate_during_read):
+            with self.assertRaises(AssertionError):comp.curvature_current_batch_extend(base)
+        self.assertEqual(comp.curvature_current_batch_extend(base),current)
 class CurvatureProductionNamespaceTests(unittest.TestCase):
     """Actual-current startup/source controls; no original-main/native claims."""
     @classmethod
     def setUpClass(cls):
         cls.model=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
-        assert len(cls.model)==2139
+        assert len(cls.model)==2146
         cls.modules={}
         cls.physical_stat=pathlib.Path.lstat
         cls.units={132:'point4_two_sided_heat_source_guard',
