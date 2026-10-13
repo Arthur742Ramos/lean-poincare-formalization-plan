@@ -2300,7 +2300,7 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                         historical=comp.git('show',head+':'+compact_path)
                         self.assertEqual(comp.sha256(historical),expected[compact_path])
                         self.assertEqual(comp.curvature_hosted_repair_source(compact_path,historical),current)
-                        expected[compact_path]='249cf330b2c3bb88da58722e7c235c787f673c39437f41ab329aa93a89172fb0'
+                        expected[compact_path]='e4adaedf2529b62acb6bd726b85418c29100429a6c3785266b7bb184822d28d5'
                         self.assertEqual(comp.sha256(current),expected[compact_path])
                         module.check_unit_blob(compact_path,current)
                         for bad in (historical,current[:-1],current+current):

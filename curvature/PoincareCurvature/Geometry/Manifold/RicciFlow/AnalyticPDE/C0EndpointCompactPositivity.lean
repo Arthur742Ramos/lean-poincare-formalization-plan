@@ -272,13 +272,19 @@ lemma exists_gaussianTensor_positivity_reserve
       intro hz
       apply hw
       simpa only [tangentCoordCLM, ContinuousLinearEquiv.coe_coe,
-        LinearEquiv.symm_apply_apply, map_zero] using
+        LinearEquiv.coe_toContinuousLinearEquiv', LinearEquiv.symm_apply_apply, map_zero] using
         congrArg ((C.trivialization i).linearEquivAt ℝ x hxBase).symm hz
     have hp := hlocal i a h ha ⟨x, hx⟩
       (tangentCoordCLM (C.trivialization i) x hxBase w) hz
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
       _root_.smul_apply, _root_.smul_apply, smul_eq_mul] at hp
-    rw [metricModelForm_tangentCoord_apply g₀ (i : M) b x hxBase] at hp
+    have hmetric : metricModelForm g₀ (i : M) b x
+        (tangentCoordCLM (C.trivialization i) x hxBase w)
+        (tangentCoordCLM (C.trivialization i) x hxBase w) = g₀.inner x w w := by
+      simpa only [PoincareCurvature.Bundle.Trivialization.FiniteSmoothPreferredTrivializingCover.trivialization,
+        PoincareCurvature.PreferredCoordinateFrame.trivialization] using
+        (metricModelForm_tangentCoord_apply g₀ (i : M) b x hxBase w w)
+    rw [hmetric] at hp
     simpa only [localTensorOfMatrix_apply_of_mem (C.trivialization i) b
       (gaussianMatrixOnManifold v C b i h) hxBase] using hp
   have hnonneg : ∀ i ∈ (Finset.univ : Finset C.Index), 0 ≤ f i := by

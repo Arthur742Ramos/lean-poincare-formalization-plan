@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "00f4bd9e9eb48e99e1d2394da036d053599f941c",
-      "final_sha256": "95da51feee0788b1370b0996bfbb66069b5eabf6cc4984c2248817fa4748656f",
+      "final_blob": "54009d2e71386190c3d9ca6e65ab7b813fd2fc06",
+      "final_sha256": "d202f98ddc961e4a6f66b587336710c7177e11c309ad0389388c7018696c5353",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "890b03b8e5e42fc19445779549a9ac422d6f0dc4",
-      "final_sha256": "3605aa2ceb1bc57eecf6c8560f8d4c55b4af2757bf704023f5a0b0866ab8c2a9",
+      "final_blob": "2c32a0c8d9dc0036a0c762a4defe0cc482dd41fe",
+      "final_sha256": "5e84baedd6c97212b78ea63b9d77d2a26466eee8afc301e81e0dd12851558062",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "d75086d572ab7aae9d944204b5146f4f150ad275",
-      "final_sha256": "0abb44fa2c3b334d80fbd3877cc3cefe14f38abad8d4a81452cc69a05b98ed3e",
+      "final_blob": "c8f00d300257136763e837f09caa4f5582031c6d",
+      "final_sha256": "dbeb15f163aac5119da3f12d6cab9cb0ed8ce958538083221a9fd7c9b1d59a35",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "c65533e4761424646e5163b0093c20096633f1d2",
-      "final_sha256": "80aeab1faa901044b10d737d894d7e14f7337e29daf0e52ab5beaccb41c00ada",
+      "final_blob": "411322d2872089baa2368224b3d097afe4ce05b4",
+      "final_sha256": "d2e589cd4c134481f2eed0ecacce07716ab8d218f9a046e0680d87bfa3b8ede1",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "b9a8e3f74e7eaaac038c2065fccccea002ddc369",
-      "final_sha256": "a8d394fa055ef88701c8c97e80cf224f3fb2ed6b6de2848634ea3f4f50963faf",
+      "final_blob": "d3845ed725d557e01748598db8b4db67375fb19b",
+      "final_sha256": "9d8943c2fd117029f9af8868729e27414c361c97c54891ac639facc12694aba6",
       "mode": "100644",
       "count": 1
     }
@@ -29335,7 +29335,7 @@
     ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0EndpointCompactPositivity.lean": [
       "100644",
-      "5e52e82e2c15782bcb3fd2182c16d5bf14569ea1"
+      "6928e783e9281951a6ffe1f02354a47caacc5db8"
     ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0FiniteAtlasGaussian.lean": [
       "100644",
@@ -30983,7 +30983,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "1482ff65848110ffc09a94fa12b094390c830031"
+      "5a8fd92ac214474a04570cb373d07702c2873751"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31007,7 +31007,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "39aae0cd0860d8ac665338a048a817590449f7c3"
+      "d72a7ad9e397b7b29ab9c077c4ecbcc46216c79c"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31015,7 +31015,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "ea085947a3c415108830c9318a6641dd22daffbe"
+      "feec3129c07cd098e60a9ceb3bc49679f281e7f8"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31039,15 +31039,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "00f4bd9e9eb48e99e1d2394da036d053599f941c"
+      "54009d2e71386190c3d9ca6e65ab7b813fd2fc06"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "08173087b0df2115ec9839b7d8c999bee71232e9"
+      "fc4e99730599586b4197ac8a929671fc8cc0229b"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "b593d6521e29570e4c7a76851160607b8297826f"
+      "cad68ee7dc75cba979ba8be0e40e657b76daf88a"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31107,11 +31107,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "cc6a689c84e7716b61b4fa98e5f61704f5cc5974"
+      "5ab158928042d309ecfa8c08013a250aba86aaa9"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "dae1510617e577f0246577a91b9a7fa11ce18760"
+      "36daf14c928c487919d0fec7b3306a474556e4de"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31155,7 +31155,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "890b03b8e5e42fc19445779549a9ac422d6f0dc4"
+      "2c32a0c8d9dc0036a0c762a4defe0cc482dd41fe"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31191,19 +31191,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "d75086d572ab7aae9d944204b5146f4f150ad275"
+      "c8f00d300257136763e837f09caa4f5582031c6d"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "c65533e4761424646e5163b0093c20096633f1d2"
+      "411322d2872089baa2368224b3d097afe4ce05b4"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "e1333bd161999f4cce340f71590d89fd930d3502"
+      "b5b9ff1f11c5a6e104e80275e117a8727d4dcc32"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "8542b5651f24501942b23cef5c202998d621e8d0"
+      "7592c19fb25f0dc39eaed5474c7b59e8d5f3ff1e"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -31215,7 +31215,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "d99207cd1f02229c6e31eeb6aef6c048ee992d0a"
+      "010e9dc4b1334aa1989dd9132e10fc38bd22b3a2"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31223,7 +31223,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "404a372173aab08b935282ec4ddb3244cf040ec4"
+      "17c3ce96547370be2202f4df9fca753b70b07df9"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31235,7 +31235,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "b9a8e3f74e7eaaac038c2065fccccea002ddc369"
+      "d3845ed725d557e01748598db8b4db67375fb19b"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -81207,6 +81207,25 @@
       "native_qualification": "UNRUN"
     },
     "scope": "Original mathematical inputs recovered by exact inverses. Current endpoint and Levi-Civita proof elaboration requires separate current/Linux/native qualification. Point4 OPEN.",
+    "hosted_98a_C0_proof_repairs": {
+      "parent": "98a337aa5f359367eb2c23b128fd3e45eb7aaadf",
+      "parent_tree": "25b6a9b92ef6e109c5a63093207355a2cd9ef4e7",
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/C0EndpointCompactPositivity.lean",
+      "parent_Compact_sha256": "249cf330b2c3bb88da58722e7c235c787f673c39437f41ab329aa93a89172fb0",
+      "current_Compact_sha256": "e4adaedf2529b62acb6bd726b85418c29100429a6c3785266b7bb184822d28d5",
+      "source_edit": "Two exact proof-only edits: explicit continuous-linear-equivalence coercion simp; exact-cover trivialization metric rewrite",
+      "public_declaration_headers_unchanged": true,
+      "public_declarations": 16,
+      "whole_two_edit_source_inverse_packet_sha256": "f2876839bdd295327e8d740b5b2a72e38f2dce672ba7339c582637d02cd66182",
+      "independent_proof_source_review_sha256": "f76ddb35a2b371a101b97bfc72c8fd1fe9bcdbaefc7a0e539bf7deda642c6d30",
+      "composition_test_identity_literal_only": true,
+      "composition_test_names_unchanged": 129,
+      "parent_TEST_sha256": "eade8ee49dc069bd2a9185b2d19cf33f4e02679f15b6147a628bcc456aac82c7",
+      "current_TEST_sha256": "ae9b0984cce8032408a4195ac5d3f5158f84012f596b31f70657600f3a9557d4",
+      "historical_prior_repair_records_preserved": true,
+      "native_qualification": "UNRUN",
+      "point4": "OPEN"
+    },
     "hosted_DCC_compact_subtype_repairs": {
       "parent": "dcc3cbcac98d79a7e5ba33c11cf2dd50550c7c6d",
       "parent_tree": "11191dcf68bf09aa779be70e09789de38368ccb0",
