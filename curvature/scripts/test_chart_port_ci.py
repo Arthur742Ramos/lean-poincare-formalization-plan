@@ -147,6 +147,16 @@ class DriverControls(unittest.TestCase):
                 derived.parent.mkdir(parents=True)
                 derived.write_bytes(b'finite synthetic derived Cache.IO; never compiled\n')
                 return dict(env, POINT4_AUTHENTICATED_CACHE_LEANTAR='finite-fixture'), {'original': {'path': str(dep / 'Cache/IO.lean')}, 'derived': {'path': str(derived)}, 'finite_synthetic_only': True}
+            def finite_cache_split(mathlib, lean, env, compiler_prefix, cache_source_view, names, inventory, bootstrap):
+                # This is only the existing finite driver orchestration fixture.
+                # Production manifest/process policy is tested independently below.
+                planner = evidence / 'cache-source-view/CachePlan.lean'
+                run([lean, '-j1', '-M5632', '-R', str(planner.parent), '--run', str(planner), *names],
+                    'cache-hash-plan', env=env, timeout=1800)
+                receipt['cache_phase_split'] = dict(finite_synthetic_source_context=True,
+                    planner=str(planner), admitted_roots=list(names),
+                    planner_reaped_before_acquisition=True, acquisition_zero_Lean=True,
+                    physical_Source_POST='UNCHANGED')
             ns = dict(Path=fake_path, LIMIT=LIMIT, ROOT=root, PKG=pkg, EVIDENCE=evidence,
                 args=types.SimpleNamespace(expected_sha='a' * 40, expected_tree='b' * 40, setup_only=setup_only),
                 receipt=receipt, save=lambda: None, json=json, hashlib=hashlib, re=re,
@@ -158,6 +168,7 @@ class DriverControls(unittest.TestCase):
                 prepare_pinned_cache_source_view=finite_cache_view,
                 verify_pinned_cache_source_view=lambda context,env,official: self.assertEqual(env.get('POINT4_AUTHENTICATED_CACHE_LEANTAR'), 'finite-fixture'),
                 ENV_KEY='POINT4_AUTHENTICATED_CACHE_LEANTAR',
+                acquire_pinned_cache_phase_split=finite_cache_split,
                 pinned_cache_query_context=lambda mathlib,names: dict(finite_synthetic_source_context=True,
                     package_root=str(mathlib),admitted_roots=list(names)),
                 materialize_pinned_mathlib_cache=lambda *args: dict(finite_synthetic_copy=True),
@@ -1512,15 +1523,18 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
     def test_cache_stage_caller_passes_only_admitted_context_and_preserves_full_geometry_gates(self):
         receipt,trace,failure=DriverControls().model(False)
         self.assertIsNone(failure)
-        cache=[row for row in trace['run'] if row[1]=='ordinary-pinned-cache-read']
+        cache=[row for row in trace['run'] if row[1]=='cache-hash-plan']
         self.assertEqual(len(cache),1)
-        argv,label,kwargs=cache[0];context=kwargs['cache_query_context']
+        argv,label,kwargs=cache[0];context=receipt['cache_phase_split']
         self.assertTrue(context['finite_synthetic_source_context'])
-        self.assertEqual(argv[3:8],['-R',context['package_root'],'--run',str(Path(context['package_root'])/'Cache/Main.lean'),'get'])
-        self.assertEqual(argv[8:],context['admitted_roots'])
+        self.assertEqual(argv[3:7],['-R',str(Path(context['planner']).parent),'--run',context['planner']])
+        self.assertEqual(argv[7:],context['admitted_roots'])
+        self.assertTrue(context['planner_reaped_before_acquisition'])
+        self.assertTrue(context['acquisition_zero_Lean'])
+        self.assertEqual(context['physical_Source_POST'],'UNCHANGED')
         self.assertEqual(kwargs['timeout'],1800)
         self.assertEqual((receipt['fresh_combined_modules'],receipt['fresh_combined_probes']),(83,11))
-        self.assertTrue(all('cache_query_context' not in row[2] for row in trace['run'] if row[1]!=label))
+        self.assertTrue(all('cache_query_context' not in row[2] for row in trace['run']))
 
     def test_cache_query_both_enumeration_orders_include_rss_and_cleanup_without_exempting_owner(self):
         context,argv,*_=self.cache_context()
@@ -2096,6 +2110,310 @@ class OwnedTerminalLifecycleTransitionControls(unittest.TestCase):
         self.assertTrue(self.process(stage)['verified_terminated_zombie'])
         self.assertEqual(stage['remaining_session_pids'], [101])
         self.assertTrue(stage['owner_reaped'])
+
+# Proposed class to append to the existing chart control script. No tests run.
+class CachePhaseSplitControls(unittest.TestCase):
+    def api(self):
+        import stat
+        ns = dict(Path=Path, json=json, re=__import__('re'), os=os, stat=stat,
+                  hashlib=hashlib, digest=digest)
+        wanted = {'CACHE_SPLIT_PIN', 'CACHE_SPLIT_URLS', 'CACHE_SPLIT_UPSTREAM'}
+        nodes = [n for n in TREE.body if (isinstance(n, ast.FunctionDef) and
+                    (n.name.startswith('cache_split_') or n.name == 'acquire_pinned_cache_phase_split'))
+                 or (isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id in wanted for t in n.targets))]
+        execute_nodes(nodes, ns)
+        return ns
+
+    def plan(self, root):
+        pkg = root / 'repo'; mathlib = pkg / '.lake/packages/mathlib'; cache = root / 'cache'
+        a = 'Mathlib.A'; b = 'Batteries.B'
+        source_a = str(mathlib / 'Mathlib/A.lean'); source_b = str(pkg / '.lake/packages/batteries/Batteries/B.lean')
+        context = str(Path('.lake/packages/mathlib'))
+        p = dict(schema='point4-cache-plan-v1', mathlib_pin=PIN, mathlib=str(mathlib), mathlib_context=context,
+                 cwd=str(pkg), cache_dir=str(cache), roots=[a], source_search_path=[str(mathlib)],
+                 root_hash_archive_spelling='0000000000000000.ltar', root_hash_generation=5,
+                 full_hash_inputs=[dict(module=a, source=source_a), dict(module=b, source=source_b)],
+                 modules=[dict(module=b, source=source_b, archive='0000000000000001.ltar', dependencies=[], extract=str(cache/'0000000000000001.ltar')),
+                          dict(module=a, source=source_a, archive='0000000000000002.ltar', dependencies=[b], extract=dict(file=str(cache/'0000000000000002.ltar'), base=context))],
+                 repo='leanprover-community/mathlib4', containers=['master','legacy'], compiler_or_acquisition_spawned=False)
+        return p, [a], mathlib, cache, pkg, {source_a: {}, source_b: {}}
+
+    def validate(self, p, *args):
+        return self.api()['cache_split_validate_plan'](json.dumps(p).encode(), *args)
+
+    def test_exact_root_closure_and_singleton_extraction_destinations(self):
+        with tempfile.TemporaryDirectory() as d:
+            p,*args=self.plan(Path(d).resolve()); self.assertEqual(self.validate(p,*args),p)
+
+    def test_missing_admitted_root_is_rejected(self):
+        with tempfile.TemporaryDirectory() as d:
+            p,*args=self.plan(Path(d).resolve()); p['modules'].pop()
+            with self.assertRaises(AssertionError): self.validate(p,*args)
+
+    def test_duplicate_module_and_duplicate_archive_are_rejected(self):
+        import copy
+        with tempfile.TemporaryDirectory() as d:
+            p,*args=self.plan(Path(d).resolve())
+            for mutation in ('module','archive'):
+                q=copy.deepcopy(p)
+                if mutation=='module': q['modules'][1]['module']=q['modules'][0]['module']
+                else: q['modules'][1]['archive']=q['modules'][0]['archive']
+                with self.assertRaises(AssertionError): self.validate(q,*args)
+
+    def test_extra_module_and_missing_dependency_are_rejected(self):
+        import copy
+        with tempfile.TemporaryDirectory() as d:
+            p,*args=self.plan(Path(d).resolve())
+            q=copy.deepcopy(p);q['modules'][1]['dependencies']=[]
+            with self.assertRaises(AssertionError): self.validate(q,*args)
+            q=copy.deepcopy(p);q['modules'][1]['dependencies']=['Batteries.Missing']
+            with self.assertRaises(AssertionError): self.validate(q,*args)
+
+    def test_wrong_extraction_base_and_source_provenance_are_rejected(self):
+        import copy
+        with tempfile.TemporaryDirectory() as d:
+            p,*args=self.plan(Path(d).resolve())
+            q=copy.deepcopy(p);q['modules'][1]['extract']['base']='outside'
+            with self.assertRaises(AssertionError): self.validate(q,*args)
+            q=copy.deepcopy(p);q['modules'][1]['source']=str(Path(d)/'unowned.lean')
+            with self.assertRaises(AssertionError): self.validate(q,*args)
+
+    def test_duplicate_json_keys_and_nonfinite_numbers_are_rejected(self):
+        parse=self.api()['cache_split_json']
+        for raw in ('{"a":1,"a":2}','{"a":NaN}','{"a":Infinity}'):
+            with self.assertRaises((AssertionError,ValueError)): parse(raw)
+
+    def transfers(self, codes, container='master', tool_exit=0):
+        requested={'/owned/'+str(i)+'.part':'https://official/f/'+str(i) for i in range(len(codes))}
+        rows=[dict(filename_effective=p,url_effective=u,http_code=code,exitcode=exitcode)
+              for (p,u),(code,exitcode) in zip(requested.items(),codes)]
+        raw=b'\n'.join(json.dumps(row).encode() for row in rows)
+        return self.api()['cache_split_transfer_results'](raw,requested,container,tool_exit),rows,requested
+
+    def test_every_successful_transfer_is_bound_to_actual_request(self):
+        (records,served,misses,failures),_,requested=self.transfers([(200,0),(201,0)])
+        self.assertEqual(served,set(requested));self.assertEqual(set(records),set(requested));self.assertFalse(misses or failures)
+
+    def test_404_and_only_legacy_403_are_cache_misses(self):
+        (r,s,m,f),_,_=self.transfers([(404,0),(403,0)])
+        self.assertEqual(len(m),1);self.assertEqual(len(f),1)
+        (r,s,m,f),_,_=self.transfers([(403,0)],'legacy')
+        self.assertEqual(len(m),1);self.assertFalse(s or f)
+
+    def test_http_success_with_transport_failure_cannot_promote(self):
+        (r,s,m,f),_,_=self.transfers([(200,18)])
+        self.assertFalse(s or m);self.assertEqual(len(f),1)
+
+    def test_whole_process_nonzero_remains_hard_failure(self):
+        (r,s,m,f),_,_=self.transfers([(200,0)],tool_exit=7)
+        self.assertEqual(len(s),1);self.assertIn({'curl_process_exit':7},f)
+
+    def test_missing_duplicate_and_extra_transfer_rows_are_rejected(self):
+        _,rows,requested=self.transfers([(200,0),(200,0)])
+        parse=self.api()['cache_split_transfer_results']
+        for values in (rows[:1],rows+[rows[0]],rows+[dict(rows[0],filename_effective='/extra')]):
+            with self.assertRaises(AssertionError): parse(b'\n'.join(json.dumps(r).encode() for r in values),requested,'master',0)
+
+    def test_altered_url_and_malformed_status_are_rejected(self):
+        _,rows,requested=self.transfers([(200,0)])
+        parse=self.api()['cache_split_transfer_results']
+        for key,value in (('url_effective','https://other/f/0'),('http_code',True),('exitcode','0')):
+            row=dict(rows[0]);row[key]=value
+            with self.assertRaises(AssertionError): parse(json.dumps(row).encode(),requested,'master',0)
+
+    def process(self):
+        image=[1,2,3,4,5]; argv=['/official/curl','--disable','--version']
+        row=dict(pid=10,session=10,pgrp=10,argv=argv,stable=True,errors=[],exe=argv[0],image_identity=image,
+                 recheck=dict(exe=argv[0],image_identity=image))
+        tool=dict(path=argv[0],image_identity=image)
+        return row,argv,tool
+
+    def test_one_authenticated_noncompiler_owner_is_accepted(self):
+        row,argv,tool=self.process();self.api()['cache_split_process_policy']([row],10,argv,tool)
+
+    def test_lean_or_unknown_descendant_is_never_exempted(self):
+        row,argv,tool=self.process();fn=self.api()['cache_split_process_policy']
+        for child in (dict(pid=11,exe='/official/lean'),dict(pid=11)):
+            with self.assertRaises(AssertionError): fn([row,child],10,argv,tool)
+
+    def test_unreadable_live_owner_remains_rejected(self):
+        row,argv,tool=self.process();row['stable']=False;row['errors']=[{'type':'FileNotFoundError'}]
+        with self.assertRaises(AssertionError): self.api()['cache_split_process_policy']([row],10,argv,tool)
+
+    def test_owner_image_argv_or_kernel_scope_drift_is_rejected(self):
+        import copy
+        row,argv,tool=self.process();fn=self.api()['cache_split_process_policy']
+        for key,value in (('exe','/other/curl'),('argv',argv+['extra']),('session',11),('image_identity',[2,2,3,4,5])):
+            changed=copy.deepcopy(row);changed[key]=value
+            with self.assertRaises(AssertionError): fn([changed],10,argv,tool)
+
+    def test_inherited_url_container_and_scope_overrides_fail_closed(self):
+        fn=self.api()['cache_split_no_overrides'];fn({})
+        for key in ('MATHLIB_CACHE_GET_URL','MATHLIB_CACHE_PUT_URL','MATHLIB_CACHE_FROM','MATHLIB_CACHE_REPO_SCOPE'):
+            with self.assertRaises(AssertionError): fn({key:'unexpected'})
+
+    def test_new_dependency_source_namespace_is_rejected(self):
+        ns=self.api()
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d).resolve();dep=root/'dep';dep.mkdir();(dep/'A.lean').write_text('module\n')
+            ns['ROOT']=root; inventory={'dep':{'A.lean':('100644','blob','unused')}}
+            ns['cache_split_source_namespace'](inventory)
+            (dep/'Unexpected.lean').write_text('module\n')
+            with self.assertRaises(AssertionError): ns['cache_split_source_namespace'](inventory)
+
+    def stage_case(self, scenario):
+        import types
+        ns=self.api();events=[];record={'stages':[]};state={'done':False,'waited':False}
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d).resolve();procroot=root/'proc';procroot.mkdir()
+            image_file=root/'finite-image';image_file.write_bytes(b'finite image, never executed')
+            for pid in (70,71):
+                q=procroot/str(pid);q.mkdir()
+                fields=['S','1','70','70']+['0']*20;fields[19]='123';fields[21]=str(LIMIT//4096+1 if scenario=='rss' else 1)
+                (q/'stat').write_text(str(pid)+' (curl) '+' '.join(fields))
+            class ProcDir:
+                def iterdir(self):
+                    return [procroot/'70'] if not state['waited'] else ([procroot/'71'] if scenario=='survivor' else [])
+            def path(value):return ProcDir() if str(value)=='/proc' else Path(value)
+            argv=['/official/curl','--disable','--version'];image=[1,2,3,4,5]
+            tool=dict(path=argv[0],sha256='a'*64,image_identity=image)
+            class Proc:
+                pid=70;returncode=None
+                def poll(self):
+                    if scenario=='poll_error':raise OSError('finite poll failure')
+                    if state['done']:self.returncode=0;return 0
+                    return None
+                def wait(self,timeout):
+                    events.append(('wait',timeout));state['waited']=True;self.returncode=0
+                    if scenario=='wait_error':raise OSError('finite wait failure')
+                    return 0
+            def popen(actual,**kwargs):
+                events.append(('spawn',actual))
+                self.assertEqual(actual,argv);self.assertEqual(kwargs['executable'],'/proc/self/fd/'+str(state['fd']))
+                self.assertEqual(kwargs['pass_fds'],(state['fd'],));self.assertTrue(kwargs['start_new_session'])
+                if scenario!='stdin_close':self.assertEqual(kwargs['stdin'],-3)
+                if scenario=='popen_error':raise OSError('finite spawn failure')
+                kwargs['stderr'].write(b'x'*131072);kwargs['stdout'].write(b'finite stdout\n')
+                return Proc()
+            def observe(p,info):
+                row=dict(pid=70,session=70,pgrp=70,argv=argv,stable=True,errors=[],exe=argv[0],image_identity=image,
+                         recheck=dict(exe=argv[0],image_identity=image))
+                if scenario=='unknown':row.update(stable=False,errors=[{'type':'FileNotFoundError'}]);row.pop('exe')
+                return row
+            probes=[]
+            def resources():
+                probes.append(1)
+                events.append(('resources',len(probes)))
+                if scenario=='pre_resource' and len(probes)==1:raise OSError('finite resource PRE failure')
+                return {'memory':LIMIT,'affinity':[1] if scenario=='resource' and len(probes)>1 else [0]}
+            def post(fd,tool):
+                events.append(('tool_POST',))
+                self.assertEqual(os.fstat(fd).st_size,len(b'finite image, never executed'))
+                if scenario=='tool_post':raise OSError('finite tool POST failure')
+            def close(fd):
+                events.append(('close',fd))
+                os.close(fd)
+                if scenario=='fd_close':raise OSError('finite fd close failure')
+            def opened(path):
+                state['fd']=os.open(image_file,os.O_RDONLY)
+                return state['fd'],tool
+            class Input:
+                def open(self,mode):return self
+                def close(self):events.append(('stdin_close',));raise OSError('finite stdin close failure')
+            original_path=path
+            def path(value):return Input() if str(value)=='finite-input' else original_path(value)
+            saves=[]
+            def save():
+                saves.append(1);events.append(('save',))
+                if scenario=='pre_save' and len(saves)==1:raise OSError('finite initial save failure')
+            class OutputPathFailure:
+                def __truediv__(self,name):raise AssertionError('finite output path failure')
+            ns.update(Path=path,LIMIT=LIMIT,PKG=root,EVIDENCE=OutputPathFailure() if scenario=='pre_path' else root,receipt=record,save=save,
+                      cache_split_open_tool=opened,cache_split_tool_POST=post,
+                      cache_split_resource_seal=resources,owned_process_identity=observe,
+                      os=types.SimpleNamespace(name='posix',sysconf=lambda _:4096,close=close,
+                         killpg=lambda pid,sig:events.append(('killpg',pid))),
+                      signal=types.SimpleNamespace(SIGKILL=9),
+                      subprocess=types.SimpleNamespace(Popen=popen,DEVNULL=-3),
+                      time=types.SimpleNamespace(monotonic=lambda:101 if scenario=='timeout' and record['stages'] else 10,
+                         sleep=lambda delay:state.update(done=True)))
+            failure=None;result=None
+            try:result=ns['cache_split_tool_stage'](argv,'finite-stage',{},100,'finite-input' if scenario=='stdin_close' else None)
+            except BaseException as exc:failure=exc
+            fd=state['fd'];self.assertIn(('close',fd),events)
+            with self.assertRaises(OSError):os.fstat(fd)
+            no_process={'popen_error','pre_resource','pre_save','pre_path'}
+            if scenario not in no_process:
+                self.assertIn(('killpg',70),events);self.assertIn(('wait',10),events)
+            if scenario=='success':
+                self.assertIsNone(failure);self.assertEqual(result[0],0);self.assertEqual(len(result[2]),131072)
+                self.assertEqual(record['stages'][0]['remaining_session_pids'],[])
+                self.assertEqual(record['stages'][0]['resources_PRE'],record['stages'][0]['resources_POST'])
+            else:
+                expected={
+                    'rss':(AssertionError,'original 6GiB RSS bound'),
+                    'unknown':(AssertionError,'Unreadable/raced acquisition owner'),
+                    'timeout':(TimeoutError,'finite-stage'),
+                    'poll_error':(OSError,'finite poll failure'),
+                    'popen_error':(OSError,'finite spawn failure'),
+                    'survivor':(AssertionError,'Acquisition session not drained'),
+                    'resource':(AssertionError,'Acquisition resource PREPOST drift'),
+                    'stdin_close':(OSError,'finite stdin close failure'),
+                    'tool_post':(OSError,'finite tool POST failure'),
+                    'fd_close':(OSError,'finite fd close failure'),
+                    'wait_error':(OSError,'finite wait failure'),
+                    'pre_resource':(OSError,'finite resource PRE failure'),
+                    'pre_save':(OSError,'finite initial save failure'),
+                    'pre_path':(AssertionError,'finite output path failure')}[scenario]
+                self.assertIsInstance(failure,expected[0]);self.assertIn(expected[1],str(failure))
+            self.assertIn(('tool_POST',),events)
+            self.assertIn(('resources',2),events)
+            self.assertEqual(events[-1],('save',))
+            self.assertLess(events.index(('tool_POST',)),events.index(('close',fd)))
+            if scenario not in no_process:
+                self.assertLess(events.index(('spawn',argv)),events.index(('killpg',70)))
+                self.assertLess(events.index(('killpg',70)),events.index(('wait',10)))
+                self.assertLess(events.index(('wait',10)),events.index(('tool_POST',)))
+            if scenario=='rss':self.assertGreater(record['stages'][0]['peak_rss_bytes'],LIMIT)
+
+    def test_actual_tool_stage_cleanup_rss_timeout_and_large_stderr(self):
+        for scenario in ('success','rss','unknown','timeout','poll_error','popen_error','survivor','resource',
+                         'stdin_close','tool_post','fd_close','wait_error','pre_resource','pre_save','pre_path'):
+            with self.subTest(scenario=scenario):self.stage_case(scenario)
+
+    def test_acquisition_keeps_early_hard_failure_after_later_success(self):
+        ns=self.api()
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d).resolve();p,*args=self.plan(root);record={};labels=[]
+            ns.update(EVIDENCE=root,receipt=record,save=lambda:None,
+                      regular_seal=lambda path:(path.read_bytes(),{'sha256':digest(path.read_bytes())}))
+            def run(argv,label,env,deadline,stdin_path=None):
+                labels.append(label);self.assertNotEqual(label,'cache-extract','Hard failures must precede extraction')
+                self.assertEqual(argv[1],'--disable');self.assertEqual(argv[argv.index('--retry')+1],'5')
+                config=Path(argv[argv.index('--config')+1]).read_text();lines=config.splitlines();rows=[]
+                for i in range(0,len(lines),2):
+                    url=json.loads(lines[i].removeprefix('url = '));path=json.loads(lines[i+1].removeprefix('-o '))
+                    code=(500 if i==0 else 404) if label=='cache-master' else 200
+                    Path(path).write_bytes(b'finite archive')
+                    rows.append(dict(filename_effective=path,url_effective=url,http_code=code,exitcode=0))
+                return 0,b'\n'.join(json.dumps(row).encode() for row in rows),b''
+            ns['cache_split_tool_stage']=run
+            with self.assertRaisesRegex(AssertionError,'hard failure'):
+                ns['cache_split_acquire'](p,{},'/official/curl','/official/leantar',100)
+            self.assertEqual(labels,['cache-master','cache-legacy'])
+            self.assertEqual(len(record['cache_acquisition']['archives']),2)
+            self.assertEqual(len(record['cache_acquisition']['hard_failures']),1)
+
+    def test_failed_unreaped_or_surviving_planner_cannot_admit_acquisition(self):
+        fn=self.api()['cache_split_planner_completed']
+        good=dict(exit_code=0,status='SUCCEEDED',owner_reaped=True,remaining_session_pids=[])
+        fn(good)
+        for key,value in (('exit_code',1),('status','FAILED'),('owner_reaped',False),('remaining_session_pids',[123])):
+            changed=dict(good);changed[key]=value;acquired=[]
+            with self.assertRaises(AssertionError):
+                fn(changed);acquired.append(True)
+            self.assertEqual(acquired,[])
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
