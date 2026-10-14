@@ -1126,7 +1126,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
             self.assertFalse(self.classify(query,owner,official,argv))
         self.assertFalse(self.classify(query,owner,{}))
 
-    def exercise(self, *, child_argv=None, race=False, disappear=False, unknown=False, snapshot_only=False, pages=2, overdue=False, missing_owner=False, exe_race=False, reverse_exe_race=False, reverse_order=False, child_state=None, terminal_change=None, terminal_read_error=None, zombie_survivor=False, owner_argv=None, cache_context=None):
+    def exercise(self, *, child_argv=None, race=False, disappear=False, unknown=False, snapshot_only=False, pages=2, overdue=False, missing_owner=False, exe_race=False, reverse_exe_race=False, reverse_order=False, child_state=None, terminal_change=None, terminal_read_error=None, zombie_survivor=False, owner_argv=None, cache_context=None, terminal_transition=False, terminal_fault_read=2):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);procdir=root/'proc';procdir.mkdir()
             image_bytes=b'finite synthetic executed official executable identity'
@@ -1161,7 +1161,7 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
                 nonlocal exe_reads
                 if Path(p).parent.name=='101':
                     exe_reads+=1
-                    if child_state=='Z':raise FileNotFoundError('finite zombie executable absent')
+                    if child_state=='Z' or terminal_transition:raise FileNotFoundError('finite terminal-transition executable absent')
                     if unknown:raise PermissionError('finite unreadable executable')
                     if exe_race and exe_reads==1:return '/official/bin/helper'
                     if reverse_exe_race and exe_reads==2:return '/official/bin/helper'
@@ -1185,7 +1185,10 @@ class OwnedProcessIdentityAndPrefixQuery(unittest.TestCase):
                 raw=original_text(p,*args,**kwargs)
                 if p.name=='stat' and p.parent.name=='101':
                     stat_reads+=1
-                    if child_state=='Z' and stat_reads==2:
+                    if terminal_transition and stat_reads>=2:
+                        prefix,tail=raw.rsplit(')',1);fields=tail.split()
+                        fields[0]='Z';fields[21]='0';raw=prefix+') '+' '.join(fields)
+                    if (child_state=='Z' or terminal_transition) and stat_reads==terminal_fault_read:
                         if terminal_read_error:raise terminal_read_error('finite terminal stat read failed')
                         if terminal_change:
                             pid_part,tail=raw.rsplit(')',1);fields=tail.split()
@@ -2000,6 +2003,99 @@ class AuthenticatedCacheSourceViewControls(unittest.TestCase):
             for name in ('owned_process_identity', 'is_exact_official_prefix_query', 'run', 'compiler_run', 'serial_compile'):
                 self.assertIn(name, SOURCE)
 
+
+
+class OwnedTerminalLifecycleTransitionControls(unittest.TestCase):
+    def exercise(self, **kwargs):
+        return OwnedProcessIdentityAndPrefixQuery().exercise(**kwargs)
+
+    def process(self, stage):
+        return OwnedProcessIdentityAndPrefixQuery().process(stage, 101)
+
+    def test_initial_running_child_requires_two_fresh_matching_terminal_observations(self):
+        for reverse in (False, True):
+            with self.subTest(reverse_order=reverse):
+                stage, events, failure = self.exercise(child_state='R',
+                    terminal_transition=True, reverse_order=reverse)
+                self.assertIsNone(failure)
+                row = self.process(stage)
+                self.assertEqual(row['state'], 'R')
+                self.assertFalse(row['stable'])
+                self.assertNotIn('exe', row); self.assertNotIn('argv', row)
+                self.assertEqual(row['errors'][0]['type'], 'FileNotFoundError')
+                self.assertEqual(len(row['terminal_samples']), 2)
+                for sample in row['terminal_samples']:
+                    self.assertEqual(sample['state'], 'Z')
+                    self.assertEqual(sample['rss_bytes'], 0)
+                    for key in ('pid', 'ppid', 'pgrp', 'session', 'starttime_ticks'):
+                        self.assertEqual(sample[key], row[key])
+                self.assertTrue(row['verified_terminated_zombie'])
+                self.assertEqual(row['terminal_errors'], [])
+                self.assertTrue(row['conservative_executable_count'])
+                self.assertFalse(row['counted_compiler'])
+                self.assertFalse(row['exact_official_prefix_query'])
+                self.assertEqual(stage['owned_process_snapshot']['counted_compilers'], 1)
+                # Initial live RSS and session cleanup are not weakened.
+                self.assertEqual(stage['peak_rss_bytes'], 4*4096)
+                self.assertTrue(stage['owner_reaped'])
+                self.assertEqual(stage['remaining_session_pids'], [])
+                self.assertEqual(events, [('kill',100,9),('wait',10)])
+
+    def test_either_fresh_terminal_sample_rejects_liveness_identity_or_rss_drift(self):
+        for fault_read in (2, 3):
+            for field in ('pid', 'ppid', 'pgrp', 'session', 'starttime_ticks', 'state', 'rss_bytes'):
+                with self.subTest(fresh_sample=fault_read-1, field=field):
+                    stage, _, failure = self.exercise(child_state='R',
+                        terminal_transition=True, terminal_change=field,
+                        terminal_fault_read=fault_read)
+                    self.assertIsInstance(failure, RuntimeError)
+                    self.assertEqual(str(failure), 'More than one Lean compiler in an owned stage')
+                    row = self.process(stage)
+                    self.assertEqual(len(row['terminal_samples']), 2)
+                    self.assertFalse(row['verified_terminated_zombie'])
+                    self.assertTrue(row['terminal_errors'])
+                    self.assertTrue(row['conservative_executable_count'])
+                    self.assertTrue(row['counted_compiler'])
+                    self.assertFalse(row['exact_official_prefix_query'])
+                    self.assertEqual(stage['owned_process_snapshot']['counted_compilers'], 2)
+
+    def test_absent_unreadable_or_malformed_fresh_stat_keeps_unknown_child_counted(self):
+        for fault_read in (2, 3):
+            for error in (FileNotFoundError, PermissionError, ValueError, IndexError):
+                with self.subTest(fresh_sample=fault_read-1, error=error):
+                    stage, _, failure = self.exercise(child_state='R',
+                        terminal_transition=True, terminal_read_error=error,
+                        terminal_fault_read=fault_read)
+                    self.assertIsInstance(failure, RuntimeError)
+                    row = self.process(stage)
+                    self.assertFalse(row['verified_terminated_zombie'])
+                    self.assertEqual(len(row['terminal_samples']), fault_read-2)
+                    self.assertEqual(row['errors'][0]['type'], 'FileNotFoundError')
+                    self.assertEqual(row['terminal_errors'][0]['type'], error.__name__)
+                    self.assertTrue(row['counted_compiler'])
+                    self.assertFalse(row['exact_official_prefix_query'])
+                    self.assertEqual(stage['owned_process_snapshot']['counted_compilers'], 2)
+
+    def test_live_unknown_or_actual_second_compiler_has_no_terminal_exemption(self):
+        for options in (dict(unknown=True), dict(child_argv=['/official/bin/lean','second.lean'])):
+            with self.subTest(options=options):
+                stage, _, failure = self.exercise(child_state='R', **options)
+                self.assertIsInstance(failure, RuntimeError)
+                row = self.process(stage)
+                self.assertEqual(len(row['terminal_samples']), 2)
+                self.assertTrue(all(sample['state']=='R' for sample in row['terminal_samples']))
+                self.assertFalse(row['verified_terminated_zombie'])
+                self.assertTrue(row['counted_compiler'])
+                self.assertEqual(stage['owned_process_snapshot']['counted_compilers'], 2)
+
+    def test_verified_terminal_child_still_cannot_survive_owned_session_cleanup(self):
+        stage, _, failure = self.exercise(child_state='R',
+            terminal_transition=True, zombie_survivor=True)
+        self.assertIsInstance(failure, AssertionError)
+        self.assertEqual(str(failure), 'Owned session not drained')
+        self.assertTrue(self.process(stage)['verified_terminated_zombie'])
+        self.assertEqual(stage['remaining_session_pids'], [101])
+        self.assertTrue(stage['owner_reaped'])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

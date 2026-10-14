@@ -214,28 +214,34 @@ def owned_process_identity(p, initial_stat):
             row['errors'].append(dict(type='IdentityRace', message='Process identity changed during observation'))
     except (OSError, ValueError, UnicodeError, IndexError) as exc:
         row['errors'].append(dict(type=type(exc).__name__, message=str(exc)))
-    if row['state'] == 'Z':
-        # A terminal state is not an executable/query exemption. Verify the
-        # same kernel identity remains Z after all fallible image reads.
-        row['terminal_errors'] = []
-        try:
+    # Image-read failure does not establish termination. Obtain two fresh,
+    # consecutive terminal observations of the same initially owned identity.
+    # No retry, wait, absent-PID inference or live/query exemption is introduced.
+    row['terminal_samples'] = []
+    row['terminal_errors'] = []
+    try:
+        for _ in range(2):
             raw_stat = (p / 'stat').read_text()
             terminal = raw_stat.rsplit(')', 1)[1].split()
-            row['terminal_recheck'] = dict(pid=int(raw_stat.split(' ', 1)[0]),
+            check = dict(pid=int(raw_stat.split(' ', 1)[0]),
                 state=terminal[0], ppid=int(terminal[1]), pgrp=int(terminal[2]),
                 session=int(terminal[3]), starttime_ticks=int(terminal[19]),
-                rss_bytes=int(terminal[21]) * os.sysconf('SC_PAGE_SIZE'))
-            check = row['terminal_recheck']
-            keys = ('pid', 'ppid', 'pgrp', 'session', 'starttime_ticks')
-            row['verified_terminated_zombie'] = (check['state'] == 'Z'
-                and row['rss_bytes'] == check['rss_bytes'] == 0
-                and row['pgrp'] == row['session']
-                and all(row[key] == check[key] for key in keys))
-            if not row['verified_terminated_zombie']:
-                row['terminal_errors'].append(dict(type='TerminalIdentityMismatch',
-                    message='Terminal state or kernel process identity changed'))
-        except (OSError, ValueError, UnicodeError, IndexError) as exc:
-            row['terminal_errors'].append(dict(type=type(exc).__name__, message=str(exc)))
+                rss_bytes=int(terminal[21]) * os.sysconf('SC_PAGE_SIZE'),
+                observed_at=time.time())
+            row['terminal_samples'].append(check)
+            row['terminal_recheck'] = check
+        keys = ('pid', 'ppid', 'pgrp', 'session', 'starttime_ticks')
+        row['verified_terminated_zombie'] = (
+            row['pgrp'] == row['session']
+            and (row['state'] != 'Z' or row['rss_bytes'] == 0)
+            and all(check['state'] == 'Z' and check['rss_bytes'] == 0
+                and all(row[key] == check[key] for key in keys)
+                for check in row['terminal_samples']))
+        if not row['verified_terminated_zombie']:
+            row['terminal_errors'].append(dict(type='TerminalIdentityMismatch',
+                message='Both fresh terminal states and kernel identities must match'))
+    except (OSError, ValueError, UnicodeError, IndexError) as exc:
+        row['terminal_errors'].append(dict(type=type(exc).__name__, message=str(exc)))
     row['rechecked_at'] = time.time()
     return row
 
