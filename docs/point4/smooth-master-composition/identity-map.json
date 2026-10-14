@@ -13220,7 +13220,7 @@
     "historical_run": 37181895941,
     "scope": "Independent jet-field heat/reaction closure only; combined-head proof checks UNRUN; both targets OPEN"
   },
-  "paths": 2151,
+  "paths": 2164,
   "canonical_point4": "OPEN",
   "smooth_general_target": "OPEN",
   "localization_mock_route": {
@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "f8302b0fac82d6603c9903b358e7e82b921955b1",
-      "final_sha256": "257d31c44dfe8dcd433eacb9df63f11da1625f3c9b2435f932321a7eda1b3fbf",
+      "final_blob": "6b46a59547f2592ef7f02be222fcea32249f6e27",
+      "final_sha256": "6c1269f2b7de206675a6a194244cc8a80f2156d8494586408d5d97344c70d477",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "540b9eeff4bc09d695e405cdf4738e21fe37cdca",
-      "final_sha256": "289d23188295e0a88975b1cf134c895004d7caee53db726c28b55fab9931e833",
+      "final_blob": "0d238a1f23e4eeb338d7400015c899fc0778cc07",
+      "final_sha256": "e2bee7164251082b60d54897debf0fedc9c2ec7de03b6548b315980cdc6a3b10",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "3ee9024fbe7d384b4e71f56320a8c4862858fb5a",
-      "final_sha256": "6c665a91ef9d1b26dfbb2cb39de33e789d86f518da3ae8c6489d7132d59861e6",
+      "final_blob": "ef69059cbcea54948c292b7fe68f6a892a2e12b6",
+      "final_sha256": "7a4682dd5a7194d86d0d255712e0bd14bd32b007c207dba6331355776a6c1cfc",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "62f25a24cd33f85771845179fcaad6188cec0149",
-      "final_sha256": "5fb11b4c4921da134ca1948af466b90e21773ace82120ab2fe7a8481d0221171",
+      "final_blob": "4f99e09d883518c174dc616827f14c212e7781f7",
+      "final_sha256": "f1b5cacc45ce4ddfedcad003ac497f5d75e9c0c157e04adae9140bb3b4df0401",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "dd59085866262b98ebbff49a8800139d5b2209ad",
-      "final_sha256": "30d6296f6d76e4b2eb1ab0bc12be87e7878e5f889b0a2def84879f0346865927",
+      "final_blob": "d12a898651c41143b46f7a098f582e13f7cc68f4",
+      "final_sha256": "73b5806633925b7b13749d9c96aee053b09a169629fb8f34cd242f01e0e95d81",
       "mode": "100644",
       "count": 1
     }
@@ -27096,6 +27096,10 @@
     ".github/workflows/palomar-submission-01.yml": [
       "100644",
       "0a92975036b1aa3c60667be2e6801a6857979206"
+    ],
+    ".github/workflows/point4-actual-gaussian-jet-affine-heat.yml": [
+      "100644",
+      "7e86e170df9baace10b70f69b88aeac1289f9290"
     ],
     ".github/workflows/point4-boundaryless-chart-frames.yml": [
       "100644",
@@ -29317,6 +29321,14 @@
       "100644",
       "a729ec785e71e5f5359577b793a3e9561e2563b1"
     ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ActualGaussianJetPrincipalError.lean": [
+      "100644",
+      "a9822c1f4ff818298648779bbc1cf96fe3b68b81"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ActualGaussianJetSymmetry.lean": [
+      "100644",
+      "ab7e225764b3f261bd8789bcccd3ba332e44a1d6"
+    ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/AutonomousResolventExp.lean": [
       "100644",
       "ba14042c54ba0241e31e40d9c97669d2993aa6e1"
@@ -29401,9 +29413,25 @@
       "100644",
       "4fd6120cc9d9e2a897f9126ab6beb80230f350a3"
     ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2AffineHeatTrace.lean": [
+      "100644",
+      "525fe2f30285faa2aeff71828a4f3e3c052b8a0e"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2AffinePullback.lean": [
+      "100644",
+      "279a5e57af09cc57f996cea01d90d5aad8d78744"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2AffineTransport.lean": [
+      "100644",
+      "7a28a54b072fb047863c36514dc8ce02bb0124af"
+    ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2Localization.lean": [
       "100644",
       "fba76b09579930caadb7b35be5e2d4223d5372f6"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2MappedAffineGenerator.lean": [
+      "100644",
+      "8e944f9fa1e618692ef44196d70c2afb17f21c40"
     ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanDuhamelClassical.lean": [
       "100644",
@@ -31011,7 +31039,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "0e5d3ffdc88a09bc11c5a022a237bb24f4dcf408"
+      "09e2bfc90b38dc610c1d5223fe0d87f6834223e0"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31025,6 +31053,14 @@
       "100755",
       "8b935d1318ff17aecb00a940b5904276035a26ac"
     ],
+    "curvature/scripts/point4_actual_gaussian_jet_principal_error_probe.lean": [
+      "100644",
+      "1a87cf34b5baf0cd9a52bfb6cda7b462830354fa"
+    ],
+    "curvature/scripts/point4_actual_gaussian_jet_symmetry_probe.lean": [
+      "100644",
+      "cf755cc9cc2bf0b251cdad4e6b86755be336d833"
+    ],
     "curvature/scripts/point4_audit.sh": [
       "100755",
       "36c7b333f80e0f57ca40fb559f84868a41cbba29"
@@ -31035,7 +31071,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "84fe4ffd1d9f7550de0b798d23221e7e79d9e8c0"
+      "c52b1157442eec9ee128cea0256ff288a7e286f6"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31043,7 +31079,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "4cc74579fd87aba61f0f708812e7ee6f2ae632ed"
+      "c2b20918bd264267608328941fab3fe2f6dc21ff"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31067,15 +31103,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "f8302b0fac82d6603c9903b358e7e82b921955b1"
+      "6b46a59547f2592ef7f02be222fcea32249f6e27"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "193eb55197df8f99773d24e6b47c69cd8d2e5554"
+      "9fc5cc4df97bd75f8d6c28505e137e2ae2e8ab2f"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "9c44523ffba4d0ac95cf897505c64812ca64ed02"
+      "c5b6ddea83176f06d01105aa644515d482505aa7"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31121,6 +31157,22 @@
       "100755",
       "f82e7e18dda413caef1e03fb3b0910d628065e56"
     ],
+    "curvature/scripts/point4_euclidean_c2_affine_heat_trace_probe.lean": [
+      "100644",
+      "c04f286b60f8fd95bf223e8e12267078b26ca516"
+    ],
+    "curvature/scripts/point4_euclidean_c2_affine_pullback_probe.lean": [
+      "100644",
+      "ab87c8a7c09600b2dd4b3b2c276f20a410368ddb"
+    ],
+    "curvature/scripts/point4_euclidean_c2_affine_transport_probe.lean": [
+      "100644",
+      "ddebb19ff4dcd89cbda40a43666680ea055fdd41"
+    ],
+    "curvature/scripts/point4_euclidean_c2_mapped_affine_generator_probe.lean": [
+      "100644",
+      "cbc8bd5a55abc9c85b5c32cc7d2e075384de8407"
+    ],
     "curvature/scripts/point4_fixed_background_heat_probe.lean": [
       "100644",
       "771b3d1569535143bc1c96cd57427adce0e8caee"
@@ -31135,11 +31187,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "b696cbc627ee78d7f6fecbd054f0e2dad57a40ef"
+      "4213a54c9d4e0b4eeffab7cf7b6e196b34570ce8"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "5f0848425d60a05bed8e1cdd86b0505569aebbc1"
+      "dba108b367cbe2ca2a8bf720f463cab71e25bb08"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31199,7 +31251,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "540b9eeff4bc09d695e405cdf4738e21fe37cdca"
+      "0d238a1f23e4eeb338d7400015c899fc0778cc07"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31235,19 +31287,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "3ee9024fbe7d384b4e71f56320a8c4862858fb5a"
+      "ef69059cbcea54948c292b7fe68f6a892a2e12b6"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "62f25a24cd33f85771845179fcaad6188cec0149"
+      "4f99e09d883518c174dc616827f14c212e7781f7"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "2a58bc8d1916c6b914a15b5fe62d5e1104ef68f7"
+      "ef74d9e1cef153be8e294d1636e9190b2188dc67"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "b515ce5472648de3ff005e2d6f27d344467ffefd"
+      "f5ebeae33d4aa3e21f0261ac2bf5de4c1157953b"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -31263,7 +31315,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "e0c463c63b94967a6154f4374898be574df1bcf1"
+      "e0ebe68d16cdb0e90ae96500ae7e7a0ccc5c839a"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31271,7 +31323,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "cc48923800f9513a2eb1b1a3f5922c081cabfbd4"
+      "d8b94e56a972323965338aeb037e2e401b5cca07"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31283,7 +31335,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "dd59085866262b98ebbff49a8800139d5b2209ad"
+      "d12a898651c41143b46f7a098f582e13f7cc68f4"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -78084,6 +78136,127 @@
     "scope": "Exact cumulative PR103/104/105 tensor source and PR109 compiler ancestry; tensor Lean 4.35rc2 is distinct from curvature Lean 4.33. Compilation, Comparator, kernel and rendering qualification pending; both Point4 targets OPEN."
   },
   "curvature_finite_input_preparation": {
+    "current_actual_gaussian_jet_affine_heat_batch": {
+      "base_head": "f678a33b860486dd3ffe662b3da6b94a6b141800",
+      "base_current_paths": 2151,
+      "new_current_paths": 2164,
+      "additions": {
+        ".github/workflows/point4-actual-gaussian-jet-affine-heat.yml": {
+          "mode": "100644",
+          "sha256": "cb109dada7f5336f389aabd0eb6c8ea063a5f4b6b02e0b1872ee1460eb1d0e25",
+          "blob": "7e86e170df9baace10b70f69b88aeac1289f9290",
+          "origin": "Exact focused successor of the audited f678 coefficient workflow; future Gaussian/affine batch only"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ActualGaussianJetPrincipalError.lean": {
+          "mode": "100644",
+          "sha256": "47a2e6682312877d337fdcfb16582b9ee54eb183464b14e53a534a9db653a826",
+          "blob": "a9822c1f4ff818298648779bbc1cf96fe3b68b81",
+          "origin": "parallel-c2-gaussian-jet-principal-bridge-20261014/ActualGaussianJetPrincipalError.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ActualGaussianJetSymmetry.lean": {
+          "mode": "100644",
+          "sha256": "0ecf2570f6df6249c5fb728088f97195f87dcf9f16066c1a72a5d7741a98f7f4",
+          "blob": "ab7e225764b3f261bd8789bcccd3ba332e44a1d6",
+          "origin": "parallel-c2-gaussian-jet-symmetry-20261014/ActualGaussianJetSymmetry.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2AffineHeatTrace.lean": {
+          "mode": "100644",
+          "sha256": "533b5bdafc7f9d669a715ffcdbd70bcc36d5b01cdfa2c8d026d5d25c2721ff79",
+          "blob": "525fe2f30285faa2aeff71828a4f3e3c052b8a0e",
+          "origin": "parallel-c2-affine-heat-trace-20261014/EuclideanC2AffineHeatTrace.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2AffinePullback.lean": {
+          "mode": "100644",
+          "sha256": "3f8c3c69ed5ccfd1d3e6f103cabac7131558149660677ccdf50d7a3e01117ac5",
+          "blob": "279a5e57af09cc57f996cea01d90d5aad8d78744",
+          "origin": "parallel-c2-derivative-20261013/ap-v2-private-proof-20261014/EuclideanC2AffinePullback.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2AffineTransport.lean": {
+          "mode": "100644",
+          "sha256": "4924055629d9f04f16f09584bd57f0d62930c3ccb98e08d58e3be01add4dc07b",
+          "blob": "7a28a54b072fb047863c36514dc8ce02bb0124af",
+          "origin": "parallel-c2-affine-transport-20261014/EuclideanC2AffineTransport.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanC2MappedAffineGenerator.lean": {
+          "mode": "100644",
+          "sha256": "59bb13153d201c4d7dbfee236aa9f3f9445e0b7dc8eb154e100758e1e3f1cdff",
+          "blob": "8e944f9fa1e618692ef44196d70c2afb17f21c40",
+          "origin": "parallel-c2-mapped-affine-generator-20261014/EuclideanC2MappedAffineGenerator.lean"
+        },
+        "curvature/scripts/point4_actual_gaussian_jet_principal_error_probe.lean": {
+          "mode": "100644",
+          "sha256": "e5e42ff290a4b97b82739ab361c883122b6f625fbf419828e7909ea54fa0be09",
+          "blob": "1a87cf34b5baf0cd9a52bfb6cda7b462830354fa",
+          "origin": "parallel-c2-gaussian-jet-principal-bridge-20261014/ActualGaussianJetPrincipalErrorEvidence.lean"
+        },
+        "curvature/scripts/point4_actual_gaussian_jet_symmetry_probe.lean": {
+          "mode": "100644",
+          "sha256": "e58be3a85fe0b72d2a3f7bd4b87eccb08f3ed6e39e838e349cfaaac02a58acc1",
+          "blob": "cf755cc9cc2bf0b251cdad4e6b86755be336d833",
+          "origin": "parallel-c2-gaussian-jet-symmetry-20261014/ActualGaussianJetSymmetryEvidence.lean"
+        },
+        "curvature/scripts/point4_euclidean_c2_affine_heat_trace_probe.lean": {
+          "mode": "100644",
+          "sha256": "bf101fb94cc7947bcf2d5ac2c8509aaf447d45053a9beb973efff48bff1d7b89",
+          "blob": "c04f286b60f8fd95bf223e8e12267078b26ca516",
+          "origin": "parallel-c2-affine-heat-trace-20261014/EuclideanC2AffineHeatTraceEvidence.lean"
+        },
+        "curvature/scripts/point4_euclidean_c2_affine_pullback_probe.lean": {
+          "mode": "100644",
+          "sha256": "440a2dbe792b5881b8c953f88e5dfea0271884e2d67e20b5a11294d4e65cb3be",
+          "blob": "ab87c8a7c09600b2dd4b3b2c276f20a410368ddb",
+          "origin": "parallel-c2-derivative-20261013/ap-v2-private-proof-20261014/EuclideanC2AffinePullbackEvidence.lean"
+        },
+        "curvature/scripts/point4_euclidean_c2_affine_transport_probe.lean": {
+          "mode": "100644",
+          "sha256": "405d5694c53f8e43b74a1ae1e0118b2177ed5b1f50906831ab2a6d25d9d53503",
+          "blob": "ddebb19ff4dcd89cbda40a43666680ea055fdd41",
+          "origin": "parallel-c2-affine-transport-20261014/EuclideanC2AffineTransportEvidence.lean"
+        },
+        "curvature/scripts/point4_euclidean_c2_mapped_affine_generator_probe.lean": {
+          "mode": "100644",
+          "sha256": "65ec95dbe48a3ac13281cbf0bf8538fd33c3e8e1d39585d1180a8dba0f033248",
+          "blob": "cbc8bd5a55abc9c85b5c32cc7d2e075384de8407",
+          "origin": "parallel-c2-mapped-affine-generator-20261014/EuclideanC2MappedAffineGeneratorEvidence.lean"
+        }
+      },
+      "policy_sha256": "ac0498752fab2fd2aae331a23308675515cd8976d41439ac410f87e43b1a9514",
+      "workflow": ".github/workflows/point4-actual-gaussian-jet-affine-heat.yml",
+      "modules": 6,
+      "probe_record_counts": [
+        6,
+        8,
+        2,
+        7,
+        4,
+        2
+      ],
+      "source_review_sha256": {
+        "parallel-c2-independent-review-20261013/actual-gaussian-jet-principal-independent-source-review.json": "dbce9ee1a916b1905019c6011a1c1c804a301e306f1d726bddfd97142aeea563",
+        "parallel-c2-independent-review-20261013/actual-gaussian-jet-symmetry-independent-source-review.json": "33192566a784c111b48b1b211e6b7588b2f4d7d31a75f19f57f12ff5cdd98d00",
+        "parallel-c2-independent-review-20261013/euclidean-c2-affine-transport-independent-source-review.json": "424c929aa913664c177b901d7fdf988c074e97517f60eaebc6a3e988bd00a3b7",
+        "parallel-c2-independent-review-20261013/certified-affine-pullback-v2-private-proof-independent-source-review.json": "5bc316488917aa1f4ee911a08158189cd000facc8077e4bf6e2c12467e2e19fa",
+        "parallel-c2-independent-review-20261013/affine-actual-heat-trace-independent-source-review.json": "21d37fdc4fc5e069227e73f17d9bc4df8381e9741be56fe88282933d051bb1e6",
+        "parallel-c2-independent-review-20261013/mapped-affine-generator-independent-source-review.json": "e178b44aa2fb3bb208d397eae0330cfee952e7e6f43a5de6508e0520958e4c65"
+      },
+      "actual_native_review_sha256_at_preparation": {
+        "independent-native-GJ-gaussian-jet-principal-actual-review-20261014.json": "f492514b9327b9bb84f521eb60b49a2aedf8fb854daa5a13b7bf6132e81fb480",
+        "independent-native-GS-gaussian-jet-symmetry-actual-review-20261014.json": "dc6c38a0a8fe5581c288155c50298fb12c8075e34be04918714d65c53de28dc2",
+        "parallel-c2-independent-review-20261013/affine-scalar-af2-independent-actual-review.json": "85ba61b3bc54c65f6cf4478671c243fec680050e37bd5241803e86aecc3ecfa9"
+      },
+      "native_qualification_snapshot": {
+        "ActualGaussianJetPrincipalError": "ACTUAL_INDEPENDENT_PASS",
+        "ActualGaussianJetSymmetry": "ACTUAL_INDEPENDENT_PASS",
+        "EuclideanC2AffineTransport": "ACTUAL_INDEPENDENT_PASS",
+        "EuclideanC2AffinePullback": "PENDING_ACTUAL_ROOT_QUALIFICATION",
+        "EuclideanC2AffineHeatTrace": "PENDING_ACTUAL_ROOT_QUALIFICATION",
+        "EuclideanC2MappedAffineGenerator": "PENDING_ACTUAL_ROOT_QUALIFICATION"
+      },
+      "application_eligible_at_preparation": false,
+      "scope": "Actual initial Gaussian jets and scalar affine heat only; no literal metric Gram identity, generator identification or nonlinear interval solution",
+      "new_head_hosted_qualification": "UNRUN",
+      "point4": "OPEN"
+    },
     "current_initial_heat_inverse_coefficients": {
       "base_head": "7c6ae414927cb7c61dbcbfef30d5442a21da1720",
       "base_current_paths": 2146,
