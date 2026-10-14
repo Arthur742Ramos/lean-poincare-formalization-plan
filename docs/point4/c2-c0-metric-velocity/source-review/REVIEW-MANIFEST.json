@@ -1,0 +1,114 @@
+{
+  "review_date": "2026-10-05",
+  "review_scope": "independent read-only mathematical and pinned-source/API review; no Lean execution",
+  "verdict": "SOURCE-ONLY REJECT",
+  "snapshot": "frozen-001",
+  "candidate_untouched": true,
+  "source_baseline_commit": "90cc7ebed996f28acb57ef9948d37f114088bd4d",
+  "mathlib_commit": "db584cd6d46c92f209a44c0f1c829460d327499d",
+  "source_files": [
+    {
+      "file": "C0EndpointCompactPositivity.lean",
+      "bytes": 14511,
+      "sha256": "45261b684e7add6c9e83eca9266777b8d12b6c7c598084d1d9e10b74f7867274",
+      "git_blob_sha1": "8ccc3b69623eb04e51c5245eddcbf28c7d94ced2",
+      "lines": 286
+    },
+    {
+      "file": "C0FiniteAtlasGaussian.lean",
+      "bytes": 20949,
+      "sha256": "474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f",
+      "git_blob_sha1": "b992548e1168157fdaa77e9c59a070cd75965392",
+      "lines": 403
+    },
+    {
+      "file": "C0GaussianEndpoint.lean",
+      "bytes": 4674,
+      "sha256": "16d76518ea457c778d54c2d9c7366af5c530eed81006f9b2454245d7d2df079d",
+      "git_blob_sha1": "fddd5a6e01432ebe760dfcad6ce28b455592e942",
+      "lines": 106
+    },
+    {
+      "file": "C2MetricVelocityExtension.lean",
+      "bytes": 9604,
+      "sha256": "ea20369d7a63dba3da0d64b964efafe4d2a7ae68c26bc9986bf0868bcac5a24d",
+      "git_blob_sha1": "46a0ccd6188961204a20aaee657719f04d6f3a0c",
+      "lines": 193
+    }
+  ],
+  "blocking_findings": [
+    {
+      "id": "R1",
+      "file": "C0GaussianEndpoint.lean",
+      "line": 54,
+      "kind": "composition argument basepoint mismatch"
+    },
+    {
+      "id": "R2",
+      "file": "C2MetricVelocityExtension.lean",
+      "line": 190,
+      "kind": "composition argument basepoint mismatch"
+    }
+  ],
+  "mathematical_obstruction_found": false,
+  "project_graph": {
+    "modules": 63,
+    "byte_matches": 63,
+    "import_matches": 63,
+    "modern_to_legacy_edges": 0,
+    "unresolved_project_imports": 0,
+    "comment_stripped_proof_hole_hits": 0
+  },
+  "external_audit": {
+    "provided_receipt_matches": 16,
+    "additional_exact_pin_receipts": [
+      {
+        "path": "Mathlib/Topology/Continuous.lean",
+        "ref": "db584cd6d46c92f209a44c0f1c829460d327499d",
+        "sha": "1cfeed8be7abc4e8bd4ce81034b01817aa7e57fa",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/Continuous.lean"
+      },
+      {
+        "path": "Mathlib/Analysis/Calculus/Deriv/Comp.lean",
+        "ref": "db584cd6d46c92f209a44c0f1c829460d327499d",
+        "sha": "0b9db5a45db7989755faf336238545ee35543aef",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/Calculus/Deriv/Comp.lean"
+      },
+      {
+        "path": "Mathlib/Topology/ContinuousMap/Bounded/Normed.lean",
+        "ref": "db584cd6d46c92f209a44c0f1c829460d327499d",
+        "sha": "91b9900c6017ab492bcc15ea793bcfe73a90c8ce",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/ContinuousMap/Bounded/Normed.lean"
+      },
+      {
+        "path": "Mathlib/Topology/VectorBundle/Riemannian.lean",
+        "ref": "db584cd6d46c92f209a44c0f1c829460d327499d",
+        "sha": "3df28f7e7b68da0c9a8310c950592e5aeed5ed7a",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/VectorBundle/Riemannian.lean"
+      },
+      {
+        "path": "Mathlib/Analysis/SpecialFunctions/Sqrt.lean",
+        "ref": "db584cd6d46c92f209a44c0f1c829460d327499d",
+        "sha": "97eb457d12cd8d572257fca6f330c5b3788f7dd9",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/SpecialFunctions/Sqrt.lean"
+      }
+    ],
+    "external_frontier_modules": 93,
+    "transitive_external_graph_complete": false
+  },
+  "artifacts": {
+    "report": {
+      "file": "REVIEW.md",
+      "sha256": "fe937c82aee7f994a5fef19a0d54cfb789988fb2f8df3b9900d66d8290e359a1"
+    },
+    "author_import_graph": {
+      "file": "AUTHOR-IMPORT-GRAPH.json",
+      "sha256": "64581be653d2ab17ebfab3a288cb7321a4512ab7bc58dd70397380e3e76749bc"
+    },
+    "project_bytes": "PROJECT-BYTE-AUDIT.tsv",
+    "project_imports": "PROJECT-IMPORT-AUDIT.tsv",
+    "provided_api_bytes": "PROVIDED-API-BYTE-AUDIT.tsv",
+    "additional_api_bytes": "ADDITIONAL-API-BYTE-AUDIT.tsv",
+    "proof_hole_scan": "COMMENT-STRIPPED-PROOF-HOLE-SCAN.txt"
+  }
+}

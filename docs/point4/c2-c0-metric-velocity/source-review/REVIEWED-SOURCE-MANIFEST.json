@@ -1,0 +1,39 @@
+{
+  "snapshot": "frozen-001",
+  "date": "2026-10-05",
+  "status": "uncompiled source candidate; no theorem verification claim",
+  "headers": "intentional legacy headers; no module command",
+  "source_baseline_commit": "90cc7ebed996f28acb57ef9948d37f114088bd4d",
+  "contract_commit": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
+  "mathlib_commit": "db584cd6d46c92f209a44c0f1c829460d327499d",
+  "files": [
+    {
+      "file": "C0EndpointCompactPositivity.lean",
+      "bytes": 14511,
+      "sha256": "45261b684e7add6c9e83eca9266777b8d12b6c7c598084d1d9e10b74f7867274",
+      "git_blob_sha1": "8ccc3b69623eb04e51c5245eddcbf28c7d94ced2",
+      "lines": 286
+    },
+    {
+      "file": "C0FiniteAtlasGaussian.lean",
+      "bytes": 20949,
+      "sha256": "474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f",
+      "git_blob_sha1": "b992548e1168157fdaa77e9c59a070cd75965392",
+      "lines": 403
+    },
+    {
+      "file": "C0GaussianEndpoint.lean",
+      "bytes": 4674,
+      "sha256": "16d76518ea457c778d54c2d9c7366af5c530eed81006f9b2454245d7d2df079d",
+      "git_blob_sha1": "fddd5a6e01432ebe760dfcad6ce28b455592e942",
+      "lines": 106
+    },
+    {
+      "file": "C2MetricVelocityExtension.lean",
+      "bytes": 9604,
+      "sha256": "ea20369d7a63dba3da0d64b964efafe4d2a7ae68c26bc9986bf0868bcac5a24d",
+      "git_blob_sha1": "46a0ccd6188961204a20aaee657719f04d6f3a0c",
+      "lines": 193
+    }
+  ]
+}

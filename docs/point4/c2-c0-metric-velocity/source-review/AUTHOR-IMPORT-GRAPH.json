@@ -1,0 +1,1509 @@
+{
+  "label": "frozen-001",
+  "source_baseline": "90cc7ebed996f28acb57ef9948d37f114088bd4d",
+  "new_headers": "legacy intentionally, to import existing legacy analytic leaves",
+  "project_graph_complete": true,
+  "external_graph_complete": false,
+  "project_module_count": 63,
+  "external_frontier_count": 93,
+  "modern_to_legacy_edges": [],
+  "records": {
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.C0GaussianEndpoint": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.C0GaussianEndpoint",
+      "source": "frozen-001/C0GaussianEndpoint.lean",
+      "origin": "new frozen-001",
+      "legacy": true,
+      "bytes": 4674,
+      "sha256": "16d76518ea457c778d54c2d9c7366af5c530eed81006f9b2454245d7d2df079d",
+      "git_blob_sha1": "fddd5a6e01432ebe760dfcad6ce28b455592e942",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialTrace",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatFrechet",
+        "Mathlib.Analysis.Calculus.Deriv.Basic",
+        "Mathlib.Topology.ContinuousMap.BoundedCompactlySupported",
+        "Mathlib.Topology.UniformSpace.HeineCantor"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatFrechet": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatFrechet",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatFrechet.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 8882,
+      "sha256": "3b45de6f2b35a6671db0d2af5c393ba1dd67c07ddd155e4ab8fb66cfd8c38536",
+      "git_blob_sha1": "724b05f65abf7e2be143ca6159d10a147df8d1f5",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelFrechet"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelFrechet": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelFrechet",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanDuhamelFrechet.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 20127,
+      "sha256": "1bc17b12f95e5e1d738a9d98b5c6ca03334bacfda0945d227f4e60c14495bf07",
+      "git_blob_sha1": "776a3cb93ea43d426444561e6dd3dacebf9a6b7d",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FiniteCoordinateFrechet",
+        "Mathlib.Analysis.Normed.Operator.NormedSpace",
+        "Mathlib.Analysis.Normed.Operator.Prod"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FiniteCoordinateFrechet": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FiniteCoordinateFrechet",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/FiniteCoordinateFrechet.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 8992,
+      "sha256": "75f2d72993cdbe3bfeab4147b7d0d23c1c7874633df00622e8a3b118268dedec",
+      "git_blob_sha1": "467d5afa65654d93bbd3095c35756b71086adfb2",
+      "imports": [
+        "Mathlib.Analysis.Calculus.FDeriv.Partial",
+        "Mathlib.Analysis.Normed.Operator.Mul"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelHessian",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanDuhamelHessian.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 18863,
+      "sha256": "109a9895aa5b3db72c8946d5d699c45624c202f3f22ea0f5df413d641d761981",
+      "git_blob_sha1": "eda5125a237aa48366ed9613bd8fd64acbc52002",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatHessian"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatHessian": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatHessian",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatHessian.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 31373,
+      "sha256": "986239468af296fb43f5cba9f7d21c23057cba6a2ece7b432876b1ac5b82e9ec",
+      "git_blob_sha1": "35c2f1a396ef074accb6e92b5e2818aa90741f20",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelClassical"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelClassical": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelClassical",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanDuhamelClassical.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 24138,
+      "sha256": "498664f93d8ba3b86e7bc58f4caa713932b28be782ce40a1c11b751f9d7832bd",
+      "git_blob_sha1": "fc810a2bbce52ffe05f910373f1be4103de0dfbe",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.HeatKernelSchauder"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.HeatKernelSchauder": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.HeatKernelSchauder",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/HeatKernelSchauder.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 55871,
+      "sha256": "f7dc15d0e6a65a304f6c12689bb524bb9a93d903af348646a97531c336f6972c",
+      "git_blob_sha1": "256e4eeb01d6f61b3e096895e1bc2e9151866352",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatEuclidean",
+        "Mathlib.Analysis.Calculus.ParametricIntervalIntegral"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatEuclidean": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatEuclidean",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatEuclidean.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 31684,
+      "sha256": "75d3787d7a735740991344f747682e30597adb1564ad8faacc7119fcead0b31d",
+      "git_blob_sha1": "6cc401572252566b41cd6418f8732cf1f034c3d8",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.HeatKernel1D",
+        "Mathlib.LinearAlgebra.Matrix.Symmetric"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.HeatKernel1D": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.HeatKernel1D",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/HeatKernel1D.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 548846,
+      "sha256": "fa8dda57559e802bc06dcc0c0d83ea8193da7a1743e00f889fd04a44ca3e470e",
+      "git_blob_sha1": "9bfa7841809cef83dfa8551827ee825a847d50c6",
+      "imports": [
+        "Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral",
+        "Mathlib.Analysis.SpecialFunctions.Sqrt",
+        "Mathlib.MeasureTheory.Integral.Pi",
+        "Mathlib.Analysis.Calculus.ParametricIntegral",
+        "Mathlib.Topology.MetricSpace.Contracting",
+        "Mathlib.Topology.ContinuousMap.Bounded.Basic",
+        "Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus",
+        "Mathlib.Analysis.ODE.PicardLindelof",
+        "Mathlib.Analysis.ODE.ExistUnique",
+        "Mathlib.Analysis.ODE.Gronwall"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialTrace": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialTrace",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatInitialTrace.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": true,
+      "bytes": 14022,
+      "sha256": "ab290500416e88764f748a827a522e1a444b3964873053b7cb3f43ca3ca8c427",
+      "git_blob_sha1": "461630e6cf945e62441b5effbf5168c155c36e9b",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialC2",
+        "Mathlib.Analysis.Calculus.MeanValue",
+        "Mathlib.Analysis.Calculus.FDeriv.Extend",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelTime",
+        "PoincareCurvature.Analysis.FiniteMomentApproximation",
+        "PoincareCurvature.Analysis.CompactUniformModulus",
+        "Mathlib.Topology.UniformSpace.UniformConvergence"
+      ]
+    },
+    "PoincareCurvature.Analysis.CompactUniformModulus": {
+      "module": "PoincareCurvature.Analysis.CompactUniformModulus",
+      "source": "curvature/PoincareCurvature/Analysis/CompactUniformModulus.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": true,
+      "bytes": 3235,
+      "sha256": "58603f65344a781d670e2c3de8229fe257e5e489e41d6d9188f99e6723a33538",
+      "git_blob_sha1": "3ca3a4deb1416a628f42453d1e97eac11584db6b",
+      "imports": [
+        "Mathlib.Topology.UniformSpace.HeineCantor",
+        "Mathlib.Topology.ContinuousMap.Bounded.Basic",
+        "Mathlib.Analysis.Normed.Module.Basic"
+      ]
+    },
+    "PoincareCurvature.Analysis.FiniteMomentApproximation": {
+      "module": "PoincareCurvature.Analysis.FiniteMomentApproximation",
+      "source": "curvature/PoincareCurvature/Analysis/FiniteMomentApproximation.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 5145,
+      "sha256": "d2e921d24dceac4edb06d697518e33e9903456bf27099920ddeed9c1ece50261",
+      "git_blob_sha1": "221d301a604e594ece174091543b5b2c0458c01b",
+      "imports": [
+        "Mathlib.Analysis.Normed.Group.Constructions",
+        "Mathlib.MeasureTheory.Integral.Bochner.Basic",
+        "Mathlib.MeasureTheory.Measure.Lebesgue.Basic",
+        "Mathlib.Topology.ContinuousMap.Bounded.Normed",
+        "Mathlib.Tactic.Abel",
+        "Mathlib.Tactic.Ring",
+        "Mathlib.Tactic.Positivity"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelTime": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelTime",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanDuhamelTime.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 50223,
+      "sha256": "3ecdbc13816ecbec473d357f68fe394c0cf3dee5740b7aae1951e51438440b02",
+      "git_blob_sha1": "b11f2992a4ff34f9d62a7045a2004dd935a40af5",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanDuhamelClassical"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialC2": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatInitialC2",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatInitialC2.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 19060,
+      "sha256": "ebccd69d9e71023310328faec9dc4b756058d26f0fe3c615558b59c59659d2a8",
+      "git_blob_sha1": "36b855353e96d7a66cc53e1999fc5225bc5e9ba8",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.EuclideanHeatFrechet"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.C0FiniteAtlasGaussian": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.C0FiniteAtlasGaussian",
+      "source": "frozen-001/C0FiniteAtlasGaussian.lean",
+      "origin": "new frozen-001",
+      "legacy": true,
+      "bytes": 20949,
+      "sha256": "474af52d61a6a90197d92ee24517952863cc834b66c3158c98182e78de21771f",
+      "git_blob_sha1": "b992548e1168157fdaa77e9c59a070cd75965392",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.C0GaussianEndpoint",
+        "PoincareCurvature.Analysis.PreferredCoordinateFrame",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteSmoothTrivializingCover",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.NormalizedCutoff",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatLocalReconstruction"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatLocalReconstruction": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatLocalReconstruction",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatLocalReconstruction.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 34175,
+      "sha256": "b396eeb4b70263d7c194a0388ae343577a2d73ffdcd6b1fecf0fee2fa4f42318",
+      "git_blob_sha1": "846cfd57d4f9ad8efa93b322f07aee508bf72b88",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatFiniteSum"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatFiniteSum": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatFiniteSum",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatFiniteSum.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 6565,
+      "sha256": "24d5c482c990466b34b306f35daae749058b36480fdcede19d58732c93aa469d",
+      "git_blob_sha1": "1becfcec5dea136d895a378ff3699bb4b3d8b336",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatOperator"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatOperator": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.TensorHeatOperator",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/TensorHeatOperator.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 7652,
+      "sha256": "3787dbaefdeeef347ba7005de91fbfaebea4d388794de214199cd9db3b9ef78b",
+      "git_blob_sha1": "e6fecff2d8350b32c7968312ce51fc124ef1d46b",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLeibniz",
+        "Mathlib.Analysis.Calculus.Deriv.Comp"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLeibniz": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLeibniz",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianLeibniz.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 12136,
+      "sha256": "b09a74aecd93f288a29945b67f4052cadf42f62be3281a8073ae7beebb4197a5",
+      "git_blob_sha1": "63f96eda9c1808a3cbba2564f9e5b17b85ff3caa",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLinear",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Existence"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Existence": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Existence",
+      "source": "schur-rigidity/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Existence.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 66126,
+      "sha256": "0d3544fba247dec755e6755d2fce297135035e1dc0abace0b32c4949d8e66b48",
+      "git_blob_sha1": "6678aacea7247af23f8c24c7bbd2d631bc68d220",
+      "imports": [
+        "Mathlib.Geometry.Manifold.PartitionOfUnity",
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+        "Mathlib.LinearAlgebra.Basis.VectorSpace",
+        "Mathlib.Topology.VectorBundle.Constructions"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLinear": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLinear",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianLinear.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 15232,
+      "sha256": "6ae26e990ecacaf1601bcdff9ba36c26072f401cc349689e858d4fdc6dc822b8",
+      "git_blob_sha1": "bb23a9ee7d14f7da3970f9db648bfd5202d68820",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacian"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacian": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacian",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacian.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 18425,
+      "sha256": "5c0e6695a6b57e20800df1d09a77b3640f382c1c9233fd967b2250022417a800",
+      "git_blob_sha1": "1595adcdd1ad9fabdafa91ca5d4c73a0766649bc",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.InducedHom",
+        "Mathlib.Analysis.InnerProductSpace.CanonicalTensor"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.InducedHom": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.InducedHom",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/InducedHom.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 11740,
+      "sha256": "2a6dfd7f0c5b1dea76b8cee056e449c3ce6b624f23253836de0cc9bedfe7c9c4",
+      "git_blob_sha1": "285d1fced674e083896b4af97cdcabcc6b3a8f56",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/HomBundleComp.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 15732,
+      "sha256": "7cfc69c985aa43a1afc5f6441dd508be460b9bb769eae63caf432f49c572a7d4",
+      "git_blob_sha1": "c690f4294896885ab5ce3a70aebb1b58b55251df",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor",
+      "source": "schur-rigidity/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Tensor.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 119386,
+      "sha256": "518928ccf224355a1a755e2477710f1c26b0662e2675ccab2c6913b10ba9f61b",
+      "git_blob_sha1": "4b887b01c3d90ef1a2b645610f281829c12808a9",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Raw",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita",
+        "Mathlib.Geometry.Manifold.BumpFunction",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.Analysis.InnerProductSpace.Dual",
+        "Mathlib.Analysis.InnerProductSpace.Trace"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita",
+      "source": "schur-rigidity/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 122369,
+      "sha256": "b9634295ebef0fa63020be132df7c1935db7cfee59d723d0e853899776c133ac",
+      "git_blob_sha1": "31a79f8cc30b8dbed94396a2575274effbd83f54",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Existence",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Metric",
+        "Mathlib.Analysis.InnerProductSpace.Dual",
+        "Mathlib.Geometry.Manifold.BumpFunction",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.Geometry.Manifold.Algebra.LieGroup",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Metric": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Metric",
+      "source": "schur-rigidity/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Metric.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 4802,
+      "sha256": "477daa95da19d0e5d72f1fa1f78f18513207ee20e619f2ff9d0181c047497d2b",
+      "git_blob_sha1": "61c3753bed4bae6d19225c6a46cc1ad7864443b7",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along",
+      "source": "schur-rigidity/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Along.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 6758,
+      "sha256": "68cef5bdf39e72ad12e1b61898a7adff522f3c6f46ca699244f3daf3b3ccdfac",
+      "git_blob_sha1": "2cb0c3d13e7d871936b06934ab0524bc4b729fcb",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection",
+      "source": "schur-rigidity/PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 261755,
+      "sha256": "01f0eac5a417b2d243b0071643c90c3114a85c2016be4d72416d7cfe640351b2",
+      "git_blob_sha1": "f250764aa6e576e55a1183e71ca8eafc3f3cfc8c",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Topology.VectorBundle.FiniteDimensional",
+        "Mathlib.Analysis.Normed.Module.FiniteDimension",
+        "Mathlib.Analysis.Normed.Module.RCLike.Real",
+        "Mathlib.Analysis.Normed.Operator.NormedSpace",
+        "Mathlib.Topology.ContinuousMap.Compact",
+        "Mathlib.Topology.ContinuousMap.Bounded.Basic",
+        "Mathlib.Topology.MetricSpace.ProperSpace",
+        "Mathlib.Topology.Order.Compact",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection",
+      "source": "schur-rigidity/PoincareCurvature/Geometry/Manifold/VectorBundle/ContinuousSection.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 202866,
+      "sha256": "9647f6cf3b0ace2e27de2ce45a149b32cdd0833541b425727baffa2e7723e208",
+      "git_blob_sha1": "5d8a958fbaeb2613f1bfe2e6e6eb020f01adbe00",
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+        "Mathlib.Topology.VectorBundle.Hom",
+        "Mathlib.Analysis.Normed.Operator.Basic",
+        "Mathlib.Analysis.Normed.Group.Submodule",
+        "Mathlib.Analysis.Normed.Module.TransferInstance",
+        "Mathlib.Topology.ContinuousMap.Compact"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Raw": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Raw",
+      "source": "schur-rigidity/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Raw.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 2414,
+      "sha256": "2f2fb93364159b6cce4fbdac62e502bab18d4f5cc1f053437a815447b67fd0e7",
+      "git_blob_sha1": "a9bbfe8933a38543c3568f185d219a7917032e26",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along",
+        "Mathlib.Geometry.Manifold.VectorField.LieBracket"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.NormalizedCutoff": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.NormalizedCutoff",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/NormalizedCutoff.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": true,
+      "bytes": 4302,
+      "sha256": "6d92333176a97786cf5b010947c21a3cac88a616dcd9d29c3bd0847dd4e30f4b",
+      "git_blob_sha1": "7839722bf213ea31339094e9bd3a8deda0602a40",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ModelManifoldGaugeFlow",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.LocalizedCoefficientScaling"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.LocalizedCoefficientScaling": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.LocalizedCoefficientScaling",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/LocalizedCoefficientScaling.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 16534,
+      "sha256": "1235a4e8b0d9ae310a5e6df053fc1a47222009338254ec72a8c36b38a6752361",
+      "git_blob_sha1": "7f3fba5677885310628d10552f5ebd05d9fa9091",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.TimeIndependentHolder",
+        "Mathlib.Analysis.Calculus.MeanValue",
+        "Mathlib.Analysis.Calculus.ContDiff.Basic",
+        "Mathlib.Analysis.Calculus.FDeriv.Const",
+        "Mathlib.Analysis.Normed.Group.Bounded"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.TimeIndependentHolder": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.TimeIndependentHolder",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/TimeIndependentHolder.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 5371,
+      "sha256": "00af6fdfcb02579937976b82f89a0e73e3a2b616f127853b723dd42581afc26d",
+      "git_blob_sha1": "94d8b7d6cc419429d643fb36598be41629c0bb86",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.BanachSpace"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.BanachSpace": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.BanachSpace",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/BanachSpace.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 132289,
+      "sha256": "202c6075c037f244c59f4781e4f311ea04dfdacd4528081f14385616b83bb645",
+      "git_blob_sha1": "99daabe4776341a63060d4324f65ba8fa12b5dc3",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FunctionSpace",
+        "Mathlib.Analysis.Normed.Group.SeparationQuotient",
+        "Mathlib.Topology.UniformSpace.UniformEmbedding",
+        "Mathlib.Topology.Algebra.SeparationQuotient.Section",
+        "Mathlib.Topology.MetricSpace.Contracting",
+        "Mathlib.Analysis.SpecificLimits.Normed"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FunctionSpace": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.Parabolic.FunctionSpace",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/Parabolic/FunctionSpace.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 126574,
+      "sha256": "f22ca1afc0ed0ee37b999387f2df7525b6217f683ea8fcecb7852eb15f6812aa",
+      "git_blob_sha1": "8a472caea3e785aa614b637a17c78bcd165bc0f3",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder",
+        "Mathlib.Analysis.Normed.Module.Basic",
+        "Mathlib.Topology.ContinuousMap.Compact"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ParabolicHolder",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ParabolicHolder.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 498585,
+      "sha256": "998139ecbf7dfdff5641d8070b731ae73ce6a59e8f572e3f51214aae9c60b115",
+      "git_blob_sha1": "8b019dd5b3bcb71ed36448282dbb479bc41c0360",
+      "imports": [
+        "Mathlib.Analysis.SpecialFunctions.Pow.Real",
+        "Mathlib.Analysis.SpecialFunctions.Pow.Continuity",
+        "Mathlib.Analysis.Normed.Operator.NormedSpace",
+        "Mathlib.Topology.MetricSpace.Basic",
+        "Mathlib.Topology.MetricSpace.Cover",
+        "Mathlib.Topology.MetricSpace.ProperSpace"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ModelManifoldGaugeFlow": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ModelManifoldGaugeFlow",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ModelManifoldGaugeFlow.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": true,
+      "bytes": 199146,
+      "sha256": "7abe475881d891e3f6a0801618a91fed2b705453e4f3c0f92936f535dd0cd088",
+      "git_blob_sha1": "397881c48bf47915b4907adc1db445d7fd711556",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.GaugeFlowAssembly",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceManifold",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FieldJetContDiff"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FieldJetContDiff": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FieldJetContDiff",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/FieldJetContDiff.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 38534,
+      "sha256": "059f6118b249fdfc2414f65c5074431a8f07f9a4b146dd233a7e5b11b4733e5b",
+      "git_blob_sha1": "1b2fbc5e0de3780717f15528eeaa261fa5337086",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceManifold"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceManifold": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceManifold",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/SmoothDependenceManifold.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 58560,
+      "sha256": "3f8f1a050c50b42ea62a5aa3f06b13d28c6244cf3393a2becbc708d106b53a6e",
+      "git_blob_sha1": "42b2396bcd7e9471d28babdb7907db5ae9f19c26",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FlowDiffeomorphism",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceContinuousDeriv",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+        "Mathlib.Geometry.Manifold.Diffeomorph"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceContinuousDeriv": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceContinuousDeriv",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/SmoothDependenceContinuousDeriv.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 23881,
+      "sha256": "bf2dedfcbff4c5252662d4b32873b0df141592bed052f5e4cef8a11f5109f10a",
+      "git_blob_sha1": "b8da09f25c38ce0da2587aeb886fade977788259",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceCk"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceCk": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceCk",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/SmoothDependenceCk.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 807659,
+      "sha256": "95044a4e358e6e68cbc916da22075bb1df79ac41d0068f6cd185478f44d535b0",
+      "git_blob_sha1": "f51be67d184f62539a2eb048b6d0473f46de8e9b",
+      "imports": [
+        "Mathlib.Analysis.ODE.Basic",
+        "Mathlib.Analysis.ODE.ExistUnique",
+        "Mathlib.Analysis.ODE.Gronwall",
+        "Mathlib.Analysis.ODE.PicardLindelof",
+        "Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FlowDiffeomorphism": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.FlowDiffeomorphism",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/FlowDiffeomorphism.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 43758,
+      "sha256": "4d48582975dc18ae49cbe9b71c24d8b028939ba72e58c440f1ed6f259ab70add",
+      "git_blob_sha1": "ab7f8ee51932432e099c7836fbf5b3cff9f74ea9",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.SmoothDependenceCk"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.GaugeFlowAssembly": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.GaugeFlowAssembly",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/GaugeFlowAssembly.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": true,
+      "bytes": 79971,
+      "sha256": "88e7e4099c44d1c99b7ff7bd0834d4d6bed0854265ac9d3b27a610ed8fa13c44",
+      "git_blob_sha1": "17c6770425b81a3a0ffa54553086bd2f345f9a1c",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ManifoldFlowExistence"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ManifoldFlowExistence": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.ManifoldFlowExistence",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/ManifoldFlowExistence.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": true,
+      "bytes": 87201,
+      "sha256": "079517f184ddba84166eb79f1ca61b1aa83083ef1bda6a11450abba1e846db1b",
+      "git_blob_sha1": "64144039a1f64fab664ae71473f86cf5ce1a367a",
+      "imports": [
+        "Mathlib.Geometry.Manifold.IntegralCurve.UniformTime",
+        "Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique",
+        "Mathlib.Geometry.Manifold.IntegralCurve.Transform",
+        "Mathlib.Topology.Compactness.Compact",
+        "Mathlib.Analysis.ODE.PicardLindelof",
+        "Mathlib.Analysis.Normed.Module.Basic",
+        "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+        "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowExistence",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/Diffeomorph3FlowExistence.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 1512498,
+      "sha256": "485f36e55025cb333251072b4f702ed845e7be24a8a14535bc1b5d99ae8fffe6",
+      "git_blob_sha1": "0bfc0d7f2ade3d3c4d8eaaf5a587282fffca5a6e",
+      "imports": [
+        "Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique",
+        "Mathlib.Topology.Order.DenselyOrdered",
+        "Mathlib.Topology.Separation.Hausdorff",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowDerivative"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowDerivative": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.Diffeomorph3FlowDerivative",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/Diffeomorph3FlowDerivative.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 238634,
+      "sha256": "889e04f4ea7c8e17fbf01120e7d2b4486ad48893dfecdc59763aa42775501c57",
+      "git_blob_sha1": "8019934ede15f1bbb56fe9606896d45ad201fc94",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckCoordinatePicardEstimates"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckCoordinatePicardEstimates": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckCoordinatePicardEstimates",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckCoordinatePicardEstimates.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 18012,
+      "sha256": "fbada945bf350cf61fdabe54f75e312707aeb2cbb1eaff07e08381ea050d8cd7",
+      "git_blob_sha1": "3a541be6cbe4931355a4a1f4f2298f011b2bc6fa",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 710433,
+      "sha256": "d237441d52e01880fa312777c3b2ad527cc3910104c9238e4f3d7a05c0139bf0",
+      "git_blob_sha1": "d52aa24f3d1e86f1c4897762e8cd68fea70b2c8a",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurck",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeTransport"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeTransport": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeTransport",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeTransport.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 306072,
+      "sha256": "44e2f86f7b53a03eedd2e4ef17194806666a5cd18f2728679baf1f4ba26f5cad",
+      "git_blob_sha1": "e5d18668163dbfd2fade6a252c74fde555df8d35",
+      "imports": [
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+        "Mathlib.Geometry.Manifold.IntegralCurve.Basic",
+        "Mathlib.Geometry.Manifold.LocalDiffeomorph",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+        "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+        "Mathlib.Geometry.Manifold.VectorField.Pullback",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Raw",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 188253,
+      "sha256": "bf9de4bf83c75b4373d72842dae0eaca96fd2e333df48336f393ff998cce1ddf",
+      "git_blob_sha1": "3d430cddf9790bd71375727570118e3aed74e183",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TimeDependent.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 36467,
+      "sha256": "f7d94bc70f0445019dc88bfa3f5ee5d0d6f577d2b57ebeb102e15b6e94aae004",
+      "git_blob_sha1": "23d11ea8d2b19bafc1c758ce3107a908486ff1a2",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Sectional",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Sectional": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Sectional",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Sectional.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 3533,
+      "sha256": "14b828a0c69a58f260eac1c3597672c542db1835bc0d5e079698e59b9031ed6c",
+      "git_blob_sha1": "a92f67c5b271d398532722c13cb6b5a345a80fe1",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor",
+        "Mathlib.Geometry.Manifold.Riemannian.Basic"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions",
+      "source": "schur-rigidity/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Contractions.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 17991,
+      "sha256": "3df47636448080a16a25cedb3f68e67434082fbcbf395b278fbd1fa42354e377",
+      "git_blob_sha1": "bdd0708ef3bd896028b000907c5c7e801f1f6834",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi",
+        "Mathlib.Analysis.InnerProductSpace.Trace",
+        "Mathlib.Geometry.Manifold.Riemannian.Basic",
+        "Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition",
+        "Mathlib.LinearAlgebra.Trace"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi",
+      "source": "schur-rigidity/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Bianchi.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 37770,
+      "sha256": "2c3045f782bfb6c7742eaf3160f6dfc7bc0a3778ce20216ffc1dfa148976aab4",
+      "git_blob_sha1": "8a485f4e3d713afd12016d09201f9d57981421a4",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurck": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurck",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/DeTurck.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 190070,
+      "sha256": "9d76cd2370f408b79d77241c7a582e83331104c25e8bffbb80f134940d43a029",
+      "git_blob_sha1": "415fbf897d53cecd35a75cc8ef2a73e8d2928730",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteSmoothTrivializingCover": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteSmoothTrivializingCover",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/FiniteSmoothTrivializingCover.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 13913,
+      "sha256": "945b9a23f15a05fd61f51a9ade93b6bba31b4ad61d8868e335111d22768283b3",
+      "git_blob_sha1": "0cfa7bd5c45b7d22cb51a9554311af33356c32f7",
+      "imports": [
+        "Mathlib.Geometry.Manifold.PartitionOfUnity",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteTrivializingCover"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteTrivializingCover": {
+      "module": "PoincareCurvature.Geometry.Manifold.VectorBundle.FiniteTrivializingCover",
+      "source": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/FiniteTrivializingCover.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": false,
+      "bytes": 6655,
+      "sha256": "ccbcd740abcaa4d238e75aa98794895482951005ab4c64f9d36b195c87e67396",
+      "git_blob_sha1": "f949958d4a3a711c71befc7f510737da2c121e3e",
+      "imports": [
+        "Mathlib.Topology.Separation.Basic",
+        "Mathlib.Topology.ContinuousMap.Compact",
+        "Mathlib.Topology.VectorBundle.Basic"
+      ]
+    },
+    "PoincareCurvature.Analysis.PreferredCoordinateFrame": {
+      "module": "PoincareCurvature.Analysis.PreferredCoordinateFrame",
+      "source": "curvature/PoincareCurvature/Analysis/PreferredCoordinateFrame.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": true,
+      "bytes": 9511,
+      "sha256": "8df8a07e01228f8ce84e288c23ddba72f6e727861e7e101ae51f829753d0e819",
+      "git_blob_sha1": "98bec391a71a456051b365cd543e191dcfd2cc99",
+      "imports": [
+        "PoincareCurvature.Analysis.BoundarylessChartTransport",
+        "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+        "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+        "Mathlib.Geometry.Manifold.MFDeriv.NormedSpace",
+        "Mathlib.Tactic.Convert"
+      ]
+    },
+    "PoincareCurvature.Analysis.BoundarylessChartTransport": {
+      "module": "PoincareCurvature.Analysis.BoundarylessChartTransport",
+      "source": "curvature/PoincareCurvature/Analysis/BoundarylessChartTransport.lean",
+      "origin": "immutable project 90cc7ebed996f28acb57ef9948d37f114088bd4d",
+      "legacy": true,
+      "bytes": 3126,
+      "sha256": "c749d7622aa1201f4b57346260108cf510d6138f8c1ee31466889fbb5eb22600",
+      "git_blob_sha1": "2ef29dd91635d059d7ad819178dffdafe8063e49",
+      "imports": [
+        "Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary",
+        "Mathlib.Geometry.Manifold.VectorField.Pullback"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.C2MetricVelocityExtension": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.C2MetricVelocityExtension",
+      "source": "frozen-001/C2MetricVelocityExtension.lean",
+      "origin": "new frozen-001",
+      "legacy": true,
+      "bytes": 9604,
+      "sha256": "ea20369d7a63dba3da0d64b964efafe4d2a7ae68c26bc9986bf0868bcac5a24d",
+      "git_blob_sha1": "46a0ccd6188961204a20aaee657719f04d6f3a0c",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.C0EndpointCompactPositivity",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence"
+      ]
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.C0EndpointCompactPositivity": {
+      "module": "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.C0EndpointCompactPositivity",
+      "source": "frozen-001/C0EndpointCompactPositivity.lean",
+      "origin": "new frozen-001",
+      "legacy": true,
+      "bytes": 14511,
+      "sha256": "45261b684e7add6c9e83eca9266777b8d12b6c7c598084d1d9e10b74f7867274",
+      "git_blob_sha1": "8ccc3b69623eb04e51c5245eddcbf28c7d94ced2",
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.C0FiniteAtlasGaussian"
+      ]
+    }
+  },
+  "external_frontier": {
+    "Mathlib.Topology.UniformSpace.HeineCantor": {
+      "module": "Mathlib.Topology.UniformSpace.HeineCantor",
+      "status": "direct source header inspected at exact Mathlib pin; transitive imports not expanded",
+      "source_receipt": {
+        "path": "Mathlib/Topology/UniformSpace/HeineCantor.lean",
+        "sha": "a3c9f8490f96b0056785997fc91987e11e587020",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/UniformSpace/HeineCantor.lean",
+        "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__UniformSpace__HeineCantor.lean",
+        "sha256": "307718982cda076dc252c6506dc9ab94a3c84e3eb92516dda94e364afc0bf07a",
+        "computed_git_blob_sha1": "a3c9f8490f96b0056785997fc91987e11e587020",
+        "git_blob_matches_receipt": true
+      },
+      "legacy": false
+    },
+    "Mathlib.Topology.ContinuousMap.BoundedCompactlySupported": {
+      "module": "Mathlib.Topology.ContinuousMap.BoundedCompactlySupported",
+      "status": "direct source header inspected at exact Mathlib pin; transitive imports not expanded",
+      "source_receipt": {
+        "path": "Mathlib/Topology/ContinuousMap/BoundedCompactlySupported.lean",
+        "sha": "8e463a392ed21beb3d728ce9c6068a004543692c",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/ContinuousMap/BoundedCompactlySupported.lean",
+        "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__ContinuousMap__BoundedCompactlySupported.lean",
+        "sha256": "d3c748be9a560274e8be6246cdd5ae4eb345ae9279176c7be340f873d2e38ac6",
+        "computed_git_blob_sha1": "8e463a392ed21beb3d728ce9c6068a004543692c",
+        "git_blob_matches_receipt": true
+      },
+      "legacy": false
+    },
+    "Mathlib.Analysis.Calculus.Deriv.Basic": {
+      "module": "Mathlib.Analysis.Calculus.Deriv.Basic",
+      "status": "direct source header inspected at exact Mathlib pin; transitive imports not expanded",
+      "source_receipt": {
+        "path": "Mathlib/Analysis/Calculus/Deriv/Basic.lean",
+        "sha": "99b298181811591362a2467cfd825017ac9d0fef",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/Calculus/Deriv/Basic.lean",
+        "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Analysis__Calculus__Deriv__Basic.lean",
+        "sha256": "da1d29570f45bd14f5a37aa5b024d46b3076a47f04e9315bf72cd65f6505d55b",
+        "computed_git_blob_sha1": "99b298181811591362a2467cfd825017ac9d0fef",
+        "git_blob_matches_receipt": true
+      },
+      "legacy": false
+    },
+    "Mathlib.Analysis.Normed.Operator.Prod": {
+      "module": "Mathlib.Analysis.Normed.Operator.Prod",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Normed.Operator.NormedSpace": {
+      "module": "Mathlib.Analysis.Normed.Operator.NormedSpace",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Normed.Operator.Mul": {
+      "module": "Mathlib.Analysis.Normed.Operator.Mul",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Calculus.FDeriv.Partial": {
+      "module": "Mathlib.Analysis.Calculus.FDeriv.Partial",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Calculus.ParametricIntervalIntegral": {
+      "module": "Mathlib.Analysis.Calculus.ParametricIntervalIntegral",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.LinearAlgebra.Matrix.Symmetric": {
+      "module": "Mathlib.LinearAlgebra.Matrix.Symmetric",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.ODE.Gronwall": {
+      "module": "Mathlib.Analysis.ODE.Gronwall",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.ODE.ExistUnique": {
+      "module": "Mathlib.Analysis.ODE.ExistUnique",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.ODE.PicardLindelof": {
+      "module": "Mathlib.Analysis.ODE.PicardLindelof",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus": {
+      "module": "Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.ContinuousMap.Bounded.Basic": {
+      "module": "Mathlib.Topology.ContinuousMap.Bounded.Basic",
+      "status": "direct source header inspected at exact Mathlib pin; transitive imports not expanded",
+      "source_receipt": {
+        "path": "Mathlib/Topology/ContinuousMap/Bounded/Basic.lean",
+        "sha": "ce9f56fc4406e5eba5c21a655692dc5a9993c0ee",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/ContinuousMap/Bounded/Basic.lean",
+        "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__ContinuousMap__Bounded__Basic.lean",
+        "sha256": "efd930a132ec7cba53752f43961815b719a27514573e52e9894cf5e7fc2e421d",
+        "computed_git_blob_sha1": "ce9f56fc4406e5eba5c21a655692dc5a9993c0ee",
+        "git_blob_matches_receipt": true
+      },
+      "legacy": false
+    },
+    "Mathlib.Topology.MetricSpace.Contracting": {
+      "module": "Mathlib.Topology.MetricSpace.Contracting",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Calculus.ParametricIntegral": {
+      "module": "Mathlib.Analysis.Calculus.ParametricIntegral",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.MeasureTheory.Integral.Pi": {
+      "module": "Mathlib.MeasureTheory.Integral.Pi",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.SpecialFunctions.Sqrt": {
+      "module": "Mathlib.Analysis.SpecialFunctions.Sqrt",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral": {
+      "module": "Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.UniformSpace.UniformConvergence": {
+      "module": "Mathlib.Topology.UniformSpace.UniformConvergence",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Normed.Module.Basic": {
+      "module": "Mathlib.Analysis.Normed.Module.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Tactic.Positivity": {
+      "module": "Mathlib.Tactic.Positivity",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Tactic.Ring": {
+      "module": "Mathlib.Tactic.Ring",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Tactic.Abel": {
+      "module": "Mathlib.Tactic.Abel",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.ContinuousMap.Bounded.Normed": {
+      "module": "Mathlib.Topology.ContinuousMap.Bounded.Normed",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.MeasureTheory.Measure.Lebesgue.Basic": {
+      "module": "Mathlib.MeasureTheory.Measure.Lebesgue.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.MeasureTheory.Integral.Bochner.Basic": {
+      "module": "Mathlib.MeasureTheory.Integral.Bochner.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Normed.Group.Constructions": {
+      "module": "Mathlib.Analysis.Normed.Group.Constructions",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Calculus.FDeriv.Extend": {
+      "module": "Mathlib.Analysis.Calculus.FDeriv.Extend",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Calculus.MeanValue": {
+      "module": "Mathlib.Analysis.Calculus.MeanValue",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Calculus.Deriv.Comp": {
+      "module": "Mathlib.Analysis.Calculus.Deriv.Comp",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.VectorBundle.Constructions": {
+      "module": "Mathlib.Topology.VectorBundle.Constructions",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.LinearAlgebra.Basis.VectorSpace": {
+      "module": "Mathlib.LinearAlgebra.Basis.VectorSpace",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame": {
+      "module": "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic": {
+      "module": "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.ContMDiffMFDeriv": {
+      "module": "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.PartitionOfUnity": {
+      "module": "Mathlib.Geometry.Manifold.PartitionOfUnity",
+      "status": "direct source header inspected at exact Mathlib pin; transitive imports not expanded",
+      "source_receipt": {
+        "path": "Mathlib/Geometry/Manifold/PartitionOfUnity.lean",
+        "sha": "e9d0243283efab7d65cd7144ef21bf1b717e5eb0",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/PartitionOfUnity.lean",
+        "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Geometry__Manifold__PartitionOfUnity.lean",
+        "sha256": "dea35887e7f3c058fde7c988e99dda3bf12ecf142784cce8baa84644e892f384",
+        "computed_git_blob_sha1": "e9d0243283efab7d65cd7144ef21bf1b717e5eb0",
+        "git_blob_matches_receipt": true
+      },
+      "legacy": false
+    },
+    "Mathlib.Analysis.InnerProductSpace.CanonicalTensor": {
+      "module": "Mathlib.Analysis.InnerProductSpace.CanonicalTensor",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.VectorBundle.Hom": {
+      "module": "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.InnerProductSpace.Trace": {
+      "module": "Mathlib.Analysis.InnerProductSpace.Trace",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.InnerProductSpace.Dual": {
+      "module": "Mathlib.Analysis.InnerProductSpace.Dual",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection": {
+      "module": "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality": {
+      "module": "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.BumpFunction": {
+      "module": "Mathlib.Geometry.Manifold.BumpFunction",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion": {
+      "module": "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.LinearAlgebra.Matrix.NonsingularInverse": {
+      "module": "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.Algebra.LieGroup": {
+      "module": "Mathlib.Geometry.Manifold.Algebra.LieGroup",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace": {
+      "module": "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.VectorBundle.Riemannian": {
+      "module": "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "status": "direct source header inspected at exact Mathlib pin; transitive imports not expanded",
+      "source_receipt": {
+        "path": "Mathlib/Geometry/Manifold/VectorBundle/Riemannian.lean",
+        "sha": "b5fc92352e7156e1adda4068c258f3e6dcb1d091",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/VectorBundle/Riemannian.lean",
+        "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Geometry__Manifold__VectorBundle__Riemannian.lean",
+        "sha256": "e3d87dc3514ff67c64f5c223071dd46842ccaa1138af5df3383e3f283d103b2b",
+        "computed_git_blob_sha1": "b5fc92352e7156e1adda4068c258f3e6dcb1d091",
+        "git_blob_matches_receipt": true
+      },
+      "legacy": false
+    },
+    "Mathlib.Topology.ContinuousMap.Compact": {
+      "module": "Mathlib.Topology.ContinuousMap.Compact",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Normed.Module.TransferInstance": {
+      "module": "Mathlib.Analysis.Normed.Module.TransferInstance",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Normed.Group.Submodule": {
+      "module": "Mathlib.Analysis.Normed.Group.Submodule",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Normed.Operator.Basic": {
+      "module": "Mathlib.Analysis.Normed.Operator.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.VectorBundle.Hom": {
+      "module": "Mathlib.Topology.VectorBundle.Hom",
+      "status": "direct source header inspected at exact Mathlib pin; transitive imports not expanded",
+      "source_receipt": {
+        "path": "Mathlib/Topology/VectorBundle/Hom.lean",
+        "sha": "5162b27a435c26918e70ee6b466192e8055504be",
+        "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/VectorBundle/Hom.lean",
+        "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__VectorBundle__Hom.lean",
+        "sha256": "8cfe2d2c3dbac2533b45407ebe8c83b6b9cf651c577e8bc3857bba2798d95dd2",
+        "computed_git_blob_sha1": "5162b27a435c26918e70ee6b466192e8055504be",
+        "git_blob_matches_receipt": true
+      },
+      "legacy": false
+    },
+    "Mathlib.Topology.Order.Compact": {
+      "module": "Mathlib.Topology.Order.Compact",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.MetricSpace.ProperSpace": {
+      "module": "Mathlib.Topology.MetricSpace.ProperSpace",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Normed.Module.RCLike.Real": {
+      "module": "Mathlib.Analysis.Normed.Module.RCLike.Real",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Normed.Module.FiniteDimension": {
+      "module": "Mathlib.Analysis.Normed.Module.FiniteDimension",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.VectorBundle.FiniteDimensional": {
+      "module": "Mathlib.Topology.VectorBundle.FiniteDimensional",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.VectorField.LieBracket": {
+      "module": "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Normed.Group.Bounded": {
+      "module": "Mathlib.Analysis.Normed.Group.Bounded",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Calculus.FDeriv.Const": {
+      "module": "Mathlib.Analysis.Calculus.FDeriv.Const",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Calculus.ContDiff.Basic": {
+      "module": "Mathlib.Analysis.Calculus.ContDiff.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.SpecificLimits.Normed": {
+      "module": "Mathlib.Analysis.SpecificLimits.Normed",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.Algebra.SeparationQuotient.Section": {
+      "module": "Mathlib.Topology.Algebra.SeparationQuotient.Section",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.UniformSpace.UniformEmbedding": {
+      "module": "Mathlib.Topology.UniformSpace.UniformEmbedding",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.Normed.Group.SeparationQuotient": {
+      "module": "Mathlib.Analysis.Normed.Group.SeparationQuotient",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.MetricSpace.Cover": {
+      "module": "Mathlib.Topology.MetricSpace.Cover",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.MetricSpace.Basic": {
+      "module": "Mathlib.Topology.MetricSpace.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.SpecialFunctions.Pow.Continuity": {
+      "module": "Mathlib.Analysis.SpecialFunctions.Pow.Continuity",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.SpecialFunctions.Pow.Real": {
+      "module": "Mathlib.Analysis.SpecialFunctions.Pow.Real",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.Diffeomorph": {
+      "module": "Mathlib.Geometry.Manifold.Diffeomorph",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.MFDeriv.FDeriv": {
+      "module": "Mathlib.Geometry.Manifold.MFDeriv.FDeriv",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Analysis.ODE.Basic": {
+      "module": "Mathlib.Analysis.ODE.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions": {
+      "module": "Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.MFDeriv.Basic": {
+      "module": "Mathlib.Geometry.Manifold.MFDeriv.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.Compactness.Compact": {
+      "module": "Mathlib.Topology.Compactness.Compact",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.IntegralCurve.Transform": {
+      "module": "Mathlib.Geometry.Manifold.IntegralCurve.Transform",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique": {
+      "module": "Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.IntegralCurve.UniformTime": {
+      "module": "Mathlib.Geometry.Manifold.IntegralCurve.UniformTime",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.Riemannian.Basic": {
+      "module": "Mathlib.Geometry.Manifold.Riemannian.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.LinearAlgebra.Trace": {
+      "module": "Mathlib.LinearAlgebra.Trace",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition": {
+      "module": "Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.VectorField.Pullback": {
+      "module": "Mathlib.Geometry.Manifold.VectorField.Pullback",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.LocalDiffeomorph": {
+      "module": "Mathlib.Geometry.Manifold.LocalDiffeomorph",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.IntegralCurve.Basic": {
+      "module": "Mathlib.Geometry.Manifold.IntegralCurve.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.Separation.Hausdorff": {
+      "module": "Mathlib.Topology.Separation.Hausdorff",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.Order.DenselyOrdered": {
+      "module": "Mathlib.Topology.Order.DenselyOrdered",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.VectorBundle.Basic": {
+      "module": "Mathlib.Topology.VectorBundle.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Topology.Separation.Basic": {
+      "module": "Mathlib.Topology.Separation.Basic",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Tactic.Convert": {
+      "module": "Mathlib.Tactic.Convert",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.MFDeriv.NormedSpace": {
+      "module": "Mathlib.Geometry.Manifold.MFDeriv.NormedSpace",
+      "status": "not expanded; external dependency source"
+    },
+    "Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary": {
+      "module": "Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary",
+      "status": "not expanded; external dependency source"
+    }
+  },
+  "source_receipts": [
+    {
+      "path": "Mathlib/Geometry/Manifold/VectorBundle/Riemannian.lean",
+      "sha": "b5fc92352e7156e1adda4068c258f3e6dcb1d091",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/VectorBundle/Riemannian.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Geometry__Manifold__VectorBundle__Riemannian.lean",
+      "sha256": "e3d87dc3514ff67c64f5c223071dd46842ccaa1138af5df3383e3f283d103b2b",
+      "computed_git_blob_sha1": "b5fc92352e7156e1adda4068c258f3e6dcb1d091",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+      "sha": "3d430cddf9790bd71375727570118e3aed74e183",
+      "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/curvature__PoincareCurvature__Geometry__Manifold__RicciFlow__LocalExistence.lean",
+      "sha256": "bf9de4bf83c75b4373d72842dae0eaca96fd2e333df48336f393ff998cce1ddf",
+      "computed_git_blob_sha1": "3d430cddf9790bd71375727570118e3aed74e183",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Topology/ContinuousMap/Bounded/Basic.lean",
+      "sha": "ce9f56fc4406e5eba5c21a655692dc5a9993c0ee",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/ContinuousMap/Bounded/Basic.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__ContinuousMap__Bounded__Basic.lean",
+      "sha256": "efd930a132ec7cba53752f43961815b719a27514573e52e9894cf5e7fc2e421d",
+      "computed_git_blob_sha1": "ce9f56fc4406e5eba5c21a655692dc5a9993c0ee",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Topology/Algebra/Support.lean",
+      "sha": "6724d9a28680cfee734a0e2be71203cd5ca0d9ee",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/Algebra/Support.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__Algebra__Support.lean",
+      "sha256": "aab196644260f0c77d8aab52c3151df9c49880c1e9b8ee08cb97193a6ef994a9",
+      "computed_git_blob_sha1": "6724d9a28680cfee734a0e2be71203cd5ca0d9ee",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Analysis/Calculus/Deriv/Basic.lean",
+      "sha": "99b298181811591362a2467cfd825017ac9d0fef",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/Calculus/Deriv/Basic.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Analysis__Calculus__Deriv__Basic.lean",
+      "sha256": "da1d29570f45bd14f5a37aa5b024d46b3076a47f04e9315bf72cd65f6505d55b",
+      "computed_git_blob_sha1": "99b298181811591362a2467cfd825017ac9d0fef",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/PointFourContract.lean",
+      "sha": "ab4be9d25a9178cb17cb9c1ed67dc60ff10025ec",
+      "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/PointFourContract.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/curvature__PoincareCurvature__Geometry__Manifold__RicciFlow__PointFourContract.lean",
+      "sha256": "36842cb3898b3a510a597877e7394f7a8e84ab6f716916e7baecb3f7572d1fca",
+      "computed_git_blob_sha1": "ab4be9d25a9178cb17cb9c1ed67dc60ff10025ec",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Topology/ContinuousMap/BoundedCompactlySupported.lean",
+      "sha": "8e463a392ed21beb3d728ce9c6068a004543692c",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/ContinuousMap/BoundedCompactlySupported.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__ContinuousMap__BoundedCompactlySupported.lean",
+      "sha256": "d3c748be9a560274e8be6246cdd5ae4eb345ae9279176c7be340f873d2e38ac6",
+      "computed_git_blob_sha1": "8e463a392ed21beb3d728ce9c6068a004543692c",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Topology/VectorBundle/Hom.lean",
+      "sha": "5162b27a435c26918e70ee6b466192e8055504be",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/VectorBundle/Hom.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__VectorBundle__Hom.lean",
+      "sha256": "8cfe2d2c3dbac2533b45407ebe8c83b6b9cf651c577e8bc3857bba2798d95dd2",
+      "computed_git_blob_sha1": "5162b27a435c26918e70ee6b466192e8055504be",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Analysis/Calculus/Deriv/Mul.lean",
+      "sha": "f688112f3812e3f50cdf169956d6c1323d32c19a",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Analysis/Calculus/Deriv/Mul.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Analysis__Calculus__Deriv__Mul.lean",
+      "sha256": "9eaf8d222c347ea647939daa68fac11edeb7c2572719246ce03d43cb04c94b44",
+      "computed_git_blob_sha1": "f688112f3812e3f50cdf169956d6c1323d32c19a",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Topology/UniformSpace/HeineCantor.lean",
+      "sha": "a3c9f8490f96b0056785997fc91987e11e587020",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/UniformSpace/HeineCantor.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__UniformSpace__HeineCantor.lean",
+      "sha256": "307718982cda076dc252c6506dc9ab94a3c84e3eb92516dda94e364afc0bf07a",
+      "computed_git_blob_sha1": "a3c9f8490f96b0056785997fc91987e11e587020",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Geometry/Manifold/VectorBundle/ContMDiffSection.lean",
+      "sha": "a6593d1272ab0bd3e6780cc5573b760e865c5f30",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/VectorBundle/ContMDiffSection.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Geometry__Manifold__VectorBundle__ContMDiffSection.lean",
+      "sha256": "06fb03179d5f63e43c0a646aa0f87e8903e3189c7b0a7866ce0c7dbad3dc630c",
+      "computed_git_blob_sha1": "a6593d1272ab0bd3e6780cc5573b760e865c5f30",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Topology/FiberBundle/Constructions.lean",
+      "sha": "a3a215afae4ff96a725940bd3e131d18b54c5035",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/FiberBundle/Constructions.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__FiberBundle__Constructions.lean",
+      "sha256": "f0fd3cc7ed96557b9ec6c892438de027366c1d6d730e574070ec6c050e19231d",
+      "computed_git_blob_sha1": "a3a215afae4ff96a725940bd3e131d18b54c5035",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Topology/MetricSpace/Pseudo/Lemmas.lean",
+      "sha": "bd5e7cc7d3820491f99e382c0f3240ee6b99ff03",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/MetricSpace/Pseudo/Lemmas.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__MetricSpace__Pseudo__Lemmas.lean",
+      "sha256": "0194113c847c252d63b1e3d924a818c3ab72343b2112acf7b0d5c13d133a6431",
+      "computed_git_blob_sha1": "bd5e7cc7d3820491f99e382c0f3240ee6b99ff03",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Geometry/Manifold/PartitionOfUnity.lean",
+      "sha": "e9d0243283efab7d65cd7144ef21bf1b717e5eb0",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Geometry/Manifold/PartitionOfUnity.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Geometry__Manifold__PartitionOfUnity.lean",
+      "sha256": "dea35887e7f3c058fde7c988e99dda3bf12ecf142784cce8baa84644e892f384",
+      "computed_git_blob_sha1": "e9d0243283efab7d65cd7144ef21bf1b717e5eb0",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Topology/Algebra/Module/Spaces/ContinuousLinearMap.lean",
+      "sha": "a59c26385477df5e903b91d26447a03e25f16a6e",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/Algebra/Module/Spaces/ContinuousLinearMap.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__Algebra__Module__Spaces__ContinuousLinearMap.lean",
+      "sha256": "72115f36a523bcfee4dc9979a16067bc1429c576a1524d27f00a44fc64bb521a",
+      "computed_git_blob_sha1": "a59c26385477df5e903b91d26447a03e25f16a6e",
+      "git_blob_matches_receipt": true
+    },
+    {
+      "path": "Mathlib/Topology/Algebra/Monoid.lean",
+      "sha": "0dac831950493b3a8af9373f5f9c6cd99b6f4538",
+      "url": "https://github.com/leanprover-community/mathlib4/blob/db584cd6d46c92f209a44c0f1c829460d327499d/Mathlib/Topology/Algebra/Monoid.lean",
+      "local": "/workspace/shared/poincare-c2-velocity-extension-source-20261005/pinned-sources/Mathlib__Topology__Algebra__Monoid.lean",
+      "sha256": "cf858f52c0f84ad0f0f950ddc0c76128c4893ced7620d0c7a4cef1c9c3ddab56",
+      "computed_git_blob_sha1": "0dac831950493b3a8af9373f5f9c6cd99b6f4538",
+      "git_blob_matches_receipt": true
+    }
+  ],
+  "verification": "read-only static source audit only; no Lean/compiler/runtime verification"
+}

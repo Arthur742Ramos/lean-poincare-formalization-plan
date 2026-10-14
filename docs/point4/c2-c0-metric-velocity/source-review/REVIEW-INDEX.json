@@ -1,0 +1,21 @@
+{
+  "current_snapshot": "frozen-003",
+  "current_verdict": "SOURCE-ONLY APPROVE",
+  "current_report": "replacement-frozen-003/REVIEW.md",
+  "current_report_sha256": "07c9bce974d0fe9b4bf4d7044263bdf520dfeecc018873078674c4481ee4c5fa",
+  "current_manifest": "replacement-frozen-003/REVIEW-MANIFEST.json",
+  "historical": [
+    {
+      "snapshot": "frozen-001",
+      "verdict": "SOURCE-ONLY REJECT",
+      "manifest": "REVIEW-MANIFEST.json"
+    },
+    {
+      "snapshot": "frozen-002",
+      "verdict": "SOURCE-ONLY APPROVE",
+      "status": "superseded",
+      "manifest": "replacement-frozen-002/REVIEW-MANIFEST.json"
+    }
+  ],
+  "exact_lean_4_33_verification": "pending"
+}

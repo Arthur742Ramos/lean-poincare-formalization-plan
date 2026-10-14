@@ -1,0 +1,47 @@
+[
+  {
+    "repository": "Arthur742Ramos/lean-poincare-formalization-plan",
+    "commit": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
+    "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+    "git_blob_sha1": "3d430cddf9790bd71375727570118e3aed74e183",
+    "sha256": "bf9de4bf83c75b4373d72842dae0eaca96fd2e333df48336f393ff998cce1ddf",
+    "bytes": 188253,
+    "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean"
+  },
+  {
+    "repository": "Arthur742Ramos/lean-poincare-formalization-plan",
+    "commit": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
+    "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/PointFourContract.lean",
+    "git_blob_sha1": "ab4be9d25a9178cb17cb9c1ed67dc60ff10025ec",
+    "sha256": "36842cb3898b3a510a597877e7394f7a8e84ab6f716916e7baecb3f7572d1fca",
+    "bytes": 1718,
+    "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/PointFourContract.lean"
+  },
+  {
+    "repository": "Arthur742Ramos/lean-poincare-formalization-plan",
+    "commit": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
+    "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TimeDependent.lean",
+    "git_blob_sha1": "23d11ea8d2b19bafc1c758ce3107a908486ff1a2",
+    "sha256": "f7d94bc70f0445019dc88bfa3f5ee5d0d6f577d2b57ebeb102e15b6e94aae004",
+    "bytes": 36467,
+    "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TimeDependent.lean"
+  },
+  {
+    "repository": "Arthur742Ramos/lean-poincare-formalization-plan",
+    "commit": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
+    "path": "curvature/lake-manifest.json",
+    "git_blob_sha1": "6f43d98dc0d1e168146656d4570dc53ea80593d4",
+    "sha256": "225d4a9c29a303ce6cc8eb4db7a369c64a2c8666b180758e0ce7097fd2a6935e",
+    "bytes": 3392,
+    "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature/lake-manifest.json"
+  },
+  {
+    "repository": "Arthur742Ramos/lean-poincare-formalization-plan",
+    "commit": "3a8ed697d1f0366f8370efb2fa9e524b68d27e97",
+    "path": "curvature/lean-toolchain",
+    "git_blob_sha1": "025e59548e48cf71f2744154e2890beefe30a258",
+    "sha256": "302cd63c54178885b89e669f33b38f12f4dd7ae7e5cac537b3203e3768d8fb2b",
+    "bytes": 25,
+    "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/blob/3a8ed697d1f0366f8370efb2fa9e524b68d27e97/curvature/lean-toolchain"
+  }
+]

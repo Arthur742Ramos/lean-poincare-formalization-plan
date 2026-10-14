@@ -1,0 +1,8 @@
+FORWARD MATCH C0GaussianEndpoint
+REVERSE MATCH C0GaussianEndpoint
+FORWARD MATCH C0FiniteAtlasGaussian
+REVERSE MATCH C0FiniteAtlasGaussian
+FORWARD MATCH C0EndpointCompactPositivity
+REVERSE MATCH C0EndpointCompactPositivity
+FORWARD MATCH C2MetricVelocityExtension
+REVERSE MATCH C2MetricVelocityExtension
