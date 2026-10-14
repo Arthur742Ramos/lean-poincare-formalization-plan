@@ -7,7 +7,7 @@ _curvature_sys.dont_write_bytecode = True
 _curvature_root = _curvature_pathlib.Path(__file__).resolve().parents[2]
 _curvature_helper = _curvature_root / 'curvature/scripts/point4_smooth_master_composition.py'
 assert _curvature_helper.is_file() and not _curvature_helper.is_symlink()
-assert _curvature_hashlib.sha256(_curvature_helper.read_bytes()).hexdigest() == 'fefd6f80727014b393a2c411516a77a1a3ac60df893d53b6b0f0dfd75c770856', "Incoming composition helper identity drift"
+assert _curvature_hashlib.sha256(_curvature_helper.read_bytes()).hexdigest() == '7dfbb60a98d19a756fcb08d001f2e85a5acf9abf0ecf234cd614e5f64a70ed5c', "Incoming composition helper identity drift"
 import point4_smooth_master_composition as _curvature_comp
 if __name__ == '__main__':
     _curvature_comp.run_curvature_mocks(111,'curvature/scripts/point4_hamilton_native_mock_test.py',_curvature_sys.argv[1:])

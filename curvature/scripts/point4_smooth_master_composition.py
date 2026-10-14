@@ -2236,4 +2236,110 @@ def curvature_current_batch_test_inverse(raw):
     assert sha256(text.encode())=='159413410cf4d242fafeb4b25d08c20143426adca8d7c3ee4e7cac78e6e973f6'
     return text.encode()
 
+# BEGIN scoped fresh immutable Git blob transport; never cache validation results.
+_curvature_git_batch_transport_base=git
+def curvature_read_batch_blob(stream):
+    header=stream.readline(4097)
+    match=re.fullmatch(rb'([0-9a-f]{40}) blob (0|[1-9][0-9]*)\n',header)
+    assert match is not None, 'Missing/nonblob/malformed immutable Git response'
+    size=int(match[2]);chunks=[];remaining=size
+    while remaining:
+        part=stream.read(remaining)
+        assert type(part) is bytes and 0<len(part)<=remaining, 'Truncated immutable Git blob body'
+        chunks.append(part);remaining-=len(part)
+    data=b''.join(chunks)
+    assert stream.read(1)==b'\n', 'Truncated immutable Git blob frame'
+    assert blob_id(data).encode()==match[1], 'Immutable Git blob object SHA drift'
+    return data
+
+@contextlib.contextmanager
+def curvature_fresh_git_blob_batch():
+    original=git;root=ROOT;environment=dict(ENV);process=None
+    # Preserve intentional fixture/source callbacks exactly; only the standard
+    # immutable Git reader uses this transport. The full verifier always runs.
+    if original is not _curvature_git_batch_transport_base:
+        yield
+        return
+    assert environment.get('GIT_NO_LAZY_FETCH')=='1' and type(root) in (pathlib.PosixPath,pathlib.WindowsPath)
+    # The transport lives for one verifier invocation only. Every request is read
+    # anew; mutable HEAD/index/status/worktree queries use the original callback.
+    def query(*args,root=None):
+        nonlocal process
+        assert globals()['git'] is query and ROOT is owner_root and ENV==environment, 'Immutable Git transport owner/input mutation'
+        if root is not None or len(args)!=2 or args[0]!='show' or type(args[1]) is not str:
+            return original(*args) if root is None else original(*args,root=root)
+        spec=args[1]
+        if re.fullmatch(r'[0-9a-f]{40}:[^\x00-\x1f\x7f]+',spec) is None:
+            return original(*args) if root is None else original(*args,root=root)
+        if process is None:
+            process=subprocess.Popen(['git','--no-replace-objects','-C',str(owner_root),'cat-file','--batch'],
+                env=environment,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,bufsize=0)
+        request=spec.encode('utf8')+b'\n'
+        assert process.stdin.write(request)==len(request), 'Truncated immutable Git batch request'
+        process.stdin.flush()
+        data=curvature_read_batch_blob(process.stdout)
+        assert globals()['git'] is query and ROOT is owner_root and ENV==environment, 'Immutable Git transport owner/input mutation'
+        return data
+    owner_root=root
+    globals()['git']=query
+    try:
+        yield
+    finally:
+        primary=sys.exception();failures=[]
+        try:
+            assert globals()['git'] is query and ROOT is owner_root and ENV==environment, 'Immutable Git transport owner/input mutation'
+        except BaseException as error:failures.append(error)
+        globals()['git']=original
+        if process is not None:
+            try:
+                process.stdin.close();process.stdin=None
+                extra,errors=process.communicate(timeout=20)
+                assert process.returncode==0 and not extra and not errors, 'Extra/duplicate/error immutable Git response or unsuccessful close'
+            except BaseException as error:
+                failures.append(error)
+                if process.poll() is None:
+                    try:
+                        process.kill();process.communicate(timeout=20)
+                    except BaseException as cleanup:failures.append(cleanup)
+        if failures:
+            if primary is None:
+                primary=failures.pop(0)
+                for error in failures:primary.add_note('Additional immutable Git cleanup failure: '+repr(error))
+                raise primary
+            for error in failures:primary.add_note('Immutable Git cleanup failure during unwind: '+repr(error))
+
+_curvature_unbatched_verify_current=verify_current
+@functools.wraps(_curvature_unbatched_verify_current)
+def verify_current():
+    with curvature_fresh_git_blob_batch():
+        return _curvature_unbatched_verify_current()
+# END scoped fresh immutable Git blob transport
+
+CURVATURE_GIT_BATCH_TEST_EDITS=(('# END authenticated finite curvature tests\n', 'def git_batch_blob(raw):\n import hashlib\n return hashlib.sha1(b\'blob \'+str(len(raw)).encode()+b\'\\0\'+raw).hexdigest()\ndef git_batch_frame(raw):return git_batch_blob(raw).encode()+b\' blob \'+str(len(raw)).encode()+b\'\\n\'+raw+b\'\\n\'\nclass GitBatchStream:\n def __init__(self):self.raw=io.BytesIO()\n def append(self,b):p=self.raw.tell();self.raw.seek(0,2);self.raw.write(b);self.raw.seek(p)\n def readline(self,n):return self.raw.readline(n)\n def read(self,n=-1):return self.raw.read(n)\nclass GitBatchInput:\n def __init__(self,p):self.p=p\n def write(self,b):self.p.requests.append(b);self.p.stdout.append(self.p.responses.pop(0));return len(b)\n def flush(self):pass\n def close(self):pass\nclass GitBatchProcess:\n def __init__(self,responses,extra=b\'\',errors=b\'\',status=0):\n  self.responses=list(responses);self.extra=extra;self.errors=errors;self.returncode=status;self.stdout=GitBatchStream();self.stdin=GitBatchInput(self);self.requests=[];self.killed=False\n def communicate(self,timeout):assert timeout==20;return self.stdout.read()+self.extra,self.errors\n def poll(self):return self.returncode\n def kill(self):self.killed=True;self.returncode=-9\nclass ImmutableGitBatchControls(unittest.TestCase):\n def context(self,responses,extra=b\'\',errors=b\'\',status=0,verify=None):\n  records=[];fallback=[];root=comp.ROOT\n  def original(*args,root=None):fallback.append((args,root));return b\'LIVE\'\n  def popen(argv,**kwargs):\n   assert argv==[\'git\',\'--no-replace-objects\',\'-C\',str(root),\'cat-file\',\'--batch\'] and kwargs[\'env\']=={\'GIT_NO_LAZY_FETCH\':\'1\'}\n   assert set(kwargs)=={\'env\',\'stdin\',\'stdout\',\'stderr\',\'bufsize\'} and kwargs[\'bufsize\']==0\n   p=GitBatchProcess(responses,extra,errors,status);records.append(p);return p\n  ns=comp.__dict__\n  changes={\'git\':original,\'_curvature_git_batch_transport_base\':original,\'ROOT\':root,\'ENV\':{\'GIT_NO_LAZY_FETCH\':\'1\'},\'subprocess\':types.SimpleNamespace(Popen=popen,PIPE=-1),\'_curvature_unbatched_verify_current\':verify or (lambda:None)}\n  for key,value in changes.items():\n   replacement=patch.object(comp,key,value);replacement.start();self.addCleanup(replacement.stop)\n  return ns,records,fallback,original\n def test_fresh_identical_queries_and_single_process(self):\n  ns,ps,_,old=self.context([git_batch_frame(b\'a\'),git_batch_frame(b\'b\'),git_batch_frame(b\'a\')]);spec=\'1\'*40+\':a\'\n  with ns[\'curvature_fresh_git_blob_batch\']():\n   self.assertEqual([ns[\'git\'](\'show\',spec) for _ in range(3)],[b\'a\',b\'b\',b\'a\'])\n  self.assertIs(ns[\'git\'],old);self.assertEqual(len(ps),1);self.assertEqual(ps[0].requests,[spec.encode()+b\'\\n\']*3)\n def test_no_cross_invocation_transport_or_result_cache(self):\n  ns,ps,_,old=self.context([git_batch_frame(b\'a\')]);spec=\'1\'*40+\':a\'\n  for _ in range(2):\n   with ns[\'curvature_fresh_git_blob_batch\']():self.assertEqual(ns[\'git\'](\'show\',spec),b\'a\')\n  self.assertEqual(len(ps),2);self.assertIs(ns[\'git\'],old)\n def test_mutable_HEAD_index_and_alternate_root_use_live_original(self):\n  ns,ps,f,_=self.context([])\n  with ns[\'curvature_fresh_git_blob_batch\']():\n   for args in [(\'rev-parse\',\'HEAD\'),(\'ls-tree\',\'-rz\',\'HEAD\'),(\'ls-files\',\'--stage\',\'-z\'),(\'show\',\'HEAD:a\'),(\'show\',\'1\'*40+\':a\\nforeign\')]:self.assertEqual(ns[\'git\'](*args),b\'LIVE\')\n   self.assertEqual(ns[\'git\'](\'show\',\'1\'*40+\':a\',root=comp.ROOT/\'other\'),b\'LIVE\')\n  self.assertEqual(len(f),6);self.assertEqual(ps,[])\n def test_missing_and_nonblob_response_rejected(self):\n  for raw in [b\'\',b\'1\'*40+b\' missing\\n\',b\'1\'*40+b\' tree 0\\n\\n\']:\n   with self.subTest(raw=raw):self.reject(raw)\n def reject(self,raw):\n  ns,_,_,old=self.context([raw])\n  with self.assertRaises(AssertionError):\n   with ns[\'curvature_fresh_git_blob_batch\']():ns[\'git\'](\'show\',\'1\'*40+\':a\')\n  self.assertIs(ns[\'git\'],old)\n def test_wrong_object_SHA_rejected(self):self.reject(b\'0\'*40+b\' blob 1\\na\\n\')\n def test_truncated_body_or_missing_terminator_rejected(self):\n  self.reject(git_batch_blob(b\'ab\').encode()+b\' blob 2\\na\');self.reject(git_batch_frame(b\'a\')[:-1])\n def test_malformed_length_and_header_rejected(self):\n  for raw in [b\'1\'*40+b\' blob -1\\n\',b\'1\'*40+b\' blob 01\\na\\n\',b\'1\'*40+b\' blob 1 trailing\\na\\n\',b\'1\'*4097]:\n   with self.subTest(raw=raw[:80]):self.reject(raw)\n def test_extra_response_rejected_at_close(self):\n  ns,_,_,old=self.context([git_batch_frame(b\'a\')],extra=b\'foreign response\')\n  with self.assertRaises(AssertionError):\n   with ns[\'curvature_fresh_git_blob_batch\']():self.assertEqual(ns[\'git\'](\'show\',\'1\'*40+\':a\'),b\'a\')\n  self.assertIs(ns[\'git\'],old)\n def test_duplicate_response_rejected_at_close(self):\n  ns,_,_,old=self.context([git_batch_frame(b\'a\')+git_batch_frame(b\'a\')])\n  with self.assertRaises(AssertionError):\n   with ns[\'curvature_fresh_git_blob_batch\']():ns[\'git\'](\'show\',\'1\'*40+\':a\')\n  self.assertIs(ns[\'git\'],old)\n def test_child_error_or_unsuccessful_close_rejected(self):\n  for errors,status in [(b\'error\',0),(b\'\',1)]:\n   ns,_,_,old=self.context([git_batch_frame(b\'a\')],errors=errors,status=status)\n   with self.assertRaises(AssertionError):\n    with ns[\'curvature_fresh_git_blob_batch\']():ns[\'git\'](\'show\',\'1\'*40+\':a\')\n   self.assertIs(ns[\'git\'],old)\n def test_context_ENV_ROOT_or_callback_mutation_rejected(self):\n  for kind in [\'env\',\'root\',\'git\']:\n   ns,_,_,old=self.context([])\n   with self.assertRaises(AssertionError):\n    with ns[\'curvature_fresh_git_blob_batch\']():\n     if kind==\'env\':ns[\'ENV\'][\'GIT_NO_LAZY_FETCH\']=\'0\'\n     elif kind==\'root\':ns[\'ROOT\']=ns[\'ROOT\']/\'foreign\'\n     else:ns[\'git\']=lambda *a,**k:b\'foreign\'\n   self.assertIs(ns[\'git\'],old)\n def test_primary_exception_and_cleanup_note_preserved(self):\n  ns,_,_,old=self.context([git_batch_frame(b\'a\')],extra=b\'extra\');primary=ValueError(\'real validator failure\')\n  with self.assertRaises(ValueError) as caught:\n   with ns[\'curvature_fresh_git_blob_batch\']():ns[\'git\'](\'show\',\'1\'*40+\':a\');raise primary\n  self.assertIs(caught.exception,primary);self.assertEqual(len(primary.__notes__),1);self.assertIs(ns[\'git\'],old)\n def test_wrong_provenance_bytes_reach_unchanged_validator(self):\n  ns,_,_,old=self.context([git_batch_frame(b\'foreign-but-well-framed\')])\n  with self.assertRaises(AssertionError):\n   with ns[\'curvature_fresh_git_blob_batch\']():assert ns[\'git\'](\'show\',\'1\'*40+\':a\')==b\'authenticated\'\n  self.assertIs(ns[\'git\'],old)\n def test_live_input_PREPOST_is_not_cached_by_wrapper(self):\n  observed=[];physical=[b\'sealed\'];box={}\n  def verifier():\n   assert physical[0]==b\'sealed\';observed.append(\'PRE\');box[\'ns\'][\'git\'](\'show\',\'1\'*40+\':a\');physical[0]=b\'mutated\';assert physical[0]==b\'sealed\',\'physical POST drift\'\n  ns,_,_,old=self.context([git_batch_frame(b\'a\')],verify=verifier);box[\'ns\']=ns\n  with self.assertRaisesRegex(AssertionError,\'physical POST drift\'):ns[\'verify_current\']()\n  self.assertEqual(observed,[\'PRE\']);self.assertIs(ns[\'git\'],old)\n\n def test_partial_unbuffered_body_reads_are_completed_exactly(self):\n  class Partial(GitBatchStream):\n   def read(self,n=-1):return super().read(min(n,2) if n>2 else n)\n  ns,ps,_,old=self.context([git_batch_frame(b\'abcdef\')])\n  factory=comp.subprocess.Popen\n  def limited(*args,**kwargs):\n   proc=factory(*args,**kwargs);proc.stdout=Partial();return proc\n  with patch.object(comp.subprocess,\'Popen\',limited):\n   with comp.curvature_fresh_git_blob_batch():self.assertEqual(comp.git(\'show\',\'1\'*40+\':a\'),b\'abcdef\')\n  self.assertIs(comp.git,old)\n def real_context(self,extra):\n  # Exercise actual FileIO and communicate/os.read semantics using only a tiny\n  # Python transport fixture, never the real Git/history/native compiler.\n  root=comp.ROOT;records=[];original=comp.git;real_popen=subprocess.Popen\n  program="import sys,os,hashlib\\nraw=b\'x\'*513\\nfr=hashlib.sha1(b\'blob \'+str(len(raw)).encode()+b\'\\\\0\'+raw).hexdigest().encode()+b\' blob \'+str(len(raw)).encode()+b\'\\\\n\'+raw+b\'\\\\n\'\\nfor line in sys.stdin.buffer:\\n for i in range(0,len(fr),2):os.write(1,fr[i:i+2])\\n"+extra\n  def launch(argv,**kwargs):\n   assert argv==[\'git\',\'--no-replace-objects\',\'-C\',str(root),\'cat-file\',\'--batch\'] and kwargs[\'bufsize\']==0\n   env=dict(os.environ);env[\'PYTHONDONTWRITEBYTECODE\']=\'1\';kwargs[\'env\']=env\n   proc=real_popen([sys.executable,\'-B\',\'-c\',program],**kwargs)\n   assert type(proc.stdout) is io.FileIO and type(proc.stdin) is io.FileIO;records.append(proc);return proc\n  p=patch.object(comp,\'subprocess\',types.SimpleNamespace(Popen=launch,PIPE=subprocess.PIPE));p.start();self.addCleanup(p.stop)\n  return records,original\n def test_real_FileIO_partial_transport_and_successful_EOF(self):\n  records,old=self.real_context(\'\')\n  with comp.curvature_fresh_git_blob_batch():self.assertEqual(comp.git(\'show\',\'1\'*40+\':a\'),b\'x\'*513)\n  self.assertEqual(len(records),1);self.assertEqual(records[0].returncode,0);self.assertIs(comp.git,old)\n def test_real_FileIO_extra_and_duplicate_response_cannot_hide_at_close(self):\n  for extra in ["os.write(1,b\'foreign extra\')\\n","os.write(1,fr)\\n"]:\n   records,old=self.real_context(extra)\n   with self.assertRaisesRegex(AssertionError,\'Extra/duplicate/error\'):\n    with comp.curvature_fresh_git_blob_batch():self.assertEqual(comp.git(\'show\',\'1\'*40+\':a\'),b\'x\'*513)\n   self.assertEqual(records[0].returncode,0);self.assertIs(comp.git,old)\n\n def test_custom_positional_reader_preserved_and_full_verifier_still_runs(self):\n  calls=[];spec=\'1\'*40+\':a\'\n  def original(command,value):calls.append((command,value));return b\'sealed\'\n  def full_verifier():\n   assert comp.git(\'show\',spec)==b\'sealed\';assert comp.git(\'rev-parse\',\'HEAD\')==b\'sealed\';return \'all_original_checks\'\n  with patch.object(comp,\'git\',original),patch.object(comp,\'_curvature_unbatched_verify_current\',full_verifier),patch.object(comp.subprocess,\'Popen\') as launch:\n   self.assertEqual(comp.verify_current(),\'all_original_checks\');launch.assert_not_called();self.assertIs(comp.git,original)\n  self.assertEqual(calls,[(\'show\',spec),(\'rev-parse\',\'HEAD\')])\n\n# END authenticated finite curvature tests\n'), ('    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(CurvatureProductionNamespaceTests))\n', '    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(CurvatureProductionNamespaceTests))\n    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(ImmutableGitBatchControls))\n'), ("    assert suite.countTestCases()==121, 'Complete ordinary suite selection drift'", "    assert suite.countTestCases()==139, 'Complete ordinary suite selection drift'"), ("    assert suite.countTestCases()==(8 if args.real_only else 129 if REAL else 121), 'Exact selected suite drift'", "    assert suite.countTestCases()==(8 if args.real_only else 147 if REAL else 139), 'Exact selected suite drift'"))
+CURVATURE_GIT_BATCH_TEST_SHA256='d1ae06b9a47b8ada0b01ff9ac9d0385f7c61c1f70e31ad93d92a5e5587f5428e'
+CURVATURE_GIT_BATCH_TEST_EDIT_SHA256='9d794b9c54ccad7a581a0e211626a0bd44ed85d51cb2dbd4c4643220594ab5f7'
+def curvature_git_batch_test_inverse(raw):
+    assert type(raw) is bytes and sha256(raw)==CURVATURE_GIT_BATCH_TEST_SHA256, 'Integrated Git batch TEST drift'
+    assert type(CURVATURE_GIT_BATCH_TEST_EDITS) is tuple and len(CURVATURE_GIT_BATCH_TEST_EDITS)==4
+    assert sha256(json.dumps(CURVATURE_GIT_BATCH_TEST_EDITS,separators=(',',':')).encode())==CURVATURE_GIT_BATCH_TEST_EDIT_SHA256
+    text=raw.decode('utf8')
+    for before,after in reversed(CURVATURE_GIT_BATCH_TEST_EDITS):
+        assert text.count(after)==1;text=text.replace(after,before,1)
+    restored=text.encode();assert sha256(restored)=='33d93c0fb3d6b69f4cd08d185e5d0cf235afed69cab3032085b54d3113a2b1bb'
+    for before,after in CURVATURE_GIT_BATCH_TEST_EDITS:
+        assert text.count(before)==1 and after not in text;text=text.replace(before,after,1)
+    assert text.encode()==raw, 'Whole integrated Git batch TEST forward recovery drift'
+    return restored
+_curvature_git_batch_original_section_inverse=curvature_section_inverse
+def curvature_section_inverse(raw,path,marker):
+    if path==TEST:raw=curvature_git_batch_test_inverse(raw)
+    return _curvature_git_batch_original_section_inverse(raw,path,marker)
+_curvature_git_batch_original_map_record=tensor_map_record
+def tensor_map_record(expected, originals, changes):
+    record=_curvature_git_batch_original_map_record(expected, originals, changes)
+    record['curvature_finite_input_preparation']['immutable_git_blob_transport']=CURVATURE_GIT_BATCH_INTEGRATION
+    return record
+
+CURVATURE_GIT_BATCH_INTEGRATION={'scope': 'Fresh immutable Git blob batching per complete verifier; all historical validator bodies remain live and unchanged', 'ordinary_previous': 121, 'new_required_transport_controls': 18, 'ordinary_current': 139, 'real_required': 8, 'combined_current': 147, 'all_previous129_test_method_AST_unchanged': True, 'current_namespace': 2146, 'required_process_timeout_seconds': 120, 'git_transport': 'cat-file --batch with bufsize0, exact partial-body read loop, objectSHA/frame/EOF/extra/error and context ownership checks', 'cross_invocation_cache': False, 'current_HEAD_index_physical_or_passed_result_cache': False, 'tests_and_performance_qualification': 'UNRUN', 'Point4': 'OPEN'}
+
 # END authenticated finite curvature extension
