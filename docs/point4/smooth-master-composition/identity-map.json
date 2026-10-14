@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "6b46a59547f2592ef7f02be222fcea32249f6e27",
-      "final_sha256": "6c1269f2b7de206675a6a194244cc8a80f2156d8494586408d5d97344c70d477",
+      "final_blob": "8de4d23a8f408725901697c3adbaff1234a7f375",
+      "final_sha256": "700ce6af7fa1f02b1142ba3443d4185698b4ec77466c873cb1286b8cd6e3dfdc",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "0d238a1f23e4eeb338d7400015c899fc0778cc07",
-      "final_sha256": "e2bee7164251082b60d54897debf0fedc9c2ec7de03b6548b315980cdc6a3b10",
+      "final_blob": "73fa28a0e8f3f7c72a41806d939cdaeb082a52df",
+      "final_sha256": "f64eda35fef8dcefd0bde3bd80318dfa6d720504bd9be7ee01f771401f5ad9a3",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "ef69059cbcea54948c292b7fe68f6a892a2e12b6",
-      "final_sha256": "7a4682dd5a7194d86d0d255712e0bd14bd32b007c207dba6331355776a6c1cfc",
+      "final_blob": "25081cba44a2f5139418af6310c2155932311a85",
+      "final_sha256": "1858d608a525272b3f63e3e6970ff4575e2b2ba1f720ec3fec2cd23e2dcac949",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "4f99e09d883518c174dc616827f14c212e7781f7",
-      "final_sha256": "f1b5cacc45ce4ddfedcad003ac497f5d75e9c0c157e04adae9140bb3b4df0401",
+      "final_blob": "e1cc452d2081dfe0cf0e29805579ee24db971464",
+      "final_sha256": "763677926c8b3e454d9f9815876c4d753d6e020fc21c5154c0ae23b769543616",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "d12a898651c41143b46f7a098f582e13f7cc68f4",
-      "final_sha256": "73b5806633925b7b13749d9c96aee053b09a169629fb8f34cd242f01e0e95d81",
+      "final_blob": "8f605edd4a308b33052942884a1ef9fa09e36203",
+      "final_sha256": "c7fac62f88c155aa405f7acb3709384f70b11bca2351167ad117efc11ca09e7c",
       "mode": "100644",
       "count": 1
     }
@@ -31039,7 +31039,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "09e2bfc90b38dc610c1d5223fe0d87f6834223e0"
+      "8ac7cd0be8962c3137f525e8f5492433cf151960"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31071,7 +31071,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "c52b1157442eec9ee128cea0256ff288a7e286f6"
+      "2597e42f760c162e54621250ba13495ccdc260eb"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31079,7 +31079,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "c2b20918bd264267608328941fab3fe2f6dc21ff"
+      "02b0b0b48835bc36f2f8e3011cac6b8d85dec382"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31103,15 +31103,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "6b46a59547f2592ef7f02be222fcea32249f6e27"
+      "8de4d23a8f408725901697c3adbaff1234a7f375"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "9fc5cc4df97bd75f8d6c28505e137e2ae2e8ab2f"
+      "53c849feab290f0ffbde3828744c1e6c0e062bb3"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "c5b6ddea83176f06d01105aa644515d482505aa7"
+      "ca0bcb930d1ed3085a096fb3dee7168a4c7c9cf1"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31187,11 +31187,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "4213a54c9d4e0b4eeffab7cf7b6e196b34570ce8"
+      "328dd0bb39da3aaac07f1d4dd8aa00b36b5195e6"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "dba108b367cbe2ca2a8bf720f463cab71e25bb08"
+      "43713fa0424bf0dcaff115629a0d0954896e8462"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31251,7 +31251,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "0d238a1f23e4eeb338d7400015c899fc0778cc07"
+      "73fa28a0e8f3f7c72a41806d939cdaeb082a52df"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31287,19 +31287,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "ef69059cbcea54948c292b7fe68f6a892a2e12b6"
+      "25081cba44a2f5139418af6310c2155932311a85"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "4f99e09d883518c174dc616827f14c212e7781f7"
+      "e1cc452d2081dfe0cf0e29805579ee24db971464"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "ef74d9e1cef153be8e294d1636e9190b2188dc67"
+      "0ea65a8abafa9c93f6166f0c38656c10bd9fe935"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "f5ebeae33d4aa3e21f0261ac2bf5de4c1157953b"
+      "8293bdd61846c2af9f5da164d6288522e2155477"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -31315,7 +31315,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "e0ebe68d16cdb0e90ae96500ae7e7a0ccc5c839a"
+      "6d15f3f2ccc591ff8827d7c597b33961f3fe72a3"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31323,7 +31323,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "d8b94e56a972323965338aeb037e2e401b5cca07"
+      "5395b32535bb4578047ab1cd11d1086fedd3ef00"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31335,7 +31335,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "d12a898651c41143b46f7a098f582e13f7cc68f4"
+      "8f605edd4a308b33052942884a1ef9fa09e36203"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -81701,6 +81701,22 @@
       "finite_edits_sha256": "53ad96e032a8032f557c2c0e9934b883c424917396b6ac30fb5babdedeaa7f15",
       "declaration_headers_byte_identical": true,
       "native_qualification": "UNRUN"
+    },
+    "immutable_git_blob_transport": {
+      "scope": "Fresh immutable Git blob batching per complete verifier; all historical validator bodies remain live and unchanged",
+      "ordinary_previous": 121,
+      "new_required_transport_controls": 18,
+      "ordinary_current": 139,
+      "real_required": 8,
+      "combined_current": 147,
+      "all_previous129_test_method_AST_unchanged": true,
+      "current_namespace": 2164,
+      "required_process_timeout_seconds": 120,
+      "git_transport": "cat-file --batch with bufsize0, exact partial-body read loop, objectSHA/frame/EOF/extra/error and context ownership checks",
+      "cross_invocation_cache": false,
+      "current_HEAD_index_physical_or_passed_result_cache": false,
+      "tests_and_performance_qualification": "UNRUN",
+      "Point4": "OPEN"
     }
   }
 }
