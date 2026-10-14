@@ -2141,6 +2141,28 @@ class CachePhaseSplitControls(unittest.TestCase):
     def validate(self, p, *args):
         return self.api()['cache_split_validate_plan'](json.dumps(p).encode(), *args)
 
+    def test_native_planner_generation_schema_and_strict_validator_types(self):
+        producer = next(ast.literal_eval(node.value) for node in TREE.body
+                        if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name)
+                        and target.id == 'CACHE_PLAN_SOURCE' for target in node.targets))
+        # These assertions bind the real Lean producer, whose Json.num self-check
+        # runs in the already-required native planner before its output is printed.
+        conversion = 'let generationJson := toJson rootHashGeneration.toNat'
+        checked = 'match generationJson with\n    | .num _ => pure ()\n    | _ => throw <| IO.userError "Cache generation must serialize as a JSON number"'
+        self.assertEqual(producer.count(conversion), 1)
+        self.assertEqual(producer.count(checked), 1)
+        self.assertEqual(producer.count('unless generationJson == toJson (5 : Nat) do'), 1)
+        self.assertEqual(producer.count('("root_hash_generation", generationJson),'), 1)
+        self.assertNotIn('("root_hash_generation", toJson rootHashGeneration),', producer)
+        with tempfile.TemporaryDirectory() as directory:
+            plan, *args = self.plan(Path(directory).resolve())
+            self.assertEqual(self.validate(plan, *args), plan)
+            for malformed in ('5', True, False, 5.0, 4, 6, None, []):
+                with self.subTest(generation=malformed, value_type=type(malformed).__name__):
+                    changed = dict(plan, root_hash_generation=malformed)
+                    with self.assertRaises(AssertionError):
+                        self.validate(changed, *args)
+
     def test_exact_root_closure_and_singleton_extraction_destinations(self):
         with tempfile.TemporaryDirectory() as d:
             p,*args=self.plan(Path(d).resolve()); self.assertEqual(self.validate(p,*args),p)
