@@ -2298,7 +2298,9 @@ class CachePhaseSplitControls(unittest.TestCase):
                     return [procroot/'70'] if not state['waited'] else ([procroot/'71'] if scenario=='survivor' else [])
             def path(value):return ProcDir() if str(value)=='/proc' else Path(value)
             argv=['/official/curl','--disable','--version'];image=[1,2,3,4,5]
-            tool=dict(path=argv[0],sha256='a'*64,image_identity=image)
+            info=image_file.stat(); identity=ns['cache_split_file_identity'](info)
+            image=[identity[i] for i in (0,1,3,4,5)]
+            tool=dict(path=argv[0],sha256='a'*64,image_identity=image,identity=identity)
             class Proc:
                 pid=70;returncode=None
                 def poll(self):
@@ -2321,6 +2323,13 @@ class CachePhaseSplitControls(unittest.TestCase):
                 row=dict(pid=70,session=70,pgrp=70,argv=argv,stable=True,errors=[],exe=argv[0],image_identity=image,
                          recheck=dict(exe=argv[0],image_identity=image))
                 if scenario=='unknown':row.update(stable=False,errors=[{'type':'FileNotFoundError'}]);row.pop('exe')
+                if scenario=='terminal':
+                    state['done']=True
+                    row=dict(pid=70,ppid=1,pgrp=70,session=70,starttime_ticks=123,state='Z',rss_bytes=0,
+                             observed_at=20,stable=False,errors=[{'type':'FileNotFoundError'}],
+                             verified_terminated_zombie=True,terminal_errors=[],rechecked_at=20)
+                    sample=dict(pid=70,ppid=1,pgrp=70,session=70,starttime_ticks=123,state='Z',rss_bytes=0,observed_at=20)
+                    row['terminal_samples']=[dict(sample),dict(sample)];row['terminal_recheck']=dict(sample)
                 return row
             probes=[]
             def resources():
@@ -2353,11 +2362,11 @@ class CachePhaseSplitControls(unittest.TestCase):
             ns.update(Path=path,LIMIT=LIMIT,PKG=root,EVIDENCE=OutputPathFailure() if scenario=='pre_path' else root,receipt=record,save=save,
                       cache_split_open_tool=opened,cache_split_tool_POST=post,
                       cache_split_resource_seal=resources,owned_process_identity=observe,
-                      os=types.SimpleNamespace(name='posix',sysconf=lambda _:4096,close=close,
+                      os=types.SimpleNamespace(name='posix',sysconf=lambda _:4096,close=close,getpid=lambda:1,fstat=os.fstat,
                          killpg=lambda pid,sig:events.append(('killpg',pid))),
                       signal=types.SimpleNamespace(SIGKILL=9),
                       subprocess=types.SimpleNamespace(Popen=popen,DEVNULL=-3),
-                      time=types.SimpleNamespace(monotonic=lambda:101 if scenario=='timeout' and record['stages'] else 10,
+                      time=types.SimpleNamespace(time=lambda:20,monotonic=lambda:101 if scenario=='timeout' and record['stages'] else 10,
                          sleep=lambda delay:state.update(done=True)))
             failure=None;result=None
             try:result=ns['cache_split_tool_stage'](argv,'finite-stage',{},100,'finite-input' if scenario=='stdin_close' else None)
@@ -2367,7 +2376,7 @@ class CachePhaseSplitControls(unittest.TestCase):
             no_process={'popen_error','pre_resource','pre_save','pre_path'}
             if scenario not in no_process:
                 self.assertIn(('killpg',70),events);self.assertIn(('wait',10),events)
-            if scenario=='success':
+            if scenario in ('success','terminal'):
                 self.assertIsNone(failure);self.assertEqual(result[0],0);self.assertEqual(len(result[2]),131072)
                 self.assertEqual(record['stages'][0]['remaining_session_pids'],[])
                 self.assertEqual(record['stages'][0]['resources_PRE'],record['stages'][0]['resources_POST'])
@@ -2397,6 +2406,136 @@ class CachePhaseSplitControls(unittest.TestCase):
                 self.assertLess(events.index(('killpg',70)),events.index(('wait',10)))
                 self.assertLess(events.index(('wait',10)),events.index(('tool_POST',)))
             if scenario=='rss':self.assertGreater(record['stages'][0]['peak_rss_bytes'],LIMIT)
+            if scenario=='terminal':
+                self.assertEqual(record['stages'][0]['terminal_owner_proof']['classification'],'PROVEN_TERMINAL_DIRECT_TOOL_OWNER')
+                self.assertEqual(record['stages'][0]['terminal_owner_proof']['exit_code'],0)
+                self.assertTrue(record['stages'][0]['owner_reaped'])
+                self.assertEqual(record['stages'][0]['status'],'RETURNED')
+
+    def terminal_owner_fixture(self):
+        import contextlib
+        @contextlib.contextmanager
+        def held():
+            with tempfile.TemporaryDirectory() as directory:
+                image=Path(directory)/'image';image.write_bytes(b'owned finite tool image')
+                fd=os.open(image,os.O_RDONLY)
+                try:
+                    ns=self.api();ns['time']=types.SimpleNamespace(time=lambda:16)
+                    identity=ns['cache_split_file_identity'](os.fstat(fd))
+                    argv=['/official/curl','--disable','--version']
+                    tool=dict(path=argv[0],sha256=digest(image.read_bytes()),identity=identity,
+                              image_identity=[identity[i] for i in (0,1,3,4,5)])
+                    launch=dict(pid=70,parent_pid=os.getpid(),argv=list(argv),fd=fd,
+                                executable='/proc/self/fd/'+str(fd),pass_fds=[fd],start_new_session=True,
+                                tool_identity=list(identity),tool_sha256=tool['sha256'],started_at=10,returned_at=11)
+                    row=dict(pid=70,ppid=os.getpid(),pgrp=70,session=70,starttime_ticks=123,
+                             state='Z',rss_bytes=0,observed_at=12,stable=False,
+                             errors=[dict(type='FileNotFoundError')],verified_terminated_zombie=True,
+                             terminal_errors=[],rechecked_at=15)
+                    row['terminal_samples']=[dict(pid=70,ppid=os.getpid(),pgrp=70,session=70,
+                        starttime_ticks=123,state='Z',rss_bytes=0,observed_at=when) for when in (13,14)]
+                    row['terminal_recheck']=dict(row['terminal_samples'][-1])
+                    yield ns,row,argv,tool,launch
+                finally:os.close(fd)
+        return held()
+
+    def test_terminal_direct_owner_recomputes_full_evidence_and_preserves_exit_status(self):
+        with self.terminal_owner_fixture() as (ns,row,argv,tool,launch):
+            for code in (0,7,-9):
+                with self.subTest(exit_code=code):
+                    result=ns['cache_split_process_policy']([row],70,argv,tool,launch=launch,exit_code=code)
+                    self.assertEqual(result['classification'],'PROVEN_TERMINAL_DIRECT_TOOL_OWNER')
+                    self.assertEqual(result['exit_code'],code)
+                    self.assertEqual(result['kernel_identity']['starttime_ticks'],123)
+
+    def test_terminal_flag_cannot_replace_two_fresh_zombie_zero_rss_samples(self):
+        import copy
+        with self.terminal_owner_fixture() as (ns,row,argv,tool,launch):
+            mutations=[]
+            for key,value in (('verified_terminated_zombie',False),('terminal_errors',[{'type':'read failure'}]),
+                              ('terminal_samples',[]),('terminal_samples',[row['terminal_samples'][0]]),
+                              ('state','R'),('rss_bytes',1),('pid',True)):
+                changed=copy.deepcopy(row);changed[key]=value;mutations.append(changed)
+            for key,value in (('state','R'),('rss_bytes',1),('rss_bytes',False),('starttime_ticks',124)):
+                changed=copy.deepcopy(row);changed['terminal_samples'][1][key]=value;mutations.append(changed)
+            for changed in mutations:
+                with self.subTest(changed=changed):
+                    with self.assertRaises(AssertionError):
+                        ns['cache_split_process_policy']([changed],70,argv,tool,launch=launch,exit_code=0)
+            changed=copy.deepcopy(row);changed.pop('starttime_ticks')
+            with self.assertRaises(KeyError):
+                ns['cache_split_process_policy']([changed],70,argv,tool,launch=launch,exit_code=0)
+
+    def test_terminal_kernel_identity_parent_and_observation_order_are_exact(self):
+        import copy
+        with self.terminal_owner_fixture() as (ns,row,argv,tool,launch):
+            for key,value in (('pid',71),('ppid',row['ppid']+1),('pgrp',71),('session',71),
+                              ('starttime_ticks',0),('observed_at',9),('rechecked_at',13)):
+                changed=copy.deepcopy(row);changed[key]=value
+                with self.subTest(key=key):
+                    with self.assertRaises(AssertionError):
+                        ns['cache_split_process_policy']([changed],70,argv,tool,launch=launch,exit_code=0)
+            changed=copy.deepcopy(row);changed['terminal_samples'][0]['observed_at']=14.5
+            with self.assertRaises(AssertionError):
+                ns['cache_split_process_policy']([changed],70,argv,tool,launch=launch,exit_code=0)
+            changed=copy.deepcopy(row);changed['terminal_samples'][0]['observed_at']=float('nan')
+            with self.assertRaises(AssertionError):
+                ns['cache_split_process_policy']([changed],70,argv,tool,launch=launch,exit_code=0)
+            changed=copy.deepcopy(row);changed['rechecked_at']=float('inf')
+            with self.assertRaises(AssertionError):
+                ns['cache_split_process_policy']([changed],70,argv,tool,launch=launch,exit_code=0)
+
+    def test_terminal_partial_image_argv_and_lean_contradictions_are_never_exempted(self):
+        import copy
+        with self.terminal_owner_fixture() as (ns,row,argv,tool,launch):
+            for place in ('initial','recheck'):
+                for key,value in (('exe','/official/lean'),('exe','/unexpected/curl'),
+                                  ('argv',argv+['extra']),('cmdline_hex','00'),
+                                  ('image_identity',[0,0,0,0,0]),('ppid',row['ppid']+1),('state','R'),('rss_bytes',1)):
+                    changed=copy.deepcopy(row);observed=changed if place=='initial' else changed.setdefault('recheck',{})
+                    observed[key]=value
+                    with self.subTest(place=place,key=key,value=value):
+                        with self.assertRaises(AssertionError):
+                            ns['cache_split_process_policy']([changed],70,argv,tool,launch=launch,exit_code=0)
+
+    def test_terminal_owner_requires_current_open_image_launch_and_actual_exit(self):
+        import copy
+        with self.terminal_owner_fixture() as (ns,row,argv,tool,launch):
+            for exit_code in (None,False,'0'):
+                with self.subTest(exit_code=exit_code):
+                    with self.assertRaises(AssertionError):
+                        ns['cache_split_process_policy']([row],70,argv,tool,launch=launch,exit_code=exit_code)
+            for key,value in (('pid',71),('parent_pid',launch['parent_pid']+1),('argv',argv+['extra']),
+                              ('executable','/unbound/curl'),('pass_fds',[]),('start_new_session',False),
+                              ('tool_sha256','0'*64),('tool_identity',[0]*6),('returned_at',13),('parent_pid',True)):
+                changed=copy.deepcopy(launch);changed[key]=value
+                with self.subTest(key=key):
+                    with self.assertRaises(AssertionError):
+                        ns['cache_split_process_policy']([row],70,argv,tool,launch=changed,exit_code=0)
+            with self.assertRaises(AssertionError):
+                ns['cache_split_process_policy']([row],70,argv,tool,exit_code=0)
+            changed=copy.deepcopy(tool);changed['identity'][3]+=1
+            with self.assertRaises(AssertionError):
+                ns['cache_split_process_policy']([row],70,argv,changed,launch=launch,exit_code=0)
+            changed=copy.deepcopy(tool);changed['identity'][0]=True
+            with self.assertRaises(AssertionError):
+                ns['cache_split_process_policy']([row],70,argv,changed,launch=launch,exit_code=0)
+            with tempfile.TemporaryFile() as other_image:
+                other_image.write(b'different finite image');other_image.flush()
+                changed=copy.deepcopy(launch);changed['fd']=other_image.fileno()
+                changed['pass_fds']=[changed['fd']];changed['executable']='/proc/self/fd/'+str(changed['fd'])
+                with self.assertRaisesRegex(AssertionError,'current image descriptor drift'):
+                    ns['cache_split_process_policy']([row],70,argv,tool,launch=changed,exit_code=0)
+
+    def test_terminal_owner_never_exempts_extra_compiler_or_unknown_descendant(self):
+        with self.terminal_owner_fixture() as (ns,row,argv,tool,launch):
+            for child in (dict(pid=71,exe='/official/lean'),dict(pid=71),dict(row,pid=71)):
+                with self.subTest(child=child):
+                    with self.assertRaises(AssertionError):
+                        ns['cache_split_process_policy']([row,child],70,argv,tool,launch=launch,exit_code=0)
+
+    def test_actual_tool_stage_proven_terminal_owner_keeps_reap_seals_and_cleanup(self):
+        self.stage_case('terminal')
 
     def test_actual_tool_stage_cleanup_rss_timeout_and_large_stderr(self):
         for scenario in ('success','rss','unknown','timeout','poll_error','popen_error','survivor','resource',

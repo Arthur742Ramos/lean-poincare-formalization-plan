@@ -623,11 +623,60 @@ def cache_split_transfer_results(raw, requested, container, tool_exit):
     return records, served, misses, failures
 
 
-def cache_split_process_policy(rows, owner_pid, argv, tool):
+def cache_split_terminal_owner(row, owner_pid, argv, tool, launch, exit_code):
+    """Accept only a recomputed, already-exited direct authenticated tool owner."""
+    assert row.get('verified_terminated_zombie') is True and row.get('terminal_errors') == [], 'Unreadable/raced acquisition owner'
+    assert type(launch) is dict and type(exit_code) is int, 'Terminal owner lacks launch/exit proof'
+    assert type(launch['pid']) is int and type(launch['parent_pid']) is int
+    assert launch['pid'] == owner_pid and launch['parent_pid'] == os.getpid()
+    assert launch['argv'] == argv and launch['start_new_session'] is True
+    fd = launch['fd']; assert type(fd) is int and fd >= 0
+    assert launch['executable'] == '/proc/self/fd/' + str(fd) and launch['pass_fds'] == [fd]
+    assert launch['tool_sha256'] == tool['sha256'] and re.fullmatch('[0-9a-f]{64}', tool['sha256'])
+    assert type(tool['identity']) is list and len(tool['identity']) == 6 and all(type(value) is int for value in tool['identity'])
+    assert type(tool['image_identity']) is list and len(tool['image_identity']) == 5 and all(type(value) is int for value in tool['image_identity'])
+    assert launch['tool_identity'] == tool['identity'] == cache_split_file_identity(os.fstat(fd)), 'Terminal owner current image descriptor drift'
+    assert tool['image_identity'] == [tool['identity'][i] for i in (0, 1, 3, 4, 5)]
+    assert Path(tool['path']).name in ('curl', 'leantar') and argv[0] == tool['path']
+    keys = ('pid', 'ppid', 'pgrp', 'session', 'starttime_ticks')
+    assert all(type(row[key]) is int for key in keys)
+    assert row['pid'] == row['pgrp'] == row['session'] == owner_pid
+    assert row['ppid'] == launch['parent_pid'] and row['starttime_ticks'] > 0
+    assert row['state'] == 'Z' and type(row['rss_bytes']) is int and row['rss_bytes'] == 0
+    samples = row['terminal_samples']; assert type(samples) is list and len(samples) == 2
+    for sample in samples:
+        assert all(type(sample[key]) is int and sample[key] == row[key] for key in keys)
+        assert sample['state'] == 'Z' and type(sample['rss_bytes']) is int and sample['rss_bytes'] == 0
+    assert row['terminal_recheck'] == samples[-1]
+    times = [launch['started_at'], launch['returned_at'], row['observed_at'],
+             samples[0]['observed_at'], samples[1]['observed_at'], row['rechecked_at'], time.time()]
+    assert all(type(value) in (int, float) and 0 < value < float('inf') for value in times)
+    assert all(a <= b for a, b in zip(times, times[1:])), 'Terminal owner observation order drift'
+    # Missing image fields are explained only by the complete terminal proof.
+    # Every field actually observed must still agree with the admitted image.
+    expected_hex = (b'\0'.join(arg.encode('utf8') for arg in argv) + b'\0').hex()
+    for observed in (row, row.get('recheck', {})):
+        assert type(observed) is dict
+        if 'exe' in observed: assert observed['exe'] == tool['path'] and Path(observed['exe']).name != 'lean'
+        if 'argv' in observed: assert observed['argv'] == argv
+        if 'cmdline_hex' in observed: assert observed['cmdline_hex'] == expected_hex
+        if 'image_identity' in observed:
+            image = observed['image_identity']
+            assert type(image) is list and all(type(value) is int for value in image) and image == tool['image_identity']
+        if 'state' in observed: assert observed['state'] == 'Z'
+        if 'rss_bytes' in observed: assert type(observed['rss_bytes']) is int and observed['rss_bytes'] == 0
+        for key in keys:
+            if key in observed: assert type(observed[key]) is int and observed[key] == row[key]
+    return dict(classification='PROVEN_TERMINAL_DIRECT_TOOL_OWNER', exit_code=exit_code,
+                kernel_identity={key: row[key] for key in keys}, terminal_samples=samples)
+
+
+def cache_split_process_policy(rows, owner_pid, argv, tool, *, launch=None, exit_code=None):
     """Stricter than the unchanged Lean-stage classifier: no descendants at all."""
     assert len(rows) == 1 and rows[0]['pid'] == owner_pid, 'Unexpected/absent acquisition process'
     row = rows[0]
-    assert row['stable'] and not row['errors'], 'Unreadable/raced acquisition owner'
+    if not (row['stable'] and not row['errors']):
+        return cache_split_terminal_owner(row, owner_pid, argv, tool, launch, exit_code)
     assert row['session'] == row['pgrp'] == owner_pid and row['argv'] == argv
     assert row['exe'] == tool['path'] and row['recheck']['exe'] == tool['path']
     assert row['image_identity'] == row['recheck']['image_identity'] == tool['image_identity']
@@ -694,10 +743,15 @@ def cache_split_tool_stage(argv, label, env, deadline, stdin_path=None):
         with out.open('xb') as stdout, err.open('xb') as stderr:
             # Execute the already authenticated open image; pathname replacement
             # cannot select another executable between PRE and kernel exec.
+            launch_started = time.time()
             proc = subprocess.Popen(argv, executable='/proc/self/fd/' + str(fd), pass_fds=(fd,),
                 cwd=PKG, env=env, stdin=input_stream if input_stream is not None else subprocess.DEVNULL,
                 stdout=stdout, stderr=stderr, start_new_session=True)
-            stage.update(pid=proc.pid, status='RUNNING'); save()
+            launch = dict(pid=proc.pid, parent_pid=os.getpid(), argv=list(argv), fd=fd,
+                executable='/proc/self/fd/' + str(fd), pass_fds=[fd], start_new_session=True,
+                tool_identity=tool['identity'], tool_sha256=tool['sha256'],
+                started_at=launch_started, returned_at=time.time())
+            stage.update(pid=proc.pid, status='RUNNING', authenticated_launch=launch); save()
             while proc.poll() is None:
                 rows = []; rss = 0
                 for path in Path('/proc').iterdir():
@@ -712,7 +766,10 @@ def cache_split_tool_stage(argv, label, env, deadline, stdin_path=None):
                 assert rss <= LIMIT, 'Acquisition exceeds original 6GiB RSS bound'
                 # Inspect every observed image even if waitpid now reports
                 # completion. An unreadable live owner never earns an exemption.
-                if rows: cache_split_process_policy(rows, proc.pid, argv, tool)
+                if rows:
+                    observed_exit = proc.poll()  # Actual same-owner nonblocking wait; no retry or grace.
+                    proof = cache_split_process_policy(rows, proc.pid, argv, tool, launch=launch, exit_code=observed_exit)
+                    if proof is not None: stage['terminal_owner_proof'] = proof
                 elif proc.poll() is None: raise RuntimeError('Live acquisition owner absent')
                 if time.monotonic() >= deadline: raise TimeoutError(label)
                 time.sleep(0.05)
