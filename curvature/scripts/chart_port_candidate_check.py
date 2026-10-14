@@ -436,7 +436,7 @@ _curvature_sys.dont_write_bytecode = True
 _curvature_root = _curvature_pathlib.Path(__file__).resolve().parents[2]
 _curvature_helper = _curvature_root / 'curvature/scripts/point4_smooth_master_composition.py'
 assert _curvature_helper.is_file() and not _curvature_helper.is_symlink()
-assert _curvature_hashlib.sha256(_curvature_helper.read_bytes()).hexdigest() == '7dfbb60a98d19a756fcb08d001f2e85a5acf9abf0ecf234cd614e5f64a70ed5c', "Auxiliary composition helper identity drift"
+assert _curvature_hashlib.sha256(_curvature_helper.read_bytes()).hexdigest() == '4c807c39e0f7f5d750c971d506abb6e0528d82c0661bf14fa87d13dfc37b92b5', "Auxiliary composition helper identity drift"
 import point4_smooth_master_composition as _curvature_comp
 _curvature_comp.install_curvature_auxiliary(globals(),138)
 # END exact finite auxiliary-138
