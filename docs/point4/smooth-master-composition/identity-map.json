@@ -13220,7 +13220,7 @@
     "historical_run": 37181895941,
     "scope": "Independent jet-field heat/reaction closure only; combined-head proof checks UNRUN; both targets OPEN"
   },
-  "paths": 2164,
+  "paths": 2175,
   "canonical_point4": "OPEN",
   "smooth_general_target": "OPEN",
   "localization_mock_route": {
@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "8de4d23a8f408725901697c3adbaff1234a7f375",
-      "final_sha256": "700ce6af7fa1f02b1142ba3443d4185698b4ec77466c873cb1286b8cd6e3dfdc",
+      "final_blob": "5eef75fd25ba96e4957f7fb346d3d0b8d818f029",
+      "final_sha256": "5fc1ffd82e065031e69f14e220bf5c3111cb4f7250c7118bfffb4ba84d323668",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "73fa28a0e8f3f7c72a41806d939cdaeb082a52df",
-      "final_sha256": "f64eda35fef8dcefd0bde3bd80318dfa6d720504bd9be7ee01f771401f5ad9a3",
+      "final_blob": "5f2f382fe5632a0edf09614a8a2502a446c04a54",
+      "final_sha256": "d0ed3bb7ff8df8ca9e43339f42912527acdde0d397254796cadf1d394d1882a0",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "25081cba44a2f5139418af6310c2155932311a85",
-      "final_sha256": "1858d608a525272b3f63e3e6970ff4575e2b2ba1f720ec3fec2cd23e2dcac949",
+      "final_blob": "5d8b662befbf7e55327aaa441fa26eccae917715",
+      "final_sha256": "81de245ab0f9e4b450b826697b98bffc3b5a78d0d6325f91423f002a607e77fd",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "e1cc452d2081dfe0cf0e29805579ee24db971464",
-      "final_sha256": "763677926c8b3e454d9f9815876c4d753d6e020fc21c5154c0ae23b769543616",
+      "final_blob": "50462ce955033d7e43241f935a06f71aa92a479a",
+      "final_sha256": "a5a7979acd3dc64fc9a0ae48070a9d19e48562ea2600cd3da67dadbcb3252f12",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "8f605edd4a308b33052942884a1ef9fa09e36203",
-      "final_sha256": "c7fac62f88c155aa405f7acb3709384f70b11bca2351167ad117efc11ca09e7c",
+      "final_blob": "1b25012032833612f8c24ab6e6c62995e8d569d7",
+      "final_sha256": "13f85f51b8e964f766f9a5f0847b7fca145c666216d7e834a26c86bd417334d0",
       "mode": "100644",
       "count": 1
     }
@@ -27176,6 +27176,10 @@
     ".github/workflows/point4-linear-heat-geometry.yml": [
       "100644",
       "83ede6a49016706e13f04a78292062a33aa48ed3"
+    ],
+    ".github/workflows/point4-literal-metric-mapped-gaussian-heat.yml": [
+      "100644",
+      "3fb6e0766f10bd3d17c9ba040691c73ca1f84711"
     ],
     ".github/workflows/point4-local-chart-connection.yml": [
       "100644",
@@ -29485,6 +29489,10 @@
       "100644",
       "1ffb0e404678c326d51b50831463b35d7da672a8"
     ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatStrongInitialGenerator.lean": [
+      "100644",
+      "f48681a0c094e4f443747cdff6cddfc28b0f739a"
+    ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatTwoSidedInitial.lean": [
       "100644",
       "437d77b93fe712ccfedaf528cd172693eda81047"
@@ -29665,6 +29673,14 @@
       "100644",
       "72caa0969512f34b88a9eacb7943d5ee6f3292b9"
     ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InitialMetricMappedGaussianEquation.lean": [
+      "100644",
+      "5e8044a065f02b93e1c3b759917e57d09dd26a69"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InitialMetricOrthonormalInverseGram.lean": [
+      "100644",
+      "21bb88e8b905c2c261abb9b29875f809d115a5f1"
+    ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InterpolationLemma.lean": [
       "100644",
       "fd5afddafbdfb8e23ca6d05a55dfec43c29cb61d"
@@ -29700,6 +29716,14 @@
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/LittleHolderNemytskiiPath.lean": [
       "100644",
       "0f7d1efa6c76cdd1375304c9871fa7623fb3c067"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/MappedGaussianScalarEquation.lean": [
+      "100644",
+      "71ecd10d27ddaf73cd1ca3133059912856d966aa"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/MappedHeatStrongInitialGenerator.lean": [
+      "100644",
+      "780950a4f538f2bc2c7739cf92becbfd7b79cdcf"
     ],
     "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/MatrixAffineInitialOperator.lean": [
       "100644",
@@ -31039,7 +31063,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "8ac7cd0be8962c3137f525e8f5492433cf151960"
+      "42e555ed14eb3618a6cc3a05ac03f4dfa0ba5a25"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31071,7 +31095,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "2597e42f760c162e54621250ba13495ccdc260eb"
+      "4b070f45edca5ae0a019b38362a5425a7e8235a3"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31079,7 +31103,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "02b0b0b48835bc36f2f8e3011cac6b8d85dec382"
+      "1de3d8326ea1924e12fc5f5887faacea8e26ece1"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31103,15 +31127,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "8de4d23a8f408725901697c3adbaff1234a7f375"
+      "5eef75fd25ba96e4957f7fb346d3d0b8d818f029"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "53c849feab290f0ffbde3828744c1e6c0e062bb3"
+      "bb9ae8883cc46a2eed414595b1710d7211949c94"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "ca0bcb930d1ed3085a096fb3dee7168a4c7c9cf1"
+      "896f3c3f15724eb19d2f795f2c9444fe1db9e2e8"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31173,6 +31197,10 @@
       "100644",
       "cbc8bd5a55abc9c85b5c32cc7d2e075384de8407"
     ],
+    "curvature/scripts/point4_euclidean_heat_strong_initial_generator_probe.lean": [
+      "100644",
+      "0873f892abaf63b3ffca45217b1933658ff4921e"
+    ],
     "curvature/scripts/point4_fixed_background_heat_probe.lean": [
       "100644",
       "771b3d1569535143bc1c96cd57427adce0e8caee"
@@ -31187,11 +31215,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "328dd0bb39da3aaac07f1d4dd8aa00b36b5195e6"
+      "cd65d8e3005d060508b348e8d471cc93ccf6ce7e"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "43713fa0424bf0dcaff115629a0d0954896e8462"
+      "03d4023ac378effabb79b6ebd04c6eae06fa478f"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31208,6 +31236,14 @@
     "curvature/scripts/point4_initial_metric_heat_inverse_freezing_probe.lean": [
       "100644",
       "2aa70debd3523d4733995656822c4a38351dd138"
+    ],
+    "curvature/scripts/point4_initial_metric_mapped_gaussian_equation_probe.lean": [
+      "100644",
+      "23786dcb6bcbd1b0d2c8b22c872da8afbea160d3"
+    ],
+    "curvature/scripts/point4_initial_metric_orthonormal_inverse_gram_probe.lean": [
+      "100644",
+      "0c72b3ca3f02c458197c100a16d3d35c6fba77a6"
     ],
     "curvature/scripts/point4_linear_heat_geometry_mock_test.py": [
       "100644",
@@ -31237,6 +31273,14 @@
       "100644",
       "531f668632845a01348df181d5112801d80ab3fb"
     ],
+    "curvature/scripts/point4_mapped_gaussian_scalar_equation_probe.lean": [
+      "100644",
+      "703680168763382b855c363d8530838268f3aacb"
+    ],
+    "curvature/scripts/point4_mapped_heat_strong_initial_generator_probe.lean": [
+      "100644",
+      "c58d919f908ae25135a5522aec195120a332e3c6"
+    ],
     "curvature/scripts/point4_matrix_heat_coercivity_probe.lean": [
       "100644",
       "98bb6ba9f940e631a4f31f81517c08575f7f1ba0"
@@ -31251,7 +31295,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "73fa28a0e8f3f7c72a41806d939cdaeb082a52df"
+      "5f2f382fe5632a0edf09614a8a2502a446c04a54"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31287,19 +31331,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "25081cba44a2f5139418af6310c2155932311a85"
+      "5d8b662befbf7e55327aaa441fa26eccae917715"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "e1cc452d2081dfe0cf0e29805579ee24db971464"
+      "50462ce955033d7e43241f935a06f71aa92a479a"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "0ea65a8abafa9c93f6166f0c38656c10bd9fe935"
+      "84b1fa7a8eae38998f5714ec408129c507adf115"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "8293bdd61846c2af9f5da164d6288522e2155477"
+      "ecef12f01edca0f49fba9f59f316aa512d747778"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -31315,7 +31359,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "6d15f3f2ccc591ff8827d7c597b33961f3fe72a3"
+      "a244eb3dd97a0f2dc79634bbace3e900602e4259"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31323,7 +31367,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "5395b32535bb4578047ab1cd11d1086fedd3ef00"
+      "241a7f29722b62bd3b9c1e35573d045e2f98a574"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31335,7 +31379,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "8f605edd4a308b33052942884a1ef9fa09e36203"
+      "1b25012032833612f8c24ab6e6c62995e8d569d7"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -78136,6 +78180,210 @@
     "scope": "Exact cumulative PR103/104/105 tensor source and PR109 compiler ancestry; tensor Lean 4.35rc2 is distinct from curvature Lean 4.33. Compilation, Comparator, kernel and rendering qualification pending; both Point4 targets OPEN."
   },
   "curvature_finite_input_preparation": {
+    "current_literal_metric_mapped_gaussian_heat_batch": {
+      "base_head": "bedf663046b3528cd2a4f267986099e345b74270",
+      "base_current_paths": 2164,
+      "new_current_paths": 2175,
+      "additions": {
+        ".github/workflows/point4-literal-metric-mapped-gaussian-heat.yml": {
+          "mode": "100644",
+          "sha256": "b9c1214c8296f121f9f60995a5ad9d87a54e9cf5d327951c93c94fa842c708b0",
+          "blob": "3fb6e0766f10bd3d17c9ba040691c73ca1f84711",
+          "origin": "Exact unchanged focused workflow successor; template authenticated at local PR142 bedf663 performance baseline"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/EuclideanHeatStrongInitialGenerator.lean": {
+          "mode": "100644",
+          "sha256": "cf36b559c912d354b8e67e27b02b82b954545145e6c4afb84c541e6aaa7d4c47",
+          "blob": "f48681a0c094e4f443747cdff6cddfc28b0f739a",
+          "origin": "parallel-c2-strong-heat-generator-20261014/normalization-v2/EuclideanHeatStrongInitialGenerator.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InitialMetricMappedGaussianEquation.lean": {
+          "mode": "100644",
+          "sha256": "6ef0c36850e3838bf2ab18f5c0059cdadf8fe845dd0e105cab0f882cb4457ed2",
+          "blob": "5e8044a065f02b93e1c3b759917e57d09dd26a69",
+          "origin": "parallel-c2-mapped-gaussian-pde-20261014/InitialMetricMappedGaussianEquation.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/InitialMetricOrthonormalInverseGram.lean": {
+          "mode": "100644",
+          "sha256": "0d6eaadc4f67f96d4766a5662026e9f6ba96feb048ffbe4cf9db06d38a6f2d1a",
+          "blob": "21bb88e8b905c2c261abb9b29875f809d115a5f1",
+          "origin": "parallel-c2-literal-inverse-gram-20261014/proof-api-v3/InitialMetricOrthonormalInverseGram.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/MappedGaussianScalarEquation.lean": {
+          "mode": "100644",
+          "sha256": "91a010cb0627cfc99ee300989695c8df43b73bbda25e5c81c394568a88b5b1ca",
+          "blob": "71ecd10d27ddaf73cd1ca3133059912856d966aa",
+          "origin": "parallel-c2-mapped-gaussian-pde-20261014/clm-normalization-v2/MappedGaussianScalarEquation.lean"
+        },
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/MappedHeatStrongInitialGenerator.lean": {
+          "mode": "100644",
+          "sha256": "52add13dc8f455aaa72d6530d5755200c51d7c0bc9a860402942c81f858d076a",
+          "blob": "780950a4f538f2bc2c7739cf92becbfd7b79cdcf",
+          "origin": "parallel-c2-strong-heat-generator-20261014/MappedHeatStrongInitialGenerator.lean"
+        },
+        "curvature/scripts/point4_euclidean_heat_strong_initial_generator_probe.lean": {
+          "mode": "100644",
+          "sha256": "cf51b87fb069f8d13c4bafbe4a6b7ff8c54110e1a31afe44269b7fe6feca4ed5",
+          "blob": "0873f892abaf63b3ffca45217b1933658ff4921e",
+          "origin": "parallel-c2-strong-heat-generator-20261014/EuclideanHeatStrongInitialGeneratorEvidence.lean"
+        },
+        "curvature/scripts/point4_initial_metric_mapped_gaussian_equation_probe.lean": {
+          "mode": "100644",
+          "sha256": "8cef1a425a08734ec281ed8df60c8483eae39251b1b148816c5392a8dbde630f",
+          "blob": "23786dcb6bcbd1b0d2c8b22c872da8afbea160d3",
+          "origin": "parallel-c2-mapped-gaussian-pde-20261014/InitialMetricMappedGaussianEquationEvidence.lean"
+        },
+        "curvature/scripts/point4_initial_metric_orthonormal_inverse_gram_probe.lean": {
+          "mode": "100644",
+          "sha256": "574dd0ce5d2dfba9189b2c0988339535f6cd60a3a54be7d4df7d2f9bde3e545c",
+          "blob": "0c72b3ca3f02c458197c100a16d3d35c6fba77a6",
+          "origin": "parallel-c2-literal-inverse-gram-20261014/probe-export-v4/InitialMetricOrthonormalInverseGramEvidence.lean"
+        },
+        "curvature/scripts/point4_mapped_gaussian_scalar_equation_probe.lean": {
+          "mode": "100644",
+          "sha256": "586a3383f4e9e0ac7235ff0d4bd98f4b21feaac5c74bd6425ee08e3acf4f22e5",
+          "blob": "703680168763382b855c363d8530838268f3aacb",
+          "origin": "parallel-c2-mapped-gaussian-pde-20261014/probe-noncomputable-v3/MappedGaussianScalarEquationEvidence.lean"
+        },
+        "curvature/scripts/point4_mapped_heat_strong_initial_generator_probe.lean": {
+          "mode": "100644",
+          "sha256": "c9da2b09e1368d63ca62de2447101ff2eae790f8ce3926e9e52c4945adf061c3",
+          "blob": "c58d919f908ae25135a5522aec195120a332e3c6",
+          "origin": "parallel-c2-strong-heat-generator-20261014/mapped-probe-noncomputable-v2/MappedHeatStrongInitialGeneratorEvidence.lean"
+        }
+      },
+      "policy_sha256": "18827c97f1b5a29ff79da9263deb21a89c8c821cc969b2662c71ad07f4338c39",
+      "workflow": ".github/workflows/point4-literal-metric-mapped-gaussian-heat.yml",
+      "modules": 5,
+      "probe_record_counts": [
+        3,
+        5,
+        1,
+        2,
+        3
+      ],
+      "source_review_sha256": {
+        "parallel-c2-independent-review-20261013/mapped-gaussian-positive-time-independent-Source-review.json": "a2076be6386902936c3ee48d9bd8e58388af4a8a844f10da3a850f8321fcd9a7"
+      },
+      "actual_native_review_sha256_at_preparation": {
+        "independent-native-GJ-gaussian-jet-principal-actual-review-20261014.json": "f492514b9327b9bb84f521eb60b49a2aedf8fb854daa5a13b7bf6132e81fb480",
+        "independent-native-GS-gaussian-jet-symmetry-actual-review-20261014.json": "dc6c38a0a8fe5581c288155c50298fb12c8075e34be04918714d65c53de28dc2",
+        "parallel-c2-independent-review-20261013/affine-scalar-af2-independent-actual-review.json": "85ba61b3bc54c65f6cf4478671c243fec680050e37bd5241803e86aecc3ecfa9",
+        "independent-native-AP2-certified-affine-pullback-actual-review-20261014.json": "c8b879611d6771467384f81384bee173bdee77bd846f4aeb6a16f5d65b59e6e1",
+        "independent-native-AH-affine-heat-trace-actual-review-20261014.json": "d020cba6e00486f2d8387f6db26cdabb29907da63e4af90b486fd5cc7431ecdc",
+        "independent-native-MG-mapped-affine-generator-actual-review-20261014.json": "6a027ab0d05b6da273561199d6f611c1fe0ae3a7b033c9a8d82ae0ffa035bc4e",
+        "parallel-c2-independent-review-20261013\\GG4-one-probe-combined-theorem-independent-actual-review.json": "d9ea2d45eeb4bfacf6731f5b348c34acd0cbc97049293a90a2493f412f24e5ce",
+        "parallel-c2-independent-review-20261013\\GPG3-one-probe-combined-theorem-independent-actual-review.json": "95d81139803a98eb740da20fee45f37958db4aebe65ea9bc9b58d25b945d741a",
+        "parallel-c2-independent-review-20261013\\SGP2-strong-primitive-independent-actual-review.json": "7311346085957f98c3cd8597766be2157708ca2b6bee6a2aaa451b7534d88d8d",
+        "parallel-c2-independent-review-20261013\\SGM2-one-probe-combined-theorem-independent-actual-review.json": "606ed8bc41c1ba4ac71bb2ceadaa470b1ffbd96d78e10757894a263c9acefbd5"
+      },
+      "native_qualification_snapshot": {
+        "InitialMetricOrthonormalInverseGram": {
+          "state": "ACTUAL_INDEPENDENT_PASS",
+          "review_path": "parallel-c2-independent-review-20261013\\GG4-one-probe-combined-theorem-independent-actual-review.json",
+          "review_sha256": "d9ea2d45eeb4bfacf6731f5b348c34acd0cbc97049293a90a2493f412f24e5ce",
+          "receipt_sha256": "0096c551c8ca6d06a77845163137b244dce9601960c8ea9c48ae445eee7a1643",
+          "POST_sha256": "dff2af3c85a46224c2fc022422aae61baff94c60c56390e1d558c7f06f4f859b",
+          "math_sha256": "0d6eaadc4f67f96d4766a5662026e9f6ba96feb048ffbe4cf9db06d38a6f2d1a",
+          "probe_sha256": "574dd0ce5d2dfba9189b2c0988339535f6cd60a3a54be7d4df7d2f9bde3e545c"
+        },
+        "MappedGaussianScalarEquation": {
+          "state": "ACTUAL_INDEPENDENT_PASS",
+          "review_path": "parallel-c2-independent-review-20261013\\GPG3-one-probe-combined-theorem-independent-actual-review.json",
+          "review_sha256": "95d81139803a98eb740da20fee45f37958db4aebe65ea9bc9b58d25b945d741a",
+          "receipt_sha256": "53d81cb9eb006cd06a43fe07b0ad4b61ac1278bb12fd0e6c58d3d343be065e1e",
+          "POST_sha256": "1b669e49119d3d13600517b3b4a35130e145ce9634a9d497b1072915d071f391",
+          "math_sha256": "91a010cb0627cfc99ee300989695c8df43b73bbda25e5c81c394568a88b5b1ca",
+          "probe_sha256": "586a3383f4e9e0ac7235ff0d4bd98f4b21feaac5c74bd6425ee08e3acf4f22e5"
+        },
+        "EuclideanHeatStrongInitialGenerator": {
+          "state": "ACTUAL_INDEPENDENT_PASS",
+          "review_path": "parallel-c2-independent-review-20261013\\SGP2-strong-primitive-independent-actual-review.json",
+          "review_sha256": "7311346085957f98c3cd8597766be2157708ca2b6bee6a2aaa451b7534d88d8d",
+          "receipt_sha256": "04e117e458638564ae997e113c72c2606f089d7b091bcc9a35542bedb0af0be9",
+          "POST_sha256": "28e3f1887d9b36c89562f261383f3b604c11a6b4098b64eed37b2c97f4ac2801",
+          "math_sha256": "cf36b559c912d354b8e67e27b02b82b954545145e6c4afb84c541e6aaa7d4c47",
+          "probe_sha256": "cf51b87fb069f8d13c4bafbe4a6b7ff8c54110e1a31afe44269b7fe6feca4ed5"
+        },
+        "MappedHeatStrongInitialGenerator": {
+          "state": "ACTUAL_INDEPENDENT_PASS",
+          "review_path": "parallel-c2-independent-review-20261013\\SGM2-one-probe-combined-theorem-independent-actual-review.json",
+          "review_sha256": "606ed8bc41c1ba4ac71bb2ceadaa470b1ffbd96d78e10757894a263c9acefbd5",
+          "receipt_sha256": "bf5e8fab38660113d62fc5f88ba2add07c3ee3cab54837a8d27cff7862248fc2",
+          "POST_sha256": "33354f69cd5616e533f027a84ed0b5a5c1d71714ee9157b3c866e02f1f6dd2e6",
+          "math_sha256": "52add13dc8f455aaa72d6530d5755200c51d7c0bc9a860402942c81f858d076a",
+          "probe_sha256": "c9da2b09e1368d63ca62de2447101ff2eae790f8ce3926e9e52c4945adf061c3"
+        },
+        "InitialMetricMappedGaussianEquation": {
+          "state": "PENDING_ACTUAL_NATIVE_AND_INDEPENDENT_QUALIFICATION",
+          "review_path": null,
+          "review_sha256": null,
+          "receipt_sha256": null,
+          "POST_sha256": null,
+          "math_sha256": "6ef0c36850e3838bf2ab18f5c0059cdadf8fe845dd0e105cab0f882cb4457ed2",
+          "probe_sha256": "8cef1a425a08734ec281ed8df60c8483eae39251b1b148816c5392a8dbde630f"
+        }
+      },
+      "application_eligible_at_preparation": false,
+      "required_before_application": {
+        "all_five_exact_actual_independent_qualifications": true,
+        "actual_GG_review": {
+          "state": "ACTUAL_INDEPENDENT_PASS",
+          "review_path": "parallel-c2-independent-review-20261013\\GG4-one-probe-combined-theorem-independent-actual-review.json",
+          "review_sha256": "d9ea2d45eeb4bfacf6731f5b348c34acd0cbc97049293a90a2493f412f24e5ce",
+          "receipt_sha256": "0096c551c8ca6d06a77845163137b244dce9601960c8ea9c48ae445eee7a1643",
+          "POST_sha256": "dff2af3c85a46224c2fc022422aae61baff94c60c56390e1d558c7f06f4f859b",
+          "math_sha256": "0d6eaadc4f67f96d4766a5662026e9f6ba96feb048ffbe4cf9db06d38a6f2d1a",
+          "probe_sha256": "574dd0ce5d2dfba9189b2c0988339535f6cd60a3a54be7d4df7d2f9bde3e545c"
+        },
+        "actual_generic_mapped_Gaussian_review": {
+          "state": "ACTUAL_INDEPENDENT_PASS",
+          "review_path": "parallel-c2-independent-review-20261013\\GPG3-one-probe-combined-theorem-independent-actual-review.json",
+          "review_sha256": "95d81139803a98eb740da20fee45f37958db4aebe65ea9bc9b58d25b945d741a",
+          "receipt_sha256": "53d81cb9eb006cd06a43fe07b0ad4b61ac1278bb12fd0e6c58d3d343be065e1e",
+          "POST_sha256": "1b669e49119d3d13600517b3b4a35130e145ce9634a9d497b1072915d071f391",
+          "math_sha256": "91a010cb0627cfc99ee300989695c8df43b73bbda25e5c81c394568a88b5b1ca",
+          "probe_sha256": "586a3383f4e9e0ac7235ff0d4bd98f4b21feaac5c74bd6425ee08e3acf4f22e5"
+        },
+        "actual_geometric_mapped_Gaussian_review": {
+          "state": "PENDING_ACTUAL_NATIVE_AND_INDEPENDENT_QUALIFICATION",
+          "review_path": null,
+          "review_sha256": null,
+          "receipt_sha256": null,
+          "POST_sha256": null,
+          "math_sha256": "6ef0c36850e3838bf2ab18f5c0059cdadf8fe845dd0e105cab0f882cb4457ed2",
+          "probe_sha256": "8cef1a425a08734ec281ed8df60c8483eae39251b1b148816c5392a8dbde630f"
+        },
+        "actual_strong_primitive_review": {
+          "state": "ACTUAL_INDEPENDENT_PASS",
+          "review_path": "parallel-c2-independent-review-20261013\\SGP2-strong-primitive-independent-actual-review.json",
+          "review_sha256": "7311346085957f98c3cd8597766be2157708ca2b6bee6a2aaa451b7534d88d8d",
+          "receipt_sha256": "04e117e458638564ae997e113c72c2606f089d7b091bcc9a35542bedb0af0be9",
+          "POST_sha256": "28e3f1887d9b36c89562f261383f3b604c11a6b4098b64eed37b2c97f4ac2801",
+          "math_sha256": "cf36b559c912d354b8e67e27b02b82b954545145e6c4afb84c541e6aaa7d4c47",
+          "probe_sha256": "cf51b87fb069f8d13c4bafbe4a6b7ff8c54110e1a31afe44269b7fe6feca4ed5"
+        },
+        "actual_strong_mapped_review": {
+          "state": "ACTUAL_INDEPENDENT_PASS",
+          "review_path": "parallel-c2-independent-review-20261013\\SGM2-one-probe-combined-theorem-independent-actual-review.json",
+          "review_sha256": "606ed8bc41c1ba4ac71bb2ceadaa470b1ffbd96d78e10757894a263c9acefbd5",
+          "receipt_sha256": "bf5e8fab38660113d62fc5f88ba2add07c3ee3cab54837a8d27cff7862248fc2",
+          "POST_sha256": "33354f69cd5616e533f027a84ed0b5a5c1d71714ee9157b3c866e02f1f6dd2e6",
+          "math_sha256": "52add13dc8f455aaa72d6530d5755200c51d7c0bc9a860402942c81f858d076a",
+          "probe_sha256": "c9da2b09e1368d63ca62de2447101ff2eae790f8ce3926e9e52c4945adf061c3"
+        },
+        "all_exact_Source_setup_logs_objects_and_unchanged_POST": true,
+        "fresh_baseline_ancestry_and_authority_reconciliation": true,
+        "complete_conditional_packet_independent_Source_review": true
+      },
+      "scope": "Literal metric Gaussian equation and strong right initial heat derivative; Hessian uniform continuity retained; no generator domain/range identification, nonlinear interval Ricci flow or full Point4",
+      "new_head_hosted_qualification": "UNRUN",
+      "point4": "OPEN",
+      "external_Source_authority": {
+        "path": "parallel-c2-conditional-math-performance-routing-20261014-v6\\external-Source-authority.json",
+        "sha256": "11e8beec4b935aa3e652c13c45363421baff0c86808af00d5e9ae90c4a76d13c"
+      }
+    },
     "current_actual_gaussian_jet_affine_heat_batch": {
       "base_head": "f678a33b860486dd3ffe662b3da6b94a6b141800",
       "base_current_paths": 2151,
@@ -81710,7 +81958,7 @@
       "real_required": 8,
       "combined_current": 147,
       "all_previous129_test_method_AST_unchanged": true,
-      "current_namespace": 2164,
+      "current_namespace": 2175,
       "required_process_timeout_seconds": 120,
       "git_transport": "cat-file --batch with bufsize0, exact partial-body read loop, objectSHA/frame/EOF/extra/error and context ownership checks",
       "cross_invocation_cache": false,

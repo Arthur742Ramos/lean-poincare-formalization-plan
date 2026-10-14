@@ -1316,7 +1316,7 @@ class FixedBackgroundCompositionTests(unittest.TestCase):
             expected, originals, changes = comp.tensor_identity(*comp.expected_identity())
             expected = comp.curvature_identity(expected,originals,changes)[0]
             self.assertEqual(expected, comp.parse_tree(comp.git('ls-tree','-rz','HEAD')))
-            self.assertEqual(len(expected), 2164)
+            self.assertEqual(len(expected), 2175)
             for path in comp.FIXED_ADDED:
                 self.assertEqual(changes[path], reader(comp.FIXED_SOURCE, path))
                 self.assertEqual(expected[path], trees[comp.FIXED_SOURCE][path])
@@ -2088,7 +2088,7 @@ class TensorCompositionTests(unittest.TestCase):
                  patch.object(pathlib.Path,'lstat',committed_mode_fixture if sys.platform=='win32' else physical_stat), \
                  patch.dict(weighted.__dict__,{'raw_git':comp.git} if sys.platform=='win32' else {}):
                 report=comp.weighted_leaf(weighted.__dict__,schema)
-            self.assertEqual(report['public_paths'],2164)
+            self.assertEqual(report['public_paths'],2175)
             self.assertEqual(verify.call_count,2)
         inherited=captured[0]
         self.assertEqual(len(inherited),1686)
@@ -2140,7 +2140,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         import point4_weighted_hessian_release_guard as weighted
         import stat
         committed=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
-        self.assertEqual(len(committed),2164)
+        self.assertEqual(len(committed),2175)
         physical_stat=pathlib.Path.lstat
         def committed_modes(physical,*args,**kwargs):
             actual=physical_stat(physical,*args,**kwargs)
@@ -2182,8 +2182,8 @@ class CurvatureCompositionTests(unittest.TestCase):
         snapshots=comp.curvature_pins()
         self.assertEqual(comp.curvature_predecessor(legacy,originals,changes,snapshots),snapshots[comp.CURVATURE_PARENT])
         complete,_,_=comp.curvature_identity(legacy,originals,changes)
-        self.assertEqual(len(complete),2164)
-        self.assertEqual(set(complete)-set(legacy),set(comp.CURVATURE_SELECTED)-{'curvature/lakefile.toml'} | set(comp.CURVATURE_CURRENT_BATCH) | set(comp.CURVATURE_INVERSE_COEFFICIENT_BATCH) | set(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH))
+        self.assertEqual(len(complete),2175)
+        self.assertEqual(set(complete)-set(legacy),set(comp.CURVATURE_SELECTED)-{'curvature/lakefile.toml'} | set(comp.CURVATURE_CURRENT_BATCH) | set(comp.CURVATURE_INVERSE_COEFFICIENT_BATCH) | set(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH) | set(comp.CURVATURE_MAPPED_GAUSSIAN_BATCH))
         self.assertEqual(comp.tensor_map_record(complete,originals,changes),comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()))
         for path,marker in ((comp.HELPER,'extension'),(comp.TEST,'tests')):
             raw=(comp.ROOT/path).read_bytes()
@@ -2210,6 +2210,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         # Exact new-batch policy and physical Source mutation controls.
         legacy=comp.tensor_identity(*comp.expected_identity())
         current=comp.curvature_identity(*legacy)[0]
+        current={p:v for p,v in current.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH}
         current={p:v for p,v in current.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         current={p:v for p,v in current.items() if p not in comp.CURVATURE_INVERSE_COEFFICIENT_BATCH}
         base={p:v for p,v in current.items() if p not in comp.CURVATURE_CURRENT_BATCH}
@@ -2240,6 +2241,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         self.assertEqual(comp.curvature_current_batch_extend(base),current)
         # Preserve the original seven-file controls above; test the separate five-file layer.
         complete=comp.curvature_identity(*legacy)[0]
+        complete={p:v for p,v in complete.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH}
         complete={p:v for p,v in complete.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         predecessor={p:v for p,v in complete.items() if p not in comp.CURVATURE_INVERSE_COEFFICIENT_BATCH}
         self.assertEqual(len(predecessor),2146)
@@ -2273,6 +2275,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         self.assertEqual(comp.curvature_inverse_coefficients_extend(predecessor),complete)
         # Exact Gaussian/affine layer; prior seven/five controls above retain their own views.
         final=comp.curvature_identity(*legacy)[0]
+        final={p:v for p,v in final.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH}
         batchbase={p:v for p,v in final.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         self.assertEqual(len(batchbase),2151)
         saved=json.loads(json.dumps(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH))
@@ -2303,12 +2306,76 @@ class CurvatureCompositionTests(unittest.TestCase):
         for badbase in (dict(list(batchbase.items())[1:]),dict(batchbase, **{'foreign.lean':('100644','0'*40)})):
             with self.assertRaises(AssertionError):comp.curvature_gaussian_affine_extend(badbase)
         self.assertEqual(comp.curvature_gaussian_affine_extend(batchbase),final)
+        # Exact literal-metric/mapped Gaussian layer; all prior controls above retain their own views.
+
+        mapped_final=comp.curvature_identity(*legacy)[0]
+
+        mapped_base={p:v for p,v in mapped_final.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH}
+
+        self.assertEqual(len(mapped_base),2164)
+
+        saved=json.loads(json.dumps(comp.CURVATURE_MAPPED_GAUSSIAN_BATCH))
+
+        selected=next(iter(saved))
+
+        for kind in ('missing','extra','origin','hash','blob','mode','case'):
+
+            changed=json.loads(json.dumps(saved))
+
+            if kind=='missing':changed.pop(selected)
+
+            elif kind=='extra':changed['foreign.lean']=changed[selected]
+
+            elif kind=='origin':changed[selected]['origin']='foreign provenance'
+
+            elif kind=='hash':changed[selected]['sha256']='0'*64
+
+            elif kind=='blob':changed[selected]['blob']='0'*40
+
+            elif kind=='case':changed[selected.upper()]=changed.pop(selected)
+
+            else:changed[selected]['mode']='100755'
+
+            with patch.object(comp,'CURVATURE_MAPPED_GAUSSIAN_BATCH',changed):
+
+                with self.assertRaises(AssertionError):comp.curvature_mapped_gaussian_extend(mapped_base)
+
+        def changed_batch_bytes(file):
+
+            value=read(file)
+
+            return value+b'literal-metric/mapped Gaussian Source mutation' if file==comp.ROOT/selected else value
+
+        with patch.object(pathlib.Path,'read_bytes',changed_batch_bytes):
+
+            with self.assertRaises(AssertionError):comp.curvature_mapped_gaussian_extend(mapped_base)
+
+        altered=json.loads(json.dumps(saved))
+
+        def mutate_batch_during_read(file):
+
+            value=read(file)
+
+            if file==comp.ROOT/selected:altered[selected]['origin']='POST mutation'
+
+            return value
+
+        with patch.object(comp,'CURVATURE_MAPPED_GAUSSIAN_BATCH',altered),patch.object(pathlib.Path,'read_bytes',mutate_batch_during_read):
+
+            with self.assertRaises(AssertionError):comp.curvature_mapped_gaussian_extend(mapped_base)
+
+        for badbase in (dict(list(mapped_base.items())[1:]),dict(mapped_base, **{'foreign.lean':('100644','0'*40)})):
+
+            with self.assertRaises(AssertionError):comp.curvature_mapped_gaussian_extend(badbase)
+
+        self.assertEqual(comp.curvature_mapped_gaussian_extend(mapped_base),mapped_final)
+
 class CurvatureProductionNamespaceTests(unittest.TestCase):
     """Actual-current startup/source controls; no original-main/native claims."""
     @classmethod
     def setUpClass(cls):
         cls.model=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
-        assert len(cls.model)==2164
+        assert len(cls.model)==2175
         cls.modules={}
         cls.physical_stat=pathlib.Path.lstat
         cls.units={132:'point4_two_sided_heat_source_guard',
