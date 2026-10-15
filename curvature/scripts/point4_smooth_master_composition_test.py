@@ -3115,6 +3115,19 @@ class WeightedInventoryPreparationControls(unittest.TestCase):
         exec(compile(raw.split(marker,1)[0],str(path),'exec',dont_inherit=True),module.__dict__)
         return module
 
+    @contextlib.contextmanager
+    def installer_auth_fixture(self):
+        # Explicit unit fault seam: replace private captured roles together.
+        # This bypasses auth only to inject installer/rollback failures, and
+        # grants no production namespace qualification or fallback behavior.
+        auth=types.FunctionType((lambda _builtin_anchor:object()).__code__,comp.__dict__,
+                                argdefs=comp.curvature_weighted_installer_auth.__defaults__)
+        role=(auth,auth.__code__,auth.__globals__,auth.__defaults__,auth.__kwdefaults__,
+              auth.__closure__,auth.__builtins__,tuple(auth.__annotations__.items()))
+        with patch.object(comp,'curvature_weighted_installer_auth',auth),\
+             patch.object(comp.install_weighted,'__defaults__',(role,)),\
+             patch.object(comp.curvature_weighted_namespace_seal,'__defaults__',(role,)):
+            yield
     def prepared(self):
         module=self.source_namespace();ns=module.__dict__;events=[];processes=[]
         data={'owned/'+str(i)+'.txt':b'owned '+str(i).encode() for i in range(1651)}
@@ -3258,6 +3271,88 @@ class WeightedInventoryPreparationControls(unittest.TestCase):
         with patch.object(ns['baseline_sources'],'cache_parameters',forbidden):
             with self.assertRaises(AssertionError):comp.curvature_weighted_source_contract(ns)
         self.assertEqual(calls,[])
+        # Builtin authority accepts only the interpreter's genuine module or
+        # dictionary; it preserves the actual incoming form in the saved seal.
+        import builtins
+        namespace=self.source_namespace().__dict__
+        for binding in (builtins.__dict__,builtins):
+            namespace['__builtins__']=binding
+            saved=dict(comp.curvature_weighted_namespace_seal(namespace))
+            self.assertIs(saved['__builtins__'][1],binding)
+        self.assertNotEqual(comp.curvature_weighted_namespace_seal(dict(namespace,__builtins__=builtins.__dict__)),
+                            comp.curvature_weighted_namespace_seal(dict(namespace,__builtins__=builtins)))
+        class ForeignBuiltins:
+            def __getattribute__(self,name):raise AssertionError('foreign builtin attribute hook called')
+        for binding in (dict(builtins.__dict__),ForeignBuiltins(),types.ModuleType('foreign_builtins')):
+            namespace['__builtins__']=binding
+            with self.assertRaisesRegex(AssertionError,'incoming genuine builtins identity drift'):
+                comp.curvature_weighted_namespace_seal(namespace)
+        # Exercise the real contents reader on an isolated unit dictionary.
+        # No mutation of the running interpreter's canonical builtin table.
+        unit={'owned':object()};saved=comp.curvature_weighted_builtin_entries(unit)
+        unit['owned']=object()
+        self.assertNotEqual(comp.curvature_weighted_builtin_entries(unit),saved)
+        unit['extra']=object()
+        self.assertNotEqual(comp.curvature_weighted_builtin_entries(unit),saved)
+        with patch.object(comp,'_wi_builtin_entries',comp._wi_builtin_entries[:-1]):
+            with self.assertRaisesRegex(AssertionError,'initial builtins policy drift'):
+                comp.curvature_weighted_namespace_seal(dict(namespace,__builtins__=builtins.__dict__))
+        # Even a switch between genuine forms is forbidden after registration.
+        module,_,_,_=self.prepared();namespace=module.__dict__;binding=namespace['__builtins__']
+        try:
+            with self.assertRaisesRegex(AssertionError,'Registered weighted global POST drift|Weighted global POST drift'):
+                with comp.curvature_weighted_inventory_companion(module):
+                    namespace['__builtins__']=builtins if binding is builtins.__dict__ else builtins.__dict__
+        finally:namespace['__builtins__']=binding
+        self.assertIsNone(comp._wi_inventory_owner);self.assertIsNone(comp._owner);self.assertEqual(comp._depth,0)
+        # Four coordinated mutable replacements must not rebase authority before
+        # the first production registration or invoke the changed auth/policy.
+        module=self.source_namespace();namespace=module.__dict__;namespace['__name__']='point4_weighted_hessian_release_guard'
+        auth=comp.curvature_weighted_installer_auth;policy=comp.curvature_weighted_builtin_policy
+        state=comp._wi_builtin_state;entries=comp._wi_builtin_entries[:-1]
+        rebased=(state[0],state[1],entries,*state[3:])
+        anchor=list(auth.__defaults__[0]);anchor[0]=rebased;anchor[7]=(rebased,)
+        with patch.object(comp,'_wi_builtin_entries',entries),patch.object(comp,'_wi_builtin_state',rebased),\
+             patch.object(policy,'__defaults__',(rebased,)),patch.object(auth,'__defaults__',(tuple(anchor),)),\
+             patch.object(comp,'_wi_registry',((),())),patch.dict(sys.modules,{'point4_weighted_hessian_release_guard':module}):
+            try:comp.install_weighted(namespace)
+            except AssertionError as error:
+                self.assertIn('initial authentication role drift',str(error))
+                codes=[];tb=error.__traceback__
+                while tb is not None:codes.append(tb.tb_frame.f_code);tb=tb.tb_next
+                self.assertNotIn(auth.__code__,codes);self.assertNotIn(policy.__code__,codes)
+            else:self.fail('Coordinated initial policy rebase accepted')
+            self.assertEqual(comp._wi_registry,((),()))
+        # Namespace entry and POST must validate the same initial anchor before
+        # the current reader or policy can run, even if auth defaults stay intact.
+        namespace=self.source_namespace().__dict__;state=comp._wi_builtin_state
+        policy=comp.curvature_weighted_builtin_policy;entries=comp._wi_builtin_entries[:-1]
+        rebased=(state[0],state[1],entries,*state[3:])
+        with patch.object(comp,'_wi_builtin_entries',entries),patch.object(comp,'_wi_builtin_state',rebased),\
+             patch.object(policy,'__defaults__',(rebased,)):
+            with self.assertRaisesRegex(AssertionError,'initial builtins policy drift'):
+                comp.curvature_weighted_namespace_seal(namespace)
+        called=[]
+        def forbidden(*args):called.append('unapproved policy/reader executed');raise RuntimeError('forbidden policy/reader')
+        for name in ('curvature_weighted_builtin_entries','curvature_weighted_builtin_policy'):
+            with patch.object(comp,name,forbidden):
+                with self.assertRaisesRegex(AssertionError,'initial builtins (reader|policy) drift'):
+                    comp.curvature_weighted_namespace_seal(namespace)
+        self.assertEqual(called,[])
+        for name in ('curvature_weighted_builtin_entries','curvature_weighted_builtin_policy'):
+            function=getattr(comp,name);code=function.__code__
+            try:
+                function.__code__=(lambda value:(_ for _ in ()).throw(RuntimeError('unapproved code executed'))).__code__
+                with self.assertRaisesRegex(AssertionError,'initial builtins (reader|policy) drift'):
+                    comp.curvature_weighted_namespace_seal(namespace)
+            finally:function.__code__=code
+        class ForeignCapture:
+            def __len__(self):called.append('foreign capture len');raise RuntimeError('foreign len')
+            def __getitem__(self,key):called.append('foreign capture getitem');raise RuntimeError('foreign getitem')
+        with patch.object(comp.curvature_weighted_namespace_seal,'__defaults__',(ForeignCapture(),)):
+            with self.assertRaisesRegex(AssertionError,'initial authentication role drift'):
+                comp.curvature_weighted_installer_auth()
+        self.assertEqual(called,[])
 
     def test_initial_installer_source_code_and_produced_closures_are_authenticated(self):
         code=comp.curvature_weighted_installer_auth();module=self.source_namespace();ns=module.__dict__
@@ -3308,7 +3403,7 @@ class WeightedInventoryPreparationControls(unittest.TestCase):
                 frame=types.SimpleNamespace(f_code=contract['code'],f_globals=ns,f_locals=ns)
                 with patch.dict(sys.modules,{'point4_weighted_hessian_release_guard':module}),\
                      patch.object(comp.sys,'_getframe',return_value=frame),\
-                     patch.object(comp,'curvature_weighted_installer_auth',return_value=object()),\
+                     self.installer_auth_fixture(),\
                      patch.object(comp,'_wi_original_installer',broken):
                     with self.assertRaises(RuntimeError) as caught:comp.install_weighted(ns)
                 self.assertIs(caught.exception,primary);self.assertIs(comp._wi_registry,registry);self.assertIs(comp._wi_install_owner,owner)
