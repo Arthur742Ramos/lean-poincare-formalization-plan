@@ -1,0 +1,82 @@
+name: Actual Gaussian strong-right resolvent equation uniqueness
+on:
+  pull_request:
+    paths:
+      - 'curvature/**'
+      - 'docs/point4/smooth-master-composition/**'
+      - '.github/workflows/point4-actual-gaussian-heat-resolvent-uniqueness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  actual_gaussian_heat_resolvent_uniqueness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Read immutable historical producer source
+        run: |
+          historical=58c6fc21bafeb8a659d6751a1a9db7a74127a300
+          if ! git cat-file -e "$historical^{commit}"; then
+            git fetch --no-tags origin "$historical"
+          fi
+      - name: Install pinned Source parser dependencies
+        run: python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0
+      - name: Authenticate complete current Source before compilation
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          git diff --exit-code HEAD -- .
+          git diff --cached --exit-code HEAD -- .
+          python3 -B -c "import sys; sys.path.insert(0,'curvature/scripts'); import point4_smooth_master_composition as c; c.verify_current()"
+      - uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: curvature
+          build: false
+      - name: Check focused rejection controls
+        run: python3 -B curvature/scripts/point4_actual_gaussian_heat_resolvent_uniqueness_mock_test.py
+      - name: Compile exact uniqueness module
+        working-directory: curvature
+        run: |
+          set -euo pipefail
+          lake env lean --version | tee /tmp/point4-actual-resolvent-uniqueness-toolchain.log
+          grep -Eq '^Lean \(version 4\.33\.0,' /tmp/point4-actual-resolvent-uniqueness-toolchain.log
+          test "$(git -C .lake/packages/mathlib rev-parse HEAD)" = db584cd6d46c92f209a44c0f1c829460d327499d
+          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ActualGaussianHeatResolventUniqueness 2>&1 | tee /tmp/point4-actual-resolvent-uniqueness-build.log
+      - name: Compile whole signatures, empty dimension and zero-RHS probe
+        working-directory: curvature
+        run: |
+          set -euo pipefail
+          lake env lean scripts/point4_actual_gaussian_heat_resolvent_uniqueness_probe.lean 2>&1 | tee /tmp/point4-actual-resolvent-uniqueness-probe.log
+      - name: Check four genuine full-type and standard-axiom groups
+        run: python3 -B curvature/scripts/point4_actual_gaussian_heat_resolvent_uniqueness_guard.py --axiom-output /tmp/point4-actual-resolvent-uniqueness-probe.log
+      - name: Authenticate complete Source after compilation
+        if: always()
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 -B -c "import sys; sys.path.insert(0,'curvature/scripts'); import point4_smooth_master_composition as c; c.verify_current()"
+          git diff --exit-code HEAD -- .
+          git diff --cached --exit-code HEAD -- .
+      - name: Preserve exact-head supporting-result evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-actual-resolvent-uniqueness-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/point4-actual-resolvent-uniqueness-*.log
+          if-no-files-found: error
