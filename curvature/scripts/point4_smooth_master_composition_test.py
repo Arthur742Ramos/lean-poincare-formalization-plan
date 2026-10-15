@@ -1316,7 +1316,7 @@ class FixedBackgroundCompositionTests(unittest.TestCase):
             expected, originals, changes = comp.tensor_identity(*comp.expected_identity())
             expected = comp.curvature_identity(expected,originals,changes)[0]
             self.assertEqual(expected, comp.parse_tree(comp.git('ls-tree','-rz','HEAD')))
-            self.assertEqual(len(expected), 2175)
+            self.assertEqual(len(expected), 2180)
             for path in comp.FIXED_ADDED:
                 self.assertEqual(changes[path], reader(comp.FIXED_SOURCE, path))
                 self.assertEqual(expected[path], trees[comp.FIXED_SOURCE][path])
@@ -2088,7 +2088,7 @@ class TensorCompositionTests(unittest.TestCase):
                  patch.object(pathlib.Path,'lstat',committed_mode_fixture if sys.platform=='win32' else physical_stat), \
                  patch.dict(weighted.__dict__,{'raw_git':comp.git} if sys.platform=='win32' else {}):
                 report=comp.weighted_leaf(weighted.__dict__,schema)
-            self.assertEqual(report['public_paths'],2175)
+            self.assertEqual(report['public_paths'],2180)
             self.assertEqual(verify.call_count,2)
         inherited=captured[0]
         self.assertEqual(len(inherited),1686)
@@ -2140,7 +2140,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         import point4_weighted_hessian_release_guard as weighted
         import stat
         committed=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
-        self.assertEqual(len(committed),2175)
+        self.assertEqual(len(committed),2180)
         physical_stat=pathlib.Path.lstat
         def committed_modes(physical,*args,**kwargs):
             actual=physical_stat(physical,*args,**kwargs)
@@ -2182,8 +2182,8 @@ class CurvatureCompositionTests(unittest.TestCase):
         snapshots=comp.curvature_pins()
         self.assertEqual(comp.curvature_predecessor(legacy,originals,changes,snapshots),snapshots[comp.CURVATURE_PARENT])
         complete,_,_=comp.curvature_identity(legacy,originals,changes)
-        self.assertEqual(len(complete),2175)
-        self.assertEqual(set(complete)-set(legacy),set(comp.CURVATURE_SELECTED)-{'curvature/lakefile.toml'} | set(comp.CURVATURE_CURRENT_BATCH) | set(comp.CURVATURE_INVERSE_COEFFICIENT_BATCH) | set(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH) | set(comp.CURVATURE_MAPPED_GAUSSIAN_BATCH))
+        self.assertEqual(len(complete),2180)
+        self.assertEqual(set(complete)-set(legacy),set(comp.CURVATURE_SELECTED)-{'curvature/lakefile.toml'} | set(comp.CURVATURE_CURRENT_BATCH) | set(comp.CURVATURE_INVERSE_COEFFICIENT_BATCH) | set(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH) | set(comp.CURVATURE_MAPPED_GAUSSIAN_BATCH) | set(comp.CURVATURE_RESOLVENT_BATCH))
         self.assertEqual(comp.tensor_map_record(complete,originals,changes),comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()))
         for path,marker in ((comp.HELPER,'extension'),(comp.TEST,'tests')):
             raw=(comp.ROOT/path).read_bytes()
@@ -2210,7 +2210,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         # Exact new-batch policy and physical Source mutation controls.
         legacy=comp.tensor_identity(*comp.expected_identity())
         current=comp.curvature_identity(*legacy)[0]
-        current={p:v for p,v in current.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH}
+        current={p:v for p,v in current.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH}
         current={p:v for p,v in current.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         current={p:v for p,v in current.items() if p not in comp.CURVATURE_INVERSE_COEFFICIENT_BATCH}
         base={p:v for p,v in current.items() if p not in comp.CURVATURE_CURRENT_BATCH}
@@ -2241,7 +2241,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         self.assertEqual(comp.curvature_current_batch_extend(base),current)
         # Preserve the original seven-file controls above; test the separate five-file layer.
         complete=comp.curvature_identity(*legacy)[0]
-        complete={p:v for p,v in complete.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH}
+        complete={p:v for p,v in complete.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH}
         complete={p:v for p,v in complete.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         predecessor={p:v for p,v in complete.items() if p not in comp.CURVATURE_INVERSE_COEFFICIENT_BATCH}
         self.assertEqual(len(predecessor),2146)
@@ -2275,7 +2275,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         self.assertEqual(comp.curvature_inverse_coefficients_extend(predecessor),complete)
         # Exact Gaussian/affine layer; prior seven/five controls above retain their own views.
         final=comp.curvature_identity(*legacy)[0]
-        final={p:v for p,v in final.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH}
+        final={p:v for p,v in final.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH}
         batchbase={p:v for p,v in final.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         self.assertEqual(len(batchbase),2151)
         saved=json.loads(json.dumps(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH))
@@ -2309,6 +2309,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         # Exact literal-metric/mapped Gaussian layer; all prior controls above retain their own views.
 
         mapped_final=comp.curvature_identity(*legacy)[0]
+        mapped_final={p:v for p,v in mapped_final.items() if p not in comp.CURVATURE_RESOLVENT_BATCH}
 
         mapped_base={p:v for p,v in mapped_final.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH}
 
@@ -2375,7 +2376,7 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.model=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
-        assert len(cls.model)==2175
+        assert len(cls.model)==2180
         cls.modules={}
         cls.physical_stat=pathlib.Path.lstat
         cls.units={132:'point4_two_sided_heat_source_guard',
@@ -3099,6 +3100,483 @@ class ImmutableGitBatchControls(unittest.TestCase):
    self.assertEqual(comp.verify_current(),'all_original_checks');launch.assert_not_called();self.assertIs(comp.git,original)
   self.assertEqual(calls,[('show',spec),('rev-parse','HEAD')])
 
+
+class WeightedInventoryPreparationControls(unittest.TestCase):
+    """Exercise preparation, not a cached successful inventory result."""
+    def source_namespace(self):
+        path=comp.ROOT/comp.WEIGHTED
+        raw=path.read_bytes()
+        marker=b'# Reviewed finite smooth/master composition; original validator bodies survive.'
+        self.assertEqual(raw.count(marker),1)
+        module=types.ModuleType('weighted_inventory_unit_fixture')
+        module.__file__=str(path)
+        # Define the actual unchanged validator functions, with their real line
+        # metadata. Do not run the CLI or its Source bootstrap in a unit fixture.
+        exec(compile(raw.split(marker,1)[0],str(path),'exec',dont_inherit=True),module.__dict__)
+        return module
+
+    @contextlib.contextmanager
+    def installer_auth_fixture(self):
+        # Explicit unit fault seam: replace private captured roles together.
+        # This bypasses auth only to inject installer/rollback failures, and
+        # grants no production namespace qualification or fallback behavior.
+        auth=types.FunctionType((lambda _builtin_anchor:object()).__code__,comp.__dict__,
+                                argdefs=comp.curvature_weighted_installer_auth.__defaults__)
+        role=(auth,auth.__code__,auth.__globals__,auth.__defaults__,auth.__kwdefaults__,
+              auth.__closure__,auth.__builtins__,tuple(auth.__annotations__.items()))
+        with patch.object(comp,'curvature_weighted_installer_auth',auth),\
+             patch.object(comp.install_weighted,'__defaults__',(role,)),\
+             patch.object(comp.curvature_weighted_namespace_seal,'__defaults__',(role,)):
+            yield
+    def prepared(self):
+        module=self.source_namespace();ns=module.__dict__;events=[];processes=[]
+        data={'owned/'+str(i)+'.txt':b'owned '+str(i).encode() for i in range(1651)}
+        data.update({path:json.dumps({'packages':[{'type':'git','name':'owned_package'}]}).encode()
+                     for path in ns['MANIFESTS']})
+        tree=b''.join(('100644 blob '+comp.blob_id(raw)+'\t'+path).encode()+b'\0' for path,raw in data.items())
+        state=types.SimpleNamespace(data=data,events=events,namespace=ns,tree=tree)
+        def git(*args):
+            state.events.append(('git',args))
+            if args in [('ls-tree','-rz',state.namespace['BASE']),('--no-replace-objects','ls-tree','-rz',state.namespace['BASE'])]:return state.tree
+            if len(args)==2 and args[0]=='show':return state.data[args[1][41:]]
+            return b'fresh mutable result'
+        ns['git']=git
+        comp._wi_original_installer(ns)
+        originals=types.MappingProxyType({name:(ns['_composition_original_'+name] if name in
+                   ('main','run_inherited','check_current','public_paths','historical_gate') else ns[name])
+                   for name in comp._WI_ROLES})
+        record=types.MappingProxyType(dict(namespace=ns,originals=originals,
+            installed=types.MappingProxyType({name:ns[name] for name in ('main','run_inherited')}),
+            globals_seal=comp.curvature_weighted_namespace_seal(ns),
+            source_sha256=comp.sha256((comp.ROOT/comp.WEIGHTED).read_bytes()),
+            execution=comp.weighted_execution,execution_code=comp.weighted_execution.__wrapped__.__code__,
+            windows_git=comp._curvature_git_batch_transport_base,
+            windows_git_seal=comp.curvature_component_snapshot(comp._curvature_git_batch_transport_base,'Windows original composition Git')))
+        registry=((record,),comp.curvature_weighted_record_seal((record,)))
+        def launch(argv,**kwargs):
+            self.assertEqual(argv,['git','--no-replace-objects','-C',str(ns['ROOT']),'cat-file','--batch'])
+            self.assertEqual(kwargs['env'],ns['ENV']);self.assertEqual(kwargs['bufsize'],0)
+            p=GitBatchProcess([git_batch_frame(raw) for raw in data.values()])
+            p.stdout.close=lambda:None
+            processes.append(p);return p
+        for key,value in {'_wi_registry':registry,'_wi_inventory_owner':None,
+                          'subprocess':types.SimpleNamespace(Popen=launch,PIPE=subprocess.PIPE)}.items():
+            control=patch.object(comp,key,value);control.start();self.addCleanup(control.stop)
+        return module,data,events,processes
+
+    def transport(self,raw=b'owned',response=None,**process_options):
+        calls=[];processes=[];base=comp._WI_BASE
+        tree={'owned.txt':('100644',comp.blob_id(raw))}
+        def original(*args):calls.append(args);return b'live'
+        def launch(*args,**kwargs):
+            p=GitBatchProcess([git_batch_frame(raw) if response is None else response],**process_options)
+            p.stdout.close=lambda:None;processes.append(p);return p
+        item=comp.CurvatureWeightedBlobTransport(original,comp.ROOT,{'GIT_NO_LAZY_FETCH':'1'},base,tree,lambda:None,launch)
+        return item,calls,processes,base+':owned.txt'
+
+    def test_cold_original_baseline_one_stream_and_original_roots(self):
+        module,data,events,processes=self.prepared();ns=module.__dict__
+        original=ns['baseline_sources'];roots=ns['lake_runtime_roots']
+        with comp.curvature_weighted_inventory_companion(module):
+            self.assertEqual(original(),{path:('100644',raw) for path,raw in data.items()})
+            expected=set(ns['LAKE_ROOTS'])|{str(pathlib.PurePosixPath(path).parent/'.lake/packages/owned_package/.lake')
+                                         for path in ns['MANIFESTS']}
+            self.assertEqual(ns['lake_runtime_roots'](),expected)
+            for _ in range(10):self.assertTrue(ns['generated_build_path']('curvature/.lake/build/lib/lean/Owned.olean'))
+            self.assertEqual(len(processes),1);self.assertEqual(len(processes[0].requests),1653)
+        self.assertIs(ns['baseline_sources'],original);self.assertIs(ns['lake_runtime_roots'],roots)
+        self.assertEqual([args for kind,args in events if args[0]=='show'],[])
+        self.assertEqual(sum(args[0]=='ls-tree' for kind,args in events),1)
+        self.assertEqual(sum(args[0]=='--no-replace-objects' for kind,args in events),1)
+        self.assertIsNone(comp._wi_inventory_owner)
+
+    def test_warm_original_lru_and_context_roots_do_not_cross_invocations(self):
+        module,_,events,processes=self.prepared();ns=module.__dict__
+        baseline=ns['baseline_sources'];snapshots=[]
+        for _ in range(2):
+            with comp.curvature_weighted_inventory_companion(module):snapshots.append(ns['lake_runtime_roots']())
+        self.assertIs(ns['baseline_sources'],baseline)
+        self.assertEqual(len(processes),1) # Original warm LRU remains warm; no reseed or forced process.
+        self.assertEqual(sum(args[0]=='--no-replace-objects' for kind,args in events),2)
+        self.assertEqual(snapshots[0],snapshots[1]);self.assertIsNot(snapshots[0],snapshots[1])
+        # Exact production adapter route: both existing temporary callbacks
+        # are approved Source closures, restored by their original context.
+        before=ns['check_current'],ns['historical_gate']
+        with comp.weighted_execution(ns):
+            with comp.curvature_weighted_inventory_companion(module):self.assertTrue(ns['lake_runtime_roots']())
+        self.assertEqual((ns['check_current'],ns['historical_gate']),before)
+        with comp.replacements(ns,{'check_current':lambda schema=None:None,'historical_gate':lambda path,args:None}):
+            with self.assertRaises(AssertionError):
+                with comp.curvature_weighted_inventory_companion(module):pass
+
+    def test_roots_callback_has_bounded_work_and_returns_fresh_sets(self):
+        module,_,_,_=self.prepared();ns=module.__dict__
+        with comp.curvature_weighted_inventory_companion(module):
+            first=ns['lake_runtime_roots']();first.clear()
+            with patch.object(comp,'curvature_component_snapshot',side_effect=AssertionError('full seal in hot path')),\
+                 patch.object(ns['json'],'loads',side_effect=AssertionError('JSON in hot path')):
+                for _ in range(100):self.assertTrue(ns['lake_runtime_roots']())
+            self.assertNotEqual(ns['lake_runtime_roots'](),first)
+
+    def test_only_requested_owned_base_paths_use_batch_and_repeat_freshly(self):
+        item,calls,processes,spec=self.transport()
+        for args in [('rev-parse','HEAD'),('ls-files','--stage','-z'),('show','HEAD:owned.txt'),
+                     ('show','1'*40+':owned.txt'),('show',comp._WI_BASE+':absent'),('show',spec+'\nforeign')]:
+            self.assertEqual(item.query(*args),b'live')
+        self.assertEqual(len(calls),6);self.assertEqual(processes,[])
+        self.assertEqual(item.query('show',spec),b'owned')
+        processes[0].responses.append(git_batch_frame(b'owned'))
+        self.assertEqual(item.query('show',spec),b'owned')
+        self.assertEqual(processes[0].requests,[spec.encode()+b'\n']*2)
+        self.assertEqual(item.close(),[])
+
+    def test_valid_other_blob_cannot_satisfy_requested_tree_oid(self):
+        item,_,_,spec=self.transport(response=git_batch_frame(b'different valid object'))
+        with self.assertRaisesRegex(AssertionError,'requested BASE path OID'):item.query('show',spec)
+        self.assertEqual(item.close(),[])
+
+    def test_weighted_transport_rejects_all_invalid_frames_and_tail(self):
+        cases=[b'',b'0'*40+b' missing\n',b'0'*40+b' tree 0\n\n',
+               b'0'*40+b' blob 5\nowned\n',git_batch_frame(b'owned')[:-1],
+               comp.blob_id(b'owned').encode()+b' blob 05\nowned\n']
+        for raw in cases:
+            with self.subTest(raw=raw):
+                item,_,_,spec=self.transport(response=raw)
+                with self.assertRaises(AssertionError):item.query('show',spec)
+                item.close()
+        for options in ({'extra':b'extra'},{'extra':git_batch_frame(b'owned')},{'errors':b'error'},{'status':1}):
+            item,_,_,spec=self.transport(**options);self.assertEqual(item.query('show',spec),b'owned')
+            self.assertTrue(item.close())
+
+    def test_initial_source_roles_defaults_policy_and_lru_are_authenticated(self):
+        module=self.source_namespace();ns=module.__dict__
+        comp.curvature_weighted_source_contract(ns)
+        old=ns['git'].__code__
+        try:
+            ns['git'].__code__=(lambda *args:b'foreign').__code__
+            with self.assertRaisesRegex(AssertionError,'Source code drift'):comp.curvature_weighted_source_contract(ns)
+        finally:ns['git'].__code__=old
+        for key,value in [('BASE','1'*40),('OUTPUT_SUFFIXES',set()),('ENV',{})]:
+            with patch.dict(ns,{key:value}):
+                with self.assertRaises(AssertionError):comp.curvature_weighted_source_contract(ns)
+        with patch.dict(ns,{'baseline_sources':lambda:{}}):
+            with self.assertRaises(AssertionError):comp.curvature_weighted_source_contract(ns)
+        fn=ns['main'];defaults=fn.__defaults__
+        try:
+            fn.__defaults__=('foreign',)
+            with self.assertRaises(AssertionError):comp.curvature_weighted_source_contract(ns)
+        finally:fn.__defaults__=defaults
+        calls=[]
+        def forbidden():calls.append('unapproved callback ran');return {'maxsize':1,'typed':False}
+        with patch.object(ns['baseline_sources'],'cache_parameters',forbidden):
+            with self.assertRaises(AssertionError):comp.curvature_weighted_source_contract(ns)
+        self.assertEqual(calls,[])
+        # Builtin authority accepts only the interpreter's genuine module or
+        # dictionary; it preserves the actual incoming form in the saved seal.
+        import builtins
+        namespace=self.source_namespace().__dict__
+        for binding in (builtins.__dict__,builtins):
+            namespace['__builtins__']=binding
+            saved=dict(comp.curvature_weighted_namespace_seal(namespace))
+            self.assertIs(saved['__builtins__'][1],binding)
+        self.assertNotEqual(comp.curvature_weighted_namespace_seal(dict(namespace,__builtins__=builtins.__dict__)),
+                            comp.curvature_weighted_namespace_seal(dict(namespace,__builtins__=builtins)))
+        class ForeignBuiltins:
+            def __getattribute__(self,name):raise AssertionError('foreign builtin attribute hook called')
+        for binding in (dict(builtins.__dict__),ForeignBuiltins(),types.ModuleType('foreign_builtins')):
+            namespace['__builtins__']=binding
+            with self.assertRaisesRegex(AssertionError,'incoming genuine builtins identity drift'):
+                comp.curvature_weighted_namespace_seal(namespace)
+        # Exercise the real contents reader on an isolated unit dictionary.
+        # No mutation of the running interpreter's canonical builtin table.
+        unit={'owned':object()};saved=comp.curvature_weighted_builtin_entries(unit)
+        unit['owned']=object()
+        self.assertNotEqual(comp.curvature_weighted_builtin_entries(unit),saved)
+        unit['extra']=object()
+        self.assertNotEqual(comp.curvature_weighted_builtin_entries(unit),saved)
+        with patch.object(comp,'_wi_builtin_entries',comp._wi_builtin_entries[:-1]):
+            with self.assertRaisesRegex(AssertionError,'initial builtins policy drift'):
+                comp.curvature_weighted_namespace_seal(dict(namespace,__builtins__=builtins.__dict__))
+        # Even a switch between genuine forms is forbidden after registration.
+        module,_,_,_=self.prepared();namespace=module.__dict__;binding=namespace['__builtins__']
+        try:
+            with self.assertRaisesRegex(AssertionError,'Registered weighted global POST drift|Weighted global POST drift'):
+                with comp.curvature_weighted_inventory_companion(module):
+                    namespace['__builtins__']=builtins if binding is builtins.__dict__ else builtins.__dict__
+        finally:namespace['__builtins__']=binding
+        self.assertIsNone(comp._wi_inventory_owner);self.assertIsNone(comp._owner);self.assertEqual(comp._depth,0)
+        # Four coordinated mutable replacements must not rebase authority before
+        # the first production registration or invoke the changed auth/policy.
+        module=self.source_namespace();namespace=module.__dict__;namespace['__name__']='point4_weighted_hessian_release_guard'
+        auth=comp.curvature_weighted_installer_auth;policy=comp.curvature_weighted_builtin_policy
+        state=comp._wi_builtin_state;entries=comp._wi_builtin_entries[:-1]
+        rebased=(state[0],state[1],entries,*state[3:])
+        anchor=list(auth.__defaults__[0]);anchor[0]=rebased;anchor[7]=(rebased,)
+        with patch.object(comp,'_wi_builtin_entries',entries),patch.object(comp,'_wi_builtin_state',rebased),\
+             patch.object(policy,'__defaults__',(rebased,)),patch.object(auth,'__defaults__',(tuple(anchor),)),\
+             patch.object(comp,'_wi_registry',((),())),patch.dict(sys.modules,{'point4_weighted_hessian_release_guard':module}):
+            try:comp.install_weighted(namespace)
+            except AssertionError as error:
+                self.assertIn('initial authentication role drift',str(error))
+                codes=[];tb=error.__traceback__
+                while tb is not None:codes.append(tb.tb_frame.f_code);tb=tb.tb_next
+                self.assertNotIn(auth.__code__,codes);self.assertNotIn(policy.__code__,codes)
+            else:self.fail('Coordinated initial policy rebase accepted')
+            self.assertEqual(comp._wi_registry,((),()))
+        # Namespace entry and POST must validate the same initial anchor before
+        # the current reader or policy can run, even if auth defaults stay intact.
+        namespace=self.source_namespace().__dict__;state=comp._wi_builtin_state
+        policy=comp.curvature_weighted_builtin_policy;entries=comp._wi_builtin_entries[:-1]
+        rebased=(state[0],state[1],entries,*state[3:])
+        with patch.object(comp,'_wi_builtin_entries',entries),patch.object(comp,'_wi_builtin_state',rebased),\
+             patch.object(policy,'__defaults__',(rebased,)):
+            with self.assertRaisesRegex(AssertionError,'initial builtins policy drift'):
+                comp.curvature_weighted_namespace_seal(namespace)
+        called=[]
+        def forbidden(*args):called.append('unapproved policy/reader executed');raise RuntimeError('forbidden policy/reader')
+        for name in ('curvature_weighted_builtin_entries','curvature_weighted_builtin_policy'):
+            with patch.object(comp,name,forbidden):
+                with self.assertRaisesRegex(AssertionError,'initial builtins (reader|policy) drift'):
+                    comp.curvature_weighted_namespace_seal(namespace)
+        self.assertEqual(called,[])
+        for name in ('curvature_weighted_builtin_entries','curvature_weighted_builtin_policy'):
+            function=getattr(comp,name);code=function.__code__
+            try:
+                function.__code__=(lambda value:(_ for _ in ()).throw(RuntimeError('unapproved code executed'))).__code__
+                with self.assertRaisesRegex(AssertionError,'initial builtins (reader|policy) drift'):
+                    comp.curvature_weighted_namespace_seal(namespace)
+            finally:function.__code__=code
+        class ForeignCapture:
+            def __len__(self):called.append('foreign capture len');raise RuntimeError('foreign len')
+            def __getitem__(self,key):called.append('foreign capture getitem');raise RuntimeError('foreign getitem')
+        with patch.object(comp.curvature_weighted_namespace_seal,'__defaults__',(ForeignCapture(),)):
+            with self.assertRaisesRegex(AssertionError,'initial authentication role drift'):
+                comp.curvature_weighted_installer_auth()
+        self.assertEqual(called,[])
+
+    def test_initial_installer_source_code_and_produced_closures_are_authenticated(self):
+        code=comp.curvature_weighted_installer_auth();module=self.source_namespace();ns=module.__dict__
+        originals={name:ns[name] for name in comp._WI_ROLES}
+        comp._wi_original_installer(ns)
+        comp.curvature_weighted_installed_auth(ns,originals,code)
+        with patch.dict(ns,{'main':lambda argv=None:None}):
+            with self.assertRaises((AssertionError,KeyError)):comp.curvature_weighted_installed_auth(ns,originals,code)
+        original=comp._wi_original_installer;before=original.__code__
+        try:
+            original.__code__=(lambda namespace:None).__code__
+            with self.assertRaisesRegex(AssertionError,'Source code drift'):comp.curvature_weighted_installer_auth()
+        finally:original.__code__=before
+        class ForbiddenAttributes:
+            def __getattribute__(self,name):raise RuntimeError('unapproved attribute hook '+name)
+        for name in ('_wi_original_installer','weighted_execution'):
+            with patch.object(comp,name,ForbiddenAttributes()):
+                with self.assertRaisesRegex(AssertionError,'function type drift'):comp.curvature_weighted_installer_auth()
+        # Genuine physical full-Source bootstrap: no forged caller frame, auth
+        # seam or constructed role record. Requires the reviewed mechanical
+        # loader closure before this Source-only core is eligible to execute.
+        path=comp.ROOT/comp.WEIGHTED;module=types.ModuleType('point4_weighted_hessian_release_guard')
+        module.__file__=str(path);prior_registry=comp._wi_registry;prior_owner=comp._wi_inventory_owner
+        with patch.dict(sys.modules,{'point4_weighted_hessian_release_guard':module}),\
+             patch.object(comp,'_wi_registry',prior_registry),patch.object(comp,'_wi_inventory_owner',prior_owner):
+            exec(compile(path.read_bytes(),str(path),'exec',dont_inherit=True),module.__dict__)
+            records=[item for item in comp._wi_registry[0] if item['namespace'] is module.__dict__]
+            self.assertEqual(len(records),1)
+            original_baseline=module.baseline_sources;original_roots=module.lake_runtime_roots
+            with comp.curvature_weighted_inventory_companion(module):
+                self.assertEqual(len(original_baseline()),1653);self.assertTrue(module.lake_runtime_roots())
+                self.assertIs(module.baseline_sources,original_baseline)
+            self.assertIs(module.lake_runtime_roots,original_roots)
+
+    def test_installer_rolls_back_every_touched_slot_and_never_publishes_failure(self):
+        # The unit mock replaces only the trusted *caller frame* and installer
+        # auth seam to inject faults. Production has no fixture escape flag.
+        for fail_after in range(len(comp._WI_INSTALL_SLOTS)):
+            with self.subTest(slot=fail_after):
+                module=self.source_namespace();ns=module.__dict__;ns['__name__']='point4_weighted_hessian_release_guard'
+                contract=comp.curvature_weighted_source_contract(ns)
+                before={key:ns.get(key,comp._wi_absent) for key in comp._WI_INSTALL_SLOTS}
+                registry=comp._wi_registry;owner=comp._wi_install_owner;primary=RuntimeError('installer fault')
+                def broken(namespace):
+                    for index,key in enumerate(comp._WI_INSTALL_SLOTS):
+                        namespace[key]=object()
+                        if index==fail_after:raise primary
+                frame=types.SimpleNamespace(f_code=contract['code'],f_globals=ns,f_locals=ns)
+                with patch.dict(sys.modules,{'point4_weighted_hessian_release_guard':module}),\
+                     patch.object(comp.sys,'_getframe',return_value=frame),\
+                     self.installer_auth_fixture(),\
+                     patch.object(comp,'_wi_original_installer',broken):
+                    with self.assertRaises(RuntimeError) as caught:comp.install_weighted(ns)
+                self.assertIs(caught.exception,primary);self.assertIs(comp._wi_registry,registry);self.assertIs(comp._wi_install_owner,owner)
+                for key,value in before.items():self.assertIs(ns.get(key,comp._wi_absent),value)
+        for phase in ('produced_wrappers','record_construction','owner_drift'):
+            with self.subTest(phase=phase):
+                module=self.source_namespace();ns=module.__dict__;ns['__name__']='point4_weighted_hessian_release_guard'
+                contract=comp.curvature_weighted_source_contract(ns)
+                frame=types.SimpleNamespace(f_code=contract['code'],f_globals=ns,f_locals=ns)
+                before={key:ns.get(key,comp._wi_absent) for key in comp._WI_INSTALL_SLOTS}
+                registry=comp._wi_registry;owner=comp._wi_install_owner;seal=comp.curvature_weighted_record_seal
+                primary=RuntimeError('post-install failure')
+                def fault(records):
+                    if len(records)>len(registry[0]):
+                        if phase=='owner_drift':comp._wi_install_owner=object()
+                        else:raise primary
+                    return seal(records)
+                with contextlib.ExitStack() as stack:
+                    stack.enter_context(patch.dict(sys.modules,{'point4_weighted_hessian_release_guard':module}))
+                    stack.enter_context(patch.object(comp.sys,'_getframe',return_value=frame))
+                    if phase=='produced_wrappers':
+                        stack.enter_context(patch.object(comp,'curvature_weighted_installed_auth',side_effect=primary))
+                    else:stack.enter_context(patch.object(comp,'curvature_weighted_record_seal',side_effect=fault))
+                    with self.assertRaises((RuntimeError,AssertionError)):comp.install_weighted(ns)
+                self.assertIs(comp._wi_registry,registry);self.assertIs(comp._wi_install_owner,owner)
+                for key,value in before.items():self.assertIs(ns.get(key,comp._wi_absent),value)
+
+    def test_known_production_drift_fails_but_foreign_fixture_runs_original(self):
+        fake=types.SimpleNamespace(__name__='point4_weighted_hessian_release_guard')
+        with self.assertRaisesRegex(AssertionError,'Unregistered production'):
+            with comp.curvature_weighted_inventory_companion(fake):self.fail('must reject before body')
+        called=[];module=types.SimpleNamespace(check_inventory=lambda:called.append('full original body'))
+        with comp.curvature_weighted_inventory_companion(module):module.check_inventory()
+        self.assertEqual(called,['full original body'])
+        module,_,_,_=self.prepared();ns=module.__dict__
+        with patch.dict(ns,{'OUTPUT_SUFFIXES':set()}):
+            with self.assertRaisesRegex(AssertionError,'global/policy drift'):
+                with comp.curvature_weighted_inventory_companion(module):self.fail('must reject policy drift')
+        original_raw=ns['raw_git']
+        with patch.object(comp.sys,'platform','win32'),patch.dict(ns,{'raw_git':comp._curvature_git_batch_transport_base}):
+            with comp.curvature_weighted_inventory_companion(module):
+                self.assertIs(ns['raw_git'],comp._curvature_git_batch_transport_base)
+        self.assertIs(ns['raw_git'],original_raw)
+        for platform in ('win32','linux'):
+            with patch.object(comp.sys,'platform',platform),patch.dict(ns,{'raw_git':lambda *args:b'foreign'}):
+                with self.assertRaises(AssertionError):
+                    with comp.curvature_weighted_inventory_companion(module):self.fail('unbound raw Git adapter')
+        with patch.object(comp.sys,'platform','linux'),patch.dict(ns,{'raw_git':comp._curvature_git_batch_transport_base}):
+            with self.assertRaisesRegex(AssertionError,'Unapproved platform'):
+                with comp.curvature_weighted_inventory_companion(module):pass
+
+    def test_owned_context_reentrancy_and_callback_mutation_fail_and_restore(self):
+        module,_,_,_=self.prepared();ns=module.__dict__;git=ns['git'];roots=ns['lake_runtime_roots']
+        with comp.curvature_weighted_inventory_companion(module):
+            with self.assertRaisesRegex(AssertionError,'Recursive/foreign'):
+                with comp.curvature_weighted_inventory_companion(module):pass
+        self.assertIs(ns['git'],git);self.assertIs(ns['lake_runtime_roots'],roots)
+        with self.assertRaises(AssertionError):
+            with comp.curvature_weighted_inventory_companion(module):ns['lake_runtime_roots']=lambda:set()
+        self.assertIs(ns['git'],git);self.assertIs(ns['lake_runtime_roots'],roots);self.assertIsNone(comp._wi_inventory_owner)
+
+    def test_poisoned_warm_baseline_and_midbody_policy_changes_rejected(self):
+        module,_,_,_=self.prepared();ns=module.__dict__
+        with comp.curvature_weighted_inventory_companion(module):pass
+        baseline=ns['baseline_sources']();saved=dict(baseline);key=next(iter(baseline))
+        try:
+            baseline[key]=('100644',b'poisoned')
+            with self.assertRaisesRegex(AssertionError,'cached baseline mode/OID drift'):
+                with comp.curvature_weighted_inventory_companion(module):pass
+        finally:baseline.clear();baseline.update(saved)
+        with self.assertRaisesRegex(AssertionError,'POST drift'):
+            with comp.curvature_weighted_inventory_companion(module):ns['ENV']['GIT_NO_LAZY_FETCH']='0'
+        ns['ENV']['GIT_NO_LAZY_FETCH']='1'
+
+    def test_primary_failure_retains_independent_post_and_cleanup_errors(self):
+        module,_,_,processes=self.prepared();ns=module.__dict__;primary=ValueError('inventory primary')
+        with self.assertRaises(ValueError) as caught:
+            with comp.curvature_weighted_inventory_companion(module):
+                processes[0].extra=b'late duplicate';ns['ENV']['GIT_NO_LAZY_FETCH']='0'
+                ns['baseline_sources']()[next(iter(ns['baseline_sources']()))]=('100644',b'mutated')
+                raise primary
+        self.assertIs(caught.exception,primary);self.assertGreaterEqual(len(primary.__notes__),4)
+        self.assertIsNone(comp._wi_inventory_owner)
+        ns['ENV']['GIT_NO_LAZY_FETCH']='1'
+        for phase in ('stdin_close','communicate1','poll1','kill','communicate2','stdout_close','stderr_close'):
+            with self.subTest(cleanup=phase):
+                module,_,_,processes=self.prepared();ns=module.__dict__;primary=ValueError('owned primary '+phase)
+                original_git=ns['git'];original_roots=ns['lake_runtime_roots'];events=[];state=types.SimpleNamespace(wait=0,polls=0)
+                with self.assertRaises(ValueError) as caught:
+                    with comp.curvature_weighted_inventory_companion(module):
+                        process=processes[0];old_wait=process.communicate
+                        def stdin_close():
+                            events.append('stdin_close')
+                            if phase=='stdin_close':raise RuntimeError('injected stdin_close')
+                        def wait(timeout):
+                            self.assertEqual(timeout,20);state.wait+=1;name='communicate'+str(state.wait);events.append(name)
+                            if name==phase or state.wait==1 and phase in ('kill','communicate2'):
+                                raise RuntimeError('injected '+name)
+                            result=old_wait(timeout);process.returncode=0;return result
+                        def poll():
+                            state.polls+=1;name='poll'+str(state.polls);events.append(name)
+                            if name==phase:raise RuntimeError('injected '+name)
+                            return process.returncode
+                        def kill():
+                            events.append('kill')
+                            if phase=='kill':raise RuntimeError('injected kill')
+                            # Like Popen.kill, this does not itself set returncode.
+                        def stdout_close():
+                            events.append('stdout_close')
+                            if phase=='stdout_close':raise RuntimeError('injected stdout_close')
+                        def stderr_close():
+                            events.append('stderr_close')
+                            if phase=='stderr_close':raise RuntimeError('injected stderr_close')
+                        process.stdin.close=stdin_close;process.communicate=wait;process.poll=poll;process.kill=kill
+                        process.stdout.close=stdout_close;process.stderr=types.SimpleNamespace(close=stderr_close)
+                        if phase in ('communicate1','kill','communicate2'):process.returncode=None
+                        raise primary
+                self.assertIs(caught.exception,primary);self.assertTrue(any('injected '+phase in item for item in primary.__notes__))
+                for name in ('stdin_close','communicate1','poll1','poll2','stdout_close','stderr_close'):self.assertIn(name,events)
+                if phase in ('communicate1','kill','communicate2'):
+                    self.assertIn('kill',events);self.assertIn('communicate2',events)
+                self.assertIs(ns['git'],original_git);self.assertIs(ns['lake_runtime_roots'],original_roots)
+                self.assertIsNone(comp._wi_inventory_owner);self.assertIsNone(comp._owner);self.assertEqual(comp._depth,0)
+
+    def test_existing_inventory_predicates_are_still_actual_original_code(self):
+        module,_,_,_=self.prepared();ns=module.__dict__
+        before={name:ns[name].__code__ for name in ('generated_build_path','check_inventory')}
+        with comp.curvature_weighted_inventory_companion(module):
+            for path in ('curvature/.lake/build/lib/lean/Owned.lean','curvature/.lake/build/lib/lean/Owned.py',
+                         'curvature/.lake/build/lib/lean/__pycache__/x.pyc','foreign/build/Owned.olean'):
+                self.assertFalse(ns['generated_build_path'](path),path)
+            for name,code in before.items():self.assertIs(ns[name].__code__,code)
+        contract=comp.curvature_weighted_contract((comp.ROOT/comp.WEIGHTED).read_bytes(),str(comp.ROOT/comp.WEIGHTED))
+        for name,code in before.items():self.assertEqual(code,contract['codes'][name])
+        # Execute the unchanged complete inventory body on tiny physical files.
+        # These explicit unit adapters do not qualify a production namespace.
+        with tempfile.TemporaryDirectory(prefix='weighted-inventory-guards-',dir=pathlib.Path.cwd()) as directory:
+            root=pathlib.Path(directory).resolve();paths={'owned.lean':b'theorem owned : True := by trivial\n','owned.txt':b'owned\n'}
+            for path,raw in paths.items():(root/path).write_bytes(raw)
+            fixture=self.source_namespace().__dict__;events=[];state=types.SimpleNamespace(mode='100644',bad=False,ignored=False)
+            def git(*args):
+                events.append(args)
+                if args==('ls-files','--stage','-z'):
+                    return b''.join((state.mode+' '+comp.blob_id(raw)+' 0\t'+path).encode()+b'\0' for path,raw in paths.items())
+                if args==('ls-files','-z','--others'):return b'ignored.py\0' if state.ignored else b''
+                self.fail('Unexpected inventory query '+repr(args))
+            def dependencies():events.append('dependencies');return set(),set()
+            def fingerprints(deps):events.append('fingerprints');return set()
+            with patch.dict(fixture,{'ROOT':root,'git':git,'baseline_sources':lambda:{path:('100644',raw) for path,raw in paths.items()},
+                                    'public_paths':lambda:set(paths),'dependency_inventory':dependencies,'runtime_fingerprints':fingerprints}):
+                fixture['check_inventory']()
+                self.assertIn('dependencies',events);self.assertIn('fingerprints',events)
+                state.mode='100755'
+                with self.assertRaisesRegex(AssertionError,'Tracked executable-mode drift'):fixture['check_inventory']()
+                state.mode='100644';(root/'owned.lean').write_bytes(b'mutated source')
+                with self.assertRaisesRegex(AssertionError,'Index/physical blob mismatch'):fixture['check_inventory']()
+                (root/'owned.lean').write_bytes(paths['owned.lean']);state.ignored=True;(root/'ignored.py').write_bytes(b'ignored source')
+                with self.assertRaisesRegex(AssertionError,'Unexpected untracked/ignored'):fixture['check_inventory']()
+
+    def test_real_FileIO_weighted_transport_partial_reads_and_EOF(self):
+        raw=b'x'*513;base=comp._WI_BASE;processes=[];real_popen=subprocess.Popen
+        program="import sys,os,hashlib\nraw=b'x'*513\nfr=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\\0'+raw).hexdigest().encode()+b' blob '+str(len(raw)).encode()+b'\\n'+raw+b'\\n'\nfor line in sys.stdin.buffer:\n for i in range(0,len(fr),2):os.write(1,fr[i:i+2])\n"
+        def launch(argv,**kwargs):
+            self.assertEqual(argv,['git','--no-replace-objects','-C',str(comp.ROOT),'cat-file','--batch'])
+            kwargs['env']=dict(os.environ,PYTHONDONTWRITEBYTECODE='1')
+            process=real_popen([sys.executable,'-B','-c',program],**kwargs)
+            self.assertIs(type(process.stdout),io.FileIO);processes.append(process);return process
+        item=comp.CurvatureWeightedBlobTransport(lambda *args:self.fail('immutable query delegated'),comp.ROOT,
+            dict(comp.ENV),base,{'owned':('100644',comp.blob_id(raw))},lambda:None,launch)
+        self.assertEqual(item.query('show',base+':owned'),raw);self.assertEqual(item.close(),[])
+        self.assertEqual(processes[0].returncode,0)
+
+
 # END authenticated finite curvature tests
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
@@ -3121,12 +3599,13 @@ if __name__=='__main__':
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(CurvatureCompositionTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(CurvatureProductionNamespaceTests))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(ImmutableGitBatchControls))
-    assert suite.countTestCases()==139, 'Complete ordinary suite selection drift'
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(WeightedInventoryPreparationControls))
+    assert suite.countTestCases()==154, 'Complete ordinary suite selection drift'
     if args.real_only:suite=unittest.TestSuite()
     if REAL:
         real_suite=unittest.defaultTestLoader.loadTestsFromTestCase(RealValidatorTests)
         assert real_suite.countTestCases()==8, 'Complete real route selection drift'
         suite.addTests(real_suite)
-    assert suite.countTestCases()==(8 if args.real_only else 147 if REAL else 139), 'Exact selected suite drift'
+    assert suite.countTestCases()==(8 if args.real_only else 162 if REAL else 154), 'Exact selected suite drift'
     result=unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(0 if result.wasSuccessful() else 1)
