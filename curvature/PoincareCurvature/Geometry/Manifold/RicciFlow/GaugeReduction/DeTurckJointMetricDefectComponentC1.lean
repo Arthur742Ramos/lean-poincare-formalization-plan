@@ -38,6 +38,7 @@ local instance jointMetricDefectComponentTangentFiberBundle : FiberBundle E TM :
 local instance jointMetricDefectComponentTangentVectorBundle : VectorBundle ℝ E TM :=
   TangentSpace.vectorBundle
 
+set_option maxHeartbeats 2000000 in
 /-- The actual metric-defect component in a fixed local frame is jointly C¹
 when the actual metric is jointly C² and the background applied to each of
 the two metric-slot frame sections is jointly C¹. The last frame index is
