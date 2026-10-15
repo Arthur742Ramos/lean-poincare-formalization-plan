@@ -75,16 +75,42 @@ theorem contMDiffOn_joint_metricDefect_component_of_joint_metric_and_backgroundF
     (g t).inner x (e.localFrame bas a x) (e.localFrame bas b x)
   have hG : ContMDiffOn (𝓘(ℝ).prod I) 𝓘(ℝ) 2
       (fun p : ℝ × M => G p.1 p.2) (Set.univ ×ˢ e.baseSet) := by
-    exact ParametrizedInner.contMDiffOn_timeDependentInner_localFrame
-      (IB := I) (F := E) (V := TM) (n := (2 : WithTop ℕ∞)) g e bas (Set.Subset.rfl) hmetric a b
+    exact @ParametrizedInner.contMDiffOn_timeDependentInner_localFrame
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› H ‹TopologicalSpace H› I (2 : WithTop ℕ∞)
+      M ‹TopologicalSpace M› ‹ChartedSpace H M›
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› TM
+      instTopologicalSpaceTangentBundle
+      (PoincareCurvature.instNormedAddCommGroupTangentSpace (M := M) I)
+      (PoincareCurvature.instNormedSpaceTangentSpace (M := M) I)
+      (by
+        change FiberBundle E TM
+        exact jointMetricDefectComponentTangentFiberBundle (I := I) (M := M))
+      (by
+        change VectorBundle ℝ E TM
+        exact jointMetricDefectComponentTangentVectorBundle (I := I) (M := M))
+      ‹ContMDiffVectorBundle 2 E TM I›
+      g e ‹MemTrivializationAtlas e› ι bas e.baseSet subset_rfl hmetric a b
   have hderiv := PoincareCurvature.contMDiffOn_mvfderiv_apply_localFrame_of_joint
     (I := I) e bas c hG
   have hframe (i : ι) : ContMDiffOn (𝓘(ℝ).prod I)
       (I.prod 𝓘(ℝ, E)) 1
       (fun p : ℝ × M => TotalSpace.mk' E p.2 (e.localFrame bas i p.2))
       (Set.univ ×ˢ e.baseSet) := by
-    exact (ParametrizedInner.contMDiffOn_frameSection_prodSnd
-      (IB := I) (F := E) (V := TM) (n := (2 : WithTop ℕ∞)) e bas (Set.Subset.rfl) i).of_le
+    exact (@ParametrizedInner.contMDiffOn_frameSection_prodSnd
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› H ‹TopologicalSpace H› I (2 : WithTop ℕ∞)
+      M ‹TopologicalSpace M› ‹ChartedSpace H M›
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› TM
+      instTopologicalSpaceTangentBundle
+      (PoincareCurvature.instNormedAddCommGroupTangentSpace (M := M) I)
+      (PoincareCurvature.instNormedSpaceTangentSpace (M := M) I)
+      (by
+        change FiberBundle E TM
+        exact jointMetricDefectComponentTangentFiberBundle (I := I) (M := M))
+      (by
+        change VectorBundle ℝ E TM
+        exact jointMetricDefectComponentTangentVectorBundle (I := I) (M := M))
+      ‹ContMDiffVectorBundle 2 E TM I›
+      e ‹MemTrivializationAtlas e› ι bas e.baseSet subset_rfl i).of_le
         (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
   have hcov_a : ContMDiffOn (𝓘(ℝ).prod I) (I.prod 𝓘(ℝ, E)) 1
       (fun p : ℝ × M => TotalSpace.mk' E p.2
@@ -99,12 +125,44 @@ theorem contMDiffOn_joint_metricDefect_component_of_joint_metric_and_backgroundF
     exact hbackground_b.clm_bundle_apply (b := Prod.snd)
       (F₁ := E) (F₂ := E) (E₁ := TM) (E₂ := TM) (hframe c)
   have hmetric_one := hmetric.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
-  have hterm_a := ParametrizedInner.contMDiffOn_paramBilin_apply₂
-    (IB := I) (F := E) (E := TM) (b := Prod.snd) (ψ := fun p : ℝ × M => (g p.1).inner p.2)
-    hmetric_one hcov_a (hframe b)
-  have hterm_b := ParametrizedInner.contMDiffOn_paramBilin_apply₂
-    (IB := I) (F := E) (E := TM) (b := Prod.snd) (ψ := fun p : ℝ × M => (g p.1).inner p.2)
-    hmetric_one (hframe a) hcov_b
+  have hterm_a := @ParametrizedInner.contMDiffOn_paramBilin_apply₂
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› H ‹TopologicalSpace H› I (1 : WithTop ℕ∞)
+      M ‹TopologicalSpace M› ‹ChartedSpace H M›
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› TM
+      instTopologicalSpaceTangentBundle
+      (PoincareCurvature.instNormedAddCommGroupTangentSpace (M := M) I)
+      (PoincareCurvature.instNormedSpaceTangentSpace (M := M) I)
+      (by
+        change FiberBundle E TM
+        exact jointMetricDefectComponentTangentFiberBundle (I := I) (M := M))
+      (by
+        change VectorBundle ℝ E TM
+        exact jointMetricDefectComponentTangentVectorBundle (I := I) (M := M))
+      (ℝ × E) inferInstance inferInstance (ℝ × H) inferInstance (𝓘(ℝ).prod I)
+      (ℝ × M) inferInstance inferInstance Prod.snd
+      (fun p : ℝ × M => (background p.1) (e.localFrame bas a) p.2 (e.localFrame bas c p.2))
+      (fun p : ℝ × M => e.localFrame bas b p.2)
+      (Set.univ ×ˢ e.baseSet) (fun p : ℝ × M => (g p.1).inner p.2)
+      hmetric_one hcov_a (hframe b)
+  have hterm_b := @ParametrizedInner.contMDiffOn_paramBilin_apply₂
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› H ‹TopologicalSpace H› I (1 : WithTop ℕ∞)
+      M ‹TopologicalSpace M› ‹ChartedSpace H M›
+      E ‹NormedAddCommGroup E› ‹NormedSpace ℝ E› TM
+      instTopologicalSpaceTangentBundle
+      (PoincareCurvature.instNormedAddCommGroupTangentSpace (M := M) I)
+      (PoincareCurvature.instNormedSpaceTangentSpace (M := M) I)
+      (by
+        change FiberBundle E TM
+        exact jointMetricDefectComponentTangentFiberBundle (I := I) (M := M))
+      (by
+        change VectorBundle ℝ E TM
+        exact jointMetricDefectComponentTangentVectorBundle (I := I) (M := M))
+      (ℝ × E) inferInstance inferInstance (ℝ × H) inferInstance (𝓘(ℝ).prod I)
+      (ℝ × M) inferInstance inferInstance Prod.snd
+      (fun p : ℝ × M => e.localFrame bas a p.2)
+      (fun p : ℝ × M => (background p.1) (e.localFrame bas b) p.2 (e.localFrame bas c p.2))
+      (Set.univ ×ˢ e.baseSet) (fun p : ℝ × M => (g p.1).inner p.2)
+      hmetric_one (hframe a) hcov_b
   refine ContMDiffOn.congr ((hderiv.sub hterm_a).sub hterm_b) ?_
   intro p hp
   letI : Bundle.RiemannianBundle TM := ⟨(g p.1).toRiemannianMetric⟩
