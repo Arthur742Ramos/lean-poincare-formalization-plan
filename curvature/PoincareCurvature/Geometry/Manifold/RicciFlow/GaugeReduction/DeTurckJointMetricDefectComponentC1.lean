@@ -138,8 +138,8 @@ theorem contMDiffOn_joint_metricDefect_component_of_joint_metric_and_backgroundF
       (by
         change VectorBundle ℝ E TM
         exact jointMetricDefectComponentTangentVectorBundle (I := I) (M := M))
-      (ℝ × E) inferInstance inferInstance (ℝ × H) inferInstance (𝓘(ℝ).prod I)
-      (ℝ × M) inferInstance inferInstance Prod.snd
+      (ℝ × E) inferInstance inferInstance (ModelProd ℝ H) inferInstance (𝓘(ℝ).prod I)
+      (ℝ × M) inferInstance (prodChartedSpace ℝ ℝ H M) Prod.snd
       (fun p : ℝ × M => (background p.1) (e.localFrame bas a) p.2 (e.localFrame bas c p.2))
       (fun p : ℝ × M => e.localFrame bas b p.2)
       (Set.univ ×ˢ e.baseSet) (fun p : ℝ × M => (g p.1).inner p.2)
@@ -157,8 +157,8 @@ theorem contMDiffOn_joint_metricDefect_component_of_joint_metric_and_backgroundF
       (by
         change VectorBundle ℝ E TM
         exact jointMetricDefectComponentTangentVectorBundle (I := I) (M := M))
-      (ℝ × E) inferInstance inferInstance (ℝ × H) inferInstance (𝓘(ℝ).prod I)
-      (ℝ × M) inferInstance inferInstance Prod.snd
+      (ℝ × E) inferInstance inferInstance (ModelProd ℝ H) inferInstance (𝓘(ℝ).prod I)
+      (ℝ × M) inferInstance (prodChartedSpace ℝ ℝ H M) Prod.snd
       (fun p : ℝ × M => e.localFrame bas a p.2)
       (fun p : ℝ × M => (background p.1) (e.localFrame bas b) p.2 (e.localFrame bas c p.2))
       (Set.univ ×ˢ e.baseSet) (fun p : ℝ × M => (g p.1).inner p.2)
