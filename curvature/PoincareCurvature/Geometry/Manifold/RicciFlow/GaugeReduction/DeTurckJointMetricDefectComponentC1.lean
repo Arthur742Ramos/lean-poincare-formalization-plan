@@ -69,12 +69,14 @@ theorem contMDiffOn_joint_metricDefect_component_of_joint_metric_and_backgroundF
         (background p.1).metricDefect p.2
           (e.localFrame bas a p.2) (e.localFrame bas b p.2)
           (e.localFrame bas c p.2)) (Set.univ ×ˢ e.baseSet) := by
+  letI : FiberBundle E TM := TangentSpace.fiberBundle
+  letI : VectorBundle ℝ E TM := TangentSpace.vectorBundle
   let G : ℝ → M → ℝ := fun t x =>
     (g t).inner x (e.localFrame bas a x) (e.localFrame bas b x)
   have hG : ContMDiffOn (𝓘(ℝ).prod I) 𝓘(ℝ) 2
       (fun p : ℝ × M => G p.1 p.2) (Set.univ ×ˢ e.baseSet) := by
     exact ParametrizedInner.contMDiffOn_timeDependentInner_localFrame
-      (IB := I) (n := (2 : WithTop ℕ∞)) g e bas (Set.Subset.rfl) hmetric a b
+      (IB := I) (F := E) (V := TM) (n := (2 : WithTop ℕ∞)) g e bas (Set.Subset.rfl) hmetric a b
   have hderiv := PoincareCurvature.contMDiffOn_mvfderiv_apply_localFrame_of_joint
     (I := I) e bas c hG
   have hframe (i : ι) : ContMDiffOn (𝓘(ℝ).prod I)
@@ -82,7 +84,7 @@ theorem contMDiffOn_joint_metricDefect_component_of_joint_metric_and_backgroundF
       (fun p : ℝ × M => TotalSpace.mk' E p.2 (e.localFrame bas i p.2))
       (Set.univ ×ˢ e.baseSet) := by
     exact (ParametrizedInner.contMDiffOn_frameSection_prodSnd
-      (IB := I) (n := (2 : WithTop ℕ∞)) e bas (Set.Subset.rfl) i).of_le
+      (IB := I) (F := E) (V := TM) (n := (2 : WithTop ℕ∞)) e bas (Set.Subset.rfl) i).of_le
         (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
   have hcov_a : ContMDiffOn (𝓘(ℝ).prod I) (I.prod 𝓘(ℝ, E)) 1
       (fun p : ℝ × M => TotalSpace.mk' E p.2
@@ -98,10 +100,10 @@ theorem contMDiffOn_joint_metricDefect_component_of_joint_metric_and_backgroundF
       (F₁ := E) (F₂ := E) (E₁ := TM) (E₂ := TM) (hframe c)
   have hmetric_one := hmetric.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ 2)
   have hterm_a := ParametrizedInner.contMDiffOn_paramBilin_apply₂
-    (b := Prod.snd) (ψ := fun p : ℝ × M => (g p.1).inner p.2)
+    (IB := I) (F := E) (E := TM) (b := Prod.snd) (ψ := fun p : ℝ × M => (g p.1).inner p.2)
     hmetric_one hcov_a (hframe b)
   have hterm_b := ParametrizedInner.contMDiffOn_paramBilin_apply₂
-    (b := Prod.snd) (ψ := fun p : ℝ × M => (g p.1).inner p.2)
+    (IB := I) (F := E) (E := TM) (b := Prod.snd) (ψ := fun p : ℝ × M => (g p.1).inner p.2)
     hmetric_one (hframe a) hcov_b
   refine ContMDiffOn.congr ((hderiv.sub hterm_a).sub hterm_b) ?_
   intro p hp
@@ -117,6 +119,8 @@ theorem contMDiffOn_joint_metricDefect_component_of_joint_metric_and_backgroundF
   have hformula := congrArg (fun L : TM p.2 →L[ℝ] ℝ => L (e.localFrame bas c p.2))
     ((background p.1).metricDefect_apply_sections hFa hFb)
   rw [CovariantDerivative.metricDefectAux_apply] at hformula
-  simpa only [G] using hformula
+  have hinner (x : M) (u v : TM x) :
+      inner ℝ u v = (g p.1).inner x u v := rfl
+  simpa only [G, hinner] using hformula
 
 end PoincareCurvature.GaugeFlowAssembly
