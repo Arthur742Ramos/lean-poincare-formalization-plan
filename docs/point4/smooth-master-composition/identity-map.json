@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "6dd5334f03e27b0dee17714be7cc5d21260393f0",
-      "final_sha256": "962c52744a805167273d4de6c0c371aa56f0b02ca36f1c6e912d00709dfaea3d",
+      "final_blob": "7f1c88725c077ea655f7323d756f552d005d9a7f",
+      "final_sha256": "d5d42a687c97400bd9f488769b849e7123d9d3608ed307d2d5bd4e2b16c138c1",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "9a9dc85a6738e635d4421675e7f728ba0387b531",
-      "final_sha256": "e36003ca98e34eb5187d05bb5830e913fda86a80a94da161fd38a42a22445e38",
+      "final_blob": "3ff811f8e14e79376f06f2ed68f2eb3cee0da371",
+      "final_sha256": "f832f86d485c833a014208fa8784d96d10b58fc5d34d1667f2f012dcbbc9f46c",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "823b29590223a749a1fb7d5804e045e71f71dbed",
-      "final_sha256": "d79136cc1821fb4dc7d2ea57dac1ec8828d47f17ebf99b326e5cbc45bf858786",
+      "final_blob": "e36f39468d28eff6ac0b05df46a9ab6884fe69c2",
+      "final_sha256": "d53b9ad8778500fb5f0ad83c152f2b8119cb0d90b7aea4a70415be9d301e4d04",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "69e17808eec68687d74c222af62d3cf86218cf7e",
-      "final_sha256": "42ba16b1f91c58dbe7a9e8bc66f2f31500d08c065aa8a9f0aa66810533d1e775",
+      "final_blob": "e95f3375e8a8d500a660745d811f1a39dbdc0830",
+      "final_sha256": "23352102197ad84200a264e1a8b5146c1b5aeb9d2f716c3d2e75591138c04d0f",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "b58ec591d05a14676366822fac913a6a8c961cb2",
-      "final_sha256": "44b7ef289f9c217494640abf9542e04bcd35d358ea608288f3fd9eb683a9b113",
+      "final_blob": "caaba013318d696c4cf95a774928e59674aaa465",
+      "final_sha256": "408e6195d9aecff4123f8f66fdca2b29bf3ff70f43fa803cd1c84dc620751d8b",
       "mode": "100644",
       "count": 1
     }
@@ -31071,7 +31071,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "baf1fcc58fb6b10778d1ae8df69d50419a1160ff"
+      "865a57e0e7369147649ba3d9c42c87f63f89f452"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31115,7 +31115,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "841a0ae27845d83b30deb632b767c1b08c46e79d"
+      "244559f98ce3883899179167df2fc206c86079d0"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31123,7 +31123,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "da5b2af06de1fef0624ac63e222ba5891b7e24d4"
+      "7dc53336726dfc9a8e36661b551e4d41d1f15e04"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31147,15 +31147,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "6dd5334f03e27b0dee17714be7cc5d21260393f0"
+      "7f1c88725c077ea655f7323d756f552d005d9a7f"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "8019d554894eade99d55be18e220cbf68c0a46ca"
+      "31751cbb054cf19c652b7daa3a2a49d7fc0e6794"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "ee82ba31bb36f3a14a4268ad51ca112bbdc4d249"
+      "a2abbfe98d6e70f30afa00808a299b08ceba6d7d"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31235,11 +31235,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "c7dc968eaec85ab339a14e9b6a114d2afa5bcaa3"
+      "2e52259961b212ad4be282ea950518906606e3ac"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "243a565f0ca2f0cb79627c33dbfa9ad882677f45"
+      "f8cdd8c72b23c84a8c1231b4e36c2d1605ace028"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31315,7 +31315,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "9a9dc85a6738e635d4421675e7f728ba0387b531"
+      "3ff811f8e14e79376f06f2ed68f2eb3cee0da371"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31351,19 +31351,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "823b29590223a749a1fb7d5804e045e71f71dbed"
+      "e36f39468d28eff6ac0b05df46a9ab6884fe69c2"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "69e17808eec68687d74c222af62d3cf86218cf7e"
+      "e95f3375e8a8d500a660745d811f1a39dbdc0830"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "02e223435104738be4da489a20b24a21f01beda7"
+      "8193676ea3676ea6822f126d5ef5c7f2c3e75243"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "9361594d2f6e547407d4eacb9c7f672cfa40f122"
+      "ea27daecbf0c59bbb111a9958ee9bbfb8761a9dd"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -31379,7 +31379,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "a771d3a9ae2bcdca8229144efa930dfcf62bff31"
+      "df9bf208d0fbf449d4fb210fe5fb7528b4c4373b"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31387,7 +31387,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "5e51fe525534e0360fc599ba0863d729dbf36e0b"
+      "739e95567c7ae7051b95976f18bb4728dea45db0"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31399,7 +31399,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "b58ec591d05a14676366822fac913a6a8c961cb2"
+      "caaba013318d696c4cf95a774928e59674aaa465"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -82128,6 +82128,37 @@
       "required_child_timeout_seconds": 120,
       "original_compiler_RSS_deadline_session_cleanup_guards_unchanged": true,
       "implementation_tests_Lean_acquisition": "UNRUN",
+      "Point4": "OPEN"
+    },
+    "weighted_immutable_inventory_preparation": {
+      "scope": "Scoped immutable weighted inventory preparation; original validator/LRU and live current/native/physical predicates unchanged",
+      "baseline_head": "03ed106223dd9d929ec35e933029ffe2e65fe5fa",
+      "baseline_tree": "be99a2961be7a56534db1115a3f83cc9a82a2702",
+      "current_paths": 2180,
+      "additions": 0,
+      "replacements": 17,
+      "approved_core_manifest_sha256": "8d2ae0f473258756a5637f101136f5265f6a2dded8e42b6edc6c36820e132b99",
+      "approved_core_helper_sha256": "ac0d403a2e8218d577e448c658e9543cf12115ede6f10865f87d1eaf3e990237",
+      "approved_core_test_sha256": "a18dd30d6ff7f2af3489412110a75443778dd65799f6723a5de96a4a1971ba82",
+      "independent_core_Source_review_sha256": "a0125ee9d36bc92f82028bc5fbc13c11aed25c95d6a76b58146f2e8ce7f3594f",
+      "design_sha256": "034fa688e2094dc4fde66e0cfc16f1b1da83927ed47c30b5969fc03d457f2781",
+      "ordinary_previous": 139,
+      "new_controls": 15,
+      "ordinary_current": 154,
+      "real_required": 8,
+      "combined_current": 162,
+      "all_previous147_raw_methods_preserved": true,
+      "chart_tests_unchanged": 123,
+      "required_child_timeout_seconds": 120,
+      "original_cleanup_timeout_seconds": 20,
+      "cold_baseline": "Original1653-entry LRU body runs with scoped requested-OID batch installed first; no clear/reseed/hit-miss seal",
+      "roots": "Genuine original manifest-derived roots once per owned inventory; bounded owner checks and fresh set per callback",
+      "actual_failure_run": 38649493751,
+      "actual_failure_job": 116144888980,
+      "actual_timed_out_child_final_stage": "UNKNOWN",
+      "actual_old_main": "FAILED_7_OK_1_ERROR",
+      "Source_composer_sha256": "bbb53639945fe89dba46bee4e0209ef6038e8dd9dcba23f02a3944b3d77bc3c4",
+      "Source_tests_native_performance": "UNRUN",
       "Point4": "OPEN"
     }
   }

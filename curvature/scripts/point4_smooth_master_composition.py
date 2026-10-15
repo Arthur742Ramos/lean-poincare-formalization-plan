@@ -774,8 +774,9 @@ def verify_current():
     # Reuse the unchanged reviewed runtime classifier for the complete public
     # physical/untracked inventory, not only tracked files and Lean suffixes.
     weighted=importlib.import_module('point4_weighted_hessian_release_guard')
-    with replacements(weighted.__dict__,{'public_paths':lambda:set(expected)}):
-        weighted.check_inventory()
+    with curvature_weighted_inventory_companion(weighted):
+        with replacements(weighted.__dict__,{'public_paths':lambda:set(expected)}):
+            weighted.check_inventory()
     assert tensor_strict_json((ROOT/MAP).read_bytes())==tensor_map_record(expected,originals,changes), 'Descriptive identity map drift'
     assert git('rev-parse','HEAD').decode().strip()==head
     return expected
@@ -2840,3 +2841,515 @@ def tensor_map_record(expected,originals,changes):
 # END exact chart authenticated terminal direct tool owner
 
 # END authenticated finite curvature extension
+
+
+# BEGIN scoped weighted immutable inventory preparation
+import ast as _wi_ast
+import builtins as _wi_builtins
+
+_WI_PREVIOUS_HELPER_SHA = 'ca816f42130949bc5df6bf8ab4d915607c1e9cfde8efe62e2f44dc6337761b03'
+_WI_WEIGHTED_SOURCE_SHA = '44b7ef289f9c217494640abf9542e04bcd35d358ea608288f3fd9eb683a9b113'
+_WI_BASE = '3a8ed697d1f0366f8370efb2fa9e524b68d27e97'
+_WI_ROLES = ('git','raw_git','baseline_sources','lake_runtime_roots','generated_build_path','check_inventory',
+             'main','run_inherited','check_current','public_paths','historical_gate')
+_WI_ALIASES = tuple('_composition_original_'+name for name in
+                   ('main','run_inherited','check_current','public_paths','historical_gate'))
+_WI_INSTALL_SLOTS = _WI_ALIASES + ('main','run_inherited')
+_wi_registry = ((), ())
+_wi_install_owner = None
+_wi_inventory_owner = None
+_wi_original_installer = install_weighted
+_wi_installer_snapshot = curvature_component_snapshot(_wi_original_installer,'weighted original installer')
+_wi_absent = object()
+_WI_CALL_BEFORE = "    with replacements(weighted.__dict__,{'public_paths':lambda:set(expected)}):\n        weighted.check_inventory()\n"
+_WI_CALL_AFTER = "    with curvature_weighted_inventory_companion(weighted):\n        with replacements(weighted.__dict__,{'public_paths':lambda:set(expected)}):\n            weighted.check_inventory()\n"
+
+def curvature_weighted_installer_auth():
+    # The whole predecessor inverse authenticates the existing executable role;
+    # compiling current bytes retains its actual line/filename code metadata.
+    path=ROOT/HELPER;raw=path.read_bytes()
+    marker=b'# BEGIN scoped weighted immutable inventory preparation\n'
+    assert raw.count(marker)==1, 'Weighted helper layer boundary drift'
+    prefix=raw.split(marker,1)[0]
+    assert prefix.endswith(b'\n\n')
+    prefix=prefix[:-2]
+    assert prefix.count(_WI_CALL_AFTER.encode())==1
+    restored=prefix.replace(_WI_CALL_AFTER.encode(),_WI_CALL_BEFORE.encode(),1)
+    assert sha256(restored)==_WI_PREVIOUS_HELPER_SHA, 'Whole predecessor helper drift'
+    assert type(_wi_original_installer) is types.FunctionType, 'Original installer function type drift'
+    assert type(weighted_execution) is types.FunctionType, 'Weighted execution function type drift'
+    filename=_wi_original_installer.__code__.co_filename
+    assert pathlib.Path(filename).resolve()==path
+    compiled=_wi_builtins.compile(raw,filename,'exec',dont_inherit=True)
+    references=[item for item in compiled.co_consts
+                if isinstance(item,types.CodeType) and item.co_name=='install_weighted']
+    assert len(references)==2 and _wi_original_installer.__code__==references[0], 'Initial installer Source code drift'
+    assert _wi_original_installer.__globals__ is globals() and _wi_original_installer.__closure__ is None
+    assert _wi_original_installer.__defaults__ is None and _wi_original_installer.__kwdefaults__ is None
+    assert _wi_original_installer.__annotations__=={} and _wi_original_installer.__builtins__ is _wi_builtins.__dict__
+    assert curvature_component_snapshot(_wi_original_installer,'weighted original installer')==_wi_installer_snapshot
+    execution,=[item for item in compiled.co_consts if isinstance(item,types.CodeType) and item.co_name=='weighted_execution']
+    target=weighted_execution.__wrapped__
+    assert type(target) is types.FunctionType and target.__code__==execution and target.__globals__ is globals()
+    assert target.__defaults__ is None and target.__kwdefaults__ is None and target.__closure__ is None
+    reference=contextlib.contextmanager(types.FunctionType(execution,globals()))
+    assert weighted_execution.__code__==reference.__code__ and weighted_execution.__globals__ is reference.__globals__
+    assert tuple(cell.cell_contents for cell in weighted_execution.__closure__ or ())==(target,)
+    assert weighted_execution.__defaults__ is None and weighted_execution.__kwdefaults__ is None
+    assert weighted_execution.__annotations__=={} and target.__annotations__=={}
+    assert weighted_execution.__builtins__ is reference.__builtins__ and target.__builtins__ is _wi_builtins.__dict__
+    # Authenticate the original composition Git role, not the mutable git slot.
+    original_git=_curvature_git_batch_transport_base
+    assert type(original_git) is types.FunctionType, 'Original composition Git function type drift'
+    git_code,=[item for item in compiled.co_consts if isinstance(item,types.CodeType) and item.co_name=='git']
+    assert original_git.__code__==git_code and original_git.__globals__ is globals()
+    assert original_git.__defaults__ is None and original_git.__kwdefaults__=={'root':None}
+    assert original_git.__annotations__=={} and original_git.__closure__ is None
+    assert original_git.__builtins__ is _wi_builtins.__dict__
+    return references[0]
+
+def curvature_weighted_installed_auth(namespace, originals, installer_code):
+    codes={item.co_name:item for item in installer_code.co_consts if isinstance(item,types.CodeType)}
+    run=namespace['run_inherited'];dispatch=namespace['main']
+    def check(function,name,closure,wrapped=None):
+        assert type(function) is types.FunctionType and function.__globals__ is globals()
+        assert function.__code__==codes[name] and function.__builtins__ is _wi_builtins.__dict__
+        assert function.__defaults__==(None,) and function.__kwdefaults__ is None
+        actual=dict(zip(function.__code__.co_freevars,(cell.cell_contents for cell in function.__closure__ or ())))
+        assert set(actual)==set(closure) and all(actual[name] is value for name,value in closure.items())
+        assert getattr(function,'__wrapped__',None) is wrapped
+        assert function.__annotations__==({} if wrapped is None else wrapped.__annotations__)
+    check(run,'run',{'namespace':namespace,'original_run':originals['run_inherited']},originals['run_inherited'])
+    cells=dict(zip(dispatch.__code__.co_freevars,(cell.cell_contents for cell in dispatch.__closure__ or ())))
+    main=cells['main']
+    check(main,'main',{'namespace':namespace,'original_main':originals['main']},originals['main'])
+    check(dispatch,'dispatch',{'namespace':namespace,'main':main})
+
+def curvature_weighted_namespace_seal(namespace):
+    return tuple((name,curvature_component_snapshot(value,'weighted global/'+name))
+                 for name,value in sorted(namespace.items()) if name not in ('check_current','historical_gate','raw_git'))
+
+def curvature_weighted_raw_git_binding(namespace,record):
+    if namespace['raw_git'] is record['originals']['raw_git']:return
+    assert sys.platform=='win32', 'Unapproved platform for weighted raw Git adapter'
+    assert namespace['raw_git'] is record['windows_git'], 'Foreign weighted raw Git adapter'
+    assert _curvature_git_batch_transport_base is record['windows_git'], 'Original composition Git pointer drift'
+    assert curvature_component_snapshot(namespace['raw_git'],'Windows original composition Git')==record['windows_git_seal']
+
+def curvature_weighted_execution_bindings(namespace,record):
+    # The existing weighted_execution adapter is the only legitimate temporary
+    # change at this callsite. Do not infer trust from arbitrary replacements.
+    originals=record['originals']
+    if all(namespace[name] is originals[name] for name in ('check_current','historical_gate')):return
+    assert _owner is namespace and _depth>0, 'Weighted adapter is outside its owned replacements context'
+    codes={item.co_name:item for item in record['execution_code'].co_consts if isinstance(item,types.CodeType)}
+    for name,code_name,defaults in (('check_current','<lambda>',(None,)),('historical_gate','historical_gate',None)):
+        function=namespace[name]
+        assert type(function) is types.FunctionType and function.__globals__ is globals()
+        assert function.__code__==codes[code_name] and function.__defaults__==defaults and function.__kwdefaults__ is None
+        assert function.__annotations__=={} and function.__builtins__ is _wi_builtins.__dict__
+        cells=dict(zip(function.__code__.co_freevars,(cell.cell_contents for cell in function.__closure__ or ())))
+        assert set(cells)=={'namespace'} and cells['namespace'] is namespace, 'Foreign weighted adapter closure'
+
+def curvature_weighted_contract(raw, filename):
+    """Parse/compile approved bytes; never execute a target Source statement."""
+    tree = _wi_ast.parse(raw, filename=filename)
+    code = _wi_builtins.compile(raw, filename, 'exec', dont_inherit=True)
+    nodes = {}
+    for node in tree.body:
+        if isinstance(node,_wi_ast.FunctionDef):
+            assert node.name not in nodes, 'Duplicate weighted Source role'
+            nodes[node.name] = node
+    codes = {node.co_name:node for node in code.co_consts if isinstance(node,types.CodeType)}
+    def literal(name):
+        values=[node.value for node in tree.body if isinstance(node,_wi_ast.Assign)
+                and any(isinstance(target,_wi_ast.Name) and target.id==name for target in node.targets)]
+        assert len(values)==1, 'Weighted policy assignment drift: '+name
+        return _wi_ast.literal_eval(values[0])
+    policies={name:literal(name) for name in ('BASE','LAKE_ROOTS','MANIFESTS','OUTPUT_SUFFIXES')}
+    assert policies['BASE']==_WI_BASE
+    return dict(tree=tree,code=code,nodes=nodes,codes=codes,policies=policies)
+
+def curvature_weighted_function_auth(value, namespace, contract, name):
+    node=contract['nodes'][name];function=value
+    decorators=[_wi_ast.dump(item,include_attributes=False) for item in node.decorator_list]
+    if name=='baseline_sources':
+        wanted=_wi_ast.parse('@functools.lru_cache(maxsize=1)\ndef sample(): pass').body[0].decorator_list
+        assert decorators==[_wi_ast.dump(item,include_attributes=False) for item in wanted]
+        assert type(value) is functools._lru_cache_wrapper, 'Original baseline LRU wrapper changed'
+        assert value.cache_info==type(value).cache_info.__get__(value)
+        assert value.cache_clear==type(value).cache_clear.__get__(value)
+        function=value.__wrapped__
+        reference=functools.lru_cache(maxsize=1)(types.FunctionType(contract['codes'][name],namespace))
+        actual=value.cache_parameters;expected=reference.cache_parameters
+        assert type(actual) is types.FunctionType and actual.__code__==expected.__code__
+        assert actual.__globals__ is expected.__globals__ and actual.__defaults__==expected.__defaults__
+        assert actual.__kwdefaults__==expected.__kwdefaults__
+        actual_cells=tuple(cell.cell_contents for cell in actual.__closure__ or ())
+        expected_cells=tuple(cell.cell_contents for cell in expected.__closure__ or ())
+        assert len(actual_cells)==len(expected_cells) and all(type(a) is type(b) and a==b for a,b in zip(actual_cells,expected_cells))
+        assert actual.__builtins__ is expected.__builtins__
+        assert value.cache_parameters()=={'maxsize':1,'typed':False}
+    else:
+        assert not decorators, 'Unexpected original weighted decorator: '+name
+    assert type(function) is types.FunctionType and function.__globals__ is namespace
+    assert function.__code__==contract['codes'][name], 'Initial weighted Source code drift: '+name
+    assert function.__closure__ is None and not function.__code__.co_freevars
+    assert function.__builtins__ is _wi_builtins.__dict__
+    defaults=tuple(_wi_ast.literal_eval(item) for item in node.args.defaults) or None
+    kwdefaults={arg.arg:_wi_ast.literal_eval(item) for arg,item in zip(node.args.kwonlyargs,node.args.kw_defaults) if item is not None} or None
+    assert function.__defaults__==defaults and function.__kwdefaults__==kwdefaults
+    annotations={arg.arg:_wi_ast.unparse(arg.annotation) for arg in
+                 (*node.args.posonlyargs,*node.args.args,*node.args.kwonlyargs) if arg.annotation is not None}
+    if node.args.vararg is not None and node.args.vararg.annotation is not None:
+        annotations[node.args.vararg.arg]=_wi_ast.unparse(node.args.vararg.annotation)
+    if node.args.kwarg is not None and node.args.kwarg.annotation is not None:
+        annotations[node.args.kwarg.arg]=_wi_ast.unparse(node.args.kwarg.annotation)
+    if node.returns is not None:annotations['return']=_wi_ast.unparse(node.returns)
+    assert type(function.__annotations__) is dict and function.__annotations__==annotations
+
+def curvature_weighted_source_contract(namespace):
+    path=ROOT/WEIGHTED
+    assert type(namespace) is dict and pathlib.Path(namespace['__file__']).resolve()==path
+    st=path.lstat();assert stat.S_ISREG(st.st_mode) and not st.st_mode&0o111
+    raw=path.read_bytes()
+    if sha256(raw)!=_WI_WEIGHTED_SOURCE_SHA:
+        digest=sha256((ROOT/HELPER).read_bytes())
+        after=("== '"+digest+"', 'Composition executable binding changed'").encode()
+        before=("== '"+_WI_PREVIOUS_HELPER_SHA+"', 'Composition executable binding changed'").encode()
+        assert raw.count(after)==1, 'Weighted loader is not bound to this helper'
+        restored=raw.replace(after,before,1)
+        assert sha256(restored)==_WI_WEIGHTED_SOURCE_SHA, 'Whole original weighted Source drift'
+    contract=curvature_weighted_contract(raw,str(path))
+    for name in _WI_ROLES:curvature_weighted_function_auth(namespace[name],namespace,contract,name)
+    for name,wanted in contract['policies'].items():
+        assert type(namespace[name]) is type(wanted) and namespace[name]==wanted, 'Initial weighted policy drift: '+name
+    assignments={target.id:node.value for node in contract['tree'].body if isinstance(node,_wi_ast.Assign)
+                 for target in node.targets if isinstance(target,_wi_ast.Name)}
+    shape=lambda source:_wi_ast.dump(_wi_ast.parse(source,mode='eval').body,include_attributes=False)
+    assert _wi_ast.dump(assignments['ROOT'],include_attributes=False)==shape('pathlib.Path(__file__).resolve().parents[2]')
+    assert _wi_ast.dump(assignments['ENV'],include_attributes=False)==shape("dict(os.environ, GIT_NO_LAZY_FETCH='1', PYTHONDONTWRITEBYTECODE='1')")
+    assert type(namespace['ROOT']) in (pathlib.PosixPath,pathlib.WindowsPath) and namespace['ROOT']==ROOT
+    assert type(namespace['ENV']) is dict and namespace['ENV']==dict(os.environ,GIT_NO_LAZY_FETCH='1',PYTHONDONTWRITEBYTECODE='1')
+    for name in ('os','pathlib','stat','re','json','subprocess','functools'):
+        assert namespace[name] is globals()[name], 'Initial weighted module dependency drift: '+name
+    return contract
+
+def curvature_weighted_record_seal(records):
+    assert type(records) is tuple
+    rows=[]
+    for record in records:
+        assert type(record) is types.MappingProxyType
+        assert set(record)=={'namespace','originals','installed','globals_seal','source_sha256','execution','execution_code','windows_git','windows_git_seal'}
+        ns=record['namespace'];assert type(ns) is dict
+        rows.append((id(record),id(ns),tuple((name,curvature_component_snapshot(value,'weighted/'+name))
+                     for name,value in sorted(record['originals'].items())),
+                     tuple((name,curvature_component_snapshot(value,'weighted installed/'+name))
+                     for name,value in sorted(record['installed'].items())),record['globals_seal'],record['source_sha256'],
+                     curvature_component_snapshot(record['execution'],'weighted execution adapter'),record['execution_code'],
+                     curvature_component_snapshot(record['windows_git'],'Windows original composition Git'),record['windows_git_seal']))
+    assert len({row[1] for row in rows})==len(rows), 'Duplicate weighted role namespace'
+    return tuple(rows)
+
+def curvature_weighted_registry_check():
+    assert type(_wi_registry) is tuple and len(_wi_registry)==2
+    assert curvature_weighted_record_seal(_wi_registry[0])==_wi_registry[1], 'Weighted role seal drift'
+
+def curvature_weighted_restore_slots(namespace, before):
+    errors=[]
+    for name,value in before.items():
+        try:
+            if value is _wi_absent:namespace.pop(name,None)
+            else:namespace[name]=value
+        except BaseException as error:errors.append(error)
+    return errors
+
+@functools.wraps(_wi_original_installer)
+def install_weighted(namespace):
+    global _wi_registry,_wi_install_owner
+    caller=sys._getframe(1)
+    expected_path=str(ROOT/WEIGHTED)
+    known=(type(namespace) is dict and namespace.get('__name__')=='point4_weighted_hessian_release_guard') or caller.f_code.co_filename==expected_path
+    if not known:
+        return _wi_original_installer(namespace) # Existing synthetic/foreign fixtures remain complete and unaccelerated.
+    curvature_weighted_registry_check()
+    assert _wi_install_owner is None, 'Recursive weighted installation'
+    installer_code=curvature_weighted_installer_auth()
+    module=sys.modules.get('point4_weighted_hessian_release_guard')
+    assert type(module) is types.ModuleType and module.__dict__ is namespace
+    contract=curvature_weighted_source_contract(namespace)
+    assert caller.f_globals is namespace and caller.f_locals is namespace and caller.f_code==contract['code'], 'Weighted installer caller is not approved Source'
+    assert not any(record['namespace'] is namespace for record in _wi_registry[0]), 'Duplicate weighted role record'
+    before={name:namespace.get(name,_wi_absent) for name in _WI_INSTALL_SLOTS}
+    prior_registry=_wi_registry;prior_owner=_wi_install_owner;owner=object();_wi_install_owner=owner
+    originals=types.MappingProxyType({name:namespace[name] for name in _WI_ROLES})
+    primary=None;published=False
+    try:
+        result=_wi_original_installer(namespace)
+        assert _wi_install_owner is owner and _wi_registry is prior_registry, 'Weighted installation ownership drift'
+        for name in ('main','run_inherited','check_current','public_paths','historical_gate'):
+            assert namespace['_composition_original_'+name] is originals[name]
+        curvature_weighted_installed_auth(namespace,originals,installer_code)
+        for name in _WI_ROLES:
+            if name not in ('main','run_inherited'):assert namespace[name] is originals[name]
+        record=types.MappingProxyType(dict(namespace=namespace,originals=originals,
+                 installed=types.MappingProxyType({name:namespace[name] for name in ('main','run_inherited')}),
+                 globals_seal=curvature_weighted_namespace_seal(namespace),source_sha256=sha256((ROOT/WEIGHTED).read_bytes()),
+                 execution=weighted_execution,execution_code=weighted_execution.__wrapped__.__code__,
+                 windows_git=_curvature_git_batch_transport_base,
+                 windows_git_seal=curvature_component_snapshot(_curvature_git_batch_transport_base,'Windows original composition Git')))
+        records=prior_registry[0]+(record,)
+        candidate=(records,curvature_weighted_record_seal(records))
+        assert _wi_install_owner is owner and _wi_registry is prior_registry, 'Weighted record construction ownership drift'
+        _wi_registry=candidate # Single publish, last potentially successful transaction step.
+        published=True
+        return result
+    except BaseException as error:
+        primary=error
+        raise
+    finally:
+        failures=[]
+        if _wi_install_owner is not owner:failures.append(AssertionError('Weighted installer owner changed'))
+        if published and _wi_registry is not candidate:failures.append(AssertionError('Weighted installer table changed after publication'))
+        if not published or failures:
+            failures.extend(curvature_weighted_restore_slots(namespace,before))
+            _wi_registry=prior_registry
+        _wi_install_owner=prior_owner
+        if failures:
+            if primary is None:
+                primary=failures.pop(0)
+                for error in failures:primary.add_note('Additional weighted install rollback failure: '+repr(error))
+                raise primary
+            for error in failures:primary.add_note('Weighted install rollback failure: '+repr(error))
+
+class CurvatureWeightedBlobTransport:
+    """One fresh ordered stream; requested tree OID is distinct from self-hash."""
+    def __init__(self, original, root, environment, base, tree, guard, launch=None):
+        self.original=original;self.root=root;self.environment=dict(environment);self.base=base
+        self.tree=types.MappingProxyType(dict(tree));self.guard=guard
+        self.launch=subprocess.Popen if launch is None else launch
+        self.process=None
+    def query(self,*args):
+        self.guard()
+        eligible=(len(args)==2 and args[0]=='show' and type(args[1]) is str
+                  and re.fullmatch(re.escape(self.base)+r':[^\x00-\x1f\x7f]+',args[1]) is not None)
+        path=args[1][41:] if eligible else None
+        if not eligible or path not in self.tree:return self.original(*args)
+        if self.process is None:
+            self.process=self.launch(['git','--no-replace-objects','-C',str(self.root),'cat-file','--batch'],
+                env=self.environment,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,bufsize=0)
+        request=args[1].encode('utf8')+b'\n'
+        assert self.process.stdin.write(request)==len(request), 'Truncated weighted Git request'
+        self.process.stdin.flush()
+        raw=curvature_read_batch_blob(self.process.stdout)
+        assert blob_id(raw)==self.tree[path][1], 'Weighted response does not match requested BASE path OID'
+        self.guard()
+        return raw
+    def close(self):
+        process=self.process
+        if process is None:return []
+        failures=[]
+        try:process.stdin.close()
+        except BaseException as error:failures.append(error)
+        try:process.stdin=None
+        except BaseException as error:failures.append(error)
+        try:
+            extra,errors=process.communicate(timeout=20)
+            assert process.returncode==0 and not extra and not errors, 'Extra/duplicate/error weighted Git response or unsuccessful close'
+        except BaseException as error:failures.append(error)
+        try:
+            if process.poll() is None:process.kill()
+        except BaseException as error:failures.append(error)
+        try:
+            if process.poll() is None:process.communicate(timeout=20)
+        except BaseException as error:failures.append(error)
+        for name in ('stdout','stderr'):
+            try:
+                stream=getattr(process,name,None)
+                if stream is not None:stream.close()
+            except BaseException as error:failures.append(error)
+        return failures
+
+def curvature_weighted_live_seal(namespace, record):
+    rows=[]
+    for name in ('git','raw_git','baseline_sources','lake_runtime_roots','generated_build_path','check_inventory','check_current','historical_gate',
+                 'main','run_inherited','public_paths',*_WI_ALIASES):
+        rows.append((name,curvature_component_snapshot(namespace[name],'weighted live/'+name)))
+    policies=tuple((name,curvature_component_snapshot(namespace[name],'weighted policy/'+name))
+                   for name in ('ROOT','ENV','BASE','LAKE_ROOTS','MANIFESTS','OUTPUT_SUFFIXES'))
+    return tuple(rows),policies
+
+@contextlib.contextmanager
+def curvature_weighted_inventory_companion(module):
+    global _wi_inventory_owner,_owner,_depth
+    namespace=module.__dict__
+    curvature_weighted_registry_check()
+    records=[record for record in _wi_registry[0] if record['namespace'] is namespace]
+    if not records:
+        known=namespace.get('__name__')=='point4_weighted_hessian_release_guard'
+        file=namespace.get('__file__')
+        if type(file) is str:known=known or pathlib.Path(file).resolve()==ROOT/WEIGHTED
+        module_binding=sys.modules.get('point4_weighted_hessian_release_guard')
+        known=known or isinstance(module_binding,types.ModuleType) and module_binding.__dict__ is namespace
+        assert not known, 'Unregistered production weighted inventory'
+        yield # Complete original caller/body, no acceleration and no result substitution.
+        return
+    record,=records
+    assert _wi_inventory_owner is None, 'Recursive/foreign weighted inventory context'
+    assert weighted_execution is record['execution'], 'Weighted helper adapter pointer drift'
+    curvature_weighted_execution_bindings(namespace,record)
+    curvature_weighted_raw_git_binding(namespace,record)
+    for name in ('git','baseline_sources','lake_runtime_roots','generated_build_path','check_inventory'):
+        assert namespace[name] is record['originals'][name], 'Registered weighted callback drift: '+name
+    for name,value in record['installed'].items():assert namespace[name] is value
+    original_git=namespace['git'];original_roots=namespace['lake_runtime_roots'];original_baseline=namespace['baseline_sources']
+    root=namespace['ROOT'];environment=namespace['ENV'];sealed_env=dict(environment);base=namespace['BASE']
+    assert root==ROOT and base==_WI_BASE and sealed_env.get('GIT_NO_LAZY_FETCH')=='1'
+    assert curvature_weighted_namespace_seal(namespace)==record['globals_seal'], 'Registered weighted global/policy drift'
+    assert sha256((ROOT/WEIGHTED).read_bytes())==record['source_sha256'], 'Registered weighted Source drift'
+    before=curvature_weighted_live_seal(namespace,record)
+    replacements_before=(_owner,_depth)
+    assert type(_depth) is int and ((_depth==0 and _owner is None) or (_depth>0 and _owner is namespace)), 'Foreign replacements owner'
+    owner=object();_wi_inventory_owner=owner
+    transport=None;baseline_snapshot=None;baseline=None;primary=None
+    roots=None
+    def guard():
+        assert _wi_inventory_owner is owner and namespace['git'] is query and namespace['lake_runtime_roots'] is prepared_roots
+        assert namespace['ROOT'] is root and namespace['ENV'] is environment and namespace['BASE']==base
+        assert namespace['baseline_sources'] is original_baseline
+        assert namespace['generated_build_path'] is record['originals']['generated_build_path']
+        assert namespace['check_inventory'] is record['originals']['check_inventory']
+        assert _owner is namespace and type(_depth) is int and _depth>replacements_before[1]
+    def prepared_roots():
+        guard();assert roots is not None, 'Recursive weighted root preparation'
+        return set(roots) # No baseline/JSON/Git/full seals per classified artifact.
+    def query(*args):return transport.query(*args)
+    try:
+        # New authentication map once/context; original cold body still makes
+        # its own original ls-tree call. Mutable/native queries remain live.
+        tree=parse_tree(original_git('--no-replace-objects','ls-tree','-rz',base))
+        assert len(tree)==1653, 'Authenticated weighted BASE tree surface drift'
+        transport=CurvatureWeightedBlobTransport(original_git,root,sealed_env,base,tree,guard)
+        with replacements(namespace,{'git':query,'lake_runtime_roots':prepared_roots}):
+            # TRANSPORT IS INSTALLED BEFORE cold baseline construction.
+            baseline=original_baseline()
+            assert type(baseline) is dict and set(baseline)==set(tree)
+            for path,(mode,raw) in baseline.items():
+                assert type(raw) is bytes and (mode,blob_id(raw))==tree[path], 'Weighted cached baseline mode/OID drift: '+path
+            baseline_snapshot=dict(baseline)
+            actual=original_roots();assert type(actual) is set
+            roots=frozenset(actual)
+            guard()
+            yield
+            guard()
+    except BaseException as error:
+        primary=error
+        raise
+    finally:
+        failures=[]
+        def owner_post():assert _wi_inventory_owner is owner, 'Weighted inventory owner mutation'
+        def live_post():assert curvature_weighted_live_seal(namespace,record)==before, 'Weighted callback/policy POST drift'
+        def globals_post():assert curvature_weighted_namespace_seal(namespace)==record['globals_seal'], 'Weighted global POST drift'
+        def baseline_post():
+            if baseline_snapshot is not None:assert baseline==baseline_snapshot, 'Weighted baseline/manifest POST drift'
+        def source_post():assert sha256((ROOT/WEIGHTED).read_bytes())==record['source_sha256'], 'Weighted Source POST drift'
+        def replacements_post():assert _owner is replacements_before[0] and _depth==replacements_before[1], 'Weighted replacements owner/depth POST drift'
+        for check in (owner_post,live_post,globals_post,baseline_post,source_post,replacements_post,curvature_weighted_registry_check):
+            try:check()
+            except BaseException as error:failures.append(error)
+        # Existing replacements has already restored original callback objects,
+        # even on an exception; attempt explicit identity restoration as well.
+        for name,value in (('git',original_git),('lake_runtime_roots',original_roots)):
+            try:namespace[name]=value
+            except BaseException as error:failures.append(error)
+        if transport is not None:
+            try:failures.extend(transport.close())
+            except BaseException as error:failures.append(error)
+        _owner,_depth=replacements_before
+        _wi_inventory_owner=None
+        if failures:
+            if primary is None:
+                primary=failures.pop(0)
+                for error in failures:primary.add_note('Additional weighted inventory cleanup failure: '+repr(error))
+                raise primary
+            for error in failures:primary.add_note('Weighted inventory POST/cleanup failure: '+repr(error))
+# END scoped weighted immutable inventory preparation
+
+
+# BEGIN exact weighted immutable inventory routing
+CURVATURE_WEIGHTED_INVENTORY_SOURCE_POLICY={'helper_previous_sha256': 'ca816f42130949bc5df6bf8ab4d915607c1e9cfde8efe62e2f44dc6337761b03', 'helper_core_sha256': 'ac0d403a2e8218d577e448c658e9543cf12115ede6f10865f87d1eaf3e990237', 'test_previous_sha256': 'fe5c0ce2b5bc15d79c63a5dec5553e4b7b17bed5fdfa5a073c84604488e79558', 'test_current_sha256': 'a18dd30d6ff7f2af3489412110a75443778dd65799f6723a5de96a4a1971ba82', 'test_ports': (('# END authenticated finite curvature tests', '\nclass WeightedInventoryPreparationControls(unittest.TestCase):\n    """Exercise preparation, not a cached successful inventory result."""\n    def source_namespace(self):\n        path=comp.ROOT/comp.WEIGHTED\n        raw=path.read_bytes()\n        marker=b\'# Reviewed finite smooth/master composition; original validator bodies survive.\'\n        self.assertEqual(raw.count(marker),1)\n        module=types.ModuleType(\'weighted_inventory_unit_fixture\')\n        module.__file__=str(path)\n        # Define the actual unchanged validator functions, with their real line\n        # metadata. Do not run the CLI or its Source bootstrap in a unit fixture.\n        exec(compile(raw.split(marker,1)[0],str(path),\'exec\',dont_inherit=True),module.__dict__)\n        return module\n\n    def prepared(self):\n        module=self.source_namespace();ns=module.__dict__;events=[];processes=[]\n        data={\'owned/\'+str(i)+\'.txt\':b\'owned \'+str(i).encode() for i in range(1651)}\n        data.update({path:json.dumps({\'packages\':[{\'type\':\'git\',\'name\':\'owned_package\'}]}).encode()\n                     for path in ns[\'MANIFESTS\']})\n        tree=b\'\'.join((\'100644 blob \'+comp.blob_id(raw)+\'\\t\'+path).encode()+b\'\\0\' for path,raw in data.items())\n        state=types.SimpleNamespace(data=data,events=events,namespace=ns,tree=tree)\n        def git(*args):\n            state.events.append((\'git\',args))\n            if args in [(\'ls-tree\',\'-rz\',state.namespace[\'BASE\']),(\'--no-replace-objects\',\'ls-tree\',\'-rz\',state.namespace[\'BASE\'])]:return state.tree\n            if len(args)==2 and args[0]==\'show\':return state.data[args[1][41:]]\n            return b\'fresh mutable result\'\n        ns[\'git\']=git\n        comp._wi_original_installer(ns)\n        originals=types.MappingProxyType({name:(ns[\'_composition_original_\'+name] if name in\n                   (\'main\',\'run_inherited\',\'check_current\',\'public_paths\',\'historical_gate\') else ns[name])\n                   for name in comp._WI_ROLES})\n        record=types.MappingProxyType(dict(namespace=ns,originals=originals,\n            installed=types.MappingProxyType({name:ns[name] for name in (\'main\',\'run_inherited\')}),\n            globals_seal=comp.curvature_weighted_namespace_seal(ns),\n            source_sha256=comp.sha256((comp.ROOT/comp.WEIGHTED).read_bytes()),\n            execution=comp.weighted_execution,execution_code=comp.weighted_execution.__wrapped__.__code__,\n            windows_git=comp._curvature_git_batch_transport_base,\n            windows_git_seal=comp.curvature_component_snapshot(comp._curvature_git_batch_transport_base,\'Windows original composition Git\')))\n        registry=((record,),comp.curvature_weighted_record_seal((record,)))\n        def launch(argv,**kwargs):\n            self.assertEqual(argv,[\'git\',\'--no-replace-objects\',\'-C\',str(ns[\'ROOT\']),\'cat-file\',\'--batch\'])\n            self.assertEqual(kwargs[\'env\'],ns[\'ENV\']);self.assertEqual(kwargs[\'bufsize\'],0)\n            p=GitBatchProcess([git_batch_frame(raw) for raw in data.values()])\n            p.stdout.close=lambda:None\n            processes.append(p);return p\n        for key,value in {\'_wi_registry\':registry,\'_wi_inventory_owner\':None,\n                          \'subprocess\':types.SimpleNamespace(Popen=launch,PIPE=subprocess.PIPE)}.items():\n            control=patch.object(comp,key,value);control.start();self.addCleanup(control.stop)\n        return module,data,events,processes\n\n    def transport(self,raw=b\'owned\',response=None,**process_options):\n        calls=[];processes=[];base=comp._WI_BASE\n        tree={\'owned.txt\':(\'100644\',comp.blob_id(raw))}\n        def original(*args):calls.append(args);return b\'live\'\n        def launch(*args,**kwargs):\n            p=GitBatchProcess([git_batch_frame(raw) if response is None else response],**process_options)\n            p.stdout.close=lambda:None;processes.append(p);return p\n        item=comp.CurvatureWeightedBlobTransport(original,comp.ROOT,{\'GIT_NO_LAZY_FETCH\':\'1\'},base,tree,lambda:None,launch)\n        return item,calls,processes,base+\':owned.txt\'\n\n    def test_cold_original_baseline_one_stream_and_original_roots(self):\n        module,data,events,processes=self.prepared();ns=module.__dict__\n        original=ns[\'baseline_sources\'];roots=ns[\'lake_runtime_roots\']\n        with comp.curvature_weighted_inventory_companion(module):\n            self.assertEqual(original(),{path:(\'100644\',raw) for path,raw in data.items()})\n            expected=set(ns[\'LAKE_ROOTS\'])|{str(pathlib.PurePosixPath(path).parent/\'.lake/packages/owned_package/.lake\')\n                                         for path in ns[\'MANIFESTS\']}\n            self.assertEqual(ns[\'lake_runtime_roots\'](),expected)\n            for _ in range(10):self.assertTrue(ns[\'generated_build_path\'](\'curvature/.lake/build/lib/lean/Owned.olean\'))\n            self.assertEqual(len(processes),1);self.assertEqual(len(processes[0].requests),1653)\n        self.assertIs(ns[\'baseline_sources\'],original);self.assertIs(ns[\'lake_runtime_roots\'],roots)\n        self.assertEqual([args for kind,args in events if args[0]==\'show\'],[])\n        self.assertEqual(sum(args[0]==\'ls-tree\' for kind,args in events),1)\n        self.assertEqual(sum(args[0]==\'--no-replace-objects\' for kind,args in events),1)\n        self.assertIsNone(comp._wi_inventory_owner)\n\n    def test_warm_original_lru_and_context_roots_do_not_cross_invocations(self):\n        module,_,events,processes=self.prepared();ns=module.__dict__\n        baseline=ns[\'baseline_sources\'];snapshots=[]\n        for _ in range(2):\n            with comp.curvature_weighted_inventory_companion(module):snapshots.append(ns[\'lake_runtime_roots\']())\n        self.assertIs(ns[\'baseline_sources\'],baseline)\n        self.assertEqual(len(processes),1) # Original warm LRU remains warm; no reseed or forced process.\n        self.assertEqual(sum(args[0]==\'--no-replace-objects\' for kind,args in events),2)\n        self.assertEqual(snapshots[0],snapshots[1]);self.assertIsNot(snapshots[0],snapshots[1])\n        # Exact production adapter route: both existing temporary callbacks\n        # are approved Source closures, restored by their original context.\n        before=ns[\'check_current\'],ns[\'historical_gate\']\n        with comp.weighted_execution(ns):\n            with comp.curvature_weighted_inventory_companion(module):self.assertTrue(ns[\'lake_runtime_roots\']())\n        self.assertEqual((ns[\'check_current\'],ns[\'historical_gate\']),before)\n        with comp.replacements(ns,{\'check_current\':lambda schema=None:None,\'historical_gate\':lambda path,args:None}):\n            with self.assertRaises(AssertionError):\n                with comp.curvature_weighted_inventory_companion(module):pass\n\n    def test_roots_callback_has_bounded_work_and_returns_fresh_sets(self):\n        module,_,_,_=self.prepared();ns=module.__dict__\n        with comp.curvature_weighted_inventory_companion(module):\n            first=ns[\'lake_runtime_roots\']();first.clear()\n            with patch.object(comp,\'curvature_component_snapshot\',side_effect=AssertionError(\'full seal in hot path\')),\\\n                 patch.object(ns[\'json\'],\'loads\',side_effect=AssertionError(\'JSON in hot path\')):\n                for _ in range(100):self.assertTrue(ns[\'lake_runtime_roots\']())\n            self.assertNotEqual(ns[\'lake_runtime_roots\'](),first)\n\n    def test_only_requested_owned_base_paths_use_batch_and_repeat_freshly(self):\n        item,calls,processes,spec=self.transport()\n        for args in [(\'rev-parse\',\'HEAD\'),(\'ls-files\',\'--stage\',\'-z\'),(\'show\',\'HEAD:owned.txt\'),\n                     (\'show\',\'1\'*40+\':owned.txt\'),(\'show\',comp._WI_BASE+\':absent\'),(\'show\',spec+\'\\nforeign\')]:\n            self.assertEqual(item.query(*args),b\'live\')\n        self.assertEqual(len(calls),6);self.assertEqual(processes,[])\n        self.assertEqual(item.query(\'show\',spec),b\'owned\')\n        processes[0].responses.append(git_batch_frame(b\'owned\'))\n        self.assertEqual(item.query(\'show\',spec),b\'owned\')\n        self.assertEqual(processes[0].requests,[spec.encode()+b\'\\n\']*2)\n        self.assertEqual(item.close(),[])\n\n    def test_valid_other_blob_cannot_satisfy_requested_tree_oid(self):\n        item,_,_,spec=self.transport(response=git_batch_frame(b\'different valid object\'))\n        with self.assertRaisesRegex(AssertionError,\'requested BASE path OID\'):item.query(\'show\',spec)\n        self.assertEqual(item.close(),[])\n\n    def test_weighted_transport_rejects_all_invalid_frames_and_tail(self):\n        cases=[b\'\',b\'0\'*40+b\' missing\\n\',b\'0\'*40+b\' tree 0\\n\\n\',\n               b\'0\'*40+b\' blob 5\\nowned\\n\',git_batch_frame(b\'owned\')[:-1],\n               comp.blob_id(b\'owned\').encode()+b\' blob 05\\nowned\\n\']\n        for raw in cases:\n            with self.subTest(raw=raw):\n                item,_,_,spec=self.transport(response=raw)\n                with self.assertRaises(AssertionError):item.query(\'show\',spec)\n                item.close()\n        for options in ({\'extra\':b\'extra\'},{\'extra\':git_batch_frame(b\'owned\')},{\'errors\':b\'error\'},{\'status\':1}):\n            item,_,_,spec=self.transport(**options);self.assertEqual(item.query(\'show\',spec),b\'owned\')\n            self.assertTrue(item.close())\n\n    def test_initial_source_roles_defaults_policy_and_lru_are_authenticated(self):\n        module=self.source_namespace();ns=module.__dict__\n        comp.curvature_weighted_source_contract(ns)\n        old=ns[\'git\'].__code__\n        try:\n            ns[\'git\'].__code__=(lambda *args:b\'foreign\').__code__\n            with self.assertRaisesRegex(AssertionError,\'Source code drift\'):comp.curvature_weighted_source_contract(ns)\n        finally:ns[\'git\'].__code__=old\n        for key,value in [(\'BASE\',\'1\'*40),(\'OUTPUT_SUFFIXES\',set()),(\'ENV\',{})]:\n            with patch.dict(ns,{key:value}):\n                with self.assertRaises(AssertionError):comp.curvature_weighted_source_contract(ns)\n        with patch.dict(ns,{\'baseline_sources\':lambda:{}}):\n            with self.assertRaises(AssertionError):comp.curvature_weighted_source_contract(ns)\n        fn=ns[\'main\'];defaults=fn.__defaults__\n        try:\n            fn.__defaults__=(\'foreign\',)\n            with self.assertRaises(AssertionError):comp.curvature_weighted_source_contract(ns)\n        finally:fn.__defaults__=defaults\n        calls=[]\n        def forbidden():calls.append(\'unapproved callback ran\');return {\'maxsize\':1,\'typed\':False}\n        with patch.object(ns[\'baseline_sources\'],\'cache_parameters\',forbidden):\n            with self.assertRaises(AssertionError):comp.curvature_weighted_source_contract(ns)\n        self.assertEqual(calls,[])\n\n    def test_initial_installer_source_code_and_produced_closures_are_authenticated(self):\n        code=comp.curvature_weighted_installer_auth();module=self.source_namespace();ns=module.__dict__\n        originals={name:ns[name] for name in comp._WI_ROLES}\n        comp._wi_original_installer(ns)\n        comp.curvature_weighted_installed_auth(ns,originals,code)\n        with patch.dict(ns,{\'main\':lambda argv=None:None}):\n            with self.assertRaises((AssertionError,KeyError)):comp.curvature_weighted_installed_auth(ns,originals,code)\n        original=comp._wi_original_installer;before=original.__code__\n        try:\n            original.__code__=(lambda namespace:None).__code__\n            with self.assertRaisesRegex(AssertionError,\'Source code drift\'):comp.curvature_weighted_installer_auth()\n        finally:original.__code__=before\n        class ForbiddenAttributes:\n            def __getattribute__(self,name):raise RuntimeError(\'unapproved attribute hook \'+name)\n        for name in (\'_wi_original_installer\',\'weighted_execution\'):\n            with patch.object(comp,name,ForbiddenAttributes()):\n                with self.assertRaisesRegex(AssertionError,\'function type drift\'):comp.curvature_weighted_installer_auth()\n        # Genuine physical full-Source bootstrap: no forged caller frame, auth\n        # seam or constructed role record. Requires the reviewed mechanical\n        # loader closure before this Source-only core is eligible to execute.\n        path=comp.ROOT/comp.WEIGHTED;module=types.ModuleType(\'point4_weighted_hessian_release_guard\')\n        module.__file__=str(path);prior_registry=comp._wi_registry;prior_owner=comp._wi_inventory_owner\n        with patch.dict(sys.modules,{\'point4_weighted_hessian_release_guard\':module}),\\\n             patch.object(comp,\'_wi_registry\',prior_registry),patch.object(comp,\'_wi_inventory_owner\',prior_owner):\n            exec(compile(path.read_bytes(),str(path),\'exec\',dont_inherit=True),module.__dict__)\n            records=[item for item in comp._wi_registry[0] if item[\'namespace\'] is module.__dict__]\n            self.assertEqual(len(records),1)\n            original_baseline=module.baseline_sources;original_roots=module.lake_runtime_roots\n            with comp.curvature_weighted_inventory_companion(module):\n                self.assertEqual(len(original_baseline()),1653);self.assertTrue(module.lake_runtime_roots())\n                self.assertIs(module.baseline_sources,original_baseline)\n            self.assertIs(module.lake_runtime_roots,original_roots)\n\n    def test_installer_rolls_back_every_touched_slot_and_never_publishes_failure(self):\n        # The unit mock replaces only the trusted *caller frame* and installer\n        # auth seam to inject faults. Production has no fixture escape flag.\n        for fail_after in range(len(comp._WI_INSTALL_SLOTS)):\n            with self.subTest(slot=fail_after):\n                module=self.source_namespace();ns=module.__dict__;ns[\'__name__\']=\'point4_weighted_hessian_release_guard\'\n                contract=comp.curvature_weighted_source_contract(ns)\n                before={key:ns.get(key,comp._wi_absent) for key in comp._WI_INSTALL_SLOTS}\n                registry=comp._wi_registry;owner=comp._wi_install_owner;primary=RuntimeError(\'installer fault\')\n                def broken(namespace):\n                    for index,key in enumerate(comp._WI_INSTALL_SLOTS):\n                        namespace[key]=object()\n                        if index==fail_after:raise primary\n                frame=types.SimpleNamespace(f_code=contract[\'code\'],f_globals=ns,f_locals=ns)\n                with patch.dict(sys.modules,{\'point4_weighted_hessian_release_guard\':module}),\\\n                     patch.object(comp.sys,\'_getframe\',return_value=frame),\\\n                     patch.object(comp,\'curvature_weighted_installer_auth\',return_value=object()),\\\n                     patch.object(comp,\'_wi_original_installer\',broken):\n                    with self.assertRaises(RuntimeError) as caught:comp.install_weighted(ns)\n                self.assertIs(caught.exception,primary);self.assertIs(comp._wi_registry,registry);self.assertIs(comp._wi_install_owner,owner)\n                for key,value in before.items():self.assertIs(ns.get(key,comp._wi_absent),value)\n        for phase in (\'produced_wrappers\',\'record_construction\',\'owner_drift\'):\n            with self.subTest(phase=phase):\n                module=self.source_namespace();ns=module.__dict__;ns[\'__name__\']=\'point4_weighted_hessian_release_guard\'\n                contract=comp.curvature_weighted_source_contract(ns)\n                frame=types.SimpleNamespace(f_code=contract[\'code\'],f_globals=ns,f_locals=ns)\n                before={key:ns.get(key,comp._wi_absent) for key in comp._WI_INSTALL_SLOTS}\n                registry=comp._wi_registry;owner=comp._wi_install_owner;seal=comp.curvature_weighted_record_seal\n                primary=RuntimeError(\'post-install failure\')\n                def fault(records):\n                    if len(records)>len(registry[0]):\n                        if phase==\'owner_drift\':comp._wi_install_owner=object()\n                        else:raise primary\n                    return seal(records)\n                with contextlib.ExitStack() as stack:\n                    stack.enter_context(patch.dict(sys.modules,{\'point4_weighted_hessian_release_guard\':module}))\n                    stack.enter_context(patch.object(comp.sys,\'_getframe\',return_value=frame))\n                    if phase==\'produced_wrappers\':\n                        stack.enter_context(patch.object(comp,\'curvature_weighted_installed_auth\',side_effect=primary))\n                    else:stack.enter_context(patch.object(comp,\'curvature_weighted_record_seal\',side_effect=fault))\n                    with self.assertRaises((RuntimeError,AssertionError)):comp.install_weighted(ns)\n                self.assertIs(comp._wi_registry,registry);self.assertIs(comp._wi_install_owner,owner)\n                for key,value in before.items():self.assertIs(ns.get(key,comp._wi_absent),value)\n\n    def test_known_production_drift_fails_but_foreign_fixture_runs_original(self):\n        fake=types.SimpleNamespace(__name__=\'point4_weighted_hessian_release_guard\')\n        with self.assertRaisesRegex(AssertionError,\'Unregistered production\'):\n            with comp.curvature_weighted_inventory_companion(fake):self.fail(\'must reject before body\')\n        called=[];module=types.SimpleNamespace(check_inventory=lambda:called.append(\'full original body\'))\n        with comp.curvature_weighted_inventory_companion(module):module.check_inventory()\n        self.assertEqual(called,[\'full original body\'])\n        module,_,_,_=self.prepared();ns=module.__dict__\n        with patch.dict(ns,{\'OUTPUT_SUFFIXES\':set()}):\n            with self.assertRaisesRegex(AssertionError,\'global/policy drift\'):\n                with comp.curvature_weighted_inventory_companion(module):self.fail(\'must reject policy drift\')\n        original_raw=ns[\'raw_git\']\n        with patch.object(comp.sys,\'platform\',\'win32\'),patch.dict(ns,{\'raw_git\':comp._curvature_git_batch_transport_base}):\n            with comp.curvature_weighted_inventory_companion(module):\n                self.assertIs(ns[\'raw_git\'],comp._curvature_git_batch_transport_base)\n        self.assertIs(ns[\'raw_git\'],original_raw)\n        for platform in (\'win32\',\'linux\'):\n            with patch.object(comp.sys,\'platform\',platform),patch.dict(ns,{\'raw_git\':lambda *args:b\'foreign\'}):\n                with self.assertRaises(AssertionError):\n                    with comp.curvature_weighted_inventory_companion(module):self.fail(\'unbound raw Git adapter\')\n        with patch.object(comp.sys,\'platform\',\'linux\'),patch.dict(ns,{\'raw_git\':comp._curvature_git_batch_transport_base}):\n            with self.assertRaisesRegex(AssertionError,\'Unapproved platform\'):\n                with comp.curvature_weighted_inventory_companion(module):pass\n\n    def test_owned_context_reentrancy_and_callback_mutation_fail_and_restore(self):\n        module,_,_,_=self.prepared();ns=module.__dict__;git=ns[\'git\'];roots=ns[\'lake_runtime_roots\']\n        with comp.curvature_weighted_inventory_companion(module):\n            with self.assertRaisesRegex(AssertionError,\'Recursive/foreign\'):\n                with comp.curvature_weighted_inventory_companion(module):pass\n        self.assertIs(ns[\'git\'],git);self.assertIs(ns[\'lake_runtime_roots\'],roots)\n        with self.assertRaises(AssertionError):\n            with comp.curvature_weighted_inventory_companion(module):ns[\'lake_runtime_roots\']=lambda:set()\n        self.assertIs(ns[\'git\'],git);self.assertIs(ns[\'lake_runtime_roots\'],roots);self.assertIsNone(comp._wi_inventory_owner)\n\n    def test_poisoned_warm_baseline_and_midbody_policy_changes_rejected(self):\n        module,_,_,_=self.prepared();ns=module.__dict__\n        with comp.curvature_weighted_inventory_companion(module):pass\n        baseline=ns[\'baseline_sources\']();saved=dict(baseline);key=next(iter(baseline))\n        try:\n            baseline[key]=(\'100644\',b\'poisoned\')\n            with self.assertRaisesRegex(AssertionError,\'cached baseline mode/OID drift\'):\n                with comp.curvature_weighted_inventory_companion(module):pass\n        finally:baseline.clear();baseline.update(saved)\n        with self.assertRaisesRegex(AssertionError,\'POST drift\'):\n            with comp.curvature_weighted_inventory_companion(module):ns[\'ENV\'][\'GIT_NO_LAZY_FETCH\']=\'0\'\n        ns[\'ENV\'][\'GIT_NO_LAZY_FETCH\']=\'1\'\n\n    def test_primary_failure_retains_independent_post_and_cleanup_errors(self):\n        module,_,_,processes=self.prepared();ns=module.__dict__;primary=ValueError(\'inventory primary\')\n        with self.assertRaises(ValueError) as caught:\n            with comp.curvature_weighted_inventory_companion(module):\n                processes[0].extra=b\'late duplicate\';ns[\'ENV\'][\'GIT_NO_LAZY_FETCH\']=\'0\'\n                ns[\'baseline_sources\']()[next(iter(ns[\'baseline_sources\']()))]=(\'100644\',b\'mutated\')\n                raise primary\n        self.assertIs(caught.exception,primary);self.assertGreaterEqual(len(primary.__notes__),4)\n        self.assertIsNone(comp._wi_inventory_owner)\n        ns[\'ENV\'][\'GIT_NO_LAZY_FETCH\']=\'1\'\n        for phase in (\'stdin_close\',\'communicate1\',\'poll1\',\'kill\',\'communicate2\',\'stdout_close\',\'stderr_close\'):\n            with self.subTest(cleanup=phase):\n                module,_,_,processes=self.prepared();ns=module.__dict__;primary=ValueError(\'owned primary \'+phase)\n                original_git=ns[\'git\'];original_roots=ns[\'lake_runtime_roots\'];events=[];state=types.SimpleNamespace(wait=0,polls=0)\n                with self.assertRaises(ValueError) as caught:\n                    with comp.curvature_weighted_inventory_companion(module):\n                        process=processes[0];old_wait=process.communicate\n                        def stdin_close():\n                            events.append(\'stdin_close\')\n                            if phase==\'stdin_close\':raise RuntimeError(\'injected stdin_close\')\n                        def wait(timeout):\n                            self.assertEqual(timeout,20);state.wait+=1;name=\'communicate\'+str(state.wait);events.append(name)\n                            if name==phase or state.wait==1 and phase in (\'kill\',\'communicate2\'):\n                                raise RuntimeError(\'injected \'+name)\n                            result=old_wait(timeout);process.returncode=0;return result\n                        def poll():\n                            state.polls+=1;name=\'poll\'+str(state.polls);events.append(name)\n                            if name==phase:raise RuntimeError(\'injected \'+name)\n                            return process.returncode\n                        def kill():\n                            events.append(\'kill\')\n                            if phase==\'kill\':raise RuntimeError(\'injected kill\')\n                            # Like Popen.kill, this does not itself set returncode.\n                        def stdout_close():\n                            events.append(\'stdout_close\')\n                            if phase==\'stdout_close\':raise RuntimeError(\'injected stdout_close\')\n                        def stderr_close():\n                            events.append(\'stderr_close\')\n                            if phase==\'stderr_close\':raise RuntimeError(\'injected stderr_close\')\n                        process.stdin.close=stdin_close;process.communicate=wait;process.poll=poll;process.kill=kill\n                        process.stdout.close=stdout_close;process.stderr=types.SimpleNamespace(close=stderr_close)\n                        if phase in (\'communicate1\',\'kill\',\'communicate2\'):process.returncode=None\n                        raise primary\n                self.assertIs(caught.exception,primary);self.assertTrue(any(\'injected \'+phase in item for item in primary.__notes__))\n                for name in (\'stdin_close\',\'communicate1\',\'poll1\',\'poll2\',\'stdout_close\',\'stderr_close\'):self.assertIn(name,events)\n                if phase in (\'communicate1\',\'kill\',\'communicate2\'):\n                    self.assertIn(\'kill\',events);self.assertIn(\'communicate2\',events)\n                self.assertIs(ns[\'git\'],original_git);self.assertIs(ns[\'lake_runtime_roots\'],original_roots)\n                self.assertIsNone(comp._wi_inventory_owner);self.assertIsNone(comp._owner);self.assertEqual(comp._depth,0)\n\n    def test_existing_inventory_predicates_are_still_actual_original_code(self):\n        module,_,_,_=self.prepared();ns=module.__dict__\n        before={name:ns[name].__code__ for name in (\'generated_build_path\',\'check_inventory\')}\n        with comp.curvature_weighted_inventory_companion(module):\n            for path in (\'curvature/.lake/build/lib/lean/Owned.lean\',\'curvature/.lake/build/lib/lean/Owned.py\',\n                         \'curvature/.lake/build/lib/lean/__pycache__/x.pyc\',\'foreign/build/Owned.olean\'):\n                self.assertFalse(ns[\'generated_build_path\'](path),path)\n            for name,code in before.items():self.assertIs(ns[name].__code__,code)\n        contract=comp.curvature_weighted_contract((comp.ROOT/comp.WEIGHTED).read_bytes(),str(comp.ROOT/comp.WEIGHTED))\n        for name,code in before.items():self.assertEqual(code,contract[\'codes\'][name])\n        # Execute the unchanged complete inventory body on tiny physical files.\n        # These explicit unit adapters do not qualify a production namespace.\n        with tempfile.TemporaryDirectory(prefix=\'weighted-inventory-guards-\',dir=pathlib.Path.cwd()) as directory:\n            root=pathlib.Path(directory).resolve();paths={\'owned.lean\':b\'theorem owned : True := by trivial\\n\',\'owned.txt\':b\'owned\\n\'}\n            for path,raw in paths.items():(root/path).write_bytes(raw)\n            fixture=self.source_namespace().__dict__;events=[];state=types.SimpleNamespace(mode=\'100644\',bad=False,ignored=False)\n            def git(*args):\n                events.append(args)\n                if args==(\'ls-files\',\'--stage\',\'-z\'):\n                    return b\'\'.join((state.mode+\' \'+comp.blob_id(raw)+\' 0\\t\'+path).encode()+b\'\\0\' for path,raw in paths.items())\n                if args==(\'ls-files\',\'-z\',\'--others\'):return b\'ignored.py\\0\' if state.ignored else b\'\'\n                self.fail(\'Unexpected inventory query \'+repr(args))\n            def dependencies():events.append(\'dependencies\');return set(),set()\n            def fingerprints(deps):events.append(\'fingerprints\');return set()\n            with patch.dict(fixture,{\'ROOT\':root,\'git\':git,\'baseline_sources\':lambda:{path:(\'100644\',raw) for path,raw in paths.items()},\n                                    \'public_paths\':lambda:set(paths),\'dependency_inventory\':dependencies,\'runtime_fingerprints\':fingerprints}):\n                fixture[\'check_inventory\']()\n                self.assertIn(\'dependencies\',events);self.assertIn(\'fingerprints\',events)\n                state.mode=\'100755\'\n                with self.assertRaisesRegex(AssertionError,\'Tracked executable-mode drift\'):fixture[\'check_inventory\']()\n                state.mode=\'100644\';(root/\'owned.lean\').write_bytes(b\'mutated source\')\n                with self.assertRaisesRegex(AssertionError,\'Index/physical blob mismatch\'):fixture[\'check_inventory\']()\n                (root/\'owned.lean\').write_bytes(paths[\'owned.lean\']);state.ignored=True;(root/\'ignored.py\').write_bytes(b\'ignored source\')\n                with self.assertRaisesRegex(AssertionError,\'Unexpected untracked/ignored\'):fixture[\'check_inventory\']()\n\n    def test_real_FileIO_weighted_transport_partial_reads_and_EOF(self):\n        raw=b\'x\'*513;base=comp._WI_BASE;processes=[];real_popen=subprocess.Popen\n        program="import sys,os,hashlib\\nraw=b\'x\'*513\\nfr=hashlib.sha1(b\'blob \'+str(len(raw)).encode()+b\'\\\\0\'+raw).hexdigest().encode()+b\' blob \'+str(len(raw)).encode()+b\'\\\\n\'+raw+b\'\\\\n\'\\nfor line in sys.stdin.buffer:\\n for i in range(0,len(fr),2):os.write(1,fr[i:i+2])\\n"\n        def launch(argv,**kwargs):\n            self.assertEqual(argv,[\'git\',\'--no-replace-objects\',\'-C\',str(comp.ROOT),\'cat-file\',\'--batch\'])\n            kwargs[\'env\']=dict(os.environ,PYTHONDONTWRITEBYTECODE=\'1\')\n            process=real_popen([sys.executable,\'-B\',\'-c\',program],**kwargs)\n            self.assertIs(type(process.stdout),io.FileIO);processes.append(process);return process\n        item=comp.CurvatureWeightedBlobTransport(lambda *args:self.fail(\'immutable query delegated\'),comp.ROOT,\n            dict(comp.ENV),base,{\'owned\':(\'100644\',comp.blob_id(raw))},lambda:None,launch)\n        self.assertEqual(item.query(\'show\',base+\':owned\'),raw);self.assertEqual(item.close(),[])\n        self.assertEqual(processes[0].returncode,0)\n\n\n# END authenticated finite curvature tests'), ('    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(ImmutableGitBatchControls))', '    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(ImmutableGitBatchControls))\n    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(WeightedInventoryPreparationControls))'), ("    assert suite.countTestCases()==139, 'Complete ordinary suite selection drift'", "    assert suite.countTestCases()==154, 'Complete ordinary suite selection drift'"), ("    assert suite.countTestCases()==(8 if args.real_only else 147 if REAL else 139), 'Exact selected suite drift'", "    assert suite.countTestCases()==(8 if args.real_only else 162 if REAL else 154), 'Exact selected suite drift'"))}
+CURVATURE_WEIGHTED_INVENTORY_SOURCE_POLICY_SHA256='20bdc187bf796a8ca03798629967a05f521349fe66132cf8920a70b296012b66'
+CURVATURE_WEIGHTED_INVENTORY_RECORD={'scope': 'Scoped immutable weighted inventory preparation; original validator/LRU and live current/native/physical predicates unchanged', 'baseline_head': '03ed106223dd9d929ec35e933029ffe2e65fe5fa', 'baseline_tree': 'be99a2961be7a56534db1115a3f83cc9a82a2702', 'current_paths': 2180, 'additions': 0, 'replacements': 17, 'approved_core_manifest_sha256': '8d2ae0f473258756a5637f101136f5265f6a2dded8e42b6edc6c36820e132b99', 'approved_core_helper_sha256': 'ac0d403a2e8218d577e448c658e9543cf12115ede6f10865f87d1eaf3e990237', 'approved_core_test_sha256': 'a18dd30d6ff7f2af3489412110a75443778dd65799f6723a5de96a4a1971ba82', 'independent_core_Source_review_sha256': 'a0125ee9d36bc92f82028bc5fbc13c11aed25c95d6a76b58146f2e8ce7f3594f', 'design_sha256': '034fa688e2094dc4fde66e0cfc16f1b1da83927ed47c30b5969fc03d457f2781', 'ordinary_previous': 139, 'new_controls': 15, 'ordinary_current': 154, 'real_required': 8, 'combined_current': 162, 'all_previous147_raw_methods_preserved': True, 'chart_tests_unchanged': 123, 'required_child_timeout_seconds': 120, 'original_cleanup_timeout_seconds': 20, 'cold_baseline': 'Original1653-entry LRU body runs with scoped requested-OID batch installed first; no clear/reseed/hit-miss seal', 'roots': 'Genuine original manifest-derived roots once per owned inventory; bounded owner checks and fresh set per callback', 'actual_failure_run': 38649493751, 'actual_failure_job': 116144888980, 'actual_timed_out_child_final_stage': 'UNKNOWN', 'actual_old_main': 'FAILED_7_OK_1_ERROR', 'Source_composer_sha256': 'bbb53639945fe89dba46bee4e0209ef6038e8dd9dcba23f02a3944b3d77bc3c4', 'Source_tests_native_performance': 'UNRUN', 'Point4': 'OPEN'}
+
+def curvature_weighted_inventory_policy_check():
+    assert type(CURVATURE_WEIGHTED_INVENTORY_SOURCE_POLICY) is dict
+    assert sha256(json.dumps(CURVATURE_WEIGHTED_INVENTORY_SOURCE_POLICY,sort_keys=True,separators=(',',':')).encode())==CURVATURE_WEIGHTED_INVENTORY_SOURCE_POLICY_SHA256=='20bdc187bf796a8ca03798629967a05f521349fe66132cf8920a70b296012b66', 'Weighted preparation Source policy drift'
+
+def curvature_weighted_inventory_test_inverse(raw):
+    curvature_weighted_inventory_policy_check()
+    policy=CURVATURE_WEIGHTED_INVENTORY_SOURCE_POLICY
+    assert type(raw) is bytes and sha256(raw)==policy['test_current_sha256'], 'Whole weighted preparation TEST drift'
+    text=raw.decode('utf8')
+    for before,after in reversed(policy['test_ports']):
+        assert text.count(after)==1, 'Missing/duplicate weighted preparation TEST inverse port'
+        text=text.replace(after,before,1)
+    restored=text.encode('utf8')
+    assert sha256(restored)==policy['test_previous_sha256'], 'Whole prior fe5 TEST not recovered'
+    for before,after in policy['test_ports']:
+        assert text.count(before)==1, 'Missing/duplicate weighted preparation TEST forward port'
+        text=text.replace(before,after,1)
+    assert text.encode('utf8')==raw, 'Whole weighted preparation TEST replay drift'
+    curvature_weighted_inventory_policy_check()
+    return restored
+
+def curvature_weighted_inventory_helper_inverse(raw):
+    curvature_weighted_inventory_policy_check()
+    assert type(raw) is bytes and sha256(raw)==CURVATURE_GIT_BATCH_RUNTIME_HELPER_SHA256, 'Whole weighted preparation helper drift'
+    assert sha256((ROOT/HELPER).read_bytes())==CURVATURE_GIT_BATCH_RUNTIME_HELPER_SHA256, 'Weighted preparation helper input mutation'
+    start=b'# BEGIN exact weighted immutable inventory routing\n'
+    end=b'# END exact weighted immutable inventory routing\n'
+    assert raw.count(start)==raw.count(end)==1 and raw.endswith(end), 'Exact weighted routing append boundary drift'
+    prefix=raw[:raw.index(start)]
+    assert prefix.endswith(b'\n\n')
+    core=prefix[:-2]
+    policy=CURVATURE_WEIGHTED_INVENTORY_SOURCE_POLICY
+    assert sha256(core)==policy['helper_core_sha256'], 'Whole approved ac0d core helper drift'
+    marker=b'# BEGIN scoped weighted immutable inventory preparation\n'
+    assert core.count(marker)==1
+    prefix=core.split(marker,1)[0]
+    assert prefix.endswith(b'\n\n')
+    previous=prefix[:-2]
+    assert previous.count(_WI_CALL_AFTER.encode())==1
+    previous=previous.replace(_WI_CALL_AFTER.encode(),_WI_CALL_BEFORE.encode(),1)
+    assert sha256(previous)==policy['helper_previous_sha256']==_WI_PREVIOUS_HELPER_SHA, 'Whole prior ca81 helper not recovered'
+    assert sha256((ROOT/HELPER).read_bytes())==CURVATURE_GIT_BATCH_RUNTIME_HELPER_SHA256, 'Weighted helper POST mutation'
+    curvature_weighted_inventory_policy_check()
+    return previous
+
+_curvature_before_weighted_inventory_test_inverse=curvature_git_batch_test_inverse
+def curvature_git_batch_test_inverse(raw):
+    return _curvature_before_weighted_inventory_test_inverse(curvature_weighted_inventory_test_inverse(raw))
+
+def curvature_chart_terminal_owner_helper_inverse(raw):
+    raw=curvature_weighted_inventory_helper_inverse(raw)
+    assert type(raw) is bytes and sha256(raw)==_WI_PREVIOUS_HELPER_SHA, 'Whole preceding ca81 helper Source drift'
+    assert sha256((ROOT/HELPER).read_bytes())==CURVATURE_GIT_BATCH_RUNTIME_HELPER_SHA256, 'Terminal owner helper input mutation'
+    text=raw.decode('utf8')
+    start='# BEGIN exact chart authenticated terminal direct tool owner\n'
+    end='# END exact chart authenticated terminal direct tool owner\n\n'
+    assert text.count(start)==text.count(end)==1, 'Exact terminal owner inverse boundary drift'
+    first=text.index(start);last=text.index(end,first)+len(end)
+    text=text[:first]+text[last:]
+    for before,after in reversed(CURVATURE_CHART_TERMINAL_OWNER_HELPER_PORTS):
+        assert text.count(after)==1, 'Missing/duplicate terminal owner helper inverse port'
+        text=text.replace(after,before,1)
+    restored=text.encode('utf8')
+    assert sha256(restored)==CURVATURE_CHART_TERMINAL_OWNER_PREVIOUS_HELPER_SHA256, 'Whole34e helper bce not recovered'
+    return restored
+
+_curvature_before_weighted_inventory_map=tensor_map_record
+def tensor_map_record(expected,originals,changes):
+    record=_curvature_before_weighted_inventory_map(expected,originals,changes)
+    record['curvature_finite_input_preparation']['weighted_immutable_inventory_preparation']=CURVATURE_WEIGHTED_INVENTORY_RECORD
+    return record
+# END exact weighted immutable inventory routing
