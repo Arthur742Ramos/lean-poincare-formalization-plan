@@ -36,7 +36,8 @@ jobs:
             git fetch --no-tags origin "$historical"
           fi
       - name: Install pinned Source parser dependencies
-        run: python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0
       - name: Authenticate complete current Source before compilation
         run: |
           set -euo pipefail

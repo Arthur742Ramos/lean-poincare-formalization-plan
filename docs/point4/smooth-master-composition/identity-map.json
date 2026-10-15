@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "48d94df0e7a685c2c7c42bf32f8e385fb597458e",
-      "final_sha256": "5276f3327ec107dd3beaf3e10b62caa1d95b887e2a4fad4af32319dd5c58c682",
+      "final_blob": "3668da4dae065e8292a6e2f7ece62e1e453fe2b7",
+      "final_sha256": "de9020cb6272a30ccd0b29c332773cc50c62ce545ad6b53251c1a96f6187a5a2",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "970078e3debcc803d4e062b9699c1f9525bf125e",
-      "final_sha256": "150d70d1e9045766a4dec6beb9bfdb2db4f96421448247d93ffe013effbd08b5",
+      "final_blob": "2face411bfc349e8b9219322d663da4f5a7e7312",
+      "final_sha256": "459a0c2eeecf7d322a38bfe67a8534a49ea403c81d8a3b72000b54f963750d5b",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "1159060f34c6d0986d79f786417240b82448c108",
-      "final_sha256": "1050578394d8c4f935a3a9a0e68571b86d5d4378724145dd5a70f7de936deab2",
+      "final_blob": "be8f1d07e5a5150c1fae8eab16dc45891b975146",
+      "final_sha256": "905605cebcdac0ab5c6374a62a2c88cce13db1d2659be9f8abfb431802000f66",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "ddec75509f6060070bba7d29fb46e44f5fd685c9",
-      "final_sha256": "f831ec8c184e340800fa27f857ba48f9a6fc1dde144b8153050165224b45c4ed",
+      "final_blob": "0e403b24f4c0b4c43e8988a44f07d88dc404d40f",
+      "final_sha256": "48c0979f9b20a5c68bdd86909b11177109c0c28cab9c8fdb22a25c9086ea8194",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "2b659c19502d155f9456159908c66588d1b0fdf7",
-      "final_sha256": "0c0fb6a71f68ac642e0552203a087f476326c9d081452e644a8c03d410c6072e",
+      "final_blob": "76bd462918cde021f9f43cc3875998719e2d5cb6",
+      "final_sha256": "676def9ff5da9f739eb8662a2ed14aeb0fff86aceabbe05ee7006b616dc33e06",
       "mode": "100644",
       "count": 1
     }
@@ -27099,7 +27099,7 @@
     ],
     ".github/workflows/point4-actual-gaussian-heat-resolvent-uniqueness.yml": [
       "100644",
-      "6f5b043be25a0e303c0bafc117d88f5a747c9bcd"
+      "542ba14cfaa3012697feb9ee22d17cdf351fe21e"
     ],
     ".github/workflows/point4-actual-gaussian-heat-resolvent.yml": [
       "100644",
@@ -31079,7 +31079,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "11cc15d36826a8585de08f4dd9ddaaed12511ca8"
+      "bcaf1bf09bdb8a5f7c43cbe0f8fc930cfa1669ec"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31135,7 +31135,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "b6d19874ba4d1fec5c6eec76a99436522cd22a8d"
+      "1bd9abd4227885505f68b8ecaf6251d7ae142d95"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31143,7 +31143,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "1c67a07f1d160f2cbaab39da2047559f0781dccd"
+      "4261020e7f14c0058bb9fceeeca7107ef7692889"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31167,15 +31167,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "48d94df0e7a685c2c7c42bf32f8e385fb597458e"
+      "3668da4dae065e8292a6e2f7ece62e1e453fe2b7"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "0e4d73d2bad8dbcd648ce77082166ed06bf08cc4"
+      "e332b7c59b9acae820090567ee3c77866bd37606"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "37067509b0286aadcdd26255a9162bf34c44b5a4"
+      "a9d22154674ee7967c08bb3ef4f7547e99d2549c"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31255,11 +31255,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "caf3ee35bd5cde844d74aa3eaaa6db503201545e"
+      "ae6f7ffbc58904641f1be036c0b32e9f33dc3903"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "97082607654e1c0bc2945b34561bd808d1c82bcc"
+      "7bc8d8f39d00604668214aad8ab27080e17fe6c4"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31335,7 +31335,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "970078e3debcc803d4e062b9699c1f9525bf125e"
+      "2face411bfc349e8b9219322d663da4f5a7e7312"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31371,15 +31371,15 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "1159060f34c6d0986d79f786417240b82448c108"
+      "be8f1d07e5a5150c1fae8eab16dc45891b975146"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "ddec75509f6060070bba7d29fb46e44f5fd685c9"
+      "0e403b24f4c0b4c43e8988a44f07d88dc404d40f"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "f9220259a9fff659f5a92317555b61c4f23caf14"
+      "c347bdb143bcc69754d62e005d949ee3a6a3aea1"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
@@ -31399,7 +31399,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "f02b8066568507cfa2f86562a9049c2885c8d476"
+      "f038e96f9299beefb2b04f87bfc188b549992a28"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31407,7 +31407,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "7b1757df89b959701b26fef001202433e91d074d"
+      "703dd6c7d86b5e128cfff64db8638bf82cb86e8d"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31419,7 +31419,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "2b659c19502d155f9456159908c66588d1b0fdf7"
+      "76bd462918cde021f9f43cc3875998719e2d5cb6"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -82218,9 +82218,9 @@
       "additions": {
         ".github/workflows/point4-actual-gaussian-heat-resolvent-uniqueness.yml": {
           "mode": "100644",
-          "sha256": "e940405d4bda6802dbeb82de93addac8722ab65203106c2de17285e01526ed10",
-          "blob": "6f5b043be25a0e303c0bafc117d88f5a747c9bcd",
-          "origin": "parallel-c2-uniqueness-publication-plan-20261014-v1\\payload\\.github\\workflows\\point4-actual-gaussian-heat-resolvent-uniqueness.yml"
+          "sha256": "db2212819e4ef96ff097f5360b9e11b8907216e0badf1d32c8ebb20655f25f42",
+          "blob": "542ba14cfaa3012697feb9ee22d17cdf351fe21e",
+          "origin": "parallel-c2-uniqueness-workflow-yaml-repair-20261015-v1/candidate/.github/workflows/point4-actual-gaussian-heat-resolvent-uniqueness.yml"
         },
         "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/AnalyticPDE/ActualGaussianHeatResolventUniqueness.lean": {
           "mode": "100644",
@@ -82247,7 +82247,7 @@
           "origin": "parallel-c2-uniqueness-publication-plan-20261014-v1\\payload\\curvature\\scripts\\point4_actual_gaussian_heat_resolvent_uniqueness_probe.lean"
         }
       },
-      "policy_sha256": "51946ce45a7ac1a03d92413e7d832649f718777bcad20ce1bc20ce7800ba3fdd",
+      "policy_sha256": "83b9f08a74587ea6a07491d8e422e73df851263777610420f07e8ad5c4ff06d3",
       "actual_RU1_qualification": {
         "independent_actual_review_file": "parallel-c2-independent-review-20261013/actual-Gaussian-resolvent-uniqueness-RU1-independent-actual-review.json",
         "independent_actual_review_sha256": "db0010093be4f37cb5b7df5a46254ea0c3a4594976593fc42680a9e9ea5e1f97",
