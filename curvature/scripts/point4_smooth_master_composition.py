@@ -3543,6 +3543,17 @@ def curvature_resolvent_uniqueness_helper_inverse(raw):
     assert sha256(restored)==CURVATURE_RESOLVENT_UNIQUENESS_PREVIOUS_HELPER_SHA256, 'Whole repaired2180 helper not recovered'
     return restored
 
+def curvature_resolvent_uniqueness_no_reparse(path):
+    info=path.lstat()
+    attributes=getattr(info,'st_file_attributes',0)
+    if attributes is None:
+        # Existing committed-mode fixtures preserve mode but omit this optional
+        # Windows field. Recover only the field from the native OS result.
+        attributes=getattr(os.lstat(path),'st_file_attributes',None)
+    assert type(attributes) is int and attributes>=0, 'Unknown uniqueness path attributes'
+    assert not attributes&0x400, 'Uniqueness reparse path rejected'
+    return True
+
 def curvature_resolvent_uniqueness_extend(base):
     import copy
     assert type(base) is dict and len(base)==2180 and len({p.casefold() for p in base})==2180
@@ -3555,9 +3566,9 @@ def curvature_resolvent_uniqueness_extend(base):
         assert set(row)=={'mode','sha256','blob','origin'} and row['mode']=='100644'
         file=ROOT/path
         for parent in file.parents:
-            assert stat.S_ISDIR(parent.lstat().st_mode) and not parent.is_symlink() and not getattr(parent.lstat(),'st_file_attributes',0)&0x400
+            assert stat.S_ISDIR(parent.lstat().st_mode) and not parent.is_symlink() and curvature_resolvent_uniqueness_no_reparse(parent)
             if parent==ROOT:break
-        assert stat.S_ISREG(file.lstat().st_mode) and not file.is_symlink() and not getattr(file.lstat(),'st_file_attributes',0)&0x400
+        assert stat.S_ISREG(file.lstat().st_mode) and not file.is_symlink() and curvature_resolvent_uniqueness_no_reparse(file)
         raw=file.read_bytes();assert sha256(raw)==row['sha256'] and blob_id(raw)==row['blob'], 'Exact qualified uniqueness Source drift: '+path
         complete[path]=('100644',row['blob'])
     assert base==original and CURVATURE_RESOLVENT_UNIQUENESS_BATCH==sealed, 'Uniqueness Source input/policy mutation'
