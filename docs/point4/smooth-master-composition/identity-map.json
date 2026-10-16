@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "9fa5e2b4ef78568b8696ffef9ba33c1aead68f46",
-      "final_sha256": "6258fd7eaf328b97d7cd9a582a9de7b009b8876609839d776303d64e68c0b276",
+      "final_blob": "9050f7b51d35e964567ca7e794ed5c999a212ddf",
+      "final_sha256": "010672eb106d25e73ee3318f6be439a80538bbc37a9dfe6abc6cea0ceacd4244",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "504a0077329700938934bf03367cf01eae0dfc7d",
-      "final_sha256": "e9d8fdf2bf9ea2c58d88ff9071fd3b0366e8c18c4fd1ef0eec1b24f920311e1a",
+      "final_blob": "812ec5960c7ef98cb8b89ad96986f966752fb49b",
+      "final_sha256": "53f3388a5082cf07b27560e4c6648483760d67e19a2fdc247f9eed21772c3e8d",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "71e9d81e7b531c3383c7e937dde2e7e44d128660",
-      "final_sha256": "299937cb3658cc553588ea776e5e7080571e26297b7c3b9aedc2edd6c11d6bdb",
+      "final_blob": "69d7f0701ebce48274b61aa7b2ff844c2f5d229d",
+      "final_sha256": "6df0f7d172088048523197554f56355a8c5e6350b5b7763015978b5cd9d14a0d",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "8a6c2c94230ad1387c43f6346ec9e316d6099316",
-      "final_sha256": "577cfe34f51eb79c941fb3605adc5f7ccde675ad6d9954f05e8272664b12d2e8",
+      "final_blob": "5809ca85d0078a04ae31f6f3111525fdfa41a848",
+      "final_sha256": "b05fb48d441c45f2e2d9112e2248da1f2af460cc6db2e3a98588c2a5035d73f3",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "f24ca1ef619ea68be5322abe47273b5ebc70651d",
-      "final_sha256": "12788403f6c71d43024165a9933969d43ee64f10e0080606ab49171770eff500",
+      "final_blob": "2d8d4df7c485e5fd1ee1dd92187889b4c8297161",
+      "final_sha256": "93b501852a7fcacb37baab0c6f7dd3b11cf7508374175f40fb10a11becdc8629",
       "mode": "100644",
       "count": 1
     }
@@ -31079,11 +31079,11 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "1882d563518ab5bd8b0f3671c4b303255d08fa23"
+      "cd166b33f4b6302401c0faa319a64065c86b0ef1"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
-      "0b6bef586fd9639986e6e319a36ebed683b67011"
+      "ba7a898e6bb3b077eb0c86aac6430ab5633a3a4e"
     ],
     "curvature/scripts/fake-landrun.sh": [
       "100755",
@@ -31135,7 +31135,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "9e3915c90968380eda24477fad07570e8897b9f2"
+      "2adcd26d32852736353569662baae24a130fecb3"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31143,7 +31143,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "efe29f807920adaa697c4b6344c139f0149e93ec"
+      "543d2d07888fd10e21d09eb3e4600b6631c257ac"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31167,15 +31167,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "9fa5e2b4ef78568b8696ffef9ba33c1aead68f46"
+      "9050f7b51d35e964567ca7e794ed5c999a212ddf"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "dc87cf7a07d8d16debfd0df49366bb19afea91ff"
+      "9d22580c5394090cec93eebf1269f7cb6610cee1"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "295f30ad0ef9a458ef1f7f5e15878405205e7a70"
+      "bec06b1b9563523f0d9b4358395a4608d2113d39"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31255,11 +31255,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "d116cb9c7a50aa4e6807c68a38cdb741c7b9bae1"
+      "402f358e303bda47ae79e54d8045dcb1fa4007c2"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "66d0d68b3c5eb1d290c5b8c124929fbc0463123b"
+      "0b3ab31574e7880f92e2955743e8dd860b5d1ad4"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31335,7 +31335,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "504a0077329700938934bf03367cf01eae0dfc7d"
+      "812ec5960c7ef98cb8b89ad96986f966752fb49b"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31371,15 +31371,15 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "71e9d81e7b531c3383c7e937dde2e7e44d128660"
+      "69d7f0701ebce48274b61aa7b2ff844c2f5d229d"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "8a6c2c94230ad1387c43f6346ec9e316d6099316"
+      "5809ca85d0078a04ae31f6f3111525fdfa41a848"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "0e486d2151935a470ab06bd5b83df5aa2ec0e5db"
+      "2f0fda537c90497b79df151b9af409c98970e908"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
@@ -31399,7 +31399,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "247d16bec35810bd0701b24c05203e0bd7085f2a"
+      "3e0d34e5da13ae0b435301256b5b2746a3fc9cd5"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31407,7 +31407,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "63347f5c789b9db61468fb6234cfe85b04041068"
+      "79cb5aa797d30321057ef9082f30a722568f716a"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31419,7 +31419,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "f24ca1ef619ea68be5322abe47273b5ebc70651d"
+      "2d8d4df7c485e5fd1ee1dd92187889b4c8297161"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -31435,7 +31435,7 @@
     ],
     "curvature/scripts/test_chart_port_ci.py": [
       "100644",
-      "4a0b65701a84444d193ce367e470af3c7a8bc70b"
+      "e6c0b8d228283da5925cb4fda6eab6e12065453e"
     ],
     "curvature/scripts/verify-comparator.sh": [
       "100755",
@@ -82423,6 +82423,75 @@
       },
       "policy_sha256": "0b4fff20a90cd48749e65610f12726db7871657e99cc7a0af0cdd39d9afd1768",
       "ordinary_chart_controls": 130,
+      "historical_failure_reclassified": false,
+      "native_qualification": "UNRUN",
+      "Point4": "OPEN"
+    },
+    "chart_terminal_waitid_acquisition": {
+      "scope": "One immediate post-query only for an initial Z zero-RSS terminal snapshot after a no-event pre-query; preserve both queries, complete existing predicate, chronological proof and actual single reap; no live-owner grace",
+      "baseline_head": "51eba688d68d4aff6333bdcb61956b89c90a9d95",
+      "baseline_tree": "62c69ce4a9f5446cbcf825e50ddded83e11658e6",
+      "current_paths": 2191,
+      "sources": {
+        "curvature/scripts/chart_port_ci.py": {
+          "before_sha256": "b2e807826058eb22523fdbcab9f37c1c5eed43a1ab37dac63204cc5c0c27808c",
+          "after_sha256": "95dcfdaf007d91c07a4e56cb20866c889228b6bcf0f923177b0b4eda38725c2b",
+          "ports": [
+            [
+              "                stage['waitid_observation'] = observed\n",
+              "                stage['waitid_observation'] = observed\n                stage['terminal_waitid_query_phase'] = 'before_snapshot'\n"
+            ],
+            [
+              "                if observed['waitable']:\n",
+              "                if (not observed['waitable'] and len(rows) == 1\n                        and rows[0]['pid'] == proc.pid and rows[0].get('state') == 'Z'\n                        and type(rows[0].get('rss_bytes')) is int and rows[0]['rss_bytes'] == 0\n                        and rows[0].get('verified_terminated_zombie') is True\n                        and rows[0].get('terminal_errors') == []):\n                    # The original snapshot is already terminal. Acquire its\n                    # exit event once, without waiting, reaping or retrying a\n                    # live/unreadable owner. The complete predicate below must\n                    # still recompute both samples and every observed field.\n                    stage['pre_terminal_waitid_observation'] = observed\n                    stage['terminal_waitid_query_phase'] = 'after_terminal_snapshot'\n                    observed = cache_split_waitable_exit(proc.pid)\n                    stage['waitid_observation'] = observed\n                    assert observed['waitable'], 'Terminal owner lacks a waitable exit event'\n\n                if observed['waitable']:\n"
+            ],
+            [
+              "                    assert launch['returned_at'] <= observed['before'] <= observed['after'] <= rows[0]['observed_at'], 'Child exit observation order drift'\n",
+              "                    if stage['terminal_waitid_query_phase'] == 'after_terminal_snapshot':\n                        initial = stage['pre_terminal_waitid_observation']\n                        assert (launch['returned_at'] <= initial['before'] <= initial['after']\n                            <= rows[0]['observed_at'] <= rows[0]['rechecked_at']\n                            <= observed['before'] <= observed['after'] <= time.time()), 'Terminal exit observation order drift'\n                    else:\n                        assert launch['returned_at'] <= observed['before'] <= observed['after'] <= rows[0]['observed_at'], 'Child exit observation order drift'\n"
+            ]
+          ]
+        },
+        "curvature/scripts/test_chart_port_ci.py": {
+          "before_sha256": "ca3a1f8e3123dc5b594f480db42776fee1ee187bd969eae4571b07f66ac1c052",
+          "after_sha256": "8a8b9e60b2b8b9f4d49fd99cea4d49289243da1831a7404274f8bf033e5709d9",
+          "ports": [
+            [
+              "state={'done':False,'waited':False}",
+              "state={'done':False,'waited':False,'queries':0}"
+            ],
+            [
+              "                if state['done'] or scenario=='terminal':\n                    state['done']=True",
+              "                if state['done'] or scenario=='terminal' or scenario.startswith('post_terminal_'):\n                    state['done']=True"
+            ],
+            [
+              "                return row\n            def waitid(kind,pid,options):",
+              "                if scenario=='post_terminal_initial_R':row['state']='R'\n                if scenario=='post_terminal_bad_image':row['exe']='/official/lean'\n                return row\n            def waitid(kind,pid,options):"
+            ],
+            [
+              "                if scenario=='poll_error':raise OSError('finite poll failure')\n                if state['done'] or scenario=='terminal':",
+              "                if scenario=='poll_error':raise OSError('finite poll failure')\n                state['queries']+=1\n                if scenario.startswith('post_terminal_') and state['queries']==1:return None\n                if scenario=='post_terminal_none':return None\n                if state['done'] or scenario=='terminal':"
+            ],
+            [
+              "            if scenario in ('success','terminal'):\n",
+              "            if scenario in ('success','terminal','post_terminal_success'):\n"
+            ],
+            [
+              "                    'wait_mismatch':(AssertionError,'Reaped child status differs from waitid'),",
+              "                    'wait_mismatch':(AssertionError,'Reaped child status differs from waitid'),\n                    'post_terminal_none':(AssertionError,'Terminal owner lacks a waitable exit event'),\n                    'post_terminal_initial_R':(AssertionError,'Terminal owner lacks launch/exit proof'),\n                    'post_terminal_bad_image':(AssertionError,''),"
+            ],
+            [
+              "            if scenario=='rss':self.assertGreater(record['stages'][0]['peak_rss_bytes'],LIMIT)",
+              "            if scenario.startswith('post_terminal_'):\n                self.assertEqual(state['queries'],1 if scenario=='post_terminal_initial_R' else 2)\n                observed=record['stages'][0]\n                if scenario!='post_terminal_initial_R':\n                    self.assertFalse(observed['pre_terminal_waitid_observation']['waitable'])\n                    self.assertEqual(observed['terminal_waitid_query_phase'],'after_terminal_snapshot')\n                if scenario=='post_terminal_success':\n                    self.assertTrue(observed['waitid_observation']['waitable'])\n                    self.assertEqual(observed['owned_process_snapshot'][0]['state'],'Z')\n                    self.assertEqual(observed['status'],'RETURNED')\n                if scenario=='post_terminal_initial_R':\n                    self.assertEqual(observed['owned_process_snapshot'][0]['state'],'R')\n                    self.assertNotIn('pre_terminal_waitid_observation',observed)\n                if scenario=='post_terminal_bad_image':\n                    self.assertEqual(observed['owned_process_snapshot'][0]['exe'],'/official/lean')\n            if scenario=='rss':self.assertGreater(record['stages'][0]['peak_rss_bytes'],LIMIT)"
+            ],
+            [
+              "    def terminal_owner_fixture(self):",
+              "    def test_terminal_transition_gets_exit_status_without_live_owner_grace(self):\n        for scenario in ('post_terminal_success','post_terminal_none',\n                         'post_terminal_initial_R','post_terminal_bad_image'):\n            with self.subTest(scenario=scenario):self.stage_case(scenario)\n\n    def terminal_owner_fixture(self):"
+            ]
+          ]
+        }
+      },
+      "policy_sha256": "907754a70c439ff3106428717534870c65bb616264a4393e6aeafb2ec77e8c4b",
+      "ordinary_chart_controls": 131,
       "historical_failure_reclassified": false,
       "native_qualification": "UNRUN",
       "Point4": "OPEN"

@@ -788,6 +788,7 @@ def cache_split_tool_stage(argv, label, env, deadline, stdin_path=None):
                 # needed by the terminal proof. Observe first, retaining it.
                 observed = cache_split_waitable_exit(proc.pid)
                 stage['waitid_observation'] = observed
+                stage['terminal_waitid_query_phase'] = 'before_snapshot'
                 rows = []; rss = 0
                 for path in Path('/proc').iterdir():
                     if not path.name.isdigit(): continue
@@ -799,9 +800,30 @@ def cache_split_tool_stage(argv, label, env, deadline, stdin_path=None):
                 stage['owned_process_snapshot'] = rows
                 stage['peak_rss_bytes'] = max(stage['peak_rss_bytes'], rss)
                 assert rss <= LIMIT, 'Acquisition exceeds original 6GiB RSS bound'
+                if (not observed['waitable'] and len(rows) == 1
+                        and rows[0]['pid'] == proc.pid and rows[0].get('state') == 'Z'
+                        and type(rows[0].get('rss_bytes')) is int and rows[0]['rss_bytes'] == 0
+                        and rows[0].get('verified_terminated_zombie') is True
+                        and rows[0].get('terminal_errors') == []):
+                    # The original snapshot is already terminal. Acquire its
+                    # exit event once, without waiting, reaping or retrying a
+                    # live/unreadable owner. The complete predicate below must
+                    # still recompute both samples and every observed field.
+                    stage['pre_terminal_waitid_observation'] = observed
+                    stage['terminal_waitid_query_phase'] = 'after_terminal_snapshot'
+                    observed = cache_split_waitable_exit(proc.pid)
+                    stage['waitid_observation'] = observed
+                    assert observed['waitable'], 'Terminal owner lacks a waitable exit event'
+
                 if observed['waitable']:
                     assert len(rows) == 1 and rows[0]['pid'] == proc.pid, 'Unexpected/absent acquisition process'
-                    assert launch['returned_at'] <= observed['before'] <= observed['after'] <= rows[0]['observed_at'], 'Child exit observation order drift'
+                    if stage['terminal_waitid_query_phase'] == 'after_terminal_snapshot':
+                        initial = stage['pre_terminal_waitid_observation']
+                        assert (launch['returned_at'] <= initial['before'] <= initial['after']
+                            <= rows[0]['observed_at'] <= rows[0]['rechecked_at']
+                            <= observed['before'] <= observed['after'] <= time.time()), 'Terminal exit observation order drift'
+                    else:
+                        assert launch['returned_at'] <= observed['before'] <= observed['after'] <= rows[0]['observed_at'], 'Child exit observation order drift'
                     # Always use the complete terminal predicate here, including
                     # when an earlier image observation happened to be stable.
                     terminal_exit = observed['exit_code']

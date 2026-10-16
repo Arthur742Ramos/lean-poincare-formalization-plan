@@ -744,7 +744,7 @@ EVIDENCE_PATHS = {'inherited-probes/contraction.log', 'inherited-probes/chosen_l
 import hashlib as _composition_hashlib, pathlib as _composition_pathlib, stat as _composition_stat, sys as _composition_sys
 _composition_file = _composition_pathlib.Path(__file__).resolve().parents[2] / 'curvature/scripts/point4_smooth_master_composition.py'
 assert _composition_stat.S_ISREG(_composition_file.lstat().st_mode) and not _composition_file.lstat().st_mode & 0o111
-assert _composition_hashlib.sha256(_composition_file.read_bytes()).hexdigest() == '60a5287fadf6fca3e5ef126e2e16d6f173c0170d3700265004ebcd3e8fbb00ed', 'Composition executable binding changed'
+assert _composition_hashlib.sha256(_composition_file.read_bytes()).hexdigest() == '8f8034056f61e0c4be2a5832e843d892cdb997bb58d99a0d274fa12e71efff18', 'Composition executable binding changed'
 _composition_sys.modules.setdefault('point4_weighted_hessian_release_guard', _composition_sys.modules[__name__])
 import point4_smooth_master_composition as _smooth_master
 _smooth_master.install_weighted(globals())

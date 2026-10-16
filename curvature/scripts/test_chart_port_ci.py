@@ -2285,7 +2285,7 @@ class CachePhaseSplitControls(unittest.TestCase):
 
     def stage_case(self, scenario):
         import types
-        ns=self.api();events=[];record={'stages':[]};state={'done':False,'waited':False}
+        ns=self.api();events=[];record={'stages':[]};state={'done':False,'waited':False,'queries':0}
         with tempfile.TemporaryDirectory() as d:
             root=Path(d).resolve();procroot=root/'proc';procroot.mkdir()
             image_file=root/'finite-image';image_file.write_bytes(b'finite image, never executed')
@@ -2321,19 +2321,24 @@ class CachePhaseSplitControls(unittest.TestCase):
                 row=dict(pid=70,session=70,pgrp=70,argv=argv,stable=True,errors=[],exe=argv[0],image_identity=image,
                          recheck=dict(exe=argv[0],image_identity=image))
                 if scenario=='unknown':row.update(stable=False,errors=[{'type':'FileNotFoundError'}]);row.pop('exe')
-                if state['done'] or scenario=='terminal':
+                if state['done'] or scenario=='terminal' or scenario.startswith('post_terminal_'):
                     state['done']=True
                     row=dict(pid=70,ppid=1,pgrp=70,session=70,starttime_ticks=123,state='Z',rss_bytes=0,
                              observed_at=20,stable=False,errors=[{'type':'FileNotFoundError'}],
                              verified_terminated_zombie=True,terminal_errors=[],rechecked_at=20)
                     sample=dict(pid=70,ppid=1,pgrp=70,session=70,starttime_ticks=123,state='Z',rss_bytes=0,observed_at=20)
                     row['terminal_samples']=[dict(sample),dict(sample)];row['terminal_recheck']=dict(sample)
+                if scenario=='post_terminal_initial_R':row['state']='R'
+                if scenario=='post_terminal_bad_image':row['exe']='/official/lean'
                 return row
             def waitid(kind,pid,options):
                 events.append(('waitid',kind,pid,options))
                 self.assertFalse(state['waited'])
                 self.assertEqual((kind,pid,options),(1,70,13))
                 if scenario=='poll_error':raise OSError('finite poll failure')
+                state['queries']+=1
+                if scenario.startswith('post_terminal_') and state['queries']==1:return None
+                if scenario=='post_terminal_none':return None
                 if state['done'] or scenario=='terminal':
                     return types.SimpleNamespace(si_pid=70,si_uid=1000,si_signo=17,si_code=1,si_status=0)
                 return None
@@ -2384,7 +2389,7 @@ class CachePhaseSplitControls(unittest.TestCase):
             no_process={'popen_error','pre_resource','pre_save','pre_path'}
             if scenario not in no_process:
                 self.assertIn(('killpg',70),events);self.assertIn(('wait',10),events)
-            if scenario in ('success','terminal'):
+            if scenario in ('success','terminal','post_terminal_success'):
                 self.assertIsNone(failure);self.assertEqual(result[0],0);self.assertEqual(len(result[2]),131072)
                 self.assertEqual(record['stages'][0]['remaining_session_pids'],[])
                 self.assertEqual(record['stages'][0]['resources_PRE'],record['stages'][0]['resources_POST'])
@@ -2402,6 +2407,9 @@ class CachePhaseSplitControls(unittest.TestCase):
                     'fd_close':(OSError,'finite fd close failure'),
                     'wait_error':(OSError,'finite wait failure'),
                     'wait_mismatch':(AssertionError,'Reaped child status differs from waitid'),
+                    'post_terminal_none':(AssertionError,'Terminal owner lacks a waitable exit event'),
+                    'post_terminal_initial_R':(AssertionError,'Terminal owner lacks launch/exit proof'),
+                    'post_terminal_bad_image':(AssertionError,''),
                     'pre_resource':(OSError,'finite resource PRE failure'),
                     'pre_save':(OSError,'finite initial save failure'),
                     'pre_path':(AssertionError,'finite output path failure')}[scenario]
@@ -2415,6 +2423,21 @@ class CachePhaseSplitControls(unittest.TestCase):
                 self.assertLess(events.index(('killpg',70)),events.index(('wait',10)))
                 self.assertLess(events.index(('wait',10)),events.index(('tool_POST',)))
                 self.assertEqual(events.count(('wait',10)),1)
+            if scenario.startswith('post_terminal_'):
+                self.assertEqual(state['queries'],1 if scenario=='post_terminal_initial_R' else 2)
+                observed=record['stages'][0]
+                if scenario!='post_terminal_initial_R':
+                    self.assertFalse(observed['pre_terminal_waitid_observation']['waitable'])
+                    self.assertEqual(observed['terminal_waitid_query_phase'],'after_terminal_snapshot')
+                if scenario=='post_terminal_success':
+                    self.assertTrue(observed['waitid_observation']['waitable'])
+                    self.assertEqual(observed['owned_process_snapshot'][0]['state'],'Z')
+                    self.assertEqual(observed['status'],'RETURNED')
+                if scenario=='post_terminal_initial_R':
+                    self.assertEqual(observed['owned_process_snapshot'][0]['state'],'R')
+                    self.assertNotIn('pre_terminal_waitid_observation',observed)
+                if scenario=='post_terminal_bad_image':
+                    self.assertEqual(observed['owned_process_snapshot'][0]['exe'],'/official/lean')
             if scenario=='rss':self.assertGreater(record['stages'][0]['peak_rss_bytes'],LIMIT)
             if scenario=='terminal':
                 self.assertEqual(record['stages'][0]['terminal_owner_proof']['classification'],'PROVEN_TERMINAL_DIRECT_TOOL_OWNER')
@@ -2489,6 +2512,11 @@ class CachePhaseSplitControls(unittest.TestCase):
     def test_actual_waitid_terminal_stage_reaps_once_and_matches_status(self):
         self.stage_case('terminal')
         self.stage_case('wait_mismatch')
+
+    def test_terminal_transition_gets_exit_status_without_live_owner_grace(self):
+        for scenario in ('post_terminal_success','post_terminal_none',
+                         'post_terminal_initial_R','post_terminal_bad_image'):
+            with self.subTest(scenario=scenario):self.stage_case(scenario)
 
     def terminal_owner_fixture(self):
         import contextlib
