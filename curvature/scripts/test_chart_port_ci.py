@@ -2304,11 +2304,9 @@ class CachePhaseSplitControls(unittest.TestCase):
             class Proc:
                 pid=70;returncode=None
                 def poll(self):
-                    if scenario=='poll_error':raise OSError('finite poll failure')
-                    if state['done']:self.returncode=0;return 0
-                    return None
+                    raise AssertionError('Premature acquisition reap')
                 def wait(self,timeout):
-                    events.append(('wait',timeout));state['waited']=True;self.returncode=0
+                    events.append(('wait',timeout));assert self.returncode is None;state['waited']=True;self.returncode=7 if scenario=='wait_mismatch' else 0
                     if scenario=='wait_error':raise OSError('finite wait failure')
                     return 0
             def popen(actual,**kwargs):
@@ -2323,7 +2321,7 @@ class CachePhaseSplitControls(unittest.TestCase):
                 row=dict(pid=70,session=70,pgrp=70,argv=argv,stable=True,errors=[],exe=argv[0],image_identity=image,
                          recheck=dict(exe=argv[0],image_identity=image))
                 if scenario=='unknown':row.update(stable=False,errors=[{'type':'FileNotFoundError'}]);row.pop('exe')
-                if scenario=='terminal':
+                if state['done'] or scenario=='terminal':
                     state['done']=True
                     row=dict(pid=70,ppid=1,pgrp=70,session=70,starttime_ticks=123,state='Z',rss_bytes=0,
                              observed_at=20,stable=False,errors=[{'type':'FileNotFoundError'}],
@@ -2331,6 +2329,14 @@ class CachePhaseSplitControls(unittest.TestCase):
                     sample=dict(pid=70,ppid=1,pgrp=70,session=70,starttime_ticks=123,state='Z',rss_bytes=0,observed_at=20)
                     row['terminal_samples']=[dict(sample),dict(sample)];row['terminal_recheck']=dict(sample)
                 return row
+            def waitid(kind,pid,options):
+                events.append(('waitid',kind,pid,options))
+                self.assertFalse(state['waited'])
+                self.assertEqual((kind,pid,options),(1,70,13))
+                if scenario=='poll_error':raise OSError('finite poll failure')
+                if state['done'] or scenario=='terminal':
+                    return types.SimpleNamespace(si_pid=70,si_uid=1000,si_signo=17,si_code=1,si_status=0)
+                return None
             probes=[]
             def resources():
                 probes.append(1)
@@ -2363,8 +2369,10 @@ class CachePhaseSplitControls(unittest.TestCase):
                       cache_split_open_tool=opened,cache_split_tool_POST=post,
                       cache_split_resource_seal=resources,owned_process_identity=observe,
                       os=types.SimpleNamespace(name='posix',sysconf=lambda _:4096,close=close,getpid=lambda:1,fstat=os.fstat,
+                         P_PID=1,WEXITED=4,WNOHANG=1,WNOWAIT=8,CLD_EXITED=1,CLD_KILLED=2,CLD_DUMPED=3,
+                         getuid=lambda:1000,waitid=waitid,
                          killpg=lambda pid,sig:events.append(('killpg',pid))),
-                      signal=types.SimpleNamespace(SIGKILL=9),
+                      signal=types.SimpleNamespace(SIGKILL=9,SIGCHLD=17,NSIG=65),
                       subprocess=types.SimpleNamespace(Popen=popen,DEVNULL=-3),
                       time=types.SimpleNamespace(time=lambda:20,monotonic=lambda:101 if scenario=='timeout' and record['stages'] else 10,
                          sleep=lambda delay:state.update(done=True)))
@@ -2393,6 +2401,7 @@ class CachePhaseSplitControls(unittest.TestCase):
                     'tool_post':(OSError,'finite tool POST failure'),
                     'fd_close':(OSError,'finite fd close failure'),
                     'wait_error':(OSError,'finite wait failure'),
+                    'wait_mismatch':(AssertionError,'Reaped child status differs from waitid'),
                     'pre_resource':(OSError,'finite resource PRE failure'),
                     'pre_save':(OSError,'finite initial save failure'),
                     'pre_path':(AssertionError,'finite output path failure')}[scenario]
@@ -2405,12 +2414,81 @@ class CachePhaseSplitControls(unittest.TestCase):
                 self.assertLess(events.index(('spawn',argv)),events.index(('killpg',70)))
                 self.assertLess(events.index(('killpg',70)),events.index(('wait',10)))
                 self.assertLess(events.index(('wait',10)),events.index(('tool_POST',)))
+                self.assertEqual(events.count(('wait',10)),1)
             if scenario=='rss':self.assertGreater(record['stages'][0]['peak_rss_bytes'],LIMIT)
             if scenario=='terminal':
                 self.assertEqual(record['stages'][0]['terminal_owner_proof']['classification'],'PROVEN_TERMINAL_DIRECT_TOOL_OWNER')
                 self.assertEqual(record['stages'][0]['terminal_owner_proof']['exit_code'],0)
                 self.assertTrue(record['stages'][0]['owner_reaped'])
                 self.assertEqual(record['stages'][0]['status'],'RETURNED')
+
+    def waitid_fixture(self, event='default'):
+        ns=self.api();calls=[]
+        if event=='default':
+            event=types.SimpleNamespace(si_pid=70,si_uid=1000,si_signo=17,si_code=1,si_status=0)
+        def waitid(kind,pid,options):
+            calls.append((kind,pid,options))
+            if isinstance(event,BaseException):raise event
+            return event
+        ns.update(os=types.SimpleNamespace(P_PID=1,WEXITED=4,WNOHANG=1,WNOWAIT=8,
+                  CLD_EXITED=1,CLD_KILLED=2,CLD_DUMPED=3,getuid=lambda:1000,waitid=waitid),
+                  signal=types.SimpleNamespace(SIGCHLD=17,NSIG=65),
+                  time=types.SimpleNamespace(time=lambda:20))
+        return ns,calls,event
+
+    def test_waitid_exact_child_nonblocking_nonreaping_and_status(self):
+        for code,status,expected in ((1,0,0),(1,7,7),(2,9,-9),(3,11,-11)):
+            ns,calls,event=self.waitid_fixture();event.si_code=code;event.si_status=status
+            observed=ns['cache_split_waitable_exit'](70)
+            self.assertEqual(calls,[(1,70,13)])
+            self.assertTrue(observed['waitable']);self.assertEqual(observed['exit_code'],expected)
+            self.assertEqual(observed['event']['si_pid'],70)
+
+    def test_waitid_none_is_explicitly_unwaitable_not_success(self):
+        ns,calls,_=self.waitid_fixture(None)
+        observed=ns['cache_split_waitable_exit'](70)
+        self.assertFalse(observed['waitable']);self.assertNotIn('exit_code',observed)
+        self.assertEqual(calls,[(1,70,13)])
+
+    def test_waitid_failures_and_reaped_child_cannot_be_completion(self):
+        for error in (ChildProcessError('already reaped'),OSError('unreadable child')):
+            ns,calls,_=self.waitid_fixture(error)
+            with self.assertRaises(type(error)):ns['cache_split_waitable_exit'](70)
+            self.assertEqual(len(calls),1)
+
+    def test_waitid_identity_signal_code_and_status_are_exact(self):
+        for key,value in (('si_pid',71),('si_pid',True),('si_uid',0),('si_signo',9),
+                          ('si_code',4),('si_code',True),('si_status',False),
+                          ('si_status',-1),('si_status',256)):
+            ns,_,event=self.waitid_fixture();setattr(event,key,value)
+            with self.subTest(key=key,value=value),self.assertRaises(AssertionError):
+                ns['cache_split_waitable_exit'](70)
+        for status in (0,65,-1):
+            ns,_,event=self.waitid_fixture();event.si_code=2;event.si_status=status
+            with self.assertRaises(AssertionError):ns['cache_split_waitable_exit'](70)
+
+    def test_waitid_owner_and_clock_are_well_formed(self):
+        for pid in (0,-1,True,'70'):
+            ns,calls,_=self.waitid_fixture()
+            with self.assertRaises(AssertionError):ns['cache_split_waitable_exit'](pid)
+            self.assertEqual(calls,[])
+        for times in ((21,20),(float('nan'),20),(20,float('inf'))):
+            ns,_,_=self.waitid_fixture();clock=iter(times)
+            ns['time']=types.SimpleNamespace(time=lambda:next(clock))
+            with self.assertRaises(AssertionError):ns['cache_split_waitable_exit'](70)
+
+    def test_actual_acquisition_never_polls_before_terminal_proof(self):
+        fn=next(n for n in TREE.body if isinstance(n,ast.FunctionDef)and n.name=='cache_split_tool_stage')
+        calls=[n for n in ast.walk(fn)if isinstance(n,ast.Call)]
+        self.assertFalse(any(isinstance(n.func,ast.Attribute)and n.func.attr=='poll'for n in calls))
+        self.assertFalse(any(isinstance(n,ast.Assign)and any(isinstance(t,ast.Attribute)
+            and t.attr=='returncode'for t in n.targets)for n in ast.walk(fn)))
+        waits=[n for n in calls if isinstance(n.func,ast.Attribute)and n.func.attr=='wait']
+        self.assertEqual(len(waits),1)
+
+    def test_actual_waitid_terminal_stage_reaps_once_and_matches_status(self):
+        self.stage_case('terminal')
+        self.stage_case('wait_mismatch')
 
     def terminal_owner_fixture(self):
         import contextlib

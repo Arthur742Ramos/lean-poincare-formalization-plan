@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "05bb196a1e98dd25aa9b7fe79067e6bf4fe5d43f",
-      "final_sha256": "a4dd54089b9b308c643955042c03d314cd40e90af763f3c30ab9a97920a48fd5",
+      "final_blob": "9fa5e2b4ef78568b8696ffef9ba33c1aead68f46",
+      "final_sha256": "6258fd7eaf328b97d7cd9a582a9de7b009b8876609839d776303d64e68c0b276",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "97db71093b47709309ec367527dc12ed0bfe9db7",
-      "final_sha256": "0139f7f2d5ecab5fa41fab0c051fd0ca24321e654f08e8b5316dd80f70bdf22f",
+      "final_blob": "504a0077329700938934bf03367cf01eae0dfc7d",
+      "final_sha256": "e9d8fdf2bf9ea2c58d88ff9071fd3b0366e8c18c4fd1ef0eec1b24f920311e1a",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "77599e40e7ed8125212636215b637ffb51dc1d76",
-      "final_sha256": "3fc9612e80d59b71ed5809d61e773b8d98ef59a1a359ca9de55d57ed776904df",
+      "final_blob": "71e9d81e7b531c3383c7e937dde2e7e44d128660",
+      "final_sha256": "299937cb3658cc553588ea776e5e7080571e26297b7c3b9aedc2edd6c11d6bdb",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "9d2c58f7808de6d6ed1e9a4035c144f81809f237",
-      "final_sha256": "f641fa7358ae0ef4c5c76a95e016d592318747d9c26b0309ead2decc8f5d11ac",
+      "final_blob": "8a6c2c94230ad1387c43f6346ec9e316d6099316",
+      "final_sha256": "577cfe34f51eb79c941fb3605adc5f7ccde675ad6d9954f05e8272664b12d2e8",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "8da169c73c24c94448bbc782b94d39c8ac641929",
-      "final_sha256": "b94385ca813c7e135dc93a7fc1f01207e81f54fed8a2a799e41c7e1cafa88b5d",
+      "final_blob": "f24ca1ef619ea68be5322abe47273b5ebc70651d",
+      "final_sha256": "12788403f6c71d43024165a9933969d43ee64f10e0080606ab49171770eff500",
       "mode": "100644",
       "count": 1
     }
@@ -31079,11 +31079,11 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "81293975da32eeeb47088c187951f4cfd173b68c"
+      "1882d563518ab5bd8b0f3671c4b303255d08fa23"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
-      "6c4dbd3277a3c28769ce59ae2529f486ed028c7e"
+      "0b6bef586fd9639986e6e319a36ebed683b67011"
     ],
     "curvature/scripts/fake-landrun.sh": [
       "100755",
@@ -31135,7 +31135,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "d649b33bb70bc2ecf62486b496762a20147aeb6d"
+      "9e3915c90968380eda24477fad07570e8897b9f2"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31143,7 +31143,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "3a67d4da6e5057e62795e812c69c9631ba8d6d9f"
+      "efe29f807920adaa697c4b6344c139f0149e93ec"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31167,15 +31167,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "05bb196a1e98dd25aa9b7fe79067e6bf4fe5d43f"
+      "9fa5e2b4ef78568b8696ffef9ba33c1aead68f46"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "3ad992982a06a1a1d6e0e8accdae6d566ed7fc83"
+      "dc87cf7a07d8d16debfd0df49366bb19afea91ff"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "2c2e7a04ee1148a0bf4f314e142c67b173740844"
+      "295f30ad0ef9a458ef1f7f5e15878405205e7a70"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31255,11 +31255,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "fe5c9d6e5b7eeec42c312cd5be8189880401a78a"
+      "d116cb9c7a50aa4e6807c68a38cdb741c7b9bae1"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "d01f443592f4c8c3bd6ae217a1cf58698c33e9cf"
+      "66d0d68b3c5eb1d290c5b8c124929fbc0463123b"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31335,7 +31335,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "97db71093b47709309ec367527dc12ed0bfe9db7"
+      "504a0077329700938934bf03367cf01eae0dfc7d"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31371,15 +31371,15 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "77599e40e7ed8125212636215b637ffb51dc1d76"
+      "71e9d81e7b531c3383c7e937dde2e7e44d128660"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "9d2c58f7808de6d6ed1e9a4035c144f81809f237"
+      "8a6c2c94230ad1387c43f6346ec9e316d6099316"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "23c525a319780473bea1c6ddcfbf0deccfec29be"
+      "0e486d2151935a470ab06bd5b83df5aa2ec0e5db"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
@@ -31399,7 +31399,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "dea8a66729dee4ef77b4eccdc5474cc0a2f17712"
+      "247d16bec35810bd0701b24c05203e0bd7085f2a"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31407,7 +31407,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "8096f6fe5cb850ce1abc9cdefdebb288dba75eee"
+      "63347f5c789b9db61468fb6234cfe85b04041068"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31419,7 +31419,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "8da169c73c24c94448bbc782b94d39c8ac641929"
+      "f24ca1ef619ea68be5322abe47273b5ebc70651d"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -31435,7 +31435,7 @@
     ],
     "curvature/scripts/test_chart_port_ci.py": [
       "100644",
-      "c178c7e794f67e61b2827d7c24ff57abc836045f"
+      "4a0b65701a84444d193ce367e470af3c7a8bc70b"
     ],
     "curvature/scripts/verify-comparator.sh": [
       "100755",
@@ -82348,6 +82348,83 @@
       "chart_controls": 123,
       "original_explicit_build_target_union": 74,
       "qualification": "UNRUN_SOURCE_ONLY",
+      "Point4": "OPEN"
+    },
+    "chart_nonreaping_waitid_owner": {
+      "scope": "Exact-child nonreaping waitid before strict live or fresh terminal ownership checks; no live-race exemption, retry or grace; original resource guards retained",
+      "baseline_head": "87fbab3815eedf1c9bf1c98789c6040ddb3cb41a",
+      "baseline_tree": "7ed6504875e11599c8018c4add8e172a43989382",
+      "current_paths": 2191,
+      "sources": {
+        "curvature/scripts/chart_port_ci.py": {
+          "before_sha256": "92b089c970fc24656ac5afbaa2f029dae705948c302c731d1b6512851c9a90f2",
+          "after_sha256": "b2e807826058eb22523fdbcab9f37c1c5eed43a1ab37dac63204cc5c0c27808c",
+          "ports": [
+            [
+              "def cache_split_resource_seal():",
+              "def cache_split_waitable_exit(owner_pid):\n    \"\"\"Observe only this direct child's exit, without reaping or waiting.\"\"\"\n    assert type(owner_pid) is int and owner_pid > 0\n    options = os.WEXITED | os.WNOHANG | os.WNOWAIT\n    before = time.time()\n    event = os.waitid(os.P_PID, owner_pid, options)\n    after = time.time()\n    assert all(type(value) in (int, float) and 0 < value < float('inf')\n               for value in (before, after)) and before <= after, 'Child exit clock drift'\n    observation = dict(owner_pid=owner_pid, idtype=os.P_PID, options=options,\n                       before=before, after=after, waitable=False)\n    if event is None:\n        return observation\n    fields = {key: getattr(event, key) for key in\n              ('si_pid', 'si_uid', 'si_signo', 'si_code', 'si_status')}\n    assert all(type(value) is int for value in fields.values()), 'Malformed child exit observation'\n    assert fields['si_pid'] == owner_pid and fields['si_uid'] == os.getuid(), 'Child exit identity drift'\n    assert fields['si_signo'] == signal.SIGCHLD, 'Child exit signal drift'\n    code, status = fields['si_code'], fields['si_status']\n    if code == os.CLD_EXITED:\n        assert 0 <= status <= 255, 'Child exit status drift'\n        exit_code = status\n    else:\n        assert code in (os.CLD_KILLED, os.CLD_DUMPED), 'Child is not terminated'\n        assert 0 < status < signal.NSIG, 'Child termination signal drift'\n        exit_code = -status\n    observation.update(waitable=True, event=fields, exit_code=exit_code)\n    return observation\n\n\ndef cache_split_resource_seal():"
+            ],
+            [
+              "start = time.monotonic(); proc = None; fd = None; tool = None; pre = None",
+              "start = time.monotonic(); proc = None; fd = None; tool = None; pre = None; terminal_exit = None"
+            ],
+            [
+              "            while proc.poll() is None:\n                rows = []; rss = 0\n                for path in Path('/proc').iterdir():\n                    if not path.name.isdigit(): continue\n                    try: info = (path / 'stat').read_text().rsplit(')', 1)[1].split()\n                    except (FileNotFoundError, ProcessLookupError, PermissionError): continue\n                    if int(info[3]) != proc.pid: continue\n                    rss += int(info[21]) * os.sysconf('SC_PAGE_SIZE')\n                    rows.append(owned_process_identity(path, info))\n                stage['owned_process_snapshot'] = rows\n                stage['peak_rss_bytes'] = max(stage['peak_rss_bytes'], rss)\n                assert rss <= LIMIT, 'Acquisition exceeds original 6GiB RSS bound'\n                # Inspect every observed image even if waitpid now reports\n                # completion. An unreadable live owner never earns an exemption.\n                if rows:\n                    observed_exit = proc.poll()  # Actual same-owner nonblocking wait; no retry or grace.\n                    proof = cache_split_process_policy(rows, proc.pid, argv, tool, launch=launch, exit_code=observed_exit)\n                    if proof is not None: stage['terminal_owner_proof'] = proof\n                elif proc.poll() is None: raise RuntimeError('Live acquisition owner absent')\n                if time.monotonic() >= deadline: raise TimeoutError(label)\n                time.sleep(0.05)\n            stage.update(exit_code=proc.returncode, status='RETURNED')\n",
+              "            while True:\n                if time.monotonic() >= deadline: raise TimeoutError(label)\n                # poll() reaps a completed child and destroys the /proc identity\n                # needed by the terminal proof. Observe first, retaining it.\n                observed = cache_split_waitable_exit(proc.pid)\n                stage['waitid_observation'] = observed\n                rows = []; rss = 0\n                for path in Path('/proc').iterdir():\n                    if not path.name.isdigit(): continue\n                    try: info = (path / 'stat').read_text().rsplit(')', 1)[1].split()\n                    except (FileNotFoundError, ProcessLookupError, PermissionError): continue\n                    if int(info[3]) != proc.pid: continue\n                    rss += int(info[21]) * os.sysconf('SC_PAGE_SIZE')\n                    rows.append(owned_process_identity(path, info))\n                stage['owned_process_snapshot'] = rows\n                stage['peak_rss_bytes'] = max(stage['peak_rss_bytes'], rss)\n                assert rss <= LIMIT, 'Acquisition exceeds original 6GiB RSS bound'\n                if observed['waitable']:\n                    assert len(rows) == 1 and rows[0]['pid'] == proc.pid, 'Unexpected/absent acquisition process'\n                    assert launch['returned_at'] <= observed['before'] <= observed['after'] <= rows[0]['observed_at'], 'Child exit observation order drift'\n                    # Always use the complete terminal predicate here, including\n                    # when an earlier image observation happened to be stable.\n                    terminal_exit = observed['exit_code']\n                    proof = cache_split_terminal_owner(rows[0], proc.pid, argv, tool,\n                        launch, terminal_exit)\n                    stage['terminal_owner_proof'] = proof\n                    break\n                # No waitable event gives no exemption for unreadable live\n                # owners, missing owners, descendants or contradictory fields.\n                cache_split_process_policy(rows, proc.pid, argv, tool,\n                    launch=launch, exit_code=None)\n                time.sleep(0.05)\n            stage.update(exit_code=terminal_exit, status='RETURNED')\n"
+            ],
+            [
+              "                proc.wait(timeout=10)\n                stage.update(exit_code=proc.returncode, owner_reaped=True)",
+              "                proc.wait(timeout=10)\n                stage.update(exit_code=proc.returncode, owner_reaped=True)\n                if terminal_exit is not None:\n                    assert proc.returncode == terminal_exit, 'Reaped child status differs from waitid'"
+            ]
+          ]
+        },
+        "curvature/scripts/test_chart_port_ci.py": {
+          "before_sha256": "51bc12106fb220b0f0703c7d906815871a852030ba017fb662bf5039824b4859",
+          "after_sha256": "ca3a1f8e3123dc5b594f480db42776fee1ee187bd969eae4571b07f66ac1c052",
+          "ports": [
+            [
+              "                pid=70;returncode=None\n                def poll(self):\n                    if scenario=='poll_error':raise OSError('finite poll failure')\n                    if state['done']:self.returncode=0;return 0\n                    return None",
+              "                pid=70;returncode=None\n                def poll(self):\n                    raise AssertionError('Premature acquisition reap')"
+            ],
+            [
+              "events.append(('wait',timeout));state['waited']=True;self.returncode=0",
+              "events.append(('wait',timeout));assert self.returncode is None;state['waited']=True;self.returncode=7 if scenario=='wait_mismatch' else 0"
+            ],
+            [
+              "                if scenario=='terminal':\n                    state['done']=True",
+              "                if state['done'] or scenario=='terminal':\n                    state['done']=True"
+            ],
+            [
+              "            probes=[]\n            def resources():",
+              "            def waitid(kind,pid,options):\n                events.append(('waitid',kind,pid,options))\n                self.assertFalse(state['waited'])\n                self.assertEqual((kind,pid,options),(1,70,13))\n                if scenario=='poll_error':raise OSError('finite poll failure')\n                if state['done'] or scenario=='terminal':\n                    return types.SimpleNamespace(si_pid=70,si_uid=1000,si_signo=17,si_code=1,si_status=0)\n                return None\n            probes=[]\n            def resources():"
+            ],
+            [
+              "os=types.SimpleNamespace(name='posix',sysconf=lambda _:4096,close=close,getpid=lambda:1,fstat=os.fstat,",
+              "os=types.SimpleNamespace(name='posix',sysconf=lambda _:4096,close=close,getpid=lambda:1,fstat=os.fstat,\n                         P_PID=1,WEXITED=4,WNOHANG=1,WNOWAIT=8,CLD_EXITED=1,CLD_KILLED=2,CLD_DUMPED=3,\n                         getuid=lambda:1000,waitid=waitid,"
+            ],
+            [
+              "signal=types.SimpleNamespace(SIGKILL=9),\n                      subprocess=types.SimpleNamespace(Popen=popen,DEVNULL=-3),",
+              "signal=types.SimpleNamespace(SIGKILL=9,SIGCHLD=17,NSIG=65),\n                      subprocess=types.SimpleNamespace(Popen=popen,DEVNULL=-3),"
+            ],
+            [
+              "                    'wait_error':(OSError,'finite wait failure'),",
+              "                    'wait_error':(OSError,'finite wait failure'),\n                    'wait_mismatch':(AssertionError,'Reaped child status differs from waitid'),"
+            ],
+            [
+              "                self.assertLess(events.index(('wait',10)),events.index(('tool_POST',)))",
+              "                self.assertLess(events.index(('wait',10)),events.index(('tool_POST',)))\n                self.assertEqual(events.count(('wait',10)),1)"
+            ],
+            [
+              "    def terminal_owner_fixture(self):",
+              "    def waitid_fixture(self, event='default'):\n        ns=self.api();calls=[]\n        if event=='default':\n            event=types.SimpleNamespace(si_pid=70,si_uid=1000,si_signo=17,si_code=1,si_status=0)\n        def waitid(kind,pid,options):\n            calls.append((kind,pid,options))\n            if isinstance(event,BaseException):raise event\n            return event\n        ns.update(os=types.SimpleNamespace(P_PID=1,WEXITED=4,WNOHANG=1,WNOWAIT=8,\n                  CLD_EXITED=1,CLD_KILLED=2,CLD_DUMPED=3,getuid=lambda:1000,waitid=waitid),\n                  signal=types.SimpleNamespace(SIGCHLD=17,NSIG=65),\n                  time=types.SimpleNamespace(time=lambda:20))\n        return ns,calls,event\n\n    def test_waitid_exact_child_nonblocking_nonreaping_and_status(self):\n        for code,status,expected in ((1,0,0),(1,7,7),(2,9,-9),(3,11,-11)):\n            ns,calls,event=self.waitid_fixture();event.si_code=code;event.si_status=status\n            observed=ns['cache_split_waitable_exit'](70)\n            self.assertEqual(calls,[(1,70,13)])\n            self.assertTrue(observed['waitable']);self.assertEqual(observed['exit_code'],expected)\n            self.assertEqual(observed['event']['si_pid'],70)\n\n    def test_waitid_none_is_explicitly_unwaitable_not_success(self):\n        ns,calls,_=self.waitid_fixture(None)\n        observed=ns['cache_split_waitable_exit'](70)\n        self.assertFalse(observed['waitable']);self.assertNotIn('exit_code',observed)\n        self.assertEqual(calls,[(1,70,13)])\n\n    def test_waitid_failures_and_reaped_child_cannot_be_completion(self):\n        for error in (ChildProcessError('already reaped'),OSError('unreadable child')):\n            ns,calls,_=self.waitid_fixture(error)\n            with self.assertRaises(type(error)):ns['cache_split_waitable_exit'](70)\n            self.assertEqual(len(calls),1)\n\n    def test_waitid_identity_signal_code_and_status_are_exact(self):\n        for key,value in (('si_pid',71),('si_pid',True),('si_uid',0),('si_signo',9),\n                          ('si_code',4),('si_code',True),('si_status',False),\n                          ('si_status',-1),('si_status',256)):\n            ns,_,event=self.waitid_fixture();setattr(event,key,value)\n            with self.subTest(key=key,value=value),self.assertRaises(AssertionError):\n                ns['cache_split_waitable_exit'](70)\n        for status in (0,65,-1):\n            ns,_,event=self.waitid_fixture();event.si_code=2;event.si_status=status\n            with self.assertRaises(AssertionError):ns['cache_split_waitable_exit'](70)\n\n    def test_waitid_owner_and_clock_are_well_formed(self):\n        for pid in (0,-1,True,'70'):\n            ns,calls,_=self.waitid_fixture()\n            with self.assertRaises(AssertionError):ns['cache_split_waitable_exit'](pid)\n            self.assertEqual(calls,[])\n        for times in ((21,20),(float('nan'),20),(20,float('inf'))):\n            ns,_,_=self.waitid_fixture();clock=iter(times)\n            ns['time']=types.SimpleNamespace(time=lambda:next(clock))\n            with self.assertRaises(AssertionError):ns['cache_split_waitable_exit'](70)\n\n    def test_actual_acquisition_never_polls_before_terminal_proof(self):\n        fn=next(n for n in TREE.body if isinstance(n,ast.FunctionDef)and n.name=='cache_split_tool_stage')\n        calls=[n for n in ast.walk(fn)if isinstance(n,ast.Call)]\n        self.assertFalse(any(isinstance(n.func,ast.Attribute)and n.func.attr=='poll'for n in calls))\n        self.assertFalse(any(isinstance(n,ast.Assign)and any(isinstance(t,ast.Attribute)\n            and t.attr=='returncode'for t in n.targets)for n in ast.walk(fn)))\n        waits=[n for n in calls if isinstance(n.func,ast.Attribute)and n.func.attr=='wait']\n        self.assertEqual(len(waits),1)\n\n    def test_actual_waitid_terminal_stage_reaps_once_and_matches_status(self):\n        self.stage_case('terminal')\n        self.stage_case('wait_mismatch')\n\n    def terminal_owner_fixture(self):"
+            ]
+          ]
+        }
+      },
+      "policy_sha256": "0b4fff20a90cd48749e65610f12726db7871657e99cc7a0af0cdd39d9afd1768",
+      "ordinary_chart_controls": 130,
+      "historical_failure_reclassified": false,
+      "native_qualification": "UNRUN",
       "Point4": "OPEN"
     }
   }
