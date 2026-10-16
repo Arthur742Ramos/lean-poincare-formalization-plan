@@ -683,6 +683,36 @@ def cache_split_process_policy(rows, owner_pid, argv, tool, *, launch=None, exit
     assert Path(row['exe']).name != 'lean', 'Lean is forbidden during acquisition'
 
 
+def cache_split_waitable_exit(owner_pid):
+    """Observe only this direct child's exit, without reaping or waiting."""
+    assert type(owner_pid) is int and owner_pid > 0
+    options = os.WEXITED | os.WNOHANG | os.WNOWAIT
+    before = time.time()
+    event = os.waitid(os.P_PID, owner_pid, options)
+    after = time.time()
+    assert all(type(value) in (int, float) and 0 < value < float('inf')
+               for value in (before, after)) and before <= after, 'Child exit clock drift'
+    observation = dict(owner_pid=owner_pid, idtype=os.P_PID, options=options,
+                       before=before, after=after, waitable=False)
+    if event is None:
+        return observation
+    fields = {key: getattr(event, key) for key in
+              ('si_pid', 'si_uid', 'si_signo', 'si_code', 'si_status')}
+    assert all(type(value) is int for value in fields.values()), 'Malformed child exit observation'
+    assert fields['si_pid'] == owner_pid and fields['si_uid'] == os.getuid(), 'Child exit identity drift'
+    assert fields['si_signo'] == signal.SIGCHLD, 'Child exit signal drift'
+    code, status = fields['si_code'], fields['si_status']
+    if code == os.CLD_EXITED:
+        assert 0 <= status <= 255, 'Child exit status drift'
+        exit_code = status
+    else:
+        assert code in (os.CLD_KILLED, os.CLD_DUMPED), 'Child is not terminated'
+        assert 0 < status < signal.NSIG, 'Child termination signal drift'
+        exit_code = -status
+    observation.update(waitable=True, event=fields, exit_code=exit_code)
+    return observation
+
+
 def cache_split_resource_seal():
     group = next(x.split(':', 2)[2] for x in Path('/proc/self/cgroup').read_text().splitlines() if x.startswith('0::'))
     cg = Path('/sys/fs/cgroup') / group.lstrip('/')
@@ -725,7 +755,7 @@ def cache_split_tool_POST(fd, tool):
 
 def cache_split_tool_stage(argv, label, env, deadline, stdin_path=None):
     assert os.name == 'posix' and deadline > time.monotonic()
-    start = time.monotonic(); proc = None; fd = None; tool = None; pre = None
+    start = time.monotonic(); proc = None; fd = None; tool = None; pre = None; terminal_exit = None
     stage = dict(argv=argv, label=label, status='STARTING',
                  zero_Lean_required=True, peak_rss_bytes=0)
     receipt['stages'].append(stage)
@@ -752,7 +782,13 @@ def cache_split_tool_stage(argv, label, env, deadline, stdin_path=None):
                 tool_identity=tool['identity'], tool_sha256=tool['sha256'],
                 started_at=launch_started, returned_at=time.time())
             stage.update(pid=proc.pid, status='RUNNING', authenticated_launch=launch); save()
-            while proc.poll() is None:
+            while True:
+                if time.monotonic() >= deadline: raise TimeoutError(label)
+                # poll() reaps a completed child and destroys the /proc identity
+                # needed by the terminal proof. Observe first, retaining it.
+                observed = cache_split_waitable_exit(proc.pid)
+                stage['waitid_observation'] = observed
+                stage['terminal_waitid_query_phase'] = 'before_snapshot'
                 rows = []; rss = 0
                 for path in Path('/proc').iterdir():
                     if not path.name.isdigit(): continue
@@ -764,16 +800,43 @@ def cache_split_tool_stage(argv, label, env, deadline, stdin_path=None):
                 stage['owned_process_snapshot'] = rows
                 stage['peak_rss_bytes'] = max(stage['peak_rss_bytes'], rss)
                 assert rss <= LIMIT, 'Acquisition exceeds original 6GiB RSS bound'
-                # Inspect every observed image even if waitpid now reports
-                # completion. An unreadable live owner never earns an exemption.
-                if rows:
-                    observed_exit = proc.poll()  # Actual same-owner nonblocking wait; no retry or grace.
-                    proof = cache_split_process_policy(rows, proc.pid, argv, tool, launch=launch, exit_code=observed_exit)
-                    if proof is not None: stage['terminal_owner_proof'] = proof
-                elif proc.poll() is None: raise RuntimeError('Live acquisition owner absent')
-                if time.monotonic() >= deadline: raise TimeoutError(label)
+                if (not observed['waitable'] and len(rows) == 1
+                        and rows[0]['pid'] == proc.pid and rows[0].get('state') == 'Z'
+                        and type(rows[0].get('rss_bytes')) is int and rows[0]['rss_bytes'] == 0
+                        and rows[0].get('verified_terminated_zombie') is True
+                        and rows[0].get('terminal_errors') == []):
+                    # The original snapshot is already terminal. Acquire its
+                    # exit event once, without waiting, reaping or retrying a
+                    # live/unreadable owner. The complete predicate below must
+                    # still recompute both samples and every observed field.
+                    stage['pre_terminal_waitid_observation'] = observed
+                    stage['terminal_waitid_query_phase'] = 'after_terminal_snapshot'
+                    observed = cache_split_waitable_exit(proc.pid)
+                    stage['waitid_observation'] = observed
+                    assert observed['waitable'], 'Terminal owner lacks a waitable exit event'
+
+                if observed['waitable']:
+                    assert len(rows) == 1 and rows[0]['pid'] == proc.pid, 'Unexpected/absent acquisition process'
+                    if stage['terminal_waitid_query_phase'] == 'after_terminal_snapshot':
+                        initial = stage['pre_terminal_waitid_observation']
+                        assert (launch['returned_at'] <= initial['before'] <= initial['after']
+                            <= rows[0]['observed_at'] <= rows[0]['rechecked_at']
+                            <= observed['before'] <= observed['after'] <= time.time()), 'Terminal exit observation order drift'
+                    else:
+                        assert launch['returned_at'] <= observed['before'] <= observed['after'] <= rows[0]['observed_at'], 'Child exit observation order drift'
+                    # Always use the complete terminal predicate here, including
+                    # when an earlier image observation happened to be stable.
+                    terminal_exit = observed['exit_code']
+                    proof = cache_split_terminal_owner(rows[0], proc.pid, argv, tool,
+                        launch, terminal_exit)
+                    stage['terminal_owner_proof'] = proof
+                    break
+                # No waitable event gives no exemption for unreadable live
+                # owners, missing owners, descendants or contradictory fields.
+                cache_split_process_policy(rows, proc.pid, argv, tool,
+                    launch=launch, exit_code=None)
                 time.sleep(0.05)
-            stage.update(exit_code=proc.returncode, status='RETURNED')
+            stage.update(exit_code=terminal_exit, status='RETURNED')
     except BaseException as exc:
         primary_error = exc
         stage.update(status='FAILED', error={'type': type(exc).__name__, 'message': str(exc)})
@@ -795,6 +858,8 @@ def cache_split_tool_stage(argv, label, env, deadline, stdin_path=None):
             def reap():
                 proc.wait(timeout=10)
                 stage.update(exit_code=proc.returncode, owner_reaped=True)
+                if terminal_exit is not None:
+                    assert proc.returncode == terminal_exit, 'Reaped child status differs from waitid'
             attempt('reap_owner', reap)
             def scan():
                 survivors = []
