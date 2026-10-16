@@ -1,0 +1,25 @@
+{
+  "total_count": 1,
+  "artifacts": [
+    {
+      "id": 12021496276,
+      "node_id": "MDg6QXJ0aWZhY3QxMjAyMTQ5NjI3Ng==",
+      "name": "local-chart-connection-2813ef52a21e13be08532f36ee9f26faf319da72-1",
+      "size_in_bytes": 883922056,
+      "url": "https://api.github.com/repos/Arthur742Ramos/lean-poincare-formalization-plan/actions/artifacts/12021496276",
+      "archive_download_url": "https://api.github.com/repos/Arthur742Ramos/lean-poincare-formalization-plan/actions/artifacts/12021496276/zip",
+      "expired": false,
+      "digest": "sha256:743ea30a9daf0fdd8928871d2dfce22411b470f4270acddc817bc4c3c983f716",
+      "created_at": "2026-10-16T02:31:56Z",
+      "updated_at": "2026-10-16T02:31:56Z",
+      "expires_at": "2027-01-14T02:01:12Z",
+      "workflow_run": {
+        "id": 38838232477,
+        "repository_id": 1217066549,
+        "head_repository_id": 1217066549,
+        "head_branch": "point4/joint-metric-defect-and-ci-cache-20261015",
+        "head_sha": "2813ef52a21e13be08532f36ee9f26faf319da72"
+      }
+    }
+  ]
+}

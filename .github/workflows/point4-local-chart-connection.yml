@@ -1,108 +1,105 @@
-name: Point-4 local chart connection
+name: Chart 2813 derived text evidence only
 
 on:
-  pull_request:
-    paths:
-      - "curvature/**"
-      - "hamilton-ivey-reaction/**"
-      - "docs/point4/local-chart-connection.md"
-      - ".github/workflows/point4-local-chart-connection.yml"
-      - ".github/workflows/point4-local-chart-environment-setup.yml"
   workflow_dispatch:
     inputs:
       candidate_sha:
-        description: Independently reviewed full candidate commit SHA
+        description: Original chart producer SHA, fixed by independently reviewed source
         required: true
         type: string
       expected_tree:
-        description: Independently reviewed full candidate Git tree SHA
+        description: Original chart producer tree, fixed by independently reviewed source
         required: true
         type: string
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
-  group: local-chart-connection-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}
+  group: chart2813-derived-text-evidence
   cancel-in-progress: false
 
 jobs:
-  chart_connection:
+  derived_text_projection:
     runs-on: ubuntu-24.04
-    timeout-minutes: 210
-    env:
-      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || inputs.candidate_sha }}
-      EXPECTED_TREE: ${{ inputs.expected_tree }}
-      EVENT_NAME: ${{ github.event_name }}
+    timeout-minutes: 15
     steps:
-      - name: Checkout reviewed candidate
+      - name: Checkout exact projection source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
-          ref: ${{ github.event.pull_request.head.sha || inputs.candidate_sha }}
+          ref: ${{ github.sha }}
           persist-credentials: false
-          fetch-depth: 0
-      - name: Admit exact candidate tree before running candidate code
+          fetch-depth: 1
+      - name: Admit fixed source package and fresh evidence namespace
+        env:
+          PRODUCER_SHA: ${{ inputs.candidate_sha }}
+          PRODUCER_TREE: ${{ inputs.expected_tree }}
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]
-          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-          actual_tree=$(git rev-parse 'HEAD^{tree}')
-          if test "$EVENT_NAME" = pull_request; then
-            EXPECTED_TREE="$actual_tree"
-            printf 'EXPECTED_TREE=%s\n' "$EXPECTED_TREE" >> "$GITHUB_ENV"
-          else
-            [[ "$EXPECTED_TREE" =~ ^[0-9a-f]{40}$ ]]
-            test "$actual_tree" = "$EXPECTED_TREE"
-          fi
-          test "$(git rev-parse '1664872ce762ee027b76cb515befb0ae829b2711^{tree}')" = 6d74e9612cf6e16f2d027012cede68e5e0a23483
-          git merge-base --is-ancestor 1664872ce762ee027b76cb515befb0ae829b2711 HEAD
-          python3 curvature/scripts/chart_port_candidate_check.py --expected-sha "$EXPECTED_SHA" --expected-tree "$EXPECTED_TREE"
-      - name: Test chart driver resource and setup controls
-        run: python3 -B curvature/scripts/test_chart_port_ci.py
-      - name: Install the official pinned toolchain without build or caches
-        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
-        with:
-          lake-package-directory: curvature
-          auto-config: false
-          build: false
-          test: false
-          lint: false
-          use-mathlib-cache: false
-          use-github-cache: false
-      - name: Rebuild source and probe under owned resource limits
+          test "$GITHUB_REPOSITORY" = Arthur742Ramos/lean-poincare-formalization-plan
+          test "$GITHUB_EVENT_NAME" = workflow_dispatch
+          test "$GITHUB_REF" = refs/heads/point4/chart2813-derived-text-evidence-20261016
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$PRODUCER_SHA" = 2813ef52a21e13be08532f36ee9f26faf319da72
+          test "$PRODUCER_TREE" = 13f982c1be40478cc14b523ea76ed3642fb3ae7e
+          test "$GITHUB_SHA" != "$PRODUCER_SHA"
+          command -v /usr/bin/setpriv
+          test "$(id -u)" -gt 0
+          package="$GITHUB_WORKSPACE/.github/point4-chart-text-projection"
+          test "$(sha256sum "$package/PINNED-SOURCES.sha256" | cut -d ' ' -f 1)" = a424ddf89978d0475f240d08ff616fea24e20d6d1e1450cabf4949c54e0e6ee2
+          (cd "$package" && sha256sum --check --strict PINNED-SOURCES.sha256)
+          root=/tmp/poincare-chart2813-projection
+          test ! -e "$root"
+          test ! -L "$root"
+          umask 077
+          mkdir "$root"
+          mkdir "$root/source" "$root/input" "$root/prepared-source"
+          cp -R "$package/." "$root/source/"
+          cp "$package/primary/"*.json "$root/input/"
+          mkdir -p "$root/prepared-source/curvature/scripts" "$root/prepared-source/.github/workflows"
+          cp "$package/original/chart_port_ci.py" "$root/prepared-source/curvature/scripts/chart_port_ci.py"
+          cp "$package/original/point4-local-chart-connection.yml" "$root/prepared-source/.github/workflows/point4-local-chart-connection.yml"
+          (cd "$root/source" && sha256sum --check --strict PINNED-SOURCES.sha256)
+      - name: Read fixed original artifact in separate finite transfer role
+        env:
+          PROJECTION_API_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          evidence="$RUNNER_TEMP/local-chart-connection-$EXPECTED_SHA"
-          sudo systemd-run --wait --pipe --collect \
-            --unit="chart-port-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
-            --uid="$(id -u)" --gid="$(id -g)" \
-            --working-directory="$GITHUB_WORKSPACE" \
-            --property=MemoryMax=6442450944 \
-            --property=MemorySwapMax=0 --property=CPUQuota=200% \
-            --property=OOMPolicy=kill --property=KillMode=control-group \
-            --property=RuntimeMaxSec=11700 \
-            --setenv="PATH=$PATH" \
-            --setenv="ELAN_HOME=${ELAN_HOME:-$HOME/.elan}" \
-            --setenv=PYTHONDONTWRITEBYTECODE=1 \
-            /usr/bin/python3 curvature/scripts/chart_port_ci.py \
-              --expected-sha "$EXPECTED_SHA" --expected-tree "$EXPECTED_TREE" \
-              --evidence "$evidence"
-      - name: Preserve small first compiler failure summary independently
-        if: always()
+          /usr/bin/setpriv --no-new-privs /usr/bin/python3 -I -B \
+            /tmp/poincare-chart2813-projection/source/trusted_artifact_transfer.py \
+            --source-sha 5db387e5a763a6828b7e5e501d98583410ad3f3c8e3f8d156a3aca348ad9d5b3 \
+            --projection-run "$GITHUB_RUN_ID" --projection-head "$GITHUB_SHA"
+      - name: Seal observed transfer provenance after transfer termination
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/setpriv --no-new-privs /usr/bin/python3 -I -B \
+            /tmp/poincare-chart2813-projection/source/build_projection_admission.py
+      - name: Select only text using unchanged c6 and clean environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=/tmp/poincare-chart2813-projection
+          admission_sha=$(sha256sum "$root/pure/C6-ADMISSION.json" | cut -d ' ' -f 1)
+          env -i PATH=/usr/bin:/bin LANG=C.UTF-8 \
+            /usr/bin/setpriv --no-new-privs /usr/bin/python3 -I -B \
+            "$root/source/linux_singleton_launcher.py" \
+            --admission "$root/pure/C6-ADMISSION.json" --admission-sha "$admission_sha" \
+            --output-directory "$root/pure-controller" --wall-seconds 120 --cpu-seconds 120
+      - name: Stage fixed derived text and bounded provenance allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/setpriv --no-new-privs /usr/bin/python3 -I -B \
+            /tmp/poincare-chart2813-projection/source/stage_projection_upload.py
+      - name: Upload new derived text evidence only
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: local-chart-first-compiler-failure-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}-${{ github.run_attempt }}
-          path: |
-            ${{ runner.temp }}/local-chart-connection-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}/first-compiler-failure.json
-            ${{ runner.temp }}/local-chart-connection-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}/first-compiler-failure.sha256
-          if-no-files-found: ignore
-      - name: Preserve exact candidate source and build receipts
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: local-chart-connection-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/local-chart-connection-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}
+          name: chart2813-derived-text-${{ github.sha }}-${{ github.run_attempt }}
+          path: /tmp/poincare-chart2813-projection/public
           if-no-files-found: error
+          retention-days: 14
