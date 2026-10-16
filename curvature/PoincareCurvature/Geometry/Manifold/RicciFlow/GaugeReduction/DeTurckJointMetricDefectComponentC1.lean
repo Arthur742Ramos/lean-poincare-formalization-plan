@@ -180,6 +180,7 @@ theorem contMDiffOn_joint_metricDefect_component_of_joint_metric_and_backgroundF
   rw [CovariantDerivative.metricDefectAux_apply] at hformula
   have hinner (x : M) (u v : TM x) :
       inner ℝ u v = (g p.1).inner x u v := rfl
-  simpa only [G, hinner] using hformula
+  simp only [G, hinner] at hformula ⊢
+  convert hformula using 1 <;> rfl
 
 end PoincareCurvature.GaugeFlowAssembly
