@@ -361,7 +361,7 @@ def check_inventory() -> None:
     check_inventory_sets(set(tracked_modes), untracked, physical, dependencies, git_roots)
     baseline = baseline_sources()
     for path in public_paths():
-        wanted = baseline[path][0] if path in baseline else '100644'
+        wanted = baseline[path][0] if path in baseline else ('100755' if path == 'scripts/point4_ci/command_broker.py' else '100644')
         if path in tracked_modes:
             assert tracked_modes[path] == wanted, f'Tracked executable-mode drift: {path}'
             data = (ROOT / path).read_bytes()
@@ -471,7 +471,7 @@ _curvature_sys.dont_write_bytecode = True
 _curvature_root = _curvature_pathlib.Path(__file__).resolve().parents[2]
 _curvature_helper = _curvature_root / 'curvature/scripts/point4_smooth_master_composition.py'
 assert _curvature_helper.is_file() and not _curvature_helper.is_symlink()
-assert _curvature_hashlib.sha256(_curvature_helper.read_bytes()).hexdigest() == 'a0ca0d22f4ed40e03d1406b24ac799b4d845b50ad270940609f02f6090d3be5d', "Incoming composition helper identity drift"
+assert _curvature_hashlib.sha256(_curvature_helper.read_bytes()).hexdigest() == '3b02710dd69c3571a1631852cd5e708f3dafffafc3b9893702ed496a6060451d', "Incoming composition helper identity drift"
 import point4_smooth_master_composition as _curvature_comp
 _curvature_comp.install_curvature_leaf(globals(),111)
 # END exact finite incoming-leaf-111

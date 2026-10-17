@@ -296,5 +296,129 @@ class ToolingOverlayTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, 'Original legacy whole Source'):
                 self.check()
 
+
+class BrokerModeGuardTests(unittest.TestCase):
+    """Execute actual guard functions with finite index records and real lstat modes."""
+    GUARDS = (
+        'curvature/scripts/point4_weighted_hessian_release_guard.py',
+        'curvature/scripts/point4_two_sided_heat_source_guard.py',
+        'curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py',
+        'curvature/scripts/point4_hamilton_native_source_guard.py',
+    )
+    BROKER = 'scripts/point4_ci/command_broker.py'
+
+    def functions(self, path):
+        import ast
+        import hashlib
+        import re
+        source = (PATH.parents[1] / path).read_bytes()
+        names = {'check_inventory', 'check_mode', 'check_modes', 'check_inventory_sets',
+                 'nul_records', 'nul_paths', 'git_blob_identity'}
+        nodes = [n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef) and n.name in names]
+        self.assertEqual({n.name for n in nodes}, names)
+        ns = dict(os=os, pathlib=__import__('pathlib'), stat=stat, re=re, hashlib=hashlib)
+        exec(compile(ast.Module(body=nodes, type_ignores=[]), str(PATH.parents[1] / path), 'exec'), ns)
+        return ns
+
+    def run_case(self, path, name, actual, tracked, baseline, method='check_inventory'):
+        ns = self.functions(path)
+        with tempfile.TemporaryDirectory(prefix='point4-mode-guard-') as temp:
+            root = Path(temp)
+            target = root / name
+            target.parent.mkdir(parents=True)
+            data = b'finite actual physical source\n'
+            target.write_bytes(data)
+            target.chmod(actual)
+            oid = ns['git_blob_identity'](data)
+            records = (tracked + ' ' + oid + ' 0\t' + name).encode() + b'\0'
+            def finite_git(*args):
+                if args == ('ls-files', '--stage', '-z'):
+                    return records
+                self.assertEqual(args, ('ls-files', '-z', '--others'))
+                return b''
+            def exact_public(paths):
+                self.assertEqual(set(paths), {name})
+            ns.update(ROOT=root, git=finite_git, dependency_inventory=lambda: (set(), set()),
+                      runtime_fingerprints=lambda deps: set(), generated_build_path=lambda p: False,
+                      baseline_sources=lambda: dict(baseline), public_paths=lambda: {name},
+                      runtime_path=lambda p: False, PROOFWIDGETS_FINGERPRINT='unused',
+                      UNIT_FILE_SHA256={}, SELF_PATHS=set(), check_public_paths=exact_public)
+            ns[method]()
+
+    def test_current_broker0755_actual_inventory_and_weighted_modes(self):
+        for path in self.GUARDS:
+            with self.subTest(path=path):
+                self.run_case(path, self.BROKER, 0o755, '100755', {})
+        self.run_case(self.GUARDS[0], self.BROKER, 0o755, '100755', {}, 'check_modes')
+
+    def test_broker0644_real_physical_rejected(self):
+        for path in self.GUARDS:
+            with self.subTest(path=path), self.assertRaisesRegex(AssertionError, 'Public executable-mode drift'):
+                self.run_case(path, self.BROKER, 0o644, '100755', {})
+        with self.assertRaisesRegex(AssertionError, 'Public executable-mode drift'):
+            self.run_case(self.GUARDS[0], self.BROKER, 0o644, '100755', {}, 'check_modes')
+
+    def test_broker0644_index_rejected(self):
+        for path in self.GUARDS:
+            with self.subTest(path=path), self.assertRaisesRegex(AssertionError, 'Tracked executable-mode drift'):
+                self.run_case(path, self.BROKER, 0o755, '100644', {})
+
+    def test_unknown_executable_rejected_by_actual_guards(self):
+        for path in self.GUARDS:
+            with self.subTest(path=path), self.assertRaisesRegex(AssertionError, 'Tracked executable-mode drift'):
+                self.run_case(path, 'scripts/new_unknown.py', 0o755, '100755', {})
+        with self.assertRaisesRegex(AssertionError, 'Public executable-mode drift'):
+            self.run_case(self.GUARDS[0], 'scripts/new_unknown.py', 0o755, '100755', {}, 'check_modes')
+
+    def test_inherited_baseline_mode_precedes_broker_exception(self):
+        for path in self.GUARDS:
+            with self.subTest(path=path):
+                self.run_case(path, self.BROKER, 0o644, '100644', {self.BROKER: ('100644', 'fixture')})
+                self.run_case(path, 'inherited/executable', 0o755, '100755', {'inherited/executable': ('100755', 'fixture')})
+        self.run_case(self.GUARDS[0], self.BROKER, 0o644, '100644', {self.BROKER: ('100644', 'fixture')}, 'check_modes')
+
+    def test_exact_mode_constructor_inverse_and_compiler_binding(self):
+        import ast
+        import hashlib
+        helper = PATH.parents[1] / OVERLAY.LEGACY_HELPER
+        tree = ast.parse(helper.read_bytes())
+        literals = {}
+        for node in tree.body:
+            if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+                try:
+                    literals[node.targets[0].id] = ast.literal_eval(node.value)
+                except (ValueError, TypeError):
+                    pass
+        names = {'curvature_tooling_policy_check', 'curvature_tooling_broker_mode_current',
+                 'curvature_tooling_broker_mode_inverse'}
+        nodes = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names]
+        ns = dict(literals, json=json, sha256=lambda data: hashlib.sha256(data).hexdigest())
+        exec(compile(ast.Module(body=nodes, type_ignores=[]), str(helper), 'exec'), ns)
+        forward = ns['curvature_tooling_broker_mode_current']
+        inverse = ns['curvature_tooling_broker_mode_inverse']
+        ports = ns['CURVATURE_TOOLING_POLICY']['broker_mode_ports']
+        self.assertEqual(sum(map(len, ports.values())), 5)
+        def functions(raw, filename):
+            return {c.co_name: c for c in compile(raw, filename, 'exec').co_consts if isinstance(c, type((lambda: None).__code__))}
+        for path in self.GUARDS:
+            current = (PATH.parents[1] / path).read_bytes()
+            previous = inverse(path, current)
+            self.assertEqual(forward(path, previous), current)
+            with self.assertRaisesRegex(AssertionError, 'inverse Source port drift'):
+                inverse(path, previous)
+            before, after = ports[path][0]
+            with self.assertRaisesRegex(AssertionError, 'inverse Source port drift'):
+                inverse(path, current + after.encode())
+            actual_codes = functions(current, path)
+            reference_codes = functions(forward(path, previous), path)
+            old_codes = functions(previous, path)
+            self.assertEqual(actual_codes['check_inventory'], reference_codes['check_inventory'])
+            self.assertNotEqual(actual_codes['check_inventory'], old_codes['check_inventory'])
+            if path != self.GUARDS[0]:
+                self.assertEqual(actual_codes['check_modes'], old_codes['check_modes'])
+        unchanged = b'def unrelated():\n    return 1\n'
+        self.assertEqual(forward('unrelated.py', unchanged), unchanged)
+        self.assertEqual(inverse('unrelated.py', unchanged), unchanged)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

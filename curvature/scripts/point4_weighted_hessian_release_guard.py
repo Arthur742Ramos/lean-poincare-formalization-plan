@@ -513,7 +513,7 @@ def check_inventory() -> None:
     check_inventory_sets(set(tracked_modes), untracked, physical, dependencies, git_roots, fingerprints)
     baseline = baseline_sources()
     for path in public_paths():
-        wanted = baseline[path][0] if path in baseline else '100644'
+        wanted = baseline[path][0] if path in baseline else ('100755' if path == 'scripts/point4_ci/command_broker.py' else '100644')
         if path in tracked_modes:
             assert tracked_modes[path] == wanted, f'Tracked executable-mode drift: {path}'
             data = (ROOT / path).read_bytes()
@@ -539,7 +539,7 @@ def check_mode(path: str, actual_mode: int, wanted: str) -> None:
 def check_modes() -> None:
     baseline = baseline_sources()
     for path in public_paths():
-        mode = baseline[path][0] if path in baseline else '100644'
+        mode = baseline[path][0] if path in baseline else ('100755' if path == 'scripts/point4_ci/command_broker.py' else '100644')
         check_mode(path, (ROOT / path).lstat().st_mode, mode)
 
 
@@ -744,7 +744,7 @@ EVIDENCE_PATHS = {'inherited-probes/contraction.log', 'inherited-probes/chosen_l
 import hashlib as _composition_hashlib, pathlib as _composition_pathlib, stat as _composition_stat, sys as _composition_sys
 _composition_file = _composition_pathlib.Path(__file__).resolve().parents[2] / 'curvature/scripts/point4_smooth_master_composition.py'
 assert _composition_stat.S_ISREG(_composition_file.lstat().st_mode) and not _composition_file.lstat().st_mode & 0o111
-assert _composition_hashlib.sha256(_composition_file.read_bytes()).hexdigest() == 'a0ca0d22f4ed40e03d1406b24ac799b4d845b50ad270940609f02f6090d3be5d', 'Composition executable binding changed'
+assert _composition_hashlib.sha256(_composition_file.read_bytes()).hexdigest() == '3b02710dd69c3571a1631852cd5e708f3dafffafc3b9893702ed496a6060451d', 'Composition executable binding changed'
 _composition_sys.modules.setdefault('point4_weighted_hessian_release_guard', _composition_sys.modules[__name__])
 import point4_smooth_master_composition as _smooth_master
 _smooth_master.install_weighted(globals())

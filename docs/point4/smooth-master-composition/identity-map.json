@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "3b8e97d9b828be46c3ad84086a68a354f44c471b",
-      "final_sha256": "29b612a2dcfd620fcc24a00166d04e0a742719451ec5815f4ef0284c11e8b86e",
+      "final_blob": "fdb5df7749d5465bcb5220e000514944c1a84bb2",
+      "final_sha256": "44ef05f892b678f97768194aae8eeb01183ecd464743bd31725236fc8a1db470",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "61995490f217a37e1d3da4053e449101b40d52e9",
-      "final_sha256": "9948c10cbdf6eaaa7220f8759b5c778cee12476eab2a06209ec2e327d617cb1a",
+      "final_blob": "bb4ffc0b7b80ea3a1b64a065530bc976891a78c6",
+      "final_sha256": "0bcb02523ab41d7539388aabeb692403a3f4b4c8f737b3c74823a1bf8e162df4",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "1a46fdaff4cef47e190af073ea7b4e53c969c0c5",
-      "final_sha256": "e546d6d565815e022da19b3f4a7b8b6602854afa686216fb454f393e92acc35f",
+      "final_blob": "57334974b4b8ca65daf2ee8605d803cdbcc2bc33",
+      "final_sha256": "a6aeb8ff6fab0e63d64111910fc751a2f25a975038c07ec7dc387bf3d691d8a7",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "2024fda51885847e59f793faf70dce8a1bc903f5",
-      "final_sha256": "dd3c81dbf79747a5faa73329e9b9e825e7b0800a002442f6858781c1c6429c6f",
+      "final_blob": "ab6ca18a57417ae1cf3c1e9b47172874e1032d63",
+      "final_sha256": "1bbff04b6f3954827bd31474e3adeb12c3608c4cc4d2e2df5a7b892eca62c47c",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "ee78c567d71650137402af26fd8b4acd0633a6eb",
-      "final_sha256": "593429e0985b958da4d4a7590400ce52f5052af70e0e41bc3ce81dedb2679500",
+      "final_blob": "68bab7b86cee855233389c2364643c0230ee2b1d",
+      "final_sha256": "24925bf5aa96fcd028d034feac175053eca782e93a24e67b8c1deb4eaedb4165",
       "mode": "100644",
       "count": 1
     }
@@ -31087,7 +31087,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "d864527485451089652976d59f3de21789e10b20"
+      "5692ed8db05bd42aebc78f542063b57f95939734"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31143,7 +31143,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "3d60299292c933cc0f2d9e239e46a2351814d143"
+      "cb788ef849fcb4a55dd75c8432de14d7fdd0753e"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31151,7 +31151,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "6c05c9edce5c0858bea9a0fc2c1a859178c6150e"
+      "6a8f0193d861a55b374c0a98583ef72b322237f2"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31175,15 +31175,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "3b8e97d9b828be46c3ad84086a68a354f44c471b"
+      "fdb5df7749d5465bcb5220e000514944c1a84bb2"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "c52358a79feaa064c83f7f6ef76dd9b73feb5268"
+      "a22b4493072a839816a601a5af932190c8124aa8"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "2ff7944540ff26e71ab55648ae5f7a4d58371d32"
+      "5ada28c8b19e26c6480aa1ddc1f9fa188132df62"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31263,11 +31263,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "698d7cfe8a6d30eddba3807e4af66241a04864a0"
+      "bd6c806952c18183d0e35a101564d899fb9439ce"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "29aa93151c3f1910bd54f2ee44291d2987edd3ea"
+      "a2bd43f1e8730529316160063169d612061318d6"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31343,7 +31343,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "61995490f217a37e1d3da4053e449101b40d52e9"
+      "bb4ffc0b7b80ea3a1b64a065530bc976891a78c6"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31379,15 +31379,15 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "1a46fdaff4cef47e190af073ea7b4e53c969c0c5"
+      "57334974b4b8ca65daf2ee8605d803cdbcc2bc33"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "2024fda51885847e59f793faf70dce8a1bc903f5"
+      "ab6ca18a57417ae1cf3c1e9b47172874e1032d63"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "3d137ef689303fe44ea3451d4ea0883593271623"
+      "05e1039d9d383cdcd8108be922074bedceb7910f"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
@@ -31407,7 +31407,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "b5b98980dbed6188647c1ec4758eb72882dd38ac"
+      "711db9bfe93daccd4b651b5df905b1e468ae9c48"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31415,7 +31415,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "d28cc1ddc95c048669b23de71b4f15ad3ed9bca0"
+      "0ff0def786be6dc36f8225377dbc45c3b49f4d45"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31427,7 +31427,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "ee78c567d71650137402af26fd8b4acd0633a6eb"
+      "68bab7b86cee855233389c2364643c0230ee2b1d"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -34231,11 +34231,11 @@
     ],
     "scripts/point4_tooling_overlay.py": [
       "100644",
-      "648b828d982ebb0eb6ab2abba4056c5c4a9c823f"
+      "6a6a5520a7c09de210965b3f56a0f3e41db501b2"
     ],
     "scripts/point4_tooling_overlay_test.py": [
       "100644",
-      "f423a1c54bbb38c52cbabb087cbc66fb41d88285"
+      "6787836992b578feeb2ebf5c31175bfaa49aebda"
     ],
     "symmetric-tensor-heat/.gitignore": [
       "100644",
@@ -82375,9 +82375,9 @@
         },
         "scripts/point4_tooling_overlay_test.py": {
           "mode": "100644",
-          "blob": "f423a1c54bbb38c52cbabb087cbc66fb41d88285",
-          "sha256": "c770055b9aa5ea7bce8f57bb6deaafa39b94c59dcdac45c5257f4861b04fd749",
-          "bytes": 15217
+          "blob": "6787836992b578feeb2ebf5c31175bfaa49aebda",
+          "sha256": "bea7ab66def7f18483ec107badfbb424e52432095534cdb9993d18feac233359",
+          "bytes": 22368
         }
       },
       "self_path": "scripts/point4_tooling_overlay.py",
@@ -82401,12 +82401,42 @@
         ],
         "append_exact": "\n  consolidated-tooling:\n    if: ${{ github.event_name == 'workflow_dispatch' && inputs.consolidated_tooling }}\n    uses: ./.github/workflows/point4-consolidated.yml\n"
       },
-      "policy_sha256": "4816b7c981f4c848e60c3f2393818b34207f40e06f0a383e01d1461618ce3c4f",
-      "helper_ports_sha256": "0b7ca468062772d14d7c2cba9b8a7c1a467a7c9b55442f50ebe5d9e1d18e1161",
+      "policy_sha256": "cdb9f20b06fa470bd2231f536fcdb3eeb0056b2b92d5130fa8c5fa731ecc994c",
+      "helper_ports_sha256": "47f5984e1035f28377f964bd6292136af0aea7dac0a1b59a3d8eb0e9ce04d308",
       "test_ports_sha256": "a34f2ccc059eb93b507b6a160ac8130ab61c0067b1982eefd6dca455ceab45f0",
       "all_Lean_sources_unchanged": true,
       "old154ordinary_plus8real_method_AST_recovered": true,
-      "original_Hamilton_guard_bodies_unchanged": true,
+      "original_guard_bodies_recovered_by_exact_five_mode_ports": true,
+      "broker_mode_ports": {
+        "curvature/scripts/point4_weighted_hessian_release_guard.py": [
+          [
+            "        wanted = baseline[path][0] if path in baseline else '100644'\n",
+            "        wanted = baseline[path][0] if path in baseline else ('100755' if path == 'scripts/point4_ci/command_broker.py' else '100644')\n"
+          ],
+          [
+            "        mode = baseline[path][0] if path in baseline else '100644'\n",
+            "        mode = baseline[path][0] if path in baseline else ('100755' if path == 'scripts/point4_ci/command_broker.py' else '100644')\n"
+          ]
+        ],
+        "curvature/scripts/point4_two_sided_heat_source_guard.py": [
+          [
+            "        wanted = baseline[path][0] if path in baseline else '100644'\n",
+            "        wanted = baseline[path][0] if path in baseline else ('100755' if path == 'scripts/point4_ci/command_broker.py' else '100644')\n"
+          ]
+        ],
+        "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
+          [
+            "        wanted = baseline[path][0] if path in baseline else '100644'\n",
+            "        wanted = baseline[path][0] if path in baseline else ('100755' if path == 'scripts/point4_ci/command_broker.py' else '100644')\n"
+          ]
+        ],
+        "curvature/scripts/point4_hamilton_native_source_guard.py": [
+          [
+            "        wanted = baseline[path][0] if path in baseline else '100644'\n",
+            "        wanted = baseline[path][0] if path in baseline else ('100755' if path == 'scripts/point4_ci/command_broker.py' else '100644')\n"
+          ]
+        ]
+      },
       "current_native_qualification": "UNRUN",
       "whole_PR_or_merge_qualified": false,
       "Point4": "OPEN"
