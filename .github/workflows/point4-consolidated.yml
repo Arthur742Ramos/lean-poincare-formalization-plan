@@ -20,16 +20,17 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  consolidated:
-    name: All 33 source protocols; shared build and audited reuse
+  first:
+    name: First stage; 30 original jobs and one verified build writer
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
       PYTHONDONTWRITEBYTECODE: "1"
+      P4_CI_STAGE: first
       EXPECTED_TOOLING_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       EXPECTED_PROOF_SHA: 5d1b3e2c123a8bdfd036a0e4d8495586c4a6d1b9
       EXPECTED_PROOF_TREE: 8081325e22bc0314d6106a311f92606e7e03f9d3
-    steps:
+    steps: &point4_stage_steps
       - name: Checkout exact tooling candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -85,13 +86,14 @@ jobs:
           source-root: ${{ runner.temp }}/point4-execution
           source-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
           targets-json: '["PoincareCurvature"]'
-      - name: Execute every original case within original budgets
+      - name: Execute every assigned original case within original budgets
         run: |
           set -euo pipefail
-          python3 -B scripts/point4_ci/runner.py --tooling-root "$GITHUB_WORKSPACE" --execution-root "$RUNNER_TEMP/point4-execution" --chart-execution-root "$RUNNER_TEMP/point4-chart-execution" --expected-sha "$EXPECTED_TOOLING_SHA" --expected-tree "${{ steps.source.outputs.tree }}" --evidence-dir "$RUNNER_TEMP/point4-consolidated-evidence" --budget-seconds 19800
+          python3 -B scripts/point4_ci/runner.py --tooling-root "$GITHUB_WORKSPACE" --execution-root "$RUNNER_TEMP/point4-execution" --chart-execution-root "$RUNNER_TEMP/point4-chart-execution" --expected-sha "$EXPECTED_TOOLING_SHA" --expected-tree "${{ steps.source.outputs.tree }}" --evidence-dir "$RUNNER_TEMP/point4-consolidated-evidence" --stage "$P4_CI_STAGE" --compiled-cache-provenance "$RUNNER_TEMP/point4-verified-cache/state.json" --budget-seconds 19800
       - name: Recheck unchanged Source after all native cases
         run: python3 -B scripts/point4_tooling_overlay.py --expected-sha "$EXPECTED_TOOLING_SHA" --output "$RUNNER_TEMP/point4-tooling-overlay-post.json"
-      - name: Single cache writer after all mandatory gates succeed
+      - name: Single cache writer after every first-stage gate succeeds
+        if: success() && env.P4_CI_STAGE == 'first'
         uses: ./.github/actions/point4-consolidated-cache
         env:
           EXPECTED_SHA: ${{ env.EXPECTED_PROOF_SHA }}
@@ -104,7 +106,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: point4-consolidated-tooling-${{ github.event.pull_request.head.sha || github.sha }}
+          name: point4-consolidated-tooling-${{ github.event.pull_request.head.sha || github.sha }}-${{ env.P4_CI_STAGE }}
           path: |
             ${{ runner.temp }}/point4-consolidated-evidence/
             ${{ runner.temp }}/point4-tooling-overlay-*.json
@@ -112,3 +114,16 @@ jobs:
             /tmp/point4-consolidated-cache-inventory.json
           if-no-files-found: error
           retention-days: 14
+
+  second:
+    name: Second stage; five retained heavy jobs using verified compiled outputs
+    needs: first
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      P4_CI_STAGE: second
+      EXPECTED_TOOLING_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_PROOF_SHA: 5d1b3e2c123a8bdfd036a0e4d8495586c4a6d1b9
+      EXPECTED_PROOF_TREE: 8081325e22bc0314d6106a311f92606e7e03f9d3
+    steps: *point4_stage_steps

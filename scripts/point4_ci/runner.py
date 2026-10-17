@@ -315,6 +315,78 @@ def validate_plan(plan, execution):
                 else:
                     require(step['uses'] in plan['setup_actions'].values(), 'Action outside explicit setup contract')
     require(len(jobs) == plan['job_count'] == 35 and runs == plan['run_step_count'] == 216, 'Complete job/Run coverage differs')
+    stage_partition(plan, 'first')
+    stage_partition(plan, 'second')
+
+
+def stage_partition(plan, stage):
+    require(stage in ('first','second'), 'Unknown execution stage')
+    expected_second={'.github/workflows/point4-'+name+'.yml'for name in (
+        'weighted-duhamel-hessian','c2-resonance','smooth-forward-support','local-chart-connection')}
+    partition=plan.get('stages')
+    require(type(partition)is dict and set(partition)=={'schema','first','second'}
+            and partition['schema']=='point4-two-stage-partition-v1','Wrong finite stage partition')
+    full=[workflow['path']for workflow in plan['workflows']]
+    require(len(full)==33 and len(set(full))==33,'Full workflow partition differs')
+    for name in ('first','second'):
+        rows=partition[name]
+        require(type(rows)is list and all(type(row)is str for row in rows)
+                and len(rows)==len(set(rows)), 'Duplicate or malformed stage rows')
+        expected=[path for path in full if (path in expected_second)==(name=='second')]
+        require(rows==expected,'Stage must preserve exact complete workflow assignment')
+    require(set(partition['first']).isdisjoint(partition['second'])
+            and set(partition['first'])|set(partition['second'])==set(full), 'Stage partition is not disjoint and complete')
+    counts={name:sum(len(w['jobs'])for w in plan['workflows']if w['path']in partition[name])for name in ('first','second')}
+    require(counts=={'first':30,'second':5}, 'Stage job partition differs')
+    assigned=[w for w in plan['workflows']if w['path']in partition[stage]]
+    return dict(stage=stage,partition=partition,partition_sha256=digest(canonical(partition)),
+                assigned_workflow_count=len(assigned),assigned_job_count=counts[stage],
+                assigned_run_count=sum('run'in step for w in assigned for job in w['jobs']for step in job['steps']),
+                workflows=assigned)
+
+
+def stage_outcome(assignment,results,stopped):
+    expected=[(w['path'],j['id'])for w in assignment['workflows']for j in w['jobs']]
+    actual=[(row['workflow'],row['job'])for row in results]
+    require(len(actual)==len(set(actual)) and all(key in expected for key in actual),
+            'Stage result contains duplicate or foreign cases')
+    # A preflight failure may be the only receipt and occur after earlier
+    # unfinished prefixes; successful completion must match every assigned case.
+    passed=not stopped and actual==expected and all(row['status']=='PASS'for row in results)
+    return dict(stage=assignment['stage'],partition_sha256=assignment['partition_sha256'],
+                stage_passed=passed,all_cases_passed=False,
+                pair_join_required=True,coverage_scope='ASSIGNED_STAGE_ONLY',
+                assigned_workflow_count=assignment['assigned_workflow_count'],
+                assigned_job_count=assignment['assigned_job_count'],
+                assigned_run_count=assignment['assigned_run_count'])
+
+
+def compiled_cache_provenance(raw,stage,proof,toolchain,provider):
+    require(stage in ('first','second'), 'Unknown cache consumer stage')
+    state=strict_json(raw)
+    require(type(state)is dict and state.get('restore_complete')is True
+            and type(state.get('cache_hit'))is bool and type(state.get('restored_bytes'))is int
+            and 0<=state['restored_bytes']<=8*1024**3,'Incomplete cache restore provenance')
+    identity=state.get('identity')
+    require(type(identity)is dict and identity.get('schema')=='point4-exact-candidate-cache-v1'
+            and identity.get('head')==proof['head'] and identity.get('tree')==proof['tree']
+            and identity.get('compiler_version')==toolchain['version']
+            and identity.get('compiler_binary_sha256')==toolchain['compiler_sha256']
+            and identity.get('targets')==['PoincareCurvature'],'Cache candidate/compiler/targets differ')
+    expected_provider={name:provider.get(name,'')for name in (
+        'GITHUB_REPOSITORY','GITHUB_REF','GITHUB_WORKFLOW_REF','GITHUB_WORKFLOW_SHA')}
+    require(all(expected_provider.values())and identity.get('provider_scope')==expected_provider,
+            'Cache tooling provider provenance differs')
+    expected_key='point4-candidate-v1-'+digest(json.dumps(identity,sort_keys=True,separators=(',',':'),ensure_ascii=True).encode())
+    require(state.get('key')==expected_key,'Cache exact identity key differs')
+    require(state['cache_hit']or state['restored_bytes']==0,'Cache miss reports restored bytes')
+    require(stage!='second'or(state['cache_hit']and state['restored_bytes']>0),
+            'Second stage requires verified exact cache hit; cold fallback forbidden')
+    return dict(state_sha256=digest(raw),state_bytes=len(raw),key=expected_key,
+                restore_complete=True,cache_hit=state['cache_hit'],restored_bytes=state['restored_bytes'],
+                stage=stage,cache_writer_allowed=stage=='first',
+                second_stage_read_only_enforced_by_coordinator=stage=='second',
+                identity=identity,proof_credit=0)
 
 
 def source_guard(root, function, *args):
@@ -510,6 +582,8 @@ def main():
     parser.add_argument('--expected-sha', required=True)
     parser.add_argument('--expected-tree', required=True)
     parser.add_argument('--evidence-dir', required=True, type=Path)
+    parser.add_argument('--stage', required=True, choices=('first','second'))
+    parser.add_argument('--compiled-cache-provenance', required=True, type=Path)
     parser.add_argument('--budget-seconds', type=int, default=19800)
     args = parser.parse_args()
     require(300 <= args.budget_seconds <= 21000, 'Finite overall budget must be300..21000seconds')
@@ -525,6 +599,7 @@ def main():
     budget.mkdir(evidence / 'cases')
     plan = strict_json(regular(tooling / 'scripts/point4_ci/plan.json'))
     validate_plan(plan, execution)
+    assignment = stage_partition(plan, args.stage)
     tooling_pre = source_identity(tooling, args.expected_sha, args.expected_tree)
     projection = source_guard(tooling, 'verify_tooling_overlay', args.expected_sha)
     execution_head = plan['baseline_master']
@@ -537,6 +612,10 @@ def main():
     real_lake, real_bash = shutil.which('lake'), '/usr/bin/bash'
     require(real_lake and Path(real_lake).is_absolute(), 'Pinned Lake must already be installed by coordinator')
     toolchain = toolchain_identity(execution, real_lake, plan)
+    cache_raw = regular(args.compiled_cache_provenance,32*1024*1024)
+    cache_provenance = compiled_cache_provenance(cache_raw,args.stage,execution_pre,toolchain,os.environ)
+    with budget.file(evidence / 'compiled-cache-provenance.json',32*1024*1024) as handle:
+        handle.write(cache_raw)
     go = subprocess.check_output(['go', 'version'], timeout=30).decode().strip()
     require(re.fullmatch(r'go version go1\.24\.0 [^\n]+', go), 'Coordinator must install exact Go1.24.0')
     shims = evidence / 'bin'; budget.mkdir(shims)
@@ -561,7 +640,7 @@ def main():
     chart_context = dict(context,execution=chart_execution,env=dict(context['env']))
     chart_context['env'].update(GITHUB_WORKSPACE=str(chart_execution),P4_CI_ROOT=str(chart_execution))
     states = [(workflow,job,chart_context if workflow['path']=='.github/workflows/point4-local-chart-connection.yml' else context)
-              for workflow in plan['workflows'] for job in workflow['jobs']]
+              for workflow in assignment['workflows'] for job in workflow['jobs']]
     states = [(workflow,job,case_context,prepare_case(workflow,job,case_context)) for workflow,job,case_context in states]
     results, stopped = [], False
     # Original Source/provenance/mock prefixes run before any cold build. The
@@ -588,18 +667,22 @@ def main():
     require(source_identity(tooling, args.expected_sha, args.expected_tree) == tooling_pre, 'Tooling Source POST differs')
     require(source_identity(execution, execution_head, execution_tree) == execution_pre, 'Execution Source POST differs')
     require(source_identity(chart_execution, execution_head, execution_tree) == chart_pre, 'Chart Source POST differs')
+    require(regular(args.compiled_cache_provenance,32*1024*1024)==cache_raw, 'Cache restore provenance changed during stage')
     output_inventory = evidence_usage(context)
-    passed = len(results) == 35 and all(x['status'] == 'PASS' for x in results)
-    write_json(evidence / 'coverage.json', dict(schema='point4-consolidated-coverage-v1',
+    outcome = stage_outcome(assignment, results, stopped)
+    passed = outcome['stage_passed']
+    write_json(evidence / 'coverage.json', dict(schema='point4-consolidated-stage-coverage-v2',
+               **outcome, full_partition=assignment['partition'],
                tooling_source=tooling_pre, executed_proof_source=execution_pre, chart_proof_source=chart_pre,
                chart_execution_root=str(chart_execution), shared_execution_root=str(execution),
                scope='Master proof Sources with independently admitted finite tooling overlay; no PR146 new-proof credit',
-               projection_witness=projection, toolchain=toolchain, native_initial_full_build=seed,
+               projection_witness=projection, toolchain=toolchain, compiled_cache_provenance=cache_provenance, native_initial_full_build=seed,
                provider_context=dict(actual_tooling_GITHUB_SHA=os.environ.get('GITHUB_SHA'),
+                                     run_id=os.environ.get('GITHUB_RUN_ID'),attempt=os.environ.get('GITHUB_RUN_ATTEMPT'),
                                      actual_tooling_GITHUB_WORKSPACE=provider_workspace,
                                      executed_GITHUB_WORKSPACE=str(execution)),
                stopped_after_first_failure=stopped, completed_case_count=len(results),
-               original_workflows=33, original_jobs=35, global_budget_seconds=args.budget_seconds, all_cases_passed=passed,
+               original_workflows=33, original_jobs=35, global_budget_seconds=args.budget_seconds,
                legacy_hosted_statuses_created=False, jobs=results, artifact_totals=context['counters'],
                output_inventory=output_inventory))
     return 0 if passed else 1

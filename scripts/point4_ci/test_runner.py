@@ -34,6 +34,68 @@ class ProtocolTests(unittest.TestCase):
     def tearDown(self):
         self._env.stop();self._budget_tmp.cleanup()
 
+    def test_two_stage_partition_is_exact_and_preserves_all_cases(self):
+        plan=json.loads(Path(__file__).with_name('plan.json').read_text())
+        first=runner.stage_partition(plan,'first');second=runner.stage_partition(plan,'second')
+        self.assertEqual((first['assigned_workflow_count'],first['assigned_job_count']),(29,30))
+        self.assertEqual((second['assigned_workflow_count'],second['assigned_job_count']),(4,5))
+        self.assertEqual(first['assigned_run_count']+second['assigned_run_count'],216)
+        self.assertEqual(first['partition_sha256'],second['partition_sha256'])
+        all_cases={(w['path'],j['id'])for w in plan['workflows']for j in w['jobs']}
+        selected=[{(w['path'],j['id'])for w in row['workflows']for j in w['jobs']}for row in(first,second)]
+        self.assertFalse(selected[0]&selected[1]);self.assertEqual(selected[0]|selected[1],all_cases)
+
+    def test_stage_partition_rejects_dropped_workflow(self):
+        plan=json.loads(Path(__file__).with_name('plan.json').read_text());plan['stages']['first'].pop()
+        with self.assertRaises(RuntimeError):runner.stage_partition(plan,'first')
+
+    def test_stage_partition_rejects_overlap_and_reassignment(self):
+        original=json.loads(Path(__file__).with_name('plan.json').read_text())
+        overlap=copy.deepcopy(original);overlap['stages']['first'].append(overlap['stages']['second'][0])
+        with self.assertRaises(RuntimeError):runner.stage_partition(overlap,'first')
+        shifted=copy.deepcopy(original)
+        shifted['stages']['first'][0],shifted['stages']['second'][0]=shifted['stages']['second'][0],shifted['stages']['first'][0]
+        with self.assertRaises(RuntimeError):runner.stage_partition(shifted,'second')
+
+    def test_stage_partition_rejects_unknown_stage(self):
+        plan=json.loads(Path(__file__).with_name('plan.json').read_text())
+        for stage in ('all','third','',None):
+            with self.assertRaises(RuntimeError):runner.stage_partition(plan,stage)
+
+    def test_stage_outcome_never_claims_pair_success_or_partial_completion(self):
+        plan=json.loads(Path(__file__).with_name('plan.json').read_text())
+        assignment=runner.stage_partition(plan,'second')
+        rows=[dict(workflow=w['path'],job=j['id'],status='PASS')for w in assignment['workflows']for j in w['jobs']]
+        complete=runner.stage_outcome(assignment,rows,False)
+        self.assertTrue(complete['stage_passed']);self.assertFalse(complete['all_cases_passed'])
+        self.assertTrue(complete['pair_join_required']);self.assertEqual(complete['coverage_scope'],'ASSIGNED_STAGE_ONLY')
+        for partial in ([],rows[:-1],[dict(rows[0],status='FAIL')]):
+            self.assertFalse(runner.stage_outcome(assignment,partial,False)['stage_passed'])
+        self.assertFalse(runner.stage_outcome(assignment,rows,True)['stage_passed'])
+        for invalid in (rows+[rows[0]],rows+[dict(workflow='foreign',job='x',status='PASS')]):
+            with self.assertRaises(RuntimeError):runner.stage_outcome(assignment,invalid,False)
+
+    def test_second_stage_cache_provenance_requires_hit_and_exact_identity(self):
+        proof=dict(head='a'*40,tree='b'*40);toolchain=dict(version='official version',compiler_sha256='c'*64)
+        provider={name:'actual-'+name for name in ('GITHUB_REPOSITORY','GITHUB_REF','GITHUB_WORKFLOW_REF','GITHUB_WORKFLOW_SHA')}
+        identity=dict(schema='point4-exact-candidate-cache-v1',head=proof['head'],tree=proof['tree'],
+                      compiler_version=toolchain['version'],compiler_binary_sha256=toolchain['compiler_sha256'],
+                      targets=['PoincareCurvature'],provider_scope=provider)
+        key='point4-candidate-v1-'+digest(json.dumps(identity,sort_keys=True,separators=(',',':'),ensure_ascii=True).encode())
+        state=dict(restore_complete=True,cache_hit=True,restored_bytes=1,identity=identity,key=key)
+        actual=runner.compiled_cache_provenance(canonical(state),'second',proof,toolchain,provider)
+        self.assertFalse(actual['cache_writer_allowed']);self.assertEqual(actual['proof_credit'],0)
+        for changes in (dict(cache_hit=False,restored_bytes=0),dict(restored_bytes=0),dict(restore_complete=False),dict(key='wrong')):
+            with self.assertRaises(RuntimeError):
+                runner.compiled_cache_provenance(canonical(dict(state,**changes)),'second',proof,toolchain,provider)
+        for changed_proof in (dict(proof,head='d'*40),dict(proof,tree='d'*40)):
+            with self.assertRaises(RuntimeError):runner.compiled_cache_provenance(canonical(state),'second',changed_proof,toolchain,provider)
+        with self.assertRaises(RuntimeError):runner.compiled_cache_provenance(canonical(state),'second',proof,dict(toolchain,compiler_sha256='wrong'),provider)
+        with self.assertRaises(RuntimeError):runner.compiled_cache_provenance(canonical(state),'second',proof,toolchain,dict(provider,GITHUB_WORKFLOW_SHA='other'))
+        miss=dict(state,cache_hit=False,restored_bytes=0)
+        first=runner.compiled_cache_provenance(canonical(miss),'first',proof,toolchain,provider)
+        self.assertTrue(first['cache_writer_allowed']);self.assertFalse(first['cache_hit'])
+
     def test_audit_only_destination_is_normalized(self):
         a, destination = broker.audit_arguments(['scripts/point4_audit.sh', '--json', '/tmp/point4-a.json'])
         b, _ = broker.audit_arguments(['scripts/point4_audit.sh', '--json', '/tmp/point4-b.json'])
