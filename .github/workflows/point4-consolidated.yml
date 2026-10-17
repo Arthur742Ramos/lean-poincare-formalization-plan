@@ -1,0 +1,114 @@
+name: Point-4 consolidated tooling validation
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/point4-consolidated.yml"
+      - ".github/actions/point4-consolidated-cache/**"
+      - "scripts/point4_ci/**"
+      - "scripts/point4_cache/**"
+      - "scripts/point4_tooling_overlay.py"
+      - "scripts/point4_tooling_overlay_test.py"
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: point4-consolidated-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  consolidated:
+    name: All 33 source protocols; shared build and audited reuse
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      EXPECTED_TOOLING_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_PROOF_SHA: 5d1b3e2c123a8bdfd036a0e4d8495586c4a6d1b9
+      EXPECTED_PROOF_TREE: 8081325e22bc0314d6106a311f92606e7e03f9d3
+    steps:
+      - name: Checkout exact tooling candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Install pinned evidence dependencies
+        run: |
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: --index-url https://pypi.org/simple PyYAML==6.0.2 jsonschema==4.23.0
+      - name: Test exact-input reuse, complete source coverage and overlay rejection
+        run: |
+          set -euo pipefail
+          python3 -B scripts/point4_cache/point4_ci_cache_test.py
+          python3 -B scripts/point4_ci/test_runner.py
+          python3 -B scripts/point4_tooling_overlay_test.py
+      - name: Admit finite tooling overlay and materialize unchanged proof Source
+        id: source
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_TOOLING_SHA"
+          command -v busctl >/dev/null
+          command -v systemctl >/dev/null
+          python3 -B scripts/point4_tooling_overlay.py --expected-sha "$EXPECTED_TOOLING_SHA" --output "$RUNNER_TEMP/point4-tooling-overlay-pre.json"
+          echo "tree=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_OUTPUT"
+          git clone --no-local --no-hardlinks --no-checkout "$GITHUB_WORKSPACE" "$RUNNER_TEMP/point4-execution"
+          git -C "$RUNNER_TEMP/point4-execution" checkout --detach "$EXPECTED_PROOF_SHA"
+          test -d "$RUNNER_TEMP/point4-execution/.git"
+          git clone --no-local --no-hardlinks --no-checkout "$GITHUB_WORKSPACE" "$RUNNER_TEMP/point4-chart-execution"
+          git -C "$RUNNER_TEMP/point4-chart-execution" checkout --detach "$EXPECTED_PROOF_SHA"
+          test -d "$RUNNER_TEMP/point4-chart-execution/.git"
+          test "$(git -C "$RUNNER_TEMP/point4-chart-execution" rev-parse 'HEAD^{tree}')" = "$EXPECTED_PROOF_TREE"
+          test ! -e "$RUNNER_TEMP/point4-chart-execution/curvature/.lake"
+          test "$(git -C "$RUNNER_TEMP/point4-execution" rev-parse 'HEAD^{tree}')" = "$EXPECTED_PROOF_TREE"
+      - name: Install pinned compiler and official dependency cache once
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: ${{ runner.temp }}/point4-execution/curvature
+          build: false
+          use-github-cache: false
+          use-mathlib-cache: true
+      - name: Install the original pinned Comparator Go prerequisite once
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: "1.24.0"
+          cache: false
+      - name: Restore only verified exact-proof outputs
+        uses: ./.github/actions/point4-consolidated-cache
+        env:
+          EXPECTED_SHA: ${{ env.EXPECTED_PROOF_SHA }}
+        with:
+          phase: restore
+          source-root: ${{ runner.temp }}/point4-execution
+          source-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          targets-json: '["PoincareCurvature"]'
+      - name: Execute every original case within original budgets
+        run: |
+          set -euo pipefail
+          python3 -B scripts/point4_ci/runner.py --tooling-root "$GITHUB_WORKSPACE" --execution-root "$RUNNER_TEMP/point4-execution" --chart-execution-root "$RUNNER_TEMP/point4-chart-execution" --expected-sha "$EXPECTED_TOOLING_SHA" --expected-tree "${{ steps.source.outputs.tree }}" --evidence-dir "$RUNNER_TEMP/point4-consolidated-evidence" --budget-seconds 19800
+      - name: Recheck unchanged Source after all native cases
+        run: python3 -B scripts/point4_tooling_overlay.py --expected-sha "$EXPECTED_TOOLING_SHA" --output "$RUNNER_TEMP/point4-tooling-overlay-post.json"
+      - name: Single cache writer after all mandatory gates succeed
+        uses: ./.github/actions/point4-consolidated-cache
+        env:
+          EXPECTED_SHA: ${{ env.EXPECTED_PROOF_SHA }}
+        with:
+          phase: save
+          source-root: ${{ runner.temp }}/point4-execution
+          source-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          targets-json: '["PoincareCurvature"]'
+      - name: Preserve one complete bounded evidence bundle
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-consolidated-tooling-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            ${{ runner.temp }}/point4-consolidated-evidence/
+            ${{ runner.temp }}/point4-tooling-overlay-*.json
+            /tmp/point4-consolidated-cache.log
+            /tmp/point4-consolidated-cache-inventory.json
+          if-no-files-found: error
+          retention-days: 14
