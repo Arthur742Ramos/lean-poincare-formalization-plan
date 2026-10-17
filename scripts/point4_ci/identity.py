@@ -262,7 +262,25 @@ def reject_untracked_modules(root):
                 require(path.relative_to(top).as_posix() in tracked, 'Untracked/ignored module injection')
 
 
-def effective_search_resolution(search, package, roots, packages):
+def absent_search_frontier(path):
+    """Seal an absent slot without following aliases or creating directories."""
+    frontier = None
+    ancestor = None
+    for node in reversed((path, *path.parents)):
+        try:
+            info = node.lstat()
+        except FileNotFoundError:
+            if frontier is None:
+                frontier = str(node)
+            continue
+        require(frontier is None and stat.S_ISDIR(info.st_mode)
+                and not stat.S_ISLNK(info.st_mode), 'Aliased/non-directory absent search ancestor')
+        ancestor = dict(path=str(node), device=info.st_dev, inode=info.st_ino, mode=info.st_mode)
+    require(frontier is not None, 'Expected absent search slot')
+    return dict(missing_from=frontier, absent_parent=ancestor)
+
+
+def effective_search_resolution(search, package, roots, packages, absent_lean_roots=()):
     """Resolve Lake's paths in the same cwd used to query its environment."""
     require(package.is_absolute() and package == package.resolve(), 'Noncanonical Lake environment cwd')
     require(type(search) is dict and set(search) == {'LEAN_PATH', 'LEAN_SRC_PATH'}
@@ -274,6 +292,13 @@ def effective_search_resolution(search, package, roots, packages):
             path = Path(raw)
             if not path.is_absolute():
                 path = package / path
+            if not path.exists():
+                require(name == 'LEAN_PATH' and path in absent_lean_roots,
+                        'Unknown missing effective Lean search root: ' + name + '=' + raw)
+                absence = absent_search_frontier(path)
+                resolved_search[name].append(dict(raw=raw, resolved=str(path),
+                                                 state='absent', **absence))
+                continue
             require(path.is_dir(), 'Missing/non-directory effective Lean search root: ' + name + '=' + raw)
             resolved = path.resolve(strict=True)
             require(any(resolved.is_relative_to(base) for base in roots) or
@@ -295,9 +320,12 @@ def compiled_identity(root, real_lake, plan):
         'import json,os;print(json.dumps({k:os.environ.get(k, "") for k in ("LEAN_PATH","LEAN_SRC_PATH")}))'], package))
     manifest = strict_json(regular(package / 'lake-manifest.json'))
     packages = [package]
+    absent_lean_roots = []
     for row in manifest['packages']:
         if row['type'] == 'git':
-            packages.append(package / '.lake/packages' / row['name'])
+            dependency = package / '.lake/packages' / row['name']
+            packages.append(dependency)
+            absent_lean_roots.append(dependency / '.lake/build/lib/lean')
         elif row['type'] == 'path':
             # Lake manifest path dependencies are relative to the package root.
             candidate = (package / row['dir']).resolve()
@@ -334,7 +362,7 @@ def compiled_identity(root, real_lake, plan):
                                 stem = rel.split('.olean', 1)[0] if '.olean' in rel else rel[:-len('.ilean')]
                                 require((pkg / (stem + '.lean')).is_file(), 'Injected compiled module has no package Source')
     roots = sorted(set(path.resolve() for path in roots))
-    search_resolution = effective_search_resolution(search, package, roots, packages)
+    search_resolution = effective_search_resolution(search, package, roots, packages, absent_lean_roots)
     rows, total, count = {}, 0, 0
     for base in roots:
         require(base.is_dir() and not base.is_symlink(), 'Compiled root alias')
@@ -363,6 +391,8 @@ def compiled_identity(root, real_lake, plan):
         row = stream_seal(path); total += row['bytes']
         require(total <= 32 * 1024 * 1024 * 1024, 'Compiled aggregate bound exceeded')
         rows[str(path)] = row
+    require(effective_search_resolution(search, package, roots, packages, absent_lean_roots)
+            == search_resolution, 'Effective Lean search roots changed during seal')
     return dict(search=search, search_resolution=search_resolution,
                 roots=[str(x) for x in roots], files=len(rows), bytes=total,
                 inventory_sha256=digest(canonical(rows)))

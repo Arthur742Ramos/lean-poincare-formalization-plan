@@ -9,6 +9,7 @@ import time
 import os
 import subprocess
 import multiprocessing
+import shutil
 
 import command_broker as broker
 from identity import canonical, digest, require, strict_json, OutputBudget, LEDGER_LIMIT
@@ -102,6 +103,121 @@ class EffectiveSearchTests(unittest.TestCase):
         (self.depbuild / 'Dependency.olean').write_bytes(b'dependency changed')
         after = self.inventory()
         self.assertNotEqual(before['inventory_sha256'], after['inventory_sha256'])
+
+    def unbuild_dependency(self):
+        shutil.rmtree(self.dependency / '.lake')
+
+    def test_manifest_dependency_absent_slot_is_bound_without_materialization(self):
+        self.unbuild_dependency()
+        before = self.inventory()
+        row = before['search_resolution']['paths']['LEAN_PATH'][1]
+        parent = self.dependency.stat()
+        self.assertEqual(row, dict(raw='.lake/packages/dependency/.lake/build/lib/lean',
+                                   resolved=str(self.depbuild), state='absent',
+                                   missing_from=str(self.dependency / '.lake'),
+                                   absent_parent=dict(path=str(self.dependency), device=parent.st_dev,
+                                                      inode=parent.st_ino, mode=parent.st_mode)))
+        self.assertFalse((self.dependency / '.lake').exists())
+        self.assertEqual(self.inventory(), before)
+        self.assertEqual(before['files'], 1)
+        self.search['LEAN_PATH'] = str(self.depbuild) + ':' + self.search['LEAN_PATH']
+        after = self.inventory()
+        self.assertEqual([r['state'] for r in after['search_resolution']['paths']['LEAN_PATH']
+                          if 'state' in r], ['absent', 'absent'])
+        self.assertNotEqual(before, after)
+
+    def test_missing_slot_frontier_and_absence_transitions_change_identity(self):
+        self.unbuild_dependency()
+        absent = self.inventory()
+        (self.dependency / '.lake/build').mkdir(parents=True)
+        frontier = self.inventory()
+        self.assertNotEqual(absent, frontier)
+        self.depbuild.mkdir(parents=True)
+        empty = self.inventory()
+        self.assertNotEqual(frontier, empty)
+        (self.depbuild / 'Dependency.olean').write_bytes(b'compiled')
+        present = self.inventory()
+        self.assertNotEqual(empty, present)
+        self.unbuild_dependency()
+        self.assertEqual(absent, self.inventory())
+
+    def test_absent_marker_binds_nearest_existing_ancestor_identity(self):
+        self.unbuild_dependency()
+        before = self.inventory()
+        self.dependency.rename(self.dependency.with_name('old-dependency'))
+        self.dependency.mkdir()
+        (self.dependency / 'Dependency.lean').write_text('-- dependency fixture\n')
+        after = self.inventory()
+        self.assertNotEqual(before, after)
+        a = before['search_resolution']['paths']['LEAN_PATH'][1]
+        b = after['search_resolution']['paths']['LEAN_PATH'][1]
+        self.assertEqual(a['missing_from'], b['missing_from'])
+        self.assertNotEqual(a['absent_parent'], b['absent_parent'])
+
+    def test_absent_slots_reject_unknown_descendants_core_and_source_paths(self):
+        self.unbuild_dependency()
+        for name, raw in [('LEAN_PATH', str(self.depbuild / 'unknown')),
+                          ('LEAN_PATH', str(self.depbuild.parent)),
+                          ('LEAN_PATH', '.lake/packages/unknown/.lake/build/lib/lean'),
+                          ('LEAN_PATH', str(self.prefix / 'lib/missing')),
+                          ('LEAN_SRC_PATH', str(self.depbuild)),
+                          ('LEAN_PATH', str(self.depbuild / '../lean'))]:
+            with self.subTest(name=name, raw=raw):
+                old = self.search[name]
+                self.search[name] = raw
+                try:
+                    with self.assertRaises(RuntimeError):
+                        self.inventory()
+                finally:
+                    self.search[name] = old
+
+    def test_absent_slots_reject_live_and_dangling_ancestor_aliases(self):
+        self.unbuild_dependency()
+        target = Path(self.tmp.name) / 'outside'
+        for destination in (target, target / 'missing'):
+            with self.subTest(destination=destination):
+                alias = self.dependency / '.lake'
+                alias.symlink_to(destination, target_is_directory=True)
+                try:
+                    with self.assertRaises(RuntimeError):
+                        self.inventory()
+                finally:
+                    alias.unlink()
+        self.depbuild.parent.mkdir(parents=True)
+        self.depbuild.symlink_to(target / 'missing', target_is_directory=True)
+        with self.assertRaises(RuntimeError):
+            self.inventory()
+
+    def test_absent_slot_existing_file_is_rejected(self):
+        self.unbuild_dependency()
+        self.depbuild.parent.mkdir(parents=True)
+        self.depbuild.write_bytes(b'not a directory')
+        with self.assertRaises(RuntimeError):
+            self.inventory()
+
+    def test_absent_frontier_does_not_hide_permission_errors(self):
+        import identity
+        self.unbuild_dependency()
+        original = Path.lstat
+        denied = self.dependency / '.lake'
+        def lstat(path):
+            if path == denied:
+                raise PermissionError('fixture denial')
+            return original(path)
+        with mock.patch.object(Path, 'lstat', lstat):
+            with self.assertRaises(PermissionError):
+                identity.absent_search_frontier(self.depbuild)
+
+    def test_absent_slot_appearance_during_inventory_is_rejected(self):
+        import identity
+        self.unbuild_dependency()
+        original = identity.stream_seal
+        def seal(path, *args):
+            self.depbuild.mkdir(parents=True, exist_ok=True)
+            return original(path, *args)
+        with mock.patch.object(identity, 'stream_seal', side_effect=seal):
+            with self.assertRaises(RuntimeError):
+                self.inventory()
 
 
 class ProtocolTests(unittest.TestCase):
