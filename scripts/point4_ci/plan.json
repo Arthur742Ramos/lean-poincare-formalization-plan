@@ -158,6 +158,16 @@
     "upload": "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
   },
   "stages": {
+    "fifth": [
+      ".github/workflows/point4-weighted-initial-heat.yml",
+      ".github/workflows/point4-chosen-lc-curvature.yml",
+      ".github/workflows/point4-linear-heat-geometry.yml",
+      ".github/workflows/point4-fixed-background-heat.yml",
+      ".github/workflows/point4-chosen-lc-coordinate.yml",
+      ".github/workflows/point4-c2-metric-localization.yml",
+      ".github/workflows/point4-weighted-duhamel-hessian.yml",
+      ".github/workflows/point4-local-chart-connection.yml"
+    ],
     "first": [
       ".github/workflows/point4-actual-gaussian-heat-resolvent.yml",
       ".github/workflows/point4-actual-gaussian-heat-resolvent-uniqueness.yml",
@@ -166,35 +176,31 @@
       ".github/workflows/point4-actual-gaussian-jet-affine-heat.yml",
       ".github/workflows/point4-initial-ricci-and-heat.yml",
       ".github/workflows/point4-support.yml",
-      ".github/workflows/point4-weighted-initial-heat.yml",
-      ".github/workflows/point4-chosen-lc-curvature.yml",
-      ".github/workflows/point4-linear-heat-geometry.yml",
-      ".github/workflows/point4-c2-initial-heat.yml",
       ".github/workflows/point4-boundaryless-chart-frames.yml",
       ".github/workflows/point4-coordinate-operator.yml",
-      ".github/workflows/point4-fixed-background-heat.yml",
       ".github/workflows/point4-manifold-only-fixed-background-heat.yml",
+      ".github/workflows/point4-c2-heat-trace.yml"
+    ],
+    "fourth": [
+      ".github/workflows/point4-c2-initial-heat.yml",
       ".github/workflows/point4-coordinate-connection.yml",
-      ".github/workflows/point4-closed-contract.yml",
-      ".github/workflows/point4-c2-heat-trace.yml",
       ".github/workflows/point4-weak-laplacian.yml",
-      ".github/workflows/palomar-submission-01.yml",
       ".github/workflows/point4-coordinate-jet.yml",
-      ".github/workflows/point4-principal-remainder.yml",
-      ".github/workflows/point4-frozen-metric-principal.yml",
-      ".github/workflows/point4-chosen-lc-coordinate.yml",
-      ".github/workflows/point4-standard-coordinate-operator.yml",
-      ".github/workflows/point4-contraction.yml",
-      ".github/workflows/point4-c2-metric-localization.yml",
       ".github/workflows/point4-two-sided-heat.yml",
       ".github/workflows/point4-c2-c0-metric-velocity.yml"
     ],
-    "schema": "point4-two-stage-partition-v1",
+    "schema": "point4-five-stage-partition-v1",
     "second": [
-      ".github/workflows/point4-weighted-duhamel-hessian.yml",
-      ".github/workflows/point4-c2-resonance.yml",
-      ".github/workflows/point4-smooth-forward-support.yml",
-      ".github/workflows/point4-local-chart-connection.yml"
+      ".github/workflows/point4-standard-coordinate-operator.yml",
+      ".github/workflows/point4-smooth-forward-support.yml"
+    ],
+    "third": [
+      ".github/workflows/point4-closed-contract.yml",
+      ".github/workflows/palomar-submission-01.yml",
+      ".github/workflows/point4-principal-remainder.yml",
+      ".github/workflows/point4-frozen-metric-principal.yml",
+      ".github/workflows/point4-contraction.yml",
+      ".github/workflows/point4-c2-resonance.yml"
     ]
   },
   "workflow_count": 33,

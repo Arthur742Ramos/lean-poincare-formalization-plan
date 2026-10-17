@@ -33,6 +33,9 @@ MAX_ARCHIVE_TOTAL = 16 * 1024 * 1024 * 1024
 MAX_ARCHIVE_FILES = 100000
 MAX_EVIDENCE_BYTES = 24 * 1024 * 1024 * 1024
 MAX_EVIDENCE_ENTRIES = 300000
+STAGES = ('first', 'second', 'third', 'fourth', 'fifth')
+STAGE_PARTITION_SHA256 = '09c5ca16f1fe3b0d0bc9ff64c25a083cc6eedc7af42aafeb013151771417f4d1'
+STAGE_COUNTS = {'first': (11, 11, 69), 'second': (2, 3, 25), 'third': (6, 7, 30), 'fourth': (6, 6, 41), 'fifth': (8, 8, 51)}
 
 
 def write_json(path, value):
@@ -362,35 +365,38 @@ def validate_plan(plan, execution):
                 else:
                     require(step['uses'] in plan['setup_actions'].values(), 'Action outside explicit setup contract')
     require(len(jobs) == plan['job_count'] == 35 and runs == plan['run_step_count'] == 216, 'Complete job/Run coverage differs')
-    stage_partition(plan, 'first')
-    stage_partition(plan, 'second')
+    stage_partition(plan, 'first')  # This validates the complete five-stage partition.
     validate_current_head_policy(plan, execution)
 
 
 def stage_partition(plan, stage):
-    require(stage in ('first','second'), 'Unknown execution stage')
-    expected_second={'.github/workflows/point4-'+name+'.yml'for name in (
-        'weighted-duhamel-hessian','c2-resonance','smooth-forward-support','local-chart-connection')}
+    require(stage in STAGES, 'Unknown execution stage')
     partition=plan.get('stages')
-    require(type(partition)is dict and set(partition)=={'schema','first','second'}
-            and partition['schema']=='point4-two-stage-partition-v1','Wrong finite stage partition')
+    require(type(partition)is dict and set(partition)=={'schema',*STAGES}
+            and partition['schema']=='point4-five-stage-partition-v1', 'Wrong finite stage partition')
     full=[workflow['path']for workflow in plan['workflows']]
-    require(len(full)==33 and len(set(full))==33,'Full workflow partition differs')
-    for name in ('first','second'):
+    require(len(full)==33 and len(set(full))==33, 'Full workflow partition differs')
+    selected=[]
+    for name in STAGES:
         rows=partition[name]
         require(type(rows)is list and all(type(row)is str for row in rows)
                 and len(rows)==len(set(rows)), 'Duplicate or malformed stage rows')
-        expected=[path for path in full if (path in expected_second)==(name=='second')]
-        require(rows==expected,'Stage must preserve exact complete workflow assignment')
-    require(set(partition['first']).isdisjoint(partition['second'])
-            and set(partition['first'])|set(partition['second'])==set(full), 'Stage partition is not disjoint and complete')
-    counts={name:sum(len(w['jobs'])for w in plan['workflows']if w['path']in partition[name])for name in ('first','second')}
-    require(counts=={'first':30,'second':5}, 'Stage job partition differs')
+        require(rows==[path for path in full if path in rows], 'Stage workflow order or membership differs')
+        selected.extend(rows)
+    require(len(selected)==len(set(selected))==33 and set(selected)==set(full),
+            'Stage partition is not disjoint and complete')
+    require(digest(canonical(partition))==STAGE_PARTITION_SHA256, 'Exact reviewed stage assignment differs')
+    counts={}
+    for name in STAGES:
+        workflows=[w for w in plan['workflows']if w['path']in partition[name]]
+        counts[name]=(len(workflows),sum(len(w['jobs'])for w in workflows),
+                      sum('run'in step for w in workflows for job in w['jobs']for step in job['steps']))
+    require(counts==STAGE_COUNTS and sum(row[1]for row in counts.values())==35
+            and sum(row[2]for row in counts.values())==216, 'Stage job/Run partition differs')
     assigned=[w for w in plan['workflows']if w['path']in partition[stage]]
     return dict(stage=stage,partition=partition,partition_sha256=digest(canonical(partition)),
-                assigned_workflow_count=len(assigned),assigned_job_count=counts[stage],
-                assigned_run_count=sum('run'in step for w in assigned for job in w['jobs']for step in job['steps']),
-                workflows=assigned)
+                assigned_workflow_count=counts[stage][0],assigned_job_count=counts[stage][1],
+                assigned_run_count=counts[stage][2],workflows=assigned)
 
 
 def stage_outcome(assignment,results,stopped):
@@ -402,7 +408,7 @@ def stage_outcome(assignment,results,stopped):
     # unfinished prefixes; successful completion must match every assigned case.
     passed=not stopped and actual==expected and all(row['status']=='PASS'for row in results)
     return dict(stage=assignment['stage'],partition_sha256=assignment['partition_sha256'],
-                stage_passed=passed,all_cases_passed=False,
+                stage_passed=passed,all_cases_passed=False,required_stages=list(STAGES),
                 pair_join_required=True,coverage_scope='ASSIGNED_STAGE_ONLY',
                 assigned_workflow_count=assignment['assigned_workflow_count'],
                 assigned_job_count=assignment['assigned_job_count'],
@@ -410,7 +416,7 @@ def stage_outcome(assignment,results,stopped):
 
 
 def compiled_cache_provenance(raw,stage,proof,toolchain,provider):
-    require(stage in ('first','second'), 'Unknown cache consumer stage')
+    require(stage in STAGES, 'Unknown cache consumer stage')
     state=strict_json(raw)
     require(type(state)is dict and state.get('restore_complete')is True
             and type(state.get('cache_hit'))is bool and type(state.get('restored_bytes'))is int
@@ -428,12 +434,13 @@ def compiled_cache_provenance(raw,stage,proof,toolchain,provider):
     expected_key='point4-candidate-v1-'+digest(json.dumps(identity,sort_keys=True,separators=(',',':'),ensure_ascii=True).encode())
     require(state.get('key')==expected_key,'Cache exact identity key differs')
     require(state['cache_hit']or state['restored_bytes']==0,'Cache miss reports restored bytes')
-    require(stage!='second'or(state['cache_hit']and state['restored_bytes']>0),
-            'Second stage requires verified exact cache hit; cold fallback forbidden')
+    require(stage=='first'or(state['cache_hit']and state['restored_bytes']>0),
+            'Every consumer stage requires verified exact cache hit; cold fallback forbidden')
     return dict(state_sha256=digest(raw),state_bytes=len(raw),key=expected_key,
                 restore_complete=True,cache_hit=state['cache_hit'],restored_bytes=state['restored_bytes'],
                 stage=stage,cache_writer_allowed=stage=='first',
                 second_stage_read_only_enforced_by_coordinator=stage=='second',
+                consumer_stage_read_only_enforced_by_coordinator=stage!='first',
                 identity=identity,proof_credit=0)
 
 
@@ -756,6 +763,7 @@ def review_validate_cases(plan,coverage,stage,evidence):
     if coverage is None:return assignment,False
     require(coverage.get('schema')=='point4-consolidated-stage-coverage-v2'
             and coverage.get('stage')==stage and coverage.get('partition_sha256')==assignment['partition_sha256']
+            and coverage.get('required_stages')==list(STAGES)
             and coverage.get('full_partition')==assignment['partition']and coverage.get('all_cases_passed')is False,
             'Coverage stage/partition join')
     rows=coverage.get('jobs');require(type(rows)is list,'Missing case rows')
@@ -995,7 +1003,7 @@ def project_review_evidence(plan,stage,evidence,destination,expansion,external,d
     require(actual_outputs==set(expected_outputs)|{'output-budget.json','output-budget.lock'},'Missing review output')
     if final_check is not None:final_check()
     index=dict(schema='point4-compact-review-projection-v1',projection_complete=True,stage=stage,
-               stage_execution_passed=passed,all_cases_passed=False,pair_join_required=True,
+               stage_execution_passed=passed,all_cases_passed=False,pair_join_required=True,required_stages=list(STAGES),
                tooling_source=source_binding['tooling'],proof_source=source_binding['proof'],chart_source=source_binding['chart'],
                full_partition=assignment['partition'],partition_sha256=assignment['partition_sha256'],
                review_policy_sha256=digest(canonical(policy)),plan_sha256=digest(canonical(plan)),
@@ -1072,7 +1080,7 @@ def main():
     parser.add_argument('--expected-sha', required=True)
     parser.add_argument('--expected-tree', required=True)
     parser.add_argument('--evidence-dir', required=True, type=Path)
-    parser.add_argument('--stage', required=True, choices=('first','second'))
+    parser.add_argument('--stage', required=True, choices=STAGES)
     parser.add_argument('--compiled-cache-provenance', required=True, type=Path)
     parser.add_argument('--budget-seconds', type=int, default=19800)
     parser.add_argument('--project-review', action='store_true')

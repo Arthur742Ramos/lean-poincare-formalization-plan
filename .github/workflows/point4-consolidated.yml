@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   first:
-    name: First stage; 30 original jobs and one verified build writer
+    name: First stage; 11 original jobs and one verified build writer
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
@@ -133,13 +133,49 @@ jobs:
           retention-days: 14
 
   second:
-    name: Second stage; five retained heavy jobs using verified compiled outputs
+    name: Second stage; three original jobs using verified compiled outputs
     needs: first
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:
       PYTHONDONTWRITEBYTECODE: "1"
       P4_CI_STAGE: second
+      EXPECTED_TOOLING_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_PROOF_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps: *point4_stage_steps
+
+  third:
+    name: Third stage; 7 original jobs using verified compiled outputs
+    needs: second
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      P4_CI_STAGE: third
+      EXPECTED_TOOLING_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_PROOF_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps: *point4_stage_steps
+
+  fourth:
+    name: Fourth stage; 6 original jobs using verified compiled outputs
+    needs: third
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      P4_CI_STAGE: fourth
+      EXPECTED_TOOLING_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_PROOF_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps: *point4_stage_steps
+
+  fifth:
+    name: Fifth stage; 8 original jobs using verified compiled outputs
+    needs: fourth
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      P4_CI_STAGE: fifth
       EXPECTED_TOOLING_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       EXPECTED_PROOF_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps: *point4_stage_steps

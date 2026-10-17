@@ -114,16 +114,19 @@ class ProtocolTests(unittest.TestCase):
     def tearDown(self):
         self._env.stop();self._budget_tmp.cleanup()
 
-    def test_two_stage_partition_is_exact_and_preserves_all_cases(self):
+    def test_five_stage_partition_is_exact_and_preserves_all_cases(self):
         plan=json.loads(Path(__file__).with_name('plan.json').read_text())
-        first=runner.stage_partition(plan,'first');second=runner.stage_partition(plan,'second')
-        self.assertEqual((first['assigned_workflow_count'],first['assigned_job_count']),(29,30))
-        self.assertEqual((second['assigned_workflow_count'],second['assigned_job_count']),(4,5))
-        self.assertEqual(first['assigned_run_count']+second['assigned_run_count'],216)
-        self.assertEqual(first['partition_sha256'],second['partition_sha256'])
+        assignments=[runner.stage_partition(plan,stage)for stage in runner.STAGES]
+        self.assertEqual([(row['assigned_workflow_count'],row['assigned_job_count'],row['assigned_run_count'])
+                          for row in assignments],[(11,11,69),(2,3,25),(6,7,30),(6,6,41),(8,8,51)])
+        self.assertEqual(sum(row['assigned_run_count']for row in assignments),216)
+        self.assertEqual(len({row['partition_sha256']for row in assignments}),1)
+        self.assertEqual(plan['stages']['first'][:7],[row['path']for row in plan['workflows'][:7]])
         all_cases={(w['path'],j['id'])for w in plan['workflows']for j in w['jobs']}
-        selected=[{(w['path'],j['id'])for w in row['workflows']for j in w['jobs']}for row in(first,second)]
-        self.assertFalse(selected[0]&selected[1]);self.assertEqual(selected[0]|selected[1],all_cases)
+        selected=[{(w['path'],j['id'])for w in row['workflows']for j in w['jobs']}for row in assignments]
+        for i,group in enumerate(selected):
+            for other in selected[i+1:]:self.assertFalse(group&other)
+        self.assertEqual(set().union(*selected),all_cases)
 
     def test_stage_partition_rejects_dropped_workflow(self):
         plan=json.loads(Path(__file__).with_name('plan.json').read_text());plan['stages']['first'].pop()
@@ -139,8 +142,27 @@ class ProtocolTests(unittest.TestCase):
 
     def test_stage_partition_rejects_unknown_stage(self):
         plan=json.loads(Path(__file__).with_name('plan.json').read_text())
-        for stage in ('all','third','',None):
+        for stage in ('all','sixth','',None):
             with self.assertRaises(RuntimeError):runner.stage_partition(plan,stage)
+
+    def test_sequential_stages_keep_one_cache_writer_and_original_timeouts(self):
+        import yaml
+        path=Path(__file__).resolve().parents[2]/'.github/workflows/point4-consolidated.yml'
+        workflow=yaml.safe_load(path.read_text());jobs=workflow['jobs']
+        self.assertEqual(tuple(jobs),runner.STAGES)
+        self.assertFalse(workflow['concurrency']['cancel-in-progress'])
+        writer_stages=[]
+        for index,stage in enumerate(runner.STAGES):
+            job=jobs[stage];self.assertEqual(job['timeout-minutes'],360)
+            self.assertEqual(job.get('needs'),None if index==0 else runner.STAGES[index-1])
+            self.assertEqual(job['env']['P4_CI_STAGE'],stage)
+            native=[step for step in job['steps']if step.get('id')=='native']
+            self.assertEqual(len(native),1);self.assertIn('--budget-seconds 19800',native[0]['run'])
+            saves=[step for step in job['steps']if step.get('with',{}).get('phase')=='save']
+            self.assertEqual(len(saves),1)
+            self.assertEqual(saves[0]['if'],"success() && env.P4_CI_STAGE == 'first'")
+            if stage=='first':writer_stages.append(stage)
+        self.assertEqual(writer_stages,['first'])
 
     def test_stage_outcome_never_claims_pair_success_or_partial_completion(self):
         plan=json.loads(Path(__file__).with_name('plan.json').read_text())
@@ -155,7 +177,7 @@ class ProtocolTests(unittest.TestCase):
         for invalid in (rows+[rows[0]],rows+[dict(workflow='foreign',job='x',status='PASS')]):
             with self.assertRaises(RuntimeError):runner.stage_outcome(assignment,invalid,False)
 
-    def test_second_stage_cache_provenance_requires_hit_and_exact_identity(self):
+    def test_all_consumer_stages_require_hit_and_exact_identity(self):
         proof=dict(head='a'*40,tree='b'*40);toolchain=dict(version='official version',compiler_sha256='c'*64)
         provider={name:'actual-'+name for name in ('GITHUB_REPOSITORY','GITHUB_REF','GITHUB_WORKFLOW_REF','GITHUB_WORKFLOW_SHA')}
         identity=dict(schema='point4-exact-candidate-cache-v1',head=proof['head'],tree=proof['tree'],
@@ -163,15 +185,17 @@ class ProtocolTests(unittest.TestCase):
                       targets=['PoincareCurvature'],provider_scope=provider)
         key='point4-candidate-v1-'+digest(json.dumps(identity,sort_keys=True,separators=(',',':'),ensure_ascii=True).encode())
         state=dict(restore_complete=True,cache_hit=True,restored_bytes=1,identity=identity,key=key)
-        actual=runner.compiled_cache_provenance(canonical(state),'second',proof,toolchain,provider)
-        self.assertFalse(actual['cache_writer_allowed']);self.assertEqual(actual['proof_credit'],0)
-        for changes in (dict(cache_hit=False,restored_bytes=0),dict(restored_bytes=0),dict(restore_complete=False),dict(key='wrong')):
-            with self.assertRaises(RuntimeError):
-                runner.compiled_cache_provenance(canonical(dict(state,**changes)),'second',proof,toolchain,provider)
-        for changed_proof in (dict(proof,head='d'*40),dict(proof,tree='d'*40)):
-            with self.assertRaises(RuntimeError):runner.compiled_cache_provenance(canonical(state),'second',changed_proof,toolchain,provider)
-        with self.assertRaises(RuntimeError):runner.compiled_cache_provenance(canonical(state),'second',proof,dict(toolchain,compiler_sha256='wrong'),provider)
-        with self.assertRaises(RuntimeError):runner.compiled_cache_provenance(canonical(state),'second',proof,toolchain,dict(provider,GITHUB_WORKFLOW_SHA='other'))
+        for stage in runner.STAGES[1:]:
+            actual=runner.compiled_cache_provenance(canonical(state),stage,proof,toolchain,provider)
+            self.assertFalse(actual['cache_writer_allowed']);self.assertEqual(actual['proof_credit'],0)
+            self.assertTrue(actual['consumer_stage_read_only_enforced_by_coordinator'])
+            for changes in (dict(cache_hit=False,restored_bytes=0),dict(restored_bytes=0),dict(restore_complete=False),dict(key='wrong')):
+                with self.assertRaises(RuntimeError):
+                    runner.compiled_cache_provenance(canonical(dict(state,**changes)),stage,proof,toolchain,provider)
+            for changed_proof in (dict(proof,head='d'*40),dict(proof,tree='d'*40)):
+                with self.assertRaises(RuntimeError):runner.compiled_cache_provenance(canonical(state),stage,changed_proof,toolchain,provider)
+            with self.assertRaises(RuntimeError):runner.compiled_cache_provenance(canonical(state),stage,proof,dict(toolchain,compiler_sha256='wrong'),provider)
+            with self.assertRaises(RuntimeError):runner.compiled_cache_provenance(canonical(state),stage,proof,toolchain,dict(provider,GITHUB_WORKFLOW_SHA='other'))
         miss=dict(state,cache_hit=False,restored_bytes=0)
         first=runner.compiled_cache_provenance(canonical(miss),'first',proof,toolchain,provider)
         self.assertTrue(first['cache_writer_allowed']);self.assertFalse(first['cache_hit'])
@@ -515,10 +539,11 @@ class CompactProjectionTests(unittest.TestCase):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
         self.root=Path(self.temp.name);self.evidence=self.root/'evidence';self.evidence.mkdir()
         self.output=self.root/'review';self.plan=json.loads(Path(__file__).with_name('plan.json').read_bytes())
-        self.assignment=runner.stage_partition(self.plan,'second')
+        self.assignment=runner.stage_partition(self.plan,'fifth')
         self.expansion=dict(sha='f'*40,tree='e'*40,runner_temp='/fixture-temp',event='workflow_dispatch')
         self.binding=dict(tooling={'head':'f'*40,'tree':'e'*40},proof={'head':'f'*40,'tree':'e'*40},chart={'head':'f'*40,'tree':'e'*40},broker_path='/fixed/broker.py',source_post_valid=True,cache_final_valid=True)
-        self.coverage=dict(schema='point4-consolidated-stage-coverage-v2',stage='second',stage_passed=True,all_cases_passed=False,
+        self.coverage=dict(schema='point4-consolidated-stage-coverage-v2',stage='fifth',stage_passed=True,all_cases_passed=False,
+            required_stages=list(runner.STAGES),
             partition_sha256=self.assignment['partition_sha256'],full_partition=self.assignment['partition'],stopped_after_first_failure=False,
             tooling_source=self.binding['tooling'],executed_proof_source=self.binding['proof'],chart_proof_source=self.binding['chart'],jobs=[],provider_context={'run_id':'fixture'})
         self.write('output-budget.json',b'{}');self.write('output-budget.lock',b'')
@@ -562,7 +587,7 @@ class CompactProjectionTests(unittest.TestCase):
     def process(self,name,data):
         self.write(name,data);return dict(exit_code=0,reaped=True,timed_out=False,leaked_group_killed=False,owned_systemd_cleanup=None,bytes=len(data),sha256=digest(data))
     def project(self,**kwargs):
-        return runner.project_review_evidence(self.plan,'second',self.evidence,self.output,self.expansion,{},time.monotonic()+120,self.binding,**kwargs)
+        return runner.project_review_evidence(self.plan,'fifth',self.evidence,self.output,self.expansion,{},time.monotonic()+120,self.binding,**kwargs)
     def artifact(self):return next(self.evidence.glob('cases/point4-weighted-duhamel*/artifact-*/members.json'))
 
     def test_compact_complete_projection_retains_all_text_and_only_inventories_objects(self):
@@ -625,6 +650,11 @@ class CompactProjectionTests(unittest.TestCase):
         self.coverage['stage_passed']=False;self.coverage['stopped_after_first_failure']=True;self.coverage['jobs']=self.coverage['jobs'][:1];self.save_coverage()
         value=self.project();self.assertTrue(value['projection_complete']);self.assertFalse(value['stage_execution_passed']);self.assertFalse(value['all_cases_passed'])
 
+    def test_compact_missing_campaign_stage_list_is_rejected(self):
+        self.coverage['required_stages'].pop();self.save_coverage()
+        with self.assertRaisesRegex(RuntimeError,'Coverage stage/partition join'):self.project()
+        self.assertFalse(self.output.exists())
+
     def test_compact_unclosed_process_or_missing_sourcepost_cannot_pass(self):
         self.coverage['native_initial_full_build']['reaped']=False;self.save_coverage()
         with self.assertRaisesRegex(RuntimeError,'Seed owner'):self.project()
@@ -633,7 +663,7 @@ class CompactProjectionTests(unittest.TestCase):
 
     def test_compact_deadline_is_global_not_per_file(self):
         with self.assertRaisesRegex(RuntimeError,'deadline'):
-            runner.project_review_evidence(self.plan,'second',self.evidence,self.output,self.expansion,{},time.monotonic()-1,self.binding)
+            runner.project_review_evidence(self.plan,'fifth',self.evidence,self.output,self.expansion,{},time.monotonic()-1,self.binding)
         self.assertFalse(self.output.exists())
 
     def test_compact_stream_detects_mutation_and_preserves_binary_bytes(self):

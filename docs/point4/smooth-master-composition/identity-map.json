@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "9ad1cfe9eb4a09628f06476f510e84804597d495",
-      "final_sha256": "91971467a81f2d2e811c35fbe023013b52a1f9052e38b78f2e0acc9202baa767",
+      "final_blob": "855209869861bb0ffac4bbf4c70aa4b4bba936fb",
+      "final_sha256": "e4e08d3ea92093af8dad80c6bf99a5e5acf7b1f81c354b980242a7722f849d33",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "9400f596b1db46272c67c682a40594c12b71f453",
-      "final_sha256": "2679cb9466c733f236c508a86452c4b97906b27af8cd890a935dc61173b80a84",
+      "final_blob": "44d889b38d1c80d89b83f50dd17eb6e7723bf9b9",
+      "final_sha256": "ed34dce154f9e3a0562f37f0eed03a6d8bd3d0cd55c1627c691464f36f959329",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "ad97d6fb6a7befde34d70d504f61551269d1c9f2",
-      "final_sha256": "8d3fc3e0fc96dce84c617ea0356663f193a4a7eaea2849303423d829413ec1b4",
+      "final_blob": "8f03d86c388b26058838ff5c647b2cc8bad3444b",
+      "final_sha256": "fd12cd6fbf5eaf0c9109e1a6200caabfe7c5321d2dedf2d75158870b912aa0cc",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "1ac549c764405cce99eba8b1bd8268aaa0260dd3",
-      "final_sha256": "5999a3165d605baf84ca4ac484e771776aef67e192c4eb911fb96d8b8eddb36e",
+      "final_blob": "9bb99dc63523c3d2df0b18af27510c1123bab174",
+      "final_sha256": "5572aea85f71c6cc67aba7486160b06425bdddb89a7f8c32943dd77b82511e50",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "632a5d6d0310e1b7a751edaffa06871c024c8a94",
-      "final_sha256": "edad55701d8a0b280065c016284dfd7e43a9a7f315c1711acebc5ae816987eb4",
+      "final_blob": "5da2d9605d4a323155f6eca224917d6c0e16a888",
+      "final_sha256": "ff3b14d88dba3c5828ab6789b8892b1fd03de47a2d6a87c3aadf5cd0cb7e748d",
       "mode": "100644",
       "count": 1
     }
@@ -27151,7 +27151,7 @@
     ],
     ".github/workflows/point4-consolidated.yml": [
       "100644",
-      "e3c602340ccc437b4e51f67d8acfc7c4b1f166b6"
+      "266fad5ef76da95e030db57f3fc3c7ac2738b8ed"
     ],
     ".github/workflows/point4-contraction.yml": [
       "100644",
@@ -31087,7 +31087,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "73b7f7a22758276c541540c6cec9a2e78b588529"
+      "0b47889e6fe2652100f8128263c1ea4ebe92b9ec"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31143,7 +31143,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "26507a0a44a9b0ee67cdbac23950183ec198237a"
+      "0a35079d855d14655a923fdc10f129640a84b03d"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31151,7 +31151,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "b21b1526b3b99667233548e3970747a783fee828"
+      "66de013895a8cc93bbe3f16a2e0cfd6bfdc45e77"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31175,15 +31175,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "9ad1cfe9eb4a09628f06476f510e84804597d495"
+      "855209869861bb0ffac4bbf4c70aa4b4bba936fb"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "787fed2e7311ade966cadc581123cee7cfb8dac2"
+      "ffec218592c22b7b2549eda209b174dfe43837af"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "b69f95ecb8c6323ec8db8b0e50e04365d6142d58"
+      "760c350abb64c8e44b08a801afdfa3287e057fc2"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31263,11 +31263,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "e1ab7690ec1c1af128147ab6ddea75d7f83cdc25"
+      "7f34ae796662346ddb44ade587fe169b866de53d"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "20d5cb7d01d1e2a52caec6edeb3455b4c6023bf5"
+      "cbe6109aec1deab4932a04856e8c1bd8675b745a"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31343,7 +31343,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "9400f596b1db46272c67c682a40594c12b71f453"
+      "44d889b38d1c80d89b83f50dd17eb6e7723bf9b9"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31379,15 +31379,15 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "ad97d6fb6a7befde34d70d504f61551269d1c9f2"
+      "8f03d86c388b26058838ff5c647b2cc8bad3444b"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "1ac549c764405cce99eba8b1bd8268aaa0260dd3"
+      "9bb99dc63523c3d2df0b18af27510c1123bab174"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "17d91161004f344a77f1605146ee4268c2ea58ec"
+      "d90608e5aee4d1aeaa7a375042e88036ba740e9e"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
@@ -31407,7 +31407,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "794a5a53c405cdccb0835d9c45c40f6851e2216a"
+      "87714efe4af59f7c647945bdfb9c3c6b3865186f"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31415,7 +31415,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "717b300e8389b95d61da16bf32a5d63aa7c6c521"
+      "552d354c2822aa7a075e6bcc9c821f9ac79c2dd1"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31427,7 +31427,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "632a5d6d0310e1b7a751edaffa06871c024c8a94"
+      "5da2d9605d4a323155f6eca224917d6c0e16a888"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -34219,19 +34219,19 @@
     ],
     "scripts/point4_ci/plan.json": [
       "100644",
-      "16a5049e2289466c69075dd43d2ccfbd8822ea6f"
+      "adbd3c0f6f9b990f779f148e2567e7bbb862eedb"
     ],
     "scripts/point4_ci/runner.py": [
       "100644",
-      "bbdcaa4c9ca5b4030d9d32ca87125150bf506b96"
+      "447d6e745ebb8da4b438d9b7727d127468f726c4"
     ],
     "scripts/point4_ci/test_runner.py": [
       "100644",
-      "2650c24250886b78fb111647884e794ed91339f9"
+      "bee98085479157d45be3826889065ea2fe2a253a"
     ],
     "scripts/point4_tooling_overlay.py": [
       "100644",
-      "156c339fc08ba90253b3659beadf40678e64fd88"
+      "ae02e59bd097472837ed77d6945deac3d20f78f1"
     ],
     "scripts/point4_tooling_overlay_test.py": [
       "100644",
@@ -82327,9 +82327,9 @@
         },
         ".github/workflows/point4-consolidated.yml": {
           "mode": "100644",
-          "blob": "e3c602340ccc437b4e51f67d8acfc7c4b1f166b6",
-          "sha256": "c9d765fdcbbf44b7a0a64f485c11503c0d9f5b7fb10c9b76285092bd7d3caaa0",
-          "bytes": 7984
+          "blob": "266fad5ef76da95e030db57f3fc3c7ac2738b8ed",
+          "sha256": "59f65182b78bfdfddad7dc46e3f3590dec047fb5307c36962d019c32aadeacfd",
+          "bytes": 9232
         },
         "scripts/point4_cache/point4_ci_cache.py": {
           "mode": "100644",
@@ -82357,21 +82357,21 @@
         },
         "scripts/point4_ci/plan.json": {
           "mode": "100644",
-          "blob": "16a5049e2289466c69075dd43d2ccfbd8822ea6f",
-          "sha256": "452bf6b895509c2bfd82e371ab747c24029bc271851d78c4d48a87a940e1c8d3",
-          "bytes": 330110
+          "blob": "adbd3c0f6f9b990f779f148e2567e7bbb862eedb",
+          "sha256": "5f37653d2dfec219146f6f2412dd88e393d05c2e7a1ef6a2b6aa52e32cb03eff",
+          "bytes": 330175
         },
         "scripts/point4_ci/runner.py": {
           "mode": "100644",
-          "blob": "bbdcaa4c9ca5b4030d9d32ca87125150bf506b96",
-          "sha256": "88ace891f8d570d37665e73496363b81a5fe06904bc28193a0fdaf5c36c45079",
-          "bytes": 81744
+          "blob": "447d6e745ebb8da4b438d9b7727d127468f726c4",
+          "sha256": "1e84a0e9537266eb5009f326fe7b1612e6749558f17b6e7a530533532fa1b6d8",
+          "bytes": 82244
         },
         "scripts/point4_ci/test_runner.py": {
           "mode": "100644",
-          "blob": "2650c24250886b78fb111647884e794ed91339f9",
-          "sha256": "25b39bc71f4c06109899e685f81c9bde1989590131b51c463c8b5f1ee544aed7",
-          "bytes": 54867
+          "blob": "bee98085479157d45be3826889065ea2fe2a253a",
+          "sha256": "13c4644482632fa47b1e169600d985bbde36e171a5b5d7402ea95afaef059969",
+          "bytes": 56710
         },
         "scripts/point4_tooling_overlay_test.py": {
           "mode": "100644",
@@ -82401,7 +82401,7 @@
         ],
         "append_exact": "\n  consolidated-tooling:\n    if: ${{ github.event_name == 'workflow_dispatch' && inputs.consolidated_tooling }}\n    uses: ./.github/workflows/point4-consolidated.yml\n"
       },
-      "policy_sha256": "c78224b3fdb777af21a1ab50173464c53ae2e480ee5a98c3eb61f6e349bd7d3f",
+      "policy_sha256": "7f0e5d9f728097533e69ea9df988027a9d1e04130ce1fefe53f7bf3f34306940",
       "helper_ports_sha256": "47f5984e1035f28377f964bd6292136af0aea7dac0a1b59a3d8eb0e9ce04d308",
       "test_ports_sha256": "a34f2ccc059eb93b507b6a160ac8130ab61c0067b1982eefd6dca455ceab45f0",
       "all_Lean_sources_unchanged": true,
