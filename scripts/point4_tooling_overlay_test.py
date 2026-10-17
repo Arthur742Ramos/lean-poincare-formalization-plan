@@ -69,7 +69,7 @@ class ToolingOverlayTests(unittest.TestCase):
         self.addCleanup(self.patch.stop)
 
     def git(self, *args):
-        return subprocess.check_output(['git', '-C', str(self.root), *args], stderr=subprocess.PIPE)
+        return subprocess.check_output(['git', '-c', 'gc.auto=0', '-c', 'maintenance.auto=false', '-C', str(self.root), *args], stderr=subprocess.PIPE)
 
     def write(self, path, raw):
         target = self.root / path
