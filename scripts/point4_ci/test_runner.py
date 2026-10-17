@@ -428,5 +428,282 @@ class ProtocolTests(unittest.TestCase):
             self.assertNotEqual(key,digest(canonical(other)))
 
 
+
+class CompactProjectionTests(unittest.TestCase):
+    """Synthetic saved-byte transport fixtures; no Lean/Git/native qualification."""
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        self.root=Path(self.temp.name);self.evidence=self.root/'evidence';self.evidence.mkdir()
+        self.output=self.root/'review';self.plan=json.loads(Path(__file__).with_name('plan.json').read_bytes())
+        self.assignment=runner.stage_partition(self.plan,'second')
+        self.expansion=dict(sha='f'*40,tree='e'*40,runner_temp='/fixture-temp',event='workflow_dispatch')
+        self.binding=dict(tooling={'head':'f'*40,'tree':'e'*40},proof={'head':'f'*40,'tree':'e'*40},chart={'head':'f'*40,'tree':'e'*40},broker_path='/fixed/broker.py',source_post_valid=True,cache_final_valid=True)
+        self.coverage=dict(schema='point4-consolidated-stage-coverage-v2',stage='second',stage_passed=True,all_cases_passed=False,
+            partition_sha256=self.assignment['partition_sha256'],full_partition=self.assignment['partition'],stopped_after_first_failure=False,
+            tooling_source=self.binding['tooling'],executed_proof_source=self.binding['proof'],chart_proof_source=self.binding['chart'],jobs=[],provider_context={'run_id':'fixture'})
+        self.write('output-budget.json',b'{}');self.write('output-budget.lock',b'')
+        self.write('compiled-cache-provenance.json',b'{}')
+        self.coverage['compiled_cache_provenance']={'state_sha256':digest(b'{}'),'state_bytes':2}
+        self.coverage['native_initial_full_build']=self.process('native-full-build.log',b'complete seed\n')
+        for workflow in self.assignment['workflows']:
+            for job in workflow['jobs']:
+                case=workflow['path'].split('/')[-1][:-4]+'--'+job['id'];steps=[]
+                for step in job['steps']:
+                    row=dict(ordinal=step['ordinal'],name=step.get('name'),source_run_sha256=step.get('run_sha256'))
+                    if 'run'in step:
+                        self.write(f'cases/{case}/step-{step["ordinal"]}.sh',step['run'].encode())
+                        row.update(status='PASS',**self.process(f'cases/{case}/step-{step["ordinal"]}.log',b'entire observed output\n'))
+                    elif step['uses']==self.plan['setup_actions']['upload']:
+                        policy=self.plan['review_projection']['producers'][case];files=[]
+                        if step['ordinal']==policy['upload_ordinal']:
+                            names=list(policy['required'])
+                            if policy['dynamic']:
+                                names.extend('point4-smooth-forward-positive-'+route+'-token-'+kind+'.log'for route in policy['dynamic']['exact_routes']for kind in('stdout','receipt'))
+                            if 'opaque_roots'in policy:names.append('local-rebuild/lib/lean/Fixture.olean')
+                            for name in names:
+                                raw=b'opaque-object\xff\x00'if name.endswith('.olean')else b'entire selected text\n'
+                                stored=f'{len(files):06d}.bin';self.write(f'cases/{case}/artifact-{step["ordinal"]}/{stored}',raw)
+                                root=runner.expand(policy['root'],**self.expansion)
+                                files.append(dict(original_path=root+'/'+name,stored_path=stored,bytes=len(raw),sha256=digest(raw)))
+                        metadata=dict(schema='point4-original-upload-selection-v1',original_upload=step,files=files,scope='synthetic')
+                        self.write_json(f'cases/{case}/artifact-{step["ordinal"]}/members.json',metadata)
+                        row.update(status='PRESERVED_SOURCE_ALLOWLIST',files=len(files),bytes=sum(x['bytes']for x in files))
+                    else:row.update(status='COORDINATOR_SETUP_REUSE',action=step['uses'])
+                    steps.append(row)
+                result=dict(schema='point4-consolidated-case-v1',workflow=workflow['path'],job=job['id'],status='PASS',steps=steps)
+                self.coverage['jobs'].append(result);self.write_json(f'cases/{case}/receipt.json',result)
+        self.save_coverage()
+
+    def write(self,name,data):
+        p=self.evidence/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(data);return p
+
+    def write_json(self,name,value):return self.write(name,canonical(value)+b'\n')
+    def save_coverage(self):self.write_json('coverage.json',self.coverage)
+    def process(self,name,data):
+        self.write(name,data);return dict(exit_code=0,reaped=True,timed_out=False,leaked_group_killed=False,owned_systemd_cleanup=None,bytes=len(data),sha256=digest(data))
+    def project(self,**kwargs):
+        return runner.project_review_evidence(self.plan,'second',self.evidence,self.output,self.expansion,{},time.monotonic()+120,self.binding,**kwargs)
+    def artifact(self):return next(self.evidence.glob('cases/point4-weighted-duhamel*/artifact-*/members.json'))
+
+    def test_compact_complete_projection_retains_all_text_and_only_inventories_objects(self):
+        value=self.project();self.assertTrue(value['projection_complete']);self.assertTrue(value['stage_execution_passed']);self.assertFalse(value['all_cases_passed'])
+        self.assertTrue(value['all_projected_output_hashes_verified']);self.assertFalse(value['original_full_ZIP_locally_hashed'])
+        chunks=[row for c in value['inventory_chunks']for row in json.loads((self.output/c['path']).read_bytes())]
+        opaque=[r for r in chunks if r['role']=='OPAQUE_ORIGINAL_OBJECT'];self.assertEqual(len(opaque),1)
+        self.assertNotIn(opaque[0]['path'],{r['source']for r in value['selected_files']})
+        self.assertEqual(len(chunks),value['preserved_inputs']);self.assertTrue((self.output/'review-index.json').is_file())
+
+    def test_compact_missing_payload_is_rejected(self):
+        meta=json.loads(self.artifact().read_bytes());(self.artifact().parent/meta['files'][0]['stored_path']).unlink()
+        with self.assertRaisesRegex(RuntimeError,'missing payload'):self.project()
+        self.assertFalse((self.output/'review-index.json').exists())
+
+    def test_compact_wrong_upload_source_is_rejected(self):
+        p=self.artifact();m=json.loads(p.read_bytes());m['original_upload']['with']['path']='/unreviewed/*';p.write_bytes(canonical(m))
+        with self.assertRaisesRegex(RuntimeError,'Source join'):self.project()
+
+    def test_compact_unknown_original_member_is_rejected(self):
+        p=self.artifact();m=json.loads(p.read_bytes());m['files'][0]['original_path']='/tmp/point4-weighted-hessian-evidence/unreviewed.log';p.write_bytes(canonical(m))
+        with self.assertRaisesRegex(RuntimeError,'outside Source upload'):self.project()
+
+    def test_compact_per_producer_size_cap_is_not_replaced_by_bundle_cap(self):
+        p=self.artifact();m=json.loads(p.read_bytes());m['files'][0]['bytes']=4*1024**2+1;p.write_bytes(canonical(m))
+        with self.assertRaisesRegex(RuntimeError,'per-file cap'):self.project()
+
+    def test_compact_unknown_empty_directory_is_rejected(self):
+        (self.evidence/'unreviewed').mkdir()
+        with self.assertRaisesRegex(RuntimeError,'Unknown evidence directory'):self.project()
+
+    def test_compact_alias_and_symlink_are_rejected(self):
+        self.write('Coverage.json',b'{}')
+        with self.assertRaisesRegex(RuntimeError,'case alias'):self.project()
+        (self.evidence/'Coverage.json').unlink();(self.evidence/'foreign').symlink_to(self.evidence/'coverage.json')
+        with self.assertRaisesRegex(RuntimeError,'Unexpected input symlink'):self.project()
+
+    def test_compact_changed_full_run_script_rejected(self):
+        p=next(self.evidence.glob('cases/*/step-*.sh'));p.write_bytes(p.read_bytes()+b'\nfalse\n')
+        with self.assertRaisesRegex(RuntimeError,'Source script differs'):self.project()
+
+    def test_compact_changed_raw_log_hash_rejected_without_truncation(self):
+        p=next(self.evidence.glob('cases/*/step-*.log'));p.write_bytes(b'mutated actual output\n')
+        with self.assertRaisesRegex(RuntimeError,'Runtime log/native receipt'):self.project()
+        self.assertFalse((self.output/'review-index.json').exists())
+
+    def test_compact_oversized_runtime_text_fails_before_output(self):
+        p=next(self.evidence.glob('cases/*/step-*.log'))
+        with p.open('wb')as stream:stream.truncate(16*1024**2+1)
+        with self.assertRaisesRegex(RuntimeError,'Oversized selected text'):self.project()
+        self.assertFalse(self.output.exists())
+
+    def test_compact_count_bound_fails_before_payload_copy(self):
+        folder=self.evidence/'command-receipts';folder.mkdir()
+        for i in range(10000):self.write(f'command-receipts/{i}-1.json',b'{}')
+        with self.assertRaisesRegex(RuntimeError,'Compact count/raw aggregate'):self.project()
+        self.assertFalse(self.output.exists())
+
+    def test_compact_partial_stage_is_diagnostic_not_pair_or_stage_pass(self):
+        self.coverage['stage_passed']=False;self.coverage['stopped_after_first_failure']=True;self.coverage['jobs']=self.coverage['jobs'][:1];self.save_coverage()
+        value=self.project();self.assertTrue(value['projection_complete']);self.assertFalse(value['stage_execution_passed']);self.assertFalse(value['all_cases_passed'])
+
+    def test_compact_unclosed_process_or_missing_sourcepost_cannot_pass(self):
+        self.coverage['native_initial_full_build']['reaped']=False;self.save_coverage()
+        with self.assertRaisesRegex(RuntimeError,'Seed owner'):self.project()
+        self.coverage['native_initial_full_build']['reaped']=True;self.save_coverage();self.binding['source_post_valid']=False
+        with self.assertRaisesRegex(RuntimeError,'SourcePOST/cache'):self.project()
+
+    def test_compact_deadline_is_global_not_per_file(self):
+        with self.assertRaisesRegex(RuntimeError,'deadline'):
+            runner.project_review_evidence(self.plan,'second',self.evidence,self.output,self.expansion,{},time.monotonic()-1,self.binding)
+        self.assertFalse(self.output.exists())
+
+    def test_compact_stream_detects_mutation_and_preserves_binary_bytes(self):
+        p=self.root/'raw.bin';p.write_bytes(b'\xff\0whole raw command bytes');seen=[]
+        class Capture:
+            def write(inner,data):seen.append(data)
+        value,_=runner.review_stream(p,time.monotonic()+5,1024,Capture());self.assertEqual(b''.join(seen),p.read_bytes());self.assertEqual(value['sha256'],digest(p.read_bytes()))
+        class Mutate:
+            def write(inner,data):p.write_bytes(b'changed')
+        with self.assertRaisesRegex(RuntimeError,'changed|grew'):runner.review_stream(p,time.monotonic()+5,1024,Mutate())
+
+    def test_compact_output_nested_under_input_is_rejected(self):
+        self.output=self.evidence/'review'
+        with self.assertRaisesRegex(RuntimeError,'fresh/separate'):self.project()
+
+    def test_compact_rejects_incomplete_main_dynamic_journal_pairs(self):
+        policy=next(p for p in self.plan['review_projection']['producers'].values()if p['dynamic'])
+        names=policy['required']+['point4-smooth-forward-positive-'+route+'-token-stdout.log'for route in policy['dynamic']['exact_routes']]
+        with self.assertRaisesRegex(RuntimeError,'Incomplete dynamic'):runner.review_producer_names(policy,names,True)
+
+    def test_compact_source_match_does_not_cross_path_components(self):
+        self.assertTrue(runner.review_source_match('/tmp/a.log','/tmp/*.log'))
+        self.assertFalse(runner.review_source_match('/tmp/foreign/a.log','/tmp/*.log'))
+        for bad in('../foreign','/absolute','a\\b','a\0b','a:b'):
+            with self.assertRaises(RuntimeError):runner.review_safe_name(bad)
+
+    def test_compact_stale_baseline_proof_identity_is_rejected(self):
+        self.binding['proof']=dict(self.binding['proof'],head=self.plan['baseline_master'])
+        with self.assertRaisesRegex(RuntimeError,'exact current proof/tooling'):self.project()
+
+    def test_compact_output_inside_source_is_rejected(self):
+        self.binding['source_roots']=[str(self.root)]
+        with self.assertRaisesRegex(RuntimeError,'outside Source'):self.project()
+
+    def test_compact_full_source_check_failure_cannot_publish_complete_index(self):
+        def bad():raise RuntimeError('fresh Source changed')
+        with self.assertRaisesRegex(RuntimeError,'fresh Source'):self.project(final_check=bad)
+        self.assertFalse((self.output/'review-index.json').exists())
+
+class CurrentHeadIntegrationTests(unittest.TestCase):
+    """Current Source identity and exact transport controls; no Git/Lean execution."""
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        self.root=Path(self.temp.name);self.plan=json.loads(Path(__file__).with_name('plan.json').read_bytes())
+        self.tool=self.root/'tool';self.execution=self.root/'execution';self.chart=self.root/'chart'
+        self.head='a'*40;self.tree='b'*40;self.identity=dict(head=self.head,tree=self.tree,files=2196,catalogue_sha256='c'*64)
+        source=Path(__file__).parents[2]
+        for workflow in self.plan['workflows']:
+            path=self.execution/workflow['path'];path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes((source/workflow['path']).read_bytes())
+        path='.github/workflows/point4-hamilton-release-audit.yml';(self.execution/path).write_bytes((source/path).read_bytes())
+
+    def test_current_plan_preserves_all_original_workflow_sources_and_full_inverse(self):
+        runner.validate_plan(self.plan,self.execution)
+        p=self.execution/self.plan['workflows'][0]['path'];p.write_bytes(p.read_bytes()+b'\n# extra Source edit\n')
+        with self.assertRaisesRegex(RuntimeError,'Original workflow Source changed'):runner.validate_plan(self.plan,self.execution)
+
+    def test_hamilton_extra_edit_is_not_admitted_by_transport_exception(self):
+        path=self.execution/'.github/workflows/point4-hamilton-release-audit.yml';path.write_bytes(path.read_bytes()+b'\n# extra\n')
+        with self.assertRaisesRegex(RuntimeError,'Hamilton current Source differs'):runner.validate_current_head_policy(self.plan,self.execution)
+
+    def test_hamilton_wrong_inverse_cannot_be_admitted_by_after_hash_only(self):
+        self.plan['current_head_execution']['hamilton_transport']['ordered_single_occurrence_ports'][0]['before']='  not_the_original_dispatch:\n'
+        with self.assertRaisesRegex(RuntimeError,'Hamilton full Source inverse differs'):runner.validate_current_head_policy(self.plan,self.execution)
+
+    def test_coordinator_and_bridge_cannot_recurse_into_legacy_job_plan(self):
+        self.plan['workflows'][0]['path']='.github/workflows/point4-consolidated.yml'
+        with self.assertRaisesRegex(RuntimeError,'recursion'):runner.validate_current_head_policy(self.plan,self.execution)
+
+    def test_current_sources_run_original_current_gate_on_both_real_proof_roots(self):
+        with mock.patch.object(runner,'source_identity',return_value=self.identity)as identity,mock.patch.object(runner,'source_guard')as gate:
+            actual=runner.current_execution_sources(self.tool,self.execution,self.chart,self.head,self.tree)
+        self.assertEqual(actual,(self.identity,self.identity,self.identity))
+        self.assertEqual(identity.call_args_list,[mock.call(root,self.head,self.tree)for root in(self.tool,self.execution,self.chart)])
+        self.assertEqual(gate.call_args_list,[mock.call(root,'verify_current')for root in(self.execution,self.chart)])
+
+    def test_wrong_proof_head_tree_or_catalogue_is_rejected(self):
+        for change in(dict(head='d'*40),dict(tree='e'*40),dict(catalogue_sha256='f'*64)):
+            bad=dict(self.identity,**change)
+            with mock.patch.object(runner,'source_identity',side_effect=[self.identity,bad,self.identity]),mock.patch.object(runner,'source_guard')as gate:
+                with self.assertRaisesRegex(RuntimeError,'catalogue differs'):runner.current_execution_sources(self.tool,self.execution,self.chart,self.head,self.tree)
+                gate.assert_not_called()
+
+    def test_external_current_identity_and_separate_roots_are_mandatory(self):
+        with self.assertRaisesRegex(RuntimeError,'External current Source identity'):runner.current_execution_sources(self.tool,self.execution,self.chart,'baseline','b'*40)
+        with self.assertRaisesRegex(RuntimeError,'Distinct'):runner.current_execution_sources(self.tool,self.tool,self.chart,self.head,self.tree)
+
+    def test_current_source_gate_failure_cannot_be_replaced_by_identity_hashes(self):
+        with mock.patch.object(runner,'source_identity',return_value=self.identity),mock.patch.object(runner,'source_guard',side_effect=RuntimeError('original current guard rejects')):
+            with self.assertRaisesRegex(RuntimeError,'original current guard rejects'):runner.current_execution_sources(self.tool,self.execution,self.chart,self.head,self.tree)
+
+    def test_stale_baseline_overlay_post_cannot_qualify_current_projection(self):
+        policy=self.plan['current_head_execution']
+        post=dict(tooling_head=self.head,tooling_tree=self.tree,execution_head=self.head,execution_tree=self.tree,
+                  proof_base_head=policy['proof_base_head'],proof_base_tree=policy['proof_base_tree'],
+                  all_lean_sources_unchanged=True,legacy_epoch_complete_current_identity_verified=True,index_and_physical_prepost=True)
+        self.assertTrue(runner.projection_source_post(post,self.head,self.tree,self.plan))
+        for change in(dict(execution_head=policy['proof_base_head']),dict(execution_tree=policy['proof_base_tree']),
+                      dict(legacy_epoch_complete_current_identity_verified=False),dict(all_lean_sources_unchanged=False)):
+            self.assertFalse(runner.projection_source_post(dict(post,**change),self.head,self.tree,self.plan))
+
+
+class CanonicalSourceGuardTests(unittest.TestCase):
+    """Tiny Source fixtures exercise real canonical imports, never real H/Git."""
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
+        self.root=Path(self.temp.name)
+        self.oldpath=list(runner.sys.path)
+        self.helper_name='point4_smooth_master_composition'
+        self.weighted_name='point4_weighted_hessian_release_guard'
+
+    def fixture(self, name, fail=False):
+        root=self.root/name;directory=root/'curvature/scripts';directory.mkdir(parents=True)
+        helper="import sys\nfrom pathlib import Path\nROOT=Path(__file__).parents[2]\ndef verify_current():\n import point4_smooth_master_composition as own\n import point4_weighted_hessian_release_guard as weighted\n assert own is sys.modules[__name__] and weighted.owner is own\n"
+        helper += " raise RuntimeError('fixture current verifier failure')\n" if fail else " return str(ROOT)\n"
+        (directory/'point4_smooth_master_composition.py').write_text(helper)
+        (directory/'point4_weighted_hessian_release_guard.py').write_text('import point4_smooth_master_composition as owner\n')
+        return root
+
+    def assert_clean(self):
+        self.assertNotIn(self.helper_name,runner.sys.modules);self.assertNotIn(self.weighted_name,runner.sys.modules)
+        self.assertEqual(runner.sys.path,self.oldpath)
+
+    def test_canonical_self_and_weighted_import_share_exact_owned_module(self):
+        root=self.fixture('one')
+        self.assertEqual(runner.source_guard(root,'verify_current'),str(root));self.assert_clean()
+
+    def test_two_execution_roots_do_not_reuse_previous_guard_or_leaf_globals(self):
+        for name in('shared','chart','tooling'):
+            root=self.fixture(name)
+            self.assertEqual(runner.source_guard(root,'verify_current'),str(root));self.assert_clean()
+
+    def test_failed_current_guard_cleans_canonical_and_owned_companions(self):
+        root=self.fixture('failing',fail=True)
+        with self.assertRaisesRegex(RuntimeError,'fixture current verifier failure'):runner.source_guard(root,'verify_current')
+        self.assert_clean()
+
+    def test_preloaded_canonical_guard_rejected_without_mutating_foreign_owner(self):
+        root=self.fixture('foreign');foreign=runner.types.ModuleType(self.helper_name)
+        with mock.patch.dict(runner.sys.modules,{self.helper_name:foreign}):
+            with self.assertRaisesRegex(RuntimeError,'Foreign/preloaded'):runner.source_guard(root,'verify_current')
+            self.assertIs(runner.sys.modules[self.helper_name],foreign)
+        self.assert_clean()
+
+    def test_preexisting_unrelated_module_binding_and_path_survive(self):
+        root=self.fixture('preserve');name='point4_unrelated_fixture_sentinel';sentinel=runner.types.ModuleType(name)
+        sentinel.__file__=str(root/'preexisting.py')
+        with mock.patch.dict(runner.sys.modules,{name:sentinel}):
+            self.assertEqual(runner.source_guard(root,'verify_current'),str(root));self.assert_clean()
+            self.assertIs(runner.sys.modules[name],sentinel)
+
+
 if __name__=='__main__':
     unittest.main()

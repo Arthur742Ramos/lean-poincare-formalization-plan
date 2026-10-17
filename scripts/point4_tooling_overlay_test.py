@@ -35,7 +35,12 @@ class ToolingOverlayTests(unittest.TestCase):
             changed = changed.replace(before, after, 1)
         self.transport_after = (changed + OVERLAY.TRANSPORT_REQUIRED_APPEND).encode()
         self.write(OVERLAY.TRANSPORT_PATH, self.transport_before)
-        for index in range(2183):
+        self.legacy_before = {}
+        for path in sorted(OVERLAY.LEGACY_PATHS):
+            raw = ('original legacy Source: ' + path + '\n').encode()
+            self.write(path, raw)
+            self.legacy_before[path] = raw
+        for index in range(2166):
             self.write('baseline/%04d.txt' % index, ('baseline-%d\n' % index).encode())
         self.git('add', '--all')
         self.git('commit', '-qm', 'Baseline fixture')
@@ -58,15 +63,40 @@ class ToolingOverlayTests(unittest.TestCase):
                          after_bytes=len(self.transport_after),
                          ports=json.loads(json.dumps(OVERLAY.TRANSPORT_REQUIRED_PORTS)),
                          append_exact=OVERLAY.TRANSPORT_REQUIRED_APPEND)
+        legacy = {}
+        for path in sorted(OVERLAY.LEGACY_PATHS - {OVERLAY.LEGACY_MAP}):
+            raw = ('reviewed legacy Source: ' + path + '\n').encode()
+            self.write(path, raw)
+            before = self.legacy_before[path]
+            legacy[path] = dict(before_mode='100644', before_blob=OVERLAY.blob_id(before),
+                                before_sha256=OVERLAY.sha256(before), before_bytes=len(before),
+                                mode='100644', blob=OVERLAY.blob_id(raw),
+                                sha256=OVERLAY.sha256(raw), bytes=len(raw))
+        self.derived_map = b'{"fixture": "exact derived current MAP"}\n'
+        self.write(OVERLAY.LEGACY_MAP, self.derived_map)
         self.write(OVERLAY.SELF, PATH.read_bytes())
         self.git('add', '--all')
         self.git('commit', '-qm', 'Finite tooling fixture')
         self.head = self.git('rev-parse', 'HEAD').decode().strip()
         self.patch = mock.patch.multiple(OVERLAY, BASE_HEAD=self.base, BASE_TREE=self.base_tree,
                                          ADDITIONS=rows, POLICY_SHA256=OVERLAY.sha256(OVERLAY.canonical(rows)),
-                                         TRANSPORT=transport, TRANSPORT_POLICY_SHA256=OVERLAY.sha256(OVERLAY.canonical(transport)))
+                                         TRANSPORT=transport, TRANSPORT_POLICY_SHA256=OVERLAY.sha256(OVERLAY.canonical(transport)),
+                                         LEGACY_REPLACEMENTS=legacy, LEGACY_POLICY_SHA256=OVERLAY.sha256(OVERLAY.canonical(legacy)))
         self.patch.start()
         self.addCleanup(self.patch.stop)
+        # Isolated unit boundary fixture only: no actual tooling checkout or
+        # legacy Source/native qualification is represented by this mock.
+        def fixture_derived_gate(root, head, expected, additions, transport, rows):
+            if (root / OVERLAY.LEGACY_MAP).read_bytes() != self.derived_map:
+                raise RuntimeError('Fixture complete derived MAP equality rejected')
+            self.assertEqual(root, self.root)
+            self.assertEqual(head, self.head)
+            self.assertEqual(len(expected), 2196)
+            self.assertEqual(rows, legacy)
+            return {'isolated_unit_boundary_fixture': True}
+        self.legacy_gate_patch = mock.patch.object(OVERLAY, 'verify_legacy_epoch', side_effect=fixture_derived_gate)
+        self.legacy_gate = self.legacy_gate_patch.start()
+        self.addCleanup(self.legacy_gate_patch.stop)
 
     def git(self, *args):
         return subprocess.check_output(['git', '-c', 'gc.auto=0', '-c', 'maintenance.auto=false', '-C', str(self.root), *args], stderr=subprocess.PIPE)
@@ -83,7 +113,8 @@ class ToolingOverlayTests(unittest.TestCase):
     def test_complete_overlay_accepts_without_native_credit(self):
         receipt = self.check()
         self.assertEqual(receipt['source_paths'], 2196)
-        self.assertEqual(receipt['execution_head'], self.base)
+        self.assertEqual(receipt['execution_head'], self.head)
+        self.assertEqual(receipt['proof_base_head'], self.base)
         self.assertTrue(receipt['all_lean_sources_unchanged'])
         self.assertFalse(receipt['native_qualification'])
         self.assertFalse(receipt['workflow_status_credit'])
@@ -222,6 +253,48 @@ class ToolingOverlayTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, 'Git environment override'):
                 self.check()
 
+
+    def test_actual_legacy_boundary_is_required_once(self):
+        receipt = self.check()
+        self.legacy_gate.assert_called_once()
+        self.assertTrue(receipt['legacy_epoch_complete_current_identity_verified'])
+        self.assertFalse(receipt['legacy_helper_and_map_unchanged'])
+
+    def test_legacy_boundary_failure_cannot_be_skipped(self):
+        self.legacy_gate.side_effect = RuntimeError('Actual legacy verifier refused')
+        with self.assertRaisesRegex(RuntimeError, 'Actual legacy verifier refused'):
+            self.check()
+
+    def test_committed_derived_map_tamper_rejected_by_required_gate(self):
+        self.write(OVERLAY.LEGACY_MAP, b'{"fixture": "unreviewed MAP"}\n')
+        self.git('add', OVERLAY.LEGACY_MAP)
+        self.git('commit', '-qm', 'Fixture committed MAP tamper')
+        self.head = self.git('rev-parse', 'HEAD').decode().strip()
+        with self.assertRaisesRegex(RuntimeError, 'derived MAP equality'):
+            self.check()
+
+    def test_committed_legacy_body_tamper_rejected(self):
+        self.write(OVERLAY.LEGACY_HELPER, b'raise RuntimeError("unreviewed helper")\n')
+        self.git('add', OVERLAY.LEGACY_HELPER)
+        self.git('commit', '-qm', 'Fixture legacy Source tamper')
+        self.head = self.git('rev-parse', 'HEAD').decode().strip()
+        with self.assertRaisesRegex(RuntimeError, 'Unknown tracked'):
+            self.check()
+
+    def test_legacy_policy_sha_mutation_rejected(self):
+        bad = json.loads(json.dumps(OVERLAY.LEGACY_REPLACEMENTS))
+        bad[OVERLAY.LEGACY_HELPER]['sha256'] = '0' * 64
+        with mock.patch.object(OVERLAY, 'LEGACY_REPLACEMENTS', bad):
+            with self.assertRaisesRegex(RuntimeError, 'legacy epoch replacement policy mutation'):
+                self.check()
+
+    def test_legacy_original_sha_provenance_rejected(self):
+        bad = json.loads(json.dumps(OVERLAY.LEGACY_REPLACEMENTS))
+        bad[OVERLAY.LEGACY_HELPER]['before_sha256'] = '0' * 64
+        with mock.patch.multiple(OVERLAY, LEGACY_REPLACEMENTS=bad,
+                                 LEGACY_POLICY_SHA256=OVERLAY.sha256(OVERLAY.canonical(bad))):
+            with self.assertRaisesRegex(RuntimeError, 'Original legacy whole Source'):
+                self.check()
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

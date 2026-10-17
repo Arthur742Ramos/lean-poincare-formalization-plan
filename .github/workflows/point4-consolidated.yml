@@ -28,8 +28,7 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
       P4_CI_STAGE: first
       EXPECTED_TOOLING_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      EXPECTED_PROOF_SHA: 5d1b3e2c123a8bdfd036a0e4d8495586c4a6d1b9
-      EXPECTED_PROOF_TREE: 8081325e22bc0314d6106a311f92606e7e03f9d3
+      EXPECTED_PROOF_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps: &point4_stage_steps
       - name: Checkout exact tooling candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -55,16 +54,17 @@ jobs:
           command -v busctl >/dev/null
           command -v systemctl >/dev/null
           python3 -B scripts/point4_tooling_overlay.py --expected-sha "$EXPECTED_TOOLING_SHA" --output "$RUNNER_TEMP/point4-tooling-overlay-pre.json"
-          echo "tree=$(git rev-parse 'HEAD^{tree}')" >> "$GITHUB_OUTPUT"
+          tooling_tree=$(git rev-parse 'HEAD^{tree}')
+          echo "tree=$tooling_tree" >> "$GITHUB_OUTPUT"
           git clone --no-local --no-hardlinks --no-checkout "$GITHUB_WORKSPACE" "$RUNNER_TEMP/point4-execution"
           git -C "$RUNNER_TEMP/point4-execution" checkout --detach "$EXPECTED_PROOF_SHA"
           test -d "$RUNNER_TEMP/point4-execution/.git"
           git clone --no-local --no-hardlinks --no-checkout "$GITHUB_WORKSPACE" "$RUNNER_TEMP/point4-chart-execution"
           git -C "$RUNNER_TEMP/point4-chart-execution" checkout --detach "$EXPECTED_PROOF_SHA"
           test -d "$RUNNER_TEMP/point4-chart-execution/.git"
-          test "$(git -C "$RUNNER_TEMP/point4-chart-execution" rev-parse 'HEAD^{tree}')" = "$EXPECTED_PROOF_TREE"
+          test "$(git -C "$RUNNER_TEMP/point4-chart-execution" rev-parse 'HEAD^{tree}')" = "$tooling_tree"
           test ! -e "$RUNNER_TEMP/point4-chart-execution/curvature/.lake"
-          test "$(git -C "$RUNNER_TEMP/point4-execution" rev-parse 'HEAD^{tree}')" = "$EXPECTED_PROOF_TREE"
+          test "$(git -C "$RUNNER_TEMP/point4-execution" rev-parse 'HEAD^{tree}')" = "$tooling_tree"
       - name: Install pinned compiler and official dependency cache once
         uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
         with:
@@ -87,6 +87,7 @@ jobs:
           source-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
           targets-json: '["PoincareCurvature"]'
       - name: Execute every assigned original case within original budgets
+        id: native
         run: |
           set -euo pipefail
           python3 -B scripts/point4_ci/runner.py --tooling-root "$GITHUB_WORKSPACE" --execution-root "$RUNNER_TEMP/point4-execution" --chart-execution-root "$RUNNER_TEMP/point4-chart-execution" --expected-sha "$EXPECTED_TOOLING_SHA" --expected-tree "${{ steps.source.outputs.tree }}" --evidence-dir "$RUNNER_TEMP/point4-consolidated-evidence" --stage "$P4_CI_STAGE" --compiled-cache-provenance "$RUNNER_TEMP/point4-verified-cache/state.json" --budget-seconds 19800
@@ -102,6 +103,13 @@ jobs:
           source-root: ${{ runner.temp }}/point4-execution
           source-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
           targets-json: '["PoincareCurvature"]'
+      - name: Project complete bounded semantic-review evidence
+        id: review
+        if: always() && steps.source.outcome == 'success' && steps.native.outcome != 'skipped'
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 120s python3 -B scripts/point4_ci/runner.py --project-review --tooling-root "$GITHUB_WORKSPACE" --execution-root "$RUNNER_TEMP/point4-execution" --chart-execution-root "$RUNNER_TEMP/point4-chart-execution" --expected-sha "$EXPECTED_TOOLING_SHA" --expected-tree "${{ steps.source.outputs.tree }}" --evidence-dir "$RUNNER_TEMP/point4-consolidated-evidence" --stage "$P4_CI_STAGE" --compiled-cache-provenance "$RUNNER_TEMP/point4-verified-cache/state.json" --review-directory "$RUNNER_TEMP/point4-consolidated-review-$P4_CI_STAGE" --source-pre "$RUNNER_TEMP/point4-tooling-overlay-pre.json" --source-post "$RUNNER_TEMP/point4-tooling-overlay-post.json"
       - name: Preserve one complete bounded evidence bundle
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -114,6 +122,15 @@ jobs:
             /tmp/point4-consolidated-cache-inventory.json
           if-no-files-found: error
           retention-days: 14
+      - name: Preserve separate semantic-review projection
+        if: always() && steps.review.outcome == 'success'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: point4-consolidated-review-${{ github.event.pull_request.head.sha || github.sha }}-${{ env.P4_CI_STAGE }}
+          path: ${{ runner.temp }}/point4-consolidated-review-${{ env.P4_CI_STAGE }}/
+          include-hidden-files: false
+          if-no-files-found: error
+          retention-days: 14
 
   second:
     name: Second stage; five retained heavy jobs using verified compiled outputs
@@ -124,6 +141,5 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
       P4_CI_STAGE: second
       EXPECTED_TOOLING_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      EXPECTED_PROOF_SHA: 5d1b3e2c123a8bdfd036a0e4d8495586c4a6d1b9
-      EXPECTED_PROOF_TREE: 8081325e22bc0314d6106a311f92606e7e03f9d3
+      EXPECTED_PROOF_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps: *point4_stage_steps
