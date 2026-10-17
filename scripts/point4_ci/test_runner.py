@@ -24,6 +24,86 @@ def _reserve_fixture_worker(root,name,start,results):
     except RuntimeError:results.put('BOUNDED_REJECT')
 
 
+class EffectiveSearchTests(unittest.TestCase):
+    """Exercise the real compiled inventory against finite Lake environment fixtures."""
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name) / 'candidate'
+        self.package = self.root / 'curvature'
+        self.prefix = Path(self.tmp.name) / 'toolchain'
+        self.build = self.package / '.lake/build/lib/lean'
+        self.dependency = self.package / '.lake/packages/dependency'
+        self.depbuild = self.dependency / '.lake/build/lib/lean'
+        for path in (self.build, self.depbuild, self.prefix / 'lib/lean', self.prefix / 'src',
+                     Path(self.tmp.name) / 'outside'):
+            path.mkdir(parents=True)
+        (self.package / 'lake-manifest.json').write_text(json.dumps({
+            'packages': [{'type': 'git', 'name': 'dependency'}]}))
+        (self.build / 'Fixture.olean').write_bytes(b'compiled fixture')
+        (self.package / 'Fixture.lean').write_text('-- Source fixture\n')
+        (self.depbuild / 'Dependency.olean').write_bytes(b'dependency fixture')
+        (self.dependency / 'Dependency.lean').write_text('-- dependency fixture\n')
+        self.search = {'LEAN_PATH': '.lake/build/lib/lean:.lake/packages/dependency/.lake/build/lib/lean',
+                       'LEAN_SRC_PATH': '.:.lake/packages/dependency:' + str(self.prefix / 'src')}
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def inventory(self):
+        import identity
+        def lake(argv, cwd):
+            self.assertEqual(cwd, self.package)
+            if argv == ['/pinned/lake', 'env', 'lean', '--print-prefix']:
+                return str(self.prefix).encode()
+            self.assertEqual(argv[:4], ['/pinned/lake', 'env', 'python3', '-c'])
+            return canonical(self.search)
+        with mock.patch.object(identity, 'command', side_effect=lake), \
+             mock.patch.object(identity, 'reject_untracked_modules'):
+            return identity.compiled_identity(self.root, '/pinned/lake', {})
+
+    def test_real_inventory_resolves_relative_roots_in_queried_package(self):
+        actual = self.inventory()
+        self.assertEqual(actual['search'], self.search)
+        self.assertEqual(actual['search_resolution']['package_cwd'], str(self.package))
+        self.assertEqual(actual['search_resolution']['paths']['LEAN_PATH'], [
+            {'raw': '.lake/build/lib/lean', 'resolved': str(self.build)},
+            {'raw': '.lake/packages/dependency/.lake/build/lib/lean', 'resolved': str(self.depbuild)}])
+        self.assertEqual(actual['files'], 2)
+
+    def test_process_cwd_does_not_change_relative_search_identity(self):
+        before = self.inventory()
+        previous = Path.cwd()
+        try:
+            os.chdir(Path(self.tmp.name) / 'outside')
+            self.assertEqual(self.inventory(), before)
+        finally:
+            os.chdir(previous)
+
+    def test_absolute_core_roots_and_duplicate_order_remain_bound(self):
+        core = str(self.prefix / 'lib/lean')
+        self.search['LEAN_PATH'] += ':' + core + ':.lake/build/lib/lean'
+        actual = self.inventory()
+        self.assertEqual([row['raw'] for row in actual['search_resolution']['paths']['LEAN_PATH']],
+                         self.search['LEAN_PATH'].split(':'))
+        self.search['LEAN_PATH'] = core + ':' + self.search['LEAN_PATH']
+        self.assertNotEqual(self.inventory(), actual)
+
+    def test_unknown_missing_file_and_escaping_alias_are_rejected(self):
+        outside = Path(self.tmp.name) / 'outside'
+        (self.package / 'escape').symlink_to(outside, target_is_directory=True)
+        for raw in ('missing', '../outside', str(outside), 'Fixture.lean', 'escape'):
+            with self.subTest(raw=raw):
+                self.search['LEAN_PATH'] = raw
+                with self.assertRaises(RuntimeError):
+                    self.inventory()
+
+    def test_complete_compiled_bytes_are_still_hashed_on_every_call(self):
+        before = self.inventory()
+        (self.depbuild / 'Dependency.olean').write_bytes(b'dependency changed')
+        after = self.inventory()
+        self.assertNotEqual(before['inventory_sha256'], after['inventory_sha256'])
+
+
 class ProtocolTests(unittest.TestCase):
     def setUp(self):
         self._budget_tmp=tempfile.TemporaryDirectory()

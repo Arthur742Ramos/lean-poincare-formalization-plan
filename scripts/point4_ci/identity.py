@@ -262,6 +262,27 @@ def reject_untracked_modules(root):
                 require(path.relative_to(top).as_posix() in tracked, 'Untracked/ignored module injection')
 
 
+def effective_search_resolution(search, package, roots, packages):
+    """Resolve Lake's paths in the same cwd used to query its environment."""
+    require(package.is_absolute() and package == package.resolve(), 'Noncanonical Lake environment cwd')
+    require(type(search) is dict and set(search) == {'LEAN_PATH', 'LEAN_SRC_PATH'}
+            and all(type(value) is str for value in search.values()), 'Malformed Lake search environment')
+    resolved_search = {}
+    for name, value in search.items():
+        resolved_search[name] = []
+        for raw in filter(None, value.split(os.pathsep)):
+            path = Path(raw)
+            if not path.is_absolute():
+                path = package / path
+            require(path.is_dir(), 'Missing/non-directory effective Lean search root: ' + name + '=' + raw)
+            resolved = path.resolve(strict=True)
+            require(any(resolved.is_relative_to(base) for base in roots) or
+                    any(resolved == pkg.resolve() for pkg in packages),
+                    'Unknown effective Lean search root: ' + name + '=' + raw)
+            resolved_search[name].append(dict(raw=raw, resolved=str(resolved)))
+    return dict(package_cwd=str(package), paths=resolved_search)
+
+
 def compiled_identity(root, real_lake, plan):
     """Seal complete live build/corelib/plugin trees and effective search roots.
 
@@ -313,13 +334,7 @@ def compiled_identity(root, real_lake, plan):
                                 stem = rel.split('.olean', 1)[0] if '.olean' in rel else rel[:-len('.ilean')]
                                 require((pkg / (stem + '.lean')).is_file(), 'Injected compiled module has no package Source')
     roots = sorted(set(path.resolve() for path in roots))
-    for value in search.values():
-        for raw in filter(None, value.split(os.pathsep)):
-            path = Path(raw)
-            require(path.is_absolute() and path.exists(), 'Missing/relative effective Lean search root')
-            resolved = path.resolve()
-            require(any(resolved.is_relative_to(base) for base in roots) or
-                    any(resolved == pkg.resolve() for pkg in packages), 'Unknown effective Lean search root')
+    search_resolution = effective_search_resolution(search, package, roots, packages)
     rows, total, count = {}, 0, 0
     for base in roots:
         require(base.is_dir() and not base.is_symlink(), 'Compiled root alias')
@@ -348,7 +363,8 @@ def compiled_identity(root, real_lake, plan):
         row = stream_seal(path); total += row['bytes']
         require(total <= 32 * 1024 * 1024 * 1024, 'Compiled aggregate bound exceeded')
         rows[str(path)] = row
-    return dict(search=search, roots=[str(x) for x in roots], files=len(rows), bytes=total,
+    return dict(search=search, search_resolution=search_resolution,
+                roots=[str(x) for x in roots], files=len(rows), bytes=total,
                 inventory_sha256=digest(canonical(rows)))
 
 
