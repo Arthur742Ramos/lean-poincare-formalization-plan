@@ -420,5 +420,189 @@ class BrokerModeGuardTests(unittest.TestCase):
         self.assertEqual(forward('unrelated.py', unchanged), unchanged)
         self.assertEqual(inverse('unrelated.py', unchanged), unchanged)
 
+
+class VerifierLocalPureValueTests(unittest.TestCase):
+    """Isolate real pure function wrappers; never execute production verify_current."""
+    def setUp(self):
+        import ast
+        import contextlib
+        import hashlib
+        import re
+        import threading
+        helper = PATH.parents[1] / OVERLAY.LEGACY_HELPER
+        tree = ast.parse(helper.read_bytes())
+        ns = dict(hashlib=hashlib, re=re, pathlib=__import__('pathlib'), json=json,
+                  os=os, contextlib=contextlib, _curvature_tooling_pure_threading=threading)
+        for node in tree.body:
+            if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+                try:
+                    ns[node.targets[0].id] = ast.literal_eval(node.value)
+                except (ValueError, TypeError):
+                    pass
+        functions = [n for n in tree.body if isinstance(n, ast.FunctionDef)]
+        originals = [next(n for n in functions if n.name == name) for name in ('sha256', 'parse_tree')]
+        exec(compile(ast.Module(body=originals, type_ignores=[]), str(helper), 'exec'), ns)
+        self.calls = dict(sha=0, tree=0, verify=0)
+        def counted(kind, function):
+            def call(data):
+                self.calls[kind] += 1
+                return function(data)
+            return call
+        ns['_curvature_before_tooling_pure_sha256'] = counted('sha', ns['sha256'])
+        ns['_curvature_before_tooling_pure_parse_tree'] = counted('tree', ns['parse_tree'])
+        def full_verifier_boundary():
+            self.calls['verify'] += 1
+            return {'original_verifier_called': self.calls['verify']}
+        ns['_curvature_before_tooling_pure_verify_current'] = full_verifier_boundary
+        ns['_curvature_tooling_pure_owner'] = None
+        selected = [n for n in functions if n.name.startswith('curvature_tooling_pure_')]
+        selected += [next(n for n in functions if n.name == 'curvature_tooling_policy_check')]
+        selected += [next(n for n in reversed(functions) if n.name == name)
+                     for name in ('sha256', 'parse_tree', 'verify_current')]
+        exec(compile(ast.Module(body=selected, type_ignores=[]), str(helper), 'exec'), ns)
+        self.ns = ns
+
+    def tree(self, count=1, prefix='source'):
+        return b''.join(('100644 blob %040x\t%s%d\0' % (i + 1, prefix, i)).encode() for i in range(count))
+
+    def test_same_bytes_reuse_value_without_dictionary_alias(self):
+        with self.ns['curvature_tooling_pure_values']():
+            before = dict(self.calls)
+            self.assertEqual(self.ns['sha256'](b'new exact bytes'), self.ns['sha256'](bytes(bytearray(b'new exact bytes'))))
+            self.assertEqual(self.calls['sha'] - before['sha'], 1)
+            data = self.tree()
+            first = self.ns['parse_tree'](data)
+            first['injected'] = ('100755', '0' * 40)
+            second = self.ns['parse_tree'](bytes(bytearray(data)))
+            self.assertEqual(second, {'source0': ('100644', '%040x' % 1)})
+            self.assertIsNot(first, second)
+            second.clear()
+            self.assertEqual(len(self.ns['parse_tree'](data)), 1)
+            self.assertEqual(self.calls['tree'] - before['tree'], 1)
+
+    def test_new_bytes_and_malformed_bytes_always_get_correct_behavior(self):
+        with self.ns['curvature_tooling_pure_values']():
+            self.assertNotEqual(self.ns['sha256'](b'one'), self.ns['sha256'](b'two'))
+            self.assertNotEqual(self.ns['parse_tree'](self.tree(prefix='one')), self.ns['parse_tree'](self.tree(prefix='two')))
+            before = self.calls['tree']
+            for _ in range(2):
+                with self.assertRaises(AssertionError):
+                    self.ns['parse_tree'](b'incomplete')
+            self.assertEqual(self.calls['tree'] - before, 2)
+            self.assertNotIn(b'incomplete', self.ns['_curvature_tooling_pure_owner']['tree'])
+            before = self.calls['sha']
+            self.ns['sha256'](bytearray(b'mutable'))
+            self.ns['sha256'](bytearray(b'mutable'))
+            self.assertEqual(self.calls['sha'] - before, 2)
+
+    def test_entry_bound_falls_back_and_keeps_existing_exact_hits(self):
+        with self.ns['curvature_tooling_pure_values']():
+            owner = self.ns['_curvature_tooling_pure_owner']
+            for i in range(owner['limits']['entries']):
+                self.ns['sha256'](('entry%d' % i).encode())
+            self.assertEqual(owner['entries'], 256)
+            before = self.calls['sha']
+            self.ns['sha256'](b'overflow'); self.ns['sha256'](b'overflow')
+            self.assertEqual(self.calls['sha'] - before, 2)
+            before = self.calls['sha']
+            self.ns['sha256'](b'entry0')
+            self.assertEqual(self.calls['sha'], before)
+            self.assertEqual(owner['entries'], 256)
+
+    def test_key_size_and_total_key_byte_bounds_fall_back(self):
+        with self.ns['curvature_tooling_pure_values']():
+            owner = self.ns['_curvature_tooling_pure_owner']
+            maximum = owner['limits']['key_bytes']
+            oversized = b'x' * (maximum + 1)
+            before = self.calls['sha']
+            self.ns['sha256'](oversized); self.ns['sha256'](oversized)
+            self.assertEqual(self.calls['sha'] - before, 2)
+            self.assertEqual(owner['entries'], 0)
+            del oversized
+            for i in range(8):
+                self.ns['sha256'](bytes([i]) * maximum)
+            self.assertEqual(owner['key_bytes'], 64 * 1024**2)
+            before = self.calls['sha']
+            self.ns['sha256'](b'full'); self.ns['sha256'](b'full')
+            self.assertEqual(self.calls['sha'] - before, 2)
+            self.assertEqual(owner['key_bytes'], 64 * 1024**2)
+
+    def test_per_tree_and_total_row_bounds_fall_back(self):
+        with self.ns['curvature_tooling_pure_values']():
+            owner = self.ns['_curvature_tooling_pure_owner']
+            oversized = self.tree(4097)
+            before = self.calls['tree']
+            self.ns['parse_tree'](oversized); self.ns['parse_tree'](oversized)
+            self.assertEqual(self.calls['tree'] - before, 2)
+            self.assertEqual(owner['entries'], 0)
+            for i in range(16):
+                self.ns['parse_tree'](self.tree(4096, 'set%d-' % i))
+            self.assertEqual(owner['tree_rows'], 65536)
+            data = self.tree(1, 'overflow')
+            before = self.calls['tree']
+            self.ns['parse_tree'](data); self.ns['parse_tree'](data)
+            self.assertEqual(self.calls['tree'] - before, 2)
+            self.assertEqual(owner['tree_rows'], 65536)
+
+    def test_exception_cleanup_and_fresh_invocation(self):
+        owner = None
+        with self.assertRaisesRegex(RuntimeError, 'original failure'):
+            with self.ns['curvature_tooling_pure_values']():
+                self.ns['sha256'](b'not retained across calls')
+                owner = self.ns['_curvature_tooling_pure_owner']
+                raise RuntimeError('original failure')
+        self.assertIsNone(self.ns['_curvature_tooling_pure_owner'])
+        self.assertEqual(owner['sha'], {})
+        self.assertEqual(owner['tree'], {})
+        self.assertEqual(owner['entries'], 0)
+        with self.ns['curvature_tooling_pure_values']():
+            before = self.calls['sha']
+            self.ns['sha256'](b'not retained across calls')
+            self.assertEqual(self.calls['sha'] - before, 1)
+            self.assertIsNot(self.ns['_curvature_tooling_pure_owner'], owner)
+
+    def test_nested_full_verifier_is_not_skipped_and_preserves_outer_owner(self):
+        with self.ns['curvature_tooling_pure_values']():
+            owner = self.ns['_curvature_tooling_pure_owner']
+            self.ns['sha256'](b'outer')
+            self.ns['verify_current'](); self.ns['verify_current']()
+            self.assertEqual(self.calls['verify'], 2)
+            self.assertIs(self.ns['_curvature_tooling_pure_owner'], owner)
+            self.assertIn(b'outer', owner['sha'])
+        self.assertIsNone(self.ns['_curvature_tooling_pure_owner'])
+        def original_failure():
+            raise RuntimeError('old verifier failure')
+        self.ns['_curvature_before_tooling_pure_verify_current'] = original_failure
+        with self.assertRaisesRegex(RuntimeError, 'old verifier failure'):
+            self.ns['verify_current']()
+        self.assertIsNone(self.ns['_curvature_tooling_pure_owner'])
+
+    def test_foreign_thread_and_pid_bypass_memos_without_owner_replacement(self):
+        import threading
+        with self.ns['curvature_tooling_pure_values']():
+            owner = self.ns['_curvature_tooling_pure_owner']
+            errors = []
+            def foreign():
+                try:
+                    self.ns['sha256'](b'foreign'); self.ns['sha256'](b'foreign')
+                    self.ns['parse_tree'](self.tree()); self.ns['parse_tree'](self.tree())
+                    self.ns['verify_current']()
+                except BaseException as exc:
+                    errors.append(exc)
+            before = dict(self.calls)
+            thread = threading.Thread(target=foreign)
+            thread.start(); thread.join()
+            self.assertEqual(errors, [])
+            self.assertEqual(self.calls['sha'] - before['sha'], 2)
+            self.assertEqual(self.calls['tree'] - before['tree'], 2)
+            self.assertEqual(self.calls['verify'] - before['verify'], 1)
+            self.assertIs(self.ns['_curvature_tooling_pure_owner'], owner)
+            self.assertEqual(owner['entries'], 0)
+            with mock.patch.object(os, 'getpid', return_value=-1):
+                before = self.calls['sha']
+                self.ns['sha256'](b'foreign pid'); self.ns['sha256'](b'foreign pid')
+                self.assertEqual(self.calls['sha'] - before, 2)
+            self.assertEqual(owner['entries'], 0)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
