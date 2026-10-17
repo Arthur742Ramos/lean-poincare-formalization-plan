@@ -397,7 +397,7 @@ class BrokerModeGuardTests(unittest.TestCase):
         forward = ns['curvature_tooling_broker_mode_current']
         inverse = ns['curvature_tooling_broker_mode_inverse']
         ports = ns['CURVATURE_TOOLING_POLICY']['broker_mode_ports']
-        self.assertEqual(sum(map(len, ports.values())), 5)
+        self.assertEqual(sum(map(len, ports.values())), 6)
         def functions(raw, filename):
             return {c.co_name: c for c in compile(raw, filename, 'exec').co_consts if isinstance(c, type((lambda: None).__code__))}
         for path in self.GUARDS:
@@ -603,6 +603,97 @@ class VerifierLocalPureValueTests(unittest.TestCase):
                 self.ns['sha256'](b'foreign pid'); self.ns['sha256'](b'foreign pid')
                 self.assertEqual(self.calls['sha'] - before, 2)
             self.assertEqual(owner['entries'], 0)
+
+
+class WeightedRuntimeFragmentSealTests(unittest.TestCase):
+    """Actual check_current body with finite Source/index/files; no Git HEAD emulation."""
+    WEIGHTED = 'curvature/scripts/point4_weighted_hessian_release_guard.py'
+    BROKER = 'scripts/point4_ci/command_broker.py'
+    BEFORE = '41e5e5e853d8dd79ead807f76124d5bdaec723548493a4b6540b5de90515b6c2'
+    CURRENT = '019345bdc43d4eb227ee6b5810c8b03382940513c61b871a67f99019f2bdd0ff'
+
+    def actual_current_fixture(self, stale=False, tamper=False, broker_mode=0o755):
+        import ast
+        import hashlib
+        import sys
+        import types
+        source = (PATH.parents[1] / self.WEIGHTED).read_bytes()
+        text = source.decode()
+        if stale:
+            before = "RUNTIME_INVENTORY_FRAGMENT_SHA256 = '" + self.CURRENT + "'"
+            self.assertEqual(text.count(before), 1)
+            text = text.replace(before, "RUNTIME_INVENTORY_FRAGMENT_SHA256 = '" + self.BEFORE + "'", 1)
+        if tamper:
+            self.assertEqual(text.count('\nLAKE_ROOTS ='), 1)
+            text = text.replace('\nLAKE_ROOTS =', '\nLAKE_ROOTS = ', 1)
+        ns = BrokerModeGuardTests.functions(self, self.WEIGHTED)
+        names = {'check_current', 'check_public_paths', 'check_physical_lean'}
+        nodes = [n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef) and n.name in names]
+        self.assertEqual({n.name for n in nodes}, names)
+        exec(compile(ast.Module(body=nodes, type_ignores=[]), str(PATH.parents[1] / self.WEIGHTED), 'exec'), ns)
+        with tempfile.TemporaryDirectory(prefix='point4-weighted-fragment-') as temp:
+            root = Path(temp)
+            workflow = '.github/workflows/finite.yml'
+            meta = 'docs/finite-weighted.toml'
+            lib = 'curvature/PoincareCurvature.lean'
+            oldmeta = 'docs/finite-original.toml'
+            regression = 'curvature/scripts/point4_closed_contract_regression.lean'
+            files = {self.WEIGHTED: text.encode(), self.BROKER: b'finite broker bytes\n',
+                     workflow: b'name: finite fixture\n', meta: b'finite weighted metadata\n',
+                     oldmeta: b'finite historical metadata\n', lib: b'-- finite import fixture\n',
+                     regression: b'-- finite Source test only\n' + b'fail_if_success exact @bad\n' * 12}
+            for name, raw in files.items():
+                target = root / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(raw)
+                target.chmod(broker_mode if name == self.BROKER else 0o644)
+            staged = b''.join((('100755' if name == self.BROKER else '100644') + ' ' + ns['git_blob_identity'](raw) + ' 0\t' + name).encode() + b'\0' for name, raw in sorted(files.items()))
+            def finite_git(*args):
+                if args == ('ls-files', '--stage', '-z'):
+                    return staged
+                self.assertEqual(args, ('ls-files', '-z', '--others'))
+                return b''
+            def exact(actual, expected):
+                self.assertEqual(actual, expected)
+            # Explicit external semantic boundaries only. The actual failing
+            # fragment check, inherited byte loop, complete inventory, physical
+            # modes/blob checks and regression-count assertions all execute.
+            historical = types.SimpleNamespace(LIBROOT=lib, METADATA=oldmeta,
+                check_imports=lambda value: exact(value, files[lib]),
+                check_metadata=lambda value: exact(value, files[oldmeta].decode()))
+            ns.update(ROOT=root, git=finite_git, sha256=lambda value: hashlib.sha256(value).hexdigest(),
+                      RUNTIME_INVENTORY_FRAGMENT_SHA256=self.BEFORE if stale else self.CURRENT,
+                      expected_sources=lambda: {name: ('fixture', raw) for name, raw in files.items()},
+                      public_paths=lambda: set(files), baseline_sources=lambda: {},
+                      dependency_inventory=lambda: (set(), set()), runtime_fingerprints=lambda deps: set(),
+                      generated_build_path=lambda name: False, runtime_path=lambda name: False,
+                      PROOFWIDGETS_FINGERPRINT='unused', UNIT_FILE_SHA256={workflow: hashlib.sha256(files[workflow]).hexdigest()},
+                      SELF_PATHS=set(), historical_c2=lambda: historical,
+                      METADATA=meta, WORKFLOW=workflow,
+                      check_metadata=lambda value, schema: exact((value, schema), (files[meta].decode(), None)),
+                      parse_workflow=lambda value: exact(value, files[workflow].decode()),
+                      source_transformations=lambda: {}, check_module_import_graph=lambda: {'finite_external_boundary': True},
+                      BASE='finite_fixture_source_scope', adapters=lambda: [])
+            with mock.patch.dict(sys.modules, {'point4_scan': types.SimpleNamespace(strip_comments=lambda value: value.splitlines())}):
+                result = ns['check_current']()
+            self.assertEqual(result['public_paths'], len(files))
+            self.assertFalse(result['lean_verified'])
+            self.assertEqual(result['point4'], 'OPEN')
+
+    def test_actual_check_current_reproduces_stale_seal_failure(self):
+        with self.assertRaisesRegex(AssertionError, 'Reviewed runtime inventory fragment changed'):
+            self.actual_current_fixture(stale=True)
+
+    def test_actual_check_current_accepts_exact_rebound_fragment(self):
+        self.actual_current_fixture()
+
+    def test_actual_check_current_rejects_one_fragment_byte_change(self):
+        with self.assertRaisesRegex(AssertionError, 'Reviewed runtime inventory fragment changed'):
+            self.actual_current_fixture(tamper=True)
+
+    def test_actual_check_current_still_rejects_wrong_broker_physical_mode(self):
+        with self.assertRaisesRegex(AssertionError, 'Public executable-mode drift'):
+            self.actual_current_fixture(broker_mode=0o644)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
