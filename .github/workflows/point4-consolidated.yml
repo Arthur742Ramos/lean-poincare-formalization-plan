@@ -90,6 +90,16 @@ jobs:
         id: native
         run: |
           set -euo pipefail
+          if [[ "$P4_CI_STAGE" == third ]]; then
+            [[ "$GITHUB_RUN_ID" =~ ^[0-9]{1,20}$ && "$GITHUB_RUN_ATTEMPT" =~ ^[0-9]{1,6}$ ]]
+            [[ "$RUNNER_TEMP" == "$(realpath -e -- "$RUNNER_TEMP")" ]]
+            [[ "$GITHUB_WORKSPACE" == "$(realpath -e -- "$GITHUB_WORKSPACE")" ]]
+            case "$RUNNER_TEMP/" in
+              "$GITHUB_WORKSPACE/"*) echo "Comparator tools must stay outside tooling Source" >&2; exit 1 ;;
+            esac
+            PALOMAR_COMPARATOR_CACHE="$(mktemp -d -- "$RUNNER_TEMP/point4-comparator-tools-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-third.XXXXXX")"
+            export PALOMAR_COMPARATOR_CACHE
+          fi
           python3 -B scripts/point4_ci/runner.py --tooling-root "$GITHUB_WORKSPACE" --execution-root "$RUNNER_TEMP/point4-execution" --chart-execution-root "$RUNNER_TEMP/point4-chart-execution" --expected-sha "$EXPECTED_TOOLING_SHA" --expected-tree "${{ steps.source.outputs.tree }}" --evidence-dir "$RUNNER_TEMP/point4-consolidated-evidence" --stage "$P4_CI_STAGE" --compiled-cache-provenance "$RUNNER_TEMP/point4-verified-cache/state.json" --budget-seconds 19800
       - name: Recheck unchanged Source after all native cases
         run: python3 -B scripts/point4_tooling_overlay.py --expected-sha "$EXPECTED_TOOLING_SHA" --output "$RUNNER_TEMP/point4-tooling-overlay-post.json"

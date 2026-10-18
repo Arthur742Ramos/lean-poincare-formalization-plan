@@ -280,6 +280,85 @@ class ProtocolTests(unittest.TestCase):
             if stage=='first':writer_stages.append(stage)
         self.assertEqual(writer_stages,['first'])
 
+    def test_comparator_tool_sources_stay_outside_guarded_checkouts(self):
+        import identity
+        import yaml
+        workflow = yaml.safe_load((Path(__file__).resolve().parents[2] /
+                                   '.github/workflows/point4-consolidated.yml').read_text())
+        native = next(s['run'] for s in workflow['jobs']['third']['steps'] if s.get('id') == 'native')
+        command = native.splitlines()[-1]
+        self.assertTrue(command.startswith('python3 -B scripts/point4_ci/runner.py '))
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary)
+            workspace, runner_temp, binaries = base/'workspace', base/'runner-temp', base/'bin'
+            for directory in (workspace, runner_temp, binaries):
+                directory.mkdir()
+            execution = runner_temp/'point4-execution'
+            package = execution/'curvature'
+            package.mkdir(parents=True)
+            (package/'Fixture.lean').write_text('-- unchanged proof Source\n')
+            record = base/'cache-path.txt'
+            # Replace only the runner executable with an offline fixture that
+            # models the original Comparator's supported cache override.
+            stub = binaries/'python3'
+            stub.write_text('#!/usr/bin/bash\nset -euo pipefail\n'
+                            'cache=${PALOMAR_COMPARATOR_CACHE:-"$RUNNER_TEMP/point4-execution/curvature/.cache/palomar-comparator"}\n'
+                            'printf "%s" "$cache" > "$CACHE_RECORD"\n'
+                            'mkdir -p "$cache/lean4export"\n'
+                            'printf "%s\\n" "-- external tool Source fixture" > "$cache/lean4export/Lean4Export.lean"\n')
+            stub.chmod(0o755)
+            env = dict(os.environ, PATH=str(binaries)+os.pathsep+os.environ['PATH'],
+                       GITHUB_WORKSPACE=str(workspace), RUNNER_TEMP=str(runner_temp),
+                       GITHUB_RUN_ID='39095091784', GITHUB_RUN_ATTEMPT='1', P4_CI_STAGE='third',
+                       EXPECTED_TOOLING_SHA='a'*40, CACHE_RECORD=str(record))
+            env.pop('PALOMAR_COMPARATOR_CACHE', None)
+            def invoke(script, environment=None):
+                return subprocess.run(['/usr/bin/bash', '--noprofile', '--norc', '-e', '-o', 'pipefail',
+                                       '-c', script.replace('${{ steps.source.outputs.tree }}', 'b'*40)],
+                                      cwd=workspace, env=env if environment is None else environment,
+                                      capture_output=True, text=True, timeout=10)
+            def git_metadata(root, *args):
+                if args == ('rev-parse', '--show-toplevel'):
+                    return (str(execution)+'\n').encode()
+                self.assertEqual(args, ('ls-tree', '--full-tree', '-rz', 'HEAD'))
+                return b'100644 blob '+b'a'*40+b'\tcurvature/Fixture.lean\0'
+            with mock.patch.object(identity, 'git', side_effect=git_metadata):
+                # The former wrapper really leaves tool Lean inside Source,
+                # and the original guard must continue rejecting that case.
+                before = invoke('set -euo pipefail\n'+command+'\n')
+                self.assertEqual(before.returncode, 0, before.stderr)
+                with self.assertRaisesRegex(RuntimeError, 'Untracked/ignored module injection'):
+                    identity.reject_untracked_modules(package)
+                shutil.rmtree(package/'.cache')
+                identity.reject_untracked_modules(package)
+                caches = []
+                for _ in range(2):
+                    current = invoke(native)
+                    self.assertEqual(current.returncode, 0, current.stderr)
+                    cache = Path(record.read_text())
+                    self.assertEqual(cache.parent, runner_temp)
+                    self.assertTrue(cache.name.startswith('point4-comparator-tools-39095091784-1-third.'))
+                    self.assertEqual(cache.lstat().st_mode & 0o777, 0o700)
+                    self.assertEqual(cache.lstat().st_uid, os.geteuid())
+                    self.assertFalse(cache.is_symlink())
+                    for guarded in (workspace, execution, runner_temp/'point4-chart-execution',
+                                    runner_temp/'point4-consolidated-evidence',
+                                    runner_temp/'point4-consolidated-review-third',
+                                    runner_temp/'point4-verified-cache'):
+                        self.assertFalse(cache.is_relative_to(guarded) or guarded.is_relative_to(cache))
+                    identity.reject_untracked_modules(package)
+                    caches.append(cache)
+                self.assertNotEqual(*caches)
+                alias = base/'runner-alias'
+                alias.symlink_to(runner_temp, target_is_directory=True)
+                for changes in ({'GITHUB_RUN_ID':'../invalid'}, {'RUNNER_TEMP':str(alias)},
+                                {'RUNNER_TEMP':str(workspace)}):
+                    record.unlink()
+                    rejected = invoke(native, dict(env, **changes))
+                    self.assertNotEqual(rejected.returncode, 0)
+                    self.assertFalse(record.exists())
+                    record.write_text('not executed')
+
     def test_stage_outcome_never_claims_pair_success_or_partial_completion(self):
         plan=json.loads(Path(__file__).with_name('plan.json').read_text())
         assignment=runner.stage_partition(plan,'second')
