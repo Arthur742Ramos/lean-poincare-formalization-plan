@@ -9,6 +9,12 @@ on:
       - "scripts/point4/test_audit_hamilton_release.py"
       - ".github/workflows/point4-hamilton-release-audit.yml"
   workflow_dispatch:
+    inputs:
+      consolidated_tooling:
+        description: Run the separate consolidated tooling validation instead of upstream Hamilton work
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -23,6 +29,7 @@ concurrency:
 
 jobs:
   upstream-checkpoint:
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.consolidated_tooling) }}
     outputs:
       checkpoint_sha256: ${{ steps.checkpoint.outputs.checkpoint_sha256 }}
       artifact_id: ${{ steps.upload-checkpoint.outputs.artifact-id }}
@@ -260,3 +267,7 @@ jobs:
           path: |
             hamilton-release-audit-sealed/
           if-no-files-found: error
+
+  consolidated-tooling:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.consolidated_tooling }}
+    uses: ./.github/workflows/point4-consolidated.yml

@@ -269,6 +269,8 @@ class OrdinaryCompositionTests(unittest.TestCase):
                     hook=comp.bootstrap(path,helper_sha).encode()
                     self.assertEqual(changed.count(hook),1)
                     without=changed.replace(hook,b'',1)
+                    without=comp.curvature_tooling_broker_mode_inverse(path,without)
+                    self.assertEqual(comp.curvature_tooling_broker_mode_current(path,without),changed.replace(hook,b'',1))
                     if path!=comp.SMOOTH:self.assertEqual(without,original)
                     else:
                         old=original.decode();new=without.decode()
@@ -1316,7 +1318,7 @@ class FixedBackgroundCompositionTests(unittest.TestCase):
             expected, originals, changes = comp.tensor_identity(*comp.expected_identity())
             expected = comp.curvature_identity(expected,originals,changes)[0]
             self.assertEqual(expected, comp.parse_tree(comp.git('ls-tree','-rz','HEAD')))
-            self.assertEqual(len(expected), 2185)
+            self.assertEqual(len(expected), 2196)
             for path in comp.FIXED_ADDED:
                 self.assertEqual(changes[path], reader(comp.FIXED_SOURCE, path))
                 self.assertEqual(expected[path], trees[comp.FIXED_SOURCE][path])
@@ -2088,7 +2090,7 @@ class TensorCompositionTests(unittest.TestCase):
                  patch.object(pathlib.Path,'lstat',committed_mode_fixture if sys.platform=='win32' else physical_stat), \
                  patch.dict(weighted.__dict__,{'raw_git':comp.git} if sys.platform=='win32' else {}):
                 report=comp.weighted_leaf(weighted.__dict__,schema)
-            self.assertEqual(report['public_paths'],2185)
+            self.assertEqual(report['public_paths'],2196)
             self.assertEqual(verify.call_count,2)
         inherited=captured[0]
         self.assertEqual(len(inherited),1686)
@@ -2140,7 +2142,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         import point4_weighted_hessian_release_guard as weighted
         import stat
         committed=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
-        self.assertEqual(len(committed),2185)
+        self.assertEqual(len(committed),2196)
         physical_stat=pathlib.Path.lstat
         def committed_modes(physical,*args,**kwargs):
             actual=physical_stat(physical,*args,**kwargs)
@@ -2182,8 +2184,8 @@ class CurvatureCompositionTests(unittest.TestCase):
         snapshots=comp.curvature_pins()
         self.assertEqual(comp.curvature_predecessor(legacy,originals,changes,snapshots),snapshots[comp.CURVATURE_PARENT])
         complete,_,_=comp.curvature_identity(legacy,originals,changes)
-        self.assertEqual(len(complete),2185)
-        self.assertEqual(set(complete)-set(legacy),set(comp.CURVATURE_SELECTED)-{'curvature/lakefile.toml'} | set(comp.CURVATURE_CURRENT_BATCH) | set(comp.CURVATURE_INVERSE_COEFFICIENT_BATCH) | set(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH) | set(comp.CURVATURE_MAPPED_GAUSSIAN_BATCH) | set(comp.CURVATURE_RESOLVENT_BATCH) | set(comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH))
+        self.assertEqual(len(complete),2196)
+        self.assertEqual(set(complete)-set(legacy),set(comp.CURVATURE_SELECTED)-{'curvature/lakefile.toml'} | set(comp.CURVATURE_CURRENT_BATCH) | set(comp.CURVATURE_INVERSE_COEFFICIENT_BATCH) | set(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH) | set(comp.CURVATURE_MAPPED_GAUSSIAN_BATCH) | set(comp.CURVATURE_RESOLVENT_BATCH) | set(comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH) | set(comp.CURVATURE_TOOLING_ADDITIONS))
         self.assertEqual(comp.tensor_map_record(complete,originals,changes),comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()))
         for path,marker in ((comp.HELPER,'extension'),(comp.TEST,'tests')):
             raw=(comp.ROOT/path).read_bytes()
@@ -2210,7 +2212,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         # Exact new-batch policy and physical Source mutation controls.
         legacy=comp.tensor_identity(*comp.expected_identity())
         current=comp.curvature_identity(*legacy)[0]
-        current={p:v for p,v in current.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH}
+        current={p:v for p,v in current.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_TOOLING_ADDITIONS}
         current={p:v for p,v in current.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         current={p:v for p,v in current.items() if p not in comp.CURVATURE_INVERSE_COEFFICIENT_BATCH}
         base={p:v for p,v in current.items() if p not in comp.CURVATURE_CURRENT_BATCH}
@@ -2241,7 +2243,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         self.assertEqual(comp.curvature_current_batch_extend(base),current)
         # Preserve the original seven-file controls above; test the separate five-file layer.
         complete=comp.curvature_identity(*legacy)[0]
-        complete={p:v for p,v in complete.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH}
+        complete={p:v for p,v in complete.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_TOOLING_ADDITIONS}
         complete={p:v for p,v in complete.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         predecessor={p:v for p,v in complete.items() if p not in comp.CURVATURE_INVERSE_COEFFICIENT_BATCH}
         self.assertEqual(len(predecessor),2146)
@@ -2275,7 +2277,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         self.assertEqual(comp.curvature_inverse_coefficients_extend(predecessor),complete)
         # Exact Gaussian/affine layer; prior seven/five controls above retain their own views.
         final=comp.curvature_identity(*legacy)[0]
-        final={p:v for p,v in final.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH}
+        final={p:v for p,v in final.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_TOOLING_ADDITIONS}
         batchbase={p:v for p,v in final.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         self.assertEqual(len(batchbase),2151)
         saved=json.loads(json.dumps(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH))
@@ -2309,7 +2311,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         # Exact literal-metric/mapped Gaussian layer; all prior controls above retain their own views.
 
         mapped_final=comp.curvature_identity(*legacy)[0]
-        mapped_final={p:v for p,v in mapped_final.items() if p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH}
+        mapped_final={p:v for p,v in mapped_final.items() if p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_TOOLING_ADDITIONS}
 
         mapped_base={p:v for p,v in mapped_final.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH}
 
@@ -2376,7 +2378,7 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.model=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
-        assert len(cls.model)==2185
+        assert len(cls.model)==2196
         cls.modules={}
         cls.physical_stat=pathlib.Path.lstat
         cls.units={132:'point4_two_sided_heat_source_guard',
@@ -2509,10 +2511,14 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                             current=(comp.ROOT/current_path).read_bytes()
                             historical=comp.git('show',head+':'+current_path)
                             self.assertEqual(comp.sha256(historical),original_digest)
-                            self.assertEqual(comp.curvature_hamilton_current_source(current_path,historical),current)
+                            reconstructed=comp.curvature_hamilton_current_source(current_path,historical)
+                            if current_path==comp.CURVATURE_TOOLING_POLICY['transport_path']:
+                                self.assertEqual(comp.curvature_tooling_previous_dispatch(current),reconstructed)
+                                reconstructed=comp.curvature_tooling_dispatch_current(reconstructed)
+                            self.assertEqual(reconstructed,current)
                             self.assertEqual(comp.curvature_selected_source(current_path,digest='0'*64),historical)
-                            expected[current_path]=comp.CURVATURE_HAMILTON_SOURCE_SHA256[current_path]
-                            reviewed[current_path]='aa4e2fa768e975c178a3b61f22999abed8e75d082fac2d695e3d773261297257' if current_path=='.github/workflows/point4-hamilton-release-audit.yml' else expected[current_path]
+                            expected[current_path]=comp.curvature_tooling_hamilton_current_rows(comp.CURVATURE_HAMILTON_SOURCE_SHA256)[current_path]
+                            reviewed[current_path]=comp.curvature_tooling_hamilton_reviewed_sha256('aa4e2fa768e975c178a3b61f22999abed8e75d082fac2d695e3d773261297257') if current_path=='.github/workflows/point4-hamilton-release-audit.yml' else expected[current_path]
                             module.check_unit_blob(current_path,current)
                             for bad in (historical,current[:-1],current+current):
                                 with self.assertRaises(AssertionError):module.check_unit_blob(current_path,bad)
