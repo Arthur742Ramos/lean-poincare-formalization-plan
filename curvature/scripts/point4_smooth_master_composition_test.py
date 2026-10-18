@@ -269,6 +269,8 @@ class OrdinaryCompositionTests(unittest.TestCase):
                     hook=comp.bootstrap(path,helper_sha).encode()
                     self.assertEqual(changed.count(hook),1)
                     without=changed.replace(hook,b'',1)
+                    without=comp.curvature_tooling_broker_mode_inverse(path,without)
+                    self.assertEqual(comp.curvature_tooling_broker_mode_current(path,without),changed.replace(hook,b'',1))
                     if path!=comp.SMOOTH:self.assertEqual(without,original)
                     else:
                         old=original.decode();new=without.decode()
@@ -2509,10 +2511,14 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
                             current=(comp.ROOT/current_path).read_bytes()
                             historical=comp.git('show',head+':'+current_path)
                             self.assertEqual(comp.sha256(historical),original_digest)
-                            self.assertEqual(comp.curvature_hamilton_current_source(current_path,historical),current)
+                            reconstructed=comp.curvature_hamilton_current_source(current_path,historical)
+                            if current_path==comp.CURVATURE_TOOLING_POLICY['transport_path']:
+                                self.assertEqual(comp.curvature_tooling_previous_dispatch(current),reconstructed)
+                                reconstructed=comp.curvature_tooling_dispatch_current(reconstructed)
+                            self.assertEqual(reconstructed,current)
                             self.assertEqual(comp.curvature_selected_source(current_path,digest='0'*64),historical)
-                            expected[current_path]=comp.CURVATURE_HAMILTON_SOURCE_SHA256[current_path]
-                            reviewed[current_path]='aa4e2fa768e975c178a3b61f22999abed8e75d082fac2d695e3d773261297257' if current_path=='.github/workflows/point4-hamilton-release-audit.yml' else expected[current_path]
+                            expected[current_path]=comp.curvature_tooling_hamilton_current_rows(comp.CURVATURE_HAMILTON_SOURCE_SHA256)[current_path]
+                            reviewed[current_path]=comp.curvature_tooling_hamilton_reviewed_sha256('aa4e2fa768e975c178a3b61f22999abed8e75d082fac2d695e3d773261297257') if current_path=='.github/workflows/point4-hamilton-release-audit.yml' else expected[current_path]
                             module.check_unit_blob(current_path,current)
                             for bad in (historical,current[:-1],current+current):
                                 with self.assertRaises(AssertionError):module.check_unit_blob(current_path,bad)
