@@ -13220,7 +13220,7 @@
     "historical_run": 37181895941,
     "scope": "Independent jet-field heat/reaction closure only; combined-head proof checks UNRUN; both targets OPEN"
   },
-  "paths": 2191,
+  "paths": 2201,
   "canonical_point4": "OPEN",
   "smooth_general_target": "OPEN",
   "localization_mock_route": {
@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "9050f7b51d35e964567ca7e794ed5c999a212ddf",
-      "final_sha256": "010672eb106d25e73ee3318f6be439a80538bbc37a9dfe6abc6cea0ceacd4244",
+      "final_blob": "93dcab489978baf4c029906ab38e74f07d5499b8",
+      "final_sha256": "e46bcda691b105bb38de259a16417827e1f07d53e9657910332ae7b5b4e2cf81",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "812ec5960c7ef98cb8b89ad96986f966752fb49b",
-      "final_sha256": "53f3388a5082cf07b27560e4c6648483760d67e19a2fdc247f9eed21772c3e8d",
+      "final_blob": "bd21a34b74830b095b377e515ce874f1ccd44cde",
+      "final_sha256": "f8992c42d9926bd85d71c97263729a7e8a189f23ffd56f752ea66f96069b480f",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "69d7f0701ebce48274b61aa7b2ff844c2f5d229d",
-      "final_sha256": "6df0f7d172088048523197554f56355a8c5e6350b5b7763015978b5cd9d14a0d",
+      "final_blob": "8811b016597f06e9d65b1a0855955924d2c5c7ba",
+      "final_sha256": "3a69c6949bdc93c5103230d1540de3599d7fb32199f511b2e2a7646291b0f56b",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "5809ca85d0078a04ae31f6f3111525fdfa41a848",
-      "final_sha256": "b05fb48d441c45f2e2d9112e2248da1f2af460cc6db2e3a98588c2a5035d73f3",
+      "final_blob": "8272a5b40f53a8ddd2d382d5402a535614f90094",
+      "final_sha256": "24d6770bb3bce30c97ff42b5c74786c866626b41ef2846b65c58aaffb5de9b6c",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "2d8d4df7c485e5fd1ee1dd92187889b4c8297161",
-      "final_sha256": "93b501852a7fcacb37baab0c6f7dd3b11cf7508374175f40fb10a11becdc8629",
+      "final_blob": "f223590846d4d397ec5a6f666766075bacac4a9e",
+      "final_sha256": "00f4d0c2096abf43de7de6db07210649781492302793fa9a642ca7f1c2674458",
       "mode": "100644",
       "count": 1
     }
@@ -27195,7 +27195,7 @@
     ],
     ".github/workflows/point4-local-chart-environment-setup.yml": [
       "100644",
-      "9c7e56849bd322acb25a13a6706b6e600b7d8427"
+      "7682d44ed0ecefce8b71e90688eb131f9b14ef9e"
     ],
     ".github/workflows/point4-manifold-only-fixed-background-heat.yml": [
       "100644",
@@ -31079,7 +31079,7 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "cd166b33f4b6302401c0faa319a64065c86b0ef1"
+      "43c2a6fce28d2cc1d329e425e5f155deb757f9b9"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
@@ -31135,7 +31135,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "2adcd26d32852736353569662baae24a130fecb3"
+      "14ee476a1b48394152e8df0afafcc6e3b613f6cd"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31143,7 +31143,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "543d2d07888fd10e21d09eb3e4600b6631c257ac"
+      "7c993ace64109b7369e0c5f23391756a2c139bdb"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31167,15 +31167,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "9050f7b51d35e964567ca7e794ed5c999a212ddf"
+      "93dcab489978baf4c029906ab38e74f07d5499b8"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "9d22580c5394090cec93eebf1269f7cb6610cee1"
+      "3e1a852d373b52128b3a3d588de6365f06949992"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "bec06b1b9563523f0d9b4358395a4608d2113d39"
+      "91e7c9a8fa833fbd2d7454854e18a643341a8414"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31255,11 +31255,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "402f358e303bda47ae79e54d8045dcb1fa4007c2"
+      "1a373e47734d061d23c0dca754037afb35842638"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "0b3ab31574e7880f92e2955743e8dd860b5d1ad4"
+      "41cae7790849049c15b075fd5b1c88451df2a0db"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31335,7 +31335,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "812ec5960c7ef98cb8b89ad96986f966752fb49b"
+      "bd21a34b74830b095b377e515ce874f1ccd44cde"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31371,19 +31371,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "69d7f0701ebce48274b61aa7b2ff844c2f5d229d"
+      "8811b016597f06e9d65b1a0855955924d2c5c7ba"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "5809ca85d0078a04ae31f6f3111525fdfa41a848"
+      "8272a5b40f53a8ddd2d382d5402a535614f90094"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "2f0fda537c90497b79df151b9af409c98970e908"
+      "b2e9f9f01853928ae712f469c7e700bc79a38dd1"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "5b3ec2d44c264c17e1edb84b94529ca7c78e159e"
+      "c12a1fb8c7619a637ef6684c197b03f2fd0efcd7"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -31399,7 +31399,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "3e0d34e5da13ae0b435301256b5b2746a3fc9cd5"
+      "802dc83122e95c46e91788467fa6fe92af81e103"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31407,7 +31407,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "79cb5aa797d30321057ef9082f30a722568f716a"
+      "eceff3d7610a971e167fa8eb8b3c578907ab11bb"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31419,7 +31419,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "2d8d4df7c485e5fd1ee1dd92187889b4c8297161"
+      "f223590846d4d397ec5a6f666766075bacac4a9e"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -31435,7 +31435,7 @@
     ],
     "curvature/scripts/test_chart_port_ci.py": [
       "100644",
-      "e6c0b8d228283da5925cb4fda6eab6e12065453e"
+      "eb86aa8c542960ad77efde67d047c5df7aafa840"
     ],
     "curvature/scripts/verify-comparator.sh": [
       "100755",
@@ -35824,6 +35824,46 @@
     "docs/point4/ci-cache-pilot.md": [
       "100644",
       "53e5a073767ea1a94303cc3cbd22935f09c2904f"
+    ],
+    ".github/scripts/point4_fixed_background_ci.py": [
+      "100644",
+      "55c0911996361d8accf1ae187dba19c7a25ff207"
+    ],
+    ".github/scripts/point4_fixed_background_sources.json": [
+      "100644",
+      "7e2ddd388142ee00a396e0e549aeb98645d56103"
+    ],
+    ".github/scripts/test_point4_fixed_background_ci.py": [
+      "100644",
+      "1d8d540639172cc011a2a2fb69c94f7877fd35c5"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointBackgroundFrameC1.lean": [
+      "100644",
+      "a792774c8a3b7b50732188d9e2e2b0c18aeb507e"
+    ],
+    "curvature/scripts/point4_fixed_background_frame_c1_probe.lean": [
+      "100644",
+      "321970c81e9227bd7ab201a6a6ccedf2ef7f8fb0"
+    ],
+    "docs/point4/fixed-background-frame-c1/resource-api-review-v1.json": [
+      "100644",
+      "0112396f3f040778053ab200d247af3d46d9907c"
+    ],
+    "docs/point4/fixed-background-frame-c1/source-review-v1.json": [
+      "100644",
+      "82c714be88e72641a655ab39448eaf882451f4cd"
+    ],
+    "docs/point4/fixed-background-frame-c1/verification-attempts.json": [
+      "100644",
+      "0c37fdbc3cbc780c7d0af84299b8a37d546abf97"
+    ],
+    "docs/point4/fixed-background-frame-c1/verification-outcome.json": [
+      "100644",
+      "bd75ace43f7a613f044b0fab55c05087d8725492"
+    ],
+    "docs/point4/fixed-background-frame-c1/verification-plan.json": [
+      "100644",
+      "9638f45401c64a8166eaad59782b598af0435145"
     ]
   },
   "metric_contraction_integration": {
@@ -82495,6 +82535,138 @@
       "historical_failure_reclassified": false,
       "native_qualification": "UNRUN",
       "Point4": "OPEN"
+    },
+    "fixed_background_frame_c1_support": {
+      "Point4": "OPEN",
+      "policy": {
+        "additions": {
+          ".github/scripts/point4_fixed_background_ci.py": {
+            "blob": "55c0911996361d8accf1ae187dba19c7a25ff207",
+            "bytes": 18210,
+            "mode": "100644",
+            "purpose": "Reviewed focused proof/caller source and official compiler/dependency/resource verification driver; proof remains pinned to be78 and historical run39321864975.",
+            "sha256": "29153a787b21e0d70228b1836ed6b69f22a17a0b17c06d6374f8c0d54b9219e2"
+          },
+          ".github/scripts/point4_fixed_background_sources.json": {
+            "blob": "7e2ddd388142ee00a396e0e549aeb98645d56103",
+            "bytes": 10884,
+            "mode": "100644",
+            "purpose": "Exact28 project-module and38 Mathlib-root dependency closure plus full probe identities for the immutable reviewed proof.",
+            "sha256": "018e46b35f5eea6919b48960225b872f582802fca82b3d099974a94a001517b9"
+          },
+          ".github/scripts/test_point4_fixed_background_ci.py": {
+            "blob": "1d8d540639172cc011a2a2fb69c94f7877fd35c5",
+            "bytes": 5949,
+            "mode": "100644",
+            "purpose": "Eleven reviewed rejection/cleanup controls for the focused driver; engineering controls carry no theorem credit.",
+            "sha256": "7ce596e925f21859e9bb2403f0bee474df569f38a6eaceac68fb7744fabbea24"
+          },
+          "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointBackgroundFrameC1.lean": {
+            "blob": "a792774c8a3b7b50732188d9e2e2b0c18aeb507e",
+            "bytes": 7078,
+            "mode": "100644",
+            "purpose": "Proved fixed-spatial-C1/C2-frame bridge, actual fixed-IVP Levi-Civita specialization; joint-C2 evolving metric retained; whole types/Fin0/axioms verified in run39321864975.",
+            "sha256": "ee89b27d2683b500956e34d3cff85a147851f3c65d80c45d25b7c2f50d53d2ec"
+          },
+          "curvature/scripts/point4_fixed_background_frame_c1_probe.lean": {
+            "blob": "321970c81e9227bd7ab201a6a6ccedf2ef7f8fb0",
+            "bytes": 6953,
+            "mode": "100644",
+            "purpose": "Independent whole-function universe assignments, genuine Fin0 endomorphism/metric-defect cases, nine declarations and seven standard-axiom records.",
+            "sha256": "b3be1c37114701007f190edbaaea1580d765eb373326e4553eed355b902cb599"
+          },
+          "docs/point4/fixed-background-frame-c1/resource-api-review-v1.json": {
+            "blob": "0112396f3f040778053ab200d247af3d46d9907c",
+            "bytes": 8510,
+            "mode": "100644",
+            "purpose": "Historical prospective resource/API review, retained as its original reviewed artifact rather than current execution certification.",
+            "sha256": "8293c8609b4535519e58fb691ea5f155017b0cdaa3d6a42d89d68666cfd04873"
+          },
+          "docs/point4/fixed-background-frame-c1/source-review-v1.json": {
+            "blob": "82c714be88e72641a655ab39448eaf882451f4cd",
+            "bytes": 9818,
+            "mode": "100644",
+            "purpose": "Historical prospective source/mathematical review, retained with its original scope and immutable proof attribution.",
+            "sha256": "68ef26ae92a04a0d184c2a0aaaa0d7b938bac152fa11d4f88d73b62be71b09ab"
+          },
+          "docs/point4/fixed-background-frame-c1/verification-attempts.json": {
+            "blob": "0c37fdbc3cbc780c7d0af84299b8a37d546abf97",
+            "bytes": 3835,
+            "mode": "100644",
+            "purpose": "Historical failed-attempt inventory; preserves failures and assigns no success credit to unreached target/probe stages.",
+            "sha256": "c57a3f48416d964b4d070efc870d4a0ef06b0422a570f05b76121efca24913db"
+          },
+          "docs/point4/fixed-background-frame-c1/verification-outcome.json": {
+            "blob": "bd75ace43f7a613f044b0fab55c05087d8725492",
+            "bytes": 6747,
+            "mode": "100644",
+            "purpose": "Committed historical verification checkpoint; subsequent successful run39321864975 is separately and precisely attributed.",
+            "sha256": "b9c41401d8b389889687857fd6dc8d71953f1ac7bda416b0909e32d2fb08b89e"
+          },
+          "docs/point4/fixed-background-frame-c1/verification-plan.json": {
+            "blob": "9638f45401c64a8166eaad59782b598af0435145",
+            "bytes": 6884,
+            "mode": "100644",
+            "purpose": "Original bounded prospective verification plan; no whole-PR or Point4 completion claim.",
+            "sha256": "12932293923c099d4b9c01af6163cc0fa4444787a118b1f15a9f5da7d6bf0df3"
+          }
+        },
+        "chart_test": {
+          "after": {
+            "blob": "eb86aa8c542960ad77efde67d047c5df7aafa840",
+            "bytes": 218031,
+            "mode": "100644",
+            "sha256": "6902ee8b9404597ebe2337db3785b3a74eec3c0de7a18525bb04642d8a5dc99a"
+          },
+          "before": {
+            "blob": "e6c0b8d228283da5925cb4fda6eab6e12065453e",
+            "bytes": 217254,
+            "mode": "100644",
+            "sha256": "8a8b9e60b2b8b9f4d49fd99cea4d49289243da1831a7404274f8bf033e5709d9"
+          },
+          "path": "curvature/scripts/test_chart_port_ci.py",
+          "ports": [
+            [
+              "        for workflow in (full, setup):\n            self.assertIn('  group: local-chart-connection-', workflow)\n",
+              "        self.assertIn('  group: local-chart-connection-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}\\n', full)\n        self.assertIn(\"  group: ${{ inputs.fixed_background_frame_c1 && 'fixed-background-frame-c1' || 'local-chart-connection' }}-${{ inputs.candidate_sha }}\\n\", setup)\n        self.assertIn('      fixed_background_frame_c1:\\n'\n                      '        description: Verify only the reviewed PR148 fixed-background proof and probe\\n'\n                      '        required: false\\n'\n                      '        type: boolean\\n'\n                      '        default: false\\n', setup)\n        self.assertIn('  chart_environment_setup:\\n    if: ${{ !inputs.fixed_background_frame_c1 }}\\n', setup)\n        self.assertIn('  fixed_background_frame_c1:\\n    if: ${{ inputs.fixed_background_frame_c1 }}\\n', setup)\n        for workflow in (full, setup):\n"
+            ]
+          ],
+          "purpose": "Exact chart-control consumer adaptation for the already-reviewed opt-in concurrency split; default chart/full no-escape and all original resource assertions retained; no driver or workflow change."
+        },
+        "chart_workflow": {
+          "after": {
+            "blob": "7682d44ed0ecefce8b71e90688eb131f9b14ef9e",
+            "bytes": 7858,
+            "mode": "100644",
+            "sha256": "06103f70d7f1efa0ebdaf0273f5d5650d64508d4f775286159f4a52920559b8d"
+          },
+          "after_source": "name: Point-4 local chart environment setup\n\non:\n  workflow_dispatch:\n    inputs:\n      candidate_sha:\n        description: Independently reviewed full candidate commit SHA\n        required: true\n        type: string\n      expected_tree:\n        description: Independently reviewed full candidate Git tree SHA\n        required: true\n        type: string\n      fixed_background_frame_c1:\n        description: Verify only the reviewed PR148 fixed-background proof and probe\n        required: false\n        type: boolean\n        default: false\n\npermissions:\n  contents: read\n\nconcurrency:\n  group: ${{ inputs.fixed_background_frame_c1 && 'fixed-background-frame-c1' || 'local-chart-connection' }}-${{ inputs.candidate_sha }}\n  cancel-in-progress: false\n\njobs:\n  chart_environment_setup:\n    if: ${{ !inputs.fixed_background_frame_c1 }}\n    runs-on: ubuntu-24.04\n    timeout-minutes: 30\n    env:\n      EXPECTED_SHA: ${{ inputs.candidate_sha }}\n      EXPECTED_TREE: ${{ inputs.expected_tree }}\n      EVENT_NAME: ${{ github.event_name }}\n    steps:\n      - name: Checkout reviewed candidate\n        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1\n        with:\n          repository: ${{ github.repository }}\n          ref: ${{ inputs.candidate_sha }}\n          persist-credentials: false\n          fetch-depth: 0\n      - name: Admit exact candidate tree before running candidate code\n        shell: bash\n        run: |\n          set -euo pipefail\n          [[ \"$EXPECTED_SHA\" =~ ^[0-9a-f]{40}$ ]]\n          test \"$(git rev-parse HEAD)\" = \"$EXPECTED_SHA\"\n          actual_tree=$(git rev-parse 'HEAD^{tree}')\n          [[ \"$EXPECTED_TREE\" =~ ^[0-9a-f]{40}$ ]]\n          test \"$actual_tree\" = \"$EXPECTED_TREE\"\n          test \"$(git rev-parse '1664872ce762ee027b76cb515befb0ae829b2711^{tree}')\" = 6d74e9612cf6e16f2d027012cede68e5e0a23483\n          git merge-base --is-ancestor 1664872ce762ee027b76cb515befb0ae829b2711 HEAD\n          python3 curvature/scripts/chart_port_candidate_check.py --expected-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\"\n      - name: Test chart driver resource and setup controls\n        run: python3 -B curvature/scripts/test_chart_port_ci.py\n      - name: Install the official pinned toolchain without build or caches\n        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9\n        with:\n          lake-package-directory: curvature\n          auto-config: false\n          build: false\n          test: false\n          lint: false\n          use-mathlib-cache: false\n          use-github-cache: false\n      - name: Check pinned environment setup under owned resource limits\n        shell: bash\n        run: |\n          set -euo pipefail\n          evidence=\"$RUNNER_TEMP/local-chart-environment-setup-$EXPECTED_SHA\"\n          sudo systemd-run --wait --pipe --collect \\\n            --unit=\"chart-port-setup-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\" \\\n            --uid=\"$(id -u)\" --gid=\"$(id -g)\" \\\n            --working-directory=\"$GITHUB_WORKSPACE\" \\\n            --property=MemoryMax=6442450944 \\\n            --property=MemorySwapMax=0 --property=CPUQuota=200% \\\n            --property=OOMPolicy=kill --property=KillMode=control-group \\\n            --property=RuntimeMaxSec=1800 \\\n            --setenv=\"PATH=$PATH\" \\\n            --setenv=\"ELAN_HOME=${ELAN_HOME:-$HOME/.elan}\" \\\n            --setenv=PYTHONDONTWRITEBYTECODE=1 \\\n            /usr/bin/python3 curvature/scripts/chart_port_ci.py \\\n              --expected-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\" \\\n              --evidence \"$evidence\" --setup-only\n      - name: Preserve setup-only receipts; full qualification remains required\n        if: always()\n        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a\n        with:\n          name: local-chart-environment-setup-${{ inputs.candidate_sha }}-${{ github.run_attempt }}\n          path: ${{ runner.temp }}/local-chart-environment-setup-${{ inputs.candidate_sha }}\n          if-no-files-found: error\n\n  fixed_background_frame_c1:\n    if: ${{ inputs.fixed_background_frame_c1 }}\n    runs-on: ubuntu-24.04\n    timeout-minutes: 60\n    env:\n      EXPECTED_SHA: ${{ inputs.candidate_sha }}\n      EXPECTED_TREE: ${{ inputs.expected_tree }}\n      PYTHONDONTWRITEBYTECODE: '1'\n    steps:\n      - name: Checkout exact workflow caller separately\n        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1\n        with:\n          ref: ${{ github.sha }}\n          path: ci-control\n          persist-credentials: false\n          fetch-depth: 1\n      - name: Checkout immutable reviewed proof\n        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1\n        with:\n          ref: be78f44a992b01dfa082472a70a89360086ee1a2\n          path: proof-source\n          persist-credentials: false\n          fetch-depth: 1\n      - name: Run focused rejection and process cleanup controls\n        run: python3 -B -m unittest discover -s ci-control/.github/scripts -p 'test_point4_fixed_background_ci.py'\n      - name: Admit exact proof and caller sources before toolchain setup\n        shell: bash\n        run: |\n          set -euo pipefail\n          python3 -B ci-control/.github/scripts/point4_fixed_background_ci.py \\\n            --phase preflight --candidate-root \"$GITHUB_WORKSPACE/proof-source\" \\\n            --control-root \"$GITHUB_WORKSPACE/ci-control\" \\\n            --candidate-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\" \\\n            --caller-sha \"$GITHUB_SHA\" \\\n            --evidence \"$RUNNER_TEMP/fixed-background-frame-c1-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\"\n      - name: Install official pinned compiler without cache or project build\n        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9\n        with:\n          lake-package-directory: proof-source/curvature\n          auto-config: false\n          build: false\n          test: false\n          lint: false\n          use-mathlib-cache: false\n          use-github-cache: false\n      - name: Verify the focused proof under owned resource limits\n        shell: bash\n        run: |\n          set -euo pipefail\n          evidence=\"$RUNNER_TEMP/fixed-background-frame-c1-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\"\n          sudo systemd-run --wait --pipe --collect \\\n            --unit=\"fixed-background-frame-c1-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\" \\\n            --uid=\"$(id -u)\" --gid=\"$(id -g)\" \\\n            --working-directory=\"$GITHUB_WORKSPACE/proof-source\" \\\n            --property=MemoryMax=6442450944 --property=MemorySwapMax=0 \\\n            --property=CPUQuota=200% --property=TasksMax=128 \\\n            --property=OOMPolicy=kill --property=KillMode=control-group \\\n            --property=RuntimeMaxSec=3000 --property=TimeoutStopSec=10 \\\n            --setenv=\"PATH=$PATH\" --setenv=\"ELAN_HOME=${ELAN_HOME:-$HOME/.elan}\" \\\n            --setenv=\"MATHLIB_CACHE_DIR=$RUNNER_TEMP/fixed-background-frame-c1-cache-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\" \\\n            --setenv=PYTHONDONTWRITEBYTECODE=1 --setenv=LEAN_NUM_THREADS=1 \\\n            /usr/bin/python3 \"$GITHUB_WORKSPACE/ci-control/.github/scripts/point4_fixed_background_ci.py\" \\\n              --phase verify --candidate-root \"$GITHUB_WORKSPACE/proof-source\" \\\n              --control-root \"$GITHUB_WORKSPACE/ci-control\" \\\n              --candidate-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\" \\\n              --caller-sha \"$GITHUB_SHA\" --evidence \"$evidence\"\n      - name: Preserve bounded exact-proof evidence including failures\n        if: always()\n        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a\n        with:\n          name: fixed-background-frame-c1-${{ github.run_id }}-${{ github.run_attempt }}\n          path: ${{ runner.temp }}/fixed-background-frame-c1-${{ github.run_id }}-${{ github.run_attempt }}\n          if-no-files-found: error\n          retention-days: 14\n",
+          "before": {
+            "blob": "9c7e56849bd322acb25a13a6706b6e600b7d8427",
+            "bytes": 3686,
+            "mode": "100644",
+            "sha256": "c02f062b07924c532789499a8ed6a5e7df7b1074cdcdf61792bd5ab6f76acbbc"
+          },
+          "before_source": "name: Point-4 local chart environment setup\n\non:\n  workflow_dispatch:\n    inputs:\n      candidate_sha:\n        description: Independently reviewed full candidate commit SHA\n        required: true\n        type: string\n      expected_tree:\n        description: Independently reviewed full candidate Git tree SHA\n        required: true\n        type: string\n\npermissions:\n  contents: read\n\nconcurrency:\n  group: local-chart-connection-${{ inputs.candidate_sha }}\n  cancel-in-progress: false\n\njobs:\n  chart_environment_setup:\n    runs-on: ubuntu-24.04\n    timeout-minutes: 30\n    env:\n      EXPECTED_SHA: ${{ inputs.candidate_sha }}\n      EXPECTED_TREE: ${{ inputs.expected_tree }}\n      EVENT_NAME: ${{ github.event_name }}\n    steps:\n      - name: Checkout reviewed candidate\n        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1\n        with:\n          repository: ${{ github.repository }}\n          ref: ${{ inputs.candidate_sha }}\n          persist-credentials: false\n          fetch-depth: 0\n      - name: Admit exact candidate tree before running candidate code\n        shell: bash\n        run: |\n          set -euo pipefail\n          [[ \"$EXPECTED_SHA\" =~ ^[0-9a-f]{40}$ ]]\n          test \"$(git rev-parse HEAD)\" = \"$EXPECTED_SHA\"\n          actual_tree=$(git rev-parse 'HEAD^{tree}')\n          [[ \"$EXPECTED_TREE\" =~ ^[0-9a-f]{40}$ ]]\n          test \"$actual_tree\" = \"$EXPECTED_TREE\"\n          test \"$(git rev-parse '1664872ce762ee027b76cb515befb0ae829b2711^{tree}')\" = 6d74e9612cf6e16f2d027012cede68e5e0a23483\n          git merge-base --is-ancestor 1664872ce762ee027b76cb515befb0ae829b2711 HEAD\n          python3 curvature/scripts/chart_port_candidate_check.py --expected-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\"\n      - name: Test chart driver resource and setup controls\n        run: python3 -B curvature/scripts/test_chart_port_ci.py\n      - name: Install the official pinned toolchain without build or caches\n        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9\n        with:\n          lake-package-directory: curvature\n          auto-config: false\n          build: false\n          test: false\n          lint: false\n          use-mathlib-cache: false\n          use-github-cache: false\n      - name: Check pinned environment setup under owned resource limits\n        shell: bash\n        run: |\n          set -euo pipefail\n          evidence=\"$RUNNER_TEMP/local-chart-environment-setup-$EXPECTED_SHA\"\n          sudo systemd-run --wait --pipe --collect \\\n            --unit=\"chart-port-setup-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\" \\\n            --uid=\"$(id -u)\" --gid=\"$(id -g)\" \\\n            --working-directory=\"$GITHUB_WORKSPACE\" \\\n            --property=MemoryMax=6442450944 \\\n            --property=MemorySwapMax=0 --property=CPUQuota=200% \\\n            --property=OOMPolicy=kill --property=KillMode=control-group \\\n            --property=RuntimeMaxSec=1800 \\\n            --setenv=\"PATH=$PATH\" \\\n            --setenv=\"ELAN_HOME=${ELAN_HOME:-$HOME/.elan}\" \\\n            --setenv=PYTHONDONTWRITEBYTECODE=1 \\\n            /usr/bin/python3 curvature/scripts/chart_port_ci.py \\\n              --expected-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\" \\\n              --evidence \"$evidence\" --setup-only\n      - name: Preserve setup-only receipts; full qualification remains required\n        if: always()\n        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a\n        with:\n          name: local-chart-environment-setup-${{ inputs.candidate_sha }}-${{ github.run_attempt }}\n          path: ${{ runner.temp }}/local-chart-environment-setup-${{ inputs.candidate_sha }}\n          if-no-files-found: error\n",
+          "path": ".github/workflows/point4-local-chart-environment-setup.yml",
+          "purpose": "Exact reviewed opt-in focused mode; original default chart job, contents:read, pinned actions, budgets and semantic checks preserved. No dispatch/export is authorized by Source admission."
+        },
+        "current_paths": 2201,
+        "focused_caller": "642e836bef7378f737ddc260d07d21523085a961",
+        "focused_run": 39321864975,
+        "frozen_proof": "be78f44a992b01dfa082472a70a89360086ee1a2",
+        "integrated_head": "8c81b18a28ecb3bc499bf0459a7c1a0c07d37002",
+        "integrated_tree": "55c8e7061afea69df56b04ad7c14d7aeecadea2d",
+        "parent_head": "2813ef52a21e13be08532f36ee9f26faf319da72",
+        "parent_paths": 2191,
+        "parent_tree": "13f982c1be40478cc14b523ea76ed3642fb3ae7e",
+        "scope": "Finite Source admission only; old2191 intermediate and all semantic/resource/merge gates preserved; Point4 OPEN; PR147 remaining24RAW+32NONRAW separate.",
+        "test_after_sha256": "75e02a07dfb22f6af1c00a8e89a14f596586930412d88ae8b8d80ba5c5a4327e",
+        "test_before_sha256": "a6c5d303efc8852e47cb629fad33d531c21f6f6676d8a8f4c9f871ad66808e9f"
+      },
+      "policy_sha256": "ef6bd95376b526da22a162b8be15ff58b04783a5157ea051080f2e0a9089d20a",
+      "qualification": "SOURCE_ADMISSION_ONLY; focused proof/caller run39321864975 remains scoped to be78/642; no new Native or whole-PR credit",
+      "receipt_reuse": "Preserve PR146 ten qualified receipts and once-only chart export at original immutable scopes; integration reuse is explicitly assessed separately"
     }
   }
 }

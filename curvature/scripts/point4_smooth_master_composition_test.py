@@ -1316,7 +1316,7 @@ class FixedBackgroundCompositionTests(unittest.TestCase):
             expected, originals, changes = comp.tensor_identity(*comp.expected_identity())
             expected = comp.curvature_identity(expected,originals,changes)[0]
             self.assertEqual(expected, comp.parse_tree(comp.git('ls-tree','-rz','HEAD')))
-            self.assertEqual(len(expected), 2191)
+            self.assertEqual(len(expected), 2201)
             for path in comp.FIXED_ADDED:
                 self.assertEqual(changes[path], reader(comp.FIXED_SOURCE, path))
                 self.assertEqual(expected[path], trees[comp.FIXED_SOURCE][path])
@@ -2088,7 +2088,7 @@ class TensorCompositionTests(unittest.TestCase):
                  patch.object(pathlib.Path,'lstat',committed_mode_fixture if sys.platform=='win32' else physical_stat), \
                  patch.dict(weighted.__dict__,{'raw_git':comp.git} if sys.platform=='win32' else {}):
                 report=comp.weighted_leaf(weighted.__dict__,schema)
-            self.assertEqual(report['public_paths'],2191)
+            self.assertEqual(report['public_paths'],2201)
             self.assertEqual(verify.call_count,2)
         inherited=captured[0]
         self.assertEqual(len(inherited),1686)
@@ -2140,7 +2140,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         import point4_weighted_hessian_release_guard as weighted
         import stat
         committed=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
-        self.assertEqual(len(committed),2191)
+        self.assertEqual(len(committed),2201)
         physical_stat=pathlib.Path.lstat
         def committed_modes(physical,*args,**kwargs):
             actual=physical_stat(physical,*args,**kwargs)
@@ -2182,8 +2182,8 @@ class CurvatureCompositionTests(unittest.TestCase):
         snapshots=comp.curvature_pins()
         self.assertEqual(comp.curvature_predecessor(legacy,originals,changes,snapshots),snapshots[comp.CURVATURE_PARENT])
         complete,_,_=comp.curvature_identity(legacy,originals,changes)
-        self.assertEqual(len(complete),2191)
-        self.assertEqual(set(complete)-set(legacy),set(comp.CURVATURE_SELECTED)-{'curvature/lakefile.toml'} | set(comp.CURVATURE_CURRENT_BATCH) | set(comp.CURVATURE_INVERSE_COEFFICIENT_BATCH) | set(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH) | set(comp.CURVATURE_MAPPED_GAUSSIAN_BATCH) | set(comp.CURVATURE_RESOLVENT_BATCH) | set(comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH) | set(comp.CURVATURE_JOINT_CACHE_ADDITIONS))
+        self.assertEqual(len(complete),2201)
+        self.assertEqual(set(complete)-set(legacy),set(comp.CURVATURE_SELECTED)-{'curvature/lakefile.toml'} | set(comp.CURVATURE_CURRENT_BATCH) | set(comp.CURVATURE_INVERSE_COEFFICIENT_BATCH) | set(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH) | set(comp.CURVATURE_MAPPED_GAUSSIAN_BATCH) | set(comp.CURVATURE_RESOLVENT_BATCH) | set(comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH) | set(comp.CURVATURE_JOINT_CACHE_ADDITIONS) | set(comp.CURVATURE_FIXED_BACKGROUND_ADDITIONS))
         self.assertEqual(comp.tensor_map_record(complete,originals,changes),comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()))
         for path,marker in ((comp.HELPER,'extension'),(comp.TEST,'tests')):
             raw=(comp.ROOT/path).read_bytes()
@@ -2210,7 +2210,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         # Exact new-batch policy and physical Source mutation controls.
         legacy=comp.tensor_identity(*comp.expected_identity())
         current=comp.curvature_identity(*legacy)[0]
-        current={p:v for p,v in current.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_JOINT_CACHE_ADDITIONS}
+        current={p:v for p,v in current.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_JOINT_CACHE_ADDITIONS and p not in comp.CURVATURE_FIXED_BACKGROUND_ADDITIONS}
         current={p:v for p,v in current.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         current={p:v for p,v in current.items() if p not in comp.CURVATURE_INVERSE_COEFFICIENT_BATCH}
         base={p:v for p,v in current.items() if p not in comp.CURVATURE_CURRENT_BATCH}
@@ -2241,7 +2241,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         self.assertEqual(comp.curvature_current_batch_extend(base),current)
         # Preserve the original seven-file controls above; test the separate five-file layer.
         complete=comp.curvature_identity(*legacy)[0]
-        complete={p:v for p,v in complete.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_JOINT_CACHE_ADDITIONS}
+        complete={p:v for p,v in complete.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_JOINT_CACHE_ADDITIONS and p not in comp.CURVATURE_FIXED_BACKGROUND_ADDITIONS}
         complete={p:v for p,v in complete.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         predecessor={p:v for p,v in complete.items() if p not in comp.CURVATURE_INVERSE_COEFFICIENT_BATCH}
         self.assertEqual(len(predecessor),2146)
@@ -2275,7 +2275,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         self.assertEqual(comp.curvature_inverse_coefficients_extend(predecessor),complete)
         # Exact Gaussian/affine layer; prior seven/five controls above retain their own views.
         final=comp.curvature_identity(*legacy)[0]
-        final={p:v for p,v in final.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_JOINT_CACHE_ADDITIONS}
+        final={p:v for p,v in final.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH and p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_JOINT_CACHE_ADDITIONS and p not in comp.CURVATURE_FIXED_BACKGROUND_ADDITIONS}
         batchbase={p:v for p,v in final.items() if p not in comp.CURVATURE_GAUSSIAN_AFFINE_BATCH}
         self.assertEqual(len(batchbase),2151)
         saved=json.loads(json.dumps(comp.CURVATURE_GAUSSIAN_AFFINE_BATCH))
@@ -2309,7 +2309,7 @@ class CurvatureCompositionTests(unittest.TestCase):
         # Exact literal-metric/mapped Gaussian layer; all prior controls above retain their own views.
 
         mapped_final=comp.curvature_identity(*legacy)[0]
-        mapped_final={p:v for p,v in mapped_final.items() if p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_JOINT_CACHE_ADDITIONS}
+        mapped_final={p:v for p,v in mapped_final.items() if p not in comp.CURVATURE_RESOLVENT_BATCH and p not in comp.CURVATURE_RESOLVENT_UNIQUENESS_BATCH and p not in comp.CURVATURE_JOINT_CACHE_ADDITIONS and p not in comp.CURVATURE_FIXED_BACKGROUND_ADDITIONS}
 
         mapped_base={p:v for p,v in mapped_final.items() if p not in comp.CURVATURE_MAPPED_GAUSSIAN_BATCH}
 
@@ -2376,7 +2376,7 @@ class CurvatureProductionNamespaceTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.model=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
-        assert len(cls.model)==2191
+        assert len(cls.model)==2201
         cls.modules={}
         cls.physical_stat=pathlib.Path.lstat
         cls.units={132:'point4_two_sided_heat_source_guard',
@@ -3159,8 +3159,15 @@ class WeightedInventoryPreparationControls(unittest.TestCase):
             p=GitBatchProcess([git_batch_frame(raw) for raw in data.values()])
             p.stdout.close=lambda:None
             processes.append(p);return p
+        def immutable_origin(argv,**kwargs):
+            # Preserve genuine immutable-origin authentication inside this
+            # Popen-only unit fixture; no synthesized Git response or auth seam.
+            self.assertEqual(argv,['git','--no-replace-objects','-C',str(comp.ROOT),
+                                   'rev-parse',comp.CURVATURE_FIXED_BACKGROUND_POLICY['integrated_head']+'^{tree}'])
+            self.assertEqual(kwargs,{'env':comp.ENV})
+            return subprocess.check_output(argv,**kwargs)
         for key,value in {'_wi_registry':registry,'_wi_inventory_owner':None,
-                          'subprocess':types.SimpleNamespace(Popen=launch,PIPE=subprocess.PIPE)}.items():
+                          'subprocess':types.SimpleNamespace(Popen=launch,PIPE=subprocess.PIPE,check_output=immutable_origin)}.items():
             control=patch.object(comp,key,value);control.start();self.addCleanup(control.stop)
         return module,data,events,processes
 
@@ -3577,6 +3584,123 @@ class WeightedInventoryPreparationControls(unittest.TestCase):
         self.assertEqual(processes[0].returncode,0)
 
 
+
+class FixedBackgroundSourceEpochTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.base=comp._curvature_before_fixed_background_identity(*comp.tensor_identity(*comp.expected_identity()))[0]
+        assert len(cls.base)==2191
+
+    def test_exact_origin_and_ten_added_paths(self):
+        policy=comp.CURVATURE_FIXED_BACKGROUND_POLICY
+        actual=comp.curvature_fixed_background_extend(self.base)
+        self.assertEqual(len(actual),2201)
+        self.assertEqual(set(actual)-set(self.base),set(comp.CURVATURE_FIXED_BACKGROUND_ADDITIONS))
+        for path,row in policy['additions'].items():
+            raw=comp.git('show',policy['integrated_head']+':'+path)
+            self.assertEqual(comp.sha256(raw),row['sha256'])
+            self.assertEqual(actual[path],('100644',comp.blob_id(raw)))
+            self.assertTrue(row['purpose'])
+
+    def test_every_added_file_rejects_byte_and_mode_changes(self):
+        read=pathlib.Path.read_bytes;lstat=pathlib.Path.lstat
+        for path in comp.CURVATURE_FIXED_BACKGROUND_ADDITIONS:
+            with self.subTest(path=path,mutation='bytes'):
+                def changed(file):
+                    raw=read(file)
+                    return raw+b'UNREVIEWED' if file==comp.ROOT/path else raw
+                with patch.object(pathlib.Path,'read_bytes',changed):
+                    with self.assertRaisesRegex(AssertionError,'source bytes drift'):comp.curvature_fixed_background_extend(self.base)
+            with self.subTest(path=path,mutation='mode'):
+                def changed_mode(file,*args,**kwargs):
+                    info=lstat(file,*args,**kwargs)
+                    if file!=comp.ROOT/path:return info
+                    values=list(info);values[0]|=0o111
+                    return os.stat_result(values)
+                with patch.object(pathlib.Path,'lstat',changed_mode):
+                    with self.assertRaisesRegex(AssertionError,'mode/type drift'):comp.curvature_fixed_background_extend(self.base)
+
+    def test_symlink_parent_and_unadmitted_base_rejected(self):
+        import stat
+        target=comp.ROOT/'.github/scripts';lstat=pathlib.Path.lstat
+        def symlink(file,*args,**kwargs):
+            info=lstat(file,*args,**kwargs)
+            if file!=target:return info
+            values=list(info);values[0]=stat.S_IFLNK|0o777
+            return os.stat_result(values)
+        with patch.object(pathlib.Path,'lstat',symlink):
+            with self.assertRaisesRegex(AssertionError,'symlink parent'):comp.curvature_fixed_background_extend(self.base)
+        for base in (dict(list(self.base.items())[1:]),dict(self.base,**{'UNADMITTED.py':('100644','0'*40)})):
+            with self.assertRaises(AssertionError):comp.curvature_fixed_background_extend(base)
+
+    def test_chart_whole_source_roundtrip_and_mutations(self):
+        row=comp.CURVATURE_FIXED_BACKGROUND_POLICY['chart_workflow']
+        old=row['before_source'].encode();new=row['after_source'].encode()
+        self.assertEqual(comp.curvature_fixed_background_chart_source(old),new)
+        self.assertEqual(comp.curvature_fixed_background_chart_inverse(new),old)
+        self.assertEqual(comp.curvature_selected_source(row['path'],digest='0'*64),old)
+        for bad in (new+b'\n',new[:-1],old,new.replace(b'contents: read',b'contents: write')):
+            with self.assertRaises(AssertionError):comp.curvature_fixed_background_chart_inverse(bad)
+        for bad in (old+b'\n',old[:-1],new):
+            with self.assertRaises(AssertionError):comp.curvature_fixed_background_chart_source(bad)
+
+        row=comp.CURVATURE_FIXED_BACKGROUND_POLICY['chart_test']
+        old=comp.git('show',comp.CURVATURE_FIXED_BACKGROUND_POLICY['integrated_head']+':'+row['path'])
+        new=(comp.ROOT/row['path']).read_bytes()
+        self.assertEqual(comp.curvature_fixed_background_chart_test_source(old),new)
+        self.assertEqual(comp.curvature_fixed_background_chart_test_inverse(new),old)
+        self.assertEqual(comp.curvature_selected_source(row['path']),new)
+        self.assertEqual(comp.curvature_selected_source(row['path'],digest='0'*64),
+                         comp._curvature_before_fixed_background_selected_source(row['path'],digest='0'*64))
+        for bad in (new+b'\n',new[:-1],old,new.replace(b'default: false',b'default: true')):
+            with self.assertRaises(AssertionError):comp.curvature_fixed_background_chart_test_inverse(bad)
+        for bad in (old+b'\n',old[:-1],new):
+            with self.assertRaises(AssertionError):comp.curvature_fixed_background_chart_test_source(bad)
+
+    def test_finite_policy_rejects_omission_alias_and_pin_changes(self):
+        import copy
+        saved=comp.CURVATURE_FIXED_BACKGROUND_POLICY
+        selected=next(iter(saved['additions']))
+        for mutation in ('missing','extra','case-alias','mode','bytes','hash','blob','purpose'):
+            changed=copy.deepcopy(saved);rows=changed['additions']
+            if mutation=='missing':rows.pop(selected)
+            elif mutation=='extra':rows['UNADMITTED.py']=rows[selected]
+            elif mutation=='case-alias':rows[selected.upper()]=rows[selected]
+            elif mutation=='mode':rows[selected]['mode']='100755'
+            elif mutation=='bytes':rows[selected]['bytes']+=1
+            elif mutation=='hash':rows[selected]['sha256']='0'*64
+            elif mutation=='blob':rows[selected]['blob']='0'*40
+            else:rows[selected]['purpose']=''
+            with self.subTest(mutation=mutation),patch.object(comp,'CURVATURE_FIXED_BACKGROUND_POLICY',changed):
+                with self.assertRaisesRegex(AssertionError,'finite policy drift'):comp.curvature_fixed_background_extend(self.base)
+
+    def test_complete_predecessor_helper_and_test_recovery(self):
+        policy=comp.CURVATURE_FIXED_BACKGROUND_POLICY
+        for path,inverse in ((comp.HELPER,comp.curvature_fixed_background_helper_inverse),(comp.TEST,comp.curvature_fixed_background_test_inverse),(policy['chart_test']['path'],comp.curvature_fixed_background_chart_test_inverse)):
+            current=(comp.ROOT/path).read_bytes()
+            self.assertEqual(inverse(current),comp.git('show',policy['integrated_head']+':'+path))
+            for bad in (current+b'\nUNREVIEWED',current[:-1]):
+                with self.assertRaises(AssertionError):inverse(bad)
+
+    def test_genuine_map_and_rejection_of_untracked_source(self):
+        expected,originals,changes=comp.curvature_identity(*comp.tensor_identity(*comp.expected_identity()))
+        self.assertEqual(comp.tensor_map_record(expected,originals,changes),comp.tensor_strict_json((comp.ROOT/comp.MAP).read_bytes()))
+        path=comp.ROOT/'curvature/scripts/fixed_background_UNADMITTED_source.py'
+        self.assertFalse(path.exists())
+        try:
+            with path.open('xb') as stream:stream.write(b'raise RuntimeError("never executed")\n')
+            with self.assertRaises(AssertionError):comp.verify_current()
+        finally:path.unlink()
+        self.assertEqual(comp.verify_current(),expected)
+
+    def test_all_frozen_Lean_and_toolchain_bytes_preserved(self):
+        policy=comp.CURVATURE_FIXED_BACKGROUND_POLICY
+        frozen=comp.parse_tree(comp.git('ls-tree','-rz',policy['integrated_head']))
+        current=comp.parse_tree(comp.git('ls-tree','-rz','HEAD'))
+        paths={p for p in frozen if p.endswith('.lean') or p.endswith('/lean-toolchain') or p.endswith('/lake-manifest.json') or p.endswith('/lakefile.toml')}
+        self.assertEqual({p for p in current if p.endswith('.lean')},{p for p in frozen if p.endswith('.lean')})
+        self.assertTrue(all(current[p]==frozen[p] for p in paths))
+
 # END authenticated finite curvature tests
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
@@ -3601,11 +3725,12 @@ if __name__=='__main__':
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(ImmutableGitBatchControls))
     suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(WeightedInventoryPreparationControls))
     assert suite.countTestCases()==154, 'Complete ordinary suite selection drift'
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(FixedBackgroundSourceEpochTests))
     if args.real_only:suite=unittest.TestSuite()
     if REAL:
         real_suite=unittest.defaultTestLoader.loadTestsFromTestCase(RealValidatorTests)
         assert real_suite.countTestCases()==8, 'Complete real route selection drift'
         suite.addTests(real_suite)
-    assert suite.countTestCases()==(8 if args.real_only else 162 if REAL else 154), 'Exact selected suite drift'
+    assert suite.countTestCases()==(8 if args.real_only else 170 if REAL else 162), 'Exact selected suite drift'
     result=unittest.TextTestRunner(verbosity=2).run(suite)
     raise SystemExit(0 if result.wasSuccessful() else 1)

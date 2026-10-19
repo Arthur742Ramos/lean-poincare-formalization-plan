@@ -266,8 +266,16 @@ class DriverControls(unittest.TestCase):
         self.assertNotIn('  chart_connection:', setup)
         self.assertNotIn('  pull_request:', setup)
         self.assertIn('--setup-only', setup)
+        self.assertIn('  group: local-chart-connection-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}\n', full)
+        self.assertIn("  group: ${{ inputs.fixed_background_frame_c1 && 'fixed-background-frame-c1' || 'local-chart-connection' }}-${{ inputs.candidate_sha }}\n", setup)
+        self.assertIn('      fixed_background_frame_c1:\n'
+                      '        description: Verify only the reviewed PR148 fixed-background proof and probe\n'
+                      '        required: false\n'
+                      '        type: boolean\n'
+                      '        default: false\n', setup)
+        self.assertIn('  chart_environment_setup:\n    if: ${{ !inputs.fixed_background_frame_c1 }}\n', setup)
+        self.assertIn('  fixed_background_frame_c1:\n    if: ${{ inputs.fixed_background_frame_c1 }}\n', setup)
         for workflow in (full, setup):
-            self.assertIn('  group: local-chart-connection-', workflow)
             for bound in ('MemoryMax=6442450944', 'MemorySwapMax=0', 'CPUQuota=200%',
                           'OOMPolicy=kill', 'KillMode=control-group', 'PYTHONDONTWRITEBYTECODE=1'):
                 self.assertIn(bound, workflow)
