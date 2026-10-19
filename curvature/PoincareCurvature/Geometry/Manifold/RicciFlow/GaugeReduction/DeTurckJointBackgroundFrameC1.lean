@@ -57,8 +57,8 @@ theorem contMDiffOn_const_background_localFrame
   letI : FiberBundle E TM := TangentSpace.fiberBundle
   letI : VectorBundle ℝ E TM := TangentSpace.vectorBundle
   have hcov : ContMDiffCovariantDerivativeOn E 1 cov₀.toFun e.baseSet :=
-    CovariantDerivative.contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one
-      (E := E) (I := I) (M := M) (F := E) (V := TM) (cov := cov₀) e.open_baseSet
+    CovariantDerivative.TangentFrame.contMDiffCovariantDerivativeOn_one_of_contMDiffCovariantDerivative_one
+      (E := E) (I := I) (M := M) (cov := cov₀) e.open_baseSet
   have hframe : ContMDiffOn I (I.prod 𝓘(ℝ, E)) (1 + 1)
       (fun x : M => TotalSpace.mk' E x (e.localFrame bas i x)) e.baseSet := by
     convert e.contMDiffOn_localFrame_baseSet (I := I) (n := (2 : WithTop ℕ∞)) bas i

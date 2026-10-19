@@ -1,6 +1,6 @@
 {
   "schema": "point4-fixed-background-C1-verification-attempts-v1",
-  "status": "BODY_LOCAL_CANONICAL_INSTANCE_REPAIR_UNVERIFIED",
+  "status": "TANGENT_SPECIALIZED_RESTRICTION_REPAIR_UNVERIFIED",
   "failed_attempt": {
     "run": 39312471681,
     "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/39312471681",
@@ -20,6 +20,26 @@
   },
   "current_body_correction": {
     "proof_source": {
+      "bytes": 7078,
+      "sha256": "ee89b27d2683b500956e34d3cff85a147851f3c65d80c45d25b7c2f50d53d2ec"
+    },
+    "change": "Use the existing tangent-specialized CovariantDerivative.TangentFrame class-to-set C1 restriction, dropping generic F/V parameters. The already compiled DowngradeNormFree API avoids the generic Pi fiber-norm instance/definitional-diamond problem documented in that module.",
+    "theorem_statements_changed": false,
+    "probe_source_changed": false,
+    "imports_or_project_import_closure_changed": false,
+    "new_hypotheses_or_axioms": false,
+    "actual_successor_compilation": "PENDING",
+    "existing_source_precedent": "DeTurckCorrectionRegularity.curvatureAux_contMDiffOn_zero uses the same tangent-specialized C1 restriction; this is a static source-use precedent, not a module compiled by either focused run.",
+    "actual_compiled_helper_evidence": "DowngradeNormFree itself is focused-order index15 and compiled successfully in both failed CI attempts, authenticating the tangent-specialized helper API."
+  },
+  "scope": {
+    "Point4": "OPEN",
+    "full_PR_or_merge_PASS": false,
+    "PR146_PR147_and_ledger28": "PRESERVED",
+    "chart_exports": 0
+  },
+  "historical_body_local_correction": {
+    "proof_source": {
       "bytes": 7084,
       "sha256": "c1e7da759231a8b386a8973f993c7ab995516457da95a85c2d3e9a3d281a2430"
     },
@@ -28,12 +48,23 @@
     "theorem_statements_changed": false,
     "probe_source_changed": false,
     "new_hypotheses_or_axioms": false,
-    "actual_successor_compilation": "PENDING"
+    "actual_successor_compilation": "FAILED_SAME_GENERIC_CALL_FIBERBUNDLE_SYNTHESIS_ERROR"
   },
-  "scope": {
-    "Point4": "OPEN",
-    "full_PR_or_merge_PASS": false,
-    "PR146_PR147_and_ledger28": "PRESERVED",
-    "chart_exports": 0
+  "successor_failed_attempt": {
+    "run": 39316626777,
+    "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/39316626777",
+    "proof_commit": "78019d610d82460480141d9e3a53c69589c66da6",
+    "caller_commit": "4dacdea8cf5f22e16e0460ae820c9c7c135ca192",
+    "GitHub_artifact_id": 12218128158,
+    "artifact_bytes": 295481,
+    "artifact_sha256": "e16eda032c0c3eaaedd669079abb1360feca11e737dfffdd9ceb56210e0c85ee",
+    "actual_project_prerequisites_compiled": 27,
+    "new_module_exit_code": 1,
+    "new_module_error": "60:4 failed to synthesize FiberBundle E (TangentSpace I) at the same generic restriction call; body-local instances were insufficient",
+    "new_module_elapsed_seconds": 5.540744170000039,
+    "new_module_leader_reaped_and_no_live_descendants": true,
+    "probe_executed": false,
+    "axiom_records_available": 0,
+    "source_PRE_POST_equal": true
   }
 }

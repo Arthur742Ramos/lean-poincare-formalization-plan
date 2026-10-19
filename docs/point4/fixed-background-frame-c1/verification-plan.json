@@ -1,6 +1,6 @@
 {
   "schema": "point4-fixed-background-frame-C1-proof-verification-plan-v1",
-  "status": "INSTANCE_ELABORATION_CORRECTION_UNVERIFIED_FRESH_REVIEW_AND_FOCUSED_CI_PENDING",
+  "status": "TANGENT_SPECIALIZED_API_CORRECTION_UNVERIFIED_FRESH_REVIEW_AND_FOCUSED_CI_PENDING",
   "parent": {
     "PR": 146,
     "commit": "2813ef52a21e13be08532f36ee9f26faf319da72",
@@ -37,7 +37,7 @@
     "scope": "LOCAL_CLOUD_EXECUTOR_ONLY. The separate GitHub Actions attempt is recorded in verification-attempts.json; its official cache succeeded and it attempted the proof closure."
   },
   "separate_focused_verification": {
-    "reuse_requirement": "Official exact compiler is installed locally; local Mathlib cache remains unavailable. Separate existing GitHub CI successfully fetched the official selective cache at the pinned sources, then compiled 27 prerequisites and attempted the new module. No cache bytes grant proof PASS credit.",
+    "reuse_requirement": "Both separate GitHub CI attempts authenticated the official exact compiler and selective cache and compiled all 27 prerequisites. Each failed the new module at the generic restriction call; neither ran the probe. Existing tangent-specialized DowngradeNormFree restriction was among compiled prerequisites. Local cache CONNECT403 remains a separate stopped route.",
     "commands_after_environment_and_budget_admission": [
       "lake build PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointBackgroundFrameC1",
       "lake env lean scripts/point4_fixed_background_frame_c1_probe.lean"
@@ -51,9 +51,9 @@
       "Exact source, compiler, dependencies, outputs, process termination and original workflow resource limits are authenticated.",
       "Independent mathematical and actual compiler-output review precede any verified claim or merge."
     ],
-    "runtime_estimate": "Predecessor CI owned execution was 1097.207 seconds; its slowest prerequisite compile was 437.221 seconds under the 480-second stage cap. New module failed elaboration after 6.296 seconds. Successor total runtime and probe runtime are unmeasured. Retain the 3000-second execution and existing stage caps for a separately reviewed successor; no cold whole-campaign build.",
-    "new_environment_need": "No new paid environment, credentials or security change is needed for the proposed ordinary existing CI. The actual blocker is the new-module instance elaboration failure; the body-local canonical-instance repair remains unverified until fresh source/control pins and focused CI succeed. Local cache CONNECT403 remains a separate stopped route.",
-    "retry_policy": "Preserve failed run39312471681 and never rerun unchanged8dda. A fresh reviewed proof/caller binding may receive one separately reviewed bounded successor run under the existing caps. No local denied-cache route retry or cold whole-campaign fallback.",
+    "runtime_estimate": "First CI owned execution1097.207 seconds, slowest prerequisite437.221<480; second owned907.775 seconds, slowest361.351<480, cache33.744<600. Both new-module failures occurred within7 seconds; no probe runtime measured. Preserve3000-second owned and existing stage limits for a separately reviewed fresh proof/caller run.",
+    "new_environment_need": "No new paid environment, credentials or security change. The unsuccessful body-local instance repair is preserved as history. The current ordinary correction selects the already compiled tangent-specialized C1 restriction instead of the generic API with Pi fiber-norm parameters; this correction remains unverified pending fresh exact source/control review and focused CI.",
+    "retry_policy": "Preserve both failures39312471681/39316626777; never rerun unchanged8dda/78019. Any fresh corrected proof/caller binding needs separate source/resource review before one ordinary bounded run under unchanged caps. No uncertain POST retry, local denied-cache retry, cap increase or cold whole-campaign fallback.",
     "actual_CI_compilation_strategy": "Compile only the exact reviewed 28-project-module import closure with serial direct lake env lean -j1 -M5632 invocations. A missing Mathlib cache import fails rather than triggering a cold Mathlib build. Then run the new probe and strict output guard."
   },
   "recovery_evidence": {
@@ -61,7 +61,7 @@
     "charged_to_exhausted_120_second_recovery_allocation": 0,
     "historical_ownership_note": "The old stalled writer was quiesced and ownership transferred before the recorded dc0def6 publication. The later O0400 recovery phase itself performed no GitHub publication. Preserve historical artifacts and attach the separate correction rather than changing their bytes."
   },
-  "publication_scope": "Supporting proof draft only. Initial exact CI failed at the new module after 27 prerequisite compiles; no probe/axiom PASS. The body-local canonical-instance correction requires fresh static review and matching CI. All inherited release/merge gates remain held; Point4 OPEN.",
+  "publication_scope": "Supporting proof draft only. Both exact CI attempts failed at the new module after27 prerequisite compiles; no probe/axiom PASS. The tangent-specialized restriction correction requires fresh static review, matching separately pinned CI and actual output review. All inherited release/merge gates remain held; Point4 OPEN.",
   "evidence": {
     "outcome": "verification-outcome.json",
     "reviews": [
@@ -71,7 +71,7 @@
     "historical_predecessor": "Existing verification-outcome.json and v1 static receipts bind predecessor 8dda7f2c; retain unchanged as history. See verification-attempts.json for actual CI failure and current correction."
   },
   "active_proof_source": {
-    "bytes": 7084,
-    "sha256": "c1e7da759231a8b386a8973f993c7ab995516457da95a85c2d3e9a3d281a2430"
+    "bytes": 7078,
+    "sha256": "ee89b27d2683b500956e34d3cff85a147851f3c65d80c45d25b7c2f50d53d2ec"
   }
 }
