@@ -15,8 +15,8 @@ import subprocess
 import sys
 import time
 
-PROOF_SHA = '8dda7f2c59dfc47971fe0f859c01819cfa11ee5e'
-PROOF_TREE = '1bcf0240c65d353b3d6496545b2261d5bc2b6e3d'
+PROOF_SHA = '78019d610d82460480141d9e3a53c69589c66da6'
+PROOF_TREE = '27b4a9ba12c48573b6ea4132a6f893915b0ae807'
 LEAN_COMMIT = 'd8b18978322de05a8f3dba51ef03cf5461676c17'
 MATHLIB_SHA = 'db584cd6d46c92f209a44c0f1c829460d327499d'
 TARGET = 'PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointBackgroundFrameC1'

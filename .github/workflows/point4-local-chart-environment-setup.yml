@@ -111,7 +111,7 @@ jobs:
       - name: Checkout immutable reviewed proof
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: 8dda7f2c59dfc47971fe0f859c01819cfa11ee5e
+          ref: 78019d610d82460480141d9e3a53c69589c66da6
           path: proof-source
           persist-credentials: false
           fetch-depth: 1

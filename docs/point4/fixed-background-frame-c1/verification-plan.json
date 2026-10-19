@@ -1,6 +1,6 @@
 {
   "schema": "point4-fixed-background-frame-C1-proof-verification-plan-v1",
-  "status": "STATIC_REVIEWED_DRAFT_UNELABORATED_OFFICIAL_CACHE_CONNECT_403",
+  "status": "INSTANCE_ELABORATION_CORRECTION_UNVERIFIED_FRESH_REVIEW_AND_FOCUSED_CI_PENDING",
   "parent": {
     "PR": 146,
     "commit": "2813ef52a21e13be08532f36ee9f26faf319da72",
@@ -33,10 +33,11 @@
     "cache_download_attempts": 1,
     "cache_endpoint_result": "CONNECT tunnel failed, response 403; stopped without alternate route or security change",
     "compiler_result": "CANDIDATE_NOT_RUN; static reviews and successful cache-tool build are not candidate elaboration or axiom evidence",
-    "cache_utility_compilation_scope": "Cache.* and Batteries.Tactic.OpenPrivate; setup only, no candidate/project proof closure compilation."
+    "cache_utility_compilation_scope": "Cache.* and Batteries.Tactic.OpenPrivate; setup only, no candidate/project proof closure compilation.",
+    "scope": "LOCAL_CLOUD_EXECUTOR_ONLY. The separate GitHub Actions attempt is recorded in verification-attempts.json; its official cache succeeded and it attempted the proof closure."
   },
   "separate_focused_verification": {
-    "reuse_requirement": "Exact official compiler is installed and hash-authenticated. Obtain eligible source-bound Mathlib dependency cache through authorized access before any focused project build.",
+    "reuse_requirement": "Official exact compiler is installed locally; local Mathlib cache remains unavailable. Separate existing GitHub CI successfully fetched the official selective cache at the pinned sources, then compiled 27 prerequisites and attempted the new module. No cache bytes grant proof PASS credit.",
     "commands_after_environment_and_budget_admission": [
       "lake build PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointBackgroundFrameC1",
       "lake env lean scripts/point4_fixed_background_frame_c1_probe.lean"
@@ -50,21 +51,27 @@
       "Exact source, compiler, dependencies, outputs, process termination and original workflow resource limits are authenticated.",
       "Independent mathematical and actual compiler-output review precede any verified claim or merge."
     ],
-    "runtime_estimate": "UNMEASURED for proof. Cache-tool setup was bounded at 240 seconds and stopped after access denial; see verification-outcome.json. No proof closure or full Mathlib build started.",
-    "new_environment_need": "Current blocker is official Mathlib cache CONNECT HTTP 403. Exact compiler is available; dependent proof compilation remains held. An already authorized exact-cache environment or approved access resolution is required; do not bypass the denial.",
-    "retry_policy": "Do not retry the access-denied endpoint through another route or start a cold full build. Ordinary bounded proof-elaboration fixes are authorized only after dependency cache admission."
+    "runtime_estimate": "Predecessor CI owned execution was 1097.207 seconds; its slowest prerequisite compile was 437.221 seconds under the 480-second stage cap. New module failed elaboration after 6.296 seconds. Successor total runtime and probe runtime are unmeasured. Retain the 3000-second execution and existing stage caps for a separately reviewed successor; no cold whole-campaign build.",
+    "new_environment_need": "No new paid environment, credentials or security change is needed for the proposed ordinary existing CI. The actual blocker is the new-module instance elaboration failure; the body-local canonical-instance repair remains unverified until fresh source/control pins and focused CI succeed. Local cache CONNECT403 remains a separate stopped route.",
+    "retry_policy": "Preserve failed run39312471681 and never rerun unchanged8dda. A fresh reviewed proof/caller binding may receive one separately reviewed bounded successor run under the existing caps. No local denied-cache route retry or cold whole-campaign fallback.",
+    "actual_CI_compilation_strategy": "Compile only the exact reviewed 28-project-module import closure with serial direct lake env lean -j1 -M5632 invocations. A missing Mathlib cache import fails rather than triggering a cold Mathlib build. Then run the new probe and strict output guard."
   },
   "recovery_evidence": {
     "O0400_ledger28_and_base_v2_delta_v3_archives": "PRESERVED_UNCHANGED",
     "charged_to_exhausted_120_second_recovery_allocation": 0,
     "historical_ownership_note": "The old stalled writer was quiesced and ownership transferred before the recorded dc0def6 publication. The later O0400 recovery phase itself performed no GitHub publication. Preserve historical artifacts and attach the separate correction rather than changing their bytes."
   },
-  "publication_scope": "Two independent static reviews accepted this source/probe as an unelaborated draft. Exact verification outcome and both receipts accompany the draft; compilation, required checks and merge remain held. No registry/submission action.",
+  "publication_scope": "Supporting proof draft only. Initial exact CI failed at the new module after 27 prerequisite compiles; no probe/axiom PASS. The body-local canonical-instance correction requires fresh static review and matching CI. All inherited release/merge gates remain held; Point4 OPEN.",
   "evidence": {
     "outcome": "verification-outcome.json",
     "reviews": [
       "source-review-v1.json",
       "resource-api-review-v1.json"
-    ]
+    ],
+    "historical_predecessor": "Existing verification-outcome.json and v1 static receipts bind predecessor 8dda7f2c; retain unchanged as history. See verification-attempts.json for actual CI failure and current correction."
+  },
+  "active_proof_source": {
+    "bytes": 7084,
+    "sha256": "c1e7da759231a8b386a8973f993c7ab995516457da95a85c2d3e9a3d281a2430"
   }
 }

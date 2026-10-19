@@ -66,9 +66,9 @@
       "sha256": "12e2dee69bee03cff4cf60f2569df1ebf9fc9bd8ad2ef6efa3e3f3e07944ea3f"
     },
     "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointBackgroundFrameC1": {
-      "bytes": 6936,
+      "bytes": 7084,
       "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointBackgroundFrameC1.lean",
-      "sha256": "d5dbb53f81c839d3ddd9db0ba4d95af472f33670e9960747c47b7ecef94f8fbf"
+      "sha256": "c1e7da759231a8b386a8973f993c7ab995516457da95a85c2d3e9a3d281a2430"
     },
     "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointMetricDefectComponentC1": {
       "bytes": 9975,
@@ -181,8 +181,8 @@
       "sha256": "01f0eac5a417b2d243b0071643c90c3114a85c2016be4d72416d7cfe640351b2"
     }
   },
-  "candidate_commit": "8dda7f2c59dfc47971fe0f859c01819cfa11ee5e",
-  "candidate_tree": "1bcf0240c65d353b3d6496545b2261d5bc2b6e3d",
+  "candidate_commit": "78019d610d82460480141d9e3a53c69589c66da6",
+  "candidate_tree": "27b4a9ba12c48573b6ea4132a6f893915b0ae807",
   "probe": {
     "path": "curvature/scripts/point4_fixed_background_frame_c1_probe.lean",
     "bytes": 6953,
