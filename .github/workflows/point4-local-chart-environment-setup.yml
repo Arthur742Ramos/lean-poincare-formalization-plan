@@ -11,16 +11,22 @@ on:
         description: Independently reviewed full candidate Git tree SHA
         required: true
         type: string
+      fixed_background_frame_c1:
+        description: Verify only the reviewed PR148 fixed-background proof and probe
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 concurrency:
-  group: local-chart-connection-${{ inputs.candidate_sha }}
+  group: ${{ inputs.fixed_background_frame_c1 && 'fixed-background-frame-c1' || 'local-chart-connection' }}-${{ inputs.candidate_sha }}
   cancel-in-progress: false
 
 jobs:
   chart_environment_setup:
+    if: ${{ !inputs.fixed_background_frame_c1 }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -85,3 +91,78 @@ jobs:
           name: local-chart-environment-setup-${{ inputs.candidate_sha }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/local-chart-environment-setup-${{ inputs.candidate_sha }}
           if-no-files-found: error
+
+  fixed_background_frame_c1:
+    if: ${{ inputs.fixed_background_frame_c1 }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      EXPECTED_SHA: ${{ inputs.candidate_sha }}
+      EXPECTED_TREE: ${{ inputs.expected_tree }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout exact workflow caller separately
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: ci-control
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Checkout immutable reviewed proof
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: be78f44a992b01dfa082472a70a89360086ee1a2
+          path: proof-source
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Run focused rejection and process cleanup controls
+        run: python3 -B -m unittest discover -s ci-control/.github/scripts -p 'test_point4_fixed_background_ci.py'
+      - name: Admit exact proof and caller sources before toolchain setup
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B ci-control/.github/scripts/point4_fixed_background_ci.py \
+            --phase preflight --candidate-root "$GITHUB_WORKSPACE/proof-source" \
+            --control-root "$GITHUB_WORKSPACE/ci-control" \
+            --candidate-sha "$EXPECTED_SHA" --expected-tree "$EXPECTED_TREE" \
+            --caller-sha "$GITHUB_SHA" \
+            --evidence "$RUNNER_TEMP/fixed-background-frame-c1-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - name: Install official pinned compiler without cache or project build
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: proof-source/curvature
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Verify the focused proof under owned resource limits
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/fixed-background-frame-c1-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          sudo systemd-run --wait --pipe --collect \
+            --unit="fixed-background-frame-c1-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+            --uid="$(id -u)" --gid="$(id -g)" \
+            --working-directory="$GITHUB_WORKSPACE/proof-source" \
+            --property=MemoryMax=6442450944 --property=MemorySwapMax=0 \
+            --property=CPUQuota=200% --property=TasksMax=128 \
+            --property=OOMPolicy=kill --property=KillMode=control-group \
+            --property=RuntimeMaxSec=3000 --property=TimeoutStopSec=10 \
+            --setenv="PATH=$PATH" --setenv="ELAN_HOME=${ELAN_HOME:-$HOME/.elan}" \
+            --setenv="MATHLIB_CACHE_DIR=$RUNNER_TEMP/fixed-background-frame-c1-cache-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+            --setenv=PYTHONDONTWRITEBYTECODE=1 --setenv=LEAN_NUM_THREADS=1 \
+            /usr/bin/python3 "$GITHUB_WORKSPACE/ci-control/.github/scripts/point4_fixed_background_ci.py" \
+              --phase verify --candidate-root "$GITHUB_WORKSPACE/proof-source" \
+              --control-root "$GITHUB_WORKSPACE/ci-control" \
+              --candidate-sha "$EXPECTED_SHA" --expected-tree "$EXPECTED_TREE" \
+              --caller-sha "$GITHUB_SHA" --evidence "$evidence"
+      - name: Preserve bounded exact-proof evidence including failures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: fixed-background-frame-c1-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/fixed-background-frame-c1-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
