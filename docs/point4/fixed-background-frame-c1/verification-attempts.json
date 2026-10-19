@@ -1,0 +1,39 @@
+{
+  "schema": "point4-fixed-background-C1-verification-attempts-v1",
+  "status": "BODY_LOCAL_CANONICAL_INSTANCE_REPAIR_UNVERIFIED",
+  "failed_attempt": {
+    "run": 39312471681,
+    "url": "https://github.com/Arthur742Ramos/lean-poincare-formalization-plan/actions/runs/39312471681",
+    "proof_commit": "8dda7f2c59dfc47971fe0f859c01819cfa11ee5e",
+    "caller_commit": "23566aed21b8e4ce00d6589bd182b60cd4b1fc18",
+    "GitHub_artifact_id": 12216889910,
+    "artifact_bytes": 295679,
+    "artifact_sha256": "3f9cb710192699f6c6a1b0a9eb2e56c47b982b1bbf724606d51c5354abde2546",
+    "actual_project_prerequisites_compiled": 27,
+    "new_module_exit_code": 1,
+    "new_module_error": "58:4 failed to synthesize FiberBundle E (TangentSpace I) at the generic class-to-set restriction call",
+    "new_module_elapsed_seconds": 6.296147769999834,
+    "new_module_leader_reaped_and_no_live_descendants": true,
+    "probe_executed": false,
+    "axiom_records_available": 0,
+    "source_PRE_POST_equal": true
+  },
+  "current_body_correction": {
+    "proof_source": {
+      "bytes": 7084,
+      "sha256": "c1e7da759231a8b386a8973f993c7ab995516457da95a85c2d3e9a3d281a2430"
+    },
+    "change": "Install the canonical tangent FiberBundle/VectorBundle inside the proof, as the compiled parent module does; fully specify E/I/M/F/V/cov at the generic restriction call.",
+    "compiled_parent_precedent": "DeTurckJointMetricDefectComponentC1.lean body-local canonical instances",
+    "theorem_statements_changed": false,
+    "probe_source_changed": false,
+    "new_hypotheses_or_axioms": false,
+    "actual_successor_compilation": "PENDING"
+  },
+  "scope": {
+    "Point4": "OPEN",
+    "full_PR_or_merge_PASS": false,
+    "PR146_PR147_and_ledger28": "PRESERVED",
+    "chart_exports": 0
+  }
+}
