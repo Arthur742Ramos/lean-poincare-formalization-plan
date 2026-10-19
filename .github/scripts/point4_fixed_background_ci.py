@@ -304,7 +304,8 @@ def main(args):
             require(not output.exists(), 'Unexpected pre-existing project output')
             source = Path(description['project_modules'][name]['path']).relative_to('curvature')
             run_process(['lake', 'env', 'lean', '-j1', '-M5632', '-o', str(output), str(source)],
-                        pkg, evidence, f'compile-{i:02d}', 480)
+                        pkg, evidence, f'compile-{i:02d}',
+                        720 if name == 'PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection' else 480)
             require(output.is_file() and output.stat().st_size, 'Compiler output missing')
             compiled.append({'module': name, 'source': description['project_modules'][name],
                              'outputs': {p.name: identity(p) for p in output.parent.glob(output.name + '*')}})
