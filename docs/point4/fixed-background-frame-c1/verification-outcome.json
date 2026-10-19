@@ -1,0 +1,151 @@
+{
+  "schema": "point4-fixed-background-frame-C1-verification-outcome-v1",
+  "status": "UNELABORATED_CACHE_ACCESS_DENIED",
+  "created_utc": "2026-10-19T19:11:36Z",
+  "candidate": {
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointBackgroundFrameC1.lean": {
+      "bytes": 6936,
+      "sha256": "d5dbb53f81c839d3ddd9db0ba4d95af472f33670e9960747c47b7ecef94f8fbf"
+    },
+    "curvature/scripts/point4_fixed_background_frame_c1_probe.lean": {
+      "bytes": 6953,
+      "sha256": "b3be1c37114701007f190edbaaea1580d765eb373326e4553eed355b902cb599"
+    }
+  },
+  "base_commit": "2813ef52a21e13be08532f36ee9f26faf319da72",
+  "static_reviews": {
+    "source-review-v1.json": {
+      "bytes": 9818,
+      "sha256": "68ef26ae92a04a0d184c2a0aaaa0d7b938bac152fa11d4f88d73b62be71b09ab"
+    },
+    "resource-api-review-v1.json": {
+      "bytes": 8510,
+      "sha256": "8293c8609b4535519e58fb691ea5f155017b0cdaa3d6a42d89d68666cfd04873"
+    }
+  },
+  "official_toolchain": {
+    "Lean": "4.33.0",
+    "commit": "d8b18978322de05a8f3dba51ef03cf5461676c17",
+    "Lake": "5.0.0-src+d8b1897",
+    "archive_bytes": 574882764,
+    "archive_sha256": "4b3fb03c29a1e0a253fb1d11f9bae3725f19a0dc6fc09b3ea16d2c9df3349e2c",
+    "published_release_digest_matched": true
+  },
+  "dependencies": {
+    "Mathlib": "db584cd6d46c92f209a44c0f1c829460d327499d",
+    "source_setup_receipt": {
+      "bytes": 1749,
+      "sha256": "685375ebd20d26c6df89c1b6339f4d030700af80e7b91a11320fe6fbec611cfc"
+    },
+    "all_nine_git_package_sources_at_root_manifest_commits": true,
+    "project_source_import_closure_modules": 28,
+    "requested_Mathlib_roots": 38,
+    "official_cache_resolved_files": 2953
+  },
+  "cache_setup": {
+    "argv": [
+      "/workspace/poincare-fixed-background-c1-verification-20261019/lean-4.33.0-linux/bin/lake",
+      "exe",
+      "cache",
+      "get",
+      "--repo=leanprover-community/mathlib4",
+      "--cache-from=master,legacy",
+      "Mathlib.Analysis.InnerProductSpace.CanonicalTensor",
+      "Mathlib.Analysis.InnerProductSpace.Dual",
+      "Mathlib.Analysis.InnerProductSpace.Trace",
+      "Mathlib.Analysis.Normed.Group.Submodule",
+      "Mathlib.Analysis.Normed.Module.FiniteDimension",
+      "Mathlib.Analysis.Normed.Module.RCLike.Real",
+      "Mathlib.Analysis.Normed.Module.TransferInstance",
+      "Mathlib.Analysis.Normed.Operator.Basic",
+      "Mathlib.Analysis.Normed.Operator.NormedSpace",
+      "Mathlib.Geometry.Manifold.Algebra.LieGroup",
+      "Mathlib.Geometry.Manifold.Algebra.SMul",
+      "Mathlib.Geometry.Manifold.BumpFunction",
+      "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+      "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+      "Mathlib.Geometry.Manifold.PartitionOfUnity",
+      "Mathlib.Geometry.Manifold.Riemannian.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+      "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+      "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+      "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+      "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+      "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+      "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+      "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+      "Mathlib.LinearAlgebra.Basis.VectorSpace",
+      "Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition",
+      "Mathlib.LinearAlgebra.Matrix.Adjugate",
+      "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+      "Mathlib.LinearAlgebra.Matrix.ToLin",
+      "Mathlib.LinearAlgebra.TensorProduct.Basis",
+      "Mathlib.LinearAlgebra.Trace",
+      "Mathlib.Topology.ContinuousMap.Bounded.Basic",
+      "Mathlib.Topology.ContinuousMap.Compact",
+      "Mathlib.Topology.MetricSpace.ProperSpace",
+      "Mathlib.Topology.Order.Compact",
+      "Mathlib.Topology.VectorBundle.Constructions",
+      "Mathlib.Topology.VectorBundle.FiniteDimensional",
+      "Mathlib.Topology.VectorBundle.Hom"
+    ],
+    "timeout_seconds": 240,
+    "address_space_limit_bytes": 12884901888,
+    "elapsed_until_leader_reaped_seconds": 45.32017014699886,
+    "leader_exit_code": -15,
+    "leader_reaped": true,
+    "remaining_local_cache_and_curl_descendants_terminated_with_SIGKILL": true,
+    "no_live_descendants_verified": true,
+    "post_stop_group_states": [
+      {
+        "pid": 10514,
+        "state": "Z"
+      },
+      {
+        "pid": 10534,
+        "state": "Z"
+      }
+    ],
+    "endpoint": "https://lakecache.blob.core.windows.net/mathlib4-master",
+    "observed_error": "CONNECT tunnel failed, response 403",
+    "observed_error_count": 1410,
+    "successful_ltar_downloads": 0,
+    "final_stopped_log": {
+      "bytes": 260993,
+      "sha256": "158ac1a603442c4d06e6824c98ffc20103ef2023484e569a7280ad5f29dae162"
+    },
+    "initial_leader_exit_record_log_hash_is_historical": true,
+    "cache_tool_build_succeeded": true,
+    "alternate_route_or_security_change_attempted": false,
+    "candidate_or_project_proof_closure_compilation_started": false,
+    "cache_tool_compilation_scope": "Cache.* utility modules and the package-support module Batteries.Tactic.OpenPrivate were compiled to build the official cache executable. This is setup only and supplies no candidate, signature or axiom-output PASS.",
+    "started_utc": "2026-10-19T19:09:53Z",
+    "SIGTERM_group_utc": "2026-10-19T19:10:38Z",
+    "remaining_descendants_SIGKILL_group_utc": "2026-10-19T19:10:58Z",
+    "start_to_SIGKILL_seconds_at_UTC_timestamp_precision": 65,
+    "timestamp_precision_seconds": 1,
+    "leader_exit_is_not_whole_group_quiescence": true
+  },
+  "checks": {
+    "exact_two_candidate_files_comment_string_aware_cheat_scan": {
+      "exit_code": 0,
+      "output": "TOTAL 0",
+      "files_scanned": 2
+    },
+    "git_diff_check": "PASS",
+    "Lean_candidate_build": "NOT_RUN_MATHLIB_CACHE_UNAVAILABLE",
+    "full_signature_assignments": "NOT_ELABORATED",
+    "genuine_Fin0_cases": "NOT_ELABORATED",
+    "seven_axiom_records": "NO_OUTPUT_DO_NOT_CLAIM_PASS"
+  },
+  "preservation": {
+    "Point4": "OPEN",
+    "PR146_and_PR147_changed_by_this_proof_task": false,
+    "chart_exports": 0,
+    "O0400_reader_or_retry_charges": 0,
+    "old_ledger_sha256": "edae2e37f101b8fd6f980cd1dc63fd4c2926738483b5831a734933a4483c933f",
+    "base_v2_archive_sha256": "35ada850f1633721c64b0a30016db9c6de3b950016c356c4646a3e26102d71d8",
+    "delta_v3_archive_sha256": "6902ba9f2578297d3a7066b3d1a1592677c55be64c348f6a9edd635721ebac1e"
+  },
+  "remaining_gate": "Use an authorized environment with these exact pinned dependencies/cache available, then perform bounded focused compilation, actual signature/axiom-output review and inherited required checks. No merge or Point4 completion claim."
+}

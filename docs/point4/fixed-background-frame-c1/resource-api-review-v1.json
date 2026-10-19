@@ -1,0 +1,143 @@
+{
+  "schema": "independent-static-lean-api-review-v1",
+  "reviewer": "/root/reader_resource_review",
+  "created_at_utc": "2026-10-19T19:07:04.722568+00:00",
+  "verdict": "APPROVE_SOURCE_AND_PROBE_STATIC_DRAFT_ONLY_UNELABORATED",
+  "targets": [
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointBackgroundFrameC1.lean",
+      "bytes": 6936,
+      "sha256": "d5dbb53f81c839d3ddd9db0ba4d95af472f33670e9960747c47b7ecef94f8fbf"
+    },
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/scripts/point4_fixed_background_frame_c1_probe.lean",
+      "bytes": 6953,
+      "sha256": "b3be1c37114701007f190edbaaea1580d765eb373326e4553eed355b902cb599"
+    }
+  ],
+  "supporting_source_pins": [
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/AGENTS.md",
+      "bytes": 5598,
+      "sha256": "fd86a1e34284670194314c7677ff0a9f6b28a09c1b5a08a6a44544d9db92df7a"
+    },
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/lean-toolchain",
+      "bytes": 25,
+      "sha256": "302cd63c54178885b89e669f33b38f12f4dd7ae7e5cac537b3203e3768d8fb2b"
+    },
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/lakefile.toml",
+      "bytes": 712,
+      "sha256": "e5390a0e7951d3229ac31eea79e0ca818a78f1e296fed6f04febaf82522e1280"
+    },
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Existence.lean",
+      "bytes": 74554,
+      "sha256": "eba90d5a299f5e4e5ef8ce3cde1c49042f13563fef9ab7ee88d4f2a098449494"
+    },
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/InducedHomRegularity.lean",
+      "bytes": 31370,
+      "sha256": "3328e07a6110f54ab8beb193ee93105d2f1b1da3d00a1352c77c362ccfad82ae"
+    },
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/InitialValueProblemBackground.lean",
+      "bytes": 5980,
+      "sha256": "49ac72dd82f34722335fca65d0976d4aad9c9e9abe00fc28cddb12af13ae90a0"
+    },
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointMetricDefectComponentC1.lean",
+      "bytes": 9975,
+      "sha256": "c4227f8d30f4de6a4cf69e8cc36e1ab818858779ac2a92ed6526bd56d8ac0337"
+    },
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Analysis/TimeDependentGram.lean",
+      "bytes": 45656,
+      "sha256": "12e2dee69bee03cff4cf60f2569df1ebf9fc9bd8ad2ef6efa3e3f3e07944ea3f"
+    },
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+      "bytes": 188253,
+      "sha256": "bf9de4bf83c75b4373d72842dae0eaca96fd2e333df48336f393ff998cce1ddf"
+    },
+    {
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TimeDependent.lean",
+      "bytes": 36467,
+      "sha256": "f7d94bc70f0445019dc88bfa3f5ee5d0d6f577d2b57ebeb102e15b6e94aae004"
+    }
+  ],
+  "blocking_static_findings": [],
+  "scope": {
+    "source_and_probe_read_only": true,
+    "lean_elaboration_performed": false,
+    "lean_axiom_output_observed": false,
+    "toolchain_setup_performed_by_reviewer": false,
+    "git_operations_performed": false,
+    "candidate_execution_performed": false,
+    "native_reader_calls_performed": false,
+    "ledger_writes_performed": false,
+    "repository_source_edits_performed": false,
+    "documentation_reviewed_in_this_receipt": false
+  },
+  "api_findings": [
+    {
+      "target": "contMDiffOn_const_background_localFrame",
+      "result": "The general-bundle open-set C1 restriction is invoked with I, F=E, V=TM and the open trivialization base set. The listed finite dimensionality, completeness, Hausdorff, smooth-manifold and C2 vector-bundle hypotheses supply the API context. Applying its contMDiff field to the C2 frame is the existing induced-Hom pattern.",
+      "locations": [
+        "CovariantDerivative/Existence.lean:1164",
+        "CovariantDerivative/Existence.lean:1238",
+        "CovariantDerivative/InducedHomRegularity.lean:142"
+      ]
+    },
+    {
+      "target": "joint constant-background extension",
+      "result": "The proof composes the spatial endomorphism section with Prod.snd and uses the product-set membership second projection. TimeDependentGram has the same composition pattern; this concerns a constant connection and asserts no general slicewise-to-joint principle.",
+      "locations": [
+        "Analysis/TimeDependentGram.lean:48"
+      ]
+    },
+    {
+      "target": "contMDiffOn_joint_metricDefect_component_of_joint_metric_and_fixed_background",
+      "result": "Both background-frame C1 premises of the inherited metric-defect theorem are supplied by the first new lemma. Joint C2 regularity of the evolving metric remains an explicit premise. Metric slots a and b and derivative-direction c are retained. No defect-regularity premise, C3 metric hypothesis, orthonormal-frame requirement, or positive-rank premise was introduced.",
+      "locations": [
+        "GaugeReduction/DeTurckJointMetricDefectComponentC1.lean:46"
+      ]
+    },
+    {
+      "target": "contMDiffOn_joint_metricDefect_component_fixedLeviCivitaBackground",
+      "result": "Uses the pre-existing actual ivp.fixedLeviCivitaBackground. Its stored spatial C1 proof is installed as a local instance; constantConnection is definitionally the constant family of the same covariant derivative. No parallel choice or replacement connection is introduced. SigmaCompactSpace is explicit as required by the canonical choice API.",
+      "locations": [
+        "RicciFlow/InitialValueProblemBackground.lean:39",
+        "RicciFlow/InitialValueProblemBackground.lean:73",
+        "RicciFlow/InitialValueProblemBackground.lean:80",
+        "RicciFlow/InitialValueProblemBackground.lean:88"
+      ]
+    },
+    {
+      "target": "probe full signatures",
+      "result": "Both expected whole-function types state the actual conclusions and are assigned the theorem constants with @, rather than testing only applications. The actual-IVP type retains the joint C2 metric premise and omits the two frame-C1 premises that the proof discharges. Universe-polymorphic signature assignments remain unelaborated."
+    },
+    {
+      "target": "probe dimension zero",
+      "result": "The two Fin 0 statements concern actual connection endomorphism and metric-defect values on arbitrary points, rather than a nonexistent basis index. Subsingleton and linearity arguments are structurally appropriate. The zero-dimensional elaboration is still pending."
+    }
+  ],
+  "mechanical_checks": {
+    "exact_parent_requested_target_hashes_match": true,
+    "targets_stable_across_review_reads": true,
+    "no_sorry_admit_unsafe_or_axiom_declarations_in_targets": true
+  },
+  "remaining_verification_gates": [
+    "Elaborate the exact frozen module and probe with repository-pinned Lean 4.33.0 and dependency revisions; no successful compilation is claimed.",
+    "Inspect actual full printed signatures and axiom lists; reject sorryAx or other unexpected axioms. No axiom list has been observed.",
+    "Check instance/coercion elaboration for general-bundle cov.toFun, local tangent bundle instances, product models, C2 order normalization, and canonical constantConnection definitional reduction.",
+    "Check probe universe assignments and Fin 0 ext/map_zero elaboration. These are mechanical risks, not established failures.",
+    "Review final documentation and status independently if changed after this receipt; this source-only approval grants no publication, CI, intake, merge, nonlinear-solution, or Point-4-completion credit."
+  ],
+  "limits": [
+    "Mathlib LocalFrame implementation was not present in the inspected local source closure; its call shape was corroborated by existing repository source uses, not by executing Lean.",
+    "PR146 base identity was supplied by parent and is not independently Git-verified by this receipt.",
+    "This new draft is not covered by historical O0400 actual qualifications. Frozen recovery archives and exhausted L28 accounting are outside this task and were not written."
+  ]
+}
