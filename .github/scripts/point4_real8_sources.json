@@ -1,0 +1,637 @@
+{
+  "Mathlib_roots": [
+    "Mathlib.Analysis.InnerProductSpace.CanonicalTensor",
+    "Mathlib.Analysis.InnerProductSpace.Dual",
+    "Mathlib.Analysis.InnerProductSpace.GramMatrix",
+    "Mathlib.Analysis.InnerProductSpace.Trace",
+    "Mathlib.Analysis.Normed.Group.Submodule",
+    "Mathlib.Analysis.Normed.Module.FiniteDimension",
+    "Mathlib.Analysis.Normed.Module.RCLike.Real",
+    "Mathlib.Analysis.Normed.Module.TransferInstance",
+    "Mathlib.Analysis.Normed.Operator.Basic",
+    "Mathlib.Analysis.Normed.Operator.NormedSpace",
+    "Mathlib.Geometry.Manifold.Algebra.LieGroup",
+    "Mathlib.Geometry.Manifold.BumpFunction",
+    "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+    "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+    "Mathlib.Geometry.Manifold.PartitionOfUnity",
+    "Mathlib.Geometry.Manifold.Riemannian.Basic",
+    "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+    "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+    "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+    "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+    "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+    "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+    "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+    "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+    "Mathlib.LinearAlgebra.Basis.VectorSpace",
+    "Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition",
+    "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+    "Mathlib.LinearAlgebra.TensorProduct.Basis",
+    "Mathlib.LinearAlgebra.Trace",
+    "Mathlib.Tactic.FinCases",
+    "Mathlib.Tactic.NormNum",
+    "Mathlib.Topology.ContinuousMap.Bounded.Basic",
+    "Mathlib.Topology.ContinuousMap.Compact",
+    "Mathlib.Topology.MetricSpace.ProperSpace",
+    "Mathlib.Topology.Order.Compact",
+    "Mathlib.Topology.VectorBundle.Constructions",
+    "Mathlib.Topology.VectorBundle.FiniteDimensional",
+    "Mathlib.Topology.VectorBundle.Hom"
+  ],
+  "archive": {
+    "bytes": 183950,
+    "sha256": "60f921e6ff1b9f92d72f4fadb9405bf23a1d0f618ad8f80c8cc9a298cf4b58f3"
+  },
+  "archive_members": {
+    "point4-manifold-heat-contract.log": {
+      "CRC32": 3292382148,
+      "bytes": 9428,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "383c9beeae4639d2316971d34c99e1609399c24fd86821b6d5cc184995c297df"
+    },
+    "point4-manifold-heat-full-audit.json": {
+      "CRC32": 2136477144,
+      "bytes": 720,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "b655bab74ed8fa02c29aaca9cebeda665991a852922cce407840b5cac457729e"
+    },
+    "point4-manifold-heat-full-audit.log": {
+      "CRC32": 388099264,
+      "bytes": 814,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "e4b9650dca675b338ea4c12521b0d66f67e5df52bf0e8f2df5e9295caf2b7dd0"
+    },
+    "point4-manifold-heat-full-audit.rc": {
+      "CRC32": 1733426259,
+      "bytes": 2,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "point4-manifold-heat-inherited-build.log": {
+      "CRC32": 4187085461,
+      "bytes": 757102,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "88602667a367e1870908a6ecd0652be71cfd66c585b937cddb004c38a1caea15"
+    },
+    "point4-manifold-heat-inherited-probes-historical-routing.log": {
+      "CRC32": 2125272170,
+      "bytes": 74590,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "9e750ca5adee77061a65e0cdd52967d83f974a52c5db566f8f19e17eec1f1b0f"
+    },
+    "point4-manifold-heat-inherited-probes/boundaryless_chart_frames.log": {
+      "CRC32": 3787778188,
+      "bytes": 5977,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "63084966d4024fcd13e1035b0b479e732f48c3d655abe0c683a50ab32ca50964"
+    },
+    "point4-manifold-heat-inherited-probes/c2_heat_trace.log": {
+      "CRC32": 4185195117,
+      "bytes": 5794,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "69a72dd7fcf4bc995d6254591a7b0f3a9e6983e6be0799f66827949a419e0332"
+    },
+    "point4-manifold-heat-inherited-probes/chosen_lc_coordinate.log": {
+      "CRC32": 2131858700,
+      "bytes": 2163,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "163689596056e44dd68b6da36c389363c3810de0cc4a7e7c36694d8b793ab3ba"
+    },
+    "point4-manifold-heat-inherited-probes/chosen_lc_curvature.log": {
+      "CRC32": 1196798373,
+      "bytes": 1451,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "259800b9664f6df901b1a3adc2b3a481dde34fac66f2eeed1e5b72784a940cfb"
+    },
+    "point4-manifold-heat-inherited-probes/contraction.log": {
+      "CRC32": 2662836004,
+      "bytes": 1786,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "d47334ca12f7dac13266300b0d80fddab302592a54c713584b33d4cca351f67c"
+    },
+    "point4-manifold-heat-inherited-probes/coordinate_connection.log": {
+      "CRC32": 4294121923,
+      "bytes": 1877,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "98ea6e86008a5269bdc54b767b8032cbac76d3bd88b8c655a49ce3f08f95280f"
+    },
+    "point4-manifold-heat-inherited-probes/coordinate_jet.log": {
+      "CRC32": 1890775014,
+      "bytes": 1820,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "8ec79acf2a89c3a5a92bef4baddbbff62d1d6497b8bbc6261b23044719b5f02c"
+    },
+    "point4-manifold-heat-inherited-probes/coordinate_operator.log": {
+      "CRC32": 3999336853,
+      "bytes": 1308,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "b01a6b4e60df025c5abd6b5446209a3527158a78c36f09639c1294e1008ccb24"
+    },
+    "point4-manifold-heat-inherited-probes/frozen_metric_principal.log": {
+      "CRC32": 3842831798,
+      "bytes": 3617,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "b773ca19dbf132ac24eaab0603bc87791a3e48f57abd26980a2d2941ab1328fb"
+    },
+    "point4-manifold-heat-inherited-probes/principal_remainder.log": {
+      "CRC32": 3893253103,
+      "bytes": 1545,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "4b1562da7c9f4307157907f686e5b3002270b30cff8a1368aec26a346e9a15ea"
+    },
+    "point4-manifold-heat-inherited-probes/standard_coordinate_operator.log": {
+      "CRC32": 949950677,
+      "bytes": 2569,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "ebcd919be4a1e07bc44aab2ca17ad6f9d173852f0e8175cb641d6de22bfc14be"
+    },
+    "point4-manifold-heat-inherited-probes/weak_laplacian.log": {
+      "CRC32": 1858041389,
+      "bytes": 18434,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "e2121d5fdd98ca2cda70ea0b3aa72928fa939d87cdeff353b334f11eb97035c1"
+    },
+    "point4-manifold-heat-inherited-probes/weighted_initial_heat.log": {
+      "CRC32": 883065362,
+      "bytes": 5274,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "8f7635ae00e880abc7a8e8432febc227f27a8d7c028a2b1cc7cb42f9434931aa"
+    },
+    "point4-manifold-heat-official-schema.json": {
+      "CRC32": 1038148565,
+      "bytes": 12694,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "25ff6b25ca4511635aff4443cf20480c15e59dddf19591c730950b442ea54fce"
+    },
+    "point4-manifold-heat-probe.log": {
+      "CRC32": 133536894,
+      "bytes": 9631,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "037359cb8597d1ba1e8c42b5fe39f64ceacd5d57f4920edbbd30f4b3a56cf2b3"
+    },
+    "point4-manifold-heat-regression.log": {
+      "CRC32": 2589723430,
+      "bytes": 6105,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "584b1a1fe54024db877b5337498cdcdedfb1e9751943e5c3a2b3ece2bb09ddcc"
+    },
+    "point4-manifold-heat-sha.log": {
+      "CRC32": 859527045,
+      "bytes": 41,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "8215b6029972c3201cd67e64300502c21aecabbcaf2be7a1659238af0e30fb43"
+    },
+    "point4-manifold-heat-source.log": {
+      "CRC32": 148429496,
+      "bytes": 3076,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "7c14757d6cb3efea17a658ba8e6a130a555746f0e7005697688c299a038be287"
+    },
+    "point4-smooth-forward-audit.log": {
+      "CRC32": 2654741244,
+      "bytes": 466,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "1a6d44c05bbdc99d65d298b9e09b20a3192735a2a83f14c22c7cc44f9cf9fe6f"
+    },
+    "point4-smooth-forward-audit/compiler-version.json": {
+      "CRC32": 3436809485,
+      "bytes": 373,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "555b338ff2cc90a6f7fbca0a4689ba380798dc6fd2f55b0ff2eecbd69e547288"
+    },
+    "point4-smooth-forward-audit/compiler-version.log": {
+      "CRC32": 2270181707,
+      "bytes": 106,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "64f534c7cd1d0dbe701f44b4da6679d120b63f0f9f3bfab60540a07af143f1f2"
+    },
+    "point4-smooth-forward-audit/completion.json": {
+      "CRC32": 1890629541,
+      "bytes": 409,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "538737781d8de72eea23116b1f184daa38d999f63d794cbbaeb144a87fac40df"
+    },
+    "point4-smooth-forward-audit/completion.log": {
+      "CRC32": 1548315211,
+      "bytes": 727,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "1b544a6b439132e02a89c850ac42d8d50a1bac5f9414a177e0e64ebe0d34a098"
+    },
+    "point4-smooth-forward-audit/full-build.json": {
+      "CRC32": 1592105141,
+      "bytes": 346,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "81dcebf79ff4dcc08fec5feee6510331fbfa6dea14ee81ffe0b6b32cf86c9038"
+    },
+    "point4-smooth-forward-audit/full-build.log": {
+      "CRC32": 1935026480,
+      "bytes": 744627,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "188227aac60fa18af4f452584d9239927892bbaaf230bd5767de5d14e6f6904a"
+    },
+    "point4-smooth-forward-audit/smooth-module-build.json": {
+      "CRC32": 3521618837,
+      "bytes": 421,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "4af772893a05b27b20b1e1d8bbf41ae5bfcc7dc899f74d0f6a2c9cdb5be5ee8a"
+    },
+    "point4-smooth-forward-audit/smooth-module-build.log": {
+      "CRC32": 3652598864,
+      "bytes": 140535,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "b23079670d72b4b9a91420f60d81adbb843d0fb1054067947659e77c7709c222"
+    },
+    "point4-smooth-forward-audit/source-scan.json": {
+      "CRC32": 2135386789,
+      "bytes": 414,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "03a6b39e14aa7d4129028848cd2a4884bedb0f76314d5d2821db49d187a7d063"
+    },
+    "point4-smooth-forward-audit/source-scan.log": {
+      "CRC32": 580739669,
+      "bytes": 8,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "fb76cc8923e7d037fe388fd1bd0a9a53dfc091b85ef17b2485be9302f0b90e73"
+    },
+    "point4-smooth-forward-audit/verdict.json": {
+      "CRC32": 4072249472,
+      "bytes": 513,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "602ba739177f77d87242c8956b55da2dc252ca523d390e4efdecc7a98a9b4a3f"
+    },
+    "point4-smooth-forward-basis.log": {
+      "CRC32": 3603414534,
+      "bytes": 25693,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "0e6ec5cec7525b5acfed4647ac5bf77cb5bfcfb509dd100c5e84d99a13171f98"
+    },
+    "point4-smooth-forward-completion.log": {
+      "CRC32": 1548315211,
+      "bytes": 727,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "1b544a6b439132e02a89c850ac42d8d50a1bac5f9414a177e0e64ebe0d34a098"
+    },
+    "point4-smooth-forward-completion.rc": {
+      "CRC32": 1733426259,
+      "bytes": 2,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "point4-smooth-forward-composition-inputs.log": {
+      "CRC32": 2079497638,
+      "bytes": 635,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "c98f1b79fcbb6008ae63eb5de61764787ff6bdd3bd8a2da07a90f3da1b647e03"
+    },
+    "point4-smooth-forward-positive-localization-manifest-full-9t44r_vx-receipt.log": {
+      "CRC32": 1753475642,
+      "bytes": 2221,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "86cb5c06a220b02b35d77f51035ea029024f03415103e10f08bc5954853dade6"
+    },
+    "point4-smooth-forward-positive-localization-manifest-full-9t44r_vx-stdout.log": {
+      "CRC32": 3655232338,
+      "bytes": 759,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "4eef74e94123fda3239ae8a1d49da2672ddf27787dd68ea65d0a613c2e6aa8b5"
+    },
+    "point4-smooth-forward-positive-localization-mocks-full-bdnxtom4-receipt.log": {
+      "CRC32": 1226279812,
+      "bytes": 2205,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "3abdf56ed365a22f3026903b2b3749d086579cc8c6f9f2b6af48c7569687432f"
+    },
+    "point4-smooth-forward-positive-localization-mocks-full-bdnxtom4-stdout.log": {
+      "CRC32": 2648261966,
+      "bytes": 1284,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "a844a0e80ecbd26aef82ceb7c61fe99c36b543e10ba77932a2c49e623d575f2d"
+    },
+    "point4-smooth-forward-positive-smooth-evidence-full-n680q53t-receipt.log": {
+      "CRC32": 875897729,
+      "bytes": 2693,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "51768ea1a06b619fa1ec0a34f0ae5ae396c453d9517f806f3d795381ad3eca72"
+    },
+    "point4-smooth-forward-positive-smooth-evidence-full-n680q53t-stdout.log": {
+      "CRC32": 2190333118,
+      "bytes": 3308,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "9f8d783dda83a24a63b28973fd1aedf097a7946579e5e2129354a2f10e763f38"
+    },
+    "point4-smooth-forward-positive-weighted-full-_xslpp0h-receipt.log": {
+      "CRC32": 3148600938,
+      "bytes": 2268,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "f19f245192634a8aebc652f5b75d2b3266d1b144be2033e518886bca68e1657b"
+    },
+    "point4-smooth-forward-positive-weighted-full-_xslpp0h-stdout.log": {
+      "CRC32": 41830530,
+      "bytes": 2107,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "2335769db05fc8b12d621f29a9914857e403e2c0bca64bc2ca987dc9423b9c49"
+    },
+    "point4-smooth-forward-ricci-reindex.log": {
+      "CRC32": 3346342018,
+      "bytes": 5419,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "7c38995e4b6a57f587d8a5d5e5400792cf647622eb32e4a233c93c3a121f66e5"
+    },
+    "point4-smooth-forward-support-probe.log": {
+      "CRC32": 790545299,
+      "bytes": 7520,
+      "selected_for_preserved_guard_inputs": true,
+      "sha256": "2570fc7e406619bc7076b51451a36336a6af26e64bd2914bee5a32cf6fecfb89"
+    },
+    "point4-smooth-forward-time-translate.log": {
+      "CRC32": 716663352,
+      "bytes": 218231,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "aa9a92d8ca15cdabce733113afcdc7f2db519f3ce55c8c8f803a58de13a8c032"
+    },
+    "point4_build.log": {
+      "CRC32": 151897563,
+      "bytes": 744627,
+      "selected_for_preserved_guard_inputs": false,
+      "sha256": "8028f855cda928949ea55a2a1319f791212f91d5f6e7ffdad729f2f690376976"
+    }
+  },
+  "candidate_commit": "589f451ab90f0e258318dd07d2624dec7c399402",
+  "candidate_tree": "ea54a41a423c93dc379a310aebf9579fa3259c3f",
+  "current_control_sources": {
+    "curvature/scripts/point4_scan.py": {
+      "bytes": 11112,
+      "sha256": "ad3edb537729b78e16495100bc1006bfca4dc7163dfaebf797a8c8a059706212"
+    },
+    "curvature/scripts/point4_smooth_forward_release_guard.py": {
+      "bytes": 17859,
+      "sha256": "3a69c6949bdc93c5103230d1540de3599d7fb32199f511b2e2a7646291b0f56b"
+    },
+    "curvature/scripts/point4_smooth_master_composition.py": {
+      "bytes": 2989284,
+      "sha256": "e0dbc32b349cb08781406b75b462f977462a4018e5a5556803ee88f2e0e5b950"
+    },
+    "curvature/scripts/point4_smooth_master_composition_test.py": {
+      "bytes": 308420,
+      "sha256": "75e02a07dfb22f6af1c00a8e89a14f596586930412d88ae8b8d80ba5c5a4327e"
+    },
+    "docs/point4/smooth-master-composition/identity-map.json": {
+      "bytes": 3424807,
+      "sha256": "0c7a3248f76094d3383bb6e9ea1a1e78c5cd84359e0708f796d505092065b3aa"
+    }
+  },
+  "historical_input_origin": {
+    "artifact": 12001365510,
+    "head": "eea83746719daf0020f2863d7862a01c9c7b41d1",
+    "job": 116500651231,
+    "run": 38757560720,
+    "scope": "Unchanged historical evidence inputs; not fresh candidate audit results"
+  },
+  "historical_probe": {
+    "bytes": 603,
+    "commit": "e883681caa862277857ee825a547502e8f3ec036",
+    "native_import": "PoincareCurvature.Geometry.Manifold.RicciFlow.MetricContractedDeTurckField",
+    "path": "curvature/scripts/point4_contraction_probe.lean",
+    "sha256": "d8c92729baf32f2abad35a23e7993cc20652fda0632cc7029efd5f3a4defee11"
+  },
+  "project_modules": {
+    "PoincareCurvature.Analysis.MetricBilinearContraction": {
+      "bytes": 8996,
+      "imports": [
+        "Mathlib.Analysis.InnerProductSpace.CanonicalTensor",
+        "Mathlib.Analysis.InnerProductSpace.GramMatrix",
+        "Mathlib.LinearAlgebra.Trace",
+        "Mathlib.Tactic.FinCases",
+        "Mathlib.Tactic.NormNum"
+      ],
+      "path": "curvature/PoincareCurvature/Analysis/MetricBilinearContraction.lean",
+      "sha256": "9b9b7a9d4ab0cecac05a0a32fed4bb28b41f8dabf30cefca5ad2b900639b6944"
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurck": {
+      "bytes": 190070,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/DeTurck.lean",
+      "sha256": "9d76cd2370f408b79d77241c7a582e83331104c25e8bffbb80f134940d43a029"
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence": {
+      "bytes": 188253,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+      "sha256": "bf9de4bf83c75b4373d72842dae0eaca96fd2e333df48336f393ff998cce1ddf"
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.MetricContractedDeTurckField": {
+      "bytes": 10119,
+      "imports": [
+        "PoincareCurvature.Analysis.MetricBilinearContraction",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurck",
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.StandardDeTurck"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/MetricContractedDeTurckField.lean",
+      "sha256": "745682f4682e297bad2fb35f8b71afdb75f02e7f27c13e9bb7cf39351b4495c4"
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.StandardDeTurck": {
+      "bytes": 4902,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.RicciFlow.DeTurck",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLocalFrame"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/StandardDeTurck.lean",
+      "sha256": "82cf513ebadc1c65f513ef12055be1da8c6f4528056a643440b52406614bf9b4"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection": {
+      "bytes": 202866,
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+        "Mathlib.Topology.VectorBundle.Hom",
+        "Mathlib.Analysis.Normed.Operator.Basic",
+        "Mathlib.Analysis.Normed.Group.Submodule",
+        "Mathlib.Analysis.Normed.Module.TransferInstance",
+        "Mathlib.Topology.ContinuousMap.Compact"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/ContinuousSection.lean",
+      "sha256": "9647f6cf3b0ace2e27de2ce45a149b32cdd0833541b425727baffa2e7723e208"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along": {
+      "bytes": 6758,
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Along.lean",
+      "sha256": "68cef5bdf39e72ad12e1b61898a7adff522f3c6f46ca699244f3daf3b3ccdfac"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacian": {
+      "bytes": 18425,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.InducedHom",
+        "Mathlib.Analysis.InnerProductSpace.CanonicalTensor"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacian.lean",
+      "sha256": "5c0e6695a6b57e20800df1d09a77b3640f382c1c9233fd967b2250022417a800"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLocalFrame": {
+      "bytes": 20868,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacian",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions",
+        "Mathlib.LinearAlgebra.TensorProduct.Basis"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianLocalFrame.lean",
+      "sha256": "cff5076439491217ad4a26d23aef785a7a53cba77dffb51a0daa81aedcb462d2"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi": {
+      "bytes": 39309,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Bianchi.lean",
+      "sha256": "6db9a50be9f45e78c0f8af1cbad4fb5116bdd3672e3e4fee5158905d9c2105ec"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions": {
+      "bytes": 17991,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi",
+        "Mathlib.Analysis.InnerProductSpace.Trace",
+        "Mathlib.Geometry.Manifold.Riemannian.Basic",
+        "Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition",
+        "Mathlib.LinearAlgebra.Trace"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Contractions.lean",
+      "sha256": "3df47636448080a16a25cedb3f68e67434082fbcbf395b278fbd1fa42354e377"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Raw": {
+      "bytes": 2414,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along",
+        "Mathlib.Geometry.Manifold.VectorField.LieBracket"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Raw.lean",
+      "sha256": "2f2fb93364159b6cce4fbdac62e502bab18d4f5cc1f053437a815447b67fd0e7"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Sectional": {
+      "bytes": 3533,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor",
+        "Mathlib.Geometry.Manifold.Riemannian.Basic"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Sectional.lean",
+      "sha256": "14b828a0c69a58f260eac1c3597672c542db1835bc0d5e079698e59b9031ed6c"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor": {
+      "bytes": 119386,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Raw",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita",
+        "Mathlib.Geometry.Manifold.BumpFunction",
+        "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.Analysis.InnerProductSpace.Dual",
+        "Mathlib.Analysis.InnerProductSpace.Trace"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Tensor.lean",
+      "sha256": "518928ccf224355a1a755e2477710f1c26b0662e2675ccab2c6913b10ba9f61b"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Existence": {
+      "bytes": 74554,
+      "imports": [
+        "Mathlib.Geometry.Manifold.PartitionOfUnity",
+        "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+        "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+        "Mathlib.LinearAlgebra.Basis.VectorSpace",
+        "Mathlib.Topology.VectorBundle.Constructions"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Existence.lean",
+      "sha256": "eba90d5a299f5e4e5ef8ce3cde1c49042f13563fef9ab7ee88d4f2a098449494"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.InducedHom": {
+      "bytes": 11740,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/InducedHom.lean",
+      "sha256": "2a6dfd7f0c5b1dea76b8cee056e449c3ce6b624f23253836de0cc9bedfe7c9c4"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita": {
+      "bytes": 122766,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Existence",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Metric",
+        "Mathlib.Analysis.InnerProductSpace.Dual",
+        "Mathlib.Geometry.Manifold.BumpFunction",
+        "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+        "Mathlib.Geometry.Manifold.Algebra.LieGroup",
+        "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+        "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+        "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean",
+      "sha256": "9af87a315282e29375d64a75492df2cecf9216974e788a93abfa076d28e457c0"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Metric": {
+      "bytes": 4802,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Metric.lean",
+      "sha256": "477daa95da19d0e5d72f1fa1f78f18513207ee20e619f2ff9d0181c047497d2b"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent": {
+      "bytes": 36467,
+      "imports": [
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Sectional",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TimeDependent.lean",
+      "sha256": "f7d94bc70f0445019dc88bfa3f5ee5d0d6f577d2b57ebeb102e15b6e94aae004"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp": {
+      "bytes": 15732,
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/HomBundleComp.lean",
+      "sha256": "7cfc69c985aa43a1afc5f6441dd508be460b9bb769eae63caf432f49c572a7d4"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection": {
+      "bytes": 261755,
+      "imports": [
+        "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+        "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+        "Mathlib.Topology.VectorBundle.FiniteDimensional",
+        "Mathlib.Analysis.Normed.Module.FiniteDimension",
+        "Mathlib.Analysis.Normed.Module.RCLike.Real",
+        "Mathlib.Analysis.Normed.Operator.NormedSpace",
+        "Mathlib.Topology.ContinuousMap.Compact",
+        "Mathlib.Topology.ContinuousMap.Bounded.Basic",
+        "Mathlib.Topology.MetricSpace.ProperSpace",
+        "Mathlib.Topology.Order.Compact",
+        "PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection"
+      ],
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean",
+      "sha256": "01f0eac5a417b2d243b0071643c90c3114a85c2016be4d72416d7cfe640351b2"
+    }
+  },
+  "real8_exact_ids": [
+    "test_actual_schema_axiom_completion_and_open_failures_restore",
+    "test_actual_two_parent_consistency_and_current_identity",
+    "test_complete_original_localization_and_current_semantics",
+    "test_current_identity_omissions_map_mode_and_transform_failures",
+    "test_genuine_original_29_localization_mocks_and_current_semantics",
+    "test_genuine_weighted_base_route",
+    "test_original_smooth_scope_and_current_real_evidence",
+    "test_real_unsupported_options_fail"
+  ]
+}
