@@ -51,8 +51,12 @@ class OwnershipControls(unittest.TestCase):
         self.assertIn('Supervisor signal', self.run_case(code, False)['error'])
 
     def test_output_overflow_is_rejected_and_reaped(self):
-        row = self.run_case('print("x"*17000000)', False)
+        # A small synthetic boundary tests the same pre-write rejection without
+        # making correctness depend on hosted runner throughput for 17MB.
+        with patch.object(ci, 'LOG_LIMIT', 64 * 1024):
+            row = self.run_case('print("x"*65537)', False)
         self.assertIn('16MiB', row['error'])
+        self.assertLessEqual(row['log']['bytes'], 64 * 1024)
 
     def test_launch_failure_restores_signal_handlers_and_mask(self):
         handlers = {s: signal.getsignal(s) for s in ci.SIGNALS}
