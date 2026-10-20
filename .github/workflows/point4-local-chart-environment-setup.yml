@@ -357,12 +357,66 @@ jobs:
           path: ${{ runner.temp }}/real8-public-compile-receipts-${{ github.run_id }}-${{ github.run_attempt }}
           if-no-files-found: error
           retention-days: 14
-      - name: Preserve only successful bounded public compiled payload
+      - name: Preserve successful public payload manifest and chunk identities
         if: success()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: real8-public-compiled-closure-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/real8-public-compile-output-${{ github.run_id }}-${{ github.run_attempt }}/export
+          name: real8-public-compiled-manifest-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/real8-public-compile-output-${{ github.run_id }}-${{ github.run_attempt }}/transfer/manifest
           if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Preserve public payload part 00 below connector ceiling
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: real8-public-compiled-part-00-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/real8-public-compile-output-${{ github.run_id }}-${{ github.run_attempt }}/transfer/part-00
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Preserve public payload part 01 when present
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: real8-public-compiled-part-01-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/real8-public-compile-output-${{ github.run_id }}-${{ github.run_attempt }}/transfer/part-01
+          if-no-files-found: ignore
+          retention-days: 14
+          compression-level: 0
+      - name: Preserve public payload part 02 when present
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: real8-public-compiled-part-02-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/real8-public-compile-output-${{ github.run_id }}-${{ github.run_attempt }}/transfer/part-02
+          if-no-files-found: ignore
+          retention-days: 14
+          compression-level: 0
+      - name: Preserve public payload part 03 when present
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: real8-public-compiled-part-03-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/real8-public-compile-output-${{ github.run_id }}-${{ github.run_attempt }}/transfer/part-03
+          if-no-files-found: ignore
+          retention-days: 14
+          compression-level: 0
+      - name: Preserve public payload part 04 when present
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: real8-public-compiled-part-04-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/real8-public-compile-output-${{ github.run_id }}-${{ github.run_attempt }}/transfer/part-04
+          if-no-files-found: ignore
+          retention-days: 14
+          compression-level: 0
+      - name: Preserve public payload part 05 when present
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: real8-public-compiled-part-05-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/real8-public-compile-output-${{ github.run_id }}-${{ github.run_attempt }}/transfer/part-05
+          if-no-files-found: ignore
           retention-days: 14
           compression-level: 0

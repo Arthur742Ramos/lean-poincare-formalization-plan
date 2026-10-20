@@ -1,4 +1,5 @@
 """Synthetic packaging controls; no compiled-proof or real8 credit."""
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -11,6 +12,41 @@ import point4_real8_compile_transfer_ci as transfer
 
 
 class PayloadControls(unittest.TestCase):
+    def split_fixture(self, root, count=1500):
+        export = root / 'export'; export.mkdir()
+        archive = export/'compiled-closure.zip'; archive.write_bytes(bytes(index % 251 for index in range(count)))
+        manifest = export/'compiled-closure-manifest.json'; manifest.write_bytes(b'{"synthetic":true}\n')
+        return export, {'archive':transfer.ci.identity(archive), 'manifest':transfer.ci.identity(manifest)}
+
+    def test_chunked_payload_exact_contiguous_rejoin_and_small_descriptor(self):
+        with tempfile.TemporaryDirectory() as temp, patch.object(transfer, 'PART_BYTES_LIMIT', 512):
+            root = Path(temp); export, record = self.split_fixture(root)
+            result = transfer.split_public_payload(export, root/'transfer', record, {'sha256':'synthetic'}, time.monotonic()+10)
+            self.assertEqual(result['part_count'],3)
+            joined = b''.join((root/'transfer'/f'part-{i:02d}'/f'compiled-closure.zip.part-{i:02d}').read_bytes() for i in range(3))
+            self.assertEqual(joined, (export/'compiled-closure.zip').read_bytes())
+            descriptor=json.loads((root/'transfer/manifest/compiled-closure-parts.json').read_bytes())
+            self.assertEqual(descriptor['archive'], record['archive'])
+            self.assertEqual([r['bytes'] for r in descriptor['parts'].values()], [512,512,476])
+            self.assertEqual((root/'transfer/manifest/compiled-closure-manifest.json').read_bytes(), b'{"synthetic":true}\n')
+
+    def test_chunk_count_hash_and_deadline_fail_closed(self):
+        for failure in ('count','hash','deadline'):
+            with tempfile.TemporaryDirectory() as temp, patch.object(transfer, 'PART_BYTES_LIMIT', 100):
+                root=Path(temp);export,record=self.split_fixture(root,700 if failure=='count' else 500)
+                if failure=='hash':record['archive']['sha256']='0'*64
+                with self.assertRaises(ValueError):transfer.split_public_payload(export, root/'transfer', record, {},
+                    time.monotonic()+(-1 if failure=='deadline' else 10))
+                self.assertFalse((root/'transfer/manifest/compiled-closure-parts.json').exists())
+
+    def test_first_successful_full_content_catalogue_identity_is_exact(self):
+        rows={'.lake/build/Project.olean':{'bytes':3,'sha256':'known'}}
+        pin=hashlib.sha256(json.dumps(rows,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        with patch.object(transfer,'FIRST_SUCCESSFUL_COMPILED_CATALOGUE_SHA256',pin):
+            self.assertEqual(transfer.require_first_compiled_catalogue(rows)['file_count'],1)
+            with self.assertRaises(ValueError):transfer.require_first_compiled_catalogue(dict(rows,extra={'bytes':0,'sha256':'new'}))
+            with self.assertRaises(ValueError):transfer.require_first_compiled_catalogue({'.lake/build/Project.olean':{'bytes':3,'sha256':'changed'}})
+
     def fixture(self, root):
         pkg = root / 'curvature'
         paths = ['.lake/build/lib/lean/Project.olean', '.lake/build/lib/lean/Project.olean.private',

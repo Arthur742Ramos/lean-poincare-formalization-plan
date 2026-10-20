@@ -29,6 +29,9 @@ FILE_BYTES_LIMIT = 512 * 1024**2
 UNCOMPRESSED_LIMIT = 8 * 1024**3
 ARCHIVE_LIMIT = 2 * 1024**3
 EXECUTION_SECONDS = 4500
+PART_BYTES_LIMIT = 400 * 1024**2
+PART_COUNT_LIMIT = 6
+FIRST_SUCCESSFUL_COMPILED_CATALOGUE_SHA256 = 'a52ead712b2425342ff33c759a882299194a27447c0ba0c02ef93280e26f381f'
 
 
 def path_dependency_state(proof):
@@ -90,7 +93,7 @@ def payload_files(pkg):
 def build_payload(pkg, output, deadline):
     ci.require(not output.exists(), 'Export directory must be fresh')
     output.mkdir(mode=0o700, parents=True)
-    ci.require(shutil.disk_usage(output).free >= ARCHIVE_LIMIT + 512 * 1024**2,
+    ci.require(shutil.disk_usage(output).free >= 2 * ARCHIVE_LIMIT + 1024**3,
                'Insufficient bounded archive disk reserve')
     files, rows, total = payload_files(pkg), {}, 0
     partial = output / 'compiled-closure.zip.partial'
@@ -134,6 +137,64 @@ def build_payload(pkg, output, deadline):
     (output / 'compiled-closure-manifest.json').write_bytes(raw)
     return {'archive': record['archive'], 'manifest': ci.identity(output / 'compiled-closure-manifest.json'),
             'member_count': len(rows), 'uncompressed_bytes': total}
+
+
+def require_first_compiled_catalogue(compiled):
+    raw = json.dumps(compiled, sort_keys=True, separators=(',', ':')).encode('utf-8')
+    observed = hashlib.sha256(raw).hexdigest()
+    ci.require(observed == FIRST_SUCCESSFUL_COMPILED_CATALOGUE_SHA256,
+        'Compiled file namespace/content differs from first successful run39348618514; no normalization or waiver')
+    return {'sha256': observed, 'canonical_JSON_bytes': len(raw), 'first_run': 39348618514,
+            'file_count': len(compiled), 'all_file_bytes': sum(row['bytes'] for row in compiled.values())}
+
+
+def split_public_payload(export, output, record, catalogue, deadline):
+    """Separate artifacts keep each normal connector transfer below512MiB."""
+    ci.require(not output.exists(), 'Fresh chunk namespace required')
+    output.mkdir(parents=True, mode=0o700)
+    source = export / 'compiled-closure.zip'; before = source.stat()
+    ci.require(stat.S_ISREG(source.lstat().st_mode) and before.st_size == record['archive']['bytes'] and
+               0 < before.st_size <= ARCHIVE_LIMIT, 'Inner archive identity/size drift before splitting')
+    whole, parts = hashlib.sha256(), {}
+    with source.open('rb') as stream:
+        for index in range(PART_COUNT_LIMIT):
+            ci.require(time.monotonic() < deadline, 'Payload splitting cumulative deadline')
+            if stream.tell() == before.st_size: break
+            directory = output / f'part-{index:02d}'; directory.mkdir(mode=0o700)
+            path = directory / f'compiled-closure.zip.part-{index:02d}'
+            count, part = 0, hashlib.sha256()
+            with path.open('xb') as destination:
+                while count < PART_BYTES_LIMIT:
+                    ci.require(time.monotonic() < deadline, 'Payload chunk write deadline')
+                    chunk = stream.read(min(1024**2, PART_BYTES_LIMIT - count))
+                    if not chunk: break
+                    ci.require(count + len(chunk) <= PART_BYTES_LIMIT, 'Part byte ceiling before write')
+                    destination.write(chunk); count += len(chunk); part.update(chunk); whole.update(chunk)
+            ci.require(count > 0 and ci.identity(path) == {'bytes': count, 'sha256': part.hexdigest()},
+                       'Whole written chunk identity/readback failed')
+            parts[path.name] = {'bytes': count, 'sha256': part.hexdigest(), 'index': index,
+                                'artifact_suffix': f'part-{index:02d}'}
+        ci.require(stream.tell() == before.st_size and not stream.read(1), 'Chunk count ceiling')
+    after = source.stat()
+    ci.require(all(getattr(before, key) == getattr(after, key) for key in
+               ('st_dev', 'st_ino', 'st_mode', 'st_size', 'st_mtime_ns', 'st_ctime_ns')) and
+               whole.hexdigest() == record['archive']['sha256'], 'Whole split archive SHA/identity mismatch')
+    small = output / 'manifest'; small.mkdir(mode=0o700)
+    shutil.copyfile(export / 'compiled-closure-manifest.json', small / 'compiled-closure-manifest.json')
+    ci.require(ci.identity(small / 'compiled-closure-manifest.json') == record['manifest'], 'Manifest copy mismatch')
+    descriptor = {'schema': 'public-compiled-payload-parts-v1', 'archive': record['archive'],
+        'manifest': record['manifest'], 'parts': parts, 'part_count': len(parts),
+        'part_bytes_limit': PART_BYTES_LIMIT, 'part_count_limit': PART_COUNT_LIMIT,
+        'canonical_first_compiled_catalogue': catalogue,
+        'old_unavailable_container_identity_claim': False,
+        'all_compiled_file_bytes_equal_first_successful_run': True,
+        'historical_inputs_or_private_review_records_included': False,
+        'scope': 'Public build-file bytes only; no hosted nested config/guard/real8 credit'}
+    raw = (json.dumps(descriptor, sort_keys=True, indent=2) + '\n').encode()
+    ci.require(len(raw) <= 1024**2, 'Chunk descriptor bound')
+    path = small / 'compiled-closure-parts.json'; path.write_bytes(raw)
+    return {'descriptor': ci.identity(path), 'parts': parts, 'part_count': len(parts),
+            'part_bytes_limit': PART_BYTES_LIMIT, 'canonical_first_compiled_catalogue': catalogue}
 
 
 def main(args):
@@ -199,8 +260,11 @@ def main(args):
             ci.require(output.is_file() and output.stat().st_size, 'Compiled project output missing')
         compiled_pre = ci.compiled_snapshot(pkg)
         ci.write_json(evidence / 'compiled-PRE.json', compiled_pre)
+        state['first_successful_compiled_catalogue'] = require_first_compiled_catalogue(compiled_pre)
         state['path_dependency'] = path_dependency_state(proof)
         state['public_compiled_transfer'] = build_payload(pkg, work / 'export', deadline)
+        state['public_compiled_parts_transfer'] = split_public_payload(work / 'export', work / 'transfer',
+            state['public_compiled_transfer'], state['first_successful_compiled_catalogue'], deadline)
         ci.require(path_dependency_state(proof) == state['path_dependency'], 'Path dependency state drift')
         state['status'] = 'PUBLIC_COMPILED_CLOSURE_READY_ACTUAL_TRANSFER_REVIEW_PENDING_NO_REAL8'
     except BaseException as exc:
