@@ -13220,7 +13220,7 @@
     "historical_run": 37181895941,
     "scope": "Independent jet-field heat/reaction closure only; combined-head proof checks UNRUN; both targets OPEN"
   },
-  "paths": 2185,
+  "paths": 2201,
   "canonical_point4": "OPEN",
   "smooth_general_target": "OPEN",
   "localization_mock_route": {
@@ -27018,8 +27018,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "95e564c82cdb06c5853e517a3f10100174fa5e59",
       "original_sha256": "6a3521d28da0bab8c92c3b0a820df6f3b5f071e3dee2f8214589337c74f39520",
-      "final_blob": "3668da4dae065e8292a6e2f7ece62e1e453fe2b7",
-      "final_sha256": "de9020cb6272a30ccd0b29c332773cc50c62ce545ad6b53251c1a96f6187a5a2",
+      "final_blob": "93dcab489978baf4c029906ab38e74f07d5499b8",
+      "final_sha256": "e46bcda691b105bb38de259a16417827e1f07d53e9657910332ae7b5b4e2cf81",
       "mode": "100644",
       "count": 1
     },
@@ -27027,8 +27027,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "4b7ddce84cca6433db42876a421ddb7381cbaab6",
       "original_sha256": "2be230d1e3cf8faebeb3b443048cfaa389b6f89f600bbbc2b97db60d3a5bd2e4",
-      "final_blob": "2face411bfc349e8b9219322d663da4f5a7e7312",
-      "final_sha256": "459a0c2eeecf7d322a38bfe67a8534a49ea403c81d8a3b72000b54f963750d5b",
+      "final_blob": "bd21a34b74830b095b377e515ce874f1ccd44cde",
+      "final_sha256": "f8992c42d9926bd85d71c97263729a7e8a189f23ffd56f752ea66f96069b480f",
       "mode": "100644",
       "count": 1
     },
@@ -27036,8 +27036,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "16b6973571c4b8364c78c53a436b0df4a75fd90d",
       "original_sha256": "7212197191463b82f2e7bd30db817a4a1f65045f93305e6f6864a89b25519f03",
-      "final_blob": "be8f1d07e5a5150c1fae8eab16dc45891b975146",
-      "final_sha256": "905605cebcdac0ab5c6374a62a2c88cce13db1d2659be9f8abfb431802000f66",
+      "final_blob": "8811b016597f06e9d65b1a0855955924d2c5c7ba",
+      "final_sha256": "3a69c6949bdc93c5103230d1540de3599d7fb32199f511b2e2a7646291b0f56b",
       "mode": "100644",
       "count": 1
     },
@@ -27045,8 +27045,8 @@
       "parent": "93ed035498e0bf02096202d2f2895d906fb88234",
       "original_blob": "7ee1e1fb6f62951bd7ed7b7a4b8b1f540ef9043b",
       "original_sha256": "b643971495c7a94708c08bb4132d05936e8aa26bcb3917253c7b0f5f024e62c6",
-      "final_blob": "0e403b24f4c0b4c43e8988a44f07d88dc404d40f",
-      "final_sha256": "48c0979f9b20a5c68bdd86909b11177109c0c28cab9c8fdb22a25c9086ea8194",
+      "final_blob": "8272a5b40f53a8ddd2d382d5402a535614f90094",
+      "final_sha256": "24d6770bb3bce30c97ff42b5c74786c866626b41ef2846b65c58aaffb5de9b6c",
       "mode": "100644",
       "count": 1
     },
@@ -27054,8 +27054,8 @@
       "parent": "e883681caa862277857ee825a547502e8f3ec036",
       "original_blob": "350c1db4e4763e0cd40a3795ed75e3704cfdda3a",
       "original_sha256": "41818196944bb256784517b6efbc0179669dd4b0bfb001739c7d1f2c3bb1ae12",
-      "final_blob": "76bd462918cde021f9f43cc3875998719e2d5cb6",
-      "final_sha256": "676def9ff5da9f739eb8662a2ed14aeb0fff86aceabbe05ee7006b616dc33e06",
+      "final_blob": "f223590846d4d397ec5a6f666766075bacac4a9e",
+      "final_sha256": "00f4d0c2096abf43de7de6db07210649781492302793fa9a642ca7f1c2674458",
       "mode": "100644",
       "count": 1
     }
@@ -27099,7 +27099,7 @@
     ],
     ".github/workflows/point4-actual-gaussian-heat-resolvent-uniqueness.yml": [
       "100644",
-      "542ba14cfaa3012697feb9ee22d17cdf351fe21e"
+      "e12515bcfc4c8a49a46e261e402f878e20a29458"
     ],
     ".github/workflows/point4-actual-gaussian-heat-resolvent.yml": [
       "100644",
@@ -27195,7 +27195,7 @@
     ],
     ".github/workflows/point4-local-chart-environment-setup.yml": [
       "100644",
-      "9c7e56849bd322acb25a13a6706b6e600b7d8427"
+      "7682d44ed0ecefce8b71e90688eb131f9b14ef9e"
     ],
     ".github/workflows/point4-manifold-only-fixed-background-heat.yml": [
       "100644",
@@ -31079,11 +31079,11 @@
     ],
     "curvature/scripts/chart_port_candidate_check.py": [
       "100644",
-      "bcaf1bf09bdb8a5f7c43cbe0f8fc930cfa1669ec"
+      "43c2a6fce28d2cc1d329e425e5f155deb757f9b9"
     ],
     "curvature/scripts/chart_port_ci.py": [
       "100644",
-      "6c4dbd3277a3c28769ce59ae2529f486ed028c7e"
+      "ba7a898e6bb3b077eb0c86aac6430ab5633a3a4e"
     ],
     "curvature/scripts/fake-landrun.sh": [
       "100755",
@@ -31135,7 +31135,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_mock_test.py": [
       "100644",
-      "1bd9abd4227885505f68b8ecaf6251d7ae142d95"
+      "14ee476a1b48394152e8df0afafcc6e3b613f6cd"
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_probe.lean": [
       "100644",
@@ -31143,7 +31143,7 @@
     ],
     "curvature/scripts/point4_c2_c0_metric_velocity_source_guard.py": [
       "100644",
-      "4261020e7f14c0058bb9fceeeca7107ef7692889"
+      "7c993ace64109b7369e0c5f23391756a2c139bdb"
     ],
     "curvature/scripts/point4_c2_heat_trace_probe.lean": [
       "100644",
@@ -31167,15 +31167,15 @@
     ],
     "curvature/scripts/point4_c2_metric_localization_source_test.py": [
       "100644",
-      "3668da4dae065e8292a6e2f7ece62e1e453fe2b7"
+      "93dcab489978baf4c029906ab38e74f07d5499b8"
     ],
     "curvature/scripts/point4_c2_resonance_guard.py": [
       "100644",
-      "e332b7c59b9acae820090567ee3c77866bd37606"
+      "3e1a852d373b52128b3a3d588de6365f06949992"
     ],
     "curvature/scripts/point4_c2_resonance_mock_test.py": [
       "100644",
-      "a9d22154674ee7967c08bb3ef4f7547e99d2549c"
+      "91e7c9a8fa833fbd2d7454854e18a643341a8414"
     ],
     "curvature/scripts/point4_c2_resonance_probe.lean": [
       "100644",
@@ -31255,11 +31255,11 @@
     ],
     "curvature/scripts/point4_hamilton_native_mock_test.py": [
       "100644",
-      "ae6f7ffbc58904641f1be036c0b32e9f33dc3903"
+      "1a373e47734d061d23c0dca754037afb35842638"
     ],
     "curvature/scripts/point4_hamilton_native_source_guard.py": [
       "100644",
-      "7bc8d8f39d00604668214aad8ab27080e17fe6c4"
+      "41cae7790849049c15b075fd5b1c88451df2a0db"
     ],
     "curvature/scripts/point4_heat_invariant_probe.lean": [
       "100644",
@@ -31335,7 +31335,7 @@
     ],
     "curvature/scripts/point4_pr130_pr133_inventory.py": [
       "100644",
-      "2face411bfc349e8b9219322d663da4f5a7e7312"
+      "bd21a34b74830b095b377e515ce874f1ccd44cde"
     ],
     "curvature/scripts/point4_pr130_pr133_inventory_test.py": [
       "100644",
@@ -31371,19 +31371,19 @@
     ],
     "curvature/scripts/point4_smooth_forward_release_guard.py": [
       "100644",
-      "be8f1d07e5a5150c1fae8eab16dc45891b975146"
+      "8811b016597f06e9d65b1a0855955924d2c5c7ba"
     ],
     "curvature/scripts/point4_smooth_forward_release_mock_test.py": [
       "100644",
-      "0e403b24f4c0b4c43e8988a44f07d88dc404d40f"
+      "8272a5b40f53a8ddd2d382d5402a535614f90094"
     ],
     "curvature/scripts/point4_smooth_master_composition.py": [
       "100644",
-      "c347bdb143bcc69754d62e005d949ee3a6a3aea1"
+      "b2e9f9f01853928ae712f469c7e700bc79a38dd1"
     ],
     "curvature/scripts/point4_smooth_master_composition_test.py": [
       "100644",
-      "7378991ea40d6d86abddaaa70d3ebfe0fe82f5cb"
+      "c12a1fb8c7619a637ef6684c197b03f2fd0efcd7"
     ],
     "curvature/scripts/point4_standard_coordinate_operator_probe.lean": [
       "100644",
@@ -31399,7 +31399,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_mock_test.py": [
       "100644",
-      "f038e96f9299beefb2b04f87bfc188b549992a28"
+      "802dc83122e95c46e91788467fa6fe92af81e103"
     ],
     "curvature/scripts/point4_two_sided_heat_probe.lean": [
       "100644",
@@ -31407,7 +31407,7 @@
     ],
     "curvature/scripts/point4_two_sided_heat_source_guard.py": [
       "100644",
-      "703dd6c7d86b5e128cfff64db8638bf82cb86e8d"
+      "eceff3d7610a971e167fa8eb8b3c578907ab11bb"
     ],
     "curvature/scripts/point4_weak_laplacian_probe.lean": [
       "100644",
@@ -31419,7 +31419,7 @@
     ],
     "curvature/scripts/point4_weighted_hessian_release_guard.py": [
       "100644",
-      "76bd462918cde021f9f43cc3875998719e2d5cb6"
+      "f223590846d4d397ec5a6f666766075bacac4a9e"
     ],
     "curvature/scripts/point4_weighted_hessian_release_mock_test.py": [
       "100644",
@@ -31435,7 +31435,7 @@
     ],
     "curvature/scripts/test_chart_port_ci.py": [
       "100644",
-      "c178c7e794f67e61b2827d7c24ff57abc836045f"
+      "eb86aa8c542960ad77efde67d047c5df7aafa840"
     ],
     "curvature/scripts/verify-comparator.sh": [
       "100755",
@@ -35800,6 +35800,70 @@
     "symmetric-tensor-heat/vendor/curvature/lean-toolchain": [
       "100644",
       "025e59548e48cf71f2744154e2890beefe30a258"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointMetricDefectComponentC1.lean": [
+      "100644",
+      "63f0c51671570fdd681a96d9dfd75326be3d695e"
+    ],
+    "curvature/scripts/point4_joint_metric_defect_c1_probe.lean": [
+      "100644",
+      "f1aaafc453a97e2cb3e6a473612f8129946ae021"
+    ],
+    "curvature/scripts/point4_ci_cache.py": [
+      "100644",
+      "e5264f269d4897ebaaaf8b61ee65d1c0ce90842c"
+    ],
+    "curvature/scripts/point4_ci_cache_test.py": [
+      "100644",
+      "3a46c4e50dbb5014c80b104f962ac48ea196339a"
+    ],
+    ".github/actions/point4-verified-cache/action.yml": [
+      "100644",
+      "6742df3d58d0a510ba730c2a4f07d87183bd8cc1"
+    ],
+    "docs/point4/ci-cache-pilot.md": [
+      "100644",
+      "53e5a073767ea1a94303cc3cbd22935f09c2904f"
+    ],
+    ".github/scripts/point4_fixed_background_ci.py": [
+      "100644",
+      "55c0911996361d8accf1ae187dba19c7a25ff207"
+    ],
+    ".github/scripts/point4_fixed_background_sources.json": [
+      "100644",
+      "7e2ddd388142ee00a396e0e549aeb98645d56103"
+    ],
+    ".github/scripts/test_point4_fixed_background_ci.py": [
+      "100644",
+      "1d8d540639172cc011a2a2fb69c94f7877fd35c5"
+    ],
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointBackgroundFrameC1.lean": [
+      "100644",
+      "a792774c8a3b7b50732188d9e2e2b0c18aeb507e"
+    ],
+    "curvature/scripts/point4_fixed_background_frame_c1_probe.lean": [
+      "100644",
+      "321970c81e9227bd7ab201a6a6ccedf2ef7f8fb0"
+    ],
+    "docs/point4/fixed-background-frame-c1/resource-api-review-v1.json": [
+      "100644",
+      "0112396f3f040778053ab200d247af3d46d9907c"
+    ],
+    "docs/point4/fixed-background-frame-c1/source-review-v1.json": [
+      "100644",
+      "82c714be88e72641a655ab39448eaf882451f4cd"
+    ],
+    "docs/point4/fixed-background-frame-c1/verification-attempts.json": [
+      "100644",
+      "0c37fdbc3cbc780c7d0af84299b8a37d546abf97"
+    ],
+    "docs/point4/fixed-background-frame-c1/verification-outcome.json": [
+      "100644",
+      "bd75ace43f7a613f044b0fab55c05087d8725492"
+    ],
+    "docs/point4/fixed-background-frame-c1/verification-plan.json": [
+      "100644",
+      "9638f45401c64a8166eaad59782b598af0435145"
     ]
   },
   "metric_contraction_integration": {
@@ -81998,7 +82062,7 @@
       "real_required": 8,
       "combined_current": 147,
       "all_previous129_test_method_AST_unchanged": true,
-      "current_namespace": 2185,
+      "current_namespace": 2191,
       "required_process_timeout_seconds": 120,
       "git_transport": "cat-file --batch with bufsize0, exact partial-body read loop, objectSHA/frame/EOF/extra/error and context ownership checks",
       "cross_invocation_cache": false,
@@ -82267,6 +82331,342 @@
       "Point4": "OPEN",
       "published_current_head_qualification": "UNRUN",
       "PR144_integration_dependency": "ACTUAL_MERGED379589_TREE_EQUAL_VERIFIED"
+    },
+    "joint_metric_defect_cache_pilot": {
+      "source_parent_head": "5d1b3e2c123a8bdfd036a0e4d8495586c4a6d1b9",
+      "source_parent_tree": "8081325e22bc0314d6106a311f92606e7e03f9d3",
+      "source_parent_paths": 2185,
+      "current_paths": 2191,
+      "additions": {
+        "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointMetricDefectComponentC1.lean": {
+          "blob": "63f0c51671570fdd681a96d9dfd75326be3d695e",
+          "bytes": 9975,
+          "mode": "100644",
+          "sha256": "c4227f8d30f4de6a4cf69e8cc36e1ab818858779ac2a92ed6526bd56d8ac0337"
+        },
+        "curvature/scripts/point4_joint_metric_defect_c1_probe.lean": {
+          "mode": "100644",
+          "blob": "f1aaafc453a97e2cb3e6a473612f8129946ae021",
+          "sha256": "4d8840f6c317f973e5870d27cf6db08b6a252ecebeda31dc23e1e7c60ca92b61",
+          "bytes": 4883
+        },
+        "curvature/scripts/point4_ci_cache.py": {
+          "mode": "100644",
+          "blob": "e5264f269d4897ebaaaf8b61ee65d1c0ce90842c",
+          "sha256": "76bc96b7b03b71e2a24321b2e4973870fbcf0711b15a7ed8a19abe104c2b438f",
+          "bytes": 21594
+        },
+        "curvature/scripts/point4_ci_cache_test.py": {
+          "mode": "100644",
+          "blob": "3a46c4e50dbb5014c80b104f962ac48ea196339a",
+          "sha256": "773ab8e1fc05071528877d825dec8a130de391b0cdb71a5070f6a529a8752635",
+          "bytes": 19650
+        },
+        ".github/actions/point4-verified-cache/action.yml": {
+          "mode": "100644",
+          "blob": "6742df3d58d0a510ba730c2a4f07d87183bd8cc1",
+          "sha256": "fe6ef22202ea6b8870d45f934c9b695d4fea5a41b9dda90be1b4bde68baa1e10",
+          "bytes": 3977
+        },
+        "docs/point4/ci-cache-pilot.md": {
+          "mode": "100644",
+          "blob": "53e5a073767ea1a94303cc3cbd22935f09c2904f",
+          "sha256": "c120c0c80c7937062735c48ac22512c97afdc7ccecc19f0d2417ec1785edc7f9",
+          "bytes": 5529
+        }
+      },
+      "workflow": {
+        "before_sha256": "db2212819e4ef96ff097f5360b9e11b8907216e0badf1d32c8ebb20655f25f42",
+        "before_blob": "542ba14cfaa3012697feb9ee22d17cdf351fe21e",
+        "after_sha256": "102b3c2a448742cbc8cc743e0e67ddc425583e2304fad797d24b2ee2960f19c5",
+        "after_blob": "e12515bcfc4c8a49a46e261e402f878e20a29458"
+      },
+      "workflow_path": ".github/workflows/point4-actual-gaussian-heat-resolvent-uniqueness.yml",
+      "policy_sha256": "d38d91d25732eba581290c3b87ea17e195412759ae9491958f2dd478b404e961",
+      "ordinary_controls": 154,
+      "real_routes": 8,
+      "chart_controls": 123,
+      "original_explicit_build_target_union": 74,
+      "qualification": "UNRUN_SOURCE_ONLY",
+      "Point4": "OPEN"
+    },
+    "chart_nonreaping_waitid_owner": {
+      "scope": "Exact-child nonreaping waitid before strict live or fresh terminal ownership checks; no live-race exemption, retry or grace; original resource guards retained",
+      "baseline_head": "87fbab3815eedf1c9bf1c98789c6040ddb3cb41a",
+      "baseline_tree": "7ed6504875e11599c8018c4add8e172a43989382",
+      "current_paths": 2191,
+      "sources": {
+        "curvature/scripts/chart_port_ci.py": {
+          "before_sha256": "92b089c970fc24656ac5afbaa2f029dae705948c302c731d1b6512851c9a90f2",
+          "after_sha256": "b2e807826058eb22523fdbcab9f37c1c5eed43a1ab37dac63204cc5c0c27808c",
+          "ports": [
+            [
+              "def cache_split_resource_seal():",
+              "def cache_split_waitable_exit(owner_pid):\n    \"\"\"Observe only this direct child's exit, without reaping or waiting.\"\"\"\n    assert type(owner_pid) is int and owner_pid > 0\n    options = os.WEXITED | os.WNOHANG | os.WNOWAIT\n    before = time.time()\n    event = os.waitid(os.P_PID, owner_pid, options)\n    after = time.time()\n    assert all(type(value) in (int, float) and 0 < value < float('inf')\n               for value in (before, after)) and before <= after, 'Child exit clock drift'\n    observation = dict(owner_pid=owner_pid, idtype=os.P_PID, options=options,\n                       before=before, after=after, waitable=False)\n    if event is None:\n        return observation\n    fields = {key: getattr(event, key) for key in\n              ('si_pid', 'si_uid', 'si_signo', 'si_code', 'si_status')}\n    assert all(type(value) is int for value in fields.values()), 'Malformed child exit observation'\n    assert fields['si_pid'] == owner_pid and fields['si_uid'] == os.getuid(), 'Child exit identity drift'\n    assert fields['si_signo'] == signal.SIGCHLD, 'Child exit signal drift'\n    code, status = fields['si_code'], fields['si_status']\n    if code == os.CLD_EXITED:\n        assert 0 <= status <= 255, 'Child exit status drift'\n        exit_code = status\n    else:\n        assert code in (os.CLD_KILLED, os.CLD_DUMPED), 'Child is not terminated'\n        assert 0 < status < signal.NSIG, 'Child termination signal drift'\n        exit_code = -status\n    observation.update(waitable=True, event=fields, exit_code=exit_code)\n    return observation\n\n\ndef cache_split_resource_seal():"
+            ],
+            [
+              "start = time.monotonic(); proc = None; fd = None; tool = None; pre = None",
+              "start = time.monotonic(); proc = None; fd = None; tool = None; pre = None; terminal_exit = None"
+            ],
+            [
+              "            while proc.poll() is None:\n                rows = []; rss = 0\n                for path in Path('/proc').iterdir():\n                    if not path.name.isdigit(): continue\n                    try: info = (path / 'stat').read_text().rsplit(')', 1)[1].split()\n                    except (FileNotFoundError, ProcessLookupError, PermissionError): continue\n                    if int(info[3]) != proc.pid: continue\n                    rss += int(info[21]) * os.sysconf('SC_PAGE_SIZE')\n                    rows.append(owned_process_identity(path, info))\n                stage['owned_process_snapshot'] = rows\n                stage['peak_rss_bytes'] = max(stage['peak_rss_bytes'], rss)\n                assert rss <= LIMIT, 'Acquisition exceeds original 6GiB RSS bound'\n                # Inspect every observed image even if waitpid now reports\n                # completion. An unreadable live owner never earns an exemption.\n                if rows:\n                    observed_exit = proc.poll()  # Actual same-owner nonblocking wait; no retry or grace.\n                    proof = cache_split_process_policy(rows, proc.pid, argv, tool, launch=launch, exit_code=observed_exit)\n                    if proof is not None: stage['terminal_owner_proof'] = proof\n                elif proc.poll() is None: raise RuntimeError('Live acquisition owner absent')\n                if time.monotonic() >= deadline: raise TimeoutError(label)\n                time.sleep(0.05)\n            stage.update(exit_code=proc.returncode, status='RETURNED')\n",
+              "            while True:\n                if time.monotonic() >= deadline: raise TimeoutError(label)\n                # poll() reaps a completed child and destroys the /proc identity\n                # needed by the terminal proof. Observe first, retaining it.\n                observed = cache_split_waitable_exit(proc.pid)\n                stage['waitid_observation'] = observed\n                rows = []; rss = 0\n                for path in Path('/proc').iterdir():\n                    if not path.name.isdigit(): continue\n                    try: info = (path / 'stat').read_text().rsplit(')', 1)[1].split()\n                    except (FileNotFoundError, ProcessLookupError, PermissionError): continue\n                    if int(info[3]) != proc.pid: continue\n                    rss += int(info[21]) * os.sysconf('SC_PAGE_SIZE')\n                    rows.append(owned_process_identity(path, info))\n                stage['owned_process_snapshot'] = rows\n                stage['peak_rss_bytes'] = max(stage['peak_rss_bytes'], rss)\n                assert rss <= LIMIT, 'Acquisition exceeds original 6GiB RSS bound'\n                if observed['waitable']:\n                    assert len(rows) == 1 and rows[0]['pid'] == proc.pid, 'Unexpected/absent acquisition process'\n                    assert launch['returned_at'] <= observed['before'] <= observed['after'] <= rows[0]['observed_at'], 'Child exit observation order drift'\n                    # Always use the complete terminal predicate here, including\n                    # when an earlier image observation happened to be stable.\n                    terminal_exit = observed['exit_code']\n                    proof = cache_split_terminal_owner(rows[0], proc.pid, argv, tool,\n                        launch, terminal_exit)\n                    stage['terminal_owner_proof'] = proof\n                    break\n                # No waitable event gives no exemption for unreadable live\n                # owners, missing owners, descendants or contradictory fields.\n                cache_split_process_policy(rows, proc.pid, argv, tool,\n                    launch=launch, exit_code=None)\n                time.sleep(0.05)\n            stage.update(exit_code=terminal_exit, status='RETURNED')\n"
+            ],
+            [
+              "                proc.wait(timeout=10)\n                stage.update(exit_code=proc.returncode, owner_reaped=True)",
+              "                proc.wait(timeout=10)\n                stage.update(exit_code=proc.returncode, owner_reaped=True)\n                if terminal_exit is not None:\n                    assert proc.returncode == terminal_exit, 'Reaped child status differs from waitid'"
+            ]
+          ]
+        },
+        "curvature/scripts/test_chart_port_ci.py": {
+          "before_sha256": "51bc12106fb220b0f0703c7d906815871a852030ba017fb662bf5039824b4859",
+          "after_sha256": "ca3a1f8e3123dc5b594f480db42776fee1ee187bd969eae4571b07f66ac1c052",
+          "ports": [
+            [
+              "                pid=70;returncode=None\n                def poll(self):\n                    if scenario=='poll_error':raise OSError('finite poll failure')\n                    if state['done']:self.returncode=0;return 0\n                    return None",
+              "                pid=70;returncode=None\n                def poll(self):\n                    raise AssertionError('Premature acquisition reap')"
+            ],
+            [
+              "events.append(('wait',timeout));state['waited']=True;self.returncode=0",
+              "events.append(('wait',timeout));assert self.returncode is None;state['waited']=True;self.returncode=7 if scenario=='wait_mismatch' else 0"
+            ],
+            [
+              "                if scenario=='terminal':\n                    state['done']=True",
+              "                if state['done'] or scenario=='terminal':\n                    state['done']=True"
+            ],
+            [
+              "            probes=[]\n            def resources():",
+              "            def waitid(kind,pid,options):\n                events.append(('waitid',kind,pid,options))\n                self.assertFalse(state['waited'])\n                self.assertEqual((kind,pid,options),(1,70,13))\n                if scenario=='poll_error':raise OSError('finite poll failure')\n                if state['done'] or scenario=='terminal':\n                    return types.SimpleNamespace(si_pid=70,si_uid=1000,si_signo=17,si_code=1,si_status=0)\n                return None\n            probes=[]\n            def resources():"
+            ],
+            [
+              "os=types.SimpleNamespace(name='posix',sysconf=lambda _:4096,close=close,getpid=lambda:1,fstat=os.fstat,",
+              "os=types.SimpleNamespace(name='posix',sysconf=lambda _:4096,close=close,getpid=lambda:1,fstat=os.fstat,\n                         P_PID=1,WEXITED=4,WNOHANG=1,WNOWAIT=8,CLD_EXITED=1,CLD_KILLED=2,CLD_DUMPED=3,\n                         getuid=lambda:1000,waitid=waitid,"
+            ],
+            [
+              "signal=types.SimpleNamespace(SIGKILL=9),\n                      subprocess=types.SimpleNamespace(Popen=popen,DEVNULL=-3),",
+              "signal=types.SimpleNamespace(SIGKILL=9,SIGCHLD=17,NSIG=65),\n                      subprocess=types.SimpleNamespace(Popen=popen,DEVNULL=-3),"
+            ],
+            [
+              "                    'wait_error':(OSError,'finite wait failure'),",
+              "                    'wait_error':(OSError,'finite wait failure'),\n                    'wait_mismatch':(AssertionError,'Reaped child status differs from waitid'),"
+            ],
+            [
+              "                self.assertLess(events.index(('wait',10)),events.index(('tool_POST',)))",
+              "                self.assertLess(events.index(('wait',10)),events.index(('tool_POST',)))\n                self.assertEqual(events.count(('wait',10)),1)"
+            ],
+            [
+              "    def terminal_owner_fixture(self):",
+              "    def waitid_fixture(self, event='default'):\n        ns=self.api();calls=[]\n        if event=='default':\n            event=types.SimpleNamespace(si_pid=70,si_uid=1000,si_signo=17,si_code=1,si_status=0)\n        def waitid(kind,pid,options):\n            calls.append((kind,pid,options))\n            if isinstance(event,BaseException):raise event\n            return event\n        ns.update(os=types.SimpleNamespace(P_PID=1,WEXITED=4,WNOHANG=1,WNOWAIT=8,\n                  CLD_EXITED=1,CLD_KILLED=2,CLD_DUMPED=3,getuid=lambda:1000,waitid=waitid),\n                  signal=types.SimpleNamespace(SIGCHLD=17,NSIG=65),\n                  time=types.SimpleNamespace(time=lambda:20))\n        return ns,calls,event\n\n    def test_waitid_exact_child_nonblocking_nonreaping_and_status(self):\n        for code,status,expected in ((1,0,0),(1,7,7),(2,9,-9),(3,11,-11)):\n            ns,calls,event=self.waitid_fixture();event.si_code=code;event.si_status=status\n            observed=ns['cache_split_waitable_exit'](70)\n            self.assertEqual(calls,[(1,70,13)])\n            self.assertTrue(observed['waitable']);self.assertEqual(observed['exit_code'],expected)\n            self.assertEqual(observed['event']['si_pid'],70)\n\n    def test_waitid_none_is_explicitly_unwaitable_not_success(self):\n        ns,calls,_=self.waitid_fixture(None)\n        observed=ns['cache_split_waitable_exit'](70)\n        self.assertFalse(observed['waitable']);self.assertNotIn('exit_code',observed)\n        self.assertEqual(calls,[(1,70,13)])\n\n    def test_waitid_failures_and_reaped_child_cannot_be_completion(self):\n        for error in (ChildProcessError('already reaped'),OSError('unreadable child')):\n            ns,calls,_=self.waitid_fixture(error)\n            with self.assertRaises(type(error)):ns['cache_split_waitable_exit'](70)\n            self.assertEqual(len(calls),1)\n\n    def test_waitid_identity_signal_code_and_status_are_exact(self):\n        for key,value in (('si_pid',71),('si_pid',True),('si_uid',0),('si_signo',9),\n                          ('si_code',4),('si_code',True),('si_status',False),\n                          ('si_status',-1),('si_status',256)):\n            ns,_,event=self.waitid_fixture();setattr(event,key,value)\n            with self.subTest(key=key,value=value),self.assertRaises(AssertionError):\n                ns['cache_split_waitable_exit'](70)\n        for status in (0,65,-1):\n            ns,_,event=self.waitid_fixture();event.si_code=2;event.si_status=status\n            with self.assertRaises(AssertionError):ns['cache_split_waitable_exit'](70)\n\n    def test_waitid_owner_and_clock_are_well_formed(self):\n        for pid in (0,-1,True,'70'):\n            ns,calls,_=self.waitid_fixture()\n            with self.assertRaises(AssertionError):ns['cache_split_waitable_exit'](pid)\n            self.assertEqual(calls,[])\n        for times in ((21,20),(float('nan'),20),(20,float('inf'))):\n            ns,_,_=self.waitid_fixture();clock=iter(times)\n            ns['time']=types.SimpleNamespace(time=lambda:next(clock))\n            with self.assertRaises(AssertionError):ns['cache_split_waitable_exit'](70)\n\n    def test_actual_acquisition_never_polls_before_terminal_proof(self):\n        fn=next(n for n in TREE.body if isinstance(n,ast.FunctionDef)and n.name=='cache_split_tool_stage')\n        calls=[n for n in ast.walk(fn)if isinstance(n,ast.Call)]\n        self.assertFalse(any(isinstance(n.func,ast.Attribute)and n.func.attr=='poll'for n in calls))\n        self.assertFalse(any(isinstance(n,ast.Assign)and any(isinstance(t,ast.Attribute)\n            and t.attr=='returncode'for t in n.targets)for n in ast.walk(fn)))\n        waits=[n for n in calls if isinstance(n.func,ast.Attribute)and n.func.attr=='wait']\n        self.assertEqual(len(waits),1)\n\n    def test_actual_waitid_terminal_stage_reaps_once_and_matches_status(self):\n        self.stage_case('terminal')\n        self.stage_case('wait_mismatch')\n\n    def terminal_owner_fixture(self):"
+            ]
+          ]
+        }
+      },
+      "policy_sha256": "0b4fff20a90cd48749e65610f12726db7871657e99cc7a0af0cdd39d9afd1768",
+      "ordinary_chart_controls": 130,
+      "historical_failure_reclassified": false,
+      "native_qualification": "UNRUN",
+      "Point4": "OPEN"
+    },
+    "chart_terminal_waitid_acquisition": {
+      "scope": "One immediate post-query only for an initial Z zero-RSS terminal snapshot after a no-event pre-query; preserve both queries, complete existing predicate, chronological proof and actual single reap; no live-owner grace",
+      "baseline_head": "51eba688d68d4aff6333bdcb61956b89c90a9d95",
+      "baseline_tree": "62c69ce4a9f5446cbcf825e50ddded83e11658e6",
+      "current_paths": 2191,
+      "sources": {
+        "curvature/scripts/chart_port_ci.py": {
+          "before_sha256": "b2e807826058eb22523fdbcab9f37c1c5eed43a1ab37dac63204cc5c0c27808c",
+          "after_sha256": "95dcfdaf007d91c07a4e56cb20866c889228b6bcf0f923177b0b4eda38725c2b",
+          "ports": [
+            [
+              "                stage['waitid_observation'] = observed\n",
+              "                stage['waitid_observation'] = observed\n                stage['terminal_waitid_query_phase'] = 'before_snapshot'\n"
+            ],
+            [
+              "                if observed['waitable']:\n",
+              "                if (not observed['waitable'] and len(rows) == 1\n                        and rows[0]['pid'] == proc.pid and rows[0].get('state') == 'Z'\n                        and type(rows[0].get('rss_bytes')) is int and rows[0]['rss_bytes'] == 0\n                        and rows[0].get('verified_terminated_zombie') is True\n                        and rows[0].get('terminal_errors') == []):\n                    # The original snapshot is already terminal. Acquire its\n                    # exit event once, without waiting, reaping or retrying a\n                    # live/unreadable owner. The complete predicate below must\n                    # still recompute both samples and every observed field.\n                    stage['pre_terminal_waitid_observation'] = observed\n                    stage['terminal_waitid_query_phase'] = 'after_terminal_snapshot'\n                    observed = cache_split_waitable_exit(proc.pid)\n                    stage['waitid_observation'] = observed\n                    assert observed['waitable'], 'Terminal owner lacks a waitable exit event'\n\n                if observed['waitable']:\n"
+            ],
+            [
+              "                    assert launch['returned_at'] <= observed['before'] <= observed['after'] <= rows[0]['observed_at'], 'Child exit observation order drift'\n",
+              "                    if stage['terminal_waitid_query_phase'] == 'after_terminal_snapshot':\n                        initial = stage['pre_terminal_waitid_observation']\n                        assert (launch['returned_at'] <= initial['before'] <= initial['after']\n                            <= rows[0]['observed_at'] <= rows[0]['rechecked_at']\n                            <= observed['before'] <= observed['after'] <= time.time()), 'Terminal exit observation order drift'\n                    else:\n                        assert launch['returned_at'] <= observed['before'] <= observed['after'] <= rows[0]['observed_at'], 'Child exit observation order drift'\n"
+            ]
+          ]
+        },
+        "curvature/scripts/test_chart_port_ci.py": {
+          "before_sha256": "ca3a1f8e3123dc5b594f480db42776fee1ee187bd969eae4571b07f66ac1c052",
+          "after_sha256": "8a8b9e60b2b8b9f4d49fd99cea4d49289243da1831a7404274f8bf033e5709d9",
+          "ports": [
+            [
+              "state={'done':False,'waited':False}",
+              "state={'done':False,'waited':False,'queries':0}"
+            ],
+            [
+              "                if state['done'] or scenario=='terminal':\n                    state['done']=True",
+              "                if state['done'] or scenario=='terminal' or scenario.startswith('post_terminal_'):\n                    state['done']=True"
+            ],
+            [
+              "                return row\n            def waitid(kind,pid,options):",
+              "                if scenario=='post_terminal_initial_R':row['state']='R'\n                if scenario=='post_terminal_bad_image':row['exe']='/official/lean'\n                return row\n            def waitid(kind,pid,options):"
+            ],
+            [
+              "                if scenario=='poll_error':raise OSError('finite poll failure')\n                if state['done'] or scenario=='terminal':",
+              "                if scenario=='poll_error':raise OSError('finite poll failure')\n                state['queries']+=1\n                if scenario.startswith('post_terminal_') and state['queries']==1:return None\n                if scenario=='post_terminal_none':return None\n                if state['done'] or scenario=='terminal':"
+            ],
+            [
+              "            if scenario in ('success','terminal'):\n",
+              "            if scenario in ('success','terminal','post_terminal_success'):\n"
+            ],
+            [
+              "                    'wait_mismatch':(AssertionError,'Reaped child status differs from waitid'),",
+              "                    'wait_mismatch':(AssertionError,'Reaped child status differs from waitid'),\n                    'post_terminal_none':(AssertionError,'Terminal owner lacks a waitable exit event'),\n                    'post_terminal_initial_R':(AssertionError,'Terminal owner lacks launch/exit proof'),\n                    'post_terminal_bad_image':(AssertionError,''),"
+            ],
+            [
+              "            if scenario=='rss':self.assertGreater(record['stages'][0]['peak_rss_bytes'],LIMIT)",
+              "            if scenario.startswith('post_terminal_'):\n                self.assertEqual(state['queries'],1 if scenario=='post_terminal_initial_R' else 2)\n                observed=record['stages'][0]\n                if scenario!='post_terminal_initial_R':\n                    self.assertFalse(observed['pre_terminal_waitid_observation']['waitable'])\n                    self.assertEqual(observed['terminal_waitid_query_phase'],'after_terminal_snapshot')\n                if scenario=='post_terminal_success':\n                    self.assertTrue(observed['waitid_observation']['waitable'])\n                    self.assertEqual(observed['owned_process_snapshot'][0]['state'],'Z')\n                    self.assertEqual(observed['status'],'RETURNED')\n                if scenario=='post_terminal_initial_R':\n                    self.assertEqual(observed['owned_process_snapshot'][0]['state'],'R')\n                    self.assertNotIn('pre_terminal_waitid_observation',observed)\n                if scenario=='post_terminal_bad_image':\n                    self.assertEqual(observed['owned_process_snapshot'][0]['exe'],'/official/lean')\n            if scenario=='rss':self.assertGreater(record['stages'][0]['peak_rss_bytes'],LIMIT)"
+            ],
+            [
+              "    def terminal_owner_fixture(self):",
+              "    def test_terminal_transition_gets_exit_status_without_live_owner_grace(self):\n        for scenario in ('post_terminal_success','post_terminal_none',\n                         'post_terminal_initial_R','post_terminal_bad_image'):\n            with self.subTest(scenario=scenario):self.stage_case(scenario)\n\n    def terminal_owner_fixture(self):"
+            ]
+          ]
+        }
+      },
+      "policy_sha256": "907754a70c439ff3106428717534870c65bb616264a4393e6aeafb2ec77e8c4b",
+      "ordinary_chart_controls": 131,
+      "historical_failure_reclassified": false,
+      "native_qualification": "UNRUN",
+      "Point4": "OPEN"
+    },
+    "fixed_background_frame_c1_support": {
+      "Point4": "OPEN",
+      "policy": {
+        "additions": {
+          ".github/scripts/point4_fixed_background_ci.py": {
+            "blob": "55c0911996361d8accf1ae187dba19c7a25ff207",
+            "bytes": 18210,
+            "mode": "100644",
+            "purpose": "Reviewed focused proof/caller source and official compiler/dependency/resource verification driver; proof remains pinned to be78 and historical run39321864975.",
+            "sha256": "29153a787b21e0d70228b1836ed6b69f22a17a0b17c06d6374f8c0d54b9219e2"
+          },
+          ".github/scripts/point4_fixed_background_sources.json": {
+            "blob": "7e2ddd388142ee00a396e0e549aeb98645d56103",
+            "bytes": 10884,
+            "mode": "100644",
+            "purpose": "Exact28 project-module and38 Mathlib-root dependency closure plus full probe identities for the immutable reviewed proof.",
+            "sha256": "018e46b35f5eea6919b48960225b872f582802fca82b3d099974a94a001517b9"
+          },
+          ".github/scripts/test_point4_fixed_background_ci.py": {
+            "blob": "1d8d540639172cc011a2a2fb69c94f7877fd35c5",
+            "bytes": 5949,
+            "mode": "100644",
+            "purpose": "Eleven reviewed rejection/cleanup controls for the focused driver; engineering controls carry no theorem credit.",
+            "sha256": "7ce596e925f21859e9bb2403f0bee474df569f38a6eaceac68fb7744fabbea24"
+          },
+          "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointBackgroundFrameC1.lean": {
+            "blob": "a792774c8a3b7b50732188d9e2e2b0c18aeb507e",
+            "bytes": 7078,
+            "mode": "100644",
+            "purpose": "Proved fixed-spatial-C1/C2-frame bridge, actual fixed-IVP Levi-Civita specialization; joint-C2 evolving metric retained; whole types/Fin0/axioms verified in run39321864975.",
+            "sha256": "ee89b27d2683b500956e34d3cff85a147851f3c65d80c45d25b7c2f50d53d2ec"
+          },
+          "curvature/scripts/point4_fixed_background_frame_c1_probe.lean": {
+            "blob": "321970c81e9227bd7ab201a6a6ccedf2ef7f8fb0",
+            "bytes": 6953,
+            "mode": "100644",
+            "purpose": "Independent whole-function universe assignments, genuine Fin0 endomorphism/metric-defect cases, nine declarations and seven standard-axiom records.",
+            "sha256": "b3be1c37114701007f190edbaaea1580d765eb373326e4553eed355b902cb599"
+          },
+          "docs/point4/fixed-background-frame-c1/resource-api-review-v1.json": {
+            "blob": "0112396f3f040778053ab200d247af3d46d9907c",
+            "bytes": 8510,
+            "mode": "100644",
+            "purpose": "Historical prospective resource/API review, retained as its original reviewed artifact rather than current execution certification.",
+            "sha256": "8293c8609b4535519e58fb691ea5f155017b0cdaa3d6a42d89d68666cfd04873"
+          },
+          "docs/point4/fixed-background-frame-c1/source-review-v1.json": {
+            "blob": "82c714be88e72641a655ab39448eaf882451f4cd",
+            "bytes": 9818,
+            "mode": "100644",
+            "purpose": "Historical prospective source/mathematical review, retained with its original scope and immutable proof attribution.",
+            "sha256": "68ef26ae92a04a0d184c2a0aaaa0d7b938bac152fa11d4f88d73b62be71b09ab"
+          },
+          "docs/point4/fixed-background-frame-c1/verification-attempts.json": {
+            "blob": "0c37fdbc3cbc780c7d0af84299b8a37d546abf97",
+            "bytes": 3835,
+            "mode": "100644",
+            "purpose": "Historical failed-attempt inventory; preserves failures and assigns no success credit to unreached target/probe stages.",
+            "sha256": "c57a3f48416d964b4d070efc870d4a0ef06b0422a570f05b76121efca24913db"
+          },
+          "docs/point4/fixed-background-frame-c1/verification-outcome.json": {
+            "blob": "bd75ace43f7a613f044b0fab55c05087d8725492",
+            "bytes": 6747,
+            "mode": "100644",
+            "purpose": "Committed historical verification checkpoint; subsequent successful run39321864975 is separately and precisely attributed.",
+            "sha256": "b9c41401d8b389889687857fd6dc8d71953f1ac7bda416b0909e32d2fb08b89e"
+          },
+          "docs/point4/fixed-background-frame-c1/verification-plan.json": {
+            "blob": "9638f45401c64a8166eaad59782b598af0435145",
+            "bytes": 6884,
+            "mode": "100644",
+            "purpose": "Original bounded prospective verification plan; no whole-PR or Point4 completion claim.",
+            "sha256": "12932293923c099d4b9c01af6163cc0fa4444787a118b1f15a9f5da7d6bf0df3"
+          }
+        },
+        "chart_test": {
+          "after": {
+            "blob": "eb86aa8c542960ad77efde67d047c5df7aafa840",
+            "bytes": 218031,
+            "mode": "100644",
+            "sha256": "6902ee8b9404597ebe2337db3785b3a74eec3c0de7a18525bb04642d8a5dc99a"
+          },
+          "before": {
+            "blob": "e6c0b8d228283da5925cb4fda6eab6e12065453e",
+            "bytes": 217254,
+            "mode": "100644",
+            "sha256": "8a8b9e60b2b8b9f4d49fd99cea4d49289243da1831a7404274f8bf033e5709d9"
+          },
+          "path": "curvature/scripts/test_chart_port_ci.py",
+          "ports": [
+            [
+              "        for workflow in (full, setup):\n            self.assertIn('  group: local-chart-connection-', workflow)\n",
+              "        self.assertIn('  group: local-chart-connection-${{ github.event.pull_request.head.sha || inputs.candidate_sha }}\\n', full)\n        self.assertIn(\"  group: ${{ inputs.fixed_background_frame_c1 && 'fixed-background-frame-c1' || 'local-chart-connection' }}-${{ inputs.candidate_sha }}\\n\", setup)\n        self.assertIn('      fixed_background_frame_c1:\\n'\n                      '        description: Verify only the reviewed PR148 fixed-background proof and probe\\n'\n                      '        required: false\\n'\n                      '        type: boolean\\n'\n                      '        default: false\\n', setup)\n        self.assertIn('  chart_environment_setup:\\n    if: ${{ !inputs.fixed_background_frame_c1 }}\\n', setup)\n        self.assertIn('  fixed_background_frame_c1:\\n    if: ${{ inputs.fixed_background_frame_c1 }}\\n', setup)\n        for workflow in (full, setup):\n"
+            ]
+          ],
+          "purpose": "Exact chart-control consumer adaptation for the already-reviewed opt-in concurrency split; default chart/full no-escape and all original resource assertions retained; no driver or workflow change."
+        },
+        "chart_workflow": {
+          "after": {
+            "blob": "7682d44ed0ecefce8b71e90688eb131f9b14ef9e",
+            "bytes": 7858,
+            "mode": "100644",
+            "sha256": "06103f70d7f1efa0ebdaf0273f5d5650d64508d4f775286159f4a52920559b8d"
+          },
+          "after_source": "name: Point-4 local chart environment setup\n\non:\n  workflow_dispatch:\n    inputs:\n      candidate_sha:\n        description: Independently reviewed full candidate commit SHA\n        required: true\n        type: string\n      expected_tree:\n        description: Independently reviewed full candidate Git tree SHA\n        required: true\n        type: string\n      fixed_background_frame_c1:\n        description: Verify only the reviewed PR148 fixed-background proof and probe\n        required: false\n        type: boolean\n        default: false\n\npermissions:\n  contents: read\n\nconcurrency:\n  group: ${{ inputs.fixed_background_frame_c1 && 'fixed-background-frame-c1' || 'local-chart-connection' }}-${{ inputs.candidate_sha }}\n  cancel-in-progress: false\n\njobs:\n  chart_environment_setup:\n    if: ${{ !inputs.fixed_background_frame_c1 }}\n    runs-on: ubuntu-24.04\n    timeout-minutes: 30\n    env:\n      EXPECTED_SHA: ${{ inputs.candidate_sha }}\n      EXPECTED_TREE: ${{ inputs.expected_tree }}\n      EVENT_NAME: ${{ github.event_name }}\n    steps:\n      - name: Checkout reviewed candidate\n        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1\n        with:\n          repository: ${{ github.repository }}\n          ref: ${{ inputs.candidate_sha }}\n          persist-credentials: false\n          fetch-depth: 0\n      - name: Admit exact candidate tree before running candidate code\n        shell: bash\n        run: |\n          set -euo pipefail\n          [[ \"$EXPECTED_SHA\" =~ ^[0-9a-f]{40}$ ]]\n          test \"$(git rev-parse HEAD)\" = \"$EXPECTED_SHA\"\n          actual_tree=$(git rev-parse 'HEAD^{tree}')\n          [[ \"$EXPECTED_TREE\" =~ ^[0-9a-f]{40}$ ]]\n          test \"$actual_tree\" = \"$EXPECTED_TREE\"\n          test \"$(git rev-parse '1664872ce762ee027b76cb515befb0ae829b2711^{tree}')\" = 6d74e9612cf6e16f2d027012cede68e5e0a23483\n          git merge-base --is-ancestor 1664872ce762ee027b76cb515befb0ae829b2711 HEAD\n          python3 curvature/scripts/chart_port_candidate_check.py --expected-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\"\n      - name: Test chart driver resource and setup controls\n        run: python3 -B curvature/scripts/test_chart_port_ci.py\n      - name: Install the official pinned toolchain without build or caches\n        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9\n        with:\n          lake-package-directory: curvature\n          auto-config: false\n          build: false\n          test: false\n          lint: false\n          use-mathlib-cache: false\n          use-github-cache: false\n      - name: Check pinned environment setup under owned resource limits\n        shell: bash\n        run: |\n          set -euo pipefail\n          evidence=\"$RUNNER_TEMP/local-chart-environment-setup-$EXPECTED_SHA\"\n          sudo systemd-run --wait --pipe --collect \\\n            --unit=\"chart-port-setup-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\" \\\n            --uid=\"$(id -u)\" --gid=\"$(id -g)\" \\\n            --working-directory=\"$GITHUB_WORKSPACE\" \\\n            --property=MemoryMax=6442450944 \\\n            --property=MemorySwapMax=0 --property=CPUQuota=200% \\\n            --property=OOMPolicy=kill --property=KillMode=control-group \\\n            --property=RuntimeMaxSec=1800 \\\n            --setenv=\"PATH=$PATH\" \\\n            --setenv=\"ELAN_HOME=${ELAN_HOME:-$HOME/.elan}\" \\\n            --setenv=PYTHONDONTWRITEBYTECODE=1 \\\n            /usr/bin/python3 curvature/scripts/chart_port_ci.py \\\n              --expected-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\" \\\n              --evidence \"$evidence\" --setup-only\n      - name: Preserve setup-only receipts; full qualification remains required\n        if: always()\n        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a\n        with:\n          name: local-chart-environment-setup-${{ inputs.candidate_sha }}-${{ github.run_attempt }}\n          path: ${{ runner.temp }}/local-chart-environment-setup-${{ inputs.candidate_sha }}\n          if-no-files-found: error\n\n  fixed_background_frame_c1:\n    if: ${{ inputs.fixed_background_frame_c1 }}\n    runs-on: ubuntu-24.04\n    timeout-minutes: 60\n    env:\n      EXPECTED_SHA: ${{ inputs.candidate_sha }}\n      EXPECTED_TREE: ${{ inputs.expected_tree }}\n      PYTHONDONTWRITEBYTECODE: '1'\n    steps:\n      - name: Checkout exact workflow caller separately\n        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1\n        with:\n          ref: ${{ github.sha }}\n          path: ci-control\n          persist-credentials: false\n          fetch-depth: 1\n      - name: Checkout immutable reviewed proof\n        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1\n        with:\n          ref: be78f44a992b01dfa082472a70a89360086ee1a2\n          path: proof-source\n          persist-credentials: false\n          fetch-depth: 1\n      - name: Run focused rejection and process cleanup controls\n        run: python3 -B -m unittest discover -s ci-control/.github/scripts -p 'test_point4_fixed_background_ci.py'\n      - name: Admit exact proof and caller sources before toolchain setup\n        shell: bash\n        run: |\n          set -euo pipefail\n          python3 -B ci-control/.github/scripts/point4_fixed_background_ci.py \\\n            --phase preflight --candidate-root \"$GITHUB_WORKSPACE/proof-source\" \\\n            --control-root \"$GITHUB_WORKSPACE/ci-control\" \\\n            --candidate-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\" \\\n            --caller-sha \"$GITHUB_SHA\" \\\n            --evidence \"$RUNNER_TEMP/fixed-background-frame-c1-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\"\n      - name: Install official pinned compiler without cache or project build\n        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9\n        with:\n          lake-package-directory: proof-source/curvature\n          auto-config: false\n          build: false\n          test: false\n          lint: false\n          use-mathlib-cache: false\n          use-github-cache: false\n      - name: Verify the focused proof under owned resource limits\n        shell: bash\n        run: |\n          set -euo pipefail\n          evidence=\"$RUNNER_TEMP/fixed-background-frame-c1-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\"\n          sudo systemd-run --wait --pipe --collect \\\n            --unit=\"fixed-background-frame-c1-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\" \\\n            --uid=\"$(id -u)\" --gid=\"$(id -g)\" \\\n            --working-directory=\"$GITHUB_WORKSPACE/proof-source\" \\\n            --property=MemoryMax=6442450944 --property=MemorySwapMax=0 \\\n            --property=CPUQuota=200% --property=TasksMax=128 \\\n            --property=OOMPolicy=kill --property=KillMode=control-group \\\n            --property=RuntimeMaxSec=3000 --property=TimeoutStopSec=10 \\\n            --setenv=\"PATH=$PATH\" --setenv=\"ELAN_HOME=${ELAN_HOME:-$HOME/.elan}\" \\\n            --setenv=\"MATHLIB_CACHE_DIR=$RUNNER_TEMP/fixed-background-frame-c1-cache-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\" \\\n            --setenv=PYTHONDONTWRITEBYTECODE=1 --setenv=LEAN_NUM_THREADS=1 \\\n            /usr/bin/python3 \"$GITHUB_WORKSPACE/ci-control/.github/scripts/point4_fixed_background_ci.py\" \\\n              --phase verify --candidate-root \"$GITHUB_WORKSPACE/proof-source\" \\\n              --control-root \"$GITHUB_WORKSPACE/ci-control\" \\\n              --candidate-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\" \\\n              --caller-sha \"$GITHUB_SHA\" --evidence \"$evidence\"\n      - name: Preserve bounded exact-proof evidence including failures\n        if: always()\n        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a\n        with:\n          name: fixed-background-frame-c1-${{ github.run_id }}-${{ github.run_attempt }}\n          path: ${{ runner.temp }}/fixed-background-frame-c1-${{ github.run_id }}-${{ github.run_attempt }}\n          if-no-files-found: error\n          retention-days: 14\n",
+          "before": {
+            "blob": "9c7e56849bd322acb25a13a6706b6e600b7d8427",
+            "bytes": 3686,
+            "mode": "100644",
+            "sha256": "c02f062b07924c532789499a8ed6a5e7df7b1074cdcdf61792bd5ab6f76acbbc"
+          },
+          "before_source": "name: Point-4 local chart environment setup\n\non:\n  workflow_dispatch:\n    inputs:\n      candidate_sha:\n        description: Independently reviewed full candidate commit SHA\n        required: true\n        type: string\n      expected_tree:\n        description: Independently reviewed full candidate Git tree SHA\n        required: true\n        type: string\n\npermissions:\n  contents: read\n\nconcurrency:\n  group: local-chart-connection-${{ inputs.candidate_sha }}\n  cancel-in-progress: false\n\njobs:\n  chart_environment_setup:\n    runs-on: ubuntu-24.04\n    timeout-minutes: 30\n    env:\n      EXPECTED_SHA: ${{ inputs.candidate_sha }}\n      EXPECTED_TREE: ${{ inputs.expected_tree }}\n      EVENT_NAME: ${{ github.event_name }}\n    steps:\n      - name: Checkout reviewed candidate\n        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1\n        with:\n          repository: ${{ github.repository }}\n          ref: ${{ inputs.candidate_sha }}\n          persist-credentials: false\n          fetch-depth: 0\n      - name: Admit exact candidate tree before running candidate code\n        shell: bash\n        run: |\n          set -euo pipefail\n          [[ \"$EXPECTED_SHA\" =~ ^[0-9a-f]{40}$ ]]\n          test \"$(git rev-parse HEAD)\" = \"$EXPECTED_SHA\"\n          actual_tree=$(git rev-parse 'HEAD^{tree}')\n          [[ \"$EXPECTED_TREE\" =~ ^[0-9a-f]{40}$ ]]\n          test \"$actual_tree\" = \"$EXPECTED_TREE\"\n          test \"$(git rev-parse '1664872ce762ee027b76cb515befb0ae829b2711^{tree}')\" = 6d74e9612cf6e16f2d027012cede68e5e0a23483\n          git merge-base --is-ancestor 1664872ce762ee027b76cb515befb0ae829b2711 HEAD\n          python3 curvature/scripts/chart_port_candidate_check.py --expected-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\"\n      - name: Test chart driver resource and setup controls\n        run: python3 -B curvature/scripts/test_chart_port_ci.py\n      - name: Install the official pinned toolchain without build or caches\n        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9\n        with:\n          lake-package-directory: curvature\n          auto-config: false\n          build: false\n          test: false\n          lint: false\n          use-mathlib-cache: false\n          use-github-cache: false\n      - name: Check pinned environment setup under owned resource limits\n        shell: bash\n        run: |\n          set -euo pipefail\n          evidence=\"$RUNNER_TEMP/local-chart-environment-setup-$EXPECTED_SHA\"\n          sudo systemd-run --wait --pipe --collect \\\n            --unit=\"chart-port-setup-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT\" \\\n            --uid=\"$(id -u)\" --gid=\"$(id -g)\" \\\n            --working-directory=\"$GITHUB_WORKSPACE\" \\\n            --property=MemoryMax=6442450944 \\\n            --property=MemorySwapMax=0 --property=CPUQuota=200% \\\n            --property=OOMPolicy=kill --property=KillMode=control-group \\\n            --property=RuntimeMaxSec=1800 \\\n            --setenv=\"PATH=$PATH\" \\\n            --setenv=\"ELAN_HOME=${ELAN_HOME:-$HOME/.elan}\" \\\n            --setenv=PYTHONDONTWRITEBYTECODE=1 \\\n            /usr/bin/python3 curvature/scripts/chart_port_ci.py \\\n              --expected-sha \"$EXPECTED_SHA\" --expected-tree \"$EXPECTED_TREE\" \\\n              --evidence \"$evidence\" --setup-only\n      - name: Preserve setup-only receipts; full qualification remains required\n        if: always()\n        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a\n        with:\n          name: local-chart-environment-setup-${{ inputs.candidate_sha }}-${{ github.run_attempt }}\n          path: ${{ runner.temp }}/local-chart-environment-setup-${{ inputs.candidate_sha }}\n          if-no-files-found: error\n",
+          "path": ".github/workflows/point4-local-chart-environment-setup.yml",
+          "purpose": "Exact reviewed opt-in focused mode; original default chart job, contents:read, pinned actions, budgets and semantic checks preserved. No dispatch/export is authorized by Source admission."
+        },
+        "current_paths": 2201,
+        "focused_caller": "642e836bef7378f737ddc260d07d21523085a961",
+        "focused_run": 39321864975,
+        "frozen_proof": "be78f44a992b01dfa082472a70a89360086ee1a2",
+        "integrated_head": "8c81b18a28ecb3bc499bf0459a7c1a0c07d37002",
+        "integrated_tree": "55c8e7061afea69df56b04ad7c14d7aeecadea2d",
+        "parent_head": "2813ef52a21e13be08532f36ee9f26faf319da72",
+        "parent_paths": 2191,
+        "parent_tree": "13f982c1be40478cc14b523ea76ed3642fb3ae7e",
+        "scope": "Finite Source admission only; old2191 intermediate and all semantic/resource/merge gates preserved; Point4 OPEN; PR147 remaining24RAW+32NONRAW separate.",
+        "test_after_sha256": "75e02a07dfb22f6af1c00a8e89a14f596586930412d88ae8b8d80ba5c5a4327e",
+        "test_before_sha256": "a6c5d303efc8852e47cb629fad33d531c21f6f6676d8a8f4c9f871ad66808e9f"
+      },
+      "policy_sha256": "ef6bd95376b526da22a162b8be15ff58b04783a5157ea051080f2e0a9089d20a",
+      "qualification": "SOURCE_ADMISSION_ONLY; focused proof/caller run39321864975 remains scoped to be78/642; no new Native or whole-PR credit",
+      "receipt_reuse": "Preserve PR146 ten qualified receipts and once-only chart export at original immutable scopes; integration reuse is explicitly assessed separately"
     }
   }
 }

@@ -1,0 +1,154 @@
+{
+  "approval_scope": "ISOLATED_PROOF_AND_PROBE_STATIC_REVIEW_ONLY_NO_BUILD_OR_PUBLICATION_VERIFICATION",
+  "base": {
+    "PR": 146,
+    "basis": "ReadonlylocalGitHEAD/treeobserved;remoteconfirmationprovidedbyparent,notreviewer",
+    "commit": "2813ef52a21e13be08532f36ee9f26faf319da72",
+    "repository": "Arthur742Ramos/lean-poincare-formalization-plan",
+    "tree": "13f982c1be40478cc14b523ea76ed3642fb3ae7e"
+  },
+  "confirmed_mathematical_blocking_findings": [],
+  "created_utc": "2026-10-19T19:06:44.126896+00:00",
+  "environment_scope_note": "Parent separately authorizedofficialtoolchain/cachepreparation. Environmentavailability/setup isoutsidethisstaticreceipt; no assertionthatfuturecurrentenvironmentlackstools,andnooldPASS substitutesforexactreviewedpinelaboration.",
+  "mathematical_findings": [
+    {
+      "API_evidence": "Existence.lean:1238 genericclass-to-open-set restriction requires globalC1class,finitecompletefibres,T2,smoothmanifold,C2bundle. Allarepresent. ItscontMDiff consumesC2section and yieldsC1covariantderivative. TimeDependentGram.lean:58 already uses same contMDiff_snd/comp pattern.",
+      "declaration": "PoincareCurvature.GaugeFlowAssembly.contMDiffOn_const_background_localFrame",
+      "finding": "FixedspatialC1covariantderivative appliedtoC2frame yields actualC1endomorphismsection, then smoothProd.snd composition gives the statedjointC1section on univ\u00d7e.baseSet.",
+      "scope": "No arbitrarytime-dependentconnectionregularity inferredfromslices;fixedconnection. Endomorphismsectionisderivedbeforeframeevaluation."
+    },
+    {
+      "API_evidence": "ImportedDeTurckJointMetricDefectComponentC1 expects exactlythese two endomorphismsections. Constantfamily fun_=>cov\u2080 makes terms definitionally identical.",
+      "declaration": "PoincareCurvature.GaugeFlowAssembly.contMDiffOn_joint_metricDefect_component_of_joint_metric_and_fixed_background",
+      "finding": "ThetwoPR146manualjointbackground-framepremises are dischargedwithnewlemma atindicesa,b. ActualmetricDefect metric-slot/metric-slot/derivative-direction order isretained.",
+      "scope": "JointC2metric premise retained. No C3,orthonormality,positive-rank,assumedmetricDefectregularity orjointtarget added."
+    },
+    {
+      "API_evidence": "InitialValueProblemBackground fields and constructor deriveC1from genuineLeviCivitaexistence under SigmaCompactSpace. constantConnection_apply is rfl. LeviCivita.lean:2448-2470 supplies C2metric\u2192C1connection.",
+      "declaration": "RicciFlow.InitialValueProblem.contMDiffOn_joint_metricDefect_component_fixedLeviCivitaBackground",
+      "finding": "Uses established ivp.fixedLeviCivitaBackground covariantDerivative/contMDiff/constantConnection. Thisobject genuinelyisLeviCivita fortheinitialC2metric;no parallelClassicalchoice isintroduced.",
+      "scope": "g is any metricfamily satisfyingjointC2 relative tofixedinitialbackground; no assertionthatg solvesRicciFlow or matchesinitialdata. No nonlinearPDEsolution orPoint4completion."
+    }
+  ],
+  "method": {
+    "Git_writes": 0,
+    "Lean_Lake_commands": 0,
+    "charged_reader_calls": 0,
+    "dependency_installs": 0,
+    "network_calls": 0,
+    "old_frozen_artifact_reads_writes": 0,
+    "proof_or_probe_imports_executions": 0,
+    "proof_probe_edits": 0,
+    "readonlySource_and_API_inspection": true
+  },
+  "primary_Source_API_readset": {
+    "AGENTS.md": {
+      "bytes": 5598,
+      "path": "/workspace/poincare-fixed-background-c1-20261019/AGENTS.md",
+      "sha256": "fd86a1e34284670194314c7677ff0a9f6b28a09c1b5a08a6a44544d9db92df7a"
+    },
+    "curvature/PoincareCurvature/Analysis/TimeDependentGram.lean": {
+      "bytes": 45656,
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Analysis/TimeDependentGram.lean",
+      "sha256": "12e2dee69bee03cff4cf60f2569df1ebf9fc9bd8ad2ef6efa3e3f3e07944ea3f"
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/ActualBackgroundCoordinateCoefficients.lean": {
+      "bytes": 8155,
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/ActualBackgroundCoordinateCoefficients.lean",
+      "sha256": "c01691367b53c262aa6f5952ba74582dbacb3f30681e50984e6776623dcc3b50"
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointMetricDefectComponentC1.lean": {
+      "bytes": 9975,
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointMetricDefectComponentC1.lean",
+      "sha256": "c4227f8d30f4de6a4cf69e8cc36e1ab818858779ac2a92ed6526bd56d8ac0337"
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/InitialValueProblemBackground.lean": {
+      "bytes": 5980,
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/InitialValueProblemBackground.lean",
+      "sha256": "49ac72dd82f34722335fca65d0976d4aad9c9e9abe00fc28cddb12af13ae90a0"
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean": {
+      "bytes": 188253,
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+      "sha256": "bf9de4bf83c75b4373d72842dae0eaca96fd2e333df48336f393ff998cce1ddf"
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Existence.lean": {
+      "bytes": 74554,
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Existence.lean",
+      "sha256": "eba90d5a299f5e4e5ef8ce3cde1c49042f13563fef9ab7ee88d4f2a098449494"
+    },
+    "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean": {
+      "bytes": 122766,
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean",
+      "sha256": "9af87a315282e29375d64a75492df2cecf9216974e788a93abfa076d28e457c0"
+    },
+    "curvature/lean-toolchain": {
+      "bytes": 25,
+      "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/lean-toolchain",
+      "sha256": "302cd63c54178885b89e669f33b38f12f4dd7ae7e5cac537b3203e3768d8fb2b"
+    }
+  },
+  "probe_findings": [
+    {
+      "check": "Whole-signature assignments",
+      "finding": "Independently written expectedforall-types expose spatialC1connectiononly forframelemma and onlyjointC2metric analyticpremise foractualIVPcorollary. Assignments reference actualtheorems. Universe/instance elaboration remainsunverified."
+    },
+    {
+      "check": "Fin0 genuineendomorphism",
+      "finding": "Usesactualfixedbackground covariantDerivative on asectionatapoint; extv andsubsingletoncodomain givezero. It isnot quantificationoveranonexistentframeindex."
+    },
+    {
+      "check": "Fin0 actualmetricDefect",
+      "finding": "Usesactualfixedbackground and evolvingmetricbundle. Subsingleton tangentdirectionw=0 andlinear-mapzero supportactualdefectzero. No emptymanifold or positiverankhypothesis."
+    },
+    {
+      "check": "Signature/axiom outputs",
+      "finding": "Probeasksfullsignature assignments,theoremprints andaxiomreports forbothassignments,allthreenewtheorems,bothFin0results. NooutputexistsorPASSisclaimedbythisreview."
+    }
+  ],
+  "remaining_conditions": [
+    "KeepUNVERIFIEDuntilexactmatchingcompilationandrequiredsignature/axiomreadbacks succeed.",
+    "Anyproof/probebytechange needsfreshSourcepinreviewandmatchingmechanicalverification.",
+    "Supportingfixedbackgroundregularity only; noPoint4/globalexistence/nonlinearDeTurcksolution/uniqueness/submissionreadiness claim.",
+    "NoPalomarintake/registration/security/paymentexception authorizedbyreview."
+  ],
+  "reviewed_probe": {
+    "bytes": 6953,
+    "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/scripts/point4_fixed_background_frame_c1_probe.lean",
+    "sha256": "b3be1c37114701007f190edbaaea1580d765eb373326e4553eed355b902cb599"
+  },
+  "reviewed_proof": {
+    "bytes": 6936,
+    "path": "/workspace/poincare-fixed-background-c1-20261019/curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointBackgroundFrameC1.lean",
+    "sha256": "d5dbb53f81c839d3ddd9db0ba4d95af472f33670e9960747c47b7ecef94f8fbf"
+  },
+  "reviewer": "/root/reader_source_review",
+  "schema": "poincare-fixed-background-frame-C1-independent-static-mathematical-source-probe-review-v1",
+  "status": {
+    "Lean_build": "NOT_RUN_BY_REVIEWER_UNVERIFIED",
+    "Point4": "OPEN",
+    "axiom_output": "NO_EXACT_REVIEWED_PIN_OUTPUT_REVIEWED",
+    "nonlinear_solution_constructed": false,
+    "probe_execution": "NOT_RUN_UNVERIFIED",
+    "publication": "NO_VERIFIED_PR_OR_PUBLICATION_APPROVAL"
+  },
+  "verdict": "STATIC_MATHEMATICAL_ARGUMENT_ACCEPTED_ELABORATION_UNVERIFIED",
+  "verification_required_not_proven_errors": [
+    {
+      "id": "LEAN433",
+      "item": "Exactproofandprobecompilationwithleanprover/lean4:v4.33.0 andpinneddependency/importclosure remainsrequired."
+    },
+    {
+      "id": "CLASS-SET-INSTANCES",
+      "item": "Confirmcov\u2080 inference in genericclass-to-set lemma and exacttangentnorm/FiberBundle/VectorBundle/endomorphismbundle instance terms; staticAPIsmatch,elaborationnotrun."
+    },
+    {
+      "id": "CONVERT-COMP",
+      "item": "ConfirmWithTop\u2115\u221e1+1\u21922 convert/norm_num,productmodelinferenceforProd.snd,anddefinitionalconstantConnection equalityinfinaIexactcall."
+    },
+    {
+      "id": "PROBE",
+      "item": "Confirmuniversepolymorphicwhole-signatureassignments,Fin0Subsingleton synthesis,map_zero simp,andactualaxiomoutputs. Textualnoholecheck isnotcompiledaxiomverification."
+    }
+  ]
+}

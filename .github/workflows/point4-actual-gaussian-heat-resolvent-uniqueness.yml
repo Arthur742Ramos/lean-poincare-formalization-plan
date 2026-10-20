@@ -4,6 +4,8 @@ on:
     paths:
       - 'curvature/**'
       - 'docs/point4/smooth-master-composition/**'
+      - 'docs/point4/ci-cache-pilot.md'
+      - '.github/actions/point4-verified-cache/**'
       - '.github/workflows/point4-actual-gaussian-heat-resolvent-uniqueness.yml'
   workflow_dispatch:
 permissions:
@@ -49,6 +51,16 @@ jobs:
         with:
           lake-package-directory: curvature
           build: false
+          use-github-cache: false
+          use-mathlib-cache: true
+      - name: Check exact-candidate cache rejection controls
+        run: python3 -B curvature/scripts/point4_ci_cache_test.py
+      - name: Restore verified exact-candidate outputs before mandatory builds
+        uses: ./.github/actions/point4-verified-cache
+        with:
+          phase: restore
+          targets-json: '["PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ActualGaussianHeatResolventUniqueness","PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointMetricDefectComponentC1"]'
+          source-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
       - name: Check focused rejection controls
         run: python3 -B curvature/scripts/point4_actual_gaussian_heat_resolvent_uniqueness_mock_test.py
       - name: Compile exact uniqueness module
@@ -66,6 +78,61 @@ jobs:
           lake env lean scripts/point4_actual_gaussian_heat_resolvent_uniqueness_probe.lean 2>&1 | tee /tmp/point4-actual-resolvent-uniqueness-probe.log
       - name: Check four genuine full-type and standard-axiom groups
         run: python3 -B curvature/scripts/point4_actual_gaussian_heat_resolvent_uniqueness_guard.py --axiom-output /tmp/point4-actual-resolvent-uniqueness-probe.log
+      - name: Compile joint metric-defect target, whole signature and Fin0 probe
+        working-directory: curvature
+        run: |
+          set -euo pipefail
+          lake build PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointMetricDefectComponentC1 2>&1 | tee /tmp/point4-actual-resolvent-uniqueness-joint-metric-build.log
+          lake env lean scripts/point4_joint_metric_defect_c1_probe.lean 2>&1 | tee /tmp/point4-actual-resolvent-uniqueness-joint-metric-probe.log
+          python3 - <<'PY' 2>&1 | tee /tmp/point4-actual-resolvent-uniqueness-joint-metric-guard.log
+          import json
+          from pathlib import Path
+          import re
+          path = Path('/tmp/point4-actual-resolvent-uniqueness-joint-metric-probe.log')
+          if path.stat().st_size > 16 * 1024**2:
+              raise ValueError('Joint metric probe log exceeds finite bound')
+          output = path.read_bytes().decode('utf-8', errors='strict')
+          lines = output.splitlines()
+          begin, end = 'JOINT_METRIC_DEFECT_C1_TYPES_BEGIN', 'JOINT_METRIC_DEFECT_C1_TYPES_END'
+          if lines.count(begin) != 1 or lines.count(end) != 1 or lines.index(begin) >= lines.index(end):
+              raise ValueError('Missing/duplicate/reordered whole-type marker group')
+          if not '\n'.join(lines[lines.index(begin) + 1:lines.index(end)]).strip():
+              raise ValueError('Empty whole-type output')
+          if re.search(r'\bsorryAx\b|(?:^|\n).*\berror:', output):
+              raise ValueError('Forbidden axiom or probe error')
+          expected = (
+              'jointMetricDefectComponentC1FullSignatureAssignment',
+              'PoincareCurvature.GaugeFlowAssembly.contMDiffOn_joint_metricDefect_component_of_joint_metric_and_backgroundFrame',
+          )
+          tail = '\n'.join(lines[lines.index(end) + 1:]).strip()
+          pattern = re.compile(r"^'([^'\n]+)' (?:depends on axioms:\s*\[([^]]*)\]|does not depend on any axioms)\s*$", re.M)
+          records = list(pattern.finditer(tail))
+          if tuple(match.group(1) for match in records) != expected:
+              raise ValueError('Missing/duplicate/extra/reordered axiom records')
+          if len(re.findall(r'depends on axioms:|does not depend on any axioms', output)) != 2:
+              raise ValueError('Unexpected axiom records outside the exact group')
+          cursor, evidence = 0, []
+          atom = re.compile(r'(propext|Classical\.choice|Quot\.sound)(?:\.\{[A-Za-z0-9_ .()+\s]{1,256}\})?')
+          for match in records:
+              if tail[cursor:match.start()].strip():
+                  raise ValueError('Unexpected text between axiom records')
+              cursor = match.end()
+              raw_list = match.group(2)
+              raw_items = [] if raw_list is None or not raw_list.strip() else [item.strip() for item in raw_list.split(',')]
+              items = [atom.fullmatch(item) for item in raw_items]
+              if any(item is None for item in items):
+                  raise ValueError('Nonstandard/malformed axiom list')
+              bases = [item.group(1) for item in items]
+              if len(bases) != len(set(bases)):
+                  raise ValueError('Duplicate axiom base name')
+              evidence.append({'name': match.group(1), 'raw_record': match.group(0),
+                               'raw_axioms': raw_items, 'standard_bases': bases})
+          if tail[cursor:].strip():
+              raise ValueError('Unexpected trailing probe output')
+          print(json.dumps({'joint_metric_axiom_records': evidence, 'whole_type_marker_groups': 1,
+                            'universe_suffix_policy': 'Only standard axiom bases; raw suffixes retained',
+                            'Point4': 'OPEN'}, sort_keys=True))
+          PY
       - name: Authenticate complete Source after compilation
         if: always()
         run: |
@@ -74,10 +141,19 @@ jobs:
           python3 -B -c "import sys; sys.path.insert(0,'curvature/scripts'); import point4_smooth_master_composition as c; c.verify_current()"
           git diff --exit-code HEAD -- .
           git diff --cached --exit-code HEAD -- .
+      - name: Save exact-candidate outputs after every manual gate succeeds
+        if: success()
+        uses: ./.github/actions/point4-verified-cache
+        with:
+          phase: save
+          targets-json: '["PoincareCurvature.Geometry.Manifold.RicciFlow.AnalyticPDE.ActualGaussianHeatResolventUniqueness","PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointMetricDefectComponentC1"]'
+          source-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
       - name: Preserve exact-head supporting-result evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: point4-actual-resolvent-uniqueness-${{ github.event.pull_request.head.sha || github.sha }}
-          path: /tmp/point4-actual-resolvent-uniqueness-*.log
+          path: |
+            /tmp/point4-actual-resolvent-uniqueness-*.log
+            /tmp/point4-actual-resolvent-uniqueness-cache-inventory.json
           if-no-files-found: error

@@ -1,0 +1,191 @@
+{
+  "Mathlib_roots": [
+    "Mathlib.Analysis.InnerProductSpace.CanonicalTensor",
+    "Mathlib.Analysis.InnerProductSpace.Dual",
+    "Mathlib.Analysis.InnerProductSpace.Trace",
+    "Mathlib.Analysis.Normed.Group.Submodule",
+    "Mathlib.Analysis.Normed.Module.FiniteDimension",
+    "Mathlib.Analysis.Normed.Module.RCLike.Real",
+    "Mathlib.Analysis.Normed.Module.TransferInstance",
+    "Mathlib.Analysis.Normed.Operator.Basic",
+    "Mathlib.Analysis.Normed.Operator.NormedSpace",
+    "Mathlib.Geometry.Manifold.Algebra.LieGroup",
+    "Mathlib.Geometry.Manifold.Algebra.SMul",
+    "Mathlib.Geometry.Manifold.BumpFunction",
+    "Mathlib.Geometry.Manifold.ContMDiff.NormedSpace",
+    "Mathlib.Geometry.Manifold.ContMDiffMFDeriv",
+    "Mathlib.Geometry.Manifold.PartitionOfUnity",
+    "Mathlib.Geometry.Manifold.Riemannian.Basic",
+    "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic",
+    "Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion",
+    "Mathlib.Geometry.Manifold.VectorBundle.Hom",
+    "Mathlib.Geometry.Manifold.VectorBundle.LocalFrame",
+    "Mathlib.Geometry.Manifold.VectorBundle.Riemannian",
+    "Mathlib.Geometry.Manifold.VectorBundle.SmoothSection",
+    "Mathlib.Geometry.Manifold.VectorBundle.Tensoriality",
+    "Mathlib.Geometry.Manifold.VectorField.LieBracket",
+    "Mathlib.LinearAlgebra.Basis.VectorSpace",
+    "Mathlib.LinearAlgebra.Dimension.FreeAndStrongRankCondition",
+    "Mathlib.LinearAlgebra.Matrix.Adjugate",
+    "Mathlib.LinearAlgebra.Matrix.NonsingularInverse",
+    "Mathlib.LinearAlgebra.Matrix.ToLin",
+    "Mathlib.LinearAlgebra.TensorProduct.Basis",
+    "Mathlib.LinearAlgebra.Trace",
+    "Mathlib.Topology.ContinuousMap.Bounded.Basic",
+    "Mathlib.Topology.ContinuousMap.Compact",
+    "Mathlib.Topology.MetricSpace.ProperSpace",
+    "Mathlib.Topology.Order.Compact",
+    "Mathlib.Topology.VectorBundle.Constructions",
+    "Mathlib.Topology.VectorBundle.FiniteDimensional",
+    "Mathlib.Topology.VectorBundle.Hom"
+  ],
+  "project_modules": {
+    "PoincareCurvature.Analysis.JointSpatialDerivative": {
+      "bytes": 2224,
+      "path": "curvature/PoincareCurvature/Analysis/JointSpatialDerivative.lean",
+      "sha256": "9c59492895271b6fa51bf8819140fd8fd7d661e113a15699bb3ac6fff2009a0e"
+    },
+    "PoincareCurvature.Analysis.JointSpatialMVFDeriv": {
+      "bytes": 15118,
+      "path": "curvature/PoincareCurvature/Analysis/JointSpatialMVFDeriv.lean",
+      "sha256": "b2b54c5ffdb7140be3fb6ebe93f6b516092ae434ae542cac4ef28afa67d1bccb"
+    },
+    "PoincareCurvature.Analysis.MatrixSmoothness": {
+      "bytes": 15432,
+      "path": "curvature/PoincareCurvature/Analysis/MatrixSmoothness.lean",
+      "sha256": "596282d026c3990cfe23aba850ea135842d47548b48a20e68220fe83543b020c"
+    },
+    "PoincareCurvature.Analysis.ParametrizedInner": {
+      "bytes": 13904,
+      "path": "curvature/PoincareCurvature/Analysis/ParametrizedInner.lean",
+      "sha256": "7558a51ac91091369e4201c89da8907d31887fe68a9654d0de1b66d881e1027c"
+    },
+    "PoincareCurvature.Analysis.TimeDependentGram": {
+      "bytes": 45656,
+      "path": "curvature/PoincareCurvature/Analysis/TimeDependentGram.lean",
+      "sha256": "12e2dee69bee03cff4cf60f2569df1ebf9fc9bd8ad2ef6efa3e3f3e07944ea3f"
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointBackgroundFrameC1": {
+      "bytes": 7078,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointBackgroundFrameC1.lean",
+      "sha256": "ee89b27d2683b500956e34d3cff85a147851f3c65d80c45d25b7c2f50d53d2ec"
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointMetricDefectComponentC1": {
+      "bytes": 9975,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/GaugeReduction/DeTurckJointMetricDefectComponentC1.lean",
+      "sha256": "c4227f8d30f4de6a4cf69e8cc36e1ab818858779ac2a92ed6526bd56d8ac0337"
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.InitialValueProblemBackground": {
+      "bytes": 5980,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/InitialValueProblemBackground.lean",
+      "sha256": "49ac72dd82f34722335fca65d0976d4aad9c9e9abe00fc28cddb12af13ae90a0"
+    },
+    "PoincareCurvature.Geometry.Manifold.RicciFlow.LocalExistence": {
+      "bytes": 188253,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/RicciFlow/LocalExistence.lean",
+      "sha256": "bf9de4bf83c75b4373d72842dae0eaca96fd2e333df48336f393ff998cce1ddf"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.ContinuousSection": {
+      "bytes": 202866,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/ContinuousSection.lean",
+      "sha256": "9647f6cf3b0ace2e27de2ce45a149b32cdd0833541b425727baffa2e7723e208"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Along": {
+      "bytes": 6758,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Along.lean",
+      "sha256": "68cef5bdf39e72ad12e1b61898a7adff522f3c6f46ca699244f3daf3b3ccdfac"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacian": {
+      "bytes": 18425,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacian.lean",
+      "sha256": "5c0e6695a6b57e20800df1d09a77b3640f382c1c9233fd967b2250022417a800"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianChart": {
+      "bytes": 19005,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianChart.lean",
+      "sha256": "f5e4250ac2623d59ad6ac60a352f47c3253fbeeb416e46c93f6308ff77090d9e"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianCoordinate": {
+      "bytes": 43136,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianCoordinate.lean",
+      "sha256": "4fade2e29d38409b9f2503983f373c003ab0ab1da1d293dc9ed0648e4166d057"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.ConnectionLaplacianLocalFrame": {
+      "bytes": 20868,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/ConnectionLaplacianLocalFrame.lean",
+      "sha256": "cff5076439491217ad4a26d23aef785a7a53cba77dffb51a0daa81aedcb462d2"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Bianchi": {
+      "bytes": 39309,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Bianchi.lean",
+      "sha256": "6db9a50be9f45e78c0f8af1cbad4fb5116bdd3672e3e4fee5158905d9c2105ec"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Contractions": {
+      "bytes": 17991,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Contractions.lean",
+      "sha256": "3df47636448080a16a25cedb3f68e67434082fbcbf395b278fbd1fa42354e377"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Raw": {
+      "bytes": 2414,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Raw.lean",
+      "sha256": "2f2fb93364159b6cce4fbdac62e502bab18d4f5cc1f053437a815447b67fd0e7"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Sectional": {
+      "bytes": 3533,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Sectional.lean",
+      "sha256": "14b828a0c69a58f260eac1c3597672c542db1835bc0d5e079698e59b9031ed6c"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Curvature.Tensor": {
+      "bytes": 119386,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Curvature/Tensor.lean",
+      "sha256": "518928ccf224355a1a755e2477710f1c26b0662e2675ccab2c6913b10ba9f61b"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.DowngradeNormFree": {
+      "bytes": 43052,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/DowngradeNormFree.lean",
+      "sha256": "e8dfe37860e2434bda2fc676e5a3c7f44fd97abe79469da3464c385799110ffc"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Existence": {
+      "bytes": 74554,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Existence.lean",
+      "sha256": "eba90d5a299f5e4e5ef8ce3cde1c49042f13563fef9ab7ee88d4f2a098449494"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.InducedHom": {
+      "bytes": 11740,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/InducedHom.lean",
+      "sha256": "2a6dfd7f0c5b1dea76b8cee056e449c3ce6b624f23253836de0cc9bedfe7c9c4"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita": {
+      "bytes": 122766,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/LeviCivita.lean",
+      "sha256": "9af87a315282e29375d64a75492df2cecf9216974e788a93abfa076d28e457c0"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.Metric": {
+      "bytes": 4802,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/Metric.lean",
+      "sha256": "477daa95da19d0e5d72f1fa1f78f18513207ee20e619f2ff9d0181c047497d2b"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.CovariantDerivative.TimeDependent": {
+      "bytes": 36467,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/CovariantDerivative/TimeDependent.lean",
+      "sha256": "f7d94bc70f0445019dc88bfa3f5ee5d0d6f577d2b57ebeb102e15b6e94aae004"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.HomBundleComp": {
+      "bytes": 15732,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/HomBundleComp.lean",
+      "sha256": "7cfc69c985aa43a1afc5f6441dd508be460b9bb769eae63caf432f49c572a7d4"
+    },
+    "PoincareCurvature.Geometry.Manifold.VectorBundle.RiemannianSection": {
+      "bytes": 261755,
+      "path": "curvature/PoincareCurvature/Geometry/Manifold/VectorBundle/RiemannianSection.lean",
+      "sha256": "01f0eac5a417b2d243b0071643c90c3114a85c2016be4d72416d7cfe640351b2"
+    }
+  },
+  "candidate_commit": "be78f44a992b01dfa082472a70a89360086ee1a2",
+  "candidate_tree": "8d63ac4bd1a7b0d6818bf15a8983c30cfa641077",
+  "probe": {
+    "path": "curvature/scripts/point4_fixed_background_frame_c1_probe.lean",
+    "bytes": 6953,
+    "sha256": "b3be1c37114701007f190edbaaea1580d765eb373326e4553eed355b902cb599"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "schema": "point4-fixed-background-frame-C1-proof-verification-plan-v1",
+  "status": "TANGENT_SPECIALIZED_API_CORRECTION_UNVERIFIED_FRESH_REVIEW_AND_FOCUSED_CI_PENDING",
+  "parent": {
+    "PR": 146,
+    "commit": "2813ef52a21e13be08532f36ee9f26faf319da72",
+    "tree": "13f982c1be40478cc14b523ea76ed3642fb3ae7e"
+  },
+  "new_module": "PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointBackgroundFrameC1",
+  "probe": "scripts/point4_fixed_background_frame_c1_probe.lean",
+  "mathematical_scope": {
+    "background": "Reuse InitialValueProblem.fixedLeviCivitaBackground and its existing spatial C1 connection, fixed in time.",
+    "construction": "Restrict the actual spatial C1 connection class to the open frame patch, apply it to the actual C2 frame, then compose the resulting endomorphism-valued section with Prod.snd.",
+    "consumer": "Discharge both PR146 joint background-frame premises using the derived frame theorem; retain joint C2 regularity of the evolving metric as the sole analytic premise.",
+    "finite_dimension_zero": "Whole-function types include arbitrary finite-dimensional models. Probe actual fixed-IVP endomorphism and metric-defect values with E = Fin 0 -> Real, without an empty-manifold or positive-rank premise.",
+    "canonical_contract": "UNCHANGED",
+    "Point4": "OPEN",
+    "nonlinear_existence_or_weak_uniqueness_claimed": false
+  },
+  "toolchain": {
+    "Lean": "leanprover/lean4:v4.33.0",
+    "Lean_commit": "d8b18978322de05a8f3dba51ef03cf5461676c17",
+    "Mathlib_commit": "db584cd6d46c92f209a44c0f1c829460d327499d"
+  },
+  "current_executor_availability": {
+    "initial_state": "No Lean/Lake/Elan or usable compiled dependency cache found before separately authorized official installation.",
+    "official_Lean_4_33_and_Lake_installed_locally": true,
+    "all_pinned_git_dependency_sources_present": true,
+    "cache_utility_build_succeeded": true,
+    "Mathlib_namespace_compiled_cache_available": false,
+    "proof_compiler_invocations": 0,
+    "cold_full_builds_started": 0,
+    "cache_download_attempts": 1,
+    "cache_endpoint_result": "CONNECT tunnel failed, response 403; stopped without alternate route or security change",
+    "compiler_result": "CANDIDATE_NOT_RUN; static reviews and successful cache-tool build are not candidate elaboration or axiom evidence",
+    "cache_utility_compilation_scope": "Cache.* and Batteries.Tactic.OpenPrivate; setup only, no candidate/project proof closure compilation.",
+    "scope": "LOCAL_CLOUD_EXECUTOR_ONLY. The separate GitHub Actions attempt is recorded in verification-attempts.json; its official cache succeeded and it attempted the proof closure."
+  },
+  "separate_focused_verification": {
+    "reuse_requirement": "Both separate GitHub CI attempts authenticated the official exact compiler and selective cache and compiled all 27 prerequisites. Each failed the new module at the generic restriction call; neither ran the probe. Existing tangent-specialized DowngradeNormFree restriction was among compiled prerequisites. Local cache CONNECT403 remains a separate stopped route.",
+    "commands_after_environment_and_budget_admission": [
+      "lake build PoincareCurvature.Geometry.Manifold.RicciFlow.GaugeReduction.DeTurckJointBackgroundFrameC1",
+      "lake env lean scripts/point4_fixed_background_frame_c1_probe.lean"
+    ],
+    "working_directory": "curvature",
+    "probe_requirements": [
+      "Both independent whole-function signature assignments elaborate at their stated universes.",
+      "Both actual Fin0 declarations elaborate, including the endomorphism-valued connection application.",
+      "Exactly one ordered nonempty FIXED_BACKGROUND_FRAME_C1_TYPES_BEGIN/END group is present, with no errors.",
+      "All seven printed axiom records occur exactly once in probe order and contain only propext, Classical.choice and Quot.sound; malformed, duplicate, extra or missing rows fail.",
+      "Exact source, compiler, dependencies, outputs, process termination and original workflow resource limits are authenticated.",
+      "Independent mathematical and actual compiler-output review precede any verified claim or merge."
+    ],
+    "runtime_estimate": "First CI owned execution1097.207 seconds, slowest prerequisite437.221<480; second owned907.775 seconds, slowest361.351<480, cache33.744<600. Both new-module failures occurred within7 seconds; no probe runtime measured. Preserve3000-second owned and existing stage limits for a separately reviewed fresh proof/caller run.",
+    "new_environment_need": "No new paid environment, credentials or security change. The unsuccessful body-local instance repair is preserved as history. The current ordinary correction selects the already compiled tangent-specialized C1 restriction instead of the generic API with Pi fiber-norm parameters; this correction remains unverified pending fresh exact source/control review and focused CI.",
+    "retry_policy": "Preserve both failures39312471681/39316626777; never rerun unchanged8dda/78019. Any fresh corrected proof/caller binding needs separate source/resource review before one ordinary bounded run under unchanged caps. No uncertain POST retry, local denied-cache retry, cap increase or cold whole-campaign fallback.",
+    "actual_CI_compilation_strategy": "Compile only the exact reviewed 28-project-module import closure with serial direct lake env lean -j1 -M5632 invocations. A missing Mathlib cache import fails rather than triggering a cold Mathlib build. Then run the new probe and strict output guard."
+  },
+  "recovery_evidence": {
+    "O0400_ledger28_and_base_v2_delta_v3_archives": "PRESERVED_UNCHANGED",
+    "charged_to_exhausted_120_second_recovery_allocation": 0,
+    "historical_ownership_note": "The old stalled writer was quiesced and ownership transferred before the recorded dc0def6 publication. The later O0400 recovery phase itself performed no GitHub publication. Preserve historical artifacts and attach the separate correction rather than changing their bytes."
+  },
+  "publication_scope": "Supporting proof draft only. Both exact CI attempts failed at the new module after27 prerequisite compiles; no probe/axiom PASS. The tangent-specialized restriction correction requires fresh static review, matching separately pinned CI and actual output review. All inherited release/merge gates remain held; Point4 OPEN.",
+  "evidence": {
+    "outcome": "verification-outcome.json",
+    "reviews": [
+      "source-review-v1.json",
+      "resource-api-review-v1.json"
+    ],
+    "historical_predecessor": "Existing verification-outcome.json and v1 static receipts bind predecessor 8dda7f2c; retain unchanged as history. See verification-attempts.json for actual CI failure and current correction."
+  },
+  "active_proof_source": {
+    "bytes": 7078,
+    "sha256": "ee89b27d2683b500956e34d3cff85a147851f3c65d80c45d25b7c2f50d53d2ec"
+  }
+}
